@@ -11,11 +11,13 @@ export async function POST(request: Request) {
   const provider = billingConfig.provider;
   const logger = await getLogger();
 
+  const ctx = {
+    name: 'billing.webhook',
+    provider,
+  };
+
   logger.info(
-    {
-      name: 'billing.webhook',
-      provider,
-    },
+    ctx,
     `Received billing webhook. Processing...`,
   );
 
@@ -32,9 +34,7 @@ export async function POST(request: Request) {
     await service.handleWebhookEvent(request);
 
     logger.info(
-      {
-        name: 'billing.webhook',
-      },
+      ctx,
       `Successfully processed billing webhook`,
     );
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
     logger.error(
       {
-        name: 'billing',
+        ...ctx,
         error: JSON.stringify(error),
       },
       `Failed to process billing webhook`,

@@ -34,7 +34,21 @@ async function getWordpressClient() {
 }
 
 async function getKeystaticClient() {
-  const { KeystaticClient } = await import('../../keystatic/src/client');
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { KeystaticClient } = await import('../../keystatic/src/client');
 
-  return new KeystaticClient();
+    return new KeystaticClient();
+  }
+
+  console.error(`[CMS] Keystatic client is only available in Node.js runtime. Please choose a different CMS client. Returning a mock client instead of throwing an error.`);
+
+  return mockCMSClient();
+}
+
+function mockCMSClient() {
+  return {
+    async getContentItems() {
+      return [];
+    },
+  };
 }

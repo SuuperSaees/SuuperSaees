@@ -1,18 +1,19 @@
 import { getOrder, getVariant } from '@lemonsqueezy/lemonsqueezy.js';
-import { createHmac, timingSafeEqual } from 'node:crypto';
 
-import {
-  BillingConfig,
-  BillingWebhookHandlerService,
-  getLineItemTypeById,
-} from '@kit/billing';
+
+
+import { BillingConfig, BillingWebhookHandlerService, getLineItemTypeById } from '@kit/billing';
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
+
+
 import { getLemonSqueezyEnv } from '../schema/lemon-squeezy-server-env.schema';
 import { OrderWebhook } from '../types/order-webhook';
-import SubscriptionWebhook from '../types/subscription-webhook';
+import { SubscriptionWebhook } from '../types/subscription-webhook';
 import { initializeLemonSqueezyClient } from './lemon-squeezy-sdk';
+import { createHmac } from "./verify-hmac";
+
 
 type UpsertSubscriptionParams =
   Database['public']['Functions']['upsert_subscription']['Args'];
@@ -68,8 +69,10 @@ export class LemonSqueezyWebhookHandlerService
       throw new Error('Signature header not found');
     }
 
+    const isValid = await isSigningSecretValid(rawBody, signature);
+
     // if the signature is invalid, throw an error
-    if (!isSigningSecretValid(Buffer.from(rawBody), signature)) {
+    if (!isValid) {
       logger.error(
         {
           eventName,
@@ -411,12 +414,19 @@ function getISOString(date: number | null) {
   return date ? new Date(date).toISOString() : undefined;
 }
 
-function isSigningSecretValid(rawBody: Buffer, signatureHeader: string) {
+async function isSigningSecretValid(rawBody: string, signatureHeader: string) {
   const { webhooksSecret } = getLemonSqueezyEnv();
-  const hmac = createHmac('sha256', webhooksSecret);
 
-  const digest = Buffer.from(hmac.update(rawBody).digest('hex'), 'utf8');
+  const { hex: digest } = await createHmac({
+    key: webhooksSecret,
+    data: rawBody
+  });
+
   const signature = Buffer.from(signatureHeader, 'utf8');
 
   return timingSafeEqual(digest, signature);
+}
+
+function timingSafeEqual(digest: string, signature: Buffer) {
+  return digest.toString() === signature.toString();
 }

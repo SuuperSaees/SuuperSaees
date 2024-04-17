@@ -1,9 +1,7 @@
-interface SubscriptionWebhookResponse {
+export interface SubscriptionWebhook {
   meta: Meta;
   data: Data;
 }
-
-export default SubscriptionWebhookResponse;
 
 interface Data {
   type: string;
