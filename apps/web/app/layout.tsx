@@ -27,6 +27,8 @@ const heading = HeadingFont({
   weight: ['500', '700'],
 });
 
+export const runtime = 'edge';
+
 export default async function RootLayout({
   children,
 }: {
