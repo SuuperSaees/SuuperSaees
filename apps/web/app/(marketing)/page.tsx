@@ -9,7 +9,7 @@ import {
   Sparkle,
 } from 'lucide-react';
 
-import { PricingTable } from '@kit/billing-gateway/components';
+import { PricingTable } from '@kit/billing-gateway/marketing';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
 import { cn } from '@kit/ui/utils';
