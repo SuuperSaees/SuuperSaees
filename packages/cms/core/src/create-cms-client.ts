@@ -50,7 +50,10 @@ async function getKeystaticClient() {
 function mockCMSClient() {
   return {
     getContentItems() {
-      return Promise.resolve([]);
+      return Promise.resolve({
+        items: [],
+        total: 0,
+      });
     },
     getContentItemBySlug() {
       return Promise.resolve(undefined);

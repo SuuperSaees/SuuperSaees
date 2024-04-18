@@ -142,10 +142,10 @@ export function PlanPicker(
                                 htmlFor={interval}
                                 key={interval}
                                 className={cn(
-                                  'hover:bg-muted flex items-center space-x-2 rounded-md border border-transparent px-4 py-2',
+                                  'hover:bg-secondary flex items-center space-x-2 rounded-md border border-transparent px-4 py-2',
                                   {
-                                    ['border-primary']: selected,
-                                    ['hover:bg-muted']: !selected,
+                                    ['border-primary bg-secondary']: selected,
+                                    ['hover:bg-secondary']: !selected,
                                   },
                                 )}
                               >
@@ -173,7 +173,6 @@ export function PlanPicker(
 
                                 <span
                                   className={cn('text-sm', {
-                                    ['font-semibold']: selected,
                                     ['cursor-pointer']: !selected,
                                   })}
                                 >

@@ -1,6 +1,6 @@
 import loadDynamic from 'next/dynamic';
 
-import { Plus } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 import { PageBody } from '@kit/ui/page';
@@ -55,8 +55,8 @@ function TeamAccountHomePage({
         description={<Trans i18nKey={'common:dashboardTabDescription'} />}
         account={params.account}
       >
-        <Button>
-          <Plus className={'mr-2 h-4'} />
+        <Button size={'sm'}>
+          <PlusCircle className={'h-4 mr-1'} />
           <span>Add Widget</span>
         </Button>
       </AccountLayoutHeader>

@@ -69,7 +69,7 @@ function SidebarContainer(props: {
 
   return (
     <>
-      <SidebarContent className={'my-4'}>
+      <SidebarContent className={'h-16 justify-center'}>
         <AccountSelector
           selectedAccount={account}
           accounts={accounts}
@@ -85,7 +85,7 @@ function SidebarContainer(props: {
         />
       </SidebarContent>
 
-      <SidebarContent className={`h-[calc(100%-160px)] overflow-y-auto`}>
+      <SidebarContent className={`h-[calc(100%-160px)] overflow-y-auto mt-5`}>
         <AccountLayoutSidebarNavigation account={account} />
       </SidebarContent>
 

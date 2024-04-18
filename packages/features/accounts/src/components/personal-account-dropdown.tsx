@@ -83,8 +83,8 @@ export function PersonalAccountDropdown({
           'animate-in fade-in group flex cursor-pointer items-center focus:outline-none',
           className ?? '',
           {
-            ['active:bg-muted/50 items-center space-x-2.5 rounded-md' +
-            ' hover:bg-muted p-2 transition-colors']: showProfileName,
+            ['active:bg-secondary/50 items-center space-x-2.5 rounded-md' +
+            ' hover:bg-secondary p-2 transition-colors']: showProfileName,
           },
         )}
       >

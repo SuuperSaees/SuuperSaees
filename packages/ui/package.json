@@ -59,7 +59,7 @@
     "date-fns": "^3.6.0",
     "eslint": "^8.57.0",
     "lucide-react": "^0.368.0",
-    "next": "14.3.0-canary.7",
+    "next": "14.3.0-canary.9",
     "next-themes": "0.3.0",
     "prettier": "^3.2.5",
     "react-day-picker": "^8.10.1",

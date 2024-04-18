@@ -20,7 +20,7 @@ export function HomeSidebar() {
 
   return (
     <Sidebar collapsed={collapsed}>
-      <SidebarContent className={'my-4'}>
+      <SidebarContent className={'h-16 justify-center'}>
         <If
           condition={featuresFlagConfig.enableTeamAccounts}
           fallback={<AppLogo className={'py-2'} />}
@@ -32,7 +32,7 @@ export function HomeSidebar() {
         </If>
       </SidebarContent>
 
-      <SidebarContent className={`h-[calc(100%-160px)] overflow-y-auto`}>
+      <SidebarContent className={`h-[calc(100%-160px)] overflow-y-auto mt-5`}>
         <SidebarNavigation config={personalAccountSidebarConfig} />
       </SidebarContent>
 
