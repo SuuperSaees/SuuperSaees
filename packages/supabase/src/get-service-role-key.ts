@@ -1,11 +1,9 @@
 import 'server-only';
 
-import { experimental_taintUniqueValue as taintUniqueValue } from 'react';
-
 import { z } from 'zod';
 
 const message =
-  'Invalid Supabase Service Role Key. Please check the environment variable SUPABASE_SERVICE_ROLE_KEY.';
+  'Invalid Supabase Service Role Key. Please add the environment variable SUPABASE_SERVICE_ROLE_KEY.';
 
 /**
  * @name getServiceRoleKey
@@ -13,7 +11,7 @@ const message =
  * ONLY USE IN SERVER-SIDE CODE. DO NOT EXPOSE THIS TO CLIENT-SIDE CODE.
  */
 export function getServiceRoleKey() {
-  const serviceRoleKey = z
+  return z
     .string({
       required_error: message,
     })
@@ -21,14 +19,6 @@ export function getServiceRoleKey() {
       message: message,
     })
     .parse(process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-  taintUniqueValue(
-    'Do not pass the service role key to the client',
-    process,
-    serviceRoleKey,
-  );
-
-  return serviceRoleKey;
 }
 
 /**

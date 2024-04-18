@@ -304,7 +304,8 @@ While you can create a migration to add the database webhooks, you can also add 
 3. Click on "Enable Webhooks"
 4. Click on "Create a new hook"
 
-Now, replicate thr webhooks at `apps/web/supabase/seed.sql` using the UI:
+Now, replicate the webhooks at `apps/web/supabase/seed.sql` using the UI:
+
 1. Please remember to set the `X-Supabase-Event-Signature` header with the value of the `SUPABASE_DB_WEBHOOK_SECRET` to the request.
 2. Please remember to set the endpoint to `/api/db/webhook` using your real APP URL. If your APP URL is `https://myapp.vercel.app`, the endpoint will be `https://myapp.vercel.app/api/db/webhook`.
 3. Use 5000 as the timeout.
@@ -319,6 +320,33 @@ From your Supabase dashboard, please visit Authentication->URL Configuration and
 Remember to update the mailing sender in Supabase too, as the default sender is most likely going to spam and has very limited quota.
 
 You can do so from Settings->Authentication->SMTP Settings.
+
+## Development Gotchas
+
+When you update the repository - I found it best to clear the workspaces and reinstall the dependencies.
+
+```bash
+pnpm run clear:workspaces
+pnpm run clear
+```
+
+Then, reinstall the dependencies:
+
+```bash
+pnpm i
+```
+
+PNPM is so fast this won't take long.
+
+Sometimes - you will see errors when running the Dev Server (sometimes it's Turbopack, and sometimes pnpm uses a different version of React).
+
+While I figure this stuff out, in these cases, please re-run the Dev Server:
+
+```bash
+pnpm dev
+```
+
+If necessary, repeat the process above.
 
 ## Deploying to Vercel
 
