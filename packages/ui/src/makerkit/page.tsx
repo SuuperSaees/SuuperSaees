@@ -44,10 +44,12 @@ export function PageHeader({
   mobileNavigation?: React.ReactNode;
 }>) {
   return (
-    <div className={'flex min-h-16 items-center justify-between border-b px-4'}>
+    <div
+      className={'flex min-h-16 items-center justify-between border-b px-4'}
+    >
       <div
         className={
-          'flex items-center space-x-4 lg:flex-col lg:items-start lg:space-x-0 lg:space-y-0.5'
+          'flex items-center space-x-4 lg:flex-col lg:space-y-0.5 lg:items-start lg:space-x-0'
         }
       >
         <div className={'flex items-center lg:hidden'}>{mobileNavigation}</div>

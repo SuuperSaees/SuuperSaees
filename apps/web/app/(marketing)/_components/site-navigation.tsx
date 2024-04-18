@@ -43,15 +43,15 @@ export function SiteNavigation() {
 
   return (
     <>
-      <div className={'hidden items-center lg:flex'}>
+      <div className={'hidden items-center justify-center md:flex'}>
         <NavigationMenu>
-          <NavigationMenuList className={'space-x-4'}>
+          <NavigationMenuList className={'space-x-1'}>
             {NavItems}
           </NavigationMenuList>
         </NavigationMenu>
       </div>
 
-      <div className={'flex items-center lg:hidden'}>
+      <div className={'flex justify-start sm:items-center md:hidden'}>
         <MobileDropdown />
       </div>
     </>
@@ -62,7 +62,7 @@ function MobileDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger aria-label={'Open Menu'}>
-        <Menu className={'h-9'} />
+        <Menu className={'h-8 w-8'} />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className={'w-full'}>

@@ -27,10 +27,10 @@ export function TopLoadingBarIndicator() {
 
   return (
     <LoadingBar
+      className={'bg-primary'}
       height={4}
       waitingTime={0}
       shadow
-      className={'bg-primary'}
       color={''}
       ref={ref}
     />

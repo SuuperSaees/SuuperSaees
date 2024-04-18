@@ -32,7 +32,7 @@ export function HomeSidebar() {
         </If>
       </SidebarContent>
 
-      <SidebarContent className={`mt-5 h-[calc(100%-160px)] overflow-y-auto`}>
+      <SidebarContent className={`h-[calc(100%-160px)] overflow-y-auto mt-5`}>
         <SidebarNavigation config={personalAccountSidebarConfig} />
       </SidebarContent>
 

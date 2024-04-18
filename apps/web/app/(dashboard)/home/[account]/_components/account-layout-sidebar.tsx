@@ -85,7 +85,7 @@ function SidebarContainer(props: {
         />
       </SidebarContent>
 
-      <SidebarContent className={`mt-5 h-[calc(100%-160px)] overflow-y-auto`}>
+      <SidebarContent className={`h-[calc(100%-160px)] overflow-y-auto mt-5`}>
         <AccountLayoutSidebarNavigation account={account} />
       </SidebarContent>
 
