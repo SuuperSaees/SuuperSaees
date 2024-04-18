@@ -31,10 +31,7 @@ export function AuthErrorAlert({
         <Trans i18nKey={`auth:errorAlertHeading`} />
       </AlertTitle>
 
-      <AlertDescription
-        className={'text-sm font-medium'}
-        data-test={'auth-error-message'}
-      >
+      <AlertDescription data-test={'auth-error-message'}>
         <Trans
           i18nKey={`auth:errors.${errorCode}`}
           defaults={'<DefaultError />'}
