@@ -1,15 +1,36 @@
 import { collection, config, fields } from '@keystatic/core';
 import { z } from 'zod';
 
-const path = z.string().parse(process.env.NEXT_PUBLIC_KEYSTATIC_CONTENT_PATH);
+const local = z.object({
+  kind: z.literal('local'),
+});
+
+const cloud = z.object({
+  kind: z.literal('cloud'),
+  project: z.string(),
+});
+
+const github = z.object({
+  kind: z.literal('github'),
+  repo: z.custom<`${string}/${string}`>(),
+  branchPrefix: z.string().optional(),
+});
+
+const storage = z.union([local, cloud, github]).parse({
+  kind: process.env.KEYSTATIC_STORAGE_KIND ?? 'local',
+  project: process.env.KEYSTATIC_STORAGE_PROJECT,
+  repo: process.env.KEYSTATIC_STORAGE_REPO,
+  branchPrefix: process.env.KEYSTATIC_STORAGE_BRANCH_PREFIX,
+  githubToken: process.env.KEYSTATIC_GITHUB_TOKEN,
+});
+
+const path = process.env.KEY_STATIC_PATH ?? 'content';
 
 export default createKeyStaticConfig(path);
 
 function createKeyStaticConfig(path: string) {
   return config({
-    storage: {
-      kind: 'local',
-    },
+    storage,
     collections: {
       posts: collection({
         label: 'Posts',

@@ -6,13 +6,13 @@ This version uses Turborepo to manage multiple packages in a single repository.
 
 **This project is currently under development. Please wait for the stable release before using it in production. It will undergo big changes and improvements.**
 
-### Roadmap
+## Roadmap
 
 The roadmap for the project is as follows:
 
 - [x] - **March 31**: Alpha release - authentication, personal accounts, team accounts (memberships)
 - [x] - **April 7**: Beta release - billing, Stripe, Lemon Squeezy, and more
-- [ ] - **April 14**: Release candidate - admin dashboard, translations, and more
+- [x] - **April 14**: Release candidate - admin dashboard, translations, and more
 - [ ] - **April 21**: Final Release candidate - in-app notifications, final features and improvements
 - [ ] - **April 28**: Stable release - final features and improvements
 - [ ] - **May 4**: Post-release - documentation, tutorials, and more
@@ -46,6 +46,40 @@ Let's get started!
 - Supabase account (optional for local development)
 - Payment Gateway account (Stripe/Lemon Squeezy)
 - Email Service account (optional for local development)
+
+Clone this repository with the command:
+
+```bash
+git clone git@github.com:makerkit/next-supabase-saas-kit-turbo
+```
+
+If your SSH key isn't set - then use the HTTPS.
+
+```bash
+git clone https://github.com/makerkit/next-supabase-saas-kit-turbo
+```
+
+Now, remove the original `origin`:
+
+```bash
+git remote rm origin
+```
+
+Add upstream pointing to this repository so you can pull updates
+
+```bash
+git remote add upstream git@github.com:makerkit/next-supabase-saas-kit-turbo
+```
+
+Once you have your own repository, do the same but use `origin` instead of `upstream`
+
+To pull updates (please do this daily with your morning coffee):
+
+```bash
+git pull upstream main
+```
+
+This will keep your repository up to date.
 
 #### 0.1. Install Pnpm
 
@@ -90,7 +124,7 @@ Should you add more apps, you can run the following command:
 pnpm run supabase:app-name:start
 ```
 
-And to stop the Supabase server, you can use the following command:
+Instead, to stop the Supabase server, you can use the following command:
 
 ```bash
 # Stop the Supabase server
@@ -115,7 +149,8 @@ The core web application can be found in the `apps/web` package.
 Here is where we add the skeleton of the application, including the routing, layout, and global styles.
 
 The main application defines the following:
-1. **Configuration**: Environment variables, feature flags, paths, and more. The configuration gets passed down to other packages.
+
+1. **Configuration**: Environment variables, feature flags, paths, and more. The configuration gets passed down to other packages
 2. **Routing**: The main routing of the application. Since this is file-based routing, we define the routes here.
 3. **Local components**: Shared components that are used across the application but not necessarily shared with other apps/packages.
 4. **Global styles**: Global styles that are used across the application.
@@ -138,21 +173,25 @@ Below are the reusable packages that can be shared across multiple applications 
 - **`@kit/next`**: Next.js specific utilities
 
 And features that can be added to the application:
+
 - **`@kit/auth`**: Authentication package (using Supabase)
 - **`@kit/accounts`**: Package that defines components and logic for managing personal accounts
 - **`@kit/team-accounts`**: Package that defines components and logic for managing team
 - **`@kit/admin`**: Admin package that defines the schema and logic for managing users, subscriptions, and more.
 
 And billing packages that can be added to the application:
+
 - **`@kit/stripe`**: Stripe package that defines the schema and logic for managing Stripe. This is used by the `@kit/billing-gateway` package and abstracts the Stripe API.
 - **`@kit/lemon-squeezy`**: Lemon Squeezy package that defines the schema and logic for managing Lemon Squeezy. This is used by the `@kit/billing-gateway` package and abstracts the Lemon Squeezy API. (Coming soon)
 - **`@kit/paddle`**: Paddle package that defines the schema and logic for managing Paddle. This is used by the `@kit/billing-gateway` package and abstracts the Paddle API. (Coming soon
 
 The CMSs that can be added to the application:
+
 - **`@kit/wordpress`**:  WordPress package that defines the schema and logic for managing WordPress. This is used by the `@kit/cms` package and abstracts the WordPress API.
 - **`@kit/contentlayer`**: Contentlayer package that defines the schema and logic for managing Contentlayer. This is used by the `@kit/cms` package and abstracts the Contentlayer API. Set to be replaced.
 
 Also planned (post-release):
+
 - **`@kit/notifications`**: Notifications package that defines the schema and logic for managing notifications
 - **`@kit/plugins`**: Move the existing plugins to a separate package here
 - **`@kit/analytics`**: A unified analytics package to track user behavior
@@ -160,6 +199,7 @@ Also planned (post-release):
 ### Application Configuration
 
 The configuration is defined in the `apps/web/config` folder. Here you can find the following configuration files:
+
 - **`app.config.ts`**: Application configuration (e.g., name, description, etc.)
 - **`auth.config.ts`**: Authentication configuration
 - **`billing.config.ts`**: Billing configuration
@@ -191,7 +231,7 @@ shared between environments (eg. they will be the same for development, staging,
 
 **NB: You will not add any secret keys or sensitive information here.** Only configuration, paths, feature flags, etc.
 
-```
+```bash
 # SHARED ENVIROMENT VARIABLES
 # HERE YOU CAN ADD ALL THE **PUBLIC** ENVIRONMENT VARIABLES THAT ARE SHARED ACROSS ALL THE ENVIROMENTS
 # PLEASE DO NOT ADD ANY CONFIDENTIAL KEYS OR SENSITIVE INFORMATION HERE
@@ -244,32 +284,54 @@ Please update the `apps/web/.env` file with the appropriate values.
 
 This is complemented by the environment variables defined in the `apps/web/.env.development` and `apps/web/.env.production` files.
 
+### Feature Flags
+
+To enable or disable certain application features, please toggle the values below:
+
+```BASH
+NEXT_PUBLIC_ENABLE_THEME_TOGGLE=true
+NEXT_PUBLIC_ENABLE_PERSONAL_ACCOUNT_DELETION=true
+NEXT_PUBLIC_ENABLE_PERSONAL_ACCOUNT_BILLING=true
+NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_DELETION=true
+NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_BILLING=true
+NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS=true
+NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_CREATION=true
+```
+
+1. **NEXT_PUBLIC_ENABLE_THEME_TOGGLE** - you can hide the theme toggle (if you want to force a single theme)
+2. **NEXT_PUBLIC_ENABLE_PERSONAL_ACCOUNT_DELETION** - to prevent users from self-deleting their personal account
+3. **NEXT_PUBLIC_ENABLE_PERSONAL_ACCOUNT_BILLING** - to enable/disable billing for personal accounts
+4. **NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_DELETION** - to prevent team accounts from self-deleting the account
+5. **NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_BILLING** - to enable/disable billing for team accounts
+6. **NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS** - to disable team accounts
+7. **NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_CREATION** - to enable/disable the ability to create a team account
+
 ### Production Environment Variables
 
 When going to production, you will need to define the environment variables in the `apps/web/.env.production` file.
 
-```
+```bash
 # SITE
 NEXT_PUBLIC_SITE_URL=
 ```
 
 If you use Stripe, also add:
 
-```
+```bash
 # STRIPE
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ```
 
 From your CI, please add the following environment variables:
 
-```
+```bash
 # SUPABASE
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 If you use Stripe, also add:
 
-```
+```bash
 # STRIPE
 STRIPE_WEBHOOK_SECRET=
 STRIPE_SECRET_KEY=
@@ -279,7 +341,7 @@ STRIPE_SECRET_KEY=
 
 Finally, you need to set a secret `SUPABASE_DB_WEBHOOK_SECRET` that your server and your Supabase instance will share in order to authenticate the requests.
 
-```
+```bash
 SUPABASE_DB_WEBHOOK_SECRET=**************************************************
 ```
 
@@ -293,7 +355,7 @@ Make sure to add the following header `X-Supabase-Event-Signature` with the valu
 
 In this way - you server will be able to authenticate the request and be sure it's coming from your Supabase instance.
 
-As endpoint, remember to use the `/api/db/webhook` endpoint. If your APP url is `https://myapp.vercel.app`, the endpoint will be `https://myapp.vercel.app/api/db/webhook`.
+As the endpoint, remember to use the `/api/db/webhook` endpoint. If your APP url is `https://myapp.vercel.app`, the endpoint will be `https://myapp.vercel.app/api/db/webhook`.
 
 #### Adding Database Webhooks from Supabase Studio
 
@@ -372,13 +434,13 @@ Before you continue, **please evaluate the limitations of the Edge runtime**. Th
 
 Cloudflare is cheaper and faster than many other providers, but running your application on Cloudflare Workers means not having access to the vast Node.js ecosystem.
 
-Makerkit uses Cloudflare as baseline, so you can deploy it to Cloudflare Workers without any issues. However, you will need to keep in mind the limitations of the Edge runtime when adding new features.
+Makerkit uses Cloudflare as a baseline, so you can deploy it to Cloudflare Workers without any issues. However, you will need to keep in mind the limitations of the Edge runtime when adding new features.
 
 One more thing to consider is that the Edge runtime does run close to your users, but may run far from your database. Consider read replicas or other strategies to reduce latency in all situations.
 
 If your mind is set on using Cloudflare, please follow the instructions below.
 
-### 1. Opting in to the Edge runtime
+### 1. Opting into the Edge runtime
 
 To opt-in to the Edge runtime, you need to do the following: open the root layout file of your app `apps/web/app/layout.tsx` and export the const runtime as `edge`:
 
@@ -394,7 +456,7 @@ Since the default library `nodemailer` relies on Node.js, we cannot use it in th
 
 To use the Cloudflare Mailer, you need to do the following. Set the `MAILER_PROVIDER` environment variable to `cloudflare` in the `apps/web/.env` file:
 
-```
+```bash
 MAILER_PROVIDER=cloudflare
 ```
 
@@ -404,13 +466,13 @@ Please follow [the Vercel Email documentation](https://github.com/Sh4yy/vercel-e
 
 Alternatively, you can use the Resend Mailer. Set the `MAILER_PROVIDER` environment variable to `resend` in the `apps/web/.env` file:
 
-```
+```bash
 MAILER_PROVIDER=resend
 ```
 
 And provide the Resend API key:
 
-```
+```bash
 RESEND_API_KEY=your-api-key
 ```
 
@@ -424,7 +486,7 @@ By default, Makerkit uses Keystatic as a CMS. Keystatic's local mode (which reli
 
 At this time, the other CMS supported is WordPress. Set `CMS_CLIENT` to `wordpress` in the `apps/web/.env` file:
 
-```
+```bash
 CMS_CLIENT=wordpress
 ```
 

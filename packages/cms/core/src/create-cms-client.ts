@@ -34,14 +34,17 @@ async function getWordpressClient() {
 }
 
 async function getKeystaticClient() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
+  if (
+    process.env.NEXT_RUNTIME === 'nodejs' ||
+    process.env.KEYSTATIC_STORAGE_KIND !== 'local'
+  ) {
     const { KeystaticClient } = await import('../../keystatic/src/client');
 
     return new KeystaticClient();
   }
 
   console.error(
-    `[CMS] Keystatic client is only available in Node.js runtime. Please choose a different CMS client. Returning a mock client instead of throwing an error.`,
+    `[CMS] Keystatic client using "Local" mode is only available in Node.js runtime. Please choose a different CMS client. Returning a mock client instead of throwing an error.`,
   );
 
   return mockCMSClient() as unknown as CmsClient;
