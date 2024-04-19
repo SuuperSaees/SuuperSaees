@@ -92,11 +92,10 @@ function Home() {
             className={
               'delay-250 rounded-lg border duration-1000 ease-out animate-in fade-in zoom-in-50 fill-mode-both'
             }
-            width={3069}
-            height={1916}
+            width={1689}
+            height={1057}
             src={`/images/dashboard-demo.webp`}
             alt={`App Image`}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
       </div>
@@ -131,7 +130,7 @@ function Home() {
       </div>
 
       <div className={'container mx-auto'}>
-        <div className={'flex flex-col space-y-4'}>
+        <div className={'flex flex-col space-y-24 xl:space-y-36'}>
           <FeatureShowcaseContainer>
             <LeftFeatureContainer>
               <div className={'flex flex-col space-y-2.5'}>
@@ -162,10 +161,9 @@ function Home() {
               <Image
                 className="rounded-2xl"
                 src={'/images/sign-in.webp'}
-                width={'1100'}
-                height={'1282'}
+                width={'1760'}
+                height={'1680'}
                 alt={'Sign In'}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </RightFeatureContainer>
           </FeatureShowcaseContainer>
@@ -175,10 +173,9 @@ function Home() {
               <Image
                 className="rounded-2xl"
                 src={'/images/dashboard.webp'}
-                width={'2094'}
-                height={'2416'}
+                width={'2004'}
+                height={'1410'}
                 alt={'Dashboard'}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </LeftFeatureContainer>
 
@@ -234,10 +231,9 @@ function Home() {
               <Image
                 className="rounded-2xl"
                 src={'/images/billing.webp'}
-                width={'2456'}
-                height={'1454'}
+                width={'1916'}
+                height={'1392'}
                 alt={'Billing'}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </RightFeatureContainer>
           </FeatureShowcaseContainer>
