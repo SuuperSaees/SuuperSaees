@@ -22,8 +22,6 @@ export async function createKeystaticReader() {
 
     case 'github':
     case 'cloud': {
-      mockWorkerdFetch();
-
       const { default: config } = await import('./keystatic.config');
 
       const githubConfig = z
