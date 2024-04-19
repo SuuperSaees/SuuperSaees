@@ -19,13 +19,20 @@ export async function initializeI18nClient(
   }
 
   const loadedLanguages: string[] = [];
+  const loadedNamespaces: string[] = [];
 
   await i18next
     .use(
       resourcesToBackend(async (language, namespace, callback) => {
         const data = await resolver(language, namespace);
 
-        loadedLanguages.push(language);
+        if (!loadedLanguages.includes(language)) {
+          loadedLanguages.push(language);
+        }
+
+        if (!loadedNamespaces.includes(namespace)) {
+          loadedNamespaces.push(namespace);
+        }
 
         return callback(null, data);
       }),
@@ -51,8 +58,16 @@ export async function initializeI18nClient(
       },
     );
 
-  // keep component suspended until all languages are loaded
-  if (loadedLanguages.length !== settings.ns?.length) {
+  // keep component suspended until all languages and namespaces are loaded
+
+  if (loadedNamespaces.length !== settings.ns?.length) {
+    throw new Error();
+  }
+
+  if (
+    loadedLanguages.length !==
+    ((settings.supportedLngs as string[]) ?? [])?.length
+  ) {
     throw new Error();
   }
 

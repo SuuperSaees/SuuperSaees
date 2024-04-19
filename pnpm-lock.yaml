@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  next: 14.3.0-canary.7
+  next: 14.2.2
   react: 18.2.0
   react-dom: 18.2.0
   '@supabase/auth-js': 2.62.0
@@ -109,7 +109,7 @@ importers:
         version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)
       '@makerkit/data-loader-supabase-nextjs':
         specifier: ^1.1.0
-        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0)
+        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2)(next@14.2.2)(react@18.2.0)
       '@marsidev/react-turnstile':
         specifier: ^0.5.4
         version: 0.5.4(react-dom@18.2.0)(react@18.2.0)
@@ -124,7 +124,7 @@ importers:
         version: 5.29.2(react@18.2.0)
       '@tanstack/react-query-next-experimental':
         specifier: ^5.29.2
-        version: 5.29.2(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0)
+        version: 5.29.2(@tanstack/react-query@5.29.2)(next@14.2.2)(react@18.2.0)
       '@tanstack/react-table':
         specifier: ^8.16.0
         version: 8.16.0(react-dom@18.2.0)(react@18.2.0)
@@ -133,7 +133,7 @@ importers:
         version: 3.6.0
       edge-csrf:
         specifier: 1.0.12-sveltekit-1
-        version: 1.0.12-sveltekit-1(@sveltejs/kit@2.5.6)(next@14.3.0-canary.7)
+        version: 1.0.12-sveltekit-1(@sveltejs/kit@2.5.6)(next@14.2.2)
       i18next:
         specifier: ^23.11.2
         version: 23.11.2
@@ -144,11 +144,11 @@ importers:
         specifier: ^0.368.0
         version: 0.368.0(react@18.2.0)
       next:
-        specifier: 14.3.0-canary.7
-        version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.2
+        version: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       next-sitemap:
         specifier: ^4.2.3
-        version: 4.2.3(next@14.3.0-canary.7)
+        version: 4.2.3(next@14.2.2)
       next-themes:
         specifier: 0.3.0
         version: 0.3.0(react-dom@18.2.0)(react@18.2.0)
@@ -298,8 +298,8 @@ importers:
         specifier: ^0.368.0
         version: 0.368.0(react@18.2.0)
       next:
-        specifier: 14.3.0-canary.7
-        version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.2
+        version: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -421,10 +421,10 @@ importers:
     dependencies:
       '@keystatic/core':
         specifier: 0.5.11
-        version: 0.5.11(next@14.3.0-canary.7)(react-dom@18.2.0)(react@18.2.0)
+        version: 0.5.11(next@14.2.2)(react-dom@18.2.0)(react@18.2.0)
       '@keystatic/next':
         specifier: 5.0.0
-        version: 5.0.0(@keystatic/core@0.5.11)(next@14.3.0-canary.7)(react-dom@18.2.0)(react@18.2.0)
+        version: 5.0.0(@keystatic/core@0.5.11)(next@14.2.2)(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@kit/cms':
         specifier: workspace:^
@@ -597,8 +597,8 @@ importers:
         specifier: ^0.368.0
         version: 0.368.0(react@18.2.0)
       next:
-        specifier: 14.3.0-canary.7
-        version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.2
+        version: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       next-themes:
         specifier: 0.3.0
         version: 0.3.0(react-dom@18.2.0)(react@18.2.0)
@@ -652,7 +652,7 @@ importers:
         version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)
       '@makerkit/data-loader-supabase-nextjs':
         specifier: ^1.1.0
-        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0)
+        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2)(next@14.2.2)(react@18.2.0)
       '@supabase/supabase-js':
         specifier: ^2.42.5
         version: 2.42.5
@@ -669,8 +669,8 @@ importers:
         specifier: ^0.368.0
         version: 0.368.0(react@18.2.0)
       next:
-        specifier: 14.3.0-canary.7
-        version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.2
+        version: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -726,8 +726,8 @@ importers:
         specifier: ^0.368.0
         version: 0.368.0(react@18.2.0)
       next:
-        specifier: 14.3.0-canary.7
-        version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.2
+        version: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react-hook-form:
         specifier: ^7.51.3
         version: 7.51.3(react@18.2.0)
@@ -811,8 +811,8 @@ importers:
         specifier: ^0.368.0
         version: 0.368.0(react@18.2.0)
       next:
-        specifier: 14.3.0-canary.7
-        version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.2
+        version: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -952,7 +952,7 @@ importers:
         version: 1.23.0
       '@sentry/nextjs':
         specifier: ^7.110.1
-        version: 7.110.1(next@14.3.0-canary.7)(react@18.2.0)
+        version: 7.110.1(next@14.2.2)(react@18.2.0)
       '@sentry/opentelemetry-node':
         specifier: ^7.110.1
         version: 7.110.1(@opentelemetry/api@1.8.0)(@opentelemetry/core@1.23.0)(@opentelemetry/sdk-trace-base@1.23.0)(@opentelemetry/semantic-conventions@1.23.0)
@@ -994,8 +994,8 @@ importers:
         specifier: ^2.42.5
         version: 2.42.5
       next:
-        specifier: 14.3.0-canary.7
-        version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.2
+        version: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -1049,8 +1049,8 @@ importers:
         specifier: ^18.2.79
         version: 18.2.79
       next:
-        specifier: 14.3.0-canary.7
-        version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.2
+        version: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -1167,8 +1167,8 @@ importers:
         specifier: ^0.368.0
         version: 0.368.0(react@18.2.0)
       next:
-        specifier: 14.3.0-canary.7
-        version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.2
+        version: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       next-themes:
         specifier: 0.3.0
         version: 0.3.0(react-dom@18.2.0)(react@18.2.0)
@@ -2164,10 +2164,10 @@ packages:
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
     dev: false
 
-  /@keystar/ui@0.7.1(next@14.3.0-canary.7)(react-dom@18.2.0)(react@18.2.0):
+  /@keystar/ui@0.7.1(next@14.2.2)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-TIV/SmycpY4UWhOSZ2e3csPtCN1hHQJlT+fiSuHWVqPTW94yH/XkCN5zogzUFOe2Z4a6IEkVoCa1BQQMTgpFNg==}
     peerDependencies:
-      next: 14.3.0-canary.7
+      next: 14.2.2
       react: 18.2.0
       react-dom: 18.2.0
     peerDependenciesMeta:
@@ -2255,12 +2255,12 @@ packages:
       '@react-types/tabs': 3.3.5(react@18.2.0)
       emery: 1.4.3
       facepaint: 1.2.1
-      next: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@keystatic/core@0.5.11(next@14.3.0-canary.7)(react-dom@18.2.0)(react@18.2.0):
+  /@keystatic/core@0.5.11(next@14.2.2)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-LC3RANu9sH74ixNluIbMf4iTNLycCYhkBmK8DfwoZNWb5v3AnLMkVly0NV2yxuGChOowqnmtbHWlkHCvNsNlFA==}
     peerDependencies:
       react: 18.2.0
@@ -2272,7 +2272,7 @@ packages:
       '@emotion/weak-memoize': 0.3.1
       '@floating-ui/react': 0.24.8(react-dom@18.2.0)(react@18.2.0)
       '@internationalized/string': 3.2.1
-      '@keystar/ui': 0.7.1(next@14.3.0-canary.7)(react-dom@18.2.0)(react@18.2.0)
+      '@keystar/ui': 0.7.1(next@14.2.2)(react-dom@18.2.0)(react@18.2.0)
       '@markdoc/markdoc': 0.4.0(@types/react@18.2.79)(react@18.2.0)
       '@react-aria/focus': 3.16.2(react@18.2.0)
       '@react-aria/i18n': 3.10.2(react@18.2.0)
@@ -2349,19 +2349,19 @@ packages:
       - supports-color
     dev: false
 
-  /@keystatic/next@5.0.0(@keystatic/core@0.5.11)(next@14.3.0-canary.7)(react-dom@18.2.0)(react@18.2.0):
+  /@keystatic/next@5.0.0(@keystatic/core@0.5.11)(next@14.2.2)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-aacEMkrSbXrhC/obKTPEbcVa1yC9POmpd8lfXNGVadSRUsoG5O+brULc1NeVeHe7MMS/PkhNzhIpWkApCf5Qhw==}
     peerDependencies:
       '@keystatic/core': '*'
-      next: 14.3.0-canary.7
+      next: 14.2.2
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
       '@babel/runtime': 7.24.4
-      '@keystatic/core': 0.5.11(next@14.3.0-canary.7)(react-dom@18.2.0)(react@18.2.0)
+      '@keystatic/core': 0.5.11(next@14.2.2)(react-dom@18.2.0)(react@18.2.0)
       '@types/react': 18.2.79
       chokidar: 3.6.0
-      next: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       server-only: 0.0.1
@@ -2382,18 +2382,18 @@ packages:
       '@supabase/supabase-js': 2.42.5
       ts-case-convert: 2.0.7
 
-  /@makerkit/data-loader-supabase-nextjs@1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0):
+  /@makerkit/data-loader-supabase-nextjs@1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2)(next@14.2.2)(react@18.2.0):
     resolution: {integrity: sha512-4+QtHMXeOCPFKnP14a/K0mVUGr/809WE1J7RF5Eue45xdXMbvhyWIHqRNvvpUo9N6MnDO7u9IaYKO0aneMPFrw==}
     peerDependencies:
       '@supabase/supabase-js': '>=2.0.0'
       '@tanstack/react-query': '>=5.0.0'
-      next: 14.3.0-canary.7
+      next: 14.2.2
       react: 18.2.0
     dependencies:
       '@makerkit/data-loader-supabase-core': 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)
       '@supabase/supabase-js': 2.42.5
       '@tanstack/react-query': 5.29.2(react@18.2.0)
-      next: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
     transitivePeerDependencies:
       - '@supabase/postgrest-js'
@@ -2485,8 +2485,8 @@ packages:
     resolution: {integrity: sha512-Yac/bV5sBGkkEXmAX5FWPS9Mmo2rthrOPRQQNfycJPkjUAUclomCPH7QFVCDQ4Mp2k2K1SSM6m0zrxYrOwtFQw==}
     dev: false
 
-  /@next/env@14.3.0-canary.7:
-    resolution: {integrity: sha512-FXmIhrOXLCAC3CFfsphwr9B4sd42TdJWJ95UgvXJErnS2XgT0iv0BtMULybWOBzpJVWQavYzl+CkFDQC2EFJiw==}
+  /@next/env@14.2.2:
+    resolution: {integrity: sha512-sk72qRfM1Q90XZWYRoJKu/UWlTgihrASiYw/scb15u+tyzcze3bOuJ/UV6TBOQEeUaxOkRqGeuGUdiiuxc5oqw==}
 
   /@next/eslint-plugin-next@14.2.2:
     resolution: {integrity: sha512-q+Ec2648JtBpKiu/FSJm8HAsFXlNvioHeBCbTP12T1SGcHYwhqHULSfQgFkPgHDu3kzNp2Kem4J54bK4rPQ5SQ==}
@@ -2494,72 +2494,72 @@ packages:
       glob: 10.3.10
     dev: false
 
-  /@next/swc-darwin-arm64@14.3.0-canary.7:
-    resolution: {integrity: sha512-AwYIdp0HHJQFI+LDAzTp7gj4suyl9KZgWFvHd79DljG4DLJMVEDb669AXpwV1m9WgVzWgnUsTJgF/XHDhaIRfg==}
+  /@next/swc-darwin-arm64@14.2.2:
+    resolution: {integrity: sha512-3iPgMhzbalizGwHNFUcGnDhFPSgVBHQ8aqSTAMxB5BvJG0oYrDf1WOJZlbXBgunOEj/8KMVbejEur/FpvFsgFQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     optional: true
 
-  /@next/swc-darwin-x64@14.3.0-canary.7:
-    resolution: {integrity: sha512-NeXcmZdRycTNG3aMROgaTVuW3espy8CX9dVC7KQT9/YnRPItNhP/maU7kgIA5C43bgjCgwg1f9ABNB2NX99eWw==}
+  /@next/swc-darwin-x64@14.2.2:
+    resolution: {integrity: sha512-x7Afi/jt0ZBRUZHTi49yyej4o8znfIMHO4RvThuoc0P+uli8Jd99y5GKjxoYunPKsXL09xBXEM1+OQy2xEL0Ag==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     optional: true
 
-  /@next/swc-linux-arm64-gnu@14.3.0-canary.7:
-    resolution: {integrity: sha512-Qct3FFELGR8Vl97GBHuend1X94ykEzF7Cvyi8TX1I1uCZZHhRzHzJMo7TjrI+YNbJF804sc/+VsNxVxR197/Nw==}
+  /@next/swc-linux-arm64-gnu@14.2.2:
+    resolution: {integrity: sha512-zbfPtkk7L41ODMJwSp5VbmPozPmMMQrzAc0HAUomVeVIIwlDGs/UCqLJvLNDt4jpWgc21SjjyIn762lNGrMaUA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     optional: true
 
-  /@next/swc-linux-arm64-musl@14.3.0-canary.7:
-    resolution: {integrity: sha512-sxLnN5QKp8JwEuABmArZ6uV8wjO9ozt7qbne/Y1zhKIyYl+WSgoPxznJz98bEGjd7o7sntSm1djYwZd+Ra1v1w==}
+  /@next/swc-linux-arm64-musl@14.2.2:
+    resolution: {integrity: sha512-wPbS3pI/JU16rm3XdLvvTmlsmm1nd+sBa2ohXgBZcShX4TgOjD4R+RqHKlI1cjo/jDZKXt6OxmcU0Iys0OC/yg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     optional: true
 
-  /@next/swc-linux-x64-gnu@14.3.0-canary.7:
-    resolution: {integrity: sha512-s3i4CFmsk7QcSDyScrMOQQ9EZPNRzkw2pUXI/SweKQC0qLXQ6agthCH0Ks69b/niMxzG+P4pen50qm1svsBHog==}
+  /@next/swc-linux-x64-gnu@14.2.2:
+    resolution: {integrity: sha512-NqWOHqqq8iC9tuHvZxjQ2tX+jWy2X9y8NX2mcB4sj2bIccuCxbIZrU/ThFPZZPauygajZuVQ6zediejQHwZHwQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     optional: true
 
-  /@next/swc-linux-x64-musl@14.3.0-canary.7:
-    resolution: {integrity: sha512-I3Js4g8ylkFGUb8ICI4ya1j89D/jw/SnItrGce03UWQhOdczlWixSFabE2RqSYtVM+cOWVLJ8SSmeoi98YQPNg==}
+  /@next/swc-linux-x64-musl@14.2.2:
+    resolution: {integrity: sha512-lGepHhwb9sGhCcU7999+iK1ZZT+6rrIoVg40MP7DZski9GIZP80wORSbt5kJzh9v2x2ev2lxC6VgwMQT0PcgTA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     optional: true
 
-  /@next/swc-win32-arm64-msvc@14.3.0-canary.7:
-    resolution: {integrity: sha512-H8iTu2VPOmm2QXhWRkItS3Vfieh52pdg6IGBnm4xp+RJ6UVBEluTT2VDYB7vqjPnbof/dq6woflZkq2/KujSrQ==}
+  /@next/swc-win32-arm64-msvc@14.2.2:
+    resolution: {integrity: sha512-TZSh/48SfcLEQ4rD25VVn2kdIgUWmMflRX3OiyPwGNXn3NiyPqhqei/BaqCYXViIQ+6QsG9R0C8LftMqy8JPMA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
     optional: true
 
-  /@next/swc-win32-ia32-msvc@14.3.0-canary.7:
-    resolution: {integrity: sha512-OwdUlF/N+nJRXqFdwdRtSuilFlBDctIJSV30TdNNTdnTCCYtI9cyrJ+8Sx3EVhQQVTxySPUgmhJitgmgyDMmkQ==}
+  /@next/swc-win32-ia32-msvc@14.2.2:
+    resolution: {integrity: sha512-M0tBVNMEBJN2ZNQWlcekMn6pvLria7Sa2Fai5znm7CCJz4pP3lrvlSxhKdkCerk0D9E0bqx5yAo3o2Q7RrD4gA==}
     engines: {node: '>= 10'}
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
     optional: true
 
-  /@next/swc-win32-x64-msvc@14.3.0-canary.7:
-    resolution: {integrity: sha512-pirSoMkVeWG7VuBEw6kISWUT1AaMeRj6TtcDuj7lJUoD2AQUO17yxRXMDLJ7Kf1ymOAxOEUf+Toys9V8NpSjKA==}
+  /@next/swc-win32-x64-msvc@14.2.2:
+    resolution: {integrity: sha512-a/20E/wtTJZ3Ykv3f/8F0l7TtgQa2LWHU2oNB9bsu0VjqGuGGHmm/q6waoUNQYTVPYrrlxxaHjJcDV6aiSTt/w==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -5666,11 +5666,11 @@ packages:
       localforage: 1.10.0
     dev: false
 
-  /@sentry/nextjs@7.110.1(next@14.3.0-canary.7)(react@18.2.0):
+  /@sentry/nextjs@7.110.1(next@14.2.2)(react@18.2.0):
     resolution: {integrity: sha512-OcH44p14DOjOPlEcFHJG4YB3koeYNFnDz5yikRs6B5HrcuQRzQkRphasysQt37NmjJG5QQMdqArYxho6JwlMfg==}
     engines: {node: '>=8'}
     peerDependencies:
-      next: 14.3.0-canary.7
+      next: 14.2.2
       react: 18.2.0
       webpack: '>= 4.0.0'
     peerDependenciesMeta:
@@ -5687,7 +5687,7 @@ packages:
       '@sentry/vercel-edge': 7.110.1
       '@sentry/webpack-plugin': 1.21.0
       chalk: 3.0.0
-      next: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       resolve: 1.22.8
       rollup: 2.78.0
@@ -5988,15 +5988,15 @@ packages:
   /@tanstack/query-core@5.29.0:
     resolution: {integrity: sha512-WgPTRs58hm9CMzEr5jpISe8HXa3qKQ8CxewdYZeVnA54JrPY9B1CZiwsCoLpLkf0dGRZq+LcX5OiJb0bEsOFww==}
 
-  /@tanstack/react-query-next-experimental@5.29.2(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0):
+  /@tanstack/react-query-next-experimental@5.29.2(@tanstack/react-query@5.29.2)(next@14.2.2)(react@18.2.0):
     resolution: {integrity: sha512-AQd0S/UD+HTUv6MOmc1glv9FZN7ZxVQJlM7IJQx4QfWJpIWZMukXtlKMfwpO4YzQgo2jitblY17rZ/8YDtIxzw==}
     peerDependencies:
       '@tanstack/react-query': ^5.29.2
-      next: 14.3.0-canary.7
+      next: 14.2.2
       react: 18.2.0
     dependencies:
       '@tanstack/react-query': 5.29.2(react@18.2.0)
-      next: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
     dev: false
 
@@ -7682,14 +7682,14 @@ packages:
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  /edge-csrf@1.0.12-sveltekit-1(@sveltejs/kit@2.5.6)(next@14.3.0-canary.7):
+  /edge-csrf@1.0.12-sveltekit-1(@sveltejs/kit@2.5.6)(next@14.2.2):
     resolution: {integrity: sha512-wftM7WJeJnirqBfHj6y+yyvIvVeP3bjJeQ8AsEhOqxe3CcrgAlKQA2ZIbThaLI44iRsMoJQ7I0ppEew4iktIlA==}
     peerDependencies:
       '@sveltejs/kit': ^2.5.5
-      next: 14.3.0-canary.7
+      next: 14.2.2
     dependencies:
       '@sveltejs/kit': 2.5.6(@sveltejs/vite-plugin-svelte@3.1.0)(svelte@4.2.15)(vite@5.2.9)
-      next: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
   /editorconfig@1.0.4:
@@ -10242,18 +10242,18 @@ packages:
     engines: {node: '>= 0.4.0'}
     dev: false
 
-  /next-sitemap@4.2.3(next@14.3.0-canary.7):
+  /next-sitemap@4.2.3(next@14.2.2):
     resolution: {integrity: sha512-vjdCxeDuWDzldhCnyFCQipw5bfpl4HmZA7uoo3GAaYGjGgfL4Cxb1CiztPuWGmS+auYs7/8OekRS8C2cjdAsjQ==}
     engines: {node: '>=14.18'}
     hasBin: true
     peerDependencies:
-      next: 14.3.0-canary.7
+      next: 14.2.2
     dependencies:
       '@corex/deepmerge': 4.0.43
       '@next/env': 13.5.6
       fast-glob: 3.3.2
       minimist: 1.2.8
-      next: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
   /next-themes@0.3.0(react-dom@18.2.0)(react@18.2.0):
@@ -10265,8 +10265,8 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  /next@14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-loPrWTCvHvZgOy3rgL9+2WpxNDxlRNt462ihqm/DUuyK8LUZV1F4H920YTAu1wEiYC8RrpNUbpz8K7KRYAkQiA==}
+  /next@14.2.2(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-oGwUaa2bCs47FbuxWMpOoXtBMPYpvTPgdZr3UAo+pu7Ns00z9otmYpoeV1HEiYL06AlRQQIA/ypK526KjJfaxg==}
     engines: {node: '>=18.17.0'}
     hasBin: true
     peerDependencies:
@@ -10283,7 +10283,7 @@ packages:
       sass:
         optional: true
     dependencies:
-      '@next/env': 14.3.0-canary.7
+      '@next/env': 14.2.2
       '@opentelemetry/api': 1.8.0
       '@swc/helpers': 0.5.5
       busboy: 1.6.0
@@ -10294,15 +10294,15 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
       styled-jsx: 5.1.1(react@18.2.0)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 14.3.0-canary.7
-      '@next/swc-darwin-x64': 14.3.0-canary.7
-      '@next/swc-linux-arm64-gnu': 14.3.0-canary.7
-      '@next/swc-linux-arm64-musl': 14.3.0-canary.7
-      '@next/swc-linux-x64-gnu': 14.3.0-canary.7
-      '@next/swc-linux-x64-musl': 14.3.0-canary.7
-      '@next/swc-win32-arm64-msvc': 14.3.0-canary.7
-      '@next/swc-win32-ia32-msvc': 14.3.0-canary.7
-      '@next/swc-win32-x64-msvc': 14.3.0-canary.7
+      '@next/swc-darwin-arm64': 14.2.2
+      '@next/swc-darwin-x64': 14.2.2
+      '@next/swc-linux-arm64-gnu': 14.2.2
+      '@next/swc-linux-arm64-musl': 14.2.2
+      '@next/swc-linux-x64-gnu': 14.2.2
+      '@next/swc-linux-x64-musl': 14.2.2
+      '@next/swc-win32-arm64-msvc': 14.2.2
+      '@next/swc-win32-ia32-msvc': 14.2.2
+      '@next/swc-win32-x64-msvc': 14.2.2
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
