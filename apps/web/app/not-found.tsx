@@ -38,7 +38,7 @@ const NotFoundPage = async () => {
       >
         <div className={'flex flex-col items-center space-y-12'}>
           <div>
-            <h1 className={'text-8xl font-extrabold'}>404 :(</h1>
+            <h1 className={'font-heading text-9xl font-extrabold'}>404 :(</h1>
           </div>
 
           <div className={'flex flex-col items-center space-y-4'}>

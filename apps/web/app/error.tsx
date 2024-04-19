@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import { ArrowLeft } from 'lucide-react';
 
 import { useCaptureException } from '@kit/monitoring/hooks';
@@ -31,7 +29,7 @@ const ErrorPage = ({
       >
         <div className={'flex flex-col items-center space-y-16'}>
           <div>
-            <h1 className={'text-8xl font-extrabold'}>500 :(</h1>
+            <h1 className={'font-heading text-9xl font-extrabold'}>500 :(</h1>
           </div>
 
           <div className={'flex flex-col items-center space-y-4'}>

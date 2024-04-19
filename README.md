@@ -513,3 +513,20 @@ UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "super-
 ```
 
 Please replace `<user_id>` with the user ID you want to assign as a super admin.
+
+
+## Going to Production
+
+When you are ready to go to production, please follow the checklist below. This is an overview, a more detailed guide will be provided in the future.
+
+This could take a couple of hours, so buckle up!
+
+1. **Create a Supabase project**. Link the project locally using the Supabase CLI (`supabase link`).
+2. **Migrations**: Push the migrations to the remote Supabase project (`supabase db push`).
+3. **Auth**: Set your APP URL in the Supabase project settings. This is required for the OAuth flow. Make sure to add the path `/auth/callback` to the allowed URLs. If you don't have it yet, wait.
+4. **Auth Providers**: Set the OAuth providers in the Supabase project settings. If you use Google Auth, make sure to set it up. This requires creating a Google Cloud project and setting up the OAuth credentials.
+5. **Deploy Next.js**: Deploy the Next.js app to Vercel or any another hosting provider. Copy the URL and set it in the Supabase project settings.
+6. **Environment Variables**: The initial deploy **will likely fail** because you may not yet have a URL to set in your environment variables. This is normal. Once you have the URL, set the URL in the environment variables and redeploy.
+7. **Webhooks**: Set the DB Webhooks in Supabase pointing against your Next.js app at `/api/db/webhooks`.
+8. **Emails**: Get some SMTP details from an email service provider like SendGrid or Mailgun or Resend and configure the emails in both the Environment Variables and the Supabase project settings.
+9. **Billing**: Create a Stripe/Lemon Squeezy account, make sure to update the environment variables with the correct values. Point webhooks from these to `/api/billing/webhook`.
