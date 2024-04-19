@@ -60,17 +60,6 @@ export async function initializeI18nClient(
 
   // keep component suspended until all languages and namespaces are loaded
 
-  if (loadedNamespaces.length !== settings.ns?.length) {
-    throw new Error();
-  }
-
-  if (
-    loadedLanguages.length !==
-    ((settings.supportedLngs as string[]) ?? [])?.length
-  ) {
-    throw new Error();
-  }
-
   clientInstance = i18next;
 
   return clientInstance;
