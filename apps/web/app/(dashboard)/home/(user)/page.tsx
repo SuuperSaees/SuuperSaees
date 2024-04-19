@@ -1,11 +1,12 @@
 import { use } from 'react';
 
 import { ServerDataLoader } from '@makerkit/data-loader-supabase-nextjs';
-import { Plus } from 'lucide-react';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
+import { If } from '@kit/ui/if';
+import { Input } from '@kit/ui/input';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
@@ -19,6 +20,7 @@ import { UserAccountHeader } from './_components/user-account-header';
 
 interface SearchParams {
   page?: string;
+  query?: string;
 }
 
 export const generateMetadata = async () => {
@@ -33,7 +35,9 @@ export const generateMetadata = async () => {
 function UserHomePage(props: { searchParams: SearchParams }) {
   const client = getSupabaseServerComponentClient();
   const { user } = use(loadUserWorkspace());
+
   const page = parseInt(props.searchParams.page ?? '1', 10);
+  const query = props.searchParams.query ?? '';
 
   return (
     <>
@@ -53,7 +57,16 @@ function UserHomePage(props: { searchParams: SearchParams }) {
             <Heading level={4}>Tasks</Heading>
           </div>
 
-          <div>
+          <div className={'flex items-center space-x-4'}>
+            <form>
+              <Input
+                name={'query'}
+                defaultValue={query}
+                className={'w-full max-w-2xl'}
+                placeholder={'Search tasks'}
+              />
+            </form>
+
             <NewTaskDialog />
           </div>
         </div>
@@ -66,9 +79,33 @@ function UserHomePage(props: { searchParams: SearchParams }) {
             account_id: {
               eq: user.id,
             },
+            title: {
+              textSearch: query ? `%${query}%` : undefined,
+            },
           }}
         >
-          {(props) => <TasksTable {...props} />}
+          {(props) => {
+            return (
+              <div className={'flex flex-col space-y-8'}>
+                <If condition={props.count === 0 && query}>
+                  <div className={'flex flex-col space-y-2.5'}>
+                    <p>
+                      No tasks found for the search query <code>{query}</code>
+                    </p>
+
+                    <form>
+                      <input type="hidden" name={'query'} value={''} />
+                      <Button variant={'outline'} size={'sm'}>
+                        Clear search
+                      </Button>
+                    </form>
+                  </div>
+                </If>
+
+                <TasksTable {...props} />
+              </div>
+            );
+          }}
         </ServerDataLoader>
       </PageBody>
     </>

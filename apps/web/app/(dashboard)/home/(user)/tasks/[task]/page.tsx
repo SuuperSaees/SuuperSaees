@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
 import { Button } from '@kit/ui/button';
 import { PageBody, PageHeader } from '@kit/ui/page';
 
-import { UpdateTask } from '~/(dashboard)/home/(user)/tasks/[task]/_components/update-task';
+import { UpdateTask } from './_components/update-task';
 
 interface Params {
   task: string;
@@ -52,7 +52,9 @@ async function TaskPage({ params }: { params: Params }) {
       </PageHeader>
 
       <PageBody>
-        <UpdateTask task={task} />
+        <div className={'container mx-auto max-w-2xl'}>
+          <UpdateTask task={task} />
+        </div>
       </PageBody>
     </>
   );
