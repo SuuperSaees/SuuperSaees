@@ -1,4 +1,4 @@
-import { unstable_cache as cache } from 'next/cache';
+import { unstable_cache as cache } from 'next/dist/server/web/spec-extension/unstable-cache';
 
 import { createCmsClient } from '@kit/cms';
 import { PageBody } from '@kit/ui/page';

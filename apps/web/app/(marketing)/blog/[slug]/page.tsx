@@ -1,7 +1,6 @@
-import { cache } from 'react';
-
 import type { Metadata } from 'next';
 
+import { unstable_cache as cache } from 'next/dist/server/web/spec-extension/unstable-cache';
 import { notFound } from 'next/navigation';
 
 import { createCmsClient } from '@kit/cms';
@@ -9,8 +8,6 @@ import { createCmsClient } from '@kit/cms';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { Post } from '../../blog/_components/post';
-
-export const dynamic = 'force-static';
 
 const getPostBySlug = cache(async (slug: string) => {
   const client = await createCmsClient();
