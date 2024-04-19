@@ -12,7 +12,8 @@ KEYSTATIC_PATH=content
 Additionally, the following environment variables may be required:
 
 ```
-KEYSTATIC_PATH=local # local, cloud, github
+KEYSTATIC_STORAGE_KIND=local # local, cloud, github
+KEYSTATIC_PATH=
 ```
 
 You can also use Keystatic Cloud or GitHub as the storage kind as remote storage.
@@ -20,16 +21,22 @@ You can also use Keystatic Cloud or GitHub as the storage kind as remote storage
 If `KEYSTATIC_STORAGE_KIND` is set to `cloud`, the following environment variables are required:
 
 ```
+KEYSTATIC_STORAGE_KIND=cloud
 KEYSTATIC_STORAGE_PROJECT=project-id
 ```
 
 If `KEYSTATIC_STORAGE_KIND` is set to `github`, the following environment variables are required:
 
 ```
-KEYSTATIC_STORAGE_REPO=repo-name
-KEYSTATIC_STORAGE_BRANCH_PREFIX=branch-prefix
+KEYSTATIC_STORAGE_KIND=github
+KEYSTATIC_STORAGE_REPO=makerkit/next-supabase-saas-kit-turbo-demo
+KEYSTATIC_GITHUB_TOKEN=github_*****************************************************
+KEYSTATIC_PATH_PREFIX=apps/web
+KEY_STATIC_PATH_PREFIX=content
 ```
 
-GitHub mode requires the installation of a GitHub app.
+Of course, you need to replace the `KEYSTATIC_STORAGE_REPO` and `KEYSTATIC_GITHUB_TOKEN` with your own values.
+
+GitHub mode requires the installation of a GitHub app for displaying the admin.
 
 Please refer to the [Keystatic documentation](https://keystatic.com/docs/github-model) for more information.

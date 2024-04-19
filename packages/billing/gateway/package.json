@@ -43,7 +43,7 @@
     "@kit/tailwind-config": "workspace:*",
     "@kit/tsconfig": "workspace:*",
     "@kit/ui": "workspace:^",
-    "@supabase/supabase-js": "^2.42.4",
+    "@supabase/supabase-js": "^2.42.5",
     "@types/react": "^18.2.79",
     "date-fns": "^3.6.0",
     "lucide-react": "^0.368.0",

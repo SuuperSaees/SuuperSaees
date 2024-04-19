@@ -105,10 +105,10 @@ importers:
         version: link:../../packages/ui
       '@makerkit/data-loader-supabase-core':
         specifier: ^0.0.7
-        version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.4)
+        version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)
       '@makerkit/data-loader-supabase-nextjs':
         specifier: ^1.1.0
-        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.4)(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0)
+        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0)
       '@marsidev/react-turnstile':
         specifier: ^0.5.4
         version: 0.5.4(react-dom@18.2.0)(react@18.2.0)
@@ -116,8 +116,8 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(react@18.2.0)
       '@supabase/supabase-js':
-        specifier: ^2.42.4
-        version: 2.42.4
+        specifier: ^2.42.5
+        version: 2.42.5
       '@tanstack/react-query':
         specifier: 5.29.2
         version: 5.29.2(react@18.2.0)
@@ -285,8 +285,8 @@ importers:
         specifier: workspace:^
         version: link:../../ui
       '@supabase/supabase-js':
-        specifier: ^2.42.4
-        version: 2.42.4
+        specifier: ^2.42.5
+        version: 2.42.5
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -507,8 +507,8 @@ importers:
         specifier: workspace:^
         version: link:../ui
       '@supabase/supabase-js':
-        specifier: ^2.42.4
-        version: 2.42.4
+        specifier: ^2.42.5
+        version: 2.42.5
       lucide-react:
         specifier: ^0.368.0
         version: 0.368.0(react@18.2.0)
@@ -581,8 +581,8 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(react@18.2.0)
       '@supabase/supabase-js':
-        specifier: ^2.42.4
-        version: 2.42.4
+        specifier: ^2.42.5
+        version: 2.42.5
       '@tanstack/react-query':
         specifier: 5.29.2
         version: 5.29.2(react@18.2.0)
@@ -648,13 +648,13 @@ importers:
         version: link:../../ui
       '@makerkit/data-loader-supabase-core':
         specifier: ^0.0.7
-        version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.4)
+        version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)
       '@makerkit/data-loader-supabase-nextjs':
         specifier: ^1.1.0
-        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.4)(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0)
+        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0)
       '@supabase/supabase-js':
-        specifier: ^2.42.4
-        version: 2.42.4
+        specifier: ^2.42.5
+        version: 2.42.5
       '@tanstack/react-query':
         specifier: 5.29.2
         version: 5.29.2(react@18.2.0)
@@ -713,8 +713,8 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(react@18.2.0)
       '@supabase/supabase-js':
-        specifier: ^2.42.4
-        version: 2.42.4
+        specifier: ^2.42.5
+        version: 2.42.5
       '@tanstack/react-query':
         specifier: 5.29.2
         version: 5.29.2(react@18.2.0)
@@ -786,8 +786,8 @@ importers:
         specifier: workspace:^
         version: link:../../ui
       '@supabase/supabase-js':
-        specifier: ^2.42.4
-        version: 2.42.4
+        specifier: ^2.42.5
+        version: 2.42.5
       '@tanstack/react-query':
         specifier: 5.29.2
         version: 5.29.2(react@18.2.0)
@@ -990,8 +990,8 @@ importers:
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@supabase/supabase-js':
-        specifier: ^2.42.4
-        version: 2.42.4
+        specifier: ^2.42.5
+        version: 2.42.5
       next:
         specifier: 14.3.0-canary.7
         version: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
@@ -1037,10 +1037,10 @@ importers:
         version: 2.62.2
       '@supabase/ssr':
         specifier: ^0.3.0
-        version: 0.3.0(@supabase/supabase-js@2.42.4)
+        version: 0.3.0(@supabase/supabase-js@2.42.5)
       '@supabase/supabase-js':
-        specifier: ^2.42.4
-        version: 2.42.4
+        specifier: ^2.42.5
+        version: 2.42.5
       '@tanstack/react-query':
         specifier: 5.29.2
         version: 5.29.2(react@18.2.0)
@@ -2371,17 +2371,17 @@ packages:
     engines: {node: '>=18'}
     dev: false
 
-  /@makerkit/data-loader-supabase-core@0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.4):
+  /@makerkit/data-loader-supabase-core@0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5):
     resolution: {integrity: sha512-9Zi7GmBZaedHl9x+LnasUL3ztx2oLInwI1uzdw4E830gSNQr/hx5/Sodd1A9cXECn51Ub5HWEJ8kfBZwX0qCKQ==}
     peerDependencies:
       '@supabase/postgrest-js': '>1.0.0'
       '@supabase/supabase-js': '>=2.0.0'
     dependencies:
       '@supabase/postgrest-js': 1.15.2
-      '@supabase/supabase-js': 2.42.4
+      '@supabase/supabase-js': 2.42.5
       ts-case-convert: 2.0.7
 
-  /@makerkit/data-loader-supabase-nextjs@1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.4)(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0):
+  /@makerkit/data-loader-supabase-nextjs@1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2)(next@14.3.0-canary.7)(react@18.2.0):
     resolution: {integrity: sha512-4+QtHMXeOCPFKnP14a/K0mVUGr/809WE1J7RF5Eue45xdXMbvhyWIHqRNvvpUo9N6MnDO7u9IaYKO0aneMPFrw==}
     peerDependencies:
       '@supabase/supabase-js': '>=2.0.0'
@@ -2389,8 +2389,8 @@ packages:
       next: 14.3.0-canary.7
       react: 18.2.0
     dependencies:
-      '@makerkit/data-loader-supabase-core': 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.4)
-      '@supabase/supabase-js': 2.42.4
+      '@makerkit/data-loader-supabase-core': 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)
+      '@supabase/supabase-js': 2.42.5
       '@tanstack/react-query': 5.29.2(react@18.2.0)
       next: 14.3.0-canary.7(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
@@ -5820,8 +5820,8 @@ packages:
     engines: {node: '>=12.16'}
     dev: false
 
-  /@supabase/auth-js@2.63.0:
-    resolution: {integrity: sha512-yIgcHnlgv24GxHtVGUhwGqAFDyJkPIC/xjx7HostN08A8yCy8HIfl4JEkTKyBqD1v1L05jNEJOUke4Lf4O1+Qg==}
+  /@supabase/auth-js@2.63.1:
+    resolution: {integrity: sha512-iwdmIc/w5QN7aMfYThEgUt1l2i0KuohZ4XNk1adECg0LETQYEzmbVToKFKZLLZ+GyNtpsExSgVY/AUWOwubGXA==}
     dependencies:
       '@supabase/node-fetch': 2.6.15
 
@@ -5858,12 +5858,12 @@ packages:
       - bufferutil
       - utf-8-validate
 
-  /@supabase/ssr@0.3.0(@supabase/supabase-js@2.42.4):
+  /@supabase/ssr@0.3.0(@supabase/supabase-js@2.42.5):
     resolution: {integrity: sha512-lcVyQ7H6eumb2FB1Wa2N+jYWMfq6CFza3KapikT0fgttMQ+QvDgpNogx9jI8bZgKds+XFSMCojxFvFb+gwdbfA==}
     peerDependencies:
       '@supabase/supabase-js': ^2.33.1
     dependencies:
-      '@supabase/supabase-js': 2.42.4
+      '@supabase/supabase-js': 2.42.5
       cookie: 0.5.0
       ramda: 0.29.1
     dev: true
@@ -5873,10 +5873,10 @@ packages:
     dependencies:
       '@supabase/node-fetch': 2.6.15
 
-  /@supabase/supabase-js@2.42.4:
-    resolution: {integrity: sha512-tRn3wloKnnFdmEr3O2VIaxqzKACpyJ3ymLDmeq0V5lvhkJ+B4VH+QmDrnBbJJUkO2t+IHg65j5jombZxU4yMyw==}
+  /@supabase/supabase-js@2.42.5:
+    resolution: {integrity: sha512-T/FlVmNHR/MDl8KhmNLb94dh+cTpqyvFlNI/Zd97dwS1yCm59xM+sTzmQLKnGNY5sPuwp40/w52bWrczdjOYtA==}
     dependencies:
-      '@supabase/auth-js': 2.63.0
+      '@supabase/auth-js': 2.63.1
       '@supabase/functions-js': 2.3.0
       '@supabase/node-fetch': 2.6.15
       '@supabase/postgrest-js': 1.15.2
