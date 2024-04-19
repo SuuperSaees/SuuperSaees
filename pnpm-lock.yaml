@@ -8,7 +8,7 @@ overrides:
   next: 14.3.0-canary.7
   react: 18.2.0
   react-dom: 18.2.0
-  '@supabase/auth-js': ^2.62.0
+  '@supabase/auth-js': 2.62.0
 
 importers:
 
@@ -5821,8 +5821,8 @@ packages:
     engines: {node: '>=12.16'}
     dev: false
 
-  /@supabase/auth-js@2.63.1:
-    resolution: {integrity: sha512-iwdmIc/w5QN7aMfYThEgUt1l2i0KuohZ4XNk1adECg0LETQYEzmbVToKFKZLLZ+GyNtpsExSgVY/AUWOwubGXA==}
+  /@supabase/auth-js@2.62.0:
+    resolution: {integrity: sha512-2pkOkd+NBBbLazy2IswnqahEBQTM4fB+U0HiNO/+mUrPCjCZV6RKhzt1AX4SqFfVW5eOENsh0vVc8IcACSpiTg==}
     dependencies:
       '@supabase/node-fetch': 2.6.15
 
@@ -5877,7 +5877,7 @@ packages:
   /@supabase/supabase-js@2.42.5:
     resolution: {integrity: sha512-T/FlVmNHR/MDl8KhmNLb94dh+cTpqyvFlNI/Zd97dwS1yCm59xM+sTzmQLKnGNY5sPuwp40/w52bWrczdjOYtA==}
     dependencies:
-      '@supabase/auth-js': 2.63.1
+      '@supabase/auth-js': 2.62.0
       '@supabase/functions-js': 2.3.0
       '@supabase/node-fetch': 2.6.15
       '@supabase/postgrest-js': 1.15.2

@@ -50,7 +50,7 @@
       "next": "14.3.0-canary.7",
       "react": "18.2.0",
       "react-dom": "18.2.0",
-      "@supabase/auth-js": "^2.62.0"
+      "@supabase/auth-js": "2.62.0"
     }
   },
   "browserslist": [
