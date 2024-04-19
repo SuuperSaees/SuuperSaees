@@ -57,12 +57,12 @@ function UserHomePage(props: { searchParams: SearchParams }) {
             <Heading level={4}>Tasks</Heading>
           </div>
 
-          <div className={'flex items-center space-x-4'}>
-            <form>
+          <div className={'flex items-center space-x-2'}>
+            <form className={'w-full'}>
               <Input
                 name={'query'}
                 defaultValue={query}
-                className={'w-full max-w-2xl'}
+                className={'w-full lg:w-[18rem]'}
                 placeholder={'Search tasks'}
               />
             </form>

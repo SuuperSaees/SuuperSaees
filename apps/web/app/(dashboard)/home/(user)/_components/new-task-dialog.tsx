@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 
-import { Plus } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 import {
@@ -26,7 +26,7 @@ export function NewTaskDialog() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className={'mr-1 h-4'} />
+          <PlusCircle className={'mr-1 h-4'} />
           <span>Add a Task</span>
         </Button>
       </DialogTrigger>
