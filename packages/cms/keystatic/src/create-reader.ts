@@ -1,15 +1,23 @@
 import { z } from 'zod';
 
+const STORAGE_KIND = process.env.KEYSTATIC_STORAGE_KIND ?? 'local';
+
 /**
  * Create a KeyStatic reader based on the storage kind.
  */
 export async function createKeystaticReader() {
-  switch (process.env.KEYSTATIC_STORAGE_KIND ?? 'local') {
+  switch (STORAGE_KIND) {
     case 'local': {
-      const { default: config } = await import('./keystatic.config');
-      const { createReader } = await import('@keystatic/core/reader');
+      if (process.env.NEXT_RUNTIME === 'nodejs') {
+        const { default: config } = await import('./keystatic.config');
+        const { createReader } = await import('@keystatic/core/reader');
 
-      return createReader('.', config);
+        return createReader('.', config);
+      } else {
+        // we should never get here but the compiler requires the check
+        // to ensure we don't parse the package at build time
+        throw new Error();
+      }
     }
 
     case 'github':

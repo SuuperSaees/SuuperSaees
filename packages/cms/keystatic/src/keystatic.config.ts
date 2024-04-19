@@ -30,7 +30,7 @@ const storage = z.union([local, cloud, github]).parse({
   pathPrefix: process.env.KEYSTATIC_PATH_PREFIX,
 });
 
-const path = process.env.KEY_STATIC_PATH ?? 'content';
+const path = process.env.KEYSTATIC_CONTENT_PATH ?? 'content';
 
 const keyStaticConfig = createKeyStaticConfig(path);
 

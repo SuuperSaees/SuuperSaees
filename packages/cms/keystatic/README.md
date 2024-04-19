@@ -32,7 +32,6 @@ KEYSTATIC_STORAGE_KIND=github
 KEYSTATIC_STORAGE_REPO=makerkit/next-supabase-saas-kit-turbo-demo
 KEYSTATIC_GITHUB_TOKEN=github_*****************************************************
 KEYSTATIC_PATH_PREFIX=apps/web
-KEY_STATIC_PATH_PREFIX=content
 ```
 
 Of course, you need to replace the `KEYSTATIC_STORAGE_REPO` and `KEYSTATIC_GITHUB_TOKEN` with your own values.
@@ -40,3 +39,9 @@ Of course, you need to replace the `KEYSTATIC_STORAGE_REPO` and `KEYSTATIC_GITHU
 GitHub mode requires the installation of a GitHub app for displaying the admin.
 
 Please refer to the [Keystatic documentation](https://keystatic.com/docs/github-model) for more information.
+
+If your content folder is not at `content`, you can set the `KEYSTATIC_CONTENT_PATH` environment variable to the correct path. For example, if your content folder is at `data/content`, you can set the `KEYSTATIC_CONTENT_PATH` environment variable as:
+
+```
+KEYSTATIC_CONTENT_PATH=data/content
+```
