@@ -10,6 +10,8 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { Post } from '../../blog/_components/post';
 
+export const dynamic = 'force-static';
+
 const getPostBySlug = cache(async (slug: string) => {
   const client = await createCmsClient();
 
@@ -36,7 +38,7 @@ export async function generateMetadata({
       title,
       description,
       type: 'article',
-      publishedTime: publishedAt?.toDateString(),
+      publishedTime: publishedAt,
       url: post.url,
       images: image
         ? [

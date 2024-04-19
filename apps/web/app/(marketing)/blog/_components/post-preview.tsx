@@ -50,7 +50,7 @@ export function PostPreview({
 
           <div className="flex flex-row items-center space-x-2 text-sm">
             <div className="text-muted-foreground">
-              <DateFormatter dateString={publishedAt.toISOString()} />
+              <DateFormatter dateString={publishedAt} />
             </div>
           </div>
         </div>

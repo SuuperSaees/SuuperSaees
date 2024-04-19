@@ -1,3 +1,5 @@
+import { unstable_cache as cache } from 'next/dist/server/web/spec-extension/unstable-cache';
+
 import { createCmsClient } from '@kit/cms';
 import { If } from '@kit/ui/if';
 import { Trans } from '@kit/ui/trans';
@@ -18,22 +20,33 @@ export const generateMetadata = async () => {
   };
 };
 
+const getContentItems = cache(
+  async (language: string | undefined, limit: number, offset: number) => {
+    const client = await createCmsClient();
+
+    return client.getContentItems({
+      collection: 'posts',
+      limit,
+      offset,
+      language,
+      sortBy: 'publishedAt',
+      sortDirection: 'desc',
+    });
+  },
+);
+
 async function BlogPage({ searchParams }: { searchParams: { page: string } }) {
   const { t, resolvedLanguage: language } = await createI18nServerInstance();
-  const cms = await createCmsClient();
 
   const page = searchParams.page ? parseInt(searchParams.page) : 0;
   const limit = 10;
   const offset = page * limit;
 
-  const { items: posts, total } = await cms.getContentItems({
-    collection: 'posts',
+  const { total, items: posts } = await getContentItems(
+    language,
     limit,
     offset,
-    language,
-    sortBy: 'publishedAt',
-    sortDirection: 'desc',
-  });
+  );
 
   return (
     <>

@@ -20,7 +20,7 @@ export const PostHeader: React.FC<{
 
           <div>
             <span className={'text-muted-foreground'}>
-              <DateFormatter dateString={publishedAt.toISOString()} />
+              <DateFormatter dateString={publishedAt} />
             </span>
           </div>
 

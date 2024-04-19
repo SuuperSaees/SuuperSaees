@@ -16,8 +16,6 @@ export class KeystaticClient implements CmsClient {
 
     const docs = await reader.collections[collection].all();
 
-    console.log(docs);
-
     const startOffset = options?.offset ?? 0;
     const endOffset = startOffset + (options?.limit ?? 10);
 
@@ -144,7 +142,7 @@ export class KeystaticClient implements CmsClient {
       url: item.slug,
       slug: item.slug,
       description: item.entry.description,
-      publishedAt,
+      publishedAt: publishedAt.toISOString(),
       content,
       image: item.entry.image ?? undefined,
       categories:

@@ -6,7 +6,7 @@ export namespace Cms {
     url: string;
     description: string | undefined;
     content: unknown;
-    publishedAt: Date;
+    publishedAt: string;
     image: string | undefined;
     slug: string;
     categories: Category[];

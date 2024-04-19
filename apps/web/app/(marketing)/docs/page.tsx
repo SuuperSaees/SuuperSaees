@@ -1,3 +1,5 @@
+import { unstable_cache as cache } from 'next/cache';
+
 import { createCmsClient } from '@kit/cms';
 import { PageBody } from '@kit/ui/page';
 
@@ -14,14 +16,18 @@ export const generateMetadata = async () => {
   };
 };
 
-async function DocsPage() {
+const getContentItems = cache(async (resolvedLanguage: string | undefined) => {
   const client = await createCmsClient();
-  const { t, resolvedLanguage } = await createI18nServerInstance();
 
-  const { items } = await client.getContentItems({
+  return client.getContentItems({
     collection: 'documentation',
     language: resolvedLanguage,
   });
+});
+
+async function DocsPage() {
+  const { t, resolvedLanguage } = await createI18nServerInstance();
+  const { items } = await getContentItems(resolvedLanguage);
 
   // Filter out any docs that have a parentId, as these are children of other docs
   const cards = items.filter((item) => !item.parentId);
