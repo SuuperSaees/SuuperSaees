@@ -104,7 +104,7 @@ function Home() {
       <div className={'container mx-auto'}>
         <div
           className={
-            'flex flex-col items-center justify-center space-y-24 py-16'
+            'flex flex-col items-center justify-center space-y-8 py-8 xl:space-y-16 xl:py-16'
           }
         >
           <div
@@ -131,23 +131,27 @@ function Home() {
       </div>
 
       <div className={'container mx-auto'}>
-        <div className={'flex flex-col space-y-24 xl:space-y-36'}>
+        <div
+          className={'flex flex-col space-y-16 xl:space-y-32 2xl:space-y-36'}
+        >
           <FeatureShowcaseContainer>
-            <LeftFeatureContainer>
-              <div className={'flex flex-col space-y-2.5'}>
+            <FeatureContainer>
+              <div className={'flex flex-col space-y-4'}>
                 <IconContainer className={'bg-green-50 dark:bg-green-500/10'}>
                   <Lock className={'h-5 text-green-500'} />
                 </IconContainer>
 
-                <Heading level={2}>Authentication</Heading>
+                <div className={'flex flex-col space-y-1'}>
+                  <Heading level={1}>Authentication</Heading>
 
-                <Heading
-                  level={3}
-                  className={'font-medium text-muted-foreground'}
-                >
-                  Secure and Easy-to-Use Authentication for Your SaaS Website
-                  and API
-                </Heading>
+                  <Heading
+                    level={2}
+                    className={'font-sans font-normal text-muted-foreground'}
+                  >
+                    Secure and Easy-to-Use Authentication for Your SaaS Website
+                    and API
+                  </Heading>
+                </div>
               </div>
 
               <div>
@@ -156,9 +160,9 @@ function Home() {
                 secure, easy-to-use, and fully customizable. It supports
                 email/password, social logins, and more.
               </div>
-            </LeftFeatureContainer>
+            </FeatureContainer>
 
-            <RightFeatureContainer>
+            <FeatureContainer>
               <Image
                 className="rounded-2xl"
                 src={'/images/sign-in.webp'}
@@ -166,11 +170,11 @@ function Home() {
                 height={'1680'}
                 alt={'Sign In'}
               />
-            </RightFeatureContainer>
+            </FeatureContainer>
           </FeatureShowcaseContainer>
 
           <FeatureShowcaseContainer>
-            <LeftFeatureContainer>
+            <FeatureContainer reverse>
               <Image
                 className="rounded-2xl"
                 src={'/images/dashboard.webp'}
@@ -178,22 +182,24 @@ function Home() {
                 height={'1410'}
                 alt={'Dashboard'}
               />
-            </LeftFeatureContainer>
+            </FeatureContainer>
 
-            <RightFeatureContainer>
-              <div className={'flex flex-col space-y-2.5'}>
+            <FeatureContainer>
+              <div className={'flex flex-col space-y-4'}>
                 <IconContainer className={'bg-indigo-50 dark:bg-indigo-500/10'}>
                   <LayoutDashboard className={'h-5 text-indigo-500'} />
                 </IconContainer>
 
-                <Heading level={2}>Dashboard</Heading>
+                <div className={'flex flex-col space-y-1'}>
+                  <Heading level={1}>Dashboard</Heading>
 
-                <Heading
-                  level={3}
-                  className={'font-medium text-muted-foreground'}
-                >
-                  A fantastic dashboard to manage your SaaS business
-                </Heading>
+                  <Heading
+                    level={2}
+                    className={'font-sans font-normal text-muted-foreground'}
+                  >
+                    A fantastic dashboard to manage your SaaS business
+                  </Heading>
+                </div>
               </div>
 
               <div>
@@ -201,24 +207,26 @@ function Home() {
                 at a glance all you need to know about your business. It is
                 fully customizable and extendable.
               </div>
-            </RightFeatureContainer>
+            </FeatureContainer>
           </FeatureShowcaseContainer>
 
           <FeatureShowcaseContainer>
-            <LeftFeatureContainer>
-              <div className={'flex flex-col space-y-2.5'}>
+            <FeatureContainer>
+              <div className={'flex flex-col space-y-4'}>
                 <IconContainer className={'bg-blue-50 dark:bg-blue-500/10'}>
                   <CreditCard className={'h-5 text-blue-500'} />
                 </IconContainer>
 
-                <Heading level={2}>Billing</Heading>
+                <div className={'flex flex-col space-y-1'}>
+                  <Heading level={1}>Billing</Heading>
 
-                <Heading
-                  level={3}
-                  className={'font-medium text-muted-foreground'}
-                >
-                  A powerful billing system for your SaaS business
-                </Heading>
+                  <Heading
+                    level={2}
+                    className={'font-sans font-normal text-muted-foreground'}
+                  >
+                    A powerful billing system for your SaaS business
+                  </Heading>
+                </div>
               </div>
 
               <div>
@@ -226,9 +234,9 @@ function Home() {
                 such as Stripe, Lemon Squeezy and Paddle. Fully customizable and
                 easy to use.
               </div>
-            </LeftFeatureContainer>
+            </FeatureContainer>
 
-            <RightFeatureContainer>
+            <FeatureContainer>
               <Image
                 className="rounded-2xl"
                 src={'/images/billing.webp'}
@@ -236,7 +244,7 @@ function Home() {
                 height={'1392'}
                 alt={'Billing'}
               />
-            </RightFeatureContainer>
+            </FeatureContainer>
           </FeatureShowcaseContainer>
         </div>
       </div>
@@ -310,7 +318,7 @@ function FeatureShowcaseContainer(props: React.PropsWithChildren) {
   return (
     <div
       className={
-        'flex flex-col items-center justify-between lg:flex-row' +
+        'flex flex-col items-center justify-between space-y-8 lg:flex-row lg:space-y-0' +
         ' lg:space-x-24'
       }
     >
@@ -319,17 +327,18 @@ function FeatureShowcaseContainer(props: React.PropsWithChildren) {
   );
 }
 
-function LeftFeatureContainer(props: React.PropsWithChildren) {
+function FeatureContainer(
+  props: React.PropsWithChildren<{
+    className?: string;
+    reverse?: boolean;
+  }>,
+) {
   return (
-    <div className={'flex w-full flex-col space-y-6 lg:w-6/12'}>
-      {props.children}
-    </div>
-  );
-}
-
-function RightFeatureContainer(props: React.PropsWithChildren) {
-  return (
-    <div className={'flex w-full flex-col space-y-6 lg:w-6/12'}>
+    <div
+      className={cn('flex w-full flex-col space-y-6 lg:w-6/12', {
+        'order-2 mt-8 lg:order-none lg:mt-0': props.reverse,
+      })}
+    >
       {props.children}
     </div>
   );

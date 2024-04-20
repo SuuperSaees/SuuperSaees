@@ -17,13 +17,14 @@ import {
   CardTitle,
 } from '@kit/ui/card';
 import { If } from '@kit/ui/if';
-import { PageBody, PageHeader } from '@kit/ui/page';
+import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
 import { Database } from '~/lib/database.types';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+import { AccountLayoutHeader } from '../_components/account-layout-header';
 import { loadTeamWorkspace } from '../_lib/server/team-account-workspace.loader';
 
 interface Params {
@@ -108,9 +109,10 @@ async function TeamAccountMembersPage({ params }: Params) {
 
   return (
     <>
-      <PageHeader
+      <AccountLayoutHeader
         title={<Trans i18nKey={'common:membersTabLabel'} />}
         description={<Trans i18nKey={'common:membersTabDescription'} />}
+        account={params.account}
       />
 
       <PageBody>

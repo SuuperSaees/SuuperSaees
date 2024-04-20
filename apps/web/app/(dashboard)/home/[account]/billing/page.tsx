@@ -6,17 +6,18 @@ import {
 } from '@kit/billing-gateway/components';
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
 import { If } from '@kit/ui/if';
-import { PageBody, PageHeader } from '@kit/ui/page';
+import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
-import { createBillingPortalSession } from '~/(dashboard)/home/[account]/billing/server-actions';
 import billingConfig from '~/config/billing.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+import { AccountLayoutHeader } from '../_components/account-layout-header';
 import { loadTeamAccountBillingPage } from '../_lib/server/team-account-billing-page.loader';
 import { loadTeamWorkspace } from '../_lib/server/team-account-workspace.loader';
+import { createBillingPortalSession } from '../billing/server-actions';
 import { TeamAccountCheckoutForm } from './_components/team-account-checkout-form';
 
 interface Params {
@@ -71,9 +72,10 @@ async function TeamAccountBillingPage({ params }: Params) {
 
   return (
     <>
-      <PageHeader
+      <AccountLayoutHeader
         title={<Trans i18nKey={'common:billingTabLabel'} />}
         description={<Trans i18nKey={'common:billingTabDescription'} />}
+        account={params.account}
       />
 
       <PageBody>
