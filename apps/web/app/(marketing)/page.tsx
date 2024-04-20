@@ -12,6 +12,7 @@ import {
 import { PricingTable } from '@kit/billing-gateway/marketing';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
+import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
 import billingConfig from '~/config/billing.config';
@@ -338,13 +339,17 @@ function MainCallToActionButton() {
   return (
     <div className={'flex space-x-2'}>
       <Link href={'/docs'}>
-        <Button variant={'link'}>Documentation</Button>
+        <Button variant={'link'}>
+          <Trans i18nKey={'common:documentation'} />
+        </Button>
       </Link>
 
       <Link href={'/auth/sign-up'}>
         <Button>
           <span className={'flex items-center space-x-0.5'}>
-            <span>Get Started</span>
+            <span>
+              <Trans i18nKey={'common:getStarted'} />
+            </span>
 
             <ChevronRight
               className={

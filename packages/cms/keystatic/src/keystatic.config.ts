@@ -22,7 +22,7 @@ const github = z.object({
 });
 
 const storage = z.union([local, cloud, github]).parse({
-  kind: process.env.KEYSTATIC_STORAGE_KIND,
+  kind: process.env.KEYSTATIC_STORAGE_KIND ?? 'local',
   project: process.env.KEYSTATIC_STORAGE_PROJECT,
   repo: process.env.KEYSTATIC_STORAGE_REPO,
   branchPrefix: process.env.KEYSTATIC_STORAGE_BRANCH_PREFIX,

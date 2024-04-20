@@ -26,7 +26,6 @@ const config = {
   reactStrictMode: true,
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: INTERNAL_PACKAGES,
-  pageExtensions: ['ts', 'tsx'],
   images: {
     remotePatterns: getRemotePatterns(),
   },
@@ -34,6 +33,9 @@ const config = {
     mdxRs: true,
     taint: true,
     instrumentationHook: true,
+    turbo: {
+      resolveExtensions: ['.ts', '.tsx', '.js', '.jsx'],
+    },
     optimizePackageImports: [
       'recharts',
       'lucide-react',

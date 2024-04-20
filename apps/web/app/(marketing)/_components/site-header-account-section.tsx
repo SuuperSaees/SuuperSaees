@@ -79,10 +79,14 @@ function AuthButtons() {
       </div>
 
       <Link href={pathsConfig.auth.signUp}>
-        <Button className='group' variant={'default'}>
+        <Button className="group" variant={'default'}>
           <Trans i18nKey={'auth:signUp'} />
 
-          <ChevronRight className={'h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-500'} />
+          <ChevronRight
+            className={
+              'ml-1 h-4 w-4 transition-transform duration-500 group-hover:translate-x-1'
+            }
+          />
         </Button>
       </Link>
     </div>

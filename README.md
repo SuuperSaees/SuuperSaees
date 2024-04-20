@@ -106,6 +106,12 @@ This command will run the web application.
 
 Please refer to `apps/web/README.md` for more information about the web application.
 
+#### Turbopack
+
+Makerkit uses Turbopack by default. Turbopack is the new bundler for Next.js - and it is still experimental. It is faster, but it may have some issues.
+
+If you encounter any issues, you can switch to the default Next.js by removing the flag `--turbo` from the `dev` command in `apps/web/package.json`.
+
 ### 3. Start the Supabase server
 
 To start the Supabase server, you can use the following command:
