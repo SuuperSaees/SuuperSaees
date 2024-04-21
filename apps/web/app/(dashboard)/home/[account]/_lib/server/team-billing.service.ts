@@ -9,6 +9,7 @@ import { getBillingGatewayProvider } from '@kit/billing-gateway';
 import { getLogger } from '@kit/shared/logger';
 import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
+import { createTeamAccountsApi } from '@kit/team-accounts/api';
 
 import appConfig from '~/config/app.config';
 import billingConfig from '~/config/billing.config';
@@ -46,11 +47,14 @@ export class TeamBillingService {
 
     logger.info(ctx, `Requested checkout session. Processing...`);
 
+    const api = createTeamAccountsApi(this.client);
+
     // verify permissions to manage billing
-    const hasPermission = await getBillingPermissionsForAccountId(
+    const hasPermission = await api.hasPermission({
       userId,
       accountId,
-    );
+      permission: 'billing.manage',
+    });
 
     // if the user does not have permission to manage billing for the account
     // then we should not proceed
@@ -73,7 +77,7 @@ export class TeamBillingService {
 
     // find the customer ID for the account if it exists
     // (eg. if the account has been billed before)
-    const customerId = await getCustomerIdFromAccountId(this.client, accountId);
+    const customerId = await api.getCustomerId(accountId);
     const customerEmail = user.email;
 
     // the return URL for the checkout session
@@ -157,11 +161,14 @@ export class TeamBillingService {
 
     const userId = user.id;
 
+    const api = createTeamAccountsApi(client);
+
     // we require the user to have permissions to manage billing for the account
-    const hasPermission = await getBillingPermissionsForAccountId(
+    const hasPermission = await api.hasPermission({
       userId,
       accountId,
-    );
+      permission: 'billing.manage',
+    });
 
     // if the user does not have permission to manage billing for the account
     // then we should not proceed
@@ -178,8 +185,7 @@ export class TeamBillingService {
       throw new Error('Permission denied');
     }
 
-    const service = await getBillingGatewayProvider(client);
-    const customerId = await getCustomerIdFromAccountId(client, accountId);
+    const customerId = await api.getCustomerId(accountId);
 
     if (!customerId) {
       throw new Error('Customer not found');
@@ -194,6 +200,9 @@ export class TeamBillingService {
       },
       `Creating billing portal session...`,
     );
+
+    // get the billing gateway provider
+    const service = await getBillingGatewayProvider(client);
 
     try {
       const returnUrl = getBillingPortalReturnUrl(slug);
@@ -227,7 +236,10 @@ export class TeamBillingService {
     lineItems: z.infer<typeof LineItemSchema>[],
     accountId: string,
   ) {
-    const variantQuantities = [];
+    const variantQuantities: Array<{
+      quantity: number;
+      variantId: string;
+    }> = [];
 
     for (const lineItem of lineItems) {
       if (lineItem.type === 'per-seat') {
@@ -246,17 +258,14 @@ export class TeamBillingService {
   }
 
   private async getCurrentMembersCount(accountId: string) {
-    const { count, error } = await this.client
-      .from('accounts_memberships')
-      .select('*', {
-        head: true,
-        count: 'exact',
-      })
-      .eq('account_id', accountId);
+    const api = createTeamAccountsApi(this.client);
+    const logger = await getLogger();
 
-    if (error) {
-      const logger = await getLogger();
+    try {
+      const count = await api.getMembersCount(accountId);
 
+      return count ?? 1;
+    } catch (error) {
       logger.error(
         {
           accountId,
@@ -266,10 +275,8 @@ export class TeamBillingService {
         `Encountered an error while fetching the number of existing seats`,
       );
 
-      throw new Error();
+      return Promise.reject(error);
     }
-
-    return count ?? 1;
   }
 }
 
@@ -283,51 +290,6 @@ function getBillingPortalReturnUrl(accountSlug: string) {
 
 function getAccountUrl(path: string, slug: string) {
   return new URL(path, appConfig.url).toString().replace('[account]', slug);
-}
-
-/**
- * @name getBillingPermissionsForAccountId
- * @description Retrieves the permissions for a user on an account for managing billing.
- */
-async function getBillingPermissionsForAccountId(
-  userId: string,
-  accountId: string,
-) {
-  const client = getSupabaseServerActionClient();
-
-  const { data, error } = await client.rpc('has_permission', {
-    account_id: accountId,
-    user_id: userId,
-    permission_name: 'billing.manage',
-  });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-/**
- * Retrieves the customer ID based on the provided account ID.
- * If it exists we need to pass it to the provider so we can bill the same
- * customer ID for the provided account ID
- */
-async function getCustomerIdFromAccountId(
-  client: SupabaseClient<Database>,
-  accountId: string,
-) {
-  const { data, error } = await client
-    .from('billing_customers')
-    .select('customer_id')
-    .eq('account_id', accountId)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data?.customer_id;
 }
 
 function getPlanDetails(productId: string, planId: string) {

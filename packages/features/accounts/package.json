@@ -12,7 +12,8 @@
     "./personal-account-dropdown": "./src/components/personal-account-dropdown.tsx",
     "./account-selector": "./src/components/account-selector.tsx",
     "./personal-account-settings": "./src/components/personal-account-settings/index.ts",
-    "./hooks/*": "./src/hooks/*.ts"
+    "./hooks/*": "./src/hooks/*.ts",
+    "./api": "./src/server/api.ts"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.16.0",

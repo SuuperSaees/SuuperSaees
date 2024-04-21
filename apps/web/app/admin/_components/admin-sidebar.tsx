@@ -11,8 +11,8 @@ import {
   SidebarItem,
 } from '@kit/ui/sidebar';
 
-import { ProfileAccountDropdownContainer } from '~/(dashboard)/home/_components/personal-account-dropdown-container';
 import { AppLogo } from '~/components/app-logo';
+import { ProfileAccountDropdownContainer } from '~/components/personal-account-dropdown-container';
 
 export async function AdminSidebar() {
   const client = getSupabaseServerActionClient();

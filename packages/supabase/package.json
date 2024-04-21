@@ -10,7 +10,6 @@
   },
   "prettier": "@kit/prettier-config",
   "exports": {
-    ".": "./src/index.ts",
     "./middleware-client": "./src/clients/middleware.client.ts",
     "./server-actions-client": "./src/clients/server-actions.client.ts",
     "./route-handler-client": "./src/clients/route-handler.client.ts",

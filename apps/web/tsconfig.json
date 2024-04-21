@@ -22,7 +22,7 @@
     "*.tsx",
     "*.mjs",
     "./config/**/*.ts",
-    "components/**/*.{tsx|ts}",
+    "components/**/*",
     "lib/**/*.ts",
     "app"
   ],

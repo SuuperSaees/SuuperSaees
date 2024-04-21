@@ -5,14 +5,14 @@ import { cookies } from 'next/headers';
 import { If } from '@kit/ui/if';
 import { Sidebar, SidebarContent, SidebarNavigation } from '@kit/ui/sidebar';
 
+import { loadUserWorkspace } from '~/(dashboard)/home/(user)/_lib/server/load-user-workspace';
 import { AppLogo } from '~/components/app-logo';
+import { ProfileAccountDropdownContainer } from '~/components/personal-account-dropdown-container';
 import featuresFlagConfig from '~/config/feature-flags.config';
 import { personalAccountSidebarConfig } from '~/config/personal-account-sidebar.config';
 
 // home imports
 import { HomeSidebarAccountSelector } from '../_components/home-sidebar-account-selector';
-import { ProfileAccountDropdownContainer } from '../_components/personal-account-dropdown-container';
-import { loadUserWorkspace } from '../_lib/load-user-workspace';
 
 export function HomeSidebar() {
   const collapsed = getSidebarCollapsed();

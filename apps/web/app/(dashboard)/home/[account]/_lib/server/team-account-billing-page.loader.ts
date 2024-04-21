@@ -2,13 +2,10 @@ import 'server-only';
 
 import { cache } from 'react';
 
-import { SupabaseClient } from '@supabase/supabase-js';
-
 import { z } from 'zod';
 
+import { createAccountsApi } from '@kit/accounts/api';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-import { Database } from '~/lib/database.types';
 
 /**
  * The variable BILLING_MODE represents the billing mode for a service. It can
@@ -27,80 +24,14 @@ const BILLING_MODE = z
 
 export const loadTeamAccountBillingPage = cache((accountId: string) => {
   const client = getSupabaseServerComponentClient();
+  const api = createAccountsApi(client);
 
   const data =
     BILLING_MODE === 'subscription'
-      ? getSubscriptionData(client, accountId)
-      : getOrdersData(client, accountId);
+      ? api.getSubscriptionData(accountId)
+      : api.getOrdersData(accountId);
 
-  const customerId = getBillingCustomerId(client, accountId);
+  const customerId = api.getBillingCustomerId(accountId);
 
   return Promise.all([data, customerId]);
 });
-
-/**
- * Get the subscription data for the given user.
- * @param client
- * @param accountId
- */
-function getSubscriptionData(
-  client: SupabaseClient<Database>,
-  accountId: string,
-) {
-  return client
-    .from('subscriptions')
-    .select('*, items: subscription_items !inner (*)')
-    .eq('account_id', accountId)
-    .maybeSingle()
-    .then((response) => {
-      if (response.error) {
-        throw response.error;
-      }
-
-      return response.data;
-    });
-}
-
-/**
- * Get the orders data for the given user.
- * @param client
- * @param accountId
- */
-function getOrdersData(client: SupabaseClient<Database>, accountId: string) {
-  return client
-    .from('orders')
-    .select('*, items: order_items !inner (*)')
-    .eq('account_id', accountId)
-    .maybeSingle()
-    .then((response) => {
-      if (response.error) {
-        throw response.error;
-      }
-
-      return response.data;
-    });
-}
-
-/**
- * Get the billing customer ID for the given user.
- * If the user does not have a billing customer ID, it will return null.
- * @param client
- * @param accountId
- */
-function getBillingCustomerId(
-  client: SupabaseClient<Database>,
-  accountId: string,
-) {
-  return client
-    .from('billing_customers')
-    .select('customer_id')
-    .eq('account_id', accountId)
-    .maybeSingle()
-    .then((response) => {
-      if (response.error) {
-        throw response.error;
-      }
-
-      return response.data?.customer_id;
-    });
-}

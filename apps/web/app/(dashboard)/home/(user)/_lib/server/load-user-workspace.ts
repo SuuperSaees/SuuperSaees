@@ -1,11 +1,9 @@
 import { cache } from 'react';
 
-import { SupabaseClient } from '@supabase/supabase-js';
-
+import { createAccountsApi } from '@kit/accounts/api';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import featureFlagsConfig from '~/config/feature-flags.config';
-import { Database } from '~/lib/database.types';
 
 const shouldLoadAccounts = featureFlagsConfig.enableTeamAccounts;
 
@@ -17,12 +15,13 @@ const shouldLoadAccounts = featureFlagsConfig.enableTeamAccounts;
  */
 export const loadUserWorkspace = cache(async () => {
   const client = getSupabaseServerComponentClient();
+  const api = createAccountsApi(client);
 
   const accountsPromise = shouldLoadAccounts
-    ? () => loadUserAccounts(client)
+    ? () => api.loadUserAccounts()
     : () => Promise.resolve([]);
 
-  const workspacePromise = loadUserAccountWorkspace(client);
+  const workspacePromise = api.getAccountWorkspace();
   const userPromise = client.auth.getUser();
 
   const [accounts, workspace, userResult] = await Promise.all([
@@ -43,34 +42,3 @@ export const loadUserWorkspace = cache(async () => {
     user,
   };
 });
-
-async function loadUserAccountWorkspace(client: SupabaseClient<Database>) {
-  const { data, error } = await client
-    .from('user_account_workspace')
-    .select(`*`)
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-async function loadUserAccounts(client: SupabaseClient<Database>) {
-  const { data: accounts, error } = await client
-    .from('user_accounts')
-    .select(`name, slug, picture_url`);
-
-  if (error) {
-    throw error;
-  }
-
-  return accounts.map(({ name, slug, picture_url }) => {
-    return {
-      label: name,
-      value: slug,
-      image: picture_url,
-    };
-  });
-}
