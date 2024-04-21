@@ -231,10 +231,20 @@ Apps are used to define the main application, including the routing, layout, and
 
 Apps pass down the configuration to the packages - and the packages provide the corresponding logic and components.
 
+#### Imports and Paths
+
+When importing something from a package or an app, you will use the following paths:
+
 - When you import something from a package, you will use `@kit/package-name` (e.g., `@kit/ui`, `@kit/shared`, etc.).
 - When you import something from an app, you will use `~/` (e.g., `~/lib/components`, `~/config`, etc.).
 
+#### Non-Route Folders
+
 Non-route folders within `app` will be prefixed with an underscore (e.g., `_components`, `_lib`, etc.). This makes it obvious that these folders are not routes and are used for shared components, utilities, etc.
+
+#### Server Code
+
+The files localed in `server` folders are to be assumed as server-side code. They are not meant to be used in the client-side code. This helps everyone understanding where the code is meant to be run, since the lines are very blurry in Next.js.
 
 ### 2. Environment Variables
 
@@ -250,6 +260,14 @@ Environment variables are defined in the `.env` file in the root of the `apps/we
 Your application will be defined in the `apps/web` package. This is where you will define the main application, including the routing, layout, and global styles.
 
 If you want - create a package for it - but it's not necessary. The `apps/web` package is the main application and you can place all your logic and files there.
+
+### 4. Updating "packages"
+
+The app is designed so that you should focus on what's in `apps/` and that's it. The packages are managed by the core team and are updated regularly.
+
+So - should you update the packages? If you need to, then you need to.
+
+Makerkit makes assumptions and as such - they may not apply to your specific use case. If you need to update the packages, you can and should do so - but it's worth noting that this will cause conflicts. That's fine, but you need to resolve them.
 
 ## Installing a Shadcn UI component
 

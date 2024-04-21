@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "nanoid": "^5.0.7",
-    "tailwind-merge": "^2.2.2"
+    "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -45,7 +45,7 @@
     "react-hook-form": "^7.51.3",
     "react-i18next": "^14.1.0",
     "sonner": "^1.4.41",
-    "zod": "^3.22.4"
+    "zod": "^3.22.5"
   },
   "peerDependencies": {
     "@hookform/resolvers": "^3.3.4",

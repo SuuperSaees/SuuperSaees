@@ -11,11 +11,11 @@ import { If } from '@kit/ui/if';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
-import { UserAccountHeader } from '~/(dashboard)/home/(user)/_components/user-account-header';
 import billingConfig from '~/config/billing.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+import { UserAccountHeader } from '../_components/user-account-header';
 import { createPersonalAccountBillingPortalSession } from '../billing/server-actions';
 import { PersonalAccountCheckoutForm } from './_components/personal-account-checkout-form';
 // user billing imports
