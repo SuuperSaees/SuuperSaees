@@ -7,6 +7,8 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import featureFlagsConfig from '~/config/feature-flags.config';
 import { Database } from '~/lib/database.types';
 
+const shouldLoadAccounts = featureFlagsConfig.enableTeamAccounts;
+
 /**
  * @name loadUserWorkspace
  * @description
@@ -15,17 +17,16 @@ import { Database } from '~/lib/database.types';
  */
 export const loadUserWorkspace = cache(async () => {
   const client = getSupabaseServerComponentClient();
-  const loadAccounts = featureFlagsConfig.enableTeamAccounts;
 
-  const accountsPromise = loadAccounts
-    ? loadUserAccounts(client)
-    : Promise.resolve([]);
+  const accountsPromise = shouldLoadAccounts
+    ? () => loadUserAccounts(client)
+    : () => Promise.resolve([]);
 
   const workspacePromise = loadUserAccountWorkspace(client);
   const userPromise = client.auth.getUser();
 
   const [accounts, workspace, userResult] = await Promise.all([
-    accountsPromise,
+    accountsPromise(),
     workspacePromise,
     userPromise,
   ]);

@@ -2,6 +2,7 @@ import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 
 import {
   BillingPortalCard,
+  CurrentLifetimeOrderCard,
   CurrentSubscriptionCard,
 } from '@kit/billing-gateway/components';
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
@@ -39,8 +40,7 @@ async function TeamAccountBillingPage({ params }: Params) {
   const workspace = await loadTeamWorkspace(params.account);
   const accountId = workspace.account.id;
 
-  const [subscription, customerId] =
-    await loadTeamAccountBillingPage(accountId);
+  const [data, customerId] = await loadTeamAccountBillingPage(accountId);
 
   const canManageBilling =
     workspace.account.permissions.includes('billing.manage');
@@ -81,23 +81,31 @@ async function TeamAccountBillingPage({ params }: Params) {
       <PageBody>
         <div
           className={cn(`flex w-full flex-col space-y-6`, {
-            'mx-auto max-w-2xl ': subscription,
+            'mx-auto max-w-2xl': data,
           })}
         >
           <If
-            condition={subscription}
+            condition={data}
             fallback={
               <div>
                 <Checkout />
               </div>
             }
           >
-            {(subscription) => (
-              <CurrentSubscriptionCard
-                subscription={subscription}
-                config={billingConfig}
-              />
-            )}
+            {(data) => {
+              if ('active' in data) {
+                return (
+                  <CurrentSubscriptionCard
+                    subscription={data}
+                    config={billingConfig}
+                  />
+                );
+              }
+
+              return (
+                <CurrentLifetimeOrderCard order={data} config={billingConfig} />
+              );
+            }}
           </If>
 
           <BillingPortal />

@@ -10,11 +10,12 @@ import { getLogger } from '@kit/shared/logger';
 import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
-import { PersonalAccountCheckoutSchema } from '~/(dashboard)/home/(user)/billing/_lib/schema/personal-account-checkout.schema';
 import appConfig from '~/config/app.config';
 import billingConfig from '~/config/billing.config';
 import pathsConfig from '~/config/paths.config';
 import { Database } from '~/lib/database.types';
+
+import { PersonalAccountCheckoutSchema } from '../schema/personal-account-checkout.schema';
 
 export class UserBillingService {
   private readonly namespace = 'billing.personal-account';
