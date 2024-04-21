@@ -10,13 +10,13 @@ import { Input } from '@kit/ui/input';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
-import { NewTaskDialog } from '~/(dashboard)/home/(user)/_components/new-task-dialog';
-import { TasksTable } from '~/(dashboard)/home/(user)/_components/tasks-table';
-import { loadUserWorkspace } from '~/(dashboard)/home/_lib/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+import { NewTaskDialog } from './_components/new-task-dialog';
+import { TasksTable } from './_components/tasks-table';
 import { UserAccountHeader } from './_components/user-account-header';
+import { loadUserWorkspace } from './_lib/server/load-user-workspace';
 
 interface SearchParams {
   page?: string;

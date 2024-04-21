@@ -616,6 +616,58 @@ export type Database = {
           },
         ]
       }
+      tasks: {
+        Row: {
+          account_id: string
+          created_at: string
+          description: string | null
+          done: boolean
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          description?: string | null
+          done?: boolean
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          description?: string | null
+          done?: boolean
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       user_account_workspace: {
@@ -667,7 +719,7 @@ export type Database = {
       can_action_account_member: {
         Args: {
           target_team_account_id: string
-          user_id: string
+          target_user_id: string
         }
         Returns: boolean
       }
@@ -747,6 +799,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_upper_system_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       has_more_elevated_role: {
         Args: {
           target_user_id: string
@@ -767,6 +823,14 @@ export type Database = {
         Args: {
           account_id: string
           account_role?: string
+        }
+        Returns: boolean
+      }
+      has_same_role_hierarchy_level: {
+        Args: {
+          target_user_id: string
+          target_account_id: string
+          role_name: string
         }
         Returns: boolean
       }
@@ -888,6 +952,8 @@ export type Database = {
         | "settings.manage"
         | "members.manage"
         | "invites.manage"
+        | "tasks.write"
+        | "tasks.delete"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       payment_status: "pending" | "succeeded" | "failed"
       subscription_item_type: "flat" | "per_seat" | "metered"
