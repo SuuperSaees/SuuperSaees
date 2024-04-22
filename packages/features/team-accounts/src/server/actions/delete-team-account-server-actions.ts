@@ -9,7 +9,7 @@ import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { DeleteTeamAccountSchema } from '../../schema/delete-team-account.schema';
-import { DeleteTeamAccountService } from '../services/delete-team-account.service';
+import { createDeleteTeamAccountService } from '../services/delete-team-account.service';
 
 export async function deleteTeamAccountAction(formData: FormData) {
   const params = DeleteTeamAccountSchema.parse(
@@ -27,7 +27,7 @@ export async function deleteTeamAccountAction(formData: FormData) {
   await assertUserPermissionsToDeleteTeamAccount(client, params.accountId);
 
   // Get the Supabase client and create a new service instance.
-  const service = new DeleteTeamAccountService();
+  const service = createDeleteTeamAccountService();
 
   // Delete the team account and all associated data.
   await service.deleteTeamAccount(

@@ -19,9 +19,9 @@ import { removeMemberFromAccountAction } from '../../server/actions/team-members
 export const RemoveMemberDialog: React.FC<{
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  accountId: string;
+  teamAccountId: string;
   userId: string;
-}> = ({ isOpen, setIsOpen, accountId, userId }) => {
+}> = ({ isOpen, setIsOpen, teamAccountId, userId }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
@@ -37,7 +37,7 @@ export const RemoveMemberDialog: React.FC<{
 
         <RemoveMemberForm
           setIsOpen={setIsOpen}
-          accountId={accountId}
+          accountId={teamAccountId}
           userId={userId}
         />
       </AlertDialogContent>

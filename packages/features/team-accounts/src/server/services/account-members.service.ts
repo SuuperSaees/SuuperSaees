@@ -10,13 +10,22 @@ import { Database } from '@kit/supabase/database';
 import { RemoveMemberSchema } from '../../schema/remove-member.schema';
 import { TransferOwnershipConfirmationSchema } from '../../schema/transfer-ownership-confirmation.schema';
 import { UpdateMemberRoleSchema } from '../../schema/update-member-role.schema';
-import { AccountPerSeatBillingService } from './account-per-seat-billing.service';
+import { createAccountPerSeatBillingService } from './account-per-seat-billing.service';
 
-export class AccountMembersService {
+export function createAccountMembersService(client: SupabaseClient<Database>) {
+  return new AccountMembersService(client);
+}
+
+class AccountMembersService {
   private readonly namespace = 'account-members';
 
   constructor(private readonly client: SupabaseClient<Database>) {}
 
+  /**
+   * @name removeMemberFromAccount
+   * @description Removes a member from an account.
+   * @param params
+   */
   async removeMemberFromAccount(params: z.infer<typeof RemoveMemberSchema>) {
     const logger = await getLogger();
 
@@ -52,13 +61,19 @@ export class AccountMembersService {
       `Successfully removed member from account. Verifying seat count...`,
     );
 
-    const service = new AccountPerSeatBillingService(this.client);
+    const service = createAccountPerSeatBillingService(this.client);
 
     await service.decreaseSeats(params.accountId);
 
     return data;
   }
 
+  /**
+   * @name updateMemberRole
+   * @description Updates the role of a member in an account.
+   * @param params
+   * @param adminClient
+   */
   async updateMemberRole(
     params: z.infer<typeof UpdateMemberRoleSchema>,
     adminClient: SupabaseClient<Database>,
@@ -123,6 +138,12 @@ export class AccountMembersService {
     return data;
   }
 
+  /**
+   * @name transferOwnership
+   * @description Transfers ownership of an account to another user.
+   * @param params
+   * @param adminClient
+   */
   async transferOwnership(
     params: z.infer<typeof TransferOwnershipConfirmationSchema>,
     adminClient: SupabaseClient<Database>,

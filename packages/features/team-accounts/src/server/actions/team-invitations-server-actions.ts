@@ -16,8 +16,8 @@ import { DeleteInvitationSchema } from '../../schema/delete-invitation.schema';
 import { InviteMembersSchema } from '../../schema/invite-members.schema';
 import { RenewInvitationSchema } from '../../schema/renew-invitation.schema';
 import { UpdateInvitationSchema } from '../../schema/update-invitation.schema';
-import { AccountInvitationsService } from '../services/account-invitations.service';
-import { AccountPerSeatBillingService } from '../services/account-per-seat-billing.service';
+import { createAccountInvitationsService } from '../services/account-invitations.service';
+import { createAccountPerSeatBillingService } from '../services/account-per-seat-billing.service';
 
 /**
  * Creates invitations for inviting members.
@@ -34,8 +34,10 @@ export async function createInvitationsAction(params: {
     invitations: params.invitations,
   });
 
-  const service = new AccountInvitationsService(client);
+  // Create the service
+  const service = createAccountInvitationsService(client);
 
+  // send invitations
   await service.sendInvitations({
     invitations,
     accountSlug: params.accountSlug,
@@ -43,7 +45,9 @@ export async function createInvitationsAction(params: {
 
   revalidateMemberPage();
 
-  return { success: true };
+  return {
+    success: true,
+  };
 }
 
 /**
@@ -66,8 +70,9 @@ export async function deleteInvitationAction(
     throw new Error(`Authentication required`);
   }
 
-  const service = new AccountInvitationsService(client);
+  const service = createAccountInvitationsService(client);
 
+  // Delete the invitation
   await service.deleteInvitation(invitation);
 
   revalidateMemberPage();
@@ -83,7 +88,7 @@ export async function updateInvitationAction(
 
   await assertSession(client);
 
-  const service = new AccountInvitationsService(client);
+  const service = createAccountInvitationsService(client);
 
   await service.updateInvitation(invitation);
 
@@ -99,10 +104,12 @@ export async function acceptInvitationAction(data: FormData) {
     Object.fromEntries(data),
   );
 
-  const accountPerSeatBillingService = new AccountPerSeatBillingService(client);
+  // Ensure the user is authenticated
   const user = await assertSession(client);
 
-  const service = new AccountInvitationsService(client);
+  // create the services
+  const perSeatBillingService = createAccountPerSeatBillingService(client);
+  const service = createAccountInvitationsService(client);
 
   // Accept the invitation
   const accountId = await service.acceptInvitationToTeam(
@@ -113,7 +120,13 @@ export async function acceptInvitationAction(data: FormData) {
     },
   );
 
-  await accountPerSeatBillingService.increaseSeats(accountId);
+  // If the account ID is not present, throw an error
+  if (!accountId) {
+    throw new Error('Failed to accept invitation');
+  }
+
+  // Increase the seats for the account
+  await perSeatBillingService.increaseSeats(accountId);
 
   return redirect(nextPath);
 }
@@ -126,13 +139,16 @@ export async function renewInvitationAction(
 
   await assertSession(client);
 
-  const service = new AccountInvitationsService(client);
+  const service = createAccountInvitationsService(client);
 
+  // Renew the invitation
   await service.renewInvitation(invitationId);
 
   revalidateMemberPage();
 
-  return { success: true };
+  return {
+    success: true,
+  };
 }
 
 async function assertSession(client: SupabaseClient<Database>) {

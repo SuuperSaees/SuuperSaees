@@ -5,7 +5,13 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
-export class CreateTeamAccountService {
+export function createCreateTeamAccountService(
+  client: SupabaseClient<Database>,
+) {
+  return new CreateTeamAccountService(client);
+}
+
+class CreateTeamAccountService {
   private readonly namespace = 'accounts.create-team-account';
 
   constructor(private readonly client: SupabaseClient<Database>) {}

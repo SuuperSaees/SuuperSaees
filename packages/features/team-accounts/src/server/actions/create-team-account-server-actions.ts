@@ -8,7 +8,7 @@ import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { CreateTeamSchema } from '../../schema/create-team.schema';
-import { CreateTeamAccountService } from '../services/create-team-account.service';
+import { createCreateTeamAccountService } from '../services/create-team-account.service';
 
 const TEAM_ACCOUNTS_HOME_PATH = z
   .string({
@@ -23,7 +23,6 @@ export async function createOrganizationAccountAction(
   const { name: accountName } = CreateTeamSchema.parse(params);
 
   const client = getSupabaseServerActionClient();
-  const service = new CreateTeamAccountService(client);
   const auth = await requireUser(client);
 
   if (auth.error) {
@@ -31,6 +30,7 @@ export async function createOrganizationAccountAction(
   }
 
   const userId = auth.data.id;
+  const service = createCreateTeamAccountService(client);
 
   const { data, error } = await service.createNewOrganizationAccount({
     name: accountName,

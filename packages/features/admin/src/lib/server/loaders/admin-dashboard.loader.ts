@@ -4,7 +4,7 @@ import { cache } from 'react';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { AdminDashboardService } from '../services/admin-dashboard.service';
+import { createAdminDashboardService } from '../services/admin-dashboard.service';
 
 /**
  * @name loadAdminDashboard
@@ -13,7 +13,7 @@ import { AdminDashboardService } from '../services/admin-dashboard.service';
  */
 export const loadAdminDashboard = cache(() => {
   const client = getSupabaseServerComponentClient({ admin: true });
-  const service = new AdminDashboardService(client);
+  const service = createAdminDashboardService(client);
 
   return service.getDashboardData();
 });

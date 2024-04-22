@@ -192,7 +192,7 @@ function useGetColumns(
             permissions={permissions}
             member={row.original}
             currentUserId={params.currentUserId}
-            accountId={params.currentAccountId}
+            currentTeamAccountId={params.currentAccountId}
             currentRoleHierarchy={params.currentRoleHierarchy}
           />
         ),
@@ -206,12 +206,13 @@ function ActionsDropdown({
   permissions,
   member,
   currentUserId,
+  currentTeamAccountId,
   currentRoleHierarchy,
 }: {
   permissions: Permissions;
   member: Members[0];
   currentUserId: string;
-  accountId: string;
+  currentTeamAccountId: string;
   currentRoleHierarchy: number;
 }) {
   const [isRemoving, setIsRemoving] = useState(false);
@@ -275,7 +276,7 @@ function ActionsDropdown({
         <RemoveMemberDialog
           isOpen
           setIsOpen={setIsRemoving}
-          accountId={member.id}
+          teamAccountId={currentTeamAccountId}
           userId={member.user_id}
         />
       </If>
@@ -286,7 +287,7 @@ function ActionsDropdown({
           setIsOpen={setIsUpdatingRole}
           userId={member.user_id}
           userRole={member.role}
-          teamAccountId={member.account_id}
+          teamAccountId={currentTeamAccountId}
           userRoleHierarchy={currentRoleHierarchy}
         />
       </If>

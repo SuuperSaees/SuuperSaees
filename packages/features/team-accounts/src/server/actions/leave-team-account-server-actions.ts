@@ -7,7 +7,7 @@ import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { LeaveTeamAccountSchema } from '../../schema/leave-team-account.schema';
-import { LeaveTeamAccountService } from '../services/leave-team-account.service';
+import { createLeaveTeamAccountService } from '../services/leave-team-account.service';
 
 export async function leaveTeamAccountAction(formData: FormData) {
   const body = Object.fromEntries(formData.entries());
@@ -20,7 +20,7 @@ export async function leaveTeamAccountAction(formData: FormData) {
     throw new Error('Authentication required');
   }
 
-  const service = new LeaveTeamAccountService(
+  const service = createLeaveTeamAccountService(
     getSupabaseServerActionClient({ admin: true }),
   );
 

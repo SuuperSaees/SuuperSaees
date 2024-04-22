@@ -261,12 +261,12 @@ export class StripeWebhookHandlerService
   }
 
   private handleSubscriptionDeletedEvent(
-    subscription: Stripe.CustomerSubscriptionDeletedEvent,
+    event: Stripe.CustomerSubscriptionDeletedEvent,
     onSubscriptionDeletedCallback: (subscriptionId: string) => Promise<unknown>,
   ) {
     // Here we don't need to do anything, so we just return the callback
 
-    return onSubscriptionDeletedCallback(subscription.id);
+    return onSubscriptionDeletedCallback(event.data.object.id);
   }
 
   private buildSubscriptionPayload<
@@ -298,6 +298,7 @@ export class StripeWebhookHandlerService
         id: item.id,
         quantity,
         subscription_id: params.id,
+        subscription_item_id: item.id,
         product_id: item.price?.product as string,
         variant_id: variantId,
         price_amount: item.price?.unit_amount,

@@ -5,6 +5,10 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
+export function createDeletePersonalAccountService() {
+  return new DeletePersonalAccountService();
+}
+
 /**
  * @name DeletePersonalAccountService
  * @description Service for managing accounts in the application
@@ -13,7 +17,7 @@ import { Database } from '@kit/supabase/database';
  * const client = getSupabaseClient();
  * const accountsService = new DeletePersonalAccountService();
  */
-export class DeletePersonalAccountService {
+class DeletePersonalAccountService {
   private namespace = 'accounts.delete';
 
   /**

@@ -14,6 +14,12 @@ import {
 
 import { BillingGatewayFactoryService } from './billing-gateway-factory.service';
 
+export function createBillingGatewayService(
+  provider: z.infer<typeof BillingProviderSchema>,
+) {
+  return new BillingGatewayService(provider);
+}
+
 /**
  * @description The billing gateway service to interact with the billing provider of choice (e.g. Stripe)
  * @class BillingGatewayService
@@ -23,7 +29,7 @@ import { BillingGatewayFactoryService } from './billing-gateway-factory.service'
  * const provider = 'stripe';
  * const billingGatewayService = new BillingGatewayService(provider);
  */
-export class BillingGatewayService {
+class BillingGatewayService {
   constructor(
     private readonly provider: z.infer<typeof BillingProviderSchema>,
   ) {}
@@ -126,17 +132,5 @@ export class BillingGatewayService {
     const payload = UpdateSubscriptionParamsSchema.parse(params);
 
     return strategy.updateSubscription(payload);
-  }
-
-  /**
-   * Retrieves a plan by the specified plan ID.
-   * @param planId
-   */
-  async getPlanById(planId: string) {
-    const strategy = await BillingGatewayFactoryService.GetProviderStrategy(
-      this.provider,
-    );
-
-    return strategy.getPlanById(planId);
   }
 }

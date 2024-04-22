@@ -6,7 +6,7 @@ import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { PersonalAccountCheckoutSchema } from '../schema/personal-account-checkout.schema';
-import { UserBillingService } from './user-billing.service';
+import { createUserBillingService } from './user-billing.service';
 
 /**
  * @name createPersonalAccountCheckoutSession
@@ -14,7 +14,8 @@ import { UserBillingService } from './user-billing.service';
  */
 export const createPersonalAccountCheckoutSession = enhanceAction(
   async function (data) {
-    const service = new UserBillingService(getSupabaseServerActionClient());
+    const client = getSupabaseServerActionClient();
+    const service = createUserBillingService(client);
 
     return await service.createCheckoutSession(data);
   },
@@ -24,10 +25,14 @@ export const createPersonalAccountCheckoutSession = enhanceAction(
 );
 
 /**
+ * @name createPersonalAccountBillingPortalSession
  * @description Creates a billing Portal session for a personal account
  */
 export async function createPersonalAccountBillingPortalSession() {
-  const service = new UserBillingService(getSupabaseServerActionClient());
+  const client = getSupabaseServerActionClient();
+  const service = createUserBillingService(client);
+
+  // get url to billing portal
   const url = await service.createBillingPortalSession();
 
   return redirect(url);

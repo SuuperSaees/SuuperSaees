@@ -13,8 +13,8 @@ import {
   ImpersonateUserSchema,
   ReactivateUserSchema,
 } from './schema/admin-actions.schema';
-import { AdminAccountsService } from './services/admin-accounts.service';
-import { AdminAuthUserService } from './services/admin-auth-user.service';
+import { createAdminAccountsService } from './services/admin-accounts.service';
+import { createAdminAuthUserService } from './services/admin-auth-user.service';
 import { adminAction } from './utils/admin-action';
 
 /**
@@ -126,13 +126,13 @@ function getAdminAuthService() {
   const client = getSupabaseServerActionClient();
   const adminClient = getSupabaseServerActionClient({ admin: true });
 
-  return new AdminAuthUserService(client, adminClient);
+  return createAdminAuthUserService(client, adminClient);
 }
 
 function getAdminAccountsService() {
   const adminClient = getSupabaseServerActionClient({ admin: true });
 
-  return new AdminAccountsService(adminClient);
+  return createAdminAccountsService(adminClient);
 }
 
 function revalidateAdmin() {

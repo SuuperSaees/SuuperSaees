@@ -2,9 +2,17 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
 
+export function createAdminDashboardService(client: SupabaseClient<Database>) {
+  return new AdminDashboardService(client);
+}
+
 export class AdminDashboardService {
   constructor(private readonly client: SupabaseClient<Database>) {}
 
+  /**
+   * Get the dashboard data for the admin dashboard
+   * @param count
+   */
   async getDashboardData(
     { count }: { count: 'exact' | 'estimated' | 'planned' } = {
       count: 'estimated',

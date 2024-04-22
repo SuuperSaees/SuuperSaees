@@ -26,7 +26,13 @@ const env = z
     emailSender,
   });
 
-export class AccountInvitationsWebhookService {
+export function createAccountInvitationsWebhookService(
+  client: SupabaseClient<Database>,
+) {
+  return new AccountInvitationsWebhookService(client);
+}
+
+class AccountInvitationsWebhookService {
   private namespace = 'accounts.invitations.webhook';
 
   constructor(private readonly adminClient: SupabaseClient<Database>) {}

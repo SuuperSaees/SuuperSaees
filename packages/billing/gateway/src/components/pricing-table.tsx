@@ -232,7 +232,7 @@ function PricingItem(
                     `animate-in slide-in-from-left-4 fade-in text-sm capitalize`,
                   )}
                 >
-                  <If condition={props.primaryLineItem.type === 'per-seat'}>
+                  <If condition={props.primaryLineItem.type === 'per_seat'}>
                     <Trans i18nKey={'billing:perTeamMember'} />
                   </If>
 

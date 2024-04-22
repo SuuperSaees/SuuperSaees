@@ -5,7 +5,11 @@ import { Database } from '@kit/supabase/database';
 
 type Account = Database['public']['Tables']['accounts']['Row'];
 
-export class AccountWebhooksService {
+export function createAccountWebhooksService() {
+  return new AccountWebhooksService();
+}
+
+class AccountWebhooksService {
   private readonly namespace = 'accounts.webhooks';
 
   async handleAccountDeletedWebhook(account: Account) {

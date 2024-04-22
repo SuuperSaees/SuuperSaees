@@ -5,7 +5,11 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
-export class DeleteTeamAccountService {
+export function createDeleteTeamAccountService() {
+  return new DeleteTeamAccountService();
+}
+
+class DeleteTeamAccountService {
   private readonly namespace = 'accounts.delete-team-account';
 
   /**

@@ -11,7 +11,7 @@ import {
   TeamBillingPortalSchema,
   TeamCheckoutSchema,
 } from '../schema/team-billing.schema';
-import { TeamBillingService } from './team-billing.service';
+import { createTeamBillingService } from './team-billing.service';
 
 /**
  * @name createTeamAccountCheckoutSession
@@ -21,7 +21,9 @@ export async function createTeamAccountCheckoutSession(
   params: z.infer<typeof TeamCheckoutSchema>,
 ) {
   const data = TeamCheckoutSchema.parse(params);
-  const service = new TeamBillingService(getSupabaseServerActionClient());
+
+  const client = getSupabaseServerActionClient();
+  const service = createTeamBillingService(client);
 
   return service.createCheckout(data);
 }
@@ -33,7 +35,9 @@ export async function createTeamAccountCheckoutSession(
  */
 export async function createBillingPortalSession(formData: FormData) {
   const params = TeamBillingPortalSchema.parse(Object.fromEntries(formData));
-  const service = new TeamBillingService(getSupabaseServerActionClient());
+
+  const client = getSupabaseServerActionClient();
+  const service = createTeamBillingService(client);
 
   // get url to billing portal
   const url = await service.createBillingPortalSession(params);

@@ -10,7 +10,7 @@ import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { DeletePersonalAccountSchema } from '../schema/delete-personal-account.schema';
-import { DeletePersonalAccountService } from './services/delete-personal-account.service';
+import { createDeletePersonalAccountService } from './services/delete-personal-account.service';
 
 const emailSettings = getEmailSettingsFromEnvironment();
 
@@ -53,7 +53,7 @@ export async function deletePersonalAccountAction(formData: FormData) {
   const userEmail = auth.data.email ?? null;
 
   // create a new instance of the personal accounts service
-  const service = new DeletePersonalAccountService();
+  const service = createDeletePersonalAccountService();
 
   // delete the user's account and cancel all subscriptions
   await service.deletePersonalAccount({

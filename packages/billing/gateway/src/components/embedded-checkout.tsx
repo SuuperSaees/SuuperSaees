@@ -20,10 +20,14 @@ export function EmbeddedCheckout(
   );
 
   return (
-    <CheckoutComponent
-      onClose={props.onClose}
-      checkoutToken={props.checkoutToken}
-    />
+    <>
+      <CheckoutComponent
+        onClose={props.onClose}
+        checkoutToken={props.checkoutToken}
+      />
+
+      <BlurryBackdrop />
+    </>
   );
 }
 
@@ -97,4 +101,15 @@ function buildLazyComponent<
   });
 
   return memo(LazyComponent);
+}
+
+function BlurryBackdrop() {
+  return (
+    <div
+      className={
+        'bg-background/30 fixed left-0 top-0 w-full backdrop-blur-sm' +
+        ' !m-0 h-full'
+      }
+    />
+  );
 }

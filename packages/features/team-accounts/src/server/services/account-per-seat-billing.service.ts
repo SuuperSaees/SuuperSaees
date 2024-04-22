@@ -2,15 +2,30 @@ import 'server-only';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-import { BillingGatewayService } from '@kit/billing-gateway';
+import { createBillingGatewayService } from '@kit/billing-gateway';
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
-export class AccountPerSeatBillingService {
+export function createAccountPerSeatBillingService(
+  client: SupabaseClient<Database>,
+) {
+  return new AccountPerSeatBillingService(client);
+}
+
+/**
+ * @name AccountPerSeatBillingService
+ * @description Service for managing per-seat billing for accounts.
+ */
+class AccountPerSeatBillingService {
   private readonly namespace = 'accounts.per-seat-billing';
 
   constructor(private readonly client: SupabaseClient<Database>) {}
 
+  /**
+   * @name getPerSeatSubscriptionItem
+   * @description Retrieves the per-seat subscription item for an account.
+   * @param accountId
+   */
   async getPerSeatSubscriptionItem(accountId: string) {
     const logger = await getLogger();
     const ctx = { accountId, name: this.namespace };
@@ -28,7 +43,7 @@ export class AccountPerSeatBillingService {
           id,
           subscription_items !inner (
             quantity,
-            id: variant_id,
+            id,
             type
           )
         `,
@@ -66,6 +81,11 @@ export class AccountPerSeatBillingService {
     return data;
   }
 
+  /**
+   * @name increaseSeats
+   * @description Increases the number of seats for an account.
+   * @param accountId
+   */
   async increaseSeats(accountId: string) {
     const logger = await getLogger();
     const subscription = await this.getPerSeatSubscriptionItem(accountId);
@@ -82,7 +102,7 @@ export class AccountPerSeatBillingService {
       return;
     }
 
-    const billingGateway = new BillingGatewayService(subscription.provider);
+    const billingGateway = createBillingGatewayService(subscription.provider);
 
     const ctx = {
       name: this.namespace,
@@ -133,6 +153,11 @@ export class AccountPerSeatBillingService {
     await Promise.all(promises);
   }
 
+  /**
+   * @name decreaseSeats
+   * @description Decreases the number of seats for an account.
+   * @param accountId
+   */
   async decreaseSeats(accountId: string) {
     const logger = await getLogger();
     const subscription = await this.getPerSeatSubscriptionItem(accountId);
@@ -157,7 +182,7 @@ export class AccountPerSeatBillingService {
 
     logger.info(ctx, `Decreasing seats for account ${accountId}...`);
 
-    const billingGateway = new BillingGatewayService(subscription.provider);
+    const billingGateway = createBillingGatewayService(subscription.provider);
 
     const promises = subscriptionItems.map(async (item) => {
       try {

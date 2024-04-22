@@ -4,12 +4,19 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
 
+export function createAdminAuthUserService(
+  client: SupabaseClient<Database>,
+  adminClient: SupabaseClient<Database>,
+) {
+  return new AdminAuthUserService(client, adminClient);
+}
+
 /**
  * @name AdminAuthUserService
  * @description Service for performing admin actions on users in the system.
  * This service only interacts with the Supabase Auth Admin API.
  */
-export class AdminAuthUserService {
+class AdminAuthUserService {
   constructor(
     private readonly client: SupabaseClient<Database>,
     private readonly adminClient: SupabaseClient<Database>,

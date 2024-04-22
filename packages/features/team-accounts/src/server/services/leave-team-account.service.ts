@@ -12,11 +12,26 @@ const Schema = z.object({
   userId: z.string().uuid(),
 });
 
-export class LeaveTeamAccountService {
+export function createLeaveTeamAccountService(
+  client: SupabaseClient<Database>,
+) {
+  return new LeaveTeamAccountService(client);
+}
+
+/**
+ * @name LeaveTeamAccountService
+ * @description Service for leaving a team account.
+ */
+class LeaveTeamAccountService {
   private readonly namespace = 'leave-team-account';
 
   constructor(private readonly adminClient: SupabaseClient<Database>) {}
 
+  /**
+   * @name leaveTeamAccount
+   * @description Leave a team account
+   * @param params
+   */
   async leaveTeamAccount(params: z.infer<typeof Schema>) {
     const logger = await getLogger();
 

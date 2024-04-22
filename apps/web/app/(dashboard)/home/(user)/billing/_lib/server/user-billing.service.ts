@@ -17,7 +17,15 @@ import { Database } from '~/lib/database.types';
 
 import { PersonalAccountCheckoutSchema } from '../schema/personal-account-checkout.schema';
 
-export class UserBillingService {
+export function createUserBillingService(client: SupabaseClient<Database>) {
+  return new UserBillingService(client);
+}
+
+/**
+ * @name UserBillingService
+ * @description Service for managing billing for personal accounts.
+ */
+class UserBillingService {
   private readonly namespace = 'billing.personal-account';
 
   constructor(private readonly client: SupabaseClient<Database>) {}

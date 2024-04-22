@@ -61,7 +61,7 @@ export function LineItemDetails(
         );
 
         const FlatFee = () => (
-          <div key={item.id} className={'flex flex-col'}>
+          <div className={'flex flex-col'}>
             <div className={className}>
               <span className={'flex items-center space-x-1'}>
                 <span className={'flex items-center space-x-1.5'}>
@@ -115,8 +115,8 @@ export function LineItemDetails(
         );
 
         const PerSeat = () => (
-          <div className={'flex flex-col'}>
-            <div key={item.id} className={className}>
+          <div key={index} className={'flex flex-col'}>
+            <div className={className}>
               <span className={'flex items-center space-x-1.5'}>
                 <PlusSquare className={'w-4'} />
 
@@ -141,7 +141,7 @@ export function LineItemDetails(
         );
 
         const Metered = () => (
-          <div key={item.id} className={'flex flex-col'}>
+          <div key={index} className={'flex flex-col'}>
             <div className={className}>
               <span className={'flex items-center space-x-1'}>
                 <span className={'flex items-center space-x-1.5'}>
@@ -179,13 +179,13 @@ export function LineItemDetails(
 
         switch (item.type) {
           case 'flat':
-            return <FlatFee />;
+            return <FlatFee key={item.id} />;
 
-          case 'per-seat':
-            return <PerSeat />;
+          case 'per_seat':
+            return <PerSeat key={item.id} />;
 
           case 'metered': {
-            return <Metered />;
+            return <Metered key={item.id} />;
           }
         }
       })}

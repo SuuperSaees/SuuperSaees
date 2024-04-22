@@ -2,13 +2,26 @@ import 'server-only';
 
 import { Database } from '@kit/supabase/database';
 
-import { BillingGatewayService } from '../billing-gateway/billing-gateway.service';
+import { createBillingGatewayService } from '../billing-gateway/billing-gateway.service';
 
 type Subscription = Database['public']['Tables']['subscriptions']['Row'];
 
-export class BillingWebhooksService {
+export function createBillingWebhooksService() {
+  return new BillingWebhooksService();
+}
+
+/**
+ * @name BillingWebhooksService
+ * @description Service for handling billing webhooks.
+ */
+class BillingWebhooksService {
+  /**
+   * @name handleSubscriptionDeletedWebhook
+   * @description Handles the webhook for when a subscription is deleted.
+   * @param subscription
+   */
   async handleSubscriptionDeletedWebhook(subscription: Subscription) {
-    const gateway = new BillingGatewayService(subscription.billing_provider);
+    const gateway = createBillingGatewayService(subscription.billing_provider);
 
     await gateway.cancelSubscription({
       subscriptionId: subscription.id,

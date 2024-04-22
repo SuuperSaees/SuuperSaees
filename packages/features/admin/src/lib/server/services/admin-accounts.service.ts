@@ -4,7 +4,11 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
 
-export class AdminAccountsService {
+export function createAdminAccountsService(client: SupabaseClient<Database>) {
+  return new AdminAccountsService(client);
+}
+
+class AdminAccountsService {
   constructor(private adminClient: SupabaseClient<Database>) {}
 
   async deleteAccount(accountId: string) {

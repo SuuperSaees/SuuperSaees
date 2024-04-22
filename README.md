@@ -661,6 +661,75 @@ NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_CREATION=true
 6. **NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS** - to disable team accounts
 7. **NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_CREATION** - to enable/disable the ability to create a team account
 
+#### Personal Accounts vs Team Accounts
+
+Personal accounts are accounts that are owned by a single user. Team accounts are accounts that are owned by multiple users.
+
+This allows you to:
+1. Server B2C customers (personal accounts)
+2. Serve B2B customers (team accounts)
+3. Allow both (for example, like GitHub)
+
+In the vast majority of cases, you will want to enable billing for personal OR team accounts. I have not seen many cases where billing both was required.
+
+To do so, please set the following variables accordingly. 
+
+For enabling personal accounts billing only:
+
+```bash
+NEXT_PUBLIC_ENABLE_PERSONAL_ACCOUNT_BILLING=true
+NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_BILLING=false
+```
+
+You may also want to fully disable team accounts:
+
+```bash
+NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS=false
+```
+
+To enable team accounts billing only:
+
+```bash
+NEXT_PUBLIC_ENABLE_PERSONAL_ACCOUNT_BILLING=false
+NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_BILLING=true
+```
+
+To enable both, leave them both as `true`.
+
+Please remember that for ensuring DB consistency, you need to also set them at DB level by adjusting the table `config`:
+
+```sql
+create table if not exists public.config(
+    enable_team_accounts boolean default true not null,
+    enable_account_billing boolean default true not null,
+    enable_team_account_billing boolean default true not null,
+    billing_provider public.billing_provider default 'stripe' not null
+);
+```
+
+To enable personal account billing:
+
+```sql
+alter table public.config
+    set enable_account_billing to true;
+```
+
+To enable team account billing:
+
+```sql
+alter table public.config
+    set enable_team_account_billing to true;
+```
+
+To disable team accounts:
+
+```sql
+alter table public.config
+    set enable_team_accounts to false;
+```
+
+To leave them both enabled, just leave them as they are.
+
 ### Cloudflare Turnstile protection
 
 To use Cloudflare's Turnstile Captcha, you need to set the following environment variables:
@@ -1089,7 +1158,7 @@ export default createBillingSchema({
               id: 'price_1NNwYHI1i3VnbZTqI2UzaHIe',
               name: 'Addon 2',
               cost: 0,
-              type: 'per-seat',
+              type: 'per_seat',
               tiers: [
                 {
                     upTo: 3,

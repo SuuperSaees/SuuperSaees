@@ -12,7 +12,7 @@ import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-clie
 import { RemoveMemberSchema } from '../../schema/remove-member.schema';
 import { TransferOwnershipConfirmationSchema } from '../../schema/transfer-ownership-confirmation.schema';
 import { UpdateMemberRoleSchema } from '../../schema/update-member-role.schema';
-import { AccountMembersService } from '../services/account-members.service';
+import { createAccountMembersService } from '../services/account-members.service';
 
 export async function removeMemberFromAccountAction(
   params: z.infer<typeof RemoveMemberSchema>,
@@ -26,7 +26,7 @@ export async function removeMemberFromAccountAction(
 
   const { accountId, userId } = RemoveMemberSchema.parse(params);
 
-  const service = new AccountMembersService(client);
+  const service = createAccountMembersService(client);
 
   await service.removeMemberFromAccount({
     accountId,
@@ -46,7 +46,7 @@ export async function updateMemberRoleAction(
 
   await assertSession(client);
 
-  const service = new AccountMembersService(client);
+  const service = createAccountMembersService(client);
   const adminClient = getSupabaseServerActionClient({ admin: true });
 
   // update the role of the member
@@ -87,7 +87,7 @@ export async function transferOwnershipAction(
     );
   }
 
-  const service = new AccountMembersService(client);
+  const service = createAccountMembersService(client);
 
   // at this point, the user is authenticated and is the owner of the account
   // so we proceed with the transfer of ownership with admin privileges
@@ -105,7 +105,9 @@ export async function transferOwnershipAction(
   // revalidate all pages that depend on the account
   revalidatePath('/home/[account]', 'layout');
 
-  return { success: true };
+  return {
+    success: true,
+  };
 }
 
 async function assertSession(client: SupabaseClient<Database>) {

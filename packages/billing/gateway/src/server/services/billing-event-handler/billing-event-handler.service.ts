@@ -60,7 +60,7 @@ export class BillingEventHandlerService {
 
         // Handle the subscription deleted event
         // here we delete the subscription from the database
-        logger.info(ctx, 'Processing subscription deleted event');
+        logger.info(ctx, 'Processing subscription deleted event...');
 
         const { error } = await client
           .from('subscriptions')

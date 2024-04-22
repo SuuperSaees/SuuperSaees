@@ -26,7 +26,6 @@ export default createBillingSchema({
         {
           name: 'Starter Monthly',
           id: 'starter-monthly',
-          trialDays: 7,
           paymentType: 'recurring',
           interval: 'month',
           lineItems: [
@@ -34,7 +33,27 @@ export default createBillingSchema({
               id: 'price_1NNwYHI1i3VnbZTqI2UzaHIe',
               name: 'billing:plans.starter.base',
               cost: 9.99,
-              type: 'flat',
+              type: 'flat' as const,
+            },
+            {
+              id: 'price_1P8N0zI1i3VnbZTqtUPc1Zvr',
+              name: 'Addon 3',
+              cost: 0,
+              type: 'per_seat' as const,
+              tiers: [
+                {
+                  upTo: 1,
+                  cost: 0,
+                },
+                {
+                  upTo: 5,
+                  cost: 4,
+                },
+                {
+                  upTo: 'unlimited',
+                  cost: 3,
+                },
+              ],
             },
           ],
         },
@@ -48,7 +67,7 @@ export default createBillingSchema({
               id: 'starter-yearly',
               name: 'billing:plans.starter.base',
               cost: 99.99,
-              type: 'flat',
+              type: 'flat' as const,
             },
           ],
         },

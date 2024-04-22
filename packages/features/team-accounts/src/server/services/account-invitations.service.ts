@@ -12,7 +12,17 @@ import { DeleteInvitationSchema } from '../../schema/delete-invitation.schema';
 import { InviteMembersSchema } from '../../schema/invite-members.schema';
 import { UpdateInvitationSchema } from '../../schema/update-invitation.schema';
 
-export class AccountInvitationsService {
+export function createAccountInvitationsService(
+  client: SupabaseClient<Database>,
+) {
+  return new AccountInvitationsService(client);
+}
+
+/**
+ * @name AccountInvitationsService
+ * @description Service for managing account invitations.
+ */
+class AccountInvitationsService {
   private readonly namespace = 'invitations';
 
   constructor(private readonly client: SupabaseClient<Database>) {}
@@ -50,6 +60,11 @@ export class AccountInvitationsService {
     return data;
   }
 
+  /**
+   * @name updateInvitation
+   * @param params
+   * @description Updates an invitation in the database.
+   */
   async updateInvitation(params: z.infer<typeof UpdateInvitationSchema>) {
     const logger = await getLogger();
 

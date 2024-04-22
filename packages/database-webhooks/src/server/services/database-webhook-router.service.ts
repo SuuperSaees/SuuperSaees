@@ -42,11 +42,11 @@ export class DatabaseWebhookRouterService {
   }
 
   private async handleInvitationsWebhook(body: RecordChange<'invitations'>) {
-    const { AccountInvitationsWebhookService } = await import(
+    const { createAccountInvitationsWebhookService } = await import(
       '@kit/team-accounts/webhooks'
     );
 
-    const service = new AccountInvitationsWebhookService(this.adminClient);
+    const service = createAccountInvitationsWebhookService(this.adminClient);
 
     return service.handleInvitationWebhook(body.record);
   }
@@ -54,22 +54,25 @@ export class DatabaseWebhookRouterService {
   private async handleSubscriptionsWebhook(
     body: RecordChange<'subscriptions'>,
   ) {
-    const { BillingWebhooksService } = await import('@kit/billing-gateway');
-    const service = new BillingWebhooksService();
-
     if (body.type === 'DELETE' && body.old_record) {
+      const { createBillingWebhooksService } = await import(
+        '@kit/billing-gateway'
+      );
+
+      const service = createBillingWebhooksService();
+
       return service.handleSubscriptionDeletedWebhook(body.old_record);
     }
   }
 
   private async handleAccountsWebhook(body: RecordChange<'accounts'>) {
-    const { AccountWebhooksService } = await import(
-      '@kit/team-accounts/webhooks'
-    );
-
-    const service = new AccountWebhooksService();
-
     if (body.type === 'DELETE' && body.old_record) {
+      const { createAccountWebhooksService } = await import(
+        '@kit/team-accounts/webhooks'
+      );
+
+      const service = createAccountWebhooksService();
+
       return service.handleAccountDeletedWebhook(body.old_record);
     }
   }

@@ -1378,6 +1378,7 @@ on conflict (
     -- Upsert subscription items
     with item_data as (
         select
+            (line_item ->> 'id')::varchar as line_item_id,
             (line_item ->> 'product_id')::varchar as prod_id,
             (line_item ->> 'variant_id')::varchar as var_id,
             (line_item ->> 'type')::public.subscription_item_type as type,
@@ -1388,6 +1389,7 @@ on conflict (
         from
             jsonb_array_elements(line_items) as line_item)
     insert into public.subscription_items(
+        id,
         subscription_id,
         product_id,
         variant_id,
@@ -1397,6 +1399,7 @@ on conflict (
         interval,
         interval_count)
     select
+        line_item_id,
         target_subscription_id,
         prod_id,
         var_id,
@@ -1436,6 +1439,7 @@ grant execute on function public.upsert_subscription(uuid, varchar,
  * -------------------------------------------------------
  */
 create table if not exists public.subscription_items(
+    id varchar(255) not null primary key,
     subscription_id text references public.subscriptions(id) on
 	delete cascade not null,
     product_id varchar(255) not null,
