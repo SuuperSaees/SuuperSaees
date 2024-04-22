@@ -20,7 +20,7 @@ import { Trans } from '@kit/ui/trans';
 
 import billingConfig from '~/config/billing.config';
 
-import { createPersonalAccountCheckoutSession } from '../server-actions';
+import { createPersonalAccountCheckoutSession } from '../_lib/server/server-actions';
 
 const EmbeddedCheckout = dynamic(
   async () => {

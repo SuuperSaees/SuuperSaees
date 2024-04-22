@@ -17,7 +17,7 @@ import { Trans } from '@kit/ui/trans';
 
 import billingConfig from '~/config/billing.config';
 
-import { createTeamAccountCheckoutSession } from '../server-actions';
+import { createTeamAccountCheckoutSession } from '../_lib/server/server-actions';
 
 const EmbeddedCheckout = dynamic(
   async () => {

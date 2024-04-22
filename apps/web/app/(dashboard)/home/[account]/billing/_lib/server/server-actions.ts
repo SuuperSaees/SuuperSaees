@@ -10,8 +10,8 @@ import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-clie
 import {
   TeamBillingPortalSchema,
   TeamCheckoutSchema,
-} from '../_lib/schema/team-billing.schema';
-import { TeamBillingService } from '../_lib/server/team-billing.service';
+} from '../schema/team-billing.schema';
+import { TeamBillingService } from './team-billing.service';
 
 /**
  * @name createTeamAccountCheckoutSession

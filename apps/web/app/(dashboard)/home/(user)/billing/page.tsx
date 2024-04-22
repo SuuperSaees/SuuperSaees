@@ -16,7 +16,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { UserAccountHeader } from '../_components/user-account-header';
-import { createPersonalAccountBillingPortalSession } from '../billing/server-actions';
+import { createPersonalAccountBillingPortalSession } from '../billing/_lib/server/server-actions';
 import { PersonalAccountCheckoutForm } from './_components/personal-account-checkout-form';
 // user billing imports
 import { loadPersonalAccountBillingPageData } from './_lib/server/personal-account-billing-page.loader';

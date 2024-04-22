@@ -410,6 +410,7 @@ NB: to use Captcha protection, you need to set the captcha token in the environm
 
 ```bash
 CAPTCHA_SECRET_TOKEN=
+NEXT_PUBLIC_CAPTCHA_SITE_KEY=
 ```
 
 As a secret environment variable, please do not add it to the `.env` file. Instead, add it to the environment variables of your CI/CD system.
@@ -571,6 +572,7 @@ NB: to use Captcha protection, you need to set the captcha token in the environm
 
 ```bash
 CAPTCHA_SECRET_TOKEN=
+NEXT_PUBLIC_CAPTCHA_SITE_KEY=
 ```
 
 As a secret environment variable, please do not add it to the `.env` file. Instead, add it to the environment variables of your CI/CD system.
@@ -585,8 +587,8 @@ shared between environments (eg. they will be the same for development, staging,
 **NB: You will not add any secret keys or sensitive information here.** Only configuration, paths, feature flags, etc.
 
 ```bash
-# SHARED ENVIROMENT VARIABLES
-# HERE YOU CAN ADD ALL THE **PUBLIC** ENVIRONMENT VARIABLES THAT ARE SHARED ACROSS ALL THE ENVIROMENTS
+# SHARED ENVIRONMENT VARIABLES
+# HERE YOU CAN ADD ALL THE **PUBLIC** ENVIRONMENT VARIABLES THAT ARE SHARED ACROSS ALL THE ENVIRONMENTS
 # PLEASE DO NOT ADD ANY CONFIDENTIAL KEYS OR SENSITIVE INFORMATION HERE
 # ONLY CONFIGURATION, PATH, FEATURE FLAGS, ETC.
 # TO OVERRIDE THESE VARIABLES IN A SPECIFIC ENVIRONMENT, PLEASE ADD THEM TO THE SPECIFIC ENVIRONMENT FILE (e.g. .env.development, .env.production)
@@ -659,6 +661,21 @@ NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_CREATION=true
 6. **NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS** - to disable team accounts
 7. **NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_CREATION** - to enable/disable the ability to create a team account
 
+### Cloudflare Turnstile protection
+
+To use Cloudflare's Turnstile Captcha, you need to set the following environment variables:
+
+```bash
+CAPTCHA_SECRET_TOKEN=
+NEXT_PUBLIC_CAPTCHA_SITE_KEY=
+```
+
+Of course, please make sure Turnstile it's set up correctly.
+
+This token will be used to validate:
+1. Sign ups (automatically) by passing the token to Supabase. **Please set the captcha token in Supabase too**.
+2. API routes and server actions that are protected by the captcha token.
+
 ### Production Environment Variables
 
 When going to production, you will need to define the environment variables in the `apps/web/.env.production` file.
@@ -675,7 +692,7 @@ If you use Stripe, also add:
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ```
 
-From your CI, please add the following environment variables:
+**Exclusively from your CI or hosting platform**, please add the following environment variables:
 
 ```bash
 # SUPABASE

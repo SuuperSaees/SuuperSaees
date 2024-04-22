@@ -18,8 +18,8 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 import { AccountLayoutHeader } from '../_components/account-layout-header';
 import { loadTeamAccountBillingPage } from '../_lib/server/team-account-billing-page.loader';
 import { loadTeamWorkspace } from '../_lib/server/team-account-workspace.loader';
-import { createBillingPortalSession } from '../billing/server-actions';
 import { TeamAccountCheckoutForm } from './_components/team-account-checkout-form';
+import { createBillingPortalSession } from './_lib/server/server-actions';
 
 interface Params {
   params: {

@@ -31,6 +31,7 @@
     "supabase:db:dump:local": "supabase db dump --local --data-only"
   },
   "dependencies": {
+    "@edge-csrf/nextjs": "2.0.0",
     "@hookform/resolvers": "^3.3.4",
     "@kit/accounts": "workspace:^",
     "@kit/admin": "workspace:^",
@@ -57,7 +58,6 @@
     "@tanstack/react-query-next-experimental": "^5.29.2",
     "@tanstack/react-table": "^8.16.0",
     "date-fns": "^3.6.0",
-    "@edge-csrf/nextjs": "2.0.0",
     "i18next": "^23.11.2",
     "i18next-resources-to-backend": "^1.2.1",
     "lucide-react": "^0.368.0",

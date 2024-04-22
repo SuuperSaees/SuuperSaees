@@ -5,8 +5,8 @@ import { redirect } from 'next/navigation';
 import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
-import { PersonalAccountCheckoutSchema } from './_lib/schema/personal-account-checkout.schema';
-import { UserBillingService } from './_lib/server/user-billing.service';
+import { PersonalAccountCheckoutSchema } from '../schema/personal-account-checkout.schema';
+import { UserBillingService } from './user-billing.service';
 
 /**
  * @name createPersonalAccountCheckoutSession

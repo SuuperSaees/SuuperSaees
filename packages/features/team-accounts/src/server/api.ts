@@ -11,6 +11,25 @@ export class TeamAccountsApi {
   constructor(private readonly client: SupabaseClient<Database>) {}
 
   /**
+   * @name getTeamAccountById
+   * @description Check if the user is already in the account.
+   * @param accountId
+   */
+  async getTeamAccountById(accountId: string) {
+    const { data, error } = await this.client
+      .from('accounts')
+      .select('*')
+      .eq('id', accountId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  }
+
+  /**
    * @name getAccountWorkspace
    * @description Get the account workspace data.
    * @param slug
@@ -134,6 +153,40 @@ export class TeamAccountsApi {
     }
 
     return data?.customer_id;
+  }
+
+  /**
+   * @name getInvitation
+   * @description Get the invitation data from the invite token.
+   * @param adminClient - The admin client instance. Since the user is not yet part of the account, we need to use an admin client to read the pending membership
+   * @param token - The invitation token.
+   */
+  async getInvitation(adminClient: SupabaseClient<Database>, token: string) {
+    const { data: invitation, error } = await adminClient
+      .from('invitations')
+      .select<
+        string,
+        {
+          id: string;
+          account: {
+            id: string;
+            name: string;
+            slug: string;
+            picture_url: string;
+          };
+        }
+      >(
+        'id, expires_at, account: account_id !inner (id, name, slug, picture_url)',
+      )
+      .eq('invite_token', token)
+      .gte('expires_at', new Date().toISOString())
+      .single();
+
+    if (!invitation ?? error) {
+      return null;
+    }
+
+    return invitation;
   }
 }
 

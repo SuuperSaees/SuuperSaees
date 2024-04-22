@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 
 import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { createTeamAccountsApi } from '@kit/team-accounts/api';
 import { AcceptInvitationContainer } from '@kit/team-accounts/components';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
@@ -13,8 +14,6 @@ import { Trans } from '@kit/ui/trans';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-
-import { JoinTeamService } from './_lib/server/join-team.service';
 
 interface Context {
   searchParams: {
@@ -50,10 +49,12 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
     permanentRedirect(path);
   }
 
-  const service = new JoinTeamService();
+  // get api to interact with team accounts
+  const adminClient = getSupabaseServerComponentClient({ admin: true });
+  const api = createTeamAccountsApi(client);
 
   // the user is logged in, we can now check if the token is valid
-  const invitation = await service.getInviteDataFromInviteToken(token);
+  const invitation = await api.getInvitation(adminClient, token);
 
   // the invitation is not found or expired
   if (!invitation) {
@@ -61,10 +62,12 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
   }
 
   // we need to verify the user isn't already in the account
-  const isSignedInUserPartOfAccount =
-    await service.isCurrentUserAlreadyInAccount(invitation.account.id);
+  // we do so by checking if the user can read the account
+  // if the user can read the account, then they are already in the account
+  const account = await api.getTeamAccountById(invitation.account.id);
 
-  if (isSignedInUserPartOfAccount) {
+  // if the user is already in the account redirect to the home page
+  if (account) {
     const { getLogger } = await import('@kit/shared/logger');
     const logger = await getLogger();
 
