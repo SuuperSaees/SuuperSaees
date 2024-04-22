@@ -285,6 +285,298 @@ npx shadcn-ui@latest add button --path=packages/src/ui/shadcn
 
 We pass the `--path` flag to specify the path where the component should be installed. You may need to adjust the path based on your project structure.
 
+**NB**: you may need to update the imports to the `cn` utility function to use the relative imports because it somehow breaks. Please do that.
+
+## Writing Server Actions
+
+In the large majority of cases - you will be writing React Server Actions to update data in your DB. Server Actions are used to perform mutations on the server-side - while being called like normal functions.
+
+To create a server action, it's enough to add `use server` at the top of the file and export the function.
+
+```tsx
+'use server';
+
+// I am now a server action!
+export const myServerAction = async function () {
+  // ... your code here
+  return {
+    success: true,
+  };
+};
+```
+
+The above is a plain POST request that basically does nothing. Let's see how we can make it more useful.
+
+Makerkit ships with a utility to help you write these actions. The utility is called `enhanceAction` and we import it from `@kit/next/actions`.
+
+```tsx
+import { enhanceAction } from '@kit/next/actions';
+```
+
+This utility helps us with three main things:
+1. checks the user state (if the user is authenticated)
+2. given a Zod schema, it validates the request body
+3. given a captcha site key, it validates the captcha token
+
+Fantastic, let's see how we can use it.
+
+```tsx
+'use server';
+
+import { z } from 'zod';
+import { enhanceAction } from '@kit/next/actions';
+
+const ZodSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+export const myServerAction = enhanceAction(
+  async function (data, user) {
+    // 1. "data" has been validated against the Zod schema, and it's safe to use
+    // 2. "user" is the authenticated user
+    
+    // ... your code here
+    return {
+      success: true,
+    };
+  },
+  {
+    schema: ZodSchema,
+  },
+);
+```
+
+### Using a Captcha token protection
+
+If you want to protect your server actions with a captcha token, you can do so by passing the captcha site token to the `enhanceAction` function and setting the `captcha` flag to `true`.
+
+```tsx
+'use server';
+
+import { enhanceAction } from '@kit/next/actions';
+
+export const myServerAction = enhanceAction(
+  async function (data, user) {
+    // ... your code here
+    return {
+      success: true,
+    };
+  },
+  {
+    captcha: true,
+    schema: ZodSchema,
+  },
+);
+```
+
+When calling the server action, we must supply the captcha token in the request body.
+
+The captcha token can be retrieved from the `useCaptchaToken` hook in the package `@kit/auth/captcha/client`.
+
+```tsx
+import { useCaptchaToken } from '@kit/auth/captcha/client';
+
+function Component() {
+  const captchaToken = useCaptchaToken();
+  
+  // ... your code here
+}
+```
+
+Now, when calling the server action, we can pass the captcha
+
+```tsx
+import { useCaptchaToken } from '@kit/auth/captcha/client';
+
+function Component() {
+  const captchaToken = useCaptchaToken();
+  
+  const onSubmit = async (params: {
+    email: string;
+    password: string;
+  }) => {
+    const response = await myServerAction({
+      ...params,
+      captchaToken,
+    });
+    
+    // ... your code here
+  };
+}
+```
+
+NB: to use Captcha protection, you need to set the captcha token in the environment variables.
+
+```bash
+CAPTCHA_SECRET_TOKEN=
+```
+
+As a secret environment variable, please do not add it to the `.env` file. Instead, add it to the environment variables of your CI/CD system.
+
+The only captcha provider supported is Cloudflare Turnstile.
+
+## Writing API Route Handlers
+
+API Route handlers are added using the convention `route.ts` and exporting one or many HTTP methods (e.g., `GET`, `POST`, `PUT`, `DELETE`).
+
+While you won't be writing too many API route handlers (prefer Server Actions for mutations) - you can use the `enhanceRouteHandler` utility to help you with the following:
+
+1. checks the user state (if the user is authenticated)
+2. given a Zod schema, it validates the request body
+3. given a captcha site key, it validates the captcha token
+
+Fantastic, let's see how we can use it.
+
+```tsx
+import { z } from 'zod';
+
+import { enhanceRouteHandler } from '@kit/next/routes';
+import { NextResponse } from 'next/server';
+
+const ZodSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+export const POST = enhanceRouteHandler(
+  async function({ body, user, request }) {
+    // 1. "body" has been validated against the Zod schema, and it's safe to use
+    // 2. "user" is the authenticated user
+    // 3. "request" is the request object that contains the headers, query, etc.
+
+    // ... your code here
+    return NextResponse.json({
+      success: true,
+    });
+  },
+  {
+    schema: ZodSchema,
+  },
+);
+```
+
+### Using a Captcha token protection
+
+If you want to protect your API route handlers with a captcha token, you can do so by passing the captcha site token to the `enhanceRouteHandler` function and setting the `captcha` flag to `true`.
+
+```tsx
+import { enhanceRouteHandler } from '@kit/next/routes';
+
+export const POST = enhanceRouteHandler(
+  async function({ body, user, request }) {
+    // ... your code here
+    return NextResponse.json({
+      success: true,
+    });
+  },
+  {
+    captcha: true,
+    schema: ZodSchema,
+  },
+);
+```
+
+When calling the API route handler, we must supply the captcha token in the request body.
+
+The captcha token can be retrieved from the `useCaptchaToken` hook in the package `@kit/auth/captcha/client`.
+
+```tsx
+import { useCaptchaToken } from '@kit/auth/captcha/client';
+
+function Component() {
+  const captchaToken = useCaptchaToken();
+  
+  // ... your code here
+}
+```
+
+Now, when calling the API route handler, we can pass the captcha and the CSRF token.
+
+NB: The CSRF token **must be added for all API routes** making mutations in routes that are outside `/api/*`. Routes inside `/api/*` are not protected by default as they're meant to be used externally.
+
+```tsx
+import { useCaptchaToken } from '@kit/auth/captcha/client';
+import { useCsrfToken } from '@kit/shared/hooks';
+
+function Component() {
+  const captchaToken = useCaptchaToken();
+  const csrfToken = useCsrfToken();
+  
+  const onSubmit = async (params: {
+    email: string;
+    password: string;
+  }) => {
+    const response = await fetch('/my-api-route', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken,
+        'x-captcha-token': captchaToken,
+      },
+      body: JSON.stringify(params),
+    });
+    
+    // ... your code here
+  };
+  
+  // ... your code here
+}
+```
+
+You can improve the above using React Query:
+
+```tsx
+import { useMutation } from '@tanstack/react-query';
+import { useCaptchaToken } from '@kit/auth/captcha/client';
+
+function Component() {
+  const captchaToken = useCaptchaToken();
+  const mutation = useMutateData();
+
+  const onSubmit = async (params: {
+    email: string;
+    password: string;
+  }) => {
+    await mutation.mutateAsync(params);
+  };
+  
+  // ... your code here
+}
+
+function useMutateData() {
+  return useMutation({
+    mutationKey: 'my-mutation',
+    mutationFn: async (params: { email: string; password: string }) => {
+      const response = await fetch('/my-api-route', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-captcha-token': captchaToken,
+        },
+        body: JSON.stringify(params),
+      });
+      
+      if (!response.ok) {
+        throw new Error('An error occurred');
+      }
+
+      return response.json();
+    },
+  });
+}
+```
+
+NB: to use Captcha protection, you need to set the captcha token in the environment variables.
+
+```bash
+CAPTCHA_SECRET_TOKEN=
+```
+
+As a secret environment variable, please do not add it to the `.env` file. Instead, add it to the environment variables of your CI/CD system.
+
+The only captcha provider supported is Cloudflare Turnstile.
+
 ## Environment Variables
 
 The majority of the environment variables are defined in the `apps/web/.env` file. These are the env variables
@@ -419,6 +711,8 @@ In this way - you server will be able to authenticate the request and be sure it
 As the endpoint, remember to use the `/api/db/webhook` endpoint. If your APP url is `https://myapp.vercel.app`, the endpoint will be `https://myapp.vercel.app/api/db/webhook`.
 
 #### Adding Database Webhooks from Supabase Studio
+
+The below is only needed when going to production. The local development seed.sql script will add the webhooks for you.
 
 While you can create a migration to add the database webhooks, you can also add them from the Supabase Studio.
 
