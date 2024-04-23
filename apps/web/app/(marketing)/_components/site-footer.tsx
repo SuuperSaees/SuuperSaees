@@ -1,6 +1,5 @@
 import Link from 'next/link';
 
-import { Label } from '@kit/ui/label';
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { Trans } from '@kit/ui/trans';
 
