@@ -39,37 +39,41 @@ export function PageHeader({
   description,
   mobileNavigation,
 }: React.PropsWithChildren<{
-  title: string | React.ReactNode;
+  title?: string | React.ReactNode;
   description?: string | React.ReactNode;
   mobileNavigation?: React.ReactNode;
 }>) {
   return (
-    <div className={'flex min-h-16 items-center justify-between border-b px-4'}>
-      <div
-        className={
-          'flex items-center space-x-4 lg:flex-col lg:items-start lg:space-x-0 lg:space-y-0.5'
-        }
-      >
-        <div className={'flex items-center lg:hidden'}>{mobileNavigation}</div>
-
-        <h1
+    <div className={'flex min-h-[4.5rem] items-center justify-between px-4'}>
+      {title ? (
+        <div
           className={
-            'font-heading text-xl font-semibold leading-none dark:text-white'
+            'flex items-center space-x-4 lg:flex-col lg:items-start lg:space-x-0 lg:space-y-0.5'
           }
         >
-          {title}
-        </h1>
+          <div className={'flex items-center lg:hidden'}>
+            {mobileNavigation}
+          </div>
 
-        <h2 className={'hidden lg:block'}>
-          <span
+          <h1
             className={
-              'text-base font-normal leading-none text-muted-foreground'
+              'font-heading text-xl font-semibold leading-none dark:text-white'
             }
           >
-            {description}
-          </span>
-        </h2>
-      </div>
+            {title}
+          </h1>
+
+          <h2 className={'hidden lg:block'}>
+            <span
+              className={
+                'text-base font-medium leading-none text-muted-foreground'
+              }
+            >
+              {description}
+            </span>
+          </h2>
+        </div>
+      ) : null}
 
       {children}
     </div>

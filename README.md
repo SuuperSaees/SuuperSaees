@@ -666,7 +666,7 @@ NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_CREATION=true
 Personal accounts are accounts that are owned by a single user. Team accounts are accounts that are owned by multiple users.
 
 This allows you to:
-1. Server B2C customers (personal accounts)
+1. Serve B2C customers (personal accounts)
 2. Serve B2B customers (team accounts)
 3. Allow both (for example, like GitHub)
 
@@ -696,36 +696,24 @@ NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_BILLING=true
 
 To enable both, leave them both as `true`.
 
-Please remember that for ensuring DB consistency, you need to also set them at DB level by adjusting the table `config`:
-
-```sql
-create table if not exists public.config(
-    enable_team_accounts boolean default true not null,
-    enable_account_billing boolean default true not null,
-    enable_team_account_billing boolean default true not null,
-    billing_provider public.billing_provider default 'stripe' not null
-);
-```
+Please remember that to ensure DB consistency, you need to also set them at DB level by adjusting the table `config`.
 
 To enable personal account billing:
 
 ```sql
-alter table public.config
-    set enable_account_billing to true;
+update config set enable_account_billing = true;
 ```
 
 To enable team account billing:
 
 ```sql
-alter table public.config
-    set enable_team_account_billing to true;
+update config set enable_team_account_billing = true;
 ```
 
 To disable team accounts:
 
 ```sql
-alter table public.config
-    set enable_team_accounts to false;
+update config set enable_team_accounts = false;
 ```
 
 To leave them both enabled, just leave them as they are.

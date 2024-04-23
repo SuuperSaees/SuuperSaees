@@ -2,7 +2,7 @@
 
 Please set the following environment variable:
 
-```
+```bash
 NEXT_PUBLIC_MONITORING_PROVIDER=sentry
 NEXT_PUBLIC_SENTRY_DSN=your_dsn
 ```

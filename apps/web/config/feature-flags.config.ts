@@ -34,6 +34,12 @@ const FeatureFlagsSchema = z.object({
     required_error:
       'Provide the variable NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_BILLING',
   }),
+  languagePriority: z
+    .enum(['user', 'application'], {
+      required_error: 'Provide the variable NEXT_PUBLIC_LANGUAGE_PRIORITY',
+      description: `If set to user, use the user's preferred language. If set to application, use the application's default language.`,
+    })
+    .default('application'),
 });
 
 const featuresFlagConfig = FeatureFlagsSchema.parse({
@@ -65,6 +71,9 @@ const featuresFlagConfig = FeatureFlagsSchema.parse({
     process.env.NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS_BILLING,
     false,
   ),
+  languagePriority: process.env.NEXT_PUBLIC_LANGUAGE_PRIORITY as
+    | 'user'
+    | 'application',
 } satisfies z.infer<typeof FeatureFlagsSchema>);
 
 export default featuresFlagConfig;

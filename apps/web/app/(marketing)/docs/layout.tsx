@@ -1,16 +1,12 @@
 import { Cms, createCmsClient } from '@kit/cms';
 
 import { DocsNavigation } from '~/(marketing)/docs/_components/docs-navigation';
+import { getDocs } from '~/(marketing)/docs/_lib/server/docs.loader';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 
 async function DocsLayout({ children }: React.PropsWithChildren) {
-  const cms = await createCmsClient();
   const { resolvedLanguage } = await createI18nServerInstance();
-
-  const { items: pages } = await cms.getContentItems({
-    collection: 'documentation',
-    language: resolvedLanguage,
-  });
+  const pages = await getDocs(resolvedLanguage);
 
   return (
     <div className={'flex'}>

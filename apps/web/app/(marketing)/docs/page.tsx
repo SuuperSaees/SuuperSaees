@@ -5,6 +5,7 @@ import { PageBody } from '@kit/ui/page';
 
 import { SitePageHeader } from '~/(marketing)/_components/site-page-header';
 import { DocsCards } from '~/(marketing)/docs/_components/docs-cards';
+import { getDocs } from '~/(marketing)/docs/_lib/server/docs.loader';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
@@ -16,18 +17,9 @@ export const generateMetadata = async () => {
   };
 };
 
-const getContentItems = cache(async (resolvedLanguage: string | undefined) => {
-  const client = await createCmsClient();
-
-  return client.getContentItems({
-    collection: 'documentation',
-    language: resolvedLanguage,
-  });
-});
-
 async function DocsPage() {
   const { t, resolvedLanguage } = await createI18nServerInstance();
-  const { items } = await getContentItems(resolvedLanguage);
+  const items = await getDocs(resolvedLanguage);
 
   // Filter out any docs that have a parentId, as these are children of other docs
   const cards = items.filter((item) => !item.parentId);

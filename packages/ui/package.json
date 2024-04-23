@@ -109,6 +109,7 @@
     "./radio-group": "./src/shadcn/radio-group.tsx",
     "./separator": "./src/shadcn/separator.tsx",
     "./input-otp": "./src/shadcn/input-otp.tsx",
+    "./textarea": "./src/shadcn/textarea.tsx",
     "./utils": "./src/utils/index.ts",
     "./if": "./src/makerkit/if.tsx",
     "./trans": "./src/makerkit/trans.tsx",

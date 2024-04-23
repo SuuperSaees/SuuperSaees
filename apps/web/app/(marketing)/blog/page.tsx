@@ -1,4 +1,4 @@
-import { unstable_cache as cache } from 'next/dist/server/web/spec-extension/unstable-cache';
+import { cache } from 'react';
 
 import { createCmsClient } from '@kit/cms';
 import { If } from '@kit/ui/if';
