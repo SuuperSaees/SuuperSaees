@@ -73,9 +73,15 @@ export function parseAcceptLanguageHeader(
       // Ignore wildcard '*' if 'ignoreWildcard' is true
       if (locale === '*' && ignoreWildcard) return [];
 
+      const languageSegment = locale.split('-')[0];
+
+      if (!languageSegment) return [];
+
       // Return the locale if it's included in the accepted languages
       try {
-        return acceptedLanguages.includes(locale) ? [locale] : [];
+        return acceptedLanguages.includes(languageSegment)
+          ? [languageSegment]
+          : [];
       } catch {
         return [];
       }

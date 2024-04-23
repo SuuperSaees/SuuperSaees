@@ -58,6 +58,10 @@ export const createI18nServerInstance = cache(createInstance);
 function getPreferredLanguageFromBrowser() {
   const acceptLanguage = headers().get('accept-language');
 
+  if (!acceptLanguage) {
+    return;
+  }
+
   return parseAcceptLanguageHeader(acceptLanguage, languages)[0];
 }
 
