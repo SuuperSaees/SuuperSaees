@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 
-import { MonitoringService } from '../../../src/services/monitoring.service';
+import { MonitoringService } from '@kit/monitoring-core';
 
 /**
  * @class

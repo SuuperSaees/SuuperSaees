@@ -1,11 +1,11 @@
 import process from 'node:process';
 import { z } from 'zod';
 
-import { MonitoringService } from '../../../src/services/monitoring.service';
+import { MonitoringService } from '@kit/monitoring-core';
 
 const apiKey = z
   .string({
-    required_error: 'API_KEY is required',
+    required_error: 'BASELIME_API_KEY is required',
   })
   .parse(process.env.BASELIME_API_KEY);
 

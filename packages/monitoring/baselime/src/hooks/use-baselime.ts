@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
+
 import { useBaselimeRum } from '@baselime/react-rum';
 
-import { MonitoringService } from '../../../src/services/monitoring.service';
+import { MonitoringService } from '@kit/monitoring-core';
 
 /**
  * @name useBaselime
@@ -9,12 +11,14 @@ import { MonitoringService } from '../../../src/services/monitoring.service';
 export function useBaselime(): MonitoringService {
   const { captureException, setUser } = useBaselimeRum();
 
-  return {
-    captureException(error: Error, extra?: React.ErrorInfo | undefined) {
-      void captureException(error, extra);
-    },
-    identifyUser(params) {
-      setUser(params.id);
-    },
-  } satisfies MonitoringService;
+  return useMemo(() => {
+    return {
+      captureException(error: Error, extra?: React.ErrorInfo | undefined) {
+        void captureException(error, extra);
+      },
+      identifyUser(params) {
+        setUser(params.id);
+      },
+    } satisfies MonitoringService;
+  }, [captureException, setUser]);
 }

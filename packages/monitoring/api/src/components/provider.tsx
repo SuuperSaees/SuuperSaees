@@ -13,6 +13,14 @@ const BaselimeProvider = lazy(async () => {
   };
 });
 
+const SentryProvider = lazy(async () => {
+  const { SentryProvider } = await import('@kit/sentry/provider');
+
+  return {
+    default: SentryProvider,
+  };
+});
+
 type Config = {
   provider: InstrumentationProvider;
   providerToken: string;
@@ -35,9 +43,8 @@ export function MonitoringProvider(
         </BaselimeProvider>
       );
 
-    // sentry does not require a provider
     case InstrumentationProvider.Sentry:
-      return <>{props.children}</>;
+      return <SentryProvider>{props.children}</SentryProvider>;
 
     default:
       return <>{props.children}</>;

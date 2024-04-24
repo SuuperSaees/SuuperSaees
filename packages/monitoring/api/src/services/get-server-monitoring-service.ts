@@ -1,6 +1,7 @@
+import { ConsoleMonitoringService } from '@kit/monitoring-core';
+
 import { getMonitoringProvider } from '../get-monitoring-provider';
 import { InstrumentationProvider } from '../monitoring-providers.enum';
-import { ConsoleMonitoringService } from './console-monitoring.service';
 
 const MONITORING_PROVIDER = getMonitoringProvider();
 

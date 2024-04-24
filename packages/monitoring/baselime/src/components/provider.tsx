@@ -1,4 +1,10 @@
+import { useRef } from 'react';
+
 import { BaselimeRum } from '@baselime/react-rum';
+
+import { MonitoringContext } from '@kit/monitoring-core';
+
+import { useBaselime } from '../hooks/use-baselime';
 
 export function BaselimeProvider({
   children,
@@ -16,7 +22,18 @@ export function BaselimeProvider({
       enableWebVitals={enableWebVitals}
       fallback={ErrorPage ?? null}
     >
-      {children}
+      <MonitoringProvider>{children}</MonitoringProvider>
     </BaselimeRum>
+  );
+}
+
+function MonitoringProvider(props: React.PropsWithChildren) {
+  const service = useBaselime();
+  const provider = useRef(service);
+
+  return (
+    <MonitoringContext.Provider value={provider.current}>
+      {props.children}
+    </MonitoringContext.Provider>
   );
 }

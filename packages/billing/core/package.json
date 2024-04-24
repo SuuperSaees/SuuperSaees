@@ -18,7 +18,7 @@
   "peerDependencies": {
     "@kit/supabase": "0.1.0",
     "@kit/ui": "0.1.0",
-    "lucide-react": "^0.368.0",
+    "lucide-react": "^0.372.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

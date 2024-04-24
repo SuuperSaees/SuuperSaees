@@ -104,7 +104,7 @@ importers:
         version: link:../../packages/mailers
       '@kit/monitoring':
         specifier: workspace:^
-        version: link:../../packages/monitoring
+        version: link:../../packages/monitoring/api
       '@kit/next':
         specifier: workspace:^
         version: link:../../packages/next
@@ -673,7 +673,7 @@ importers:
         version: link:../../mailers
       '@kit/monitoring':
         specifier: workspace:^
-        version: link:../../monitoring
+        version: link:../../monitoring/api
       '@kit/prettier-config':
         specifier: workspace:*
         version: link:../../../tooling/prettier
@@ -792,6 +792,9 @@ importers:
       react:
         specifier: 18.2.0
         version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       react-hook-form:
         specifier: ^7.51.3
         version: 7.51.3(react@18.2.0)
@@ -895,7 +898,7 @@ importers:
         version: link:../../mailers
       '@kit/monitoring':
         specifier: workspace:*
-        version: link:../../monitoring
+        version: link:../../monitoring/api
       '@kit/prettier-config':
         specifier: workspace:*
         version: link:../../../tooling/prettier
@@ -1043,7 +1046,7 @@ importers:
         specifier: ^3.23.0
         version: 3.23.0
 
-  packages/monitoring:
+  packages/monitoring/api:
     dependencies:
       '@tanstack/react-table':
         specifier: ^8.16.0
@@ -1060,22 +1063,25 @@ importers:
     devDependencies:
       '@kit/baselime':
         specifier: workspace:*
-        version: link:baselime
+        version: link:../baselime
       '@kit/eslint-config':
         specifier: workspace:*
-        version: link:../../tooling/eslint
+        version: link:../../../tooling/eslint
+      '@kit/monitoring-core':
+        specifier: workspace:*
+        version: link:../core
       '@kit/prettier-config':
         specifier: workspace:*
-        version: link:../../tooling/prettier
+        version: link:../../../tooling/prettier
       '@kit/sentry':
         specifier: workspace:*
-        version: link:sentry
+        version: link:../sentry
       '@kit/tailwind-config':
         specifier: workspace:*
-        version: link:../../tooling/tailwind
+        version: link:../../../tooling/tailwind
       '@kit/tsconfig':
         specifier: workspace:*
-        version: link:../../tooling/typescript
+        version: link:../../../tooling/typescript
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -1091,6 +1097,9 @@ importers:
       '@baselime/react-rum':
         specifier: ^0.2.9
         version: 0.2.9(react@18.2.0)
+      '@kit/monitoring-core':
+        specifier: workspace:*
+        version: link:../core
       '@tanstack/react-table':
         specifier: ^8.16.0
         version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1116,9 +1125,39 @@ importers:
       '@kit/tsconfig':
         specifier: workspace:*
         version: link:../../../tooling/typescript
+      '@types/react':
+        specifier: ^18.2.79
+        version: 18.2.79
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+
+  packages/monitoring/core:
+    devDependencies:
+      '@kit/eslint-config':
+        specifier: workspace:*
+        version: link:../../../tooling/eslint
+      '@kit/prettier-config':
+        specifier: workspace:*
+        version: link:../../../tooling/prettier
+      '@kit/tailwind-config':
+        specifier: workspace:*
+        version: link:../../../tooling/tailwind
+      '@kit/tsconfig':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript
+      '@types/react':
+        specifier: ^18.2.79
+        version: 18.2.79
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
 
   packages/monitoring/sentry:
     dependencies:
+      '@kit/monitoring-core':
+        specifier: workspace:*
+        version: link:../core
       '@opentelemetry/resources':
         specifier: 1.23.0
         version: 1.23.0(@opentelemetry/api@1.8.0)
@@ -1159,6 +1198,12 @@ importers:
       '@kit/tsconfig':
         specifier: workspace:*
         version: link:../../../tooling/typescript
+      '@types/react':
+        specifier: ^18.2.79
+        version: 18.2.79
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
 
   packages/next:
     dependencies:
