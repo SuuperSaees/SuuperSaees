@@ -15,6 +15,7 @@ VALUES (tests.get_supabase_uid('primary_owner'), 'stripe', 'cus_test');
 -- Call the upsert_subscription function
 SELECT public.upsert_subscription(tests.get_supabase_uid('primary_owner'), 'cus_test', 'sub_test', true, 'active', 'stripe', false, 'usd', now(), now() + interval '1 month', '[
     {
+        "id": "sub_123",
         "product_id": "prod_test",
         "variant_id": "var_test",
         "type": "flat",
@@ -24,6 +25,7 @@ SELECT public.upsert_subscription(tests.get_supabase_uid('primary_owner'), 'cus_
         "interval_count": 1
     },
     {
+        "id": "sub_456",
         "product_id": "prod_test_2",
         "variant_id": "var_test_2",
         "type": "flat",
@@ -57,6 +59,7 @@ SELECT is(
 -- Call the upsert_subscription function again to update the subscription
 SELECT public.upsert_subscription(tests.get_supabase_uid('primary_owner'), 'cus_test', 'sub_test', false, 'past_due', 'stripe', true, 'usd', now(), now() + interval '1 month', '[
     {
+        "id": "sub_123",
         "product_id": "prod_test",
         "variant_id": "var_test",
         "type": "flat",
@@ -66,6 +69,7 @@ SELECT public.upsert_subscription(tests.get_supabase_uid('primary_owner'), 'cus_
         "interval_count": 1
     },
     {
+        "id": "sub_456",
         "product_id": "prod_test_2",
         "variant_id": "var_test_2",
         "type": "flat",
@@ -132,19 +136,31 @@ select throws_ok(
   'permission denied for function upsert_subscription'
 );
 
+select is(
+    (public.has_active_subscription(tests.get_supabase_uid('primary_owner'))),
+    true,
+    'The function public.has_active_subscription should return true when the account has a subscription'
+);
+
 -- foreigners
 select tests.create_supabase_user('foreigner');
 select tests.authenticate_as('foreigner');
 
 -- account cannot read other's subscription
-SELECT is_empty(
+select is_empty(
   $$ select 1 from subscriptions where id = 'sub_test' $$,
    'The account cannot read the other account subscriptions'
 );
 
-SELECT is_empty(
+select is_empty(
   $$ select 1 from subscription_items where subscription_id = 'sub_test' $$,
     'The account cannot read the other account subscription items'
+);
+
+select is(
+    (public.has_active_subscription(tests.get_supabase_uid('primary_owner'))),
+    false,
+    'The function public.has_active_subscription should return false when a foreigner is querying the account subscription'
 );
 
 -- Finish the tests and clean up

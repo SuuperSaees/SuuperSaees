@@ -30,6 +30,43 @@ export class TeamAccountsApi {
   }
 
   /**
+   * @name getSubscription
+   * @description Get the subscription data for the account.
+   * @param accountId
+   */
+  async getSubscription(accountId: string) {
+    const { data, error } = await this.client
+      .from('subscriptions')
+      .select('*')
+      .eq('account_id', accountId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  }
+
+  /**
+   * Get the orders data for the given account.
+   * @param accountId
+   */
+  async getOrder(accountId: string) {
+    const response = await this.client
+      .from('orders')
+      .select('*, items: order_items !inner (*)')
+      .eq('account_id', accountId)
+      .maybeSingle();
+
+    if (response.error) {
+      throw response.error;
+    }
+
+    return response.data;
+  }
+
+  /**
    * @name getAccountWorkspace
    * @description Get the account workspace data.
    * @param slug

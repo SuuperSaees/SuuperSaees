@@ -28,8 +28,8 @@ export const loadTeamAccountBillingPage = cache((accountId: string) => {
 
   const data =
     BILLING_MODE === 'subscription'
-      ? api.getSubscriptionData(accountId)
-      : api.getOrdersData(accountId);
+      ? api.getSubscription(accountId)
+      : api.getOrder(accountId);
 
   const customerId = api.getBillingCustomerId(accountId);
 

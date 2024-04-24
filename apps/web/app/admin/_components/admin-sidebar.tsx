@@ -28,7 +28,7 @@ export async function AdminSidebar() {
         <AppLogo href={'/admin'} />
       </SidebarContent>
 
-      <SidebarContent>
+      <SidebarContent className={'mt-5'}>
         <SidebarGroup label={'Admin'} collapsible={false}>
           <SidebarItem end path={'/admin'} Icon={<Home className={'h-4'} />}>
             Home

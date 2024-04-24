@@ -21,6 +21,7 @@ import {
 } from '@kit/ui/dropdown-menu';
 import { DataTable } from '@kit/ui/enhanced-data-table';
 import { Form, FormControl, FormField, FormItem } from '@kit/ui/form';
+import { Heading } from '@kit/ui/heading';
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import {
@@ -98,59 +99,63 @@ function AccountsTableFilters(props: {
   };
 
   return (
-    <div className={'flex justify-end space-x-4'}>
-      <Form {...form}>
-        <form
-          className={'flex space-x-4'}
-          onSubmit={form.handleSubmit((data) => onSubmit(data))}
-        >
-          <Select
-            value={form.watch('type')}
-            onValueChange={(value) => {
-              form.setValue(
-                'type',
-                value as z.infer<typeof FiltersSchema>['type'],
-                {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                  shouldTouch: true,
-                },
-              );
+    <div className={'flex items-center justify-between space-x-4'}>
+      <Heading level={4}>Accounts</Heading>
 
-              return onSubmit(form.getValues());
-            }}
+      <div className={'flex space-x-4'}>
+        <Form {...form}>
+          <form
+            className={'flex space-x-4'}
+            onSubmit={form.handleSubmit((data) => onSubmit(data))}
           >
-            <SelectTrigger>
-              <SelectValue placeholder={'Account Type'} />
-            </SelectTrigger>
+            <Select
+              value={form.watch('type')}
+              onValueChange={(value) => {
+                form.setValue(
+                  'type',
+                  value as z.infer<typeof FiltersSchema>['type'],
+                  {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  },
+                );
 
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Account Type</SelectLabel>
+                return onSubmit(form.getValues());
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={'Account Type'} />
+              </SelectTrigger>
 
-                <SelectItem value={'all'}>All accounts</SelectItem>
-                <SelectItem value={'team'}>Team</SelectItem>
-                <SelectItem value={'personal'}>Personal</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Account Type</SelectLabel>
 
-          <FormField
-            name={'query'}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl className={'min-w-72'}>
-                  <Input
-                    className={'w-full'}
-                    placeholder={`Search account...`}
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
+                  <SelectItem value={'all'}>All accounts</SelectItem>
+                  <SelectItem value={'team'}>Team</SelectItem>
+                  <SelectItem value={'personal'}>Personal</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <FormField
+              name={'query'}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl className={'w-full min-w-36 md:min-w-72'}>
+                    <Input
+                      className={'w-full'}
+                      placeholder={`Search account...`}
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }

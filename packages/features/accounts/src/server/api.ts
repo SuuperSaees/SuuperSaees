@@ -10,6 +10,10 @@ import { Database } from '@kit/supabase/database';
 class AccountsApi {
   constructor(private readonly client: SupabaseClient<Database>) {}
 
+  /**
+   * @name getAccountWorkspace
+   * @description Get the account workspace data.
+   */
   async getAccountWorkspace() {
     const { data, error } = await this.client
       .from('user_account_workspace')
@@ -23,6 +27,10 @@ class AccountsApi {
     return data;
   }
 
+  /**
+   * @name loadUserAccounts
+   * Load the user accounts.
+   */
   async loadUserAccounts() {
     const { data: accounts, error } = await this.client
       .from('user_accounts')
@@ -42,42 +50,40 @@ class AccountsApi {
   }
 
   /**
-   * @name getSubscriptionData
+   * @name getSubscription
    * Get the subscription data for the given user.
    * @param accountId
    */
-  getSubscriptionData(accountId: string) {
-    return this.client
+  async getSubscription(accountId: string) {
+    const response = await this.client
       .from('subscriptions')
       .select('*, items: subscription_items !inner (*)')
       .eq('account_id', accountId)
-      .maybeSingle()
-      .then((response) => {
-        if (response.error) {
-          throw response.error;
-        }
+      .maybeSingle();
 
-        return response.data;
-      });
+    if (response.error) {
+      throw response.error;
+    }
+
+    return response.data;
   }
 
   /**
    * Get the orders data for the given account.
    * @param accountId
    */
-  getOrdersData(accountId: string) {
-    return this.client
+  async getOrder(accountId: string) {
+    const response = await this.client
       .from('orders')
       .select('*, items: order_items !inner (*)')
       .eq('account_id', accountId)
-      .maybeSingle()
-      .then((response) => {
-        if (response.error) {
-          throw response.error;
-        }
+      .maybeSingle();
 
-        return response.data;
-      });
+    if (response.error) {
+      throw response.error;
+    }
+
+    return response.data;
   }
 
   /**
@@ -86,19 +92,18 @@ class AccountsApi {
    * If the user does not have a billing customer ID, it will return null.
    * @param accountId
    */
-  getBillingCustomerId(accountId: string) {
-    return this.client
+  async getBillingCustomerId(accountId: string) {
+    const response = await this.client
       .from('billing_customers')
       .select('customer_id')
       .eq('account_id', accountId)
-      .maybeSingle()
-      .then((response) => {
-        if (response.error) {
-          throw response.error;
-        }
+      .maybeSingle();
 
-        return response.data?.customer_id;
-      });
+    if (response.error) {
+      throw response.error;
+    }
+
+    return response.data?.customer_id;
   }
 }
 

@@ -7,7 +7,6 @@ import { Badge } from '@kit/ui/badge';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
 import { If } from '@kit/ui/if';
-import { PageBody, PageHeader } from '@kit/ui/page';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 import { Separator } from '@kit/ui/separator';
 import {
@@ -59,9 +58,9 @@ async function PersonalAccountPage(props: { account: Account }) {
     'banned_until' in data.user && data.user.banned_until !== 'none';
 
   return (
-    <>
-      <PageHeader
-        title={
+    <div className={'flex flex-col space-y-4'}>
+      <div className={'flex items-center justify-between'}>
+        <div className={'flex items-center space-x-4'}>
           <div className={'flex items-center space-x-2.5'}>
             <ProfileAvatar
               pictureUrl={props.account.picture_url}
@@ -69,15 +68,15 @@ async function PersonalAccountPage(props: { account: Account }) {
             />
 
             <span>{props.account.name}</span>
-
-            <Badge variant={'outline'}>Personal Account</Badge>
-
-            <If condition={isBanned}>
-              <Badge variant={'destructive'}>Banned</Badge>
-            </If>
           </div>
-        }
-      >
+
+          <Badge variant={'outline'}>Personal Account</Badge>
+
+          <If condition={isBanned}>
+            <Badge variant={'destructive'}>Banned</Badge>
+          </If>
+        </div>
+
         <div className={'flex space-x-1'}>
           <If condition={isBanned}>
             <AdminReactivateUserDialog userId={props.account.id}>
@@ -111,24 +110,22 @@ async function PersonalAccountPage(props: { account: Account }) {
             </Button>
           </AdminDeleteUserDialog>
         </div>
-      </PageHeader>
+      </div>
 
-      <PageBody>
-        <div className={'flex flex-col space-y-8'}>
-          <SubscriptionsTable accountId={props.account.id} />
+      <div className={'flex flex-col space-y-8'}>
+        <SubscriptionsTable accountId={props.account.id} />
 
-          <div className={'divider-divider-x flex flex-col space-y-2.5'}>
-            <Heading level={6}>
-              This user is a member of the following teams:
-            </Heading>
+        <div className={'divider-divider-x flex flex-col space-y-2.5'}>
+          <Heading className={'font-bold'} level={5}>
+            Teams
+          </Heading>
 
-            <div>
-              <AdminMembershipsTable memberships={memberships} />
-            </div>
+          <div>
+            <AdminMembershipsTable memberships={memberships} />
           </div>
         </div>
-      </PageBody>
-    </>
+      </div>
+    </div>
   );
 }
 
@@ -138,9 +135,9 @@ async function TeamAccountPage(props: {
   const members = await getMembers(props.account.slug ?? '');
 
   return (
-    <>
-      <PageHeader
-        title={
+    <div className={'flex flex-col space-y-4'}>
+      <div className={'flex justify-between'}>
+        <div className={'flex items-center space-x-4'}>
           <div className={'flex items-center space-x-2.5'}>
             <ProfileAvatar
               pictureUrl={props.account.picture_url}
@@ -148,33 +145,33 @@ async function TeamAccountPage(props: {
             />
 
             <span>{props.account.name}</span>
-
-            <Badge variant={'outline'}>Team Account</Badge>
           </div>
-        }
-      >
+
+          <Badge variant={'outline'}>Team Account</Badge>
+        </div>
+
         <AdminDeleteAccountDialog accountId={props.account.id}>
           <Button size={'sm'} variant={'destructive'}>
             <BadgeX className={'mr-1 h-4'} />
             Delete
           </Button>
         </AdminDeleteAccountDialog>
-      </PageHeader>
+      </div>
 
-      <PageBody>
+      <div>
         <div className={'flex flex-col space-y-8'}>
           <SubscriptionsTable accountId={props.account.id} />
 
-          <Separator />
-
           <div className={'flex flex-col space-y-2.5'}>
-            <Heading level={6}>This team has the following members:</Heading>
+            <Heading className={'font-bold'} level={5}>
+              Team Members
+            </Heading>
 
             <AdminMembersTable members={members} />
           </div>
         </div>
-      </PageBody>
-    </>
+      </div>
+    </div>
   );
 }
 
@@ -203,11 +200,21 @@ async function SubscriptionsTable(props: { accountId: string }) {
 
   return (
     <div className={'flex flex-col space-y-2.5'}>
-      <Heading level={6}>Subscription</Heading>
+      <Heading className={'font-bold'} level={5}>
+        Subscription
+      </Heading>
 
       <If
         condition={subscription}
-        fallback={<>This account does not have an active subscription.</>}
+        fallback={
+          <Alert>
+            <AlertTitle>No subscription found for this account.</AlertTitle>
+
+            <AlertDescription>
+              This account does not have a subscription.
+            </AlertDescription>
+          </Alert>
+        }
       >
         {(subscription) => {
           return (

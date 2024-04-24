@@ -1410,9 +1410,7 @@ on conflict (
         intv_count
     from
         item_data
-    on conflict (subscription_id,
-        product_id,
-        variant_id)
+    on conflict (id)
         do update set
             price_amount = excluded.price_amount,
             quantity = excluded.quantity,
@@ -2153,6 +2151,28 @@ language plpgsql;
 
 grant execute on function public.add_invitations_to_account(text,
     public.invitation[]) to authenticated, service_role;
+
+create or replace function public.has_active_subscription(target_account_id uuid)
+    returns boolean
+    as $$
+begin
+    return exists (
+        select
+            1
+        from
+            public.subscriptions
+        where
+            account_id = target_account_id
+            and active = true);
+
+end;
+
+$$
+language plpgsql;
+
+grant execute on function public.has_active_subscription(uuid) to
+    authenticated, service_role;
+
 
 -- Storage
 -- Account Image

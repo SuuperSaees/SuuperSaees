@@ -36,8 +36,8 @@ export const loadPersonalAccountBillingPageData = cache((userId: string) => {
 
   const data =
     BILLING_MODE === 'subscription'
-      ? api.getSubscriptionData(userId)
-      : api.getOrdersData(userId);
+      ? api.getSubscription(userId)
+      : api.getOrder(userId);
 
   const customerId = api.getBillingCustomerId(userId);
 

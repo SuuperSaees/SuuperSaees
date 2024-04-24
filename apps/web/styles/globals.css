@@ -91,3 +91,7 @@ Optimize dropdowns for mobile
 [data-radix-menu-content] {
   @apply rounded-none md:rounded-lg;
 }
+
+[data-radix-menu-content] [role="menuitem"] {
+  @apply md:min-h-0 min-h-12;
+}
