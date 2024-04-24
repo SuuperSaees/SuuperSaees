@@ -18,11 +18,7 @@
   "dependencies": {
     "@baselime/node-opentelemetry": "^0.5.8",
     "@baselime/react-rum": "^0.2.9",
-    "@kit/monitoring-core": "workspace:*",
-    "@tanstack/react-table": "^8.16.0",
-    "next": "14.3.0-canary.7",
-    "tailwind-merge": "^2.3.0",
-    "zod": "^3.23.0"
+    "@kit/monitoring-core": "workspace:*"
   },
   "devDependencies": {
     "@kit/eslint-config": "workspace:*",
@@ -30,10 +26,8 @@
     "@kit/tailwind-config": "workspace:*",
     "@kit/tsconfig": "workspace:*",
     "@types/react": "^18.2.79",
-    "react": "18.2.0"
-  },
-  "peerDependencies": {
-    "react": "18.2.0"
+    "react": "18.2.0",
+    "zod": "^3.23.4"
   },
   "eslintConfig": {
     "root": true,

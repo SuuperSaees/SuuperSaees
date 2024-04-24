@@ -28,18 +28,7 @@ export async function POST(request: Request) {
   );
 
   try {
-    await service.handleWebhookEvent(request, {
-      onEvent(event: string, data: unknown) {
-        logger.info(
-          {
-            ...ctx,
-            event,
-            data,
-          },
-          `Received billing event`,
-        );
-      },
-    });
+    await service.handleWebhookEvent(request);
 
     logger.info(ctx, `Successfully processed billing webhook`);
 

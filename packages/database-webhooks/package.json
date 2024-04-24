@@ -12,12 +12,6 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "peerDependencies": {
-    "@kit/billing-gateway": "workspace:^",
-    "@kit/shared": "^0.1.0",
-    "@kit/supabase": "^0.1.0",
-    "@kit/team-accounts": "workspace:^"
-  },
   "devDependencies": {
     "@kit/billing": "workspace:^",
     "@kit/billing-gateway": "workspace:^",
@@ -29,10 +23,8 @@
     "@kit/tailwind-config": "workspace:*",
     "@kit/team-accounts": "workspace:^",
     "@kit/tsconfig": "workspace:*",
-    "@kit/ui": "workspace:^",
     "@supabase/supabase-js": "^2.42.5",
-    "lucide-react": "^0.372.0",
-    "zod": "^3.23.0"
+    "zod": "^3.23.4"
   },
   "eslintConfig": {
     "root": true,
@@ -47,10 +39,5 @@
         "src/*"
       ]
     }
-  },
-  "dependencies": {
-    "@tanstack/react-table": "^8.16.0",
-    "next": "14.3.0-canary.7",
-    "tailwind-merge": "^2.3.0"
   }
 }

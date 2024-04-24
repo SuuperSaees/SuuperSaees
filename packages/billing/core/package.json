@@ -15,12 +15,6 @@
     "./schema": "./src/schema/index.ts",
     "./types": "./src/types/index.ts"
   },
-  "peerDependencies": {
-    "@kit/supabase": "0.1.0",
-    "@kit/ui": "0.1.0",
-    "lucide-react": "^0.372.0",
-    "zod": "^3.22.4"
-  },
   "devDependencies": {
     "@kit/eslint-config": "workspace:*",
     "@kit/prettier-config": "workspace:*",
@@ -28,8 +22,7 @@
     "@kit/tailwind-config": "workspace:*",
     "@kit/tsconfig": "workspace:*",
     "@kit/ui": "workspace:*",
-    "lucide-react": "^0.372.0",
-    "zod": "^3.23.0"
+    "zod": "^3.23.4"
   },
   "eslintConfig": {
     "root": true,
@@ -44,10 +37,5 @@
         "src/*"
       ]
     }
-  },
-  "dependencies": {
-    "@tanstack/react-table": "^8.16.0",
-    "next": "14.3.0-canary.7",
-    "tailwind-merge": "^2.3.0"
   }
 }

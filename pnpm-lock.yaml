@@ -51,8 +51,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
     devDependencies:
       '@playwright/test':
         specifier: ^1.43.1
@@ -125,7 +125,7 @@ importers:
         version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)
       '@makerkit/data-loader-supabase-nextjs':
         specifier: ^1.1.0
-        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.32.0(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       '@marsidev/react-turnstile':
         specifier: ^0.5.4
         version: 0.5.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -136,26 +136,20 @@ importers:
         specifier: ^2.42.5
         version: 2.42.5
       '@tanstack/react-query':
-        specifier: 5.29.2
-        version: 5.29.2(react@18.2.0)
+        specifier: 5.32.0
+        version: 5.32.0(react@18.2.0)
       '@tanstack/react-query-next-experimental':
-        specifier: ^5.29.2
-        version: 5.29.2(@tanstack/react-query@5.29.2(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        specifier: ^5.32.0
+        version: 5.32.0(@tanstack/react-query@5.32.0(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       '@tanstack/react-table':
         specifier: ^8.16.0
         version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
-      i18next:
-        specifier: ^23.11.2
-        version: 23.11.2
-      i18next-resources-to-backend:
-        specifier: ^1.2.1
-        version: 1.2.1
       lucide-react:
-        specifier: ^0.372.0
-        version: 0.372.0(react@18.2.0)
+        specifier: ^0.373.0
+        version: 0.373.0(react@18.2.0)
       next:
         specifier: 14.2.2
         version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -175,8 +169,8 @@ importers:
         specifier: ^7.51.3
         version: 7.51.3(react@18.2.0)
       react-i18next:
-        specifier: ^14.1.0
-        version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^14.1.1
+        version: 14.1.1(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       recharts:
         specifier: ^2.12.6
         version: 2.12.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -187,8 +181,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:^
@@ -230,8 +224,8 @@ importers:
         specifier: ^3.2.5
         version: 3.2.5
       supabase:
-        specifier: ^1.162.4
-        version: 1.162.4
+        specifier: ^1.163.2
+        version: 1.163.2
       tailwindcss:
         specifier: 3.4.3
         version: 3.4.3(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.4.5))
@@ -240,16 +234,6 @@ importers:
         version: 5.4.5
 
   packages/billing/core:
-    dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
@@ -269,21 +253,11 @@ importers:
       '@kit/ui':
         specifier: workspace:*
         version: link:../../ui
-      lucide-react:
-        specifier: ^0.372.0
-        version: 0.372.0(react@18.2.0)
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/billing/gateway:
-    dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.3.4
@@ -328,8 +302,8 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
       lucide-react:
-        specifier: ^0.372.0
-        version: 0.372.0(react@18.2.0)
+        specifier: ^0.373.0
+        version: 0.373.0(react@18.2.0)
       next:
         specifier: 14.2.2
         version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -340,26 +314,17 @@ importers:
         specifier: ^7.51.3
         version: 7.51.3(react@18.2.0)
       react-i18next:
-        specifier: ^14.1.0
-        version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^14.1.1
+        version: 14.1.1(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/billing/lemon-squeezy:
     dependencies:
       '@lemonsqueezy/lemonsqueezy.js':
         specifier: 2.2.0
         version: 2.2.0
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@kit/billing':
         specifier: workspace:^
@@ -388,12 +353,15 @@ importers:
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
+      next:
+        specifier: 14.2.2
+        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/billing/stripe:
     dependencies:
@@ -403,18 +371,9 @@ importers:
       '@stripe/stripe-js':
         specifier: ^3.3.0
         version: 3.3.0
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       stripe:
         specifier: ^15.3.0
         version: 15.3.0
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@kit/billing':
         specifier: workspace:^
@@ -446,27 +405,17 @@ importers:
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
+      next:
+        specifier: 14.2.2
+        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/cms/core:
-    dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
-      zod:
-        specifier: ^3.23.0
-        version: 3.23.0
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
@@ -489,15 +438,6 @@ importers:
       '@keystatic/next':
         specifier: 5.0.0
         version: 5.0.0(@keystatic/core@0.5.11(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@kit/cms':
         specifier: workspace:^
@@ -518,23 +458,10 @@ importers:
         specifier: ^20.12.7
         version: 20.12.7
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/cms/wordpress:
-    dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
-      zod:
-        specifier: ^3.23.0
-        version: 3.23.0
     devDependencies:
       '@kit/cms':
         specifier: workspace:^
@@ -559,16 +486,6 @@ importers:
         version: 3.65.0
 
   packages/database-webhooks:
-    dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@kit/billing':
         specifier: workspace:^
@@ -600,36 +517,18 @@ importers:
       '@kit/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@kit/ui':
-        specifier: workspace:^
-        version: link:../ui
       '@supabase/supabase-js':
         specifier: ^2.42.5
         version: 2.42.5
-      lucide-react:
-        specifier: ^0.372.0
-        version: 0.372.0(react@18.2.0)
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/email-templates:
     dependencies:
       '@react-email/components':
         specifier: 0.0.16
         version: 0.0.16(@types/react@18.2.79)(react@18.2.0)
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
-      zod:
-        specifier: ^3.23.0
-        version: 3.23.0
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
@@ -646,15 +545,9 @@ importers:
 
   packages/features/accounts:
     dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       nanoid:
         specifier: ^5.0.7
         version: 5.0.7
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.3.4
@@ -699,17 +592,14 @@ importers:
         specifier: ^2.42.5
         version: 2.42.5
       '@tanstack/react-query':
-        specifier: 5.29.2
-        version: 5.29.2(react@18.2.0)
+        specifier: 5.32.0
+        version: 5.32.0(react@18.2.0)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
       '@types/react-dom':
         specifier: ^18.2.25
         version: 18.2.25
-      lucide-react:
-        specifier: ^0.372.0
-        version: 0.372.0(react@18.2.0)
       next:
         specifier: 14.2.2
         version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -726,20 +616,16 @@ importers:
         specifier: ^7.51.3
         version: 7.51.3(react@18.2.0)
       react-i18next:
-        specifier: ^14.1.0
-        version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^14.1.1
+        version: 14.1.1(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       sonner:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/features/admin:
-    dependencies:
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.3.4
@@ -770,13 +656,13 @@ importers:
         version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)
       '@makerkit/data-loader-supabase-nextjs':
         specifier: ^1.1.0
-        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        version: 1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.32.0(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       '@supabase/supabase-js':
         specifier: ^2.42.5
         version: 2.42.5
       '@tanstack/react-query':
-        specifier: 5.29.2
-        version: 5.29.2(react@18.2.0)
+        specifier: 5.32.0
+        version: 5.32.0(react@18.2.0)
       '@tanstack/react-table':
         specifier: ^8.16.0
         version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -784,8 +670,8 @@ importers:
         specifier: ^18.2.79
         version: 18.2.79
       lucide-react:
-        specifier: ^0.372.0
-        version: 0.372.0(react@18.2.0)
+        specifier: ^0.373.0
+        version: 0.373.0(react@18.2.0)
       next:
         specifier: 14.2.2
         version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -799,17 +685,10 @@ importers:
         specifier: ^7.51.3
         version: 7.51.3(react@18.2.0)
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/features/auth:
-    dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.3.4
@@ -845,14 +724,14 @@ importers:
         specifier: ^2.42.5
         version: 2.42.5
       '@tanstack/react-query':
-        specifier: 5.29.2
-        version: 5.29.2(react@18.2.0)
+        specifier: 5.32.0
+        version: 5.32.0(react@18.2.0)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
       lucide-react:
-        specifier: ^0.372.0
-        version: 0.372.0(react@18.2.0)
+        specifier: ^0.373.0
+        version: 0.373.0(react@18.2.0)
       next:
         specifier: 14.2.2
         version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -860,23 +739,20 @@ importers:
         specifier: ^7.51.3
         version: 7.51.3(react@18.2.0)
       react-i18next:
-        specifier: ^14.1.0
-        version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^14.1.1
+        version: 14.1.1(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       sonner:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/features/team-accounts:
     dependencies:
       nanoid:
         specifier: ^5.0.7
         version: 5.0.7
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.3.4
@@ -921,8 +797,8 @@ importers:
         specifier: ^2.42.5
         version: 2.42.5
       '@tanstack/react-query':
-        specifier: 5.29.2
-        version: 5.29.2(react@18.2.0)
+        specifier: 5.32.0
+        version: 5.32.0(react@18.2.0)
       '@tanstack/react-table':
         specifier: ^8.16.0
         version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -938,9 +814,6 @@ importers:
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
-      lucide-react:
-        specifier: ^0.372.0
-        version: 0.372.0(react@18.2.0)
       next:
         specifier: 14.2.2
         version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -954,29 +827,26 @@ importers:
         specifier: ^7.51.3
         version: 7.51.3(react@18.2.0)
       react-i18next:
-        specifier: ^14.1.0
-        version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^14.1.1
+        version: 14.1.1(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       sonner:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/i18n:
     dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
-      zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+      i18next:
+        specifier: ^23.11.2
+        version: 23.11.2
+      i18next-browser-languagedetector:
+        specifier: 7.2.1
+        version: 7.2.1
+      i18next-resources-to-backend:
+        specifier: ^1.2.1
+        version: 1.2.1
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
@@ -994,35 +864,17 @@ importers:
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@tanstack/react-query':
-        specifier: 5.29.2
-        version: 5.29.2(react@18.2.0)
-      i18next:
-        specifier: ^23.11.2
-        version: 23.11.2
-      i18next-browser-languagedetector:
-        specifier: 7.2.1
-        version: 7.2.1
-      i18next-resources-to-backend:
-        specifier: ^1.2.1
-        version: 1.2.1
+        specifier: 5.32.0
+        version: 5.32.0(react@18.2.0)
       react-i18next:
-        specifier: ^14.1.0
-        version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^14.1.1
+        version: 14.1.1(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
 
   packages/mailers:
     dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       nodemailer:
         specifier: ^6.9.13
         version: 6.9.13
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
       vercel-email:
         specifier: 0.0.6
         version: 0.0.6
@@ -1043,23 +895,10 @@ importers:
         specifier: 6.4.14
         version: 6.4.14
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/monitoring/api:
-    dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
-      zod:
-        specifier: ^3.23.0
-        version: 3.23.0
     devDependencies:
       '@kit/baselime':
         specifier: workspace:*
@@ -1100,18 +939,6 @@ importers:
       '@kit/monitoring-core':
         specifier: workspace:*
         version: link:../core
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
-      zod:
-        specifier: ^3.23.0
-        version: 3.23.0
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
@@ -1131,6 +958,9 @@ importers:
       react:
         specifier: 18.2.0
         version: 18.2.0
+      zod:
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/monitoring/core:
     devDependencies:
@@ -1155,9 +985,6 @@ importers:
 
   packages/monitoring/sentry:
     dependencies:
-      '@kit/monitoring-core':
-        specifier: workspace:*
-        version: link:../core
       '@opentelemetry/resources':
         specifier: 1.23.0
         version: 1.23.0(@opentelemetry/api@1.8.0)
@@ -1168,27 +995,18 @@ importers:
         specifier: ^1.23.0
         version: 1.23.0
       '@sentry/nextjs':
-        specifier: ^7.111.0
-        version: 7.111.0(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        specifier: ^7.112.2
+        version: 7.112.2(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       '@sentry/opentelemetry-node':
-        specifier: ^7.111.0
-        version: 7.111.0(@opentelemetry/api@1.8.0)(@opentelemetry/core@1.23.0(@opentelemetry/api@1.8.0))(@opentelemetry/sdk-trace-base@1.23.0(@opentelemetry/api@1.8.0))(@opentelemetry/semantic-conventions@1.23.0)
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
-      zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^7.112.2
+        version: 7.112.2(@opentelemetry/api@1.8.0)(@opentelemetry/core@1.23.0(@opentelemetry/api@1.8.0))(@opentelemetry/sdk-trace-base@1.23.0(@opentelemetry/api@1.8.0))(@opentelemetry/semantic-conventions@1.23.0)
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
         version: link:../../../tooling/eslint
+      '@kit/monitoring-core':
+        specifier: workspace:*
+        version: link:../core
       '@kit/prettier-config':
         specifier: workspace:*
         version: link:../../../tooling/prettier
@@ -1206,13 +1024,6 @@ importers:
         version: 18.2.0
 
   packages/next:
-    dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@kit/auth':
         specifier: workspace:^
@@ -1239,26 +1050,14 @@ importers:
         specifier: 14.2.2
         version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/shared:
     dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next:
-        specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       pino:
         specifier: ^8.20.0
         version: 8.20.0
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
-      zod:
-        specifier: ^3.23.0
-        version: 3.23.0
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
@@ -1272,15 +1071,11 @@ importers:
       '@kit/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
-
-  packages/supabase:
-    dependencies:
       '@tanstack/react-table':
         specifier: ^8.16.0
         version: 8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.3.0
+
+  packages/supabase:
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
@@ -1304,8 +1099,8 @@ importers:
         specifier: ^2.42.5
         version: 2.42.5
       '@tanstack/react-query':
-        specifier: 5.29.2
-        version: 5.29.2(react@18.2.0)
+        specifier: 5.32.0
+        version: 5.32.0(react@18.2.0)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -1316,8 +1111,8 @@ importers:
         specifier: 18.2.0
         version: 18.2.0
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   packages/ui:
     dependencies:
@@ -1376,14 +1171,17 @@ importers:
         specifier: 1.0.7
         version: 1.0.7(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       clsx:
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.1
+        version: 2.1.1
       cmdk:
         specifier: 1.0.0
         version: 1.0.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       input-otp:
         specifier: 1.2.4
         version: 1.2.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      lucide-react:
+        specifier: ^0.373.0
+        version: 0.373.0(react@18.2.0)
       react-top-loading-bar:
         specifier: 2.3.1
         version: 2.3.1(react@18.2.0)
@@ -1424,9 +1222,6 @@ importers:
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
-      lucide-react:
-        specifier: ^0.372.0
-        version: 0.372.0(react@18.2.0)
       next:
         specifier: 14.2.2
         version: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1443,8 +1238,8 @@ importers:
         specifier: ^7.51.3
         version: 7.51.3(react@18.2.0)
       react-i18next:
-        specifier: ^14.1.0
-        version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^14.1.1
+        version: 14.1.1(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       sonner:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1458,8 +1253,8 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
   tooling/eslint:
     dependencies:
@@ -1503,8 +1298,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
     devDependencies:
       '@kit/prettier-config':
         specifier: workspace:^
@@ -1540,8 +1335,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
     devDependencies:
       '@kit/tsconfig':
         specifier: workspace:^
@@ -1574,8 +1369,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.3(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.4.5)))
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:^
@@ -1608,8 +1403,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       zod:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^3.23.4
+        version: 3.23.4
 
 packages:
 
@@ -3413,20 +3208,20 @@ packages:
   '@selderee/plugin-htmlparser2@0.11.0':
     resolution: {integrity: sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ==}
 
-  '@sentry-internal/feedback@7.111.0':
-    resolution: {integrity: sha512-xaKgPPDEirOan7c9HwzYA1KK87kRp/qfIx9ZKLOEtxwy6nqoMuSByGqSwm1Oqfcjpbd7y6/y+7Bw+69ZKNVLDQ==}
+  '@sentry-internal/feedback@7.112.2':
+    resolution: {integrity: sha512-z+XP8BwB8B3pa+i8xqbrPsbtDWUFUS6wo+FJbmOYUqOusJJbVFDAhBoEdKoo5ZjOcsAZG7XR6cA9zrhJynIWBA==}
     engines: {node: '>=12'}
 
-  '@sentry-internal/replay-canvas@7.111.0':
-    resolution: {integrity: sha512-3KPBIpiegTYmuVw9gA2aKuliAQONS3Ny1kJc9x5kz6XQGuLFxqlh6KzoCVaKfQJeq2WJqRNeR4KFFuNGuB3H8w==}
+  '@sentry-internal/replay-canvas@7.112.2':
+    resolution: {integrity: sha512-BCCCxrZ1wJvN6La5gg1JJbKitAhJI5MATCnhtklsZbUcHkHB9iZoj19J65+P56gwssvHz5xh63AjNiITaetIRg==}
     engines: {node: '>=12'}
 
-  '@sentry-internal/tracing@7.111.0':
-    resolution: {integrity: sha512-CgXly8rsdu4loWVKi2RqpInH3C2cVBuaYsx4ZP5IJpzSinsUAMyyr3Pc0PZzCyoVpBBXGBGj/4HhFsY3q6Z0Vg==}
+  '@sentry-internal/tracing@7.112.2':
+    resolution: {integrity: sha512-fT1Y46J4lfXZkgFkb03YMNeIEs2xS6jdKMoukMFQfRfVvL9fSWEbTgZpHPd/YTT8r2i082XzjtAoQNgklm/0Hw==}
     engines: {node: '>=8'}
 
-  '@sentry/browser@7.111.0':
-    resolution: {integrity: sha512-x7S9XoJh+TbMnur4eBhPpCVo+p7udABBV2gQk+Iw6LP9e8EFKmGmNyl76vSsT6GeFJ7mwxDEKfuwbVoLBjIvHw==}
+  '@sentry/browser@7.112.2':
+    resolution: {integrity: sha512-wULwavCch84+d0bueAdFm6CDm1u0TfOjN91VgY+sj/vxUV2vesvDgI8zRZfmbZEor3MYA90zerkZT3ehZQKbYw==}
     engines: {node: '>=8'}
 
   '@sentry/cli@1.77.3':
@@ -3434,16 +3229,16 @@ packages:
     engines: {node: '>= 8'}
     hasBin: true
 
-  '@sentry/core@7.111.0':
-    resolution: {integrity: sha512-/ljeMjZu8CSrLGrseBi/7S2zRIFsqMcvfyG6Nwgfc07J9nbHt8/MqouE1bXZfiaILqDBpK7BK9MLAAph4mkAWg==}
+  '@sentry/core@7.112.2':
+    resolution: {integrity: sha512-gHPCcJobbMkk0VR18J65WYQTt3ED4qC6X9lHKp27Ddt63E+MDGkG6lvYBU1LS8cV7CdyBGC1XXDCfor61GvLsA==}
     engines: {node: '>=8'}
 
-  '@sentry/integrations@7.111.0':
-    resolution: {integrity: sha512-rNS7euKI2/1CneWbAY2NCkEro/GJbGCyxIX7okmqOjcBJ/7AnrMMU0kck7svydReF1nWvkuQ3CT27KXeKgrk4w==}
+  '@sentry/integrations@7.112.2':
+    resolution: {integrity: sha512-ioC2yyU6DqtLkdmWnm87oNvdn2+9oKctJeA4t+jkS6JaJ10DcezjCwiLscX4rhB9aWJV3IWF7Op0O6K3w0t2Hg==}
     engines: {node: '>=8'}
 
-  '@sentry/nextjs@7.111.0':
-    resolution: {integrity: sha512-Jvl/m9QoVw8KBG3pEswJH4YLf7W7o34WLcfomge5pKUcwrgWvhiQ7L0yOOQQxDaj0zTBQhnyEHXVdULRyn7nZA==}
+  '@sentry/nextjs@7.112.2':
+    resolution: {integrity: sha512-cXxhNdvDRNg15D1fF0eo0AliRHj3eeiG1kpapKKr9rEDsVA+vRHquOyWf18X956gw5A81Y6s/BotBEWbaimioQ==}
     engines: {node: '>=8'}
     peerDependencies:
       next: 14.2.2
@@ -3453,12 +3248,12 @@ packages:
       webpack:
         optional: true
 
-  '@sentry/node@7.111.0':
-    resolution: {integrity: sha512-bTLZNETT7W89HEk04rwsch02KSpu++Yec/BEyM3AxUNY+ZQ9ZLL/lrNZuCwbe7fURpKoZrvGAhxpPjgs5UcB9w==}
+  '@sentry/node@7.112.2':
+    resolution: {integrity: sha512-MNzkqER8jc2xOS3ArkCLH5hakzu15tcjeC7qjU7rQ1Ms4WuV+MG0docSRESux0/p23Qjzf9tZOc8C5Eq+Sxduw==}
     engines: {node: '>=8'}
 
-  '@sentry/opentelemetry-node@7.111.0':
-    resolution: {integrity: sha512-5jvwvA1Lm86ldHn04dh6lFC+ypzaMHUf48Ey2dbsw/7s7ROA1mxR/YuDqOXkytcyWUU4gmYPZlX2+F3aCit7YQ==}
+  '@sentry/opentelemetry-node@7.112.2':
+    resolution: {integrity: sha512-XIYqq/mQy7JOc+xQPGQoRwGb3DPNuMcOR6vox81zs4UHCL1POBo8/q3Og6q5jUj18YBrFMkiaZUDFi5VsgxHAA==}
     engines: {node: '>=8'}
     peerDependencies:
       '@opentelemetry/api': 1.x
@@ -3466,26 +3261,26 @@ packages:
       '@opentelemetry/sdk-trace-base': 1.x
       '@opentelemetry/semantic-conventions': 1.x
 
-  '@sentry/react@7.111.0':
-    resolution: {integrity: sha512-8HVl4D5TsNLaIgXsOa1H+/aOcUHvRBsH+25OzxGpyS5Cu2gSlAQxfXKYxZ0axYoMc7TNkMNdmEhYN+CGV+NUZg==}
+  '@sentry/react@7.112.2':
+    resolution: {integrity: sha512-Xf6mc1+/ncCk6ZFIj0oT4or2o0UxqqJZk09U/21RYNvVCn7+DNyCdJZ/F5wXWgPqVE67PrjydLLYaQWiqLibiA==}
     engines: {node: '>=8'}
     peerDependencies:
       react: 18.2.0
 
-  '@sentry/replay@7.111.0':
-    resolution: {integrity: sha512-cSbI4A4hrO0sZ0ynvLQauPg8YyaDOQkhGkyvbws8W9WgfxR8X827bY9S0f1TPfgaFiVcKb0iRaAwyXHg3pyzOg==}
+  '@sentry/replay@7.112.2':
+    resolution: {integrity: sha512-7Ns/8D54WPsht1nlVj93Inf6rXyve2AZoibYN0YfcM2w3lI4NO51gPPHJU0lFEfMwzwK4ZBJWzOeW9098a+uEg==}
     engines: {node: '>=12'}
 
-  '@sentry/types@7.111.0':
-    resolution: {integrity: sha512-Oti4pgQ55+FBHKKcHGu51ZUxO1u52G5iVNK4mbtAN+5ArSCy/2s1H8IDJiOMswn3acfUnCR0oB/QsbEgAPZ26g==}
+  '@sentry/types@7.112.2':
+    resolution: {integrity: sha512-kCMLt7yhY5OkWE9MeowlTNmox9pqDxcpvqguMo4BDNZM5+v9SEb1AauAdR78E1a1V8TyCzjBD7JDfXWhvpYBcQ==}
     engines: {node: '>=8'}
 
-  '@sentry/utils@7.111.0':
-    resolution: {integrity: sha512-CB5rz1EgCSwj3xoXogsCZ5pQtfERrURc/ItcCuoaijUhkD0iMq5MCNWMHW3mBsBrqx/Oba+XGvDu0t/5+SWwBg==}
+  '@sentry/utils@7.112.2':
+    resolution: {integrity: sha512-OjLh0hx0t1EcL4ZIjf+4svlmmP+tHUDGcr5qpFWH78tjmkPW4+cqPuZCZfHSuWcDdeiaXi8TnYoVRqDcJKK/eQ==}
     engines: {node: '>=8'}
 
-  '@sentry/vercel-edge@7.111.0':
-    resolution: {integrity: sha512-yX28qxG2T30mxch/gIFK4oX7jax/ulahK/FbPTuECux0fvNdXcrIeFky9aeSKE0gr6sERcQm8i19V6mlRlFmpQ==}
+  '@sentry/vercel-edge@7.112.2':
+    resolution: {integrity: sha512-19fyAAw7+wvgtpLsaLijvqvdPpf94oPmu9PRyvxM8azVeAF2YUtVo2XZkTKuxZwxAmouuKCNLgwtSJ51YbLSIw==}
     engines: {node: '>=8'}
 
   '@sentry/webpack-plugin@1.21.0':
@@ -3564,18 +3359,18 @@ packages:
     resolution: {integrity: sha512-+PmQX0PiAYPMeVYe237LJAYvOMYW1j2rH5YROyS3b4CTVJum34HfRvKvAzozHAQG0TnHNdUfY9nCeUyRAs//cw==}
     engines: {node: '>=14.16'}
 
-  '@tanstack/query-core@5.29.0':
-    resolution: {integrity: sha512-WgPTRs58hm9CMzEr5jpISe8HXa3qKQ8CxewdYZeVnA54JrPY9B1CZiwsCoLpLkf0dGRZq+LcX5OiJb0bEsOFww==}
+  '@tanstack/query-core@5.32.0':
+    resolution: {integrity: sha512-Z3flEgCat55DRXU5UMwYU1U+DgFZKA3iufyOKs+II7iRAo0uXkeU7PH5e6sOH1CGEag0IpKmZxlUFpCg6roSKw==}
 
-  '@tanstack/react-query-next-experimental@5.29.2':
-    resolution: {integrity: sha512-AQd0S/UD+HTUv6MOmc1glv9FZN7ZxVQJlM7IJQx4QfWJpIWZMukXtlKMfwpO4YzQgo2jitblY17rZ/8YDtIxzw==}
+  '@tanstack/react-query-next-experimental@5.32.0':
+    resolution: {integrity: sha512-qCroRXgyHu2vrxb/GFtgXTzARH8hhn1KnC4sO/F1oZePStQQS5Yar+qZ42bukypB1vitIVnUL0SOqymr8G04Fg==}
     peerDependencies:
-      '@tanstack/react-query': ^5.29.2
+      '@tanstack/react-query': ^5.32.0
       next: 14.2.2
       react: 18.2.0
 
-  '@tanstack/react-query@5.29.2':
-    resolution: {integrity: sha512-nyuWILR4u7H5moLGSiifLh8kIqQDLNOHGuSz0rcp+J75fNc8aQLyr5+I2JCHU3n+nJrTTW1ssgAD8HiKD7IFBQ==}
+  '@tanstack/react-query@5.32.0':
+    resolution: {integrity: sha512-+E3UudQtarnx9A6xhpgMZapyF+aJfNBGFMgI459FnduEZqT/9KhOWnMOneZahLRt52yzskSA0AuOyLkXHK0yBA==}
     peerDependencies:
       react: 18.2.0
 
@@ -4086,6 +3881,9 @@ packages:
   caniuse-lite@1.0.30001611:
     resolution: {integrity: sha512-19NuN1/3PjA3QI8Eki55N8my4LzfkMCRLgCVfrl/slbSAchQfV0+GwjPrK3rq37As4UCLlM/DHajbKkAqbv92Q==}
 
+  caniuse-lite@1.0.30001612:
+    resolution: {integrity: sha512-lFgnZ07UhaCcsSZgWW0K5j4e69dK1u/ltrL9lTUiFOwNHs12S3UMIEYgBV0Z6C6hRDev7iRnMzzYmKabYdXF9g==}
+
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
 
@@ -4166,6 +3964,10 @@ packages:
 
   clsx@2.1.0:
     resolution: {integrity: sha512-m3iNNWpd9rl3jvvcBnu70ylMdrXt8Vlq4HYadnU5fwcOtvkSQWPmj7amUcDT2qYI7risszBjI5AUIUox9D16pg==}
+    engines: {node: '>=6'}
+
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
 
   cmd-shim@6.0.2:
@@ -5465,8 +5267,8 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  lucide-react@0.372.0:
-    resolution: {integrity: sha512-0cKdqmilHXWUwWAWnf6CrrjHD8YaqPMtLrmEHXolZusNTr9epULCsiJwIOHk2q1yFxdEwd96D4zShlAj67UJdA==}
+  lucide-react@0.373.0:
+    resolution: {integrity: sha512-0kygFhk/DmK4mi+zf1t5mNStJQGaElACZdDdLiHOHFJzi7g3maC3SR86AcaUsxvDkZPId3XCd4vRngnjkPHu3Q==}
     peerDependencies:
       react: 18.2.0
 
@@ -6275,8 +6077,8 @@ packages:
     peerDependencies:
       react: 18.2.0
 
-  react-i18next@14.1.0:
-    resolution: {integrity: sha512-3KwX6LHpbvGQ+sBEntjV4sYW3Zovjjl3fpoHbUwSgFHf0uRBcbeCBLR5al6ikncI5+W0EFb71QXZmfop+J6NrQ==}
+  react-i18next@14.1.1:
+    resolution: {integrity: sha512-QSiKw+ihzJ/CIeIYWrarCmXJUySHDwQr5y8uaNIkbxoGRm/5DukkxZs+RPla79IKyyDPzC/DRlgQCABHtrQuQQ==}
     peerDependencies:
       i18next: '>= 23.2.3'
       react: 18.2.0
@@ -6719,8 +6521,8 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
 
-  supabase@1.162.4:
-    resolution: {integrity: sha512-oNTn2eyvDLcKr4wRDs/QxN9lVcO6hMzKUjMLtDMU700WuyOpBZ6YBsAZkPlFWyodwmH/jUX2jqTMpcHL2XRv0g==}
+  supabase@1.163.2:
+    resolution: {integrity: sha512-mA/lhdNsEk9HEF72HbHzpm4EO39TKw2rChizcp8+dwFhaa2ex/jvkLHXujAuPjsZMXgQzRvUj4ltHsY0Z1cUlA==}
     engines: {npm: '>=8'}
     hasBin: true
 
@@ -7209,8 +7011,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.23.0:
-    resolution: {integrity: sha512-OFLT+LTocvabn6q76BTwVB0hExEBS0IduTr3cqZyMqEDbOnYmcU+y0tUAYbND4uwclpBGi4I4UUBGzylWpjLGA==}
+  zod@3.23.4:
+    resolution: {integrity: sha512-/AtWOKbBgjzEYYQRNfoGKHObgfAZag6qUJX1VbHo2PRBgS+wfWagEY2mizjfyAPcGesrJOcx/wcl0L9WnVrHFw==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -7820,7 +7622,7 @@ snapshots:
       y-prosemirror: 1.2.3(prosemirror-model@1.20.0)(prosemirror-state@1.4.3)(prosemirror-view@1.33.4)(y-protocols@1.0.6(yjs@13.6.14))(yjs@13.6.14)
       y-protocols: 1.0.6(yjs@13.6.14)
       yjs: 13.6.14
-      zod: 3.23.0
+      zod: 3.23.4
     transitivePeerDependencies:
       - next
       - supports-color
@@ -7844,11 +7646,11 @@ snapshots:
       '@supabase/supabase-js': 2.42.5
       ts-case-convert: 2.0.7
 
-  '@makerkit/data-loader-supabase-nextjs@1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.29.2(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
+  '@makerkit/data-loader-supabase-nextjs@1.1.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)(@tanstack/react-query@5.32.0(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@makerkit/data-loader-supabase-core': 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.42.5)
       '@supabase/supabase-js': 2.42.5
-      '@tanstack/react-query': 5.29.2(react@18.2.0)
+      '@tanstack/react-query': 5.32.0(react@18.2.0)
       next: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
     transitivePeerDependencies:
@@ -8896,7 +8698,7 @@ snapshots:
       '@react-aria/utils': 3.23.2(react@18.2.0)
       '@react-types/shared': 3.22.1(react@18.2.0)
       '@swc/helpers': 0.5.10
-      clsx: 2.1.0
+      clsx: 2.1.1
       react: 18.2.0
 
   '@react-aria/form@3.0.3(react@18.2.0)':
@@ -9247,7 +9049,7 @@ snapshots:
       '@react-stately/utils': 3.9.1(react@18.2.0)
       '@react-types/shared': 3.22.1(react@18.2.0)
       '@swc/helpers': 0.5.10
-      clsx: 2.1.0
+      clsx: 2.1.1
       react: 18.2.0
 
   '@react-aria/virtualizer@3.9.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
@@ -9762,34 +9564,35 @@ snapshots:
       domhandler: 5.0.3
       selderee: 0.11.0
 
-  '@sentry-internal/feedback@7.111.0':
+  '@sentry-internal/feedback@7.112.2':
     dependencies:
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/core': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
-  '@sentry-internal/replay-canvas@7.111.0':
+  '@sentry-internal/replay-canvas@7.112.2':
     dependencies:
-      '@sentry/core': 7.111.0
-      '@sentry/replay': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/core': 7.112.2
+      '@sentry/replay': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
-  '@sentry-internal/tracing@7.111.0':
+  '@sentry-internal/tracing@7.112.2':
     dependencies:
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/core': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
-  '@sentry/browser@7.111.0':
+  '@sentry/browser@7.112.2':
     dependencies:
-      '@sentry-internal/feedback': 7.111.0
-      '@sentry-internal/replay-canvas': 7.111.0
-      '@sentry-internal/tracing': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/replay': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry-internal/feedback': 7.112.2
+      '@sentry-internal/replay-canvas': 7.112.2
+      '@sentry-internal/tracing': 7.112.2
+      '@sentry/core': 7.112.2
+      '@sentry/integrations': 7.112.2
+      '@sentry/replay': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
   '@sentry/cli@1.77.3':
     dependencies:
@@ -9803,28 +9606,28 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/core@7.111.0':
+  '@sentry/core@7.112.2':
     dependencies:
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
-  '@sentry/integrations@7.111.0':
+  '@sentry/integrations@7.112.2':
     dependencies:
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/core': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
       localforage: 1.10.0
 
-  '@sentry/nextjs@7.111.0(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
+  '@sentry/nextjs@7.112.2(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@rollup/plugin-commonjs': 24.0.0(rollup@2.78.0)
-      '@sentry/core': 7.111.0
-      '@sentry/integrations': 7.111.0
-      '@sentry/node': 7.111.0
-      '@sentry/react': 7.111.0(react@18.2.0)
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
-      '@sentry/vercel-edge': 7.111.0
+      '@sentry/core': 7.112.2
+      '@sentry/integrations': 7.112.2
+      '@sentry/node': 7.112.2
+      '@sentry/react': 7.112.2(react@18.2.0)
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
+      '@sentry/vercel-edge': 7.112.2
       '@sentry/webpack-plugin': 1.21.0
       chalk: 3.0.0
       next: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -9836,51 +9639,53 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/node@7.111.0':
+  '@sentry/node@7.112.2':
     dependencies:
-      '@sentry-internal/tracing': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry-internal/tracing': 7.112.2
+      '@sentry/core': 7.112.2
+      '@sentry/integrations': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
-  '@sentry/opentelemetry-node@7.111.0(@opentelemetry/api@1.8.0)(@opentelemetry/core@1.23.0(@opentelemetry/api@1.8.0))(@opentelemetry/sdk-trace-base@1.23.0(@opentelemetry/api@1.8.0))(@opentelemetry/semantic-conventions@1.23.0)':
+  '@sentry/opentelemetry-node@7.112.2(@opentelemetry/api@1.8.0)(@opentelemetry/core@1.23.0(@opentelemetry/api@1.8.0))(@opentelemetry/sdk-trace-base@1.23.0(@opentelemetry/api@1.8.0))(@opentelemetry/semantic-conventions@1.23.0)':
     dependencies:
       '@opentelemetry/api': 1.8.0
       '@opentelemetry/core': 1.23.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/sdk-trace-base': 1.23.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/semantic-conventions': 1.23.0
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/core': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
-  '@sentry/react@7.111.0(react@18.2.0)':
+  '@sentry/react@7.112.2(react@18.2.0)':
     dependencies:
-      '@sentry/browser': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/browser': 7.112.2
+      '@sentry/core': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
       hoist-non-react-statics: 3.3.2
       react: 18.2.0
 
-  '@sentry/replay@7.111.0':
+  '@sentry/replay@7.112.2':
     dependencies:
-      '@sentry-internal/tracing': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry-internal/tracing': 7.112.2
+      '@sentry/core': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
-  '@sentry/types@7.111.0': {}
+  '@sentry/types@7.112.2': {}
 
-  '@sentry/utils@7.111.0':
+  '@sentry/utils@7.112.2':
     dependencies:
-      '@sentry/types': 7.111.0
+      '@sentry/types': 7.112.2
 
-  '@sentry/vercel-edge@7.111.0':
+  '@sentry/vercel-edge@7.112.2':
     dependencies:
-      '@sentry-internal/tracing': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry-internal/tracing': 7.112.2
+      '@sentry/core': 7.112.2
+      '@sentry/integrations': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
   '@sentry/webpack-plugin@1.21.0':
     dependencies:
@@ -9987,17 +9792,17 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@tanstack/query-core@5.29.0': {}
+  '@tanstack/query-core@5.32.0': {}
 
-  '@tanstack/react-query-next-experimental@5.29.2(@tanstack/react-query@5.29.2(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
+  '@tanstack/react-query-next-experimental@5.32.0(@tanstack/react-query@5.32.0(react@18.2.0))(next@14.2.2(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@tanstack/react-query': 5.29.2(react@18.2.0)
+      '@tanstack/react-query': 5.32.0(react@18.2.0)
       next: 14.2.2(@babel/core@7.24.4)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
 
-  '@tanstack/react-query@5.29.2(react@18.2.0)':
+  '@tanstack/react-query@5.32.0(react@18.2.0)':
     dependencies:
-      '@tanstack/query-core': 5.29.0
+      '@tanstack/query-core': 5.32.0
       react: 18.2.0
 
   '@tanstack/react-table@8.16.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
@@ -10625,6 +10430,8 @@ snapshots:
 
   caniuse-lite@1.0.30001611: {}
 
+  caniuse-lite@1.0.30001612: {}
+
   ccount@2.0.1: {}
 
   chalk@2.4.2:
@@ -10717,6 +10524,8 @@ snapshots:
   clsx@2.0.0: {}
 
   clsx@2.1.0: {}
+
+  clsx@2.1.1: {}
 
   cmd-shim@6.0.2: {}
 
@@ -12130,7 +11939,7 @@ snapshots:
 
   lru-cache@7.18.3: {}
 
-  lucide-react@0.372.0(react@18.2.0):
+  lucide-react@0.373.0(react@18.2.0):
     dependencies:
       react: 18.2.0
 
@@ -12667,7 +12476,7 @@ snapshots:
       '@next/env': 14.2.2
       '@swc/helpers': 0.5.5
       busboy: 1.6.0
-      caniuse-lite: 1.0.30001611
+      caniuse-lite: 1.0.30001612
       graceful-fs: 4.2.11
       postcss: 8.4.31
       react: 18.2.0
@@ -13187,7 +12996,7 @@ snapshots:
     dependencies:
       react: 18.2.0
 
-  react-i18next@14.1.0(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  react-i18next@14.1.1(i18next@23.11.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       html-parse-stringify: 3.0.1
@@ -13678,7 +13487,7 @@ snapshots:
       pirates: 4.0.6
       ts-interface-checker: 0.1.13
 
-  supabase@1.162.4:
+  supabase@1.163.2:
     dependencies:
       bin-links: 4.0.3
       https-proxy-agent: 7.0.4
@@ -14211,6 +14020,6 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.23.0: {}
+  zod@3.23.4: {}
 
   zwitch@2.0.4: {}
