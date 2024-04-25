@@ -12,13 +12,24 @@ export function BaselimeProvider({
   enableWebVitals,
   ErrorPage,
 }: React.PropsWithChildren<{
-  apiKey: string;
+  apiKey?: string;
   enableWebVitals?: boolean;
   ErrorPage?: React.ReactElement;
 }>) {
+  const key = apiKey ?? process.env.NEXT_PUBLIC_BASELIME_KEY ?? '';
+
+  if (!key) {
+    console.warn(
+      'You configured Baselime as monitoring provider but did not provide a key. ' +
+        'Please provide a key to enable monitoring with Baselime using the variable NEXT_PUBLIC_BASELIME_KEY.',
+    );
+
+    return children;
+  }
+
   return (
     <BaselimeRum
-      apiKey={apiKey}
+      apiKey={key}
       enableWebVitals={enableWebVitals}
       fallback={ErrorPage ?? null}
     >
