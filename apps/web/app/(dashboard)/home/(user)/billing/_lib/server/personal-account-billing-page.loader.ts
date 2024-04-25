@@ -39,7 +39,7 @@ export const loadPersonalAccountBillingPageData = cache((userId: string) => {
       ? api.getSubscription(userId)
       : api.getOrder(userId);
 
-  const customerId = api.getBillingCustomerId(userId);
+  const customerId = api.getCustomerId(userId);
 
   return Promise.all([data, customerId]);
 });

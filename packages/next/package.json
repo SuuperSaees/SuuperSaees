@@ -16,6 +16,7 @@
   "devDependencies": {
     "@kit/auth": "workspace:^",
     "@kit/eslint-config": "workspace:*",
+    "@kit/monitoring": "workspace:*",
     "@kit/prettier-config": "workspace:*",
     "@kit/supabase": "workspace:^",
     "@kit/tailwind-config": "workspace:*",

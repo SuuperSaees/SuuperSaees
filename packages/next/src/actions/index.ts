@@ -10,7 +10,7 @@ import { verifyCaptchaToken } from '@kit/auth/captcha/server';
 import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
-import { zodParseFactory } from '../utils';
+import { captureException, zodParseFactory } from '../utils';
 
 /**
  *
@@ -22,9 +22,10 @@ export function enhanceAction<
   Schema extends z.ZodType<Omit<Args, 'captchaToken'>, z.ZodTypeDef>,
   Response,
 >(
-  fn: (params: z.infer<Schema>, user: User) => Response,
+  fn: (params: z.infer<Schema>, user: User) => Response | Promise<Response>,
   config: {
     captcha?: boolean;
+    captureException?: boolean;
     schema: Schema;
   },
 ) {
@@ -52,7 +53,20 @@ export function enhanceAction<
     const parsed = zodParseFactory(config.schema);
     const data = parsed(params);
 
-    // pass the data to the action
-    return fn(data, auth.data);
+    // capture exceptions if required
+    const shouldCaptureException = config.captureException ?? true;
+
+    if (shouldCaptureException) {
+      try {
+        return await fn(data, auth.data);
+      } catch (error) {
+        await captureException(error);
+
+        throw error;
+      }
+    } else {
+      // pass the data to the action
+      return fn(data, auth.data);
+    }
   };
 }

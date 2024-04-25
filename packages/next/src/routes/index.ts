@@ -11,7 +11,7 @@ import { verifyCaptchaToken } from '@kit/auth/captcha/server';
 import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseRouteHandlerClient } from '@kit/supabase/route-handler-client';
 
-import { zodParseFactory } from '../utils';
+import { captureException, zodParseFactory } from '../utils';
 
 interface HandlerParams<Body> {
   request: NextRequest;
@@ -53,6 +53,7 @@ export const enhanceRouteHandler = <
   // Parameters object
   params?: {
     captcha?: boolean;
+    captureException?: boolean;
     schema?: Schema;
   },
 ) => {
@@ -92,8 +93,21 @@ export const enhanceRouteHandler = <
       body = zodParseFactory(params.schema)(body);
     }
 
-    // all good, call the handler with the request, body and user
-    return handler({ request, body, user });
+    const shouldCaptureException = params?.captureException ?? true;
+
+    if (shouldCaptureException) {
+      try {
+        return await handler({ request, body, user });
+      } catch (error) {
+        // capture the exception
+        await captureException(error);
+
+        throw error;
+      }
+    } else {
+      // all good, call the handler with the request, body and user
+      return handler({ request, body, user });
+    }
   };
 };
 

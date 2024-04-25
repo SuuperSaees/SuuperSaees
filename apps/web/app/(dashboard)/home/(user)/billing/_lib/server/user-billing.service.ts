@@ -59,7 +59,7 @@ class UserBillingService {
     // find the customer ID for the account if it exists
     // (eg. if the account has been billed before)
     const api = createAccountsApi(this.client);
-    const customerId = await api.getBillingCustomerId(accountId);
+    const customerId = await api.getCustomerId(accountId);
 
     const product = billingConfig.products.find(
       (item) => item.id === productId,
@@ -139,7 +139,7 @@ class UserBillingService {
 
     const accountId = data.id;
     const api = createAccountsApi(this.client);
-    const customerId = await api.getBillingCustomerId(accountId);
+    const customerId = await api.getCustomerId(accountId);
     const returnUrl = getBillingPortalReturnUrl();
 
     if (!customerId) {

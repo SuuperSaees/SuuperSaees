@@ -32,6 +32,7 @@ The `enhanceAction` function takes two arguments:
 The options object can contain the following properties:
 - `captcha` - If true, the action will require a captcha to be passed to the body as `captchaToken`
 - `schema` - A zod schema that the data will be validated against
+- `captureException` - If true, the action will capture exceptions and report them to the configured provider. It is `true` by default.
 
 When successfully called, the action will return the result of the action function.
 
@@ -70,10 +71,11 @@ export const POST = enhanceRouteHandler(({ request, body, user }) => {
   // "user" is the user object from the session
   
   // "request" is the raw request object passed by POST
-
   // if "captcha" is true, the action will require a captcha
+  // if "captureException" is true, the action will capture exceptions and report them to the configured provider
 }, {
   captcha: true,
+  captureException: true,
   schema: z.object({
     id: z.number()
   }),

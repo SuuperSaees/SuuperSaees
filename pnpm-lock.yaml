@@ -1030,6 +1030,10 @@ importers:
         version: 18.2.0
 
   packages/next:
+    dependencies:
+      '@kit/monitoring':
+        specifier: workspace:*
+        version: link:../monitoring/api
     devDependencies:
       '@kit/auth':
         specifier: workspace:^

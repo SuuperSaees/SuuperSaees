@@ -87,12 +87,12 @@ class AccountsApi {
   }
 
   /**
-   * @name getBillingCustomerId
+   * @name getCustomerId
    * Get the billing customer ID for the given user.
    * If the user does not have a billing customer ID, it will return null.
    * @param accountId
    */
-  async getBillingCustomerId(accountId: string) {
+  async getCustomerId(accountId: string) {
     const response = await this.client
       .from('billing_customers')
       .select('customer_id')
