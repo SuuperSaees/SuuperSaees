@@ -10,4 +10,8 @@ export class ConsoleMonitoringService implements MonitoringService {
       `[Console Monitoring] Caught exception: ${JSON.stringify(error)}`,
     );
   }
+
+  captureEvent(event: string) {
+    console.log(`[Console Monitoring] Captured event: ${event}`);
+  }
 }

@@ -9,7 +9,7 @@ import { MonitoringService } from '@kit/monitoring-core';
  * @description Get the Baselime monitoring service for the browser.
  */
 export function useBaselime(): MonitoringService {
-  const { captureException, setUser } = useBaselimeRum();
+  const { captureException, setUser, sendEvent } = useBaselimeRum();
 
   return useMemo(() => {
     return {
@@ -19,6 +19,9 @@ export function useBaselime(): MonitoringService {
       identifyUser(params) {
         setUser(params.id);
       },
+      captureEvent<Extra extends object>(event: string, extra?: Extra) {
+        return sendEvent(event, extra);
+      },
     } satisfies MonitoringService;
-  }, [captureException, setUser]);
+  }, [captureException, sendEvent, setUser]);
 }

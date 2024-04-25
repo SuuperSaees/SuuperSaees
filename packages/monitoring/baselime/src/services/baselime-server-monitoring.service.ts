@@ -31,7 +31,7 @@ export class BaselimeServerMonitoringService implements MonitoringService {
       message: error ? `${error.name}: ${error.message}` : `Unknown error`,
     };
 
-    const response = await fetch(`https://events.baselime.io/v1/web`, {
+    const response = await fetch(`https://events.baselime.io/v1/logs`, {
       method: 'POST',
       headers: {
         contentType: 'application/json',
@@ -45,6 +45,42 @@ export class BaselimeServerMonitoringService implements MonitoringService {
           sessionId: extra?.sessionId,
           namespace: extra?.namespace,
           ...event,
+        },
+      ]),
+    });
+
+    if (!response.ok) {
+      console.error(
+        {
+          response,
+          event,
+        },
+        'Failed to send event to Baselime',
+      );
+    }
+  }
+
+  async captureEvent<
+    Extra extends {
+      sessionId?: string;
+      namespace?: string;
+      service?: string;
+    },
+  >(event: string, extra?: Extra) {
+    const response = await fetch(`https://events.baselime.io/v1/logs`, {
+      method: 'POST',
+      headers: {
+        contentType: 'application/json',
+        'x-api-key': apiKey,
+        'x-service': extra?.service ?? '',
+        'x-namespace': extra?.namespace ?? '',
+      },
+      body: JSON.stringify([
+        {
+          userId: this.userId,
+          sessionId: extra?.sessionId,
+          namespace: extra?.namespace,
+          message: event,
         },
       ]),
     });

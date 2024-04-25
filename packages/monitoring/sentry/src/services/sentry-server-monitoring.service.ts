@@ -12,6 +12,13 @@ export class SentryServerMonitoringService implements MonitoringService {
     return Sentry.captureException(error);
   }
 
+  captureEvent<Extra extends Sentry.Event>(event: string, extra?: Extra) {
+    return Sentry.captureEvent({
+      message: event,
+      ...(extra ?? {}),
+    });
+  }
+
   identifyUser(user: Sentry.User) {
     Sentry.setUser(user);
   }

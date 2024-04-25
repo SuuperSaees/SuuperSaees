@@ -15,6 +15,16 @@ export abstract class MonitoringService {
   ): unknown;
 
   /**
+   * Track an event
+   * @param event
+   * @param extra
+   */
+  abstract captureEvent<Extra extends object>(
+    event: string,
+    extra?: Extra,
+  ): unknown;
+
+  /**
    * Identify a user in the monitoring service - used for tracking user actions
    * @param info
    */
