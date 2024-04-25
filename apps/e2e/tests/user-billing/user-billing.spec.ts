@@ -1,4 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
+import { Page, expect, test } from '@playwright/test';
+
 import { UserBillingPageObject } from './user-billing.po';
 
 test.describe('User Billing', () => {
@@ -25,7 +26,7 @@ test.describe('User Billing', () => {
 
     await po.billing.returnToBilling();
 
-    await expect(await po.billing.getStatus()).toContainText('Trial');
+    await expect(await po.billing.getStatus()).toContainText('Active');
     await expect(po.billing.manageBillingButton()).toBeVisible();
   });
 });

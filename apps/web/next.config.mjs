@@ -47,9 +47,6 @@ const config = {
     ],
   },
   modularizeImports: {
-    'lucide-react': {
-      transform: 'lucide-react/dist/esm/icons/{{ kebabCase member }}',
-    },
     lodash: {
       transform: 'lodash/{{member}}',
     },

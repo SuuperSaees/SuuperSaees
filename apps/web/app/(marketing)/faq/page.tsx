@@ -86,15 +86,15 @@ async function FAQPage() {
           </div>
 
           <div>
-            <Link href={'/contact'}>
-              <Button variant={'outline'}>
+            <Button asChild variant={'outline'}>
+              <Link href={'/contact'}>
                 <span>
                   <Trans i18nKey={'marketing:contactFaq'} />
                 </span>
 
                 <ArrowRight className={'ml-2 w-4'} />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ import {
   RetrieveCheckoutSessionSchema,
   UpdateSubscriptionParamsSchema,
 } from '../schema';
+import { QueryBillingUsageSchema } from '../schema/query-billing-usage.schema';
 
 export abstract class BillingStrategyProviderService {
   abstract createBillingPortalSession(
@@ -44,6 +45,12 @@ export abstract class BillingStrategyProviderService {
     params: z.infer<typeof ReportBillingUsageSchema>,
   ): Promise<{
     success: boolean;
+  }>;
+
+  abstract queryUsage(
+    params: z.infer<typeof QueryBillingUsageSchema>,
+  ): Promise<{
+    value: number;
   }>;
 
   abstract updateSubscription(

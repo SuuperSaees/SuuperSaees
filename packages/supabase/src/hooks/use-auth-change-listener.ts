@@ -14,8 +14,7 @@ import { useRevalidateUserSession, useUserSession } from './use-user-session';
 const PRIVATE_PATH_PREFIXES = ['/home', '/admin', '/join', '/update-password'];
 
 /**
- * @name AuthRedirectListener
- * @description A component that listens to auth state changes and redirects users
+ * @name useAuthChangeListener
  * @param privatePathPrefixes
  * @param appHomePath
  */
@@ -66,6 +65,7 @@ export function useAuthChangeListener({
     revalidateUserSession,
     pathName,
     appHomePath,
+    privatePathPrefixes,
   ]);
 }
 

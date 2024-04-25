@@ -164,14 +164,15 @@ export function SidebarItem({
   const size = collapsed ? 'icon' : 'sm';
 
   return (
-    <Link key={path} href={path}>
-      <Button
-        className={cn('flex w-full text-sm shadow-none', {
-          'justify-start space-x-2': !collapsed,
-        })}
-        size={size}
-        variant={variant}
-      >
+    <Button
+      asChild
+      className={cn('flex w-full text-sm shadow-none', {
+        'justify-start space-x-2': !collapsed,
+      })}
+      size={size}
+      variant={variant}
+    >
+      <Link key={path} href={path}>
         <If condition={collapsed} fallback={Icon}>
           <TooltipProvider>
             <Tooltip>
@@ -185,8 +186,8 @@ export function SidebarItem({
         </If>
 
         <span className={cn({ hidden: collapsed })}>{children}</span>
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   );
 }
 

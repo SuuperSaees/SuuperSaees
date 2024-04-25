@@ -45,11 +45,11 @@ function SignUpPage({ searchParams }: Props) {
       />
 
       <div className={'justify-centers flex'}>
-        <Link href={pathsConfig.auth.signIn}>
-          <Button variant={'link'} size={'sm'}>
+        <Button asChild variant={'link'} size={'sm'}>
+          <Link href={pathsConfig.auth.signIn}>
             <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     </>
   );

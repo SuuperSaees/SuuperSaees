@@ -70,7 +70,7 @@ function MobileDropdown() {
           const className = 'flex w-full h-full items-center';
 
           return (
-            <DropdownMenuItem key={item.path}>
+            <DropdownMenuItem key={item.path} asChild>
               <Link className={className} href={item.path}>
                 <Trans i18nKey={item.label} />
               </Link>

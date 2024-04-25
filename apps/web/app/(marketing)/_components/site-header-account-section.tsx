@@ -71,15 +71,15 @@ function AuthButtons() {
       <div className={'hidden space-x-0.5 md:flex'}>
         <ModeToggle className={textClassName} />
 
-        <Link href={pathsConfig.auth.signIn}>
-          <Button variant={'ghost'} className={textClassName}>
+        <Button asChild variant={'ghost'} className={textClassName}>
+          <Link href={pathsConfig.auth.signIn}>
             <Trans i18nKey={'auth:signIn'} />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
-      <Link href={pathsConfig.auth.signUp}>
-        <Button className="group" variant={'default'}>
+      <Button asChild className="group" variant={'default'}>
+        <Link href={pathsConfig.auth.signUp}>
           <Trans i18nKey={'auth:signUp'} />
 
           <ChevronRight
@@ -87,8 +87,8 @@ function AuthButtons() {
               'ml-1 h-4 w-4 transition-transform duration-500 group-hover:translate-x-1'
             }
           />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </div>
   );
 }

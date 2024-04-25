@@ -19,9 +19,9 @@
     "./config/edge": "./src/config/sentry.server.edge.ts"
   },
   "dependencies": {
-    "@opentelemetry/resources": "1.23.0",
-    "@opentelemetry/sdk-node": "0.50.0",
-    "@opentelemetry/semantic-conventions": "^1.23.0",
+    "@opentelemetry/resources": "1.24.0",
+    "@opentelemetry/sdk-node": "0.51.0",
+    "@opentelemetry/semantic-conventions": "^1.24.0",
     "@sentry/nextjs": "^7.112.2",
     "@sentry/opentelemetry-node": "^7.112.2"
   },

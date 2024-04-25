@@ -56,13 +56,13 @@ const NotFoundPage = async () => {
               </p>
             </div>
 
-            <Link href={'/'}>
-              <Button variant={'outline'}>
+            <Button asChild variant={'outline'}>
+              <Link href={'/'}>
                 <ArrowLeft className={'mr-2 h-4'} />
 
                 <Trans i18nKey={'common:backToHomePage'} />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

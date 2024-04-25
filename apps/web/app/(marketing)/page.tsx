@@ -347,14 +347,14 @@ function FeatureContainer(
 function MainCallToActionButton() {
   return (
     <div className={'flex space-x-2'}>
-      <Link href={'/docs'}>
-        <Button variant={'link'}>
+      <Button asChild variant={'link'}>
+        <Link href={'/docs'}>
           <Trans i18nKey={'common:documentation'} />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
 
-      <Link href={'/auth/sign-up'}>
-        <Button>
+      <Button asChild>
+        <Link href={'/auth/sign-up'}>
           <span className={'flex items-center space-x-0.5'}>
             <span>
               <Trans i18nKey={'common:getStarted'} />
@@ -367,8 +367,8 @@ function MainCallToActionButton() {
               }
             />
           </span>
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </div>
   );
 }

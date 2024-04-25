@@ -31,11 +31,11 @@ function PasswordResetPage() {
         <PasswordResetRequestContainer redirectPath={redirectPath} />
 
         <div className={'flex justify-center text-xs'}>
-          <Link href={signIn}>
-            <Button variant={'link'} size={'sm'}>
+          <Button asChild variant={'link'} size={'sm'}>
+            <Link href={signIn}>
               <Trans i18nKey={'auth:passwordRecoveredQuestion'} />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     </>

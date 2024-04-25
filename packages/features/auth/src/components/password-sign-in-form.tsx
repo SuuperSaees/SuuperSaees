@@ -88,16 +88,17 @@ export const PasswordSignInForm: React.FC<{
 
               <FormMessage />
 
-              <Link href={'/auth/password-reset'}>
-                <Button
-                  type={'button'}
-                  size={'sm'}
-                  variant={'link'}
-                  className={'text-xs'}
-                >
+              <Button
+                asChild
+                type={'button'}
+                size={'sm'}
+                variant={'link'}
+                className={'text-xs'}
+              >
+                <Link href={'/auth/password-reset'}>
                   <Trans i18nKey={'auth:passwordForgottenQuestion'} />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </FormItem>
           )}
         />

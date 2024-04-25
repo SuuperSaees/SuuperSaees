@@ -119,12 +119,12 @@ function InviteNotFoundOrExpired() {
         <Trans i18nKey={'teams:inviteNotFoundOrExpiredDescription'} />
       </p>
 
-      <Link href={pathsConfig.app.home}>
-        <Button className={'w-full'} variant={'outline'}>
+      <Button asChild className={'w-full'} variant={'outline'}>
+        <Link href={pathsConfig.app.home}>
           <ArrowLeft className={'mr-2 w-4'} />
           <Trans i18nKey={'teams:backToHome'} />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </div>
   );
 }

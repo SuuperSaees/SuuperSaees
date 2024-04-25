@@ -39,7 +39,7 @@ function AuthCallbackErrorPage({ searchParams }: Params) {
         </Alert>
       </div>
 
-      <Button>
+      <Button asChild>
         <Link href={signInPath}>
           <Trans i18nKey={'auth:signIn'} />
         </Link>

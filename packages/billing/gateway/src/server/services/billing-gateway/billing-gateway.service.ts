@@ -7,6 +7,7 @@ import {
   CancelSubscriptionParamsSchema,
   CreateBillingCheckoutSchema,
   CreateBillingPortalSessionSchema,
+  QueryBillingUsageSchema,
   ReportBillingUsageSchema,
   RetrieveCheckoutSessionSchema,
   UpdateSubscriptionParamsSchema,
@@ -116,6 +117,21 @@ class BillingGatewayService {
     const payload = ReportBillingUsageSchema.parse(params);
 
     return strategy.reportUsage(payload);
+  }
+
+  /**
+   * @name queryUsage
+   * @description Queries the usage of the metered billing.
+   * @param params
+   */
+  async queryUsage(params: z.infer<typeof QueryBillingUsageSchema>) {
+    const strategy = await BillingGatewayFactoryService.GetProviderStrategy(
+      this.provider,
+    );
+
+    const payload = QueryBillingUsageSchema.parse(params);
+
+    return strategy.queryUsage(payload);
   }
 
   /**

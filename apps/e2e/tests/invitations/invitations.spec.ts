@@ -1,4 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
+import { Page, expect, test } from '@playwright/test';
+
 import { InvitationsPageObject } from './invitations.po';
 
 test.describe('Invitations', () => {
@@ -21,7 +22,7 @@ test.describe('Invitations', () => {
     const invites = [
       {
         email,
-        role: 'member'
+        role: 'member',
       },
     ];
 
@@ -43,7 +44,7 @@ test.describe('Invitations', () => {
     const invites = [
       {
         email,
-        role: 'member'
+        role: 'member',
       },
     ];
 
@@ -55,7 +56,9 @@ test.describe('Invitations', () => {
 
     const row = invitations.getInvitationRow(email);
 
-    await expect(row.locator('[data-test="member-role-badge"]')).toHaveText('owner');
+    await expect(row.locator('[data-test="member-role-badge"]')).toHaveText(
+      'Owner',
+    );
   });
 });
 
@@ -77,11 +80,11 @@ test.describe('Full Invitation Flow', () => {
     const invites = [
       {
         email: invitations.auth.createRandomEmail(),
-        role: 'member'
+        role: 'member',
       },
       {
         email: invitations.auth.createRandomEmail(),
-        role: 'member'
+        role: 'member',
       },
     ];
 
@@ -89,7 +92,7 @@ test.describe('Full Invitation Flow', () => {
 
     const firstEmail = invites[0]!.email;
 
-    await expect(await invitations.getInvitations()).toHaveCount(2)
+    await expect(await invitations.getInvitations()).toHaveCount(2);
 
     // sign out and sign in with the first email
     await invitations.auth.signOut();
@@ -101,7 +104,7 @@ test.describe('Full Invitation Flow', () => {
     await invitations.auth.signUp({
       email: firstEmail,
       password: 'password',
-      repeatPassword: 'password'
+      repeatPassword: 'password',
     });
 
     await invitations.auth.visitConfirmEmailLink(firstEmail);

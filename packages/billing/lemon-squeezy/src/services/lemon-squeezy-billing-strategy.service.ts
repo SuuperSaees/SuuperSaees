@@ -5,6 +5,7 @@ import {
   createUsageRecord,
   getCheckout,
   getVariant,
+  listUsageRecords,
   updateSubscriptionItem,
 } from '@lemonsqueezy/lemonsqueezy.js';
 import { z } from 'zod';
@@ -14,6 +15,7 @@ import {
   CancelSubscriptionParamsSchema,
   CreateBillingCheckoutSchema,
   CreateBillingPortalSessionSchema,
+  QueryBillingUsageSchema,
   ReportBillingUsageSchema,
   RetrieveCheckoutSessionSchema,
   UpdateSubscriptionParamsSchema,
@@ -28,6 +30,11 @@ export class LemonSqueezyBillingStrategyService
 {
   private readonly namespace = 'billing.lemon-squeezy';
 
+  /**
+   * @name createCheckoutSession
+   * @description Creates a checkout session for a customer
+   * @param params
+   */
   async createCheckoutSession(
     params: z.infer<typeof CreateBillingCheckoutSchema>,
   ) {
@@ -63,6 +70,11 @@ export class LemonSqueezyBillingStrategyService
     };
   }
 
+  /**
+   * @name createBillingPortalSession
+   * @description Creates a billing portal session for a customer
+   * @param params
+   */
   async createBillingPortalSession(
     params: z.infer<typeof CreateBillingPortalSessionSchema>,
   ) {
@@ -95,6 +107,11 @@ export class LemonSqueezyBillingStrategyService
     return { url: data };
   }
 
+  /**
+   * @name cancelSubscription
+   * @description Cancels a subscription
+   * @param params
+   */
   async cancelSubscription(
     params: z.infer<typeof CancelSubscriptionParamsSchema>,
   ) {
@@ -138,6 +155,11 @@ export class LemonSqueezyBillingStrategyService
     }
   }
 
+  /**
+   * @name retrieveCheckoutSession
+   * @description Retrieves a checkout session
+   * @param params
+   */
   async retrieveCheckoutSession(
     params: z.infer<typeof RetrieveCheckoutSessionSchema>,
   ) {
@@ -178,19 +200,24 @@ export class LemonSqueezyBillingStrategyService
     };
   }
 
+  /**
+   * @name reportUsage
+   * @description Reports the usage of the billing
+   * @param params
+   */
   async reportUsage(params: z.infer<typeof ReportBillingUsageSchema>) {
     const logger = await getLogger();
 
     const ctx = {
       name: this.namespace,
-      subscriptionItemId: params.subscriptionItemId,
+      subscriptionItemId: params.id,
     };
 
     logger.info(ctx, 'Reporting usage...');
 
     const { error } = await createUsageRecord({
       quantity: params.usage.quantity,
-      subscriptionItemId: params.subscriptionItemId,
+      subscriptionItemId: params.id,
       action: params.usage.action,
     });
 
@@ -211,6 +238,75 @@ export class LemonSqueezyBillingStrategyService
     return { success: true };
   }
 
+  /**
+   * @name queryUsage
+   * @description Queries the usage of the metered billing
+   * @param params
+   */
+  async queryUsage(
+    params: z.infer<typeof QueryBillingUsageSchema>,
+  ): Promise<{ value: number }> {
+    const logger = await getLogger();
+
+    const ctx = {
+      name: this.namespace,
+      ...params,
+    };
+
+    if (!('page' in params.filter)) {
+      logger.error(ctx, `Page parameters are required for Lemon Squeezy`);
+
+      throw new Error('Page is required');
+    }
+
+    logger.info(ctx, 'Querying usage...');
+
+    const records = await listUsageRecords({
+      filter: {
+        subscriptionItemId: params.id,
+      },
+      page: params.filter,
+    });
+
+    if (records.error) {
+      logger.error(
+        {
+          ...ctx,
+          error: records.error,
+        },
+        'Failed to query usage',
+      );
+
+      throw new Error('Failed to query usage');
+    }
+
+    if (!records.data) {
+      return {
+        value: 0,
+      };
+    }
+
+    const value = records.data.data.reduce(
+      (acc, record) => acc + record.attributes.quantity,
+      0,
+    );
+
+    logger.info(
+      {
+        ...ctx,
+        value,
+      },
+      'Usage queried successfully',
+    );
+
+    return { value };
+  }
+
+  /**
+   * @name queryUsage
+   * @description Queries the usage of the metered billing
+   * @param params
+   */
   async updateSubscription(
     params: z.infer<typeof UpdateSubscriptionParamsSchema>,
   ) {
@@ -244,6 +340,11 @@ export class LemonSqueezyBillingStrategyService
     return { success: true };
   }
 
+  /**
+   * @name queryUsage
+   * @description Queries the usage of the metered billing
+   * @param planId
+   */
   async getPlanById(planId: string) {
     const logger = await getLogger();
 
