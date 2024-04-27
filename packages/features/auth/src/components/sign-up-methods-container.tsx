@@ -28,7 +28,7 @@ export function SignUpMethodsContainer(props: {
   inviteToken?: string;
 }) {
   const redirectUrl = getCallbackUrl(props);
-  const captchaToken = useCaptchaToken();
+  const { captchaToken } = useCaptchaToken();
 
   return (
     <>

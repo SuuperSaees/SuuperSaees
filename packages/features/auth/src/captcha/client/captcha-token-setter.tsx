@@ -10,7 +10,7 @@ export function CaptchaTokenSetter(props: {
   siteKey: string | undefined;
   options?: TurnstileProps;
 }) {
-  const { setToken } = useContext(Captcha);
+  const { setToken, setInstance } = useContext(Captcha);
 
   if (!props.siteKey) {
     return null;
@@ -23,6 +23,15 @@ export function CaptchaTokenSetter(props: {
   };
 
   return (
-    <Turnstile siteKey={props.siteKey} onSuccess={setToken} {...options} />
+    <Turnstile
+      ref={(instance) => {
+        if (instance) {
+          setInstance(instance);
+        }
+      }}
+      siteKey={props.siteKey}
+      onSuccess={setToken}
+      {...options}
+    />
   );
 }
