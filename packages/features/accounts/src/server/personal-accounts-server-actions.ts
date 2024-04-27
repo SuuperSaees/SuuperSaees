@@ -5,8 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { z } from 'zod';
 
-import { getLogger } from '@kit/shared/logger';
-import { requireUser } from '@kit/supabase/require-user';
+import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { DeletePersonalAccountSchema } from '../schema/delete-personal-account.schema';
@@ -22,56 +21,41 @@ export async function refreshAuthSession() {
   return {};
 }
 
-export async function deletePersonalAccountAction(formData: FormData) {
-  // validate the form data
-  const { success } = DeletePersonalAccountSchema.safeParse(
-    Object.fromEntries(formData.entries()),
-  );
-
-  if (!success) {
-    throw new Error('Invalid form data');
-  }
-
-  const client = getSupabaseServerActionClient();
-  const auth = await requireUser(client);
-
-  if (auth.error) {
-    const logger = await getLogger();
-
-    logger.error(
-      {
-        error: auth.error,
-      },
-      `User is not authenticated. Redirecting to login page.`,
+export const deletePersonalAccountAction = enhanceAction(
+  async (formData: FormData, user) => {
+    // validate the form data
+    const { success } = DeletePersonalAccountSchema.safeParse(
+      Object.fromEntries(formData.entries()),
     );
 
-    redirect(auth.redirectTo);
-  }
+    if (!success) {
+      throw new Error('Invalid form data');
+    }
 
-  // retrieve user ID and email
-  const userId = auth.data.id;
-  const userEmail = auth.data.email ?? null;
+    const client = getSupabaseServerActionClient();
 
-  // create a new instance of the personal accounts service
-  const service = createDeletePersonalAccountService();
+    // create a new instance of the personal accounts service
+    const service = createDeletePersonalAccountService();
 
-  // delete the user's account and cancel all subscriptions
-  await service.deletePersonalAccount({
-    adminClient: getSupabaseServerActionClient({ admin: true }),
-    userId,
-    userEmail,
-    emailSettings,
-  });
+    // delete the user's account and cancel all subscriptions
+    await service.deletePersonalAccount({
+      adminClient: getSupabaseServerActionClient({ admin: true }),
+      userId: user.id,
+      userEmail: user.email ?? null,
+      emailSettings,
+    });
 
-  // sign out the user after deleting their account
-  await client.auth.signOut();
+    // sign out the user after deleting their account
+    await client.auth.signOut();
 
-  // clear the cache for all pages
-  revalidatePath('/', 'layout');
+    // clear the cache for all pages
+    revalidatePath('/', 'layout');
 
-  // redirect to the home page
-  redirect('/');
-}
+    // redirect to the home page
+    redirect('/');
+  },
+  {},
+);
 
 function getEmailSettingsFromEnvironment() {
   return z

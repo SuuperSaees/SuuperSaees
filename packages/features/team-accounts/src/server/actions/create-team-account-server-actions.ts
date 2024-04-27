@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { z } from 'zod';
 
-import { requireUser } from '@kit/supabase/require-user';
+import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { CreateTeamSchema } from '../../schema/create-team.schema';
@@ -17,31 +17,25 @@ const TEAM_ACCOUNTS_HOME_PATH = z
   .min(1)
   .parse(process.env.TEAM_ACCOUNTS_HOME_PATH);
 
-export async function createOrganizationAccountAction(
-  params: z.infer<typeof CreateTeamSchema>,
-) {
-  const { name: accountName } = CreateTeamSchema.parse(params);
+export const createOrganizationAccountAction = enhanceAction(
+  async (params, user) => {
+    const client = getSupabaseServerActionClient();
+    const service = createCreateTeamAccountService(client);
 
-  const client = getSupabaseServerActionClient();
-  const auth = await requireUser(client);
+    const { data, error } = await service.createNewOrganizationAccount({
+      name: params.name,
+      userId: user.id,
+    });
 
-  if (auth.error) {
-    redirect(auth.redirectTo);
-  }
+    if (error) {
+      throw new Error('Error creating team account');
+    }
 
-  const userId = auth.data.id;
-  const service = createCreateTeamAccountService(client);
+    const accountHomePath = TEAM_ACCOUNTS_HOME_PATH + '/' + data.slug;
 
-  const { data, error } = await service.createNewOrganizationAccount({
-    name: accountName,
-    userId,
-  });
-
-  if (error) {
-    throw new Error('Error creating team account');
-  }
-
-  const accountHomePath = TEAM_ACCOUNTS_HOME_PATH + '/' + data.slug;
-
-  redirect(accountHomePath);
-}
+    redirect(accountHomePath);
+  },
+  {
+    schema: CreateTeamSchema,
+  },
+);

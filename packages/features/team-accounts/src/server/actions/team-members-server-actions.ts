@@ -2,11 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { SupabaseClient } from '@supabase/supabase-js';
-
-import { z } from 'zod';
-
-import { Database } from '@kit/supabase/database';
+import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { RemoveMemberSchema } from '../../schema/remove-member.schema';
@@ -14,106 +10,89 @@ import { TransferOwnershipConfirmationSchema } from '../../schema/transfer-owner
 import { UpdateMemberRoleSchema } from '../../schema/update-member-role.schema';
 import { createAccountMembersService } from '../services/account-members.service';
 
-export async function removeMemberFromAccountAction(
-  params: z.infer<typeof RemoveMemberSchema>,
-) {
-  const client = getSupabaseServerActionClient();
-  const { data, error } = await client.auth.getUser();
+/**
+ * @name removeMemberFromAccountAction
+ * @description Removes a member from an account.
+ */
+export const removeMemberFromAccountAction = enhanceAction(
+  async ({ accountId, userId }) => {
+    const client = getSupabaseServerActionClient();
+    const service = createAccountMembersService(client);
 
-  if (error ?? !data.user) {
-    throw new Error(`Authentication required`);
-  }
-
-  const { accountId, userId } = RemoveMemberSchema.parse(params);
-
-  const service = createAccountMembersService(client);
-
-  await service.removeMemberFromAccount({
-    accountId,
-    userId,
-  });
-
-  // revalidate all pages that depend on the account
-  revalidatePath('/home/[account]', 'layout');
-
-  return { success: true };
-}
-
-export async function updateMemberRoleAction(
-  params: z.infer<typeof UpdateMemberRoleSchema>,
-) {
-  const client = getSupabaseServerActionClient();
-
-  await assertSession(client);
-
-  const service = createAccountMembersService(client);
-  const adminClient = getSupabaseServerActionClient({ admin: true });
-
-  // update the role of the member
-  await service.updateMemberRole(
-    {
-      accountId: params.accountId,
-      userId: params.userId,
-      role: params.role,
-    },
-    adminClient,
-  );
-
-  // revalidate all pages that depend on the account
-  revalidatePath('/home/[account]', 'layout');
-
-  return { success: true };
-}
-
-export async function transferOwnershipAction(
-  params: z.infer<typeof TransferOwnershipConfirmationSchema>,
-) {
-  const client = getSupabaseServerActionClient();
-
-  const { accountId, userId } =
-    TransferOwnershipConfirmationSchema.parse(params);
-
-  // assert that the user is authenticated
-  await assertSession(client);
-
-  // assert that the user is the owner of the account
-  const { data: isOwner, error } = await client.rpc('is_account_owner', {
-    account_id: accountId,
-  });
-
-  if (error ?? !isOwner) {
-    throw new Error(
-      `You must be the owner of the account to transfer ownership`,
-    );
-  }
-
-  const service = createAccountMembersService(client);
-
-  // at this point, the user is authenticated and is the owner of the account
-  // so we proceed with the transfer of ownership with admin privileges
-  const adminClient = getSupabaseServerActionClient({ admin: true });
-
-  await service.transferOwnership(
-    {
+    await service.removeMemberFromAccount({
       accountId,
       userId,
-      confirmation: params.confirmation,
-    },
-    adminClient,
-  );
+    });
 
-  // revalidate all pages that depend on the account
-  revalidatePath('/home/[account]', 'layout');
+    // revalidate all pages that depend on the account
+    revalidatePath('/home/[account]', 'layout');
 
-  return {
-    success: true,
-  };
-}
+    return { success: true };
+  },
+  {
+    schema: RemoveMemberSchema,
+  },
+);
 
-async function assertSession(client: SupabaseClient<Database>) {
-  const { data, error } = await client.auth.getUser();
+/**
+ * @name updateMemberRoleAction
+ * @description Updates the role of a member in an account.
+ */
+export const updateMemberRoleAction = enhanceAction(
+  async (data) => {
+    const client = getSupabaseServerActionClient();
+    const service = createAccountMembersService(client);
+    const adminClient = getSupabaseServerActionClient({ admin: true });
 
-  if (error ?? !data.user) {
-    throw new Error(`Authentication required`);
-  }
-}
+    // update the role of the member
+    await service.updateMemberRole(data, adminClient);
+
+    // revalidate all pages that depend on the account
+    revalidatePath('/home/[account]', 'layout');
+
+    return { success: true };
+  },
+  {
+    schema: UpdateMemberRoleSchema,
+  },
+);
+
+/**
+ * @name transferOwnershipAction
+ * @description Transfers the ownership of an account to another member.
+ */
+export const transferOwnershipAction = enhanceAction(
+  async (data) => {
+    const client = getSupabaseServerActionClient();
+
+    // assert that the user is the owner of the account
+    const { data: isOwner, error } = await client.rpc('is_account_owner', {
+      account_id: data.accountId,
+    });
+
+    if (error ?? !isOwner) {
+      throw new Error(
+        `You must be the owner of the account to transfer ownership`,
+      );
+    }
+
+    const service = createAccountMembersService(client);
+
+    // at this point, the user is authenticated and is the owner of the account
+    // so we proceed with the transfer of ownership with admin privileges
+    const adminClient = getSupabaseServerActionClient({ admin: true });
+
+    // transfer the ownership of the account
+    await service.transferOwnership(data, adminClient);
+
+    // revalidate all pages that depend on the account
+    revalidatePath('/home/[account]', 'layout');
+
+    return {
+      success: true,
+    };
+  },
+  {
+    schema: TransferOwnershipConfirmationSchema,
+  },
+);

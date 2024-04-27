@@ -3,12 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { SupabaseClient } from '@supabase/supabase-js';
-
 import { z } from 'zod';
 
-import { Database } from '@kit/supabase/database';
-import { requireUser } from '@kit/supabase/require-user';
+import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { AcceptInvitationSchema } from '../../schema/accept-invitation.schema';
@@ -20,146 +17,141 @@ import { createAccountInvitationsService } from '../services/account-invitations
 import { createAccountPerSeatBillingService } from '../services/account-per-seat-billing.service';
 
 /**
- * Creates invitations for inviting members.
+ * @name createInvitationsAction
+ * @description Creates invitations for inviting members.
  */
-export async function createInvitationsAction(params: {
-  accountSlug: string;
-  invitations: z.infer<typeof InviteMembersSchema>['invitations'];
-}) {
-  const client = getSupabaseServerActionClient();
+export const createInvitationsAction = enhanceAction(
+  async (params) => {
+    const client = getSupabaseServerActionClient();
 
-  await assertSession(client);
+    // Create the service
+    const service = createAccountInvitationsService(client);
 
-  const { invitations } = InviteMembersSchema.parse({
-    invitations: params.invitations,
-  });
+    // send invitations
+    await service.sendInvitations(params);
 
-  // Create the service
-  const service = createAccountInvitationsService(client);
+    revalidateMemberPage();
 
-  // send invitations
-  await service.sendInvitations({
-    invitations,
-    accountSlug: params.accountSlug,
-  });
-
-  revalidateMemberPage();
-
-  return {
-    success: true,
-  };
-}
+    return {
+      success: true,
+    };
+  },
+  {
+    schema: InviteMembersSchema.and(
+      z.object({
+        accountSlug: z.string().min(1),
+      }),
+    ),
+  },
+);
 
 /**
- * Deletes an invitation specified by the invitation ID.
- *
- * @param {Object} params - The parameters for the method.
- * @param {string} params.invitationId - The ID of the invitation to be deleted.
- *
- * @return {Object} - The result of the delete operation.
+ * @name deleteInvitationAction
+ * @description Deletes an invitation specified by the invitation ID.
  */
-export async function deleteInvitationAction(
-  params: z.infer<typeof DeleteInvitationSchema>,
-) {
-  const invitation = DeleteInvitationSchema.parse(params);
+export const deleteInvitationAction = enhanceAction(
+  async (data) => {
+    const client = getSupabaseServerActionClient();
+    const service = createAccountInvitationsService(client);
 
-  const client = getSupabaseServerActionClient();
-  const { data, error } = await client.auth.getUser();
+    // Delete the invitation
+    await service.deleteInvitation(data);
 
-  if (error ?? !data.user) {
-    throw new Error(`Authentication required`);
-  }
+    revalidateMemberPage();
 
-  const service = createAccountInvitationsService(client);
+    return {
+      success: true,
+    };
+  },
+  {
+    schema: DeleteInvitationSchema,
+  },
+);
 
-  // Delete the invitation
-  await service.deleteInvitation(invitation);
+/**
+ * @name updateInvitationAction
+ * @description Updates an invitation.
+ */
+export const updateInvitationAction = enhanceAction(
+  async (invitation) => {
+    const client = getSupabaseServerActionClient();
+    const service = createAccountInvitationsService(client);
 
-  revalidateMemberPage();
+    await service.updateInvitation(invitation);
 
-  return { success: true };
-}
+    revalidateMemberPage();
 
-export async function updateInvitationAction(
-  params: z.infer<typeof UpdateInvitationSchema>,
-) {
-  const client = getSupabaseServerActionClient();
-  const invitation = UpdateInvitationSchema.parse(params);
+    return {
+      success: true,
+    };
+  },
+  {
+    schema: UpdateInvitationSchema,
+  },
+);
 
-  await assertSession(client);
+/**
+ * @name acceptInvitationAction
+ * @description Accepts an invitation to join a team.
+ */
+export const acceptInvitationAction = enhanceAction(
+  async (data: FormData, user) => {
+    const client = getSupabaseServerActionClient();
 
-  const service = createAccountInvitationsService(client);
+    const { inviteToken, nextPath } = AcceptInvitationSchema.parse(
+      Object.fromEntries(data),
+    );
 
-  await service.updateInvitation(invitation);
+    // create the services
+    const perSeatBillingService = createAccountPerSeatBillingService(client);
+    const service = createAccountInvitationsService(client);
 
-  revalidateMemberPage();
+    // Accept the invitation
+    const accountId = await service.acceptInvitationToTeam(
+      getSupabaseServerActionClient({ admin: true }),
+      {
+        inviteToken,
+        userId: user.id,
+      },
+    );
 
-  return { success: true };
-}
+    // If the account ID is not present, throw an error
+    if (!accountId) {
+      throw new Error('Failed to accept invitation');
+    }
 
-export async function acceptInvitationAction(data: FormData) {
-  const client = getSupabaseServerActionClient();
+    // Increase the seats for the account
+    await perSeatBillingService.increaseSeats(accountId);
 
-  const { inviteToken, nextPath } = AcceptInvitationSchema.parse(
-    Object.fromEntries(data),
-  );
+    return redirect(nextPath);
+  },
+  {},
+);
 
-  // Ensure the user is authenticated
-  const user = await assertSession(client);
+/**
+ * @name renewInvitationAction
+ * @description Renews an invitation.
+ */
+export const renewInvitationAction = enhanceAction(
+  async (params) => {
+    const client = getSupabaseServerActionClient();
+    const { invitationId } = RenewInvitationSchema.parse(params);
 
-  // create the services
-  const perSeatBillingService = createAccountPerSeatBillingService(client);
-  const service = createAccountInvitationsService(client);
+    const service = createAccountInvitationsService(client);
 
-  // Accept the invitation
-  const accountId = await service.acceptInvitationToTeam(
-    getSupabaseServerActionClient({ admin: true }),
-    {
-      inviteToken,
-      userId: user.id,
-    },
-  );
+    // Renew the invitation
+    await service.renewInvitation(invitationId);
 
-  // If the account ID is not present, throw an error
-  if (!accountId) {
-    throw new Error('Failed to accept invitation');
-  }
+    revalidateMemberPage();
 
-  // Increase the seats for the account
-  await perSeatBillingService.increaseSeats(accountId);
-
-  return redirect(nextPath);
-}
-
-export async function renewInvitationAction(
-  params: z.infer<typeof RenewInvitationSchema>,
-) {
-  const client = getSupabaseServerActionClient();
-  const { invitationId } = RenewInvitationSchema.parse(params);
-
-  await assertSession(client);
-
-  const service = createAccountInvitationsService(client);
-
-  // Renew the invitation
-  await service.renewInvitation(invitationId);
-
-  revalidateMemberPage();
-
-  return {
-    success: true,
-  };
-}
-
-async function assertSession(client: SupabaseClient<Database>) {
-  const { error, data } = await requireUser(client);
-
-  if (error) {
-    throw new Error(`Authentication required`);
-  }
-
-  return data;
-}
+    return {
+      success: true,
+    };
+  },
+  {
+    schema: RenewInvitationSchema,
+  },
+);
 
 function revalidateMemberPage() {
   revalidatePath('/home/[account]/members', 'page');

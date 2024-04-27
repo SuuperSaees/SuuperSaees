@@ -28,12 +28,15 @@ export const createPersonalAccountCheckoutSession = enhanceAction(
  * @name createPersonalAccountBillingPortalSession
  * @description Creates a billing Portal session for a personal account
  */
-export async function createPersonalAccountBillingPortalSession() {
-  const client = getSupabaseServerActionClient();
-  const service = createUserBillingService(client);
+export const createPersonalAccountBillingPortalSession = enhanceAction(
+  async () => {
+    const client = getSupabaseServerActionClient();
+    const service = createUserBillingService(client);
 
-  // get url to billing portal
-  const url = await service.createBillingPortalSession();
+    // get url to billing portal
+    const url = await service.createBillingPortalSession();
 
-  return redirect(url);
-}
+    return redirect(url);
+  },
+  {},
+);

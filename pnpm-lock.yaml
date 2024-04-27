@@ -564,6 +564,9 @@ importers:
       '@kit/monitoring':
         specifier: workspace:^
         version: link:../../monitoring/api
+      '@kit/next':
+        specifier: workspace:^
+        version: link:../../next
       '@kit/prettier-config':
         specifier: workspace:*
         version: link:../../../tooling/prettier
@@ -775,6 +778,9 @@ importers:
       '@kit/monitoring':
         specifier: workspace:*
         version: link:../../monitoring/api
+      '@kit/next':
+        specifier: workspace:^
+        version: link:../../next
       '@kit/prettier-config':
         specifier: workspace:*
         version: link:../../../tooling/prettier

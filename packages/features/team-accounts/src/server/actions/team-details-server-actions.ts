@@ -2,41 +2,43 @@
 
 import { redirect } from 'next/navigation';
 
-import { z } from 'zod';
-
+import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { UpdateTeamNameSchema } from '../../schema/update-team-name.schema';
 
-export async function updateTeamAccountName(
-  params: z.infer<typeof UpdateTeamNameSchema>,
-) {
-  const client = getSupabaseServerComponentClient();
-  const { name, slug, path } = UpdateTeamNameSchema.parse(params);
+export const updateTeamAccountName = enhanceAction(
+  async (params) => {
+    const client = getSupabaseServerComponentClient();
+    const { name, path, slug } = params;
 
-  const { error, data } = await client
-    .from('accounts')
-    .update({
-      name,
-      slug,
-    })
-    .match({
-      slug,
-    })
-    .select('slug')
-    .single();
+    const { error, data } = await client
+      .from('accounts')
+      .update({
+        name,
+        slug,
+      })
+      .match({
+        slug,
+      })
+      .select('slug')
+      .single();
 
-  if (error) {
-    throw error;
-  }
+    if (error) {
+      throw error;
+    }
 
-  const newSlug = data.slug;
+    const newSlug = data.slug;
 
-  if (newSlug) {
-    const nextPath = path.replace('[account]', newSlug);
+    if (newSlug) {
+      const nextPath = path.replace('[account]', newSlug);
 
-    redirect(nextPath);
-  }
+      redirect(nextPath);
+    }
 
-  return { success: true };
-}
+    return { success: true };
+  },
+  {
+    schema: UpdateTeamNameSchema,
+  },
+);

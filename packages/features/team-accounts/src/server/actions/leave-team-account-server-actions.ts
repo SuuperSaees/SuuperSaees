@@ -3,33 +3,29 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { requireUser } from '@kit/supabase/require-user';
+import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { LeaveTeamAccountSchema } from '../../schema/leave-team-account.schema';
 import { createLeaveTeamAccountService } from '../services/leave-team-account.service';
 
-export async function leaveTeamAccountAction(formData: FormData) {
-  const body = Object.fromEntries(formData.entries());
-  const params = LeaveTeamAccountSchema.parse(body);
+export const leaveTeamAccountAction = enhanceAction(
+  async (formData: FormData, user) => {
+    const body = Object.fromEntries(formData.entries());
+    const params = LeaveTeamAccountSchema.parse(body);
 
-  const client = getSupabaseServerActionClient();
-  const auth = await requireUser(client);
+    const service = createLeaveTeamAccountService(
+      getSupabaseServerActionClient({ admin: true }),
+    );
 
-  if (auth.error) {
-    throw new Error('Authentication required');
-  }
+    await service.leaveTeamAccount({
+      accountId: params.accountId,
+      userId: user.id,
+    });
 
-  const service = createLeaveTeamAccountService(
-    getSupabaseServerActionClient({ admin: true }),
-  );
+    revalidatePath('/home/[account]', 'layout');
 
-  await service.leaveTeamAccount({
-    accountId: params.accountId,
-    userId: auth.data.id,
-  });
-
-  revalidatePath('/home/[account]', 'layout');
-
-  return redirect('/home');
-}
+    return redirect('/home');
+  },
+  {},
+);

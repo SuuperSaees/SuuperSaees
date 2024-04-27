@@ -24,6 +24,7 @@
     "@kit/eslint-config": "workspace:*",
     "@kit/mailers": "workspace:^",
     "@kit/monitoring": "workspace:*",
+    "@kit/next": "workspace:^",
     "@kit/prettier-config": "workspace:*",
     "@kit/shared": "workspace:^",
     "@kit/supabase": "workspace:^",
