@@ -35,13 +35,15 @@ export function UpdateTask(props: {
         )}
         onSubmit={(data) => {
           startTransition(async () => {
-            await updateTaskAction({
-              ...data,
-              id: props.task.id,
-              captchaToken,
-            });
-
-            resetCaptchaToken();
+            try {
+              await updateTaskAction({
+                ...data,
+                id: props.task.id,
+                captchaToken,
+              });
+            } finally {
+              resetCaptchaToken();
+            }
           });
         }}
       />

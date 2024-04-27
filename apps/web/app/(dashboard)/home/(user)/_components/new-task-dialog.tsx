@@ -17,7 +17,7 @@ import {
 import { Trans } from '@kit/ui/trans';
 
 import { TaskForm } from '../_components/task-form';
-import { addTaskAction } from '../_lib/server/server-actions';
+import { addTaskAction, updateTaskAction } from '../_lib/server/server-actions';
 
 export function NewTaskDialog() {
   const [pending, startTransition] = useTransition();
@@ -58,11 +58,12 @@ export function NewTaskDialog() {
           )}
           onSubmit={(data) => {
             startTransition(async () => {
-              await addTaskAction({ ...data, captchaToken });
-
-              resetCaptchaToken();
-
-              setIsOpen(false);
+              try {
+                await addTaskAction({ ...data, captchaToken });
+              } finally {
+                resetCaptchaToken();
+                setIsOpen(false);
+              }
             });
           }}
         />
