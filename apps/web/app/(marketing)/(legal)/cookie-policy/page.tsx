@@ -15,11 +15,13 @@ async function CookiePolicyPage() {
 
   return (
     <div>
-      <div className={'container mx-auto'}>
-        <SitePageHeader
-          title={t(`marketing:cookiePolicy`)}
-          subtitle={t(`marketing:cookiePolicyDescription`)}
-        />
+      <SitePageHeader
+        title={t(`marketing:cookiePolicy`)}
+        subtitle={t(`marketing:cookiePolicyDescription`)}
+      />
+
+      <div className={'container mx-auto py-8'}>
+        <div>Your terms of service content here</div>
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ async function ContactPage() {
   const { t } = await createI18nServerInstance();
 
   return (
-    <div className={'mt-8'}>
+    <div>
       <SitePageHeader
         title={t(`marketing:contact`)}
         subtitle={t(`marketing:contactDescription`)}

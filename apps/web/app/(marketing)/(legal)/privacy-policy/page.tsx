@@ -14,12 +14,14 @@ async function PrivacyPolicyPage() {
   const { t } = await createI18nServerInstance();
 
   return (
-    <div className={'mt-8'}>
-      <div className={'container mx-auto'}>
-        <SitePageHeader
-          title={t('marketing:privacyPolicy')}
-          subtitle={t('marketing:privacyPolicyDescription')}
-        />
+    <div>
+      <SitePageHeader
+        title={t('marketing:privacyPolicy')}
+        subtitle={t('marketing:privacyPolicyDescription')}
+      />
+
+      <div className={'container mx-auto py-8'}>
+        <div>Your terms of service content here</div>
       </div>
     </div>
   );

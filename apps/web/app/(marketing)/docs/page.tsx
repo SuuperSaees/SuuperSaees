@@ -1,13 +1,11 @@
-import { unstable_cache as cache } from 'next/dist/server/web/spec-extension/unstable-cache';
-
-import { createCmsClient } from '@kit/cms';
 import { PageBody } from '@kit/ui/page';
 
-import { SitePageHeader } from '~/(marketing)/_components/site-page-header';
-import { DocsCards } from '~/(marketing)/docs/_components/docs-cards';
-import { getDocs } from '~/(marketing)/docs/_lib/server/docs.loader';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+
+import { SitePageHeader } from '../_components/site-page-header';
+import { DocsCards } from './_components/docs-cards';
+import { getDocs } from './_lib/server/docs.loader';
 
 export const generateMetadata = async () => {
   const { t } = await createI18nServerInstance();

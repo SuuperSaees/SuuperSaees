@@ -20,11 +20,12 @@ export const generateMetadata = async () => {
 async function FAQPage() {
   const { t } = await createI18nServerInstance();
 
-  // replace this content
-  // with translations
+  // replace this content with translations
   const faqItems = [
     {
+      // or: t('marketing:faq.question1')
       question: `Do you offer a free trial?`,
+      // or: t('marketing:faq.answer1')
       answer: `Yes, we offer a 14-day free trial. You can cancel at any time during the trial period and you won't be charged.`,
     },
     {
@@ -124,7 +125,7 @@ function FaqItem({
             'hover:underline-none cursor-pointer font-sans font-medium'
           }
         >
-          {item.question}
+          <Trans i18nKey={item.question} defaults={item.question} />
         </h2>
 
         <div>
@@ -134,10 +135,9 @@ function FaqItem({
         </div>
       </summary>
 
-      <div
-        className={'flex flex-col space-y-2 py-1 text-muted-foreground'}
-        dangerouslySetInnerHTML={{ __html: item.answer }}
-      />
+      <div className={'flex flex-col space-y-2 py-1 text-muted-foreground'}>
+        <Trans i18nKey={item.answer} defaults={item.answer} />
+      </div>
     </details>
   );
 }

@@ -1,4 +1,4 @@
-import { Cms, createCmsClient } from '@kit/cms';
+import { Cms } from '@kit/cms';
 
 import { DocsNavigation } from '~/(marketing)/docs/_components/docs-navigation';
 import { getDocs } from '~/(marketing)/docs/_lib/server/docs.loader';
