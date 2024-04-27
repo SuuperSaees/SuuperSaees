@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { isRedirectError } from 'next/dist/client/components/redirect';
 import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -102,6 +103,10 @@ export const enhanceRouteHandler = <
       try {
         return await handler({ request, body, user });
       } catch (error) {
+        if (isRedirectError(error)) {
+          throw error;
+        }
+
         // capture the exception
         await captureException(error);
 

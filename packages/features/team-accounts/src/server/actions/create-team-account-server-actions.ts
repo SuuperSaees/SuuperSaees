@@ -10,7 +10,7 @@ import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-clie
 import { CreateTeamSchema } from '../../schema/create-team.schema';
 import { createCreateTeamAccountService } from '../services/create-team-account.service';
 
-const TEAM_ACCOUNTS_HOME_PATH = z
+const path = z
   .string({
     required_error: 'variable TEAM_ACCOUNTS_HOME_PATH is required',
   })
@@ -31,7 +31,7 @@ export const createOrganizationAccountAction = enhanceAction(
       throw new Error('Error creating team account');
     }
 
-    const accountHomePath = TEAM_ACCOUNTS_HOME_PATH + '/' + data.slug;
+    const accountHomePath = path + '/' + data.slug;
 
     redirect(accountHomePath);
   },

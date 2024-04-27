@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { isRedirectError } from 'next/dist/client/components/redirect';
 import { redirect } from 'next/navigation';
 
 import type { User } from '@supabase/supabase-js';
@@ -81,6 +82,10 @@ export function enhanceAction<
         // pass the data to the action
         return await fn(data, user);
       } catch (error) {
+        if (isRedirectError(error)) {
+          throw error;
+        }
+
         // capture the exception
         await captureException(error);
 
