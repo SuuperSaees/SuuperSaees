@@ -13,13 +13,6 @@ import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-clie
 import { captureException, zodParseFactory } from '../utils';
 
 /**
- * @name IS_CAPTCHA_SETUP
- * @description Check if the CAPTCHA is setup
- */
-const IS_CAPTCHA_SETUP = !!process.env.CAPTCHA_SECRET_TOKEN;
-
-/**
- *
  * @name enhanceAction
  * @description Enhance an action with captcha, schema and auth checks
  */
@@ -48,9 +41,25 @@ export function enhanceAction<
     type UserParam = Config['auth'] extends false ? undefined : User;
 
     const requireAuth = config.auth ?? true;
-
     let user: UserParam = undefined as UserParam;
 
+    // validate the schema passed in the config if it exists
+    const data = config.schema
+      ? zodParseFactory(config.schema)(params)
+      : params;
+
+    // by default, the CAPTCHA token is not required
+    const verifyCaptcha = config.captcha ?? false;
+
+    // verify the CAPTCHA token. It will throw an error if the token is invalid.
+    if (verifyCaptcha) {
+      const token = (data as Args & { captchaToken: string }).captchaToken;
+
+      // Verify the CAPTCHA token. It will throw an error if the token is invalid.
+      await verifyCaptchaToken(token);
+    }
+
+    // verify the user is authenticated if required
     if (requireAuth) {
       // verify the user is authenticated if required
       const auth = await requireUser(getSupabaseServerActionClient());
@@ -63,35 +72,23 @@ export function enhanceAction<
       user = auth.data as UserParam;
     }
 
-    // validate the schema
-    const data = config.schema
-      ? zodParseFactory(config.schema)(params)
-      : params;
-
-    // verify captcha unless it's explicitly disabled
-    // verify the captcha token if required
-    const verifyCaptcha = config.captcha ?? IS_CAPTCHA_SETUP;
-
-    if (verifyCaptcha) {
-      const token = (data as Args & { captchaToken: string }).captchaToken;
-
-      // Verify the CAPTCHA token. It will throw an error if the token is invalid.
-      await verifyCaptchaToken(token);
-    }
-
     // capture exceptions if required
     const shouldCaptureException = config.captureException ?? true;
 
+    // if the action should capture exceptions, wrap the action in a try/catch block
     if (shouldCaptureException) {
       try {
+        // pass the data to the action
         return await fn(data, user);
       } catch (error) {
+        // capture the exception
         await captureException(error);
 
+        // re-throw the error
         throw error;
       }
     } else {
-      // pass the data to the action
+      // no need to capture exceptions, just pass the data to the action
       return fn(data, user);
     }
   };

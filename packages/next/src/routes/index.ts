@@ -20,12 +20,6 @@ interface HandlerParams<Body> {
 }
 
 /**
- * @name IS_CAPTCHA_SETUP
- * @description Check if the CAPTCHA is setup
- */
-const IS_CAPTCHA_SETUP = !!process.env.CAPTCHA_SECRET_TOKEN;
-
-/**
  * Enhanced route handler function.
  *
  * This function takes a request and parameters object as arguments and returns a route handler function.
@@ -69,7 +63,8 @@ export const enhanceRouteHandler = <
    * This function takes a request object as an argument and returns a response object.
    */
   return async function routeHandler(request: NextRequest) {
-    const shouldVerifyCaptcha = params?.captcha ?? IS_CAPTCHA_SETUP;
+    // Check if the captcha token should be verified
+    const shouldVerifyCaptcha = params?.captcha ?? false;
 
     // Verify the captcha token if required and setup
     if (shouldVerifyCaptcha) {

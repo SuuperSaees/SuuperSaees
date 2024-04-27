@@ -3,20 +3,26 @@ import 'server-only';
 const verifyEndpoint =
   'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
-const secret = process.env.CAPTCHA_SECRET_TOKEN;
+const CAPTCHA_SECRET_TOKEN = process.env.CAPTCHA_SECRET_TOKEN;
 
 /**
- * Verify the CAPTCHA token with the CAPTCHA service
- * @param token
+ * @name verifyCaptchaToken
+ * @description Verify the CAPTCHA token with the CAPTCHA service
+ * @param token - The CAPTCHA token to verify
  */
 export async function verifyCaptchaToken(token: string) {
-  if (!secret) {
+  if (!CAPTCHA_SECRET_TOKEN) {
     throw new Error('CAPTCHA_SECRET_TOKEN is not set');
   }
 
+  const formData = new FormData();
+
+  formData.append('secret', CAPTCHA_SECRET_TOKEN);
+  formData.append('response', token);
+
   const res = await fetch(verifyEndpoint, {
     method: 'POST',
-    body: `secret=${encodeURIComponent(secret)}&response=${encodeURIComponent(token)}`,
+    body: formData,
     headers: {
       'content-type': 'application/x-www-form-urlencoded',
     },
