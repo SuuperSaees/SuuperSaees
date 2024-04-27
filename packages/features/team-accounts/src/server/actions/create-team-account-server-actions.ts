@@ -10,15 +10,17 @@ import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-clie
 import { CreateTeamSchema } from '../../schema/create-team.schema';
 import { createCreateTeamAccountService } from '../services/create-team-account.service';
 
-const path = z
-  .string({
-    required_error: 'variable TEAM_ACCOUNTS_HOME_PATH is required',
-  })
-  .min(1)
-  .parse(process.env.TEAM_ACCOUNTS_HOME_PATH);
+console.log(process.env);
 
 export const createOrganizationAccountAction = enhanceAction(
   async (params, user) => {
+    const path = z
+      .string({
+        required_error: 'variable TEAM_ACCOUNTS_HOME_PATH is required',
+      })
+      .min(1)
+      .parse(process.env.TEAM_ACCOUNTS_HOME_PATH);
+
     const client = getSupabaseServerActionClient();
     const service = createCreateTeamAccountService(client);
 
