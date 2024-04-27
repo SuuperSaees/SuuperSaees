@@ -33,7 +33,7 @@ export function UpdateTask(props: {
         )}
         onSubmit={(data) => {
           startTransition(async () => {
-            await updateTaskAction(props.task.id, data);
+            await updateTaskAction({ ...data, id: props.task.id });
           });
         }}
       />

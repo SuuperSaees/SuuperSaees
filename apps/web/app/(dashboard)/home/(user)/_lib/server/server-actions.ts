@@ -5,81 +5,80 @@ import { redirect } from 'next/navigation';
 
 import { z } from 'zod';
 
+import { enhanceAction } from '@kit/next/actions';
 import { getLogger } from '@kit/shared/logger';
 import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
-import { WriteTaskSchema } from '~/(dashboard)/home/(user)/_lib/schema/write-task.schema';
+import { WriteTaskSchema } from '../schema/write-task.schema';
 
-export async function addTaskAction(params: z.infer<typeof WriteTaskSchema>) {
-  'use server';
+export const addTaskAction = enhanceAction(
+  async (task, user) => {
+    const logger = await getLogger();
+    const client = getSupabaseServerActionClient();
 
-  const task = WriteTaskSchema.parse(params);
+    logger.info(task, `Adding task...`);
 
-  const logger = await getLogger();
-  const client = getSupabaseServerActionClient();
-  const auth = await requireUser(client);
+    const { data, error } = await client
+      .from('tasks')
+      .insert({ ...task, account_id: user.id });
 
-  if (!auth.data) {
-    redirect(auth.redirectTo);
-  }
+    if (error) {
+      logger.error(error, `Failed to add task`);
 
-  logger.info(task, `Adding task...`);
+      throw new Error(`Failed to add task`);
+    }
 
-  const { data, error } = await client
-    .from('tasks')
-    .insert({ ...task, account_id: auth.data.id });
+    logger.info(data, `Task added successfully`);
 
-  if (error) {
-    logger.error(error, `Failed to add task`);
+    revalidatePath('/home', 'page');
 
-    throw new Error(`Failed to add task`);
-  }
+    return null;
+  },
+  {
+    schema: WriteTaskSchema,
+  },
+);
 
-  logger.info(data, `Task added successfully`);
+export const updateTaskAction = enhanceAction(
+  async (params) => {
+    const logger = await getLogger();
+    const client = getSupabaseServerActionClient();
+    const auth = await requireUser(client);
 
-  revalidatePath('/home', 'page');
+    if (!auth.data) {
+      redirect(auth.redirectTo);
+    }
 
-  return null;
-}
+    logger.info(params, `Updating task...`);
 
-export async function updateTaskAction(
-  id: string,
-  params: z.infer<typeof WriteTaskSchema>,
-) {
-  'use server';
+    const { id, ...task } = params;
 
-  const task = WriteTaskSchema.parse(params);
+    const { data, error } = await client
+      .from('tasks')
+      .update(task)
+      .eq('id', id);
 
-  const logger = await getLogger();
-  const client = getSupabaseServerActionClient();
-  const auth = await requireUser(client);
+    if (error) {
+      logger.error(error, `Failed to update task`);
 
-  if (!auth.data) {
-    redirect(auth.redirectTo);
-  }
+      throw new Error(`Failed to update task`);
+    }
 
-  logger.info({ id, task }, `Updating task...`);
+    logger.info(data, `Task updated successfully`);
 
-  const { data, error } = await client.from('tasks').update(task).eq('id', id);
+    revalidatePath('/home/tasks/[task]', 'page');
 
-  if (error) {
-    logger.error(error, `Failed to update task`);
+    return null;
+  },
+  {
+    schema: WriteTaskSchema.and(z.object({ id: z.string() })),
+  },
+);
 
-    throw new Error(`Failed to update task`);
-  }
-
-  logger.info(data, `Task updated successfully`);
-
-  revalidatePath('/home/tasks/[task]', 'page');
-
-  return null;
-}
-
-export async function deleteTaskAction(data: FormData) {
-  'use server';
-
+export const deleteTaskAction = enhanceAction(async (data: FormData) => {
   const id = z.string().parse(data.get('id'));
+
   const logger = await getLogger();
   const client = getSupabaseServerActionClient();
   const auth = await requireUser(client);
@@ -104,4 +103,4 @@ export async function deleteTaskAction(data: FormData) {
   revalidatePath('/home/tasks/[task]', 'page');
 
   return null;
-}
+}, {});
