@@ -48,7 +48,7 @@ export function NewTaskDialog() {
 
         <TaskForm
           SubmitButton={() => (
-            <Button>
+            <Button disabled={pending}>
               {pending ? (
                 <Trans i18nKey={'tasks:addingTask'} />
               ) : (

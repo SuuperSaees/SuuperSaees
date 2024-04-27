@@ -23,10 +23,13 @@ export async function verifyCaptchaToken(token: string) {
   const res = await fetch(verifyEndpoint, {
     method: 'POST',
     body: formData,
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded',
-    },
   });
+
+  if (!res.ok) {
+    console.error(`Captcha failed:`, res.statusText);
+
+    throw new Error('Failed to verify CAPTCHA token');
+  }
 
   const data = await res.json();
 

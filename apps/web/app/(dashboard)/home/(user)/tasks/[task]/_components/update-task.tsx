@@ -24,7 +24,7 @@ export function UpdateTask(props: {
         task={props.task}
         SubmitButton={() => (
           <div>
-            <Button>
+            <Button disabled={pending}>
               {pending ? (
                 <Trans i18nKey={'tasks:updatingTask'} />
               ) : (
