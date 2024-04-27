@@ -7,7 +7,7 @@ import { Database } from '@kit/supabase/database';
 
 type Invitation = Database['public']['Tables']['invitations']['Row'];
 
-const invitePath = process.env.INVITATION_PAGE_PATH;
+const invitePath = '/join';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL;
 const productName = process.env.NEXT_PUBLIC_PRODUCT_NAME ?? '';
 const emailSender = process.env.EMAIL_SENDER;

@@ -1,18 +1,9 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 
-import { z } from 'zod';
-
 import { checkRequiresMultiFactorAuthentication } from './check-requires-mfa';
 
-const MULTI_FACTOR_AUTH_VERIFY_PATH = z
-  .string()
-  .default('/auth/verify')
-  .parse(process.env.MULTI_FACTOR_AUTH_VERIFY_PATH);
-
-const SIGN_IN_PATH = z
-  .string()
-  .default('/auth/sign-in')
-  .parse(process.env.SIGN_IN_PATH);
+const MULTI_FACTOR_AUTH_VERIFY_PATH = '/auth/verify';
+const SIGN_IN_PATH = '/auth/sign-in';
 
 /**
  * @name requireUser

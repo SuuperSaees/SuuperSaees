@@ -2,25 +2,14 @@
 
 import { redirect } from 'next/navigation';
 
-import { z } from 'zod';
-
 import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
 import { CreateTeamSchema } from '../../schema/create-team.schema';
 import { createCreateTeamAccountService } from '../services/create-team-account.service';
 
-console.log(process.env);
-
 export const createOrganizationAccountAction = enhanceAction(
   async (params, user) => {
-    const path = z
-      .string({
-        required_error: 'variable TEAM_ACCOUNTS_HOME_PATH is required',
-      })
-      .min(1)
-      .parse(process.env.TEAM_ACCOUNTS_HOME_PATH);
-
     const client = getSupabaseServerActionClient();
     const service = createCreateTeamAccountService(client);
 
@@ -33,7 +22,7 @@ export const createOrganizationAccountAction = enhanceAction(
       throw new Error('Error creating team account');
     }
 
-    const accountHomePath = path + '/' + data.slug;
+    const accountHomePath = '/home/' + data.slug;
 
     redirect(accountHomePath);
   },
