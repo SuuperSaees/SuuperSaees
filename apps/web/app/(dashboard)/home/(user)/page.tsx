@@ -18,8 +18,6 @@ import { TasksTable } from './_components/tasks-table';
 import { UserAccountHeader } from './_components/user-account-header';
 import { loadUserWorkspace } from './_lib/server/load-user-workspace';
 
-export const runtime = 'edge';
-
 interface SearchParams {
   page?: string;
   query?: string;

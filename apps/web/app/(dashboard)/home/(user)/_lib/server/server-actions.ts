@@ -17,9 +17,10 @@ const CaptchaSchema = z.object({
 });
 
 export const addTaskAction = enhanceAction(
-  async (task, user) => {
+  async (params, user) => {
     const logger = await getLogger();
     const client = getSupabaseServerActionClient();
+    const { captchaToken: _, ...task } = params;
 
     logger.info(task, `Adding task...`);
 

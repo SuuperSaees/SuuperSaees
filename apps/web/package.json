@@ -10,6 +10,8 @@
     "build:test": "NODE_ENV=test pnpm with-env:test next build",
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "pnpm with-env next dev --turbo",
+    "cloudflare:build": "pnpm dlx @cloudflare/next-on-pages",
+    "cloudflare:preview": "pnpm dlx wrangler pages dev .vercel/output/static --compatibility-flag=nodejs_compat",
     "next:lint": "next lint",
     "format": "prettier --check \"**/*.{js,cjs,mjs,ts,tsx,md,json}\"",
     "start": "pnpm with-env next start",
