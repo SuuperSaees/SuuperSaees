@@ -2,6 +2,8 @@ import { collection, config, fields } from '@keystatic/core';
 import { Entry } from '@keystatic/core/reader';
 import { z } from 'zod';
 
+import './mock-fetch';
+
 const local = z.object({
   kind: z.literal('local'),
 });
