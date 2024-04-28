@@ -14,7 +14,7 @@ export function useUser(initialData?: User | null) {
 
     // this is most likely a session error or the user is not logged in
     if (response.error) {
-      return null;
+      return undefined;
     }
 
     if (response.data?.user) {
@@ -28,6 +28,7 @@ export function useUser(initialData?: User | null) {
     queryFn,
     queryKey,
     initialData,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
 }

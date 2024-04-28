@@ -34,7 +34,7 @@ export function useAuthChangeListener({
 
   useEffect(() => {
     // keep this running for the whole session unless the component was unmounted
-    const listener = client.auth.onAuthStateChange((_, user) => {
+    const listener = client.auth.onAuthStateChange((event, user) => {
       // log user out if user is falsy
       // and if the current path is a private route
       const shouldRedirectUser =
@@ -45,6 +45,10 @@ export function useAuthChangeListener({
         window.location.assign('/');
 
         return;
+      }
+
+      if (event === 'SIGNED_OUT') {
+        return router.refresh();
       }
 
       if (accessToken) {

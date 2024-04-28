@@ -1,6 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse, URLPattern } from 'next/server';
 
+import type { UserResponse } from '@supabase/supabase-js';
+
 import { CsrfError, createCsrfProtect } from '@edge-csrf/nextjs';
 
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
@@ -20,12 +22,16 @@ export const config = {
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  const supabase = createMiddlewareClient(request, response);
+
+  // get the user from the session (no matter if it's logged in or not)
+  const userResponse = await supabase.auth.getUser();
 
   // set a unique request ID for each request
   // this helps us log and trace requests
   setRequestId(request);
 
-  // apply CSRF and session middleware
+  // apply CSRF protection for mutating requests
   const csrfResponse = await withCsrfMiddleware(request, response);
 
   // handle patterns for specific routes
@@ -33,7 +39,11 @@ export async function middleware(request: NextRequest) {
 
   // if a pattern handler exists, call it
   if (handlePattern) {
-    const patternHandlerResponse = await handlePattern(request, csrfResponse);
+    const patternHandlerResponse = await handlePattern(
+      request,
+      csrfResponse,
+      userResponse,
+    );
 
     // if a pattern handler returns a response, return it
     if (patternHandlerResponse) {
@@ -41,7 +51,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // if no pattern handler returned a response, return the session response
+  // if no pattern handler returned a response,
+  // return the session response
   return csrfResponse;
 }
 
@@ -149,9 +160,13 @@ function getPatterns() {
     },
     {
       pattern: new URLPattern({ pathname: '/home*' }),
-      handler: async (req: NextRequest, res: NextResponse) => {
-        const supabase = createMiddlewareClient(req, res);
-        const { data: user, error } = await supabase.auth.getUser();
+      handler: async (
+        req: NextRequest,
+        res: NextResponse,
+        userResponse: UserResponse,
+      ) => {
+        const { data: user, error } = userResponse;
+
         const origin = req.nextUrl.origin;
         const next = req.nextUrl.pathname;
 
@@ -162,6 +177,8 @@ function getPatterns() {
 
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
+
+        const supabase = createMiddlewareClient(req, res);
 
         const requiresMultiFactorAuthentication =
           await checkRequiresMultiFactorAuthentication(supabase);
