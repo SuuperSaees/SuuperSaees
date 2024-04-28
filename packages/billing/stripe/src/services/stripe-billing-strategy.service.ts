@@ -19,6 +19,12 @@ import { createStripeBillingPortalSession } from './create-stripe-billing-portal
 import { createStripeCheckout } from './create-stripe-checkout';
 import { createStripeClient } from './stripe-sdk';
 
+/**
+ * @name StripeBillingStrategyService
+ * @description The Stripe billing strategy service
+ * @class StripeBillingStrategyService
+ * @implements {BillingStrategyProviderService}
+ */
 export class StripeBillingStrategyService
   implements BillingStrategyProviderService
 {

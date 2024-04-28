@@ -30,6 +30,7 @@ export class StripeWebhookHandlerService
   private readonly namespace = 'billing.stripe';
 
   /**
+   * @name verifyWebhookSignature
    * @description Verifies the webhook signature - should throw an error if the signature is invalid
    */
   async verifyWebhookSignature(request: Request) {
@@ -55,14 +56,6 @@ export class StripeWebhookHandlerService
     }
 
     return event;
-  }
-
-  private async loadStripe() {
-    if (!this.stripe) {
-      this.stripe = await createStripeClient();
-    }
-
-    return this.stripe;
   }
 
   async handleWebhookEvent(
@@ -353,6 +346,14 @@ export class StripeWebhookHandlerService
     });
 
     return onInvoicePaid(payload);
+  }
+
+  private async loadStripe() {
+    if (!this.stripe) {
+      this.stripe = await createStripeClient();
+    }
+
+    return this.stripe;
   }
 }
 
