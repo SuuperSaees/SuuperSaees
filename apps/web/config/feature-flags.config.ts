@@ -39,7 +39,19 @@ const FeatureFlagsSchema = z.object({
       required_error: 'Provide the variable NEXT_PUBLIC_LANGUAGE_PRIORITY',
       description: `If set to user, use the user's preferred language. If set to application, use the application's default language.`,
     })
-    .default('user'),
+    .default('application'),
+  enableNotifications: z
+    .boolean({
+      description: 'Enable notifications functionality',
+      required_error: 'Provide the variable NEXT_PUBLIC_ENABLE_NOTIFICATIONS',
+    })
+    .default(true),
+  realtimeNotifications: z
+    .boolean({
+      description: 'Enable realtime for the notifications functionality',
+      required_error: 'Provide the variable NEXT_PUBLIC_REALTIME_NOTIFICATIONS',
+    })
+    .default(true),
 });
 
 const featuresFlagConfig = FeatureFlagsSchema.parse({
@@ -74,6 +86,14 @@ const featuresFlagConfig = FeatureFlagsSchema.parse({
   languagePriority: process.env.NEXT_PUBLIC_LANGUAGE_PRIORITY as
     | 'user'
     | 'application',
+  enableNotifications: getBoolean(
+    process.env.NEXT_PUBLIC_ENABLE_NOTIFICATIONS,
+    true,
+  ),
+  realtimeNotifications: getBoolean(
+    process.env.NEXT_PUBLIC_REALTIME_NOTIFICATIONS,
+    false,
+  ),
 } satisfies z.infer<typeof FeatureFlagsSchema>);
 
 export default featuresFlagConfig;

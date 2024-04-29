@@ -64,8 +64,6 @@ export function UserLayoutMobileNavigation() {
   );
 }
 
-export default UserLayoutMobileNavigation;
-
 function DropdownLink(
   props: React.PropsWithChildren<{
     path: string;

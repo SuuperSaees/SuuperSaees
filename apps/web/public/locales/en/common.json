@@ -48,6 +48,9 @@
   "noData": "No data available",
   "pageNotFoundHeading": "Ouch! :|",
   "errorPageHeading": "Ouch! :|",
+  "notifications": "Notifications",
+  "noNotifications": "No notifications",
+  "justNow": "Just now",
   "roles": {
     "owner": {
       "label": "Owner"
