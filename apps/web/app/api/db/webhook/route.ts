@@ -1,22 +1,18 @@
-import { DatabaseWebhookHandlerService } from '@kit/database-webhooks';
-
-const service = new DatabaseWebhookHandlerService();
-
-const response = (status: number) => new Response(null, { status });
+import { getDatabaseWebhookHandlerService } from '@kit/database-webhooks';
 
 /**
  * @name POST
  * @description POST handler for the webhook route that handles the webhook event
- * @param request
- * @constructor
  */
 export async function POST(request: Request) {
+  const service = getDatabaseWebhookHandlerService();
+
   try {
     // handle the webhook event
     await service.handleWebhook(request);
 
-    return response(200);
+    return new Response(null, { status: 200 });
   } catch {
-    return response(500);
+    return new Response(null, { status: 500 });
   }
 }

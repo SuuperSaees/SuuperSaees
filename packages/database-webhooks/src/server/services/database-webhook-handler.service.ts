@@ -7,23 +7,31 @@ import { RecordChange, Tables } from '../record-change.type';
 import { DatabaseWebhookRouterService } from './database-webhook-router.service';
 import { getDatabaseWebhookVerifier } from './verifier';
 
-export class DatabaseWebhookHandlerService {
+export function getDatabaseWebhookHandlerService() {
+  return new DatabaseWebhookHandlerService();
+}
+
+class DatabaseWebhookHandlerService {
   private readonly namespace = 'database-webhook-handler';
 
+  /**
+   * @name handleWebhook
+   * @description Handle the webhook event
+   * @param request
+   */
   async handleWebhook(request: Request) {
     const logger = await getLogger();
 
     const json = await request.clone().json();
     const { table, type } = json as RecordChange<keyof Tables>;
 
-    logger.info(
-      {
-        name: this.namespace,
-        table,
-        type,
-      },
-      'Received webhook from DB. Processing...',
-    );
+    const ctx = {
+      name: this.namespace,
+      table,
+      type,
+    };
+
+    logger.info(ctx, 'Received webhook from DB. Processing...');
 
     // check if the signature is valid
     const verifier = await getDatabaseWebhookVerifier();
@@ -45,20 +53,11 @@ export class DatabaseWebhookHandlerService {
       // handle the webhook event based on the table
       await service.handleWebhook(json);
 
-      logger.info(
-        {
-          name: this.namespace,
-          table,
-          type,
-        },
-        'Webhook processed successfully',
-      );
+      logger.info(ctx, 'Webhook processed successfully');
     } catch (error) {
       logger.error(
         {
-          name: this.namespace,
-          table,
-          type,
+          ...ctx,
           error,
         },
         'Failed to process webhook',
