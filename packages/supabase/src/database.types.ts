@@ -320,77 +320,9 @@ export type Database = {
           },
         ]
       }
-      notifications: {
-        Row: {
-          account_id: string
-          body: string
-          channel: Database["public"]["Enums"]["notification_channel"]
-          created_at: string
-          dismissed: boolean
-          entity_id: string | null
-          entity_type: string | null
-          expires_at: string | null
-          id: number
-          language_code: string
-          link: string | null
-          type: Database["public"]["Enums"]["notification_type"]
-        }
-        Insert: {
-          account_id: string
-          body: string
-          channel?: Database["public"]["Enums"]["notification_channel"]
-          created_at?: string
-          dismissed?: boolean
-          entity_id?: string | null
-          entity_type?: string | null
-          expires_at?: string | null
-          id?: never
-          language_code?: string
-          link?: string | null
-          type?: Database["public"]["Enums"]["notification_type"]
-        }
-        Update: {
-          account_id?: string
-          body?: string
-          channel?: Database["public"]["Enums"]["notification_channel"]
-          created_at?: string
-          dismissed?: boolean
-          entity_id?: string | null
-          entity_type?: string | null
-          expires_at?: string | null
-          id?: never
-          language_code?: string
-          link?: string | null
-          type?: Database["public"]["Enums"]["notification_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       order_items: {
         Row: {
           created_at: string
-          id: string
           order_id: string
           price_amount: number | null
           product_id: string
@@ -400,7 +332,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id: string
           order_id: string
           price_amount?: number | null
           product_id: string
@@ -410,7 +341,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          id?: string
           order_id?: string
           price_amount?: number | null
           product_id?: string
@@ -689,6 +619,58 @@ export type Database = {
           },
         ]
       }
+      tasks: {
+        Row: {
+          account_id: string
+          created_at: string
+          description: string | null
+          done: boolean
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          description?: string | null
+          done?: boolean
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          description?: string | null
+          done?: boolean
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       user_account_workspace: {
@@ -867,12 +849,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_account_team_member: {
-        Args: {
-          target_account_id: string
-        }
-        Returns: boolean
-      }
       is_set: {
         Args: {
           field_name: string
@@ -908,6 +884,18 @@ export type Database = {
           new_owner_id: string
         }
         Returns: undefined
+      }
+      unaccent: {
+        Args: {
+          "": string
+        }
+        Returns: string
+      }
+      unaccent_init: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
       }
       upsert_order: {
         Args: {
@@ -973,9 +961,9 @@ export type Database = {
         | "settings.manage"
         | "members.manage"
         | "invites.manage"
+        | "tasks.write"
+        | "tasks.delete"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
-      notification_channel: "in_app" | "email"
-      notification_type: "info" | "warning" | "error"
       payment_status: "pending" | "succeeded" | "failed"
       subscription_item_type: "flat" | "per_seat" | "metered"
       subscription_status:
