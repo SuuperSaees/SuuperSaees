@@ -9,8 +9,6 @@ type Notification = {
   type: 'info' | 'warning' | 'error';
   created_at: string;
   link: string | null;
-  entity_id: string | null;
-  entity_type: string | null;
 };
 
 export function useFetchNotifications({
@@ -58,9 +56,7 @@ export function useFetchNotifications({
            dismissed, 
            type, 
            created_at, 
-           link, 
-           entity_id, 
-           entity_type
+           link
            `,
         )
         .in('account_id', accountIds)

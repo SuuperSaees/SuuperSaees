@@ -421,7 +421,9 @@ begin
             public.get_upper_system_role())
     where
         target_account_id = account_id
-        and user_id = new_owner_id;
+        and user_id = new_owner_id
+        and account_role <>(
+            public.get_upper_system_role());
 
 end;
 
@@ -579,9 +581,12 @@ from
 
 -- Open up access to roles table for authenticated users and service_role
 grant
-select, insert, delete, update
-  on table public.roles to authenticated,
-  service_role;
+select
+,
+  insert,
+  delete,
+update on table public.roles to authenticated,
+service_role;
 
 -- define the system role uuid as a static UUID to be used as a default
 -- account_id for system roles when the account_id is null. Useful for constraints.
@@ -680,7 +685,8 @@ select
 ,
   insert,
 update,
-delete on table public.accounts_memberships to authenticated, service_role;
+delete on table public.accounts_memberships to authenticated,
+service_role;
 
 -- Indexes on the accounts_memberships table
 create index ix_accounts_memberships_account_id on public.accounts_memberships (account_id);
@@ -720,6 +726,26 @@ $$ language plpgsql;
 create
 or replace trigger prevent_account_owner_membership_delete_check before delete on public.accounts_memberships for each row
 execute function kit.prevent_account_owner_membership_delete ();
+
+-- Function "kit.prevent_memberships_update"
+-- Trigger to prevent updates to account memberships with the exception of the account_role
+create
+or replace function kit.prevent_memberships_update () returns trigger
+set
+  search_path = '' as $$
+begin
+    if new.account_role <> old.account_role then
+        return new;
+    end if;
+
+    raise exception 'Only the account_role can be updated';
+
+end; $$ language plpgsql;
+
+create
+or replace trigger prevent_memberships_update_check before
+update on public.accounts_memberships for each row
+execute function kit.prevent_memberships_update ();
 
 -- Function "public.has_role_on_account"
 -- Function to check if a user has a role on an account
@@ -1290,7 +1316,7 @@ with
     )
   );
 
--- UPDATE(public.invitations):
+-- UPDATE(invitations):
 -- Users can update invitations to users of an account they are a member of and have the 'invites.manage' permission AND
 -- the target role is not higher than the user's role
 create policy invitations_update on public.invitations
