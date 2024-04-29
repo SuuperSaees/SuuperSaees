@@ -60,10 +60,7 @@ export const UpdateMemberRoleDialog: React.FC<{
           </DialogDescription>
         </DialogHeader>
 
-        <RolesDataProvider
-          accountId={teamAccountId}
-          maxRoleHierarchy={userRoleHierarchy}
-        >
+        <RolesDataProvider maxRoleHierarchy={userRoleHierarchy}>
           {(data) => (
             <UpdateMemberForm
               setIsOpen={setIsOpen}

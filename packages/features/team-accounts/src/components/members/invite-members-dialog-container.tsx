@@ -52,12 +52,10 @@ const MAX_INVITES = 5;
 
 export function InviteMembersDialogContainer({
   accountSlug,
-  accountId,
   userRoleHierarchy,
   children,
 }: React.PropsWithChildren<{
   accountSlug: string;
-  accountId: string;
   userRoleHierarchy: number;
 }>) {
   const [pending, startTransition] = useTransition();
@@ -79,10 +77,7 @@ export function InviteMembersDialogContainer({
           </DialogDescription>
         </DialogHeader>
 
-        <RolesDataProvider
-          accountId={accountId}
-          maxRoleHierarchy={userRoleHierarchy}
-        >
+        <RolesDataProvider maxRoleHierarchy={userRoleHierarchy}>
           {(roles) => (
             <InviteMembersForm
               pending={pending}

@@ -45,7 +45,7 @@ select row_eq(
 -- Custom roles
 -- New roles created for the app
 
-set local role service_role;
+set local role postgres;
 
 -- the name should be unique
 
@@ -57,17 +57,16 @@ select throws_ok(
 -- the hierarchy level should be unique
 select throws_ok(
   $$ insert into public.roles (name, hierarchy_level) values ('custom-role-2', 1) $$,
-  'duplicate key value violates unique constraint "idx_unique_hierarchy_per_account"'
+  'duplicate key value violates unique constraint "roles_hierarchy_level_key"'
 );
 
 -- Custom Account Role
--- Roles created specifically for the account
 
-set local role service_role;
+set local role postgres;
 
 -- the names should be unique
 select throws_ok(
-  $$ insert into public.roles (name, hierarchy_level, account_id) values ('owner', 1, makerkit.get_account_id_by_slug('test')) $$,
+  $$ insert into public.roles (name, hierarchy_level) values ('owner', 1) $$,
   'duplicate key value violates unique constraint "roles_pkey"'
 );
 

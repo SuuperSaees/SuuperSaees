@@ -141,8 +141,8 @@ INSERT INTO "public"."accounts" ("id", "primary_owner_user_id", "name", "slug", 
 -- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."roles" ("name", "hierarchy_level", "account_id") VALUES
-        ('custom-role', 4, '5deaa894-2094-4da3-b4fd-1fada0809d1c');
+INSERT INTO "public"."roles" ("name", "hierarchy_level") VALUES
+        ('custom-role', 4);
 
 --
 -- Data for Name: accounts_memberships; Type: TABLE DATA; Schema: public; Owner: postgres

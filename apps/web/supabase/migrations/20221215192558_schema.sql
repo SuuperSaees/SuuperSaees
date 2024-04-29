@@ -490,8 +490,7 @@ declare
     role varchar(50);
 begin
     select name from public.roles
-      where account_id is null and
-      hierarchy_level = 1 into role;
+      where hierarchy_level = 1 into role;
 
     return role;
 end;
@@ -568,9 +567,8 @@ create table if not exists
   public.roles (
     name varchar(50) not null,
     hierarchy_level int not null check (hierarchy_level > 0),
-    account_id uuid references public.accounts (id) on delete cascade,
-    unique (name, account_id),
-    primary key (name)
+    primary key (name),
+    unique (hierarchy_level)
   );
 
 -- Revoke all on roles table from authenticated and service_role
@@ -582,68 +580,8 @@ from
 -- Open up access to roles table for authenticated users and service_role
 grant
 select
-,
-  insert,
-  delete,
-update on table public.roles to authenticated,
+on table public.roles to authenticated,
 service_role;
-
--- define the system role uuid as a static UUID to be used as a default
--- account_id for system roles when the account_id is null. Useful for constraints.
-create
-or replace function kit.get_system_role_uuid () returns uuid
-set
-  search_path = '' as $$
-begin
-    return 'fd4f287c-762e-42b7-8207-b1252f799670';
-end; $$ language plpgsql immutable;
-
-grant
-execute on function kit.get_system_role_uuid () to authenticated,
-service_role;
-
--- we create a unique index on the roles table to ensure that the
--- can there be a unique hierarchy_level per account (or system role)
-create unique index idx_unique_hierarchy_per_account on public.roles (
-  hierarchy_level,
-  coalesce(account_id, kit.get_system_role_uuid ())
-);
-
--- we create a unique index on the roles table to ensure that the
--- can there be a unique name per account (or system role)
-create unique index idx_unique_name_per_account on public.roles (
-  name,
-  coalesce(account_id, kit.get_system_role_uuid ())
-);
-
--- Indexes on the roles table
-create index idx_roles_account_id on public.roles (account_id);
-
--- Function "kit.check_non_personal_account_roles"
--- Trigger to prevent roles from being created for personal accounts
-create
-or replace function kit.check_non_personal_account_roles () returns trigger
-set
-  search_path = '' as $$
-begin
-    if new.account_id is not null and(
-        select
-            is_personal_account
-        from
-            public.accounts
-        where
-            id = new.account_id) then
-        raise exception 'Roles cannot be created for personal accounts';
-    end if;
-
-    return new;
-end; $$ language plpgsql;
-
-create constraint trigger tr_check_non_personal_account_roles
-after insert
-or
-update on public.roles for each row
-execute procedure kit.check_non_personal_account_roles ();
 
 -- RLS
 alter table public.roles enable row level security;
@@ -796,12 +734,11 @@ service_role;
 
 -- RLS
 -- SELECT(roles)
--- authenticated users can query roles if the role is public or the user has a role on the account the role is for
+-- authenticated users can query roles
 create policy roles_read on public.roles for
 select
   to authenticated using (
-    account_id is null
-    or public.has_role_on_account (account_id)
+    true
   );
 
 -- Function "public.can_action_account_member"
@@ -1094,8 +1031,7 @@ begin
     from
         public.roles
     where
-        name = role_name
-        and (account_id = target_account_id or account_id is null);
+        name = role_name;
 
     -- If the target role does not exist, the user cannot perform the action
     if target_role_hierarchy_level is null then
@@ -1171,8 +1107,7 @@ begin
     from
         public.roles
     where
-        name = role_name
-        and (account_id = target_account_id or account_id is null);
+        name = role_name;
 
     -- If the target role does not exist, the user cannot perform the action
     if target_role_hierarchy_level is null then

@@ -512,43 +512,18 @@ export type Database = {
       }
       roles: {
         Row: {
-          account_id: string | null
           hierarchy_level: number
           name: string
         }
         Insert: {
-          account_id?: string | null
           hierarchy_level: number
           name: string
         }
         Update: {
-          account_id?: string | null
           hierarchy_level?: number
           name?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "roles_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "roles_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "roles_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       subscription_items: {
         Row: {

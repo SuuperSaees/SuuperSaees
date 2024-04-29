@@ -144,10 +144,7 @@ function UpdateInvitationForm({
                 </FormLabel>
 
                 <FormControl>
-                  <RolesDataProvider
-                    accountId={account}
-                    maxRoleHierarchy={userRoleHierarchy}
-                  >
+                  <RolesDataProvider maxRoleHierarchy={userRoleHierarchy}>
                     {(roles) => (
                       <MembershipRoleSelector
                         roles={roles}

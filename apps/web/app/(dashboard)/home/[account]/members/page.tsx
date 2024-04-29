@@ -78,7 +78,6 @@ async function TeamAccountMembersPage({ params }: Params) {
               <If condition={canManageInvitations && canAddMember}>
                 <InviteMembersDialogContainer
                   userRoleHierarchy={currentUserRoleHierarchy}
-                  accountId={account.id}
                   accountSlug={account.slug}
                 >
                   <Button size={'sm'} data-test={'invite-members-form-trigger'}>
