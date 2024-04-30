@@ -1,4 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
+import { Page, expect, test } from '@playwright/test';
+
 import { TeamAccountsPageObject } from './team-accounts.po';
 
 test.describe('Team Accounts', () => {
@@ -13,7 +14,7 @@ test.describe('Team Accounts', () => {
   test('user can update their team name (and slug)', async () => {
     await teamAccounts.setup();
 
-    const {teamName, slug} = teamAccounts.createTeamName();
+    const { teamName, slug } = teamAccounts.createTeamName();
 
     await teamAccounts.goToSettings();
     await teamAccounts.updateName(teamName);
@@ -21,7 +22,9 @@ test.describe('Team Accounts', () => {
     // the slug should be updated to match the new team name
     await page.waitForURL(`http://localhost:3000/home/${slug}/settings`);
 
-    await expect(await teamAccounts.getTeamFromSelector(slug)).toBeVisible();
+    await teamAccounts.openAccountsSelector();
+
+    await expect(teamAccounts.getTeamFromSelector(slug)).toBeVisible();
   });
 });
 
@@ -34,7 +37,10 @@ test.describe('Account Deletion', () => {
     await teamAccounts.goToSettings();
 
     await teamAccounts.deleteAccount(params.teamName);
+    await teamAccounts.openAccountsSelector();
 
-    await expect(await teamAccounts.getTeamFromSelector(params.slug)).not.toBeVisible();
+    await expect(
+      teamAccounts.getTeamFromSelector(params.slug),
+    ).not.toBeVisible();
   });
 });

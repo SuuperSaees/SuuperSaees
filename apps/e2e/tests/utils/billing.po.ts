@@ -1,12 +1,11 @@
 import { Page } from '@playwright/test';
+
 import { StripePageObject } from './stripe.po';
 
 export class BillingPageObject {
   public readonly stripe: StripePageObject;
 
-  constructor(
-    private readonly page: Page,
-  ) {
+  constructor(private readonly page: Page) {
     this.stripe = new StripePageObject(page);
   }
 
@@ -32,14 +31,16 @@ export class BillingPageObject {
     // wait a bit for the webhook to be processed
     await this.page.waitForTimeout(1000);
 
-    await this.page.locator('[data-test="checkout-success-back-link"]').click();
+    return this.page
+      .locator('[data-test="checkout-success-back-link"]')
+      .click();
   }
 
   proceedToCheckout() {
     return this.page.click('[data-test="checkout-submit-button"]');
   }
 
-  async getStatus() {
+  getStatus() {
     return this.page.locator('[data-test="current-plan-card-status-badge"]');
   }
 }

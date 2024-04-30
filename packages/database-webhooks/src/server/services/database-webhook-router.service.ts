@@ -1,13 +1,27 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
 import { RecordChange, Tables } from '../record-change.type';
 
-export class DatabaseWebhookRouterService {
+export function createDatabaseWebhookRouterService(
+  adminClient: SupabaseClient<Database>,
+) {
+  return new DatabaseWebhookRouterService(adminClient);
+}
+
+/**
+ * @name DatabaseWebhookRouterService
+ * @description Service that routes the webhook event to the appropriate service
+ */
+class DatabaseWebhookRouterService {
   constructor(private readonly adminClient: SupabaseClient<Database>) {}
 
+  /**
+   * @name handleWebhook
+   * @description Handle the webhook event
+   * @param body
+   */
   async handleWebhook(body: RecordChange<keyof Tables>) {
     switch (body.table) {
       case 'invitations': {
@@ -29,14 +43,7 @@ export class DatabaseWebhookRouterService {
       }
 
       default: {
-        const logger = await getLogger();
-
-        logger.warn(
-          {
-            table: body.table,
-          },
-          'No handler found for table',
-        );
+        return;
       }
     }
   }

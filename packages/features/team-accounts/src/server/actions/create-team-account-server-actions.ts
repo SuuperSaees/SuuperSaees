@@ -9,12 +9,12 @@ import { CreateTeamSchema } from '../../schema/create-team.schema';
 import { createCreateTeamAccountService } from '../services/create-team-account.service';
 
 export const createOrganizationAccountAction = enhanceAction(
-  async (params, user) => {
+  async ({ name }, user) => {
     const client = getSupabaseServerActionClient();
     const service = createCreateTeamAccountService(client);
 
     const { data, error } = await service.createNewOrganizationAccount({
-      name: params.name,
+      name,
       userId: user.id,
     });
 

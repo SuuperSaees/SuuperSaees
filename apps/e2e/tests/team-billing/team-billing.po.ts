@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+
 import { TeamAccountsPageObject } from '../team-accounts/team-accounts.po';
 import { BillingPageObject } from '../utils/billing.po';
 
@@ -11,7 +12,7 @@ export class TeamBillingPageObject {
     this.billing = new BillingPageObject(page);
   }
 
-  async setup() {
-    await this.teamAccounts.setup();
+  setup() {
+    return this.teamAccounts.setup();
   }
 }

@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+
 import { AuthPageObject } from '../authentication/auth.po';
 import { TeamAccountsPageObject } from '../team-accounts/team-accounts.po';
 
@@ -17,10 +18,12 @@ export class InvitationsPageObject {
     await this.teamAccounts.setup();
   }
 
-  public async inviteMembers(invites: Array<{
-    email: string;
-    role: string;
-  }>) {
+  public async inviteMembers(
+    invites: Array<{
+      email: string;
+      role: string;
+    }>,
+  ) {
     const form = this.getInviteForm();
 
     for (let index = 0; index < invites.length; index++) {
@@ -30,12 +33,17 @@ export class InvitationsPageObject {
         continue;
       }
 
-      console.log(`Inviting ${invite.email} with role ${invite.role}...`)
+      console.log(`Inviting ${invite.email} with role ${invite.role}...`);
 
       const nth = index + 1;
 
-      await this.page.fill(`[data-test="invite-member-form-item"]:nth-child(${nth}) [data-test="invite-email-input"]`, invite.email);
-      await this.page.click(`[data-test="invite-member-form-item"]:nth-child(${nth}) [data-test="role-selector-trigger"]`);
+      await this.page.fill(
+        `[data-test="invite-member-form-item"]:nth-child(${nth}) [data-test="invite-email-input"]`,
+        invite.email,
+      );
+      await this.page.click(
+        `[data-test="invite-member-form-item"]:nth-child(${nth}) [data-test="role-selector-trigger"]`,
+      );
       await this.page.click(`[data-test="role-option-${invite.role}"]`);
 
       if (index < invites.length - 1) {
@@ -46,22 +54,22 @@ export class InvitationsPageObject {
     await form.locator('button[type="submit"]').click();
   }
 
-   navigateToMembers() {
-    return this.page.locator('a', {
-      hasText: 'Members',
-    }).click();
+  navigateToMembers() {
+    return this.page
+      .locator('a', {
+        hasText: 'Members',
+      })
+      .click();
   }
 
-   async openInviteForm() {
-    await this.page.locator('[data-test="invite-members-form-trigger"]').click();
+  openInviteForm() {
+    return this.page
+      .locator('[data-test="invite-members-form-trigger"]')
+      .click();
   }
 
-  async getInvitations() {
+  getInvitations() {
     return this.page.locator('[data-test="invitation-email"]');
-  }
-
-  private getInviteForm() {
-    return this.page.locator('[data-test="invite-members-form"]');
   }
 
   async deleteInvitation(email: string) {
@@ -71,7 +79,9 @@ export class InvitationsPageObject {
 
     await this.page.locator('[data-test="remove-invitation-trigger"]').click();
 
-    await this.page.click('[data-test="delete-invitation-form"] button[type="submit"]');
+    await this.page.click(
+      '[data-test="delete-invitation-form"] button[type="submit"]',
+    );
   }
 
   getInvitationRow(email: string) {
@@ -89,16 +99,27 @@ export class InvitationsPageObject {
     await this.page.click(`[data-test="role-selector-trigger"]`);
     await this.page.click(`[data-test="role-option-${role}"]`);
 
-    await this.page.click('[data-test="update-invitation-form"] button[type="submit"]');
+    await this.page.click(
+      '[data-test="update-invitation-form"] button[type="submit"]',
+    );
   }
 
   async acceptInvitation() {
     console.log('Accepting invitation...');
 
-    await this.page.locator('[data-test="join-team-form"] button[type="submit"]').click();
+    await this.page
+      .locator('[data-test="join-team-form"] button[type="submit"]')
+      .click();
 
-    await this.page.waitForResponse(response => {
-      return response.url().includes('/join') && response.request().method() === 'POST';
+    await this.page.waitForResponse((response) => {
+      return (
+        response.url().includes('/join') &&
+        response.request().method() === 'POST'
+      );
     });
+  }
+
+  private getInviteForm() {
+    return this.page.locator('[data-test="invite-members-form"]');
   }
 }

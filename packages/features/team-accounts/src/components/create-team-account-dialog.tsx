@@ -120,15 +120,19 @@ function CreateOrganizationAccountForm(props: { onClose: () => void }) {
           <div className={'flex justify-end space-x-2'}>
             <Button
               variant={'outline'}
-              disabled={pending}
               type={'button'}
+              disabled={pending}
               onClick={props.onClose}
             >
               <Trans i18nKey={'common:cancel'} />
             </Button>
 
             <Button data-test={'confirm-create-team-button'} disabled={pending}>
-              <Trans i18nKey={'teams:createTeamSubmitLabel'} />
+              {pending ? (
+                <Trans i18nKey={'teams:creatingTeam'} />
+              ) : (
+                <Trans i18nKey={'teams:createTeamSubmitLabel'} />
+              )}
             </Button>
           </div>
         </div>

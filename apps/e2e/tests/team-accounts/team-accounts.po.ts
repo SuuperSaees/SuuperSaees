@@ -1,4 +1,5 @@
-import { expect, Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
+
 import { AuthPageObject } from '../authentication/auth.po';
 
 export class TeamAccountsPageObject {
@@ -15,34 +16,40 @@ export class TeamAccountsPageObject {
     await this.createTeam(params);
   }
 
-  async getTeamFromSelector(teamSlug: string) {
-    await this.openAccountsSelector();
-
-    return this.page.locator(`[data-test="account-selector-team"][data-value="${teamSlug}"]`);
+  getTeamFromSelector(teamSlug: string) {
+    return this.page.locator(
+      `[data-test="account-selector-team"][data-value="${teamSlug}"]`,
+    );
   }
 
-  async selectAccount(teamName: string) {
-    await this.page.click(`[data-test="account-selector-team"][data-name="${teamName}"]`);
+  selectAccount(teamName: string) {
+    return this.page.click(
+      `[data-test="account-selector-team"][data-name="${teamName}"]`,
+    );
   }
 
-  async getTeams() {
-    await this.openAccountsSelector();
-
+  getTeams() {
     return this.page.locator('[data-test="account-selector-team"]');
   }
 
   goToSettings() {
-    return this.page.locator('a', {
-      hasText: 'Settings',
-    }).click();
+    return this.page
+      .locator('a', {
+        hasText: 'Settings',
+      })
+      .click();
   }
 
   goToBilling() {
-    return this.page.getByRole('button', { name: 'Billing' }).click();
+    return this.page
+      .locator('a', {
+        hasText: 'Billing',
+      })
+      .click();
   }
 
-  async openAccountsSelector() {
-    await this.page.click('[data-test="account-selector-trigger"]');
+  openAccountsSelector() {
+    return this.page.click('[data-test="account-selector-trigger"]');
   }
 
   async createTeam({ teamName, slug } = this.createTeamName()) {
@@ -51,23 +58,36 @@ export class TeamAccountsPageObject {
     await this.page.click('[data-test="create-team-account-trigger"]');
     await this.page.fill('[data-test="create-team-form"] input', teamName);
     await this.page.click('[data-test="create-team-form"] button:last-child');
+
+    await this.page.waitForURL(`/home/${slug}`);
   }
 
   async updateName(name: string) {
-    await this.page.fill('[data-test="update-team-account-name-form"] input', name);
+    await this.page.fill(
+      '[data-test="update-team-account-name-form"] input',
+      name,
+    );
+
     await this.page.click('[data-test="update-team-account-name-form"] button');
   }
 
   async deleteAccount(teamName: string) {
     await this.page.click('[data-test="delete-team-trigger"]');
 
-    expect(await this.page.locator('[data-test="delete-team-form-confirm-input"]').isVisible()).toBeTruthy();
+    expect(
+      await this.page
+        .locator('[data-test="delete-team-form-confirm-input"]')
+        .isVisible(),
+    ).toBeTruthy();
 
-    await this.page.fill('[data-test="delete-team-form-confirm-input"]', teamName);
+    await this.page.fill(
+      '[data-test="delete-team-form-confirm-input"]',
+      teamName,
+    );
     await this.page.click('[data-test="delete-team-form-confirm-button"]');
   }
 
-   createTeamName() {
+  createTeamName() {
     const random = (Math.random() * 100000000).toFixed(0);
 
     const teamName = `Team-Name-${random}`;

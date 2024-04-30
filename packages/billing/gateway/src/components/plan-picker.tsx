@@ -356,7 +356,7 @@ export function PlanPicker(
               disabled={props.pending ?? !form.formState.isValid}
             >
               {props.pending ? (
-                t('processing')
+                t('redirectingToPayment')
               ) : (
                 <>
                   <If

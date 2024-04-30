@@ -26,7 +26,7 @@ test.describe('User Billing', () => {
 
     await po.billing.returnToBilling();
 
-    await expect(await po.billing.getStatus()).toContainText('Active');
+    await expect(po.billing.getStatus()).toContainText('Active');
     await expect(po.billing.manageBillingButton()).toBeVisible();
   });
 });

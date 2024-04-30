@@ -28,11 +28,11 @@ test.describe('Invitations', () => {
 
     await invitations.inviteMembers(invites);
 
-    await expect(await invitations.getInvitations()).toHaveCount(1);
+    await expect(invitations.getInvitations()).toHaveCount(1);
 
     await invitations.deleteInvitation(email);
 
-    await expect(await invitations.getInvitations()).toHaveCount(0);
+    await expect(invitations.getInvitations()).toHaveCount(0);
   });
 
   test('users can update invites', async () => {
@@ -50,7 +50,7 @@ test.describe('Invitations', () => {
 
     await invitations.inviteMembers(invites);
 
-    await expect(await invitations.getInvitations()).toHaveCount(1);
+    await expect(invitations.getInvitations()).toHaveCount(1);
 
     await invitations.updateInvitation(email, 'owner');
 
@@ -92,7 +92,7 @@ test.describe('Full Invitation Flow', () => {
 
     const firstEmail = invites[0]!.email;
 
-    await expect(await invitations.getInvitations()).toHaveCount(2);
+    await expect(invitations.getInvitations()).toHaveCount(2);
 
     // sign out and sign in with the first email
     await invitations.auth.signOut();
@@ -115,6 +115,6 @@ test.describe('Full Invitation Flow', () => {
 
     await invitations.teamAccounts.openAccountsSelector();
 
-    await expect(await invitations.teamAccounts.getTeams()).toHaveCount(1);
+    await expect(invitations.teamAccounts.getTeams()).toHaveCount(1);
   });
 });

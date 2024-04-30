@@ -20,6 +20,7 @@
   },
   "yourTeams": "Your Teams ({{teamsCount}})",
   "createTeam": "Create a Team",
+  "creatingTeam": "Creating Team...",
   "personalAccount": "Personal Account",
   "searchAccount": "Search Account...",
   "membersTabLabel": "Members",

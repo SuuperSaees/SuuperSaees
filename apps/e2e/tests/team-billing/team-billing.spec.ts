@@ -11,10 +11,11 @@ test.describe('Team Billing', () => {
     po = new TeamBillingPageObject(page);
 
     await po.setup();
-    await po.teamAccounts.goToBilling();
   });
 
   test('a team can subscribe to a plan', async () => {
+    await po.teamAccounts.goToBilling();
+
     await po.billing.selectPlan(0);
     await po.billing.proceedToCheckout();
 
@@ -27,7 +28,7 @@ test.describe('Team Billing', () => {
 
     await po.billing.returnToBilling();
 
-    await expect(await po.billing.getStatus()).toContainText('Active');
+    await expect(po.billing.getStatus()).toContainText('Active');
     await expect(po.billing.manageBillingButton()).toBeVisible();
   });
 });

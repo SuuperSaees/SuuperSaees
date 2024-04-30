@@ -29,7 +29,7 @@
   "lifetime": "Lifetime",
   "trialPeriod": "{{period}} day trial",
   "perPeriod": "per {{period}}",
-  "processing": "Processing...",
+  "redirectingToPayment": "Redirecting to checkout. Please wait...",
   "proceedToPayment": "Proceed to Payment",
   "startTrial": "Start Trial",
   "perTeamMember": "Per team member",

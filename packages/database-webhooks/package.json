@@ -24,7 +24,7 @@
     "@kit/team-accounts": "workspace:^",
     "@kit/tsconfig": "workspace:*",
     "@supabase/supabase-js": "^2.42.7",
-    "zod": "^3.23.4"
+    "zod": "^3.23.5"
   },
   "eslintConfig": {
     "root": true,
