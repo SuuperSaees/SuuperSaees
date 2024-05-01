@@ -29,7 +29,6 @@
     "stripe:listen": "pnpm --filter '@kit/stripe' start"
   },
   "prettier": "@kit/prettier-config",
-  "packageManager": "pnpm@9.0.4",
   "workspaces": [
     "apps/*",
     "packages/**",
