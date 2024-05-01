@@ -1,5 +1,3 @@
-import { readdirSync } from 'fs';
-import { join } from 'path';
 
 /**
  * This file is used to register monitoring instrumentation
@@ -7,18 +5,23 @@ import { join } from 'path';
  */
 
 export async function register() {
-  readdirSync(join(process.cwd(), 'content'));
 
   // only run in nodejs runtime
   if (
-    process.env.NEXT_RUNTIME === 'nodejs' &&
-    process.env.MONITORING_INSTRUMENTATION_ENABLED === 'true'
+    process.env.NEXT_RUNTIME === 'nodejs'
   ) {
-    const { registerMonitoringInstrumentation } = await import(
-      '@kit/monitoring/instrumentation'
-    );
+    const path = await import('node:path');
+    const fs = await import('node:fs');
 
-    // Register monitoring instrumentation based on the MONITORING_PROVIDER environment variable.
-    return registerMonitoringInstrumentation();
+    fs.readdirSync(path.join(process.cwd(), 'content'));
+
+    if (process.env.MONITORING_INSTRUMENTATION_ENABLED === 'true') {
+      const {registerMonitoringInstrumentation} = await import(
+          '@kit/monitoring/instrumentation'
+          );
+
+      // Register monitoring instrumentation based on the MONITORING_PROVIDER environment variable.
+      return registerMonitoringInstrumentation();
+    }
   }
 }
