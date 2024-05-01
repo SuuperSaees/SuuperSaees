@@ -12,7 +12,7 @@ export async function createKeystaticReader() {
         const { default: config } = await import('./keystatic.config');
         const { createReader } = await import('@keystatic/core/reader');
 
-        return createReader('.', config);
+        return createReader(process.cwd(), config);
       } else {
         // we should never get here but the compiler requires the check
         // to ensure we don't parse the package at build time

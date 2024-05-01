@@ -38,7 +38,6 @@ const config = {
     turbo: {
       resolveExtensions: ['.ts', '.tsx', '.js', '.jsx'],
     },
-    outputFileTracingRoot: join(__dirname, '../../'),
     optimizePackageImports: [
       'recharts',
       'lucide-react',
