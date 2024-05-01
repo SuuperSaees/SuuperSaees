@@ -1,5 +1,5 @@
-import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdirSync } from 'fs';
+import { join } from 'path';
 
 /**
  * This file is used to register monitoring instrumentation
