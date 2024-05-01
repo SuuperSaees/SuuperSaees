@@ -63,7 +63,7 @@ async function BlogPost({ params }: { params: { slug: string } }) {
   }
 
   return (
-    <div className={'container'}>
+    <div className={'container sm:max-w-none sm:p-0'}>
       <Post post={post} content={post.content} />
     </div>
   );
