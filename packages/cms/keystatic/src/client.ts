@@ -7,6 +7,8 @@ export class KeystaticClient implements CmsClient {
   async getContentItems(options: Cms.GetContentItemsOptions) {
     const reader = await createKeystaticReader();
 
+    console.log(`Reader Path: ${(reader as unknown as { repoPath: string }).repoPath}`);
+
     const collection =
       options.collection as keyof (typeof reader)['collections'];
 
