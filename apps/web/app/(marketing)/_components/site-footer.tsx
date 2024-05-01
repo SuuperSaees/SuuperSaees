@@ -1,6 +1,5 @@
 import Link from 'next/link';
 
-import { LanguageSelector } from '@kit/ui/language-selector';
 import { Trans } from '@kit/ui/trans';
 
 import { AppLogo } from '~/components/app-logo';
@@ -8,7 +7,7 @@ import appConfig from '~/config/app.config';
 
 export function SiteFooter() {
   return (
-    <footer className={'border-t py-8 mt-auto 2xl:py-14'}>
+    <footer className={'mt-auto border-t py-8 2xl:py-14'}>
       <div className={'px-8'}>
         <div className={'flex flex-col space-y-8 lg:flex-row lg:space-y-0'}>
           <div
@@ -113,12 +112,6 @@ export function SiteFooter() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className={'mt-8 flex items-end justify-end px-8'}>
-        <div className={'max-w-xs'}>
-          <LanguageSelector />
         </div>
       </div>
     </footer>

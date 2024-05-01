@@ -10,11 +10,20 @@ const webhooksSecret = z
   .min(1)
   .parse(process.env.SUPABASE_DB_WEBHOOK_SECRET);
 
-export class PostgresDatabaseWebhookVerifierService
+export function createDatabaseWebhookVerifierService() {
+  return new PostgresDatabaseWebhookVerifierService();
+}
+
+class PostgresDatabaseWebhookVerifierService
   implements DatabaseWebhookVerifierService
 {
   verifySignatureOrThrow(request: Request) {
     const header = request.headers.get('X-Supabase-Event-Signature');
+
+    console.log({
+      header,
+      webhooksSecret,
+    });
 
     if (header !== webhooksSecret) {
       throw new Error('Invalid signature');

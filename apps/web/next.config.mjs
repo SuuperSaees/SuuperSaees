@@ -37,6 +37,7 @@ const config = {
     turbo: {
       resolveExtensions: ['.ts', '.tsx', '.js', '.jsx'],
     },
+    // needed for supporting dynamic imports for local content
     outputFileTracingIncludes: {
       "/*": ["./content/**/*"],
     },

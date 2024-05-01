@@ -4,11 +4,11 @@ const WEBHOOK_SENDER_PROVIDER =
 export async function getDatabaseWebhookVerifier() {
   switch (WEBHOOK_SENDER_PROVIDER) {
     case 'postgres': {
-      const { PostgresDatabaseWebhookVerifierService } = await import(
+      const { createDatabaseWebhookVerifierService } = await import(
         './postgres-database-webhook-verifier.service'
       );
 
-      return new PostgresDatabaseWebhookVerifierService();
+      return createDatabaseWebhookVerifierService();
     }
 
     default:

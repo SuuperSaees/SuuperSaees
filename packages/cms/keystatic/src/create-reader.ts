@@ -2,11 +2,6 @@ import { z } from 'zod';
 
 const STORAGE_KIND = process.env.KEYSTATIC_STORAGE_KIND ?? 'local';
 
-console.log(
-    `Keystatic Storage Kind: ${STORAGE_KIND}`,
-    `Keystatic Content Path: ${process.env.NEXT_PUBLIC_KEYSTATIC_CONTENT_PATH}`,
-);
-
 /**
  * Create a KeyStatic reader based on the storage kind.
  */
@@ -21,15 +16,11 @@ export async function createKeystaticReader() {
         const contentPath = process.env.NEXT_PUBLIC_KEYSTATIC_CONTENT_PATH;
         const repositoryPath = path.join(process.cwd(), contentPath as string);
 
-        console.log(`path`, {
-          repositoryPath
-        });
-
         return createReader(repositoryPath, config);
       } else {
         // we should never get here but the compiler requires the check
         // to ensure we don't parse the package at build time
-        throw new Error(`Invalid runtime: ${process.env.NEXT_RUNTIME}`);
+        throw new Error();
       }
     }
 
