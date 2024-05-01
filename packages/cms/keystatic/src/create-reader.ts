@@ -18,7 +18,7 @@ export async function createKeystaticReader() {
         const { createReader } = await import('@keystatic/core/reader');
 
         const path = process.env.NEXT_PUBLIC_KEYSTATIC_CONTENT_PATH;
-        const repositoryPath = process.cwd() + path;
+        const repositoryPath = '/var/task' + path;
 
         console.log(`path`, {
           repositoryPath
