@@ -38,7 +38,7 @@ const config = {
       resolveExtensions: ['.ts', '.tsx', '.js', '.jsx'],
     },
     outputFileTracingIncludes: {
-      'content': ['./content/**/*'],
+      'apps/web/content': ['./content/**/*'],
     },
     optimizePackageImports: [
       'recharts',
