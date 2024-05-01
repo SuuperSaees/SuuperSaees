@@ -2,7 +2,7 @@ import withBundleAnalyzer from '@next/bundle-analyzer';
 import { readdirSync } from "node:fs";
 import { join } from 'node:path';
 
-readdirSync(join(__dirname,'./content'));
+readdirSync(join(process.cwd(),'./content'));
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
