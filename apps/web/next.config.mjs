@@ -1,4 +1,5 @@
 import withBundleAnalyzer from '@next/bundle-analyzer';
+import { join } from 'path';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -37,9 +38,7 @@ const config = {
     turbo: {
       resolveExtensions: ['.ts', '.tsx', '.js', '.jsx'],
     },
-    outputFileTracingIncludes: {
-      'apps/web/content': ['./content/**/*'],
-    },
+    outputFileTracingRoot: join(__dirname, '../../'),
     optimizePackageImports: [
       'recharts',
       'lucide-react',
