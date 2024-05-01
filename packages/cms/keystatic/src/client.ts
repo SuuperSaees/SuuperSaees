@@ -2,7 +2,6 @@ import { Cms, CmsClient } from '@kit/cms';
 
 import { createKeystaticReader } from './create-reader';
 import { PostEntryProps } from './keystatic.config';
-import './mock-fetch';
 
 export class KeystaticClient implements CmsClient {
   async getContentItems(options: Cms.GetContentItemsOptions) {

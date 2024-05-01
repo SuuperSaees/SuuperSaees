@@ -2,8 +2,6 @@ import { collection, config, fields } from '@keystatic/core';
 import { Entry } from '@keystatic/core/reader';
 import { z } from 'zod';
 
-import './mock-fetch';
-
 const local = z.object({
   kind: z.literal('local'),
 });
@@ -32,7 +30,7 @@ const storage = z.union([local, cloud, github]).parse({
   pathPrefix: process.env.KEYSTATIC_PATH_PREFIX,
 });
 
-const path = process.env.KEYSTATIC_CONTENT_PATH ?? 'content';
+const path = process.env.NEXT_PUBLIC_KEYSTATIC_CONTENT_PATH ?? './content';
 
 const keyStaticConfig = createKeyStaticConfig(path);
 

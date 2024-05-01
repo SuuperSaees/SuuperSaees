@@ -121,13 +121,13 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(react@18.3.1)
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       '@tanstack/react-query':
         specifier: 5.32.0
         version: 5.32.0(react@18.3.1)
       '@tanstack/react-query-next-experimental':
-        specifier: ^5.32.0
+        specifier: ^5.32.1
         version: 5.32.1(@tanstack/react-query@5.32.0(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@tanstack/react-table':
         specifier: ^8.16.0
@@ -281,7 +281,7 @@ importers:
         specifier: workspace:^
         version: link:../../ui
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       '@types/react':
         specifier: ^18.3.1
@@ -506,7 +506,7 @@ importers:
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       zod:
         specifier: ^3.23.5
@@ -583,7 +583,7 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(react@18.3.1)
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       '@tanstack/react-query':
         specifier: 5.32.0
@@ -655,7 +655,7 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.0)(@tanstack/react-query@5.32.0(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       '@tanstack/react-query':
         specifier: 5.32.0
@@ -718,7 +718,7 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(react@18.3.1)
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       '@tanstack/react-query':
         specifier: 5.32.0
@@ -766,7 +766,7 @@ importers:
         specifier: workspace:*
         version: link:../../ui
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       '@tanstack/react-query':
         specifier: 5.32.0
@@ -836,7 +836,7 @@ importers:
         specifier: workspace:^
         version: link:../../ui
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       '@tanstack/react-query':
         specifier: 5.32.0
@@ -1092,7 +1092,7 @@ importers:
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       next:
         specifier: 14.2.3
@@ -1144,7 +1144,7 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0(@supabase/supabase-js@2.43.0)
       '@supabase/supabase-js':
-        specifier: ^2.42.7
+        specifier: ^2.43.0
         version: 2.43.0
       '@tanstack/react-query':
         specifier: 5.32.0
@@ -3820,8 +3820,8 @@ packages:
   '@urql/core@4.3.0':
     resolution: {integrity: sha512-wT+FeL8DG4x5o6RfHEnONNFVDM3616ouzATMYUClB6CB+iIu2mwfBKd7xSUxYOZmwtxna5/hDRQdMl3nbQZlnw==}
 
-  '@urql/core@5.0.3':
-    resolution: {integrity: sha512-NZ3YqRr6IphbpFjGqujJOuVuV8/QegYxfjy1zdmOSWpYYFLpmMBfVtzZ/L8IiqPERVAEAIKjUsryLnVtXJQo4w==}
+  '@urql/core@5.0.2':
+    resolution: {integrity: sha512-gxMYkhbZg43cPftRv9K/A8lLjbZm2aam+K5AfPyQyADQVKkQ0V5hC/XtH++Zdi3swhBvgjbvVG/YjdkZTh8PVg==}
 
   '@urql/exchange-auth@2.1.6':
     resolution: {integrity: sha512-snOlt7p5kYq0KnPDuXkKe2qW3/BucQZOElvTeo3svLQuk9JiNJVnm6ffQ6QGiGO+G3AtMrctnno1+X44fLtDuQ==}
@@ -4479,8 +4479,8 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
-  electron-to-chromium@1.4.752:
-    resolution: {integrity: sha512-P3QJreYI/AUTcfBVrC4zy9KvnZWekViThgQMX/VpJ+IsOBbcX5JFpORM4qWapwWQ+agb2nYAOyn/4PMXOk0m2Q==}
+  electron-to-chromium@1.4.751:
+    resolution: {integrity: sha512-2DEPi++qa89SMGRhufWTiLmzqyuGmNF3SK4+PQetW1JKiZdEpF4XQonJXJCzyuYSA6mauiMhbyVhqYAP45Hvfw==}
 
   emery@1.4.3:
     resolution: {integrity: sha512-DrP24dscOZx5BJpOo32X1CjaWgbFojS4sAXKtlmTQmCJ01Vv2brjeWKIS6cQ4Rblt/hZIN+6pdV2L7Y9Rsh8EA==}
@@ -7244,7 +7244,7 @@ snapshots:
 
   '@babel/generator@7.17.7':
     dependencies:
-      '@babel/types': 7.17.0
+      '@babel/types': 7.24.5
       jsesc: 2.5.2
       source-map: 0.5.7
 
@@ -7318,7 +7318,7 @@ snapshots:
 
   '@babel/parser@7.24.5':
     dependencies:
-      '@babel/types': 7.17.0
+      '@babel/types': 7.24.5
 
   '@babel/runtime-corejs3@7.24.5':
     dependencies:
@@ -10483,7 +10483,7 @@ snapshots:
     transitivePeerDependencies:
       - graphql
 
-  '@urql/core@5.0.3(graphql@16.8.1)':
+  '@urql/core@5.0.2(graphql@16.8.1)':
     dependencies:
       '@0no-co/graphql.web': 1.0.7(graphql@16.8.1)
       wonka: 6.3.4
@@ -10492,7 +10492,7 @@ snapshots:
 
   '@urql/exchange-auth@2.1.6(graphql@16.8.1)':
     dependencies:
-      '@urql/core': 4.3.0(graphql@16.8.1)
+      '@urql/core': 5.0.2(graphql@16.8.1)
       wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
@@ -10500,14 +10500,14 @@ snapshots:
   '@urql/exchange-graphcache@6.5.1(graphql@16.8.1)':
     dependencies:
       '@0no-co/graphql.web': 1.0.7(graphql@16.8.1)
-      '@urql/core': 4.3.0(graphql@16.8.1)
+      '@urql/core': 5.0.2(graphql@16.8.1)
       wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
 
   '@urql/exchange-persisted@4.2.0(graphql@16.8.1)':
     dependencies:
-      '@urql/core': 4.3.0(graphql@16.8.1)
+      '@urql/core': 5.0.2(graphql@16.8.1)
       wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
@@ -10742,7 +10742,7 @@ snapshots:
   browserslist@4.23.0:
     dependencies:
       caniuse-lite: 1.0.30001614
-      electron-to-chromium: 1.4.752
+      electron-to-chromium: 1.4.751
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
 
@@ -11198,7 +11198,7 @@ snapshots:
       minimatch: 9.0.1
       semver: 7.6.0
 
-  electron-to-chromium@1.4.752: {}
+  electron-to-chromium@1.4.751: {}
 
   emery@1.4.3: {}
 
@@ -14146,7 +14146,7 @@ snapshots:
 
   urql@4.0.7(graphql@16.8.1)(react@18.3.1):
     dependencies:
-      '@urql/core': 5.0.3(graphql@16.8.1)
+      '@urql/core': 5.0.2(graphql@16.8.1)
       react: 18.3.1
       wonka: 6.3.4
     transitivePeerDependencies:
