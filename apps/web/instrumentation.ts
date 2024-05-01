@@ -1,27 +1,19 @@
-
 /**
  * This file is used to register monitoring instrumentation
  * for your Next.js application.
  */
 
 export async function register() {
-
   // only run in nodejs runtime
   if (
-    process.env.NEXT_RUNTIME === 'nodejs'
+    process.env.NEXT_RUNTIME === 'nodejs' &&
+    process.env.MONITORING_INSTRUMENTATION_ENABLED === 'true'
   ) {
-    const path = await import('node:path');
-    const fs = await import('node:fs');
+    const { registerMonitoringInstrumentation } = await import(
+      '@kit/monitoring/instrumentation'
+    );
 
-    fs.readdirSync(path.join(process.cwd(), 'content'));
-
-    if (process.env.MONITORING_INSTRUMENTATION_ENABLED === 'true') {
-      const {registerMonitoringInstrumentation} = await import(
-          '@kit/monitoring/instrumentation'
-          );
-
-      // Register monitoring instrumentation based on the MONITORING_PROVIDER environment variable.
-      return registerMonitoringInstrumentation();
-    }
+    // Register monitoring instrumentation based on the MONITORING_PROVIDER environment variable.
+    return registerMonitoringInstrumentation();
   }
 }

@@ -4,6 +4,11 @@ import { SiteFooter } from '~/(marketing)/_components/site-footer';
 import { SiteHeader } from '~/(marketing)/_components/site-header';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+const path = await import('node:path');
+const fs = await import('node:fs');
+
+fs.readdirSync(path.join(process.cwd(), 'content'));
+
 async function SiteLayout(props: React.PropsWithChildren) {
   const user = await getUser();
 
