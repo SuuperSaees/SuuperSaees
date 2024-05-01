@@ -1,9 +1,14 @@
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 /**
  * This file is used to register monitoring instrumentation
  * for your Next.js application.
  */
 
 export async function register() {
+  readdirSync(join(process.cwd(), 'content'));
+
   // only run in nodejs runtime
   if (
     process.env.NEXT_RUNTIME === 'nodejs' &&
