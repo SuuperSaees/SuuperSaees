@@ -26,6 +26,7 @@
     "month": "Facturé mensuellement",
     "year": "Facturé annuellement"
   },
+  "custom": "Coutume",
   "lifetime": "Durée de vie",
   "trialPeriod": "{{period}} journée d'essai",
   "perPeriod": "par {{period}}",

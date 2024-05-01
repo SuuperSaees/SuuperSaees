@@ -26,6 +26,7 @@
     "month": "Fatturazione mensile",
     "year": "Fatturato annualmente"
   },
+  "custom": "Personalizzato",
   "lifetime": "Tutta la vita",
   "trialPeriod": "{{period}} giornata di prova",
   "perPeriod": "per {{period}}",

@@ -26,6 +26,7 @@
     "month": "按月计费",
     "year": "按年计费"
   },
+  "custom": "自定义",
   "lifetime": "寿命",
   "trialPeriod": "{{period}} 日间试用",
   "perPeriod": "每 {{period}}",

@@ -26,6 +26,7 @@
     "month": "毎月請求される",
     "year": "毎年請求される"
   },
+  "custom": "カスタム",
   "lifetime": "一生",
   "trialPeriod": "{{period}} 一日トライアル",
   "perPeriod": "当たり {{period}}",

@@ -87,12 +87,17 @@ export const PlanSchema = z
       })
       .min(1),
     interval: BillingIntervalSchema.optional(),
+    custom: z.boolean().default(false).optional(),
+    label: z.string().min(1).optional(),
+    href: z.string().min(1).optional(),
     lineItems: z.array(LineItemSchema).refine(
       (schema) => {
         const types = schema.map((item) => item.type);
+
         const perSeat = types.filter(
           (type) => type === LineItemType.PerSeat,
         ).length;
+
         const flat = types.filter((type) => type === LineItemType.Flat).length;
 
         return perSeat <= 1 && flat <= 1;
@@ -111,10 +116,32 @@ export const PlanSchema = z
       .optional(),
     paymentType: PaymentTypeSchema,
   })
-  .refine((data) => data.lineItems.length > 0, {
-    message: 'Plans must have at least one line item',
-    path: ['lineItems'],
-  })
+  .refine(
+    (data) => {
+      if (data.custom) {
+        return data.lineItems.length === 0;
+      }
+
+      return data.lineItems.length > 0;
+    },
+    {
+      message: 'Non-Custom Plans must have at least one line item',
+      path: ['lineItems'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.custom) {
+        return data.lineItems.length === 0;
+      }
+
+      return data.lineItems.length > 0;
+    },
+    {
+      message: 'Custom Plans must have 0 line items',
+      path: ['lineItems'],
+    },
+  )
   .refine(
     (data) => data.paymentType !== 'one-time' || data.interval === undefined,
     {

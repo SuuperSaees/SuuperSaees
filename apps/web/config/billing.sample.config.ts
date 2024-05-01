@@ -109,29 +109,21 @@ export default createBillingSchema({
           name: 'Enterprise Monthly',
           id: 'enterprise-monthly',
           paymentType: 'recurring',
+          label: 'common:contactUs',
+          href: '/contact',
+          custom: true,
           interval: 'month',
-          lineItems: [
-            {
-              id: 'price_enterprise-monthly',
-              name: 'Base',
-              cost: 29.99,
-              type: 'flat',
-            },
-          ],
+          lineItems: [],
         },
         {
           name: 'Enterprise Yearly',
           id: 'enterprise-yearly',
           paymentType: 'recurring',
+          label: 'common:contactUs',
+          href: '/contact',
+          custom: true,
           interval: 'year',
-          lineItems: [
-            {
-              id: 'price_enterprise_yearly',
-              name: 'Base',
-              cost: 299.99,
-              type: 'flat',
-            },
-          ],
+          lineItems: [],
         },
       ],
       features: [

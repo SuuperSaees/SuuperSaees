@@ -26,6 +26,7 @@
     "month": "Wird monatlich abgerechnet",
     "year": "Jährliche Abrechnung"
   },
+  "custom": "Benutzerdefiniert",
   "lifetime": "Lebensdauer",
   "trialPeriod": "{{period}} Tagesversuch",
   "perPeriod": "pro {{period}}",

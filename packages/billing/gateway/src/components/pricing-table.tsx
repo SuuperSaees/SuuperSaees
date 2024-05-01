@@ -83,8 +83,8 @@ export function PricingTable({
 
           const primaryLineItem = getPrimaryLineItem(config, plan.id);
 
-          if (!primaryLineItem) {
-            throw new Error(`Base line item was not found`);
+          if (!plan.custom && !primaryLineItem) {
+            throw new Error(`Primary line item not found for plan ${plan.id}`);
           }
 
           return (
@@ -115,7 +115,7 @@ function PricingItem(
 
     selectable: boolean;
 
-    primaryLineItem: z.infer<typeof LineItemSchema>;
+    primaryLineItem: z.infer<typeof LineItemSchema> | undefined;
 
     redirectToCheckout?: boolean;
 
@@ -145,10 +145,12 @@ function PricingItem(
 ) {
   const highlighted = props.product.highlighted ?? false;
 
+  const lineItem = props.primaryLineItem;
+
   // we want to exclude the primary plan from the list of line items
   // since we are displaying the primary line item separately as the main price
   const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
-    return item.id !== props.primaryLineItem.id;
+    return item.id !== lineItem?.id;
   });
 
   return (
@@ -205,7 +207,11 @@ function PricingItem(
 
         <div className={'flex flex-col space-y-1'}>
           <Price>
-            {formatCurrency(props.product.currency, props.primaryLineItem.cost)}
+            {lineItem ? (
+              formatCurrency(props.product.currency, lineItem.cost)
+            ) : (
+              <Trans i18nKey={'billing:custom'} />
+            )}
           </Price>
 
           <If condition={props.plan.name}>
@@ -225,7 +231,7 @@ function PricingItem(
                 </If>
               </span>
 
-              <If condition={props.primaryLineItem.type !== 'flat'}>
+              <If condition={lineItem && lineItem?.type !== 'flat'}>
                 <span>/</span>
 
                 <span
@@ -233,15 +239,15 @@ function PricingItem(
                     `animate-in slide-in-from-left-4 fade-in text-sm capitalize`,
                   )}
                 >
-                  <If condition={props.primaryLineItem.type === 'per_seat'}>
+                  <If condition={lineItem?.type === 'per_seat'}>
                     <Trans i18nKey={'billing:perTeamMember'} />
                   </If>
 
-                  <If condition={props.primaryLineItem.unit}>
+                  <If condition={lineItem?.unit}>
                     <Trans
                       i18nKey={'billing:perUnit'}
                       values={{
-                        unit: props.primaryLineItem.unit,
+                        unit: lineItem?.unit,
                       }}
                     />
                   </If>
