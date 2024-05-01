@@ -1,0 +1,53 @@
+{
+  "homeTabLabel": "Inicio",
+  "homeTabDescription": "Bienvenido a tu página de inicio",
+  "accountMembers": "Miembros",
+  "membersTabDescription": "Administra los miembros de tu organización",
+  "billingTabLabel": "Facturación",
+  "billingTabDescription": "Administra tu facturación y suscripción",
+  "yourAccountTabLabel": "Configuración de la Cuenta",
+  "dashboardTabLabel": "Tablero",
+  "organizationSettingsTabLabel": "Organización",
+  "settingsTabLabel": "Configuraciones",
+  "profileSettingsTabLabel": "Perfil",
+  "subscriptionSettingsTabLabel": "Suscripción",
+  "dashboardTabDescription": "Un resumen de la actividad y rendimiento de tu organización en todos tus proyectos.",
+  "settingsTabDescription": "Administra tus configuraciones y preferencias.",
+  "emailAddress": "Dirección de Correo Electrónico",
+  "password": "Contraseña",
+  "modalConfirmationQuestion": "¿Estás seguro de que quieres continuar?",
+  "loading": "Cargando...",
+  "genericServerErrorHeading": "Lo siento, algo salió mal al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
+  "pageNotFound": "Lo siento, esta página no existe.",
+  "pageNotFoundSubHeading": "Lo sentimos, la página que buscabas no fue encontrada",
+  "genericError": "Lo siento, algo salió mal.",
+  "genericErrorSubHeading": "Lo sentimos, ocurrió un error al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
+  "anonymousUser": "Anónimo",
+  "tryAgain": "Intentar de Nuevo",
+  "theme": "Tema",
+  "lightTheme": "Claro",
+  "darkTheme": "Oscuro",
+  "systemTheme": "Sistema",
+  "expandSidebar": "Expandir Barra Lateral",
+  "collapseSidebar": "Colapsar Barra Lateral",
+  "documentation": "Documentación",
+  "getStarted": "Comenzar",
+  "getStartedWithPlan": "Comienza con {{plan}}",
+  "retry": "Reintentar",
+  "yourOrganizations": "Tus Organizaciones",
+  "continue": "Continuar",
+  "skip": "Omitir",
+  "signedInAs": "Conectado como",
+  "pageOfPages": "Página {{page}} de {{total}}",
+  "noData": "No hay datos disponibles",
+  "pageNotFoundHeading": "¡Ay! :|",
+  "errorPageHeading": "¡Ay! :|",
+  "roles": {
+    "owner": {
+      "label": "Propietario"
+    },
+    "member": {
+      "label": "Miembro"
+    }
+  }
+}
