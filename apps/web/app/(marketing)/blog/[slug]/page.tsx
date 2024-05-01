@@ -1,6 +1,7 @@
+import { cache } from 'react';
+
 import type { Metadata } from 'next';
 
-import { unstable_cache as cache } from 'next/dist/server/web/spec-extension/unstable-cache';
 import { notFound } from 'next/navigation';
 
 import { createCmsClient } from '@kit/cms';

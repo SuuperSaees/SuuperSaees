@@ -1,8 +1,10 @@
 import { Cms } from '@kit/cms';
 
-import { DocsNavigation } from '~/(marketing)/docs/_components/docs-navigation';
-import { getDocs } from '~/(marketing)/docs/_lib/server/docs.loader';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+
+// local imports
+import { DocsNavigation } from './_components/docs-navigation';
+import { getDocs } from './_lib/server/docs.loader';
 
 async function DocsLayout({ children }: React.PropsWithChildren) {
   const { resolvedLanguage } = await createI18nServerInstance();
