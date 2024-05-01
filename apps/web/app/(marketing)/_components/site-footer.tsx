@@ -8,7 +8,7 @@ import appConfig from '~/config/app.config';
 
 export function SiteFooter() {
   return (
-    <footer className={'border-t py-8 xl:py-12 2xl:py-14'}>
+    <footer className={'border-t py-8 mt-auto 2xl:py-14'}>
       <div className={'px-8'}>
         <div className={'flex flex-col space-y-8 lg:flex-row lg:space-y-0'}>
           <div
