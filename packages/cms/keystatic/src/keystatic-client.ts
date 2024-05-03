@@ -3,7 +3,11 @@ import { Cms, CmsClient } from '@kit/cms';
 import { createKeystaticReader } from './create-reader';
 import type { PostEntryProps } from './keystatic.config';
 
-export class KeystaticClient implements CmsClient {
+export function createKeystaticClient() {
+  return new KeystaticClient();
+}
+
+class KeystaticClient implements CmsClient {
   async getContentItems(options: Cms.GetContentItemsOptions) {
     const reader = await createKeystaticReader();
 

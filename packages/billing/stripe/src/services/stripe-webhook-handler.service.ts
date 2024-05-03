@@ -45,7 +45,7 @@ export class StripeWebhookHandlerService
 
     const stripe = await this.loadStripe();
 
-    const event = stripe.webhooks.constructEvent(
+    const event = await stripe.webhooks.constructEventAsync(
       body,
       signature,
       webhooksSecret,

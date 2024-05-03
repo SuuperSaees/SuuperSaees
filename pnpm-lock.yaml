@@ -169,8 +169,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:^
@@ -212,8 +212,8 @@ importers:
         specifier: ^3.2.5
         version: 3.2.5
       supabase:
-        specifier: ^1.164.1
-        version: 1.164.1
+        specifier: ^1.165.0
+        version: 1.165.0
       tailwindcss:
         specifier: 3.4.3
         version: 3.4.3(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.4.5))
@@ -242,8 +242,8 @@ importers:
         specifier: workspace:*
         version: link:../../ui
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/billing/gateway:
     devDependencies:
@@ -305,8 +305,8 @@ importers:
         specifier: ^14.1.1
         version: 14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/billing/lemon-squeezy:
     dependencies:
@@ -348,8 +348,8 @@ importers:
         specifier: 18.3.1
         version: 18.3.1
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/billing/stripe:
     dependencies:
@@ -360,8 +360,8 @@ importers:
         specifier: ^3.3.0
         version: 3.3.0
       stripe:
-        specifier: ^15.4.0
-        version: 15.4.0
+        specifier: ^15.5.0
+        version: 15.5.0
     devDependencies:
       '@kit/billing':
         specifier: workspace:^
@@ -400,8 +400,8 @@ importers:
         specifier: 18.3.1
         version: 18.3.1
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/cms/core:
     devDependencies:
@@ -446,8 +446,8 @@ importers:
         specifier: ^20.12.7
         version: 20.12.7
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/cms/wordpress:
     devDependencies:
@@ -509,8 +509,8 @@ importers:
         specifier: ^2.43.0
         version: 2.43.0
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/email-templates:
     dependencies:
@@ -619,8 +619,8 @@ importers:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/features/admin:
     devDependencies:
@@ -682,8 +682,8 @@ importers:
         specifier: ^7.51.3
         version: 7.51.3(react@18.3.1)
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/features/auth:
     devDependencies:
@@ -742,8 +742,8 @@ importers:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/features/notifications:
     devDependencies:
@@ -878,8 +878,8 @@ importers:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/i18n:
     dependencies:
@@ -940,8 +940,8 @@ importers:
         specifier: 6.4.14
         version: 6.4.14
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/monitoring/api:
     devDependencies:
@@ -1004,8 +1004,8 @@ importers:
         specifier: 18.3.1
         version: 18.3.1
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/monitoring/core:
     devDependencies:
@@ -1043,8 +1043,8 @@ importers:
         specifier: ^7.112.2
         version: 7.112.2(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@sentry/opentelemetry-node':
-        specifier: ^7.112.2
-        version: 7.112.2(@opentelemetry/api@1.8.0)(@opentelemetry/core@1.24.0(@opentelemetry/api@1.8.0))(@opentelemetry/sdk-trace-base@1.24.0(@opentelemetry/api@1.8.0))(@opentelemetry/semantic-conventions@1.24.0)
+        specifier: ^7.113.0
+        version: 7.113.0(@opentelemetry/api@1.8.0)(@opentelemetry/core@1.24.0(@opentelemetry/api@1.8.0))(@opentelemetry/sdk-trace-base@1.24.0(@opentelemetry/api@1.8.0))(@opentelemetry/semantic-conventions@1.24.0)
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
@@ -1098,8 +1098,8 @@ importers:
         specifier: 14.2.3
         version: 14.2.3(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(@playwright/test@1.43.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/shared:
     dependencies:
@@ -1159,8 +1159,8 @@ importers:
         specifier: 18.3.1
         version: 18.3.1
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   packages/ui:
     dependencies:
@@ -1304,8 +1304,8 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
   tooling/eslint:
     dependencies:
@@ -1349,8 +1349,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
     devDependencies:
       '@kit/prettier-config':
         specifier: workspace:^
@@ -1386,8 +1386,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
     devDependencies:
       '@kit/tsconfig':
         specifier: workspace:^
@@ -1420,8 +1420,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.3(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.4.5)))
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:^
@@ -1454,8 +1454,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       zod:
-        specifier: ^3.23.5
-        version: 3.23.5
+        specifier: ^3.23.6
+        version: 3.23.6
 
 packages:
 
@@ -3421,6 +3421,10 @@ packages:
     resolution: {integrity: sha512-gHPCcJobbMkk0VR18J65WYQTt3ED4qC6X9lHKp27Ddt63E+MDGkG6lvYBU1LS8cV7CdyBGC1XXDCfor61GvLsA==}
     engines: {node: '>=8'}
 
+  '@sentry/core@7.113.0':
+    resolution: {integrity: sha512-pg75y3C5PG2+ur27A0Re37YTCEnX0liiEU7EOxWDGutH17x3ySwlYqLQmZsFZTSnvzv7t3MGsNZ8nT5O0746YA==}
+    engines: {node: '>=8'}
+
   '@sentry/integrations@7.112.2':
     resolution: {integrity: sha512-ioC2yyU6DqtLkdmWnm87oNvdn2+9oKctJeA4t+jkS6JaJ10DcezjCwiLscX4rhB9aWJV3IWF7Op0O6K3w0t2Hg==}
     engines: {node: '>=8'}
@@ -3440,8 +3444,8 @@ packages:
     resolution: {integrity: sha512-MNzkqER8jc2xOS3ArkCLH5hakzu15tcjeC7qjU7rQ1Ms4WuV+MG0docSRESux0/p23Qjzf9tZOc8C5Eq+Sxduw==}
     engines: {node: '>=8'}
 
-  '@sentry/opentelemetry-node@7.112.2':
-    resolution: {integrity: sha512-XIYqq/mQy7JOc+xQPGQoRwGb3DPNuMcOR6vox81zs4UHCL1POBo8/q3Og6q5jUj18YBrFMkiaZUDFi5VsgxHAA==}
+  '@sentry/opentelemetry-node@7.113.0':
+    resolution: {integrity: sha512-3IWC8dZ2KrMBmsVBK3rECc8JZbjRswKMGG2iVsKn2V+K0OVLldwXCnezFtHyIkM02vx6Dj/z3AffYP4KllsHLQ==}
     engines: {node: '>=8'}
     peerDependencies:
       '@opentelemetry/api': 1.x
@@ -3463,8 +3467,16 @@ packages:
     resolution: {integrity: sha512-kCMLt7yhY5OkWE9MeowlTNmox9pqDxcpvqguMo4BDNZM5+v9SEb1AauAdR78E1a1V8TyCzjBD7JDfXWhvpYBcQ==}
     engines: {node: '>=8'}
 
+  '@sentry/types@7.113.0':
+    resolution: {integrity: sha512-PJbTbvkcPu/LuRwwXB1He8m+GjDDLKBtu3lWg5xOZaF5IRdXQU2xwtdXXsjge4PZR00tF7MO7X8ZynTgWbYaew==}
+    engines: {node: '>=8'}
+
   '@sentry/utils@7.112.2':
     resolution: {integrity: sha512-OjLh0hx0t1EcL4ZIjf+4svlmmP+tHUDGcr5qpFWH78tjmkPW4+cqPuZCZfHSuWcDdeiaXi8TnYoVRqDcJKK/eQ==}
+    engines: {node: '>=8'}
+
+  '@sentry/utils@7.113.0':
+    resolution: {integrity: sha512-nzKsErwmze1mmEsbW2AwL2oB+I5v6cDEJY4sdfLekA4qZbYZ8pV5iWza6IRl4XfzGTE1qpkZmEjPU9eyo0yvYw==}
     engines: {node: '>=8'}
 
   '@sentry/vercel-edge@7.112.2':
@@ -6677,8 +6689,8 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  stripe@15.4.0:
-    resolution: {integrity: sha512-o3STlHYUmJh1ogAem434As7hCMEGG43R1fFkX0NuxabnmZoOQ9Ytxuu+e5Tq5NSE3LPUIV64jbjQebHoZvLTKw==}
+  stripe@15.5.0:
+    resolution: {integrity: sha512-c04ToET4ZUzoeSh2rWarXCPNa2+6YzkwNAcWaT4axYRlN/u1XMkz9+inouNsXWjeT6ttBrp1twz10x/sCbWLpQ==}
     engines: {node: '>=12.*'}
 
   styled-jsx@5.1.1:
@@ -6702,8 +6714,8 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
 
-  supabase@1.164.1:
-    resolution: {integrity: sha512-1NwkDBW9Ny28Nhdxwf79tyU/x3BLNWNw/9m5olZXvJZvhaZhOCKt1JZgPnSYX/eXS2OQiKd8MJkE0gMYRZorew==}
+  supabase@1.165.0:
+    resolution: {integrity: sha512-bN1TSR6p4POxCQqb3OsO6vo2H9yKIUB2HW44SiLAV9leBIjdm4AsrJJ1hmc/YecqjtuBooAr7RXz/uGKQEQbEQ==}
     engines: {npm: '>=8'}
     hasBin: true
 
@@ -7196,8 +7208,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.23.5:
-    resolution: {integrity: sha512-fkwiq0VIQTksNNA131rDOsVJcns0pfVUjHzLrNBiF/O/Xxb5lQyEXkhZWcJ7npWsYlvs+h0jFWXXy4X46Em1JA==}
+  zod@3.23.6:
+    resolution: {integrity: sha512-RTHJlZhsRbuA8Hmp/iNL7jnfc4nZishjsanDAfEY1QpDQZCahUp3xDzl+zfweE9BklxMUcgBgS1b7Lvie/ZVwA==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -7808,7 +7820,7 @@ snapshots:
       y-prosemirror: 1.2.3(prosemirror-model@1.20.0)(prosemirror-state@1.4.3)(prosemirror-view@1.33.6)(y-protocols@1.0.6(yjs@13.6.15))(yjs@13.6.15)
       y-protocols: 1.0.6(yjs@13.6.15)
       yjs: 13.6.15
-      zod: 3.23.5
+      zod: 3.23.6
     transitivePeerDependencies:
       - next
       - supports-color
@@ -9978,6 +9990,11 @@ snapshots:
       '@sentry/types': 7.112.2
       '@sentry/utils': 7.112.2
 
+  '@sentry/core@7.113.0':
+    dependencies:
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
+
   '@sentry/integrations@7.112.2':
     dependencies:
       '@sentry/core': 7.112.2
@@ -10014,15 +10031,15 @@ snapshots:
       '@sentry/types': 7.112.2
       '@sentry/utils': 7.112.2
 
-  '@sentry/opentelemetry-node@7.112.2(@opentelemetry/api@1.8.0)(@opentelemetry/core@1.24.0(@opentelemetry/api@1.8.0))(@opentelemetry/sdk-trace-base@1.24.0(@opentelemetry/api@1.8.0))(@opentelemetry/semantic-conventions@1.24.0)':
+  '@sentry/opentelemetry-node@7.113.0(@opentelemetry/api@1.8.0)(@opentelemetry/core@1.24.0(@opentelemetry/api@1.8.0))(@opentelemetry/sdk-trace-base@1.24.0(@opentelemetry/api@1.8.0))(@opentelemetry/semantic-conventions@1.24.0)':
     dependencies:
       '@opentelemetry/api': 1.8.0
       '@opentelemetry/core': 1.24.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/sdk-trace-base': 1.24.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/semantic-conventions': 1.24.0
-      '@sentry/core': 7.112.2
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
+      '@sentry/core': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
 
   '@sentry/react@7.112.2(react@18.3.1)':
     dependencies:
@@ -10042,9 +10059,15 @@ snapshots:
 
   '@sentry/types@7.112.2': {}
 
+  '@sentry/types@7.113.0': {}
+
   '@sentry/utils@7.112.2':
     dependencies:
       '@sentry/types': 7.112.2
+
+  '@sentry/utils@7.113.0':
+    dependencies:
+      '@sentry/types': 7.113.0
 
   '@sentry/vercel-edge@7.112.2':
     dependencies:
@@ -13827,7 +13850,7 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  stripe@15.4.0:
+  stripe@15.5.0:
     dependencies:
       '@types/node': 20.12.7
       qs: 6.12.1
@@ -13851,7 +13874,7 @@ snapshots:
       pirates: 4.0.6
       ts-interface-checker: 0.1.13
 
-  supabase@1.164.1:
+  supabase@1.165.0:
     dependencies:
       bin-links: 4.0.3
       https-proxy-agent: 7.0.4
@@ -14386,6 +14409,6 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.23.5: {}
+  zod@3.23.6: {}
 
   zwitch@2.0.4: {}

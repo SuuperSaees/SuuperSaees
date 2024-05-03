@@ -1,4 +1,5 @@
 import { getBillingEventHandlerService } from '@kit/billing-gateway';
+import { enhanceRouteHandler } from '@kit/next/routes';
 import { getLogger } from '@kit/shared/logger';
 import { getSupabaseRouteHandlerClient } from '@kit/supabase/route-handler-client';
 
@@ -7,43 +8,42 @@ import billingConfig from '~/config/billing.config';
 /**
  * @description Handle the webhooks from Stripe related to checkouts
  */
-export async function POST(request: Request) {
-  const provider = billingConfig.provider;
-  const logger = await getLogger();
+export const POST = enhanceRouteHandler(
+  async ({ request }) => {
+    const provider = billingConfig.provider;
+    const logger = await getLogger();
 
-  const ctx = {
-    name: 'billing.webhook',
-    provider,
-  };
+    const ctx = {
+      name: 'billing.webhook',
+      provider,
+    };
 
-  logger.info(ctx, `Received billing webhook. Processing...`);
+    logger.info(ctx, `Received billing webhook. Processing...`);
 
-  const supabaseClientProvider = () =>
-    getSupabaseRouteHandlerClient({ admin: true });
+    const supabaseClientProvider = () =>
+      getSupabaseRouteHandlerClient({ admin: true });
 
-  const service = await getBillingEventHandlerService(
-    supabaseClientProvider,
-    provider,
-    billingConfig,
-  );
-
-  try {
-    await service.handleWebhookEvent(request);
-
-    logger.info(ctx, `Successfully processed billing webhook`);
-
-    return new Response('OK', { status: 200 });
-  } catch (error) {
-    console.error(error);
-
-    logger.error(
-      {
-        ...ctx,
-        error: JSON.stringify(error),
-      },
-      `Failed to process billing webhook`,
+    const service = await getBillingEventHandlerService(
+      supabaseClientProvider,
+      provider,
+      billingConfig,
     );
 
-    return new Response('Error', { status: 500 });
-  }
-}
+    try {
+      await service.handleWebhookEvent(request);
+
+      logger.info(ctx, `Successfully processed billing webhook`);
+
+      return new Response('OK', { status: 200 });
+    } catch (error) {
+      logger.error(ctx, `Failed to process billing webhook`, error);
+
+      return new Response('Failed to process billing webhook', {
+        status: 500,
+      });
+    }
+  },
+  {
+    auth: false,
+  },
+);

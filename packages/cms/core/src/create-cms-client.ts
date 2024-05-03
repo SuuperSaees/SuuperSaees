@@ -28,9 +28,11 @@ async function cmsClientFactory(type: CmsType) {
 }
 
 async function getWordpressClient() {
-  const { WordpressClient } = await import('../../wordpress/src/wp-client');
+  const { createWordpressClient } = await import(
+    '../../wordpress/src/wp-client'
+  );
 
-  return new WordpressClient();
+  return createWordpressClient();
 }
 
 async function getKeystaticClient() {
@@ -38,9 +40,11 @@ async function getKeystaticClient() {
     process.env.NEXT_RUNTIME === 'nodejs' ||
     process.env.KEYSTATIC_STORAGE_KIND !== 'local'
   ) {
-    const { KeystaticClient } = await import('../../keystatic/src/client');
+    const { createKeystaticClient } = await import(
+      '../../keystatic/src/keystatic-client'
+    );
 
-    return new KeystaticClient();
+    return createKeystaticClient();
   }
 
   console.error(

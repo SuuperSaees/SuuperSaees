@@ -14,9 +14,19 @@ import { getSupabaseRouteHandlerClient } from '@kit/supabase/route-handler-clien
 
 import { captureException, zodParseFactory } from '../utils';
 
-interface HandlerParams<Body> {
+interface Config<Schema> {
+  auth?: boolean;
+  captcha?: boolean;
+  captureException?: boolean;
+  schema?: Schema;
+}
+
+interface HandlerParams<
+  Body extends object,
+  RequireAuth extends boolean | undefined,
+> {
   request: NextRequest;
-  user: User;
+  user: RequireAuth extends false ? undefined : User;
   body: Body;
 }
 
@@ -41,22 +51,21 @@ interface HandlerParams<Body> {
  *
  */
 export const enhanceRouteHandler = <
-  Body,
+  Body extends object,
   Schema extends z.ZodType<Body, z.ZodTypeDef>,
+  Params extends Config<Schema> = Config<Schema>,
 >(
   // Route handler function
   handler:
-    | ((params: HandlerParams<z.infer<Schema>>) => NextResponse | Response)
     | ((
-        params: HandlerParams<z.infer<Schema>>,
+        params: HandlerParams<z.infer<Schema>, Params['auth']>,
+      ) => NextResponse | Response)
+    | ((
+        params: HandlerParams<z.infer<Schema>, Params['auth']>,
       ) => Promise<NextResponse | Response>),
 
   // Parameters object
-  params?: {
-    captcha?: boolean;
-    captureException?: boolean;
-    schema?: Schema;
-  },
+  params?: Params,
 ) => {
   /**
    * Route handler function.
@@ -64,6 +73,10 @@ export const enhanceRouteHandler = <
    * This function takes a request object as an argument and returns a response object.
    */
   return async function routeHandler(request: NextRequest) {
+    type UserParam = Params['auth'] extends false ? undefined : User;
+
+    let user: UserParam = undefined as UserParam;
+
     // Check if the captcha token should be verified
     const shouldVerifyCaptcha = params?.captcha ?? false;
 
@@ -80,14 +93,21 @@ export const enhanceRouteHandler = <
     }
 
     const client = getSupabaseRouteHandlerClient();
-    const auth = await requireUser(client);
 
-    // If the user is not authenticated, redirect to the specified URL.
-    if (auth.error) {
-      return redirect(auth.redirectTo);
+    const shouldVerifyAuth = params?.auth ?? true;
+
+    // Check if the user should be authenticated
+    if (shouldVerifyAuth) {
+      // Get the authenticated user
+      const auth = await requireUser(client);
+
+      // If the user is not authenticated, redirect to the specified URL.
+      if (auth.error) {
+        return redirect(auth.redirectTo);
+      }
+
+      user = auth.data as UserParam;
     }
-
-    const user = auth.data;
 
     // clone the request to read the body
     // so that we can pass it to the handler safely

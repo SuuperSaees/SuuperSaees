@@ -8,17 +8,19 @@ import { Cms, CmsClient } from '@kit/cms';
 
 import GetTagsOptions = Cms.GetTagsOptions;
 
+export function createWordpressClient(
+  apiUrl = process.env.WORDPRESS_API_URL as string,
+) {
+  return new WordpressClient(apiUrl);
+}
+
 /**
  * @name WordpressClient
  * @description Represents a client for interacting with a Wordpress CMS.
  * Implements the CmsClient interface.
  */
-export class WordpressClient implements CmsClient {
-  private readonly apiUrl: string;
-
-  constructor(apiUrl = process.env.WORDPRESS_API_URL as string) {
-    this.apiUrl = apiUrl;
-  }
+class WordpressClient implements CmsClient {
+  constructor(private readonly apiUrl: string) {}
 
   /**
    * Retrieves content items from a CMS based on the provided options.

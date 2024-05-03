@@ -27,7 +27,7 @@ import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
 import { CreateTeamSchema } from '../schema/create-team.schema';
-import { createOrganizationAccountAction } from '../server/actions/create-team-account-server-actions';
+import { createTeamAccountAction } from '../server/actions/create-team-account-server-actions';
 
 export function CreateTeamAccountDialog(
   props: React.PropsWithChildren<{
@@ -75,7 +75,7 @@ function CreateOrganizationAccountForm(props: { onClose: () => void }) {
         onSubmit={form.handleSubmit((data) => {
           startTransition(async () => {
             try {
-              await createOrganizationAccountAction(data);
+              await createTeamAccountAction(data);
             } catch (error) {
               setError(true);
             }
