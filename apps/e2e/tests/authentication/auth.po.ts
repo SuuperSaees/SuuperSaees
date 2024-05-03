@@ -1,4 +1,5 @@
-import { expect, Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
+
 import { Mailbox } from '../utils/mailbox';
 
 export class AuthPageObject {
@@ -23,10 +24,7 @@ export class AuthPageObject {
     await this.page.click('[data-test="account-dropdown-sign-out"]');
   }
 
-  async signIn(params: {
-    email: string,
-    password: string
-  }) {
+  async signIn(params: { email: string; password: string }) {
     await this.page.waitForTimeout(1000);
 
     await this.page.fill('input[name="email"]', params.email);
@@ -35,9 +33,9 @@ export class AuthPageObject {
   }
 
   async signUp(params: {
-    email: string,
-    password: string,
-    repeatPassword: string
+    email: string;
+    password: string;
+    repeatPassword: string;
   }) {
     await this.page.waitForTimeout(1000);
 
@@ -48,13 +46,18 @@ export class AuthPageObject {
     await this.page.click('button[type="submit"]');
   }
 
-  async visitConfirmEmailLink(email: string, params: {
-    deleteAfter: boolean
-  } = {
-    deleteAfter: true
-  }) {
-    return expect(async() => {
+  async visitConfirmEmailLink(
+    email: string,
+    params: {
+      deleteAfter: boolean;
+    } = {
+      deleteAfter: true,
+    },
+  ) {
+    return expect(async () => {
       const res = await this.mailbox.visitMailbox(email, params);
+
+      console.log(res);
 
       expect(res).not.toBeNull();
     }).toPass();

@@ -97,9 +97,11 @@ test.describe('Full Invitation Flow', () => {
     // sign out and sign in with the first email
     await invitations.auth.signOut();
 
-    await invitations.auth.visitConfirmEmailLink(invites[0]!.email);
+    console.log(`Finding email to ${firstEmail} ...`);
 
-    console.log(`Signing up with ${firstEmail}`);
+    await invitations.auth.visitConfirmEmailLink(firstEmail);
+
+    console.log(`Signing up with ${firstEmail} ...`);
 
     await invitations.auth.signUp({
       email: firstEmail,
