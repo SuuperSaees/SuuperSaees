@@ -2,17 +2,17 @@ import { Page } from '@playwright/test';
 import { parse } from 'node-html-parser';
 
 export class Mailbox {
-  constructor(
-    private readonly page: Page
-  ) {
-  }
+  constructor(private readonly page: Page) {}
 
-  async visitMailbox(email: string, params?: {
-    deleteAfter: boolean
-  }) {
+  async visitMailbox(
+    email: string,
+    params: {
+      deleteAfter: boolean;
+    },
+  ) {
     const mailbox = email.split('@')[0];
 
-    console.log(`Visiting mailbox ${email} ...`)
+    console.log(`Visiting mailbox ${email} ...`);
 
     if (!mailbox) {
       throw new Error('Invalid email');
@@ -20,9 +20,11 @@ export class Mailbox {
 
     const json = await this.getInviteEmail(mailbox, params);
 
-    if (!json.body) {
+    if (!json?.body) {
       throw new Error('Email body was not found');
     }
+
+    console.log('Email found');
 
     const html = (json.body as { html: string }).html;
     const el = parse(html);
@@ -40,9 +42,9 @@ export class Mailbox {
 
   async getInviteEmail(
     mailbox: string,
-    params = {
-      deleteAfter: false,
-    }
+    params: {
+      deleteAfter: boolean;
+    },
   ) {
     const url = `http://localhost:54324/api/v1/mailbox/${mailbox}`;
 
@@ -69,9 +71,15 @@ export class Mailbox {
 
     // delete message
     if (params.deleteAfter) {
-      await fetch(messageUrl, {
-        method: 'DELETE'
+      console.log(`Deleting email ${messageId} ...`);
+
+      const res = await fetch(messageUrl, {
+        method: 'DELETE',
       });
+
+      if (!res.ok) {
+        console.error(`Failed to delete email: ${res.statusText}`);
+      }
     }
 
     return await messageResponse.json();

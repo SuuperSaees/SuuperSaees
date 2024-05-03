@@ -89,7 +89,6 @@ function RemoveMemberForm({
             data-test={'confirm-remove-member'}
             variant={'destructive'}
             disabled={isSubmitting}
-            onClick={onMemberRemoved}
           >
             <Trans i18nKey={'teams:removeMemberSubmitLabel'} />
           </Button>
