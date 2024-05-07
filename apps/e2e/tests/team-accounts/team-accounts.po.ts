@@ -13,19 +13,14 @@ export class TeamAccountsPageObject {
 
   async setup(params = this.createTeamName()) {
     await this.auth.signUpFlow('/home');
+
     await this.createTeam(params);
   }
 
-  getTeamFromSelector(teamSlug: string) {
-    return this.page.locator(
-      `[data-test="account-selector-team"][data-value="${teamSlug}"]`,
-    );
-  }
-
-  selectAccount(teamName: string) {
-    return this.page.click(
-      `[data-test="account-selector-team"][data-name="${teamName}"]`,
-    );
+  getTeamFromSelector(teamName: string) {
+    return this.page.locator(`[data-test="account-selector-team"]`, {
+      hasText: teamName,
+    });
   }
 
   getTeams() {
@@ -33,23 +28,37 @@ export class TeamAccountsPageObject {
   }
 
   goToSettings() {
-    return this.page
-      .locator('a', {
-        hasText: 'Settings',
-      })
-      .click();
+    return expect(async () => {
+      await this.page
+        .locator('a', {
+          hasText: 'Settings',
+        })
+        .click();
+
+      await this.page.waitForURL('**/home/*/settings');
+    }).toPass();
   }
 
   goToBilling() {
-    return this.page
-      .locator('a', {
-        hasText: 'Billing',
-      })
-      .click();
+    return expect(async () => {
+      await this.page
+        .locator('a', {
+          hasText: 'Billing',
+        })
+        .click();
+
+      return await this.page.waitForURL('**/home/*/billing');
+    }).toPass();
   }
 
   openAccountsSelector() {
-    return this.page.click('[data-test="account-selector-trigger"]');
+    return expect(async () => {
+      await this.page.click('[data-test="account-selector-trigger"]');
+
+      return expect(
+        this.page.locator('[data-test="account-selector-content"]'),
+      ).toBeVisible();
+    }).toPass();
   }
 
   async createTeam({ teamName, slug } = this.createTeamName()) {
@@ -57,34 +66,55 @@ export class TeamAccountsPageObject {
 
     await this.page.click('[data-test="create-team-account-trigger"]');
     await this.page.fill('[data-test="create-team-form"] input', teamName);
-    await this.page.click('[data-test="create-team-form"] button:last-child');
 
-    await this.page.waitForURL(`/home/${slug}`);
-  }
-
-  async updateName(name: string) {
-    await this.page.fill(
-      '[data-test="update-team-account-name-form"] input',
-      name,
+    const click = this.page.click(
+      '[data-test="create-team-form"] button:last-child',
     );
 
-    await this.page.click('[data-test="update-team-account-name-form"] button');
+    const response = this.page.waitForURL(`/home/${slug}`);
+
+    await Promise.all([click, response]);
+  }
+
+  async updateName(name: string, slug: string) {
+    await expect(async () => {
+      await this.page.fill(
+        '[data-test="update-team-account-name-form"] input',
+        name,
+      );
+
+      const click = this.page.click(
+        '[data-test="update-team-account-name-form"] button',
+      );
+
+      // the slug should be updated to match the new team name
+      const response = this.page.waitForURL(`**/home/${slug}/settings`);
+
+      return Promise.all([click, response]);
+    }).toPass();
   }
 
   async deleteAccount(teamName: string) {
-    await this.page.click('[data-test="delete-team-trigger"]');
+    await expect(async () => {
+      await this.page.click('[data-test="delete-team-trigger"]');
 
-    expect(
-      await this.page
-        .locator('[data-test="delete-team-form-confirm-input"]')
-        .isVisible(),
-    ).toBeTruthy();
+      await expect(
+        this.page.locator('[data-test="delete-team-form-confirm-input"]'),
+      ).toBeVisible();
 
-    await this.page.fill(
-      '[data-test="delete-team-form-confirm-input"]',
-      teamName,
-    );
-    await this.page.click('[data-test="delete-team-form-confirm-button"]');
+      await this.page.fill(
+        '[data-test="delete-team-form-confirm-input"]',
+        teamName,
+      );
+
+      const click = this.page.click(
+        '[data-test="delete-team-form-confirm-button"]',
+      );
+
+      const response = this.page.waitForURL('**/home');
+
+      return Promise.all([click, response]);
+    }).toPass();
   }
 
   createTeamName() {

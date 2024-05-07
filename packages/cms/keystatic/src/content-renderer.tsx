@@ -1,6 +1,7 @@
-import { DocumentElement } from '@keystatic/core';
-import { DocumentRenderer } from '@keystatic/core/renderer';
+import * as React from 'react';
 
-export function KeystaticDocumentRenderer(props: { content: unknown }) {
-  return <DocumentRenderer document={props.content as DocumentElement[]} />;
+const Markdoc = await import('@markdoc/markdoc');
+
+export function KeystaticDocumentRenderer({ content }: { content: unknown }) {
+  return Markdoc.renderers.react(content as string, React);
 }
