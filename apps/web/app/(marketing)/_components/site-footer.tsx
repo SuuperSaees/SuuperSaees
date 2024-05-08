@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { LanguageSelector } from '@kit/ui/language-selector';
 import { Trans } from '@kit/ui/trans';
 
 import { AppLogo } from '~/components/app-logo';
@@ -112,6 +113,12 @@ export function SiteFooter() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className={'mt-8 flex items-end justify-end px-8'}>
+        <div className={'max-w-xs'}>
+          <LanguageSelector />
         </div>
       </div>
     </footer>
