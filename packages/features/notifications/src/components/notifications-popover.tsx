@@ -138,7 +138,7 @@ export function NotificationsPopover(params: {
       </PopoverTrigger>
 
       <PopoverContent
-        className={'flex w-full flex-col p-0 lg:min-w-64'}
+        className={'flex w-full max-w-96 flex-col p-0 lg:min-w-64'}
         align={'start'}
         collisionPadding={20}
         sideOffset={10}

@@ -19,7 +19,7 @@
     "@kit/tsconfig": "workspace:*",
     "@kit/ui": "workspace:^",
     "@makerkit/data-loader-supabase-core": "^0.0.7",
-    "@makerkit/data-loader-supabase-nextjs": "^1.2.0",
+    "@makerkit/data-loader-supabase-nextjs": "^1.2.2",
     "@supabase/supabase-js": "^2.43.1",
     "@tanstack/react-query": "5.35.1",
     "@tanstack/react-table": "^8.16.0",
@@ -29,7 +29,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-hook-form": "^7.51.4",
-    "zod": "^3.23.6"
+    "zod": "^3.23.8"
   },
   "exports": {
     ".": "./src/index.ts",

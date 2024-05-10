@@ -4,20 +4,9 @@ This is a Starter Kit for building SaaS applications using Supabase, Next.js, an
 
 This version uses Turborepo to manage multiple packages in a single repository.
 
-**This project is currently under development. Please wait for the stable release before using it in production. It will undergo big changes and improvements.**
+**This project is stable but still under development. Please update the repository daily**.
 
 A demo version of this project can be found at [makerkit/next-supabase-saas-kit-turbo-demo](https://github.com/makerkit/next-supabase-saas-kit-turbo-demo). This version contains a tasks functionality that is not present in the original version, multiple languages, and other various modifications.
-
-## Roadmap
-
-The roadmap for the project is as follows:
-
-- [x] - **March 31**: Alpha release - authentication, personal accounts, team accounts (memberships)
-- [x] - **April 7**: Beta release - billing, Stripe, Lemon Squeezy, and more
-- [x] - **April 14**: Release candidate - admin dashboard, translations, and more
-- [ ] - **April 21**: Final Release candidate - in-app notifications, final features and improvements
-- [ ] - **April 28**: Stable release - final features and improvements
-- [ ] - **May 4**: Post-release - documentation, tutorials, and more
 
 ## Features
 
@@ -151,6 +140,8 @@ To generate the Supabase schema, you can use the following command:
 pnpm run supabase:web:typegen
 ```
 
+You don't need to do it yet, only when you update the schema.
+
 ## Architecture
 
 This project uses Turborepo to manage multiple packages in a single repository.
@@ -218,8 +209,8 @@ The configuration is defined in the `apps/web/config` folder. Here you can find 
 - **`billing.config.ts`**: Billing configuration
 - **`feature-flags.config.ts`**: Feature flags configuration
 - **`paths.config.ts`**: Paths configuration (e.g., routes, API paths, etc.)
-- **`personal-account-sidebar.config.ts`**: Personal account sidebar configuration (e.g., links, icons, etc.)
-- **`team-account-sidebar.config.ts`**: Team account sidebar configuration (e.g., links, icons, etc.)
+- **`personal-account-navigation.config.ts`**: Personal account sidebar configuration (e.g., links, icons, etc.)
+- **`team-account-navigation.config.ts`**: Team account sidebar configuration (e.g., links, icons, etc.)
 
 ## Conventions
 
