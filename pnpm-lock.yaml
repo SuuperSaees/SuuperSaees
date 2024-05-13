@@ -109,14 +109,14 @@ importers:
         specifier: workspace:^
         version: link:../../packages/ui
       '@makerkit/data-loader-supabase-core':
-        specifier: ^0.0.7
-        version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)
+        specifier: ^0.0.8
+        version: 0.0.8(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)
       '@makerkit/data-loader-supabase-nextjs':
-        specifier: ^1.2.2
-        version: 1.2.2(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)(@tanstack/react-query@5.35.1(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: ^1.2.3
+        version: 1.2.3(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)(@tanstack/react-query@5.36.0(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@marsidev/react-turnstile':
-        specifier: ^0.6.0
-        version: 0.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.6.1
+        version: 0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-icons':
         specifier: ^1.3.0
         version: 1.3.0(react@18.3.1)
@@ -124,14 +124,14 @@ importers:
         specifier: ^2.43.1
         version: 2.43.1
       '@tanstack/react-query':
-        specifier: 5.35.1
-        version: 5.35.1(react@18.3.1)
+        specifier: 5.36.0
+        version: 5.36.0(react@18.3.1)
       '@tanstack/react-query-next-experimental':
-        specifier: ^5.35.1
-        version: 5.35.1(@tanstack/react-query@5.35.1(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: ^5.36.0
+        version: 5.36.0(@tanstack/react-query@5.36.0(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^8.17.0
+        version: 8.17.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
@@ -158,7 +158,7 @@ importers:
         version: 7.51.4(react@18.3.1)
       react-i18next:
         specifier: ^14.1.1
-        version: 14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.1.1(i18next@23.11.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       recharts:
         specifier: ^2.12.7
         version: 2.12.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -303,7 +303,7 @@ importers:
         version: 7.51.4(react@18.3.1)
       react-i18next:
         specifier: ^14.1.1
-        version: 14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.1.1(i18next@23.11.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -525,7 +525,7 @@ importers:
     dependencies:
       '@react-email/components':
         specifier: 0.0.17
-        version: 0.0.17(@types/react@18.3.1)(react@18.3.1)
+        version: 0.0.17(@types/react@18.3.2)(react@18.3.1)
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*
@@ -595,8 +595,8 @@ importers:
         specifier: ^2.43.1
         version: 2.43.1
       '@tanstack/react-query':
-        specifier: 5.35.1
-        version: 5.35.1(react@18.3.1)
+        specifier: 5.36.0
+        version: 5.36.0(react@18.3.1)
       '@types/react':
         specifier: ^18.3.1
         version: 18.3.1
@@ -623,7 +623,7 @@ importers:
         version: 7.51.4(react@18.3.1)
       react-i18next:
         specifier: ^14.1.1
-        version: 14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.1.1(i18next@23.11.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       sonner:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -658,20 +658,20 @@ importers:
         specifier: workspace:^
         version: link:../../ui
       '@makerkit/data-loader-supabase-core':
-        specifier: ^0.0.7
-        version: 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)
+        specifier: ^0.0.8
+        version: 0.0.8(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)
       '@makerkit/data-loader-supabase-nextjs':
-        specifier: ^1.2.2
-        version: 1.2.2(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)(@tanstack/react-query@5.35.1(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: ^1.2.3
+        version: 1.2.3(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)(@tanstack/react-query@5.36.0(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@supabase/supabase-js':
         specifier: ^2.43.1
         version: 2.43.1
       '@tanstack/react-query':
-        specifier: 5.35.1
-        version: 5.35.1(react@18.3.1)
+        specifier: 5.36.0
+        version: 5.36.0(react@18.3.1)
       '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^8.17.0
+        version: 8.17.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react':
         specifier: ^18.3.1
         version: 18.3.1
@@ -721,8 +721,8 @@ importers:
         specifier: workspace:^
         version: link:../../ui
       '@marsidev/react-turnstile':
-        specifier: ^0.6.0
-        version: 0.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.6.1
+        version: 0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-icons':
         specifier: ^1.3.0
         version: 1.3.0(react@18.3.1)
@@ -730,8 +730,8 @@ importers:
         specifier: ^2.43.1
         version: 2.43.1
       '@tanstack/react-query':
-        specifier: 5.35.1
-        version: 5.35.1(react@18.3.1)
+        specifier: 5.36.0
+        version: 5.36.0(react@18.3.1)
       '@types/react':
         specifier: ^18.3.1
         version: 18.3.1
@@ -746,7 +746,7 @@ importers:
         version: 7.51.4(react@18.3.1)
       react-i18next:
         specifier: ^14.1.1
-        version: 14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.1.1(i18next@23.11.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       sonner:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -778,8 +778,8 @@ importers:
         specifier: ^2.43.1
         version: 2.43.1
       '@tanstack/react-query':
-        specifier: 5.35.1
-        version: 5.35.1(react@18.3.1)
+        specifier: 5.36.0
+        version: 5.36.0(react@18.3.1)
       '@types/react':
         specifier: ^18.3.1
         version: 18.3.1
@@ -794,7 +794,7 @@ importers:
         version: 18.3.1(react@18.3.1)
       react-i18next:
         specifier: ^14.1.1
-        version: 14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.1.1(i18next@23.11.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   packages/features/team-accounts:
     dependencies:
@@ -848,11 +848,11 @@ importers:
         specifier: ^2.43.1
         version: 2.43.1
       '@tanstack/react-query':
-        specifier: 5.35.1
-        version: 5.35.1(react@18.3.1)
+        specifier: 5.36.0
+        version: 5.36.0(react@18.3.1)
       '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^8.17.0
+        version: 8.17.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react':
         specifier: ^18.3.1
         version: 18.3.1
@@ -882,7 +882,7 @@ importers:
         version: 7.51.4(react@18.3.1)
       react-i18next:
         specifier: ^14.1.1
-        version: 14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.1.1(i18next@23.11.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       sonner:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -893,8 +893,8 @@ importers:
   packages/i18n:
     dependencies:
       i18next:
-        specifier: ^23.11.3
-        version: 23.11.3
+        specifier: ^23.11.4
+        version: 23.11.4
       i18next-browser-languagedetector:
         specifier: 7.2.1
         version: 7.2.1
@@ -918,11 +918,11 @@ importers:
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@tanstack/react-query':
-        specifier: 5.35.1
-        version: 5.35.1(react@18.3.1)
+        specifier: 5.36.0
+        version: 5.36.0(react@18.3.1)
       react-i18next:
         specifier: ^14.1.1
-        version: 14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.1.1(i18next@23.11.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   packages/mailers:
     dependencies:
@@ -1129,8 +1129,8 @@ importers:
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^8.17.0
+        version: 8.17.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   packages/supabase:
     devDependencies:
@@ -1156,8 +1156,8 @@ importers:
         specifier: ^2.43.1
         version: 2.43.1
       '@tanstack/react-query':
-        specifier: 5.35.1
-        version: 5.35.1(react@18.3.1)
+        specifier: 5.36.0
+        version: 5.36.0(react@18.3.1)
       '@types/react':
         specifier: ^18.3.1
         version: 18.3.1
@@ -1265,8 +1265,8 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(react@18.3.1)
       '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^8.17.0
+        version: 8.17.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react':
         specifier: ^18.3.1
         version: 18.3.1
@@ -1299,7 +1299,7 @@ importers:
         version: 7.51.4(react@18.3.1)
       react-i18next:
         specifier: ^14.1.1
-        version: 14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.1.1(i18next@23.11.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       sonner:
         specifier: ^1.4.41
         version: 1.4.41(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1368,8 +1368,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1(prettier@3.2.5)
       '@tanstack/react-table':
-        specifier: ^8.16.0
-        version: 8.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^8.17.0
+        version: 8.17.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next:
         specifier: 14.2.3
         version: 14.2.3(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1778,14 +1778,14 @@ packages:
     resolution: {integrity: sha512-DsZTeowehSLTESUZ6xxoYPDhoE8BYepWsj3TCqibG7FvB8X1HERPXQlc6E/IeGj22SOfIM997b7GfFkeLWY8pA==}
     engines: {node: '>=18'}
 
-  '@makerkit/data-loader-supabase-core@0.0.7':
-    resolution: {integrity: sha512-9Zi7GmBZaedHl9x+LnasUL3ztx2oLInwI1uzdw4E830gSNQr/hx5/Sodd1A9cXECn51Ub5HWEJ8kfBZwX0qCKQ==}
+  '@makerkit/data-loader-supabase-core@0.0.8':
+    resolution: {integrity: sha512-beMhHboq5LgbiptXC9CFD6LPo6oVMMHDSEcF5cFcafC7B7E8x6TqV/t3v3cnzl4VXB+4v4ntGaTT2u/aiJ+djA==}
     peerDependencies:
       '@supabase/postgrest-js': '>1.0.0'
       '@supabase/supabase-js': '>=2.0.0'
 
-  '@makerkit/data-loader-supabase-nextjs@1.2.2':
-    resolution: {integrity: sha512-8ZULtgXyg/1tqSn0AdU9x97+Vcy8gVXdz/krCX/BJX9/PLA1xa449/R9mz5roxdiOSyEekNnw30kxlYd5m7TSA==}
+  '@makerkit/data-loader-supabase-nextjs@1.2.3':
+    resolution: {integrity: sha512-SH9XiCEG6doROIlI5tTBcn5DkMqI3dltolMKpeh8ypvgHYMKQrJTzRRXzp8hlKkvnyuFHsT466Fkgr+/XCvuZQ==}
     peerDependencies:
       '@supabase/supabase-js': '>=2.0.0'
       '@tanstack/react-query': '>=5.0.0'
@@ -1821,8 +1821,8 @@ packages:
       react:
         optional: true
 
-  '@marsidev/react-turnstile@0.6.0':
-    resolution: {integrity: sha512-CXv2xy27f3a7Rn1PqFeTKGxkdv4uiD7Zpbazeb+1AbC3VEfTk0OFNiyQvIIFn+kCYWkeTLdY7pXRzsfebHH97w==}
+  '@marsidev/react-turnstile@0.6.1':
+    resolution: {integrity: sha512-xsWFqmdccmZ09MX72t2cppQJlxeBH8kdiZNLpYRBHMbKgXhU0ucOCnaOsM0eXv65ripeXiXQcfxu78QIKklRGA==}
     peerDependencies:
       react: 18.3.1
       react-dom: 18.3.1
@@ -3562,23 +3562,23 @@ packages:
     resolution: {integrity: sha512-+PmQX0PiAYPMeVYe237LJAYvOMYW1j2rH5YROyS3b4CTVJum34HfRvKvAzozHAQG0TnHNdUfY9nCeUyRAs//cw==}
     engines: {node: '>=14.16'}
 
-  '@tanstack/query-core@5.35.1':
-    resolution: {integrity: sha512-0Dnpybqb8+ps6WgqBnqFEC+1F/xLvUosRAq+wiGisTgolOZzqZfkE2995dEXmhuzINiTM7/a6xSGznU0NIvBkw==}
+  '@tanstack/query-core@5.36.0':
+    resolution: {integrity: sha512-B5BD3pg/mztDR36i77hGcyySKKeYrbM5mnogOROTBi1SUml5ByRK7PGUUl16vvubvQC+mSnqziFG/VIy/DE3FQ==}
 
-  '@tanstack/react-query-next-experimental@5.35.1':
-    resolution: {integrity: sha512-jMrRHnFLn7fa2Spv2FjmqggtIS6KKRXHl4vgC3LhEyTrr6wLAMFx8W+p+MR579YbZIcyUp5HqmU6w0LUPJfdgg==}
+  '@tanstack/react-query-next-experimental@5.36.0':
+    resolution: {integrity: sha512-NBYM8HuOjZeDce+fdE9mlf2BTqJgtbSp9VJX+fN6t+wVtoUSN93SeZD/7vRnRv22yKA4PehbPNQ0maX4TWwa/A==}
     peerDependencies:
-      '@tanstack/react-query': ^5.35.1
+      '@tanstack/react-query': ^5.36.0
       next: ^13 || ^14
       react: 18.3.1
 
-  '@tanstack/react-query@5.35.1':
-    resolution: {integrity: sha512-i2T7m2ffQdNqlX3pO+uMsnQ0H4a59Ens2GxtlMsRiOvdSB4SfYmHb27MnvFV8rGmtWRaa4gPli0/rpDoSS5LbQ==}
+  '@tanstack/react-query@5.36.0':
+    resolution: {integrity: sha512-BATvtM0rohwg7pRHUnxgeDiwLWRGZ8OM/4y8LImHVpecQWoH6Uhytu3Z8YV6V7hQ1sMQBFcUrGE1/e4MxR6YiA==}
     peerDependencies:
       react: 18.3.1
 
-  '@tanstack/react-table@8.16.0':
-    resolution: {integrity: sha512-rKRjnt8ostqN2fercRVOIH/dq7MAmOENCMvVlKx6P9Iokhh6woBGnIZEkqsY/vEJf1jN3TqLOb34xQGLVRuhAg==}
+  '@tanstack/react-table@8.17.0':
+    resolution: {integrity: sha512-LSJxTDzlKGs8EN7/UHB1l3yLR9HUIxoHFkTbTjHaUUGL4kgYZFYhsQsdDJSIykG86qpIA/6gSWmtwNfy5Iprhw==}
     engines: {node: '>=12'}
     peerDependencies:
       react: 18.3.1
@@ -3749,6 +3749,9 @@ packages:
 
   '@types/react@18.3.1':
     resolution: {integrity: sha512-V0kuGBX3+prX+DQ/7r2qsv1NsdfnCLnTgnRJ1pYnxykBhGMz+qj+box5lq7XsO5mtZsBqpjwwTu/7wszPfMBcw==}
+
+  '@types/react@18.3.2':
+    resolution: {integrity: sha512-Btgg89dAnqD4vV7R3hlwOxgqobUQKgx3MmrQRi0yYbs/P0ym8XozIAlkqVilPqHQwXs4e9Tf63rrCgl58BcO4w==}
 
   '@types/semver@6.2.7':
     resolution: {integrity: sha512-blctEWbzUFzQx799RZjzzIdBJOXmE37YYEyDtKkx5Dg+V7o/zyyAxLPiI98A2jdTtDgxZleMdfV+7p8WbRJ1OQ==}
@@ -5032,8 +5035,8 @@ packages:
   i18next-resources-to-backend@1.2.1:
     resolution: {integrity: sha512-okHbVA+HZ7n1/76MsfhPqDou0fptl2dAlhRDu2ideXloRRduzHsqDOznJBef+R3DFZnbvWoBW+KxJ7fnFjd6Yw==}
 
-  i18next@23.11.3:
-    resolution: {integrity: sha512-Pq/aSKowir7JM0rj+Wa23Kb6KKDUGno/HjG+wRQu0PxoTbpQ4N89MAT0rFGvXmLkRLNMb1BbBOKGozl01dabzg==}
+  i18next@23.11.4:
+    resolution: {integrity: sha512-CCUjtd5TfaCl+mLUzAA0uPSN+AVn4fP/kWCYt/hocPUwusTpMVczdrRyOBUwk6N05iH40qiKx6q1DoNJtBIwdg==}
 
   iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
@@ -7854,17 +7857,17 @@ snapshots:
 
   '@lemonsqueezy/lemonsqueezy.js@2.2.0': {}
 
-  '@makerkit/data-loader-supabase-core@0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)':
+  '@makerkit/data-loader-supabase-core@0.0.8(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)':
     dependencies:
       '@supabase/postgrest-js': 1.15.2
       '@supabase/supabase-js': 2.43.1
       ts-case-convert: 2.0.7
 
-  '@makerkit/data-loader-supabase-nextjs@1.2.2(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)(@tanstack/react-query@5.35.1(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@makerkit/data-loader-supabase-nextjs@1.2.3(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)(@tanstack/react-query@5.36.0(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@makerkit/data-loader-supabase-core': 0.0.7(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)
+      '@makerkit/data-loader-supabase-core': 0.0.8(@supabase/postgrest-js@1.15.2)(@supabase/supabase-js@2.43.1)
       '@supabase/supabase-js': 2.43.1
-      '@tanstack/react-query': 5.35.1(react@18.3.1)
+      '@tanstack/react-query': 5.36.0(react@18.3.1)
       next: 14.2.3(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
     transitivePeerDependencies:
@@ -7910,7 +7913,7 @@ snapshots:
       '@types/react': 18.3.1
       react: 18.3.1
 
-  '@marsidev/react-turnstile@0.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@marsidev/react-turnstile@0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -8516,6 +8519,13 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.1
 
+  '@radix-ui/react-compose-refs@1.0.1(@types/react@18.3.2)(react@18.3.1)':
+    dependencies:
+      '@babel/runtime': 7.24.5
+      react: 18.3.1
+    optionalDependencies:
+      '@types/react': 18.3.2
+
   '@radix-ui/react-context@1.0.1(@types/react@18.3.1)(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.24.5
@@ -8850,6 +8860,14 @@ snapshots:
       react: 18.3.1
     optionalDependencies:
       '@types/react': 18.3.1
+
+  '@radix-ui/react-slot@1.0.2(@types/react@18.3.2)(react@18.3.1)':
+    dependencies:
+      '@babel/runtime': 7.24.5
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.3.2)(react@18.3.1)
+      react: 18.3.1
+    optionalDependencies:
+      '@types/react': 18.3.2
 
   '@radix-ui/react-switch@1.0.3(@types/react-dom@18.3.0)(@types/react@18.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -9528,7 +9546,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@react-email/components@0.0.17(@types/react@18.3.1)(react@18.3.1)':
+  '@react-email/components@0.0.17(@types/react@18.3.2)(react@18.3.1)':
     dependencies:
       '@react-email/body': 0.0.8(react@18.3.1)
       '@react-email/button': 0.0.15(react@18.3.1)
@@ -9538,7 +9556,7 @@ snapshots:
       '@react-email/container': 0.0.12(react@18.3.1)
       '@react-email/font': 0.0.6(react@18.3.1)
       '@react-email/head': 0.0.8(react@18.3.1)
-      '@react-email/heading': 0.0.12(@types/react@18.3.1)(react@18.3.1)
+      '@react-email/heading': 0.0.12(@types/react@18.3.2)(react@18.3.1)
       '@react-email/hr': 0.0.8(react@18.3.1)
       '@react-email/html': 0.0.8(react@18.3.1)
       '@react-email/img': 0.0.8(react@18.3.1)
@@ -9566,9 +9584,9 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@react-email/heading@0.0.12(@types/react@18.3.1)(react@18.3.1)':
+  '@react-email/heading@0.0.12(@types/react@18.3.2)(react@18.3.1)':
     dependencies:
-      '@radix-ui/react-slot': 1.0.2(@types/react@18.3.1)(react@18.3.1)
+      '@radix-ui/react-slot': 1.0.2(@types/react@18.3.2)(react@18.3.1)
       react: 18.3.1
     transitivePeerDependencies:
       - '@types/react'
@@ -10233,20 +10251,20 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@tanstack/query-core@5.35.1': {}
+  '@tanstack/query-core@5.36.0': {}
 
-  '@tanstack/react-query-next-experimental@5.35.1(@tanstack/react-query@5.35.1(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@tanstack/react-query-next-experimental@5.36.0(@tanstack/react-query@5.36.0(react@18.3.1))(next@14.2.3(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@tanstack/react-query': 5.35.1(react@18.3.1)
+      '@tanstack/react-query': 5.36.0(react@18.3.1)
       next: 14.2.3(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(@playwright/test@1.44.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
 
-  '@tanstack/react-query@5.35.1(react@18.3.1)':
+  '@tanstack/react-query@5.36.0(react@18.3.1)':
     dependencies:
-      '@tanstack/query-core': 5.35.1
+      '@tanstack/query-core': 5.36.0
       react: 18.3.1
 
-  '@tanstack/react-table@8.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@tanstack/react-table@8.17.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@tanstack/table-core': 8.16.0
       react: 18.3.1
@@ -10445,6 +10463,12 @@ snapshots:
     dependencies:
       '@types/prop-types': 15.7.12
       csstype: 3.1.3
+
+  '@types/react@18.3.2':
+    dependencies:
+      '@types/prop-types': 15.7.12
+      csstype: 3.1.3
+    optional: true
 
   '@types/semver@6.2.7': {}
 
@@ -11959,7 +11983,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.24.5
 
-  i18next@23.11.3:
+  i18next@23.11.4:
     dependencies:
       '@babel/runtime': 7.24.5
 
@@ -13453,11 +13477,11 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  react-i18next@14.1.1(i18next@23.11.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-i18next@14.1.1(i18next@23.11.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.5
       html-parse-stringify: 3.0.1
-      i18next: 23.11.3
+      i18next: 23.11.4
       react: 18.3.1
     optionalDependencies:
       react-dom: 18.3.1(react@18.3.1)
