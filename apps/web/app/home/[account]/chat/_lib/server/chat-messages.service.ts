@@ -165,7 +165,7 @@ class ChatMessagesService {
     >;
 
     return {
-      maxTokens: settings.maxTokens ?? 100,
+      maxTokens: settings.maxTokens ?? 500,
       systemMessage: settings.systemMessage ?? `You are a helpful assistant`,
       model: settings.model ?? 'gpt-3.5-turbo',
       temperature: settings.temperature ?? 0.7,

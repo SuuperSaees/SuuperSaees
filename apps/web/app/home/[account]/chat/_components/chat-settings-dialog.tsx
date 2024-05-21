@@ -121,7 +121,7 @@ function ChatSettingsForm({
       model: settings.model ?? 'gpt-3.5-turbo',
       temperature: settings.temperature ?? 0.7,
       systemMessage: settings.systemMessage ?? 'You are a helpful assistant',
-      maxTokens: settings.maxTokens ?? 100,
+      maxTokens: settings.maxTokens ?? 500,
     },
   });
 
