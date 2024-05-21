@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useTransition } from 'react';
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -8,7 +8,14 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Message, nanoid } from 'ai';
 import { useChat } from 'ai/react';
-import { Bot, SendIcon, SettingsIcon, Trash } from 'lucide-react';
+import {
+  Bot,
+  CircleStop,
+  SendIcon,
+  SettingsIcon,
+  StepForwardIcon,
+  Trash,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -64,6 +71,7 @@ export function ChatContainer(
     handleSubmit,
     isLoading,
     append,
+    stop,
   } = useChat({
     api: `${props.referenceId}/respond`,
     headers: {
@@ -80,6 +88,16 @@ export function ChatContainer(
       });
     },
   });
+
+  const onContinue = useCallback(() => {
+    void append(
+      {
+        role: 'user',
+        content: 'Continue',
+      },
+      {},
+    );
+  }, [append]);
 
   // append the user's message if it exists
   useEffect(() => {
@@ -106,12 +124,18 @@ export function ChatContainer(
         referenceId={props.referenceId}
       />
 
-      <ChatMessagesContainer isLoading={isLoading} messages={messages} />
+      <ChatMessagesContainer
+        isLoading={isLoading}
+        messages={messages}
+        onContinue={onContinue}
+      />
 
       <ChatInput
-        disabled={isCreatingChat || isLoading}
+        loading={isLoading}
+        disabled={isCreatingChat}
         handleInputChange={handleInputChange}
         value={input}
+        onStop={stop}
         handleSubmit={(event) => {
           event.preventDefault();
 
@@ -150,9 +174,11 @@ export function ChatContainer(
 export function ChatMessagesContainer({
   messages,
   isLoading,
+  onContinue,
 }: {
   messages: Message[];
   isLoading: boolean;
+  onContinue: () => void;
 }) {
   const scrollingDiv = useRef<HTMLDivElement>(null);
 
@@ -175,7 +201,7 @@ export function ChatMessagesContainer({
 
       <If condition={messages.length}>
         <div className={'flex max-w-full flex-1 flex-col space-y-4'}>
-          {messages.map((message) => (
+          {messages.map((message, index) => (
             <div
               key={message.id}
               className={cn(
@@ -194,7 +220,7 @@ export function ChatMessagesContainer({
 
               <div
                 className={cn(
-                  'w-auto whitespace-pre-line rounded-3xl border border-transparent px-6 py-6 text-sm',
+                  'flex w-auto flex-col space-y-6 whitespace-pre-line rounded-3xl border border-transparent px-6 py-6 text-sm',
                   {
                     'bg-muted dark:bg-primary dark:text-primary-foreground':
                       message.role === 'user',
@@ -202,7 +228,23 @@ export function ChatMessagesContainer({
                   },
                 )}
               >
-                {message.content}
+                <div>{message.content}</div>
+
+                <If
+                  condition={
+                    message.role === 'assistant' &&
+                    index === messages.length - 1
+                  }
+                >
+                  <If condition={!isLoading}>
+                    <div className="flex space-x-2">
+                      <Button size="sm" variant="outline" onClick={onContinue}>
+                        <StepForwardIcon className="mr-2 h-4 w-4" />
+                        <Trans i18nKey={'chats:continue'} />
+                      </Button>
+                    </div>
+                  </If>
+                </If>
               </div>
             </div>
           ))}
@@ -217,7 +259,9 @@ export function ChatMessagesContainer({
 }
 
 export function ChatInput(props: {
+  loading: boolean;
   disabled: boolean;
+  onStop: () => void;
   handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
   handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
@@ -231,8 +275,20 @@ export function ChatInput(props: {
         'relative bottom-8 mx-auto mt-auto w-full max-w-3xl shadow-[0px_-58px_80px_4px_#fff] animate-in slide-in-from-bottom-8 dark:shadow-[0px_-58px_80px_4px_#000]'
       }
     >
+      <If condition={props.loading}>
+        <Button
+          className="absolute right-4 top-2 z-[1]"
+          variant="outline"
+          size="sm"
+          onClick={props.onStop}
+        >
+          <CircleStop className="mr-1 h-4" />
+          <span>{t('stopGenerating')}</span>
+        </Button>
+      </If>
+
       <Input
-        disabled={props.disabled}
+        disabled={props.disabled || props.loading}
         value={props.value}
         onChange={props.handleInputChange}
         placeholder={t('askAiPlaceholder')}
@@ -243,14 +299,16 @@ export function ChatInput(props: {
 
       <Bot className="absolute left-4 top-3.5 h-5 text-muted-foreground" />
 
-      <Button
-        disabled={props.disabled}
-        variant={'ghost'}
-        size={'icon'}
-        className={'absolute right-4 top-1.5 rounded-full'}
-      >
-        <SendIcon className={'h-5 text-muted-foreground'} />
-      </Button>
+      <If condition={!props.loading}>
+        <Button
+          disabled={props.disabled}
+          variant={'ghost'}
+          size={'icon'}
+          className={'absolute right-4 top-1.5 rounded-full'}
+        >
+          <SendIcon className={'h-5 text-muted-foreground'} />
+        </Button>
+      </If>
     </form>
   );
 }

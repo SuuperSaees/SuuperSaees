@@ -10,7 +10,11 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const FAKE_STREAMER = false;
+let FAKE_STREAMER = false;
+
+if (process.env.NODE_ENV === 'production') {
+  FAKE_STREAMER = false;
+}
 
 export const POST = enhanceRouteHandler(
   async ({ body, params }) => {

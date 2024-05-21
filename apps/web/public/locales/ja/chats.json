@@ -20,5 +20,7 @@
   "rename": "名前の変更",
   "delete": "消去",
   "renameChatDialogTitle": "チャット名の変更",
-  "renameChatDialogDescription": "このチャットの新しい名前を入力してください"
+  "renameChatDialogDescription": "このチャットの新しい名前を入力してください",
+  "stopGenerating": "生成を停止",
+  "continue": "続行"
 }

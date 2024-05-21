@@ -21,5 +21,7 @@
   "delete": "Löschen",
   "renameChatDialogTitle": "Chat umbenennen",
   "renameChatDialogDescription": "Geben Sie einen neuen Namen für diesen Chat ein",
-  "modelDemoAlert": "Für diese Demo unterstützen wir nur GPT-3.5 Turbo. In der Produktion können Sie jedes Modell wählen, das Sie verwenden möchten."
+  "modelDemoAlert": "Für diese Demo unterstützen wir nur GPT-3.5 Turbo. In der Produktion können Sie jedes Modell wählen, das Sie verwenden möchten.",
+  "stopGenerating": "Generierung stoppen",
+  "continue": "Weiter"
 }
