@@ -27,6 +27,7 @@ import {
 import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
+import { LoadingBubble } from '~/home/[account]/chat/_components/loading-bubble';
 import { createChatAction } from '~/home/[account]/chat/_lib/server/server-actions';
 
 import { ChatSettingsDialog } from './chat-settings-dialog';
@@ -205,6 +206,10 @@ export function ChatMessagesContainer({
               </div>
             </div>
           ))}
+
+          <If condition={isLoading}>
+            <LoadingBubble />
+          </If>
         </div>
       </If>
     </div>
