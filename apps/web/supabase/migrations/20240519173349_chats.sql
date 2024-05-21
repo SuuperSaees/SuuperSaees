@@ -17,6 +17,27 @@ create index ix_chats_account_id on public.chats(account_id);
 -- public.chats row level security
 alter table public.chats enable row level security;
 
+-- Function "kit.prevent_chats_update"
+create
+or replace function kit.prevent_chats_update () returns trigger
+set
+  search_path = '' as $$
+begin
+-- only allow updating name and settings
+if
+  new.name <> old.name or
+  new.settings <> old.settings
+then
+  return new;
+end if;
+
+end; $$ language plpgsql;
+
+create
+or replace trigger prevent_chats_update before
+update on public.chats for each row
+execute function kit.prevent_chats_update ();
+
 -- public.has_credits
 create or replace function public.has_credits(account_id uuid) returns boolean as $$
    select remaining_credits > 0 from public.credits_usage where public.credits_usage.account_id = $1;
