@@ -23,5 +23,6 @@
   "renameChatDialogDescription": "Inserisci un nuovo nome per questa chat",
   "modelDemoAlert": "Per questa demo, supportiamo solo GPT-3.5 Turbo. In produzione, puoi scegliere qualsiasi modello che desideri utilizzare.",
   "stopGenerating": "Stoppa la generazione",
-  "continue": "Continua"
+  "continue": "Continua",
+  "errorCreatingChat": "Errore durante la creazione della chat"
 }

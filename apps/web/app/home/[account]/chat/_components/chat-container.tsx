@@ -60,7 +60,11 @@ export function ChatContainer(
     if (error instanceof Error && error.message === 'No credits available') {
       toast.error(t('noCredits'));
     } else {
-      toast.error(t('genericError'));
+      toast.error(
+        t(error, {
+          defaultValue: error,
+        }),
+      );
     }
   };
 
@@ -150,18 +154,18 @@ export function ChatContainer(
               // assign an ID
               const referenceId = nanoid(8);
 
-              try {
-                // create a chat
+              const response = // create a chat
                 await createChatAction({
                   accountId: props.accountId,
                   referenceId,
                   content: input,
                 });
 
+              if (response.success) {
                 // navigate to the chat
                 router.replace(`chat/${referenceId}?content=${input}`);
-              } catch (error) {
-                onError(error);
+              } else {
+                onError(response.message);
               }
             });
           }
@@ -288,6 +292,7 @@ export function ChatInput(props: {
       </If>
 
       <Input
+        required
         disabled={props.disabled || props.loading}
         value={props.value}
         onChange={props.handleInputChange}

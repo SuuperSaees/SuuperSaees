@@ -29,19 +29,31 @@ export const createChatAction = enhanceAction(
     const service = createChatMessagesService(client);
     const chatService = createChatLLMService(client, adminClient);
 
-    const chatName = await chatService.createChatNameFromMessage({
-      message: body.content,
-      accountId: body.accountId,
-    });
+    try {
+      const chatName = await chatService.createChatNameFromMessage({
+        message: body.content,
+        accountId: body.accountId,
+      });
 
-    revalidatePath('/home/[account]/chat', 'layout');
+      await service.createChat({
+        accountId: body.accountId,
+        chatReferenceId: body.referenceId,
+        name: chatName,
+        messages: [],
+      });
 
-    return await service.createChat({
-      accountId: body.accountId,
-      chatReferenceId: body.referenceId,
-      name: chatName,
-      messages: [],
-    });
+      revalidatePath('/home/[account]/chat', 'layout');
+
+      return {
+        success: true,
+        message: null,
+      };
+    } catch (e) {
+      return {
+        success: false,
+        message: e instanceof Error ? e.message : 'chat:errorCreatingChat',
+      };
+    }
   },
   {
     schema: CreateChatSchema,

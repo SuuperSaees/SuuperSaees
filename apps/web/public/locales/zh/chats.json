@@ -22,5 +22,6 @@
   "renameChatDialogTitle": "重命名聊天",
   "renameChatDialogDescription": "为此聊天输入新名称",
   "stopGenerating": "停止生成",
-  "continue": "继续"
+  "continue": "继续",
+  "errorCreatingChat": "创建聊天时出错"
 }

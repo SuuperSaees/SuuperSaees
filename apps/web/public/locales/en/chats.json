@@ -24,5 +24,6 @@
   "modelDemoAlert": "For this demo, we only support GPT-3.5 Turbo. In production, you can choose from any model you wish to use.",
   "stopGenerating": "Stop generating",
   "continue": "Continue",
-  "rewrite": "Rewrite"
+  "rewrite": "Rewrite",
+  "errorCreatingChat": "Error creating chat. Please try again later."
 }

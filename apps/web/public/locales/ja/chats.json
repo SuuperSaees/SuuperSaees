@@ -22,5 +22,6 @@
   "renameChatDialogTitle": "チャット名の変更",
   "renameChatDialogDescription": "このチャットの新しい名前を入力してください",
   "stopGenerating": "生成を停止",
-  "continue": "続行"
+  "continue": "続行",
+  "errorCreatingChat": "チャットの作成中にエラーが発生しました"
 }
