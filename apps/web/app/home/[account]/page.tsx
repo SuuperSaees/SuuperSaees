@@ -53,12 +53,7 @@ function TeamAccountHomePage({ params }: { params: Params }) {
         account={params.account}
         title={<Trans i18nKey={'common:dashboardTabLabel'} />}
         description={<Trans i18nKey={'common:dashboardTabDescription'} />}
-      >
-        <Button>
-          <PlusCircle className={'mr-1 h-4'} />
-          <span>Add Widget</span>
-        </Button>
-      </TeamAccountLayoutPageHeader>
+      />
 
       <PageBody>
         <DashboardDemo />

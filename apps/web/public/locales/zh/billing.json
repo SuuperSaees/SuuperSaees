@@ -122,7 +122,7 @@
       "badge": "价值",
       "base": "根据",
       "features": {
-        "maxTasks": "最多 10 个任务"
+        "maxTokens": "最多 500k 代币"
       }
     },
     "pro": {
@@ -131,7 +131,7 @@
       "badge": "受欢迎的",
       "base": "根据",
       "features": {
-        "maxTasks": "最多 20 个任务"
+        "maxTokens": "最多 3M 代币"
       }
     },
     "enterprise": {
@@ -140,7 +140,7 @@
       "badge": "风俗",
       "base": "根据",
       "features": {
-        "maxTasks": "无限任务",
+        "maxTokens": "无限代币",
         "chatSupport": "优先支持"
       }
     }

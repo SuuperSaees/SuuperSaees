@@ -1,4 +1,10 @@
-import { CreditCard, LayoutDashboard, Settings, Users } from 'lucide-react';
+import {
+  CreditCard,
+  LayoutDashboard,
+  MessageSquare,
+  Settings,
+  Users,
+} from 'lucide-react';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
@@ -13,6 +19,12 @@ const getRoutes = (account: string) => [
     path: pathsConfig.app.accountHome.replace('[account]', account),
     Icon: <LayoutDashboard className={iconClasses} />,
     end: true,
+  },
+  {
+    label: 'chats:chatTabLabel',
+    path: pathsConfig.app.accountHome.replace('[account]', account) + '/chat',
+    Icon: <MessageSquare className={iconClasses} />,
+    end: false,
   },
   {
     label: 'common:settingsTabLabel',

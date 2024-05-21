@@ -122,7 +122,7 @@
       "badge": "Valeur",
       "base": "Base",
       "features": {
-        "maxTasks": "Jusqu'à 10 tâches"
+        "maxTokens": "Jusqu'à 500k jetons"
       }
     },
     "pro": {
@@ -131,7 +131,7 @@
       "badge": "Populaire",
       "base": "Base",
       "features": {
-        "maxTasks": "Jusqu'à 20 tâches"
+        "maxTokens": "Jusqu'à 3M jetons"
       }
     },
     "enterprise": {
@@ -140,7 +140,7 @@
       "badge": "Coutume",
       "base": "Base",
       "features": {
-        "maxTasks": "Tâches illimitées",
+        "maxTokens": "Jetons illimitées",
         "chatSupport": "Assistance prioritaire"
       }
     }

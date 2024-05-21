@@ -10,6 +10,8 @@ import { generateRootMetadata } from '~/lib/root-metdata';
 
 import '../styles/globals.css';
 
+export const runtime = 'edge';
+
 export default async function RootLayout({
   children,
 }: {

@@ -113,7 +113,7 @@
   },
   "plans": {
     "features": {
-      "maxTasks": "Fino a 10 attività",
+      "maxTokens": "Fino a 500k tokens",
       "chatSupport": "Supporto via chat"
     },
     "starter": {
@@ -122,7 +122,7 @@
       "badge": "Valore",
       "base": "Base",
       "features": {
-        "maxTasks": "Fino a 10 attività"
+        "maxTokens": "Fino a 500k tokens"
       }
     },
     "pro": {
@@ -131,7 +131,7 @@
       "badge": "Popolare",
       "base": "Base",
       "features": {
-        "maxTasks": "Fino a 20 attività"
+        "maxTokens": "Fino a 3M tokens"
       }
     },
     "enterprise": {
@@ -140,7 +140,7 @@
       "badge": "Costume",
       "base": "Base",
       "features": {
-        "maxTasks": "Compiti illimitati",
+        "maxTokens": "Tokens illimitati",
         "chatSupport": "Supporto prioritario"
       }
     }

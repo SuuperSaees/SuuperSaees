@@ -22,12 +22,13 @@ interface Config<Schema> {
 }
 
 interface HandlerParams<
-  Body extends object,
+  Schema extends z.ZodType | undefined,
   RequireAuth extends boolean | undefined,
 > {
   request: NextRequest;
   user: RequireAuth extends false ? undefined : User;
-  body: Body;
+  body: Schema extends z.ZodType ? z.infer<Schema> : never;
+  params: Record<string, string>;
 }
 
 /**
@@ -51,19 +52,17 @@ interface HandlerParams<
  *
  */
 export const enhanceRouteHandler = <
-  Body extends object,
-  Schema extends z.ZodType<Body, z.ZodTypeDef>,
-  Params extends Config<Schema> = Config<Schema>,
+  Body,
+  Params extends Config<z.ZodType<Body, z.ZodTypeDef>>,
 >(
   // Route handler function
   handler:
     | ((
-        params: HandlerParams<z.infer<Schema>, Params['auth']>,
+        params: HandlerParams<Params['schema'], Params['auth']>,
       ) => NextResponse | Response)
     | ((
-        params: HandlerParams<z.infer<Schema>, Params['auth']>,
+        params: HandlerParams<Params['schema'], Params['auth']>,
       ) => Promise<NextResponse | Response>),
-
   // Parameters object
   params?: Params,
 ) => {
@@ -72,7 +71,12 @@ export const enhanceRouteHandler = <
    *
    * This function takes a request object as an argument and returns a response object.
    */
-  return async function routeHandler(request: NextRequest) {
+  return async function routeHandler(
+    request: NextRequest,
+    routeParams: {
+      params: Record<string, string>;
+    },
+  ) {
     type UserParam = Params['auth'] extends false ? undefined : User;
 
     let user: UserParam = undefined as UserParam;
@@ -121,7 +125,12 @@ export const enhanceRouteHandler = <
 
     if (shouldCaptureException) {
       try {
-        return await handler({ request, body, user });
+        return await handler({
+          request,
+          body,
+          user,
+          params: routeParams.params,
+        });
       } catch (error) {
         if (isRedirectError(error)) {
           throw error;
@@ -134,7 +143,12 @@ export const enhanceRouteHandler = <
       }
     } else {
       // all good, call the handler with the request, body and user
-      return handler({ request, body, user });
+      return handler({
+        request,
+        body,
+        user,
+        params: routeParams.params,
+      });
     }
   };
 };

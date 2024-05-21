@@ -10,6 +10,8 @@
     "build:test": "NODE_ENV=test pnpm with-env:test next build",
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "pnpm with-env next dev --turbo",
+    "cloudflare:build": "pnpm dlx @cloudflare/next-on-pages",
+    "cloudflare:preview": "pnpm dlx wrangler pages dev .vercel/output/static --compatibility-flag=nodejs_compat",
     "next:lint": "next lint",
     "format": "prettier --check \"**/*.{js,cjs,mjs,ts,tsx,md,json}\"",
     "start": "pnpm with-env next start",
@@ -31,6 +33,7 @@
     "supabase:db:dump:local": "supabase db dump --local --data-only"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.13",
     "@edge-csrf/nextjs": "2.0.0",
     "@hookform/resolvers": "^3.4.0",
     "@kit/accounts": "workspace:^",
@@ -58,7 +61,9 @@
     "@tanstack/react-query": "5.37.1",
     "@tanstack/react-query-next-experimental": "^5.36.2",
     "@tanstack/react-table": "^8.17.3",
+    "ai": "^3.1.12",
     "date-fns": "^3.6.0",
+    "gpt-tokenizer": "^2.1.2",
     "lucide-react": "^0.378.0",
     "next": "14.2.3",
     "next-sitemap": "^4.2.3",

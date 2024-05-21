@@ -124,7 +124,7 @@
       "badge": "Value",
       "base": "Base",
       "features": {
-        "maxTasks": "Up to 10 tasks"
+        "maxTokens": "Up to 500k tokens"
       }
     },
     "pro": {
@@ -133,7 +133,7 @@
       "badge": "Popular",
       "base": "Base",
       "features": {
-        "maxTasks": "Up to 20 tasks"
+        "maxTokens": "Up to 3 million tokens"
       }
     },
     "enterprise": {
@@ -142,7 +142,7 @@
       "badge": "Custom",
       "base": "Base",
       "features": {
-        "maxTasks": "Unlimited tasks",
+        "maxTokens": "Unlimited tokens",
         "chatSupport": "Priority support"
       }
     }

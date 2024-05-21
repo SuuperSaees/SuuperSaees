@@ -8,7 +8,7 @@ import { BillingProviderSchema, createBillingSchema } from '@kit/billing';
 // and should match the provider in the database. We also add it here so we can validate
 // your configuration against the selected provider at build time.
 const provider = BillingProviderSchema.parse(
-    process.env.NEXT_PUBLIC_BILLING_PROVIDER,
+  process.env.NEXT_PUBLIC_BILLING_PROVIDER,
 );
 
 export default createBillingSchema({
@@ -53,7 +53,7 @@ export default createBillingSchema({
         },
       ],
       features: [
-        'billing:plans.starter.features.maxTasks',
+        'billing:plans.starter.features.maxTokens',
         'billing:plans.features.chatSupport',
       ],
     },
@@ -95,7 +95,7 @@ export default createBillingSchema({
         },
       ],
       features: [
-        'billing:plans.pro.features.maxTasks',
+        'billing:plans.pro.features.maxTokens',
         'billing:plans.features.chatSupport',
       ],
     },
@@ -127,7 +127,7 @@ export default createBillingSchema({
         },
       ],
       features: [
-        'billing:plans.enterprise.features.maxTasks',
+        'billing:plans.enterprise.features.maxTokens',
         'billing:plans.enterprise.features.chatSupport',
       ],
     },

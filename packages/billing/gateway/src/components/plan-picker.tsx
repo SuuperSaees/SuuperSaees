@@ -402,6 +402,11 @@ export function PlanPicker(
           />
         ) : null}
       </div>
+
+      <p className="text-muted-foreground my-4 text-xs">
+        Please note that subscribing won&apos;t refill your tokens, this is for
+        demonstration purposes only.
+      </p>
     </Form>
   );
 }
