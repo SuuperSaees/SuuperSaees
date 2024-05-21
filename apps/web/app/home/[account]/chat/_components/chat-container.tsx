@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useTransition } from 'react';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -34,6 +33,7 @@ import {
 import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
+import { ChatgptLogo } from '~/home/[account]/chat/_components/chatgpt-logo';
 import { LoadingBubble } from '~/home/[account]/chat/_components/loading-bubble';
 import { createChatAction } from '~/home/[account]/chat/_lib/server/server-actions';
 
@@ -61,8 +61,8 @@ export function ChatContainer(
       toast.error(t('noCredits'));
     } else {
       toast.error(
-        t(error, {
-          defaultValue: error,
+        t(error as string, {
+          defaultValue: error as string,
         }),
       );
     }
@@ -382,12 +382,7 @@ function EmptyState() {
       }
     >
       <div className={'flex justify-center'}>
-        <Image
-          alt={'ChatGPT logo'}
-          src={'/images/chatgpt-logo.svg'}
-          width={120}
-          height={120}
-        />
+        <ChatgptLogo />
       </div>
 
       <div>
