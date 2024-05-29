@@ -1,6 +1,9 @@
 import 'server-only';
 
+import { unstable_noStore as noStore } from 'next/cache';
 import { cookies } from 'next/headers';
+
+import { createClient } from '@supabase/supabase-js';
 
 import type { CookieOptions } from '@supabase/ssr';
 import { createServerClient } from '@supabase/ssr';
@@ -24,14 +27,18 @@ export function getSupabaseRouteHandlerClient<GenericSchema = Database>(
     admin: false,
   },
 ) {
+  // prevent any caching (to be removed in Next v15)
+  noStore();
+
   if (params.admin) {
     warnServiceRoleKeyUsage();
 
-    return createServerClient<GenericSchema>(keys.url, serviceRoleKey, {
+    return createClient<GenericSchema>(keys.url, serviceRoleKey, {
       auth: {
         persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
       },
-      cookies: {},
     });
   }
 
