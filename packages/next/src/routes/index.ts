@@ -27,7 +27,7 @@ interface HandlerParams<
 > {
   request: NextRequest;
   user: RequireAuth extends false ? undefined : User;
-  body: Schema extends z.ZodType ? z.infer<Schema> : never;
+  body: Schema extends z.ZodType ? z.infer<Schema> : undefined;
   params: Record<string, string>;
 }
 
@@ -113,12 +113,15 @@ export const enhanceRouteHandler = <
       user = auth.data as UserParam;
     }
 
-    // clone the request to read the body
-    // so that we can pass it to the handler safely
-    let body = await request.clone().json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let body: any;
 
     if (params?.schema) {
-      body = zodParseFactory(params.schema)(body);
+      // clone the request to read the body
+      // so that we can pass it to the handler safely
+      const json = await request.clone().json();
+
+      body = zodParseFactory(params.schema)(json);
     }
 
     const shouldCaptureException = params?.captureException ?? true;
