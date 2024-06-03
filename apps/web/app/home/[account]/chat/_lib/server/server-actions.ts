@@ -51,7 +51,7 @@ export const createChatAction = enhanceAction(
     } catch (e) {
       return {
         success: false,
-        message: e instanceof Error ? e.message : 'chat:errorCreatingChat',
+        message: e instanceof Error ? e.message : 'chats:errorCreatingChat',
       };
     }
   },

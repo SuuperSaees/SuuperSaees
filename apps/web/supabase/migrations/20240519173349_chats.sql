@@ -38,28 +38,12 @@ or replace trigger prevent_chats_update before
 update on public.chats for each row
 execute function kit.prevent_chats_update ();
 
--- public.has_credits
-create or replace function public.has_credits(account_id uuid) returns boolean as $$
-   select remaining_credits > 0 from public.credits_usage where public.credits_usage.account_id = $1;
-$$ language sql stable;
-
-grant execute on function public.has_credits(uuid) to authenticated, service_role;
-
 -- SELECT(public.chats)
 create policy select_chats on public.chats
  for select
   to authenticated
   using (
     public.has_role_on_account(account_id)
- );
-
--- INSERT(public.chats)
-create policy insert_chats on public.chats
- for insert
-  to authenticated
-  with check (
-    public.has_role_on_account(account_id) and
-    public.has_credits(account_id)
  );
 
 -- UPDATE(public.chats)
@@ -125,6 +109,22 @@ create policy select_credits_usage on public.credits_usage
   to authenticated
   using (
     public.has_role_on_account(account_id)
+ );
+
+ -- public.has_credits
+ create or replace function public.has_credits(account_id uuid) returns boolean as $$
+    select remaining_credits > 0 from public.credits_usage where public.credits_usage.account_id = $1;
+ $$ language sql stable;
+
+ grant execute on function public.has_credits(uuid) to authenticated, service_role;
+
+-- INSERT(public.chats)
+create policy insert_chats on public.chats
+ for insert
+  to authenticated
+  with check (
+    public.has_role_on_account(account_id) and
+    public.has_credits(account_id)
  );
 
 -- public.plans

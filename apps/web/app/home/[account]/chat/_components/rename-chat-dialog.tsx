@@ -98,7 +98,7 @@ function RenameChatButton() {
 
   return (
     <Button disabled={pending}>
-      <Trans i18nKey={'chats:renameChat'} />
+      <Trans i18nKey={'chats:renameChatDialogTitle'} />
     </Button>
   );
 }
