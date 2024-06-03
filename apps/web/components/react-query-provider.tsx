@@ -9,7 +9,7 @@ const staleTime = isServer ? 0 : 60 * 1000;
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime,
+      /// gcTime,
       staleTime,
     },
   },
