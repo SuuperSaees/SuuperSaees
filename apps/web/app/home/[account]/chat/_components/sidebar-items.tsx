@@ -66,13 +66,13 @@ export function SidebarItems({
                   chatReferenceId={chat.reference_id}
                 >
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Trans i18nKey={'chats:rename'} />
+                    <Trans i18nKey={'chats:renameChat'} />
                   </DropdownMenuItem>
                 </RenameChatDialog>
 
                 <DeleteChatDialog chatReferenceId={chat.reference_id}>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Trans i18nKey={'chats:delete'} />
+                    <Trans i18nKey={'chats:deleteChat'} />
                   </DropdownMenuItem>
                 </DeleteChatDialog>
               </DropdownMenuContent>
