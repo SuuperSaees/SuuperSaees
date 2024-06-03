@@ -29,10 +29,14 @@ async function workspaceLoader(accountSlug: string) {
   const client = getSupabaseServerComponentClient();
   const api = createTeamAccountsApi(client);
 
+  console.time('loadTeamWorkspace');
+
   const [workspace, auth] = await Promise.all([
     api.getAccountWorkspace(accountSlug),
     requireUser(client),
   ]);
+
+  console.timeEnd('loadTeamWorkspace');
 
   // we cannot find any record for the selected account
   // so we redirect the user to the home page

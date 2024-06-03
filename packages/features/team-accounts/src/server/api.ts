@@ -91,6 +91,7 @@ export class TeamAccountsApi {
    * @param slug
    */
   async getAccountWorkspace(slug: string) {
+    console.time('getAccountWorkspace');
     const accountPromise = this.client.rpc('team_account_workspace', {
       account_slug: slug,
     });
@@ -124,6 +125,8 @@ export class TeamAccountsApi {
         data: null,
       };
     }
+
+    console.timeEnd('getAccountWorkspace');
 
     return {
       data: {

@@ -28,6 +28,7 @@ export async function requireUser(client: SupabaseClient): Promise<
         }
     )
 > {
+  console.time('client.auth.getUser();');
   const { data, error } = await client.auth.getUser();
 
   if (!data.user || error) {
@@ -49,6 +50,8 @@ export async function requireUser(client: SupabaseClient): Promise<
       redirectTo: MULTI_FACTOR_AUTH_VERIFY_PATH,
     };
   }
+
+  console.timeEnd('client.auth.getUser();');
 
   return {
     error: null,
