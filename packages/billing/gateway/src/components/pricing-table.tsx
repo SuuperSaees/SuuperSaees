@@ -150,10 +150,10 @@ function PricingItem(
 
   const lineItem = props.primaryLineItem;
 
-  // we want to exclude the primary plan from the list of line items
-  // since we are displaying the primary line item separately as the main price
+  // we exclude flat line items from the details since
+  // it doesn't need further explanation
   const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
-    return item.id !== lineItem?.id;
+    return item.type !== 'flat';
   });
 
   return (
@@ -161,8 +161,7 @@ function PricingItem(
       data-cy={'subscription-plan'}
       className={cn(
         props.className,
-        `s-full relative flex flex-1 grow flex-col items-stretch justify-between
-            self-stretch rounded-lg border p-8 lg:w-4/12 xl:max-w-[20rem]`,
+        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-lg border p-8 lg:w-4/12 xl:max-w-[20rem]`,
         {
           ['border-primary']: highlighted,
           ['dark:shadow-primary/40 border-transparent shadow dark:shadow-sm']:
@@ -222,10 +221,10 @@ function PricingItem(
           <If condition={props.plan.name}>
             <span
               className={cn(
-                `animate-in slide-in-from-left-4 fade-in flex items-center space-x-0.5 text-sm capitalize`,
+                `animate-in slide-in-from-left-4 fade-in text-muted-foreground flex items-center space-x-0.5 text-sm capitalize`,
               )}
             >
-              <span className={'text-muted-foreground'}>
+              <span>
                 <If
                   condition={props.plan.interval}
                   fallback={<Trans i18nKey={'billing:lifetime'} />}
