@@ -23,7 +23,6 @@ const getUser = (request: NextRequest, response: NextResponse) => {
 };
 
 export async function middleware(request: NextRequest) {
-  console.time('middleware');
   const response = NextResponse.next();
 
   // set a unique request ID for each request
@@ -51,8 +50,6 @@ export async function middleware(request: NextRequest) {
   if (isServerAction(request)) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
-
-  console.timeEnd('middleware');
 
   // if no pattern handler returned a response,
   // return the session response

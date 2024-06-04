@@ -1,8 +1,8 @@
 import { use } from 'react';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { createTeamAccountsApi } from '@kit/team-accounts/api';
 
-import { loadTeamWorkspace } from '~/home/[account]/_lib/server/team-account-workspace.loader';
 import { createChatMessagesService } from '~/home/[account]/chat/_lib/server/chat-messages.service';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
@@ -20,16 +20,19 @@ interface Props {
 }
 
 function ChatPage(props: Props) {
-  const { account } = use(loadTeamWorkspace(props.params.account));
-
   const client = getSupabaseServerComponentClient();
+
+  const teamAccountsApi = createTeamAccountsApi(client);
   const service = createChatMessagesService(client);
 
-  const data = use(
-    service.getMessages({
-      chatReferenceId: props.params.referenceId,
-      page: 0,
-    }),
+  const [data, account] = use(
+    Promise.all([
+      service.getMessages({
+        chatReferenceId: props.params.referenceId,
+        page: 0,
+      }),
+      teamAccountsApi.getTeamAccount(props.params.account),
+    ]),
   );
 
   const messages = data.map((message) => {
