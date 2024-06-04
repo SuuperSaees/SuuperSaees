@@ -6,7 +6,6 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Button } from '@kit/ui/button';
 import { Sidebar, SidebarContent } from '@kit/ui/sidebar';
 
-import { loadTeamWorkspace } from '~/home/[account]/_lib/server/team-account-workspace.loader';
 import { SidebarItems } from '~/home/[account]/chat/_components/sidebar-items';
 import { createChatMessagesService } from '~/home/[account]/chat/_lib/server/chat-messages.service';
 import { withI18n } from '~/lib/i18n/with-i18n';
@@ -19,11 +18,10 @@ async function ChatLayout({
     account: string;
   };
 }>) {
-  const { account } = await loadTeamWorkspace(params.account);
   const client = getSupabaseServerComponentClient();
   const service = createChatMessagesService(client);
 
-  const chats = await service.getChats(account.id);
+  const chats = await service.getChats(params.account);
 
   const href = `/home/${params.account}/chat`;
 
