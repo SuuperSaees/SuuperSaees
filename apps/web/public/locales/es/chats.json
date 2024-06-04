@@ -18,6 +18,7 @@
   "save": "Ahorrar",
   "chatName": "Nombre de chat",
   "rename": "Rebautizar",
+  "renameChat": "Cambiar nombre de chat",
   "delete": "Borrar",
   "renameChatDialogTitle": "Cambiar nombre de chat",
   "renameChatDialogDescription": "Ingrese un nuevo nombre para este chat",

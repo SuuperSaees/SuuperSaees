@@ -18,6 +18,7 @@
   "save": "Speichern",
   "chatName": "Chat Name",
   "rename": "Umbenennen",
+  "renameChat": "Chat umbenennen",
   "delete": "Löschen",
   "renameChatDialogTitle": "Chat umbenennen",
   "renameChatDialogDescription": "Geben Sie einen neuen Namen für diesen Chat ein",

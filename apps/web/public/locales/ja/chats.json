@@ -18,6 +18,7 @@
   "save": "保存",
   "chatName": "チャット名",
   "rename": "名前の変更",
+  "renameChat": "チャット名の変更",
   "delete": "消去",
   "renameChatDialogTitle": "チャット名の変更",
   "renameChatDialogDescription": "このチャットの新しい名前を入力してください",

@@ -18,6 +18,7 @@
   "save": "节省",
   "chatName": "聊天名称",
   "rename": "改名",
+  "renameChat": "重命名聊天",
   "delete": "删除",
   "renameChatDialogTitle": "重命名聊天",
   "renameChatDialogDescription": "为此聊天输入新名称",

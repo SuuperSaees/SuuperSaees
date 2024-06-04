@@ -18,6 +18,7 @@
   "save": "Sauvegarder",
   "chatName": "nom du chat",
   "rename": "Renommer",
+  "renameChat": "Renommer la chat",
   "delete": "Supprimer",
   "renameChatDialogTitle": "Renommer la discussion",
   "renameChatDialogDescription": "Entrez un nouveau nom pour ce chat",
