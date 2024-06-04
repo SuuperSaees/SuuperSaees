@@ -44,10 +44,12 @@ export const generateMetadata = async () => {
 async function TeamAccountMembersPage({ params }: Params) {
   const client = getSupabaseServerComponentClient();
 
-  const { user } = await loadTeamWorkspace(params.account);
+  const { user, account } = await loadTeamWorkspace(params.account);
 
-  const [{ account }, members, invitations, canAddMember] =
-    await loadMembersPageData(client, params.account);
+  const [members, invitations, canAddMember] = await loadMembersPageData(
+    client,
+    params.account,
+  );
 
   const canManageRoles = account.permissions.includes('roles.manage');
   const canManageInvitations = account.permissions.includes('invites.manage');

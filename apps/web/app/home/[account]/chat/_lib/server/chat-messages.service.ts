@@ -135,11 +135,11 @@ class ChatMessagesService {
     return data.id;
   }
 
-  async getChats(accountId: string) {
+  async getChats(accountSlug: string) {
     const { data: chats, error } = await this.client
       .from('chats')
-      .select('*')
-      .eq('account_id', accountId)
+      .select('*, account_id !inner (slug)')
+      .eq('account_id.slug', accountSlug)
       .order('created_at', { ascending: false });
 
     if (error) {
