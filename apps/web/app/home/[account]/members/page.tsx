@@ -18,7 +18,6 @@ import { If } from '@kit/ui/if';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
-import { loadTeamWorkspace } from '~/home/[account]/_lib/server/team-account-workspace.loader';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
@@ -44,12 +43,8 @@ export const generateMetadata = async () => {
 async function TeamAccountMembersPage({ params }: Params) {
   const client = getSupabaseServerComponentClient();
 
-  const { user, account } = await loadTeamWorkspace(params.account);
-
-  const [members, invitations, canAddMember] = await loadMembersPageData(
-    client,
-    params.account,
-  );
+  const [members, invitations, canAddMember, { user, account }] =
+    await loadMembersPageData(client, params.account);
 
   const canManageRoles = account.permissions.includes('roles.manage');
   const canManageInvitations = account.permissions.includes('invites.manage');
