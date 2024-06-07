@@ -10,7 +10,7 @@
   },
   "prettier": "@kit/prettier-config",
   "devDependencies": {
-    "@hookform/resolvers": "^3.4.0",
+    "@hookform/resolvers": "^3.6.0",
     "@kit/eslint-config": "workspace:*",
     "@kit/next": "workspace:^",
     "@kit/prettier-config": "workspace:*",
@@ -24,7 +24,7 @@
     "@tanstack/react-query": "5.40.1",
     "@tanstack/react-table": "^8.17.3",
     "@types/react": "^18.3.3",
-    "lucide-react": "^0.383.0",
+    "lucide-react": "^0.390.0",
     "next": "14.2.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
