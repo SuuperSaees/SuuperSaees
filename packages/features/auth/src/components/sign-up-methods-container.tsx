@@ -42,6 +42,7 @@ export function SignUpMethodsContainer(props: {
         <MagicLinkAuthContainer
           inviteToken={props.inviteToken}
           redirectUrl={redirectUrl}
+          shouldCreateUser={true}
         />
       </If>
 
@@ -51,6 +52,7 @@ export function SignUpMethodsContainer(props: {
         <OauthProviders
           enabledProviders={props.providers.oAuth}
           inviteToken={props.inviteToken}
+          shouldCreateUser={true}
           paths={{
             callback: props.paths.callback,
             returnPath: props.paths.appHome,
