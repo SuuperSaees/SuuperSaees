@@ -31,6 +31,7 @@
     "supabase:db:dump:local": "supabase db dump --local --data-only"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.28",
     "@edge-csrf/nextjs": "2.2.0",
     "@hookform/resolvers": "^3.6.0",
     "@kit/accounts": "workspace:^",
@@ -58,6 +59,7 @@
     "@tanstack/react-query": "5.45.0",
     "@tanstack/react-query-next-experimental": "^5.45.0",
     "@tanstack/react-table": "^8.17.3",
+    "ai": "^3.1.34",
     "date-fns": "^3.6.0",
     "gpt-tokenizer": "^2.1.2",
     "lucide-react": "^0.394.0",
