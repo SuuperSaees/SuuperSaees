@@ -10,6 +10,7 @@
     "name": "MakerKit"
   },
   "scripts": {
+    "postinstall": "manypkg fix",
     "build": "turbo build --cache-dir=.turbo",
     "clean": "git clean -xdf node_modules dist .next",
     "clean:workspaces": "turbo clean",
@@ -33,12 +34,12 @@
   "prettier": "@kit/prettier-config",
   "dependencies": {
     "@manypkg/cli": "^0.21.4",
-    "@turbo/gen": "^2.0.4",
+    "@turbo/gen": "^2.0.5",
     "cross-env": "^7.0.3",
     "pnpm": "^9.4.0",
     "prettier": "^3.3.2",
-    "turbo": "2.0.4",
-    "typescript": "^5.4.5"
+    "turbo": "2.0.5",
+    "typescript": "^5.5.2"
   },
   "pnpm": {
     "overrides": {

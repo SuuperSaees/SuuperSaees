@@ -88,9 +88,7 @@ export class StripeWebhookHandlerService
       onSubscriptionDeleted: (subscriptionId: string) => Promise<unknown>;
       onPaymentSucceeded: (sessionId: string) => Promise<unknown>;
       onPaymentFailed: (sessionId: string) => Promise<unknown>;
-      onInvoicePaid: (
-        data: UpsertSubscriptionParams,
-      ) => Promise<unknown>;
+      onInvoicePaid: (data: UpsertSubscriptionParams) => Promise<unknown>;
       onEvent?(event: Stripe.Event): Promise<unknown>;
     },
   ) {
@@ -294,19 +292,17 @@ export class StripeWebhookHandlerService
 
   private async handleInvoicePaid(
     event: Stripe.InvoicePaidEvent,
-    onInvoicePaid: (
-      data: UpsertSubscriptionParams,
-    ) => Promise<unknown>,
+    onInvoicePaid: (data: UpsertSubscriptionParams) => Promise<unknown>,
   ) {
     const stripe = await this.loadStripe();
 
     const invoice = event.data.object;
     const subscriptionId = invoice.subscription as string;
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
-      expand: ['line_items'],
-    });
+    // Retrieve the subscription
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
+    // Here we need to retrieve the subscription and build the payload
     const accountId = subscription.metadata.accountId as string;
 
     const subscriptionPayloadBuilderService =
