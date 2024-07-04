@@ -31,9 +31,9 @@
     "supabase:db:dump:local": "supabase db dump --local --data-only"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.28",
     "@edge-csrf/nextjs": "2.2.2",
     "@hookform/resolvers": "^3.7.0",
-    "@ai-sdk/openai": "^0.0.28",
     "@kit/accounts": "workspace:^",
     "@kit/admin": "workspace:^",
     "@kit/auth": "workspace:^",
@@ -55,11 +55,11 @@
     "@makerkit/data-loader-supabase-nextjs": "^1.2.3",
     "@marsidev/react-turnstile": "^0.7.1",
     "@radix-ui/react-icons": "^1.3.0",
-    "ai": "^3.1.34",
     "@supabase/supabase-js": "^2.44.2",
     "@tanstack/react-query": "5.49.2",
     "@tanstack/react-query-next-experimental": "^5.49.2",
     "@tanstack/react-table": "^8.19.2",
+    "ai": "^3.1.34",
     "date-fns": "^3.6.0",
     "gpt-tokenizer": "^2.1.2",
     "lucide-react": "^0.400.0",
