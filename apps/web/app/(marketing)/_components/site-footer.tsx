@@ -116,8 +116,8 @@ export function SiteFooter() {
         </div>
       </div>
 
-      <div className={'mt-8 flex items-end justify-end px-8'}>
-        <div className={'max-w-xs'}>
+      <div className={'mt-8 flex items-end justify-end container'}>
+        <div className={'max-w-sm'}>
           <LanguageSelector />
         </div>
       </div>
