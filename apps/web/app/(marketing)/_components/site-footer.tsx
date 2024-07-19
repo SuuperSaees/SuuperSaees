@@ -1,3 +1,4 @@
+import { LanguageSelector } from '@kit/ui/language-selector';
 import { Footer } from '@kit/ui/marketing';
 import { Trans } from '@kit/ui/trans';
 
@@ -10,20 +11,29 @@ export function SiteFooter() {
       logo={<AppLogo className="w-[85px] md:w-[95px]" />}
       description={<Trans i18nKey="marketing:footerDescription" />}
       copyright={
-        <Trans
-          i18nKey="marketing:copyright"
-          values={{
-            product: appConfig.name,
-            year: new Date().getFullYear(),
-          }}
-        />
+        <span className={'flex flex-col space-y-8'}>
+          <span>
+            <Trans
+              i18nKey="marketing:copyright"
+              values={{
+                product: appConfig.name,
+                year: new Date().getFullYear(),
+              }}
+            />
+          </span>
+
+          <LanguageSelector />
+        </span>
       }
       sections={[
         {
           heading: <Trans i18nKey="marketing:about" />,
           links: [
             { href: '/blog', label: <Trans i18nKey="marketing:blog" /> },
-            { href: '/contact', label: <Trans i18nKey="marketing:contact" /> },
+            {
+              href: '/contact',
+              label: <Trans i18nKey="marketing:contact" />,
+            },
           ],
         },
         {
