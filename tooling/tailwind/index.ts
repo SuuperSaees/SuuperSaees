@@ -64,7 +64,7 @@ export default {
       },
       fontFamily: {
         cal: ['var(--font-cal)', ...fontFamily.sans],
-        sans: ['-apple-system', 'var(--font-sans)', ...fontFamily.sans],
+        sans: ['var(--font-sans)', ...fontFamily.sans],
         heading: ['var(--font-heading)'],
       },
       keyframes: {

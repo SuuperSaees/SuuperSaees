@@ -33,13 +33,16 @@
   },
   "prettier": "@kit/prettier-config",
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.37",
     "@manypkg/cli": "^0.21.4",
     "@turbo/gen": "^2.0.9",
     "cross-env": "^7.0.3",
+    "gpt-tokenizer": "^2.2.1",
     "pnpm": "^9.6.0",
     "prettier": "^3.3.3",
     "turbo": "2.0.9",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "untitled-ui-icons-pack": "^0.0.3"
   },
   "pnpm": {
     "overrides": {

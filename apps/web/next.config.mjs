@@ -69,6 +69,10 @@ export default withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })(config);
 
+
+
+
+
 function getRemotePatterns() {
   /** @type {import('next').NextConfig['remotePatterns']} */
   // add here the remote patterns for your images

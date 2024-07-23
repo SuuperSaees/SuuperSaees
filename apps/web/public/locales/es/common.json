@@ -42,6 +42,7 @@
   "noData": "No hay datos disponibles",
   "pageNotFoundHeading": "¡Ay! :|",
   "errorPageHeading": "¡Ay! :|",
+  "correoelectronico": "Ingresa tu correo electronico",
   "roles": {
     "owner": {
       "label": "Propietario"

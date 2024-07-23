@@ -1,4 +1,4 @@
-import { CreditCard, Home, User } from 'lucide-react';
+import { CreditCard, Home, User, Layers, Users, Wallet, Settings, SquareCheck } from 'lucide-react';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
@@ -9,16 +9,37 @@ const iconClasses = 'w-4';
 
 const routes = [
   {
-    label: 'common:homeTabLabel',
+    label: 'Inicio',
     path: pathsConfig.app.home,
     Icon: <Home className={iconClasses} />,
     end: true,
   },
   {
-    label: 'account:accountTabLabel',
-    path: pathsConfig.app.personalAccountSettings,
-    Icon: <User className={iconClasses} />,
+    label: 'Pedidos',
+    path: pathsConfig.app.orders,
+    Icon: <Layers className={iconClasses} />,
   },
+  {
+    label: 'Usuarios',
+    path: pathsConfig.app.users,
+    Icon: <Users className={iconClasses} />,
+  },
+  {
+    label: 'Servicios',
+    path: pathsConfig.app.services,
+    Icon: <SquareCheck className={iconClasses} />,
+  },
+  {
+    label: 'Facturas',
+    path: pathsConfig.app.invoices,
+    Icon: <Wallet className={iconClasses} />,
+  },
+  {
+    label: 'Configuraciones',
+    path: pathsConfig.app.personalAccountSettings,
+    Icon: <Settings className={iconClasses} />,
+  },
+  
 ];
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {

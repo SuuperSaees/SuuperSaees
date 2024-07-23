@@ -32,7 +32,7 @@ function Home() {
         }
         title={
           <>
-            <span>The ultimate SaaS Starter</span>
+            <span>Hola mundo</span>
             <span>for your next project</span>
           </>
         }
