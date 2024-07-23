@@ -43,8 +43,12 @@
   "noData": "No hay datos disponibles",
   "pageNotFoundHeading": "¡Ay! :|",
   "errorPageHeading": "¡Ay! :|",
+<<<<<<< HEAD
   "nameInput": "Nombre",
   "namePortalInput": "Nombre del Portal",
+=======
+  "correoelectronico": "Ingresa tu correo electronico",
+>>>>>>> main
   "roles": {
     "owner": {
       "label": "Propietario"

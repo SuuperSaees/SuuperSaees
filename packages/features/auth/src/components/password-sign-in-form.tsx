@@ -52,7 +52,7 @@ export function PasswordSignInForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                <Trans i18nKey={'common:emailAddress'} />
+                <Trans i18nKey={'common:correoelectronico'} />
               </FormLabel>
 
               <FormControl>

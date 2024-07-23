@@ -48,7 +48,6 @@ async function TeamAccountSettingsPage(props: Props) {
         title={<Trans i18nKey={'teams:settings.pageTitle'} />}
         description={<Trans i18nKey={'teams:settings.pageDescription'} />}
       />
-
       <PageBody>
         <div className={'flex max-w-2xl flex-1 flex-col'}>
           <TeamAccountSettingsContainer account={account} paths={paths} />
