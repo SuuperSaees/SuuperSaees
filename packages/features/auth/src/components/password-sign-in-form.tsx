@@ -22,6 +22,7 @@ import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
 import { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
+import { Separator } from '@kit/ui/separator';
 
 export function PasswordSignInForm({
   onSubmit,
@@ -51,9 +52,14 @@ export function PasswordSignInForm({
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                <Trans i18nKey={'common:correoelectronico'} />
+              <FormLabel className='text-sm font-normal'>
+                <Trans i18nKey={'common:plsDetailInputs'} />
               </FormLabel>
+              
+              <div className='text-left text-sm' style={{ marginTop: '30px' }}>
+                <Trans i18nKey={'common:emailLabel'} />
+              </div>
+              
 
               <FormControl>
                 <Input
@@ -75,9 +81,9 @@ export function PasswordSignInForm({
           name={'password'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
+              <div className='text-left text-sm'>
                 <Trans i18nKey={'common:password'} />
-              </FormLabel>
+              </div>
 
               <FormControl>
                 <Input
@@ -90,21 +96,37 @@ export function PasswordSignInForm({
               </FormControl>
 
               <FormMessage />
+      
 
-              <Button
-                asChild
-                type={'button'}
-                size={'sm'}
-                variant={'link'}
-                className={'text-xs'}
-              >
-                <Link href={'/auth/password-reset'}>
-                  <Trans i18nKey={'auth:passwordForgottenQuestion'} />
-                </Link>
-              </Button>
+              <div className="flex justify-between items-center w-full">
+
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" id="rememberMe" className="form-checkbox"/>
+                  <label htmlFor="rememberMe" className="text-xs">
+                    <Trans i18nKey={'auth:rememberMe'} />
+                  </label>
+                </div>
+
+                <Button
+                  asChild
+                  type={'button'}
+                  size={'sm'}
+                  variant={'link'}
+                  className={'text-xs'}
+                >
+                  <Link href={'/auth/password-reset'}>
+                    <Trans i18nKey={'auth:passwordForgottenQuestion'} />
+                  </Link>
+                </Button>
+            </div>
+
+
+
             </FormItem>
           )}
         />
+
+<Separator />
 
         <Button
           data-test="auth-submit-button"
@@ -112,6 +134,7 @@ export function PasswordSignInForm({
           type="submit"
           disabled={loading}
         >
+          
           <If
             condition={loading}
             fallback={
