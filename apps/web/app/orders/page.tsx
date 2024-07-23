@@ -19,7 +19,9 @@ export const generateMetadata = async () => {
 function UserHomePage() {
   return (
     <>
-
+    <div className=' bg-grayCool-25'>
+    <h1 className=' bg-gray-25 text-display-2xl regular'>test</h1>
+    </div>
     </>
   );
 }

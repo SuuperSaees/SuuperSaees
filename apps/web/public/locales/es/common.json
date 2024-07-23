@@ -16,7 +16,7 @@
   "emailAddress": "Dirección de Correo Electrónico",
   "password": "Contraseña",
   "modalConfirmationQuestion": "¿Estás seguro de que quieres continuar?",
-  "loading": "Cargando...",
+  "loading": "Estamos cargando la pagina...",
   "genericServerErrorHeading": "Lo siento, algo salió mal al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
   "pageNotFound": "Lo siento, esta página no existe.",
   "pageNotFoundSubHeading": "Lo sentimos, la página que buscabas no fue encontrada",
