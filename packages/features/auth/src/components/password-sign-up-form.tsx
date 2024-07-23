@@ -35,9 +35,11 @@ export function PasswordSignUpForm({
   displayTermsCheckbox?: boolean;
 
   onSubmit: (params: {
+    name: string;
     email: string;
     password: string;
-    repeatPassword: string;
+    portalName: string;
+    // repeatPassword: string;
   }) => unknown;
   loading: boolean;
 }) {
@@ -46,9 +48,11 @@ export function PasswordSignUpForm({
   const form = useForm({
     resolver: zodResolver(PasswordSignUpSchema),
     defaultValues: {
+      name: '',
       email: defaultValues?.email ?? '',
       password: '',
-      repeatPassword: '',
+      portalName: '',
+      // repeatPassword: '',
     },
   });
 
@@ -58,6 +62,28 @@ export function PasswordSignUpForm({
         className={'w-full space-y-2.5'}
         onSubmit={form.handleSubmit(onSubmit)}
       >
+        <FormField
+          control={form.control}
+          name={'name'}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                <Trans i18nKey={'common:nameInput'} />
+              </FormLabel>
+
+              <FormControl>
+                <Input
+                  required
+                  type="string"
+                  placeholder={t('namePlaceholder')}
+                  {...field}
+                />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name={'email'}
@@ -81,8 +107,30 @@ export function PasswordSignUpForm({
             </FormItem>
           )}
         />
-
         <FormField
+          control={form.control}
+          name={'portalName'}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                <Trans i18nKey={'common:namePortalInput'} />
+              </FormLabel>
+
+              <FormControl>
+                <Input
+                  required
+                  type="string"
+                  placeholder={t('namePortalPlaceholder')}
+                  {...field}
+                />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* <FormField
           control={form.control}
           name={'password'}
           render={({ field }) => (
@@ -104,9 +152,9 @@ export function PasswordSignUpForm({
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name={'repeatPassword'}
           render={({ field }) => (
@@ -132,7 +180,7 @@ export function PasswordSignUpForm({
               </FormDescription>
             </FormItem>
           )}
-        />
+        /> */}
 
         <If condition={displayTermsCheckbox}>
           <TermsAndConditionsFormField />
@@ -140,7 +188,7 @@ export function PasswordSignUpForm({
 
         <Button
           data-test={'auth-submit-button'}
-          className={'w-full'}
+          className={'w-full bg-indigo-500 hover:bg-indigo-400'}
           type="submit"
           disabled={loading}
         >
@@ -149,12 +197,6 @@ export function PasswordSignUpForm({
             fallback={
               <>
                 <Trans i18nKey={'auth:signUpWithEmail'} />
-
-                <ArrowRight
-                  className={
-                    'zoom-in animate-in slide-in-from-left-2 fill-mode-both h-4 delay-500 duration-500'
-                  }
-                />
               </>
             }
           >

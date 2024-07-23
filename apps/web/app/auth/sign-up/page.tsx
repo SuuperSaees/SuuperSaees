@@ -38,23 +38,61 @@ function SignUpPage({ searchParams }: Props) {
 
   return (
     <>
-      <Heading level={4}>
-        <Trans i18nKey={'auth:signUpHeading'} />
-      </Heading>
+      <div className="w-full md:w-1/2 flex items-center justify-center">
+        <div className="w-full md:w-1/2">
+          <Heading level={4}>
+            <Trans i18nKey={'auth:signUpHeading'} />
+          </Heading>
 
-      <SignUpMethodsContainer
-        providers={authConfig.providers}
-        displayTermsCheckbox={authConfig.displayTermsCheckbox}
-        inviteToken={inviteToken}
-        paths={paths}
-      />
+          <SignUpMethodsContainer
+            providers={authConfig.providers}
+            displayTermsCheckbox={authConfig.displayTermsCheckbox}
+            inviteToken={inviteToken}
+            paths={paths}
+          />
 
-      <div className={'justify-centers flex'}>
-        <Button asChild variant={'link'} size={'sm'}>
-          <Link href={signInPath}>
-            <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
-          </Link>
-        </Button>
+          <div className="flex justify-center mt-4">
+            <Button asChild variant={'link'} size={'sm'}>
+              <Link href={signInPath}>
+                <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
+              </Link>
+            </Button>
+            <Button asChild variant={'link'} size={'sm'} className='text-indigo-500'>
+              <Link href={signInPath}>
+                <Trans i18nKey={'auth:signInAlreadyHaveAnAccount'} />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className='hidden md:flex md:w-1/2 flex items-center justify-center'>
+        <div className='w-full md:w-1/2'>
+          <Heading level={1}>
+            <Trans i18nKey='Convierte tu negocio' />
+          </Heading>
+          <Heading level={1}>
+            <Trans i18nKey='de servicios, en una suscripción.' />
+          </Heading>
+          <div className='font-medium text-lg'>
+            Comienza a vender tus servicios de diseño de manera recurrente, Gratis durante 14 días, sin necesidad de añadir tu tarjeta.
+          </div>
+
+          {/* <SignUpMethodsContainer
+            providers={authConfig.providers}
+            displayTermsCheckbox={authConfig.displayTermsCheckbox}
+            inviteToken={inviteToken}
+            paths={paths}
+          />
+
+          <div className="flex justify-center mt-4">
+            <Button asChild variant={'link'} size={'sm'}>
+              <Link href={signInPath}>
+                <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
+              </Link>
+            </Button>
+          </div> */}
+        </div>
       </div>
     </>
   );
