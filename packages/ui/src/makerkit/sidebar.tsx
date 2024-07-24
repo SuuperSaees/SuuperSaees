@@ -1,14 +1,10 @@
 'use client';
-
 import { useContext, useId, useState } from 'react';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
 import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
 import { z } from 'zod';
-
 import { Button } from '../shadcn/button';
 import {
   Tooltip,
@@ -21,9 +17,7 @@ import { SidebarContext } from './context/sidebar.context';
 import { If } from './if';
 import { NavigationConfigSchema } from './navigation-config.schema';
 import { Trans } from './trans';
-
 export type SidebarConfig = z.infer<typeof NavigationConfigSchema>;
-
 export function Sidebar(props: {
   collapsed?: boolean;
   className?: string;
@@ -35,13 +29,10 @@ export function Sidebar(props: {
       }) => React.ReactNode);
 }) {
   const [collapsed, setCollapsed] = useState(props.collapsed ?? false);
-
   const className = getClassNameBuilder(props.className ?? '')({
     collapsed,
   });
-
   const ctx = { collapsed, setCollapsed };
-
   return (
     <SidebarContext.Provider value={ctx}>
       <div className={className}>
@@ -52,7 +43,6 @@ export function Sidebar(props: {
     </SidebarContext.Provider>
   );
 }
-
 export function SidebarContent({
   children,
   className,
@@ -65,73 +55,63 @@ export function SidebarContent({
     </div>
   );
 }
-
 export function SidebarGroup({
   label,
   collapsed = false,
   collapsible = true,
+  Icon,
   children,
 }: React.PropsWithChildren<{
   label: string | React.ReactNode;
   collapsible?: boolean;
   collapsed?: boolean;
+  Icon?: React.ReactNode;
 }>) {
   const { collapsed: sidebarCollapsed } = useContext(SidebarContext);
   const [isGroupCollapsed, setIsGroupCollapsed] = useState(collapsed);
   const id = useId();
-
-  const Title = (props: React.PropsWithChildren) => {
-    if (sidebarCollapsed) {
-      return null;
-    }
-
-    return (
-      <span className={'text-md font-semibold uppercase text-muted-foreground'}>
-        {props.children}
-      </span>
-    );
-  };
-
   const Wrapper = () => {
     const className = cn(
-      'px-3 group flex items-center justify-between px-container',
+      'flex w-full text-md shadow-none',
       {
-        'py-2.5': !sidebarCollapsed,
+        'justify-between space-x-2.5': !sidebarCollapsed,
       },
     );
-
     if (collapsible) {
       return (
-        <button
+        <Button
           aria-expanded={!isGroupCollapsed}
           aria-controls={id}
           onClick={() => setIsGroupCollapsed(!isGroupCollapsed)}
           className={className}
+          variant="ghost"
+          size="sm"
         >
-          <Title>{label}</Title>
-
-          <If condition={collapsible}>
-            <ChevronDown
-              className={cn(`h-3 transition duration-300`, {
-                'rotate-180': !isGroupCollapsed,
-              })}
-            />
-          </If>
-        </button>
+          <div className='flex gap-2'>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>{Icon}</TooltipTrigger>
+              </Tooltip>
+            </TooltipProvider>
+            <Trans i18nKey={label as string} defaults={label as string} />
+          </div>
+          <ChevronDown
+            className={cn(`h-3 transition duration-300`, {
+              'rotate-180': !isGroupCollapsed,
+            })}
+          />
+        </Button>
       );
     }
-
     return (
       <div className={className}>
-        <Title>{label}</Title>
+        <Trans i18nKey={label as string} defaults={label as string} />
       </div>
     );
   };
-
   return (
     <div className={'flex flex-col space-y-1 py-1'}>
       <Wrapper />
-
       <If condition={collapsible ? !isGroupCollapsed : true}>
         <div id={id} className={'flex flex-col space-y-1.5 px-6.5'}>
           {children}
@@ -140,13 +120,11 @@ export function SidebarGroup({
     </div>
   );
 }
-
 export function SidebarDivider() {
   return (
     <div className={'dark:border-dark-800 my-2 border-t border-gray-100'} />
   );
 }
-
 export function SidebarItem({
   end,
   path,
@@ -159,11 +137,9 @@ export function SidebarItem({
 }>) {
   const { collapsed } = useContext(SidebarContext);
   const currentPath = usePathname() ?? '';
-
   const active = isRouteActive(path, currentPath, end ?? false);
   const variant = active ? 'secondary' : 'ghost';
   const size = collapsed ? 'icon' : 'sm';
-
   return (
     <Button
       asChild
@@ -178,20 +154,17 @@ export function SidebarItem({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>{Icon}</TooltipTrigger>
-
               <TooltipContent side={'right'} sideOffset={20}>
                 {children}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </If>
-
         <span className={cn({ hidden: collapsed })}>{children}</span>
       </Link>
     </Button>
   );
 }
-
 function getClassNameBuilder(className: string) {
   return cva(
     [
@@ -210,7 +183,6 @@ function getClassNameBuilder(className: string) {
     },
   );
 }
-
 export function SidebarNavigation({
   config,
 }: React.PropsWithChildren<{
@@ -222,7 +194,6 @@ export function SidebarNavigation({
         if ('divider' in item) {
           return <SidebarDivider key={index} />;
         }
-
         if ('children' in item) {
           return (
             <SidebarGroup
@@ -230,6 +201,7 @@ export function SidebarNavigation({
               label={<Trans i18nKey={item.label} defaults={item.label} />}
               collapsible={item.collapsible}
               collapsed={item.collapsed}
+              Icon={item.Icon}
             >
               {item.children.map((child) => {
                 return (
@@ -246,7 +218,6 @@ export function SidebarNavigation({
             </SidebarGroup>
           );
         }
-
         return (
           <SidebarItem
             key={item.path}
