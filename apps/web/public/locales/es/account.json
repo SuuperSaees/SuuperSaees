@@ -1,5 +1,6 @@
 {
   "generalTab": "Mis Detalles",
+  "rememberMe": "Recuerdame",
   "generalTabSubheading": "Administra los detalles de tu perfil",
   "emailTab": "Correo Electrónico",
   "emailTabTabSubheading": "Actualiza tu dirección de correo electrónico",
@@ -8,6 +9,7 @@
   "homePage": "Inicio",
   "billingTab": "Facturación",
   "settingsTab": "Configuraciones",
+  "plsDetailInputs": "Por favor ingresa tus detalles",
   "authenticationTab": "Autenticación",
   "multiFactorAuth": "Autenticación de Multi-Factor",
   "multiFactorAuthDescription": "Configura el método de Autenticación de Multi-Factor para asegurar aún más tu cuenta",

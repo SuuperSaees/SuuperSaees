@@ -1,5 +1,6 @@
 {
   "accountTabLabel": "Account Settings",
+  "rememberMe": "Remember me",
   "accountTabDescription": "Manage your account settings",
   "homePage": "Home",
   "billingTab": "Billing",
@@ -16,6 +17,7 @@
   "name": "Your Name",
   "nameDescription": "Update your name to be displayed on your profile",
   "emailLabel": "Email Address",
+  "plsDetailInputs": "Please input your details",
   "accountImage": "Your Profile Picture",
   "accountImageDescription": "Please choose a photo to upload as your profile picture.",
   "profilePictureHeading": "Upload a Profile Picture",
