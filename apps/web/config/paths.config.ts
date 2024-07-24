@@ -24,6 +24,9 @@ const PathsSchema = z.object({
     accountMembers: z.string().min(1),
     accountBillingReturn: z.string().min(1),
     joinTeam: z.string().min(1),
+    team:z.string().min(1),
+    clients:z.string().min(1)
+
   }),
 });
 
@@ -38,6 +41,8 @@ const pathsConfig = PathsSchema.parse({
   },
   app: {
     home: '/home',
+    team: '/team',
+    clients: '/clients',
     orders: '/orders',
     users: '/users',
     services: '/services',

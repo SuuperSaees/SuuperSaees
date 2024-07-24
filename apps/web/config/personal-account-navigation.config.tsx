@@ -21,9 +21,18 @@ const routes = [
   },
   {
     label: 'Usuarios',
-    path: pathsConfig.app.users,
-    Icon: <Users className={iconClasses} />,
+    children: [
+      {
+        label: 'Clientes',
+        path: pathsConfig.app.clients
+      },
+      {
+        label: 'Equipo',
+        path: pathsConfig.app.team
+      },
+    ]
   },
+  
   {
     label: 'Servicios',
     path: pathsConfig.app.services,
@@ -39,6 +48,8 @@ const routes = [
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
   },
+  
+
   
 ];
 

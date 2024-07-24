@@ -6,6 +6,13 @@ export default {
   content: [...baseConfig.content],
     theme: {
     extend: {
+        spacing: {
+            '6.5': '1.625rem', // 6.5 * 0.25rem = 1.625rem
+          },
+          screens: {
+            'lg-custom': '1250px',
+            'md-custom': '900px'
+          },
       colors: {
         white: '#FFFFFF',
         black: '#000000',
