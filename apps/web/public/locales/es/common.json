@@ -25,6 +25,7 @@
   "anonymousUser": "Anónimo",
   "tryAgain": "Intentar de Nuevo",
   "theme": "Tema",
+  "contactUs": "Contactanos",
   "lightTheme": "Claro",
   "darkTheme": "Oscuro",
   "systemTheme": "Sistema",
@@ -42,7 +43,8 @@
   "noData": "No hay datos disponibles",
   "pageNotFoundHeading": "¡Ay! :|",
   "errorPageHeading": "¡Ay! :|",
-  "correoelectronico": "Ingresa tu correo electronico",
+  "nameInput": "Nombre",
+  "namePortalInput": "Nombre del Portal",
   "roles": {
     "owner": {
       "label": "Propietario"

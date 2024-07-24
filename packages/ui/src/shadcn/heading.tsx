@@ -12,7 +12,7 @@ export function Heading({
       return (
         <h1
           className={cn(
-            `scroll-m-20 font-heading text-3xl font-bold tracking-tight dark:text-white lg:text-4xl`,
+            `scroll-m-20 font-heading text-5xl font-bold tracking-tight dark:text-white lg:text-5xl`,
             className,
           )}
         >

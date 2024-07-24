@@ -38,23 +38,131 @@ function SignUpPage({ searchParams }: Props) {
 
   return (
     <>
-      <Heading level={4}>
-        <Trans i18nKey={'auth:signUpHeading'} />
-      </Heading>
+      <div className="w-full md:w-1/2 h-screen flex items-center justify-center">
+        <img 
+          src="/images/logo/Suuper_Logo.svg" 
+          alt="SuuperLogo" 
+          className="hidden md:block absolute md:w-[160px] md:h-auto md:left-8 md:top-8 md:object-contain" 
+        />
+        <div className="w-full md:w-1/2 md:px-[32px] px-6">
 
-      <SignUpMethodsContainer
-        providers={authConfig.providers}
-        displayTermsCheckbox={authConfig.displayTermsCheckbox}
-        inviteToken={inviteToken}
-        paths={paths}
-      />
+          <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px] hidden md:block">
+            <Trans i18nKey={'auth:signUpHeading'} />
+          </div>
+          <img
+            src="/images/logo/Suuper_Logo_Small.svg"
+            alt="SuuperLogoSmall"
+            className="md:hidden mb-6"
+          />
+          <div className='text-gray-900 font-inter text-[24px] font-semibold leading-8 md:hidden'>
+            Convierte tu negocio de 
+          </div>
+          <div className='text-gray-900 font-inter text-[24px] font-semibold leading-8 md:hidden'>
+            servicios en una suscripción.
+          </div>
+          <div className='text-gray-600 font-inter text-[14px] font-normal leading-6 mb-4 md:hidden'>
+            Gratis durante 14 días, sin añadir tu tarjeta.
+          </div>
 
-      <div className={'justify-centers flex'}>
-        <Button asChild variant={'link'} size={'sm'}>
-          <Link href={signInPath}>
-            <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
-          </Link>
-        </Button>
+          <SignUpMethodsContainer
+            providers={authConfig.providers}
+            displayTermsCheckbox={authConfig.displayTermsCheckbox}
+            inviteToken={inviteToken}
+            paths={paths}
+          />
+
+          <div className="flex justify-center mt-4 items-center">
+            <div className='text-xs'>
+              <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
+            </div>
+            <Button asChild variant={'link'} size={'sm'} className='text-indigo-500 font-bold'>
+              <Link href={signInPath}>
+                <Trans i18nKey={'auth:signInAlreadyHaveAnAccount'} />
+              </Link>
+            </Button>
+          </div>
+        </div>
+        <div className="leading-5 absolute bottom-8 flex justify-between w-1/2 hidden md:flex">
+            <div className='text-[#475467] font-inter text-sm font-normal pl-10'>© Suuper 2024</div>
+            <div className='flex gap-2 items-center'>
+              <div className="text-[#475467] font-inter text-sm font-normal">
+                <img
+                  src="/images/icons/mail-01.svg"
+                  alt="mailicon"  
+                >
+                </img>
+              </div>
+              <div className="text-[#475467] font-inter text-sm font-normal pr-10">soporte@suuper.co</div>
+            </div>
+        </div>
+
+      </div>
+
+      <div className='hidden md:flex md:w-1/2 h-screen flex items-center justify-center  bg-no-repeat' style={{
+        backgroundImage: "url('/images/oauth/signUpBackground.png')",
+        backgroundSize: "100% 100%",
+        backgroundPosition: "center center"
+        }}>
+        <div className='w-full md:w-full px-2 mt-56 pl-16'>
+          <div>
+            <img 
+              src="/images/oauth/stars.png" 
+              alt="Stars" 
+              className="" 
+            />  
+          </div>
+          <div className='text-white font-inter text-[60px] font-semibold leading-[72px] tracking-[-1.2px]'>
+            Convierte tu negocio
+          </div>
+          <div className='text-white font-inter text-[60px] font-semibold leading-[72px] tracking-[-1.2px]'>
+          de servicios, en una suscripción.
+          </div>
+          <div className='text-white font-inter text-lg font-medium leading-7'>
+            Comienza a vender tus servicios de diseño de manera recurrente.
+          </div>
+          <div className='text-white font-inter text-lg font-medium leading-7 mb-10'>
+            Gratis durante 14 días, sin necesidad de añadir tu tarjeta.
+          </div>
+          <div className='flex gap-4'>
+            <img 
+              src="/images/oauth/avatarGroup.png" 
+              alt="AvatarGroup" 
+              className="" 
+            />  
+            <div className='flex flex-col'>
+              <div className='flex items-center gap-2'>
+                <img 
+                  src="/images/oauth/califications.png" 
+                  alt="Califications" 
+                  className="" 
+                />
+                <div className='text-white font-inter text-[16px] font-semibold leading-[24px]'>
+                  5.0
+                </div>
+              </div>
+              <div className='text-white font-inter text-[16px] font-semibold leading-[24px]'>
+                200+ reviews
+              </div>
+              
+            </div>
+
+          </div>
+
+          {/* <SignUpMethodsContainer
+            providers={authConfig.providers}
+            displayTermsCheckbox={authConfig.displayTermsCheckbox}
+            inviteToken={inviteToken}
+            paths={paths}
+          />
+
+          <div className="flex justify-center mt-4">
+            <Button asChild variant={'link'} size={'sm'}>
+              <Link href={signInPath}>
+                <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
+              </Link>
+            </Button>
+          </div> */}
+        </div>
       </div>
     </>
   );

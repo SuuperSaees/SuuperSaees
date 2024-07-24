@@ -21,6 +21,7 @@ import { Trans } from '@kit/ui/trans';
 
 import { PasswordSignUpSchema } from '../schemas/password-sign-up.schema';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
+import { Separator } from '@kit/ui/separator';
 
 export function PasswordSignUpForm({
   defaultValues,
@@ -35,9 +36,11 @@ export function PasswordSignUpForm({
   displayTermsCheckbox?: boolean;
 
   onSubmit: (params: {
+    name: string;
     email: string;
     password: string;
-    repeatPassword: string;
+    portalName: string;
+    // repeatPassword: string;
   }) => unknown;
   loading: boolean;
 }) {
@@ -46,9 +49,11 @@ export function PasswordSignUpForm({
   const form = useForm({
     resolver: zodResolver(PasswordSignUpSchema),
     defaultValues: {
+      name: '',
       email: defaultValues?.email ?? '',
-      password: '',
-      repeatPassword: '',
+      password: 'defaultPassword123',
+      portalName: '',
+      // repeatPassword: '',
     },
   });
 
@@ -58,6 +63,28 @@ export function PasswordSignUpForm({
         className={'w-full space-y-2.5'}
         onSubmit={form.handleSubmit(onSubmit)}
       >
+        <FormField
+          control={form.control}
+          name={'name'}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                <Trans i18nKey={'common:nameInput'} />
+              </FormLabel>
+
+              <FormControl>
+                <Input
+                  required
+                  type="string"
+                  placeholder={t('namePlaceholder')}
+                  {...field}
+                />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name={'email'}
@@ -81,18 +108,41 @@ export function PasswordSignUpForm({
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name={'portalName'}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                <Trans i18nKey={'common:namePortalInput'} />
+              </FormLabel>
+
+              <FormControl>
+                <Input
+                  required
+                  type="string"
+                  placeholder={t('namePortalPlaceholder')}
+                  {...field}
+                />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
           name={'password'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
+              {/* <FormLabel>
                 <Trans i18nKey={'common:password'} />
-              </FormLabel>
+              </FormLabel> */}
 
               <FormControl>
                 <Input
+                  className={'hidden'}
                   required
                   data-test={'password-input'}
                   type="password"
@@ -106,7 +156,7 @@ export function PasswordSignUpForm({
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name={'repeatPassword'}
           render={({ field }) => (
@@ -132,15 +182,17 @@ export function PasswordSignUpForm({
               </FormDescription>
             </FormItem>
           )}
-        />
+        /> */}
 
         <If condition={displayTermsCheckbox}>
           <TermsAndConditionsFormField />
         </If>
 
+        <Separator  />
+
         <Button
           data-test={'auth-submit-button'}
-          className={'w-full'}
+          className={'w-full bg-brand-600 hover:bg-brand-700'}
           type="submit"
           disabled={loading}
         >
@@ -149,12 +201,6 @@ export function PasswordSignUpForm({
             fallback={
               <>
                 <Trans i18nKey={'auth:signUpWithEmail'} />
-
-                <ArrowRight
-                  className={
-                    'zoom-in animate-in slide-in-from-left-2 fill-mode-both h-4 delay-500 duration-500'
-                  }
-                />
               </>
             }
           >
