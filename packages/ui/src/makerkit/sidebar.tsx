@@ -86,7 +86,7 @@ export function SidebarGroup({
     }
 
     return (
-      <span className={'text-xs font-semibold uppercase text-muted-foreground'}>
+      <span className={'text-md font-semibold uppercase text-muted-foreground'}>
         {props.children}
       </span>
     );
@@ -167,7 +167,7 @@ export function SidebarItem({
   return (
     <Button
       asChild
-      className={cn('flex w-full text-sm shadow-none', {
+      className={cn('flex w-full text-md shadow-none', {
         'justify-start space-x-2.5': !collapsed,
       })}
       size={size}

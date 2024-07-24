@@ -5,7 +5,7 @@ export function AuthLayoutShell({
   Logo: React.ComponentType;
 }>) {
   return (
-    <div className="flex justify-between items-center h-screen w-screen">
+    <div className="flex justify-between text-center items-center h-screen w-screen px-10">
         {children}
     </div>
   );

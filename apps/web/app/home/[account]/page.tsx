@@ -1,7 +1,5 @@
 import loadDynamic from 'next/dynamic';
 
-import { PlusCircle } from 'lucide-react';
-
 import { Button } from '@kit/ui/button';
 import { PageBody } from '@kit/ui/page';
 import { Spinner } from '@kit/ui/spinner';

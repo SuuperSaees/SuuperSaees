@@ -7,6 +7,7 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { HomeAccountsList } from '~/home/(user)/_components/home-accounts-list';
 import { HomeLayoutPageHeader } from '~/home/(user)/_components/home-page-header';
+import { OrderList } from './components/orders-list';
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   const title = i18n.t('account:homePage');
@@ -19,7 +20,7 @@ export const generateMetadata = async () => {
 function UserHomePage() {
   return (
     <>
-
+    <OrderList></OrderList>
     </>
   );
 }

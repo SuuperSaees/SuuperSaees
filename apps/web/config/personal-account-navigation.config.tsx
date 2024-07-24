@@ -1,4 +1,4 @@
-import { CreditCard, Home, User, Layers, Users, Wallet, Settings, SquareCheck } from 'lucide-react';
+import { CreditCard, Home, Layers, Users, Wallet, Settings, SquareCheck } from 'lucide-react';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 

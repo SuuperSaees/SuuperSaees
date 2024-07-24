@@ -62,21 +62,7 @@ export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent sideOffset={10} className={'w-screen rounded-none'}>
-        <If condition={featuresFlagConfig.enableTeamAccounts}>
-          <DropdownMenuGroup>
-            <DropdownMenuLabel>
-              <Trans i18nKey={'common:yourAccounts'} />
-            </DropdownMenuLabel>
-
-            <HomeAccountSelector
-              userId={props.workspace.user.id}
-              accounts={props.workspace.accounts}
-              collapsed={false}
-            />
-          </DropdownMenuGroup>
-
-          <DropdownMenuSeparator />
-        </If>
+  
 
         <DropdownMenuGroup>{Links}</DropdownMenuGroup>
 

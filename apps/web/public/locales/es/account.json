@@ -1,5 +1,6 @@
 {
   "generalTab": "Mis Detalles",
+  "rememberMe": "Recuerdame",
   "generalTabSubheading": "Administra los detalles de tu perfil",
   "emailTab": "Correo Electrónico",
   "emailTabTabSubheading": "Actualiza tu dirección de correo electrónico",
@@ -8,6 +9,7 @@
   "homePage": "Inicio",
   "billingTab": "Facturación",
   "settingsTab": "Configuraciones",
+  "plsDetailInputs": "Por favor ingresa tus detalles",
   "authenticationTab": "Autenticación",
   "multiFactorAuth": "Autenticación de Multi-Factor",
   "multiFactorAuthDescription": "Configura el método de Autenticación de Multi-Factor para asegurar aún más tu cuenta",
@@ -20,7 +22,7 @@
   "updateProfileLoading": "Actualizando perfil...",
   "name": "Tu Nombre",
   "nameDescription": "Actualiza tu nombre para que se muestre en tu perfil",
-  "emailLabel": "Dirección de Correo Electrónico",
+  "emailLabel": "Correo electrónico",
   "accountImage": "Tu Foto de Perfil",
   "accountImageDescription": "Por favor, elige una foto para subir como tu foto de perfil.",
   "profilePictureHeading": "Sube una foto de perfil",

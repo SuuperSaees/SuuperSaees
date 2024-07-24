@@ -35,12 +35,12 @@ const authConfig = AuthConfigSchema.parse({
   displayTermsCheckbox:
     process.env.NEXT_PUBLIC_DISPLAY_TERMS_AND_CONDITIONS_CHECKBOX === 'true',
 
-  // NB: Enable the providers below in the Supabase Console
-  // in your production project
+  // NB: Enable the providers below in the Supabase Console when production comes up
+  // IMPORTANTE!: (GOOGLE DISABLED, BEFORE: oAuth: ['google'], after: oAuth: [])
   providers: {
     password: process.env.NEXT_PUBLIC_AUTH_PASSWORD === 'true',
     magicLink: process.env.NEXT_PUBLIC_AUTH_MAGIC_LINK === 'true',
-    oAuth: ['google'],
+    oAuth: [],
   },
 } satisfies z.infer<typeof AuthConfigSchema>);
 

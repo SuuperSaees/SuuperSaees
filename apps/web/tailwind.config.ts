@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-
+const defaultTheme = require("tailwindcss/defaultTheme");
 import baseConfig from '@kit/tailwind-config';
 
 export default {
@@ -445,6 +445,71 @@ export default {
             950: "#542c0d",
         },                
     },
+    fontFamily: {
+        sans: ["Inter", ...defaultTheme.fontFamily.sans],
+    },
+    fontSize: {
+        "display-2xl": [
+            "4.5rem",
+            {
+                lineHeight: "5.625rem",
+            },
+        ],
+        "display-xl": [
+            "3.75rem",
+            {
+                lineHeight: "4.5rem",
+            },
+        ],
+        "display-lg": [
+            "3rem",
+            {
+                lineHeight: "3.75rem",
+            },
+        ],
+        "display-md": [
+            "2.25rem",
+            {
+                lineHeight: "2.75rem",
+            },
+        ],
+        "display-sm": [
+            "1.875rem",
+            {
+                lineHeight: "2.375rem",
+            },
+        ],
+        "display-xs": [
+            "1.5rem",
+            {
+                lineHeight: "2rem",
+            },
+        ],
+        "text-lg": [
+            "1.125rem",
+            {
+                lineHeight: "1.75rem",
+            },
+        ],
+        "text-md": [
+            "1rem",
+            {
+                lineHeight: "1.5rem",
+            },
+        ],
+        "text-sm": [
+            "0.875rem",
+            {
+                lineHeight: "1.25rem",
+            },
+        ],
+        "text-xs": [
+            "0.75rem",
+            {
+                lineHeight: "1.125rem",
+            },
+        ],
+    }
     }
   },
   presets: [baseConfig],
