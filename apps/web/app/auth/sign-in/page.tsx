@@ -9,6 +9,7 @@ import authConfig from '~/config/auth.config';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+import { AppLogo } from '~/components/app-logo';
 
 interface SignInPageProps {
   searchParams: {
@@ -42,11 +43,9 @@ function SignInPage({ searchParams }: SignInPageProps) {
   
 
 <div className="w-full md:w-1/2 h-screen flex items-center justify-center">
-        <img
-          src="/images/logo/Suuper_Logo.svg"
-          alt="SuuperLogo"
-          className="hidden md:block absolute md:w-[142px] md:h-auto md:left-8 md:top-8 md:object-contain"
-        />
+      <div className="hidden md:block absolute md:w-[142px] md:h-auto md:left-8 md:top-8 md:object-contain">
+      <AppLogo />
+      </div>
         <div className="w-full md:w-1/2 md:px-[32px]">
           <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
             <Trans i18nKey={'auth:signInHeading'} />
@@ -56,14 +55,12 @@ function SignInPage({ searchParams }: SignInPageProps) {
             inviteToken={inviteToken}
             paths={paths}
           />
-          <div className="flex justify-center mt-4">
-            <Button asChild variant={'link'} size={'sm'}>
-              <Link href={signUpPath}>
+          <div className="flex justify-center mt-4 text-xs flex items-center">
+
                 <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
-              </Link>
-            </Button>
+
             <Button asChild variant={'link'} size={'sm'} className='text-indigo-500'>
-              <Link href={signUpPath}>
+              <Link href={signUpPath} className='text-brand-700 font-inter font-semibold text-xs leading-[20px] tracking-normal leading-[20px] space-y-3 block'>
                 <Trans i18nKey={'auth:signInAlreadyHaveAnAccount'} />
               </Link>
             </Button>
@@ -73,14 +70,14 @@ function SignInPage({ searchParams }: SignInPageProps) {
 
       <div className="relative w-full md:w-1/2 py-4 px-8 h-full">
           <img src="/images/oauth/loginBackground.png" alt="Placeholder Image" className="shadow-sm rounded-xl w-full h-full object-cover"/>
-          <div className="backdrop-blur-md bg-white/30 absolute bottom-4 left-8 right-8 w-auto h-1/3 rounded-b-xl p-6 flex flex-col space-y-4 border-t" style={{ borderColor: 'rgba(200, 200, 200, 0.5)' }}>
+          <div className="backdrop-blur-md bg-white/30 absolute bottom-4 left-8 right-8 w-auto h-1/3 rounded-b-xl p-6 flex flex-col space-y-4 border-t p-8" style={{ borderColor: 'rgba(200, 200, 200, 0.5)' }}>
             
-            <div className="text-white text-justify text-2xl">
+            <div className="text-white text-justify text-2xl font-semibold leading-38">
               <Trans i18nKey={'marketing:suuperRecomendation1'} />
             </div>
             
             <div className="flex justify-between items-center">
-              <div className="text-3xl text-white">
+              <div className="text-white font-inter font-semibold text-3xl leading-11 tracking-[-0.0125em] leading-[44px] space-y-9">
                 Mariana Mejía
               </div>
               <div className="flex space-x-1">
@@ -94,8 +91,13 @@ function SignInPage({ searchParams }: SignInPageProps) {
             
             <div className="flex justify-between items-center">
 
-              <div className="text-white">
-                <Trans i18nKey={'marketing:marianaCeo'} /> <br/> <Trans i18nKey={'marketing:marianaOrg'} />
+              <div className='items-start'> 
+                <span className="text-white font-inter font-semibold text-base leading-[28px] tracking-normal leading-[28px] space-y-4 block">
+                  <Trans i18nKey={'marketing:marianaCeo'} />
+                  </span> 
+                  <span className="text-white font-inter font-medium text-sm leading-[24px] tracking-normal leading-[24px] space-y-4 block text-left">
+                    <Trans i18nKey={'marketing:marianaOrg'} />
+                    </span>
               </div>
 
               <div className="flex space-x-2">
