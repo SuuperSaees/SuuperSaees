@@ -21,6 +21,7 @@ const routes = [
   },
   {
     label: 'Usuarios',
+    Icon: <Users className={iconClasses} />,
     children: [
       {
         label: 'Clientes',
