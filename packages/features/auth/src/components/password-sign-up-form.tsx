@@ -67,7 +67,7 @@ export function PasswordSignUpForm({
           control={form.control}
           name={'name'}
           render={({ field }) => (
-            <FormItem>
+            <FormItem  className='text-start'>
               <FormLabel>
                 <Trans i18nKey={'common:nameInput'} />
               </FormLabel>
@@ -89,7 +89,7 @@ export function PasswordSignUpForm({
           control={form.control}
           name={'email'}
           render={({ field }) => (
-            <FormItem>
+            <FormItem  className='text-start'>
               <FormLabel>
                 <Trans i18nKey={'common:emailAddress'} />
               </FormLabel>
@@ -112,7 +112,7 @@ export function PasswordSignUpForm({
           control={form.control}
           name={'portalName'}
           render={({ field }) => (
-            <FormItem>
+            <FormItem  className='text-start'>
               <FormLabel>
                 <Trans i18nKey={'common:namePortalInput'} />
               </FormLabel>
@@ -188,7 +188,7 @@ export function PasswordSignUpForm({
           <TermsAndConditionsFormField />
         </If>
 
-        <Separator  />
+
 
         <Button
           data-test={'auth-submit-button'}

@@ -44,7 +44,7 @@
   "pageNotFoundHeading": "¡Ay! :|",
   "errorPageHeading": "¡Ay! :|",
   "nameInput": "Nombre",
-  "namePortalInput": "Nombre del Portal",
+  "namePortalInput": "Nombre del portal",
   "roles": {
     "owner": {
       "label": "Propietario"
