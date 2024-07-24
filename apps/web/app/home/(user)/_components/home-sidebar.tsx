@@ -34,15 +34,6 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
       <SidebarContent className={`mt-5 h-[calc(100%-160px)] overflow-y-auto`}>
         <SidebarNavigation config={personalAccountNavigationConfig} />
         <SidebarContent>
-        <div>
-          <div>
-            <h5>¡Nuevas funcionalidades!</h5>
-            <p>Echa un vistazo a la nueva vista del panel. Las páginas ahora cargan más rápido.</p>
-            <img src="" alt="" />
-            <p>Descartar</p>
-            <a>¿Qué hay de nuevo?</a>
-          </div>
-        </div>
       </SidebarContent>
       </SidebarContent>
 
