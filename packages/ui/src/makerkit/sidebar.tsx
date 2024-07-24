@@ -94,7 +94,7 @@ export function SidebarGroup({
 
   const Wrapper = () => {
     const className = cn(
-      'group flex items-center justify-between px-container space-x-2.5',
+      'px-3 group flex items-center justify-between px-container',
       {
         'py-2.5': !sidebarCollapsed,
       },
@@ -133,7 +133,7 @@ export function SidebarGroup({
       <Wrapper />
 
       <If condition={collapsible ? !isGroupCollapsed : true}>
-        <div id={id} className={'flex flex-col space-y-1.5'}>
+        <div id={id} className={'flex flex-col space-y-1.5 px-6.5'}>
           {children}
         </div>
       </If>
