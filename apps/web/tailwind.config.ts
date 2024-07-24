@@ -6,7 +6,7 @@ export default {
   content: [...baseConfig.content],
     theme: {
     extend: {
-      color: {
+      colors: {
         white: '#FFFFFF',
         black: '#000000',
         'gray': {
@@ -24,7 +24,7 @@ export default {
             900: "#101828",
             950: "#0C111D",
         },
-        'brand': {
+        brand: {
             DEFAULT: "#9E77ED",
             25: "#FCFAFF",
             50: "#F9F5FF",

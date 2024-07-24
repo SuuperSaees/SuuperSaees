@@ -13,7 +13,7 @@
   "subscriptionSettingsTabLabel": "Suscripción",
   "dashboardTabDescription": "Un resumen de la actividad y rendimiento de tu organización en todos tus proyectos.",
   "settingsTabDescription": "Administra tus configuraciones y preferencias.",
-  "emailAddress": "Dirección de Correo Electrónico",
+  "emailAddress": "Correo Electrónico",
   "password": "Contraseña",
   "modalConfirmationQuestion": "¿Estás seguro de que quieres continuar?",
   "loading": "Cargando...",
@@ -43,12 +43,8 @@
   "noData": "No hay datos disponibles",
   "pageNotFoundHeading": "¡Ay! :|",
   "errorPageHeading": "¡Ay! :|",
-<<<<<<< HEAD
   "nameInput": "Nombre",
   "namePortalInput": "Nombre del Portal",
-=======
-  "correoelectronico": "Ingresa tu correo electronico",
->>>>>>> main
   "roles": {
     "owner": {
       "label": "Propietario"
