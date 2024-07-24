@@ -48,9 +48,6 @@ const routes = [
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
   },
-  
-
-  
 ];
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {

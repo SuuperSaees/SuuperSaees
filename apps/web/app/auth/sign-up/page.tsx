@@ -9,6 +9,7 @@ import authConfig from '~/config/auth.config';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+import { AppLogo } from '~/components/app-logo';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -39,14 +40,12 @@ function SignUpPage({ searchParams }: Props) {
   return (
     <>
       <div className="w-full md:w-1/2 h-screen flex items-center justify-center">
-        <img 
-          src="/images/logo/Suuper_Logo.svg" 
-          alt="SuuperLogo" 
-          className="hidden md:block absolute md:w-[160px] md:h-auto md:left-8 md:top-8 md:object-contain" 
-        />
-        <div className="w-full md:w-1/2 md:px-[32px] px-6">
+      <div className='hidden md:block absolute md:w-[160px] md:h-auto md:left-8 md:top-8 md:object-contain'>
+        <AppLogo></AppLogo>
+      </div>
+        <div className="w-full md:w-1/2 ">
 
-          <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px] hidden md:block">
+          <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px] hidden md:block text-start mb-[32px]">
             <Trans i18nKey={'auth:signUpHeading'} />
           </div>
           <img
@@ -54,14 +53,11 @@ function SignUpPage({ searchParams }: Props) {
             alt="SuuperLogoSmall"
             className="md:hidden mb-6"
           />
-          <div className='text-gray-900 font-inter text-[24px] font-semibold leading-8 md:hidden'>
-            Convierte tu negocio de 
+          <div className='text-start text-[24px] mb-[8px]'>
+          <span className='font-inter text-gray-900 font-semibold text-[24px] leading-32 tracking-tight leading-32 mb-2 md:hidden text-start'>Convierte tu negocio de servicios en una suscripción</span>
           </div>
-          <div className='text-gray-900 font-inter text-[24px] font-semibold leading-8 md:hidden'>
-            servicios en una suscripción.
-          </div>
-          <div className='text-gray-600 font-inter text-[14px] font-normal leading-6 mb-4 md:hidden'>
-            Gratis durante 14 días, sin añadir tu tarjeta.
+          <div className='text-start text-[16px] mb-[32px]'>
+          <span className='font-inter text-gray-900 font-regular text-[16px] leading-32 tracking-tight leading-32 mb-[32px] md:hidden text-start'>Gratis durante 14 días, sin añadir tu tarjeta. </span>
           </div>
 
           <SignUpMethodsContainer
@@ -73,11 +69,11 @@ function SignUpPage({ searchParams }: Props) {
 
           <div className="flex justify-center mt-4 items-center">
             <div className='text-xs'>
-              <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
+              <Trans i18nKey={'auth:alreadyHasAccountAsking'} />
             </div>
             <Button asChild variant={'link'} size={'sm'} className='text-indigo-500 font-bold'>
               <Link href={signInPath}>
-                <Trans i18nKey={'auth:signInAlreadyHaveAnAccount'} />
+                <Trans i18nKey={'auth:alreadyHasAccountAnswer'} />
               </Link>
             </Button>
           </div>
@@ -100,10 +96,10 @@ function SignUpPage({ searchParams }: Props) {
 
       <div className='hidden md:flex md:w-1/2 h-screen flex items-center justify-center  bg-no-repeat' style={{
         backgroundImage: "url('/images/oauth/signUpBackground.png')",
-        backgroundSize: "100% 100%",
+        backgroundSize: "cover",
         backgroundPosition: "center center"
         }}>
-        <div className='w-full md:w-full px-2 mt-56 pl-16'>
+        <div className='w-full md:w-full mt-56 py-[96px] px-[64px]'>
           <div>
             <img 
               src="/images/oauth/stars.png" 
@@ -111,17 +107,11 @@ function SignUpPage({ searchParams }: Props) {
               className="" 
             />  
           </div>
-          <div className='text-white font-inter text-[60px] font-semibold leading-[72px] tracking-[-1.2px]'>
-            Convierte tu negocio
+          <div className='text-white font-semibold text-6xl leading-72 tracking-[-2%] leading-72 text-left mb-[20px]'>
+          Convierte tu negocio de servicios, en una suscripción.
           </div>
-          <div className='text-white font-inter text-[60px] font-semibold leading-[72px] tracking-[-1.2px]'>
-          de servicios, en una suscripción.
-          </div>
-          <div className='text-white font-inter text-lg font-medium leading-7'>
-            Comienza a vender tus servicios de diseño de manera recurrente.
-          </div>
-          <div className='text-white font-inter text-lg font-medium leading-7 mb-10'>
-            Gratis durante 14 días, sin necesidad de añadir tu tarjeta.
+          <div className='font-inter text-white text-medium leading-28 tracking-tight leading-28 text-left mb-[32px]'>
+          Comienza a vender tus servicios de diseño de manera recurrente. <br></br> Gratis durante 14 días, sin necesidad de añadir tu tarjeta.
           </div>
           <div className='flex gap-4'>
             <img 
@@ -140,8 +130,8 @@ function SignUpPage({ searchParams }: Props) {
                   5.0
                 </div>
               </div>
-              <div className='text-white font-inter text-[16px] font-semibold leading-[24px]'>
-                200+ reviews
+              <div className='text-white font-inter text-[16px] font-semibold leading-[24px] text-left'>
+                200+ reseñas
               </div>
               
             </div>
