@@ -18,6 +18,7 @@
   "billing": {
     "pageTitle": "Billing"
   },
+  "team": "Team",
   "yourTeams": "Your Teams ({{teamsCount}})",
   "createTeam": "Create a Team",
   "creatingTeam": "Creating Team...",
