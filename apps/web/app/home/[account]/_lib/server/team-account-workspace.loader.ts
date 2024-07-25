@@ -37,7 +37,7 @@ async function workspaceLoader(accountSlug: string) {
   // we cannot find any record for the selected account
   // so we redirect the user to the home page
   if (!workspace.data?.account) {
-    return redirect(pathsConfig.app.home);
+    return redirect(pathsConfig.app.teams);
   }
 
   return {

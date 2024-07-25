@@ -1,15 +1,12 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-
 import { Button } from '@kit/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,10 +15,9 @@ import {
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
-
 import { PasswordSignUpSchema } from '../schemas/password-sign-up.schema';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
-import { Separator } from '@kit/ui/separator';
+
 
 export function PasswordSignUpForm({
   defaultValues,
@@ -40,7 +36,6 @@ export function PasswordSignUpForm({
     email: string;
     password: string;
     portalName: string;
-    // repeatPassword: string;
   }) => unknown;
   loading: boolean;
 }) {
@@ -53,7 +48,6 @@ export function PasswordSignUpForm({
       email: defaultValues?.email ?? '',
       password: 'defaultPassword123',
       portalName: '',
-      // repeatPassword: '',
     },
   });
 
@@ -136,10 +130,6 @@ export function PasswordSignUpForm({
           name={'password'}
           render={({ field }) => (
             <FormItem>
-              {/* <FormLabel>
-                <Trans i18nKey={'common:password'} />
-              </FormLabel> */}
-
               <FormControl>
                 <Input
                   className={'hidden'}
@@ -155,41 +145,9 @@ export function PasswordSignUpForm({
             </FormItem>
           )}
         />
-
-        {/* <FormField
-          control={form.control}
-          name={'repeatPassword'}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                <Trans i18nKey={'auth:repeatPassword'} />
-              </FormLabel>
-
-              <FormControl>
-                <Input
-                  required
-                  data-test={'repeat-password-input'}
-                  type="password"
-                  placeholder={''}
-                  {...field}
-                />
-              </FormControl>
-
-              <FormMessage />
-
-              <FormDescription className={'pb-2 text-xs'}>
-                <Trans i18nKey={'auth:repeatPasswordHint'} />
-              </FormDescription>
-            </FormItem>
-          )}
-        /> */}
-
         <If condition={displayTermsCheckbox}>
           <TermsAndConditionsFormField />
         </If>
-
-
-
         <Button
           data-test={'auth-submit-button'}
           className={'w-full bg-brand-600 hover:bg-brand-700'}

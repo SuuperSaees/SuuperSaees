@@ -99,11 +99,11 @@ export function AccountMembersTable({
 
   return (
     <div className={'flex flex-col space-y-2'}>
-      <Input
+      {/* <Input
         value={search}
         onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
         placeholder={t(`searchMembersPlaceholder`)}
-      />
+      /> */}
 
       <DataTable columns={columns} data={filteredMembers} />
     </div>
@@ -149,13 +149,6 @@ function useGetColumns(
         },
       },
       {
-        header: t('emailLabel'),
-        accessorKey: 'email',
-        cell: ({ row }) => {
-          return row.original.email ?? '-';
-        },
-      },
-      {
         header: t('roleLabel'),
         cell: ({ row }) => {
           const { role, primary_owner_user_id, user_id } = row.original;
@@ -176,6 +169,13 @@ function useGetColumns(
               </If>
             </span>
           );
+        },
+      },
+      {
+        header: t('emailLabel'),
+        accessorKey: 'email',
+        cell: ({ row }) => {
+          return row.original.email ?? '-';
         },
       },
       {
