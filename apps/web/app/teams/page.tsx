@@ -20,58 +20,123 @@ import { Button } from '@kit/ui/button';
 import { loadMembersPageData } from './_lib/server/members-page.loader';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { TeamAccountLayoutPageHeader } from './components/team-account-layout-page-header';
+import { ArrowRight, BellIcon } from 'lucide-react';
+import { Separator } from '@kit/ui/separator';
+import { ArrowLeft } from 'lucide-react';
+import { ScrollArea } from "@kit/ui/scroll-area" 
+import { Badge } from '@kit/ui/badge';
+import { User } from '@supabase/supabase-js';
 
-
-interface Params {
-    params: {
-      account: "{id: '5deaa894-2094-4da3-b4fd-1fada0809d1c', name: 'Makerkit',picture_url: null,slug: 'makerkit',role: 'owner',role_hierarchy_level: 1,primary_owner_user_id: '31a03e74-1639-45b6-bfa7-77447f1a4762',subscription_status: null,permissions: ['roles.manage','billing.manage','settings.manage','members.manage','invites.manage']}";
-    };
-  }
-
-  export const generateMetadata = async () => {
-    const i18n = await createI18nServerInstance();
-    const title = i18n.t('teams:members.pageTitle');
-  
+export const generateMetadata = async () => {
+  const i18n = await createI18nServerInstance();
+  const tags = Array.from({ length: 50 }).map(
+    (_, i, a) => `v1.2.0-beta.${a.length - i}`
+  )
     return {
-      title,
+      title: i18n.t('clients:title'),
     };
-  };
-  
-  async function TeamAccountMembersPage({ params }: Params) {
+};
+
+type Account = {
+    id: string;
+    primary_owner_user_id: string;
+    name: string;
+    slug: string;
+    email: string | null;
+    is_personal_account: boolean;
+    updated_at: string | null;
+    created_at: string | null;
+    created_by: string | null;
+    updated_by: string | null;
+    picture_url: string | null;
+    public_data: object;
+    role_hierarchy_level: number;
+    permissions: Array<'roles.manage' | 'billing.manage' | 'settings.manage' | 'members.manage' | 'invites.manage'>;
+};
+
+  async function ClientsMembersPage() {
+    const tags = Array.from({ length: 50 }).map(
+      (_, i, a) => `v1.2.0-beta.${a.length - i}`
+    )
+
     const client = getSupabaseServerComponentClient();
-  
+
+    // Obtén el usuario autenticado directamente desde Supabase
+    const { data: userData } = await client.auth.getUser();
+
+    // console.log('Usuario:', userData.user!.id);
+
+    // Obtener los datos del cliente desde la base de datos
+    const { data, error } = await client
+    .from('accounts')
+    .select()
+    .eq('primary_owner_user_id', userData.user!.id); 
+
+    // console.log('Data:', data);
+
+    const { data: data2} = await client
+    .from('accounts_memberships')
+    .select()
+    .eq('user_id', userData.user!.id); 
+
+    // console.log('Data:', data2);
+
+    const account_role = data2!.length > 0 ? data2![0]?.account_role : null;
+
+    // console.log('Account Role:', account_role);
+
+    const { data: data3} = await client
+    .from('role_permissions')
+    .select('permission')
+    .eq('role', account_role!); 
+
+    // console.log('Role Permissions:', data23);
+
+    const userPermissions = data3!.map(permission => permission.permission);
+
+    // console.log('User Permissions:', userPermissions);
     
-  
-    // Asigna directamente el objeto account
+
+    const { data: data4} = await client
+    .from('roles')
+    .select('hierarchy_level')
+    .eq('name', account_role!);
+
+    // console.log('Role Hierarchy:', data4);
+
+    const roleHierarchies = data4!.map(roleHierarchy => roleHierarchy.hierarchy_level);
+    // const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
+    const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
+
+    console.log('Role Hierarchy:', roleHierarchies[0]);
+
+    const filteredData = data ? data.filter(item => item.id !== userData.user!.id) : [];
+
+    const accountData = filteredData.length > 0 ? filteredData[0] : {};
+
+    // Crear el objeto `account` con `permissions` y los datos filtrados
     const account = {
-      id: '5deaa894-2094-4da3-b4fd-1fada0809d1c',
-      name: 'Makerkit',
-      picture_url: null,
-      slug: 'makerkit',
-      role: 'owner',
-      role_hierarchy_level: 1,
-      primary_owner_user_id: '31a03e74-1639-45b6-bfa7-77447f1a4762',
-      subscription_status: null,
-      permissions: [
-        'roles.manage',
-        'billing.manage',
-        'settings.manage',
-        'members.manage',
-        'invites.manage',
-      ],
+        ...(accountData as Account),
+        permissions: userPermissions,
+        role_hierarchy_level: roleHierarchyLevel,
     };
 
-    // const [members, invitations, canAddMember, { user }] =
-    //   await loadMembersPageData(client, account);
+    console.log('Account:', account);
+
+
+    const slug = account.slug;
+    
+
     const [members, invitations, canAddMember, { user }] =
-        await loadMembersPageData(client, account.slug);
+        await loadMembersPageData(client, slug);
+
   
     const canManageRoles = account.permissions.includes('roles.manage');
     const canManageInvitations = account.permissions.includes('invites.manage');
   
     const isPrimaryOwner = account.primary_owner_user_id === user.id;
     const currentUserRoleHierarchy = account.role_hierarchy_level;
-  
+
     return (
       <>
         <TeamAccountLayoutPageHeader
@@ -91,7 +156,7 @@ interface Params {
   
                 <If condition={canManageInvitations && canAddMember}>
                   <InviteMembersDialogContainer
-                    userRoleHierarchy={currentUserRoleHierarchy}
+                    userRoleHierarchy={currentUserRoleHierarchy ?? 0}
                     accountSlug={account.slug}
                   >
                     <Button size={'sm'} data-test={'invite-members-form-trigger'}>
@@ -105,7 +170,7 @@ interface Params {
   
               <CardContent>
                 <AccountMembersTable
-                  userRoleHierarchy={currentUserRoleHierarchy}
+                  userRoleHierarchy={currentUserRoleHierarchy ?? 0}
                   currentUserId={user.id}
                   currentAccountId={account.id}
                   members={members}
@@ -133,7 +198,7 @@ interface Params {
                   permissions={{
                     canUpdateInvitation: canManageRoles,
                     canRemoveInvitation: canManageRoles,
-                    currentUserRoleHierarchy,
+                    currentUserRoleHierarchy: currentUserRoleHierarchy ?? 0,
                   }}
                   invitations={invitations}
                 />
@@ -145,4 +210,4 @@ interface Params {
     );
   }
   
-  export default withI18n(TeamAccountMembersPage);
+  export default withI18n(ClientsMembersPage);

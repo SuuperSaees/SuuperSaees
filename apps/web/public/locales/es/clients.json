@@ -1,0 +1,13 @@
+{
+  "title": "Clientes",
+  "client": "Clientes",
+  "yourTeams": "Tus equipos ({{teamsCount}})",
+  "createTeam": "Crear un equipo",
+  "personalAccount": "Cuenta personal",
+  "searchAccount": "Buscar cuenta...",
+  "teamsTabLabel": "Equipo",
+  "membersTabLabel": "Miembros del equipo",
+  "memberName": "Nombre",
+  "youLabel": "Tú"
+
+}
