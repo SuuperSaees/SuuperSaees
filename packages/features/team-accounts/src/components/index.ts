@@ -1,4 +1,5 @@
 export * from './members/account-members-table';
+export * from './clients/clients-table';
 export * from './members/invite-members-dialog-container';
 export * from './settings/team-account-danger-zone';
 export * from './invitations/account-invitations-table';

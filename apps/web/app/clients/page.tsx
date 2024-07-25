@@ -12,7 +12,7 @@ import {
 } from '@kit/ui/card';
 import {
   AccountInvitationsTable,
-  AccountMembersTable,
+  ClientsTable,
   InviteMembersDialogContainer,
 } from '@kit/team-accounts/components';
 import { If } from '@kit/ui/if';
@@ -37,43 +37,104 @@ export const generateMetadata = async () => {
     };
 };
 
+type Account = {
+    id: string;
+    primary_owner_user_id: string;
+    name: string;
+    slug: string;
+    email: string | null;
+    is_personal_account: boolean;
+    updated_at: string | null;
+    created_at: string | null;
+    created_by: string | null;
+    updated_by: string | null;
+    picture_url: string | null;
+    public_data: object;
+    role_hierarchy_level: number;
+    permissions: Array<'roles.manage' | 'billing.manage' | 'settings.manage' | 'members.manage' | 'invites.manage'>;
+};
+
   
   async function ClientsMembersPage() {
     const tags = Array.from({ length: 50 }).map(
       (_, i, a) => `v1.2.0-beta.${a.length - i}`
     )
     
-    // const client = getSupabaseServerComponentClient();
-  
-    // Asigna directamente el objeto account
+    const client = getSupabaseServerComponentClient();
+
+    // Obtén el usuario autenticado directamente desde Supabase
+    const { data: userData } = await client.auth.getUser();
+
+    // console.log('Usuario:', userData.user!.id);
+
+    // Obtener los datos del cliente desde la base de datos
+    const { data, error } = await client
+    .from('accounts')
+    .select()
+    .eq('primary_owner_user_id', userData.user!.id); 
+
+    // console.log('Data:', data);
+
+    const { data: data2} = await client
+    .from('accounts_memberships')
+    .select()
+    .eq('user_id', userData.user!.id); 
+
+    // console.log('Data:', data2);
+
+    const account_role = data2!.length > 0 ? data2![0]?.account_role : null;
+
+    // console.log('Account Role:', account_role);
+
+    const { data: data3} = await client
+    .from('role_permissions')
+    .select('permission')
+    .eq('role', account_role!); 
+
+    // console.log('Role Permissions:', data23);
+
+    const userPermissions = data3!.map(permission => permission.permission);
+
+    // console.log('User Permissions:', userPermissions);
+    
+
+    const { data: data4} = await client
+    .from('roles')
+    .select('hierarchy_level')
+    .eq('name', account_role!);
+
+    // console.log('Role Hierarchy:', data4);
+
+    const roleHierarchies = data4!.map(roleHierarchy => roleHierarchy.hierarchy_level);
+    // const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
+    const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
+
+    // console.log('Role Hierarchy:', roleHierarchies[0]);
+
+    const filteredData = data ? data.filter(item => item.id !== userData.user!.id) : [];
+
+    const accountData = filteredData.length > 0 ? filteredData[0] : {};
+
+    // Crear el objeto `account` con `permissions` y los datos filtrados
     const account = {
-      id: '5deaa894-2094-4da3-b4fd-1fada0809d1c',
-      name: 'Makerkit',
-      picture_url: null,
-      slug: 'makerkit',
-      role: 'owner',
-      role_hierarchy_level: 1,
-      primary_owner_user_id: '31a03e74-1639-45b6-bfa7-77447f1a4762',
-      subscription_status: null,
-      permissions: [
-        'roles.manage',
-        'billing.manage',
-        'settings.manage',
-        'members.manage',
-        'invites.manage',
-      ],
+        ...(accountData as Account),
+        permissions: userPermissions,
+        role_hierarchy_level: roleHierarchyLevel,
     };
 
-    // const [members, invitations, canAddMember, { user }] =
-    //   await loadMembersPageData(client, account);
-    // const [members, invitations, canAddMember, { user }] =
-    //     await loadMembersPageData(client, account.slug);
+    const slug = account.slug;
+    
+
+    const [members, invitations, canAddMember, { user }] =
+        await loadMembersPageData(client, slug);
+
   
-    // const canManageRoles = account.permissions.includes('roles.manage');
-    // const canManageInvitations = account.permissions.includes('invites.manage');
+    const canManageRoles = account.permissions.includes('roles.manage');
+    const canManageInvitations = account.permissions.includes('invites.manage');
   
-    // const isPrimaryOwner = account.primary_owner_user_id === user.id;
-    // const currentUserRoleHierarchy = account.role_hierarchy_level;
+    const isPrimaryOwner = account.primary_owner_user_id === user.id;
+    const currentUserRoleHierarchy = account.role_hierarchy_level;
+
 
     return (
       
@@ -127,41 +188,28 @@ export const generateMetadata = async () => {
         </div>
 
         <Card x-chunk="dashboard-05-chunk-3" className='h-[80vh] max-h-full overflow-hidden'>
-            <Separator />
-            <div className='h-10 bg-[#F9FAFB] px-5 py-2 flex flex-wrap justify-between text-sm text-[#475467] font-medium'>
+            {/* <Separator />
+            <div className='h-10 bg-[#F9FAFB] px-10 py-2 flex flex-wrap justify-between text-sm text-[#475467] font-medium items-center'>
                 <h1>Nombre</h1>
                 <h1>Rol</h1>
-                <h1>Organizaciones gestionadas</h1>
+                <h1>Organización</h1>
+                <h1>Último inicio de sesión</h1>
                 <h1>Creado en</h1>
-                <div className="invisible">Espacio vacío</div>
+                <h1>Acciones</h1>
                 
             </div>
-            <Separator />
+            <Separator /> */}
 
-            <ScrollArea className="h-[80%] w-full">
-                
-                <div>
-                    {tags.map((tag) => (
-                    <>
-                        
-                        <div role="status" className="animate-pulse">
-                            <div className="flex items-center justify-center mt-4">
-                                <svg className="w-8 h-8 text-gray-200 dark:text-gray-700 me-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
-                                </svg>
-                                <div className="w-24 h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 me-3"></div>
-                                <div className="w-24 h-2 bg-gray-200 rounded-full dark:bg-gray-700 me-3"></div>
-                                <div className="w-24 h-2 bg-gray-200 rounded-full dark:bg-gray-700 me-4"></div>
-                                <div className="w-24 h-2 bg-gray-200 rounded-full dark:bg-gray-700 me-5"></div>
-                            </div>
-                            <span className="sr-only">Loading...</span>
-                        </div>
-
-                        <Separator className="my-2" />
-                    </>
-                    ))}
-                </div>
-            </ScrollArea>
+            <CardContent>
+                <ClientsTable
+                  userRoleHierarchy={currentUserRoleHierarchy ?? 0}
+                  currentUserId={user.id}
+                  currentAccountId={account.id}
+                  members={members}
+                  isPrimaryOwner={isPrimaryOwner}
+                  canManageRoles={canManageRoles}
+                />
+              </CardContent>
         </Card>
     </div>
     );
