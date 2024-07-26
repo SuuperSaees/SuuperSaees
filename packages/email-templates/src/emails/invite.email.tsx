@@ -36,102 +36,107 @@ interface Props {
 export async function renderInviteEmail(props: Props) {
   const namespace = 'invite-email';
 
-  const { t } = await initializeEmailI18n({
-    language: props.language,
-    namespace,
-  });
+  try {
+    const { t } = await initializeEmailI18n({
+      language: props.language,
+      namespace,
+    });
 
-  const previewText = `Join ${props.invitedUserEmail} on ${props.productName}`;
-  const subject = t(`${namespace}:subject`);
+    const previewText = `Join ${props.invitedUserEmail} on ${props.productName}`;
+    const subject = t(`${namespace}:subject`);
 
-  const heading = t(`${namespace}:heading`, {
-    teamName: props.teamName,
-    productName: props.productName,
-  });
+    const heading = t(`${namespace}:heading`, {
+      teamName: props.teamName,
+      productName: props.productName,
+    });
 
-  const hello = t(`${namespace}:hello`, {
-    invitedUserEmail: props.invitedUserEmail,
-  });
+    const hello = t(`${namespace}:hello`, {
+      invitedUserEmail: props.invitedUserEmail,
+    });
 
-  const mainText = t(`${namespace}:mainText`, {
-    inviter: props.inviter,
-    teamName: props.teamName,
-    productName: props.productName,
-  });
+    const mainText = t(`${namespace}:mainText`, {
+      inviter: props.inviter,
+      teamName: props.teamName,
+      productName: props.productName,
+    });
 
-  const joinTeam = t(`${namespace}:joinTeam`, {
-    teamName: props.teamName,
-  });
+    const joinTeam = t(`${namespace}:joinTeam`, {
+      teamName: props.teamName,
+    });
 
-  const html = render(
-    <Html>
-      <Head>
-        <BodyStyle />
-      </Head>
+    const html = render(
+      <Html>
+        <Head>
+          <BodyStyle />
+        </Head>
 
-      <Preview>{previewText}</Preview>
+        <Preview>{previewText}</Preview>
 
-      <Tailwind>
-        <Body>
-          <EmailWrapper>
-            <EmailHeader>
-              <EmailHeading>{heading}</EmailHeading>
-            </EmailHeader>
+        <Tailwind>
+          <Body>
+            <EmailWrapper>
+              <EmailHeader>
+                <EmailHeading>{heading}</EmailHeading>
+              </EmailHeader>
 
-            <EmailContent>
-              <Text className="text-[14px] leading-[24px] text-black">
-                {hello}
-              </Text>
+              <EmailContent>
+                <Text className="text-[14px] leading-[24px] text-black">
+                  {hello}
+                </Text>
 
-              <Text
-                className="text-[14px] leading-[24px] text-black"
-                dangerouslySetInnerHTML={{ __html: mainText }}
-              />
+                <Text
+                  className="text-[14px] leading-[24px] text-black"
+                  dangerouslySetInnerHTML={{ __html: mainText }}
+                />
 
-              {props.teamLogo && (
-                <Section>
-                  <Row>
-                    <Column align="center">
-                      <Img
-                        className="rounded-full"
-                        src={props.teamLogo}
-                        width="64"
-                        height="64"
-                      />
-                    </Column>
-                  </Row>
+                {props.teamLogo && (
+                  <Section>
+                    <Row>
+                      <Column align="center">
+                        <Img
+                          className="rounded-full"
+                          src={props.teamLogo}
+                          width="64"
+                          height="64"
+                        />
+                      </Column>
+                    </Row>
+                  </Section>
+                )}
+
+                <Section className="mb-[32px] mt-[32px] text-center">
+                  <CtaButton href={props.link}>{joinTeam}</CtaButton>
                 </Section>
-              )}
 
-              <Section className="mb-[32px] mt-[32px] text-center">
-                <CtaButton href={props.link}>{joinTeam}</CtaButton>
-              </Section>
+                <Text className="text-[14px] leading-[24px] text-black">
+                  {t(`${namespace}:copyPasteLink`)}{' '}
+                  <Link href={props.link} className="text-blue-600 no-underline">
+                    {props.link}
+                  </Link>
+                </Text>
 
-              <Text className="text-[14px] leading-[24px] text-black">
-                {t(`${namespace}:copyPasteLink`)}{' '}
-                <Link href={props.link} className="text-blue-600 no-underline">
-                  {props.link}
-                </Link>
-              </Text>
+                <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
 
-              <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
+                <Text className="text-[12px] leading-[24px] text-[#666666]">
+                  {t(`${namespace}:invitationIntendedFor`, {
+                    invitedUserEmail: props.invitedUserEmail,
+                  })}
+                </Text>
+              </EmailContent>
 
-              <Text className="text-[12px] leading-[24px] text-[#666666]">
-                {t(`${namespace}:invitationIntendedFor`, {
-                  invitedUserEmail: props.invitedUserEmail,
-                })}
-              </Text>
-            </EmailContent>
+              <EmailFooter>{props.productName}</EmailFooter>
+            </EmailWrapper>
+          </Body>
+        </Tailwind>
+      </Html>,
+    );
 
-            <EmailFooter>{props.productName}</EmailFooter>
-          </EmailWrapper>
-        </Body>
-      </Tailwind>
-    </Html>,
-  );
-
-  return {
-    html,
-    subject,
-  };
+    return {
+      html,
+      subject,
+    };
+  } catch (error) {
+    console.error('Error al renderizar el correo:', error);
+    throw error; // Re-lanza el error para que pueda ser manejado por el llamador si es necesario
+  }
 }
