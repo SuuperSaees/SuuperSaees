@@ -101,6 +101,41 @@ export type Database = {
           },
         ]
       }
+      // Clients Table
+      clients: {
+        Row: {
+          id: string
+          created_at: string
+          name: string
+          client_organization: string
+          email: string
+          role: string
+          propietary_organization: string
+          propietary_organization_id: string
+        }
+        Insert: {
+          id: string
+          created_at: string
+          name: string
+          client_organization: string
+          email: string
+          role: string
+          propietary_organization: string
+          propietary_organization_id: string
+        }
+        Update: {
+          id: string
+          created_at: string
+          name: string
+          client_organization: string
+          email: string
+          role: string
+          propietary_organization: string
+          propietary_organization_id: string
+        }
+        Relationships: []
+      }
+      //////////////////////////////////////////////////////////////////////
       accounts_memberships: {
         Row: {
           account_id: string
