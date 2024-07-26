@@ -107,6 +107,7 @@ export type Database = {
           id: string
           created_at: string
           name: string
+          picture_url: string | null
           client_organization: string
           email: string
           role: string
@@ -117,6 +118,7 @@ export type Database = {
           id: string
           created_at: string
           name: string
+          picture_url: string | null
           client_organization: string
           email: string
           role: string
@@ -127,6 +129,7 @@ export type Database = {
           id: string
           created_at: string
           name: string
+          picture_url: string | null
           client_organization: string
           email: string
           role: string

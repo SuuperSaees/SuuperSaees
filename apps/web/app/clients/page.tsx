@@ -62,10 +62,13 @@ type Account = {
     
     const client = getSupabaseServerComponentClient();
 
+    const { data: userData } = await client.auth.getUser();
+
 
     const { data: dataClients} = await client
     .from('clients')
-    .select();
+    .select()
+    .eq('propietary_organization_id', userData.user!.id); 
 
     // console.log('Data:', dataClients);
 

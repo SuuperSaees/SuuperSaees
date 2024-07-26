@@ -18,6 +18,9 @@ importers:
       '@manypkg/cli':
         specifier: ^0.21.4
         version: 0.21.4
+      '@radix-ui/react-slot':
+        specifier: ^1.1.0
+        version: 1.1.0(@types/react@18.3.3)(react@18.3.1)
       '@turbo/gen':
         specifier: ^2.0.9
         version: 2.0.9(@types/node@20.14.11)(typescript@5.5.4)
@@ -1347,7 +1350,7 @@ importers:
         version: 14.2.5
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^4.3.0
-        version: 4.3.0(prettier@3.3.3)
+        version: 4.3.0(@vue/compiler-sfc@3.4.33)(prettier@3.3.3)
       '@types/eslint':
         specifier: ^8.56.10
         version: 8.56.11
@@ -1390,13 +1393,13 @@ importers:
     dependencies:
       '@ianvs/prettier-plugin-sort-imports':
         specifier: ^4.3.1
-        version: 4.3.1(prettier@3.3.3)
+        version: 4.3.1(@vue/compiler-sfc@3.4.33)(prettier@3.3.3)
       prettier:
         specifier: ^3.3.3
         version: 3.3.3
       prettier-plugin-tailwindcss:
         specifier: ^0.6.5
-        version: 0.6.5(@ianvs/prettier-plugin-sort-imports@4.3.1(prettier@3.3.3))(@trivago/prettier-plugin-sort-imports@4.3.0(prettier@3.3.3))(prettier@3.3.3)
+        version: 0.6.5(@ianvs/prettier-plugin-sort-imports@4.3.1(@vue/compiler-sfc@3.4.33)(prettier@3.3.3))(@trivago/prettier-plugin-sort-imports@4.3.0(@vue/compiler-sfc@3.4.33)(prettier@3.3.3))(prettier@3.3.3)
     devDependencies:
       '@kit/tsconfig':
         specifier: workspace:^
@@ -8352,7 +8355,7 @@ snapshots:
 
   '@humanwhocodes/object-schema@2.0.3': {}
 
-  '@ianvs/prettier-plugin-sort-imports@4.3.1(prettier@3.3.3)':
+  '@ianvs/prettier-plugin-sort-imports@4.3.1(@vue/compiler-sfc@3.4.33)(prettier@3.3.3)':
     dependencies:
       '@babel/core': 7.24.9
       '@babel/generator': 7.24.10
@@ -8361,6 +8364,8 @@ snapshots:
       '@babel/types': 7.24.9
       prettier: 3.3.3
       semver: 7.6.3
+    optionalDependencies:
+      '@vue/compiler-sfc': 3.4.33
     transitivePeerDependencies:
       - supports-color
 
@@ -11218,7 +11223,7 @@ snapshots:
 
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
-  '@trivago/prettier-plugin-sort-imports@4.3.0(prettier@3.3.3)':
+  '@trivago/prettier-plugin-sort-imports@4.3.0(@vue/compiler-sfc@3.4.33)(prettier@3.3.3)':
     dependencies:
       '@babel/generator': 7.17.7
       '@babel/parser': 7.24.8
@@ -11227,6 +11232,8 @@ snapshots:
       javascript-natural-sort: 0.7.1
       lodash: 4.17.21
       prettier: 3.3.3
+    optionalDependencies:
+      '@vue/compiler-sfc': 3.4.33
     transitivePeerDependencies:
       - supports-color
 
@@ -14523,12 +14530,12 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-tailwindcss@0.6.5(@ianvs/prettier-plugin-sort-imports@4.3.1(prettier@3.3.3))(@trivago/prettier-plugin-sort-imports@4.3.0(prettier@3.3.3))(prettier@3.3.3):
+  prettier-plugin-tailwindcss@0.6.5(@ianvs/prettier-plugin-sort-imports@4.3.1(@vue/compiler-sfc@3.4.33)(prettier@3.3.3))(@trivago/prettier-plugin-sort-imports@4.3.0(@vue/compiler-sfc@3.4.33)(prettier@3.3.3))(prettier@3.3.3):
     dependencies:
       prettier: 3.3.3
     optionalDependencies:
-      '@ianvs/prettier-plugin-sort-imports': 4.3.1(prettier@3.3.3)
-      '@trivago/prettier-plugin-sort-imports': 4.3.0(prettier@3.3.3)
+      '@ianvs/prettier-plugin-sort-imports': 4.3.1(@vue/compiler-sfc@3.4.33)(prettier@3.3.3)
+      '@trivago/prettier-plugin-sort-imports': 4.3.0(@vue/compiler-sfc@3.4.33)(prettier@3.3.3)
 
   prettier@3.3.3: {}
 
