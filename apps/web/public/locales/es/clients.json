@@ -7,7 +7,10 @@
   "searchAccount": "Buscar cuenta...",
   "teamsTabLabel": "Equipo",
   "membersTabLabel": "Miembros del equipo",
-  "memberName": "Nombre",
-  "youLabel": "Tú"
-
+  "clientName": "Nombre",
+  "youLabel": "Tú",
+  "searchClientsPlaceholder": "Buscar clientes...",
+  "organizationLabel": "Organización",
+  "ActionsLabel": "Acciones",
+  "lastSignInLabel": "Último inicio de sesión"
 }

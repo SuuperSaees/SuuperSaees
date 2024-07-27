@@ -1,306 +1,670 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-
-import { ColumnDef } from '@tanstack/react-table';
+import * as React from "react"
+import { ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable, } from '@tanstack/react-table';
 import { Ellipsis } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Database } from '@kit/supabase/database';
 import { Badge } from '@kit/ui/badge';
 import { Button } from '@kit/ui/button';
+import { Checkbox } from "@kit/ui/checkbox"
 import { DataTable } from '@kit/ui/data-table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
 } from '@kit/ui/dropdown-menu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@kit/ui/table"
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 import { Trans } from '@kit/ui/trans';
-
 import { RemoveMemberDialog } from './remove-member-dialog';
 import { RoleBadge } from './role-badge';
 import { TransferOwnershipDialog } from './transfer-ownership-dialog';
 import { UpdateMemberRoleDialog } from './update-member-role-dialog';
+import { Search, Pen, ArrowUp, ArrowDown, Users2Icon, Trash2 } from 'lucide-react';
+import { Separator } from '@kit/ui/separator';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../../../../../../packages/ui/src/shadcn/pagination';
+import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/delete/delete-client';
+import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/create/create-client';
+import UpdateClientDialog from '../../server/actions/update/update-client';
 
-type Members =
-  Database['public']['Functions']['get_account_members']['Returns'];
+const getUniqueOrganizations = (clients: Client[]) => {
+  const organizationMap = new Map<string, Client>();
 
-interface Permissions {
-  canUpdateRole: (roleHierarchy: number) => boolean;
-  canRemoveFromAccount: (roleHierarchy: number) => boolean;
-  canTransferOwnership: boolean;
-}
-
-type ClientsTableProps = {
-  members: Members;
-  currentUserId: string;
-  currentAccountId: string;
-  userRoleHierarchy: number;
-  isPrimaryOwner: boolean;
-  canManageRoles: boolean;
-};
-
-export function ClientsTable({
-  members,
-  currentUserId,
-  currentAccountId,
-  isPrimaryOwner,
-  userRoleHierarchy,
-  canManageRoles,
-}: ClientsTableProps) {
-  const [search, setSearch] = useState('');
-  const { t } = useTranslation('teams');
-
-  const permissions = {
-    canUpdateRole: (targetRole: number) => {
-      return (
-        isPrimaryOwner || (canManageRoles && userRoleHierarchy < targetRole)
-      );
-    },
-    canRemoveFromAccount: (targetRole: number) => {
-      return (
-        isPrimaryOwner || (canManageRoles && userRoleHierarchy < targetRole)
-      );
-    },
-    canTransferOwnership: isPrimaryOwner,
-  };
-
-  const columns = useGetColumns(permissions, {
-    currentUserId,
-    currentAccountId,
-    currentRoleHierarchy: userRoleHierarchy,
+  clients.forEach(client => {
+    if (!organizationMap.has(client.client_organization)) {
+      // Solo guardar el primer cliente por organización
+      organizationMap.set(client.client_organization, client);
+    } else {
+      // Actualizar si el cliente actual es un líder
+      const existingClient = organizationMap.get(client.client_organization);
+      if (client.role === 'Líder') {
+        organizationMap.set(client.client_organization, client);
+      }
+    }
   });
 
-  const filteredMembers = members
-    .filter((member) => {
-      const searchString = search.toLowerCase();
-      const displayName = member.name ?? member.email.split('@')[0];
+  return Array.from(organizationMap.values());
+};
 
-      return (
-        displayName.includes(searchString) ||
-        member.role.toLowerCase().includes(searchString)
-      );
-    })
-    .sort((prev, next) => {
-      if (prev.primary_owner_user_id === prev.user_id) {
-        return -1;
-      }
-
-      if (prev.role_hierarchy_level < next.role_hierarchy_level) {
-        return -1;
-      }
-
-      return 1;
-    });
-
-  return (
-    <div className={'flex flex-col space-y-2'}>
-      {/* <Input
-        value={search}
-        onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
-        placeholder={t(`searchMembersPlaceholder`)}
-      /> */}
-
-      <DataTable columns={columns} data={filteredMembers} />
-    </div>
-  );
+type ClientsTableProps = {
+  clients: {
+    id: string
+    created_at: string
+    name: string
+    client_organization: string
+    email: string
+    role: string
+    propietary_organization: string
+    propietary_organization_id: string
+    picture_url: string | null
+  }[];
 }
 
-function useGetColumns(
-  permissions: Permissions,
-  params: {
-    currentUserId: string;
-    currentAccountId: string;
-    currentRoleHierarchy: number;
+type Client = {
+  id: string;
+  created_at: string;
+  name: string;
+  client_organization: string;
+  email: string;
+  role: string;
+  propietary_organization: string;
+  propietary_organization_id: string;
+  picture_url: string | null
+}
+
+
+// CLIENTS TABLE
+export const clientColumns: ColumnDef<Client>[] = [
+  {
+    accessorKey: "name",
+    header: "Nombre",
+    cell: ({ row }) => (
+      <span className={'flex items-center space-x-4 text-left'}>
+        <span>
+          <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+        </span>
+        <div className='flex flex-col'>
+          <span className='text-gray-900 text-sm font-medium leading-[1.42857]'>{row.original.name}</span>
+          <span className='text-gray-600 text-sm font-normal leading-[1.42857]'>{row.original.email}</span>
+        </div>
+      </span>
+    ),
   },
-): ColumnDef<Members[0]>[] {
-  const { t } = useTranslation('teams');
+  {
+    accessorKey: "role",
+    header: "Rol",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("role")}</div>
+    ),
+  },
+  {
+    accessorKey: "client_organization",
+    header: "Organización",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("client_organization")}</div>
+    ),
+  },
+  {
+    accessorKey: "last_login",
+    header: ({ column }) => {
+      return (
+        <div >
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <div className='flex justify-between items-center'>
+              <span>Último inicio de sesión</span>
+              <ArrowDown className="h-4 w-4 ml-2" />
+            </div>
+          </Button>
+        </div>
+        
+      )
+    },
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+  
+      const formattedDate = `${day}-${month}-${year}`;
+  
+      return (
+        <span className="text-gray-900 text-sm font-medium">
+          {formattedDate}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "created_at_column",
+    header: ({ column }) => {
+      return (
+        <div >
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <div className='flex justify-between items-center'>
+              <span>Creado en</span>
+              <ArrowUp className="h-4 w-4 ml-2" />
+            </div>
+          </Button>
+        </div>
+        
+      )
+    },
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+  
+      const formattedDate = `${day}-${month}-${year}`;
+  
+      return (
+        <span className="text-gray-900 text-sm font-medium">
+          {formattedDate}
+        </span>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: "Acciones",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const client = row.original
+ 
+      return (
+        <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
+          {/* <Pen className="h-4 w-4 text-gray-600" /> */}
+          <UpdateClientDialog {...client} />
+          <DeleteUserDialog userId={client.id}/>
+        </div>
+      )
+    },
+  },
+]
 
-  return useMemo(
-    () => [
-      {
-        header: t('memberName'),
-        size: 200,
-        cell: ({ row }) => {
-          const member = row.original;
-          const displayName = member.name ?? member.email.split('@')[0];
-          const isSelf = member.user_id === params.currentUserId;
+//ORGANIZATIONS TABLE
+// export const organizationColumns: ColumnDef<Client>[] = [
+//   {
+//     accessorKey: "client_organization",
+//     header: "Nombre de la organización",
+//     cell: ({ row }) => (
+//       <span className={'flex items-center space-x-4 text-left'}>
+//         <span>
+//           <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//         </span>
+//         <div className='flex flex-col'>
+//           <span className='text-gray-900 text-sm font-medium leading-[1.42857]'>{row.original.client_organization}</span>
+//           <span className='text-gray-600 text-sm font-normal leading-[1.42857]'>Líder: {row.original.name}</span>
+//         </div>
+//       </span>
+//     ),
+//   },
+//   {
+//     accessorKey: "role",
+//     header: "Miembros",
+//     cell: ({ row }) => (
+//       <div className='flex'>
+//         <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//         <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//         <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//         <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//       </div>
+//     ),
+//   },
+//   {
+//     accessorKey: "created_at_organization",
+//     header: ({ column }) => {
+//       return (
+//         <div >
+//           <Button
+//             variant="ghost"
+//             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+//           >
+//             <div className='flex justify-between items-center'>
+//               <span>Creado en</span>
+//               <ArrowUp className="h-4 w-4 ml-2" />
+//             </div>
+//           </Button>
+//         </div>
+        
+//       )
+//     },
+//     cell: ({ row }) => {
+//       const date = new Date(row.original.created_at);
+//       const day = date.getDate().toString().padStart(2, '0');
+//       const month = (date.getMonth() + 1).toString().padStart(2, '0');
+//       const year = date.getFullYear();
+  
+//       const formattedDate = `${day}-${month}-${year}`;
+  
+//       return (
+//         <span className="text-gray-900 text-sm font-medium">
+//           {formattedDate}
+//         </span>
+//       );
+//     },
+//   },
+//   {
+//     id: "actions",
+//     header: "Acciones",
+//     enableHiding: false,
+//     cell: ({ row }) => {
+//       const client = row.original
+ 
+//       return (
+//         <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
+//           {/* <UpdateClientDialog {...client} /> */}
+//           <Pen className="h-4 w-4 text-gray-600" />
+//         </div>
+//       )
+//     },
+//   },
+// ]
+export const organizationColumns: ColumnDef<Client>[] = [
+  {
+    accessorKey: "client_organization",
+    header: "Nombre de la organización",
+    cell: ({ row }) => (
+      <span className={'flex items-center space-x-4 text-left'}>
+        <span>
+          <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+        </span>
+        <div className='flex flex-col'>
+          <span className='text-gray-900 text-sm font-medium leading-[1.42857]'>{row.original.client_organization}</span>
+          <span className='text-gray-600 text-sm font-normal leading-[1.42857]'>Líder: {row.original.name}</span>
+        </div>
+      </span>
+    ),
+  },
+  {
+    accessorKey: "role",
+    header: "Miembros",
+    cell: ({ row }) => (
+      <div className='flex'>
+        <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+        {/* Puedes añadir más avatares aquí si tienes datos adicionales */}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "created_at_organization",
+    header: ({ column }) => (
+      <div>
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <div className='flex justify-between items-center'>
+            <span>Creado en</span>
+            <ArrowUp className="h-4 w-4 ml-2" />
+          </div>
+        </Button>
+      </div>
+    ),
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+  
+      const formattedDate = `${day}-${month}-${year}`;
+  
+      return (
+        <span className="text-gray-900 text-sm font-medium">
+          {formattedDate}
+        </span>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: "Acciones",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const client = row.original;
+ 
+      return (
+        <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
+          <Pen className="h-4 w-4 text-gray-600" />
+        </div>
+      );
+    },
+  },
+];
 
-          return (
-            <span className={'flex items-center space-x-4 text-left'}>
-              <span>
-                <ProfileAvatar
-                  displayName={displayName}
-                  pictureUrl={member.picture_url}
-                />
-              </span>
 
-              <span>{displayName}</span>
 
-              <If condition={isSelf}>
-                <Badge variant={'outline'}>{t('youLabel')}</Badge>
-              </If>
-            </span>
-          );
-        },
-      },
-      {
-        header: t('roleLabel'),
-        cell: ({ row }) => {
-          const { role, primary_owner_user_id, user_id } = row.original;
-          const isPrimaryOwner = primary_owner_user_id === user_id;
+// export function ClientsTable({ clients }: ClientsTableProps ) {
+//   const [activeButton, setActiveButton] = useState<'clientes' | 'organizaciones'>('clientes');
+//   const [sorting, setSorting] = React.useState<SortingState>([])
+//   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+//   const [columnVisibility, setColumnVisibility] =React.useState<VisibilityState>({})
+//   const [rowSelection, setRowSelection] = React.useState({});
 
-          return (
-            <span className={'flex items-center space-x-1'}>
-              <RoleBadge role={role} />
+//   const columns = activeButton === 'clientes' ? clientColumns : organizationColumns;
+ 
+//   const table = useReactTable({
+//     data: clients,
+//     columns,
+//     onSortingChange: setSorting,
+//     onColumnFiltersChange: setColumnFilters,
+//     getCoreRowModel: getCoreRowModel(),
+//     getPaginationRowModel: getPaginationRowModel(),
+//     getSortedRowModel: getSortedRowModel(),
+//     getFilteredRowModel: getFilteredRowModel(),
+//     onColumnVisibilityChange: setColumnVisibility,
+//     onRowSelectionChange: setRowSelection,
+//     state: {
+//       sorting,
+//       columnFilters,
+//       columnVisibility,
+//       rowSelection,
+//     },
+//   })
 
-              <If condition={isPrimaryOwner}>
-                <span
-                  className={
-                    'rounded-md bg-yellow-400 px-2.5 py-1 text-xs font-medium dark:text-black'
-                  }
-                >
-                  {t('primaryOwnerLabel')}
-                </span>
-              </If>
-            </span>
-          );
-        },
-      },
-      {
-        header: t('emailLabel'),
-        accessorKey: 'email',
-        cell: ({ row }) => {
-          return row.original.email ?? '-';
-        },
-      },
-      {
-        header: t('joinedAtLabel'),
-        cell: ({ row }) => {
-          return new Date(row.original.created_at).toLocaleDateString();
-        },
-      },
-      {
-        header: '',
-        id: 'actions',
-        cell: ({ row }) => (
-          <ActionsDropdown
-            permissions={permissions}
-            member={row.original}
-            currentUserId={params.currentUserId}
-            currentTeamAccountId={params.currentAccountId}
-            currentRoleHierarchy={params.currentRoleHierarchy}
-          />
-        ),
-      },
-    ],
-    [t, params, permissions],
-  );
-}
+//   const firstClient = clients[0];
+//   const handleButtonClick = (button: 'clientes' | 'organizaciones') => {
+//     setActiveButton(button);
+//     if (button === 'clientes') {
+//       table.getColumn("name")?.setFilterValue(table.getColumn("name")?.getFilterValue() ?? "");
+//     } else if (button === 'organizaciones') {
+//       table.getColumn("client_organization")?.setFilterValue(table.getColumn("client_organization")?.getFilterValue() ?? "");
+//     }
+//   };
+ 
+//   return (
+//     <div className="w-full">
+//       <div className="flex items-center py-4 justify-between">
+//         <div className='flex'>
+//           <Button
+//             className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'clientes' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+//             onClick={() => handleButtonClick('clientes')}
+//           >
+//             <span className="text-sm font-semibold leading-5">Clientes</span>
+//           </Button>
+//           <Button
+//             variant='ghost'
+//             className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'organizaciones' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+//             onClick={() => handleButtonClick('organizaciones')}
+//           >
+//             <span className="text-sm font-semibold leading-5">Organizaciones</span>
+//           </Button>
+//         </div>
+//         <div className='flex px-2 gap-4'>
+//           <div className='relative max-w-sm'>
+//             <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
+//             <Input
+//               placeholder={activeButton === 'clientes' ? "Buscar clientes..." : "Buscar organizaciones..."}
+//               value={
+//                 activeButton === 'clientes'
+//                   ? (table.getColumn("name")?.getFilterValue() as string) ?? ""
+//                   : (table.getColumn("client_organization")?.getFilterValue() as string) ?? ""
+//               }
+//               onChange={(event) => {
+//                 if (activeButton === 'clientes') {
+//                   table.getColumn("name")?.setFilterValue(event.target.value);
+//                 } else {
+//                   table.getColumn("client_organization")?.setFilterValue(event.target.value);
+//                 }
+//               }}
+//               className="pl-10"
+//             />
+//           </div>
+//           <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/>
+//         </div>
+//       </div>
+//       <Separator />
+//       <div className="rounded-md border mt-4">
+//         <Table>
+//           <TableHeader>
+//             {table.getHeaderGroups().map((headerGroup) => (
+//               <TableRow key={headerGroup.id}>
+//                 {headerGroup.headers.map((header) => {
+//                   return (
+//                     <TableHead key={header.id}>
+//                       {header.isPlaceholder
+//                         ? null
+//                         : flexRender(
+//                             header.column.columnDef.header,
+//                             header.getContext()
+//                           )}
+//                     </TableHead>
+//                   )
+//                 })}
+//               </TableRow>
+//             ))}
+//           </TableHeader>
+//           <TableBody>
+//             {table.getRowModel().rows?.length ? (
+//               table.getRowModel().rows.map((row) => (
+//                 <TableRow
+//                   key={row.id}
+//                   data-state={row.getIsSelected() && "selected"}
+//                 >
+//                   {row.getVisibleCells().map((cell) => (
+//                     <TableCell key={cell.id}>
+//                       {flexRender(
+//                         cell.column.columnDef.cell,
+//                         cell.getContext()
+//                       )}
+//                     </TableCell>
+//                   ))}
+//                 </TableRow>
+//               ))
+//             ) : (
+//               <TableRow>
+//                 <TableCell
+//                   colSpan={columns.length}
+//                   className="h-24 text-center"
+//                 >
+//                   No results.
+//                 </TableCell>
+//               </TableRow>
+//             )}
+//           </TableBody>
+//         </Table>
+//       </div>
+//       <div className="flex justify-between items-center mt-4">
+//         <Pagination className="w-full">
+//           <PaginationPrevious href="#" className="mr-auto" />
+//           <div>
+//             <PaginationLink href="#" isActive>1</PaginationLink>
+//             <PaginationLink href="#" >
+//                 2
+//             </PaginationLink>
+//             <PaginationLink href="#">3</PaginationLink>
+//             <PaginationLink href="#">...</PaginationLink>
+//             <PaginationLink href="#">8</PaginationLink>
+//             <PaginationLink href="#">9</PaginationLink>
+//             <PaginationLink href="#">10</PaginationLink>
 
-function ActionsDropdown({
-  permissions,
-  member,
-  currentUserId,
-  currentTeamAccountId,
-  currentRoleHierarchy,
-}: {
-  permissions: Permissions;
-  member: Members[0];
-  currentUserId: string;
-  currentTeamAccountId: string;
-  currentRoleHierarchy: number;
-}) {
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [isTransferring, setIsTransferring] = useState(false);
-  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+//           </div>
+//           <PaginationNext href="#" className="ml-auto" />
+//         </Pagination>
+//       </div>
+//     </div>
+//   )
+// }
 
-  const isCurrentUser = member.user_id === currentUserId;
-  const isPrimaryOwner = member.primary_owner_user_id === member.user_id;
+export function ClientsTable({ clients }: ClientsTableProps) {
+  const [activeButton, setActiveButton] = useState<'clientes' | 'organizaciones'>('clientes');
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
 
-  if (isCurrentUser || isPrimaryOwner) {
-    return null;
-  }
+  const uniqueClients = useMemo(() => getUniqueOrganizations(clients), [clients]);
+  const columns = activeButton === 'clientes' ? clientColumns : organizationColumns;
 
-  const memberRoleHierarchy = member.role_hierarchy_level;
-  const canUpdateRole = permissions.canUpdateRole(memberRoleHierarchy);
+  const table = useReactTable({
+    data: activeButton === 'organizaciones' ? uniqueClients : clients,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  });
 
-  const canRemoveFromAccount =
-    permissions.canRemoveFromAccount(memberRoleHierarchy);
-
-  // if has no permission to update role, transfer ownership or remove from account
-  // do not render the dropdown menu
-  if (
-    !canUpdateRole &&
-    !permissions.canTransferOwnership &&
-    !canRemoveFromAccount
-  ) {
-    return null;
-  }
+  const firstClient = clients[0];
+  const handleButtonClick = (button: 'clientes' | 'organizaciones') => {
+    setActiveButton(button);
+    if (button === 'clientes') {
+      table.getColumn("name")?.setFilterValue(table.getColumn("name")?.getFilterValue() ?? "");
+    } else if (button === 'organizaciones') {
+      table.getColumn("client_organization")?.setFilterValue(table.getColumn("client_organization")?.getFilterValue() ?? "");
+    }
+  };
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant={'ghost'} size={'icon'}>
-            <Ellipsis className={'h-5 w-5'} />
+    <div className="w-full">
+      <div className="flex items-center py-4 justify-between">
+        <div className='flex'>
+          <Button
+            className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'clientes' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+            onClick={() => handleButtonClick('clientes')}
+          >
+            <span className="text-sm font-semibold leading-5">Clientes</span>
           </Button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent>
-          <If condition={canUpdateRole}>
-            <DropdownMenuItem onClick={() => setIsUpdatingRole(true)}>
-              <Trans i18nKey={'teams:updateRole'} />
-            </DropdownMenuItem>
-          </If>
-
-          <If condition={permissions.canTransferOwnership}>
-            <DropdownMenuItem onClick={() => setIsTransferring(true)}>
-              <Trans i18nKey={'teams:transferOwnership'} />
-            </DropdownMenuItem>
-          </If>
-
-          <If condition={canRemoveFromAccount}>
-            <DropdownMenuItem onClick={() => setIsRemoving(true)}>
-              <Trans i18nKey={'teams:removeMember'} />
-            </DropdownMenuItem>
-          </If>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <If condition={isRemoving}>
-        <RemoveMemberDialog
-          isOpen
-          setIsOpen={setIsRemoving}
-          teamAccountId={currentTeamAccountId}
-          userId={member.user_id}
-        />
-      </If>
-
-      <If condition={isUpdatingRole}>
-        <UpdateMemberRoleDialog
-          isOpen
-          setIsOpen={setIsUpdatingRole}
-          userId={member.user_id}
-          userRole={member.role}
-          teamAccountId={currentTeamAccountId}
-          userRoleHierarchy={currentRoleHierarchy}
-        />
-      </If>
-
-      <If condition={isTransferring}>
-        <TransferOwnershipDialog
-          isOpen
-          setIsOpen={setIsTransferring}
-          targetDisplayName={member.name ?? member.email}
-          accountId={member.account_id}
-          userId={member.user_id}
-        />
-      </If>
-    </>
+          <Button
+            variant='ghost'
+            className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'organizaciones' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+            onClick={() => handleButtonClick('organizaciones')}
+          >
+            <span className="text-sm font-semibold leading-5">Organizaciones</span>
+          </Button>
+        </div>
+        <div className='flex px-2 gap-4'>
+          <div className='relative max-w-sm'>
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
+            <Input
+              placeholder={activeButton === 'clientes' ? "Buscar clientes..." : "Buscar organizaciones..."}
+              value={
+                activeButton === 'clientes'
+                  ? (table.getColumn("name")?.getFilterValue() as string) ?? ""
+                  : (table.getColumn("client_organization")?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event) => {
+                if (activeButton === 'clientes') {
+                  table.getColumn("name")?.setFilterValue(event.target.value);
+                } else {
+                  table.getColumn("client_organization")?.setFilterValue(event.target.value);
+                }
+              }}
+              className="pl-10"
+            />
+          </div>
+          <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/>
+        </div>
+      </div>
+      <Separator />
+      <div className="rounded-md border mt-4">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex justify-between items-center mt-4">
+        <Pagination className="w-full">
+          <PaginationPrevious href="#" className="mr-auto" />
+          <div>
+            <span className="text-sm font-semibold">{table.getPageCount()}</span>
+          </div>
+          <PaginationNext href="#" className="ml-auto" />
+        </Pagination>
+      </div>
+    </div>
   );
 }
