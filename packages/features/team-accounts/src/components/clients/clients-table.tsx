@@ -56,8 +56,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
-import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/delete-client';
-
+import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/delete/delete-client';
+import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/create/create-client';
+import UpdateClientDialog from '../../server/actions/update/update-client';
 
 type ClientsTableProps = {
   clients: {
@@ -83,6 +84,11 @@ type Client = {
   propietary_organization: string;
   propietary_organization_id: string;
   picture_url: string | null
+}
+
+type CreateClientProps = {
+  propietary_organization: string;
+  propietary_organization_id: string;
 }
 
 export const columns: ColumnDef<Client>[] = [
@@ -190,9 +196,8 @@ export const columns: ColumnDef<Client>[] = [
  
       return (
         <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
-          <Users2Icon className="h-4 w-4 text-gray-600" />
-          <Pen className="h-4 w-4 text-gray-600" />
-          {/* <Trash2 className="h-4 w-4 text-gray-600" /> */}
+          {/* <Pen className="h-4 w-4 text-gray-600" /> */}
+          <UpdateClientDialog {...client} />
           <DeleteUserDialog userId={client.id}/>
         </div>
       )
@@ -207,7 +212,7 @@ export function ClientsTable({ clients }: ClientsTableProps ) {
   )
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [rowSelection, setRowSelection] = React.useState({});
  
   const table = useReactTable({
     data: clients,
@@ -227,6 +232,8 @@ export function ClientsTable({ clients }: ClientsTableProps ) {
       rowSelection,
     },
   })
+
+  const firstClient = clients[0];
  
   return (
     <div className="w-full">
@@ -242,9 +249,7 @@ export function ClientsTable({ clients }: ClientsTableProps ) {
             className="pl-10"
           />
         </div>
-        <Button>
-          Crear cliente
-        </Button>
+        <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/>
       </div>
       <Separator />
       <div className="rounded-md border mt-4">

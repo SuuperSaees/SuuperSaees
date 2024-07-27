@@ -115,8 +115,8 @@ export type Database = {
           propietary_organization_id: string
         }
         Insert: {
-          id: string
-          created_at: string
+          id?: string
+          created_at?: string | null
           name: string
           picture_url: string | null
           client_organization: string
@@ -128,11 +128,11 @@ export type Database = {
         Update: {
           id: string
           created_at: string
-          name: string
-          picture_url: string | null
-          client_organization: string
-          email: string
-          role: string
+          name?: string
+          picture_url?: string | null
+          client_organization?: string
+          email?: string
+          role?: string
           propietary_organization: string
           propietary_organization_id: string
         }
