@@ -60,6 +60,25 @@ import DeleteUserDialog from '../../../../../../packages/features/team-accounts/
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/create/create-client';
 import UpdateClientDialog from '../../server/actions/update/update-client';
 
+const getUniqueOrganizations = (clients: Client[]) => {
+  const organizationMap = new Map<string, Client>();
+
+  clients.forEach(client => {
+    if (!organizationMap.has(client.client_organization)) {
+      // Solo guardar el primer cliente por organización
+      organizationMap.set(client.client_organization, client);
+    } else {
+      // Actualizar si el cliente actual es un líder
+      const existingClient = organizationMap.get(client.client_organization);
+      if (client.role === 'Líder') {
+        organizationMap.set(client.client_organization, client);
+      }
+    }
+  });
+
+  return Array.from(organizationMap.values());
+};
+
 type ClientsTableProps = {
   clients: {
     id: string
@@ -86,12 +105,9 @@ type Client = {
   picture_url: string | null
 }
 
-type CreateClientProps = {
-  propietary_organization: string;
-  propietary_organization_id: string;
-}
 
-export const columns: ColumnDef<Client>[] = [
+// CLIENTS TABLE
+export const clientColumns: ColumnDef<Client>[] = [
   {
     accessorKey: "name",
     header: "Nombre",
@@ -122,7 +138,7 @@ export const columns: ColumnDef<Client>[] = [
     ),
   },
   {
-    accessorKey: "created_at",
+    accessorKey: "last_login",
     header: ({ column }) => {
       return (
         <div >
@@ -155,7 +171,7 @@ export const columns: ColumnDef<Client>[] = [
     },
   },
   {
-    accessorKey: "created_at",
+    accessorKey: "created_at_column",
     header: ({ column }) => {
       return (
         <div >
@@ -205,17 +221,322 @@ export const columns: ColumnDef<Client>[] = [
   },
 ]
 
-export function ClientsTable({ clients }: ClientsTableProps ) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({});
+//ORGANIZATIONS TABLE
+// export const organizationColumns: ColumnDef<Client>[] = [
+//   {
+//     accessorKey: "client_organization",
+//     header: "Nombre de la organización",
+//     cell: ({ row }) => (
+//       <span className={'flex items-center space-x-4 text-left'}>
+//         <span>
+//           <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//         </span>
+//         <div className='flex flex-col'>
+//           <span className='text-gray-900 text-sm font-medium leading-[1.42857]'>{row.original.client_organization}</span>
+//           <span className='text-gray-600 text-sm font-normal leading-[1.42857]'>Líder: {row.original.name}</span>
+//         </div>
+//       </span>
+//     ),
+//   },
+//   {
+//     accessorKey: "role",
+//     header: "Miembros",
+//     cell: ({ row }) => (
+//       <div className='flex'>
+//         <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//         <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//         <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//         <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+//       </div>
+//     ),
+//   },
+//   {
+//     accessorKey: "created_at_organization",
+//     header: ({ column }) => {
+//       return (
+//         <div >
+//           <Button
+//             variant="ghost"
+//             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+//           >
+//             <div className='flex justify-between items-center'>
+//               <span>Creado en</span>
+//               <ArrowUp className="h-4 w-4 ml-2" />
+//             </div>
+//           </Button>
+//         </div>
+        
+//       )
+//     },
+//     cell: ({ row }) => {
+//       const date = new Date(row.original.created_at);
+//       const day = date.getDate().toString().padStart(2, '0');
+//       const month = (date.getMonth() + 1).toString().padStart(2, '0');
+//       const year = date.getFullYear();
+  
+//       const formattedDate = `${day}-${month}-${year}`;
+  
+//       return (
+//         <span className="text-gray-900 text-sm font-medium">
+//           {formattedDate}
+//         </span>
+//       );
+//     },
+//   },
+//   {
+//     id: "actions",
+//     header: "Acciones",
+//     enableHiding: false,
+//     cell: ({ row }) => {
+//       const client = row.original
  
+//       return (
+//         <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
+//           {/* <UpdateClientDialog {...client} /> */}
+//           <Pen className="h-4 w-4 text-gray-600" />
+//         </div>
+//       )
+//     },
+//   },
+// ]
+export const organizationColumns: ColumnDef<Client>[] = [
+  {
+    accessorKey: "client_organization",
+    header: "Nombre de la organización",
+    cell: ({ row }) => (
+      <span className={'flex items-center space-x-4 text-left'}>
+        <span>
+          <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+        </span>
+        <div className='flex flex-col'>
+          <span className='text-gray-900 text-sm font-medium leading-[1.42857]'>{row.original.client_organization}</span>
+          <span className='text-gray-600 text-sm font-normal leading-[1.42857]'>Líder: {row.original.name}</span>
+        </div>
+      </span>
+    ),
+  },
+  {
+    accessorKey: "role",
+    header: "Miembros",
+    cell: ({ row }) => (
+      <div className='flex'>
+        <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+        {/* Puedes añadir más avatares aquí si tienes datos adicionales */}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "created_at_organization",
+    header: ({ column }) => (
+      <div>
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <div className='flex justify-between items-center'>
+            <span>Creado en</span>
+            <ArrowUp className="h-4 w-4 ml-2" />
+          </div>
+        </Button>
+      </div>
+    ),
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+  
+      const formattedDate = `${day}-${month}-${year}`;
+  
+      return (
+        <span className="text-gray-900 text-sm font-medium">
+          {formattedDate}
+        </span>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: "Acciones",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const client = row.original;
+ 
+      return (
+        <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
+          <Pen className="h-4 w-4 text-gray-600" />
+        </div>
+      );
+    },
+  },
+];
+
+
+
+// export function ClientsTable({ clients }: ClientsTableProps ) {
+//   const [activeButton, setActiveButton] = useState<'clientes' | 'organizaciones'>('clientes');
+//   const [sorting, setSorting] = React.useState<SortingState>([])
+//   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+//   const [columnVisibility, setColumnVisibility] =React.useState<VisibilityState>({})
+//   const [rowSelection, setRowSelection] = React.useState({});
+
+//   const columns = activeButton === 'clientes' ? clientColumns : organizationColumns;
+ 
+//   const table = useReactTable({
+//     data: clients,
+//     columns,
+//     onSortingChange: setSorting,
+//     onColumnFiltersChange: setColumnFilters,
+//     getCoreRowModel: getCoreRowModel(),
+//     getPaginationRowModel: getPaginationRowModel(),
+//     getSortedRowModel: getSortedRowModel(),
+//     getFilteredRowModel: getFilteredRowModel(),
+//     onColumnVisibilityChange: setColumnVisibility,
+//     onRowSelectionChange: setRowSelection,
+//     state: {
+//       sorting,
+//       columnFilters,
+//       columnVisibility,
+//       rowSelection,
+//     },
+//   })
+
+//   const firstClient = clients[0];
+//   const handleButtonClick = (button: 'clientes' | 'organizaciones') => {
+//     setActiveButton(button);
+//     if (button === 'clientes') {
+//       table.getColumn("name")?.setFilterValue(table.getColumn("name")?.getFilterValue() ?? "");
+//     } else if (button === 'organizaciones') {
+//       table.getColumn("client_organization")?.setFilterValue(table.getColumn("client_organization")?.getFilterValue() ?? "");
+//     }
+//   };
+ 
+//   return (
+//     <div className="w-full">
+//       <div className="flex items-center py-4 justify-between">
+//         <div className='flex'>
+//           <Button
+//             className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'clientes' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+//             onClick={() => handleButtonClick('clientes')}
+//           >
+//             <span className="text-sm font-semibold leading-5">Clientes</span>
+//           </Button>
+//           <Button
+//             variant='ghost'
+//             className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'organizaciones' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+//             onClick={() => handleButtonClick('organizaciones')}
+//           >
+//             <span className="text-sm font-semibold leading-5">Organizaciones</span>
+//           </Button>
+//         </div>
+//         <div className='flex px-2 gap-4'>
+//           <div className='relative max-w-sm'>
+//             <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
+//             <Input
+//               placeholder={activeButton === 'clientes' ? "Buscar clientes..." : "Buscar organizaciones..."}
+//               value={
+//                 activeButton === 'clientes'
+//                   ? (table.getColumn("name")?.getFilterValue() as string) ?? ""
+//                   : (table.getColumn("client_organization")?.getFilterValue() as string) ?? ""
+//               }
+//               onChange={(event) => {
+//                 if (activeButton === 'clientes') {
+//                   table.getColumn("name")?.setFilterValue(event.target.value);
+//                 } else {
+//                   table.getColumn("client_organization")?.setFilterValue(event.target.value);
+//                 }
+//               }}
+//               className="pl-10"
+//             />
+//           </div>
+//           <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/>
+//         </div>
+//       </div>
+//       <Separator />
+//       <div className="rounded-md border mt-4">
+//         <Table>
+//           <TableHeader>
+//             {table.getHeaderGroups().map((headerGroup) => (
+//               <TableRow key={headerGroup.id}>
+//                 {headerGroup.headers.map((header) => {
+//                   return (
+//                     <TableHead key={header.id}>
+//                       {header.isPlaceholder
+//                         ? null
+//                         : flexRender(
+//                             header.column.columnDef.header,
+//                             header.getContext()
+//                           )}
+//                     </TableHead>
+//                   )
+//                 })}
+//               </TableRow>
+//             ))}
+//           </TableHeader>
+//           <TableBody>
+//             {table.getRowModel().rows?.length ? (
+//               table.getRowModel().rows.map((row) => (
+//                 <TableRow
+//                   key={row.id}
+//                   data-state={row.getIsSelected() && "selected"}
+//                 >
+//                   {row.getVisibleCells().map((cell) => (
+//                     <TableCell key={cell.id}>
+//                       {flexRender(
+//                         cell.column.columnDef.cell,
+//                         cell.getContext()
+//                       )}
+//                     </TableCell>
+//                   ))}
+//                 </TableRow>
+//               ))
+//             ) : (
+//               <TableRow>
+//                 <TableCell
+//                   colSpan={columns.length}
+//                   className="h-24 text-center"
+//                 >
+//                   No results.
+//                 </TableCell>
+//               </TableRow>
+//             )}
+//           </TableBody>
+//         </Table>
+//       </div>
+//       <div className="flex justify-between items-center mt-4">
+//         <Pagination className="w-full">
+//           <PaginationPrevious href="#" className="mr-auto" />
+//           <div>
+//             <PaginationLink href="#" isActive>1</PaginationLink>
+//             <PaginationLink href="#" >
+//                 2
+//             </PaginationLink>
+//             <PaginationLink href="#">3</PaginationLink>
+//             <PaginationLink href="#">...</PaginationLink>
+//             <PaginationLink href="#">8</PaginationLink>
+//             <PaginationLink href="#">9</PaginationLink>
+//             <PaginationLink href="#">10</PaginationLink>
+
+//           </div>
+//           <PaginationNext href="#" className="ml-auto" />
+//         </Pagination>
+//       </div>
+//     </div>
+//   )
+// }
+
+export function ClientsTable({ clients }: ClientsTableProps) {
+  const [activeButton, setActiveButton] = useState<'clientes' | 'organizaciones'>('clientes');
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
+
+  const uniqueClients = useMemo(() => getUniqueOrganizations(clients), [clients]);
+  const columns = activeButton === 'clientes' ? clientColumns : organizationColumns;
+
   const table = useReactTable({
-    data: clients,
+    data: activeButton === 'organizaciones' ? uniqueClients : clients,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -231,25 +552,58 @@ export function ClientsTable({ clients }: ClientsTableProps ) {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
 
   const firstClient = clients[0];
- 
+  const handleButtonClick = (button: 'clientes' | 'organizaciones') => {
+    setActiveButton(button);
+    if (button === 'clientes') {
+      table.getColumn("name")?.setFilterValue(table.getColumn("name")?.getFilterValue() ?? "");
+    } else if (button === 'organizaciones') {
+      table.getColumn("client_organization")?.setFilterValue(table.getColumn("client_organization")?.getFilterValue() ?? "");
+    }
+  };
+
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 justify-end space-x-4">
-      <div className='relative max-w-sm'>
-          <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
-          <Input
-            placeholder="Filtrar nombres..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
-            }
-            className="pl-10"
-          />
+      <div className="flex items-center py-4 justify-between">
+        <div className='flex'>
+          <Button
+            className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'clientes' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+            onClick={() => handleButtonClick('clientes')}
+          >
+            <span className="text-sm font-semibold leading-5">Clientes</span>
+          </Button>
+          <Button
+            variant='ghost'
+            className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'organizaciones' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+            onClick={() => handleButtonClick('organizaciones')}
+          >
+            <span className="text-sm font-semibold leading-5">Organizaciones</span>
+          </Button>
         </div>
-        <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/>
+        <div className='flex px-2 gap-4'>
+          <div className='relative max-w-sm'>
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
+            <Input
+              placeholder={activeButton === 'clientes' ? "Buscar clientes..." : "Buscar organizaciones..."}
+              value={
+                activeButton === 'clientes'
+                  ? (table.getColumn("name")?.getFilterValue() as string) ?? ""
+                  : (table.getColumn("client_organization")?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event) => {
+                if (activeButton === 'clientes') {
+                  table.getColumn("name")?.setFilterValue(event.target.value);
+                } else {
+                  table.getColumn("client_organization")?.setFilterValue(event.target.value);
+                }
+              }}
+              className="pl-10"
+            />
+          </div>
+          <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/>
+        </div>
       </div>
       <Separator />
       <div className="rounded-md border mt-4">
@@ -306,21 +660,11 @@ export function ClientsTable({ clients }: ClientsTableProps ) {
         <Pagination className="w-full">
           <PaginationPrevious href="#" className="mr-auto" />
           <div>
-            <PaginationLink href="#" isActive>1</PaginationLink>
-            <PaginationLink href="#" >
-                2
-            </PaginationLink>
-            <PaginationLink href="#">3</PaginationLink>
-            <PaginationLink href="#">...</PaginationLink>
-            <PaginationLink href="#">8</PaginationLink>
-            <PaginationLink href="#">9</PaginationLink>
-            <PaginationLink href="#">10</PaginationLink>
-
+            <span className="text-sm font-semibold">{table.getPageCount()}</span>
           </div>
           <PaginationNext href="#" className="ml-auto" />
         </Pagination>
       </div>
     </div>
-  )
+  );
 }
-
