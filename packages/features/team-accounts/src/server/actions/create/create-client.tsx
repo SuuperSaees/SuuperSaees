@@ -1,18 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@kit/ui/alert-dialog'; // Asegúrate de ajustar la importación según tu configuración
-import { Pen } from 'lucide-react';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@kit/ui/alert-dialog'; 
 import { createClient } from './create-client-server';
 import { Button } from '@kit/ui/button';
-import { redirect } from 'next/navigation';
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -26,12 +23,7 @@ import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuPortal,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
   } from "@kit/ui/dropdown-menu"
 
@@ -73,38 +65,21 @@ const CreateClientDialog = ( { propietary_organization, propietary_organization_
         },
       })
      
-      // 2. Define a submit handler.
       async function onSubmit(values: z.infer<typeof formSchema>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
         await createClient({
             ...values,
             picture_url: null,
             propietary_organization,
             propietary_organization_id
         })
-        // console.log(values)
-        alert('Usuario creado correctamente, refresca la página para ver los cambios');
+        alert('Usuario creado correctamente');
+        window.location.reload();
       }
 
       const handleRoleSelect = (role: string) => {
         setSelectedRole(role);
         form.setValue("role", role);
       }
-
-
-//   const handleCreate = async () => {
-//     try {
-//       await createClient(
-        
-//       );
-
-//       alert('Usuario eliminado correctamente, refresca la página para ver los cambios');;
-//     } catch (error) {
-//       console.error('Error al eliminar el usuario:', error);
-//       alert('Error al eliminar el usuario');
-//     }
-//   };
 
   return (
     <>

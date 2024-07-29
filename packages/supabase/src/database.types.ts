@@ -334,37 +334,37 @@ export type Database = {
       }
       clients: {
         Row: {
-          client_organization: string | null
+          client_organization: string 
           created_at: string
-          email: string | null
+          email: string 
           id: string
-          name: string | null
+          name: string 
           picture_url: string | null
-          propietary_organization: string | null
-          propietary_organization_id: string | null
-          role: string | null
+          propietary_organization: string 
+          propietary_organization_id: string 
+          role: string 
         }
         Insert: {
-          client_organization?: string | null
+          client_organization?: string 
           created_at?: string
-          email?: string | null
+          email?: string 
           id?: string
-          name?: string | null
+          name?: string 
           picture_url?: string | null
-          propietary_organization?: string | null
-          propietary_organization_id?: string | null
-          role?: string | null
+          propietary_organization?: string 
+          propietary_organization_id?: string 
+          role?: string 
         }
         Update: {
-          client_organization?: string | null
+          client_organization?: string 
           created_at?: string
-          email?: string | null
+          email?: string 
           id?: string
-          name?: string | null
+          name?: string 
           picture_url?: string | null
-          propietary_organization?: string | null
-          propietary_organization_id?: string | null
-          role?: string | null
+          propietary_organization?: string 
+          propietary_organization_id?: string 
+          role?: string 
         }
         Relationships: []
       }

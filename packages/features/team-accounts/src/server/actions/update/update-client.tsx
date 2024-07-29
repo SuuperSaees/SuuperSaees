@@ -5,14 +5,12 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { Pen } from 'lucide-react';
 import { updateClient } from './update-client-server';
 import { Button } from '@kit/ui/button';
-import { redirect } from 'next/navigation';
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -26,12 +24,7 @@ import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuPortal,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
   } from "@kit/ui/dropdown-menu"
 
@@ -80,7 +73,8 @@ const UpdateClientDialog = ( { id, created_at, name, client_organization, email,
             ...values,
             picture_url: null
         })
-        alert('Usuario actualizado correctamente, refresca la página para ver los cambios');
+        alert('Usuario actualizado correctamente.');
+        window.location.reload();
       }
 
       const handleRoleSelect = (role: string) => {
@@ -158,7 +152,6 @@ const UpdateClientDialog = ( { id, created_at, name, client_organization, email,
                     />
                     <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        {/* <Button variant="outline">Rol</Button> */}
                         <Button variant="outline">{selectedRole || role}</Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56">
