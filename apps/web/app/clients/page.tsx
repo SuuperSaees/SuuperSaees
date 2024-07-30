@@ -1,30 +1,12 @@
-import { PageBody } from '@kit/ui/page';
-import { PlusCircle } from 'lucide-react';
 import { Trans } from '@kit/ui/trans';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@kit/ui/card';
-import {
-  AccountInvitationsTable,
   ClientsTable,
-  InviteMembersDialogContainer,
 } from '@kit/team-accounts/components';
-import { If } from '@kit/ui/if';
 import { Button } from '@kit/ui/button';
-import { loadMembersPageData } from './_lib/server/members-page.loader';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { TeamAccountLayoutPageHeader } from './components/team-account-layout-page-header';
-import { ArrowRight, BellIcon } from 'lucide-react';
-import { Separator } from '@kit/ui/separator';
-import { ArrowLeft } from 'lucide-react';
-import { ScrollArea } from "@kit/ui/scroll-area" 
-import { Badge } from '@kit/ui/badge';
+import { BellIcon } from 'lucide-react';
 
 
 export const generateMetadata = async () => {
@@ -37,24 +19,6 @@ export const generateMetadata = async () => {
     };
 };
 
-type Account = {
-    id: string;
-    primary_owner_user_id: string;
-    name: string;
-    slug: string;
-    email: string | null;
-    is_personal_account: boolean;
-    updated_at: string | null;
-    created_at: string | null;
-    created_by: string | null;
-    updated_by: string | null;
-    picture_url: string | null;
-    public_data: object;
-    role_hierarchy_level: number;
-    permissions: Array<'roles.manage' | 'billing.manage' | 'settings.manage' | 'members.manage' | 'invites.manage'>;
-};
-
-  
   async function ClientsMembersPage() {
     const tags = Array.from({ length: 50 }).map(
       (_, i, a) => `v1.2.0-beta.${a.length - i}`
@@ -68,9 +32,7 @@ type Account = {
     const { data: dataClients} = await client
     .from('clients')
     .select()
-    .eq('propietary_organization_id', userData.user!.id); 
-
-    // console.log('Data:', dataClients);
+    .eq('propietary_organization_id', userData.user!.id);
 
 
     return (
