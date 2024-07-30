@@ -65,7 +65,11 @@ type ClientsTableProps = {
     propietary_organization_id: string;
     picture_url: string | null;
   }[];
+  accountIds: string[];
+  accountNames: string[];
+
 }
+
 
 type Client = {
   id: string;
@@ -274,7 +278,7 @@ type Client = {
   },
 ];
 
-export function ClientsTable({ clients }: ClientsTableProps) {
+export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTableProps) {
   const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clientes' | 'organizaciones'>('clientes');
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -284,6 +288,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 
   const uniqueClients = useMemo(() => getUniqueOrganizations(clients), [clients]);
   const columns = useMemo<ColumnDef<Client>[]>(() => activeButton === 'clientes' ? clientColumns(t) : organizationColumns(t), [t, activeButton]);
+  
   
 
   const table = useReactTable({
@@ -305,7 +310,11 @@ export function ClientsTable({ clients }: ClientsTableProps) {
     },
   });
 
+  const importantPropietaryOrganization = accountNames[0];
+  const importantPropietaryOrganizationId = accountIds[0];
+
   const firstClient = clients[0];
+
   const handleButtonClick = (button: 'clientes' | 'organizaciones') => {
     setActiveButton(button);
     if (button === 'clientes') {
@@ -353,7 +362,8 @@ export function ClientsTable({ clients }: ClientsTableProps) {
               className="pl-10"
             />
           </div>
-          <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/>
+          {/* <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/> */}
+          <CreateClientDialog propietary_organization={importantPropietaryOrganization ?? ''} propietary_organization_id={importantPropietaryOrganizationId ?? ''}/>
         </div>
       </div>
       <Separator />

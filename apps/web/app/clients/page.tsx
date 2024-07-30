@@ -27,6 +27,15 @@ export const generateMetadata = async () => {
     
     const client = getSupabaseServerComponentClient();
     const { data: userData } = await client.auth.getUser();
+
+    const { data: accountsData} = await client.from('accounts').select().eq('primary_owner_user_id', userData.user!.id);
+
+    const filteredAccounts = accountsData?.filter(account => account.id !== userData.user!.id);
+
+    const accountIds = filteredAccounts?.map(account => account.primary_owner_user_id) || []; 
+
+    const accountNames = filteredAccounts?.map(account => account.name) || [];
+
     const { data: dataClients} = await client
     .from('clients')
     .select()
@@ -57,7 +66,7 @@ export const generateMetadata = async () => {
                 </div>
             </div>
             {dataClients ? (
-                    <ClientsTable clients={dataClients} />
+                    <ClientsTable clients={dataClients} accountIds={accountIds} accountNames={accountNames}  />
                 ) : (
                     <p>No clients available</p>
                 )}
