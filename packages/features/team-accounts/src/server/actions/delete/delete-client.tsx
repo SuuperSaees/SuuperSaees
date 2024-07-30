@@ -9,8 +9,6 @@ const DeleteUserDialog = ({ userId }: { userId: string }) => {
   const handleDelete = async () => {
     try {
       await deleteClient(userId);
-
-      alert('Usuario eliminado correctamente.');
       window.location.reload();
     } catch (error) {
       console.error('Error al eliminar el usuario:', error);
@@ -22,7 +20,7 @@ const DeleteUserDialog = ({ userId }: { userId: string }) => {
     <>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Trash2 className="h-4 w-4 text-gray-600 cursor-pointer" />
+          <Trash2 className="h-4 w-4 text-gray-600" />
         </AlertDialogTrigger>
         <AlertDialogContent>
           <div className='flex '>
@@ -33,7 +31,6 @@ const DeleteUserDialog = ({ userId }: { userId: string }) => {
               ¿Está seguro de que desea eliminar este cliente?
             </AlertDialogDescription>
           </AlertDialogHeader>
-
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>

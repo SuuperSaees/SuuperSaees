@@ -27,6 +27,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@kit/ui/dropdown-menu"
+import { useTranslation } from 'react-i18next';
 
 const formSchema = z.object({
     id: z.string(),
@@ -53,7 +54,8 @@ type CreateClientProps = {
 
 
 const UpdateClientDialog = ( { id, created_at, name, client_organization, email, role, propietary_organization, propietary_organization_id }: CreateClientProps ) => {
-    const [selectedRole, setSelectedRole] = useState("");
+    const [selectedRole, setSelectedRole] = useState(role);
+    const { t } = useTranslation('clients');
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -73,7 +75,6 @@ const UpdateClientDialog = ( { id, created_at, name, client_organization, email,
             ...values,
             picture_url: null
         })
-        alert('Usuario actualizado correctamente.');
         window.location.reload();
       }
 
@@ -90,10 +91,13 @@ const UpdateClientDialog = ( { id, created_at, name, client_organization, email,
           <Pen className="h-4 w-4 text-gray-600 cursor-pointer" />
         </AlertDialogTrigger>
         <AlertDialogContent>
-          <div className='flex '>
+        <div className='flex justify-between w-full items-center'>
           <AlertDialogHeader>
-            <AlertDialogTitle>Actualizar cliente</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("updateClient")}
+              </AlertDialogTitle>
           </AlertDialogHeader>
+          <AlertDialogCancel className="text-red-500 hover:text-red-700 font-bold">X</AlertDialogCancel>
           </div>
           <AlertDialogDescription>
             <Form {...form}>
@@ -103,9 +107,9 @@ const UpdateClientDialog = ( { id, created_at, name, client_organization, email,
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Nombre</FormLabel>
+                        <FormLabel>{t("clientName")}</FormLabel>
                         <FormControl>
-                            <Input placeholder="Ingresa su nombre" {...field} />
+                            <Input placeholder={t("nameLabel")} {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -116,7 +120,7 @@ const UpdateClientDialog = ( { id, created_at, name, client_organization, email,
                     name="email"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Correo </FormLabel>
+                        <FormLabel>{t("clientEmail")}</FormLabel>
                         <FormControl>
                             <Input placeholder="Ingresa su correo electrónico" {...field} />
                         </FormControl>
@@ -129,7 +133,7 @@ const UpdateClientDialog = ( { id, created_at, name, client_organization, email,
                     name="client_organization"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Nombre de la organización</FormLabel>
+                        <FormLabel>{t("organizationName")}</FormLabel>
                         <FormControl>
                             <Input placeholder="Ingresa el nombre de su organización" {...field} />
                         </FormControl>
@@ -142,7 +146,7 @@ const UpdateClientDialog = ( { id, created_at, name, client_organization, email,
                     name="role"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Selecciona su rol</FormLabel>
+                        <FormLabel>{t("roleSelection")}</FormLabel>
                         <FormControl>
                             <Input className='hidden' {...field} value={selectedRole} />
                         </FormControl>
@@ -151,21 +155,23 @@ const UpdateClientDialog = ( { id, created_at, name, client_organization, email,
                     )}
                     />
                     <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{selectedRole || role}</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                        <DropdownMenuLabel>Selecciona un rol</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => handleRoleSelect("Miembro")}>
-                            Miembro
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleRoleSelect("Líder")}>
-                            Líder
-                        </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                    </DropdownMenuContent>
+                      <DropdownMenuTrigger asChild>
+                          <Button variant="outline">
+                              {selectedRole ? t(selectedRole) : t("role")}
+                          </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56">
+                          <DropdownMenuLabel>{t("roleSelection")}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                              <DropdownMenuItem onClick={() => handleRoleSelect("member")}>
+                                  {t("member")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleRoleSelect("leader")}>
+                                  {t("leader")}
+                              </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                      </DropdownMenuContent>
                     </DropdownMenu>
                     <Separator/>
                     <Button type="submit" className='w-full '>Actualizar cliente</Button>
