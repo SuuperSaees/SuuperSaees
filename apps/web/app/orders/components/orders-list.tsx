@@ -1,7 +1,6 @@
 "use client"
 
-import Image from "next/image"
-import Link from "next/link"
+
 import {
   File,
   Home,
@@ -18,7 +17,6 @@ import {
   Users2,
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@kit/ui/avatar"
-
 import { Button } from "@kit/ui/button"
 import {
   Card,
@@ -62,21 +60,45 @@ import {
   TabsTrigger,
 } from "@kit/ui/tabs"
 import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-  } from "../../../../../packages/ui/src/shadcn/pagination"
-
-  import { PaginationDefaultOptions } from "@tanstack/react-table"
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../../../../../packages/ui/src/shadcn/pagination"
+import { PaginationDefaultOptions } from "@tanstack/react-table"
 import { cn } from "@kit/ui/utils"
 import { date } from "zod"
-import React from "react"
+import React, { useState } from "react"
+import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
+import { useTranslation } from 'react-i18next';
 
-export function OrderList() {
+type OrdersTableProps = {
+  orders: {
+    id: string;
+    created_at: string;
+    title: string;
+    description: string | null;
+    customer_id: string;
+    status: string;
+    assigned_to: string[] | null;
+    due_date: string | null;
+    propietary_organization_id: string;
+    customer_name: string | null;
+    customer_organization: string | null;
+  }[];
+}
+
+export function OrderList({ orders }: OrdersTableProps) {
+  const { t } = useTranslation('orders');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredOrders = orders.filter(order => 
+    order.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">    
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
@@ -84,9 +106,9 @@ export function OrderList() {
           <Tabs defaultValue="open">
             <div className="flex items-center">
               <TabsList>
-                <TabsTrigger value="open">Abiertos</TabsTrigger>
-                <TabsTrigger value="completed">Completados</TabsTrigger>
-                <TabsTrigger value="all">Todos</TabsTrigger>
+                <TabsTrigger value="open">{t("openOrders")}</TabsTrigger>
+                <TabsTrigger value="completed">{t("completedOrders")}</TabsTrigger>
+                <TabsTrigger value="all">{t("allOrders")}</TabsTrigger>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-7 gap-1">
@@ -110,14 +132,16 @@ export function OrderList() {
                 </DropdownMenu>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
-              <div className="relative ml-auto flex-1 md:grow-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-            />
-          </div>
+                <div className="relative ml-auto flex-1 md:grow-0">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Buscar..."
+                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
             <TabsContent value="open">
@@ -126,156 +150,344 @@ export function OrderList() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Titulo</TableHead>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Cliente</TableHead>
+                        <TableHead>{t("titleLabel")}</TableHead>
+                        <TableHead>{t("idLabel")}</TableHead>
+                        <TableHead>{t("clientLabel")}</TableHead>
                         <TableHead className="hidden md:table-cell">
-                          Estado
+                          {t("statusLabel")}
                         </TableHead>
                         <TableHead className="hidden md:table-cell">
-                          Asignado a
+                          {t("assignedToLabel")}
                         </TableHead>
                         <TableHead className="hidden md:table-cell">
-                          Prioridad
-                        </TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          Última actualización
-                        </TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          Fecha de vencimiento
+                          {t("dueDateLabel")}
                         </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell className="">
-                        <span className="font-medium block">Pedido 29 - Diseño volantes QR</span>
-                        <span className="text-sm block">Diseño para Redes Sociales</span>
-                        </TableCell>
-                        <TableCell>
-                        <span className="text-sm block">#1988</span>
-                        </TableCell>
-                        <TableCell>
-                        <span className="font-medium block">Marcela Baquero</span>
-                        <span className="text-sm block">Estudio Ocho</span>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <DropdownMenu>
-                          <DropdownMenuTrigger className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg flex items-center inline-flex"><span  className="pl-2 pr-2">En revisión</span><ChevronDownIcon className="flex items-center"></ChevronDownIcon></DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg">En revisión</DropdownMenuItem>
-                              <DropdownMenuItem className="bg-brand-100 text-brand-700 p-2 m-2 rounded-lg">En progreso</DropdownMenuItem>
-                              <DropdownMenuItem className="bg-yellow-100 text-yellow-700 p-2 m-2 rounded-lg">Esperando respuesta</DropdownMenuItem>
-                              <DropdownMenuItem className="bg-success-100 text-success-700 p-2 m-2 rounded-lg">Completado</DropdownMenuItem>
-                              <DropdownMenuItem className="bg-error-100 text-error-700 p-2 m-2 rounded-lg">En pausa</DropdownMenuItem>
-                              <DropdownMenuItem className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg">En cola</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                        <div className="flex -space-x-1">
-                            <Avatar className="w-6 h-6 border-2 border-white max-w-6 max-h-6">
-                            <AvatarImage src="https://github.com/shadcn.png" className="w-6 h-6 max-w-6 max-h-6" />
-                            <AvatarFallback>CN</AvatarFallback>
-                            </Avatar>
-                            <Avatar className="w-6 h-6 border-2 border-white">
-                            <AvatarImage src="https://github.com/shadcn.png" className="w-full h-full" />
-                            <AvatarFallback>CN</AvatarFallback>
-                            </Avatar>
-                            <Avatar className="w-6 h-6 border-2 border-white">
-                            <AvatarFallback>+5</AvatarFallback>
-                            </Avatar>
-                        </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg flex items-center inline-flex"><CircleIcon className="pl-2 w-2 h-2 bg-gray-700 rounded-full"></CircleIcon> <span className="pl-2 pr-2">Ninguna</span><ChevronDownIcon className="flex items-center"></ChevronDownIcon></DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem className="bg-error-100 text-error-700 p-2 m-2 rounded-lg flex items-center"> <CircleIcon className="pl-2 w-2 h-2 bg-error-700 rounded-full"></CircleIcon> <span className="pl-2">Alta</span></DropdownMenuItem>
-                              <DropdownMenuItem className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg flex items-center"><CircleIcon className="pl-2 w-2 h-2 bg-warning-700 rounded-full"></CircleIcon> <span className="pl-2">Media</span></DropdownMenuItem>
-                              <DropdownMenuItem className="bg-success-100 text-success-700 p-2 m-2 rounded-lg flex items-center"><CircleIcon className="pl-2 w-2 h-2 bg-success-700 rounded-full"></CircleIcon> <span className="pl-2">Baja</span></DropdownMenuItem>
-                              <DropdownMenuItem className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg flex items-center"><CircleIcon className="pl-2 w-2 h-2 bg-gray-700 rounded-full"></CircleIcon> <span className="pl-2">Ninguna</span></DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          2023-07-12 10:42 AM
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                            <DatePickerDemo></DatePickerDemo>
-                        </TableCell>
-                      </TableRow>
+                      {filteredOrders
+                        .filter(order => order.status !== 'completed' && order.status !== 'closed')
+                        .map((order) => (
+                          <TableRow key={order.id}>
+                            <TableCell className="">
+                              <span className="font-medium block">{order.title}</span>
+                              <span className="text-sm block">{order.description || 'Sin descripción'}</span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm block">#{order.id}</span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="font-medium block">{order.customer_name || 'Sin nombre'}</span>
+                              <span className="text-sm block">{order.customer_organization || 'Sin organización'}</span>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg flex items-center inline-flex">
+                                  <span className="pl-2 pr-2">{order.status}</span>
+                                  <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg">
+                                    En revisión
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-brand-100 text-brand-700 p-2 m-2 rounded-lg">
+                                    En progreso
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-yellow-100 text-yellow-700 p-2 m-2 rounded-lg">
+                                    Esperando respuesta
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-success-100 text-success-700 p-2 m-2 rounded-lg">
+                                    Completado
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-error-100 text-error-700 p-2 m-2 rounded-lg">
+                                    En pausa
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg">
+                                    En cola
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <div className="flex -space-x-1">
+                                {order.assigned_to?.map((assignee) => (
+                                  <Avatar key={assignee} className="w-6 h-6 border-2 border-white max-w-6 max-h-6">
+                                    <AvatarFallback>{assignee.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <DatePicker {...order} />
+                            </TableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 </CardContent>
                 <CardFooter>
-                <Pagination>
-        <PaginationContent>
-        <div className="space-between flex flex-row justify-between w-full">
-  <div>
-    <PaginationItem>
-      <PaginationPrevious href="#" />
-      <PaginationNext href="#" />
-    </PaginationItem>
-  </div>
-  <div className="flex flex-row gap-1">
-    <PaginationItem>
-      <PaginationLink href="#">1</PaginationLink>
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationLink href="#" isActive>
-        2
-      </PaginationLink>
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationLink href="#">3</PaginationLink>
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationEllipsis />
-    </PaginationItem>
-  </div>
-</div>
-
-        </PaginationContent>
-      </Pagination>
+                  <Pagination>
+                    <PaginationContent>
+                      <div className="space-between flex flex-row justify-between w-full">
+                        <div>
+                          <PaginationItem>
+                            <PaginationPrevious href="#" />
+                            <PaginationNext href="#" />
+                          </PaginationItem>
+                        </div>
+                        <div className="flex flex-row">
+                          <PaginationItem>
+                            <PaginationLink href="#">1</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">2</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">3</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">10</PaginationLink>
+                          </PaginationItem>
+                        </div>
+                      </div>
+                    </PaginationContent>
+                  </Pagination>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            <TabsContent value="completed">
+              <Card x-chunk="dashboard-06-chunk-0">
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("titleLabel")}</TableHead>
+                        <TableHead>{t("idLabel")}</TableHead>
+                        <TableHead>{t("clientLabel")}</TableHead>
+                        <TableHead className="hidden md:table-cell">
+                          {t("statusLabel")}
+                        </TableHead>
+                        <TableHead className="hidden md:table-cell">
+                          {t("assignedToLabel")}
+                        </TableHead>
+                        <TableHead className="hidden md:table-cell">
+                          {t("dueDateLabel")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredOrders
+                        .filter(order => order.status === 'completed' || order.status === 'closed')
+                        .map((order) => (
+                          <TableRow key={order.id}>
+                            <TableCell className="">
+                              <span className="font-medium block">{order.title}</span>
+                              <span className="text-sm block">{order.description || 'Sin descripción'}</span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm block">#{order.id}</span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="font-medium block">{order.customer_name || 'Sin nombre'}</span>
+                              <span className="text-sm block">{order.customer_organization || 'Sin organización'}</span>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg flex items-center inline-flex">
+                                  <span className="pl-2 pr-2">{order.status}</span>
+                                  <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg">
+                                    En revisión
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-brand-100 text-brand-700 p-2 m-2 rounded-lg">
+                                    En progreso
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-yellow-100 text-yellow-700 p-2 m-2 rounded-lg">
+                                    Esperando respuesta
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-success-100 text-success-700 p-2 m-2 rounded-lg">
+                                    Completado
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-error-100 text-error-700 p-2 m-2 rounded-lg">
+                                    En pausa
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg">
+                                    En cola
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <div className="flex -space-x-1">
+                                {order.assigned_to?.map((assignee) => (
+                                  <Avatar key={assignee} className="w-6 h-6 border-2 border-white max-w-6 max-h-6">
+                                    <AvatarFallback>{assignee.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <DatePicker {...order} />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+                <CardFooter>
+                  <Pagination>
+                    <PaginationContent>
+                      <div className="space-between flex flex-row justify-between w-full">
+                        <div>
+                          <PaginationItem>
+                            <PaginationPrevious href="#" />
+                            <PaginationNext href="#" />
+                          </PaginationItem>
+                        </div>
+                        <div className="flex flex-row">
+                          <PaginationItem>
+                            <PaginationLink href="#">1</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">2</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">3</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">10</PaginationLink>
+                          </PaginationItem>
+                        </div>
+                      </div>
+                    </PaginationContent>
+                  </Pagination>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            <TabsContent value="all">
+              <Card x-chunk="dashboard-06-chunk-0">
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("titleLabel")}</TableHead>
+                        <TableHead>{t("idLabel")}</TableHead>
+                        <TableHead>{t("clientLabel")}</TableHead>
+                        <TableHead className="hidden md:table-cell">
+                          {t("statusLabel")}
+                        </TableHead>
+                        <TableHead className="hidden md:table-cell">
+                          {t("assignedToLabel")}
+                        </TableHead>
+                        <TableHead className="hidden md:table-cell">
+                          {t("dueDateLabel")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredOrders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="">
+                            <span className="font-medium block">{order.title}</span>
+                            <span className="text-sm block">{order.description || 'Sin descripción'}</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm block">#{order.id}</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-medium block">{order.customer_name || 'Sin nombre'}</span>
+                            <span className="text-sm block">{order.customer_organization || 'Sin organización'}</span>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg flex items-center inline-flex">
+                                <span className="pl-2 pr-2">{order.status}</span>
+                                <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg">
+                                  En revisión
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="bg-brand-100 text-brand-700 p-2 m-2 rounded-lg">
+                                  En progreso
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="bg-yellow-100 text-yellow-700 p-2 m-2 rounded-lg">
+                                  Esperando respuesta
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="bg-success-100 text-success-700 p-2 m-2 rounded-lg">
+                                  Completado
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="bg-error-100 text-error-700 p-2 m-2 rounded-lg">
+                                  En pausa
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg">
+                                  En cola
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <div className="flex -space-x-1">
+                              {order.assigned_to?.map((assignee) => (
+                                <Avatar key={assignee} className="w-6 h-6 border-2 border-white max-w-6 max-h-6">
+                                  <AvatarFallback>{assignee.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <DatePicker {...order} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+                <CardFooter>
+                  <Pagination>
+                    <PaginationContent>
+                      <div className="space-between flex flex-row justify-between w-full">
+                        <div>
+                          <PaginationItem>
+                            <PaginationPrevious href="#" />
+                            <PaginationNext href="#" />
+                          </PaginationItem>
+                        </div>
+                        <div className="flex flex-row">
+                          <PaginationItem>
+                            <PaginationLink href="#">1</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">2</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">3</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">10</PaginationLink>
+                          </PaginationItem>
+                        </div>
+                      </div>
+                    </PaginationContent>
+                  </Pagination>
                 </CardFooter>
               </Card>
             </TabsContent>
           </Tabs>
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
+
   )
 }
-
-
-
-  
-export function DatePickerDemo() {
-    const [date, setDate] = React.useState<Date>()
-   
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-[240px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>Selecciona una fecha</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={setDate}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
-    )
-  }

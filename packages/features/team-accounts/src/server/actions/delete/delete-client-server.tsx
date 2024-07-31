@@ -7,7 +7,6 @@ import { redirect } from 'next/navigation';
 export const deleteClient = async (userId: string) => {
   try {
     const client = getSupabaseServerComponentClient();
-    console.log('userId', userId);
     const { error } = await client
       .from('clients') // Asegúrate de que el nombre de la tabla sea correcto
       .delete()
