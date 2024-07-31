@@ -332,6 +332,7 @@ export type Database = {
           },
         ]
       }
+      // This is the schema of the table that contains the clients
       clients: {
         Row: {
           client_organization: string 

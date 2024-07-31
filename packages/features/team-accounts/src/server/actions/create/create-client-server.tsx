@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 // Define la función createClient
 export const createClient = async (clientData: {
     id?: string
-    created_at?: string | null
+    created_at?: string
     name: string
     picture_url: string | null
     client_organization: string

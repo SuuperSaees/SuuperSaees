@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@kit/ui/alert-dialog'; 
 import { createClient } from './create-client-server';
 import { Button } from '@kit/ui/button';
@@ -26,6 +26,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@kit/ui/dropdown-menu"
+import { useTranslation } from 'react-i18next';
 
 const formSchema = z.object({
     name: z.string().min(2).max(50),
@@ -39,22 +40,10 @@ type CreateClientProps = {
     propietary_organization_id: string;
 }
 
-type ExpectedFormValues = {
-    id?: string | null
-    created_at?: string | null
-    name: string
-    picture_url: string | null
-    client_organization: string
-    email: string
-    role: string
-    propietary_organization: string
-    propietary_organization_id: string
-}
-
-
 
 const CreateClientDialog = ( { propietary_organization, propietary_organization_id }: CreateClientProps ) => {
     const [selectedRole, setSelectedRole] = useState("");
+    const { t } = useTranslation('clients');
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -72,7 +61,6 @@ const CreateClientDialog = ( { propietary_organization, propietary_organization_
             propietary_organization,
             propietary_organization_id
         })
-        alert('Usuario creado correctamente');
         window.location.reload();
       }
 
@@ -80,20 +68,24 @@ const CreateClientDialog = ( { propietary_organization, propietary_organization_
         setSelectedRole(role);
         form.setValue("role", role);
       }
+      
 
   return (
     <>
       <AlertDialog>
         <AlertDialogTrigger asChild>
         <Button>
-          Crear cliente
+          {t("createClient")}
         </Button>
         </AlertDialogTrigger>
-        <AlertDialogContent>
-          <div className='flex '>
+        <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+          <div className='flex justify-between w-full items-center'>
           <AlertDialogHeader>
-            <AlertDialogTitle>Crear cliente</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("createClient")} 
+              </AlertDialogTitle>
           </AlertDialogHeader>
+          <AlertDialogCancel className="text-red-500 hover:text-red-700 font-bold">X</AlertDialogCancel>
           </div>
           <AlertDialogDescription>
             <Form {...form}>
@@ -103,9 +95,9 @@ const CreateClientDialog = ( { propietary_organization, propietary_organization_
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Nombre</FormLabel>
+                        <FormLabel>{t("clientName")}</FormLabel>
                         <FormControl>
-                            <Input placeholder="Ingresa su nombre" {...field} />
+                            <Input placeholder={t("nameLabel")} {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -116,9 +108,9 @@ const CreateClientDialog = ( { propietary_organization, propietary_organization_
                     name="email"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Correo </FormLabel>
+                        <FormLabel>{t("clientEmail")}</FormLabel>
                         <FormControl>
-                            <Input placeholder="Ingresa su correo electrónico" {...field} />
+                            <Input placeholder={t("emailLabel")} {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -129,9 +121,9 @@ const CreateClientDialog = ( { propietary_organization, propietary_organization_
                     name="client_organization"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Nombre de la organización</FormLabel>
+                        <FormLabel>{t("organizationName")}</FormLabel>
                         <FormControl>
-                            <Input placeholder="Ingresa el nombre de su organización" {...field} />
+                            <Input placeholder={t("organizationLabelInput")} {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -142,7 +134,7 @@ const CreateClientDialog = ( { propietary_organization, propietary_organization_
                     name="role"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Selecciona su rol</FormLabel>
+                        <FormLabel>{t("roleSelection")}</FormLabel>
                         <FormControl>
                             <Input className='hidden' {...field} value={selectedRole} />
                         </FormControl>
@@ -151,22 +143,23 @@ const CreateClientDialog = ( { propietary_organization, propietary_organization_
                     )}
                     />
                     <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        {/* <Button variant="outline">Rol</Button> */}
-                        <Button variant="outline">{selectedRole || "Rol"}</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                        <DropdownMenuLabel>Selecciona un rol</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => handleRoleSelect("Miembro")}>
-                            Miembro
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleRoleSelect("Líder")}>
-                            Líder
-                        </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                    </DropdownMenuContent>
+                      <DropdownMenuTrigger asChild>
+                          <Button variant="outline">
+                              {selectedRole ? t(selectedRole) : t("role")}
+                          </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56">
+                          <DropdownMenuLabel>{t("roleSelection")}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                              <DropdownMenuItem onClick={() => handleRoleSelect("member")}>
+                                  {t("member")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleRoleSelect("leader")}>
+                                  {t("leader")}
+                              </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                      </DropdownMenuContent>
                     </DropdownMenu>
                     <Separator/>
                     <Button type="submit" className='w-full '>Crear cliente</Button>

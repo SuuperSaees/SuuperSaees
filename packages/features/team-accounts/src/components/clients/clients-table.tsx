@@ -33,6 +33,8 @@ import {
 import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/delete/delete-client';
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/create/create-client';
 import UpdateClientDialog from '../../server/actions/update/update-client';
+import { useTranslation } from 'react-i18next';
+
 
 const getUniqueOrganizations = (clients: Client[]) => {
   const organizationMap = new Map<string, Client>();
@@ -42,7 +44,7 @@ const getUniqueOrganizations = (clients: Client[]) => {
       organizationMap.set(client.client_organization, client);
     } else {
       const existingClient = organizationMap.get(client.client_organization);
-      if (client.role === 'Líder') {
+      if (client.role === 'leader') {
         organizationMap.set(client.client_organization, client);
       }
     }
@@ -63,7 +65,11 @@ type ClientsTableProps = {
     propietary_organization_id: string;
     picture_url: string | null;
   }[];
+  accountIds: string[];
+  accountNames: string[];
+
 }
+
 
 type Client = {
   id: string;
@@ -78,11 +84,12 @@ type Client = {
 }
 
 
+
 // CLIENTS TABLE
-export const clientColumns: ColumnDef<Client>[] = [
+  const clientColumns = (t: any): ColumnDef<Client>[] => [
   {
     accessorKey: "name",
-    header: "Nombre",
+    header: t('clientName'),
     cell: ({ row }) => (
       <span className={'flex items-center space-x-4 text-left'}>
         <span>
@@ -97,14 +104,19 @@ export const clientColumns: ColumnDef<Client>[] = [
   },
   {
     accessorKey: "role",
-    header: "Rol",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("role")}</div>
-    ),
+    header: t("role"),
+    cell: ({ row }) => {
+      const role = row.getValue("role");
+      return (
+        <div className="capitalize">
+          {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "client_organization",
-    header: "Organización",
+    header: t("organization"),
     cell: ({ row }) => (
       <div className="capitalize">{row.getValue("client_organization")}</div>
     ),
@@ -119,7 +131,7 @@ export const clientColumns: ColumnDef<Client>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             <div className='flex justify-between items-center'>
-              <span>Último inicio de sesión</span>
+              <span>{t("lastLogin")}</span>
               <ArrowDown className="h-4 w-4 ml-2" />
             </div>
           </Button>
@@ -152,7 +164,7 @@ export const clientColumns: ColumnDef<Client>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             <div className='flex justify-between items-center'>
-              <span>Creado en</span>
+              <span>{t("createdAt")}</span>
               <ArrowUp className="h-4 w-4 ml-2" />
             </div>
           </Button>
@@ -177,7 +189,7 @@ export const clientColumns: ColumnDef<Client>[] = [
   },
   {
     id: "actions",
-    header: "Acciones",
+    header: t("actions"),
     enableHiding: false,
     cell: ({ row }) => {
       const client = row.original
@@ -192,10 +204,11 @@ export const clientColumns: ColumnDef<Client>[] = [
   },
 ]
 
-export const organizationColumns: ColumnDef<Client>[] = [
+// ORGANIZATIONS TABLE
+  const organizationColumns = (t: any): ColumnDef<Client>[] => [
   {
     accessorKey: "client_organization",
-    header: "Nombre de la organización",
+    header: t("organizationName"),
     cell: ({ row }) => (
       <span className={'flex items-center space-x-4 text-left'}>
         <span>
@@ -203,14 +216,16 @@ export const organizationColumns: ColumnDef<Client>[] = [
         </span>
         <div className='flex flex-col'>
           <span className='text-gray-900 text-sm font-medium leading-[1.42857]'>{row.original.client_organization}</span>
-          <span className='text-gray-600 text-sm font-normal leading-[1.42857]'>Líder: {row.original.name}</span>
+          <span className='text-gray-600 text-sm font-normal leading-[1.42857]'>
+            {t('leader')}: {row.original.name}
+          </span>
         </div>
       </span>
     ),
-  },
+},
   {
-    accessorKey: "role",
-    header: "Miembros",
+    accessorKey: "members",
+    header: t("organizationMembers"),
     cell: ({ row }) => (
       <div className='flex'>
         <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
@@ -226,7 +241,7 @@ export const organizationColumns: ColumnDef<Client>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <div className='flex justify-between items-center'>
-            <span>Creado en</span>
+            <span>{t("createdAt")}</span>
             <ArrowUp className="h-4 w-4 ml-2" />
           </div>
         </Button>
@@ -249,7 +264,7 @@ export const organizationColumns: ColumnDef<Client>[] = [
   },
   {
     id: "actions",
-    header: "Acciones",
+    header: t("actions"),
     enableHiding: false,
     cell: ({ row }) => {
       const client = row.original;
@@ -263,7 +278,8 @@ export const organizationColumns: ColumnDef<Client>[] = [
   },
 ];
 
-export function ClientsTable({ clients }: ClientsTableProps) {
+export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTableProps) {
+  const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clientes' | 'organizaciones'>('clientes');
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -271,7 +287,9 @@ export function ClientsTable({ clients }: ClientsTableProps) {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const uniqueClients = useMemo(() => getUniqueOrganizations(clients), [clients]);
-  const columns = activeButton === 'clientes' ? clientColumns : organizationColumns;
+  const columns = useMemo<ColumnDef<Client>[]>(() => activeButton === 'clientes' ? clientColumns(t) : organizationColumns(t), [t, activeButton]);
+  
+  
 
   const table = useReactTable({
     data: activeButton === 'organizaciones' ? uniqueClients : clients,
@@ -292,7 +310,11 @@ export function ClientsTable({ clients }: ClientsTableProps) {
     },
   });
 
+  const importantPropietaryOrganization = accountNames[0];
+  const importantPropietaryOrganizationId = accountIds[0];
+
   const firstClient = clients[0];
+
   const handleButtonClick = (button: 'clientes' | 'organizaciones') => {
     setActiveButton(button);
     if (button === 'clientes') {
@@ -340,7 +362,8 @@ export function ClientsTable({ clients }: ClientsTableProps) {
               className="pl-10"
             />
           </div>
-          <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/>
+          {/* <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/> */}
+          <CreateClientDialog propietary_organization={importantPropietaryOrganization ?? ''} propietary_organization_id={importantPropietaryOrganizationId ?? ''}/>
         </div>
       </div>
       <Separator />
@@ -394,15 +417,34 @@ export function ClientsTable({ clients }: ClientsTableProps) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex justify-between items-center mt-4">
-        <Pagination className="w-full">
-          <PaginationPrevious href="#" className="mr-auto" />
-          <div>
-            <span className="text-sm font-semibold">{table.getPageCount()}</span>
+       <div className="flex items-center justify-between px-2 py-4">
+          <div className="flex items-center gap-2">
+            <PaginationPrevious
+              onClick={() => table.previousPage()}
+              isActive={table.getCanPreviousPage()}
+            >
+              {t('previous')}
+            </PaginationPrevious>
+
+            <span className="text-sm font-medium">
+              {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+            </span>
+
+            <PaginationNext
+              onClick={() => {
+                if (table.getCanNextPage()) {
+                  table.nextPage();
+                }
+              }}
+              isActive={table.getCanNextPage()}
+              className={`${
+                !table.getCanNextPage() ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {t('next')}
+            </PaginationNext>
           </div>
-          <PaginationNext href="#" className="ml-auto" />
-        </Pagination>
-      </div>
+        </div>
     </div>
   );
 }

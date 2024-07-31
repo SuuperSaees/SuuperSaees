@@ -7,6 +7,7 @@ import {
 import { Button } from '@kit/ui/button';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { BellIcon } from 'lucide-react';
+import { PageBody } from '@kit/ui/page';
 
 
 export const generateMetadata = async () => {
@@ -25,46 +26,53 @@ export const generateMetadata = async () => {
     )
     
     const client = getSupabaseServerComponentClient();
-
     const { data: userData } = await client.auth.getUser();
 
+    const { data: accountsData} = await client.from('accounts').select().eq('primary_owner_user_id', userData.user!.id);
+
+    const filteredAccounts = accountsData?.filter(account => account.id !== userData.user!.id);
+
+    const accountIds = filteredAccounts?.map(account => account.primary_owner_user_id) || []; 
+
+    const accountNames = filteredAccounts?.map(account => account.name) || [];
 
     const { data: dataClients} = await client
     .from('clients')
     .select()
     .eq('propietary_organization_id', userData.user!.id);
 
-
     return (
-      
-      <div className='p-[35px]'>
-        <div className="flex justify-between items-center mb-[32px]">
-            <div className="flex-grow">
-                <span>
-                <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
-                  <Trans i18nKey={'clients:client'} />
+      <PageBody>
+        <div className='p-[35px]'>
+            <div className="flex justify-between items-center mb-[32px]">
+                <div className="flex-grow">
+                    <span>
+                    <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
+                      <Trans i18nKey={'clients:client'} />
+                    </div>
+                    </span>
                 </div>
-                </span>
+                <div className="flex space-x-4">
+                    <span>
+                        <Button variant="outline">
+                            Tu prueba gratuita termina en xx dias
+                        </Button>
+                    </span>
+                    <span>
+                        <Button variant="outline" size="icon">
+                            <BellIcon className="h-4 w-4" />
+                        </Button>
+                    </span>
+                </div>
             </div>
-            <div className="flex space-x-4">
-                <span>
-                    <Button variant="outline">
-                        Tu prueba gratuita termina en xx dias
-                    </Button>
-                </span>
-                <span>
-                    <Button variant="outline" size="icon">
-                        <BellIcon className="h-4 w-4" />
-                    </Button>
-                </span>
-            </div>
+            {dataClients ? (
+                    <ClientsTable clients={dataClients} accountIds={accountIds} accountNames={accountNames}  />
+                ) : (
+                    <p>No clients available</p>
+                )}
         </div>
-        {dataClients ? (
-                <ClientsTable clients={dataClients} />
-            ) : (
-                <p>No clients available</p>
-            )}
-    </div>
+      </PageBody>
+      
     );
   }
   
