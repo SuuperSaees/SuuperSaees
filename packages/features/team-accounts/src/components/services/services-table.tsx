@@ -23,7 +23,7 @@ import {
 } from "@kit/ui/table"
 import { Input } from '@kit/ui/input';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
-import { Search, Pen, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Pen, ArrowUp, ArrowDown, Link2 } from 'lucide-react';
 import { Separator } from '@kit/ui/separator';
 import {
   Pagination,
@@ -138,6 +138,7 @@ type Service = {
  
       return (
         <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
+          <Link2 className='h-6 w-6 text-gray-500' />
           <UpdateServiceDialog {...service} />
           <DeleteserviceDialog serviceId={service.id}/>
         </div>
@@ -154,8 +155,6 @@ export function ServicesTable({ services,  accountIds, accountNames  }: Services
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-//   const uniqueClients = useMemo(() => getUniqueOrganizations(clients), [clients]);
-//   const columns = useMemo<ColumnDef<Client>[]>(() => activeButton === 'clientes' ? clientColumns(t) : organizationColumns(t), [t, activeButton]);
   const columns =  useMemo<ColumnDef<Service>[]>(() => servicesColumns(t), [t]);
   
 
@@ -178,9 +177,7 @@ export function ServicesTable({ services,  accountIds, accountNames  }: Services
     },
   });
 
-  const importantPropietaryOrganization = accountNames[0];
   const importantPropietaryOrganizationId = accountIds[0];
-
 
   return (
     <div className="w-full">
