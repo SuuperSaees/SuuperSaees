@@ -30,9 +30,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
-import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/delete/delete-client';
-import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/create/create-client';
-import UpdateClientDialog from '../../server/actions/update/update-client';
+import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/delete/delete-client';
+import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
+import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 import { useTranslation } from 'react-i18next';
 
 
