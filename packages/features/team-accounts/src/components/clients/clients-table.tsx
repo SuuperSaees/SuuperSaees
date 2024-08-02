@@ -313,8 +313,6 @@ export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTab
   const importantPropietaryOrganization = accountNames[0];
   const importantPropietaryOrganizationId = accountIds[0];
 
-  const firstClient = clients[0];
-
   const handleButtonClick = (button: 'clientes' | 'organizaciones') => {
     setActiveButton(button);
     if (button === 'clientes') {
@@ -362,7 +360,6 @@ export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTab
               className="pl-10"
             />
           </div>
-          {/* <CreateClientDialog propietary_organization={firstClient?.propietary_organization ?? ''} propietary_organization_id={firstClient?.propietary_organization_id ?? ''}/> */}
           <CreateClientDialog propietary_organization={importantPropietaryOrganization ?? ''} propietary_organization_id={importantPropietaryOrganizationId ?? ''}/>
         </div>
       </div>

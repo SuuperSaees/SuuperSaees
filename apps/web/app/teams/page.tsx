@@ -61,68 +61,44 @@ type Account = {
 
     const client = getSupabaseServerComponentClient();
 
-    // Obtén el usuario autenticado directamente desde Supabase
     const { data: userData } = await client.auth.getUser();
 
-    // console.log('Usuario:', userData.user!.id);
-
-    // Obtener los datos del cliente desde la base de datos
     const { data, error } = await client
     .from('accounts')
     .select()
     .eq('primary_owner_user_id', userData.user!.id); 
-
-    // console.log('Data:', data);
 
     const { data: data2} = await client
     .from('accounts_memberships')
     .select()
     .eq('user_id', userData.user!.id); 
 
-    // console.log('Data:', data2);
-
     const account_role = data2!.length > 0 ? data2![0]?.account_role : null;
-
-    // console.log('Account Role:', account_role);
 
     const { data: data3} = await client
     .from('role_permissions')
     .select('permission')
     .eq('role', account_role!); 
 
-    // console.log('Role Permissions:', data23);
-
     const userPermissions = data3!.map(permission => permission.permission);
-
-    // console.log('User Permissions:', userPermissions);
     
-
     const { data: data4} = await client
     .from('roles')
     .select('hierarchy_level')
     .eq('name', account_role!);
 
-    // console.log('Role Hierarchy:', data4);
-
     const roleHierarchies = data4!.map(roleHierarchy => roleHierarchy.hierarchy_level);
-    // const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
     const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
-
-    console.log('Role Hierarchy:', roleHierarchies[0]);
 
     const filteredData = data ? data.filter(item => item.id !== userData.user!.id) : [];
 
     const accountData = filteredData.length > 0 ? filteredData[0] : {};
 
-    // Crear el objeto `account` con `permissions` y los datos filtrados
     const account = {
         ...(accountData as Account),
         permissions: userPermissions,
         role_hierarchy_level: roleHierarchyLevel,
     };
-
-    console.log('Account:', account);
-
 
     const slug = account.slug;
     

@@ -15,10 +15,8 @@ export const updateClient = async (clientData: {
     propietary_organization: string
     propietary_organization_id: string
 }) => {
-  console.log('clientData', clientData);
   try {
     const client = getSupabaseServerComponentClient();
-    console.log('clientData', clientData);
     const { error } = await client
       .from('clients')
       .update(clientData)

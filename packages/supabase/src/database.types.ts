@@ -369,6 +369,42 @@ export type Database = {
         }
         Relationships: []
       }
+      orders_v2: {
+        Row: {
+          id: string
+          created_at: string
+          title: string
+          description: string | null
+          customer_id: string
+          status: string
+          assigned_to: string[] | null
+          due_date: string | null
+          propietary_organization_id: string
+        }
+        Insert: {
+          id: string
+          created_at: string
+          title: string
+          description: string | null
+          customer_id: string
+          status: string
+          assigned_to: string[] | null
+          due_date: string | null
+          propietary_organization_id: string
+        }
+        Update: {
+          id: string
+          created_at: string
+          title: string
+          description: string | null
+          customer_id: string
+          status: string
+          assigned_to: string[] | null
+          due_date: string | null
+          propietary_organization_id: string
+        }
+        Relationships: []
+      }
       config: {
         Row: {
           billing_provider: Database["public"]["Enums"]["billing_provider"]
