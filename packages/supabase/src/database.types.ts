@@ -369,6 +369,7 @@ export type Database = {
         }
         Relationships: []
       }
+      // This is the schema of the table that contains the orders
       orders_v2: {
         Row: {
           id: string
@@ -401,6 +402,37 @@ export type Database = {
           status: string
           assigned_to: string[] | null
           due_date: string | null
+          propietary_organization_id: string
+        }
+        Relationships: []
+      }
+      // This is the schema that contains the services
+      services: {
+        Row: {
+          id: string
+          created_at: string
+          name: string 
+          price: number
+          number_of_clients: number
+          status: string
+          propietary_organization_id: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          name: string 
+          price: number
+          number_of_clients?: number
+          status?: string
+          propietary_organization_id: string
+        }
+        Update: {
+          id: string
+          created_at: string
+          name?: string 
+          price?: number
+          number_of_clients: number
+          status?: string
           propietary_organization_id: string
         }
         Relationships: []

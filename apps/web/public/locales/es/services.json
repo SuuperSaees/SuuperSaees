@@ -1,0 +1,23 @@
+{
+    "serviceTitle": "Servicios",
+    "name": "Nombre",
+    "price": "Precio",
+    "clients": "Clientes",
+    "status": "Estado",
+    "createdAt": "Creado en",
+    "actions": "Acciones",
+    "createService": "Crear servicio",
+    "serviceNameLabel": "Ingresa el nombre del servicio",
+    "serviceName": "Nombre",
+    "servicePrice": "Precio",
+    "servicepriceLabel": "Ingresa el precio del servicio",
+    "deleteService": "Eliminar servicio",
+    "deleteServiceDescription": "¿Está seguro de que desea eliminar este servicio?",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "updateService": "Actualizar servicio",
+    "statusSelection": "Selecciona el estado",
+    "active": "Activo",
+    "draft": "En borrador"
+}
+  
