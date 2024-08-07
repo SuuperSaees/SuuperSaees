@@ -1,4 +1,13 @@
-import { CreditCard, Home, Layers, Users, Wallet, Settings, SquareCheck } from 'lucide-react';
+import {
+  Briefcase,
+  CreditCard,
+  Home,
+  Layers,
+  Settings,
+  SquareCheck,
+  Users,
+  Wallet,
+} from 'lucide-react';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
@@ -25,15 +34,15 @@ const routes = [
     children: [
       {
         label: 'Clientes',
-        path: pathsConfig.app.clients
+        path: pathsConfig.app.clients,
       },
       {
         label: 'Equipo',
-        path: pathsConfig.app.teams
+        path: pathsConfig.app.teams,
       },
-    ]
+    ],
   },
-  
+
   {
     label: 'Servicios',
     path: pathsConfig.app.services,
@@ -48,6 +57,11 @@ const routes = [
     label: 'Configuraciones',
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
+  },
+  {
+    label: 'Briefs',
+    path: pathsConfig.app.briefs,
+    Icon: <Briefcase className={iconClasses} />,
   },
 ];
 
