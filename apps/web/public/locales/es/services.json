@@ -18,6 +18,18 @@
     "updateService": "Actualizar servicio",
     "statusSelection": "Selecciona el estado",
     "active": "Activo",
-    "draft": "En borrador"
+    "draft": "En borrador",
+    "step_type_of_service": "Tipo de servicio",
+    "step_service_details": "Detalles del servicio",
+    "step_service_price": "Configuración de precios",
+    "step_connect_briefs": "Conectar briefs",
+    "single_sale": "Venta única",
+    "single_sale_description": "Vende tus servicios con un único pago, ideal para proyectos puntuales que no requieren seguimiento continuo.",
+    "recurring_subscription": "Suscripción recurrente",
+    "recurring_subscription_description": "Vende tus servicios de manera continua con un pago mensual fijo, perfecto para necesidades regulares y predecibles.",
+    "next": "Siguiente",
+    "service_image": "Imagen del servicio",
+    "service_name": "Nombre del servicio",
+    "service_description": "Descripción del servicio"
 }
   

@@ -34,15 +34,17 @@ export const I18N_COOKIE_NAME = 'lang';
  * Add your own namespaces here
  **/
 export const defaultI18nNamespaces = [
-  'common',
-  'auth',
   'account',
-  'teams',
+  'auth',
   'billing',
-  'marketing',
-  'tasks',
   'chats',
-  'clients'
+  'clients',
+  'common',
+  'marketing',
+  'orders',
+  'services',
+  'tasks',
+  'teams',
 ];
 
 /**

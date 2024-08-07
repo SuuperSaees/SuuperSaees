@@ -43,7 +43,16 @@ async function UserHomePage() {
           .from('services')
           .select()
           .eq('propietary_organization_id', firstAccountId);
-        dataServices = data;
+        // dataServices = data;
+        dataServices = data?.map(service => ({
+          ...service,
+          id: String(service.id), // Convertir id de number a string
+          name: service.name ?? '', // Proveer un valor por defecto si es null
+          price: service.price ?? 0, // Proveer un valor por defecto si es null
+          number_of_clients: service.number_of_clients ?? 0, // Proveer un valor por defecto si es null
+          status: service.status ?? 'unknown', // Proveer un valor por defecto si es null
+          propietary_organization_id: service.propietary_organization_id ?? '', // Proveer un valor por defecto si es null
+        }));
       }
     }
   
