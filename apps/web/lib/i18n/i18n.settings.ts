@@ -37,6 +37,7 @@ export const defaultI18nNamespaces = [
   'account',
   'auth',
   'billing',
+  'briefs',
   'chats',
   'clients',
   'common',
