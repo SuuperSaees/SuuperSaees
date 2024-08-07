@@ -227,6 +227,27 @@ export type Database = {
           },
         ]
       }
+      briefs: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          propietary_organization_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          propietary_organization_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          propietary_organization_id?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           account_id: string
@@ -332,108 +353,39 @@ export type Database = {
           },
         ]
       }
-      // This is the schema of the table that contains the clients
       clients: {
         Row: {
-          client_organization: string 
+          client_organization: string | null
           created_at: string
-          email: string 
+          email: string | null
           id: string
-          name: string 
+          name: string | null
           picture_url: string | null
-          propietary_organization: string 
-          propietary_organization_id: string 
-          role: string 
+          propietary_organization: string | null
+          propietary_organization_id: string | null
+          role: string | null
         }
         Insert: {
-          client_organization?: string 
+          client_organization?: string | null
           created_at?: string
-          email?: string 
+          email?: string | null
           id?: string
-          name?: string 
+          name?: string | null
           picture_url?: string | null
-          propietary_organization?: string 
-          propietary_organization_id?: string 
-          role?: string 
+          propietary_organization?: string | null
+          propietary_organization_id?: string | null
+          role?: string | null
         }
         Update: {
-          client_organization?: string 
+          client_organization?: string | null
           created_at?: string
-          email?: string 
+          email?: string | null
           id?: string
-          name?: string 
+          name?: string | null
           picture_url?: string | null
-          propietary_organization?: string 
-          propietary_organization_id?: string 
-          role?: string 
-        }
-        Relationships: []
-      }
-      // This is the schema of the table that contains the orders
-      orders_v2: {
-        Row: {
-          id: string
-          created_at: string
-          title: string
-          description: string | null
-          customer_id: string
-          status: string
-          assigned_to: string[] | null
-          due_date: string | null
-          propietary_organization_id: string
-        }
-        Insert: {
-          id: string
-          created_at: string
-          title: string
-          description: string | null
-          customer_id: string
-          status: string
-          assigned_to: string[] | null
-          due_date: string | null
-          propietary_organization_id: string
-        }
-        Update: {
-          id: string
-          created_at: string
-          title: string
-          description: string | null
-          customer_id: string
-          status: string
-          assigned_to: string[] | null
-          due_date: string | null
-          propietary_organization_id: string
-        }
-        Relationships: []
-      }
-      // This is the schema that contains the services
-      services: {
-        Row: {
-          id: string
-          created_at: string
-          name: string 
-          price: number
-          number_of_clients: number
-          status: string
-          propietary_organization_id: string
-        }
-        Insert: {
-          id?: string
-          created_at?: string
-          name: string 
-          price: number
-          number_of_clients?: number
-          status?: string
-          propietary_organization_id: string
-        }
-        Update: {
-          id: string
-          created_at: string
-          name?: string 
-          price?: number
-          number_of_clients: number
-          status?: string
-          propietary_organization_id: string
+          propietary_organization?: string | null
+          propietary_organization_id?: string | null
+          role?: string | null
         }
         Relationships: []
       }
@@ -734,6 +686,42 @@ export type Database = {
           },
         ]
       }
+      orders_v2: {
+        Row: {
+          assigned_to: string[] | null
+          created_at: string
+          customer_id: string | null
+          description: string | null
+          due_date: string | null
+          id: number
+          propietary_organization_id: string | null
+          status: string | null
+          title: string | null
+        }
+        Insert: {
+          assigned_to?: string[] | null
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: number
+          propietary_organization_id?: string | null
+          status?: string | null
+          title?: string | null
+        }
+        Update: {
+          assigned_to?: string[] | null
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: number
+          propietary_organization_id?: string | null
+          status?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       plans: {
         Row: {
           name: string
@@ -790,6 +778,69 @@ export type Database = {
         Update: {
           hierarchy_level?: number
           name?: string
+        }
+        Relationships: []
+      }
+      service_briefs: {
+        Row: {
+          brief_id: string
+          created_at: string
+          service_id: number
+        }
+        Insert: {
+          brief_id?: string
+          created_at?: string
+          service_id?: number
+        }
+        Update: {
+          brief_id?: string
+          created_at?: string
+          service_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_briefs_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_briefs_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          created_at: string
+          id: number
+          name: string | null
+          number_of_clients: number | null
+          price: number | null
+          propietary_organization_id: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name?: string | null
+          number_of_clients?: number | null
+          price?: number | null
+          propietary_organization_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string | null
+          number_of_clients?: number | null
+          price?: number | null
+          propietary_organization_id?: string | null
+          status?: string | null
         }
         Relationships: []
       }
