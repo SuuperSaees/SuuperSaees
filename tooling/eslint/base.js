@@ -41,9 +41,11 @@ const config = {
             importNames: ['Trans'],
             message: 'Please use `@kit/ui/trans` instead',
           },
+          
         ],
       },
     ],
+    "@typescript-eslint/no-namespace": "off"
   },
   ignorePatterns: [
     '**/.eslintrc.cjs',

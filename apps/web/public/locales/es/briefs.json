@@ -1,0 +1,18 @@
+{
+    "briefTitle": "Brief",
+    "name": "Nombre",
+    "services": "Servicios conectados",
+    "createdAt": "Creado en",
+    "actions": "Acciones",
+    "createBrief": "Crear brief",
+    "briefNameLabel": "Ingresa el nombre del brief",
+    "briefName": "Nombre",
+    "deleteBrief": "Eliminar brief",
+    "deleteDescription": "¿Está seguro de que desea eliminar este brief?",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "updateBrief": "Actualizar brief",
+    "previous": "Anterior",
+    "next": "Siguiente"
+}
+  

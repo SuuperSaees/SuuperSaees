@@ -227,6 +227,27 @@ export type Database = {
           },
         ]
       }
+      briefs: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          propietary_organization_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          propietary_organization_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          propietary_organization_id?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           account_id: string
@@ -759,6 +780,39 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      service_briefs: {
+        Row: {
+          brief_id: string
+          created_at: string
+          service_id: number
+        }
+        Insert: {
+          brief_id?: string
+          created_at?: string
+          service_id?: number
+        }
+        Update: {
+          brief_id?: string
+          created_at?: string
+          service_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_briefs_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_briefs_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       services: {
         Row: {
