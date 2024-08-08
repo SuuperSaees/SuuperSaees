@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@kit/ui/alert-dialog';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel} from '@kit/ui/alert-dialog';
 import { Pen } from 'lucide-react';
 import { updateService } from './update-service-server';
 import { Button } from '@kit/ui/button';
@@ -28,57 +28,36 @@ import {
     DropdownMenuTrigger,
 } from "@kit/ui/dropdown-menu";
 import { useTranslation } from 'react-i18next';
+import { Service } from '../../../../../../../../apps/web/lib/services.types';
 
 const formSchema = z.object({
     id: z.number(),
     created_at: z.string(),
     name: z.string().min(2).max(50),
-    price: z.string().min(2).max(15),
-    number_of_clients: z.string(),
+    price: z.number().min(2).max(15),
+    number_of_clients: z.number(),
     status: z.string().min(2).max(20),
     propietary_organization_id: z.string(),
 });
 
-type CreateClientProps = {
-    id: string
-    created_at: string
-    name?: string 
-    price?: number
-    number_of_clients: number
-    status?: string
-    propietary_organization_id: string
+type UpdateServiceProps = {
+    id: number,
+    values: Service.Update
 };
 
-const UpdateServiceDialog = ({ id, created_at, name, price, number_of_clients, status, propietary_organization_id }: CreateClientProps) => {
+const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
     const { t } = useTranslation('services');
     const [selectedStatus, setSelectedStatus] = useState(status);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            id: parseFloat(id.toString()),
-            created_at: created_at,
-            name: name,
-            price: price!.toString(),
-            number_of_clients: number_of_clients!.toString(),
-            status: status,
-            propietary_organization_id: propietary_organization_id,
-        },
+        defaultValues: values,
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("onSubmit called"); // Asegúrate de que esta línea se imprima
-        console.log("Submitted values:", values); // Verifica los valores aquí
-
-        const priceAsNumber = parseFloat(values.price.toString());
-        const numberOfClientsAsNumber = parseFloat(values.number_of_clients.toString());
-        const idAsString = values.id.toString();
-        
-        await updateService({
-            ...values,
-            id: idAsString,
-            price: priceAsNumber,
-            number_of_clients: numberOfClientsAsNumber,
-        });
+        await updateService(
+            id,
+            values,
+    );
         window.location.reload();
     }
 

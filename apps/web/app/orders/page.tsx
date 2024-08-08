@@ -1,11 +1,6 @@
 import { PageBody } from '@kit/ui/page';
-import { Trans } from '@kit/ui/trans';
-
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-
-
-import { HomeAccountsList } from '~/home/(user)/_components/home-accounts-list';
 import { HomeLayoutPageHeader } from '~/home/(user)/_components/home-page-header';
 import { OrderList } from './components/orders-list';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
@@ -39,8 +34,8 @@ async function UserHomePage() {
     const client = clientsMap.get(order.customer_id);
     return {
       ...order,
-      customer_name: client?.name || null,
-      customer_organization: client?.client_organization || null,
+      customer_name: client?.name,
+      customer_organization: client?.client_organization,
     };
   });
 
