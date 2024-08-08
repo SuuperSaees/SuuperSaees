@@ -89,7 +89,7 @@ export function PersonalAccountSettingsContainer(
             </CardTitle>
 
             <CardDescription>
-              <Trans i18nKey={'account:languageDescription'} />
+              <Trans i18nKey={'account:languageDescription'} key={'s'}/>
             </CardDescription>
           </CardHeader>
 

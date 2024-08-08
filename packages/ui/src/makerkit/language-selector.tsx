@@ -58,7 +58,7 @@ export function LanguageSelector({
       </SelectTrigger>
 
       <SelectContent>
-        {locales.map((locale) => {
+        {locales.map((locale, idx) => {
           const label = capitalize(languageNames.of(locale) ?? locale);
 
           const option = {
@@ -67,7 +67,7 @@ export function LanguageSelector({
           };
 
           return (
-            <SelectItem value={option.value} key={option.value}>
+            <SelectItem value={option.value} key={option.value + idx}>
               {option.label}
             </SelectItem>
           );

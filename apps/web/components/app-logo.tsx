@@ -1,16 +1,13 @@
 import Link from 'next/link';
 
-import { cn } from '@kit/ui/utils';
 
 function LogoImage({
   className,
-  width = 105,
 }: {
   className?: string;
-  width?: number;
 }) {
   return (
-<svg xmlns="http://www.w3.org/2000/svg" width="194" height="43" viewBox="0 0 194 55" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="194" height="43" viewBox="0 0 194 55" fill="none" className={className}>
 <path d="M134.882 42.7612V20.4619H141.885L142.205 27.727L140.832 26.2992C141.229 25.1234 141.839 24.0595 142.663 23.1076C143.487 22.1557 144.463 21.3998 145.592 20.8399C146.752 20.28 147.957 20 149.208 20C149.757 20 150.261 20.042 150.718 20.126C151.207 20.182 151.634 20.28 152 20.4199L150.032 27.853C149.696 27.685 149.238 27.5451 148.659 27.4331C148.109 27.2931 147.53 27.2231 146.919 27.2231C146.248 27.2231 145.623 27.3351 145.043 27.5591C144.494 27.755 144.005 28.049 143.578 28.441C143.181 28.8329 142.861 29.2948 142.617 29.8268C142.403 30.3587 142.297 30.9606 142.297 31.6326V42.7612H134.882Z" fill="url(#paint0_linear_10160_1124)"/>
 <path d="M122.802 43.1811C120.117 43.1811 117.767 42.6912 115.753 41.7113C113.77 40.7314 112.229 39.3876 111.13 37.6798C110.063 35.944 109.529 33.9703 109.529 31.7585C109.529 30.0228 109.834 28.441 110.444 27.0131C111.054 25.5573 111.909 24.3115 113.007 23.2756C114.136 22.2397 115.448 21.4418 116.943 20.8819C118.469 20.294 120.132 20 121.932 20C123.641 20 125.197 20.28 126.601 20.8399C128.005 21.3998 129.225 22.1837 130.263 23.1916C131.3 24.1995 132.094 25.3893 132.643 26.7612C133.192 28.133 133.452 29.6308 133.421 31.2546L133.375 33.1024H114.06L112.961 29.2808H127.379L126.601 30.0368V29.1969C126.54 28.4969 126.296 27.895 125.869 27.3911C125.472 26.8591 124.938 26.4392 124.267 26.1312C123.626 25.8233 122.894 25.6693 122.07 25.6693C120.849 25.6693 119.812 25.8933 118.957 26.3412C118.133 26.7612 117.508 27.3771 117.081 28.189C116.654 29.0009 116.44 30.0088 116.44 31.2126C116.44 32.4165 116.715 33.4803 117.264 34.4042C117.844 35.3281 118.667 36.042 119.735 36.5459C120.834 37.0499 122.131 37.3018 123.626 37.3018C124.633 37.3018 125.548 37.1619 126.372 36.8819C127.196 36.6019 128.081 36.126 129.027 35.4541L132.46 39.9055C131.514 40.6334 130.507 41.2494 129.439 41.7533C128.371 42.2292 127.272 42.5792 126.143 42.8032C125.045 43.0551 123.931 43.1811 122.802 43.1811Z" fill="url(#paint1_linear_10160_1124)"/>
 <path d="M84.2994 52V20.4619H91.3023L91.6227 25.3753L90.2038 24.9974C90.3869 24.1015 90.8904 23.2896 91.7143 22.5617C92.5687 21.8058 93.6214 21.2038 94.8725 20.7559C96.1236 20.28 97.4509 20.042 98.8546 20.042C100.93 20.042 102.776 20.5319 104.393 21.5118C106.01 22.4917 107.276 23.8635 108.192 25.6273C109.138 27.3631 109.611 29.3648 109.611 31.6325C109.611 33.8443 109.138 35.818 108.192 37.5538C107.276 39.2896 105.995 40.6614 104.347 41.6693C102.73 42.6492 100.884 43.1391 98.8088 43.1391C97.4052 43.1391 96.0778 42.9011 94.8267 42.4252C93.5756 41.9213 92.5229 41.2774 91.6685 40.4934C90.8141 39.7095 90.2649 38.8557 90.0208 37.9318L91.7143 37.3018V52H84.2994Z" fill="url(#paint2_linear_10160_1124)"/>
@@ -24,8 +21,8 @@ function LogoImage({
 <path d="M86.1103 31.5792C92.0205 31.386 96.7626 27.0663 96.9747 21.6826C97.1868 27.0663 101.929 31.386 107.839 31.5792C101.929 31.7725 97.1868 36.0921 96.9747 41.4758C96.7626 36.0921 92.0205 31.7725 86.1103 31.5792Z" fill="url(#paint7_linear_10160_1124)"/>
 </g>
 <defs>
-<filter id="filter0_d_10160_1124" x="3.18284" y="0.721546" width="187.582" height="190.879" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<filter id="filter0_d_10160_1124" x="3.18284" y="0.721546" width="187.582" height="190.879" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+<feFlood floodOpacity="0" result="BackgroundImageFix"/>
 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
 <feMorphology radius="43.0545" operator="erode" in="SourceAlpha" result="effect1_dropShadow_10160_1124"/>
 <feOffset dy="64.5817"/>
@@ -35,8 +32,8 @@ function LogoImage({
 <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10160_1124"/>
 <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10160_1124" result="shape"/>
 </filter>
-<filter id="filter1_d_10160_1124" x="-1.80935" y="-1.49403" width="197.568" height="195.31" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<filter id="filter1_d_10160_1124" x="-1.80935" y="-1.49403" width="197.568" height="195.31" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+<feFlood floodOpacity="0" result="BackgroundImageFix"/>
 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
 <feMorphology radius="43.0545" operator="erode" in="SourceAlpha" result="effect1_dropShadow_10160_1124"/>
 <feOffset dy="64.5817"/>
@@ -47,36 +44,36 @@ function LogoImage({
 <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_10160_1124" result="shape"/>
 </filter>
 <linearGradient id="paint0_linear_10160_1124" x1="134.881" y1="42.761" x2="156.749" y2="26.3146" gradientUnits="userSpaceOnUse">
-<stop stop-color="#4300B1"/>
-<stop offset="1" stop-color="#A531DC"/>
+<stop stopColor="#4300B1"/>
+<stop offset="1" stopColor="#A531DC"/>
 </linearGradient>
 <linearGradient id="paint1_linear_10160_1124" x1="109.528" y1="43.181" x2="132.699" y2="19.2969" gradientUnits="userSpaceOnUse">
-<stop stop-color="#4300B1"/>
-<stop offset="1" stop-color="#A531DC"/>
+<stop stopColor="#4300B1"/>
+<stop offset="1" stopColor="#A531DC"/>
 </linearGradient>
 <linearGradient id="paint2_linear_10160_1124" x1="84.299" y1="51.9998" x2="115.408" y2="27.3611" gradientUnits="userSpaceOnUse">
-<stop stop-color="#4300B1"/>
-<stop offset="1" stop-color="#A531DC"/>
+<stop stopColor="#4300B1"/>
+<stop offset="1" stopColor="#A531DC"/>
 </linearGradient>
 <linearGradient id="paint3_linear_10160_1124" x1="57.8163" y1="43.1807" x2="80.5322" y2="20.0696" gradientUnits="userSpaceOnUse">
-<stop stop-color="#4300B1"/>
-<stop offset="1" stop-color="#A531DC"/>
+<stop stopColor="#4300B1"/>
+<stop offset="1" stopColor="#A531DC"/>
 </linearGradient>
 <linearGradient id="paint4_linear_10160_1124" x1="31.6088" y1="43.1807" x2="54.3247" y2="20.0696" gradientUnits="userSpaceOnUse">
-<stop stop-color="#4300B1"/>
-<stop offset="1" stop-color="#A531DC"/>
+<stop stopColor="#4300B1"/>
+<stop offset="1" stopColor="#A531DC"/>
 </linearGradient>
 <linearGradient id="paint5_linear_10160_1124" x1="9.99968" y1="43.181" x2="33.0317" y2="22.6255" gradientUnits="userSpaceOnUse">
-<stop stop-color="#4300B1"/>
-<stop offset="1" stop-color="#A531DC"/>
+<stop stopColor="#4300B1"/>
+<stop offset="1" stopColor="#A531DC"/>
 </linearGradient>
 <linearGradient id="paint6_linear_10160_1124" x1="96.9741" y1="24.5814" x2="96.9741" y2="38.5773" gradientUnits="userSpaceOnUse">
-<stop stop-color="white" stop-opacity="0.8"/>
-<stop offset="1" stop-color="white" stop-opacity="0.5"/>
+<stop stopColor="white" stopOpacity="0.8"/>
+<stop offset="1" stopColor="white" stopOpacity="0.5"/>
 </linearGradient>
 <linearGradient id="paint7_linear_10160_1124" x1="91.5425" y1="26.6309" x2="101.396" y2="37.4482" gradientUnits="userSpaceOnUse">
-<stop stop-color="white" stop-opacity="0.8"/>
-<stop offset="1" stop-color="white" stop-opacity="0.5"/>
+<stop stopColor="white" stopOpacity="0.8"/>
+<stop offset="1" stopColor="white" stopOpacity="0.5"/>
 </linearGradient>
 </defs>
 </svg>
