@@ -30,8 +30,10 @@
     "next": "Siguiente",
     "previous": "Anterior",
     "service_image": "Imagen del servicio",
-    "service_name": "Nombre del servicio *",
-    "service_description": "Descripción del servicio *",
+    "service_name": "Nombre del servicio",
+    "service_description": "Descripción del servicio",
+    "step_connect_briefs_description": "Briefs conectados a este servicio",
+    "addBrief": "Añadir brief",
     "insert_price": "Precio *",
     "standard": "Estándar",
     "standard_description": "Establece tus propios precios y recibe pedidos de tus clientes",
@@ -70,5 +72,6 @@
     "max_number_of_monthly_orders": "Máximo número de pedidos al mes *",
     "max_number_of_monthly_orders_description": "Déjalo en blanco si permites pedidos ilimitados por mes para esta suscripción.",
     "select_unit_of_measurement": "Días"
+
 }
   
