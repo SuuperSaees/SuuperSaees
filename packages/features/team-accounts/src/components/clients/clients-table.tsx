@@ -27,6 +27,10 @@ import { Search, Pen, ArrowUp, ArrowDown } from 'lucide-react';
 import { Separator } from '@kit/ui/separator';
 import {
   Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
@@ -310,6 +314,10 @@ export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTab
     },
   });
 
+  const { pageIndex } = table.getState().pagination;
+  const pageCount = table.getPageCount();
+  const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
+
   const importantPropietaryOrganization = accountNames[0];
   const importantPropietaryOrganizationId = accountIds[0];
 
@@ -414,7 +422,7 @@ export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTab
           </TableBody>
         </Table>
       </div>
-       <div className="flex items-center justify-between px-2 py-4">
+       {/* <div className="flex items-center justify-between px-2 py-4">
           <div className="flex items-center gap-2">
             <PaginationPrevious
               onClick={() => table.previousPage()}
@@ -441,7 +449,56 @@ export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTab
               {t('next')}
             </PaginationNext>
           </div>
-        </div>
+        </div> */}
+        <div className="flex justify-between items-center py-4">
+        <Pagination>
+          <PaginationContent className="flex justify-between items-center w-full">
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (table.getCanPreviousPage()) {
+                    table.previousPage();
+                  }
+                }}
+              />
+            </PaginationItem>
+            <div className="flex-1 flex justify-center">
+              {pages.map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    isActive={pageIndex === page - 1}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      table.setPageIndex(page - 1);
+                    }}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              {pageCount > 3 && pageIndex < pageCount - 2 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+            </div>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (table.getCanNextPage()) {
+                    table.nextPage();
+                  }
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

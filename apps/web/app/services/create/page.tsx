@@ -17,9 +17,8 @@ function CreateServicePage() {
   return (
     <>
     <PageBody>
-        <div className='p-[35px]'>
-            <MultiStepFormDemo />
-        </div>
+            <MultiStepFormDemo/>
+
       </PageBody>
     </>
   );

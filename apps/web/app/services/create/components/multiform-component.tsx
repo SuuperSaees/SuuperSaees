@@ -30,7 +30,7 @@ import {
 } from '@kit/ui/multi-step-form';
 import { Stepper } from '@kit/ui/stepper';
 import { Textarea } from '@kit/ui/textarea';
-
+import { BellIcon } from 'lucide-react';
 import UploadImageComponent from '../../../../../../packages/features/team-accounts/src/server/actions/services/create/upload-image';
 import CreditBasedRecurringSubscription from './recurring_subscription/credit_based';
 import StandardRecurringSubscription from './recurring_subscription/standard';
@@ -39,6 +39,7 @@ import CreditBased from './single_sale/credit_based';
 import Standard from './single_sale/standard';
 import TimeBased from './single_sale/time_based';
 import BriefConnectionStep from './step-brief-connection';
+import Link from 'next/link';
 
 export const FormSchema = createStepSchema({
   step_type_of_service: z.object({
@@ -48,7 +49,7 @@ export const FormSchema = createStepSchema({
   step_service_details: z.object({
     service_image: z.string(),
     service_name: z.string().min(2).max(50),
-    service_description: z.string().min(2).max(50),
+    service_description: z.string().min(2).max(500),
   }),
   step_service_price: z.object({
     standard: z.boolean().default(false),
@@ -118,7 +119,7 @@ export function MultiStepFormDemo() {
 
   return (
     <MultiStepForm
-      className={'space-y-10 rounded-xl border p-8'}
+      className={'space-y-10 rounded-xl p-8'}
       schema={FormSchema}
       form={form}
       onSubmit={onSubmit}
@@ -126,20 +127,43 @@ export function MultiStepFormDemo() {
       <MultiStepFormHeader
         className={'flex w-full flex-col justify-center space-y-6'}
       >
-        {/* <h2 className={'text-xl font-bold'}>Create your account</h2> */}
-
         <MultiStepFormContextProvider>
           {({ currentStepIndex }) => (
-            <Stepper
-              variant={'numbers'}
-              steps={[
-                t('step_type_of_service'),
-                t('step_service_details'),
-                t('step_service_price'),
-                t('step_connect_briefs'),
-              ]}
-              currentStep={currentStepIndex}
-            />
+            <>
+              <div className='flex justify-between items-center mb-[32px]'>
+                <h2 className={'text-gray-900 font-inter text-[30px] font-semibold leading-8'}>
+                  {currentStepIndex === 0
+                    ? t('step_type_of_service_title')
+                    : currentStepIndex === 1
+                    ? t('step_service_details')
+                    : currentStepIndex === 2
+                    ? t('step_service_price')
+                    : t('step_connect_briefs')}
+                </h2>
+                <div className="flex space-x-4">
+                    <span>
+                        <Button variant="outline">
+                            Tu prueba gratuita termina en xx dias
+                        </Button>
+                    </span>
+                    <span>
+                        <Button variant="outline" size="icon">
+                            <BellIcon className="h-4 w-4" />
+                        </Button>
+                    </span>
+                </div>
+              </div>
+              <Stepper
+                variant={'customDots'}
+                steps={[
+                  t('step_type_of_service'),
+                  t('step_service_details'),
+                  t('step_service_price'),
+                  t('step_connect_briefs'),
+                ]}
+                currentStep={currentStepIndex}
+              />
+            </>
           )}
         </MultiStepFormContextProvider>
       </MultiStepFormHeader>
@@ -155,10 +179,6 @@ export function MultiStepFormDemo() {
       <MultiStepFormStep name="step_service_price">
         <PricingStep />
       </MultiStepFormStep>
-
-      {/* <MultiStepFormStep name="review">
-        <ReviewStep />
-      </MultiStepFormStep> */}
 
       <MultiStepFormStep name="connect_briefs">
         <BriefConnectionStep  />
@@ -193,7 +213,7 @@ function TypeOfServiceStep() {
       </div>
       <Form {...form}>
         <div className={'flex flex-col gap-4'}>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-[47.17px] justify-center">
             <FormField
               control={form.control}
               name="step_type_of_service.single_sale"
@@ -271,8 +291,15 @@ function TypeOfServiceStep() {
               )}
             />
           </div>
-
-          <div className="flex justify-end">
+          <div className="mt-4 flex justify-between space-x-2">
+            <Link
+              type="button"
+              href={'/services'}
+              className="border border-gray-300 inline-flex items-center justify-center whitespace-nowrap rounded-md bg-white text-sm font-medium text-gray-700 shadow transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50
+              px-4"
+            >
+              {t('previous')}
+            </Link>
             <Button onClick={nextStep} disabled={!isStepValid()}>
               {t('next')}
             </Button>
@@ -289,10 +316,12 @@ function DetailsStep() {
   const [selectedImage, setSelectedImage] = useState<
     string | ArrayBuffer | null
   >(null);
+  
   const handleImageUpload = (imageUrl: string) => {
     setSelectedImage(imageUrl);
     form.setValue('step_service_details.service_image', imageUrl);
   };
+
   return (
     <Form {...form}>
       <div className={'flex gap-[36px]'}>
@@ -485,56 +514,56 @@ function PricingStep() {
             )}
           />
         </div>
-        <div>
+        
           {form.watch('step_service_price.standard') &&
             form.watch('step_type_of_service.single_sale') && (
               <>
                 <Standard />
               </>
             )}
-        </div>
-        <div>
+        
+        
           {form.watch('step_service_price.standard') &&
             form.watch('step_type_of_service.recurring_subscription') && (
               <>
                 <StandardRecurringSubscription />
               </>
             )}
-        </div>
-        <div>
+        
+        
           {form.watch('step_service_price.time_based') &&
             form.watch('step_type_of_service.single_sale') && (
               <>
                 <TimeBased />
               </>
             )}
-        </div>
-        <div>
+        
+        
           {form.watch('step_service_price.time_based') &&
             form.watch('step_type_of_service.recurring_subscription') && (
               <>
                 <TimeBasedRecurringSubscription />
               </>
             )}
-        </div>
+        
 
-        <div>
+        
           {form.watch('step_service_price.credit_based') &&
             form.watch('step_type_of_service.single_sale') && (
               <>
                 <CreditBased />
               </>
             )}
-        </div>
+        
 
-        <div>
+       
           {form.watch('step_service_price.credit_based') &&
             form.watch('step_type_of_service.recurring_subscription') && (
               <>
                 <CreditBasedRecurringSubscription />
               </>
             )}
-        </div>
+        
       </div>
 
       <div className="mt-4 flex justify-between space-x-2">
