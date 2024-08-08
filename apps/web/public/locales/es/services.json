@@ -30,6 +30,8 @@
     "next": "Siguiente",
     "service_image": "Imagen del servicio",
     "service_name": "Nombre del servicio",
-    "service_description": "Descripción del servicio"
+    "service_description": "Descripción del servicio",
+    "step_connect_briefs_description": "Briefs conectados a este servicio",
+    "addBrief": "Añadir brief"
 }
   
