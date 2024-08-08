@@ -2,7 +2,7 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-export const deleteService = async (serviceId: string) => {
+export const deleteService = async (serviceId: number) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { error } = await client

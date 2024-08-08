@@ -5,7 +5,7 @@ import { Trash2 } from 'lucide-react';
 import { deleteService } from './delete-service-server';
 import { useTranslation } from 'react-i18next';
 
-const DeleteserviceDialog = ({ serviceId }: { serviceId: string }) => {
+const DeleteserviceDialog = ({ serviceId }: { serviceId: number }) => {
   const { t } = useTranslation('services');
 
   const handleDelete = async () => {

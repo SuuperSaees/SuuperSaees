@@ -1,16 +1,13 @@
 import { PageBody } from '@kit/ui/page';
-import { Trans } from '@kit/ui/trans';
-
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import {
   ServicesTable,
 } from '../../../../packages/features/team-accounts/src/components/services/services-table';
-import { HomeAccountsList } from '~/home/(user)/_components/home-accounts-list';
-import { HomeLayoutPageHeader } from '~/home/(user)/_components/home-page-header';
 import { Button } from '@kit/ui/button';
 import { BellIcon } from 'lucide-react';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { Database } from '~/lib/database.types';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -22,16 +19,16 @@ export const generateMetadata = async () => {
 };
 
 async function UserHomePage() {
-    const client = getSupabaseServerComponentClient();
+    const client = getSupabaseServerComponentClient<Database>();
     const { data: userData } = await client.auth.getUser();
 
     const { data: accountsData} = await client.from('accounts').select().eq('primary_owner_user_id', userData.user!.id);
 
     const filteredAccounts = accountsData?.filter(account => account.id !== userData.user!.id);
 
-    const accountIds = filteredAccounts?.map(account => account.id) || []; 
+    const accountIds = filteredAccounts?.map(account => account.id) ?? []; 
 
-    const accountNames = filteredAccounts?.map(account => account.name) || [];
+    const accountNames = filteredAccounts?.map(account => account.name) ?? [];
 
     let dataServices = null;
 
@@ -46,12 +43,12 @@ async function UserHomePage() {
         // dataServices = data;
         dataServices = data?.map(service => ({
           ...service,
-          id: String(service.id), // Convertir id de number a string
-          name: service.name ?? '', // Proveer un valor por defecto si es null
-          price: service.price ?? 0, // Proveer un valor por defecto si es null
-          number_of_clients: service.number_of_clients ?? 0, // Proveer un valor por defecto si es null
-          status: service.status ?? 'unknown', // Proveer un valor por defecto si es null
-          propietary_organization_id: service.propietary_organization_id ?? '', // Proveer un valor por defecto si es null
+          id: service.id, 
+          name: service.name ?? '', 
+          price: service.price ?? 0, 
+          number_of_clients: service.number_of_clients ?? 0, 
+          status: service.status ?? 'unknown', 
+          propietary_organization_id: service.propietary_organization_id ?? '', 
         }));
       }
     }

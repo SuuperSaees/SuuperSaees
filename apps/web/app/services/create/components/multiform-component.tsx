@@ -24,25 +24,51 @@ import {
   useMultiStepFormContext,
 } from '@kit/ui/multi-step-form';
 import { Stepper } from '@kit/ui/stepper';
-import { Checkbox } from "@kit/ui/checkbox"
 import React, { useState } from 'react';
 import { Textarea } from '@kit/ui/textarea';
- 
+import Image from 'next/image';
+import Standard from './single_sale/standard';
+import TimeBased from './single_sale/time_based';
+import CreditBased from './single_sale/credit_based';
+import StandardRecurringSubscription from './recurring_subscription/standard';
+import TimeBasedRecurringSubscription from './recurring_subscription/time_based';
+import CreditBasedRecurringSubscription from './recurring_subscription/credit_based';
+import { createService } from '../../../../../../packages/features/team-accounts/src/server/actions/services/create/create-service-server';
+import UploadImageComponent  from '../../../../../../packages/features/team-accounts/src/server/actions/services/create/upload-image';
+
+
 const FormSchema = createStepSchema({
     step_type_of_service: z.object({
-        single_sale: z.boolean().default(false).optional(),
-        recurring_subscription: z.boolean().default(false).optional(),
+        single_sale: z.boolean().default(false),
+        recurring_subscription: z.boolean().default(false),
     }),
     step_service_details: z.object({
         service_image: z.string(),
-        service_name: z.string(),
-        service_description: z.string(),
+        service_name: z.string().min(2).max(50),
+        service_description: z.string().min(2).max(50),
+    }),
+    step_service_price: z.object({
+        standard: z.boolean().default(false),
+        purchase_limit: z.number(),
+        allowed_orders: z.number(),
+        time_based: z.boolean().default(false),
+        hours: z.number(),
+        credit_based: z.boolean().default(false),
+        credits: z.number(),
+        price: z.number(),
+        recurrence: z.string(),
+        test_period: z.boolean().default(false),
+        test_period_duration: z.number(),
+        test_period_duration_unit_of_measurement: z.string(),
+        test_period_price: z.number(),
+        max_number_of_simultaneous_orders: z.number(),
+        max_number_of_monthly_orders: z.number(),
     }),
 });
  
 type FormValues = z.infer<typeof FormSchema>;
  
-export function MultiStepFormDemo() {
+export function MultiStepFormDemo(  ) {
   const { t } = useTranslation('services');
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -52,20 +78,43 @@ export function MultiStepFormDemo() {
             recurring_subscription: false,
         },
         step_service_details: {
-            service_image: '',
+            service_image: undefined,
             service_name: '',
             service_description: '',
-        }
+        },
+        step_service_price: {
+            standard: true,
+            purchase_limit: 0,
+            allowed_orders: 0,
+            time_based: false,
+            hours: 0,
+            credit_based: false,
+            credits: 0,
+            price: 0,
+            recurrence: '',
+            test_period: false,
+            test_period_duration: 0,
+            test_period_duration_unit_of_measurement: 'days',
+            test_period_price: 0,
+            max_number_of_simultaneous_orders: 0,
+            max_number_of_monthly_orders: 0,
+        },
+
 
     },
     reValidateMode: 'onBlur',
     mode: 'onBlur',
   });
- 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log({ 'data': data
+
+
+
+  async function onSubmit( values: z.infer<typeof FormSchema>) {
+    await createService({
+        ...values
     })
+    window.location.reload();
   }
+
  
   return (
     <MultiStepForm
@@ -100,10 +149,14 @@ export function MultiStepFormDemo() {
         <TypeOfServiceStep />
       </MultiStepFormStep>
  
-      <MultiStepFormStep name="step_details">
+      <MultiStepFormStep name="step_service_details">
         <DetailsStep />
-        {/* <ReviewStep /> */}
       </MultiStepFormStep>
+
+      <MultiStepFormStep name="step_service_price">
+        <PricingStep />
+      </MultiStepFormStep>
+      
  
       <MultiStepFormStep name="review">
         <ReviewStep />
@@ -138,7 +191,7 @@ function TypeOfServiceStep() {
             </div>
             <Form {...form}>
                 <div className={'flex flex-col gap-4'}>
-                    <div className='flex gap-4'>
+                    <div className='flex gap-4 justify-between items-center'>
                         <FormField
                             control={form.control}
                             name="step_type_of_service.single_sale"
@@ -222,26 +275,33 @@ function DetailsStep() {
     const { form, nextStep, prevStep } = useMultiStepFormContext();
     const [selectedImage, setSelectedImage] = useState<string | ArrayBuffer | null>(null);
   
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setSelectedImage(reader.result);
-          form.setValue('step_service_details.service_image', file.name); // Optionally store the filename or URL
-        };
-        reader.readAsDataURL(file);
-      }
+    // const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //   const file = event.target.files?.[0];
+    //   if (file) {
+    //     const reader = new FileReader();
+    //     reader.onloadend = () => {
+    //       setSelectedImage(reader.result);
+    //       form.setValue('step_service_details.service_image', file); 
+    //     };
+    //     reader.readAsDataURL(file);
+    //   }
+    // };
+
+    const handleImageUpload = (imageUrl: string) => {
+      setSelectedImage(imageUrl);
+      form.setValue('step_service_details.service_image', imageUrl); 
     };
   
     return (
       <Form {...form}>
-        <div className={'flex gap-[36px]'}>
+        {/* <div className={'flex gap-[36px]'}>
           <div className="w-[390px] h-[190px] rounded-md bg-gray-300">
             {selectedImage && (
-              <img
+              <Image
                 src={selectedImage as string}
                 alt="Selected"
+                width={390}
+                height={190}
                 className="w-[390px] h-[190px] rounded-md bg-gray-300"
               />
             )}
@@ -255,20 +315,37 @@ function DetailsStep() {
                   <FormLabel className='text-gray-700 text-xl font-bold leading-[20px]'>{t('service_image')}</FormLabel>
                   <FormControl>
                     <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(event) => {
-                        handleImageChange(event);
-                        field.onChange(event);
-                      }}
-                    />
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => {
+                      handleImageChange(event);
+                      field.onChange(event);
+                    }}
+                  />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+        </div> */}
+        <div className={'flex gap-[36px]'}>
+        <div className="w-[390px] h-[190px] rounded-md bg-gray-300">
+          {selectedImage && (
+            <Image
+              src={selectedImage as string}
+              alt="Selected"
+              width={390}
+              height={190}
+              className="w-[390px] h-[190px] rounded-md bg-gray-300"
+            />
+          )}
         </div>
+
+        <div className="w-1/2 p-[36px]">
+          <UploadImageComponent onImageUpload={handleImageUpload} />
+        </div>
+      </div>
           <FormField
             name="step_service_details.service_name"
             render={({ field }) => (
@@ -288,7 +365,6 @@ function DetailsStep() {
               <FormItem>
                 <FormLabel>{t('service_description')}</FormLabel>
                 <FormControl>
-                  {/* <Input {...field} className='w-full flex' /> */}
                   <Textarea {...field} className='w-full flex' />
                 </FormControl>
                 <FormMessage />
@@ -297,16 +373,201 @@ function DetailsStep() {
           />
 
   
-        <div className="flex justify-end space-x-2 mt-4">
+        <div className="flex justify-between space-x-2 mt-4">
           <Button type="button" variant="outline" onClick={prevStep}>
-            Previous
+          {t('previous')}
           </Button>
   
-          <Button onClick={nextStep}>Next</Button>
+          <Button onClick={nextStep}>{t('next')}</Button>
         </div>
       </Form>
     );
   }
+
+  function PricingStep() {
+    const { t } = useTranslation('services');
+    const { form, nextStep, prevStep } = useMultiStepFormContext();
+  
+    type CheckboxName = 'step_service_price.standard' | 'step_service_price.time_based' | 'step_service_price.credit_based';
+
+    const handleCheckboxChange = (name: CheckboxName) => (checked: boolean) => {
+        form.setValue('step_service_price.standard', false); 
+        form.setValue('step_service_price.time_based', false); 
+        form.setValue('step_service_price.credit_based', false);
+        form.setValue(name, checked);  
+    };
+
+    const getCheckboxClass = (isSelected: boolean) =>
+        isSelected
+          ? "flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[2.948px] border-brand-600 bg-white"
+          : "flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[1.474px] border-gray-200 bg-white";
+  
+    return (
+        <Form {...form}>
+                <div className={'flex flex-col gap-4'}>
+                    <div className='flex gap-[22px] justify-between items-center'>
+                        <FormField
+                            control={form.control}
+                            name="step_service_price.standard"
+                            render={({ field }) => (
+                                <FormItem className={getCheckboxClass(field.value)}>
+                                    <FormControl>
+                                        <div className='flex gap-[11.792px]'>
+                                            <div
+                                                className={`w-8 h-8 border-2 flex items-center justify-center cursor-pointer ${
+                                                    field.value ? 'flex w-[23.583px] h-[23.583px] p-[7.37px] justify-center items-center rounded-[11.792px] border-[1.474px] border-brand-600 bg-brand-600' : 'w-[47.166px] h-[23.583px] rounded-[5.896px] border-[1.474px] border-gray-300'
+                                                }`}
+                                                onClick={() => handleCheckboxChange('step_service_price.standard')(!field.value)}
+                                                >
+                                                {field.value && (
+                                                    <div className="w-2 h-2 rounded-full bg-white" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <FormLabel className="text-gray-700 font-inter text-[20.635px] font-medium leading-[29.479px]">
+                                                    {t('standard')}
+                                                </FormLabel>
+                                                <div>
+                                                    <FormDescription className='text-gray-600 font-inter text-[20.635px] font-normal leading-[29.479px]'>
+                                                        {t('standard_description')}
+                                                    </FormDescription>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="step_service_price.time_based"
+                            render={({ field }) => (
+                                <FormItem className={getCheckboxClass(field.value)}>
+                                    <FormControl>
+                                        <div className='flex gap-[11.792px]'>
+                                            <div
+                                                className={`w-8 h-6 border-2 flex items-center justify-center cursor-pointer ${
+                                                    field.value ? 'flex w-[23.583px] h-[23.583px] p-[7.37px] justify-center items-center rounded-[11.792px] border-[1.474px] border-brand-600 bg-brand-600' : 'w-[47.166px] h-[23.583px] rounded-[5.896px] border-[1.474px] border-gray-300'
+                                                }`}
+                                                onClick={() => handleCheckboxChange('step_service_price.time_based')(!field.value)}
+                                                >
+                                                {field.value && (
+                                                    <div className="w-2 h-2 rounded-full bg-white" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <FormLabel className="text-gray-700 font-inter text-[20.635px] font-medium leading-[29.479px]">
+                                                    {t('time_based')}
+                                                </FormLabel>
+                                                <div>
+                                                    <FormDescription className='text-gray-600 font-inter text-[20.635px] font-normal leading-[29.479px]'>
+                                                        {t('time_based_description')}
+                                                    </FormDescription>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="step_service_price.credit_based"
+                            render={({ field }) => (
+                                <FormItem className={getCheckboxClass(field.value)}>
+                                    <FormControl>
+                                        <div className='flex gap-[11.792px]'>
+                                            <div
+                                                className={`w-8 h-6 border-2 flex items-center justify-center cursor-pointer ${
+                                                    field.value ? 'flex w-[23.583px] h-[23.583px] p-[7.37px] justify-center items-center rounded-[11.792px] border-[1.474px] border-brand-600 bg-brand-600' : 'w-[47.166px] h-[23.583px] rounded-[5.896px] border-[1.474px] border-gray-300'
+                                                }`}
+                                                onClick={() => handleCheckboxChange('step_service_price.credit_based')(!field.value)}
+                                                >
+                                                {field.value && (
+                                                    <div className="w-2 h-2 rounded-full bg-white" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <FormLabel className="text-gray-700 font-inter text-[20.635px] font-medium leading-[29.479px]">
+                                                    {t('credit_based')}
+                                                </FormLabel>
+                                                <div>
+                                                    <FormDescription className='text-gray-600 font-inter text-[20.635px] font-normal leading-[29.479px]'>
+                                                        {t('credit_based_description')}
+                                                    </FormDescription>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                      <div>
+                        {form.watch('step_service_price.standard') && form.watch('step_type_of_service.single_sale') && (
+                          <>
+                            <Standard />
+                          </>
+                        )}
+
+                      </div>
+                      <div>
+                        {form.watch('step_service_price.standard') && form.watch('step_type_of_service.recurring_subscription') && (
+                          <>
+                            <StandardRecurringSubscription />
+                          </>
+                        )}
+
+                      </div>
+                      <div>
+                        {form.watch('step_service_price.time_based') && form.watch('step_type_of_service.single_sale') && (
+                          <>
+                          <TimeBased />
+                          </>
+                        )}
+                      </div>
+                      <div>
+                        {form.watch('step_service_price.time_based') && form.watch('step_type_of_service.recurring_subscription') && (
+                          <>
+                          <TimeBasedRecurringSubscription />
+                          </>
+                        )}
+                      </div>
+
+                      <div>
+                        {form.watch('step_service_price.credit_based') && form.watch('step_type_of_service.single_sale') && (
+                          <>
+                            <CreditBased />
+                          </>
+                        )}
+                      </div>
+
+                      <div>
+                        {form.watch('step_service_price.credit_based') && form.watch('step_type_of_service.recurring_subscription') && (
+                          <>
+                          <CreditBasedRecurringSubscription />
+                          </>
+                        )}
+                      </div>
+                      
+
+                    </div>
+
+                    <div className="flex justify-between space-x-2 mt-4">
+                    <Button type="button" variant="outline" onClick={prevStep}>
+                      {t('previous')}
+                    </Button>
+            
+                    <Button onClick={nextStep}>{t('next')}</Button>
+                  </div>
+            </Form>
+      
+    );
+  }
+
+
 
 
  
@@ -321,11 +582,25 @@ function ReviewStep() {
  
         <div className={'flex flex-col space-y-2 text-sm'}>
           <div className='flex flex-col'>
-            <span>Single Sale</span> <span>{values.step_type_of_service.single_sale ? 'Sí' : 'No'}</span>
-            <span>Recurring subscription</span> <span>{values.step_type_of_service.recurring_subscription ? 'Sí' : 'No'}</span>
-            <span>Service Image</span> <span>{values.step_service_details.service_image}</span>
-            <span>Service Name</span> <span>{values.step_service_details.service_name}</span>
-            <span>Service Description</span> <span>{values.step_service_details.service_description}</span>
+            {/* <div><span className='font-bold'>Single Sale: </span> <span>{values.step_type_of_service.single_sale ? 'Sí' : 'No'}</span></div> */}
+            <div><span className='font-bold'>Recurring Subscription: </span> <span>{values.step_type_of_service.recurring_subscription ? 'Sí' : 'No'}</span></div>
+            <div><span className='font-bold'>Service Name: </span> <span>{values.step_service_details.service_name}</span></div>
+            {/* <div><span className='font-bold'>Service Image: </span> <span>{values.step_service_details.service_image}</span></div> */}
+            <div><span className='font-bold'>Service Description: </span> <span>{values.step_service_details.service_description}</span></div>
+            {/* <div><span className='font-bold'>Standard: </span> <span>{values.step_service_price.standard ? 'Sí' : 'No'}</span></div> */}
+            <div><span className='font-bold'>Price: </span> <span>{values.step_service_price.price}</span></div>
+            {/* <div><span className='font-bold'>Purchase Limit: </span> <span>{values.step_service_price.purchase_limit}</span></div> */}
+            {/* <div><span className='font-bold'>Allowed Orders: </span> <span>{values.step_service_price.allowed_orders}</span></div> */}
+            {/* <div><span className='font-bold'>Time Based: </span> <span>{values.step_service_price.time_based ? 'Sí' : 'No'}</span></div> */}
+            {/* <div><span className='font-bold'>Hours: </span> <span>{values.step_service_price.hours}</span></div> */}
+            <div><span className='font-bold'>Credit Based: </span> <span>{values.step_service_price.credit_based ? 'Sí' : 'No'}</span></div>
+            <div><span className='font-bold'>Credits: </span> <span>{values.step_service_price.credits}</span></div>
+            <div><span className='font-bold'>Recurrence: </span> <span>{values.step_service_price.recurrence}</span></div>
+            <div><span className='font-bold'>Test Period: </span> <span>{values.step_service_price.test_period ? 'Sí' : 'No'}</span></div>
+            <div><span className='font-bold'>Test Period Duration: </span> <span>{values.step_service_price.test_period_duration} {values.step_service_price.test_period_duration_unit_of_measurement}</span></div>
+            <div><span className='font-bold'>Test Period Price: </span> <span>{values.step_service_price.test_period_price}</span></div>
+            <div><span className='font-bold'>Max Number of Simultaneous Orders: </span> <span>{values.step_service_price.max_number_of_simultaneous_orders}</span></div>
+            <div><span className='font-bold'>Max Number of Monthly Orders: </span> <span>{values.step_service_price.max_number_of_monthly_orders}</span></div>
           </div>
         </div>
       </div>
@@ -335,7 +610,7 @@ function ReviewStep() {
           Back
         </Button>
  
-        <Button type={'submit'}>Create Account</Button>
+        <Button type={'submit'} >Create Account</Button>
       </div>
     </div>
   );

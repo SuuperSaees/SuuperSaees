@@ -690,7 +690,7 @@ export type Database = {
         Row: {
           assigned_to: string[] | null
           created_at: string
-          customer_id: string | null
+          customer_id: string 
           description: string | null
           due_date: string | null
           id: number
@@ -701,7 +701,7 @@ export type Database = {
         Insert: {
           assigned_to?: string[] | null
           created_at?: string
-          customer_id?: string | null
+          customer_id: string
           description?: string | null
           due_date?: string | null
           id?: number
@@ -712,7 +712,7 @@ export type Database = {
         Update: {
           assigned_to?: string[] | null
           created_at?: string
-          customer_id?: string | null
+          customer_id: string 
           description?: string | null
           due_date?: string | null
           id?: number
@@ -816,31 +816,85 @@ export type Database = {
       }
       services: {
         Row: {
-          created_at: string
-          id: number
-          name: string | null
-          number_of_clients: number | null
-          price: number | null
-          propietary_organization_id: string | null
-          status: string | null
+          id: number,
+          created_at: string,
+          status: string
+          propietary_organization_id: string
+          number_of_clients: number 
+          single_sale: boolean, 
+          recurring_subscription: boolean,
+          service_image: string,
+          name: string,
+          service_description: string,
+          standard: boolean,
+          purchase_limit: number,
+          allowed_orders: number,
+          time_based: boolean,
+          hours: number,
+          credit_based: boolean,
+          credits: number,
+          price: number,
+          recurrence: string,
+          test_period: boolean,
+          test_period_duration: number,
+          test_period_duration_unit_of_measurement: string,
+          test_period_price: number,
+          max_number_of_simultaneous_orders: number,
+          max_number_of_monthly_orders: number
         }
         Insert: {
-          created_at?: string
-          id?: number
-          name?: string | null
-          number_of_clients?: number | null
-          price?: number | null
-          propietary_organization_id?: string | null
-          status?: string | null
+          id?: number,
+          created_at: string,
+          status: string
+          propietary_organization_id: string
+          number_of_clients: number 
+          single_sale: boolean, 
+          recurring_subscription: boolean,
+          service_image: string,
+          name: string,
+          service_description: string,
+          standard: boolean,
+          purchase_limit: number,
+          allowed_orders: number,
+          time_based: boolean,
+          hours: number,
+          credit_based: boolean,
+          credits: number,
+          price: number,
+          recurrence: string,
+          test_period: boolean,
+          test_period_duration: number,
+          test_period_duration_unit_of_measurement: string,
+          test_period_price: number,
+          max_number_of_simultaneous_orders: number,
+          max_number_of_monthly_orders: number
         }
         Update: {
-          created_at?: string
-          id?: number
-          name?: string | null
-          number_of_clients?: number | null
-          price?: number | null
-          propietary_organization_id?: string | null
-          status?: string | null
+          id: number,
+          created_at: string,
+          status: string
+          propietary_organization_id: string
+          number_of_clients: number 
+          single_sale: boolean, 
+          recurring_subscription: boolean,
+          service_image: string,
+          name: string,
+          service_description: string,
+          standard: boolean,
+          purchase_limit: number,
+          allowed_orders: number,
+          time_based: boolean,
+          hours: number,
+          credit_based: boolean,
+          credits: number,
+          price: number,
+          recurrence: string,
+          test_period: boolean,
+          test_period_duration: number,
+          test_period_duration_unit_of_measurement: string,
+          test_period_price: number,
+          max_number_of_simultaneous_orders: number,
+          max_number_of_monthly_orders: number
         }
         Relationships: []
       }
