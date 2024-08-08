@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import * as React from "react"
 import { ColumnDef,
   ColumnFiltersState,
@@ -22,48 +22,29 @@ import {
   TableRow,
 } from "@kit/ui/table"
 import { Input } from '@kit/ui/input';
-import { ProfileAvatar } from '@kit/ui/profile-avatar';
-import { Search, Pen, ArrowUp, ArrowDown, Link2 } from 'lucide-react';
+import { Search, ArrowUp, Link2 } from 'lucide-react';
 import { Separator } from '@kit/ui/separator';
 import {
-  Pagination,
   PaginationNext,
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
 import DeleteserviceDialog from '../../../../../../packages/features/team-accounts/src/server/actions/services/delete/delete-service';
-import CreateServiceDialog from '../../../../../../packages/features/team-accounts/src/server/actions/services/create/create-service';
 import UpdateServiceDialog from '../../server/actions/services/update/update-service';
 import { useTranslation } from 'react-i18next';
-
+import Link from 'next/link';
+import { Service } from '../../../../../../apps/web/lib/services.types';
+import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 
 type ServicesTableProps = {
-services: {
-    id: string
-    created_at: string
-    name: string 
-    price: number
-    number_of_clients: number
-    status: string
-    propietary_organization_id: string
-  }[];
+  services: Service.Type[];
   accountIds: string[];
   accountNames: string[];
-
-}
-
-
-type Service = {
-    id: string
-    created_at: string
-    name: string 
-    price: number
-    number_of_clients: number
-    status: string
-    propietary_organization_id: string
 }
 
 // SERVICES TABLE
-  const servicesColumns = (t: any): ColumnDef<Service>[] => [
+  const servicesColumns = (
+    t: TFunction<'services', undefined>,
+  ): ColumnDef<Service.Type>[] => [
   {
     accessorKey: "name",
     header: t("name"),
@@ -91,6 +72,7 @@ type Service = {
     accessorKey: "status",
     header: t("status"),
     cell: ({ row }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const status = row.getValue("status") as string;
       const displayStatus = status === 'active' ? 'Activo' : status === 'draft' ? 'En borrador' : status;
       return <div>{displayStatus}</div>;
@@ -139,7 +121,7 @@ type Service = {
       return (
         <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
           <Link2 className='h-6 w-6 text-gray-500' />
-          <UpdateServiceDialog {...service} />
+          <UpdateServiceDialog values={service} id={service.id} />
           <DeleteserviceDialog serviceId={service.id}/>
         </div>
       )
@@ -148,14 +130,14 @@ type Service = {
 ]
 
 
-export function ServicesTable({ services,  accountIds, accountNames  }: ServicesTableProps) {
+export function ServicesTable({ services }: ServicesTableProps) {
   const { t } = useTranslation('services');
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const columns =  useMemo<ColumnDef<Service>[]>(() => servicesColumns(t), [t]);
+  const columns =  useMemo<ColumnDef<Service.Type>[]>(() => servicesColumns(t), [t]);
   
 
   const table = useReactTable({
@@ -177,12 +159,10 @@ export function ServicesTable({ services,  accountIds, accountNames  }: Services
     },
   });
 
-  const importantPropietaryOrganizationId = accountIds[0];
-
   return (
     <div className="w-full">
       <div className="flex items-center py-4 justify-between">
-        <div className='flex px-2 gap-4'>
+        <div className='flex px-2 gap-4 '>
           <div className='relative max-w-sm'>
             <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
             <Input
@@ -196,7 +176,10 @@ export function ServicesTable({ services,  accountIds, accountNames  }: Services
               className="pl-10"
             />
           </div>
-          <CreateServiceDialog  propietary_organization_id={importantPropietaryOrganizationId ?? ''}/>
+          <Button>
+            <Link href="/services/create">{t('createService')}</Link>
+          </Button>
+          {/* <CreateServiceDialog  propietary_organization_id={importantPropietaryOrganizationId ?? ''}/> */}
         </div>
       </div>
       <Separator />

@@ -31,6 +31,7 @@ import {
 } from '@kit/ui/table';
 
 import { Brief } from '../../../../../../apps/web/lib/brief.types';
+import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import {
   PaginationNext,
   PaginationPrevious,
@@ -46,7 +47,9 @@ type BriefTableProps = {
 
 // SERVICES TABLE
 // TFunction<'briefs', undefined>
-const briefColumns = (t: any): ColumnDef<Brief.Type>[] => [
+const briefColumns = (
+  t: TFunction<'briefs', undefined>,
+): ColumnDef<Brief.Type>[] => [
   {
     accessorKey: 'name',
     header: t('name'),
