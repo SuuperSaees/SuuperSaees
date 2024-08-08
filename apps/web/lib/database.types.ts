@@ -840,7 +840,8 @@ export type Database = {
           test_period_duration_unit_of_measurement: string,
           test_period_price: number,
           max_number_of_simultaneous_orders: number,
-          max_number_of_monthly_orders: number
+          max_number_of_monthly_orders: number,
+          connected_briefs: string[]
         }
         Insert: {
           id?: number,
@@ -867,7 +868,8 @@ export type Database = {
           test_period_duration_unit_of_measurement: string,
           test_period_price: number,
           max_number_of_simultaneous_orders: number,
-          max_number_of_monthly_orders: number
+          max_number_of_monthly_orders: number,
+          connected_briefs: string[]
         }
         Update: {
           id: number,
@@ -894,7 +896,9 @@ export type Database = {
           test_period_duration_unit_of_measurement: string,
           test_period_price: number,
           max_number_of_simultaneous_orders: number,
-          max_number_of_monthly_orders: number
+          max_number_of_monthly_orders: number,
+          connected_briefs: string[]
+
         }
         Relationships: []
       }
