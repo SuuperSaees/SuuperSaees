@@ -91,13 +91,28 @@ type OrdersTableProps = {
   }[];
 }
 
+const PAGE_SIZE = 10;
+
 export function OrderList({ orders }: OrdersTableProps) {
   const { t } = useTranslation('orders');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
+  // const filteredOrders = orders.filter(order => 
+  //   order.title.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  // Filtrar y paginar órdenes
   const filteredOrders = orders.filter(order => 
     order.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const totalPages = Math.ceil(filteredOrders.length / PAGE_SIZE);
+  const paginatedOrders = filteredOrders.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  // Manejo del cambio de página
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">    
@@ -171,14 +186,14 @@ export function OrderList({ orders }: OrdersTableProps) {
                           <TableRow key={order.id}>
                             <TableCell className="">
                               <span className="font-medium block">{order.title}</span>
-                              <span className="text-sm block">{order.description || 'Sin descripción'}</span>
+                              <span className="text-sm block">{order.description ?? 'Sin descripción'}</span>
                             </TableCell>
                             <TableCell>
                               <span className="text-sm block">#{order.id}</span>
                             </TableCell>
                             <TableCell>
-                              <span className="font-medium block">{order.customer_name || 'Sin nombre'}</span>
-                              <span className="text-sm block">{order.customer_organization || 'Sin organización'}</span>
+                              <span className="font-medium block">{order.customer_name ?? 'Sin nombre'}</span>
+                              <span className="text-sm block">{order.customer_organization ?? 'Sin organización'}</span>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
                               <DropdownMenu>
@@ -226,7 +241,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                   </Table>
                 </CardContent>
                 <CardFooter>
-                  <Pagination>
+                  {/* <Pagination>
                     <PaginationContent>
                       <div className="space-between flex flex-row justify-between w-full">
                         <div>
@@ -251,6 +266,42 @@ export function OrderList({ orders }: OrdersTableProps) {
                           <PaginationItem>
                             <PaginationLink href="#">10</PaginationLink>
                           </PaginationItem>
+                        </div>
+                      </div>
+                    </PaginationContent>
+                  </Pagination> */}
+                  <Pagination>
+                    <PaginationContent>
+                      <div className="space-between flex flex-row justify-between w-full">
+                        <div>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              href="#" 
+                              onClick={() => handlePageChange(Math.max(currentPage - 1, 1))} 
+                            />
+                            <PaginationNext 
+                              href="#" 
+                              onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))} 
+                            />
+                          </PaginationItem>
+                        </div>
+                        <div className="flex flex-row">
+                          {Array.from({ length: totalPages }, (_, index) => (
+                            <PaginationItem key={index + 1}>
+                              <PaginationLink 
+                                href="#" 
+                                onClick={() => handlePageChange(index + 1)} 
+                                isActive={currentPage === index + 1}
+                              >
+                                {index + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          {totalPages > 5 && currentPage < totalPages - 2 && (
+                            <PaginationItem>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )}
                         </div>
                       </div>
                     </PaginationContent>
@@ -285,14 +336,14 @@ export function OrderList({ orders }: OrdersTableProps) {
                           <TableRow key={order.id}>
                             <TableCell className="">
                               <span className="font-medium block">{order.title}</span>
-                              <span className="text-sm block">{order.description || 'Sin descripción'}</span>
+                              <span className="text-sm block">{order.description ?? 'Sin descripción'}</span>
                             </TableCell>
                             <TableCell>
                               <span className="text-sm block">#{order.id}</span>
                             </TableCell>
                             <TableCell>
-                              <span className="font-medium block">{order.customer_name || 'Sin nombre'}</span>
-                              <span className="text-sm block">{order.customer_organization || 'Sin organización'}</span>
+                              <span className="font-medium block">{order.customer_name ?? 'Sin nombre'}</span>
+                              <span className="text-sm block">{order.customer_organization ?? 'Sin organización'}</span>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
                               <DropdownMenu>
@@ -340,7 +391,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                   </Table>
                 </CardContent>
                 <CardFooter>
-                  <Pagination>
+                  {/* <Pagination>
                     <PaginationContent>
                       <div className="space-between flex flex-row justify-between w-full">
                         <div>
@@ -365,6 +416,42 @@ export function OrderList({ orders }: OrdersTableProps) {
                           <PaginationItem>
                             <PaginationLink href="#">10</PaginationLink>
                           </PaginationItem>
+                        </div>
+                      </div>
+                    </PaginationContent>
+                  </Pagination> */}
+                  <Pagination>
+                    <PaginationContent>
+                      <div className="space-between flex flex-row justify-between w-full">
+                        <div>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              href="#" 
+                              onClick={() => handlePageChange(Math.max(currentPage - 1, 1))} 
+                            />
+                            <PaginationNext 
+                              href="#" 
+                              onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))} 
+                            />
+                          </PaginationItem>
+                        </div>
+                        <div className="flex flex-row">
+                          {Array.from({ length: totalPages }, (_, index) => (
+                            <PaginationItem key={index + 1}>
+                              <PaginationLink 
+                                href="#" 
+                                onClick={() => handlePageChange(index + 1)} 
+                                isActive={currentPage === index + 1}
+                              >
+                                {index + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          {totalPages > 5 && currentPage < totalPages - 2 && (
+                            <PaginationItem>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )}
                         </div>
                       </div>
                     </PaginationContent>
@@ -397,14 +484,14 @@ export function OrderList({ orders }: OrdersTableProps) {
                         <TableRow key={order.id}>
                           <TableCell className="">
                             <span className="font-medium block">{order.title}</span>
-                            <span className="text-sm block">{order.description || 'Sin descripción'}</span>
+                            <span className="text-sm block">{order.description ?? 'Sin descripción'}</span>
                           </TableCell>
                           <TableCell>
                             <span className="text-sm block">#{order.id}</span>
                           </TableCell>
                           <TableCell>
-                            <span className="font-medium block">{order.customer_name || 'Sin nombre'}</span>
-                            <span className="text-sm block">{order.customer_organization || 'Sin organización'}</span>
+                            <span className="font-medium block">{order.customer_name ?? 'Sin nombre'}</span>
+                            <span className="text-sm block">{order.customer_organization ?? 'Sin organización'}</span>
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
                             <DropdownMenu>
@@ -452,7 +539,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                   </Table>
                 </CardContent>
                 <CardFooter>
-                  <Pagination>
+                  {/* <Pagination>
                     <PaginationContent>
                       <div className="space-between flex flex-row justify-between w-full">
                         <div>
@@ -477,6 +564,42 @@ export function OrderList({ orders }: OrdersTableProps) {
                           <PaginationItem>
                             <PaginationLink href="#">10</PaginationLink>
                           </PaginationItem>
+                        </div>
+                      </div>
+                    </PaginationContent>
+                  </Pagination> */}
+                  <Pagination>
+                    <PaginationContent>
+                      <div className="space-between flex flex-row justify-between w-full">
+                        <div>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              href="#" 
+                              onClick={() => handlePageChange(Math.max(currentPage - 1, 1))} 
+                            />
+                            <PaginationNext 
+                              href="#" 
+                              onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))} 
+                            />
+                          </PaginationItem>
+                        </div>
+                        <div className="flex flex-row">
+                          {Array.from({ length: totalPages }, (_, index) => (
+                            <PaginationItem key={index + 1}>
+                              <PaginationLink 
+                                href="#" 
+                                onClick={() => handlePageChange(index + 1)} 
+                                isActive={currentPage === index + 1}
+                              >
+                                {index + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          {totalPages > 5 && currentPage < totalPages - 2 && (
+                            <PaginationItem>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )}
                         </div>
                       </div>
                     </PaginationContent>

@@ -25,6 +25,11 @@ import { Input } from '@kit/ui/input';
 import { Search, ArrowUp, Link2 } from 'lucide-react';
 import { Separator } from '@kit/ui/separator';
 import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
@@ -159,28 +164,29 @@ export function ServicesTable({ services }: ServicesTableProps) {
     },
   });
 
+  const { pageIndex } = table.getState().pagination;
+  const pageCount = table.getPageCount();
+  const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
+
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 justify-between">
-        <div className='flex px-2 gap-4 '>
-          <div className='relative max-w-sm'>
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
-            <Input
-              placeholder="Buscar servicios"
-              value={
-                table.getColumn("name")?.getFilterValue() as string
-              }
-              onChange={(event) => {
-                table.getColumn("name")?.setFilterValue(event.target.value);
-              }}
-              className="pl-10"
-            />
-          </div>
-          <Button>
-            <Link href="/services/create">{t('createService')}</Link>
-          </Button>
-          {/* <CreateServiceDialog  propietary_organization_id={importantPropietaryOrganizationId ?? ''}/> */}
+      <div className="flex items-center py-4 justify-end gap-4">
+        <div className='relative max-w-sm'>
+          <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
+          <Input
+            placeholder="Buscar servicios"
+            value={
+              table.getColumn("name")?.getFilterValue() as string
+            }
+            onChange={(event) => {
+              table.getColumn("name")?.setFilterValue(event.target.value);
+            }}
+            className="pl-10"
+          />
         </div>
+        <Button>
+          <Link href="/services/create">{t('createService')}</Link>
+        </Button>
       </div>
       <Separator />
       <div className="rounded-md border mt-4">
@@ -233,34 +239,55 @@ export function ServicesTable({ services }: ServicesTableProps) {
           </TableBody>
         </Table>
       </div>
-       <div className="flex items-center justify-between px-2 py-4">
-          <div className="flex items-center gap-2">
-            <PaginationPrevious
-              onClick={() => table.previousPage()}
-              isActive={table.getCanPreviousPage()}
-            >
-              {t('previous')}
-            </PaginationPrevious>
-
-            <span className="text-sm font-medium">
-              {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-            </span>
-
-            <PaginationNext
-              onClick={() => {
-                if (table.getCanNextPage()) {
-                  table.nextPage();
-                }
-              }}
-              isActive={table.getCanNextPage()}
-              className={`${
-                !table.getCanNextPage() ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {t('next')}
-            </PaginationNext>
-          </div>
-        </div>
+      <div className="flex justify-between items-center py-4">
+        <Pagination>
+          <PaginationContent className="flex justify-between items-center w-full">
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (table.getCanPreviousPage()) {
+                    table.previousPage();
+                  }
+                }}
+              />
+            </PaginationItem>
+            <div className="flex-1 flex justify-center">
+              {pages.map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    isActive={pageIndex === page - 1}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      table.setPageIndex(page - 1);
+                    }}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              {pageCount > 3 && pageIndex < pageCount - 2 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+            </div>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (table.getCanNextPage()) {
+                    table.nextPage();
+                  }
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

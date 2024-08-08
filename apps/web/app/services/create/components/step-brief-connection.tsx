@@ -98,7 +98,7 @@ export default function BriefConnectionStep() {
       const serviceId = service.id;
 
       await addBriefToService(serviceId);
-      window.location.reload();
+      //window.location.reload();
       // onSubmit()
     } catch (error) {
       console.error(error);

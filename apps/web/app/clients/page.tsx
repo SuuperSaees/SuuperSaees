@@ -32,14 +32,14 @@ export const generateMetadata = async () => {
 
     const filteredAccounts = accountsData?.filter(account => account.id !== userData.user!.id);
 
-    const accountIds = filteredAccounts?.map(account => account.primary_owner_user_id) || []; 
+    const accountIds = filteredAccounts?.map(account => account.id) ?? []; 
 
-    const accountNames = filteredAccounts?.map(account => account.name) || [];
+    const accountNames = filteredAccounts?.map(account => account.name) ?? [];
 
     const { data: dataClients} = await client
     .from('clients')
     .select()
-    .eq('propietary_organization_id', userData.user!.id);
+    .eq('propietary_organization_id', accountIds[0] ?? '');
 
     return (
       <PageBody>

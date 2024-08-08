@@ -20,8 +20,11 @@
     "active": "Activo",
     "draft": "En borrador",
     "step_type_of_service": "Tipo de servicio",
+    "step_type_of_service_title": "¿Cómo quieres vender tu próximo servicio?",
     "step_service_details": "Detalles del servicio",
+    "step_service_details_title": "Detalles del servicio",
     "step_service_price": "Configuración de precios",
+    
     "step_connect_briefs": "Conectar briefs",
     "single_sale": "Venta única",
     "single_sale_description": "Vende tus servicios con un único pago, ideal para proyectos puntuales que no requieren seguimiento continuo.",
@@ -30,8 +33,9 @@
     "next": "Siguiente",
     "previous": "Anterior",
     "service_image": "Imagen del servicio",
-    "service_name": "Nombre del servicio",
-    "service_description": "Descripción del servicio",
+    "service_image_recommendation": "Recomendado 390x190 px.",
+    "service_name": "Nombre del servicio *",
+    "service_description": "Descripción del servicio *",
     "step_connect_briefs_description": "Briefs conectados a este servicio",
     "addBrief": "Añadir brief",
     "insert_price": "Precio *",
@@ -63,7 +67,7 @@
     "months": "Meses",
     "years": "Años",
     "select_recurrence": "Selecciona la recurrencia",
-    "test_period_offert": "Ofrecer período de prueba",
+    "test_period_offert": "Ofrecer un período de prueba",
     "test_period_price": "Precio del período de prueba *",
     "test_period_description": "Establece $0 para una prueba gratuita.",
     "test_period_time": "Tiempo de la prueba gratuita",
@@ -71,7 +75,8 @@
     "max_number_of_simultaneous_orders_description": "Déjalo en blanco si permites pedidos simultáneos ilimitados para este servicio.",
     "max_number_of_monthly_orders": "Máximo número de pedidos al mes *",
     "max_number_of_monthly_orders_description": "Déjalo en blanco si permites pedidos ilimitados por mes para esta suscripción.",
-    "select_unit_of_measurement": "Días"
+    "select_unit_of_measurement": "Días",
+    "upload_image": "Subir"
 
 }
   
