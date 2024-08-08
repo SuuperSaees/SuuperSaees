@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react';
 
+import Link from 'next/link';
+
 import { addServiceBriefs } from 'node_modules/@kit/team-accounts/src/server/actions/briefs/create/create-briefs';
 import { getPrimaryOwnerId } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
 import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
 
+// import { z } from 'zod';
 import { getSupabaseBrowserClient } from '@kit/supabase/browser-client';
 import { Button } from '@kit/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@kit/ui/form';
 import {
-  createStepSchema,
   useMultiStepFormContext,
 } from '@kit/ui/multi-step-form';
 
@@ -20,29 +21,11 @@ import { Brief } from '~/lib/brief.types';
 import { Database } from '~/lib/database.types';
 
 import { Combobox } from './combobox';
+import { FormSchema } from './multiform-component';
 
-//Delete this and import from common source for multistep form
-const FormSchema = createStepSchema({
-  step_type_of_service: z.object({
-    single_sale: z.boolean().default(false).optional(),
-    recurring_subscription: z.boolean().default(false).optional(),
-  }),
-  step_service_details: z.object({
-    service_image: z.string(),
-    service_name: z.string(),
-    service_description: z.string(),
-  }),
-  step_connect_briefs: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-    }),
-  ),
-});
 
 export default function BriefConnectionStep() {
   const { prevStep, form } = useMultiStepFormContext<typeof FormSchema>();
-  // const values = form.getValues();
   const { t } = useTranslation('services');
   const [loading, setLoading] = useState(false);
 
@@ -82,11 +65,13 @@ export default function BriefConnectionStep() {
         service_id: serviceId,
       }));
       await addServiceBriefs(formattedBriefsToConnect);
+      console.log('briefs added to service');
     } catch (error) {
       // reset the briefs
       setSelectedBriefs([]);
       form.setValue('step_connect_briefs', []);
       console.error(error);
+      throw error;
     }
   };
 
@@ -94,17 +79,17 @@ export default function BriefConnectionStep() {
     // Create the service
     // "services" needs to be modified when all the model is well defined and handled via prev steps
     try {
-      const { service_name } = form.getValues('step_service_details');
+      // const { service_name } = form.getValues('step_service_details');
       const propietary_organization_id = await getPrimaryOwnerId();
       if (!propietary_organization_id) {
         throw new Error('No propietary_organization_id provided');
       }
-
+      const values = form.getValues();
       const service = await createService({
-        name: service_name,
-        price: 50,
-        propietary_organization_id,
+        ...values,
       });
+
+      console.log('values', values);
 
       if (!service) {
         throw new Error('Service not created');
@@ -113,6 +98,8 @@ export default function BriefConnectionStep() {
       const serviceId = service.id;
 
       await addBriefToService(serviceId);
+      window.location.reload();
+      // onSubmit()
     } catch (error) {
       console.error(error);
     }
@@ -195,7 +182,15 @@ export default function BriefConnectionStep() {
           Previous
         </Button>
 
-        <Button onClick={createNewService}>{t('createService')}</Button>
+        <Link
+          type="button"
+          onClick={createNewService}
+          href={'/services'}
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50
+          px-4"
+        >
+          {t('createService')}
+        </Link>
       </div>
     </section>
   );

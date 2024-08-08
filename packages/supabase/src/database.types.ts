@@ -816,31 +816,85 @@ export type Database = {
       }
       services: {
         Row: {
+          allowed_orders: number | null
           created_at: string
+          credit_based: boolean | null
+          credits: number | null
+          hours: number | null
           id: number
+          max_number_of_monthly_orders: number | null
+          max_number_of_simultaneous_orders: number | null
           name: string | null
           number_of_clients: number | null
           price: number | null
           propietary_organization_id: string | null
+          purchase_limit: number
+          recurrence: string | null
+          recurring_subscription: boolean | null
+          service_description: string | null
+          service_image: string | null
+          single_sale: boolean | null
+          standard: boolean
           status: string | null
+          test_period: boolean | null
+          test_period_duration: number | null
+          test_period_duration_unit_of_measurement: string | null
+          test_period_price: number | null
+          time_based: boolean | null
         }
         Insert: {
+          allowed_orders?: number | null
           created_at?: string
+          credit_based?: boolean | null
+          credits?: number | null
+          hours?: number | null
           id?: number
+          max_number_of_monthly_orders?: number | null
+          max_number_of_simultaneous_orders?: number | null
           name?: string | null
           number_of_clients?: number | null
           price?: number | null
           propietary_organization_id?: string | null
+          purchase_limit?: number
+          recurrence?: string | null
+          recurring_subscription?: boolean | null
+          service_description?: string | null
+          service_image?: string | null
+          single_sale?: boolean | null
+          standard: boolean
           status?: string | null
+          test_period?: boolean | null
+          test_period_duration?: number | null
+          test_period_duration_unit_of_measurement?: string | null
+          test_period_price?: number | null
+          time_based?: boolean | null
         }
         Update: {
+          allowed_orders?: number | null
           created_at?: string
+          credit_based?: boolean | null
+          credits?: number | null
+          hours?: number | null
           id?: number
+          max_number_of_monthly_orders?: number | null
+          max_number_of_simultaneous_orders?: number | null
           name?: string | null
           number_of_clients?: number | null
           price?: number | null
           propietary_organization_id?: string | null
+          purchase_limit?: number
+          recurrence?: string | null
+          recurring_subscription?: boolean | null
+          service_description?: string | null
+          service_image?: string | null
+          single_sale?: boolean | null
+          standard?: boolean
           status?: string | null
+          test_period?: boolean | null
+          test_period_duration?: number | null
+          test_period_duration_unit_of_measurement?: string | null
+          test_period_price?: number | null
+          time_based?: boolean | null
         }
         Relationships: []
       }

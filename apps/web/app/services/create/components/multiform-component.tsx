@@ -31,7 +31,6 @@ import {
 import { Stepper } from '@kit/ui/stepper';
 import { Textarea } from '@kit/ui/textarea';
 
-import { createService } from '../../../../../../packages/features/team-accounts/src/server/actions/services/create/create-service-server';
 import UploadImageComponent from '../../../../../../packages/features/team-accounts/src/server/actions/services/create/upload-image';
 import CreditBasedRecurringSubscription from './recurring_subscription/credit_based';
 import StandardRecurringSubscription from './recurring_subscription/standard';
@@ -41,7 +40,7 @@ import Standard from './single_sale/standard';
 import TimeBased from './single_sale/time_based';
 import BriefConnectionStep from './step-brief-connection';
 
-const FormSchema = createStepSchema({
+export const FormSchema = createStepSchema({
   step_type_of_service: z.object({
     single_sale: z.boolean().default(false),
     recurring_subscription: z.boolean().default(false),
@@ -68,6 +67,11 @@ const FormSchema = createStepSchema({
     max_number_of_simultaneous_orders: z.number(),
     max_number_of_monthly_orders: z.number(),
   }),
+  step_connect_briefs: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+    })),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -108,10 +112,7 @@ export function MultiStepFormDemo() {
     mode: 'onBlur',
   });
 
-  async function onSubmit(values: z.infer<typeof FormSchema>) {
-    await createService({
-      ...values,
-    });
+  function onSubmit() {
     window.location.reload();
   }
 
@@ -155,12 +156,12 @@ export function MultiStepFormDemo() {
         <PricingStep />
       </MultiStepFormStep>
 
-      <MultiStepFormStep name="review">
+      {/* <MultiStepFormStep name="review">
         <ReviewStep />
-      </MultiStepFormStep>
+      </MultiStepFormStep> */}
 
       <MultiStepFormStep name="connect_briefs">
-        <BriefConnectionStep />
+        <BriefConnectionStep  />
       </MultiStepFormStep>
     </MultiStepForm>
   );
@@ -544,101 +545,6 @@ function PricingStep() {
         <Button onClick={nextStep}>{t('next')}</Button>
       </div>
     </Form>
-  );
-}
-
-function ReviewStep() {
-  const { prevStep, form } = useMultiStepFormContext<typeof FormSchema>();
-  const values = form.getValues();
-  return (
-    <div className={'flex flex-col space-y-4'}>
-      <div className={'flex flex-col space-y-4'}>
-        <div>Great! Please review the values.</div>
-        <div className={'flex flex-col space-y-2 text-sm'}>
-          <div className="flex flex-col">
-            {/* <div><span className='font-bold'>Single Sale: </span> <span>{values.step_type_of_service.single_sale ? 'Sí' : 'No'}</span></div> */}
-            <div>
-              <span className="font-bold">Recurring Subscription: </span>{' '}
-              <span>
-                {values.step_type_of_service.recurring_subscription
-                  ? 'Sí'
-                  : 'No'}
-              </span>
-            </div>
-            <div>
-              <span className="font-bold">Service Name: </span>{' '}
-              <span>{values.step_service_details.service_name}</span>
-            </div>
-            {/* <div><span className='font-bold'>Service Image: </span> <span>{values.step_service_details.service_image}</span></div> */}
-            <div>
-              <span className="font-bold">Service Description: </span>{' '}
-              <span>{values.step_service_details.service_description}</span>
-            </div>
-            {/* <div><span className='font-bold'>Standard: </span> <span>{values.step_service_price.standard ? 'Sí' : 'No'}</span></div> */}
-            <div>
-              <span className="font-bold">Price: </span>{' '}
-              <span>{values.step_service_price.price}</span>
-            </div>
-            {/* <div><span className='font-bold'>Purchase Limit: </span> <span>{values.step_service_price.purchase_limit}</span></div> */}
-            {/* <div><span className='font-bold'>Allowed Orders: </span> <span>{values.step_service_price.allowed_orders}</span></div> */}
-            {/* <div><span className='font-bold'>Time Based: </span> <span>{values.step_service_price.time_based ? 'Sí' : 'No'}</span></div> */}
-            {/* <div><span className='font-bold'>Hours: </span> <span>{values.step_service_price.hours}</span></div> */}
-            <div>
-              <span className="font-bold">Credit Based: </span>{' '}
-              <span>
-                {values.step_service_price.credit_based ? 'Sí' : 'No'}
-              </span>
-            </div>
-            <div>
-              <span className="font-bold">Credits: </span>{' '}
-              <span>{values.step_service_price.credits}</span>
-            </div>
-            <div>
-              <span className="font-bold">Recurrence: </span>{' '}
-              <span>{values.step_service_price.recurrence}</span>
-            </div>
-            <div>
-              <span className="font-bold">Test Period: </span>{' '}
-              <span>{values.step_service_price.test_period ? 'Sí' : 'No'}</span>
-            </div>
-            <div>
-              <span className="font-bold">Test Period Duration: </span>{' '}
-              <span>
-                {values.step_service_price.test_period_duration}{' '}
-                {
-                  values.step_service_price
-                    .test_period_duration_unit_of_measurement
-                }
-              </span>
-            </div>
-            <div>
-              <span className="font-bold">Test Period Price: </span>{' '}
-              <span>{values.step_service_price.test_period_price}</span>
-            </div>
-            <div>
-              <span className="font-bold">
-                Max Number of Simultaneous Orders:{' '}
-              </span>{' '}
-              <span>
-                {values.step_service_price.max_number_of_simultaneous_orders}
-              </span>
-            </div>
-            <div>
-              <span className="font-bold">Max Number of Monthly Orders: </span>{' '}
-              <span>
-                {values.step_service_price.max_number_of_monthly_orders}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end space-x-2">
-        <Button type={'button'} variant={'outline'} onClick={prevStep}>
-          Back
-        </Button>
-        <Button type={'submit'}>Create Account</Button>
-      </div>
-    </div>
   );
 }
 
