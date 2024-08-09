@@ -1,5 +1,4 @@
 import { PageBody } from '@kit/ui/page';
-import { PlusCircle } from 'lucide-react';
 import { Trans } from '@kit/ui/trans';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
@@ -20,18 +19,9 @@ import { Button } from '@kit/ui/button';
 import { loadMembersPageData } from './_lib/server/members-page.loader';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { TeamAccountLayoutPageHeader } from './components/team-account-layout-page-header';
-import { ArrowRight, BellIcon } from 'lucide-react';
-import { Separator } from '@kit/ui/separator';
-import { ArrowLeft } from 'lucide-react';
-import { ScrollArea } from "@kit/ui/scroll-area" 
-import { Badge } from '@kit/ui/badge';
-import { User } from '@supabase/supabase-js';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
-  const tags = Array.from({ length: 50 }).map(
-    (_, i, a) => `v1.2.0-beta.${a.length - i}`
-  )
     return {
       title: i18n.t('clients:title'),
     };
@@ -55,15 +45,12 @@ type Account = {
 };
 
   async function ClientsMembersPage() {
-    const tags = Array.from({ length: 50 }).map(
-      (_, i, a) => `v1.2.0-beta.${a.length - i}`
-    )
 
     const client = getSupabaseServerComponentClient();
 
     const { data: userData } = await client.auth.getUser();
 
-    const { data, error } = await client
+    const { data } = await client
     .from('accounts')
     .select()
     .eq('primary_owner_user_id', userData.user!.id); 

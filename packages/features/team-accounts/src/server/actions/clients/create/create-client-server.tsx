@@ -8,7 +8,7 @@ export const createClient = async (clientData: {
     id?: string
     created_at?: string
     name: string
-    picture_url: string | null
+    picture_url: string
     client_organization: string
     email: string
     role: string
