@@ -198,7 +198,7 @@ export function SidebarNavigation({
           return (
             <SidebarGroup
               key={item.label}
-              label={<Trans i18nKey={item.label} defaults={item.label} />}
+              label={<Trans i18nKey={item.label} defaults={item.label} key={item.label + index}/>}
               collapsible={item.collapsible}
               collapsed={item.collapsed}
               Icon={item.Icon}
