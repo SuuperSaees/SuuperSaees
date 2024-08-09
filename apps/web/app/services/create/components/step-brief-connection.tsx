@@ -13,16 +13,14 @@ import { useTranslation } from 'react-i18next';
 import { getSupabaseBrowserClient } from '@kit/supabase/browser-client';
 import { Button } from '@kit/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@kit/ui/form';
-import {
-  useMultiStepFormContext,
-} from '@kit/ui/multi-step-form';
+import { useMultiStepFormContext } from '@kit/ui/multi-step-form';
+import { Spinner } from '@kit/ui/spinner';
 
 import { Brief } from '~/lib/brief.types';
 import { Database } from '~/lib/database.types';
 
 import { Combobox } from './combobox';
 import { FormSchema } from './multiform-component';
-
 
 export default function BriefConnectionStep() {
   const { prevStep, form } = useMultiStepFormContext<typeof FormSchema>();
@@ -137,57 +135,54 @@ export default function BriefConnectionStep() {
   }, [form]);
 
   return (
-    <section
-      className={
-        'mx-auto flex h-full max-w-3xl flex-col space-y-4 text-gray-600'
-      }
-    >
-      <p>{t('step_connect_briefs_description')}</p>
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        selectedBriefs?.map((selectedBrief) => (
-          <div
-            key={selectedBrief.id}
-            className="rounded-md border border-gray-300 p-2"
-          >
-            <p>{selectedBrief.name}</p>
-          </div>
-        ))
-      )}
+    <section className={'full w-full'}>
+      <div className="mx-auto flex h-full max-w-3xl flex-col space-y-4 text-gray-600">
+        <p className="font-semibold">{t('step_connect_briefs_description')}</p>
+        {loading ? (
+          <Spinner className="mx-auto w-5" />
+        ) : (
+          selectedBriefs?.map((selectedBrief) => (
+            <div
+              key={selectedBrief.id}
+              className="rounded-md border border-gray-300 p-2"
+            >
+              <p>{selectedBrief.name}</p>
+            </div>
+          ))
+        )}
 
-      <Form {...form}>
-        <FormField
-          control={form.control}
-          name="step_connect_briefs"
-          render={() => {
-            return (
-              <FormItem>
-                <FormControl>
-                  <Combobox
-                    options={briefOptions}
-                    title={t('addBrief')}
-                    className="justify-start gap-1 border-none pl-0 shadow-none"
-                    resetOnSelect
-                  />
-                </FormControl>
-              </FormItem>
-            );
-          }}
-        />
-      </Form>
+        <Form {...form}>
+          <FormField
+            control={form.control}
+            name="step_connect_briefs"
+            render={() => {
+              return (
+                <FormItem>
+                  <FormControl>
+                    <Combobox
+                      options={briefOptions}
+                      title={t('addBrief')}
+                      className="justify-start gap-1 border-none pl-0 shadow-none"
+                      resetOnSelect
+                    />
+                  </FormControl>
+                </FormItem>
+              );
+            }}
+          />
+        </Form>
+      </div>
 
-      <div className="mt-4 flex justify-end space-x-2">
+      <div className="mt-4 flex justify-between space-x-2">
         <Button type="button" variant="outline" onClick={prevStep}>
-          Previous
+          {t('previous')}
         </Button>
 
         <Link
           type="button"
           onClick={createNewService}
           href={'/services'}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50
-          px-4"
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
         >
           {t('createService')}
         </Link>
