@@ -227,6 +227,81 @@ export type Database = {
           },
         ]
       }
+      brief_form_fields: {
+        Row: {
+          brief_id: string
+          created_at: string
+          form_field_id: string
+          id: string
+        }
+        Insert: {
+          brief_id: string
+          created_at?: string
+          form_field_id: string
+          id?: string
+        }
+        Update: {
+          brief_id?: string
+          created_at?: string
+          form_field_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brief_form_fields_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brief_form_fields_form_field_id_fkey"
+            columns: ["form_field_id"]
+            isOneToOne: false
+            referencedRelation: "form_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brief_responses: {
+        Row: {
+          brief_id: string
+          created_at: string
+          form_field_id: string
+          id: string
+          response: string
+        }
+        Insert: {
+          brief_id: string
+          created_at?: string
+          form_field_id: string
+          id?: string
+          response: string
+        }
+        Update: {
+          brief_id?: string
+          created_at?: string
+          form_field_id?: string
+          id?: string
+          response?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brief_responses_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brief_responses_form_field_id_fkey"
+            columns: ["form_field_id"]
+            isOneToOne: false
+            referencedRelation: "form_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       briefs: {
         Row: {
           created_at: string
@@ -449,6 +524,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      form_fields: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          label: string
+          options: Json[] | null
+          placeholder: string | null
+          type: Database["public"]["Enums"]["field_types"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          label: string
+          options?: Json[] | null
+          placeholder?: string | null
+          type?: Database["public"]["Enums"]["field_types"]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          label?: string
+          options?: Json[] | null
+          placeholder?: string | null
+          type?: Database["public"]["Enums"]["field_types"]
+        }
+        Relationships: []
       }
       invitations: {
         Row: {
@@ -1380,6 +1485,7 @@ export type Database = {
         | "tasks.delete"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
+      field_types: "date" | "multiple_choice" | "select" | "text"
       notification_channel: "in_app" | "email"
       notification_type: "info" | "warning" | "error"
       payment_status: "pending" | "succeeded" | "failed"
