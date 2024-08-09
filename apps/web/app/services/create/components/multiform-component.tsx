@@ -38,8 +38,9 @@ import TimeBasedRecurringSubscription from './recurring_subscription/time_based'
 import CreditBased from './single_sale/credit_based';
 import Standard from './single_sale/standard';
 import TimeBased from './single_sale/time_based';
-import BriefConnectionStep from './step-brief-connection';
+// import BriefConnectionStep from './step-brief-connection';
 import Link from 'next/link';
+import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
 
 export const FormSchema = createStepSchema({
   step_type_of_service: z.object({
@@ -68,11 +69,11 @@ export const FormSchema = createStepSchema({
     max_number_of_simultaneous_orders: z.number(),
     max_number_of_monthly_orders: z.number(),
   }),
-  step_connect_briefs: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-    })),
+  // step_connect_briefs: z.array(
+  //   z.object({
+  //     id: z.string(),
+  //     name: z.string(),
+  //   })),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -113,8 +114,11 @@ export function MultiStepFormDemo() {
     mode: 'onBlur',
   });
 
-  function onSubmit() {
-    window.location.reload();
+  async function onSubmit() {
+    // await createService({
+    //   ...form.getValues(),
+    // });
+    // window.location.reload();
   }
 
   return (
@@ -159,7 +163,7 @@ export function MultiStepFormDemo() {
                   t('step_type_of_service'),
                   t('step_service_details'),
                   t('step_service_price'),
-                  t('step_connect_briefs'),
+                  // t('step_connect_briefs'),
                 ]}
                 currentStep={currentStepIndex}
               />
@@ -180,9 +184,9 @@ export function MultiStepFormDemo() {
         <PricingStep />
       </MultiStepFormStep>
 
-      <MultiStepFormStep name="connect_briefs">
+      {/* <MultiStepFormStep name="connect_briefs">
         <BriefConnectionStep  />
-      </MultiStepFormStep>
+      </MultiStepFormStep> */}
     </MultiStepForm>
   );
 }
@@ -376,7 +380,8 @@ function DetailsStep() {
 
 function PricingStep() {
   const { t } = useTranslation('services');
-  const { form, nextStep, prevStep } = useMultiStepFormContext();
+  // const { form, nextStep, prevStep } = useMultiStepFormContext();
+  const { form, prevStep } = useMultiStepFormContext();
 
   type CheckboxName =
     | 'step_service_price.standard'
@@ -394,6 +399,13 @@ function PricingStep() {
     isSelected
       ? 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[2.948px] border-brand-600 bg-white'
       : 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[1.474px] border-gray-200 bg-white';
+
+  async function createServiceFunction() {
+    await createService({
+      ...form.getValues(),
+    });
+    // window.location.reload();
+  }
 
   return (
     <Form {...form}>
@@ -571,7 +583,16 @@ function PricingStep() {
           {t('previous')}
         </Button>
 
-        <Button onClick={nextStep}>{t('next')}</Button>
+        {/* <Button onClick={nextStep}>{t('next')}</Button> */}
+        {/* <Button type='submit' >{t('createService')}</Button> */}
+        <Link
+          // type="button"
+          onClick={createServiceFunction}
+          href={'/services'}
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+        >
+          {t('createService')}
+        </Link>
       </div>
     </Form>
   );

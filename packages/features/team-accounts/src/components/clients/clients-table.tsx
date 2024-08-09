@@ -38,7 +38,7 @@ import DeleteUserDialog from '../../../../../../packages/features/team-accounts/
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
 import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 import { useTranslation } from 'react-i18next';
-
+import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 
 const getUniqueOrganizations = (clients: Client[]) => {
   const organizationMap = new Map<string, Client>();
@@ -47,7 +47,6 @@ const getUniqueOrganizations = (clients: Client[]) => {
     if (!organizationMap.has(client.client_organization)) {
       organizationMap.set(client.client_organization, client);
     } else {
-      const existingClient = organizationMap.get(client.client_organization);
       if (client.role === 'leader') {
         organizationMap.set(client.client_organization, client);
       }
@@ -90,7 +89,7 @@ type Client = {
 
 
 // CLIENTS TABLE
-  const clientColumns = (t: any): ColumnDef<Client>[] => [
+  const clientColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
   {
     accessorKey: "name",
     header: t('clientName'),
@@ -110,7 +109,8 @@ type Client = {
     accessorKey: "role",
     header: t("role"),
     cell: ({ row }) => {
-      const role = row.getValue("role");
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const role = row.getValue("role") as string;
       return (
         <div className="capitalize">
           {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
@@ -209,7 +209,7 @@ type Client = {
 ]
 
 // ORGANIZATIONS TABLE
-  const organizationColumns = (t: any): ColumnDef<Client>[] => [
+  const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
   {
     accessorKey: "client_organization",
     header: t("organizationName"),
@@ -270,9 +270,7 @@ type Client = {
     id: "actions",
     header: t("actions"),
     enableHiding: false,
-    cell: ({ row }) => {
-      const client = row.original;
- 
+    cell: () => {
       return (
         <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
           <Pen className="h-4 w-4 text-gray-600" />
@@ -422,34 +420,6 @@ export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTab
           </TableBody>
         </Table>
       </div>
-       {/* <div className="flex items-center justify-between px-2 py-4">
-          <div className="flex items-center gap-2">
-            <PaginationPrevious
-              onClick={() => table.previousPage()}
-              isActive={table.getCanPreviousPage()}
-            >
-              {t('previous')}
-            </PaginationPrevious>
-
-            <span className="text-sm font-medium">
-              {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-            </span>
-
-            <PaginationNext
-              onClick={() => {
-                if (table.getCanNextPage()) {
-                  table.nextPage();
-                }
-              }}
-              isActive={table.getCanNextPage()}
-              className={`${
-                !table.getCanNextPage() ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {t('next')}
-            </PaginationNext>
-          </div>
-        </div> */}
         <div className="flex justify-between items-center py-4">
         <Pagination>
           <PaginationContent className="flex justify-between items-center w-full">

@@ -12,19 +12,12 @@ import { PageBody } from '@kit/ui/page';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
-  const tags = Array.from({ length: 50 }).map(
-    (_, i, a) => `v1.2.0-beta.${a.length - i}`
-  )
     return {
       title: i18n.t('clients:title'),
     };
 };
 
   async function ClientsMembersPage() {
-    const tags = Array.from({ length: 50 }).map(
-      (_, i, a) => `v1.2.0-beta.${a.length - i}`
-    )
-    
     const client = getSupabaseServerComponentClient();
     const { data: userData } = await client.auth.getUser();
 

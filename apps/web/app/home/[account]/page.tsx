@@ -1,6 +1,4 @@
 import loadDynamic from 'next/dynamic';
-
-import { Button } from '@kit/ui/button';
 import { PageBody } from '@kit/ui/page';
 import { Spinner } from '@kit/ui/spinner';
 import { Trans } from '@kit/ui/trans';

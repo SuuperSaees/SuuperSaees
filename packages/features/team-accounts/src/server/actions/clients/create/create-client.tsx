@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@kit/ui/alert-dialog'; 
+import React, { useState } from 'react';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel } from '@kit/ui/alert-dialog'; 
 import { createClient } from './create-client-server';
 import { Button } from '@kit/ui/button';
 import { z } from "zod"
@@ -57,7 +57,7 @@ const CreateClientDialog = ( { propietary_organization, propietary_organization_
       async function onSubmit(values: z.infer<typeof formSchema>) {
         await createClient({
             ...values,
-            picture_url: null,
+            picture_url: "",
             propietary_organization,
             propietary_organization_id
         })

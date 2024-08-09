@@ -1,5 +1,5 @@
 import {
-  Briefcase,
+  // Briefcase,
   CreditCard,
   Home,
   Layers,
@@ -58,11 +58,11 @@ const routes = [
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
   },
-  {
-    label: 'Briefs',
-    path: pathsConfig.app.briefs,
-    Icon: <Briefcase className={iconClasses} />,
-  },
+  // {
+  //   label: 'Briefs',
+  //   path: pathsConfig.app.briefs,
+  //   Icon: <Briefcase className={iconClasses} />,
+  // },
 ];
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {
