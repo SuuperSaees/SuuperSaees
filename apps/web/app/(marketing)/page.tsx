@@ -27,7 +27,7 @@ function Home() {
       <Hero
         pill={
           <Pill label={'New'}>
-            <span>The leading SssaS Starter Kit for ambitious developers</span>
+            <span>The leading SaaS Startser Kit for ambitious developers</span>
           </Pill>
         }
         title={
