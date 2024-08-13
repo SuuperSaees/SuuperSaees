@@ -14,7 +14,7 @@ export function HomeAddAccountButton() {
       <Button size="sm" onClick={() => setIsAddingAccount(true)}>
         <Trans i18nKey={'account:createTeamButtonLabel'} />
       </Button>
-
+      
       <CreateTeamAccountDialog
         isOpen={isAddingAccount}
         setIsOpen={setIsAddingAccount}

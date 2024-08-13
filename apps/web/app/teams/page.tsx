@@ -19,158 +19,168 @@ import { Button } from '@kit/ui/button';
 import { loadMembersPageData } from './_lib/server/members-page.loader';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { TeamAccountLayoutPageHeader } from './components/team-account-layout-page-header';
+import { BellIcon } from '@radix-ui/react-icons';
+import { Separator } from '@kit/ui/separator';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
-    return {
-      title: i18n.t('clients:title'),
-    };
+  return {
+    title: i18n.t('teams:team'),
+  };
 };
 
 type Account = {
-    id: string;
-    primary_owner_user_id: string;
-    name: string;
-    slug: string;
-    email: string | null;
-    is_personal_account: boolean;
-    updated_at: string | null;
-    created_at: string | null;
-    created_by: string | null;
-    updated_by: string | null;
-    picture_url: string | null;
-    public_data: object;
-    role_hierarchy_level: number;
-    permissions: Array<'roles.manage' | 'billing.manage' | 'settings.manage' | 'members.manage' | 'invites.manage'>;
+  id: string;
+  primary_owner_user_id: string;
+  name: string;
+  slug: string;
+  email: string | null;
+  is_personal_account: boolean;
+  updated_at: string | null;
+  created_at: string | null;
+  created_by: string | null;
+  updated_by: string | null;
+  picture_url: string | null;
+  public_data: object;
+  role_hierarchy_level: number;
+  permissions: Array<'roles.manage' | 'billing.manage' | 'settings.manage' | 'members.manage' | 'invites.manage'>;
 };
 
-  async function ClientsMembersPage() {
+async function ClientsMembersPage() {
 
-    const client = getSupabaseServerComponentClient();
+  const client = getSupabaseServerComponentClient();
 
-    const { data: userData } = await client.auth.getUser();
+  const { data: userData } = await client.auth.getUser();
 
-    const { data } = await client
+  const { data } = await client
     .from('accounts')
     .select()
-    .eq('primary_owner_user_id', userData.user!.id); 
+    .eq('primary_owner_user_id', userData.user!.id);
 
-    const { data: data2} = await client
+  const { data: data2 } = await client
     .from('accounts_memberships')
     .select()
-    .eq('user_id', userData.user!.id); 
+    .eq('user_id', userData.user!.id);
 
-    const account_role = data2!.length > 0 ? data2![0]?.account_role : null;
+  const account_role = data2!.length > 0 ? data2![0]?.account_role : null;
 
-    const { data: data3} = await client
+  const { data: data3 } = await client
     .from('role_permissions')
     .select('permission')
-    .eq('role', account_role!); 
+    .eq('role', account_role!);
 
-    const userPermissions = data3!.map(permission => permission.permission);
-    
-    const { data: data4} = await client
+  const userPermissions = data3!.map(permission => permission.permission);
+
+  const { data: data4 } = await client
     .from('roles')
     .select('hierarchy_level')
     .eq('name', account_role!);
 
-    const roleHierarchies = data4!.map(roleHierarchy => roleHierarchy.hierarchy_level);
-    const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
+  const roleHierarchies = data4!.map(roleHierarchy => roleHierarchy.hierarchy_level);
+  const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
 
-    const filteredData = data ? data.filter(item => item.id !== userData.user!.id) : [];
+  const filteredData = data ? data.filter(item => item.id !== userData.user!.id) : [];
 
-    const accountData = filteredData.length > 0 ? filteredData[0] : {};
+  const accountData = filteredData.length > 0 ? filteredData[0] : {};
 
-    const account = {
-        ...(accountData as Account),
-        permissions: userPermissions,
-        role_hierarchy_level: roleHierarchyLevel,
-    };
+  const account = {
+    ...(accountData as Account),
+    permissions: userPermissions,
+    role_hierarchy_level: roleHierarchyLevel,
+  };
 
-    const slug = account.slug;
-    
+  const slug = account.slug;
 
-    const [members, invitations, canAddMember, { user }] =
-        await loadMembersPageData(client, slug);
 
-  
-    const canManageRoles = account.permissions.includes('roles.manage');
-    const canManageInvitations = account.permissions.includes('invites.manage');
-  
-    const isPrimaryOwner = account.primary_owner_user_id === user.id;
-    const currentUserRoleHierarchy = account.role_hierarchy_level;
+  const [members, invitations, canAddMember, { user }] =
+    await loadMembersPageData(client, slug);
 
-    return (
-      <>
-        <TeamAccountLayoutPageHeader
-          title={<Trans i18nKey={'common:teamsTabLabel'} />}
-          account={account.slug}
-        />
-  
-        <PageBody>
-          <div className={'flex w-full max-w-4xl flex-col space-y-6 pb-32'}>
-            <Card>
-              <CardHeader className={'flex flex-row justify-between'}>
-                <div className={'flex flex-col space-y-1.5'}>
-                  <CardTitle>
-                    <Trans i18nKey={'common:membersTabLabel'} />
-                  </CardTitle>
+
+  const canManageRoles = account.permissions.includes('roles.manage');
+  const canManageInvitations = account.permissions.includes('invites.manage');
+
+  const isPrimaryOwner = account.primary_owner_user_id === user.id;
+  const currentUserRoleHierarchy = account.role_hierarchy_level;
+
+  return (
+    <>
+      <PageBody>
+        <div className='p-[35px]'>
+          <div className="flex justify-between items-center mb-[32px]">
+            <div className="flex-grow">
+              <span>
+                <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
+                  <Trans i18nKey={'teams:team'} />
                 </div>
-  
-                <If condition={canManageInvitations && canAddMember}>
-                  <InviteMembersDialogContainer
-                    userRoleHierarchy={currentUserRoleHierarchy ?? 0}
-                    accountSlug={account.slug}
-                  >
-                    <Button size={'sm'} data-test={'invite-members-form-trigger'}>
-                      <span>
-                        <Trans i18nKey={'teams:inviteMembersButton'} />
-                      </span>
-                    </Button>
-                  </InviteMembersDialogContainer>
-                </If>
-              </CardHeader>
-  
-              <CardContent>
-                <AccountMembersTable
-                  userRoleHierarchy={currentUserRoleHierarchy ?? 0}
-                  currentUserId={user.id}
-                  currentAccountId={account.id}
-                  members={members}
-                  isPrimaryOwner={isPrimaryOwner}
-                  canManageRoles={canManageRoles}
-                />
-              </CardContent>
-            </Card>
-  
-            <Card>
-              <CardHeader className={'flex flex-row justify-between'}>
-                <div className={'flex flex-col space-y-1.5'}>
-                  <CardTitle>
-                    <Trans i18nKey={'teams:pendingInvitesHeading'} />
-                  </CardTitle>
-  
-                  <CardDescription>
-                    <Trans i18nKey={'teams:pendingInvitesDescription'} />
-                  </CardDescription>
-                </div>
-              </CardHeader>
-  
-              <CardContent>
-                <AccountInvitationsTable
-                  permissions={{
-                    canUpdateInvitation: canManageRoles,
-                    canRemoveInvitation: canManageRoles,
-                    currentUserRoleHierarchy: currentUserRoleHierarchy ?? 0,
-                  }}
-                  invitations={invitations}
-                />
-              </CardContent>
-            </Card>
+              </span>
+            </div>
+            <div className="flex space-x-4">
+              <span>
+                <Button variant="outline">
+                  Tu prueba gratuita termina en xx dias
+                </Button>
+              </span>
+              <span>
+                <Button variant="outline" size="icon">
+                  <BellIcon className="h-4 w-4" />
+                </Button>
+              </span>
+            </div>
           </div>
-        </PageBody>
-      </>
-    );
-  }
-  
-  export default withI18n(ClientsMembersPage);
+
+          <div className="w-full">
+            <div className="flex items-center py-4 justify-between">
+
+              <Button
+                variant='ghost'
+                className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+              >
+                <span className="text-sm font-semibold leading-5"><Trans i18nKey={'common:membersTabLabel'} /></span>
+              </Button>
+              
+              <If condition={canManageInvitations && canAddMember}>
+                <InviteMembersDialogContainer
+                  userRoleHierarchy={currentUserRoleHierarchy ?? 0}
+                  accountSlug={account.slug}
+                >
+                  <Button size={'sm'} data-test={'invite-members-form-trigger'}>
+                    <span>
+                      <Trans i18nKey={'teams:inviteMembersButton'} />
+                    </span>
+                  </Button>
+                </InviteMembersDialogContainer>
+              </If>
+            </div>
+          </div>
+
+          <Separator />
+          <div className='mt-4'>
+            <AccountMembersTable
+              userRoleHierarchy={currentUserRoleHierarchy ?? 0}
+              currentUserId={user.id}
+              currentAccountId={account.id}
+              members={members}
+              isPrimaryOwner={isPrimaryOwner}
+              canManageRoles={canManageRoles}
+            />
+          </div>
+
+
+          
+          <div className='mt-12'>
+            <AccountInvitationsTable
+              permissions={{
+                canUpdateInvitation: canManageRoles,
+                canRemoveInvitation: canManageRoles,
+                currentUserRoleHierarchy: currentUserRoleHierarchy ?? 0,
+              }}
+              invitations={invitations}
+            />
+          </div>
+        </div>
+      </PageBody>
+    </>
+  );
+}
+
+export default withI18n(ClientsMembersPage);
