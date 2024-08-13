@@ -16,6 +16,8 @@ export function useSignUpWithEmailAndPassword() {
   const mutationFn = async (params: Credentials) => {
     const { emailRedirectTo, captchaToken, ...credentials } = params;
 
+    console.log('Email Redirect To:', emailRedirectTo);
+
     const response = await client.auth.signUp({
       ...credentials,
       options: {
@@ -23,6 +25,8 @@ export function useSignUpWithEmailAndPassword() {
         captchaToken,
       },
     });
+
+    console.log(response)
 
     if (response.error) {
       throw response.error.message;

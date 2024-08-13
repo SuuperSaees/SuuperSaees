@@ -17,7 +17,7 @@ import { PasswordSignUpForm } from './password-sign-up-form';
 interface EmailPasswordSignUpContainerProps {
   displayTermsCheckbox?: boolean;
   defaultValues?: {
-    email: string;
+    email: string; 
   };
 
   onSignUp?: (userId?: string) => unknown;
@@ -40,7 +40,7 @@ export function EmailPasswordSignUpContainer({
   const loading = signUpMutation.isPending || redirecting.current;
 
   const onSignupRequested = useCallback(
-    async (credentials: { name:string; email: string; password: string }) => {
+    async (credentials: { email: string; password: string }) => {
       if (loading) {
         return;
       }
