@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Ellipsis } from 'lucide-react';
+import { Ellipsis, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Database } from '@kit/supabase/database';
@@ -25,6 +25,7 @@ import { RoleBadge } from '../members/role-badge';
 import { DeleteInvitationDialog } from './delete-invitation-dialog';
 import { RenewInvitationDialog } from './renew-invitation-dialog';
 import { UpdateInvitationDialog } from './update-invitation-dialog';
+import { Separator } from '@kit/ui/separator';
 
 type Invitations =
   Database['public']['Functions']['get_account_invitations']['Returns'];
@@ -58,19 +59,36 @@ export function AccountInvitationsTable({
   });
 
   return (
-    <div className={'flex flex-col space-y-2'}>
-      <Input
-        value={search}
-        onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
-        placeholder={t(`searchInvitations`)}
-      />
+    <div className={'flex flex-col space-y-4'}>
+      <div className="flex justify-between items-center">
+      <Button
+                  variant='ghost'
+                  className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+                >
+                  <span className="text-sm font-semibold leading-5"><Trans i18nKey={'teams:pendingInvitesHeading'} /></span>
+                </Button>
+        
+        <div className="relative flex-1 md:grow-0">
+          <Search className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
+            placeholder={t(`searchInvitations`)}
+            className='w-full rounded-lg bg-background pr-8 md:w-[200px] lg:w-[320px]'
+          />
+        </div>
+      </div>
+
+      <Separator className="mb-4 mt-4"/>
 
       <DataTable
         data-cy={'invitations-table'}
         columns={columns}
         data={filteredInvitations}
       />
-    </div>
+      </div>
+ 
+
   );
 }
 
