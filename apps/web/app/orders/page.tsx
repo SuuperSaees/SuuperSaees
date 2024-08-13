@@ -4,11 +4,14 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 import { HomeLayoutPageHeader } from '~/home/(user)/_components/home-page-header';
 import { OrderList } from './components/orders-list';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { Button } from '@kit/ui/button';
+import { BellIcon } from '@radix-ui/react-icons';
+
 
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
-
+  const title = i18n.t('orders:title');
   return {
     title: i18n.t('orders:title'),
   };
@@ -56,12 +59,32 @@ async function UserHomePage() {
 
   return (
     <>
-    <HomeLayoutPageHeader
-        title={`Te damos la bienvenida, ${accountName || ''}`}
-        description=""
-      />
     <PageBody>
-      <OrderList orders={enrichedOrdersData ?? []}></OrderList>
+    <div className='p-[35px]'>
+      <div className="flex justify-between items-center mb-[32px]">
+                  <div className="flex-grow">
+                      <span>
+                      <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
+                        Pedidos
+                      </div>
+                      </span>
+                  </div>
+                  <div className="flex space-x-4">
+                      <span>
+                          <Button variant="outline">
+                              Tu prueba gratuita termina en xx dias
+                          </Button>
+                      </span>
+                      <span>
+                          <Button variant="outline" size="icon">
+                              <BellIcon className="h-4 w-4" />
+                          </Button>
+                      </span>
+                  </div>
+              </div>
+            
+        <OrderList orders={enrichedOrdersData ?? []}></OrderList>
+      </div>
     </PageBody>
     </>
   );
