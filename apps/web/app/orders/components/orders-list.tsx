@@ -74,6 +74,7 @@ import { date } from "zod"
 import React, { useState } from "react"
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { useTranslation } from 'react-i18next';
+import { Separator } from "@kit/ui/separator"
 
 type OrdersTableProps = {
   orders: {
@@ -115,11 +116,11 @@ export function OrderList({ orders }: OrdersTableProps) {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">    
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+    <div className="flex min-h-screen w-full flex-col">    
+      <div className="flex flex-col py-4">
+        <main className="grid flex-1 items-start gap-4 md:gap-8">
           <Tabs defaultValue="open">
-            <div className="flex items-center">
+            <div className="flex items-center mb-4">
               <TabsList>
                 <TabsTrigger value="open">{t("openOrders")}</TabsTrigger>
                 <TabsTrigger value="completed">{t("completedOrders")}</TabsTrigger>
@@ -159,6 +160,8 @@ export function OrderList({ orders }: OrdersTableProps) {
                 </div>
               </div>
             </div>
+            <Separator />
+            <div className="mt-4">
             <TabsContent value="open">
               <Card x-chunk="dashboard-06-chunk-0">
                 <CardContent>
@@ -607,6 +610,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                 </CardFooter>
               </Card>
             </TabsContent>
+            </div>
           </Tabs>
           </main>
         </div>
