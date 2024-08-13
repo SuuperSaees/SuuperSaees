@@ -1,0 +1,37 @@
+'use client';
+
+import { ProfileAvatar } from '@kit/ui/profile-avatar';
+
+interface AvatarDisplayerProps {
+  displayName: string | null;
+  pictureUrl: string;
+  nickname?: string;
+  status?: 'online' | 'offline';
+  className?: string;
+}
+const AvatarDisplayer = ({
+  pictureUrl,
+  displayName,
+  nickname,
+  status,
+  className,
+}: AvatarDisplayerProps) => {
+  return (
+    <div
+      className={`relative flex h-fit w-fit items-start gap-2 ${
+        status
+          ? 'after:absolute after:bottom-1 after:left-7 after:h-3 after:w-3 after:rounded-full after:border-2 after:border-white'
+          : ''
+      } ${status === 'online' ? 'after:bg-green-400' : 'after:bg-gray-400'} ${className}`}
+    >
+      <ProfileAvatar displayName={displayName} pictureUrl={pictureUrl} />
+      <div className="flex flex-col">
+        {displayName && (
+          <span className="text-sm font-semibold">{displayName}</span>
+        )}
+        {nickname && <span className="text-sm text-gray-600">{nickname}</span>}
+      </div>
+    </div>
+  );
+};
+export default AvatarDisplayer;

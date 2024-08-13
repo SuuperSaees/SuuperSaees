@@ -14,6 +14,7 @@
   "statusLabel": "Estado",
   "assignedToLabel": "Asignado a",
   "dueDateLabel": "Fecha de vencimiento",
+
   "creation": {
     "title": "Crear pedido",
     "form": {
@@ -24,7 +25,12 @@
       "filesLabel": "Archivos",
       "filesPlaceholder": "Haz click o arrastra para subir un archivo SVG, PNG, JPG or GIF (max. 800x400px)",
       "submitMessage": "Crear pedido"
+    },
+    "details": {
+      "title": "Detalles del pedido",
+      "summary": "Resumen",
+      "createdAt": "Creado"
     }
   }
-  
+
 }
