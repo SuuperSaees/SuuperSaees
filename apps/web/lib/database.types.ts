@@ -525,6 +525,33 @@ export type Database = {
           },
         ]
       }
+      files: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          size: number
+          type: Database["public"]["Enums"]["file_types"]
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          size: number
+          type: Database["public"]["Enums"]["file_types"]
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          size?: number
+          type?: Database["public"]["Enums"]["file_types"]
+          url?: string
+        }
+        Relationships: []
+      }
       form_fields: {
         Row: {
           created_at: string
@@ -685,6 +712,39 @@ export type Database = {
           },
         ]
       }
+      order_files: {
+        Row: {
+          created_at: string
+          file_id: string
+          order_id: number
+        }
+        Insert: {
+          created_at?: string
+          file_id?: string
+          order_id: number
+        }
+        Update: {
+          created_at?: string
+          file_id?: string
+          order_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_files_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_files_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -795,37 +855,45 @@ export type Database = {
         Row: {
           assigned_to: string[] | null
           created_at: string
-          customer_id: string | null
-          description: string | null
+          customer_id: string
+          description: string
           due_date: string | null
           id: number
           propietary_organization_id: string | null
           status: string | null
-          title: string | null
+          title: string
         }
         Insert: {
           assigned_to?: string[] | null
           created_at?: string
-          customer_id?: string | null
-          description?: string | null
+          customer_id: string
+          description: string
           due_date?: string | null
           id?: number
           propietary_organization_id?: string | null
           status?: string | null
-          title?: string | null
+          title: string
         }
         Update: {
           assigned_to?: string[] | null
           created_at?: string
-          customer_id?: string | null
-          description?: string | null
+          customer_id?: string
+          description?: string
           due_date?: string | null
           id?: number
           propietary_organization_id?: string | null
           status?: string | null
-          title?: string | null
+          title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_v2_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       plans: {
         Row: {
@@ -1486,6 +1554,7 @@ export type Database = {
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
       field_types: "date" | "multiple_choice" | "select" | "text"
+      file_types: "image" | "video" | "pdf" | "fig"
       notification_channel: "in_app" | "email"
       notification_type: "info" | "warning" | "error"
       payment_status: "pending" | "succeeded" | "failed"
@@ -1581,6 +1650,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -1594,6 +1664,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -1607,6 +1678,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -1628,6 +1700,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -1638,6 +1711,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -1648,6 +1722,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -1783,6 +1858,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {
