@@ -57,7 +57,8 @@ const OrderCreationForm = () => {
 
   const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
     try {
-      const result = await createOrder(values);
+      const customer_id = '418f1169-af1a-4c94-99ce-cb98bd3c3d1a';
+      const result = await createOrder(values, customer_id);
       console.log('submit', result);
     } catch (error) {
       console.log(error);
