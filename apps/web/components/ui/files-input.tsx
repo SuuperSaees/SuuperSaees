@@ -2,112 +2,184 @@
 
 import React, { useState } from 'react';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { Button } from '@kit/ui/button';
-import { useTranslation } from 'react-i18next';
-import { Plus } from 'lucide-react';
-import { Label } from '@kit/ui/label';
+import { StickyNote, CloudUpload } from 'lucide-react';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 
+const fileTypeColors: Record<string, string> = {
+  'pdf': 'fill-pdf',
+  'png': 'fill-png',
+  'jpg': 'fill-jpg',
+  'jpeg': 'fill-jpeg',
+  'doc': 'fill-doc',
+  'docx': 'fill-docx',
+};
+
 export default function UploadFileComponent() {
-  const { t } = useTranslation('orders');
   const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<number[]>([]); // Array para el progreso de múltiples archivos
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragMessage, setDragMessage] = useState('Arrastra los archivos o dale click aquí para subir archivos');
 
-  const handleButtonClick = () => {
+  const handleFileInputClick = () => {
     const fileInput = document.getElementById('file-input');
     if (fileInput) {
-      fileInput.click(); 
+      fileInput.click();
     }
   };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []);
-
     if (selectedFiles.length === 0) {
       setError('Debes seleccionar al menos un archivo');
       return;
     }
 
-    setFiles(selectedFiles); // Almacena los archivos seleccionados
-    setError(null); 
-    setUploadProgress(new Array(selectedFiles.length).fill(0)); // Inicializa el progreso de subida
+    setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
+    setError(null);
 
-    try {
-        for (let i = 0; i < selectedFiles.length; i++) {
-          const file = selectedFiles[i];
-          
-          if (!file) continue;
-  
-          const filePath = `uploads/${Date.now()}_${file.name}`;
-          
-          // Utilizando XMLHttpRequest para manejar el progreso de subida
-          const xhr = new XMLHttpRequest();
-          xhr.open('POST', supabase.storage.from('orders').getUploadUrl(filePath), true);
-          xhr.setRequestHeader('Authorization', `Bearer ${supabase.auth.session()?.access_token}`);
-  
-          xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-              const progress = Math.round((event.loaded / event.total) * 100);
-              setUploadProgress((prevProgress) => {
-                const newProgress = [...prevProgress];
-                newProgress[i] = progress;
-                return newProgress;
-              });
-            }
-          };
-  
-          xhr.onload = () => {
-            if (xhr.status === 200) {
-              console.log(`Archivo ${file.name} subido con éxito`);
-            } else {
-              setError(`Error al subir el archivo ${file.name}: ${xhr.statusText}`);
-            }
-          };
-  
-          xhr.onerror = () => {
-            setError(`Error al subir el archivo ${file.name}`);
-          };
-  
-          const formData = new FormData();
-          formData.append('file', file);
-          xhr.send(formData);
-        }
-  
-      } catch (error) {
-        console.error('Error al subir los archivos:', error);
-        setError('Hubo un error al subir los archivos. Intenta nuevamente.');
+    for (const file of selectedFiles) {
+      await uploadFile(file);
+    }
+  };
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(event.dataTransfer.files);
+    if (droppedFiles.length === 0) {
+      setError('Debes seleccionar al menos un archivo');
+      return;
+    }
+
+    setFiles(prevFiles => [...prevFiles, ...droppedFiles]);
+    setError(null);
+
+    for (const file of droppedFiles) {
+      await uploadFile(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+    setDragMessage('Suelta aquí para subir los archivos');
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+    setDragMessage('Arrastra los archivos o dale click aquí para subir archivos');
+  };
+
+  const uploadFile = async (file: File) => {
+    const filePath = `uploads/${Date.now()}_${file.name}`;
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) {
+        const progress = (event.loaded / event.total) * 100;
+        setUploadProgress((prev) => ({
+          ...prev,
+          [file.name]: progress
+        }));
       }
+    });
+
+    xhr.upload.addEventListener('error', () => {
+      setError(`Error al subir el archivo ${file.name}`);
+    });
+
+    xhr.upload.addEventListener('load', () => {
+      setUploadProgress((prev) => ({
+        ...prev,
+        [file.name]: 100
+      }));
+    });
+
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status !== 200) {
+          setError(`Error al subir el archivo ${file.name}: ${xhr.statusText}`);
+        }
+      }
+    };
+
+    const { data, error } = await supabase.storage.from('orders').createSignedUploadUrl(filePath);
+
+    if (error) {
+      setError(`Error al obtener la URL de carga: ${error.message}`);
+      return;
+    }
+
+    xhr.open('PUT', data.signedUrl, true);
+    xhr.setRequestHeader('Content-Type', file.type);
+    xhr.send(file);
+  };
+
+  const getFileTypeClass = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+    return fileTypeColors[extension] ?? 'fill-unknown';
+  };
+
+  const formatFileSize = (size: number) => {
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB`;
+    return `${(size / (1024 * 1024)).toFixed(2)} MB`;
   };
 
   return (
     <div className='flex flex-col gap-2'>
-      <Label className="text-gray-700 text-[20px] font-normal font-bold leading-[20px]">{t('service_files')}</Label>
-      <Label className='text-gray-700 text-[14px] font-medium leading-[20px]'>{t('service_files_recommendation')}</Label>
-      <div>
-        <Button onClick={handleButtonClick}>
-          <Plus size={16} className='mr-2'/>
-          {t('upload_files')}
-        </Button>
+      <div
+        className={`flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-lg cursor-pointer ${isDragging ? 'bg-gray-300' : 'bg-gray-100'}`}
+        onClick={handleFileInputClick}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+      >
+        <div className='border border-gray-200 rounded-lg w-[40px] h-[40px] items-center flex justify-center p-2 mb-[12px]'>
+            <CloudUpload className='text-gray-600 w-[20px] h-[20px]' />
+        </div>
+        <p className="text-gray-600 text-sm">
+          {dragMessage}
+        </p>
         <input
           type="file"
-          accept="image/*,video/*,.pdf,.doc,.docx"
           id="file-input"
           onChange={handleFileChange}
           style={{ display: 'none' }}
-          multiple // Permitir selección de múltiples archivos
+          multiple
         />
       </div>
 
       {files.map((file, index) => (
-        <div key={index} className="flex flex-col gap-1 mt-2">
-          <span className="text-sm text-gray-500">{file.name}</span>
-          {uploadProgress[index]! > 0 && <Progress value={uploadProgress[index]} />}
+        <div key={index} className="flex p-4 items-start gap-1.5 self-stretch rounded-xl border border-gray-200 bg-white"> 
+          <div className="relative flex items-center justify-center">
+            <StickyNote 
+              className={`text-white ${getFileTypeClass(file.name)} w-[40px] h-[56px]`} 
+            /> 
+            <span 
+              className="absolute inset-0 flex items-end justify-center text-[9px] font-semibold py-4 text-white"
+            >
+              {file.name.split('.').pop()?.toUpperCase()}
+            </span>
+          </div>
+          <div className='flex flex-col flex-1'>
+            <span className="text-gray-700 text-sm font-medium leading-5 font-inter">{file.name}</span>
+            <span className="truncate text-gray-600 text-sm font-normal leading-5 font-inter">{formatFileSize(file.size)}</span>
+            <div className='flex items-center gap-2 mt-2'>
+              <div className='flex-1'>
+                <Progress value={uploadProgress[file.name] ?? 0} className="w-full" />
+              </div>
+              <span className="text-gray-600 text-sm font-normal leading-5 font-inter">
+                {Math.round(uploadProgress[file.name] ?? 0)}%
+              </span>
+            </div>
+          </div>
         </div>
       ))}
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="text-red-500">{error}</p>}
     </div>
   );
 }
