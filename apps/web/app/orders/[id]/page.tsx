@@ -8,12 +8,13 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import AsideOrderInformation from './components/aside-order-information';
+import UserMessage from './components/user-message';
 
 const mockedOrder = {
   id: 2002,
   title: 'Pedido 29 - Diseño volantes QR',
   description: 'This is the order details page',
-  status: 'active',
+  status: 'in_progress',
   priority: 'high',
   due_date: '2024-08-15',
   created_at: '2024-08-13',
@@ -89,8 +90,10 @@ function OrderDetailsPage({ params }: { params: { id: string } }) {
             </span>
           </div>
         </div>
-        <div className="flex w-full">
-          <div className="w-full min-w-0 max-w-full">Chat goes here</div>
+        <div className="flex w-full gap-4">
+          <div className="w-full min-w-0 max-w-full rounded-md border border-gray-200 p-4">
+            <UserMessage user={orderDetail.client} />
+          </div>
           <AsideOrderInformation order={orderDetail} />
         </div>
       </div>

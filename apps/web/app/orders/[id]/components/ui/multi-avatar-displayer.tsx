@@ -8,6 +8,7 @@ type Avatar = {
   picture_url: string;
   status: 'online' | 'offline';
 };
+
 interface MultiAvatarDisplayerProps {
   avatars: Avatar[];
   maxAvatars?: number;
@@ -20,28 +21,36 @@ interface MultiAvatarDisplayerProps {
  * @param {MultiAvatarDisplayerProps} props - The props for the component.
  * @returns {JSX.Element} The rendered component.
  */
-// if avatars length is greater thant maxAvatars props, show a circle with bg gray with the remaining avatars (eg. +5)
+// if avatars length is greater than maxAvatars props, show a circle with bg gray with the remaining avatars (eg. +5)
 const MultiAvatarDisplayer = ({
   avatars,
   maxAvatars = 5,
   className,
 }: MultiAvatarDisplayerProps) => {
   return (
-    <div className={`relative flex items-center ${className}`}>
+    <div className={`relative flex items-center ${className} w-fit`}>
       {avatars.slice(0, maxAvatars).map((avatar, index) => (
         <AvatarDisplayer
           pictureUrl={avatar.picture_url}
           displayName={null}
           key={index + avatar.name}
           status={avatar.status}
-          className={`${
-            index !== 0 ? `'-left-[40px]'` : '' // if it's not the first avatar, move it to the left by 20px
-          }`}
+          className={'h-8 w-8 border-2 border-white'}
+          style={{
+            position: 'relative',
+            left: index === 0 ? 0 : `-${index * 33.33}%`,
+            zIndex: maxAvatars - index,
+          }}
         />
       ))}
       {avatars.length > maxAvatars && (
         <div
-          className={`'-left-[3px]'} absolute inline-block flex h-8 w-8 items-center justify-center rounded-full bg-gray-200`}
+          className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 font-bold`}
+          style={{
+            position: 'relative',
+            right: `${33.33}%`,
+            zIndex: maxAvatars,
+          }}
         >
           +{avatars.length - maxAvatars}
         </div>

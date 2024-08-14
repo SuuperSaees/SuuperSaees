@@ -8,6 +8,7 @@ interface AvatarDisplayerProps {
   nickname?: string;
   status?: 'online' | 'offline';
   className?: string;
+  [key: string]: unknown;
 }
 const AvatarDisplayer = ({
   pictureUrl,
@@ -15,16 +16,20 @@ const AvatarDisplayer = ({
   nickname,
   status,
   className,
+  ...rest
 }: AvatarDisplayerProps) => {
   return (
-    <div
-      className={`relative flex h-fit w-fit items-start gap-2 ${
-        status
-          ? 'after:absolute after:bottom-1 after:left-7 after:h-3 after:w-3 after:rounded-full after:border-2 after:border-white'
-          : ''
-      } ${status === 'online' ? 'after:bg-green-400' : 'after:bg-gray-400'} ${className}`}
-    >
-      <ProfileAvatar displayName={displayName} pictureUrl={pictureUrl} />
+    <div className={`relative flex h-fit w-fit items-start gap-2`}>
+      <ProfileAvatar
+        displayName={displayName}
+        pictureUrl={pictureUrl}
+        className={`relative ${
+          status
+            ? 'after:absolute after:bottom-[1%] after:right-[5%] after:z-[1000] after:h-3 after:w-3 after:rounded-full after:border-2 after:border-white'
+            : ''
+        } ${status === 'online' ? 'after:bg-green-400' : 'after:bg-gray-400'} ${className} `}
+        {...rest}
+      />
       <div className="flex flex-col">
         {displayName && (
           <span className="text-sm font-semibold">{displayName}</span>

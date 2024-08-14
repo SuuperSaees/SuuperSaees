@@ -1,9 +1,15 @@
 'use client';
 
+import { useState } from 'react';
+
+import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { useTranslation } from 'react-i18next';
 
-import AvatarDisplayer from './avatar-displayer';
-import MultiAvatarDisplayer from './multi-avatar-displayer';
+import { Separator } from '@kit/ui/separator';
+
+import AvatarDisplayer from './ui/avatar-displayer';
+import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
+import SelectAction from './ui/select-action';
 
 type Account = {
   id?: string;
@@ -27,13 +33,64 @@ interface AsideOrderInformationProps {
 }
 const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
   const { t } = useTranslation('orders');
+  const [selectedStatus, setSelectedStatus] = useState(order.status);
+  const [selectedPriority, setSelectedPriority] = useState(order.priority);
   const avatarsWithStatus =
     order.assigned_to?.map((account) => ({
       ...account,
       status: 'online' as 'online' | 'offline',
     })) || [];
+
+  const changeStatus = (status: string) => {
+    console.log('change', status);
+    // here the server function to change the status
+    setSelectedStatus(status);
+  };
+
+  const changePriority = (priority: string) => {
+    console.log('changePriority', priority);
+    // here the server function to change the priority
+    setSelectedPriority(priority);
+  };
+
+  const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
+  const priorities = ['low', 'medium', 'high'];
+
+  const statusOptions = statuses.map((status) => {
+    const camelCaseStatus = status.replace(/_./g, (match) =>
+      match.charAt(1).toUpperCase(),
+    );
+    return {
+      value: status,
+      label: t(`details.statuses.${camelCaseStatus}`)
+        .replace(/_/g, ' ') // Replace underscores with spaces (even though there are no underscores in the priorities array)
+        .replace(/^\w/, (c) => c.toUpperCase()),
+    };
+  });
+
+  const priorityOptions = priorities.map((priority) => ({
+    value: priority,
+    label: t(`details.priorities.${priority}`)
+      .replace(/_/g, ' ') // Replace underscores with spaces (even though there are no underscores in the priorities array)
+      .replace(/^\w/, (c) => c.toUpperCase()),
+  }));
+
+  // set class bg color for each status
+  const statusColors = {
+    pending: 'bg-gray-100 text-gray-700 focus:gray-700',
+    in_progress: 'bg-purple-100 text-purple-700',
+    completed: 'bg-green-100 text-green-700',
+    in_review: 'bg-yellow-100 text-yellow-700',
+  };
+
+  const priorityColors = {
+    low: 'bg-yellow-100 text-yellow-700',
+    medium: 'bg-blue-100 text-blue-700',
+    high: 'bg-red-100 text-red-700',
+  };
+
   return (
-    <div className="flex w-full max-w-80 flex-col gap-4 p-6">
+    <div className="flex w-full max-w-80 flex-col gap-4 p-6 text-gray-700">
       <h3 className="font-bold">{t('details.summary')}</h3>
       <div>
         <p>{`#${order.id}`}</p>
@@ -49,12 +106,34 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
         nickname="Deo p"
         status="online"
       />
-      <p>Status: {order.status}</p>
-      <p>Priority: {order.priority}</p>
-      <p>Due Date: {order.due_date}</p>
-      <p>
-        Assigned To: <MultiAvatarDisplayer avatars={avatarsWithStatus} />
-      </p>
+
+      <Separator />
+      <SelectAction
+        options={statusOptions}
+        groupName={t('details.status')}
+        defaultValue={selectedStatus}
+        className={statusColors[selectedStatus]}
+        onSelectHandler={changeStatus}
+      />
+      <Separator />
+      <SelectAction
+        options={priorityOptions}
+        groupName={t('details.priority')}
+        defaultValue={selectedPriority}
+        className={priorityColors[selectedPriority]}
+        onSelectHandler={changePriority}
+      />
+      <Separator />
+      <div className="flex flex-col gap-2">
+        <span className="font-semibold">{t('details.assignedTo')}: </span>
+        <MultiAvatarDisplayer avatars={avatarsWithStatus} maxAvatars={4} />
+      </div>
+      <Separator />
+      <div className="flex flex-col gap-2">
+        <span>{t('details.dueDate')}</span>
+        <DatePicker {...order} />
+      </div>
+      <Separator />
     </div>
   );
 };
