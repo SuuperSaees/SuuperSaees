@@ -30,12 +30,6 @@ export default async function UserHomePage() {
 
     const name = names?.[0]?.name;
 
-    if (name) {
-        console.log(name);
-    } else {
-        console.log('No data found or name is undefined');
-    }
-
 
 
   const { data: accounts} = await supabase

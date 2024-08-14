@@ -6,9 +6,11 @@ import { Trans } from '@kit/ui/trans';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+import UploadFileComponent from '~/components/ui/files-input';
 
 import AsideOrderInformation from './components/aside-order-information';
-import UserMessage from './components/user-message';
+import UploadImageComponent from 'node_modules/@kit/team-accounts/src/server/actions/services/create/upload-image';
+import { ImageUploadInput } from 'node_modules/@kit/ui/src/makerkit/image-upload-input';
 
 const mockedOrder = {
   id: 2002,
@@ -66,6 +68,7 @@ export const generateMetadata = async () => {
 };
 function OrderDetailsPage({ params }: { params: { id: string } }) {
   const orderDetail = mockedOrder;
+ 
   return (
     <PageBody>
       <div className="flex flex-col p-[35px]">
@@ -90,10 +93,11 @@ function OrderDetailsPage({ params }: { params: { id: string } }) {
             </span>
           </div>
         </div>
-        <div className="flex w-full gap-4">
-          <div className="w-full min-w-0 max-w-full rounded-md border border-gray-200 p-4">
-            <UserMessage user={orderDetail.client} />
+        <div className="w-full min-w-0 max-w-full">
+            <UploadFileComponent/>
           </div>
+        <div className="flex w-full">
+          <div className="w-full min-w-0 max-w-full">Chat goes here</div>
           <AsideOrderInformation order={orderDetail} />
         </div>
       </div>

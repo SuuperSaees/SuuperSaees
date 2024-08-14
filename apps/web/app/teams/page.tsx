@@ -3,13 +3,6 @@ import { Trans } from '@kit/ui/trans';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@kit/ui/card';
-import {
   AccountInvitationsTable,
   AccountMembersTable,
   InviteMembersDialogContainer,
@@ -18,7 +11,6 @@ import { If } from '@kit/ui/if';
 import { Button } from '@kit/ui/button';
 import { loadMembersPageData } from './_lib/server/members-page.loader';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { TeamAccountLayoutPageHeader } from './components/team-account-layout-page-header';
 import { BellIcon } from '@radix-ui/react-icons';
 import { Separator } from '@kit/ui/separator';
 

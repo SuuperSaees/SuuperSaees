@@ -30,6 +30,8 @@ export const createOrder = async (
     const orderToInsert = {
       ...order,
       customer_id,
+      status: 'active',
+      propietary_organization_id: primary_owner_user_id,
     };
 
     delete orderToInsert.files;
