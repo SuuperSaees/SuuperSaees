@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 
+
+
 import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { useTranslation } from 'react-i18next';
 
 import { Separator } from '@kit/ui/separator';
 
+import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
 import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
 import SelectAction from './ui/select-action';
@@ -74,20 +77,6 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
       .replace(/_/g, ' ') // Replace underscores with spaces (even though there are no underscores in the priorities array)
       .replace(/^\w/, (c) => c.toUpperCase()),
   }));
-
-  // set class bg color for each status
-  const statusColors = {
-    pending: 'bg-gray-100 text-gray-700 focus:gray-700',
-    in_progress: 'bg-purple-100 text-purple-700',
-    completed: 'bg-green-100 text-green-700',
-    in_review: 'bg-yellow-100 text-yellow-700',
-  };
-
-  const priorityColors = {
-    low: 'bg-yellow-100 text-yellow-700',
-    medium: 'bg-blue-100 text-blue-700',
-    high: 'bg-red-100 text-red-700',
-  };
 
   return (
     <div className="flex w-full max-w-80 flex-col gap-4 p-6 text-gray-700">

@@ -2,9 +2,10 @@
 
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
+
 interface AvatarDisplayerProps {
   displayName: string | null;
-  pictureUrl: string;
+  pictureUrl: string | null;
   nickname?: string;
   status?: 'online' | 'offline';
   className?: string;

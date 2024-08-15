@@ -1,17 +1,24 @@
 import { BellIcon } from 'lucide-react';
 
+
+
 import { Button } from '@kit/ui/button';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
+import UploadFileComponent from '~/components/ui/files-input';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import UploadFileComponent from '~/components/ui/files-input';
 
 import AsideOrderInformation from './components/aside-order-information';
-import UploadImageComponent from 'node_modules/@kit/team-accounts/src/server/actions/services/create/upload-image';
-import { ImageUploadInput } from 'node_modules/@kit/ui/src/makerkit/image-upload-input';
+import Interactions from './components/interactions';
 
+export const generateMetadata = async () => {
+  const i18n = await createI18nServerInstance();
+  return {
+    title: i18n.t('orders:details.title'),
+  };
+};
 const mockedOrder = {
   id: 2002,
   title: 'Pedido 29 - Diseño volantes QR',
@@ -60,18 +67,11 @@ const mockedOrder = {
   },
 };
 
-export const generateMetadata = async () => {
-  const i18n = await createI18nServerInstance();
-  return {
-    title: i18n.t('orders:details.title'),
-  };
-};
-function OrderDetailsPage({ params }: { params: { id: string } }) {
+function OrderDetailsPage() {
   const orderDetail = mockedOrder;
- 
   return (
     <PageBody>
-      <div className="flex flex-col p-[35px]">
+      <div className="flex flex-col p-[35px] text-gray-700">
         <div className="mb-[32px] flex items-center justify-between">
           <div className="flex-grow">
             <span>
@@ -93,11 +93,12 @@ function OrderDetailsPage({ params }: { params: { id: string } }) {
             </span>
           </div>
         </div>
-        <div className="w-full min-w-0 max-w-full">
-            <UploadFileComponent/>
-          </div>
+
         <div className="flex w-full">
-          <div className="w-full min-w-0 max-w-full">Chat goes here</div>
+          <div className="w-full min-w-0 max-w-full">
+            <Interactions />
+            <UploadFileComponent />
+          </div>
           <AsideOrderInformation order={orderDetail} />
         </div>
       </div>
