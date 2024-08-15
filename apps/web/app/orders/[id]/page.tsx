@@ -98,7 +98,7 @@ function OrderDetailsPage() {
         <div className="flex w-full gap-6">
           <div className="w-full min-w-0 max-w-full flex flex-col gap-2">
             <Interactions />
-            <UploadFileComponent />
+            <UploadFileComponent bucketName='orders'/>
           </div>
           <AsideOrderInformation order={orderDetail} />
         </div>

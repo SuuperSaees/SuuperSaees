@@ -14,7 +14,11 @@ const fileTypeColors: Record<string, string> = {
   'docx': 'fill-docx',
 };
 
-export default function UploadFileComponent() {
+interface UploadFileComponentProps {
+  bucketName: string;
+}
+
+export default function UploadFileComponent({ bucketName }: UploadFileComponentProps) {
   const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -72,8 +76,15 @@ export default function UploadFileComponent() {
     setDragMessage('Arrastra los archivos o dale click aquí para subir archivos');
   };
 
+  const sanitizeFileName = (fileName: string) => {
+    return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+  };
+  
+
   const uploadFile = async (file: File) => {
-    const filePath = `uploads/${Date.now()}_${file.name}`;
+    const sanitizedFileName = sanitizeFileName(file.name);
+    const filePath = `uploads/${Date.now()}_${sanitizedFileName}`;
+    // const filePath = `uploads/${Date.now()}_${file.name}`;
     const xhr = new XMLHttpRequest();
 
     xhr.upload.addEventListener('progress', (event) => {
@@ -105,7 +116,7 @@ export default function UploadFileComponent() {
       }
     };
 
-    const { data, error } = await supabase.storage.from('orders').createSignedUploadUrl(filePath);
+    const { data, error } = await supabase.storage.from(bucketName).createSignedUploadUrl(filePath);
 
     if (error) {
       setError(`Error al obtener la URL de carga: ${error.message}`);
