@@ -10,8 +10,9 @@ import UploadFileComponent from '~/components/ui/files-input';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
-import AsideOrderInformation from './components/aside-order-information';
 import Interactions from './components/interactions';
+import AsideOrderInformation from './components/aside-order-information';
+
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -71,7 +72,7 @@ function OrderDetailsPage() {
   const orderDetail = mockedOrder;
   return (
     <PageBody>
-      <div className="flex flex-col p-[35px] text-gray-700">
+      <div className="flex flex-col p-[35px] text-gray-700 max-w-7xl mx-auto">
         <div className="mb-[32px] flex items-center justify-between">
           <div className="flex-grow">
             <span>
@@ -94,13 +95,14 @@ function OrderDetailsPage() {
           </div>
         </div>
 
-        <div className="flex w-full">
-          <div className="w-full min-w-0 max-w-full">
+        <div className="flex w-full gap-6">
+          <div className="w-full min-w-0 max-w-full flex flex-col gap-2">
             <Interactions />
             <UploadFileComponent />
           </div>
           <AsideOrderInformation order={orderDetail} />
         </div>
+        
       </div>
     </PageBody>
   );

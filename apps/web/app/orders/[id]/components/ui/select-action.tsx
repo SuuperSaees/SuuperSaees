@@ -43,8 +43,8 @@ const SelectAction = ({
           onSelectHandler && onSelectHandler(value);
         }}
       >
-        <SelectTrigger className={'w-[180px] border-none ' + className}>
-          <SelectValue placeholder="Select an option" className="focus:" />
+        <SelectTrigger className={'w-[180px] border-none bg-black ' + className}>
+          <SelectValue placeholder="Select an option" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>

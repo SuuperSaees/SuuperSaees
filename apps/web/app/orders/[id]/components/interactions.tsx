@@ -199,7 +199,7 @@ const Interactions = () => {
       activities={activities}
       reviews={reviews}
     >
-      <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-200 p-4">
+      <div className="flex w-full flex-col gap-8 rounded-lg border border-gray-200 p-4">
         {sortedInteractions.map((interaction) => {
           return interaction.type === 'message' ? (
             <UserMessage key={interaction.id} message={interaction} />

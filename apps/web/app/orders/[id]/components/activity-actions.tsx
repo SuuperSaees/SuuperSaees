@@ -2,6 +2,7 @@ import { Activity, ActivityType } from '../context/activity-context';
 import { formatDateToString } from '../utils/get-formatted-dates';
 import AvatarDisplayer from './ui/avatar-displayer';
 
+
 interface ActivityActionProps {
   activity: Activity;
 }
@@ -17,9 +18,9 @@ export const StatusActivity = ({ activity }: ActivityActionProps) => {
     return (
       <div className="flex h-fit w-fit w-full justify-between gap-1 text-gray-400">
         <span>{activity.message}</span>
-        <span>
+        <small>
           {formatDateToString(new Date(activity.created_at), 'short')}
-        </span>
+        </small>
       </div>
     );
   }
@@ -36,7 +37,9 @@ export const DefaultAction = ({ activity }: ActivityActionProps) => {
         />
         <span>{activity.message}</span>
       </div>
-      <span>{formatDateToString(new Date(activity.created_at), 'short')}</span>
+      <small>
+        {formatDateToString(new Date(activity.created_at), 'short')}
+      </small>
     </div>
   );
 };
