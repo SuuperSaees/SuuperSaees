@@ -6,20 +6,18 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
+
+
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { Button } from '@kit/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 import { Textarea } from '@kit/ui/textarea';
 
+
+
 import { mapMimeTypeToFileType } from '../utils/map-mime-type';
+
 
 const orderCreationFormSchema = z.object({
   title: z
@@ -57,8 +55,7 @@ const OrderCreationForm = () => {
 
   const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
     try {
-      const customer_id = '418f1169-af1a-4c94-99ce-cb98bd3c3d1a';
-      const result = await createOrder(values, customer_id);
+      const result = await createOrder(values);
       console.log('submit', result);
     } catch (error) {
       console.log(error);
