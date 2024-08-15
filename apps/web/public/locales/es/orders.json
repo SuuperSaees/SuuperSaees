@@ -44,6 +44,11 @@
       "low": "Baja",
       "medium": "Media",
       "high": "Alta"
+    },
+    "navigation": {
+      "details": "Detalles",
+      "activity": "Actividad",
+      "files": "Archivos"
     }
   }
   

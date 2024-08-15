@@ -1,7 +1,12 @@
+import { Epilogue } from 'next/font/google';
 import { cookies } from 'next/headers';
+
+
 
 import { Toaster } from '@kit/ui/sonner';
 import { cn } from '@kit/ui/utils';
+
+
 
 import { RootProviders } from '~/components/root-providers';
 import { heading, sans } from '~/lib/fonts';
@@ -10,6 +15,7 @@ import { generateRootMetadata } from '~/lib/root-metdata';
 
 import '../styles/globals.css';
 
+const epilogue = Epilogue({ subsets: ['latin'] });
 export default async function RootLayout({
   children,
 }: {
@@ -20,7 +26,7 @@ export default async function RootLayout({
   const className = getClassName(theme);
 
   return (
-    <html lang={language} className={className}>
+    <html lang={language} className={`${className} ${epilogue.className}`}>
       <body>
         <RootProviders theme={theme} lang={language}>
           {children}

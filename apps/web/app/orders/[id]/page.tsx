@@ -71,29 +71,9 @@ const mockedOrder = {
 function OrderDetailsPage() {
   const orderDetail = mockedOrder;
   return (
-    <PageBody>
-      <div className="flex flex-col p-[35px] text-gray-700 max-w-7xl mx-auto">
-        <div className="mb-[32px] flex items-center justify-between">
-          <div className="flex-grow">
-            <span>
-              <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
-                <Trans i18nKey={'orders:details.title'} />
-              </div>
-            </span>
-          </div>
-          <div className="flex space-x-4">
-            <span>
-              <Button variant="outline">
-                Tu prueba gratuita termina en xx dias
-              </Button>
-            </span>
-            <span>
-              <Button variant="outline" size="icon">
-                <BellIcon className="h-4 w-4" />
-              </Button>
-            </span>
-          </div>
-        </div>
+    <PageBody className='lg:px-0'>
+      <div className="flex flex-col  text-gray-700 w-full">
+      
 
         <div className="flex w-full gap-6">
           <div className="w-full min-w-0 max-w-full flex flex-col gap-2">
