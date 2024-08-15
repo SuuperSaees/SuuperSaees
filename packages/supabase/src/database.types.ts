@@ -531,7 +531,7 @@ export type Database = {
           id: string
           name: string
           size: number
-          type: Database["public"]["Enums"]["file_types"]
+          type: string
           url: string
         }
         Insert: {
@@ -539,7 +539,7 @@ export type Database = {
           id?: string
           name: string
           size: number
-          type: Database["public"]["Enums"]["file_types"]
+          type: string
           url: string
         }
         Update: {
@@ -547,7 +547,7 @@ export type Database = {
           id?: string
           name?: string
           size?: number
-          type?: Database["public"]["Enums"]["file_types"]
+          type?: string
           url?: string
         }
         Relationships: []
@@ -716,17 +716,17 @@ export type Database = {
         Row: {
           created_at: string
           file_id: string
-          order_id: number
+          order_id: string
         }
         Insert: {
           created_at?: string
           file_id?: string
-          order_id: number
+          order_id: string
         }
         Update: {
           created_at?: string
           file_id?: string
-          order_id?: number
+          order_id?: string
         }
         Relationships: [
           {
@@ -858,7 +858,8 @@ export type Database = {
           customer_id: string
           description: string
           due_date: string | null
-          id: number
+          id: string
+          order_number: number
           propietary_organization_id: string | null
           status: string | null
           title: string
@@ -869,7 +870,8 @@ export type Database = {
           customer_id: string
           description: string
           due_date?: string | null
-          id?: number
+          id: string
+          order_number?: number
           propietary_organization_id?: string | null
           status?: string | null
           title: string
@@ -880,7 +882,8 @@ export type Database = {
           customer_id?: string
           description?: string
           due_date?: string | null
-          id?: number
+          id?: string
+          order_number?: number
           propietary_organization_id?: string | null
           status?: string | null
           title?: string

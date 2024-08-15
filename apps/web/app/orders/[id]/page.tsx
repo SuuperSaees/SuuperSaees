@@ -54,6 +54,7 @@ const mockedOrder = {
     },
   ],
   client: {
+    id: '418f1169-af1a-4c94-99ce-cb98bd3c3d1a',
     name: 'Fredd',
     email: 'freed@example.com',
     picture_url:
@@ -69,7 +70,7 @@ function OrderDetailsPage() {
         <div className="flex w-full gap-6">
           <div className="flex w-full min-w-0 max-w-full flex-col gap-2">
             <Interactions />
-            <UploadFileComponent bucketName="orders" />
+            <UploadFileComponent bucketName="orders" id={orderDetail.id.toString()}/>
           </div>
           <AsideOrderInformation order={orderDetail} />
         </div>

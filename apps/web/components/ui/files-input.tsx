@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { StickyNote, CloudUpload } from 'lucide-react';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
+import { File } from '../../../web/lib/file.types';
+import { createFile } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 
 const fileTypeColors: Record<string, string> = {
   'pdf': 'fill-pdf',
@@ -16,15 +18,19 @@ const fileTypeColors: Record<string, string> = {
 
 interface UploadFileComponentProps {
   bucketName: string;
+  id: string;
 }
 
-export default function UploadFileComponent({ bucketName }: UploadFileComponentProps) {
+export default function UploadFileComponent({ bucketName, id}: UploadFileComponentProps) {
   const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isDragging, setIsDragging] = useState(false);
   const [dragMessage, setDragMessage] = useState('Arrastra los archivos o dale click aquí para subir archivos');
+  // const [dbFiles, setDbFiles] = useState<File.Insert[]>([]);
+
+
 
   const handleFileInputClick = () => {
     const fileInput = document.getElementById('file-input');
@@ -46,6 +52,7 @@ export default function UploadFileComponent({ bucketName }: UploadFileComponentP
     for (const file of selectedFiles) {
       await uploadFile(file);
     }
+
   };
 
   const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
@@ -83,7 +90,7 @@ export default function UploadFileComponent({ bucketName }: UploadFileComponentP
 
   const uploadFile = async (file: File) => {
     const sanitizedFileName = sanitizeFileName(file.name);
-    const filePath = `uploads/${Date.now()}_${sanitizedFileName}`;
+    const filePath = `uploads/${id}/${Date.now()}_${sanitizedFileName}`;
     // const filePath = `uploads/${Date.now()}_${file.name}`;
     const xhr = new XMLHttpRequest();
 
@@ -126,7 +133,38 @@ export default function UploadFileComponent({ bucketName }: UploadFileComponentP
     xhr.open('PUT', data.signedUrl, true);
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.send(file);
+
+    const fileUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/' + filePath;
+
+    const newFileData = {
+      name: file.name,
+      size: file.size,
+      type: file.type as File.Type['type'],
+      url: fileUrl,
+    };
+
+    // setDbFiles([...dbFiles, newFileData]);
+
+    const files = await createFile([newFileData]);
+
+    const orderFilesToInsert = files.map((file) => ({
+      order_id: 'fd92a98d-72bf-41d4-9acc-3e2cc5e5eb6f',
+      file_id: file.id,
+    }));
+
+    console.log('orderFilesToInsert', orderFilesToInsert);
+
+    const { error: orderFilesError } = await supabase
+      .from('order_files')
+      .insert(orderFilesToInsert);
+
+      if (orderFilesError) throw orderFilesError.message;
+
+
+
   };
+
+  
 
   const getFileTypeClass = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
