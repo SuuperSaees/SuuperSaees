@@ -181,6 +181,55 @@ export type Database = {
           },
         ]
       }
+      activities: {
+        Row: {
+          action: Database["public"]["Enums"]["action_type"]
+          created_at: string
+          id: number
+          message: string
+          type: Database["public"]["Enums"]["action_type"]
+          user_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_type"]
+          created_at?: string
+          id?: number
+          message: string
+          type: Database["public"]["Enums"]["action_type"]
+          user_id?: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_type"]
+          created_at?: string
+          id?: number
+          message?: string
+          type?: Database["public"]["Enums"]["action_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_customers: {
         Row: {
           account_id: string
@@ -529,6 +578,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          message_id: string | null
           name: string
           size: number
           type: Database["public"]["Enums"]["file_types"]
@@ -537,6 +587,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          message_id?: string | null
           name: string
           size: number
           type: Database["public"]["Enums"]["file_types"]
@@ -545,12 +596,21 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          message_id?: string | null
           name?: string
           size?: number
           type?: Database["public"]["Enums"]["file_types"]
           url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "files_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       form_fields: {
         Row: {
@@ -653,6 +713,27 @@ export type Database = {
             referencedColumns: ["name"]
           },
         ]
+      }
+      messages: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -859,8 +940,9 @@ export type Database = {
           description: string
           due_date: string | null
           id: number
-          propietary_organization_id: string | null
-          status: string | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status: Database["public"]["Enums"]["order_status_types"] | null
           title: string
         }
         Insert: {
@@ -870,8 +952,9 @@ export type Database = {
           description: string
           due_date?: string | null
           id?: number
-          propietary_organization_id?: string | null
-          status?: string | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status?: Database["public"]["Enums"]["order_status_types"] | null
           title: string
         }
         Update: {
@@ -881,8 +964,9 @@ export type Database = {
           description?: string
           due_date?: string | null
           id?: number
-          propietary_organization_id?: string | null
-          status?: string | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id?: string
+          status?: Database["public"]["Enums"]["order_status_types"] | null
           title?: string
         }
         Relationships: [
@@ -912,6 +996,101 @@ export type Database = {
           variant_id?: string
         }
         Relationships: []
+      }
+      reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: number
+          type: Database["public"]["Enums"]["reaction_types"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: number
+          type: Database["public"]["Enums"]["reaction_types"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: number
+          type?: Database["public"]["Enums"]["reaction_types"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_permissions: {
         Row: {
@@ -1543,6 +1722,15 @@ export type Database = {
       }
     }
     Enums: {
+      action_type: "create" | "update" | "delete"
+      activity_type:
+        | "message"
+        | "review"
+        | "status"
+        | "priority"
+        | "assign"
+        | "due_date"
+        | "description"
       app_permissions:
         | "roles.manage"
         | "billing.manage"
@@ -1557,7 +1745,15 @@ export type Database = {
       file_types: "image" | "video" | "pdf" | "fig"
       notification_channel: "in_app" | "email"
       notification_type: "info" | "warning" | "error"
+      order_status_types:
+        | "in_progress"
+        | "in_review"
+        | "pending"
+        | "completed"
+        | "annulled"
       payment_status: "pending" | "succeeded" | "failed"
+      priority_types: "high" | "medium" | "low"
+      reaction_types: "like" | "favorite"
       subscription_item_type: "flat" | "per_seat" | "metered"
       subscription_status:
         | "active"
