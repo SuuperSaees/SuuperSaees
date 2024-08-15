@@ -1,18 +1,11 @@
-import { BellIcon } from 'lucide-react';
-
-
-
-import { Button } from '@kit/ui/button';
 import { PageBody } from '@kit/ui/page';
-import { Trans } from '@kit/ui/trans';
 
 import UploadFileComponent from '~/components/ui/files-input';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
-import Interactions from './components/interactions';
 import AsideOrderInformation from './components/aside-order-information';
-
+import Interactions from './components/interactions';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -71,18 +64,15 @@ const mockedOrder = {
 function OrderDetailsPage() {
   const orderDetail = mockedOrder;
   return (
-    <PageBody className='lg:px-0'>
-      <div className="flex flex-col  text-gray-700 w-full">
-      
-
+    <PageBody className="lg:px-0">
+      <div className="flex w-full flex-col text-gray-700">
         <div className="flex w-full gap-6">
-          <div className="w-full min-w-0 max-w-full flex flex-col gap-2">
+          <div className="flex w-full min-w-0 max-w-full flex-col gap-2">
             <Interactions />
-            <UploadFileComponent />
+            <UploadFileComponent bucketName="orders" />
           </div>
           <AsideOrderInformation order={orderDetail} />
         </div>
-        
       </div>
     </PageBody>
   );
