@@ -12,11 +12,24 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
 
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
-      .select('*, client:clients (id, name, email, created_at, picture_url)')
+      .select(
+        '*, client:clients (id, name, email, created_at, picture_url), messages(*, user:accounts(*))',
+      )
       .eq('id', orderId)
       .single();
-    console.log('orderData', orderData);
+
     if (orderError) throw orderError.message;
+
+    // Process messages to flatten the user relationship
+    // const processedData = {
+    //   ...orderData,
+    //   messages: orderData.messages.map(message => ({
+    //     ...message,
+    //     user: message.user[0]
+    //   }))
+    // };
+
+    console.log('a', orderData);
 
     return orderData;
   } catch (error) {

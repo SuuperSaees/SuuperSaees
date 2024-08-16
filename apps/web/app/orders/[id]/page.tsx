@@ -1,12 +1,18 @@
+import { addOrderMessage } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
+import { toast } from 'sonner';
+
 import { PageBody } from '@kit/ui/page';
 
 import UploadFileComponent from '~/components/ui/files-input';
+import RichTextEditor from '~/components/ui/rich-text-editor';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { getOrderById } from '../../../../../packages/features/team-accounts/src/server/actions/orders/get/get-order';
+import ActivityPage from './components/activity';
 import AsideOrderInformation from './components/aside-order-information';
 import Interactions from './components/interactions';
+import { ActivityProvider } from './context/activity-context';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -69,15 +75,32 @@ async function OrderDetailsPage({
 }) {
   // const orderDetail = mockedOrder;
   const order = await getOrderById(Number(id));
-  console.log('order', order);
+  const messages = order.messages ? order.messages : [];
+  const files = [];
+  const activities = [];
+  const reviews = [];
+
+  // Combine all items into a single array
+  const combinedInteractions = [
+    ...messages.map((message) => ({ ...message, type: 'message' })),
+    ...files.map((file) => ({ ...file, type: 'file' })),
+    ...activities.map((activity) => ({ ...activity, type: 'activity' })),
+    ...reviews.map((review) => ({ ...review, type: 'review' })),
+  ];
+
   return (
     <PageBody className="lg:px-0">
       <div className="flex w-full flex-col text-gray-700">
         <div className="flex w-full gap-6">
-          <div className="flex w-full min-w-0 max-w-full flex-col gap-2">
-            <Interactions />
-            <UploadFileComponent bucketName="orders" />
-          </div>
+          <ActivityProvider
+            messages={messages}
+            files={files}
+            activities={activities}
+            reviews={reviews}
+            order={order}
+          >
+            <ActivityPage />
+          </ActivityProvider>
           <AsideOrderInformation order={order} />
         </div>
       </div>

@@ -2,6 +2,13 @@
 
 import { ReactNode, createContext, useContext } from 'react';
 
+
+
+import { addOrderMessage } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
+import { toast } from 'sonner';
+
+import { Order } from '~/lib/order.types';
+
 export enum ActivityType {
   MESSAGE = 'message',
   REVIEW = 'review',
@@ -68,6 +75,8 @@ interface ActivityContextType {
   messages: Message[];
   reviews: Review[];
   files: File[];
+  order: Order.Type;
+  writeMessage: (message: string) => Promise<void>;
 }
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -79,13 +88,33 @@ export const ActivityProvider = ({
   messages,
   reviews,
   files,
+  order,
 }: {
   children: ReactNode;
   activities: Activity[];
   messages: Message[];
   reviews: Review[];
   files: File[];
+  order: Order.Type;
 }) => {
+  const writeMessage = async (message: string) => {
+    try {
+      const messageToSend = {
+        content: message,
+        user_id: '380f0771-695e-470e-88f3-4e283fbaf181' ?? '',
+        order_id: Number(order.id),
+      };
+      await addOrderMessage(Number(order.id), messageToSend);
+      toast.success('Success', {
+        description: 'The message has been sent.',
+      });
+    } catch (error) {
+      toast.error('Error', {
+        description: 'The message could not be sent.',
+      });
+    }
+  };
+
   return (
     <ActivityContext.Provider
       value={{
@@ -93,6 +122,8 @@ export const ActivityProvider = ({
         messages,
         reviews,
         files,
+        order,
+        writeMessage,
       }}
     >
       {children}
