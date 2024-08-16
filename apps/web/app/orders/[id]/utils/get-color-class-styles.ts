@@ -3,6 +3,7 @@ export const statusColors = {
   in_progress: 'bg-purple-100 text-purple-700',
   completed: 'bg-green-100 text-green-700',
   in_review: 'bg-yellow-100 text-yellow-700',
+  annulled: 'bg-red-100 text-red-700',
 };
 
 export const priorityColors = {

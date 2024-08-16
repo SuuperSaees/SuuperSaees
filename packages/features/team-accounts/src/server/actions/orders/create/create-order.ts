@@ -2,8 +2,6 @@
 
 import { redirect } from 'next/navigation';
 
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
@@ -19,7 +17,7 @@ export const createOrder = async (order: OrderInsert) => {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
-    const userId = '418f1169-af1a-4c94-99ce-cb98bd3c3d1a' || userData.user.id;
+    const userId = 'daa16e77-4ab3-4a52-afa7-2903d352378c' || userData.user.id;
 
     console.log('userId', userId);
     const primary_owner_user_id = await getPrimaryOwnerId();
@@ -28,7 +26,6 @@ export const createOrder = async (order: OrderInsert) => {
     const orderToInsert = {
       ...order,
       customer_id: userId,
-      status: 'active',
       propietary_organization_id: primary_owner_user_id,
     };
 

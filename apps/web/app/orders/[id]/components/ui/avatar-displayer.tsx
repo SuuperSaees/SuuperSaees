@@ -4,8 +4,8 @@ import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
 
 interface AvatarDisplayerProps {
-  displayName: string | null;
-  pictureUrl: string | null;
+  displayName?: string | null;
+  pictureUrl?: string | null;
   nickname?: string;
   status?: 'online' | 'offline';
   className?: string;
@@ -22,7 +22,7 @@ const AvatarDisplayer = ({
   return (
     <div className={`relative flex h-fit w-fit items-start gap-2`}>
       <ProfileAvatar
-        displayName={displayName}
+        displayName={!displayName ? null : displayName}
         pictureUrl={pictureUrl}
         className={`relative ${
           status
