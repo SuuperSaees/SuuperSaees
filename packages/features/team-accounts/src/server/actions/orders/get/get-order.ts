@@ -15,7 +15,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
       .select(
-        '*, client:clients (id, name, email, created_at, picture_url), messages(*, user:accounts(*))',
+        '*, client:clients (id, name, email, created_at, picture_url), messages(*, user:accounts(*)), files(*)',
       )
       .eq('id', orderId)
       .single();

@@ -18,19 +18,18 @@ const fileTypeColors: Record<string, string> = {
 
 interface UploadFileComponentProps {
   bucketName: string;
-  id: string;
+  uuid: string;
+  onFileIdsChange: (fileIds: string[]) => void;
 }
 
-export default function UploadFileComponent({ bucketName, id}: UploadFileComponentProps) {
+export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange }: UploadFileComponentProps) {
   const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isDragging, setIsDragging] = useState(false);
   const [dragMessage, setDragMessage] = useState('Arrastra los archivos o dale click aquí para subir archivos');
-  // const [dbFiles, setDbFiles] = useState<File.Insert[]>([]);
-
-
+  const [fileIds, setFileIds] = useState<string[]>([]);  
 
   const handleFileInputClick = () => {
     const fileInput = document.getElementById('file-input');
@@ -52,7 +51,6 @@ export default function UploadFileComponent({ bucketName, id}: UploadFileCompone
     for (const file of selectedFiles) {
       await uploadFile(file);
     }
-
   };
 
   const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
@@ -86,12 +84,10 @@ export default function UploadFileComponent({ bucketName, id}: UploadFileCompone
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
   };
-  
 
   const uploadFile = async (file: File) => {
     const sanitizedFileName = sanitizeFileName(file.name);
-    const filePath = `uploads/${id}/${Date.now()}_${sanitizedFileName}`;
-    // const filePath = `uploads/${Date.now()}_${file.name}`;
+    const filePath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
     const xhr = new XMLHttpRequest();
 
     xhr.upload.addEventListener('progress', (event) => {
@@ -134,7 +130,7 @@ export default function UploadFileComponent({ bucketName, id}: UploadFileCompone
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.send(file);
 
-    const fileUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/' + filePath;
+    const fileUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/orders/' + filePath;
 
     const newFileData = {
       name: file.name,
@@ -143,28 +139,27 @@ export default function UploadFileComponent({ bucketName, id}: UploadFileCompone
       url: fileUrl,
     };
 
-    // setDbFiles([...dbFiles, newFileData]);
+    const createdFiles = await createFile([newFileData]);
 
-    const files = await createFile([newFileData]);
-
-    const orderFilesToInsert = files.map((file) => ({
-      order_id: 'fd92a98d-72bf-41d4-9acc-3e2cc5e5eb6f',
-      file_id: file.id,
+    const orderFilesToInsert = createdFiles.map((createdFile) => ({
+      order_id: uuid,
+      file_id: createdFile.id,
     }));
 
     console.log('orderFilesToInsert', orderFilesToInsert);
 
-    const { error: orderFilesError } = await supabase
-      .from('order_files')
-      .insert(orderFilesToInsert);
+    // const { error: orderFilesError } = await supabase
+    //   .from('order_files')
+    //   .insert(orderFilesToInsert);
 
-      if (orderFilesError) throw orderFilesError.message;
+    // if (orderFilesError) throw orderFilesError.message;
 
-
-
+    setFileIds((prevFileIds) => {
+      const newFileIds = [...prevFileIds, ...createdFiles.map(file => file.id)];
+      onFileIdsChange(newFileIds);
+      return newFileIds;
+    });
   };
-
-  
 
   const getFileTypeClass = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
