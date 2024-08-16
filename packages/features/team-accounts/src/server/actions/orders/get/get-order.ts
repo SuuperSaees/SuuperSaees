@@ -2,6 +2,8 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
@@ -28,10 +30,19 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     //     user: message.user[0]
     //   }))
     // };
+    const proccesedData = {
+      ...orderData,
+      messages: orderData.messages.map((message, msgIdx) => {
+        return {
+          ...message,
+          user: message.user,
+        };
+      }),
+    };
 
-    console.log('a', orderData);
+    console.log('a', orderData.messages[0]?.user, proccesedData);
 
-    return orderData;
+    return proccesedData;
   } catch (error) {
     console.error('Error fetching order:', error);
     throw error;

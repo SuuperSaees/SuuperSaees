@@ -7,6 +7,8 @@ import { ReactNode, createContext, useContext } from 'react';
 import { addOrderMessage } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { toast } from 'sonner';
 
+
+
 import { Order } from '~/lib/order.types';
 
 export enum ActivityType {
@@ -101,7 +103,7 @@ export const ActivityProvider = ({
     try {
       const messageToSend = {
         content: message,
-        user_id: '380f0771-695e-470e-88f3-4e283fbaf181' ?? '',
+        user_id: '2bd7eb2d-bb28-42f5-ac89-35d2b1f590b1' ?? '',
         order_id: Number(order.id),
       };
       await addOrderMessage(Number(order.id), messageToSend);
