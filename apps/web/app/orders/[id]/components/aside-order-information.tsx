@@ -4,57 +4,103 @@ import { useState } from 'react';
 
 
 
+import { useMutation } from '@tanstack/react-query';
 import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { Separator } from '@kit/ui/separator';
 
+import { Order } from '~/lib/order.types';
+
+import { updateOrder } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
-import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
+// import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
 import SelectAction from './ui/select-action';
 
-type Account = {
-  id?: string;
-  name: string;
-  email: string;
-  picture_url: string;
-};
+// type Account = {
+//   id?: string;
+//   name: string;
+//   email: string;
+//   picture_url: string;
+// };
 
 interface AsideOrderInformationProps {
-  order: {
-    id: number;
-    title: string;
-    description: string;
-    status: string;
-    priority: string;
-    due_date: string;
-    created_at: string;
-    assigned_to: Account[];
-    client: Account;
-  };
+  // order: {
+  //   id: number;
+  //   title: string;
+  //   description: string;
+  //   status: string;
+  //   priority: string;
+  //   due_date: string;
+  //   created_at: string;
+  //   assigned_to: Account[];
+  //   client: Account;
+  // };
+  order: Order.Type;
 }
 const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
   const { t } = useTranslation('orders');
   const [selectedStatus, setSelectedStatus] = useState(order.status);
   const [selectedPriority, setSelectedPriority] = useState(order.priority);
-  const avatarsWithStatus =
-    order.assigned_to?.map((account) => ({
-      ...account,
-      status: 'online' as 'online' | 'offline',
-    })) || [];
+  // const avatarsWithStatus =
+  //   order.assigned_to?.map((account) => ({
+  //     ...account,
+  //     status: 'online',
+  //   })) ?? [];
 
-  const changeStatus = (status: string) => {
-    console.log('change', status);
-    // here the server function to change the status
-    setSelectedStatus(status);
-  };
+  const changeStatus = useMutation({
+    mutationFn: (status: Order.Type['status']) => {
+      setSelectedStatus(status);
+      return updateOrder(order.id, { status });
+    },
+    onSuccess: () => {
+      console.log('status changed');
+    },
+    onError: (error) => {
+      console.log('error', error);
+      setSelectedStatus(order.status);
+    },
+  });
 
-  const changePriority = (priority: string) => {
-    console.log('changePriority', priority);
-    // here the server function to change the priority
-    setSelectedPriority(priority);
-  };
+  const changePriority = useMutation({
+    mutationFn: (priority: Order.Type['priority']) => {
+      setSelectedPriority(priority);
+      return updateOrder(order.id, { priority });
+    },
+    onSuccess: () => {
+      console.log('priority changed');
+      toast.success('Success', {
+        description: 'Priority updated successfully!',
+      });
+    },
+    onError: (error) => {
+      console.log('error', error);
+      setSelectedPriority(order.priority);
+      toast.error('Error', {
+        description: 'The priority could not be updated.',
+      });
+    },
+  });
+
+  const changeDate = useMutation({
+    mutationFn: (due_date: Order.Type['due_date']) => {
+      return updateOrder(order.id, { due_date });
+    },
+    onSuccess: () => {
+      console.log('date changed');
+      toast.success('Success', {
+        description: 'Date updated successfully!',
+      });
+    },
+    onError: (error) => {
+      console.log('error', error);
+      toast.error('Error', {
+        description: 'The date could not be updated.',
+      });
+    },
+  });
 
   const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
   const priorities = ['low', 'medium', 'high'];
@@ -90,37 +136,47 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
         </p>
       </div>
       <AvatarDisplayer
-        displayName={order.client.name}
-        pictureUrl={order.client.picture_url}
-        nickname="Deo p"
+        displayName={order.client ? order.client.name : undefined}
+        pictureUrl={
+          order.client
+            ? order.client.picture_url && order.client.picture_url
+            : undefined
+        }
         status="online"
       />
 
       <Separator />
+
       <SelectAction
         options={statusOptions}
         groupName={t('details.status')}
         defaultValue={selectedStatus}
-        className={statusColors[selectedStatus]}
-        onSelectHandler={changeStatus}
+        className={selectedStatus ? statusColors[selectedStatus]: undefined}
+        onSelectHandler={(status) => {
+          changeStatus.mutate(status as Order.Type['status']);
+        }}
+        disabled={changeStatus.isPending}
       />
       <Separator />
       <SelectAction
         options={priorityOptions}
         groupName={t('details.priority')}
         defaultValue={selectedPriority}
-        className={priorityColors[selectedPriority]}
-        onSelectHandler={changePriority}
+        className={selectedPriority ? priorityColors[selectedPriority]: undefined}
+        onSelectHandler={(priority) => {
+          changePriority.mutate(priority as Order.Type['priority']);
+        }}
+        disabled={changePriority.isPending}
       />
       <Separator />
       <div className="flex flex-col gap-2">
         <span className="font-semibold">{t('details.assignedTo')}: </span>
-        <MultiAvatarDisplayer avatars={avatarsWithStatus} maxAvatars={4} />
+        {/* <MultiAvatarDisplayer avatars={avatarsWithStatus} maxAvatars={4} /> */}
       </div>
       <Separator />
       <div className="flex flex-col gap-2">
         <span>{t('details.dueDate')}</span>
-        <DatePicker {...order} />
+        <DatePicker updateFn={changeDate.mutate} defaultDate={order.due_date} />
       </div>
       <Separator />
     </div>

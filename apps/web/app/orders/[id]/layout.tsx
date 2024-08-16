@@ -10,7 +10,7 @@ export default function OrderDetailsLayout({
   params: { id: string };
 }) {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 p-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 p-8">
       <PageHeader i18nKey={'orders:details.title'} />
       <NavigationBar orderId={id} />
       {children}
