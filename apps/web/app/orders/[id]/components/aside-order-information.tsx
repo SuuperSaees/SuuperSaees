@@ -125,7 +125,7 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
   }));
 
   return (
-    <div className="flex w-full max-w-80 flex-col gap-4 p-6 text-gray-700">
+    <div className="flex w-full max-w-80 flex-col gap-4 text-gray-700">
       <h3 className="font-bold">{t('details.summary')}</h3>
       <div>
         <p>{`#${order.id}`}</p>

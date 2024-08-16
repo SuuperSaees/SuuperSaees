@@ -43,6 +43,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '../../../../../packages/ui/src/shadcn/pagination';
+import Link from 'next/link';
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -160,15 +161,17 @@ export function OrderList({ orders }: OrdersTableProps) {
                               order.status !== 'annulled',
                           )
                           .map((order) => (
-                            <TableRow key={order.id}>
-                              <TableCell className="">
-                                <span className="block font-medium">
-                                  {order.title}
-                                </span>
-                                <span className="block text-sm">
-                                  {order.description ?? 'Sin descripción'}
-                                </span>
-                              </TableCell>
+                            <TableRow key={order.id} >
+                              <Link href={`orders/${order.id}`}>
+                                <TableCell className="">
+                                  <span className="block font-medium">
+                                    {order.title}
+                                  </span>
+                                  <span className="block text-sm">
+                                    {order.description ?? 'Sin descripción'}
+                                  </span>
+                                </TableCell>
+                              </Link>
                               <TableCell>
                                 <span className="block text-sm">
                                   #{order.id}
