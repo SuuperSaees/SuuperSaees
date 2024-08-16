@@ -187,6 +187,7 @@ export type Database = {
           created_at: string
           id: number
           message: string
+          order_id: number
           type: Database["public"]["Enums"]["action_type"]
           user_id: string
         }
@@ -195,6 +196,7 @@ export type Database = {
           created_at?: string
           id?: number
           message: string
+          order_id: number
           type: Database["public"]["Enums"]["action_type"]
           user_id?: string
         }
@@ -203,10 +205,18 @@ export type Database = {
           created_at?: string
           id?: number
           message?: string
+          order_id?: number
           type?: Database["public"]["Enums"]["action_type"]
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "activities_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "activities_user_id_fkey"
             columns: ["user_id"]
@@ -719,21 +729,56 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          order_id: number
           updated_at: string
+          user_id: string
         }
         Insert: {
           content?: string | null
           created_at?: string
           id?: string
+          order_id: number
           updated_at?: string
+          user_id: string
         }
         Update: {
           content?: string | null
           created_at?: string
           id?: string
+          order_id?: number
           updated_at?: string
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -1048,6 +1093,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          order_id: number
           rating: number
           updated_at: string
           user_id: string
@@ -1056,6 +1102,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          order_id: number
           rating?: number
           updated_at?: string
           user_id?: string
@@ -1064,11 +1111,19 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          order_id?: number
           rating?: number
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reviews_user_id_fkey"
             columns: ["user_id"]

@@ -18,9 +18,9 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
 
       <div className="flex flex-col gap-2 rounded-lg rounded-ss-none border border-gray-200 bg-gray-50 p-4">
         <p className="max-w-xs">{message.content}</p>
-        {message.files.length > 0 && (
+        {message?.files?.length > 0 && (
           <div className="flex flex-wrap gap-4">
-            {message.files.map((file) => (
+            {message?.files?.map((file) => (
               <ImageContainer
                 key={file.id}
                 name={file.name}

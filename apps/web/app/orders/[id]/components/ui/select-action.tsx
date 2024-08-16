@@ -2,14 +2,10 @@
 
 import { useState } from 'react';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@kit/ui/select';
+
+
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@kit/ui/select';
+
 
 type Option = {
   label: string;
@@ -19,9 +15,10 @@ type Option = {
 interface SelectActionProps {
   options: Option[];
   groupName?: string;
-  defaultValue?: string;
+  defaultValue?: string | null;
   className?: string;
   onSelectHandler?: (value: string) => void;
+  [key: string]: unknown
 }
 const SelectAction = ({
   options,
@@ -29,6 +26,7 @@ const SelectAction = ({
   defaultValue,
   className,
   onSelectHandler,
+  ...rest
 }: SelectActionProps) => {
   const [selectedOption, setSelectedOption] = useState(defaultValue);
   return (
@@ -37,13 +35,16 @@ const SelectAction = ({
         {groupName ? groupName : 'Select an option'}
       </span>
       <Select
-        value={selectedOption}
+        {...rest}
+        value={!selectedOption ? undefined : selectedOption}
         onValueChange={(value) => {
           setSelectedOption(value);
           onSelectHandler && onSelectHandler(value);
         }}
       >
-        <SelectTrigger className={'w-[180px] border-none bg-black ' + className}>
+        <SelectTrigger
+          className={'w-[180px] border-none bg-black ' + className}
+        >
           <SelectValue placeholder="Select an option" />
         </SelectTrigger>
         <SelectContent>
