@@ -591,7 +591,7 @@ export type Database = {
           message_id: string | null
           name: string
           size: number
-          type: Database["public"]["Enums"]["file_types"]
+          type: string
           url: string
           user_id: string
         }
@@ -601,7 +601,7 @@ export type Database = {
           message_id?: string | null
           name: string
           size: number
-          type: Database["public"]["Enums"]["file_types"]
+          type: string
           url: string
           user_id: string
         }
@@ -611,7 +611,7 @@ export type Database = {
           message_id?: string | null
           name?: string
           size?: number
-          type?: Database["public"]["Enums"]["file_types"]
+          type?: string
           url?: string
           user_id?: string
         }
@@ -866,23 +866,23 @@ export type Database = {
         Row: {
           created_at: string
           file_id: string
-          order_id: number
+          order_id: string
         }
         Insert: {
           created_at?: string
           file_id?: string
-          order_id: number
+          order_id: string
         }
         Update: {
           created_at?: string
           file_id?: string
-          order_id?: number
+          order_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "order_files_file_id_fkey"
             columns: ["file_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "files"
             referencedColumns: ["id"]
           },
@@ -891,7 +891,7 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders_v2"
-            referencedColumns: ["id"]
+            referencedColumns: ["uuid"]
           },
         ]
       }
@@ -1013,6 +1013,7 @@ export type Database = {
           propietary_organization_id: string
           status: Database["public"]["Enums"]["order_status_types"] | null
           title: string
+          uuid: string
         }
         Insert: {
           assigned_to?: string[] | null
@@ -1025,6 +1026,7 @@ export type Database = {
           propietary_organization_id: string
           status?: Database["public"]["Enums"]["order_status_types"] | null
           title: string
+          uuid: string
         }
         Update: {
           assigned_to?: string[] | null
@@ -1037,6 +1039,7 @@ export type Database = {
           propietary_organization_id?: string
           status?: Database["public"]["Enums"]["order_status_types"] | null
           title?: string
+          uuid?: string
         }
         Relationships: [
           {

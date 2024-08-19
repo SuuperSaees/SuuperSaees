@@ -29,7 +29,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
       .select(
-        `*, client:clients(id, name, email, picture_url), 
+        `*, client:clients(id, name, email, picture_url, created_at), 
         messages(*, user:accounts(id, name, email, picture_url), files(*)), 
         activities(*, user:accounts(id, name, email, picture_url)),
           reviews(*, user:accounts(id, name, email, picture_url)), 
