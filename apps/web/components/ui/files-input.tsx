@@ -1,11 +1,21 @@
 "use client";
 
 import React, { useState } from 'react';
+
+
+
+import { CloudUpload, StickyNote } from 'lucide-react';
+
+
+
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { StickyNote, CloudUpload } from 'lucide-react';
+
+
+
+import { createFile } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { File } from '../../../web/lib/file.types';
-import { createFile } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
+
 
 const fileTypeColors: Record<string, string> = {
   'pdf': 'fill-pdf',
@@ -22,14 +32,22 @@ interface UploadFileComponentProps {
   onFileIdsChange: (fileIds: string[]) => void;
 }
 
-export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange }: UploadFileComponentProps) {
+export default function UploadFileComponent({
+  bucketName,
+  uuid,
+  onFileIdsChange,
+}: UploadFileComponentProps) {
   const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
+    {},
+  );
   const [isDragging, setIsDragging] = useState(false);
-  const [dragMessage, setDragMessage] = useState('Arrastra los archivos o dale click aquí para subir archivos');
-  const [fileIds, setFileIds] = useState<string[]>([]);  
+  const [dragMessage, setDragMessage] = useState(
+    'Arrastra los archivos o dale click aquí para subir archivos',
+  );
+  const [fileIds, setFileIds] = useState<string[]>([]);
 
   const handleFileInputClick = () => {
     const fileInput = document.getElementById('file-input');
@@ -38,14 +56,16 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
     }
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const selectedFiles = Array.from(event.target.files ?? []);
     if (selectedFiles.length === 0) {
       setError('Debes seleccionar al menos un archivo');
       return;
     }
 
-    setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
+    setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
     setError(null);
 
     for (const file of selectedFiles) {
@@ -62,7 +82,7 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
       return;
     }
 
-    setFiles(prevFiles => [...prevFiles, ...droppedFiles]);
+    setFiles((prevFiles) => [...prevFiles, ...droppedFiles]);
     setError(null);
 
     for (const file of droppedFiles) {
@@ -78,7 +98,9 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
 
   const handleDragLeave = () => {
     setIsDragging(false);
-    setDragMessage('Arrastra los archivos o dale click aquí para subir archivos');
+    setDragMessage(
+      'Arrastra los archivos o dale click aquí para subir archivos',
+    );
   };
 
   const sanitizeFileName = (fileName: string) => {
@@ -95,7 +117,7 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
         const progress = (event.loaded / event.total) * 100;
         setUploadProgress((prev) => ({
           ...prev,
-          [file.name]: progress
+          [file.name]: progress,
         }));
       }
     });
@@ -107,7 +129,7 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
     xhr.upload.addEventListener('load', () => {
       setUploadProgress((prev) => ({
         ...prev,
-        [file.name]: 100
+        [file.name]: 100,
       }));
     });
 
@@ -119,7 +141,9 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
       }
     };
 
-    const { data, error } = await supabase.storage.from(bucketName).createSignedUploadUrl(filePath);
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .createSignedUploadUrl(filePath);
 
     if (error) {
       setError(`Error al obtener la URL de carga: ${error.message}`);
@@ -130,7 +154,10 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.send(file);
 
-    const fileUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/orders/' + filePath;
+    const fileUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL +
+      '/storage/v1/object/public/orders/' +
+      filePath;
 
     const newFileData = {
       name: file.name,
@@ -155,7 +182,10 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
     // if (orderFilesError) throw orderFilesError.message;
 
     setFileIds((prevFileIds) => {
-      const newFileIds = [...prevFileIds, ...createdFiles.map(file => file.id)];
+      const newFileIds = [
+        ...prevFileIds,
+        ...createdFiles.map((file) => file.id),
+      ];
       onFileIdsChange(newFileIds);
       return newFileIds;
     });
@@ -173,20 +203,18 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
   };
 
   return (
-    <div className='flex flex-col gap-2'>
+    <div className="flex flex-col gap-2">
       <div
-        className={`flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-lg cursor-pointer ${isDragging ? 'bg-gray-300' : 'bg-gray-100'}`}
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 ${isDragging ? 'bg-gray-300' : 'bg-gray-100'}`}
         onClick={handleFileInputClick}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
       >
-        <div className='border border-gray-200 rounded-lg w-[40px] h-[40px] items-center flex justify-center p-2 mb-[12px]'>
-            <CloudUpload className='text-gray-600 w-[20px] h-[20px]' />
+        <div className="mb-[12px] flex h-[40px] w-[40px] items-center justify-center rounded-lg border border-gray-200 p-2">
+          <CloudUpload className="h-[20px] w-[20px] text-gray-600" />
         </div>
-        <p className="text-gray-600 text-sm">
-          {dragMessage}
-        </p>
+        <p className="text-sm text-gray-600">{dragMessage}</p>
         <input
           type="file"
           id="file-input"
@@ -197,25 +225,33 @@ export default function UploadFileComponent({ bucketName, uuid, onFileIdsChange 
       </div>
 
       {files.map((file, index) => (
-        <div key={index} className="flex p-4 items-start gap-1.5 self-stretch rounded-xl border border-gray-200 bg-white"> 
+        <div
+          key={index}
+          className="flex items-start gap-1.5 self-stretch rounded-xl border border-gray-200 bg-white p-4"
+        >
           <div className="relative flex items-center justify-center">
-            <StickyNote 
-              className={`text-white ${getFileTypeClass(file.name)} w-[40px] h-[56px]`} 
-            /> 
-            <span 
-              className="absolute inset-0 flex items-end justify-center text-[9px] font-semibold py-4 text-white"
-            >
+            <StickyNote
+              className={`text-white ${getFileTypeClass(file.name)} h-[56px] w-[40px]`}
+            />
+            <span className="absolute inset-0 flex items-end justify-center py-4 text-[9px] font-semibold text-white">
               {file.name.split('.').pop()?.toUpperCase()}
             </span>
           </div>
-          <div className='flex flex-col flex-1'>
-            <span className="text-gray-700 text-sm font-medium leading-5 font-inter">{file.name}</span>
-            <span className="truncate text-gray-600 text-sm font-normal leading-5 font-inter">{formatFileSize(file.size)}</span>
-            <div className='flex items-center gap-2 mt-2'>
-              <div className='flex-1'>
-                <Progress value={uploadProgress[file.name] ?? 0} className="w-full" />
+          <div className="flex flex-1 flex-col">
+            <span className="font-inter text-sm font-medium leading-5 text-gray-700">
+              {file.name}
+            </span>
+            <span className="font-inter truncate text-sm font-normal leading-5 text-gray-600">
+              {formatFileSize(file.size)}
+            </span>
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex-1">
+                <Progress
+                  value={uploadProgress[file.name] ?? 0}
+                  className="w-full"
+                />
               </div>
-              <span className="text-gray-600 text-sm font-normal leading-5 font-inter">
+              <span className="font-inter text-sm font-normal leading-5 text-gray-600">
                 {Math.round(uploadProgress[file.name] ?? 0)}%
               </span>
             </div>

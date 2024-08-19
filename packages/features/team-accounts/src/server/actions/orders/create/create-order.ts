@@ -1,10 +1,13 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
-
 
 type OrderInsert = Omit<Order.Insert, 'customer_id'> & {
   fileIds?: string[];
@@ -15,34 +18,34 @@ export const createOrders = async (orders: OrderInsert[]) => {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
-    const userId = 'e00bd5bc-22e1-4ebe-ae32-b1ff0252d08e' || userData.user.id;
+    const userId = 'be61fae8-5bc9-483d-976f-7921c28fde38' || userData.user.id;
 
     console.log('userId', userId);
     const primary_owner_user_id = await getPrimaryOwnerId();
 
     if (!primary_owner_user_id) throw new Error('No primary owner found');
 
-
     // const ordersToInsert = orders.map((order) => ({
     //   ...order,
     //   customer_id: userId,
     //   propietary_organization_id: primary_owner_user_id,
     // }));
-    const ordersToInsert = orders.map(({ fileIds, ...orderWithoutFileIds }) => ({
-      ...orderWithoutFileIds,
-      customer_id: userId,
-      propietary_organization_id: primary_owner_user_id,
-    }));
+    const ordersToInsert = orders.map(
+      ({ fileIds, ...orderWithoutFileIds }) => ({
+        ...orderWithoutFileIds,
+        customer_id: userId,
+        propietary_organization_id: primary_owner_user_id,
+      }),
+    );
 
     console.log('ordersToInsert', ordersToInsert);
-
 
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
       .insert(ordersToInsert)
       .select()
       .single();
-    
+
     console.log('orderData', orderData);
 
     if (orderError) throw orderError.message;
@@ -52,8 +55,8 @@ export const createOrders = async (orders: OrderInsert[]) => {
       if (order.fileIds && order.fileIds.length > 0) {
         for (const fileId of order.fileIds) {
           const orderFileToInsert = {
-            order_id: orderData.uuid,  
-            file_id: fileId,    
+            order_id: orderData.uuid,
+            file_id: fileId,
           };
 
           const { error: orderFilesError } = await client
@@ -64,7 +67,6 @@ export const createOrders = async (orders: OrderInsert[]) => {
         }
       }
     }
-
 
     // insert metadata of the file in a new table
     // if (orders.files) {
@@ -87,4 +89,3 @@ export const createOrders = async (orders: OrderInsert[]) => {
     throw error;
   }
 };
-

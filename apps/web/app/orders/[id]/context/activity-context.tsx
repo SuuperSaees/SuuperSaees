@@ -121,7 +121,6 @@ export const ActivityProvider = ({
     try {
       const messageToSend = {
         content: message,
-        user_id: '2bd7eb2d-bb28-42f5-ac89-35d2b1f590b1' ?? '',
         order_id: Number(order.id),
       };
       await addOrderMessage(Number(order.id), messageToSend);

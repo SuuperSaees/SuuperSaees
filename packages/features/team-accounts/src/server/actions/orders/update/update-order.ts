@@ -13,6 +13,7 @@ import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { addActivityAction } from '../../activity/create/create-activity';
 
+
 export const updateOrder = async (
   orderId: Order.Type['id'],
   order: Order.Update,
@@ -100,16 +101,20 @@ const logOrderActivities = async (
 
 export const addOrderMessage = async (
   orderId: Order.Type['id'],
-  message: Message.Insert,
+  message: Omit<Message.Insert, Message.Insert['user_id']>,
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { error: userError } = await client.auth.getUser();
+    const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
 
     const { data: messageData, error: messageError } = await client
       .from('messages')
-      .insert(message)
+      .insert({
+        ...message,
+        user_id: userData.user.id,
+        order_id: orderId,
+      })
       .select()
       .single();
     console.log('messageData:', orderId, message);
