@@ -25,6 +25,38 @@
       "filesPlaceholder": "Haz click o arrastra para subir un archivo SVG, PNG, JPG or GIF (max. 800x400px)",
       "submitMessage": "Crear pedido"
     }
+  },
+  "details": {
+    "title": "Detalles del pedido",
+    "summary": "Resumen",
+    "createdAt": "Creado",
+    "assignedTo": "Asignado a",
+    "status": "Estado",
+    "priority": "Prioridad",
+    "dueDate": "Fecha de vencimiento",
+    "statuses": {
+      "pending": "Pendiente",
+      "inProgress": "En progreso",
+      "completed": "Completado",
+      "inReview": "En revisión"
+    },
+    "priorities": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "navigation": {
+      "details": "Detalles",
+      "activity": "Actividad",
+      "files": "Archivos"
+    },
+    "dialog": {
+      "button": "Marcar como completado",
+      "title": "Deja una reseña",
+      "description": "!Cuentanos sobre tu experiencia con este pedido!",
+      "label": "Escribe una reseña",
+      "placeholder": "¿Qué te pareció este pedido?"
+    }
   }
   
 }
