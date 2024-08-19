@@ -1,13 +1,13 @@
 export const statusColors = {
-  pending: 'bg-gray-100 text-gray-700 focus:gray-700',
-  in_progress: 'bg-purple-100 text-purple-700',
-  completed: 'bg-green-100 text-green-700',
-  in_review: 'bg-yellow-100 text-yellow-700',
-  annulled: 'bg-red-100 text-red-700',
+  pending: 'bg-yellow-100 text-yellow-700',
+  in_progress: 'bg-brand-100 text-brand-700',
+  completed: 'bg-success-100 text-success-700',
+  in_review: 'bg-warning-100 text-warning-700',
+  annulled: 'bg-error-100 text-error-700',
 };
 
 export const priorityColors = {
   low: 'bg-yellow-100 text-yellow-700',
-  medium: 'bg-blue-100 text-blue-700',
-  high: 'bg-red-100 text-red-700',
+  medium: 'bg-warning-100 text-warning-700',
+  high: 'bg-error-100 text-error-700',
 };

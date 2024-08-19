@@ -9,6 +9,8 @@ import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/order
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+
+
 import { Separator } from '@kit/ui/separator';
 
 import { Order } from '~/lib/order.types';
@@ -19,25 +21,7 @@ import AvatarDisplayer from './ui/avatar-displayer';
 // import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
 import SelectAction from './ui/select-action';
 
-// type Account = {
-//   id?: string;
-//   name: string;
-//   email: string;
-//   picture_url: string;
-// };
-
 interface AsideOrderInformationProps {
-  // order: {
-  //   id: number;
-  //   title: string;
-  //   description: string;
-  //   status: string;
-  //   priority: string;
-  //   due_date: string;
-  //   created_at: string;
-  //   assigned_to: Account[];
-  //   client: Account;
-  // };
   order: Order.Type;
 }
 const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
@@ -56,11 +40,15 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
       return updateOrder(order.id, { status });
     },
     onSuccess: () => {
-      console.log('status changed');
+      toast.success('Success', {
+        description: 'Status updated successfully!',
+      });
     },
-    onError: (error) => {
-      console.log('error', error);
+    onError: () => {
       setSelectedStatus(order.status);
+      toast.error('Error', {
+        description: 'The status could not be updated.',
+      });
     },
   });
 
@@ -70,13 +58,11 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
       return updateOrder(order.id, { priority });
     },
     onSuccess: () => {
-      console.log('priority changed');
       toast.success('Success', {
         description: 'Priority updated successfully!',
       });
     },
-    onError: (error) => {
-      console.log('error', error);
+    onError: () => {
       setSelectedPriority(order.priority);
       toast.error('Error', {
         description: 'The priority could not be updated.',
@@ -151,7 +137,7 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
         options={statusOptions}
         groupName={t('details.status')}
         defaultValue={selectedStatus}
-        className={selectedStatus ? statusColors[selectedStatus]: undefined}
+        className={selectedStatus ? statusColors[selectedStatus] : undefined}
         onSelectHandler={(status) => {
           changeStatus.mutate(status as Order.Type['status']);
         }}
@@ -162,7 +148,9 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
         options={priorityOptions}
         groupName={t('details.priority')}
         defaultValue={selectedPriority}
-        className={selectedPriority ? priorityColors[selectedPriority]: undefined}
+        className={
+          selectedPriority ? priorityColors[selectedPriority] : undefined
+        }
         onSelectHandler={(priority) => {
           changePriority.mutate(priority as Order.Type['priority']);
         }}

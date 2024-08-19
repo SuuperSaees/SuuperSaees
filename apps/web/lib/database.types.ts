@@ -113,7 +113,7 @@ export type Database = {
         }
         Insert: {
           account_id: string
-          account_role: string
+          account_role?: string
           created_at?: string
           created_by?: string | null
           updated_at?: string
@@ -188,7 +188,7 @@ export type Database = {
           id: number
           message: string
           order_id: number
-          type: Database["public"]["Enums"]["action_type"]
+          type: Database["public"]["Enums"]["activity_type"]
           user_id: string
         }
         Insert: {
@@ -197,8 +197,8 @@ export type Database = {
           id?: number
           message: string
           order_id: number
-          type: Database["public"]["Enums"]["action_type"]
-          user_id?: string
+          type: Database["public"]["Enums"]["activity_type"]
+          user_id: string
         }
         Update: {
           action?: Database["public"]["Enums"]["action_type"]
@@ -206,7 +206,7 @@ export type Database = {
           id?: number
           message?: string
           order_id?: number
-          type?: Database["public"]["Enums"]["action_type"]
+          type?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
         }
         Relationships: [
@@ -593,6 +593,7 @@ export type Database = {
           size: number
           type: Database["public"]["Enums"]["file_types"]
           url: string
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -602,6 +603,7 @@ export type Database = {
           size: number
           type: Database["public"]["Enums"]["file_types"]
           url: string
+          user_id: string
         }
         Update: {
           created_at?: string
@@ -611,6 +613,7 @@ export type Database = {
           size?: number
           type?: Database["public"]["Enums"]["file_types"]
           url?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -618,6 +621,27 @@ export type Database = {
             columns: ["message_id"]
             isOneToOne: false
             referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -1094,7 +1118,7 @@ export type Database = {
           created_at: string
           id: string
           order_id: number
-          rating: number
+          rating: number | null
           updated_at: string
           user_id: string
         }
@@ -1103,16 +1127,16 @@ export type Database = {
           created_at?: string
           id?: string
           order_id: number
-          rating?: number
+          rating?: number | null
           updated_at?: string
-          user_id?: string
+          user_id: string
         }
         Update: {
           content?: string
           created_at?: string
           id?: string
           order_id?: number
-          rating?: number
+          rating?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -1786,6 +1810,8 @@ export type Database = {
         | "assign"
         | "due_date"
         | "description"
+        | "title"
+        | "assigned_to"
       app_permissions:
         | "roles.manage"
         | "billing.manage"

@@ -9,11 +9,12 @@ import Interactions from './interactions';
 const ActivityPage = () => {
   const { writeMessage } = useActivityContext();
   return (
-    <div className="flex w-full min-w-0 max-w-full flex-col gap-2">
+    <div className="flex w-full min-w-0 max-w-full max-h-full flex-col gap-4">
       <Interactions />
-
-      <UploadFileComponent bucketName="orders" />
-      <RichTextEditor onComplete={writeMessage} />
+      <div className="mt-auto flex flex-col gap-4">
+        <UploadFileComponent bucketName="orders" />
+        <RichTextEditor onComplete={writeMessage} />
+      </div>
     </div>
   );
 };

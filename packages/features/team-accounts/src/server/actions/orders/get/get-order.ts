@@ -4,8 +4,22 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 
+import { Activity } from '../../../../../../../../apps/web/lib/activity.types';
+import { File } from '../../../../../../../../apps/web/lib/file.types';
+import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
+import { Review } from '../../../../../../../../apps/web/lib/review.types';
+import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 
+type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url'>;
+
+type OrderWithAllRelations = Order.Relationships.All & {
+  messages: (Message.Type & { user: User; files: File.Type[] })[];
+  files: (File.Type & { user: User })[];
+  activities: (Activity.Type & { user: User })[];
+  reviews: (Review.Type & { user: User })[];
+  client: User;
+};
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -15,24 +29,21 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
       .select(
-        '*, client:clients (id, name, email, created_at, picture_url), messages(*, user:accounts(*))',
+        `*, client:clients(id, name, email, picture_url), 
+        messages(*, user:accounts(id, name, email, picture_url), files(*)), 
+        activities(*, user:accounts(id, name, email, picture_url)),
+          reviews(*, user:accounts(id, name, email, picture_url)), 
+          files(*, user:accounts(id, name, email, picture_url))
+        `,
       )
       .eq('id', orderId)
       .single();
 
     if (orderError) throw orderError.message;
 
-    // Process messages to flatten the user relationship
-    // const processedData = {
-    //   ...orderData,
-    //   messages: orderData.messages.map(message => ({
-    //     ...message,
-    //     user: message.user[0]
-    //   }))
-    // };
     const proccesedData = {
       ...orderData,
-      messages: orderData.messages.map((message, msgIdx) => {
+      messages: orderData.messages.map((message) => {
         return {
           ...message,
           user: message.user,
@@ -42,7 +53,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
 
     console.log('a', orderData.messages[0]?.user, proccesedData);
 
-    return proccesedData;
+    return proccesedData as OrderWithAllRelations;
   } catch (error) {
     console.error('Error fetching order:', error);
     throw error;

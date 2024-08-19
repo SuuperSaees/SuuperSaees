@@ -15,11 +15,11 @@ const UserReviewMessage = ({ review }: UserReviewMessageProps) => {
         <Star className="h-5 w-5 text-yellow-400" />
       </div>
       <div className="flex flex-col">
-        <div className="flex justify-between">
+        <div className="flex gap-4 justify-between">
           <p className="font-semibold text-gray-600">{`Left a ${review.rating} star review:`}</p>
-          <span className="text-gray-400">
+          <small className="text-gray-400">
             {formatDateToString(new Date(review.created_at), 'short')}
-          </span>
+          </small>
         </div>
         <div className="flex gap-1 rounded-lg rounded-ss-none border border-gray-200 bg-gray-50 p-3">
           <AvatarDisplayer
@@ -30,7 +30,7 @@ const UserReviewMessage = ({ review }: UserReviewMessageProps) => {
             <span className="font-semibold">{review.user.name}</span>
             <p>{review.content}</p>
             <div className="flex gap-1">
-              {Array.from({ length: review.rating }, (_, i) => (
+              {Array.from({ length: review.rating ?? 0 }, (_, i) => (
                 <StarFilledIcon
                   className="h-4 w-4 text-yellow-400"
                   key={'start' + i}

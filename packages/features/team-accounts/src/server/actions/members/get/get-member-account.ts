@@ -2,6 +2,7 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
 export async function getPrimaryOwnerId() {
   try {
     const client = getSupabaseServerComponentClient();
@@ -27,5 +28,29 @@ export async function getPrimaryOwnerId() {
   } catch (error) {
     console.error('Error fetching primary owner:', error);
     // throw error;
+  }
+}
+
+// get a given user
+
+export async function getUserById(userId: string) {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { error: userAuthenticatedError } = await client.auth.getUser();
+
+    if (userAuthenticatedError) throw userAuthenticatedError;
+
+    const { data: userData, error: userError } = await client
+      .from('accounts')
+      .select('name, email, id, picture_url')
+      .eq('id', userId)
+      .single();
+
+    if (userError) throw userError;
+
+    return userData;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw error;
   }
 }
