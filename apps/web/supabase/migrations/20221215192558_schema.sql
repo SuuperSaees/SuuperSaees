@@ -495,7 +495,7 @@ declare
     role varchar(50);
 begin
     select name from public.roles
-      where hierarchy_level = 1 into role;
+      where hierarchy_level = 2 into role;
 
     return role;
 end;

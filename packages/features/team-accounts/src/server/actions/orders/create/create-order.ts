@@ -6,8 +6,11 @@ import { redirect } from 'next/navigation';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
+
 
 type OrderInsert = Omit<Order.Insert, 'customer_id'> & {
   fileIds?: string[];
@@ -18,7 +21,7 @@ export const createOrders = async (orders: OrderInsert[]) => {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
-    const userId = 'be61fae8-5bc9-483d-976f-7921c28fde38' || userData.user.id;
+    const userId = '1b5e96a8-b9a3-41bb-b7ff-00dc6d59a007' || userData.user.id;
 
     console.log('userId', userId);
     const primary_owner_user_id = await getPrimaryOwnerId();

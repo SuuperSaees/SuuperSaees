@@ -882,7 +882,7 @@ export type Database = {
           {
             foreignKeyName: "order_files_file_id_fkey"
             columns: ["file_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "files"
             referencedColumns: ["id"]
           },
