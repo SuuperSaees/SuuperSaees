@@ -1,6 +1,7 @@
 "use client"
 
-
+import Image from "next/image"
+import Link from "next/link"
 import {
   File,
   Home,
@@ -151,347 +152,87 @@ export function InvoicesTable({ invoices }: OrdersTableProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredInvoices
-                        .filter(invoice => invoice.status !== 'completed' && invoice.status !== 'closed')
-                        .map((invoice) => (
-                          <TableRow key={invoice.id}>
-                            <TableCell className="">
-                              <span className="font-medium block">{invoice.id}</span>
-                              <span className="text-sm block">{invoice.id ?? 'Sin descripción'}</span>
-                            </TableCell>
-                            <TableCell>
-                              <span className="text-sm block">#{invoice.id}</span>
-                            </TableCell>
-                            <TableCell>
-                              <span className="font-medium block">{invoice.customer_organization ?? 'Sin nombre'}</span>
-                              <span className="text-sm block">{invoice.customer_organization ?? 'Sin organización'}</span>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg flex items-center inline-flex">
-                                  <span className="pl-2 pr-2">{invoice.status}</span>
-                                  <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg">
-                                    En revisión
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-brand-100 text-brand-700 p-2 m-2 rounded-lg">
-                                    En progreso
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-yellow-100 text-yellow-700 p-2 m-2 rounded-lg">
-                                    Esperando respuesta
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-success-100 text-success-700 p-2 m-2 rounded-lg">
-                                    Completado
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-error-100 text-error-700 p-2 m-2 rounded-lg">
-                                    En pausa
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg">
-                                    En cola
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <div className="flex -space-x-1">
-                                
-                              </div>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <DatePicker title={""} description={null} customer_id={""} assigned_to={null} due_date={null} propietary_organization_id={""} {...invoice} />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-                <CardFooter>
-                  {/* <Pagination>
-                    <PaginationContent>
-                      <div className="space-between flex flex-row justify-between w-full">
-                        <div>
-                          <PaginationItem>
-                            <PaginationPrevious href="#" />
-                            <PaginationNext href="#" />
-                          </PaginationItem>
-                        </div>
-                        <div className="flex flex-row">
-                          <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">2</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">3</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">10</PaginationLink>
-                          </PaginationItem>
-                        </div>
-                      </div>
-                    </PaginationContent>
-                  </Pagination> */}
-                  <Pagination>
-                    <PaginationContent>
-                      <div className="space-between flex flex-row justify-between w-full">
-                        <div>
-                          <PaginationItem>
-                            <PaginationPrevious 
-                              href="#" 
-                              onClick={() => handlePageChange(Math.max(currentPage - 1, 1))} 
-                            />
-                            <PaginationNext 
-                              href="#" 
-                              onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))} 
-                            />
-                          </PaginationItem>
-                        </div>
-                        <div className="flex flex-row">
-                          {Array.from({ length: totalPages }, (_, index) => (
-                            <PaginationItem key={index + 1}>
-                              <PaginationLink 
-                                href="#" 
-                                onClick={() => handlePageChange(index + 1)} 
-                                isActive={currentPage === index + 1}
-                              >
-                                {index + 1}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          {totalPages > 5 && currentPage < totalPages - 2 && (
-                            <PaginationItem>
-                              <PaginationEllipsis />
-                            </PaginationItem>
-                          )}
-                        </div>
-                      </div>
-                    </PaginationContent>
-                  </Pagination>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-            <TabsContent value="completed">
-              <Card x-chunk="dashboard-06-chunk-0">
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t("titleLabel")}</TableHead>
-                        <TableHead>{t("idLabel")}</TableHead>
-                        <TableHead>{t("clientLabel")}</TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          {t("statusLabel")}
-                        </TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          {t("assignedToLabel")}
-                        </TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          {t("dueDateLabel")}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredInvoices
-                        .filter(invoice => invoice.status === 'completed' || invoice.status === 'closed')
-                        .map((invoice) => (
-                          <TableRow key={invoice.id}>
-                            <TableCell className="">
-                              <span className="font-medium block">{invoice.id}</span>
-                            </TableCell>
-                            <TableCell>
-                              <span className="text-sm block">#{invoice.id}</span>
-                            </TableCell>
-                            <TableCell>
-                              <span className="font-medium block">{invoice.customer_organization ?? 'Sin nombre'}</span>
-                              <span className="text-sm block">{invoice.customer_organization ?? 'Sin organización'}</span>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg flex items-center inline-flex">
-                                  <span className="pl-2 pr-2">{invoice.status}</span>
-                                  <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg">
-                                    En revisión
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-brand-100 text-brand-700 p-2 m-2 rounded-lg">
-                                    En progreso
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-yellow-100 text-yellow-700 p-2 m-2 rounded-lg">
-                                    Esperando respuesta
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-success-100 text-success-700 p-2 m-2 rounded-lg">
-                                    Completado
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-error-100 text-error-700 p-2 m-2 rounded-lg">
-                                    En pausa
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg">
-                                    En cola
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <div className="flex -space-x-1">
+                    {filteredInvoices.length > 0 ? (
+  filteredInvoices.map((invoice) => (
+    <TableRow key={invoice.id}>
+      <TableCell>
+        <span className="font-medium block">{invoice.id}</span>
+      </TableCell>
+      <TableCell>
+        <span className="text-sm block">#{invoice.id}</span>
+      </TableCell>
+      <TableCell>
+        <span className="font-medium block">{invoice.customer_organization ?? 'Sin nombre'}</span>
+        <span className="text-sm block">{invoice.customer_organization ?? 'Sin organización'}</span>
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        <DropdownMenu>
+          <DropdownMenuTrigger className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg flex items-center inline-flex">
+            <span className="pl-2 pr-2">{invoice.status}</span>
+            <ChevronDownIcon className="flex items-center" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg">
+              En revisión
+            </DropdownMenuItem>
+            <DropdownMenuItem className="bg-brand-100 text-brand-700 p-2 m-2 rounded-lg">
+              En progreso
+            </DropdownMenuItem>
+            <DropdownMenuItem className="bg-yellow-100 text-yellow-700 p-2 m-2 rounded-lg">
+              Esperando respuesta
+            </DropdownMenuItem>
+            <DropdownMenuItem className="bg-success-100 text-success-700 p-2 m-2 rounded-lg">
+              Completado
+            </DropdownMenuItem>
+            <DropdownMenuItem className="bg-error-100 text-error-700 p-2 m-2 rounded-lg">
+              En pausa
+            </DropdownMenuItem>
+            <DropdownMenuItem className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg">
+              En cola
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        <div className="flex -space-x-1">
+          {/* Aquí puedes agregar los elementos que necesitas */}
+        </div>
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        <DatePicker
+          title={""}
+          description={null}
+          customer_id={""}
+          assigned_to={null}
+          due_date={null}
+          propietary_organization_id={""}
+          {...invoice}
+        />
+      </TableCell>
+    </TableRow>
+  ))
+) : (
+  <TableRow>
+    <TableCell colSpan={6} className="text-center py-10">
+      <div className="flex flex-col items-center justify-center">
+        <Image
+          src="/images/illustrations/Illustration-card.svg"
+          alt="No hay facturas"
+          width={220}
+          height={160}
+        />
+        <h3 className="mt-4 text-lg font-medium text-gray-900 text-semibold">Comencemos con tu primera factura</h3>
+        <p className="mt-1 text-sm text-gray-500">Aún no haz creado ninguna factura, agrega uno haciendo clic a continuación.</p>
+        <Button>
+            <Link href="/invoices/create">Crear factura</Link>
+            {/*Hay que arreglar este redirect*/}
+          </Button>
+      </div>
+      
+    </TableCell>
+  </TableRow>
+)}
 
-                              </div>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <DatePicker title={""} description={null} customer_id={""} assigned_to={null} due_date={null} propietary_organization_id={""} {...invoice} />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-                <CardFooter>
-                  {/* <Pagination>
-                    <PaginationContent>
-                      <div className="space-between flex flex-row justify-between w-full">
-                        <div>
-                          <PaginationItem>
-                            <PaginationPrevious href="#" />
-                            <PaginationNext href="#" />
-                          </PaginationItem>
-                        </div>
-                        <div className="flex flex-row">
-                          <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">2</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">3</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">10</PaginationLink>
-                          </PaginationItem>
-                        </div>
-                      </div>
-                    </PaginationContent>
-                  </Pagination> */}
-                  <Pagination>
-                    <PaginationContent>
-                      <div className="space-between flex flex-row justify-between w-full">
-                        <div>
-                          <PaginationItem>
-                            <PaginationPrevious 
-                              href="#" 
-                              onClick={() => handlePageChange(Math.max(currentPage - 1, 1))} 
-                            />
-                            <PaginationNext 
-                              href="#" 
-                              onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))} 
-                            />
-                          </PaginationItem>
-                        </div>
-                        <div className="flex flex-row">
-                          {Array.from({ length: totalPages }, (_, index) => (
-                            <PaginationItem key={index + 1}>
-                              <PaginationLink 
-                                href="#" 
-                                onClick={() => handlePageChange(index + 1)} 
-                                isActive={currentPage === index + 1}
-                              >
-                                {index + 1}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          {totalPages > 5 && currentPage < totalPages - 2 && (
-                            <PaginationItem>
-                              <PaginationEllipsis />
-                            </PaginationItem>
-                          )}
-                        </div>
-                      </div>
-                    </PaginationContent>
-                  </Pagination>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-            <TabsContent value="all">
-              <Card x-chunk="dashboard-06-chunk-0">
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t("titleLabel")}</TableHead>
-                        <TableHead>{t("idLabel")}</TableHead>
-                        <TableHead>{t("clientLabel")}</TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          {t("statusLabel")}
-                        </TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          {t("assignedToLabel")}
-                        </TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          {t("dueDateLabel")}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredInvoices.map((invoice) => (
-                        <TableRow key={invoice.id}>
-                          <TableCell className="">
-                            <span className="font-medium block">{invoice.id}</span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm block">#{invoice.id}</span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="font-medium block">{invoice.customer_organization ?? 'Sin nombre'}</span>
-                            <span className="text-sm block">{invoice.customer_organization ?? 'Sin organización'}</span>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg flex items-center inline-flex">
-                                <span className="pl-2 pr-2">{invoice.status}</span>
-                                <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem className="bg-warning-100 text-warning-700 p-2 m-2 rounded-lg">
-                                  En revisión
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="bg-brand-100 text-brand-700 p-2 m-2 rounded-lg">
-                                  En progreso
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="bg-yellow-100 text-yellow-700 p-2 m-2 rounded-lg">
-                                  Esperando respuesta
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="bg-success-100 text-success-700 p-2 m-2 rounded-lg">
-                                  Completado
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="bg-error-100 text-error-700 p-2 m-2 rounded-lg">
-                                  En pausa
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="bg-gray-100 text-gray-700 p-2 m-2 rounded-lg">
-                                  En cola
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <div className="flex -space-x-1">
-                             
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <DatePicker title={""} description={null} customer_id={""} assigned_to={null} due_date={null} propietary_organization_id={""} {...invoice} />
-                          </TableCell>
-                        </TableRow>
-                      ))}
                     </TableBody>
                   </Table>
                 </CardContent>

@@ -1,6 +1,6 @@
 "use client"
 
-
+import Image from "next/image"
 import {
   File,
   Home,
@@ -75,6 +75,7 @@ import React, { useState } from "react"
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { useTranslation } from 'react-i18next';
 import { Separator } from "@kit/ui/separator"
+import Link from "next/link"
 
 type OrdersTableProps = {
   orders: {
@@ -183,9 +184,10 @@ export function OrderList({ orders }: OrdersTableProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredOrders
-                        .filter(order => order.status !== 'completed' && order.status !== 'closed')
-                        .map((order) => (
+                    {filteredOrders.length > 0 ? (
+                    filteredOrders
+                      .filter(order => order.status !== 'completed' && order.status !== 'closed')
+                      .map(order => (
                           <TableRow key={order.id}>
                             <TableCell className="">
                               <span className="font-medium block">{order.title}</span>
@@ -239,7 +241,23 @@ export function OrderList({ orders }: OrdersTableProps) {
                               <DatePicker {...order} />
                             </TableCell>
                           </TableRow>
-                        ))}
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-10">
+                            <div className="flex flex-col items-center justify-center">
+                              <Image
+                                src="/images/illustrations/Illustration-box.svg"
+                                alt="No hay órdenes"
+                                width={220}
+                                height={160}
+                              />
+                              <h3 className="mt-4 text-lg font-medium text-gray-900 font-semibold">Comencemos con tu primer pedido</h3>
+                              <p className="mt-1 text-sm text-gray-500">Aún no haz creado ningún pedido, agrega uno haciendo clic a continuación.</p>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
                 </CardContent>
@@ -273,6 +291,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                       </div>
                     </PaginationContent>
                   </Pagination> */}
+                  {filteredOrders.length ? (
                   <Pagination>
                     <PaginationContent>
                       <div className="space-between flex flex-row justify-between w-full">
@@ -309,6 +328,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                       </div>
                     </PaginationContent>
                   </Pagination>
+                ) : ( <></>)}
                 </CardFooter>
               </Card>
             </TabsContent>
@@ -333,9 +353,10 @@ export function OrderList({ orders }: OrdersTableProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredOrders
-                        .filter(order => order.status === 'completed' || order.status === 'closed')
-                        .map((order) => (
+                    {filteredOrders.length > 0 ? (
+                    filteredOrders
+                      .filter(order => order.status !== 'completed' && order.status !== 'closed')
+                      .map(order => (
                           <TableRow key={order.id}>
                             <TableCell className="">
                               <span className="font-medium block">{order.title}</span>
@@ -389,7 +410,23 @@ export function OrderList({ orders }: OrdersTableProps) {
                               <DatePicker {...order} />
                             </TableCell>
                           </TableRow>
-                        ))}
+                                                  ))
+                                                ) : (
+                                                  <TableRow>
+                                                    <TableCell colSpan={6} className="text-center py-10">
+                                                      <div className="flex flex-col items-center justify-center">
+                                                        <Image
+                                                          src="/images/illustrations/Illustration-box.svg"
+                                                          alt="No hay órdenes"
+                                                          width={220}
+                                                          height={160}
+                                                        />
+                                                        <h3 className="mt-4 text-lg font-medium text-gray-900 font-semibold">Comencemos con tu primer pedido</h3>
+                                                        <p className="mt-1 text-sm text-gray-500">Aún no haz creado ningún pedido, agrega uno haciendo clic a continuación.</p>
+                                                      </div>
+                                                    </TableCell>
+                                                  </TableRow>
+                                                )}
                     </TableBody>
                   </Table>
                 </CardContent>
@@ -423,6 +460,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                       </div>
                     </PaginationContent>
                   </Pagination> */}
+                  {filteredOrders.length ? (
                   <Pagination>
                     <PaginationContent>
                       <div className="space-between flex flex-row justify-between w-full">
@@ -459,6 +497,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                       </div>
                     </PaginationContent>
                   </Pagination>
+                ) : ( <></>)}
                 </CardFooter>
               </Card>
             </TabsContent>
@@ -483,7 +522,9 @@ export function OrderList({ orders }: OrdersTableProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredOrders.map((order) => (
+                      
+                    {filteredOrders.length > 0 ? (
+                      filteredOrders.map((order) => (
                         <TableRow key={order.id}>
                           <TableCell className="">
                             <span className="font-medium block">{order.title}</span>
@@ -537,7 +578,24 @@ export function OrderList({ orders }: OrdersTableProps) {
                             <DatePicker {...order} />
                           </TableCell>
                         </TableRow>
-                      ))}
+                                                                          ))
+                                                                        ) : (
+                                                                          <TableRow>
+                                                                            <TableCell colSpan={6} className="text-center py-10">
+                                                                              <div className="flex flex-col items-center justify-center">
+                                                                                <Image
+                                                                                  src="/images/illustrations/Illustration-box.svg"
+                                                                                  alt="No hay órdenes"
+                                                                                  width={220}
+                                                                                  height={160}
+                                                                                />
+                                                                                <h3 className="mt-4 text-lg font-medium text-gray-900 font-semibold">Comencemos con tu primer pedido</h3>
+                                                                                <p className="mt-1 text-sm text-gray-500">Aún no haz creado ningún pedido, agrega uno haciendo clic a continuación.</p>
+                                                                              </div>
+                                                                            </TableCell>
+                                                                          </TableRow>
+                                                                        )}
+
                     </TableBody>
                   </Table>
                 </CardContent>
@@ -571,6 +629,8 @@ export function OrderList({ orders }: OrdersTableProps) {
                       </div>
                     </PaginationContent>
                   </Pagination> */}
+                  
+                  {filteredOrders.length ? (
                   <Pagination>
                     <PaginationContent>
                       <div className="space-between flex flex-row justify-between w-full">
@@ -607,6 +667,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                       </div>
                     </PaginationContent>
                   </Pagination>
+                ) : ( <></>)}
                 </CardFooter>
               </Card>
             </TabsContent>
