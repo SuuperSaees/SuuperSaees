@@ -214,21 +214,24 @@ export function InvoicesTable({ invoices }: OrdersTableProps) {
 ) : (
   <TableRow>
     <TableCell colSpan={6} className="text-center py-10">
-      <div className="flex flex-col items-center justify-center">
-        <Image
-          src="/images/illustrations/Illustration-card.svg"
-          alt="No hay facturas"
-          width={220}
-          height={160}
-        />
-        <h3 className="mt-4 text-lg font-medium text-gray-900 text-semibold">Comencemos con tu primera factura</h3>
-        <p className="mt-1 text-sm text-gray-500">Aún no haz creado ninguna factura, agrega uno haciendo clic a continuación.</p>
-        <Button>
+    <div className='flex flex-col place-content-center items-center h-[493px]'>
+          <Image
+            src="/images/illustrations/Illustration-box.svg"
+            alt="Illustration Card"
+            width={220}
+            height={160}
+          />
+          <h3 className='w-[352px] text-center text-[20px] text-[#101828] leading-[30px] mb-[20px] font-semibold'>
+          Comencemos con tu primera factura
+          </h3>
+          <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
+          Aún no haz creado ninguna factura, agrega uno haciendo clic a continuación.
+          </p>
+          <Button>
             <Link href="/invoices/create">Crear factura</Link>
             {/*Hay que arreglar este redirect*/}
           </Button>
-      </div>
-      
+        </div>      
     </TableCell>
   </TableRow>
 )}
