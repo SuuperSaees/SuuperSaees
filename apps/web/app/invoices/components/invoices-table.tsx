@@ -216,7 +216,7 @@ export function InvoicesTable({ invoices }: OrdersTableProps) {
     <TableCell colSpan={6} className="text-center py-10">
     <div className='flex flex-col place-content-center items-center h-[493px]'>
           <Image
-            src="/images/illustrations/Illustration-box.svg"
+            src="/images/illustrations/Illustration-card.svg"
             alt="Illustration Card"
             width={220}
             height={160}
