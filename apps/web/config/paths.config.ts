@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+
 const PathsSchema = z.object({
   auth: z.object({
     signIn: z.string().min(1),
@@ -24,7 +25,7 @@ const PathsSchema = z.object({
     accountMembers: z.string().min(1),
     accountBillingReturn: z.string().min(1),
     joinTeam: z.string().min(1),
-    teams: z.string().min(1),
+    teams: z.string().min(1).optional(),
     clients: z.string().min(1),
     // briefs: z.string().min(1),
   }),

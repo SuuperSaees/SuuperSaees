@@ -23,8 +23,19 @@ export const createOrders = async (orders: OrderInsert[]) => {
     if (userError) throw userError.message;
     const userId = userData.user.id;
 
+
     // console.log('userId', userId);
-    const primary_owner_user_id = await getPrimaryOwnerId();
+    const { data: clientData, error: clientError } = await client
+      .from('clients')
+      .select('*')
+      .eq('user_client_id', userId)
+      .single();
+    if (clientError) {
+      console.error('clientError', clientError);
+      throw clientError.message;
+    }
+    const agency_client_id = clientData.agency_id;
+    const primary_owner_user_id = agency_client_id;
 
     if (!primary_owner_user_id) throw new Error('No primary owner found');
 
@@ -37,6 +48,7 @@ export const createOrders = async (orders: OrderInsert[]) => {
       ({ fileIds, ...orderWithoutFileIds }) => ({
         ...orderWithoutFileIds,
         customer_id: userId,
+        client_organization_id: clientData.organization_client_id,
         propietary_organization_id: primary_owner_user_id,
       }),
     );

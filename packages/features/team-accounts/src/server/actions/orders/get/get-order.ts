@@ -11,6 +11,7 @@ import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Review } from '../../../../../../../../apps/web/lib/review.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 
+
 type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url'>;
 
 type OrderWithAllRelations = Order.Relationships.All & {
@@ -29,7 +30,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
       .select(
-        `*, client:clients(id, name, email, picture_url, created_at), 
+        `*, client:accounts!customer_id(id, name, email, picture_url, created_at), 
         messages(*, user:accounts(id, name, email, picture_url), files(*)), 
         activities(*, user:accounts(id, name, email, picture_url)),
           reviews(*, user:accounts(id, name, email, picture_url)), 

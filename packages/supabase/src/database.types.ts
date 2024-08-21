@@ -493,21 +493,18 @@ export type Database = {
       clients: {
         Row: {
           agency_id: string
-          agency_id2: string | null
           id: string
           organization_client_id: string
           user_client_id: string
         }
         Insert: {
           agency_id: string
-          agency_id2?: string | null
           id?: string
           organization_client_id: string
           user_client_id: string
         }
         Update: {
           agency_id?: string
-          agency_id2?: string | null
           id?: string
           organization_client_id?: string
           user_client_id?: string
@@ -995,6 +992,7 @@ export type Database = {
       orders_v2: {
         Row: {
           assigned_to: string[] | null
+          client_organization_id: string
           created_at: string
           customer_id: string
           description: string
@@ -1008,6 +1006,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string[] | null
+          client_organization_id: string
           created_at?: string
           customer_id: string
           description: string
@@ -1021,6 +1020,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string[] | null
+          client_organization_id?: string
           created_at?: string
           customer_id?: string
           description?: string
@@ -1033,6 +1033,27 @@ export type Database = {
           uuid?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_v2_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_v2_customer_id_fkey"
             columns: ["customer_id"]
