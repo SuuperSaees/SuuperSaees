@@ -54,3 +54,26 @@ export async function getUserById(userId: string) {
     throw error;
   }
 }
+
+export async function getUserRole() {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { error: userAuthenticatedError, data: userAuthenticatedData } =
+      await client.auth.getUser();
+    const userId = userAuthenticatedData?.user?.id;
+
+    if (userAuthenticatedError || !userId) throw userAuthenticatedError;
+    const { error: userAccountError, data: userAccountData } = await client
+      .from('accounts_memberships')
+      .select('account_role')
+      .eq('user_id', userId)
+      .single();
+
+    console.log('userAccountData', userAccountData);
+    if (userAccountError) throw userAccountError;
+
+    return userAccountData?.account_role;
+  } catch (error) {
+    console.error('Error fetching user role:', error);
+  }
+}

@@ -1,72 +1,106 @@
+import { BellIcon } from 'lucide-react';
+import { getPrimaryOwnerId } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { ClientsTable } from '@kit/team-accounts/components';
+import { Button } from '@kit/ui/button';
+import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
+
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import {
-  ClientsTable,
-} from '@kit/team-accounts/components';
-import { Button } from '@kit/ui/button';
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { BellIcon } from 'lucide-react';
-import { PageBody } from '@kit/ui/page';
-
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
-    return {
-      title: i18n.t('clients:title'),
-    };
+  return {
+    title: i18n.t('clients:title'),
+  };
 };
 
-  async function ClientsMembersPage() {
-    const client = getSupabaseServerComponentClient();
-    const { data: userData } = await client.auth.getUser();
+async function ClientsMembersPage() {
+  const client = getSupabaseServerComponentClient();
+  const { data: userData } = await client.auth.getUser();
 
-    const { data: accountsData} = await client.from('accounts').select().eq('primary_owner_user_id', userData.user!.id);
+  const { data: accountsData } = await client.from('accounts').select();
+  // console.log('all', accountsData);
+  const filteredAccounts = accountsData?.filter(
+    (account) => account.id !== userData.user!.id,
+  );
+  const accountIds = filteredAccounts?.map((account) => account.id) ?? [];
+  const accountNames = filteredAccounts?.map((account) => account.name) ?? [];
+  const agencyId = await getPrimaryOwnerId();
 
-    const filteredAccounts = accountsData?.filter(account => account.id !== userData.user!.id);
-
-    const accountIds = filteredAccounts?.map(account => account.id) ?? []; 
-
-    const accountNames = filteredAccounts?.map(account => account.name) ?? [];
-
-    const { data: dataClients} = await client
+  const { data: agencyClients } = await client
     .from('clients')
     .select()
-    .eq('propietary_organization_id', accountIds[0] ?? '');
+    .eq('agency_id', agencyId ?? '');
 
-    return (
-      <PageBody>
-        <div className='p-[35px]'>
-            <div className="flex justify-between items-center mb-[32px]">
-                <div className="flex-grow">
-                    <span>
-                    <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
-                      <Trans i18nKey={'clients:client'} />
-                    </div>
-                    </span>
-                </div>
-                <div className="flex space-x-4">
-                    <span>
-                        <Button variant="outline">
-                            Tu prueba gratuita termina en xx dias
-                        </Button>
-                    </span>
-                    <span>
-                        <Button variant="outline" size="icon">
-                            <BellIcon className="h-4 w-4" />
-                        </Button>
-                    </span>
-                </div>
-            </div>
-            {dataClients ? (
-                    <ClientsTable clients={dataClients} accountIds={accountIds} accountNames={accountNames}  />
-                ) : (
-                    <p>No clients available</p>
-                )}
-        </div>
-      </PageBody>
-      
+  const clientOrganizationIds =
+    agencyClients?.map((client) => client.organization_client_id) ?? [];
+
+  const clientuserIds =
+    agencyClients?.map((client) => client.user_client_id) ?? [];
+  // bring the agencyClients
+
+  const { data: clientOwners, error } = await client
+    .from('accounts')
+    .select('*, rol:accounts_memberships(*)')
+    .in('id', clientuserIds);
+
+  const { data: clientOrganizations } = await client
+    .from('accounts')
+    .select()
+    .in('id', clientOrganizationIds)
+    .eq('is_personal_account', false);
+
+  const clientsWithOrganizations = clientOwners?.map((clientOwner) => {
+    const organization = clientOrganizations?.find(
+      (org) => org.primary_owner_user_id === clientOwner.organization_id,
     );
-  }
-  
-  export default withI18n(ClientsMembersPage);
+    const organizationName = organization?.name ?? '';
+    return { ...clientOwner, client_organization: organizationName };
+  });
+
+  if (error) console.error(error.message);
+
+  console.log('clientIds', clientOrganizations);
+
+  return (
+    <PageBody>
+      <div className="p-[35px]">
+        <div className="mb-[32px] flex items-center justify-between">
+          <div className="flex-grow">
+            <span>
+              <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
+                <Trans i18nKey={'clients:client'} />
+              </div>
+            </span>
+          </div>
+          <div className="flex space-x-4">
+            <span>
+              <Button variant="outline">
+                Tu prueba gratuita termina en xx dias
+              </Button>
+            </span>
+            <span>
+              <Button variant="outline" size="icon">
+                <BellIcon className="h-4 w-4" />
+              </Button>
+            </span>
+          </div>
+        </div>
+        {clientOwners ? (
+          <ClientsTable
+            clients={clientsWithOrganizations}
+            accountIds={accountIds}
+            accountNames={accountNames}
+          />
+        ) : (
+          <p>No clients available</p>
+        )}
+      </div>
+    </PageBody>
+  );
+}
+
+export default withI18n(ClientsMembersPage);

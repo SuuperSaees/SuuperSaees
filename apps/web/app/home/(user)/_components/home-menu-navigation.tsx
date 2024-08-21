@@ -41,11 +41,11 @@ export function HomeMenuNavigation(props: { workspace: UserWorkspace }) {
       <div className={'flex items-center space-x-8'}>
         <AppLogo />
 
-        <BorderedNavigationMenu>
-          {routes.map((route) => (
-            <BorderedNavigationMenuItem {...route} key={route.path} />
-          ))}
-        </BorderedNavigationMenu>
+          <BorderedNavigationMenu>
+            {routes.map((route) => (
+              <BorderedNavigationMenuItem {...route} key={route.path} />
+            ))}
+          </BorderedNavigationMenu>
       </div>
 
       <div className={'flex justify-end space-x-2.5'}>
