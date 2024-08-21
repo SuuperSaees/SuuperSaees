@@ -30,11 +30,13 @@ alter table "public"."clients" drop column "picture_url";
 alter table "public"."clients" drop column "propietary_organization";
 alter table "public"."clients" drop column "propietary_organization_id";
 alter table "public"."clients" drop column "role";
+
+
 -- Agregar columnas a "clients"
 alter table "public"."clients" add column "agency_id" uuid not null;
-alter table "public"."clients" add column "agency_id2" uuid;
 alter table "public"."clients" add column "organization_client_id" uuid not null;
 alter table "public"."clients" add column "user_client_id" uuid not null;
+
 -- Crear índices y restricciones
 CREATE UNIQUE INDEX clients_id_key1 ON public.clients USING btree (id);
 CREATE UNIQUE INDEX clients_id_key ON public.clients USING btree (agency_id2);
@@ -50,18 +52,21 @@ as permissive
 for insert
 to authenticated
 with check (true);
+
 create policy "Update for all authenticated"
 on "public"."accounts_memberships"
 as permissive
 for update
 to authenticated
 using (true);
+
 create policy "accounts_read"
 on "public"."accounts"
 as permissive
 for select
 to authenticated
 using (true);
+
 create policy "accounts_self_update"
 on "public"."accounts"
 as permissive
