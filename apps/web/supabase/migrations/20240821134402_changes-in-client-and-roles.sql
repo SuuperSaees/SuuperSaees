@@ -34,6 +34,7 @@ alter table "public"."clients" drop column "role";
 
 -- Agregar columnas a "clients"
 alter table "public"."clients" add column "agency_id" uuid not null;
+alter table "public"."clients" add column "agency_id2" uuid not null;
 alter table "public"."clients" add column "organization_client_id" uuid not null;
 alter table "public"."clients" add column "user_client_id" uuid not null;
 
