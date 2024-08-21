@@ -1,45 +1,30 @@
 'use client';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
-import * as React from "react"
-import { ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable, } from '@tanstack/react-table';
+import * as React from "react";
+
+
+
+import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import { ArrowDown, ArrowUp, Pen, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+
+
 import { Button } from '@kit/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@kit/ui/table"
 import { Input } from '@kit/ui/input';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
-import { Search, Pen, ArrowUp, ArrowDown } from 'lucide-react';
 import { Separator } from '@kit/ui/separator';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '../../../../../../packages/ui/src/shadcn/pagination';
-import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/delete/delete-client';
-import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
-import UpdateClientDialog from '../../server/actions/clients/update/update-client';
-import { useTranslation } from 'react-i18next';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@kit/ui/table";
+
+
+
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
-import Link from 'next/link';
+import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
+import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/delete/delete-client';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../../packages/ui/src/shadcn/pagination';
+import UpdateClientDialog from '../../server/actions/clients/update/update-client';
+
 
 const getUniqueOrganizations = (clients: Client[]) => {
   const organizationMap = new Map<string, Client>();
@@ -90,124 +75,135 @@ type Client = {
 
 
 // CLIENTS TABLE
-  const clientColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
-  {
-    accessorKey: "name",
-    header: t('clientName'),
-    cell: ({ row }) => (
-      <span className={'flex items-center space-x-4 text-left'}>
-        <span>
-          <ProfileAvatar displayName={row.original.name} pictureUrl={row.original.picture_url} />
+  const clientColumns = (
+    t: TFunction<'clients', undefined>,
+  ): ColumnDef<Client>[] => [
+    {
+      accessorKey: 'name',
+      header: t('clientName'),
+      cell: ({ row }) => (
+        <span className={'flex items-center space-x-4 text-left'}>
+          <span>
+            <ProfileAvatar
+              displayName={row.original.name}
+              pictureUrl={row.original.picture_url}
+            />
+          </span>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium leading-[1.42857] text-gray-900">
+              {row.original.name}
+            </span>
+            <span className="text-sm font-normal leading-[1.42857] text-gray-600">
+              {row.original.email}
+            </span>
+          </div>
         </span>
-        <div className='flex flex-col'>
-          <span className='text-gray-900 text-sm font-medium leading-[1.42857]'>{row.original.name}</span>
-          <span className='text-gray-600 text-sm font-normal leading-[1.42857]'>{row.original.email}</span>
-        </div>
-      </span>
-    ),
-  },
-  {
-    accessorKey: "role",
-    header: t("role"),
-    cell: ({ row }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const role = row.getValue("role") as string;
-      return (
-        <div className="capitalize">
-          {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
-        </div>
-      );
+      ),
     },
-  },
-  {
-    accessorKey: "client_organization",
-    header: t("organization"),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("client_organization")}</div>
-    ),
-  },
-  {
-    accessorKey: "last_login",
-    header: ({ column }) => {
-      return (
-        <div >
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            <div className='flex justify-between items-center'>
-              <span>{t("lastLogin")}</span>
-              <ArrowDown className="h-4 w-4 ml-2" />
-            </div>
-          </Button>
-        </div>
-        
-      )
+    // {
+    //   accessorKey: "role",
+    //   header: t("role"),
+    //   cell: ({ row }) => {
+    //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    //     const role = row.getValue("role") as string;
+    //     return (
+    //       <div className="capitalize">
+    //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
+    //       </div>
+    //     );
+    //   },
+    // },
+    {
+      accessorKey: 'client_organization',
+      header: t('organization'),
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue('client_organization')}</div>
+      ),
     },
-    cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-  
-      const formattedDate = `${day}-${month}-${year}`;
-  
-      return (
-        <span className="text-gray-900 text-sm font-medium">
-          {formattedDate}
-        </span>
-      );
+    {
+      accessorKey: 'last_login',
+      header: ({ column }) => {
+        return (
+          <div>
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              <div className="flex items-center justify-between">
+                <span>{t('lastLogin')}</span>
+                <ArrowDown className="ml-2 h-4 w-4" />
+              </div>
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const date = new Date(row.original.created_at);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        const formattedDate = `${day}-${month}-${year}`;
+
+        return (
+          <span className="text-sm font-medium text-gray-900">
+            {formattedDate}
+          </span>
+        );
+      },
     },
-  },
-  {
-    accessorKey: "created_at_column",
-    header: ({ column }) => {
-      return (
-        <div >
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            <div className='flex justify-between items-center'>
-              <span>{t("createdAt")}</span>
-              <ArrowUp className="h-4 w-4 ml-2" />
-            </div>
-          </Button>
-        </div>
-        
-      )
+    {
+      accessorKey: 'created_at_column',
+      header: ({ column }) => {
+        return (
+          <div>
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              <div className="flex items-center justify-between">
+                <span>{t('createdAt')}</span>
+                <ArrowUp className="ml-2 h-4 w-4" />
+              </div>
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const date = new Date(row.original.created_at);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        const formattedDate = `${day}-${month}-${year}`;
+
+        return (
+          <span className="text-sm font-medium text-gray-900">
+            {formattedDate}
+          </span>
+        );
+      },
     },
-    cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-  
-      const formattedDate = `${day}-${month}-${year}`;
-  
-      return (
-        <span className="text-gray-900 text-sm font-medium">
-          {formattedDate}
-        </span>
-      );
+    {
+      id: 'actions',
+      header: t('actions'),
+      enableHiding: false,
+      cell: ({ row }) => {
+        const client = row.original;
+
+        return (
+          <div className="h-18 flex items-center gap-4 self-stretch p-4">
+            <UpdateClientDialog {...client} />
+            <DeleteUserDialog userId={client.id} />
+          </div>
+        );
+      },
     },
-  },
-  {
-    id: "actions",
-    header: t("actions"),
-    enableHiding: false,
-    cell: ({ row }) => {
-      const client = row.original
- 
-      return (
-        <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
-          <UpdateClientDialog {...client} />
-          <DeleteUserDialog userId={client.id}/>
-        </div>
-      )
-    },
-  },
-]
+  ];
 
 // ORGANIZATIONS TABLE
   const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
@@ -280,8 +276,8 @@ type Client = {
     },
   },
 ];
-
-export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTableProps) {
+// accountIds, accountNames
+export function ClientsTable({ clients,}: ClientsTableProps) {
   const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clientes' | 'organizaciones'>('clientes');
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -317,8 +313,8 @@ export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTab
   const pageCount = table.getPageCount();
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
-  const importantPropietaryOrganization = accountNames[0];
-  const importantPropietaryOrganizationId = accountIds[0];
+  // const importantPropietaryOrganization = accountNames[0];
+  // const importantPropietaryOrganizationId = accountIds[0];
 
   const handleButtonClick = (button: 'clientes' | 'organizaciones') => {
     setActiveButton(button);
@@ -367,7 +363,7 @@ export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTab
               className="pl-10"
             />
           </div>
-          <CreateClientDialog propietary_organization={importantPropietaryOrganization ?? ''} propietary_organization_id={importantPropietaryOrganizationId ?? ''}/>
+          <CreateClientDialog />
         </div>
       </div>
       <Separator />
@@ -424,10 +420,7 @@ export function ClientsTable({ clients,  accountIds, accountNames  }: ClientsTab
             <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
               Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.
             </p>
-            <CreateClientDialog 
-              propietary_organization={importantPropietaryOrganization ?? ''} 
-              propietary_organization_id={importantPropietaryOrganizationId ?? ''}
-            />
+            <CreateClientDialog />
           </div>
         </TableCell>
       </TableRow>

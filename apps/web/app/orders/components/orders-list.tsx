@@ -1,39 +1,16 @@
-"use client"
+'use client';
 
+import React, { useState } from 'react';
+
+import { ChevronDownIcon } from '@radix-ui/react-icons';
+import { ListFilter, Search } from 'lucide-react';
+import { updateOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
+import { useTranslation } from 'react-i18next';
+
+import { Avatar, AvatarFallback } from '@kit/ui/avatar';
+import { Button } from '@kit/ui/button';
+import { Card, CardContent, CardFooter } from '@kit/ui/card';
 import Image from "next/image"
-import {
-  File,
-  Home,
-  LineChart,
-  ListFilter,
-  MoreHorizontal,
-  Package,
-  Package2,
-  PanelLeft,
-  PlusCircle,
-  Search,
-  Settings,
-  ShoppingCart,
-  Users2,
-} from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@kit/ui/avatar"
-import { Button } from "@kit/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@kit/ui/card"
-import { CalendarIcon, CircleIcon, ChevronDownIcon } from "@radix-ui/react-icons"
-import { format, setDate } from "date-fns"
-import { Calendar } from "@kit/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@kit/ui/popover"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -42,9 +19,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@kit/ui/dropdown-menu"
-import { Input } from "@kit/ui/input"
-import { Sheet, SheetContent, SheetTrigger } from "@kit/ui/sheet"
+} from '@kit/ui/dropdown-menu';
+import { Input } from '@kit/ui/input';
+import { Separator } from '@kit/ui/separator';
 import {
   Table,
   TableBody,
@@ -52,13 +29,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@kit/ui/table"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@kit/ui/tabs"
+} from '@kit/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
+
+import { Order } from '~/lib/order.types';
+
+import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import {
   Pagination,
   PaginationContent,
@@ -67,31 +43,19 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../../../../../packages/ui/src/shadcn/pagination"
-import { PaginationDefaultOptions } from "@tanstack/react-table"
-import { cn } from "@kit/ui/utils"
-import { date } from "zod"
-import React, { useState } from "react"
-import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
-import { useTranslation } from 'react-i18next';
-import { Separator } from "@kit/ui/separator"
-import Link from "next/link"
+} from '../../../../../packages/ui/src/shadcn/pagination';
+import Link from 'next/link';
 
+
+type ExtendedOrderType = Order.Type & {
+  customer_name: string | null;
+  customer_organization: string | null;
+};
+
+// Use the extended type 
 type OrdersTableProps = {
-  orders: {
-    id: string;
-    created_at: string;
-    title: string;
-    description: string | null;
-    customer_id: string;
-    status: string;
-    assigned_to: string[] | null;
-    due_date: string | null;
-    propietary_organization_id: string;
-    customer_name: string | null;
-    customer_organization: string | null;
-  }[];
-}
+  orders: ExtendedOrderType[];
+};
 
 const PAGE_SIZE = 10;
 
@@ -100,7 +64,7 @@ export function OrderList({ orders }: OrdersTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // const filteredOrders = orders.filter(order => 
+  // const filteredOrders = orders.filter(order =>
   //   order.title.toLowerCase().includes(searchTerm.toLowerCase())
   // );
 
@@ -109,11 +73,17 @@ export function OrderList({ orders }: OrdersTableProps) {
     order.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const totalPages = Math.ceil(filteredOrders.length / PAGE_SIZE);
-  const paginatedOrders = filteredOrders.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  // const paginatedOrders = filteredOrders.slice(
+  //   (currentPage - 1) * PAGE_SIZE,
+  //   currentPage * PAGE_SIZE,
+  // );
 
   // Manejo del cambio de página
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+  const updateOrderDate = async (due_date: string, orderId: number) => {
+    await updateOrder(orderId, { due_date });
   };
 
   return (
@@ -121,11 +91,13 @@ export function OrderList({ orders }: OrdersTableProps) {
       <div className="flex flex-col py-4">
         <main className="grid flex-1 items-start gap-4 md:gap-8">
           <Tabs defaultValue="open">
-            <div className="flex items-center mb-4">
+            <div className="mb-4 flex items-center">
               <TabsList>
-                <TabsTrigger value="open">{t("openOrders")}</TabsTrigger>
-                <TabsTrigger value="completed">{t("completedOrders")}</TabsTrigger>
-                <TabsTrigger value="all">{t("allOrders")}</TabsTrigger>
+                <TabsTrigger value="open">{t('openOrders')}</TabsTrigger>
+                <TabsTrigger value="completed">
+                  {t('completedOrders')}
+                </TabsTrigger>
+                <TabsTrigger value="all">{t('allOrders')}</TabsTrigger>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-7 gap-1">
@@ -186,7 +158,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                       <TableBody>
                         {filteredOrders.length > 0 ? (
                           filteredOrders
-                            .filter(order => order.status !== 'completed' && order.status !== 'closed')
+                            .filter(order => order.status !== 'completed' && order.status !== 'annulled')
                             .map(order => (
                               <TableRow key={order.id}>
                                 <TableCell className="">
@@ -238,7 +210,9 @@ export function OrderList({ orders }: OrdersTableProps) {
                                   </div>
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
-                                  <DatePicker {...order} />
+                                  <DatePicker updateFn={(dueDate: string) =>
+                                    updateOrderDate(dueDate, order.id)
+                                  } />
                                 </TableCell>
                               </TableRow>
                             ))
@@ -260,7 +234,6 @@ export function OrderList({ orders }: OrdersTableProps) {
                                 </p>
                                 <Button>
                                   <Link href="/orders/create">Crear pedido</Link>
-                                  {/*Hay que arreglar este redirect*/}
                                 </Button>
                               </div>
                             </TableCell>
@@ -270,35 +243,6 @@ export function OrderList({ orders }: OrdersTableProps) {
                     </Table>
                   </CardContent>
                   <CardFooter>
-                    {/* <Pagination>
-                    <PaginationContent>
-                      <div className="space-between flex flex-row justify-between w-full">
-                        <div>
-                          <PaginationItem>
-                            <PaginationPrevious href="#" />
-                            <PaginationNext href="#" />
-                          </PaginationItem>
-                        </div>
-                        <div className="flex flex-row">
-                          <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">2</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">3</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">10</PaginationLink>
-                          </PaginationItem>
-                        </div>
-                      </div>
-                    </PaginationContent>
-                  </Pagination> */}
                     {filteredOrders.length ? (
                       <Pagination>
                         <PaginationContent>
@@ -363,7 +307,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                       <TableBody>
                         {filteredOrders.length > 0 ? (
                           filteredOrders
-                            .filter(order => order.status !== 'completed' && order.status !== 'closed')
+                            .filter(order => order.status !== 'completed' && order.status !== 'annulled')
                             .map(order => (
                               <TableRow key={order.id}>
                                 <TableCell className="">
@@ -415,7 +359,9 @@ export function OrderList({ orders }: OrdersTableProps) {
                                   </div>
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
-                                  <DatePicker {...order} />
+                                  <DatePicker updateFn={(dueDate: string) =>
+                                    updateOrderDate(dueDate, order.id)
+                                  } defaultDate={order.due_date}/>
                                 </TableCell>
                               </TableRow>
                             ))
@@ -447,35 +393,6 @@ export function OrderList({ orders }: OrdersTableProps) {
                     </Table>
                   </CardContent>
                   <CardFooter>
-                    {/* <Pagination>
-                    <PaginationContent>
-                      <div className="space-between flex flex-row justify-between w-full">
-                        <div>
-                          <PaginationItem>
-                            <PaginationPrevious href="#" />
-                            <PaginationNext href="#" />
-                          </PaginationItem>
-                        </div>
-                        <div className="flex flex-row">
-                          <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">2</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">3</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">10</PaginationLink>
-                          </PaginationItem>
-                        </div>
-                      </div>
-                    </PaginationContent>
-                  </Pagination> */}
                     {filteredOrders.length ? (
                       <Pagination>
                         <PaginationContent>
@@ -591,7 +508,9 @@ export function OrderList({ orders }: OrdersTableProps) {
                                 </div>
                               </TableCell>
                               <TableCell className="hidden md:table-cell">
-                                <DatePicker {...order} />
+                                <DatePicker updateFn={(dueDate: string) =>
+                                    updateOrderDate(dueDate, order.id)
+                                  }/>
                               </TableCell>
                             </TableRow>
                           ))
@@ -624,36 +543,6 @@ export function OrderList({ orders }: OrdersTableProps) {
                     </Table>
                   </CardContent>
                   <CardFooter>
-                    {/* <Pagination>
-                    <PaginationContent>
-                      <div className="space-between flex flex-row justify-between w-full">
-                        <div>
-                          <PaginationItem>
-                            <PaginationPrevious href="#" />
-                            <PaginationNext href="#" />
-                          </PaginationItem>
-                        </div>
-                        <div className="flex flex-row">
-                          <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">2</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">3</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">10</PaginationLink>
-                          </PaginationItem>
-                        </div>
-                      </div>
-                    </PaginationContent>
-                  </Pagination> */}
-
                     {filteredOrders.length ? (
                       <Pagination>
                         <PaginationContent>

@@ -1,40 +1,76 @@
--- Seed the roles table with default roles 'owner' and 'member'
+-- Seed the roles table with default roles
 insert into public.roles(
     name,
     hierarchy_level)
 values (
-    'owner',
-    1);
+    'super_admin',
+    1),
+(
+    'agency_owner',
+    2),
+(
+    'agency_project_manager',
+    3),
+(
+    'agency_member',
+    4),
+(
+    'client_owner',
+    5),
+(
+    'client_member',
+    6);
 
-insert into public.roles(
-    name,
-    hierarchy_level)
-values (
-    'member',
-    2);
-
--- We seed the role_permissions table with the default roles and permissions
+-- Seed the role_permissions table with the default roles and permissions
 insert into public.role_permissions(
   role,
   permission)
 values (
-  'owner',
+  'super_admin',
   'roles.manage'),
 (
-  'owner',
+  'super_admin', 
   'billing.manage'),
 (
-  'owner',
+  'super_admin',
   'settings.manage'),
 (
-  'owner',
+  'super_admin',
   'members.manage'),
 (
-  'owner',
+  'super_admin',
   'invites.manage'),
 (
-  'member',
+  'agency_owner',
+  'billing.manage'),
+(
+  'agency_owner',
+  'roles.manage'),
+(
+  'agency_owner',
   'settings.manage'),
 (
-  'member',
+  'agency_owner',
+  'members.manage'),
+(
+  'agency_owner',
+  'invites.manage'),
+(
+  'agency_member',
+  'settings.manage'),
+(
+  'agency_member',
+  'invites.manage'),
+(
+  'agency_project_manager',
+  'roles.manage'),
+(
+  'agency_project_manager',
+  'settings.manage'),
+(
+  'agency_project_manager',
+  'members.manage'),
+(
+  'agency_project_manager',
   'invites.manage');
+

@@ -14,6 +14,13 @@ export default {
             'md-custom': '900px'
           },
       colors: {
+        'pdf': '#FF5722',
+        'png': '#4CAF50',
+        'jpg': '#2196F3',
+        'jpeg': '#9C27B0',
+        'doc': '#FF9800',
+        'docx': '#FF9800',
+        'unknown': '#9E9E9E',
         white: '#FFFFFF',
         black: '#000000',
         'gray': {

@@ -43,18 +43,17 @@ export function PersonalAccountSettingsContainer(
   }
 
   return (
-    <div className={'flex w-full flex-col space-y-6 pb-32'}>
+    <div className="flex w-full space-x-6 pb-32">
+    <div className="flex flex-col space-y-6 w-[87%]">
       <Card>
         <CardHeader>
           <CardTitle>
             <Trans i18nKey={'account:accountImage'} />
           </CardTitle>
-
           <CardDescription>
             <Trans i18nKey={'account:accountImageDescription'} />
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           <UpdateAccountImageContainer
             user={{
@@ -64,107 +63,69 @@ export function PersonalAccountSettingsContainer(
           />
         </CardContent>
       </Card>
-
+  
       <Card>
         <CardHeader>
           <CardTitle>
             <Trans i18nKey={'account:name'} />
           </CardTitle>
-
           <CardDescription>
             <Trans i18nKey={'account:nameDescription'} />
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           <UpdateAccountDetailsFormContainer user={user.data} />
         </CardContent>
       </Card>
-
+  
       <If condition={supportsLanguageSelection}>
         <Card>
           <CardHeader>
             <CardTitle>
               <Trans i18nKey={'account:language'} />
             </CardTitle>
-
             <CardDescription>
               <Trans i18nKey={'account:languageDescription'} key={'s'}/>
             </CardDescription>
           </CardHeader>
-
           <CardContent>
             <LanguageSelector />
           </CardContent>
         </Card>
       </If>
-
+    </div>
+  
+    <div className="flex flex-col space-y-6 w-[26%]">
       <Card>
         <CardHeader>
           <CardTitle>
             <Trans i18nKey={'account:updateEmailCardTitle'} />
           </CardTitle>
-
           <CardDescription>
             <Trans i18nKey={'account:updateEmailCardDescription'} />
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           <UpdateEmailFormContainer callbackPath={props.paths.callback} />
         </CardContent>
       </Card>
-
+  
       <Card>
         <CardHeader>
           <CardTitle>
             <Trans i18nKey={'account:updatePasswordCardTitle'} />
           </CardTitle>
-
           <CardDescription>
             <Trans i18nKey={'account:updatePasswordCardDescription'} />
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           <UpdatePasswordFormContainer callbackPath={props.paths.callback} />
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Trans i18nKey={'account:multiFactorAuth'} />
-          </CardTitle>
-
-          <CardDescription>
-            <Trans i18nKey={'account:multiFactorAuthDescription'} />
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <MultiFactorAuthFactorsList userId={props.userId} />
-        </CardContent>
-      </Card>
-
-      <If condition={props.features.enableAccountDeletion}>
-        <Card className={'border-destructive border-2'}>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:dangerZone'} />
-            </CardTitle>
-
-            <CardDescription>
-              <Trans i18nKey={'account:dangerZoneDescription'} />
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <AccountDangerZone />
-          </CardContent>
-        </Card>
-      </If>
     </div>
+  </div>
+  
   );
 }
 

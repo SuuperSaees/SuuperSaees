@@ -46,11 +46,20 @@
   "nameInput": "Nombre",
   "namePortalInput": "Nombre del portal",
   "roles": {
-    "owner": {
-      "label": "Propietario"
+    "agency_owner": {
+      "label": "Agencía - Propietario"
     },
-    "member": {
-      "label": "Miembro"
+    "agency_member": {
+      "label": "Agencía - Miembro"
+    },
+    "agency_project_manager": {
+      "label": "Agencía - Gestor de proyectos"
+    },
+    "client_owner": {
+      "label": "Cliente - Lider"
+    },
+    "client_member": {
+      "label": "Cliente - Miembro"
     }
   }
 }

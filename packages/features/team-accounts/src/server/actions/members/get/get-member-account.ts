@@ -2,6 +2,7 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
 export async function getPrimaryOwnerId() {
   try {
     const client = getSupabaseServerComponentClient();
@@ -27,5 +28,52 @@ export async function getPrimaryOwnerId() {
   } catch (error) {
     console.error('Error fetching primary owner:', error);
     // throw error;
+  }
+}
+
+// get a given user
+
+export async function getUserById(userId: string) {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { error: userAuthenticatedError } = await client.auth.getUser();
+
+    if (userAuthenticatedError) throw userAuthenticatedError;
+
+    const { data: userData, error: userError } = await client
+      .from('accounts')
+      .select('name, email, id, picture_url')
+      .eq('id', userId)
+      .single();
+
+    if (userError) throw userError;
+
+    return userData;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw error;
+  }
+}
+
+export async function getUserRole() {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { error: userAuthenticatedError, data: userAuthenticatedData } =
+      await client.auth.getUser();
+    const userId = userAuthenticatedData?.user?.id;
+
+    if (userAuthenticatedError || !userId) throw userAuthenticatedError;
+    const { error: userAccountError, data: userAccountData } = await client
+      .from('accounts_memberships')
+      .select('account_role')
+      .eq('user_id', userId)
+      .single();
+
+    console.log('userAccountData', userAccountData);
+    if (userAccountError) throw userAccountError;
+
+    return userAccountData?.account_role;
+  } catch (error) {
+    console.error('Error fetching user role:', error);
   }
 }

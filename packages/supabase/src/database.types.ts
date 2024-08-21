@@ -42,6 +42,7 @@ export type Database = {
           id: string
           is_personal_account: boolean
           name: string
+          organization_id: string | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
@@ -56,6 +57,7 @@ export type Database = {
           id?: string
           is_personal_account?: boolean
           name: string
+          organization_id?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -70,6 +72,7 @@ export type Database = {
           id?: string
           is_personal_account?: boolean
           name?: string
+          organization_id?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -113,7 +116,7 @@ export type Database = {
         }
         Insert: {
           account_id: string
-          account_role: string
+          account_role?: string
           created_at?: string
           created_by?: string | null
           updated_at?: string
@@ -177,6 +180,65 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activities: {
+        Row: {
+          action: Database["public"]["Enums"]["action_type"]
+          created_at: string
+          id: number
+          message: string
+          order_id: number
+          type: Database["public"]["Enums"]["activity_type"]
+          user_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_type"]
+          created_at?: string
+          id?: number
+          message: string
+          order_id: number
+          type: Database["public"]["Enums"]["activity_type"]
+          user_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_type"]
+          created_at?: string
+          id?: number
+          message?: string
+          order_id?: number
+          type?: Database["public"]["Enums"]["activity_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -430,37 +492,22 @@ export type Database = {
       }
       clients: {
         Row: {
-          client_organization: string
-          created_at: string
-          email: string
+          agency_id: string
           id: string
-          name: string
-          picture_url: string
-          propietary_organization: string
-          propietary_organization_id: string
-          role: string
+          organization_client_id: string
+          user_client_id: string
         }
         Insert: {
-          client_organization?: string
-          created_at?: string
-          email?: string
+          agency_id: string
           id?: string
-          name?: string
-          picture_url?: string
-          propietary_organization?: string
-          propietary_organization_id?: string
-          role?: string
+          organization_client_id: string
+          user_client_id: string
         }
         Update: {
-          client_organization?: string
-          created_at?: string
-          email?: string
+          agency_id?: string
           id?: string
-          name?: string
-          picture_url?: string
-          propietary_organization?: string
-          propietary_organization_id?: string
-          role?: string
+          organization_client_id?: string
+          user_client_id?: string
         }
         Relationships: []
       }
@@ -519,6 +566,68 @@ export type Database = {
           {
             foreignKeyName: "credits_usage_account_id_fkey"
             columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      files: {
+        Row: {
+          created_at: string
+          id: string
+          message_id: string | null
+          name: string
+          size: number
+          type: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          name: string
+          size: number
+          type: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          name?: string
+          size?: number
+          type?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "files_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
@@ -627,6 +736,62 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          order_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          order_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          order_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           account_id: string
@@ -682,6 +847,39 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_files: {
+        Row: {
+          created_at: string
+          file_id: string
+          order_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_id?: string
+          order_id: string
+        }
+        Update: {
+          created_at?: string
+          file_id?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_files_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_files_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["uuid"]
           },
         ]
       }
@@ -794,38 +992,90 @@ export type Database = {
       orders_v2: {
         Row: {
           assigned_to: string[] | null
+          client_organization_id: string
           created_at: string
-          customer_id: string | null
-          description: string | null
+          customer_id: string
+          description: string
           due_date: string | null
           id: number
-          propietary_organization_id: string | null
-          status: string | null
-          title: string | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status: Database["public"]["Enums"]["order_status_types"] | null
+          title: string
+          uuid: string
         }
         Insert: {
           assigned_to?: string[] | null
+          client_organization_id: string
           created_at?: string
-          customer_id?: string | null
-          description?: string | null
+          customer_id: string
+          description: string
           due_date?: string | null
           id?: number
-          propietary_organization_id?: string | null
-          status?: string | null
-          title?: string | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status?: Database["public"]["Enums"]["order_status_types"] | null
+          title: string
+          uuid: string
         }
         Update: {
           assigned_to?: string[] | null
+          client_organization_id?: string
           created_at?: string
-          customer_id?: string | null
-          description?: string | null
+          customer_id?: string
+          description?: string
           due_date?: string | null
           id?: number
-          propietary_organization_id?: string | null
-          status?: string | null
-          title?: string | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id?: string
+          status?: Database["public"]["Enums"]["order_status_types"] | null
+          title?: string
+          uuid?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_v2_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       plans: {
         Row: {
@@ -844,6 +1094,111 @@ export type Database = {
           variant_id?: string
         }
         Relationships: []
+      }
+      reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: number
+          type: Database["public"]["Enums"]["reaction_types"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: number
+          type: Database["public"]["Enums"]["reaction_types"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: number
+          type?: Database["public"]["Enums"]["reaction_types"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          order_id: number
+          rating: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          order_id: number
+          rating?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          order_id?: number
+          rating?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_permissions: {
         Row: {
@@ -1268,6 +1623,7 @@ export type Database = {
           id: string
           is_personal_account: boolean
           name: string
+          organization_id: string | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
@@ -1475,6 +1831,17 @@ export type Database = {
       }
     }
     Enums: {
+      action_type: "create" | "update" | "delete"
+      activity_type:
+        | "message"
+        | "review"
+        | "status"
+        | "priority"
+        | "assign"
+        | "due_date"
+        | "description"
+        | "title"
+        | "assigned_to"
       app_permissions:
         | "roles.manage"
         | "billing.manage"
@@ -1486,9 +1853,18 @@ export type Database = {
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
       field_types: "date" | "multiple_choice" | "select" | "text"
+      file_types: "image" | "video" | "pdf" | "fig"
       notification_channel: "in_app" | "email"
       notification_type: "info" | "warning" | "error"
+      order_status_types:
+        | "in_progress"
+        | "in_review"
+        | "pending"
+        | "completed"
+        | "annulled"
       payment_status: "pending" | "succeeded" | "failed"
+      priority_types: "high" | "medium" | "low"
+      reaction_types: "like" | "favorite"
       subscription_item_type: "flat" | "per_seat" | "metered"
       subscription_status:
         | "active"
@@ -1581,6 +1957,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -1594,6 +1971,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -1607,6 +1985,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -1628,6 +2007,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -1638,6 +2018,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -1648,6 +2029,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -1783,6 +2165,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {
