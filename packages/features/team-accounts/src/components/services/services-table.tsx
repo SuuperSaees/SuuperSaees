@@ -1,5 +1,5 @@
 'use client';
-
+import Image from 'next/image';
 import { useMemo } from 'react';
 import * as React from "react"
 import { ColumnDef,
@@ -190,56 +190,75 @@ export function ServicesTable({ services }: ServicesTableProps) {
       </div>
       <Separator />
       <div className="rounded-md border mt-4">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+      <Table>
+  {table.getRowModel().rows?.length ? (
+    <>
+      <TableHeader>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => {
+              return (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
                       )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex justify-between items-center py-4">
+                </TableHead>
+              )
+            })}
+          </TableRow>
+        ))}
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows.map((row) => (
+          <TableRow
+            key={row.id}
+            data-state={row.getIsSelected() && "selected"}
+          >
+            {row.getVisibleCells().map((cell) => (
+              <TableCell key={cell.id}>
+                {flexRender(
+                  cell.column.columnDef.cell,
+                  cell.getContext()
+                )}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </>
+  ) : (
+    <TableBody>
+    <TableRow>
+      <TableCell colSpan={table.getAllColumns().length}>
+        <div className='flex flex-col place-content-center items-center h-[493px]'>
+          <Image
+            src="/images/illustrations/Illustration-box.svg"
+            alt="Illustration Card"
+            width={220}
+            height={160}
+          />
+          <h3 className='w-[352px] text-center text-[20px] text-[#101828] leading-[30px] mb-[20px] font-semibold'>
+            Comencemos con tu primer servicio
+          </h3>
+          <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
+            Aún no has creado ningún servicio, agrega uno haciendo clic a continuación.
+          </p>
+          <Button>
+            <Link href="/services/create">Crear servicio</Link>
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  </TableBody>
+  )}
+</Table>
+
+{table.getRowModel().rows?.length ? (
+    <>
+    <div className="flex justify-between items-center py-4">
         <Pagination>
           <PaginationContent className="flex justify-between items-center w-full">
             <PaginationItem>
@@ -288,6 +307,12 @@ export function ServicesTable({ services }: ServicesTableProps) {
           </PaginationContent>
         </Pagination>
       </div>
+      </>
+    ) : (
+    <></>
+    )}
+      </div>
+      
     </div>
   );
 }
