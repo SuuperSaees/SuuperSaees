@@ -1,169 +1,184 @@
 'use client';
 
-import React, { useState } from 'react';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel } from '@kit/ui/alert-dialog'; 
-import { createClient } from './create-client-server';
-import { Button } from '@kit/ui/button';
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-  } from "@kit/ui/form"
-import { Input } from "@kit/ui/input"
-import { Separator } from '@kit/ui/separator';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-  } from "@kit/ui/dropdown-menu"
+import React from 'react';
+
+
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+
+
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
+import { Button } from '@kit/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import { Input } from '@kit/ui/input';
+import { Separator } from '@kit/ui/separator';
+
+
+
+import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
+import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
+import { createClient } from './create-client-server';
+
 
 const formSchema = z.object({
-    name: z.string().min(2).max(50),
-    client_organization: z.string().min(2).max(50),
-    email: z.string().email(),
-    role: z.string().min(2).max(50),
-})
+  name: z.string().min(2).max(50),
+  slug: z.string().min(2).max(50),
+  email: z.string().email(),
+  role: z.string().min(2).max(50),
+});
 
-type CreateClientProps = {
-    propietary_organization: string;
-    propietary_organization_id: string;
-}
+const CreateClientDialog = () => {
+  // const [selectedRole, setSelectedRole] = useState('');
+  const { t } = useTranslation('clients');
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      role: 'client_owner',
+    },
+  });
 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const newClient = { ...values };
+      // delete newClient?.role;
+      await createClient({ client: newClient, role: values.role });
+      console.log('values client', values);
+      // sendClientInvitations(
+      //   [{ email: values.email, role: selectedRole }],
+      //   client?.slug ?? '',
+      // );
+      window.location.reload();
+    } catch (error) {
+      toast.error('error', {
+        description: 'Something went wrong while creating the client',
+      });
+    }
+  }
 
-const CreateClientDialog = ( { propietary_organization, propietary_organization_id }: CreateClientProps ) => {
-    const [selectedRole, setSelectedRole] = useState("");
-    const { t } = useTranslation('clients');
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: "",
-            client_organization: "",
-            email: "",
-            role: "",
-        },
-      })
-     
-      async function onSubmit(values: z.infer<typeof formSchema>) {
-        await createClient({
-            ...values,
-            picture_url: "",
-            propietary_organization,
-            propietary_organization_id
-        })
-        window.location.reload();
-      }
-
-      const handleRoleSelect = (role: string) => {
-        setSelectedRole(role);
-        form.setValue("role", role);
-      }
-      
+  // const handleRoleSelect = (role: string) => {
+  //   setSelectedRole(role);
+  //   form.setValue('role', role);
+  // };
 
   return (
     <>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-        <Button>
-          {t("createClient")}
-        </Button>
+          <Button>{t('createClient')}</Button>
         </AlertDialogTrigger>
         <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
-          <div className='flex justify-between w-full items-center'>
-          <AlertDialogHeader>
-              <AlertDialogTitle>
-                {t("createClient")} 
-              </AlertDialogTitle>
-          </AlertDialogHeader>
-          <AlertDialogCancel className="text-red-500 hover:text-red-700 font-bold">X</AlertDialogCancel>
+          <div className="flex w-full items-center justify-between">
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('createClient')}</AlertDialogTitle>
+            </AlertDialogHeader>
+            <AlertDialogCancel className="font-bold text-red-500 hover:text-red-700">
+              X
+            </AlertDialogCancel>
           </div>
           <AlertDialogDescription>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>{t("clientName")}</FormLabel>
-                        <FormControl>
-                            <Input placeholder={t("nameLabel")} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>{t("clientEmail")}</FormLabel>
-                        <FormControl>
-                            <Input placeholder={t("emailLabel")} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <FormField
-                    control={form.control}
-                    name="client_organization"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>{t("organizationName")}</FormLabel>
-                        <FormControl>
-                            <Input placeholder={t("organizationLabelInput")} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>{t("roleSelection")}</FormLabel>
-                        <FormControl>
-                            <Input className='hidden' {...field} value={selectedRole} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                          <Button variant="outline">
-                              {selectedRole ? t(selectedRole) : t("role")}
-                          </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56">
-                          <DropdownMenuLabel>{t("roleSelection")}</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuGroup>
-                              <DropdownMenuItem onClick={() => handleRoleSelect("member")}>
-                                  {t("member")}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleRoleSelect("leader")}>
-                                  {t("leader")}
-                              </DropdownMenuItem>
-                          </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <Separator/>
-                    <Button type="submit" className='w-full '>Crear cliente</Button>
-                </form>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('clientName')}</FormLabel>
+                      <FormControl>
+                        <Input placeholder={t('nameLabel')} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('clientEmail')}</FormLabel>
+                      <FormControl>
+                        <Input placeholder={t('emailLabel')} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('organizationName')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t('organizationLabelInput')}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('roleSelection')}</FormLabel>
+                      <FormControl>
+                        <Input className="hidden" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <RolesDataProvider maxRoleHierarchy={5}>
+                  {(roles) => {
+                    return (
+                      <FormField
+                        name={'role'}
+                        render={({ field }) => {
+                          return (
+                            <FormItem>
+                              {/* <If condition={isFirst}> */}
+                              <FormLabel>{t('teams:roleLabel')}</FormLabel>
+                              {/* </If> */}
+
+                              <FormControl>
+                                <MembershipRoleSelector
+                                  roles={roles}
+                                  value={field.value}
+                                  onChange={(role) => {
+                                    form.setValue(field.name, role);
+                                  }}
+                                />
+                              </FormControl>
+
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    );
+                  }}
+                </RolesDataProvider>
+
+                <Separator />
+                <Button type="submit" className="w-full">
+                  Crear cliente
+                </Button>
+              </form>
             </Form>
           </AlertDialogDescription>
         </AlertDialogContent>

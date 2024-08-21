@@ -42,6 +42,7 @@ export type Database = {
           id: string
           is_personal_account: boolean
           name: string
+          organization_id: string | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
@@ -56,6 +57,7 @@ export type Database = {
           id?: string
           is_personal_account?: boolean
           name: string
+          organization_id?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -70,6 +72,7 @@ export type Database = {
           id?: string
           is_personal_account?: boolean
           name?: string
+          organization_id?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -489,37 +492,25 @@ export type Database = {
       }
       clients: {
         Row: {
-          client_organization: string
-          created_at: string
-          email: string
+          agency_id: string
+          agency_id2: string | null
           id: string
-          name: string
-          picture_url: string
-          propietary_organization: string
-          propietary_organization_id: string
-          role: string
+          organization_client_id: string
+          user_client_id: string
         }
         Insert: {
-          client_organization?: string
-          created_at?: string
-          email?: string
+          agency_id: string
+          agency_id2?: string | null
           id?: string
-          name?: string
-          picture_url?: string
-          propietary_organization?: string
-          propietary_organization_id?: string
-          role?: string
+          organization_client_id: string
+          user_client_id: string
         }
         Update: {
-          client_organization?: string
-          created_at?: string
-          email?: string
+          agency_id?: string
+          agency_id2?: string | null
           id?: string
-          name?: string
-          picture_url?: string
-          propietary_organization?: string
-          propietary_organization_id?: string
-          role?: string
+          organization_client_id?: string
+          user_client_id?: string
         }
         Relationships: []
       }
@@ -1046,7 +1037,21 @@ export type Database = {
             foreignKeyName: "orders_v2_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -1597,6 +1602,7 @@ export type Database = {
           id: string
           is_personal_account: boolean
           name: string
+          organization_id: string | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json

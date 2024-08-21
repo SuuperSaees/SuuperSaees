@@ -21,9 +21,9 @@ export const createOrders = async (orders: OrderInsert[]) => {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
-    const userId = '1b5e96a8-b9a3-41bb-b7ff-00dc6d59a007' || userData.user.id;
+    const userId = userData.user.id;
 
-    console.log('userId', userId);
+    // console.log('userId', userId);
     const primary_owner_user_id = await getPrimaryOwnerId();
 
     if (!primary_owner_user_id) throw new Error('No primary owner found');
