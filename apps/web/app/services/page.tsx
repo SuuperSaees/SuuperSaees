@@ -8,6 +8,7 @@ import { Button } from '@kit/ui/button';
 import { BellIcon } from 'lucide-react';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { Database } from '~/lib/database.types';
+import Link from 'next/link';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -82,7 +83,7 @@ async function UserHomePage() {
             {dataServices ? (
                     <ServicesTable services={dataServices} accountIds={accountIds} accountNames={accountNames}  />
                 ) : (
-                    <p>No clients available</p>
+                 <></>
                 )}
         </div>
       </PageBody>

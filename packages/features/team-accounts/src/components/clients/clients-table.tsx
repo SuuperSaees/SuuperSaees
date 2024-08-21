@@ -1,5 +1,5 @@
 'use client';
-
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import * as React from "react";
 
@@ -386,38 +386,51 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
                 })}
               </TableRow>
             ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+    </TableHeader>
+  <TableBody>
+    {table.getRowModel().rows?.length ? (
+      table.getRowModel().rows.map((row) => (
+        <TableRow
+          key={row.id}
+          data-state={row.getIsSelected() && "selected"}
+        >
+          {row.getVisibleCells().map((cell) => (
+            <TableCell key={cell.id}>
+              {flexRender(
+                cell.column.columnDef.cell,
+                cell.getContext()
+              )}
+            </TableCell>
+          ))}
+        </TableRow>
+      ))
+    ) : (
+      <TableRow>
+        <TableCell colSpan={table.getAllColumns().length}>
+          <div className='flex flex-col place-content-center items-center h-[493px]'>
+            <Image
+              src="/images/illustrations/Illustration-cloud.svg"
+              alt="Illustration Card"
+              width={220}
+              height={160}
+            />
+            <h3 className='w-[352px] text-center text-[20px] text-[#101828] leading-[30px] mb-[20px] font-semibold'>
+              Comencemos con tu primer cliente
+            </h3>
+            <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
+              Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.
+            </p>
+            <CreateClientDialog />
+          </div>
+        </TableCell>
+      </TableRow>
+    )}
+  </TableBody>
+</Table>
       </div>
-        <div className="flex justify-between items-center py-4">
+      {table.getRowModel().rows?.length ? (
+    <>
+    <div className="flex justify-between items-center py-4">
         <Pagination>
           <PaginationContent className="flex justify-between items-center w-full">
             <PaginationItem>
@@ -466,6 +479,10 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
           </PaginationContent>
         </Pagination>
       </div>
+</>
+      ) : 
+      (<>
+      </>)}
     </div>
   );
 }
