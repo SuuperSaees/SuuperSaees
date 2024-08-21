@@ -9,6 +9,10 @@ import { User } from '../../../../../../../../apps/web/lib/user.types';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+console.log('Base URL:', baseUrl);
+
 // Define la función createClient
 type CreateClient = {
   client: User.Insert;
@@ -26,6 +30,9 @@ export const createClient = async (clientData: CreateClient) => {
       await supabase.auth.signUp({
         email: clientData.client.email ?? '',
         password: 'anyDDA',
+        options: {
+          emailRedirectTo: `${baseUrl}set-password` 
+        }
       });
 
       
