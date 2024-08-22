@@ -187,30 +187,42 @@ export type Database = {
       activities: {
         Row: {
           action: Database["public"]["Enums"]["action_type"]
+          actor: string
           created_at: string
           id: number
           message: string
           order_id: number
+          preposition: string
+          previous_value: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
+          value: string
         }
         Insert: {
           action: Database["public"]["Enums"]["action_type"]
+          actor: string
           created_at?: string
           id?: number
           message: string
           order_id: number
+          preposition: string
+          previous_value?: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
+          value: string
         }
         Update: {
           action?: Database["public"]["Enums"]["action_type"]
+          actor?: string
           created_at?: string
           id?: number
           message?: string
           order_id?: number
+          preposition?: string
+          previous_value?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
+          value?: string
         }
         Relationships: [
           {

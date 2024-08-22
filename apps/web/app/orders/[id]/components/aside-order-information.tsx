@@ -122,10 +122,10 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
         </p>
       </div>
       <AvatarDisplayer
-        displayName={order.client ? order.client.name : undefined}
+        displayName={order.client ? order.client?.name : undefined}
         pictureUrl={
           order.client
-            ? order.client.picture_url && order.client.picture_url
+            ? order.client?.picture_url && order.client?.picture_url
             : undefined
         }
         status="online"

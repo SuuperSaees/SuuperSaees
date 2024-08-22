@@ -54,15 +54,17 @@ const logOrderActivities = async (
     const logActivity = async (
       type: Activity.Enums.ActivityType,
       field: keyof Order.Update,
-      value: unknown,
+      value: string,
     ) => {
       if (field in order) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const message = `${userNameOrEmail} has changed ${field} to ${value}`;
+        const message = `has changed`;
         const activity = {
+          actor: userNameOrEmail.split('@')[0] ?? userNameOrEmail,
           action: Activity.Enums.ActionType.UPDATE,
           type,
           message,
+          value,
+          preposition: `to`,
           order_id: orderId,
           user_id: userId,
         };
@@ -75,24 +77,28 @@ const logOrderActivities = async (
     await logActivity(
       Activity.Enums.ActivityType.STATUS,
       'status',
-      order.status,
+      order.status ?? '',
     );
     await logActivity(
       Activity.Enums.ActivityType.PRIORITY,
       'priority',
-      order.priority,
+      order.priority ?? '',
     );
     await logActivity(
       Activity.Enums.ActivityType.DUE_DATE,
       'due_date',
-      order.due_date,
+      order.due_date ?? '',
     );
     await logActivity(
       Activity.Enums.ActivityType.DESCRIPTION,
       'description',
-      order.description,
+      order.description ?? '',
     );
-    await logActivity(Activity.Enums.ActivityType.TITLE, 'title', order.title);
+    await logActivity(
+      Activity.Enums.ActivityType.TITLE,
+      'title',
+      order.title ?? '',
+    );
   } catch (error) {
     console.error('Error logging order activities:', error);
     throw error;
