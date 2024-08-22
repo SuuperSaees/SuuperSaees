@@ -50,7 +50,7 @@ const DetailsPage = () => {
         </div>
 
         <div className='grid grid-cols-3 gap-4'>
-          {order.files.map((file) => (
+          {order.files!.map((file) => (
             <div key={file.id} className='flex flex-col items-start w-[220px] p-[10px] px-[14px] gap-[8px] border border-gray-200 rounded-none rounded-tr-md rounded-bl-md rounded-br-md bg-white'>
             {getFilePreviewComponent(file)}
             <span className='text-gray-700 text-sm font-medium leading-5 overflow-hidden text-ellipsis whitespace-nowrap w-full'>{file.name}</span>

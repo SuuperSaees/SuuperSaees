@@ -24,7 +24,22 @@
     "step_service_details": "Detalles del servicio",
     "step_service_details_title": "Detalles del servicio",
     "step_service_price": "Configuración de precios",
-    
+    "checkout": {
+        "title": "Aquirir servicio",
+        "billing_details": "Detalles de facturación",
+        "resume": "Resumen de tu pedido",
+        "billing_data_label": "Datos de facturación",
+        "full_name": "Nombre completo *",
+        "email": "Correo electrónico *",
+        "address": "Dirección *",
+        "city": "Ciudad *",
+        "country": "País *",
+        "state_province": "Estado/Provincia/Región *",
+        "postal_code": "Código postal *",
+        "buying_for_organization": "Estoy comprando para una organización",
+        "enterprise_name": "Nombre de la empresa",
+        "tax_code": "Código fiscal"
+    },
     "step_connect_briefs": "Conectar briefs",
     "single_sale": "Venta única",
     "single_sale_description": "Vende tus servicios con un único pago, ideal para proyectos puntuales que no requieren seguimiento continuo.",
