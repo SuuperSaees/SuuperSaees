@@ -19,7 +19,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         <small>{`${date}`}</small>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg rounded-ss-none border border-gray-200 bg-gray-50 p-4">
+      <div className="flex flex-col gap-2 rounded-lg rounded-ss-none bg-gray-50 p-4">
         <div dangerouslySetInnerHTML={{ __html: content }} />
         {/* <p className="max-w-xs">{message.content}</p> */}
         {message.files && message.files.length > 0 && (

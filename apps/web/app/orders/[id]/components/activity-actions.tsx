@@ -32,6 +32,7 @@ interface ActivityActionProps {
 }
 interface ActivityCustomSpan {
   value: string;
+  translatedValue: string;
 }
 
 function formatTarget(target: string) {
@@ -41,7 +42,10 @@ function formatTarget(target: string) {
     .replace(/\b\w/g, (char) => char.toLowerCase());
 }
 
-export const ActivityCustomSpan = ({ value }: ActivityCustomSpan) => {
+export const ActivityCustomSpan = ({
+  value,
+  translatedValue,
+}: ActivityCustomSpan) => {
   const statuses = [
     Order.Enums.Status.PENDING,
     Order.Enums.Status.IN_PROGRESS,
@@ -78,7 +82,7 @@ export const ActivityCustomSpan = ({ value }: ActivityCustomSpan) => {
               : ''
         } px-2 py-1 font-semibold`}
       >
-        {matchedWord}
+        {translatedValue}
       </span>
       {after}
     </span>
@@ -124,7 +128,10 @@ export const StatusActivity = ({
           <span>{formattedActivity.message}</span>
           <span>{formatTarget(formattedActivity.type)}</span>
           <span>{formattedActivity.preposition}</span>
-          <ActivityCustomSpan value={formattedActivity.value} />
+          <ActivityCustomSpan
+            value={activity.value}
+            translatedValue={formattedActivity.value}
+          />
         </span>
         <small className="w-full max-w-[100px] text-right">
           {formatDateToString(new Date(formattedActivity.created_at), 'short')}

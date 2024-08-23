@@ -2,14 +2,10 @@
 
 import { useState } from 'react';
 
-
-
 import { useMutation } from '@tanstack/react-query';
 import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
-
 
 import { Separator } from '@kit/ui/separator';
 
@@ -17,6 +13,7 @@ import { Order } from '~/lib/order.types';
 
 import { updateOrder } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
+import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 // import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
 import SelectAction from './ui/select-action';
@@ -112,6 +109,7 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
 
   return (
     <div className="flex w-full max-w-80 flex-col gap-4 text-gray-700">
+      <ReviewDialog orderId={order.id} />
       <h3 className="font-bold">{t('details.summary')}</h3>
       <div>
         <p>{`#${order.id}`}</p>

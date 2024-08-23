@@ -40,7 +40,8 @@ const Interactions = () => {
 
   return (
     <div
-      className="no-scrollbar flex max-h-[400px] min-h-full w-full flex-col gap-8 overflow-y-auto rounded-lg border border-gray-200 p-4"
+      className="no-scrollbar flex max-h-full shrink w-full flex-col
+       gap-8 overflow-y-auto rounded-lg border border-gray-200 p-4"
       ref={interactionsContainerRef}
     >
       {sortedInteractions.map((interaction) => {

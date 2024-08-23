@@ -21,13 +21,13 @@ const UserReviewMessage = ({ review }: UserReviewMessageProps) => {
             {formatDateToString(new Date(review?.created_at), 'short')}
           </small>
         </div>
-        <div className="flex gap-1 rounded-lg rounded-ss-none border border-gray-200 bg-gray-50 p-3">
+        <div className="flex gap-1 rounded-lg rounded-ss-none bg-gray-50 p-3">
           <AvatarDisplayer
             pictureUrl={review?.user?.picture_url}
             displayName={null}
           />
           <div className="flex flex-col gap-1">
-            <span className="font-semibold">{review?.user.name}</span>
+            <span className="font-semibold">{review?.user?.name}</span>
             <p>{review?.content}</p>
             <div className="flex gap-1">
               {Array.from({ length: review?.rating ?? 0 }, (_, i) => (

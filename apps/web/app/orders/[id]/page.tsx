@@ -32,9 +32,9 @@ async function OrderDetailsPage({
   const reviews = order.reviews ? order.reviews : [];
 
   return (
-    <PageBody className="lg:px-0">
-      <div className="flex w-full flex-col text-gray-700">
-        <div className="flex w-full justify-between gap-6">
+    <PageBody className="lg:px-0 flex-grow h-full">
+      <div className="flex w-full  h-full max-h-full flex-col text-gray-700">
+        <div className="flex w-full h-full max-h-full justify-between gap-6">
           <ActivityProvider
             messages={messages}
             files={files}
@@ -42,24 +42,24 @@ async function OrderDetailsPage({
             reviews={reviews}
             order={order}
           >
-            <div className="flex w-full flex-col">
-              <div className="flex w-full min-w-full gap-4">
+            <div className="flex w-full flex-col gap-6">
+              {/* <div className="flex w-full min-w-full gap-4">
                 <div className="mb-[16px] w-full rounded-lg border border-gray-500 px-[12px] py-[8px]">
                   <span className="font-inter text-md overflow-hidden text-ellipsis leading-6 text-gray-500">
                     {order.title}
                   </span>
                 </div>
-                <ReviewDialog orderId={order.id} />
-              </div>
-              <Tabs defaultValue="activity">
-                <TabsList>
-                  <TabsTrigger value="activity">Activity</TabsTrigger>
-                  <TabsTrigger value="details">Details</TabsTrigger>
+           
+              </div> */}
+              <Tabs defaultValue="activity" className='flex-grow h-full flex flex-col gap-6'>
+                <TabsList className='flex'>
+                  <TabsTrigger value="activity" className='flex-1'>Activity</TabsTrigger>
+                  <TabsTrigger value="details" className='flex-1'>Details</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
                   <DetailsPage />
                 </TabsContent>
-                <TabsContent value="activity">
+                <TabsContent value="activity" className='max-h-full h-full '>
                   <ActivityPage />
                 </TabsContent>
               </Tabs>

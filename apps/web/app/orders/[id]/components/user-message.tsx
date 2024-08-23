@@ -11,11 +11,11 @@ const UserMessage = ({ message }: UserMessageProps) => {
     <div className="flex gap-1">
       <AvatarDisplayer
         displayName={null}
-        pictureUrl={message.user.picture_url}
+        pictureUrl={message?.user.picture_url}
         status="online"
       />
 
-      <ChatMessage key={message.id} message={message} />
+      <ChatMessage key={message?.id} message={message} />
     </div>
   );
 };
