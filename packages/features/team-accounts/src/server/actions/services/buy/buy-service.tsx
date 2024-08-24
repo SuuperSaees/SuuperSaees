@@ -15,6 +15,7 @@ export const buyService = async (
         buying_for_organization: boolean;
         enterprise_name: string;
         tax_code: string;
+        discount_coupon: string;
     }) => {
     try {
       // Imprimir los valores en la consola

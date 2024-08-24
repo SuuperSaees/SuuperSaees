@@ -38,7 +38,13 @@
         "postal_code": "Código postal *",
         "buying_for_organization": "Estoy comprando para una organización",
         "enterprise_name": "Nombre de la empresa",
-        "tax_code": "Código fiscal"
+        "tax_code": "Código fiscal",
+        "discount_coupon": "Cupón de descuento *",
+        "apply": "Aplicar",
+        "subtotal": "Subtotal",
+        "total": "Total (USD)",
+        "accept_terms": "Al enviar este formulario, aceptas nuestros términos de servicio.",
+        "subscribe": "Suscribirse"
     },
     "step_connect_briefs": "Conectar briefs",
     "single_sale": "Venta única",

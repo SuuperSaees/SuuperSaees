@@ -15,9 +15,9 @@ import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 
 import { usePersonalAccountData } from '../../hooks/use-personal-account-data';
-import { AccountDangerZone } from './account-danger-zone';
+// import { AccountDangerZone } from './account-danger-zone';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
-import { MultiFactorAuthFactorsList } from './mfa/multi-factor-auth-list';
+// import { MultiFactorAuthFactorsList } from './mfa/multi-factor-auth-list';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';

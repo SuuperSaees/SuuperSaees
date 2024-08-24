@@ -35,6 +35,7 @@ const formSchema = z.object({
     buying_for_organization: z.boolean().default(false),
     enterprise_name: z.string(),
     tax_code: z.string(),
+    discount_coupon: z.string(),
 });
 
 const BillingForm: React.FC<{ service: ServiceType }> = ({ service }) => {
@@ -52,6 +53,7 @@ const BillingForm: React.FC<{ service: ServiceType }> = ({ service }) => {
             buying_for_organization: false,
             enterprise_name: "",
             tax_code: "",
+            discount_coupon: "",
         },
     });
 
@@ -67,7 +69,7 @@ const BillingForm: React.FC<{ service: ServiceType }> = ({ service }) => {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className='flex'>
+                <div className='flex gap-8'>
                     <div className='w-[831px]'>
                         <div className="text-gray-900 font-inter text-2xl font-semibold leading-[1.27]">
                             <Trans i18nKey={'services:checkout:billing_details'} />
@@ -211,34 +213,6 @@ const BillingForm: React.FC<{ service: ServiceType }> = ({ service }) => {
                                 )}
                             />
                         </div>
-                        {/* <div className='flex items-center gap-4 mt-4'>
-                            <FormField
-                                name="enterprise_name"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <FormItem className='w-full'>
-                                         <FormLabel className='text-sm font-medium leading-[20px] text-gray-700'><Trans i18nKey={'services:checkout:enterprise_name'} /></FormLabel>
-                                        <FormControl>
-                                            <Input  {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="tax_code"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <FormItem className='w-full'>
-                                         <FormLabel className='text-sm font-medium leading-[20px] text-gray-700'><Trans i18nKey={'services:checkout:tax_code'} /></FormLabel>
-                                        <FormControl>
-                                            <Input  {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div> */}
                         {isBuyingForOrganization && (
                             <>
                                 <div className='flex items-center gap-4 mt-4'>
@@ -271,14 +245,12 @@ const BillingForm: React.FC<{ service: ServiceType }> = ({ service }) => {
                                 </div>
                             </>
                         )}
-                        
-                        <Button type="submit" className='w-full '>Submit</Button>
                     </div>
-                    <div className=''>
+                    <div className='flex flex-col'>
                         <div className="text-gray-900 font-inter text-2xl font-semibold leading-[1.27]">
                             <Trans i18nKey={'services:checkout:resume'} />
                         </div>
-                        <div className='flex items-center'>
+                        <div className='flex items-center mb-[18px]'>
                             {service.service_image ? (
                                 <Image
                                     alt='Service Image'
@@ -295,7 +267,34 @@ const BillingForm: React.FC<{ service: ServiceType }> = ({ service }) => {
                                 <div className='text-sm font-medium leading-5 text-gray-700'>${service.price}</div>
                             </div>
                         </div>
-
+                        <FormField
+                            name="discount_coupon"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem className='w-full mb-[18px]'>
+                                        <FormLabel className='text-sm font-medium leading-[20px] text-gray-700'><Trans i18nKey={'services:checkout:discount_coupon'} /></FormLabel>
+                                    <FormControl>
+                                        <div className='flex gap-4'>
+                                        <Input  {...field} />
+                                        <Button variant='ghost' type='button' className='border border-gray-300'>
+                                            <Trans i18nKey={'services:checkout:apply'} />
+                                        </Button>
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className='flex justify-between mb-[18px]'>
+                            <div className='text-gray-700 text-sm font-medium leading-5'><Trans i18nKey={'services:checkout:subtotal'}/></div>
+                            <div className='text-sm font-medium leading-5 text-gray-700'>${service.price}</div>
+                        </div>
+                        <div className='flex justify-between mb-[18px]'>
+                            <div className='text-gray-700 text-sm font-medium leading-5'><Trans i18nKey={'services:checkout:total'}/></div>
+                            <div className='text-sm font-medium leading-5 text-gray-700'>${service.price}</div>
+                        </div>
+                        <div className='text-gray-700 text-sm font-medium leading-5 mb-[18px]'><Trans i18nKey={'services:checkout:accept_terms'}/></div>
+                        <Button type="submit" className='w-full '><Trans i18nKey={'services:checkout:subscribe'} /></Button>
                     </div>
                 </div>
             </form>
