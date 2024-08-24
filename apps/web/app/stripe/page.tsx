@@ -17,7 +17,6 @@ function StripePage() {
   return (
     <>
       <PageBody>
-        {/* <UpdateStripeFormContainer /> */}
         <PayContainer />
       </PageBody>
     </>
