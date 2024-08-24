@@ -25,6 +25,7 @@ const UserReviewMessage = ({ review }: UserReviewMessageProps) => {
           <AvatarDisplayer
             pictureUrl={review?.user?.picture_url}
             displayName={null}
+            text={review?.user.name ? review.user.name : undefined}
           />
           <div className="flex flex-col gap-1">
             <span className="font-semibold">{review?.user?.name}</span>

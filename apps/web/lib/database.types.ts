@@ -862,6 +862,50 @@ export type Database = {
           },
         ]
       }
+      order_assignations: {
+        Row: {
+          agency_member_id: string
+          order_id: number
+        }
+        Insert: {
+          agency_member_id: string
+          order_id: number
+        }
+        Update: {
+          agency_member_id?: string
+          order_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_assignations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_files: {
         Row: {
           created_at: string
@@ -1003,7 +1047,6 @@ export type Database = {
       }
       orders_v2: {
         Row: {
-          assigned_to: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -1017,7 +1060,6 @@ export type Database = {
           uuid: string
         }
         Insert: {
-          assigned_to?: string[] | null
           client_organization_id: string
           created_at?: string
           customer_id: string
@@ -1031,7 +1073,6 @@ export type Database = {
           uuid: string
         }
         Update: {
-          assigned_to?: string[] | null
           client_organization_id?: string
           created_at?: string
           customer_id?: string

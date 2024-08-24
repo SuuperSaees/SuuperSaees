@@ -12,7 +12,7 @@ const UserMessage = ({ message }: UserMessageProps) => {
       <AvatarDisplayer
         displayName={null}
         pictureUrl={message?.user.picture_url}
-        status="online"
+        text={message?.user.name ? message.user.name : undefined}
       />
 
       <ChatMessage key={message?.id} message={message} />

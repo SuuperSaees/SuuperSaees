@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 
-import { useMutation } from '@tanstack/react-query';
+
+
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { getOrderAgencyMembers } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -11,11 +14,14 @@ import { Separator } from '@kit/ui/separator';
 
 import { Order } from '~/lib/order.types';
 
-import { updateOrder } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
+import {
+  updateOrder,
+  updateOrderAssigns,
+} from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
+import ActivityAssignations from './activity-assignations';
 import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
-// import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
 import SelectAction from './ui/select-action';
 
 interface AsideOrderInformationProps {
@@ -25,11 +31,6 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
   const { t } = useTranslation('orders');
   const [selectedStatus, setSelectedStatus] = useState(order.status);
   const [selectedPriority, setSelectedPriority] = useState(order.priority);
-  // const avatarsWithStatus =
-  //   order.assigned_to?.map((account) => ({
-  //     ...account,
-  //     status: 'online',
-  //   })) ?? [];
 
   const changeStatus = useMutation({
     mutationFn: (status: Order.Type['status']) => {
@@ -85,6 +86,36 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
     },
   });
 
+  const changeAgencyMembersAssigned = useMutation({
+    mutationFn: (agencyMemberIds: string[]) => {
+      return updateOrderAssigns(order.id, agencyMemberIds);
+    },
+    onSuccess: () => {
+      toast.success('Success', {
+        description: 'Agency members updated successfully!',
+      });
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: 'The agency members could not be updated.',
+      });
+    },
+  });
+
+  const { data: orderAgencyMembers, error: orderAgencyMembersError } = useQuery(
+    {
+      queryKey: ['order-agency-members', order.id],
+      queryFn: () =>
+        getOrderAgencyMembers(order.propietary_organization_id, order.id),
+      retry: 5,
+    },
+  );
+
+  console.log(
+    'orderAgencyMembers',
+    orderAgencyMembersError,
+    orderAgencyMembers,
+  );
   const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
   const priorities = ['low', 'medium', 'high'];
 
@@ -107,6 +138,13 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
       .replace(/^\w/, (c) => c.toUpperCase()),
   }));
 
+  const searchUserOptions =
+    orderAgencyMembers?.map((user) => ({
+      picture_url: user.picture_url,
+      value: user.id,
+      label: user.name,
+    })) ?? [];
+
   return (
     <div className="flex w-full max-w-80 flex-col gap-4 text-gray-700">
       <ReviewDialog orderId={order.id} />
@@ -126,7 +164,7 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
             ? order.client?.picture_url && order.client?.picture_url
             : undefined
         }
-        status="online"
+        // status="online"
       />
 
       <Separator />
@@ -155,10 +193,12 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
         disabled={changePriority.isPending}
       />
       <Separator />
-      <div className="flex flex-col gap-2">
-        <span className="font-semibold">{t('details.assignedTo')}: </span>
-        {/* <MultiAvatarDisplayer avatars={avatarsWithStatus} maxAvatars={4} /> */}
-      </div>
+
+      <ActivityAssignations
+        searchUserOptions={searchUserOptions}
+        assignedTo={order.assigned_to}
+        updateFunction={changeAgencyMembersAssigned.mutate}
+      />
       <Separator />
       <div className="flex flex-col gap-2">
         <span>{t('details.dueDate')}</span>

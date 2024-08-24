@@ -13,6 +13,7 @@ const UserFile = ({ file }: UserFileProps) => {
         displayName={null}
         pictureUrl={file?.user?.picture_url}
         status="online"
+        text={file?.user.name ? file.user.name : undefined}
       />
       <div className="flex flex-col gap-1">
         <div className="flex w-full justify-between gap-4">

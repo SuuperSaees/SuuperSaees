@@ -10,6 +10,7 @@ interface AvatarDisplayerProps {
   status?: 'online' | 'offline';
   className?: string;
   [key: string]: unknown;
+  fallbackInitials?: string;
 }
 const AvatarDisplayer = ({
   pictureUrl,
@@ -36,6 +37,7 @@ const AvatarDisplayer = ({
           <span className="text-sm font-semibold">{displayName}</span>
         )}
         {nickname && <span className="text-sm text-gray-600">{nickname}</span>}
+        {/* <AvatarFallback>SD</AvatarFallback> */}
       </div>
     </div>
   );

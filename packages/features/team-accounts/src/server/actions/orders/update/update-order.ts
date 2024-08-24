@@ -44,6 +44,62 @@ export const updateOrder = async (
   }
 };
 
+export const updateOrderAssigns = async (
+  orderId: Order.Type['id'],
+  agencyMemberIds: string[],
+) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    // 1. Fetch existing assignments to determine if you need to delete any
+    const { data: existingAssignments, error: fetchError } = await client
+      .from('order_assignations')
+      .select('agency_member_id')
+      .eq('order_id', orderId);
+
+    if (fetchError) throw fetchError;
+
+    // Extract existing IDs
+    const existingIds =
+      existingAssignments?.map((assign) => assign.agency_member_id) || [];
+
+    // Determine IDs to add and remove
+    const idsToAdd = agencyMemberIds.filter((id) => !existingIds.includes(id));
+    const idsToRemove = existingIds.filter(
+      (id) => !agencyMemberIds.includes(id),
+    );
+
+    // 2. Remove old assignments
+    if (idsToRemove.length > 0) {
+      const { error: deleteError } = await client
+        .from('order_assignations')
+        .delete()
+        .in('agency_member_id', idsToRemove)
+        .eq('order_id', orderId);
+
+      if (deleteError) throw deleteError;
+    }
+
+    // 3. Upsert new assignments
+    const newAssignments = idsToAdd.map((id) => ({
+      order_id: orderId,
+      agency_member_id: id,
+    }));
+
+    const { error: upsertError } = await client
+      .from('order_assignations')
+      .upsert(newAssignments)
+      .select();
+
+    if (upsertError) throw upsertError;
+
+    revalidatePath(`/orders/${orderId}`);
+  } catch (error) {
+    console.error('Error updating order assignments:', error);
+    throw new Error('Failed to update order assignments');
+  }
+};
+
 const logOrderActivities = async (
   orderId: Order.Type['id'],
   order: Order.Update,
