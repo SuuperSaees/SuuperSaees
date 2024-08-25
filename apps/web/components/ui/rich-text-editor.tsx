@@ -10,18 +10,11 @@ import { Image as ImageInsert } from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Youtube from '@tiptap/extension-youtube';
-import {
-  Editor,
-  EditorContent,
-  Extension,
-  ReactNodeViewRenderer,
-  useEditor,
-} from '@tiptap/react';
+import { Editor, EditorContent, Extension, ReactNodeViewRenderer, useEditor } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import {
   Bold,
-  File,
   Heading1,
   Heading2,
   Image,
@@ -33,7 +26,10 @@ import {
   Strikethrough,
 } from 'lucide-react';
 
+
+
 import styles from './styles.module.css';
+
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -432,14 +428,7 @@ export const Toolbar = ({
       >
         <Quote className="h-4 w-4" />
       </button>
-      <button
-        onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        className={
-          editor.isActive('horizontalRule') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <File className="h-4 w-4" />
-      </button>
+
       <button
         onClick={
           uploadFileIsExternal && toggleExternalUpload

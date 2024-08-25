@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+import { DownloadIcon, StickyNote } from 'lucide-react';
 
 import { File } from '../context/activity-context';
 import AvatarDisplayer from './ui/avatar-displayer';
@@ -6,8 +7,68 @@ import AvatarDisplayer from './ui/avatar-displayer';
 interface UserFileProps {
   file: File;
 }
-
+const fileTypeColors: Record<string, string> = {
+  pdf: 'fill-pdf',
+  png: 'fill-png',
+  jpg: 'fill-jpg',
+  jpeg: 'fill-jpeg',
+  doc: 'fill-doc',
+  docx: 'fill-docx',
+};
+const getFileTypeClass = (fileName: string) => {
+  const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+  return fileTypeColors[extension] ?? 'fill-unknown';
+};
 const UserFile = ({ file }: UserFileProps) => {
+  const renderFilePreview = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      return (
+        /*eslint-disable @next/next/no-img-element */
+        <img
+          src={file?.url}
+          alt="image"
+          className="aspect-square h-full w-auto object-cover"
+        />
+      );
+    } else if (file.type.startsWith('video/')) {
+      return (
+        <video className="w-full max-w-[400px] rounded-lg" controls>
+          <source src={file.url} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      );
+    } else if (file.type === 'application/pdf') {
+      return (
+        <a className="flex items-center space-x-2" href={file.url}>
+          <div className="relative flex items-center justify-center">
+            <StickyNote
+              className={`text-white ${getFileTypeClass(file.name)} h-[56px] w-[40px]`}
+            />
+            <span className="absolute inset-0 flex items-end justify-center py-4 text-[9px] font-semibold text-white">
+              {file.name.split('.').pop()?.toUpperCase()}
+            </span>
+          </div>
+          <span className="text-sm font-medium text-gray-400">{file.name}</span>
+          <DownloadIcon className="h-4 w-4 text-gray-400" />
+        </a>
+      );
+    } else {
+      return (
+        <a className="flex items-center space-x-2" href={file.url}>
+          <div className="relative flex items-center justify-center">
+            <StickyNote
+              className={`text-white ${getFileTypeClass(file.name)} h-[56px] w-[40px]`}
+            />
+            <span className="absolute inset-0 flex items-end justify-center py-4 text-[9px] font-semibold text-white">
+              {file.name.split('.').pop()?.toUpperCase()}
+            </span>
+          </div>
+          <span className="text-sm font-medium text-gray-400">{file.name}</span>
+          <DownloadIcon className="h-4 w-4 text-gray-400" />
+        </a>
+      );
+    }
+  };
   return (
     <div className="flex gap-1">
       <AvatarDisplayer
@@ -25,13 +86,13 @@ const UserFile = ({ file }: UserFileProps) => {
         </div>
 
         <div className="flex max-h-72 w-full max-w-full flex-wrap gap-4 overflow-hidden rounded-md">
-          {/*eslint-disable @next/next/no-img-element */}
           {/*conditional rendering must be added */}
-          <img
+          {/* <img
             src={file?.url}
             alt="image"
             className="aspect-square h-full w-auto object-cover"
-          />
+          /> */}
+          {renderFilePreview(file)}
         </div>
       </div>
     </div>
