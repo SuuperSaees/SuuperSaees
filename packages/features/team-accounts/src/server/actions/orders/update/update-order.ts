@@ -182,7 +182,8 @@ export const addOrderMessage = async (
     console.log('messageData:', orderId, message);
     if (messageError) throw messageError.message;
     console.log('addedMessage:', messageData);
-    revalidatePath(`/orders/${orderId}`);
+    // revalidatePath(`/orders/${orderId}`);
+    return messageData
   } catch (error) {
     console.error('Error adding message:', error);
     throw error;

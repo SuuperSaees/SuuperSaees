@@ -10,19 +10,23 @@ import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/order
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+
+
 import { Separator } from '@kit/ui/separator';
+
+
 
 import { Order } from '~/lib/order.types';
 
-import {
-  updateOrder,
-  updateOrderAssigns,
-} from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
+
+
+import { updateOrder, updateOrderAssigns } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import ActivityAssignations from './activity-assignations';
 import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
+
 
 interface AsideOrderInformationProps {
   order: Order.Type;
@@ -102,20 +106,18 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
     },
   });
 
-  const { data: orderAgencyMembers, error: orderAgencyMembersError } = useQuery(
-    {
-      queryKey: ['order-agency-members', order.id],
-      queryFn: () =>
-        getOrderAgencyMembers(order.propietary_organization_id, order.id),
-      retry: 5,
-    },
-  );
+  const { data: orderAgencyMembers } = useQuery({
+    queryKey: ['order-agency-members', order.id],
+    queryFn: () =>
+      getOrderAgencyMembers(order.propietary_organization_id, order.id),
+    retry: 5,
+  });
 
-  console.log(
-    'orderAgencyMembers',
-    orderAgencyMembersError,
-    orderAgencyMembers,
-  );
+  // console.log(
+  //   'orderAgencyMembers',
+  //   orderAgencyMembersError,
+  //   orderAgencyMembers,
+  // );
   const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
   const priorities = ['low', 'medium', 'high'];
 

@@ -26,7 +26,6 @@ const Interactions = () => {
     (a, b) =>
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   );
-  console.log('files', combinedInteractions);
 
   // Scroll to bottom / last item with smooth behaviour
   useEffect(() => {
