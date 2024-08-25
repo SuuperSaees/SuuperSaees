@@ -3,6 +3,8 @@
 // import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef } from 'react';
 
+
+
 import Heading from '@tiptap/extension-heading';
 import { Image as ImageInsert } from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -11,6 +13,7 @@ import Youtube from '@tiptap/extension-youtube';
 import {
   Editor,
   EditorContent,
+  Extension,
   ReactNodeViewRenderer,
   useEditor,
 } from '@tiptap/react';
@@ -44,11 +47,7 @@ interface GroupedImageNodeViewProps {
   cleanupFunction?: () => void; // Optional cleanup function
 }
 
-const GroupedImageNodeView = ({
-  node,
-  editor,
-  // cleanupFunction,
-}: GroupedImageNodeViewProps) => {
+const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,6 +67,39 @@ const GroupedImageNodeView = ({
     clonedImage.removeAttribute('data-cloned');
     clonedImage.classList.add('cloned-img');
 
+    // Assign a unique ID to the cloned image
+    const imageId = `img-${Math.random().toString(36).substring(2, 9)}`;
+    clonedImage.id = imageId;
+
+    // Create a wrapper div to hold the image and delete button
+    const imageWrapper = document.createElement('div');
+    imageWrapper.classList.add('relative', 'cloned-image-wrapper');
+
+    // Move the cloned image into the wrapper
+    imageWrapper.appendChild(clonedImage);
+
+    // Create the delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add(
+      'absolute',
+      'right-2',
+      'top-1',
+      'cursor-pointer',
+      'text-white/80',
+      'hover:text-white/100',
+    );
+
+    // Add the "X" icon inside the delete button
+    deleteButton.innerHTML = '<span>X</span>';
+
+    // Attach the delete function to the button
+    deleteButton.addEventListener('click', () => {
+      imageWrapper.remove();
+    });
+
+    // Append the delete button to the image wrapper
+    imageWrapper.appendChild(deleteButton);
+
     // Mark the original image to prevent further cloning
     if (originalImage) {
       originalImage.style.visibility = 'hidden';
@@ -84,17 +116,20 @@ const GroupedImageNodeView = ({
       editor.view.dom.appendChild(parentDiv);
     }
 
-    // Append the cloned image to the existing or newly created group
-    parentDiv.appendChild(clonedImage);
+    // Append the image wrapper (with the image and delete button) to the group
+    parentDiv.appendChild(imageWrapper);
 
-    // Call cleanup function if provided
-    // if (cleanupFunction) {
-    //   cleanupFunction();
-    // }
+    // Clean up the DOM when the component unmounts
+    // return () => {
+    //   if (imageWrapper) {
+    //     imageWrapper.remove();
+    //   }
+    // };
   }, [editor]);
+
   /* eslint-disable @next/next/no-img-element */
   return (
-    <NodeViewWrapper ref={wrapperRef} as="div">
+    <NodeViewWrapper ref={wrapperRef} as="div" className="relative">
       <img {...node?.attrs} className="cloned-image" />
     </NodeViewWrapper>
   );
@@ -120,10 +155,12 @@ const RichTextEditor = ({
   toggleExternalUpload,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
-
   const cleanupImages = () => {
-    const clonedImages = document.querySelectorAll('.cloned-img');
-    clonedImages.forEach((img) => img.remove());
+    // Select all image wrappers
+    const imageWrappers = document.querySelectorAll('.cloned-image-wrapper');
+
+    // Remove each image wrapper (which includes the image and the delete button)
+    imageWrappers.forEach((wrapper) => wrapper.remove());
 
     // Remove the parent div if it's empty
     const parentDiv = document.querySelector('.image-group');
@@ -154,6 +191,24 @@ const RichTextEditor = ({
     }, 500);
   }, []);
 
+  const CustomShortcuts = Extension.create({
+    addKeyboardShortcuts() {
+      return {
+        // Send content on Enter
+        // Enter: () => {
+        //   sendContent();
+        //   return true;
+        // },
+        // Insert new paragraph on Ctrl + Enter or Cmd + Enter
+        'Mod-Enter': () => {
+          console.log('ctrl + enter');
+          this.editor.commands.splitBlock();
+          return true;
+        },
+      };
+    },
+  });
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -179,6 +234,7 @@ const RichTextEditor = ({
           },
         },
       }),
+
       Heading.configure({
         HTMLAttributes: {
           class: 'text-xl font-bold',
@@ -226,6 +282,7 @@ const RichTextEditor = ({
         //   return 'Can you add some further context?'
         // },
       }),
+      CustomShortcuts,
     ],
     content: content ?? '<p></p>',
     editorProps: {
@@ -234,14 +291,14 @@ const RichTextEditor = ({
           'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none',
       },
 
-      // handleKeyDown: (_, event) => {
-      //   if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey) {
-      //     event.preventDefault();
-      //     sendContent();
-      //     return true;
-      //   }
-      //   return false;
-      // },
+      handleKeyDown: (_, event) => {
+        if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey) {
+          event.preventDefault();
+          sendContent();
+          return true;
+        }
+        return false;
+      },
     },
     onUpdate({ editor }) {
       const text = editor.getText();
@@ -267,7 +324,7 @@ const RichTextEditor = ({
   // Implement sanitizer to ensure the content to be nested is secure before sending to server
 
   return (
-    <div className="relative flex flex-col gap-4 rounded border border-input p-4">
+    <div className="relative flex h-fit flex-col gap-4 rounded border border-input p-4">
       <EditorContent
         editor={editor}
         className={styles['image-input-text-editor'] + 'h-fit w-full'}

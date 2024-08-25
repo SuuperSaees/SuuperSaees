@@ -1,6 +1,8 @@
 import { PageBody } from '@kit/ui/page';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
 
+
+
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
@@ -8,8 +10,8 @@ import { getOrderById } from '../../../../../packages/features/team-accounts/src
 import ActivityPage from './components/activity';
 import AsideOrderInformation from './components/aside-order-information';
 import DetailsPage from './components/details';
-import { ReviewDialog } from './components/review-dialog';
 import { ActivityProvider } from './context/activity-context';
+
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -32,9 +34,9 @@ async function OrderDetailsPage({
   const reviews = order.reviews ? order.reviews : [];
 
   return (
-    <PageBody className="lg:px-0 flex-grow h-full">
-      <div className="flex w-full  h-full max-h-full flex-col text-gray-700">
-        <div className="flex w-full h-full max-h-full justify-between gap-6">
+    <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
+      <div className="flex h-full max-h-full w-full flex-col text-gray-700">
+        <div className="flex h-full max-h-full w-full justify-between gap-6">
           <ActivityProvider
             messages={messages}
             files={files}
@@ -42,7 +44,7 @@ async function OrderDetailsPage({
             reviews={reviews}
             order={order}
           >
-            <div className="flex w-full flex-col gap-6">
+            <div className="flex w-full flex-grow min-w-0 flex-col gap-6">
               {/* <div className="flex w-full min-w-full gap-4">
                 <div className="mb-[16px] w-full rounded-lg border border-gray-500 px-[12px] py-[8px]">
                   <span className="font-inter text-md overflow-hidden text-ellipsis leading-6 text-gray-500">
@@ -51,21 +53,31 @@ async function OrderDetailsPage({
                 </div>
            
               </div> */}
-              <Tabs defaultValue="activity" className='flex-grow h-full flex flex-col gap-6'>
-                <TabsList className='flex'>
-                  <TabsTrigger value="activity" className='flex-1'>Activity</TabsTrigger>
-                  <TabsTrigger value="details" className='flex-1'>Details</TabsTrigger>
+              <Tabs
+                defaultValue="activity"
+                className="flex h-full flex-grow flex-col gap-6"
+              >
+                <TabsList className="flex">
+                  <TabsTrigger value="activity" className="flex-1">
+                    Activity
+                  </TabsTrigger>
+                  <TabsTrigger value="details" className="flex-1">
+                    Details
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
                   <DetailsPage />
                 </TabsContent>
-                <TabsContent value="activity" className='max-h-full h-full '>
+                <TabsContent
+                  value="activity"
+                  className="h-full max-h-full min-h-0"
+                >
                   <ActivityPage />
                 </TabsContent>
               </Tabs>
             </div>
           </ActivityProvider>
-          <AsideOrderInformation order={order} />
+          <AsideOrderInformation order={order} className="hidden lg:flex" />
         </div>
       </div>
     </PageBody>

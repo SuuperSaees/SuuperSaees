@@ -30,8 +30,14 @@ import SelectAction from './ui/select-action';
 
 interface AsideOrderInformationProps {
   order: Order.Type;
+  className?: string;
+  [key: string]: unknown;
 }
-const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
+const AsideOrderInformation = ({
+  order,
+  className,
+  ...rest
+}: AsideOrderInformationProps) => {
   const { t } = useTranslation('orders');
   const [selectedStatus, setSelectedStatus] = useState(order.status);
   const [selectedPriority, setSelectedPriority] = useState(order.priority);
@@ -148,7 +154,10 @@ const AsideOrderInformation = ({ order }: AsideOrderInformationProps) => {
     })) ?? [];
 
   return (
-    <div className="flex w-full max-w-80 flex-col gap-4 text-gray-700">
+    <div
+      className={`flex w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 text-gray-700 ${className}`}
+      {...rest}
+    >
       <ReviewDialog orderId={order.id} />
       <h3 className="font-bold">{t('details.summary')}</h3>
       <div>

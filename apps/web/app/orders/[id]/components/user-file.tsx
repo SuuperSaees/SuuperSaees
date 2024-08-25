@@ -1,5 +1,6 @@
+import { format } from 'date-fns';
+
 import { File } from '../context/activity-context';
-import { formatDateToString } from '../utils/get-formatted-dates';
 import AvatarDisplayer from './ui/avatar-displayer';
 
 interface UserFileProps {
@@ -19,7 +20,7 @@ const UserFile = ({ file }: UserFileProps) => {
         <div className="flex w-full justify-between gap-4">
           <span className="font-semibold">{file?.user?.name}</span>
           <small className="text-gray-400">
-            {formatDateToString(new Date(file.created_at), 'short')}
+            {format(new Date(file?.created_at), 'MMM dd, p')}
           </small>
         </div>
 

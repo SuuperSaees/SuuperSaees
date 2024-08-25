@@ -2,14 +2,18 @@
 
 import React from 'react';
 
+
+
 import { CircleHelp } from 'lucide-react';
+
+import { File as ServerFile } from '~/lib/file.types';
 
 import { useActivityContext } from '../context/activity-context';
 import PreviewImage from './file-types/preview-image';
 import PreviewPDF from './file-types/preview-pdf';
 import PreviewVideo from './file-types/preview-video';
 
-const formatFileSize = (bytes) => {
+const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
   const kb = bytes / 1024;
   if (kb < 1024) return `${kb.toFixed(2)} KB`;
@@ -19,7 +23,7 @@ const formatFileSize = (bytes) => {
   return `${gb.toFixed(2)} GB`;
 };
 
-const getFilePreviewComponent = (file) => {
+const getFilePreviewComponent = (file: ServerFile.Type) => {
   const { type, url, name } = file;
 
   if (type.startsWith('image/')) {
@@ -39,12 +43,12 @@ const getFilePreviewComponent = (file) => {
 };
 
 const DetailsPage = () => {
-  const { order } = useActivityContext();
+  const { order, files } = useActivityContext();
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex w-full min-w-full gap-2">
-        <div className="w-full rounded-lg border border-gray-500 px-[12px] py-[8px]">
+        <div className="w-full rounded-lg border border-gray-300 px-[12px] py-[8px]">
           <span className="font-inter text-md overflow-hidden text-ellipsis leading-6 text-gray-500">
             {order.title}
           </span>
@@ -60,6 +64,7 @@ const DetailsPage = () => {
         <textarea
           className="rounded-lg border border-gray-300 px-[14px] py-[12px]"
           rows={10}
+          disabled={true}
         >
           {order.description}
         </textarea>
@@ -74,7 +79,7 @@ const DetailsPage = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          {order.files.map((file) => (
+          {files.map((file) => (
             <div
               key={file.id}
               className="flex h-56 w-full flex-col items-start gap-2 rounded-none rounded-bl-md rounded-br-md rounded-tr-md border border-gray-200 bg-white p-[10px] px-[14px]"

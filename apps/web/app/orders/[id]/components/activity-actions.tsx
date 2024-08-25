@@ -1,6 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
+import { BarChart, Calendar, LineChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Order } from '~/lib/order.types';
@@ -8,7 +9,6 @@ import { Order } from '~/lib/order.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { Activity, ActivityType } from '../context/activity-context';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
-import { formatDateToString } from '../utils/get-formatted-dates';
 import AvatarDisplayer from './ui/avatar-displayer';
 
 const translateActivity = (
@@ -51,6 +51,7 @@ export const ActivityCustomSpan = ({
     Order.Enums.Status.IN_PROGRESS,
     Order.Enums.Status.COMPLETED,
     Order.Enums.Status.ANNULLED,
+    Order.Enums.Status.IN_REVIEW,
   ];
   const priorities = [
     Order.Enums.Priority.LOW,
@@ -96,7 +97,8 @@ const ActivityAction = ({
   const formattedActivity = translateActivity(activity, t);
   if (
     activity.type === ActivityType.STATUS ||
-    activity.type === ActivityType.PRIORITY
+    activity.type === ActivityType.PRIORITY ||
+    activity.type === ActivityType.DUE_DATE
   )
     return (
       <StatusActivity
@@ -119,22 +121,40 @@ export const StatusActivity = ({
 }: ActivityActionProps) => {
   if (
     activity.type === ActivityType.STATUS ||
-    activity.type === ActivityType.PRIORITY
+    activity.type === ActivityType.PRIORITY ||
+    activity.type === ActivityType.DUE_DATE
   ) {
     return (
-      <div className="flex h-fit w-full justify-between gap-4 pl-12 text-gray-400">
-        <span className="inline-flex flex-wrap gap-1">
-          <span>{formattedActivity.actor}</span>
-          <span>{formattedActivity.message}</span>
-          <span>{formatTarget(formattedActivity.type)}</span>
-          <span>{formattedActivity.preposition}</span>
-          <ActivityCustomSpan
-            value={activity.value}
-            translatedValue={formattedActivity.value}
-          />
-        </span>
+      <div className="flex h-fit w-full justify-between gap-4 text-gray-400">
+        <div className="flex gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+            {activity.type === ActivityType.PRIORITY ? (
+              <BarChart className="h-5 w-5 text-gray-400" />
+            ) : activity.type === ActivityType.DUE_DATE ? (
+              <Calendar className="h-5 w-5 text-gray-400" />
+            ) : activity.type === ActivityType.STATUS ? (
+              <LineChart className="h-5 w-5 text-gray-400" />
+            ) : null}
+          </div>
+          <span className="inline-flex flex-wrap gap-1">
+            <span>{formattedActivity.actor}</span>
+            <span>{formattedActivity.message}</span>
+            <span>{formatTarget(formattedActivity.type)}</span>
+            <span>{formattedActivity.preposition}</span>
+            <span>
+              {activity.type === 'due_date' &&
+                format(new Date(formattedActivity.value ?? ''), '	Pp')}
+            </span>
+            {(activity.type === 'priority' || activity.type === 'status') && (
+              <ActivityCustomSpan
+                value={activity.value}
+                translatedValue={formattedActivity.value}
+              />
+            )}
+          </span>
+        </div>
         <small className="w-full max-w-[100px] text-right">
-          {formatDateToString(new Date(formattedActivity.created_at), 'short')}
+          {format(new Date(formattedActivity.created_at), 'MMM dd, p')}
         </small>
       </div>
     );
@@ -166,7 +186,7 @@ export const DefaultAction = ({
         </span>
       </div>
       <small className="w-full max-w-[100px] text-right">
-        {formatDateToString(new Date(formattedActivity.created_at), 'short')}
+        {format(new Date(activity.created_at), 'MMM dd, p')}
       </small>
     </div>
   );

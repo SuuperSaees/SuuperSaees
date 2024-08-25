@@ -1,5 +1,6 @@
+import { format } from 'date-fns';
+
 import { Message } from '../context/activity-context';
-import { formatDateToString } from '../utils/get-formatted-dates';
 import ImageContainer from './ui/image-container';
 
 interface ChatMessageProps {
@@ -7,14 +8,14 @@ interface ChatMessageProps {
 }
 
 const ChatMessage = ({ message }: ChatMessageProps) => {
-  const date = formatDateToString(new Date(message.created_at), 'short');
-  
+  const date = format(new Date(message.created_at), 'MMM dd, p');
+
   // Ensure content is a string
   const content = message.content ?? '';
 
   return (
     <div className="flex w-fit flex-col gap-1">
-      <div className="flex gap-4 justify-between">
+      <div className="flex justify-between gap-4">
         <span className="font-semibold">{message.user.name}</span>
         <small>{`${date}`}</small>
       </div>
