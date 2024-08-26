@@ -10,6 +10,7 @@ import {
   File,
   Message,
   Review,
+  ServerOrderFile,
   SubscriptionPayload,
   TableName,
 } from '../context/activity-context';
@@ -21,7 +22,7 @@ export const useOrderSubscriptions = (
     currentDataStore: T[],
     stateSetter: React.Dispatch<React.SetStateAction<T[]>>,
     tableName: TableName,
-  ) => void,
+  ) => Promise<void>,
   setOrder: React.Dispatch<React.SetStateAction<Order.Type>>,
   activities: Activity[],
   setActivities: React.Dispatch<React.SetStateAction<Activity[]>>,
@@ -35,110 +36,115 @@ export const useOrderSubscriptions = (
   const supabase = useSupabase();
 
   useEffect(() => {
-    const messagesChannel = supabase.channel('message-subscription').on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'messages',
-        filter: `order_id=eq.${orderId}`,
-      },
-      (payload) => {
-        handleSubscription<Message>(
-          payload.new as SubscriptionPayload,
-          messages,
-          setMessages,
-          TableName.MESSAGES,
-        );
-      },
-    );
+    const channel = supabase
+      .channel('order-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `order_id=eq.${orderId}`,
+        },
+        (payload) => {
+          void handleSubscription<Message>(
+            payload.new as SubscriptionPayload,
+            messages,
+            setMessages,
+            TableName.MESSAGES,
+          );
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reviews',
+          filter: `order_id=eq.${orderId}`,
+        },
+        (payload) => {
+          void handleSubscription<Review>(
+            payload.new as SubscriptionPayload,
+            reviews,
+            setReviews,
+            TableName.REVIEWS,
+          );
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'order_files' },
+        (payload) => {
+          void (async () => {
+            const { file_id } = payload.new as ServerOrderFile;
 
-    const reviewsChannel = supabase.channel('review-subscription').on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'reviews',
-        filter: `order_id=eq.${orderId}`,
-      },
-      (payload) => {
-        handleSubscription<Review>(
-          payload.new as SubscriptionPayload,
-          reviews,
-          setReviews,
-          TableName.REVIEWS,
-        );
-      },
-    );
+            // Fetch the associated file data if needed
+            const { data: file, error } = await supabase
+              .from('files')
+              .select('*')
+              .eq('id', file_id)
+              .single();
 
-    const filesChannel = supabase.channel('file-subscription').on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'files',
-        filter: `order_id=eq.${orderId}`,
-      },
-      (payload) => {
-        handleSubscription<File>(
-          payload.new as SubscriptionPayload,
-          files,
-          setFiles,
-          TableName.FILES,
-        );
-      },
-    );
-
-    const activitiesChannel = supabase.channel('activity-subscription').on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'activities',
-        filter: `order_id=eq.${orderId}`,
-      },
-      (payload) => {
-        handleSubscription<Activity>(
-          payload.new as SubscriptionPayload,
-          activities,
-          setActivities,
-          TableName.ACTIVITIES,
-        );
-      },
-    );
-
-    const orderChannel = supabase.channel('order-subscription').on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'orders_v2',
-        filter: `id=eq.${orderId}`,
-      },
-      (payload) => {
-        setOrder(payload.new as Order.Type);
-      },
-    );
-
-    // subscribe to channels
-    messagesChannel.subscribe();
-    reviewsChannel.subscribe();
-    filesChannel.subscribe();
-    activitiesChannel.subscribe();
-    orderChannel.subscribe();
+            if (!error && file) {
+              void handleSubscription<File>(
+                file as SubscriptionPayload,
+                files,
+                setFiles,
+                TableName.FILES,
+              );
+            }
+          })();
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activities',
+          filter: `order_id=eq.${orderId}`,
+        },
+        (payload) => {
+          void handleSubscription<Activity>(
+            payload.new as SubscriptionPayload,
+            activities,
+            setActivities,
+            TableName.ACTIVITIES,
+          );
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders_v2',
+          filter: `id=eq.${orderId}`,
+        },
+        (payload) => {
+          setOrder(payload.new as Order.Type);
+        },
+      )
+      .subscribe((state) => {
+        console.log('channel', state);
+        // if the connection is lost due to innactivity or any other state
+        // a retry connection should be trigger
+        // if (state === 'TIMED_OUT' || state === 'CLOSED') {
+        //   console.log('trying to resubscribe...');
+        //   messagesChannel.subscribe();
+        // }
+      });
+    // reviewsChannel.subscribe();
+    // filesChannel.subscribe();
+    // activitiesChannel.subscribe();
+    // orderChannel.subscribe();
 
     // unsubscribe when component unmounts
     return () => {
       //eslint-disable-next-line @typescript-eslint/no-floating-promises
-      supabase.removeChannel(orderChannel);
-      //eslint-disable-next-line @typescript-eslint/no-floating-promises
-      supabase.removeChannel(messagesChannel);
-      //eslint-disable-next-line @typescript-eslint/no-floating-promises
-      supabase.removeChannel(activitiesChannel);
-      //eslint-disable-next-line @typescript-eslint/no-floating-promises
-      supabase.removeChannel(reviewsChannel);
-      //eslint-disable-next-line @typescript-eslint/no-floating-promises
-      supabase.removeChannel(filesChannel);
+      supabase.removeChannel(channel);
+
     };
   }, [
     supabase,

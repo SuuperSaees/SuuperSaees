@@ -43,7 +43,7 @@ const SelectAction = ({
         }}
       >
         <SelectTrigger
-          className={'w-[180px] border-none bg-black ' + className}
+          className={'w-full max-w-[240px] border-none bg-black ' + className}
         >
           <SelectValue placeholder="Select an option" />
         </SelectTrigger>

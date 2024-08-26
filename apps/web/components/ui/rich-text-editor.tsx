@@ -1,17 +1,20 @@
 'use client';
 
 // import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+
+
 
 import Heading from '@tiptap/extension-heading';
 import { Image as ImageInsert } from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Youtube from '@tiptap/extension-youtube';
-import { Editor, EditorContent, useEditor } from '@tiptap/react';
+import { Editor, EditorContent, Extension, ReactNodeViewRenderer, useEditor } from '@tiptap/react';
+import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import {
   Bold,
-  File,
   Heading1,
   Heading2,
   Image,
@@ -23,12 +26,185 @@ import {
   Strikethrough,
 } from 'lucide-react';
 
+
+
+import styles from './styles.module.css';
+
+
+interface GroupedImageNodeViewProps {
+  node: {
+    attrs: {
+      src: string;
+      alt?: string;
+      [key: string]: unknown;
+    };
+  };
+  editor: Editor;
+  cleanupFunction?: () => void; // Optional cleanup function
+}
+
+const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+
+    const originalImage = wrapperRef.current.querySelector('img');
+
+    // If the image is already cloned, do nothing
+    if (originalImage && originalImage.dataset.cloned === 'true') {
+      return;
+    }
+
+    // Clone the image and mark it as cloned
+    const clonedImage = originalImage?.cloneNode(true) as HTMLElement;
+    clonedImage.style.visibility = 'visible';
+    clonedImage.style.position = 'static';
+    clonedImage.removeAttribute('data-cloned');
+    clonedImage.classList.add('cloned-img');
+
+    // Assign a unique ID to the cloned image
+    const imageId = `img-${Math.random().toString(36).substring(2, 9)}`;
+    clonedImage.id = imageId;
+
+    // Create a wrapper div to hold the image and delete button
+    const imageWrapper = document.createElement('div');
+    imageWrapper.classList.add('relative', 'cloned-image-wrapper');
+
+    // Move the cloned image into the wrapper
+    imageWrapper.appendChild(clonedImage);
+
+    // Create the delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add(
+      'absolute',
+      'right-2',
+      'top-1',
+      'cursor-pointer',
+      'text-white/80',
+      'hover:text-white/100',
+    );
+
+    // Add the "X" icon inside the delete button
+    deleteButton.innerHTML = '<span>X</span>';
+
+    // Attach the delete function to the button
+    deleteButton.addEventListener('click', () => {
+      imageWrapper.remove();
+    });
+
+    // Append the delete button to the image wrapper
+    imageWrapper.appendChild(deleteButton);
+
+    // Mark the original image to prevent further cloning
+    if (originalImage) {
+      originalImage.style.visibility = 'hidden';
+      originalImage.style.position = 'absolute';
+      originalImage.dataset.cloned = 'true';
+    }
+
+    let parentDiv = document.querySelector('.image-group');
+
+    if (!parentDiv) {
+      // If no group exists, create a new one
+      parentDiv = document.createElement('div');
+      parentDiv.classList.add('image-group', `${styles['image-group']}`);
+      editor.view.dom.appendChild(parentDiv);
+    }
+
+    // Append the image wrapper (with the image and delete button) to the group
+    parentDiv.appendChild(imageWrapper);
+
+    // Clean up the DOM when the component unmounts
+    // return () => {
+    //   if (imageWrapper) {
+    //     imageWrapper.remove();
+    //   }
+    // };
+  }, [editor]);
+
+  /* eslint-disable @next/next/no-img-element */
+  return (
+    <NodeViewWrapper ref={wrapperRef} as="div" className="relative">
+      <img {...node?.attrs} className="cloned-image" />
+    </NodeViewWrapper>
+  );
+};
+
 interface RichTextEditorProps {
   onComplete: (richText: string) => void | Promise<void>;
   content?: string;
   onChange?: (richText: string) => void;
+  uploadFileIsExternal?: boolean;
+  toggleExternalUpload?: () => void;
 }
-const RichTextEditor = ({ content, onComplete }: RichTextEditorProps) => {
+const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
+function extractImageUrls(text: string) {
+  const matches = text.match(IMAGE_URL_REGEX);
+  return matches ?? []; // Return an empty array if no matches are found
+}
+
+const RichTextEditor = ({
+  content,
+  onComplete,
+  uploadFileIsExternal,
+  toggleExternalUpload,
+}: RichTextEditorProps) => {
+  const insertedImages = useRef(new Set<string>());
+  const cleanupImages = () => {
+    // Select all image wrappers
+    const imageWrappers = document.querySelectorAll('.cloned-image-wrapper');
+
+    // Remove each image wrapper (which includes the image and the delete button)
+    imageWrappers.forEach((wrapper) => wrapper.remove());
+
+    // Remove the parent div if it's empty
+    const parentDiv = document.querySelector('.image-group');
+    if (parentDiv && parentDiv.children.length === 0) {
+      parentDiv.remove();
+    }
+  };
+
+  const debounce = (func: (...args: string[]) => void, wait: number) => {
+    let timeout: NodeJS.Timeout;
+    return (...args: string[]) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  };
+
+  const debounceHandleImageUrl = useCallback((editor: Editor) => {
+    return debounce((text: string) => {
+      const imagesInText = extractImageUrls(text);
+
+      // insert image node for each ulr of image found
+      imagesInText.forEach((image) => {
+        if (!insertedImages.current.has(image)) {
+          editor.chain().focus().setImage({ src: image }).run();
+          insertedImages.current.add(image);
+        }
+      });
+    }, 500);
+  }, []);
+
+  const CustomShortcuts = Extension.create({
+    addKeyboardShortcuts() {
+      return {
+        // Send content on Enter
+        // Enter: () => {
+        //   sendContent();
+        //   return true;
+        // },
+        // Insert new paragraph on Ctrl + Enter or Cmd + Enter
+        'Mod-Enter': () => {
+          console.log('ctrl + enter');
+          this.editor.commands.splitBlock();
+          return true;
+        },
+      };
+    },
+  });
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -54,6 +230,7 @@ const RichTextEditor = ({ content, onComplete }: RichTextEditorProps) => {
           },
         },
       }),
+
       Heading.configure({
         HTMLAttributes: {
           class: 'text-xl font-bold',
@@ -62,11 +239,31 @@ const RichTextEditor = ({ content, onComplete }: RichTextEditorProps) => {
       }),
 
       Youtube.configure({
-        controls: false,
+        controls: true,
         nocookie: true,
+        height: 320,
+        HTMLAttributes: {
+          class: 'aspect-video w-auto rounded-md',
+        },
+      }),
+      // ImageWrapperNode,
+      ImageInsert.configure({
+        inline: true,
+        HTMLAttributes: {
+          class: 'rounded-md max-h-[400px] h-full w-auto object-cover ',
+        },
+      }).extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(GroupedImageNodeView);
+        },
       }),
 
-      ImageInsert.configure(),
+      Link.configure({
+        autolink: true,
+        HTMLAttributes: {
+          class: 'text-primary underline',
+        },
+      }),
 
       Placeholder.configure({
         // Use a placeholder:
@@ -81,8 +278,9 @@ const RichTextEditor = ({ content, onComplete }: RichTextEditorProps) => {
         //   return 'Can you add some further context?'
         // },
       }),
+      CustomShortcuts,
     ],
-    content,
+    content: content ?? '<p></p>',
     editorProps: {
       attributes: {
         class:
@@ -98,22 +296,40 @@ const RichTextEditor = ({ content, onComplete }: RichTextEditorProps) => {
         return false;
       },
     },
+    onUpdate({ editor }) {
+      const text = editor.getText();
+      const imagesInText = extractImageUrls(text);
+      imagesInText && debounceHandleImageUrl(editor)(text);
+    },
   });
 
   const sendContent = useCallback(() => {
     void (async () => {
-      const content = editor ? editor.getHTML() : '';
-      editor?.commands.clearContent();
-      await onComplete(content);
+      try {
+        cleanupImages();
+        const content = editor ? editor.getHTML() : '';
+        editor?.commands.clearContent();
+        await onComplete(content);
+        insertedImages.current = new Set<string>();
+      } finally {
+        // cleanupImages();
+      }
     })();
   }, [editor, onComplete]);
 
   // Implement sanitizer to ensure the content to be nested is secure before sending to server
 
   return (
-    <div className="relative flex flex-col gap-4 rounded border border-input p-4">
-      <EditorContent editor={editor} />
-      <Toolbar editor={editor} />
+    <div className="relative flex h-fit flex-col gap-4 rounded border border-input p-4">
+      <EditorContent
+        editor={editor}
+        className={styles['image-input-text-editor'] + 'h-fit w-full'}
+      />
+      <Toolbar
+        editor={editor}
+        toggleExternalUpload={toggleExternalUpload}
+        uploadFileIsExternal={uploadFileIsExternal}
+      />
       <button
         className="bg-purple absolute bottom-2 right-2 h-fit w-fit rounded-md bg-black p-2 shadow-sm"
         onClick={sendContent}
@@ -126,9 +342,15 @@ const RichTextEditor = ({ content, onComplete }: RichTextEditorProps) => {
 
 interface ToolbarProps {
   editor: Editor | null;
+  uploadFileIsExternal?: boolean;
+  toggleExternalUpload?: () => void;
 }
 
-export const Toolbar = ({ editor }: ToolbarProps) => {
+export const Toolbar = ({
+  editor,
+  uploadFileIsExternal,
+  toggleExternalUpload,
+}: ToolbarProps) => {
   if (!editor) {
     return null;
   }
@@ -206,18 +428,13 @@ export const Toolbar = ({ editor }: ToolbarProps) => {
       >
         <Quote className="h-4 w-4" />
       </button>
+
       <button
-        onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        className={
-          editor.isActive('horizontalRule') ? 'text-gray-700' : 'text-gray-400'
+        onClick={
+          uploadFileIsExternal && toggleExternalUpload
+            ? () => toggleExternalUpload()
+            : undefined
         }
-      >
-        <File className="h-4 w-4" />
-      </button>
-      <button
-        onClick={() => {
-          editor.chain().focus().setImage({ src: editor.getText() }).run();
-        }}
         className={editor.isActive('image') ? 'text-gray-700' : 'text-gray-400'}
       >
         <Image className="h-4 w-4" />

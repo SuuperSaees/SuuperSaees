@@ -7,7 +7,7 @@ export const statusColors = {
 };
 
 export const priorityColors = {
-  low: 'bg-yellow-100 text-yellow-700',
-  medium: 'bg-warning-100 text-warning-700',
+  low: 'bg-success-100 text-success-700',
+  medium: 'bg-yellow-100 text-yellow-700',
   high: 'bg-error-100 text-error-700',
 };

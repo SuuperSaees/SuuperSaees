@@ -6,7 +6,7 @@ export default function OrderDetailsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 p-8">
+    <div className="mx-auto max-h-lvh h-full flex w-full max-w-screen-2xl flex-col gap-4 p-8">
       <PageHeader i18nKey={'orders:details.title'} />
       {children}
     </div>
