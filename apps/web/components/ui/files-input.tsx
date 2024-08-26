@@ -1,29 +1,24 @@
 "use client";
 
-import React, { useState } from 'react';
-
-
+import React, { useEffect, useRef, useState } from 'react';
 
 import { CloudUpload, StickyNote } from 'lucide-react';
 
-
-
-import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-
-
-
-import { createFile } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
+// import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+import {
+  createFile,
+  createUploadBucketURL,
+} from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { File } from '../../../web/lib/file.types';
 
-
 const fileTypeColors: Record<string, string> = {
-  'pdf': 'fill-pdf',
-  'png': 'fill-png',
-  'jpg': 'fill-jpg',
-  'jpeg': 'fill-jpeg',
-  'doc': 'fill-doc',
-  'docx': 'fill-docx',
+  pdf: 'fill-pdf',
+  png: 'fill-png',
+  jpg: 'fill-jpg',
+  jpeg: 'fill-jpeg',
+  doc: 'fill-doc',
+  docx: 'fill-docx',
 };
 
 interface UploadFileComponentProps {
@@ -37,7 +32,7 @@ export default function UploadFileComponent({
   uuid,
   onFileIdsChange,
 }: UploadFileComponentProps) {
-  const supabase = useSupabase();
+  // const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
@@ -67,7 +62,7 @@ export default function UploadFileComponent({
 
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
     setError(null);
-
+    console.log('WARN', selectedFiles);
     for (const file of selectedFiles) {
       await uploadFile(file);
     }
@@ -131,6 +126,14 @@ export default function UploadFileComponent({
         ...prev,
         [file.name]: 100,
       }));
+      // Automatically remove the file from the list when the upload is complete
+      setTimeout(() => {
+        setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
+        setUploadProgress((prev) => {
+          const { [file.name]: _, ...rest } = prev;
+          return rest;
+        });
+      }, 1000); // Delay to let the user see the 100% state
     });
 
     xhr.onreadystatechange = () => {
@@ -141,15 +144,13 @@ export default function UploadFileComponent({
       }
     };
 
-    const { data, error } = await supabase.storage
-      .from(bucketName)
-      .createSignedUploadUrl(filePath);
-
-    if (error) {
-      setError(`Error al obtener la URL de carga: ${error.message}`);
-      return;
-    }
-
+    const data = await createUploadBucketURL(bucketName, filePath).catch(
+      (error) => {
+        setError(`Error al obtener la URL de carga: ${error.message}`);
+        throw error;
+      },
+    );
+    console.log('sigened', data.signedUrl);
     xhr.open('PUT', data.signedUrl, true);
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.send(file);
@@ -162,18 +163,19 @@ export default function UploadFileComponent({
     const newFileData = {
       name: file.name,
       size: file.size,
-      type: file.type as File.Type['type'],
+      type: file.type,
       url: fileUrl,
+      // message_id: 'a1499927-5483-4b70-934c-7316e7b36d96',
     };
 
     const createdFiles = await createFile([newFileData]);
 
-    const orderFilesToInsert = createdFiles.map((createdFile) => ({
-      order_id: uuid,
-      file_id: createdFile.id,
-    }));
+    // const orderFilesToInsert = createdFiles.map((createdFile) => ({
+    //   order_id: uuid,
+    //   file_id: createdFile.id,
+    // }));
 
-    console.log('orderFilesToInsert', orderFilesToInsert);
+    // console.log('orderFilesToInsert', orderFilesToInsert);
 
     // const { error: orderFilesError } = await supabase
     //   .from('order_files')
@@ -202,10 +204,20 @@ export default function UploadFileComponent({
     return `${(size / (1024 * 1024)).toFixed(2)} MB`;
   };
 
+  // Reference to the container for auto-scroll
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Scroll to the bottom when files change
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [files]);
+
   return (
     <div className="flex flex-col gap-2">
       <div
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 ${isDragging ? 'bg-gray-300' : 'bg-gray-100'}`}
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 ${isDragging ? 'bg-gray-300' : 'bg-gray-100'} `}
         onClick={handleFileInputClick}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -223,41 +235,42 @@ export default function UploadFileComponent({
           multiple
         />
       </div>
-
-      {files.map((file, index) => (
-        <div
-          key={index}
-          className="flex items-start gap-1.5 self-stretch rounded-xl border border-gray-200 bg-white p-4"
-        >
-          <div className="relative flex items-center justify-center">
-            <StickyNote
-              className={`text-white ${getFileTypeClass(file.name)} h-[56px] w-[40px]`}
-            />
-            <span className="absolute inset-0 flex items-end justify-center py-4 text-[9px] font-semibold text-white">
-              {file.name.split('.').pop()?.toUpperCase()}
-            </span>
-          </div>
-          <div className="flex flex-1 flex-col">
-            <span className="font-inter text-sm font-medium leading-5 text-gray-700">
-              {file.name}
-            </span>
-            <span className="font-inter truncate text-sm font-normal leading-5 text-gray-600">
-              {formatFileSize(file.size)}
-            </span>
-            <div className="mt-2 flex items-center gap-2">
-              <div className="flex-1">
-                <Progress
-                  value={uploadProgress[file.name] ?? 0}
-                  className="w-full"
-                />
-              </div>
-              <span className="font-inter text-sm font-normal leading-5 text-gray-600">
-                {Math.round(uploadProgress[file.name] ?? 0)}%
+      <div className="no-scrollbar max-h-52 overflow-y-auto" ref={containerRef}>
+        {files.map((file, index) => (
+          <div
+            key={index}
+            className="flex items-start gap-1.5 self-stretch rounded-xl border border-gray-200 bg-white p-4"
+          >
+            <div className="relative flex items-center justify-center">
+              <StickyNote
+                className={`text-white ${getFileTypeClass(file.name)} h-[56px] w-[40px]`}
+              />
+              <span className="absolute inset-0 flex items-end justify-center py-4 text-[9px] font-semibold text-white">
+                {file.name.split('.').pop()?.toUpperCase()}
               </span>
             </div>
+            <div className="flex flex-1 flex-col">
+              <span className="font-inter text-sm font-medium leading-5 text-gray-700">
+                {file.name}
+              </span>
+              <span className="font-inter truncate text-sm font-normal leading-5 text-gray-600">
+                {formatFileSize(file.size)}
+              </span>
+              <div className="mt-2 flex items-center gap-2">
+                <div className="flex-1">
+                  <Progress
+                    value={uploadProgress[file.name] ?? 0}
+                    className="w-full"
+                  />
+                </div>
+                <span className="font-inter text-sm font-normal leading-5 text-gray-600">
+                  {Math.round(uploadProgress[file.name] ?? 0)}%
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {error && <p className="text-red-500">{error}</p>}
     </div>

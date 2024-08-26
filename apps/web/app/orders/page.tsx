@@ -62,7 +62,7 @@ async function UserHomePage() {
       .select(
         '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
       )
-      .eq('propietary_organization_id', userId);
+      .eq('propietary_organization_id', userId); // error here
 
     ordersData = orderData ?? [];
 
@@ -75,6 +75,8 @@ async function UserHomePage() {
       customer_organization: order.organization.name ?? '',
       customer_name: order.customer.name ?? '',
     })) ?? [];
+
+  console.log('processedOrders', processedOrders);
 
   return (
     <>

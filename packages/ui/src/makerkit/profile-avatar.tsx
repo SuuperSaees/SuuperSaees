@@ -5,6 +5,7 @@ type SessionProps = {
   displayName: string | null;
   pictureUrl?: string | null;
   className?: string;
+  showFallbackInitials?: boolean;
 };
 
 type TextProps = {

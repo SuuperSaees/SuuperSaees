@@ -2,17 +2,19 @@
 
 import AvatarDisplayer from './avatar-displayer';
 
-type Avatar = {
+
+export type Avatar = {
   name: string;
   email: string;
-  picture_url: string;
-  status: 'online' | 'offline';
+  picture_url?: string | null;
+  status?: 'online' | 'offline';
 };
 
 interface MultiAvatarDisplayerProps {
   avatars: Avatar[];
   maxAvatars?: number;
   className?: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -26,21 +28,22 @@ const MultiAvatarDisplayer = ({
   avatars,
   maxAvatars = 5,
   className,
+  ...rest
 }: MultiAvatarDisplayerProps) => {
   return (
     <div className={`relative flex items-center ${className} w-fit`}>
       {avatars.slice(0, maxAvatars).map((avatar, index) => (
         <AvatarDisplayer
-          pictureUrl={avatar.picture_url}
-          displayName={null}
-          key={index + avatar.name}
-          status={avatar.status}
+          pictureUrl={avatar?.picture_url}
+          key={index + avatar?.name}
+          status={avatar?.status}
           className={'h-8 w-8 border-2 border-white'}
           style={{
             position: 'relative',
             left: index === 0 ? 0 : `-${index * 33.33}%`,
             zIndex: maxAvatars - index,
           }}
+          {...rest}
         />
       ))}
       {avatars.length > maxAvatars && (

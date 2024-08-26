@@ -1,0 +1,20 @@
+/* YourComponent.module.css */
+.image-input-text-editor img,
+.image-group img {
+  width: 80 !important;
+  height: 80 !important;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.image-input-text-editor iframe[height] {
+    height: 200px !important;
+  }
+
+.image-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+  
+
+
