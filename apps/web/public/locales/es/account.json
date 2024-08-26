@@ -140,5 +140,7 @@
   "needsReauthentication": "Se requiere reautenticación",
   "needsReauthenticationDescription": "Necesitas reautenticarte para cambiar tu contraseña. Por favor, cierra sesión e inicia sesión de nuevo para cambiar tu contraseña.",
   "language": "Idioma",
-  "languageDescription": "Elige tu idioma preferido"
+  "languageDescription": "Elige tu idioma preferido",
+  "connectToStripe": "Conectar con Stripe",
+  "connectToStripeDescription": "Conecta tu cuenta con Stripe para habilitar la facturación y los pagos"
 }

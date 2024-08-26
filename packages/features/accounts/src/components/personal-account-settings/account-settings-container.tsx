@@ -21,6 +21,8 @@ import { UpdateEmailFormContainer } from './email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
+import { Button } from '@kit/ui/button';
+import Link from 'next/link';
 
 export function PersonalAccountSettingsContainer(
   props: React.PropsWithChildren<{
@@ -93,6 +95,22 @@ export function PersonalAccountSettingsContainer(
           </CardContent>
         </Card>
       </If>
+
+      <Card>
+          <CardHeader>
+            <CardTitle>
+              <Trans i18nKey={'account:connectToStripe'} />
+            </CardTitle>
+            <CardDescription>
+              <Trans i18nKey={'account:connectToStripeDescription'} key={'s'}/>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button><Link href={'/stripe'}>Conectar</Link></Button>
+          </CardContent>
+        </Card>
+
+
     </div>
   
     <div className="flex flex-col space-y-6 w-[26%]">
