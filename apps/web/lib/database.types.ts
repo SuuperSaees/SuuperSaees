@@ -1047,6 +1047,7 @@ export type Database = {
       }
       orders_v2: {
         Row: {
+          agency_id: string
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -1056,10 +1057,12 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: Database["public"]["Enums"]["order_status_types"] | null
+          stripe_account_id: string | null
           title: string
           uuid: string
         }
         Insert: {
+          agency_id: string
           client_organization_id: string
           created_at?: string
           customer_id: string
@@ -1069,10 +1072,12 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status?: Database["public"]["Enums"]["order_status_types"] | null
+          stripe_account_id?: string | null
           title: string
           uuid: string
         }
         Update: {
+          agency_id?: string
           client_organization_id?: string
           created_at?: string
           customer_id?: string
@@ -1082,6 +1087,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
           status?: Database["public"]["Enums"]["order_status_types"] | null
+          stripe_account_id?: string | null
           title?: string
           uuid?: string
         }

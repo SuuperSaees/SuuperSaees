@@ -2,12 +2,15 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Activity } from '../../../../../../../../apps/web/lib/activity.types';
 import { File } from '../../../../../../../../apps/web/lib/file.types';
 import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Review } from '../../../../../../../../apps/web/lib/review.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
+
 
 type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url'>;
 
@@ -113,3 +116,74 @@ export async function getOrderAgencyMembers(
     throw error;
   }
 }
+
+export const getOrders = async () => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: userData } = await client.auth.getUser();
+
+    const userId = userData.user!.id;
+
+    // Getting the role
+    const { data: role, error: roleError } = await client
+      .from('accounts_memberships')
+      .select('account_role')
+      .eq('user_id', userId)
+      .single();
+
+    if (roleError) console.error(roleError.message);
+    let ordersData = [];
+
+    const isClient =
+      (role && role.account_role === 'client_owner') ||
+      (role && role.account_role === 'client_member');
+
+    if (isClient) {
+      const { data: orderData, error: clientError } = await client
+        .from('orders_v2')
+        .select(
+          '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
+        )
+        // necessary to specify which relation to use, so tell exact the name of the foreign key
+        .eq('customer_id', userId);
+
+      ordersData = orderData ?? [];
+
+      if (clientError) {
+        console.error(clientError.message);
+        throw clientError.message;
+      }
+    } else {
+      const { data: agencyUserAccount, error: accountError } = await client
+        .from('accounts')
+        .select('organization_id')
+        .eq('id', userId)
+        .single();
+
+      if (accountError) {
+        console.error(accountError.message);
+        throw accountError.message;
+      }
+
+      const { data: orderData, error: ownerError } = await client
+        .from('orders_v2')
+        .select(
+          `*, organization:accounts!client_organization_id(slug, name), 
+        customer:accounts!customer_id(name)`,
+        )
+        .eq('agency_id', agencyUserAccount?.organization_id ?? ''); // error here
+
+      ordersData = orderData ?? [];
+
+      if (ownerError) {
+        console.error('Error in the agency owner');
+        throw ownerError.message;
+      }
+    }
+
+    return ordersData;
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    throw error;
+  }
+};
