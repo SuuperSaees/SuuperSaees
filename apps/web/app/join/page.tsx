@@ -77,27 +77,27 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
   // we need to verify the user isn't already in the account
   // we do so by checking if the user can read the account
   // if the user can read the account, then they are already in the account
-  const account = await api
-    .getTeamAccountById(invitation.account.id)
-    .catch(() => undefined);
+  // const account = await api
+  //   .getTeamAccountById(invitation.account.id)
+  //   .catch(() => undefined);
 
   // if the user is already in the account redirect to the home page
-  if (account) {
-    const { getLogger } = await import('@kit/shared/logger');
-    const logger = await getLogger();
+  // if (account) {
+  //   const { getLogger } = await import('@kit/shared/logger');
+  //   const logger = await getLogger();
 
-    logger.warn(
-      {
-        name: 'join-team-account',
-        accountId: invitation.account.id,
-        userId: auth.data.id,
-      },
-      'User is already in the account. Redirecting to account page.',
-    );
+  //   logger.warn(
+  //     {
+  //       name: 'join-team-account',
+  //       accountId: invitation.account.id,
+  //       userId: auth.data.id,
+  //     },
+  //     'User is already in the account. Redirecting to account page.',
+  //   );
 
-    // if the user is already in the account redirect to the home page
-    redirect(pathsConfig.app.home);
-  }
+  //   // if the user is already in the account redirect to the home page
+  //   redirect(pathsConfig.app.home);
+  // }
 
   // if the user decides to sign in with a different account
   // we redirect them to the sign in page with the invite token
