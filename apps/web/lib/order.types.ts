@@ -1,20 +1,17 @@
-import { User } from '@supabase/supabase-js';
-
-
-
 import { Activity } from './activity.types';
 import { Database } from './database.types';
 import { File } from './file.types';
 import { Message } from './message.types';
 import { Review } from './review.types';
-
+import { User } from './user.types';
 
 export namespace Order {
   export type Type = Database['public']['Tables']['orders_v2']['Row'] & {
     client?: Database['public']['Tables']['clients']['Update'] | null;
-    user?: User;
+    user?: User.Type;
     messages?: Message.Type[];
     files?: File.Type[];
+    assigned_to?: { agency_member: User.Type }[];
   };
   export type Insert = Database['public']['Tables']['orders_v2']['Insert'];
   export type Update = Database['public']['Tables']['orders_v2']['Update'];

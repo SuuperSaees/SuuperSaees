@@ -53,13 +53,13 @@ export function TeamAccountNavigationMenu(props: {
           userId={user.id}
           selectedAccount={account.slug}
           accounts={accounts.map((account) => ({
-            label: account.name,
-            value: account.slug,
-            image: account.picture_url,
+            label: account?.name,
+            value: account?.slug,
+            image: account?.picture_url,
           }))}
         />
 
-        <TeamAccountNotifications accountId={account.id} userId={user.id} />
+        <TeamAccountNotifications accountId={account?.id} userId={user?.id} />
 
         <ProfileAccountDropdownContainer
           collapsed={true}

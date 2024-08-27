@@ -77,7 +77,7 @@ export function ReviewDialog({ orderId }: { orderId: number }) {
           <DialogTrigger asChild>
             <Button
               variant="outline"
-              className="ml-auto w-fit bg-primary text-white hover:bg-primary/90 hover:text-white"
+              className="w-fit bg-primary text-white hover:bg-primary/90 hover:text-white"
             >
               {t('details.dialog.button')}
             </Button>

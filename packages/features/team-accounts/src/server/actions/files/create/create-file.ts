@@ -2,8 +2,6 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
 import { File } from '../../../../../../../../apps/web/lib/file.types';
 
 type CreateFileProps = Omit<File.Insert, 'user_id'>;
@@ -26,6 +24,24 @@ export const createFile = async (files: CreateFileProps[]) => {
     return fileData;
   } catch (error) {
     console.error(error);
+    throw error;
+  }
+};
+
+export const createUploadBucketURL = async (
+  bucketName: string,
+  filePath: string,
+) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    const { data: urlData, error: urlError } = await client.storage
+      .from(bucketName)
+      .createSignedUploadUrl(filePath);
+    if (urlError) throw urlError.message;
+    return urlData;
+  } catch (error) {
+    console.error('Error creating signed upload URL:', error);
     throw error;
   }
 };

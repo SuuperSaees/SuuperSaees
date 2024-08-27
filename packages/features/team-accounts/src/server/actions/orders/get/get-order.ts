@@ -20,6 +20,9 @@ type OrderWithAllRelations = Order.Relationships.All & {
   activities: (Activity.Type & { user: User })[];
   reviews: (Review.Type & { user: User })[];
   client: User;
+  assigned_to: {
+    agency_member: User;
+  }[];
 };
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
@@ -34,7 +37,8 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
         messages(*, user:accounts(id, name, email, picture_url), files(*)), 
         activities(*, user:accounts(id, name, email, picture_url)),
           reviews(*, user:accounts(id, name, email, picture_url)), 
-          files(*, user:accounts(id, name, email, picture_url))
+          files(*, user:accounts(id, name, email, picture_url)),
+         assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))
         `,
       )
       .eq('id', orderId)
@@ -52,11 +56,134 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       }),
     };
 
-    console.log('a', orderData.messages[0]?.user, proccesedData);
+    console.log('a', proccesedData);
 
     return proccesedData as OrderWithAllRelations;
   } catch (error) {
     console.error('Error fetching order:', error);
+    throw error;
+  }
+};
+
+export async function getOrderAgencyMembers(
+  agencyId: ServerUser.Type['organization_id'],
+  orderId: Order.Type['id'],
+) {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { error: userAuthenticatedError, data: userAuthenticatedData } =
+      await client.auth.getUser();
+
+    if (userAuthenticatedError) throw userAuthenticatedError;
+    const userId = userAuthenticatedData?.user?.id;
+
+    // Retrieve authenticated account information
+    const { data: accountData, error: accountError } = await client
+      .from('accounts')
+      .select()
+      .eq('id', userId)
+      .single();
+
+    if (accountError) throw accountError;
+
+    // Retrieve the order
+    const { data: orderData, error: orderError } = await client
+      .from('orders_v2')
+      .select()
+      .eq('id', orderId)
+      .single();
+
+    if (orderError) throw orderError;
+
+    // Verify that the order organization_id matches the authenticated account's organization_id
+    if (
+      orderData.propietary_organization_id !==
+      (accountData.organization_id ?? accountData.primary_owner_user_id)
+    ) {
+      throw new Error('Unauthorized access to order agency members');
+    }
+    // console.log('aid', accountData.id);
+    const { data: agencyMembersData, error: agencyMembersError } = await client
+      .from('accounts')
+      .select()
+      .eq('organization_id', agencyId ?? accountData.primary_owner_user_id);
+
+    if (agencyMembersError) throw agencyMembersError;
+
+    return agencyMembersData;
+  } catch (error) {
+    console.error('Error fetching order agency members:', error);
+    throw error;
+  }
+}
+
+export const getOrders = async () => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: userData } = await client.auth.getUser();
+
+    const userId = userData.user!.id;
+
+    // Getting the role
+    const { data: role, error: roleError } = await client
+      .from('accounts_memberships')
+      .select('account_role')
+      .eq('user_id', userId)
+      .single();
+
+    if (roleError) console.error(roleError.message);
+    let ordersData = [];
+
+    const isClient =
+      (role && role.account_role === 'client_owner') ||
+      (role && role.account_role === 'client_member');
+
+    if (isClient) {
+      const { data: orderData, error: clientError } = await client
+        .from('orders_v2')
+        .select(
+          '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
+        )
+        // necessary to specify which relation to use, so tell exact the name of the foreign key
+        .eq('customer_id', userId);
+
+      ordersData = orderData ?? [];
+
+      if (clientError) {
+        console.error(clientError.message);
+        throw clientError.message;
+      }
+    } else {
+      const { data: agencyUserAccount, error: accountError } = await client
+        .from('accounts')
+        .select('organization_id')
+        .eq('id', userId)
+        .single();
+
+      if (accountError) {
+        console.error(accountError.message);
+        throw accountError.message;
+      }
+
+      const { data: orderData, error: ownerError } = await client
+        .from('orders_v2')
+        .select(
+          `*, organization:accounts!client_organization_id(slug, name), 
+        customer:accounts!customer_id(name)`,
+        )
+        .eq('agency_id', agencyUserAccount?.organization_id ?? ''); // error here
+
+      ordersData = orderData ?? [];
+
+      if (ownerError) {
+        console.error('Error in the agency owner');
+        throw ownerError.message;
+      }
+    }
+
+    return ordersData;
+  } catch (error) {
+    console.error('Error fetching orders:', error);
     throw error;
   }
 };

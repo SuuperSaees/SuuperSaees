@@ -1,18 +1,17 @@
 'use client';
 
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useState,
-} from 'react';
+import { ReactNode, createContext, useCallback, useContext, useState } from 'react';
+
+
 
 import { getUserById } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { addOrderMessage } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { toast } from 'sonner';
 
+
+
 import { Activity as ServerActivity } from '~/lib/activity.types';
+import { Database } from '~/lib/database.types';
 import { File as ServerFile } from '~/lib/file.types';
 import { Message as ServerMessage } from '~/lib/message.types';
 import { Order } from '~/lib/order.types';
@@ -69,6 +68,8 @@ export type Review = ServerReview.Type & {
   user: User;
 };
 
+export type ServerOrderFile =
+  Database['public']['Tables']['order_files']['Row'];
 export type SubscriptionPayload =
   | ServerReview.Type
   | ServerMessage.Type
@@ -83,7 +84,7 @@ interface ActivityContextType {
   reviews: Review[];
   files: File[];
   order: Order.Type;
-  writeMessage: (message: string) => Promise<void>;
+  writeMessage: (message: string) => Promise<ServerMessage.Type>;
 }
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -123,36 +124,38 @@ export const ActivityProvider = ({
         content: message,
         order_id: Number(order.id),
       };
-      await addOrderMessage(Number(order.id), messageToSend);
+      const newMessage = await addOrderMessage(Number(order.id), messageToSend);
       toast.success('Success', {
         description: 'The message has been sent.',
       });
+      return newMessage;
     } catch (error) {
       toast.error('Error', {
         description: 'The message could not be sent.',
       });
+      throw error;
     }
   };
 
-  // handling realtime subscriptions
   const reconcileData = useCallback(
-    (
+    async (
       pureDataSource: SubscriptionPayload,
       dataTarget: ActivityData[],
       tableName: TableName,
     ) => {
       let newDataUser = dataTarget.find(
-        (data) => data.user.id === pureDataSource.user_id,
+        (data) => data?.user?.id === pureDataSource?.user_id,
       )?.user as User;
 
       if (!newDataUser) {
-        getUserById(pureDataSource.user_id)
-          .then((user) => {
-            newDataUser = user as User;
-          })
-          .catch((err) => {
-            console.log(err);
-          });
+        try {
+          console.log('Fetching user...');
+          newDataUser = await getUserById(pureDataSource.user_id);
+          console.log('User fetched:', newDataUser);
+        } catch (err) {
+          console.log('Error fetching user:', err);
+          throw err; // Rethrow the error if you want the caller to handle it
+        }
       }
 
       let nestedFiles = undefined;
@@ -174,21 +177,32 @@ export const ActivityProvider = ({
         user: newDataUser,
         files: nestedFiles,
       };
-
+      console.log('Reconciled Data:', reconciledData);
       return reconciledData;
     },
     [files], // Dependency array to ensure that `files` is up-to-date
   );
 
   const handleSubscription = useCallback(
-    <T extends ActivityData>(
+    async <T extends ActivityData>(
       payload: SubscriptionPayload,
       currentDataStore: T[],
       stateSetter: React.Dispatch<React.SetStateAction<T[]>>,
       tableName: TableName,
     ) => {
-      const newData = reconcileData(payload, currentDataStore, tableName) as T;
-      stateSetter((prev) => [...prev, newData]);
+      try {
+        // Await the async reconcileData function
+        const newData = (await reconcileData(
+          payload,
+          currentDataStore,
+          tableName,
+        )) as T;
+
+        // Update state with the new data
+        stateSetter((prev) => [...prev, newData]);
+      } catch (error) {
+        console.error('Error handling subscription:', error);
+      }
     },
     [reconcileData], // Dependency array ensures `handleSubscription` only updates when `reconcileData` changes
   );
@@ -207,13 +221,15 @@ export const ActivityProvider = ({
     setFiles,
   );
 
+  console.log('messages', messages);
+  console.log('files', files);
   return (
     <ActivityContext.Provider
       value={{
         activities: activities,
         messages: messages,
         reviews: reviews,
-        files: serverFiles.filter((svFile) => !svFile.message_id),
+        files: files.filter((svFile) => !svFile.message_id),
         order,
         writeMessage,
       }}

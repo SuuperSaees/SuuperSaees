@@ -9,8 +9,6 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
-import { getPrimaryOwnerId } from '../../members/get/get-member-account';
-
 
 type OrderInsert = Omit<Order.Insert, 'customer_id'> & {
   fileIds?: string[];
@@ -23,7 +21,6 @@ export const createOrders = async (orders: OrderInsert[]) => {
     if (userError) throw userError.message;
     const userId = userData.user.id;
 
-
     // console.log('userId', userId);
     const { data: clientData, error: clientError } = await client
       .from('clients')
@@ -35,9 +32,15 @@ export const createOrders = async (orders: OrderInsert[]) => {
       throw clientError.message;
     }
     const agency_client_id = clientData.agency_id;
-    const primary_owner_user_id = agency_client_id;
+    // const primary_owner_user_id = agency_client_id;
 
-    if (!primary_owner_user_id) throw new Error('No primary owner found');
+    const { data: agencyOrganizationData, error: agencyOrganizationError } =
+      await client
+        .from('accounts')
+        .select('id, primary_owner_user_id')
+        .eq('id', agency_client_id)
+        .single();
+    if (agencyOrganizationError) throw agencyOrganizationError.message;
 
     // const ordersToInsert = orders.map((order) => ({
     //   ...order,
@@ -49,7 +52,9 @@ export const createOrders = async (orders: OrderInsert[]) => {
         ...orderWithoutFileIds,
         customer_id: userId,
         client_organization_id: clientData.organization_client_id,
-        propietary_organization_id: primary_owner_user_id,
+        propietary_organization_id:
+          agencyOrganizationData.primary_owner_user_id,
+        agency_id: agencyOrganizationData.id,
       }),
     );
 

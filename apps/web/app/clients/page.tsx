@@ -1,5 +1,4 @@
 import { BellIcon } from 'lucide-react';
-import { getPrimaryOwnerId } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { ClientsTable } from '@kit/team-accounts/components';
@@ -21,19 +20,18 @@ async function ClientsMembersPage() {
   const client = getSupabaseServerComponentClient();
   const { data: userData } = await client.auth.getUser();
 
-  const { data: accountsData } = await client.from('accounts').select();
-  // console.log('all', accountsData);
-  const filteredAccounts = accountsData?.filter(
-    (account) => account.id !== userData.user!.id,
-  );
-  const accountIds = filteredAccounts?.map((account) => account.id) ?? [];
-  const accountNames = filteredAccounts?.map((account) => account.name) ?? [];
-  const agencyId = await getPrimaryOwnerId();
+  const { data: userAccountData, error: userAccountError } = await client
+    .from('accounts')
+    .select('organization_id')
+    .eq('id', userData.user!.id)
+    .single();
+
+  if (userAccountError) console.error(userAccountError.message);
 
   const { data: agencyClients } = await client
     .from('clients')
     .select()
-    .eq('agency_id', agencyId ?? '');
+    .eq('agency_id', userAccountData?.organization_id ?? '');
 
   const clientOrganizationIds =
     agencyClients?.map((client) => client.organization_client_id) ?? [];
@@ -55,7 +53,7 @@ async function ClientsMembersPage() {
 
   const clientsWithOrganizations = clientOwners?.map((clientOwner) => {
     const organization = clientOrganizations?.find(
-      (org) => org.primary_owner_user_id === clientOwner.organization_id,
+      (org) => org.id === clientOwner.organization_id,
     );
     const organizationName = organization?.name ?? '';
     return { ...clientOwner, client_organization: organizationName };
@@ -63,7 +61,7 @@ async function ClientsMembersPage() {
 
   if (error) console.error(error.message);
 
-  console.log('clientIds', clientOrganizations);
+  // console.log('clientIds', clientsWithOrganizations);
 
   return (
     <PageBody>
@@ -91,9 +89,9 @@ async function ClientsMembersPage() {
         </div>
         {clientOwners ? (
           <ClientsTable
-            clients={clientsWithOrganizations}
-            accountIds={accountIds}
-            accountNames={accountNames}
+            clients={clientsWithOrganizations ?? []}
+            // accountIds={accountIds}
+            // accountNames={accountNames}
           />
         ) : (
           <p>No clients available</p>

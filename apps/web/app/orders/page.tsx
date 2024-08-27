@@ -1,20 +1,13 @@
 import { BellIcon } from '@radix-ui/react-icons';
+import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 
-
-
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { Button } from '@kit/ui/button';
 import { PageBody } from '@kit/ui/page';
-
-
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
-
-
 import { OrderList } from './components/orders-list';
-
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -28,53 +21,15 @@ export const generateMetadata = async () => {
 // };
 
 async function UserHomePage() {
-  const client = getSupabaseServerComponentClient();
-  const { data: userData } = await client.auth.getUser();
-
-  const userId = userData.user!.id;
-
-  // Getting the role
-  const { data: role, error: roleError } = await client
-    .from('accounts_memberships')
-    .select('account_role')
-    .eq('user_id', userId)
-    .single();
-
-  if (roleError) console.error(roleError.message);
-  let ordersData = [];
-  const isClient =
-    (role && role.account_role === 'client_owner') ||
-    (role && role.account_role === 'client_member');
-  if (isClient) {
-    const { data: orderData, error: clientError } = await client
-      .from('orders_v2')
-      .select(
-        '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
-      )
-      // necessary to specify which relation to use, so tell exact the name of the foreign key
-      .eq('customer_id', userId);
-
-    ordersData = orderData ?? [];
-    if (clientError) console.error(clientError.message);
-  } else {
-    const { data: orderData, error: ownerError } = await client
-      .from('orders_v2')
-      .select(
-        '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
-      )
-      .eq('propietary_organization_id', userId);
-
-    ordersData = orderData ?? [];
-
-    if (ownerError) console.error(ownerError.message);
-  }
-
+  const ordersData = await getOrders();
   const processedOrders =
     ordersData.map((order) => ({
       ...order,
       customer_organization: order.organization.name ?? '',
       customer_name: order.customer.name ?? '',
     })) ?? [];
+
+  // console.log('processedOrders', processedOrders);
 
   return (
     <>

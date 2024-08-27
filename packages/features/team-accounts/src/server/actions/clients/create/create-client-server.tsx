@@ -18,6 +18,16 @@ type CreateClient = {
   client: User.Insert;
   role: string;
 };
+
+function generateRandomPassword(length: number) {
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from(
+    { length },
+    () => chars[Math.floor(Math.random() * chars.length)],
+  ).join('');
+}
+
 export const createClient = async (clientData: CreateClient) => {
   try {
     const supabase = getSupabaseServerComponentClient();
@@ -26,21 +36,21 @@ export const createClient = async (clientData: CreateClient) => {
     if (!primary_owner_user_id)
       throw new Error('No primary owner user id found');
     // pre-authentication of the user
+    const password = generateRandomPassword(12);
     const { data: clientOrganizationUser, error: clientOrganizationUserError } =
       await supabase.auth.signUp({
         email: clientData.client.email ?? '',
-        password: 'anyDDA',
+        password,
         options: {
-          emailRedirectTo: `${baseUrl}set-password` 
-        }
+          emailRedirectTo: `${baseUrl}set-password`,
+        },
       });
 
-      
     if (clientOrganizationUserError) {
       throw new Error(clientOrganizationUserError.message);
     }
 
-    const {data: clientOrganizationExists } = await supabase
+    const { data: clientOrganizationExists } = await supabase
       .from('accounts')
       .select()
       .eq('name', clientData.client.slug ?? '')
@@ -64,8 +74,7 @@ export const createClient = async (clientData: CreateClient) => {
       }
       clientOrganizationAccount = data;
     } else {
-      clientOrganizationAccount =
-        clientOrganizationExists ;
+      clientOrganizationAccount = clientOrganizationExists;
     }
 
     const { error: accountRoleError } = await supabase
@@ -87,15 +96,18 @@ export const createClient = async (clientData: CreateClient) => {
       })
       .select()
       .single();
-    
-      // update clientUser with organization id
-      const {error: errorUpdateClientUser } = await supabase.from('accounts').update(
-        {
-          organization_id: clientOrganizationAccount.primary_owner_user_id,
-        }
-        ).eq('primary_owner_user_id', clientOrganizationUser.user?.id ?? '').eq('is_personal_account', true);
-      
-        if (errorUpdateClientUser) throw new Error('Error updating the user client');
+
+    // update clientUser with organization id
+    const { error: errorUpdateClientUser } = await supabase
+      .from('accounts')
+      .update({
+        organization_id: clientOrganizationAccount.id,
+      })
+      .eq('primary_owner_user_id', clientOrganizationUser.user?.id ?? '')
+      .eq('is_personal_account', true);
+
+    if (errorUpdateClientUser)
+      throw new Error('Error updating the user client');
 
     if (clientError) {
       throw new Error(clientError.message);
