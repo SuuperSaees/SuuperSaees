@@ -47,6 +47,7 @@ export type Database = {
           primary_owner_user_id: string
           public_data: Json
           slug: string | null
+          stripe_id: string
           updated_at: string | null
           updated_by: string | null
         }
@@ -62,6 +63,7 @@ export type Database = {
           primary_owner_user_id?: string
           public_data?: Json
           slug?: string | null
+          stripe_id?: string
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -77,6 +79,7 @@ export type Database = {
           primary_owner_user_id?: string
           public_data?: Json
           slug?: string | null
+          stripe_id?: string
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -1628,6 +1631,7 @@ export type Database = {
           primary_owner_user_id: string
           public_data: Json
           slug: string | null
+          stripe_id: string
           updated_at: string | null
           updated_by: string | null
         }

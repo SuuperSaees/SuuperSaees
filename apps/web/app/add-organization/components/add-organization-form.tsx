@@ -92,7 +92,7 @@ const CreateOrganization = ( ) => {
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <Link href="/add-billing">
+                            <Link href="/home">
                                 <AlertDialogAction>{t('continue')}</AlertDialogAction>
                             </Link>
                         </AlertDialogFooter>

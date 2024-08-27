@@ -51,7 +51,8 @@ function Standard() {
                 )}
             />
         </div>
-        <FormField
+        {/* At this time we will only handle standard for one-time payment and subscription */}
+        {/* <FormField
             name="step_service_price.allowed_orders"
             render={({ field }) => (
                 <FormItem>
@@ -68,7 +69,7 @@ function Standard() {
                     <FormMessage />
                 </FormItem>
             )}
-        />
+        /> */}
     </div>
   );
 }

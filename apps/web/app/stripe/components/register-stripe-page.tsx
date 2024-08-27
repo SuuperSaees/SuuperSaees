@@ -180,7 +180,28 @@ const RegisterStripePage = ({  email }: { email: string }) => {
     };
 
     if (!accountId || !stripe || !elements) {
-        return (
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <div
+            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+            role="status"
+          >
+            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+              Loading...
+            </span>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <form onSubmit={handleSubmit} className="flex flex-col items-center">
+          {email ? <div>{t('email')} {email}</div> : <div>Loading...</div>}
+          {linkData ? (
+            <Button>
+              <Link href={linkData}>{t('completeRegister')}</Link>
+            </Button>
+          ) : (
             <div className="flex items-center justify-center">
               <div
                 className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
@@ -191,28 +212,11 @@ const RegisterStripePage = ({  email }: { email: string }) => {
                 </span>
               </div>
             </div>
-          );
-    }
-
-    return(
-      <div className="flex flex-col w-full h-full items-center">
-        <form onSubmit={handleSubmit}>
-            {email ? <div>{t('email')} {email}</div> : <div>Loading...</div>}
-            {/* {accountId ? <div>Cliente creado con ID: {accountId}</div> : <div>Loading...</div>} */}
-            {linkData ? <Button><Link href={linkData}>{t('completeRegister')}</Link></Button> : <div className="flex items-center justify-center">
-              <div
-                className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-                role="status"
-              >
-                <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-                  Loading...
-                </span>
-              </div>
-            </div>}
-            {errorMessage && <div>{errorMessage}</div>}
+          )}
+          {errorMessage && <div>{errorMessage}</div>}
         </form>
       </div>
-    )
+    );
 
 }
 
