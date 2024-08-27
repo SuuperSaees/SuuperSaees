@@ -97,7 +97,6 @@ const DetailsPage = () => {
           ))}
         </div>
       </div>
-    </div>
   );
 };
 export default DetailsPage;
