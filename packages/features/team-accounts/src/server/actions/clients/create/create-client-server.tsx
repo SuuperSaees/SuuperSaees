@@ -101,7 +101,7 @@ export const createClient = async (clientData: CreateClient) => {
     const { error: errorUpdateClientUser } = await supabase
       .from('accounts')
       .update({
-        organization_id: clientOrganizationAccount.primary_owner_user_id,
+        organization_id: clientOrganizationAccount.id,
       })
       .eq('primary_owner_user_id', clientOrganizationUser.user?.id ?? '')
       .eq('is_personal_account', true);

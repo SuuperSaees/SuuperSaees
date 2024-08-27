@@ -106,6 +106,31 @@ export const acceptInvitationAction = enhanceAction(
     const perSeatBillingService = createAccountPerSeatBillingService(client);
     const service = createAccountInvitationsService(client);
 
+    // get the organization of the sender
+    const { data: senderAccount, error: senderAccountError } = await client
+      .from('invitations')
+      .select('invited_by')
+      .eq('invite_token', inviteToken)
+      .single();
+
+    if (senderAccountError) {
+      console.error('Fail to obtainer the sender account');
+      throw new Error(senderAccountError.message);
+    }
+
+    // get the organization id of the sender
+    const { data: senderOrganization, error: senderOrganizationError } =
+      await client
+        .from('accounts')
+        .select('organization_id')
+        .eq('id', senderAccount.invited_by)
+        .single();
+
+    if (senderOrganizationError) {
+      console.error('Fail to obtainer the sender organization');
+      throw new Error(senderOrganizationError.message);
+    }
+
     // Accept the invitation
     const accountId = await service.acceptInvitationToTeam(
       getSupabaseServerActionClient({ admin: true }),
@@ -119,6 +144,12 @@ export const acceptInvitationAction = enhanceAction(
     if (!accountId) {
       throw new Error('Failed to accept invitation');
     }
+
+    // Associate the new member with the organization
+    await client
+      .from('accounts')
+      .update({ organization_id: senderOrganization?.organization_id })
+      .eq('id', user.id);
 
     // Increase the seats for the account
     await perSeatBillingService.increaseSeats(accountId);
