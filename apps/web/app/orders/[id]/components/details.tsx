@@ -70,12 +70,14 @@ const DetailsPage = () => {
         </textarea>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <div className="mb-[6px] flex">
-          <span className="font-inter text-sm font-medium leading-5 text-gray-700">
-            Archivos
-          </span>
-          <CircleHelp className="ml-1 h-4 w-4 text-gray-500" />
+        <div className='grid grid-cols-3 gap-4'>
+          {order.files!.map((file) => (
+            <div key={file.id} className='flex flex-col items-start w-[220px] p-[10px] px-[14px] gap-[8px] border border-gray-200 rounded-none rounded-tr-md rounded-bl-md rounded-br-md bg-white'>
+            {getFilePreviewComponent(file)}
+            <span className='text-gray-700 text-sm font-medium leading-5 overflow-hidden text-ellipsis whitespace-nowrap w-full'>{file.name}</span>
+            <span className='text-gray-600 text-sm font-normal leading-5'>{formatFileSize(file.size)}</span>
+          </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-3 gap-2">
@@ -95,7 +97,6 @@ const DetailsPage = () => {
           ))}
         </div>
       </div>
-    </div>
   );
 };
 export default DetailsPage;

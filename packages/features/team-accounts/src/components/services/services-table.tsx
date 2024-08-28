@@ -42,8 +42,8 @@ import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.
 
 type ServicesTableProps = {
   services: Service.Type[];
-  accountIds: string[];
-  accountNames: string[];
+  // accountIds: string[];
+  // accountNames: string[];
 }
 
 // SERVICES TABLE

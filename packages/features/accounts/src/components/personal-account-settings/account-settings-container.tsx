@@ -15,12 +15,14 @@ import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 
 import { usePersonalAccountData } from '../../hooks/use-personal-account-data';
-import { AccountDangerZone } from './account-danger-zone';
+// import { AccountDangerZone } from './account-danger-zone';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
-import { MultiFactorAuthFactorsList } from './mfa/multi-factor-auth-list';
+// import { MultiFactorAuthFactorsList } from './mfa/multi-factor-auth-list';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
+import { Button } from '@kit/ui/button';
+import Link from 'next/link';
 
 export function PersonalAccountSettingsContainer(
   props: React.PropsWithChildren<{
@@ -93,6 +95,22 @@ export function PersonalAccountSettingsContainer(
           </CardContent>
         </Card>
       </If>
+
+      <Card>
+          <CardHeader>
+            <CardTitle>
+              <Trans i18nKey={'account:connectToStripe'} />
+            </CardTitle>
+            <CardDescription>
+              <Trans i18nKey={'account:connectToStripeDescription'} key={'s'}/>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button><Link href={'/stripe'}>Conectar</Link></Button>
+          </CardContent>
+        </Card>
+
+
     </div>
   
     <div className="flex flex-col space-y-6 w-[26%]">
