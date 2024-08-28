@@ -113,19 +113,22 @@ import {
 import { Button } from "@kit/ui/button";
 import Link from "next/link";
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { updateTeamAccountStripeId } from '../../../../../packages/features/team-accounts/src/server/actions/team-details-server-actions';
 
-const RegisterStripePage = ({  email }: { email: string }) => {
+const RegisterStripePage = ({  email, stripeId, slug}: { email: string, stripeId: string, slug: string }) => {
   const { t } = useTranslation('stripe');
     const stripe = useStripe();
     const elements = useElements();
 
     const [errorMessage, setErrorMessage] = useState<string>();
-    const [accountId, setaccountId] = useState("");
+    const [accountId, setaccountId] = useState(stripeId);
     const [linkData, setLinkData] = useState("");
     const [loading, setLoading] = useState<boolean>(false);
     
-
     useEffect(() => {
+      if (!stripeId) {
+        console.log("HOLAAA")
         fetch("/api/stripe/create-account", {
             method: "POST",
             headers: {
@@ -135,28 +138,37 @@ const RegisterStripePage = ({  email }: { email: string }) => {
         })
         .then((res) => res.json())
             .then((data) => {
-                console.log(data);
-                setaccountId(data.accountId);
-                fetch("/api/stripe/account-onboarding", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ accountId: data.accountId }),
-                  })
-                    .then((res) => res.json())
-                    .then((linkData) => {
-                        console.log(linkData);
-                        setLinkData(linkData.url);
-                    })
-                    .catch((error) => {
-                      setErrorMessage(error.message);
-                    });
+              setaccountId(data.accountId);
             })
             .catch((error) => {
                 setErrorMessage(error.message);
+                // SAVE OR UPDATE ACCOUNT ID
+              const promise = updateTeamAccountStripeId({
+                stripe_id: stripeId,
+                slug: slug
+              });
+              toast.promise(promise, {
+                loading: t('updateTeamLoadingMessage'),
+                success: t('updateTeamSuccessMessage'),
+                error: t('updateTeamErrorMessage'),
+              });
             });
-    }, [email, stripe, elements]);
+      }
+      fetch("/api/stripe/account-onboarding", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ accountId }),
+      })
+        .then((res) => res.json())
+        .then((linkData) => {
+            setLinkData(linkData.url);
+        })
+        .catch((error) => {
+          setErrorMessage(error.message);
+        });
+    }, [email, stripe, elements, accountId, stripeId, slug, t]);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();

@@ -47,7 +47,7 @@ export type Database = {
           primary_owner_user_id: string
           public_data: Json
           slug: string | null
-          stripe_id: string
+          stripe_id: string | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -63,7 +63,7 @@ export type Database = {
           primary_owner_user_id?: string
           public_data?: Json
           slug?: string | null
-          stripe_id?: string
+          stripe_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -79,7 +79,7 @@ export type Database = {
           primary_owner_user_id?: string
           public_data?: Json
           slug?: string | null
-          stripe_id?: string
+          stripe_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -190,42 +190,30 @@ export type Database = {
       activities: {
         Row: {
           action: Database["public"]["Enums"]["action_type"]
-          actor: string
           created_at: string
           id: number
           message: string
           order_id: number
-          preposition: string
-          previous_value: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
-          value: string
         }
         Insert: {
           action: Database["public"]["Enums"]["action_type"]
-          actor: string
           created_at?: string
           id?: number
           message: string
           order_id: number
-          preposition: string
-          previous_value?: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
-          value: string
         }
         Update: {
           action?: Database["public"]["Enums"]["action_type"]
-          actor?: string
           created_at?: string
           id?: number
           message?: string
           order_id?: number
-          preposition?: string
-          previous_value?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
-          value?: string
         }
         Relationships: [
           {
@@ -865,50 +853,6 @@ export type Database = {
           },
         ]
       }
-      order_assignations: {
-        Row: {
-          agency_member_id: string
-          order_id: number
-        }
-        Insert: {
-          agency_member_id: string
-          order_id: number
-        }
-        Update: {
-          agency_member_id?: string
-          order_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_assignations_agency_member_id_fkey"
-            columns: ["agency_member_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_assignations_agency_member_id_fkey"
-            columns: ["agency_member_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_assignations_agency_member_id_fkey"
-            columns: ["agency_member_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_assignations_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders_v2"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       order_files: {
         Row: {
           created_at: string
@@ -1050,7 +994,8 @@ export type Database = {
       }
       orders_v2: {
         Row: {
-          agency_id: string
+          agency_id: string | null
+          assigned_to: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -1060,12 +1005,12 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: Database["public"]["Enums"]["order_status_types"] | null
-          stripe_account_id: string | null
           title: string
           uuid: string
         }
         Insert: {
-          agency_id: string
+          agency_id?: string | null
+          assigned_to?: string[] | null
           client_organization_id: string
           created_at?: string
           customer_id: string
@@ -1075,12 +1020,12 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status?: Database["public"]["Enums"]["order_status_types"] | null
-          stripe_account_id?: string | null
           title: string
           uuid: string
         }
         Update: {
-          agency_id?: string
+          agency_id?: string | null
+          assigned_to?: string[] | null
           client_organization_id?: string
           created_at?: string
           customer_id?: string
@@ -1090,7 +1035,6 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
           status?: Database["public"]["Enums"]["order_status_types"] | null
-          stripe_account_id?: string | null
           title?: string
           uuid?: string
         }
@@ -1690,7 +1634,7 @@ export type Database = {
           primary_owner_user_id: string
           public_data: Json
           slug: string | null
-          stripe_id: string
+          stripe_id: string | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -2020,7 +1964,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2034,7 +1977,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2048,7 +1990,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2070,7 +2011,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2081,7 +2021,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2092,7 +2031,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2228,10 +2166,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {

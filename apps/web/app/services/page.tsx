@@ -111,8 +111,7 @@ export const generateMetadata = async () => {
 const primary_owner_user_id = await getPrimaryOwnerId();
 if (!primary_owner_user_id) throw new Error('No primary owner found');
 
-const stripeId = await getStripeAccountID();
-if (!stripeId) throw new Error('No stripe account found');
+const stripeId = await getStripeAccountID() as string;
 
 const accountIds = [primary_owner_user_id];
 

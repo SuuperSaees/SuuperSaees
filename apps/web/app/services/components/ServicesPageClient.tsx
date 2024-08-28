@@ -106,6 +106,7 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 async function fetchStripeProducts(accountId: string) {
+  if (!accountId) return
     const response = await fetch(`/api/stripe/get-products?accountId=${encodeURIComponent(accountId)}`, {
       method: 'GET',
       headers: {
@@ -122,6 +123,7 @@ async function fetchStripeProducts(accountId: string) {
 }
 
 async function fetchStripePrices(accountId: string) {
+  if (!accountId) return
     const response = await fetch(`/api/stripe/get-prices?accountId=${encodeURIComponent(accountId)}`, {
       method: 'GET',
       headers: {
