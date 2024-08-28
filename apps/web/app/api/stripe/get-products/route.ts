@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { StripeProductResponse } from "~/services/hooks/use-stripe";
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function GET(req: NextRequest) {
@@ -17,12 +19,12 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-      // Recupera los productos de la cuenta conectada
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const products = await stripe.products.list({
           limit: 100, 
       }, {
           stripeAccount: accountId, 
-      });
+      }) as StripeProductResponse;
 
     //   console.log('Products:', products);
 
