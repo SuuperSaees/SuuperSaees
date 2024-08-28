@@ -84,24 +84,19 @@ export async function getStripeAccountID() {
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError;
 
-    const { data: accountsData } = await client
+    const { data: accountsData , error: accountsError } = await client
       .from('accounts')
       .select()
-      .eq('primary_owner_user_id', userData.user.id);
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (accountsError) throw accountsError;
+    
+    const stripetId = accountsData?.stripe_id;
 
-    const filteredAccounts = accountsData?.filter(
-      (account) => account.id === userData.user.id,
-    );
-    const accountIds = filteredAccounts?.map((account) => account.stripe_id) ?? [];
+    return stripetId;
 
-    if (accountIds.length > 0) {
-      const firstAccountId = accountIds[0];
-
-      return firstAccountId;
-    }
-    throw new Error('Error fetching primary owner');
   } catch (error) {
     console.error('Error fetching primary owner:', error);
-    // throw error;
   }
 }
