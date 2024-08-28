@@ -44,18 +44,6 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ stripeId, strip
                 </div>
               </span>
             </div>
-            <div className="flex space-x-4">
-              <span>
-                <Button variant="outline">
-                  Tu prueba gratuita termina en xx días
-                </Button>
-              </span>
-              <span>
-                <Button variant="outline" size="icon">
-                  <BellIcon className="h-4 w-4" />
-                </Button>
-              </span>
-            </div>
           </div>
           <ServicesTable services={products}  />
         </div>
