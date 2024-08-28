@@ -1,18 +1,21 @@
-import { PageBody } from '@kit/ui/page';
-import { Trans } from '@kit/ui/trans';
-import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
-import { withI18n } from '~/lib/i18n/with-i18n';
+import { BellIcon } from '@radix-ui/react-icons';
+
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import {
   AccountInvitationsTable,
   AccountMembersTable,
   InviteMembersDialogContainer,
 } from '@kit/team-accounts/components';
-import { If } from '@kit/ui/if';
 import { Button } from '@kit/ui/button';
-import { loadMembersPageData } from './_lib/server/members-page.loader';
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { BellIcon } from '@radix-ui/react-icons';
+import { If } from '@kit/ui/if';
+import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
+import { Trans } from '@kit/ui/trans';
+
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+import { withI18n } from '~/lib/i18n/with-i18n';
+
+import { loadMembersPageData } from './_lib/server/members-page.loader';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -35,11 +38,16 @@ type Account = {
   picture_url: string | null;
   public_data: object;
   role_hierarchy_level: number;
-  permissions: Array<'roles.manage' | 'billing.manage' | 'settings.manage' | 'members.manage' | 'invites.manage'>;
+  permissions: Array<
+    | 'roles.manage'
+    | 'billing.manage'
+    | 'settings.manage'
+    | 'members.manage'
+    | 'invites.manage'
+  >;
 };
 
 async function ClientsMembersPage() {
-
   const client = getSupabaseServerComponentClient();
 
   const { data: userData } = await client.auth.getUser();
@@ -61,17 +69,22 @@ async function ClientsMembersPage() {
     .select('permission')
     .eq('role', account_role!);
 
-  const userPermissions = data3!.map(permission => permission.permission);
+  const userPermissions = data3!.map((permission) => permission.permission);
 
   const { data: data4 } = await client
     .from('roles')
     .select('hierarchy_level')
     .eq('name', account_role!);
 
-  const roleHierarchies = data4!.map(roleHierarchy => roleHierarchy.hierarchy_level);
-  const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
+  const roleHierarchies = data4!.map(
+    (roleHierarchy) => roleHierarchy.hierarchy_level,
+  );
+  const roleHierarchyLevel =
+    roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
 
-  const filteredData = data ? data.filter(item => item.id !== userData.user!.id) : [];
+  const filteredData = data
+    ? data.filter((item) => item.id !== userData.user!.id)
+    : [];
 
   const accountData = filteredData.length > 0 ? filteredData[0] : {};
 
@@ -81,27 +94,31 @@ async function ClientsMembersPage() {
     role_hierarchy_level: roleHierarchyLevel,
   };
 
-  const slug = account.slug;
+  const organizationAccount = await client
+    .from('accounts')
+    .select()
+    .eq('id', data?.[0]?.organization_id ?? '')
+    .single();
 
+  const slug = organizationAccount.data?.slug ?? '';
 
   const [members, invitations, canAddMember, { user }] =
     await loadMembersPageData(client, slug);
-
 
   const canManageRoles = account.permissions.includes('roles.manage');
   const canManageInvitations = account.permissions.includes('invites.manage');
 
   const isPrimaryOwner = account.primary_owner_user_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
-
+  console.log('orgnazation account ', organizationAccount, slug);
   return (
     <>
       <PageBody>
-        <div className='p-[35px]'>
-          <div className="flex justify-between items-center mb-[32px]">
+        <div className="p-[35px]">
+          <div className="mb-[32px] flex items-center justify-between">
             <div className="flex-grow">
               <span>
-                <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
+                <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
                   <Trans i18nKey={'teams:team'} />
                 </div>
               </span>
@@ -121,19 +138,20 @@ async function ClientsMembersPage() {
           </div>
 
           <div className="w-full">
-            <div className="flex items-center py-4 justify-between">
-
+            <div className="flex items-center justify-between py-4">
               <Button
-                variant='ghost'
-                className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+                variant="ghost"
+                className={`'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'} flex h-9 items-center gap-2 rounded-md p-2 px-3`}
               >
-                <span className="text-sm font-semibold leading-5"><Trans i18nKey={'common:membersTabLabel'} /></span>
+                <span className="text-sm font-semibold leading-5">
+                  <Trans i18nKey={'common:membersTabLabel'} />
+                </span>
               </Button>
-              
-              <If condition={canManageInvitations && canAddMember}>
+
+              <If condition={canManageInvitations && (await canAddMember())}>
                 <InviteMembersDialogContainer
                   userRoleHierarchy={currentUserRoleHierarchy ?? 0}
-                  accountSlug={account.slug}
+                  accountSlug={slug}
                 >
                   <Button size={'sm'} data-test={'invite-members-form-trigger'}>
                     <span>
@@ -146,7 +164,7 @@ async function ClientsMembersPage() {
           </div>
 
           <Separator />
-          <div className='mt-4'>
+          <div className="mt-4">
             <AccountMembersTable
               userRoleHierarchy={currentUserRoleHierarchy ?? 0}
               currentUserId={user.id}
@@ -157,9 +175,7 @@ async function ClientsMembersPage() {
             />
           </div>
 
-
-          
-          <div className='mt-12'>
+          <div className="mt-12">
             <AccountInvitationsTable
               permissions={{
                 canUpdateInvitation: canManageRoles,

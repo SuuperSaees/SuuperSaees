@@ -96,3 +96,39 @@ export const hasPermissionToReadOrders = async (
     throw error;
   }
 };
+
+export const hasPermissionToAddTeamMembers = async () => {
+  const client = getSupabaseServerComponentClient();
+  const { data: userData, error: userError } = await client.auth.getUser();
+
+  if (userError) throw userError.message;
+
+  const userId = userData.user.id;
+  const { data: accountData, error: accountError } = await client
+    .from('accounts')
+    .select('id, organization_id')
+    .eq('id', userId)
+    .eq('is_personal_account', true)
+    .single();
+
+  if (accountError) throw accountError.message;
+  const accountId = accountData.organization_id;
+
+  // First check for general permission on the account, be either client or agency
+  const { data: hasPermission, error: permissionError } = await client.rpc(
+    'has_permission',
+    {
+      user_id: userId,
+      account_id: accountId ?? '',
+      permission_name: 'invites.manage',
+    },
+  );
+  console.log('hasPermission', hasPermission);
+
+  if (permissionError) {
+    console.error('Error checking permission:', permissionError);
+    throw new Error('The account has not permissions to MANAGE team members');
+  }
+
+  return hasPermission;
+};
