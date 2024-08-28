@@ -93,7 +93,10 @@ export default function UploadImageComponent({
           style={{ display: 'none' }}
         />
       </div>
-      <span className="text-sm text-gray-500">{fileName}</span>
+      <span className={`text-sm ${fileName === 'Debe seleccionar una imagen' ? 'text-red-500' : 'text-gray-500'}`}>
+        {fileName}
+      </span>
+
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );

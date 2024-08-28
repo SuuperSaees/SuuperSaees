@@ -41,6 +41,14 @@ import TimeBased from './single_sale/time_based';
 // import BriefConnectionStep from './step-brief-connection';
 import Link from 'next/link';
 import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+
+if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
+  throw new Error("Stripe public key is not defined in environment variables");
+}
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export const FormSchema = createStepSchema({
   step_type_of_service: z.object({
@@ -378,39 +386,266 @@ function DetailsStep() {
   );
 }
 
+//At this time we will only handle standard for one-time payment and subscription
+
+// function PricingStep() {
+//   const { t } = useTranslation('services');
+//   // const { form, nextStep, prevStep } = useMultiStepFormContext();
+//   const { form, prevStep } = useMultiStepFormContext();
+
+//   type CheckboxName =
+//     | 'step_service_price.standard'
+//     | 'step_service_price.time_based'
+//     | 'step_service_price.credit_based';
+
+//   const handleCheckboxChange = (name: CheckboxName) => (checked: boolean) => {
+//     form.setValue('step_service_price.standard', false);
+//     form.setValue('step_service_price.time_based', false);
+//     form.setValue('step_service_price.credit_based', false);
+//     form.setValue(name, checked);
+//   };
+
+//   const getCheckboxClass = (isSelected: boolean) =>
+//     isSelected
+//       ? 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[2.948px] border-brand-600 bg-white'
+//       : 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[1.474px] border-gray-200 bg-white';
+
+//   async function createServiceFunction() {
+//     await createService({
+//       ...form.getValues(),
+//     });
+//     // window.location.reload();
+//   }
+
+//   return (
+//     <Form {...form}>
+//       <div className={'flex flex-col gap-4'}>
+//         <div className="flex items-center justify-between gap-[22px]">
+//           <FormField
+//             control={form.control}
+//             name="step_service_price.standard"
+//             render={({ field }) => (
+//               <FormItem className={getCheckboxClass(field.value)}>
+//                 <FormControl>
+//                   <div className="flex gap-[11.792px]">
+//                     <div
+//                       className={`flex h-8 w-8 cursor-pointer items-center justify-center border-2 ${
+//                         field.value
+//                           ? 'flex h-[23.583px] w-[23.583px] items-center justify-center rounded-[11.792px] border-[1.474px] border-brand-600 bg-brand-600 p-[7.37px]'
+//                           : 'h-[23.583px] w-[47.166px] rounded-[5.896px] border-[1.474px] border-gray-300'
+//                       }`}
+//                       onClick={() =>
+//                         handleCheckboxChange('step_service_price.standard')(
+//                           !field.value,
+//                         )
+//                       }
+//                     >
+//                       {field.value && (
+//                         <div className="h-2 w-2 rounded-full bg-white" />
+//                       )}
+//                     </div>
+//                     <div>
+//                       <FormLabel className="font-inter text-[20.635px] font-medium leading-[29.479px] text-gray-700">
+//                         {t('standard')}
+//                       </FormLabel>
+//                       <div>
+//                         <FormDescription className="font-inter text-[20.635px] font-normal leading-[29.479px] text-gray-600">
+//                           {t('standard_description')}
+//                         </FormDescription>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </FormControl>
+//               </FormItem>
+//             )}
+//           />
+//           <FormField
+//             control={form.control}
+//             name="step_service_price.time_based"
+//             render={({ field }) => (
+//               <FormItem className={getCheckboxClass(field.value)}>
+//                 <FormControl>
+//                   <div className="flex gap-[11.792px]">
+//                     <div
+//                       className={`flex h-6 w-8 cursor-pointer items-center justify-center border-2 ${
+//                         field.value
+//                           ? 'flex h-[23.583px] w-[23.583px] items-center justify-center rounded-[11.792px] border-[1.474px] border-brand-600 bg-brand-600 p-[7.37px]'
+//                           : 'h-[23.583px] w-[47.166px] rounded-[5.896px] border-[1.474px] border-gray-300'
+//                       }`}
+//                       onClick={() =>
+//                         handleCheckboxChange('step_service_price.time_based')(
+//                           !field.value,
+//                         )
+//                       }
+//                     >
+//                       {field.value && (
+//                         <div className="h-2 w-2 rounded-full bg-white" />
+//                       )}
+//                     </div>
+//                     <div>
+//                       <FormLabel className="font-inter text-[20.635px] font-medium leading-[29.479px] text-gray-700">
+//                         {t('time_based')}
+//                       </FormLabel>
+//                       <div>
+//                         <FormDescription className="font-inter text-[20.635px] font-normal leading-[29.479px] text-gray-600">
+//                           {t('time_based_description')}
+//                         </FormDescription>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </FormControl>
+//               </FormItem>
+//             )}
+//           />
+//           <FormField
+//             control={form.control}
+//             name="step_service_price.credit_based"
+//             render={({ field }) => (
+//               <FormItem className={getCheckboxClass(field.value)}>
+//                 <FormControl>
+//                   <div className="flex gap-[11.792px]">
+//                     <div
+//                       className={`flex h-6 w-8 cursor-pointer items-center justify-center border-2 ${
+//                         field.value
+//                           ? 'flex h-[23.583px] w-[23.583px] items-center justify-center rounded-[11.792px] border-[1.474px] border-brand-600 bg-brand-600 p-[7.37px]'
+//                           : 'h-[23.583px] w-[47.166px] rounded-[5.896px] border-[1.474px] border-gray-300'
+//                       }`}
+//                       onClick={() =>
+//                         handleCheckboxChange('step_service_price.credit_based')(
+//                           !field.value,
+//                         )
+//                       }
+//                     >
+//                       {field.value && (
+//                         <div className="h-2 w-2 rounded-full bg-white" />
+//                       )}
+//                     </div>
+//                     <div>
+//                       <FormLabel className="font-inter text-[20.635px] font-medium leading-[29.479px] text-gray-700">
+//                         {t('credit_based')}
+//                       </FormLabel>
+//                       <div>
+//                         <FormDescription className="font-inter text-[20.635px] font-normal leading-[29.479px] text-gray-600">
+//                           {t('credit_based_description')}
+//                         </FormDescription>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </FormControl>
+//               </FormItem>
+//             )}
+//           />
+//         </div>
+        
+//           {form.watch('step_service_price.standard') &&
+//             form.watch('step_type_of_service.single_sale') && (
+//               <>
+//                 <Standard />
+//               </>
+//             )}
+        
+        
+//           {form.watch('step_service_price.standard') &&
+//             form.watch('step_type_of_service.recurring_subscription') && (
+//               <>
+//                 <StandardRecurringSubscription />
+//               </>
+//             )}
+        
+        
+//           {form.watch('step_service_price.time_based') &&
+//             form.watch('step_type_of_service.single_sale') && (
+//               <>
+//                 <TimeBased />
+//               </>
+//             )}
+        
+        
+//           {form.watch('step_service_price.time_based') &&
+//             form.watch('step_type_of_service.recurring_subscription') && (
+//               <>
+//                 <TimeBasedRecurringSubscription />
+//               </>
+//             )}
+        
+
+        
+//           {form.watch('step_service_price.credit_based') &&
+//             form.watch('step_type_of_service.single_sale') && (
+//               <>
+//                 <CreditBased />
+//               </>
+//             )}
+        
+
+       
+//           {form.watch('step_service_price.credit_based') &&
+//             form.watch('step_type_of_service.recurring_subscription') && (
+//               <>
+//                 <CreditBasedRecurringSubscription />
+//               </>
+//             )}
+        
+//       </div>
+
+//       <div className="mt-4 flex justify-between space-x-2">
+//         <Button type="button" variant="outline" onClick={prevStep}>
+//           {t('previous')}
+//         </Button>
+
+//         {/* <Button onClick={nextStep}>{t('next')}</Button> */}
+//         {/* <Button type='submit' >{t('createService')}</Button> */}
+//         <Link
+//           // type="button"
+//           onClick={createServiceFunction}
+//           href={'/services'}
+//           className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+//         >
+//           {t('createService')}
+//         </Link>
+//       </div>
+//     </Form>
+//   );
+// }
+
+
 function PricingStep() {
   const { t } = useTranslation('services');
   // const { form, nextStep, prevStep } = useMultiStepFormContext();
   const { form, prevStep } = useMultiStepFormContext();
 
-  type CheckboxName =
-    | 'step_service_price.standard'
-    | 'step_service_price.time_based'
-    | 'step_service_price.credit_based';
+  // type CheckboxName =
+  //   | 'step_service_price.standard'
+  //   | 'step_service_price.time_based'
+  //   | 'step_service_price.credit_based';
 
-  const handleCheckboxChange = (name: CheckboxName) => (checked: boolean) => {
-    form.setValue('step_service_price.standard', false);
-    form.setValue('step_service_price.time_based', false);
-    form.setValue('step_service_price.credit_based', false);
-    form.setValue(name, checked);
-  };
+  // const handleCheckboxChange = (name: CheckboxName) => (checked: boolean) => {
+  //   form.setValue('step_service_price.standard', false);
+  //   form.setValue('step_service_price.time_based', false);
+  //   form.setValue('step_service_price.credit_based', false);
+  //   form.setValue(name, checked);
+  // };
 
-  const getCheckboxClass = (isSelected: boolean) =>
-    isSelected
-      ? 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[2.948px] border-brand-600 bg-white'
-      : 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[1.474px] border-gray-200 bg-white';
+  // const getCheckboxClass = (isSelected: boolean) =>
+  //   isSelected
+  //     ? 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[2.948px] border-brand-600 bg-white'
+  //     : 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[1.474px] border-gray-200 bg-white';
 
   async function createServiceFunction() {
     await createService({
       ...form.getValues(),
     });
-    // window.location.reload();
+    window.location.href = '/services';
   }
+
+ 
+
+  
 
   return (
     <Form {...form}>
       <div className={'flex flex-col gap-4'}>
-        <div className="flex items-center justify-between gap-[22px]">
+        {/* <div className="flex items-center justify-between gap-[22px]">
           <FormField
             control={form.control}
             name="step_service_price.standard"
@@ -525,7 +760,7 @@ function PricingStep() {
               </FormItem>
             )}
           />
-        </div>
+        </div> */}
         
           {form.watch('step_service_price.standard') &&
             form.watch('step_type_of_service.single_sale') && (
@@ -582,20 +817,16 @@ function PricingStep() {
         <Button type="button" variant="outline" onClick={prevStep}>
           {t('previous')}
         </Button>
-
-        {/* <Button onClick={nextStep}>{t('next')}</Button> */}
-        {/* <Button type='submit' >{t('createService')}</Button> */}
-        <Link
-          // type="button"
-          onClick={createServiceFunction}
-          href={'/services'}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-        >
-          {t('createService')}
-        </Link>
+        <Button onClick={createServiceFunction}>{t('createService')}</Button>
       </div>
     </Form>
   );
 }
 
-export default MultiStepFormDemo;
+export default function MultiFormComponent() {
+  return (
+    <Elements stripe={stripePromise}>
+      <MultiStepFormDemo />
+    </Elements>
+  );
+}

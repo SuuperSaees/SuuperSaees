@@ -24,22 +24,25 @@ export const generateMetadata = async () => {
 export default function UserAddOrganizationPage() {
   return (
     <>
-      <PageBody className={''}>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Trans i18nKey={'account:updatePasswordCardTitle'} />
-          </CardTitle>
+      <PageBody className='flex flex-col items-center justify-center'>
+        <div className='flex flex-col items-center justify-center'>
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <Trans i18nKey={'account:updatePasswordCardTitle'} />
+              </CardTitle>
 
-          <CardDescription>
-            <Trans i18nKey={'account:updatePasswordCardDescription'} />
-          </CardDescription>
-        </CardHeader>
+              <CardDescription>
+                <Trans i18nKey={'account:updatePasswordCardDescription'} />
+              </CardDescription>
+            </CardHeader>
 
-        <CardContent>
-          <UpdatePasswordFormContainer callbackPath={`${baseUrl}home`} />
-        </CardContent>
-      </Card>
+            <CardContent>
+              <UpdatePasswordFormContainer callbackPath={`${baseUrl}home`} />
+            </CardContent>
+          </Card>
+        </div>
+      
       </PageBody>
     </>
   );

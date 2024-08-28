@@ -62,7 +62,7 @@ export async function getUserRole() {
       await client.auth.getUser();
     const userId = userAuthenticatedData?.user?.id;
 
-    if (userAuthenticatedError || !userId) throw userAuthenticatedError;
+    if (userAuthenticatedError ?? !userId) throw userAuthenticatedError;
     const { error: userAccountError, data: userAccountData } = await client
       .from('accounts_memberships')
       .select('account_role')
@@ -75,5 +75,28 @@ export async function getUserRole() {
     return userAccountData?.account_role;
   } catch (error) {
     console.error('Error fetching user role:', error);
+  }
+}
+
+export async function getStripeAccountID() {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: userData, error: userError } = await client.auth.getUser();
+    if (userError) throw userError;
+
+    const { data: accountsData , error: accountsError } = await client
+      .from('accounts')
+      .select()
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (accountsError) throw accountsError;
+    
+    const stripetId = accountsData?.stripe_id;
+
+    return stripetId;
+
+  } catch (error) {
+    console.error('Error fetching primary owner:', error);
   }
 }
