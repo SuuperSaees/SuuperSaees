@@ -1,24 +1,57 @@
+'use client';
+
+import { format } from 'date-fns';
+import { BarChart, Calendar, LineChart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { Order } from '~/lib/order.types';
 
+import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { Activity, ActivityType } from '../context/activity-context';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
-import { formatDateToString } from '../utils/get-formatted-dates';
 import AvatarDisplayer from './ui/avatar-displayer';
 
+const translateActivity = (
+  activity: Activity,
+  t: TFunction<'logs', undefined>,
+) => {
+  const availableTranslates = ['status', 'priority'];
+  const newActivity = { ...activity, class: 'activity' };
+  newActivity.type = t(`types.${activity.type}`);
+  if (availableTranslates.includes(activity.type)) {
+    newActivity.value = t(`values.${activity.value}`);
+  }
+  newActivity.message = `${t(`messages.${activity.action}`)} ${activity.type === 'due_date' ? t('articles.due_date.singular.feminine') : ''}`;
+
+  newActivity.preposition = t(`prepositions.${activity.preposition}`);
+  return newActivity;
+};
 interface ActivityActionProps {
   activity: Activity;
+  formattedActivity: Activity;
 }
-interface ActivityCustomMessageProps {
-  message: string;
+interface ActivityCustomSpan {
+  value: string;
+  translatedValue: string;
 }
-export const ActivityCustomMessage = ({
-  message,
-}: ActivityCustomMessageProps) => {
+
+function formatTarget(target: string) {
+  return target
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toLowerCase());
+}
+
+export const ActivityCustomSpan = ({
+  value,
+  translatedValue,
+}: ActivityCustomSpan) => {
   const statuses = [
     Order.Enums.Status.PENDING,
     Order.Enums.Status.IN_PROGRESS,
     Order.Enums.Status.COMPLETED,
     Order.Enums.Status.ANNULLED,
+    Order.Enums.Status.IN_REVIEW,
   ];
   const priorities = [
     Order.Enums.Priority.LOW,
@@ -29,14 +62,14 @@ export const ActivityCustomMessage = ({
   const wordsToMark = [...statuses, ...priorities];
 
   // Find the first occurrence of any marked word
-  const matchedWord = wordsToMark.find((word) => message.includes(word));
+  const matchedWord = wordsToMark.find((word) => value.includes(word));
 
   if (!matchedWord) {
-    return <span>{message}</span>;
+    return <span>{value}</span>;
   }
 
   // Split the message into two parts based on the matched word
-  const [before, after] = message.split(matchedWord);
+  const [before, after] = value.split(matchedWord);
 
   return (
     <span>
@@ -50,32 +83,78 @@ export const ActivityCustomMessage = ({
               : ''
         } px-2 py-1 font-semibold`}
       >
-        {matchedWord}
+        {translatedValue}
       </span>
       {after}
     </span>
   );
 };
 
-const ActivityAction = ({ activity }: ActivityActionProps) => {
+const ActivityAction = ({
+  activity,
+}: Omit<ActivityActionProps, 'formattedActivity'>) => {
+  const { t } = useTranslation('logs');
+  const formattedActivity = translateActivity(activity, t);
   if (
     activity.type === ActivityType.STATUS ||
-    activity.type === ActivityType.PRIORITY
+    activity.type === ActivityType.PRIORITY ||
+    activity.type === ActivityType.DUE_DATE
   )
-    return <StatusActivity activity={activity} />;
-  else return <DefaultAction activity={activity} />;
+    return (
+      <StatusActivity
+        activity={activity}
+        formattedActivity={formattedActivity}
+      />
+    );
+  else
+    return (
+      <DefaultAction
+        activity={activity}
+        formattedActivity={formattedActivity}
+      />
+    );
 };
 
-export const StatusActivity = ({ activity }: ActivityActionProps) => {
+export const StatusActivity = ({
+  activity,
+  formattedActivity,
+}: ActivityActionProps) => {
   if (
     activity.type === ActivityType.STATUS ||
-    activity.type === ActivityType.PRIORITY
+    activity.type === ActivityType.PRIORITY ||
+    activity.type === ActivityType.DUE_DATE
   ) {
     return (
-      <div className="flex h-fit w-fit w-full justify-between gap-1 text-gray-400">
-        <ActivityCustomMessage message={activity.message} />
-        <small>
-          {formatDateToString(new Date(activity.created_at), 'short')}
+      <div className="flex h-fit w-full justify-between gap-4 text-gray-400">
+        <div className="flex gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+            {activity.type === ActivityType.PRIORITY ? (
+              <BarChart className="h-5 w-5 text-gray-400" />
+            ) : activity.type === ActivityType.DUE_DATE ? (
+              <Calendar className="h-5 w-5 text-gray-400" />
+            ) : activity.type === ActivityType.STATUS ? (
+              <LineChart className="h-5 w-5 text-gray-400" />
+            ) : null}
+          </div>
+          <span className="inline-flex flex-wrap gap-1">
+            <span>{formattedActivity.actor}</span>
+            <span>{formattedActivity.message}</span>
+            <span>{formatTarget(formattedActivity.type)}</span>
+            <span>{formattedActivity.preposition}</span>
+            <span>
+              {activity.type === 'due_date' &&
+                format(new Date(formattedActivity.value ?? ''), '	Pp')}
+            </span>
+            {(activity.type === 'priority' || activity.type === 'status') && (
+              <ActivityCustomSpan
+                value={activity.value}
+                translatedValue={formattedActivity.value}
+              />
+            )}
+          </span>
+        </div>
+        <small className="w-full max-w-[100px] text-right">
+          {format(new Date(formattedActivity.created_at), 'MMM dd, p')}
         </small>
       </div>
     );
@@ -83,18 +162,31 @@ export const StatusActivity = ({ activity }: ActivityActionProps) => {
   return null;
 };
 
-export const DefaultAction = ({ activity }: ActivityActionProps) => {
+export const DefaultAction = ({
+  activity,
+  formattedActivity,
+}: ActivityActionProps) => {
   return (
-    <div className="flex h-fit w-fit w-full justify-between gap-1 text-gray-400">
+    <div className="flex h-fit w-full justify-between gap-4 text-gray-400">
       <div className="flex gap-1">
         <AvatarDisplayer
           displayName={null}
-          pictureUrl={activity.user.picture_url}
+          pictureUrl={formattedActivity.user.picture_url}
         />
-        <span>{activity.message}</span>
+        <span className="flex flex-wrap gap-1">
+          <span>{formattedActivity.actor}</span>
+          <span>{formattedActivity.message}</span>
+          <span>{formatTarget(formattedActivity.type)}</span>
+          <span>{formattedActivity.preposition}</span>
+          <span>
+            {activity.type === 'due_date'
+              ? format(new Date(formattedActivity.value ?? ''), '	Pp')
+              : formattedActivity.value}
+          </span>
+        </span>
       </div>
-      <small>
-        {formatDateToString(new Date(activity.created_at), 'short')}
+      <small className="w-full max-w-[100px] text-right">
+        {format(new Date(activity.created_at), 'MMM dd, p')}
       </small>
     </div>
   );
