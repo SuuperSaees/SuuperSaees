@@ -17,6 +17,6 @@ export const UpdateTeamNameSchema = TeamNameFormSchema.merge(
 
 export const UpdateTeamStripeIdSchema = TeamStripeIdFormSchema.merge(
   z.object({
-    slug: z.string().min(1).max(255),
+    id: z.string(),
   })
 )

@@ -13,17 +13,17 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
-interface accountSchema {
-    email: string;
-    slug: string;
-    stripeId: string;
+type AccountSchema = {
+    email: string | null | undefined;
+    id: string | null | undefined;
+    stripeId: string | null | undefined;
 }
 
 export default function RegisterAccountContainer() {
     const supabase = useSupabase();
-    const [account, setAccount] = useState<accountSchema>({
+    const [account, setAccount] = useState<AccountSchema>({
         email: "",
-        slug: "",
+        id: "",
         stripeId: ""
     })
     // const amount = 49.99;
@@ -35,23 +35,20 @@ export default function RegisterAccountContainer() {
                 error,
             } = await supabase.auth.getUser();
             const email = user?.email as string;
-            const responseDataAccount = await supabase
+            const {data: responseDataAccount, error: errorResponseAccount } = await supabase
             .from("accounts")
             .select("*")
             .eq("email", email);
 
-            if (error) {
+            if (errorResponseAccount) {
                 console.error("Error fetching user:", error);
             } else {
-                if (responseDataAccount.data && responseDataAccount.data.length > 0){
-                    const accountData = responseDataAccount.data[0]
-                    const email= accountData?.email as string;
-                    const slug= accountData?.slug as string;
-                    const stripeId= accountData?.email as string;
+                if (responseDataAccount && responseDataAccount.length > 0){
+                    const accountData = responseDataAccount[0]
                     setAccount({
-                        email,
-                        slug,
-                        stripeId
+                        email: accountData?.email,
+                        id: accountData?.id,
+                        stripeId: accountData?.stripe_id,
                     })
                 }
             }
@@ -62,17 +59,8 @@ export default function RegisterAccountContainer() {
     
     return (
         <div>
-            <Elements 
-                stripe={stripePromise}
-                // options={
-                //     {
-                //         mode: 'payment',
-                //         amount: convertToSubcurrency(amount),
-                //         currency: 'usd',
-                //     }
-                // }
-            >
-                <RegisterStripePage  email={account?.email} stripeId={account?.stripeId} slug={account?.slug}/>
+            <Elements stripe={stripePromise}>
+               {account?.email && account?.id && <RegisterStripePage  email={account?.email} stripeId={account?.stripeId} id={account?.id}/>}
             </Elements>
 
         </div>

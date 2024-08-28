@@ -60,33 +60,25 @@ export const updateTeamAccountStripeId = enhanceAction(
   async (params) => {
     const client = getSupabaseServerActionClient();
     const logger = await getLogger();
-    const { stripe_id, slug } = params;
-
-    const ctx = {
-      name: 'team-accounts.update',
-      accountName: name,
-    };
-
-    logger.info(ctx, `Updating team name...`);
-
+    const { stripe_id, id } = params;
     const { error } = await client
       .from('accounts')
       .update({
         stripe_id
       })
       .match({
-        slug,
+        id,
       })
       .select('slug')
       .single();
 
     if (error) {
-      logger.error({ ...ctx, error }, `Failed to update stripe id`);
+      logger.error({ error }, `Failed to update stripe id`);
 
       throw error;
     }
 
-    logger.info(ctx, `Team name updated`);
+    logger.info(`Team name updated`);
 
     return { success: true };
   },
