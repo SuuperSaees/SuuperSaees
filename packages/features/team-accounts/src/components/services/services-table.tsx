@@ -246,9 +246,9 @@ export function ServicesTable({ services }: ServicesTableProps) {
           <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
             Aún no has creado ningún servicio, agrega uno haciendo clic a continuación.
           </p>
-          <Button>
+          {/* <Button>
             <Link href="/services/create">Crear servicio</Link>
-          </Button>
+          </Button> */}
         </div>
       </TableCell>
     </TableRow>
