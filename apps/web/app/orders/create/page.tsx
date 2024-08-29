@@ -28,18 +28,7 @@ function CreateOrderPage() {
         >
           <Trans i18nKey={'orders:creation.title'} />
         </h2>
-        <div className="flex space-x-4">
-          <span>
-            <Button variant="outline">
-              Tu prueba gratuita termina en xx dias
-            </Button>
-          </span>
-          <span>
-            <Button variant="outline" size="icon">
-              <BellIcon className="h-4 w-4" />
-            </Button>
-          </span>
-        </div>
+
       </div>
 
       <OrderCreationForm />
