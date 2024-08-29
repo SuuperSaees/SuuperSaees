@@ -19,7 +19,6 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 import { Button } from '@kit/ui/button';
 import Link from 'next/link';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { TurtleIcon } from 'lucide-react';
 
 type AccountStripe = {
   id: string;
@@ -58,18 +57,14 @@ export function PersonalAccountSettingsContainer(
     charges_enabled: false,
   });
   const supportsLanguageSelection = useSupportMultiLanguage();
-  console.log("HOLAAAA MUNDOOOO JUJUU")
-  
   useEffect(() => {
     let user;
     void fetchUserAccount().then((data)=> {
       setUser(data)
       user= data
-      console.log(user)
     }).then(()=> {
       const fetchAccountStripe = async () => {
         const stripeId = user?.stripe_id as string;
-        console.log(user)
         if (stripeId) {
           try {
             const response = await fetch(`/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`, {
@@ -83,7 +78,6 @@ export function PersonalAccountSettingsContainer(
             }
             const data: AccountStripe = await response.json();
             setAccountStripe(data);
-            console.log(data)
           } catch (error) {
             console.error('Error fetching account data:', error);
           }
