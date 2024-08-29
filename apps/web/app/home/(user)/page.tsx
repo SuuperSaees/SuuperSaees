@@ -1,9 +1,14 @@
 import { redirect } from 'next/navigation';
+
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { PageBody } from '@kit/ui/page';
-import { HomeLayoutPageHeader } from './_components/home-page-header';
+
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+
 import { HomeAccountMetrics } from './_components/home-account-metrics';
+import { HomeLayoutPageHeader } from './_components/home-page-header';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -17,35 +22,43 @@ export const generateMetadata = async () => {
 export default async function UserHomePage() {
   const supabase = getSupabaseServerComponentClient();
 
-  const { data: {user} } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    return redirect('/login'); 
+    return redirect('/login');
   }
 
-  const { data: names} = await supabase
+  const { data: userAccount, error: userAccountError } = await supabase
     .from('accounts')
     .select('*')
     .eq('id', user.id)
+    .single();
 
-    const name = names?.[0]?.name;
-
-
-
-  const { data: accounts} = await supabase
-    .from('accounts')
-    .select('*')
-    .eq('primary_owner_user_id', user.id)
-    .eq('is_personal_account', false);
-
-  if (accounts!.length === 0) {
-    console.log('No tiene organizaciones');
-    return redirect('/add-organization'); 
+  if (userAccountError) {
+    console.error('Error al obtener la cuenta del usuario', userAccountError);
+    return;
   }
+  const name = userAccount.name;
 
+  // const { data: accounts } = await supabase
+  //   .from('accounts')
+  //   .select('*')
+  //   .eq('id', userAccount.organization_id ?? '')
+  //   .eq('is_personal_account', false);
+
+  if (!userAccount.organization_id) {
+    console.log('No tiene organizaciones');
+    return redirect('/add-organization');
+  }
+  return redirect('/orders')
   return (
     <>
-      <HomeLayoutPageHeader title={`Te damos la bienvenida, ${name}`} description="" />
+      <HomeLayoutPageHeader
+        title={`Te damos la bienvenida, ${name}`}
+        description=""
+      />
       <PageBody className="space-y-4">
         <HomeAccountMetrics />
       </PageBody>
