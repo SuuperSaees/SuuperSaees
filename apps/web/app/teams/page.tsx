@@ -129,14 +129,7 @@ async function ClientsMembersPage() {
           <div className="w-full">
             <div className="flex items-center justify-between py-4">
 
-              <Button
-                variant="ghost"
-                className={`'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'} flex h-9 items-center gap-2 rounded-md p-2 px-3`}
-              >
-                <span className="text-sm font-semibold leading-5">
-                  <Trans i18nKey={'common:membersTabLabel'} />
-                </span>
-              </Button>
+          
 
               <If condition={canManageInvitations && (await canAddMember())}>
 
@@ -154,7 +147,7 @@ async function ClientsMembersPage() {
                 )}
               </div>
 
-              <If condition={canManageInvitations && canAddMember}>
+        
 
                 <InviteMembersDialogContainer
                   userRoleHierarchy={currentUserRoleHierarchy ?? 0}
