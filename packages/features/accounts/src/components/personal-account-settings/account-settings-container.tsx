@@ -19,13 +19,14 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 import { Button } from '@kit/ui/button';
 import Link from 'next/link';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+import { TurtleIcon } from 'lucide-react';
 
 type AccountStripe = {
   id: string;
   charges_enabled: boolean;
 };
 
-export async function PersonalAccountSettingsContainer(
+export function PersonalAccountSettingsContainer(
   
   props: React.PropsWithChildren<{
     userId: string;
@@ -37,15 +38,20 @@ export async function PersonalAccountSettingsContainer(
     };
   }>,
 ) {
- const client = useSupabase()
+  const [user, setUser] = useState()
+  const client = useSupabase()
 
-  const { data: user, error: userAccountError } = await client
-    .from('accounts')
-    .select('*')
-    .eq('id', props.userId)
-    .single();
+  const fetchUserAccount = async () => {
+    const { data: user, error: userAccountError } = await client
+      .from('accounts')
+      .select('*')
+      .eq('id', props.userId)
+      .single();
+   
+    if (userAccountError) console.error(userAccountError.message);
+    return user
+  }
 
-  if (userAccountError) console.error(userAccountError.message);
 
   const [accountStripe, setAccountStripe] = useState<AccountStripe>({
     id: "",
@@ -53,10 +59,14 @@ export async function PersonalAccountSettingsContainer(
   });
   const supportsLanguageSelection = useSupportMultiLanguage();
   console.log("HOLAAAA MUNDOOOO JUJUU")
-  console.log(user)
-
+  
   useEffect(() => {
-    if (user) {
+    let user;
+    void fetchUserAccount().then((data)=> {
+      setUser(data)
+      user= data
+      console.log(user)
+    }).then(()=> {
       const fetchAccountStripe = async () => {
         const stripeId = user?.stripe_id as string;
         console.log(user)
@@ -73,6 +83,7 @@ export async function PersonalAccountSettingsContainer(
             }
             const data: AccountStripe = await response.json();
             setAccountStripe(data);
+            console.log(data)
           } catch (error) {
             console.error('Error fetching account data:', error);
           }
@@ -80,7 +91,7 @@ export async function PersonalAccountSettingsContainer(
       };
 
       void fetchAccountStripe();
-    }
+    })
   }, []);
 
   if (!user) {
