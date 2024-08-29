@@ -102,49 +102,6 @@ const CreateOrganization = ( ) => {
         </div>
     );
       
-
-//   return (
-//     <>
-//     <Form {...form}>
-//         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-//             <FormField
-//             control={form.control}
-//             name="organization_name"
-//             render={({ field }) => (
-//                 <FormItem>
-//                 <FormLabel>{t("organizationName")}</FormLabel>
-//                 <FormControl>
-//                     <Input placeholder={t("organizationLabel")} {...field} />
-//                 </FormControl>
-//                 <FormMessage />
-//                 </FormItem>
-//             )}
-//             />
-//             <Button type="submit" className='w-full '>
-//                 {t('continue')}
-//             </Button>
-//         </form>
-//     </Form>
-//     <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-//                 <AlertDialogTrigger asChild>
-//                     <Button variant="outline" />
-//                 </AlertDialogTrigger>
-//                 <AlertDialogContent>
-//                     <AlertDialogHeader>
-//                         <AlertDialogTitle>{t('successAgency')}</AlertDialogTitle>
-//                         <AlertDialogDescription>
-//                             {t('successAgencyDescription')}
-//                         </AlertDialogDescription>
-//                     </AlertDialogHeader>
-//                     <AlertDialogFooter>
-//                         <Link href="/home">
-//                             <AlertDialogAction>{t('continue')}</AlertDialogAction>
-//                         </Link>
-//                     </AlertDialogFooter>
-//                 </AlertDialogContent>
-//             </AlertDialog>
-//     </>
-//   );
 };
 
 export default CreateOrganization;

@@ -20,17 +20,17 @@ function StandardRecurringSubscription() {
     const [isTestPeriod, setIsTestPeriod] = useState(false);
 
     const recurrenceOptions = [
-        { value: 'daily', label: t('daily') },
-        { value: 'weekly', label: t('weekly') },
-        { value: 'monthly', label: t('monthly') },
-        { value: 'yearly', label: t('yearly') },
+        { value: 'day', label: t('daily') },
+        { value: 'week', label: t('weekly') },
+        { value: 'month', label: t('monthly') },
+        { value: 'year', label: t('yearly') },
     ];
 
     const UnitOfMeasurementOptions = [
-        { value: 'days', label: t('days') },
-        { value: 'weeks', label: t('weeks') },
-        { value: 'months', label: t('months') },
-        { value: 'years', label: t('years') },
+        { value: 'day', label: t('days') },
+        { value: 'week', label: t('weeks') },
+        { value: 'month', label: t('months') },
+        { value: 'year', label: t('years') },
     ];
 
   return (
@@ -183,7 +183,10 @@ function StandardRecurringSubscription() {
             </div>
             
         </div>
-        <div className='flex justify-between space-x-4'>
+
+        {/* //At this time we will only handle standard for one-time payment and subscription */}
+
+        {/* <div className='flex justify-between space-x-4'>
             <FormField
                 name="step_service_price.max_number_of_simultaneous_orders"
                 render={({ field }) => (
@@ -220,7 +223,7 @@ function StandardRecurringSubscription() {
                     </FormItem>
                 )}
             />
-        </div>
+        </div> */}
         
     </div>
   );

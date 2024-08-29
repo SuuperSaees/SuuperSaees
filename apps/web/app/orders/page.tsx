@@ -1,7 +1,5 @@
-import { BellIcon } from '@radix-ui/react-icons';
 import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 
-import { Button } from '@kit/ui/button';
 import { PageBody } from '@kit/ui/page';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
@@ -41,18 +39,6 @@ async function UserHomePage() {
                 <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
                   Pedidos
                 </div>
-              </span>
-            </div>
-            <div className="flex space-x-4">
-              <span>
-                <Button variant="outline">
-                  Tu prueba gratuita termina en xx dias
-                </Button>
-              </span>
-              <span>
-                <Button variant="outline" size="icon">
-                  <BellIcon className="h-4 w-4" />
-                </Button>
               </span>
             </div>
           </div>
