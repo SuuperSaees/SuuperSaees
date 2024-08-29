@@ -20,8 +20,8 @@ import { Separator } from '@kit/ui/separator';
 
 
 
-import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
-import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
+// import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
+// import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
 import { createClient } from './create-client-server';
 
 
@@ -130,7 +130,7 @@ const CreateClientDialog = () => {
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="role"
                   render={({ field }) => (
@@ -142,8 +142,8 @@ const CreateClientDialog = () => {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
-                <RolesDataProvider maxRoleHierarchy={5}>
+                /> */}
+                {/* <RolesDataProvider maxRoleHierarchy={5}>
                   {(roles) => {
                     return (
                       <FormField
@@ -152,10 +152,10 @@ const CreateClientDialog = () => {
                           return (
                             <FormItem>
                               {/* <If condition={isFirst}> */}
-                              <FormLabel>{t('teams:roleLabel')}</FormLabel>
+                              {/* <FormLabel>{t('teams:roleLabel')}</FormLabel> */}
                               {/* </If> */}
 
-                              <FormControl>
+                              {/* <FormControl>
                                 <MembershipRoleSelector
                                   roles={roles}
                                   value={field.value}
@@ -166,13 +166,13 @@ const CreateClientDialog = () => {
                               </FormControl>
 
                               <FormMessage />
-                            </FormItem>
-                          );
+                            </FormItem> */}
+                          {/* );
                         }}
-                      />
-                    );
-                  }}
-                </RolesDataProvider>
+                      /> */}
+                    {/* ); */}
+                  {/* }} */}
+                {/* </RolesDataProvider> */} 
 
                 <Separator />
                 <Button type="submit" className="w-full">

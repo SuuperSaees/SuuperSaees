@@ -102,6 +102,7 @@ async function ClientsMembersPage() {
 
   const slug = organizationAccount.data?.slug ?? '';
 
+
   const [members, invitations, canAddMember, { user }] =
     await loadMembersPageData(client, slug);
 
@@ -123,22 +124,11 @@ async function ClientsMembersPage() {
                 </div>
               </span>
             </div>
-            <div className="flex space-x-4">
-              <span>
-                <Button variant="outline">
-                  Tu prueba gratuita termina en xx dias
-                </Button>
-              </span>
-              <span>
-                <Button variant="outline" size="icon">
-                  <BellIcon className="h-4 w-4" />
-                </Button>
-              </span>
-            </div>
           </div>
 
           <div className="w-full">
             <div className="flex items-center justify-between py-4">
+
               <Button
                 variant="ghost"
                 className={`'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'} flex h-9 items-center gap-2 rounded-md p-2 px-3`}
@@ -149,6 +139,23 @@ async function ClientsMembersPage() {
               </Button>
 
               <If condition={canManageInvitations && (await canAddMember())}>
+
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold">
+                  <Trans i18nKey={'common:membersTabLabel'} />
+                </h3>
+                {members && (
+                  <div className="rounded-full border border-brand-700 bg-brand-50 px-2 py-0 text-brand-700">
+                    <span className="inline-flex gap-2 text-[12px]">
+                      <span>{members.length}</span>
+                      <Trans i18nKey={'teams:labelNumberOfUsers'} />
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <If condition={canManageInvitations && canAddMember}>
+
                 <InviteMembersDialogContainer
                   userRoleHierarchy={currentUserRoleHierarchy ?? 0}
                   accountSlug={slug}

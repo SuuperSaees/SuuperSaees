@@ -1,7 +1,6 @@
 import {
   // Briefcase,
   CreditCard,
-  Home,
   Layers,
   Settings,
   SquareCheck,
@@ -17,12 +16,12 @@ import pathsConfig from '~/config/paths.config';
 const iconClasses = 'w-4';
 
 const routes = [
-  {
-    label: 'Inicio',
-    path: pathsConfig.app.home,
-    Icon: <Home className={iconClasses} />,
-    end: true,
-  },
+  // {
+  //   label: 'Inicio',
+  //   path: pathsConfig.app.home,
+  //   Icon: <Home className={iconClasses} />,
+  //   end: true,
+  // },
   {
     label: 'Pedidos',
     path: pathsConfig.app.orders,
