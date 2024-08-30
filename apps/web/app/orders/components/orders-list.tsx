@@ -255,11 +255,9 @@ export function OrderList({ orders }: OrdersTableProps) {
                                   Aún no haz creado ningún pedido, agrega uno
                                   haciendo clic a continuación.
                                 </p>
-                                <Button>
-                                  <Link href="/orders/create">
-                                    Crear pedido
-                                  </Link>
-                                </Button>
+                                <Link href="/orders/create">
+                                  <Button className="po">Crear pedido</Button>
+                                </Link>
                               </div>
                             </TableCell>
                           </TableRow>

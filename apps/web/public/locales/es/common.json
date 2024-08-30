@@ -22,6 +22,8 @@
   "pageNotFoundSubHeading": "Lo sentimos, la página que buscabas no fue encontrada",
   "genericError": "Lo siento, algo salió mal.",
   "genericErrorSubHeading": "Lo sentimos, ocurrió un error al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
+  "goBack": "Volver",
+  "backToHomePage": "Regresar a la página principal",
   "anonymousUser": "Anónimo",
   "tryAgain": "Intentar de Nuevo",
   "theme": "Tema",

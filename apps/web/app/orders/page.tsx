@@ -1,11 +1,18 @@
 import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 
+
+
 import { PageBody } from '@kit/ui/page';
+
+
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+
+
 import { OrderList } from './components/orders-list';
+
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -19,9 +26,9 @@ export const generateMetadata = async () => {
 // };
 
 async function UserHomePage() {
-  const ordersData = await getOrders();
+  const ordersData = await getOrders().catch((err) => console.error(err));
   const processedOrders =
-    ordersData.map((order) => ({
+    ordersData?.map((order) => ({
       ...order,
       customer_organization: order.organization.name ?? '',
       customer_name: order.customer.name ?? '',
