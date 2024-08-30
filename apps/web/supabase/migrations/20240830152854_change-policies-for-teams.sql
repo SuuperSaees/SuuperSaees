@@ -16,12 +16,17 @@ drop view if exists "public"."user_accounts";
 
 alter table "public"."accounts" drop column "stripe_id";
 
-set check_function_bodies = off;
-
-CREATE OR REPLACE FUNCTION public.has_same_role_hierarchy_level_or_lower(target_user_id uuid, target_account_id uuid, role_name text)
- RETURNS boolean
- LANGUAGE plpgsql
-AS $function$declare
+-- Function "public.has_same_role_hierarchy_level_or_lower"
+-- Check if a user has the same role hierarchy level as the target role
+create
+or replace function public.has_same_role_hierarchy_level_or_lower (
+  target_user_id uuid,
+  target_account_id uuid,
+  role_name varchar
+) returns boolean
+set
+  search_path = '' as $$
+declare
     is_primary_owner boolean;
     user_role_hierarchy_level int;
     target_role_hierarchy_level int;
@@ -75,11 +80,16 @@ begin
         return false;
     end if;
 
-   -- check the user's role hierarchy level is the same as the target role
+   -- check the user's role hierarchy level is same or lower as the target role
     return user_role_hierarchy_level <= target_role_hierarchy_level;
 
-end;$function$
-;
+end;
+
+$$ language plpgsql;
+
+grant
+execute on function public.has_same_role_hierarchy_level_or_lower (uuid, uuid, varchar) to authenticated,
+service_role;
 
 create or replace view "public"."user_account_workspace" as  SELECT accounts.id,
     accounts.name,
