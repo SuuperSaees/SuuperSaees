@@ -64,7 +64,7 @@ export function AccountSelector({
     selectedAccount ?? PERSONAL_ACCOUNT_SLUG,
   );
 
-  const { t } = useTranslation('teams');
+  const { t } = useTranslation('team');
   const personalData = usePersonalAccountData(userId);
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export function AccountSelector({
                       hidden: collapsed,
                     })}
                   >
-                    <Trans i18nKey={'teams:personalAccount'} />
+                    <Trans i18nKey={'team:personalAccount'} />
                   </span>
                 </span>
               }
@@ -169,7 +169,7 @@ export function AccountSelector({
                   <PersonalAccountAvatar />
 
                   <span className={'ml-2'}>
-                    <Trans i18nKey={'teams:personalAccount'} />
+                    <Trans i18nKey={'team:personalAccount'} />
                   </span>
 
                   <Icon item={PERSONAL_ACCOUNT_SLUG} />
@@ -182,7 +182,7 @@ export function AccountSelector({
                 <CommandGroup
                   heading={
                     <Trans
-                      i18nKey={'teams:yourTeams'}
+                      i18nKey={'team:yourTeams'}
                       values={{ teamsCount: accounts.length }}
                     />
                   }
@@ -254,7 +254,7 @@ export function AccountSelector({
                 <Plus className="mr-3 h-4 w-4" />
 
                 <span>
-                  <Trans i18nKey={'teams:createTeam'} />
+                  <Trans i18nKey={'team:createTeam'} />
                 </span>
               </Button>
             </div>

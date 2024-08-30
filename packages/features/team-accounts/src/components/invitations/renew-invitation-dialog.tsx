@@ -94,7 +94,7 @@ function RenewInvitationForm({
             data-test={'confirm-renew-invitation'}
             disabled={isSubmitting}
           >
-            <Trans i18nKey={'teams:renewInvitation'} />
+            <Trans i18nKey={'team:renewInvitation'} />
           </Button>
         </AlertDialogFooter>
       </div>
@@ -106,11 +106,11 @@ function RenewInvitationErrorAlert() {
   return (
     <Alert variant={'destructive'}>
       <AlertTitle>
-        <Trans i18nKey={'teams:renewInvitationErrorTitle'} />
+        <Trans i18nKey={'team:renewInvitationErrorTitle'} />
       </AlertTitle>
 
       <AlertDescription>
-        <Trans i18nKey={'teams:renewInvitationErrorDescription'} />
+        <Trans i18nKey={'team:renewInvitationErrorDescription'} />
       </AlertDescription>
     </Alert>
   );

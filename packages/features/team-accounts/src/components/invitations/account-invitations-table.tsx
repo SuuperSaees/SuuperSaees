@@ -43,7 +43,7 @@ export function AccountInvitationsTable({
   invitations,
   permissions,
 }: AccountInvitationsTableProps) {
-  const { t } = useTranslation('teams');
+  const { t } = useTranslation('team');
   const [search, setSearch] = useState('');
   const columns = useGetColumns(permissions);
 
@@ -61,7 +61,7 @@ export function AccountInvitationsTable({
     <div className={'flex flex-col space-y-4'}>
       <div className="flex items-center justify-between">
         <h3 className="font-bold">
-          <Trans i18nKey={'teams:pendingInvitesHeading'} />
+          <Trans i18nKey={'team:pendingInvitesHeading'} />
         </h3>
         <div className="relative flex-1 md:grow-0">
           <Search className="text-muted-foreground absolute right-2.5 top-2.5 h-4 w-4" />
@@ -90,7 +90,7 @@ function useGetColumns(permissions: {
   canRemoveInvitation: boolean;
   currentUserRoleHierarchy: number;
 }): ColumnDef<Invitations[0]>[] {
-  const { t } = useTranslation('teams');
+  const { t } = useTranslation('team');
 
   return useMemo(
     () => [
@@ -192,7 +192,7 @@ function ActionsDropdown({
               data-test={'update-invitation-trigger'}
               onClick={() => setIsUpdatingRole(true)}
             >
-              <Trans i18nKey={'teams:updateInvitation'} />
+              <Trans i18nKey={'team:updateInvitation'} />
             </DropdownMenuItem>
 
             <If condition={getIsInviteExpired(invitation.expires_at)}>
@@ -200,7 +200,7 @@ function ActionsDropdown({
                 data-test={'renew-invitation-trigger'}
                 onClick={() => setIsRenewingInvite(true)}
               >
-                <Trans i18nKey={'teams:renewInvitation'} />
+                <Trans i18nKey={'team:renewInvitation'} />
               </DropdownMenuItem>
             </If>
           </If>
@@ -210,7 +210,7 @@ function ActionsDropdown({
               data-test={'remove-invitation-trigger'}
               onClick={() => setIsDeletingInvite(true)}
             >
-              <Trans i18nKey={'teams:removeInvitation'} />
+              <Trans i18nKey={'team:removeInvitation'} />
             </DropdownMenuItem>
           </If>
         </DropdownMenuContent>

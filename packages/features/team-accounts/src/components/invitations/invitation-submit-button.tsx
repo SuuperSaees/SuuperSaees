@@ -14,7 +14,7 @@ export function InvitationSubmitButton(props: {
   return (
     <Button type={'submit'} className={'w-full'} disabled={pending}>
       <Trans
-        i18nKey={pending ? 'teams:joiningTeam' : 'teams:continueAs'}
+        i18nKey={pending ? 'team:joiningTeam' : 'team:continueAs'}
         values={{
           accountName: props.accountName,
           email: props.email,

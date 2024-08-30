@@ -37,7 +37,7 @@ const routes = [
       },
       {
         label: 'Equipo',
-        path: pathsConfig.app.teams,
+        path: pathsConfig.app.team,
       },
     ],
   },
