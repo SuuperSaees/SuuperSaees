@@ -1,16 +1,6 @@
-"use client";
-
 import React, { useEffect, useRef, useState } from 'react';
-
-
-
-import { CheckSquare, CloudUpload, StickyNote } from 'lucide-react';
-
-// import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import {
-  createFile,
-  createUploadBucketURL,
-} from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
+import { CheckSquare, CloudUpload, StickyNote, Trash2 } from 'lucide-react';
+import { createFile, createUploadBucketURL } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { File } from '../../../web/lib/file.types';
 
@@ -36,18 +26,13 @@ export default function UploadFileComponent({
   onFileIdsChange,
   removeResults = false,
 }: UploadFileComponentProps) {
-  // const supabase = useSupabase();
-  const [error, setError] = useState<string | null>(null);
-  const [files, setFiles] = useState<File[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
-    {},
-  );
+  const [filesWithId, setFilesWithId] = useState<Map<string, File>>({});
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isDragging, setIsDragging] = useState(false);
-  const [dragMessage, setDragMessage] = useState(
-    'Arrastra los archivos o dale click aquí para subir archivos',
-  );
+  const [dragMessage, setDragMessage] = useState('Arrastra los archivos o dale click aquí para subir archivos');
   const [fileIds, setFileIds] = useState<string[]>([]);
-
+  
   const handleFileInputClick = () => {
     const fileInput = document.getElementById('file-input');
     if (fileInput) {
@@ -55,20 +40,24 @@ export default function UploadFileComponent({
     }
   };
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []);
     if (selectedFiles.length === 0) {
-      setError('Debes seleccionar al menos un archivo');
+      setErrors((prevErrors) => ({ ...prevErrors, '': 'Debes seleccionar al menos un archivo' }));
       return;
     }
 
-    setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
-    setError(null);
-    console.log('WARN', selectedFiles);
-    for (const file of selectedFiles) {
-      await uploadFile(file);
+    const filesWithIds = selectedFiles.reduce((acc, file) => {
+      const id = generateFileId();
+      acc[id] = file;
+      return acc;
+    }, {} as Record<string, File>);
+
+    setFilesWithId((prevFiles) => ({ ...prevFiles, ...filesWithIds }));
+    setErrors((prevErrors) => ({ ...prevErrors, ...Object.fromEntries(Object.keys(filesWithIds).map(id => [id, null])) }));
+
+    for (const [id, file] of Object.entries(filesWithIds)) {
+      await uploadFile(id, file);
     }
   };
 
@@ -77,15 +66,21 @@ export default function UploadFileComponent({
     setIsDragging(false);
     const droppedFiles = Array.from(event.dataTransfer.files);
     if (droppedFiles.length === 0) {
-      setError('Debes seleccionar al menos un archivo');
+      setErrors((prevErrors) => ({ ...prevErrors, '': 'Debes seleccionar al menos un archivo' }));
       return;
     }
 
-    setFiles((prevFiles) => [...prevFiles, ...droppedFiles]);
-    setError(null);
+    const filesWithIds = droppedFiles.reduce((acc, file) => {
+      const id = generateFileId();
+      acc[id] = file;
+      return acc;
+    }, {} as Record<string, File>);
 
-    for (const file of droppedFiles) {
-      await uploadFile(file);
+    setFilesWithId((prevFiles) => ({ ...prevFiles, ...filesWithIds }));
+    setErrors((prevErrors) => ({ ...prevErrors, ...Object.fromEntries(Object.keys(filesWithIds).map(id => [id, null])) }));
+
+    for (const [id, file] of Object.entries(filesWithIds)) {
+      await uploadFile(id, file);
     }
   };
 
@@ -97,16 +92,16 @@ export default function UploadFileComponent({
 
   const handleDragLeave = () => {
     setIsDragging(false);
-    setDragMessage(
-      'Arrastra los archivos o dale click aquí para subir archivos',
-    );
+    setDragMessage('Arrastra los archivos o dale click aquí para subir archivos');
   };
+
+  const generateFileId = () => Date.now() + Math.random().toString(36).substr(2, 9);
 
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
   };
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (id: string, file: File) => {
     const sanitizedFileName = sanitizeFileName(file.name);
     const filePath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
     const xhr = new XMLHttpRequest();
@@ -116,28 +111,32 @@ export default function UploadFileComponent({
         const progress = (event.loaded / event.total) * 100;
         setUploadProgress((prev) => ({
           ...prev,
-          [file.name]: progress,
+          [id]: progress,
         }));
       }
     });
 
     xhr.upload.addEventListener('error', () => {
-      setError(`Error al subir el archivo ${file.name}`);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [id]: `Error al subir el archivo ${file.name}`,
+      }));
     });
 
     xhr.upload.addEventListener('load', () => {
       setUploadProgress((prev) => ({
         ...prev,
-        [file.name]: 100,
+        [id]: 100,
       }));
-      // Automatically remove the file from the list when the upload is complete
       removeResults &&
         setTimeout(() => {
-          setFiles((prevFiles) =>
-            prevFiles.filter((f) => f.name !== file.name),
-          );
+          setFilesWithId((prevFiles) => {
+            const updatedFiles = { ...prevFiles };
+            delete updatedFiles[id];
+            return updatedFiles;
+          });
           setUploadProgress((prev) => {
-            const { [file.name]: _, ...rest } = prev;
+            const { [id]: _, ...rest } = prev;
             return rest;
           });
         }, 1000); // Delay to let the user see the 100% state
@@ -146,57 +145,64 @@ export default function UploadFileComponent({
     xhr.onreadystatechange = () => {
       if (xhr.readyState === XMLHttpRequest.DONE) {
         if (xhr.status !== 200) {
-          setError(`Error al subir el archivo ${file.name}: ${xhr.statusText}`);
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            [id]: `Error al subir el archivo ${file.name}: ${xhr.statusText}`,
+          }));
         }
       }
     };
 
-    const data = await createUploadBucketURL(bucketName, filePath).catch(
-      (error) => {
-        setError(`Error al obtener la URL de carga: ${error.message}`);
-        throw error;
-      },
-    );
-    console.log('sigened', data.signedUrl);
-    xhr.open('PUT', data.signedUrl, true);
-    xhr.setRequestHeader('Content-Type', file.type);
-    xhr.send(file);
+    try {
+      const data = await createUploadBucketURL(bucketName, filePath);
+      xhr.open('PUT', data.signedUrl, true);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.send(file);
 
-    const fileUrl =
-      process.env.NEXT_PUBLIC_SUPABASE_URL +
-      '/storage/v1/object/public/orders/' +
-      filePath;
+      const fileUrl =
+        process.env.NEXT_PUBLIC_SUPABASE_URL +
+        '/storage/v1/object/public/orders/' +
+        filePath;
 
-    const newFileData = {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      url: fileUrl,
-      // message_id: 'a1499927-5483-4b70-934c-7316e7b36d96',
-    };
+      const newFileData = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: fileUrl,
+      };
 
-    const createdFiles = await createFile([newFileData]);
+      const createdFiles = await createFile([newFileData]);
+      setFileIds((prevFileIds) => {
+        const newFileIds = [
+          ...prevFileIds,
+          ...createdFiles.map((file) => file.id),
+        ];
+        onFileIdsChange(newFileIds);
+        return newFileIds;
+      });
+    } catch (error) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [id]: `Error al obtener la URL de carga: ${error.message}`,
+      }));
+    }
+  };
 
-    // const orderFilesToInsert = createdFiles.map((createdFile) => ({
-    //   order_id: uuid,
-    //   file_id: createdFile.id,
-    // }));
-
-    // console.log('orderFilesToInsert', orderFilesToInsert);
-
-    // const { error: orderFilesError } = await supabase
-    //   .from('order_files')
-    //   .insert(orderFilesToInsert);
-
-    // if (orderFilesError) throw orderFilesError.message;
-
-    setFileIds((prevFileIds) => {
-      const newFileIds = [
-        ...prevFileIds,
-        ...createdFiles.map((file) => file.id),
-      ];
-      onFileIdsChange(newFileIds);
-      return newFileIds;
+  const handleDelete = (id: string) => {
+    setFilesWithId((prevFiles) => {
+      const updatedFiles = { ...prevFiles };
+      delete updatedFiles[id];
+      return updatedFiles;
+    });
+    setErrors((prevErrors) => {
+      const updatedErrors = { ...prevErrors };
+      delete updatedErrors[id];
+      return updatedErrors;
+    });
+    setUploadProgress((prevProgress) => {
+      const updatedProgress = { ...prevProgress };
+      delete updatedProgress[id];
+      return updatedProgress;
     });
   };
 
@@ -211,15 +217,13 @@ export default function UploadFileComponent({
     return `${(size / (1024 * 1024)).toFixed(2)} MB`;
   };
 
-  // Reference to the container for auto-scroll
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Scroll to the bottom when files change
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [files]);
+  }, [filesWithId]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -237,19 +241,16 @@ export default function UploadFileComponent({
         <input
           type="file"
           id="file-input"
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
+          className="hidden"
           multiple
+          onChange={handleFileChange}
         />
       </div>
-      <div
-        className="thin-scrollbar max-h-52 overflow-y-auto"
-        ref={containerRef}
-      >
-        {files.map((file, index) => (
+      <div ref={containerRef} className="overflow-y-auto">
+        {Object.entries(filesWithId).map(([id, file]) => (
           <div
-            key={index}
-            className={`relative flex items-start gap-1.5 self-stretch rounded-xl border bg-white p-4 ${error ? 'border-error' : 'border-gray-200'}`}
+            key={id}
+            className={`relative flex items-start gap-1.5 self-stretch rounded-xl border bg-white p-4 ${errors[id] ? 'border-error' : 'border-gray-200'}`}
           >
             <div className="relative flex items-center justify-center">
               <StickyNote
@@ -267,28 +268,35 @@ export default function UploadFileComponent({
                 {formatFileSize(file.size)}
               </span>
               <div className="mt-2 flex items-center gap-2">
-                <div className="flex-1">
-                  <Progress
-                    value={uploadProgress[file.name] ?? 0}
-                    className="w-full"
-                  />
-                </div>
-                <span className="font-inter text-sm font-normal leading-5 text-gray-600">
-                  {Math.round(uploadProgress[file.name] ?? 0)}%
-                </span>
-                {/* Add other conditional for show the trash or ERROR icon when the upload is not completed and error is produced */}
-                {uploadProgress[file.name] === 100 ? (
-                  <div className="absolute right-4 top-4">
-                    <CheckSquare className="text-brand" />
-                  </div>
-                ) : null}
+                {errors[id] ? (
+                  <>
+                    <div className="flex-1 text-red-500">
+                      {errors[id]}
+                    </div>
+                    <div className="absolute right-4 top-4">
+                    <Trash2 className="text-red-500 cursor-pointer" onClick={() => handleDelete(id)} />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex-1">
+                      <Progress value={uploadProgress[id] ?? 0} className="w-full" />
+                    </div>
+                    <span className="font-inter text-sm font-normal leading-5 text-gray-600">
+                      {Math.round(uploadProgress[id] ?? 0)}%
+                    </span>
+                    {uploadProgress[id] === 100 && (
+                      <div className="absolute right-4 top-4">
+                        <CheckSquare className="text-brand" />
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
-
-      {error && <p className="text-red-500">{error}</p>}
     </div>
   );
 }
