@@ -1050,6 +1050,7 @@ export type Database = {
       }
       orders_v2: {
         Row: {
+          assigned_to: string[] | null
           agency_id: string
           client_organization_id: string
           created_at: string
@@ -1065,6 +1066,7 @@ export type Database = {
           uuid: string
         }
         Insert: {
+          assigned_to?: string[] | null
           agency_id: string
           client_organization_id: string
           created_at?: string
@@ -1080,6 +1082,7 @@ export type Database = {
           uuid: string
         }
         Update: {
+          assigned_to?: string[] | null
           agency_id?: string
           client_organization_id?: string
           created_at?: string

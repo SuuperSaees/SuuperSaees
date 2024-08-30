@@ -4,8 +4,6 @@ import { useMemo } from 'react';
 import * as React from 'react';
 
 import Image from 'next/image';
-import Link from 'next/link';
-
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -46,10 +44,7 @@ import {
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
 import UpdateServiceDialog from '../../server/actions/services/update/update-service';
-import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { Service } from '../../../../../../apps/web/lib/services.types';
-import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { toast } from 'sonner';
 import { getStripeAccountID } from '../../server/actions/members/get/get-member-account';
 
