@@ -144,7 +144,7 @@ const servicesColumns = (
     cell: ({ row }) => {
       const service = row.original;
 
-      const handleCheckout = async (priceId: string, type: string) => {
+      const handleCheckout = async (priceId: string) => {
         try {
           const stripeId = await getStripeAccountID();
           
