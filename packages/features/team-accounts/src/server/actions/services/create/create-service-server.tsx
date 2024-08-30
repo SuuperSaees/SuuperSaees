@@ -90,6 +90,7 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { getPrimaryOwnerId, getStripeAccountID } from '../../members/get/get-member-account';
+import { updateTeamAccountStripeId } from '../../team-details-server-actions';
 
 export const createService = async (clientData: {
   step_type_of_service: {
@@ -125,7 +126,7 @@ export const createService = async (clientData: {
     const primary_owner_user_id = await getPrimaryOwnerId()
     if (!primary_owner_user_id) throw new Error('No primary owner found');
 
-    const stripe_account_id = await getStripeAccountID();
+    let stripe_account_id = await getStripeAccountID();
     if (!stripe_account_id) throw new Error('No stripe account found');
 
     const newService = {
@@ -154,7 +155,7 @@ export const createService = async (clientData: {
       max_number_of_simultaneous_orders: clientData.step_service_price.max_number_of_simultaneous_orders,
       max_number_of_monthly_orders: clientData.step_service_price.max_number_of_monthly_orders,
     };
-
+    
     // Inserta en Supabase
     const { error, data } = await client
       .from('services')
@@ -167,6 +168,39 @@ export const createService = async (clientData: {
     }
 
     // Si se inserta correctamente en Supabase, procede a crear el servicio en Stripe
+    const fetchUserAccount = async () => {
+      const { data: {user}, error: userAccountError } = await client.auth.getUser();
+     
+      if (userAccountError) console.error(userAccountError.message);
+      return user
+    }
+
+    if (!stripe_account_id) {
+      let user;
+    void fetchUserAccount().then((data)=> {
+      user= data
+    }).then(()=> {
+        fetch("/api/stripe/create-account", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email: user?.email }),
+        })
+        .then((res) => res.json())
+        .then(async (data) => {
+          // SAVE OR UPDATE ACCOUNT ID
+          stripe_account_id = data.accountId
+          await updateTeamAccountStripeId({
+            stripe_id: data.accountId as string,
+            id: user?.id as string
+          })
+            }).catch((error) => {
+                console.log(error)
+            });
+          })
+      }
+
     const stripeResponse = await fetch(`${baseUrl}/api/stripe/create-service`, {
       method: "POST",
       headers: {

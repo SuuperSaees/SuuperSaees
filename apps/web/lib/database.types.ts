@@ -190,30 +190,42 @@ export type Database = {
       activities: {
         Row: {
           action: Database["public"]["Enums"]["action_type"]
+          actor: string
           created_at: string
           id: number
           message: string
           order_id: number
+          preposition: string
+          previous_value: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
+          value: string
         }
         Insert: {
           action: Database["public"]["Enums"]["action_type"]
+          actor: string
           created_at?: string
           id?: number
           message: string
           order_id: number
+          preposition: string
+          previous_value?: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
+          value: string
         }
         Update: {
           action?: Database["public"]["Enums"]["action_type"]
+          actor?: string
           created_at?: string
           id?: number
           message?: string
           order_id?: number
+          preposition?: string
+          previous_value?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
+          value?: string
         }
         Relationships: [
           {
@@ -853,6 +865,50 @@ export type Database = {
           },
         ]
       }
+      order_assignations: {
+        Row: {
+          agency_member_id: string
+          order_id: number
+        }
+        Insert: {
+          agency_member_id: string
+          order_id: number
+        }
+        Update: {
+          agency_member_id?: string
+          order_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_assignations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_files: {
         Row: {
           created_at: string
@@ -994,7 +1050,7 @@ export type Database = {
       }
       orders_v2: {
         Row: {
-          assigned_to: string[] | null
+          agency_id: string
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -1004,11 +1060,12 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: Database["public"]["Enums"]["order_status_types"] | null
+          stripe_account_id: string | null
           title: string
           uuid: string
         }
         Insert: {
-          assigned_to?: string[] | null
+          agency_id: string
           client_organization_id: string
           created_at?: string
           customer_id: string
@@ -1018,11 +1075,12 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status?: Database["public"]["Enums"]["order_status_types"] | null
+          stripe_account_id?: string | null
           title: string
           uuid: string
         }
         Update: {
-          assigned_to?: string[] | null
+          agency_id?: string
           client_organization_id?: string
           created_at?: string
           customer_id?: string
@@ -1032,6 +1090,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
           status?: Database["public"]["Enums"]["order_status_types"] | null
+          stripe_account_id?: string | null
           title?: string
           uuid?: string
         }
@@ -1857,6 +1916,8 @@ export type Database = {
         | "invites.manage"
         | "tasks.write"
         | "tasks.delete"
+        | "messages.write"
+        | "messages.read"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
       field_types: "date" | "multiple_choice" | "select" | "text"

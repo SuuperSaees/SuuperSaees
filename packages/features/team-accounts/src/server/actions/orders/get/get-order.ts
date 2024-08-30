@@ -10,7 +10,7 @@ import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Review } from '../../../../../../../../apps/web/lib/review.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
-
+import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
 type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url'>;
 
@@ -43,6 +43,14 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       )
       .eq('id', orderId)
       .single();
+
+    const userHasReadMessagePermission = await hasPermissionToReadOrders(
+      orderId,
+      orderData?.propietary_organization_id ?? '',
+      orderData?.client_organization_id ?? '',
+    );
+
+    if (!userHasReadMessagePermission) throw 'Unauthorized access to order';
 
     if (orderError) throw orderError.message;
 
@@ -97,8 +105,7 @@ export async function getOrderAgencyMembers(
 
     // Verify that the order organization_id matches the authenticated account's organization_id
     if (
-      orderData.propietary_organization_id !==
-      (accountData.organization_id ?? accountData.primary_owner_user_id)
+      orderData.propietary_organization_id !== accountData.primary_owner_user_id
     ) {
       throw new Error('Unauthorized access to order agency members');
     }

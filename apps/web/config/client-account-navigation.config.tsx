@@ -1,11 +1,9 @@
 import {
   // Briefcase,
-  CreditCard,
-  Home,
+  CreditCard, // Home,
   Layers,
-  Settings,
-  SquareCheck,
-  Users,
+  Settings, // SquareCheck,
+  // Users,
   Wallet,
 } from 'lucide-react';
 
@@ -17,27 +15,27 @@ import pathsConfig from '~/config/paths.config';
 const iconClasses = 'w-4';
 
 const routes = [
-  {
-    label: 'Inicio',
-    path: pathsConfig.app.home,
-    Icon: <Home className={iconClasses} />,
-    end: true,
-  },
+  // {
+  //   label: 'Inicio',
+  //   path: pathsConfig.app.home,
+  //   Icon: <Home className={iconClasses} />,
+  //   end: true,
+  // },
   {
     label: 'Pedidos',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
   },
-  {
-    label: 'Usuarios',
-    Icon: <Users className={iconClasses} />,
-    children: [
-      {
-        label: 'Clientes',
-        path: pathsConfig.app.clients,
-      },
-    ],
-  },
+  // {
+  //   label: 'Usuarios',
+  //   Icon: <Users className={iconClasses} />,
+  //   children: [
+  //     {
+  //       label: 'Clientes',
+  //       path: pathsConfig.app.clients,
+  //     },
+  //   ],
+  // },
 
   {
     label: 'Facturas',
