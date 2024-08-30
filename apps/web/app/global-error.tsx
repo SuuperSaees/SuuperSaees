@@ -9,7 +9,7 @@ import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
 import { Trans } from '@kit/ui/trans';
 
-import { SiteHeader } from '~/(marketing)/_components/site-header';
+// import { SiteHeader } from '~/(marketing)/_components/site-header';
 
 const GlobalErrorPage = ({
   error,
@@ -24,7 +24,7 @@ const GlobalErrorPage = ({
     <html>
       <body>
         <div className={'flex h-screen flex-1 flex-col'}>
-          <SiteHeader />
+          {/* <SiteHeader /> */}
 
           <div
             className={
@@ -61,9 +61,11 @@ const GlobalErrorPage = ({
                     variant={'default'}
                     onClick={reset}
                   >
-                    <ArrowLeft className={'mr-2 h-4'} />
+                    <Link href={'/'}>
+                      <ArrowLeft className={'mr-2 flex h-4 space-x-4'} />
 
-                    <Trans i18nKey={'common:goBack'} />
+                      <Trans i18nKey={'common:goBack'} />
+                    </Link>
                   </Button>
 
                   <Button className={'w-full'} variant={'outline'} asChild>

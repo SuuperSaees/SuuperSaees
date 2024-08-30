@@ -1,25 +1,36 @@
 'use client';
 
+import React, { useState } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/create/create-order';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { z } from 'zod';
+
 // import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { Button } from '@kit/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 import { Textarea } from '@kit/ui/textarea';
+
 import UploadFileComponent from '~/components/ui/files-input';
-import React, {useState} from 'react';
 
 function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
-
 
 // import { mapMimeTypeToFileType } from '../utils/map-mime-type';
 
@@ -37,7 +48,7 @@ const orderCreationFormSchema = z.object({
     .max(500, {
       message: 'Description must be at most 500 characters.',
     }),
-    fileIds: z.array(z.string()),
+  fileIds: z.array(z.string()),
 });
 const OrderCreationForm = () => {
   const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
@@ -58,20 +69,20 @@ const OrderCreationForm = () => {
   const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
     try {
       const result = await createOrders([
-        {...values,
-        fileIds: uploadedFileIds,
-        propietary_organization_id: '',}
+        { ...values, fileIds: uploadedFileIds, propietary_organization_id: '' },
       ]);
       console.log('submit', result);
     } catch (error) {
-      console.log(error);
+      toast('Error', {
+        description: 'There was an error creating the order.',
+      });
     }
   };
 
   const handleFileIdsChange = (fileIds: string[]) => {
     setUploadedFileIds(fileIds);
     form.setValue('fileIds', fileIds);
-    console.log('Uploaded File IDs:', fileIds);
+    // console.log('Uploaded File IDs:', fileIds);
   };
 
   return (
@@ -110,7 +121,11 @@ const OrderCreationForm = () => {
             </FormItem>
           )}
         />
-        <UploadFileComponent bucketName='orders' uuid={uniqueId} onFileIdsChange={handleFileIdsChange}/>
+        <UploadFileComponent
+          bucketName="orders"
+          uuid={uniqueId}
+          onFileIdsChange={handleFileIdsChange}
+        />
         <Button type="submit">{t('creation.form.submitMessage')}</Button>
       </form>
     </Form>
