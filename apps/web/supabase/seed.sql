@@ -6,6 +6,7 @@
 -- We don't do it because you'll need to manually add your webhook URL and secret key.
 
 -- this webhook will be triggered after deleting an account
+drop trigger if exists "accounts_teardown" on "accounts";
 create trigger "accounts_teardown" after delete
 on "public"."accounts" for each row
 execute function "supabase_functions"."http_request"(
@@ -18,6 +19,7 @@ execute function "supabase_functions"."http_request"(
 
 -- this webhook will be triggered after a delete on the subscriptions table
 -- which should happen when a user deletes their account (and all their subscriptions)
+drop trigger if exists "subscriptions_delete" on "subscriptions";
 create trigger "subscriptions_delete" after delete
 on "public"."subscriptions" for each row
 execute function "supabase_functions"."http_request"(
@@ -30,6 +32,7 @@ execute function "supabase_functions"."http_request"(
 
 -- this webhook will be triggered after every insert on the invitations table
 -- which should happen when a user invites someone to their account
+drop trigger if exists "invitations_insert" on "invitations";
 create trigger "invitations_insert" after insert
 on "public"."invitations" for each row
 execute function "supabase_functions"."http_request"(

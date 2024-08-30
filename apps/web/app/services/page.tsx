@@ -10,8 +10,6 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
-
-
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   const title = i18n.t('services:serviceTitle');
