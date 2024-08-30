@@ -114,8 +114,7 @@ const AsideOrderInformation = ({
 
   const { data: orderAgencyMembers } = useQuery({
     queryKey: ['order-agency-members', order.id],
-    queryFn: () =>
-      getOrderAgencyMembers(order.propietary_organization_id, order.id),
+    queryFn: () => getOrderAgencyMembers(order.agency_id, order.id),
     retry: 5,
   });
 

@@ -2,7 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-import { CloudUpload, StickyNote } from 'lucide-react';
+
+
+import { CheckSquare, CloudUpload, StickyNote } from 'lucide-react';
 
 // import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import {
@@ -25,12 +27,14 @@ interface UploadFileComponentProps {
   bucketName: string;
   uuid: string;
   onFileIdsChange: (fileIds: string[]) => void;
+  removeResults?: boolean;
 }
 
 export default function UploadFileComponent({
   bucketName,
   uuid,
   onFileIdsChange,
+  removeResults = false,
 }: UploadFileComponentProps) {
   // const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
@@ -127,13 +131,16 @@ export default function UploadFileComponent({
         [file.name]: 100,
       }));
       // Automatically remove the file from the list when the upload is complete
-      setTimeout(() => {
-        setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
-        setUploadProgress((prev) => {
-          const { [file.name]: _, ...rest } = prev;
-          return rest;
-        });
-      }, 1000); // Delay to let the user see the 100% state
+      removeResults &&
+        setTimeout(() => {
+          setFiles((prevFiles) =>
+            prevFiles.filter((f) => f.name !== file.name),
+          );
+          setUploadProgress((prev) => {
+            const { [file.name]: _, ...rest } = prev;
+            return rest;
+          });
+        }, 1000); // Delay to let the user see the 100% state
     });
 
     xhr.onreadystatechange = () => {
@@ -235,11 +242,14 @@ export default function UploadFileComponent({
           multiple
         />
       </div>
-      <div className="no-scrollbar max-h-52 overflow-y-auto" ref={containerRef}>
+      <div
+        className="thin-scrollbar max-h-52 overflow-y-auto"
+        ref={containerRef}
+      >
         {files.map((file, index) => (
           <div
             key={index}
-            className="flex items-start gap-1.5 self-stretch rounded-xl border border-gray-200 bg-white p-4"
+            className={`relative flex items-start gap-1.5 self-stretch rounded-xl border bg-white p-4 ${error ? 'border-error' : 'border-gray-200'}`}
           >
             <div className="relative flex items-center justify-center">
               <StickyNote
@@ -266,6 +276,12 @@ export default function UploadFileComponent({
                 <span className="font-inter text-sm font-normal leading-5 text-gray-600">
                   {Math.round(uploadProgress[file.name] ?? 0)}%
                 </span>
+                {/* Add other conditional for show the trash or ERROR icon when the upload is not completed and error is produced */}
+                {uploadProgress[file.name] === 100 ? (
+                  <div className="absolute right-4 top-4">
+                    <CheckSquare className="text-brand" />
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>

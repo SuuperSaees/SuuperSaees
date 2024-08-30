@@ -94,7 +94,14 @@ async function ClientsMembersPage() {
     role_hierarchy_level: roleHierarchyLevel,
   };
 
-  const slug = account.slug;
+  const organizationAccount = await client
+    .from('accounts')
+    .select()
+    .eq('id', data?.[0]?.organization_id ?? '')
+    .single();
+
+  const slug = organizationAccount.data?.slug ?? '';
+
 
   const [members, invitations, canAddMember, { user }] =
     await loadMembersPageData(client, slug);
@@ -104,7 +111,7 @@ async function ClientsMembersPage() {
 
   const isPrimaryOwner = account.primary_owner_user_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
-
+  console.log('orgnazation account ', organizationAccount, slug);
   return (
     <>
       <PageBody>
@@ -121,6 +128,11 @@ async function ClientsMembersPage() {
 
           <div className="w-full">
             <div className="flex items-center justify-between py-4">
+
+          
+
+              <If condition={canManageInvitations && (await canAddMember())}>
+
               <div className="flex items-center gap-2">
                 <h3 className="font-bold">
                   <Trans i18nKey={'common:membersTabLabel'} />
@@ -135,10 +147,11 @@ async function ClientsMembersPage() {
                 )}
               </div>
 
-              <If condition={canManageInvitations && canAddMember}>
+        
+
                 <InviteMembersDialogContainer
                   userRoleHierarchy={currentUserRoleHierarchy ?? 0}
-                  accountSlug={account.slug}
+                  accountSlug={slug}
                 >
                   <Button size={'sm'} data-test={'invite-members-form-trigger'}>
                     <span>

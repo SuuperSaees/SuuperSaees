@@ -6,6 +6,8 @@ import React from 'react';
 
 import { CircleHelp } from 'lucide-react';
 
+
+
 import { File as ServerFile } from '~/lib/file.types';
 
 import { useActivityContext } from '../context/activity-context';
@@ -43,7 +45,7 @@ const getFilePreviewComponent = (file: ServerFile.Type) => {
 };
 
 const DetailsPage = () => {
-  const { order, files } = useActivityContext();
+  const { order } = useActivityContext();
 
   return (
     <div className="flex flex-col gap-6">
@@ -70,33 +72,40 @@ const DetailsPage = () => {
         </textarea>
       </div>
 
-        <div className='grid grid-cols-3 gap-4'>
-          {order.files!.map((file) => (
-            <div key={file.id} className='flex flex-col items-start w-[220px] p-[10px] px-[14px] gap-[8px] border border-gray-200 rounded-none rounded-tr-md rounded-bl-md rounded-br-md bg-white'>
+      <div className="grid grid-cols-3 gap-4">
+        {order?.files?.map((file) => (
+          <div
+            key={file.id}
+            className="flex w-[220px] flex-col items-start gap-[8px] rounded-none rounded-bl-md rounded-br-md rounded-tr-md border border-gray-200 bg-white p-[10px] px-[14px]"
+          >
             {getFilePreviewComponent(file)}
-            <span className='text-gray-700 text-sm font-medium leading-5 overflow-hidden text-ellipsis whitespace-nowrap w-full'>{file.name}</span>
-            <span className='text-gray-600 text-sm font-normal leading-5'>{formatFileSize(file.size)}</span>
+            <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 text-gray-700">
+              {file.name}
+            </span>
+            <span className="text-sm font-normal leading-5 text-gray-600">
+              {formatFileSize(file.size)}
+            </span>
           </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-3 gap-2">
-          {files.map((file) => (
-            <div
-              key={file.id}
-              className="flex h-56 w-full flex-col items-start gap-2 rounded-none rounded-bl-md rounded-br-md rounded-tr-md border border-gray-200 bg-white p-[10px] px-[14px]"
-            >
-              {getFilePreviewComponent(file)}
-              <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 text-gray-700">
-                {file.name}
-              </span>
-              <span className="text-sm font-normal leading-5 text-gray-600">
-                {formatFileSize(file.size)}
-              </span>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {order?.files?.map((file) => (
+          <div
+            key={file.id}
+            className="flex h-56 w-full flex-col items-start gap-2 rounded-none rounded-bl-md rounded-br-md rounded-tr-md border border-gray-200 bg-white p-[10px] px-[14px]"
+          >
+            {getFilePreviewComponent(file)}
+            <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 text-gray-700">
+              {file.name}
+            </span>
+            <span className="text-sm font-normal leading-5 text-gray-600">
+              {formatFileSize(file.size)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 export default DetailsPage;

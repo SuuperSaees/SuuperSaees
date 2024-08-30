@@ -1857,6 +1857,8 @@ export type Database = {
         | "invites.manage"
         | "tasks.write"
         | "tasks.delete"
+        | "messages.write"
+        | "messages.read"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
       field_types: "date" | "multiple_choice" | "select" | "text"
