@@ -3,6 +3,20 @@ alter type public.app_permissions add value 'messages.write';
 alter type public.app_permissions add value 'messages.read';
 commit;
 
+insert into public.role_permissions (role, permission) values ('agency_owner', 'messages.write');
+insert into public.role_permissions (role, permission) values ('agency_owner', 'messages.read');
+insert into public.role_permissions (role, permission) values ('agency_member', 'messages.write');
+insert into public.role_permissions (role, permission) values ('agency_member', 'messages.read');
+insert into public.role_permissions (role, permission) values ('agency_project_manager', 'messages.write');
+insert into public.role_permissions (role, permission) values ('agency_project_manager', 'messages.read');
+insert into public.role_permissions (role, permission) values ('super_admin', 'messages.write');
+insert into public.role_permissions (role, permission) values ('super_admin', 'messages.read');
+insert into public.role_permissions (role, permission) values ('client_owner', 'messages.write');
+insert into public.role_permissions (role, permission) values ('client_owner', 'messages.read');
+insert into public.role_permissions (role, permission) values ('client_member', 'messages.write');
+insert into public.role_permissions (role, permission) values ('client_member', 'messages.read');
+
+
 -- drop policy "Delete for all authenticated users" on "public"."messages";
 
 -- drop policy "Read for all authenticated users" on "public"."messages";

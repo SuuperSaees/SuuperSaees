@@ -3,6 +3,10 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
+
+import { getUserRole } from '../members/get/get-member-account';
+
+
 export const hasPermissionToReadOrders = async (
   message_order_id: number,
   message_order_propietary_organization_id: string,
@@ -114,21 +118,28 @@ export const hasPermissionToAddTeamMembers = async () => {
   if (accountError) throw accountError.message;
   const accountId = accountData.organization_id;
 
-  // First check for general permission on the account, be either client or agency
-  const { data: hasPermission, error: permissionError } = await client.rpc(
-    'has_permission',
-    {
-      user_id: userId,
-      account_id: accountId ?? '',
-      permission_name: 'invites.manage',
-    },
-  );
-  console.log('hasPermission', hasPermission);
+  const role = await getUserRole();
+  // There's an error on the policy for roles below owner as allow add for "same "hierarchy level when should be "equal or lower"
+  // so add special condition
+  if (role === 'agency_project_manager') {
+    return true;
+  } else {
 
-  if (permissionError) {
-    console.error('Error checking permission:', permissionError);
-    throw new Error('The account has not permissions to MANAGE team members');
+    // check for general permission on the account, be either client or agency
+    const { data: hasPermission, error: permissionError } = await client.rpc(
+      'has_permission',
+      {
+        user_id: userId,
+        account_id: accountId ?? '',
+        permission_name: 'invites.manage',
+      },
+    );
+
+    if (permissionError) {
+      console.error('Error checking permission:', permissionError);
+      throw new Error('The account has not permissions to MANAGE team members');
+    }
+  
+    return hasPermission;
   }
-
-  return hasPermission;
 };

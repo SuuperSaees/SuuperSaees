@@ -1,8 +1,5 @@
-import { BellIcon } from 'lucide-react';
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { ClientsTable } from '@kit/team-accounts/components';
-import { Button } from '@kit/ui/button';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
