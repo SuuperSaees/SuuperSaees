@@ -11,12 +11,13 @@ export function usePersonalAccountData(
         id: string | null;
         name: string | null;
         picture_url: string | null;
+        stripe_id: string | null 
       }
     | undefined,
 ) {
   const client = useSupabase();
   const queryKey = ['account:data', userId];
-
+  console.log("HOLAAAA")
   const queryFn = async () => {
     if (!userId) {
       return null;
@@ -28,16 +29,19 @@ export function usePersonalAccountData(
         `
         id,
         name,
-        picture_url
+        picture_url,
+        stripe_id
     `,
       )
       .eq('primary_owner_user_id', userId)
       .eq('is_personal_account', true)
       .single();
 
-    if (response.error) {
-      throw response.error;
-    }
+      
+      if (response.error) {
+        throw response.error;
+      }
+      console.log("HOLAAAA", response?.data?.name)
 
     return response.data;
   };
@@ -53,6 +57,7 @@ export function usePersonalAccountData(
           id: partialAccount.id,
           name: partialAccount.name,
           picture_url: partialAccount.picture_url,
+          stripe_id: partialAccount.stripe_id
         }
       : undefined,
   });

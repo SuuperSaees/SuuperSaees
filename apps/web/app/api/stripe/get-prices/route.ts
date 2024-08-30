@@ -9,8 +9,6 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const accountId = searchParams.get('accountId');
 
-  console.log('Account ID:', accountId);
-
   if (!accountId) {
       return NextResponse.json(
           { error: { message: "Account ID is required" } },
