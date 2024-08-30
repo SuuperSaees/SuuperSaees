@@ -112,6 +112,7 @@ function transformProduct(product: StripeProduct, prices: StripePrice[]): Servic
         name: product.name,
         number_of_clients: null,
         price: price ? price.unit_amount / 100 : null,
+        price_id: price ? price.id : null,
         propietary_organization_id: null,
         purchase_limit: 0,
         recurrence: null,

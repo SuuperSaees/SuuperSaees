@@ -4,8 +4,6 @@ import { useMemo } from 'react';
 import * as React from 'react';
 
 import Image from 'next/image';
-import Link from 'next/link';
-
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -46,6 +44,9 @@ import {
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
 import UpdateServiceDialog from '../../server/actions/services/update/update-service';
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { getStripeAccountID } from '../../server/actions/members/get/get-member-account';
 
 type ServicesTableProps = {
   services: Service.Type[];
@@ -74,8 +75,15 @@ const servicesColumns = (
     ),
   },
   {
-    accessorKey: 'number_of_clients',
-    header: t('clients'),
+    accessorKey: "price_id",
+    header: "Price ID",
+    cell: ({ row }) => (
+      <div className='text-gray-600 font-sans text-sm font-normal leading-[1.42857]'>{row.getValue("price_id")}</div>
+    ),
+  },
+  {
+    accessorKey: "number_of_clients",
+    header: t("clients"),
     cell: ({ row }) => (
       <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
         {row.getValue('number_of_clients')}
@@ -136,9 +144,38 @@ const servicesColumns = (
     cell: ({ row }) => {
       const service = row.original;
 
+      const handleCheckout = async (priceId: string) => {
+        try {
+          const stripeId = await getStripeAccountID();
+          
+          const response = await fetch('/api/stripe/checkout-session', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ priceId, stripeId }),
+          });
+  
+          if (!response.ok) {
+            throw new Error('Failed to create checkout session');
+          }
+  
+          const { sessionUrl } = await response.json();
+         
+          navigator.clipboard.writeText(sessionUrl).then(() => {
+            toast.success('URL copiado en el portapapeles');
+          }).catch(err => {
+              console.error('Error al copiar al portapapeles:', err);
+          });
+          
+        } catch (error) {
+          console.error(error);
+        }
+      };
+ 
       return (
-        <div className="h-18 flex items-center gap-4 self-stretch p-4">
-          <Link2 className="h-6 w-6 text-gray-500" />
+        <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
+          <div><Link2 onClick={() => service.price_id && handleCheckout(service.price_id)} className='h-6 w-6 text-gray-500 cursor-pointer' /></div>
           <UpdateServiceDialog values={service} id={service.id} />
           <DeleteserviceDialog serviceId={service.id} />
         </div>

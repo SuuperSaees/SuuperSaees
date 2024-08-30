@@ -86,7 +86,7 @@
 // };
 'use server';
 
-const baseUrl = process.env.BASE_URL ?? 'http://localhost:3000';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { getPrimaryOwnerId, getStripeAccountID } from '../../members/get/get-member-account';
@@ -222,8 +222,8 @@ export const createService = async (clientData: {
 
     console.log('Servicio creado en Stripe:', stripeData);
 
-    const unitAmount = clientData.step_service_price.price * 100; // Asumiendo que el precio está en USD y en centavos
-    const currency = 'usd'; // Asumiendo que la moneda es USD; ajusta según sea necesario
+    const unitAmount = clientData.step_service_price.price * 100; 
+    const currency = 'usd'; 
 
     const stripePriceResponse = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
       method: "POST",

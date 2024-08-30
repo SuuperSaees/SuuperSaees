@@ -75,6 +75,7 @@ export async function getUserRole() {
     return userAccountData?.account_role;
   } catch (error) {
     console.error('Error fetching user role:', error);
+    throw error;
   }
 }
 
