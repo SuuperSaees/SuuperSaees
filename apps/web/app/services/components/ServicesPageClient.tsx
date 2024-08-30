@@ -2,13 +2,9 @@
 
 import { PageBody } from '@kit/ui/page';
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
-import { Button } from '@kit/ui/button';
-import { BellIcon } from 'lucide-react';
 import { Elements } from '@stripe/react-stripe-js';
 import { useStripeProducts } from '../hooks/use-stripe';
 import { Stripe } from '@stripe/stripe-js';
-
-
 interface ServicesPageClientProps {
   stripeId?: string | null;
   stripePromise: Promise<Stripe | null>;

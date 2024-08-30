@@ -1,7 +1,6 @@
-'use client';
-
+"use client";
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import {
   Card,
   CardContent,
@@ -13,137 +12,201 @@ import { If } from '@kit/ui/if';
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
-
-import { usePersonalAccountData } from '../../hooks/use-personal-account-data';
-// import { AccountDangerZone } from './account-danger-zone';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
-// import { MultiFactorAuthFactorsList } from './mfa/multi-factor-auth-list';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
 import { Button } from '@kit/ui/button';
 import Link from 'next/link';
+import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+
+type AccountStripe = {
+  id: string;
+  charges_enabled: boolean;
+};
 
 export function PersonalAccountSettingsContainer(
+  
   props: React.PropsWithChildren<{
     userId: string;
-
     features: {
       enableAccountDeletion: boolean;
     };
-
     paths: {
       callback: string;
     };
   }>,
 ) {
-  const supportsLanguageSelection = useSupportMultiLanguage();
-  const user = usePersonalAccountData(props.userId);
+  const [user, setUser] = useState()
+  const client = useSupabase()
 
-  if (!user.data || user.isPending) {
+  const fetchUserAccount = async () => {
+    const { data: user, error: userAccountError } = await client
+      .from('accounts')
+      .select('*')
+      .eq('id', props.userId)
+      .single();
+   
+    if (userAccountError) console.error(userAccountError.message);
+    return user
+  }
+
+
+  const [accountStripe, setAccountStripe] = useState<AccountStripe>({
+    id: "",
+    charges_enabled: false,
+  });
+  const supportsLanguageSelection = useSupportMultiLanguage();
+  useEffect(() => {
+    let user;
+    void fetchUserAccount().then((data)=> {
+      setUser(data)
+      user= data
+    }).then(()=> {
+      const fetchAccountStripe = async () => {
+        const stripeId = user?.stripe_id as string;
+        if (stripeId) {
+          try {
+            const response = await fetch(`/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            if (!response.ok) {
+              throw new Error('Failed to fetch account data from Stripe');
+            }
+            const data: AccountStripe = await response.json();
+            setAccountStripe(data);
+          } catch (error) {
+            console.error('Error fetching account data:', error);
+          }
+        }
+      };
+
+      void fetchAccountStripe();
+    })
+  }, []);
+
+  if (!user) {
     return <LoadingOverlay fullPage />;
   }
 
   return (
     <div className="flex w-full space-x-6 pb-32">
-    <div className="flex flex-col space-y-6 w-[87%]">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Trans i18nKey={'account:accountImage'} />
-          </CardTitle>
-          <CardDescription>
-            <Trans i18nKey={'account:accountImageDescription'} />
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <UpdateAccountImageContainer
-            user={{
-              pictureUrl: user.data.picture_url,
-              id: user.data.id,
-            }}
-          />
-        </CardContent>
-      </Card>
-  
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Trans i18nKey={'account:name'} />
-          </CardTitle>
-          <CardDescription>
-            <Trans i18nKey={'account:nameDescription'} />
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <UpdateAccountDetailsFormContainer user={user.data} />
-        </CardContent>
-      </Card>
-  
-      <If condition={supportsLanguageSelection}>
+      <div className="flex flex-col space-y-6 w-[87%]">
         <Card>
           <CardHeader>
             <CardTitle>
-              <Trans i18nKey={'account:language'} />
+              <Trans i18nKey={'account:accountImage'} />
             </CardTitle>
             <CardDescription>
-              <Trans i18nKey={'account:languageDescription'} key={'s'}/>
+              <Trans i18nKey={'account:accountImageDescription'} />
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <LanguageSelector />
+            <UpdateAccountImageContainer
+              user={{
+                pictureUrl: user.picture_url,
+                id: user.id,
+              }}
+            />
           </CardContent>
         </Card>
-      </If>
 
-      <Card>
+        <Card>
           <CardHeader>
             <CardTitle>
-              <Trans i18nKey={'account:connectToStripe'} />
+              <Trans i18nKey={'account:name'} />
             </CardTitle>
             <CardDescription>
-              <Trans i18nKey={'account:connectToStripeDescription'} key={'s'}/>
+              <Trans i18nKey={'account:nameDescription'} />
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button><Link href={'/stripe'}>Conectar</Link></Button>
+            <UpdateAccountDetailsFormContainer user={user} />
           </CardContent>
         </Card>
 
+        <If condition={supportsLanguageSelection}>
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <Trans i18nKey={'account:language'} />
+              </CardTitle>
+              <CardDescription>
+                <Trans i18nKey={'account:languageDescription'} key={'s'} />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LanguageSelector />
+            </CardContent>
+          </Card>
+        </If>
 
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {!accountStripe?.id ? (
+                <Trans i18nKey={'account:connectToStripe'} />
+              ) : accountStripe.charges_enabled ? (
+                <Trans i18nKey={'account:stripeConnected'} />
+              ) : (
+                <Trans i18nKey={'account:continueWithOnboardingStripe'} />
+              )}
+            </CardTitle>
+            <CardDescription>
+              {!accountStripe?.id ? (
+                <Trans i18nKey={'account:connectToStripeDescription'} key={'s'} />
+              ) : accountStripe.charges_enabled ? (
+                <Trans i18nKey={'account:stripeConnectedDescription'} />
+              ) : (
+                <Trans i18nKey={'account:continueWithOnboardingStripeDescription'} />
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {(!accountStripe?.id || !accountStripe.charges_enabled) && (
+              <Button>
+                <Link href={'/stripe'}>
+                  {accountStripe?.id ? "Continuar" : "Conectar"}
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex flex-col space-y-6 w-[26%]">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Trans i18nKey={'account:updateEmailCardTitle'} />
+            </CardTitle>
+            <CardDescription>
+              <Trans i18nKey={'account:updateEmailCardDescription'} />
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UpdateEmailFormContainer callbackPath={props.paths.callback} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Trans i18nKey={'account:updatePasswordCardTitle'} />
+            </CardTitle>
+            <CardDescription>
+              <Trans i18nKey={'account:updatePasswordCardDescription'} />
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UpdatePasswordFormContainer callbackPath={props.paths.callback} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  
-    <div className="flex flex-col space-y-6 w-[26%]">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Trans i18nKey={'account:updateEmailCardTitle'} />
-          </CardTitle>
-          <CardDescription>
-            <Trans i18nKey={'account:updateEmailCardDescription'} />
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <UpdateEmailFormContainer callbackPath={props.paths.callback} />
-        </CardContent>
-      </Card>
-  
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Trans i18nKey={'account:updatePasswordCardTitle'} />
-          </CardTitle>
-          <CardDescription>
-            <Trans i18nKey={'account:updatePasswordCardDescription'} />
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <UpdatePasswordFormContainer callbackPath={props.paths.callback} />
-        </CardContent>
-      </Card>
-    </div>
-  </div>
-  
   );
 }
 
