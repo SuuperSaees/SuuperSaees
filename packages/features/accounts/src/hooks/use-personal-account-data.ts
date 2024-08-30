@@ -17,7 +17,6 @@ export function usePersonalAccountData(
 ) {
   const client = useSupabase();
   const queryKey = ['account:data', userId];
-  console.log("HOLAAAA")
   const queryFn = async () => {
     if (!userId) {
       return null;
@@ -41,8 +40,6 @@ export function usePersonalAccountData(
       if (response.error) {
         throw response.error;
       }
-      console.log("HOLAAAA", response?.data?.name)
-
     return response.data;
   };
 
