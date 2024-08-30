@@ -12,7 +12,7 @@ import { TeamAccountLayoutPageHeader } from '../_components/team-account-layout-
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
-  const title = i18n.t('teams:settings:pageTitle');
+  const title = i18n.t('team:settings:pageTitle');
 
   return {
     title,
@@ -45,8 +45,8 @@ async function TeamAccountSettingsPage(props: Props) {
     <>
       <TeamAccountLayoutPageHeader
         account={account.slug}
-        title={<Trans i18nKey={'teams:settings.pageTitle'} />}
-        description={<Trans i18nKey={'teams:settings.pageDescription'} />}
+        title={<Trans i18nKey={'team:settings.pageTitle'} />}
+        description={<Trans i18nKey={'team:settings.pageDescription'} />}
       />
       <PageBody>
         <div className={'flex max-w-2xl flex-1 flex-col'}>

@@ -121,7 +121,7 @@
     },
     "starter": {
       "name": "Starter",
-      "description": "For small teams just getting started",
+      "description": "For small team just getting started",
       "badge": "Value",
       "base": "Base",
       "features": {
@@ -130,7 +130,7 @@
     },
     "pro": {
       "name": "Pro",
-      "description": "For growing teams",
+      "description": "For growing team",
       "badge": "Popular",
       "base": "Base",
       "features": {
@@ -139,7 +139,7 @@
     },
     "enterprise": {
       "name": "Enterprise",
-      "description": "For large teams and organizations",
+      "description": "For large team and organizations",
       "badge": "Custom",
       "base": "Base",
       "features": {

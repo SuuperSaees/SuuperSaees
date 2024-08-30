@@ -152,7 +152,7 @@ const CreateClientDialog = () => {
                           return (
                             <FormItem>
                               {/* <If condition={isFirst}> */}
-                              {/* <FormLabel>{t('teams:roleLabel')}</FormLabel> */}
+                              {/* <FormLabel>{t('team:roleLabel')}</FormLabel> */}
                               {/* </If> */}
 
                               {/* <FormControl>

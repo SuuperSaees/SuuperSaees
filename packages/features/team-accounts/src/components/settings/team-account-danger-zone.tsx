@@ -75,12 +75,12 @@ function DeleteTeamContainer(props: {
     <div className={'flex flex-col space-y-4'}>
       <div className={'flex flex-col space-y-1'}>
         <span className={'font-medium'}>
-          <Trans i18nKey={'teams:deleteTeam'} />
+          <Trans i18nKey={'team:deleteTeam'} />
         </span>
 
         <p className={'text-muted-foreground text-sm'}>
           <Trans
-            i18nKey={'teams:deleteTeamDescription'}
+            i18nKey={'team:deleteTeamDescription'}
             values={{
               teamName: props.account.name,
             }}
@@ -96,19 +96,19 @@ function DeleteTeamContainer(props: {
               type={'button'}
               variant={'destructive'}
             >
-              <Trans i18nKey={'teams:deleteTeam'} />
+              <Trans i18nKey={'team:deleteTeam'} />
             </Button>
           </AlertDialogTrigger>
 
           <AlertDialogContent onEscapeKeyDown={(e) => e.preventDefault()}>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                <Trans i18nKey={'teams:deletingTeam'} />
+                <Trans i18nKey={'team:deletingTeam'} />
               </AlertDialogTitle>
 
               <AlertDialogDescription>
                 <Trans
-                  i18nKey={'teams:deletingTeamDescription'}
+                  i18nKey={'team:deletingTeamDescription'}
                   values={{
                     teamName: props.account.name,
                   }}
@@ -167,7 +167,7 @@ function DeleteTeamConfirmationForm({
             >
               <div>
                 <Trans
-                  i18nKey={'teams:deleteTeamDisclaimer'}
+                  i18nKey={'team:deleteTeamDisclaimer'}
                   values={{
                     teamName: name,
                   }}
@@ -185,7 +185,7 @@ function DeleteTeamConfirmationForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    <Trans i18nKey={'teams:teamNameInputLabel'} />
+                    <Trans i18nKey={'team:teamNameInputLabel'} />
                   </FormLabel>
 
                   <FormControl>
@@ -202,7 +202,7 @@ function DeleteTeamConfirmationForm({
                   </FormControl>
 
                   <FormDescription>
-                    <Trans i18nKey={'teams:deleteTeamInputField'} />
+                    <Trans i18nKey={'team:deleteTeamInputField'} />
                   </FormDescription>
 
                   <FormMessage />
@@ -234,7 +234,7 @@ function DeleteTeamSubmitButton() {
       disabled={pending}
       variant={'destructive'}
     >
-      <Trans i18nKey={'teams:deleteTeam'} />
+      <Trans i18nKey={'team:deleteTeam'} />
     </Button>
   );
 }
@@ -263,7 +263,7 @@ function LeaveTeamContainer(props: {
     <div className={'flex flex-col space-y-4'}>
       <p className={'text-muted-foreground text-sm'}>
         <Trans
-          i18nKey={'teams:leaveTeamDescription'}
+          i18nKey={'team:leaveTeamDescription'}
           values={{
             teamName: props.account.name,
           }}
@@ -278,7 +278,7 @@ function LeaveTeamContainer(props: {
               type={'button'}
               variant={'destructive'}
             >
-              <Trans i18nKey={'teams:leaveTeam'} />
+              <Trans i18nKey={'team:leaveTeam'} />
             </Button>
           </div>
         </AlertDialogTrigger>
@@ -286,11 +286,11 @@ function LeaveTeamContainer(props: {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <Trans i18nKey={'teams:leavingTeamModalHeading'} />
+              <Trans i18nKey={'team:leavingTeamModalHeading'} />
             </AlertDialogTitle>
 
             <AlertDialogDescription>
-              <Trans i18nKey={'teams:leavingTeamModalDescription'} />
+              <Trans i18nKey={'team:leavingTeamModalDescription'} />
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -312,7 +312,7 @@ function LeaveTeamContainer(props: {
                     return (
                       <FormItem>
                         <FormLabel>
-                          <Trans i18nKey={'teams:leaveTeamInputLabel'} />
+                          <Trans i18nKey={'team:leaveTeamInputLabel'} />
                         </FormLabel>
 
                         <FormControl>
@@ -329,7 +329,7 @@ function LeaveTeamContainer(props: {
                         </FormControl>
 
                         <FormDescription>
-                          <Trans i18nKey={'teams:leaveTeamInputDescription'} />
+                          <Trans i18nKey={'team:leaveTeamInputDescription'} />
                         </FormDescription>
 
                         <FormMessage />
@@ -363,7 +363,7 @@ function LeaveTeamSubmitButton() {
       disabled={pending}
       variant={'destructive'}
     >
-      <Trans i18nKey={'teams:leaveTeam'} />
+      <Trans i18nKey={'team:leaveTeam'} />
     </Button>
   );
 }
@@ -373,7 +373,7 @@ function LeaveTeamErrorAlert() {
     <>
       <Alert variant={'destructive'}>
         <AlertTitle>
-          <Trans i18nKey={'teams:leaveTeamErrorHeading'} />
+          <Trans i18nKey={'team:leaveTeamErrorHeading'} />
         </AlertTitle>
 
         <AlertDescription>
@@ -394,7 +394,7 @@ function DeleteTeamErrorAlert() {
   return (
     <Alert variant={'destructive'}>
       <AlertTitle>
-        <Trans i18nKey={'teams:deleteTeamErrorHeading'} />
+        <Trans i18nKey={'team:deleteTeamErrorHeading'} />
       </AlertTitle>
 
       <AlertDescription>

@@ -47,7 +47,7 @@ export const defaultI18nNamespaces = [
   'services',
   'stripe',
   'tasks',
-  'teams',
+  'team',
 ];
 
 /**
