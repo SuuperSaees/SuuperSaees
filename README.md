@@ -24,7 +24,9 @@ graph TD;
     D --> H[Store Stripe Account ID in Database];
     H --> G;
     G --> I[View Invoices];
+    G --> L[List Prices and products]
     G --> J[Generate Checkout];
     I --> K[Connected Companies' Customers];
     J --> K;
+    L --> K;
 ```

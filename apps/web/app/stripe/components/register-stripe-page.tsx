@@ -42,11 +42,6 @@ const RegisterStripePage = ({ email, stripeId, id}: AccountSchema) => {
             stripe_id: data.accountId as string,
             id: id as string
           });
-          // toast.promise(promise, {
-          //   loading: t('updateTeamLoadingMessage'),
-          //   success: t('updateTeamSuccessMessage'),
-          //   error: t('updateTeamErrorMessage'),
-          // });
 
           fetch("/api/stripe/account-onboarding", {
             method: "POST",
