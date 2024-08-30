@@ -39,6 +39,8 @@ import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { Service } from '../../../../../../apps/web/lib/services.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
+import { toast } from 'sonner';
+import { getStripeAccountID } from '../../server/actions/members/get/get-member-account';
 
 type ServicesTableProps = {
   services: Service.Type[];
@@ -64,6 +66,13 @@ type ServicesTableProps = {
     header: t("price"),
     cell: ({ row }) => (
       <div className='text-gray-600 font-sans text-sm font-normal leading-[1.42857]'>${row.getValue("price")} USD/mes</div>
+    ),
+  },
+  {
+    accessorKey: "price_id",
+    header: "Price ID",
+    cell: ({ row }) => (
+      <div className='text-gray-600 font-sans text-sm font-normal leading-[1.42857]'>{row.getValue("price_id")}</div>
     ),
   },
   {
@@ -121,11 +130,40 @@ type ServicesTableProps = {
     header: t("actions"),
     enableHiding: false,
     cell: ({ row }) => {
-      const service = row.original
+      const service = row.original;
+
+      const handleCheckout = async (priceId: string) => {
+        try {
+          const stripeId = await getStripeAccountID();
+          
+          const response = await fetch('/api/stripe/checkout-session', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ priceId, stripeId }),
+          });
+  
+          if (!response.ok) {
+            throw new Error('Failed to create checkout session');
+          }
+  
+          const { sessionUrl } = await response.json();
+         
+          navigator.clipboard.writeText(sessionUrl).then(() => {
+            toast.success('URL copiado en el portapapeles');
+          }).catch(err => {
+              console.error('Error al copiar al portapapeles:', err);
+          });
+          
+        } catch (error) {
+          console.error(error);
+        }
+      };
  
       return (
         <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
-          <Link2 className='h-6 w-6 text-gray-500' />
+          <div><Link2 onClick={() => service.price_id && handleCheckout(service.price_id)} className='h-6 w-6 text-gray-500 cursor-pointer' /></div>
           <UpdateServiceDialog values={service} id={service.id} />
           <DeleteserviceDialog serviceId={service.id}/>
         </div>
