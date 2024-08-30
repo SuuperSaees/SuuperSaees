@@ -4,13 +4,18 @@ import { NextRequest, NextResponse } from "next/server";
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
-    const { priceId, stripeId } = await req.json();
+    const { priceId, stripeId } = await req.json(); 
 
     try {
 
-        // HERE 
-        const price = await stripe.prices.retrieve(priceId);
-        const {type} = price;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        const price = await stripe.prices.retrieve(priceId, {
+            stripeAccount: stripeId,
+        });
+    
+        const { type } = price;
+
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'], 
@@ -27,6 +32,7 @@ export async function POST(req: NextRequest) {
             stripeAccount: stripeId,
         }
     );
+
         return NextResponse.json({ sessionUrl: session.url });
     } catch (error) {
         console.error('Error creating checkout session:', error);

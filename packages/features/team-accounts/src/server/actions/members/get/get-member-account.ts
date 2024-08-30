@@ -69,7 +69,6 @@ export async function getUserRole() {
       .eq('user_id', userId)
       .single();
 
-    console.log('userAccountData', userAccountData);
     if (userAccountError) throw userAccountError;
 
     return userAccountData?.account_role;
