@@ -330,6 +330,7 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
       <div className="flex items-center py-4 justify-between">
         <div className='flex'>
           <Button
+          variant='ghost'
             className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'clientes' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
             onClick={() => handleButtonClick('clientes')}
           >
@@ -337,7 +338,7 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
           </Button>
           <Button
             variant='ghost'
-            className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'organizaciones' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+            className={`ml-[20px] flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'organizaciones' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
             onClick={() => handleButtonClick('organizaciones')}
           >
             <span className="text-sm font-semibold leading-5">Organizaciones</span>

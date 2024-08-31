@@ -333,7 +333,8 @@ export function ServicesTable({ services }: ServicesTableProps) {
             <div className="flex items-center justify-between py-4">
               <Pagination>
                 <PaginationContent className="flex w-full items-center justify-between ">
-                  <PaginationItem>
+
+                  {pageIndex > 0 && <PaginationItem>
                     <PaginationPrevious
                       href="#"
                       onClick={(e) => {
@@ -343,7 +344,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
                         }
                       }}
                     />
-                  </PaginationItem>
+                  </PaginationItem>}
                   <div className="flex flex-1 justify-center">
                     {pages.map((page) => (
                       <PaginationItem key={page}>
@@ -365,6 +366,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
                       </PaginationItem>
                     )}
                   </div>
+                  {pageIndex < pageCount - 1 && 
                   <PaginationItem>
                     <PaginationNext
                       href="#"
@@ -376,6 +378,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
                       }}
                     />
                   </PaginationItem>
+                  }
                 </PaginationContent>
               </Pagination>
             </div>

@@ -1,51 +1,51 @@
 "use client"
 
 import Image from "next/image"
-import Link from "next/link"
+// import Link from "next/link"
 import {
-  File,
-  Home,
-  LineChart,
-  ListFilter,
-  MoreHorizontal,
-  Package,
-  Package2,
-  PanelLeft,
-  PlusCircle,
+  // File,
+  // Home,
+  // LineChart,
+  // ListFilter,
+  // MoreHorizontal,
+  // Package,
+  // Package2,
+  // PanelLeft,
+  // PlusCircle,
   Search,
-  Settings,
-  ShoppingCart,
-  Users2,
+  // Settings,
+  // ShoppingCart,
+  // Users2,
 } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@kit/ui/avatar"
-import { Button } from "@kit/ui/button"
+// import { Avatar, AvatarFallback, AvatarImage } from "@kit/ui/avatar"
+// import { Button } from "@kit/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
+  // CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
+  // CardHeader,
+  // CardTitle,
 } from "@kit/ui/card"
-import { CalendarIcon, CircleIcon, ChevronDownIcon } from "@radix-ui/react-icons"
-import { format, setDate } from "date-fns"
-import { Calendar } from "@kit/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@kit/ui/popover"
+import { ChevronDownIcon } from "@radix-ui/react-icons"
+// import { format, setDate } from "date-fns"
+// import { Calendar } from "@kit/ui/calendar"
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@kit/ui/popover"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
+  // DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+  // DropdownMenuLabel,
+  // DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@kit/ui/dropdown-menu"
 import { Input } from "@kit/ui/input"
-import { Sheet, SheetContent, SheetTrigger } from "@kit/ui/sheet"
+// import { Sheet, SheetContent, SheetTrigger } from "@kit/ui/sheet"
 import {
   Table,
   TableBody,
@@ -57,8 +57,8 @@ import {
 import {
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
+  // TabsList,
+  // TabsTrigger,
 } from "@kit/ui/tabs"
 import {
   Pagination,
@@ -69,9 +69,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../../../../../packages/ui/src/shadcn/pagination"
-import { PaginationDefaultOptions } from "@tanstack/react-table"
-import { cn } from "@kit/ui/utils"
-import { date } from "zod"
+// import { PaginationDefaultOptions } from "@tanstack/react-table"
+// import { cn } from "@kit/ui/utils"
+// import { date } from "zod"
 import React, { useState } from "react"
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { useTranslation } from 'react-i18next';
@@ -103,7 +103,7 @@ export function InvoicesTable({ invoices }: OrdersTableProps) {
     invoice.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const totalPages = Math.ceil(filteredInvoices.length / PAGE_SIZE);
-  const paginatedInvoices = filteredInvoices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  // const paginatedInvoices = filteredInvoices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE); <------ is assigned a value but never used. ----->
 
   // Manejo del cambio de página
   const handlePageChange = (page: number) => {
@@ -227,10 +227,12 @@ export function InvoicesTable({ invoices }: OrdersTableProps) {
           <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
           Aún no haz creado ninguna factura, agrega uno haciendo clic a continuación.
           </p>
+          {/* <Link href="/invoices/create">
           <Button>
-            <Link href="/invoices/create">Crear factura</Link>
-            {/*Hay que arreglar este redirect*/}
+            Crear factura
+            {/*Hay que arreglar este redirect}
           </Button>
+          </Link> */}
         </div>      
     </TableCell>
   </TableRow>
@@ -269,7 +271,7 @@ export function InvoicesTable({ invoices }: OrdersTableProps) {
                       </div>
                     </PaginationContent>
                   </Pagination> */}
-                  <Pagination>
+                  {filteredInvoices.length > 0 && <Pagination>
                     <PaginationContent>
                       <div className="space-between flex flex-row justify-between w-full">
                         <div>
@@ -304,7 +306,7 @@ export function InvoicesTable({ invoices }: OrdersTableProps) {
                         </div>
                       </div>
                     </PaginationContent>
-                  </Pagination>
+                  </Pagination>}
                 </CardFooter>
               </Card>
             </TabsContent>
