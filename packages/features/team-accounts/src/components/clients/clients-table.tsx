@@ -1,35 +1,57 @@
 'use client';
-import Image from 'next/image';
+
 import { useMemo, useState } from 'react';
-import * as React from "react";
+import * as React from 'react';
 
+import Image from 'next/image';
 
-
-import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, Pen, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-
 
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 import { Separator } from '@kit/ui/separator';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@kit/ui/table";
-
-
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@kit/ui/table';
 
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
 import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/delete/delete-client';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../../packages/ui/src/shadcn/pagination';
-import UpdateClientDialog from '../../server/actions/clients/update/update-client';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../../../../../../packages/ui/src/shadcn/pagination';
 
+// import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 
 const getUniqueOrganizations = (clients: Client[]) => {
   const organizationMap = new Map<string, Client>();
 
-  clients.forEach(client => {
+  clients.forEach((client) => {
     if (!organizationMap.has(client.client_organization)) {
       organizationMap.set(client.client_organization, client);
     } else {
@@ -56,9 +78,7 @@ type ClientsTableProps = {
   }[];
   accountIds: string[];
   accountNames: string[];
-
-}
-
+};
 
 type Client = {
   id: string;
@@ -69,141 +89,135 @@ type Client = {
   role: string;
   propietary_organization: string;
   propietary_organization_id: string;
-  picture_url: string | null
-}
-
-
+  picture_url: string | null;
+};
 
 // CLIENTS TABLE
-  const clientColumns = (
-    t: TFunction<'clients', undefined>,
-  ): ColumnDef<Client>[] => [
-    {
-      accessorKey: 'name',
-      header: t('clientName'),
-      cell: ({ row }) => (
-        <span className={'flex items-center space-x-4 text-left'}>
-          <span>
-            <ProfileAvatar
-              displayName={row.original.name}
-              pictureUrl={row.original.picture_url}
-            />
-          </span>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium leading-[1.42857] text-gray-900">
-              {row.original.name}
-            </span>
-            <span className="text-sm font-normal leading-[1.42857] text-gray-600">
-              {row.original.email}
-            </span>
-          </div>
+const clientColumns = (
+  t: TFunction<'clients', undefined>,
+): ColumnDef<Client>[] => [
+  {
+    accessorKey: 'name',
+    header: t('clientName'),
+    cell: ({ row }) => (
+      <span className={'flex items-center space-x-4 text-left'}>
+        <span>
+          <ProfileAvatar
+            displayName={row.original.name}
+            pictureUrl={row.original.picture_url}
+          />
         </span>
-      ),
-    },
-    // {
-    //   accessorKey: "role",
-    //   header: t("role"),
-    //   cell: ({ row }) => {
-    //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    //     const role = row.getValue("role") as string;
-    //     return (
-    //       <div className="capitalize">
-    //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
-    //       </div>
-    //     );
-    //   },
-    // },
-    {
-      accessorKey: 'client_organization',
-      header: t('organization'),
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue('client_organization')}</div>
-      ),
-    },
-    {
-      accessorKey: 'last_login',
-      header: ({ column }) => {
-        return (
-          <div>
-            <Button
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === 'asc')
-              }
-            >
-              <div className="flex items-center justify-between">
-                <span>{t('lastLogin')}</span>
-                <ArrowDown className="ml-2 h-4 w-4" />
-              </div>
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        const date = new Date(row.original.created_at);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-
-        const formattedDate = `${day}-${month}-${year}`;
-
-        return (
-          <span className="text-sm font-medium text-gray-900">
-            {formattedDate}
+        <div className="flex flex-col">
+          <span className="text-sm font-medium leading-[1.42857] text-gray-900">
+            {row.original.name}
           </span>
-        );
-      },
-    },
-    {
-      accessorKey: 'created_at_column',
-      header: ({ column }) => {
-        return (
-          <div>
-            <Button
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === 'asc')
-              }
-            >
-              <div className="flex items-center justify-between">
-                <span>{t('createdAt')}</span>
-                <ArrowUp className="ml-2 h-4 w-4" />
-              </div>
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        const date = new Date(row.original.created_at);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-
-        const formattedDate = `${day}-${month}-${year}`;
-
-        return (
-          <span className="text-sm font-medium text-gray-900">
-            {formattedDate}
+          <span className="text-sm font-normal leading-[1.42857] text-gray-600">
+            {row.original.email}
           </span>
-        );
-      },
+        </div>
+      </span>
+    ),
+  },
+  // {
+  //   accessorKey: "role",
+  //   header: t("role"),
+  //   cell: ({ row }) => {
+  //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  //     const role = row.getValue("role") as string;
+  //     return (
+  //       <div className="capitalize">
+  //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
+  //       </div>
+  //     );
+  //   },
+  // },
+  {
+    accessorKey: 'client_organization',
+    header: t('organization'),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue('client_organization')}</div>
+    ),
+  },
+  {
+    accessorKey: 'last_login',
+    header: ({ column }) => {
+      return (
+        <div>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            <div className="flex items-center justify-between">
+              <span>{t('lastLogin')}</span>
+              <ArrowDown className="ml-2 h-4 w-4" />
+            </div>
+          </Button>
+        </div>
+      );
     },
-    {
-      id: 'actions',
-      header: t('actions'),
-      enableHiding: false,
-      cell: ({ row }) => {
-        const client = row.original;
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
 
-        return (
-          <div className="h-18 flex items-center gap-4 self-stretch p-4">
-            <UpdateClientDialog {...client} />
-            <DeleteUserDialog userId={client.id} />
-          </div>
-        );
-      },
+      const formattedDate = `${day}-${month}-${year}`;
+
+      return (
+        <span className="text-sm font-medium text-gray-900">
+          {formattedDate}
+        </span>
+      );
     },
-  ];
+  },
+  {
+    accessorKey: 'created_at_column',
+    header: ({ column }) => {
+      return (
+        <div>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            <div className="flex items-center justify-between">
+              <span>{t('createdAt')}</span>
+              <ArrowUp className="ml-2 h-4 w-4" />
+            </div>
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+
+      const formattedDate = `${day}-${month}-${year}`;
+
+      return (
+        <span className="text-sm font-medium text-gray-900">
+          {formattedDate}
+        </span>
+      );
+    },
+  },
+  {
+    id: 'actions',
+    header: t('actions'),
+    enableHiding: false,
+    cell: ({ row }) => {
+      const client = row.original;
+
+      return (
+        <div className="h-18 flex items-center gap-4 self-stretch p-4">
+          {/* <UpdateClientDialog {...client} /> */}
+          <DeleteUserDialog userId={client.id} />
+        </div>
+      );
+    },
+  },
+];
 
 // ORGANIZATIONS TABLE
   const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
@@ -270,7 +284,7 @@ type Client = {
     cell: () => {
       return (
         <div className='flex h-18 p-4 items-center gap-4 self-stretch'>
-          <Pen className="h-4 w-4 text-gray-600" />
+          {/* <Pen className="h-4 w-4 text-gray-600" /> */}
         </div>
       );
     },
