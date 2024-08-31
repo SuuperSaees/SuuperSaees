@@ -111,7 +111,7 @@ async function ClientsMembersPage() {
 
   const isPrimaryOwner = account.primary_owner_user_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
-  console.log('orgnazation account ', organizationAccount, slug);
+  // console.log('orgnazation account ', organizationAccount, slug);
   return (
     <>
       <PageBody>

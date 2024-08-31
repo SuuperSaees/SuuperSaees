@@ -327,7 +327,7 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 justify-between">
+      <div className="flex items-center py-4 justify-between flex-wrap gap-4">
         <div className='flex'>
           <Button
           variant='ghost'

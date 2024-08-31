@@ -160,6 +160,9 @@
     "joiningTeam": "Uniéndose al equipo...",
     "leaveTeamInputLabel": "Por favor escriba LEAVE para confirmar su salida del equipo.",
     "leaveTeamInputDescription": "Al abandonar el equipo, ya no tendrás acceso a él.",
-    "labelNumberOfUsers": "usuarios"
+    "labelNumberOfUsers": {
+      "plural": "usuarios",
+      "singular": "usuario"
+    }
   }
   
