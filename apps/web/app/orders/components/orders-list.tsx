@@ -10,30 +10,47 @@ import Link from 'next/link';
 
 
 import { ChevronDownIcon } from '@radix-ui/react-icons';
-import { ListFilter, Search } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { Search } from 'lucide-react';
 import { updateOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { useTranslation } from 'react-i18next';
-
-
+import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback } from '@kit/ui/avatar';
 import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardFooter } from '@kit/ui/card';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@kit/ui/dropdown-menu';
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@kit/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@kit/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
 
-
-
 import { Order } from '~/lib/order.types';
-
-
+import { statuses } from '~/lib/orders-data';
 
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../packages/ui/src/shadcn/pagination';
-
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../../../../../packages/ui/src/shadcn/pagination';
+import { statusColors } from '../[id]/utils/get-color-class-styles';
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -71,22 +88,53 @@ export function OrderList({ orders }: OrdersTableProps) {
     setCurrentPage(page);
   };
   const updateOrderDate = async (due_date: string, orderId: number) => {
-    await updateOrder(orderId, { due_date });
+    try {
+      await updateOrder(orderId, { due_date });
+      toast('Success!', {
+        description: 'The date has been updated.',
+      });
+    } catch (error) {
+      toast('Error', {
+        description: 'The date could not be updated.',
+      });
+    }
   };
+
+  const changeStatus = useMutation({
+    mutationFn: ({
+      orderId,
+      status,
+    }: {
+      orderId: Order.Type['id'];
+      status: Order.Type['status'];
+    }) => {
+      return updateOrder(orderId, { status });
+    },
+    onSuccess: () => {
+      toast.success('Success', {
+        description: 'Status updated successfully!',
+      });
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: 'The status could not be updated.',
+      });
+    },
+  });
 
   return (
     <div className="flex min-h-screen w-full flex-col">
       <div className="flex flex-col py-4">
         <main className="grid flex-1 items-start gap-4 md:gap-8">
           <Tabs defaultValue="open">
-            <div className="mb-4 flex items-center">
+            <div className="mb-4 flex flex-wrap items-center gap-4">
               <TabsList>
                 <TabsTrigger value="open">{t('openOrders')}</TabsTrigger>
                 <TabsTrigger value="completed">
                   {t('completedOrders')}
                 </TabsTrigger>
                 <TabsTrigger value="all">{t('allOrders')}</TabsTrigger>
-                <DropdownMenu>
+                {/* <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-7 gap-1">
                       <ListFilter className="h-3.5 w-3.5" />
@@ -106,7 +154,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                       Archived
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu> */}
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
                 {orders.length > 0 ? (
@@ -158,22 +206,22 @@ export function OrderList({ orders }: OrdersTableProps) {
                             )
                             .map((order) => (
                               <TableRow key={order.id}>
-                                <TableCell className="">
+                                <TableCell className="flex-1">
                                   <Link href={`/orders/${order.id}`}>
-                                    <span className="block font-medium">
+                                    <span className="block font-medium underline">
                                       {order.title}
                                     </span>
-                                    <span className="block text-sm">
-                                      {order.description ?? 'Sin descripción'}
-                                    </span>
                                   </Link>
+                                  <span className="block text-sm">
+                                    {order.description ?? 'Sin descripción'}
+                                  </span>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="flex-1">
                                   <span className="block text-sm">
                                     #{order.id}
                                   </span>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="flex-1">
                                   <span className="block font-medium">
                                     {order.customer_name ?? 'Sin nombre'}
                                   </span>
@@ -182,55 +230,74 @@ export function OrderList({ orders }: OrdersTableProps) {
                                       'Sin organización'}
                                   </span>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell">
+                                <TableCell className="hidden flex-1 md:table-cell">
                                   <DropdownMenu>
-                                    <DropdownMenuTrigger className="m-2 flex inline-flex items-center rounded-lg bg-warning-100 p-2 text-warning-700">
+                                    <DropdownMenuTrigger
+                                      className={`m-2 flex inline-flex items-center rounded-lg p-2 ${order.status ? statusColors[order.status] : ''}`}
+                                    >
                                       <span className="pl-2 pr-2">
-                                        {order.status}
+                                        {order.status
+                                          ?.replace(/_/g, ' ')
+                                          .replace(/^\w/, (c) =>
+                                            c.toUpperCase(),
+                                          )}
                                       </span>
                                       <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-warning-100 p-2 text-warning-700">
-                                        En revisión
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-brand-100 p-2 text-brand-700">
-                                        En progreso
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-yellow-100 p-2 text-yellow-700">
-                                        Esperando respuesta
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-success-100 p-2 text-success-700">
-                                        Completado
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-error-100 p-2 text-error-700">
-                                        En pausa
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-gray-100 p-2 text-gray-700">
-                                        En cola
-                                      </DropdownMenuItem>
+                                      {statuses.map((status, statusIndex) => {
+                                        const camelCaseStatus = status?.replace(
+                                          /_./g,
+                                          (match) =>
+                                            match.charAt(1).toUpperCase(),
+                                        );
+                                        if (!status) return null;
+                                        return (
+                                          <DropdownMenuItem
+                                            className={`m-2 rounded-lg p-2 ${statusColors[status]} cursor-pointer`}
+                                            key={status + statusIndex}
+                                            onClick={() => {
+                                              changeStatus.mutate({
+                                                orderId: order.id,
+                                                status,
+                                              });
+                                            }}
+                                          >
+                                            {t(
+                                              `details.statuses.${camelCaseStatus}`,
+                                            )
+                                              .replace(/_/g, ' ') // Replace underscores with spaces (even though there are no underscores in the priorities array)
+                                              .replace(/^\w/, (c) =>
+                                                c.toUpperCase(),
+                                              )}
+                                          </DropdownMenuItem>
+                                        );
+                                      })}
                                     </DropdownMenuContent>
                                   </DropdownMenu>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell">
+                                <TableCell className="hidden flex-1 md:table-cell">
                                   <div className="flex -space-x-1">
                                     {order.assigned_to?.map((assignee) => (
                                       <Avatar
-                                        key={assignee}
+                                        key={assignee.agency_member.email}
                                         className="h-6 max-h-6 w-6 max-w-6 border-2 border-white"
                                       >
                                         <AvatarFallback>
-                                          {assignee.charAt(0)}
+                                          {assignee.agency_member.name.charAt(
+                                            0,
+                                          )}
                                         </AvatarFallback>
                                       </Avatar>
                                     ))}
                                   </div>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell">
+                                <TableCell className="hidden flex-1 md:table-cell">
                                   <DatePicker
                                     updateFn={(dueDate: string) =>
                                       updateOrderDate(dueDate, order.id)
                                     }
+                                    defaultDate={order.due_date}
                                   />
                                 </TableCell>
                               </TableRow>
@@ -239,7 +306,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                           <TableRow>
                             <TableCell
                               colSpan={6}
-                              className="py-10 text-center"
+                              className="flex-1 py-10 text-center"
                             >
                               <div className="flex h-[493px] flex-col place-content-center items-center">
                                 <Image
@@ -346,27 +413,25 @@ export function OrderList({ orders }: OrdersTableProps) {
                       <TableBody>
                         {filteredOrders.length > 0 ? (
                           filteredOrders
-                            .filter(
-                              (order) =>
-                                order.status !== 'completed' &&
-                                order.status !== 'annulled',
-                            )
+                            .filter((order) => order.status == 'completed')
                             .map((order) => (
                               <TableRow key={order.id}>
-                                <TableCell className="">
-                                  <span className="block font-medium">
-                                    {order.title}
-                                  </span>
+                                <TableCell className="flex-1">
+                                  <Link href={`/orders/${order.id}`}>
+                                    <span className="block font-medium underline">
+                                      {order.title}
+                                    </span>
+                                  </Link>
                                   <span className="block text-sm">
                                     {order.description ?? 'Sin descripción'}
                                   </span>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="flex-1">
                                   <span className="block text-sm">
                                     #{order.id}
                                   </span>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="flex-1">
                                   <span className="block font-medium">
                                     {order.customer_name ?? 'Sin nombre'}
                                   </span>
@@ -375,51 +440,69 @@ export function OrderList({ orders }: OrdersTableProps) {
                                       'Sin organización'}
                                   </span>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell">
+                                <TableCell className="hidden flex-1 md:table-cell">
                                   <DropdownMenu>
-                                    <DropdownMenuTrigger className="m-2 flex inline-flex items-center rounded-lg bg-warning-100 p-2 text-warning-700">
+                                    <DropdownMenuTrigger
+                                      className={`m-2 flex inline-flex items-center rounded-lg p-2 ${order.status ? statusColors[order.status] : ''}`}
+                                    >
                                       <span className="pl-2 pr-2">
-                                        {order.status}
+                                        {order.status
+                                          ?.replace(/_/g, ' ')
+                                          .replace(/^\w/, (c) =>
+                                            c.toUpperCase(),
+                                          )}
                                       </span>
                                       <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-warning-100 p-2 text-warning-700">
-                                        En revisión
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-brand-100 p-2 text-brand-700">
-                                        En progreso
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-yellow-100 p-2 text-yellow-700">
-                                        Esperando respuesta
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-success-100 p-2 text-success-700">
-                                        Completado
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-error-100 p-2 text-error-700">
-                                        En pausa
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="m-2 rounded-lg bg-gray-100 p-2 text-gray-700">
-                                        En cola
-                                      </DropdownMenuItem>
+                                      {statuses.map((status, statusIndex) => {
+                                        const camelCaseStatus = status?.replace(
+                                          /_./g,
+                                          (match) =>
+                                            match.charAt(1).toUpperCase(),
+                                        );
+                                        if (!status) return null;
+                                        return (
+                                          <DropdownMenuItem
+                                            className={`m-2 rounded-lg p-2 ${statusColors[status]} cursor-pointer`}
+                                            key={status + statusIndex}
+                                            onClick={() => {
+                                              changeStatus.mutate({
+                                                orderId: order.id,
+                                                status,
+                                              });
+                                            }}
+                                          >
+                                            {t(
+                                              `details.statuses.${camelCaseStatus}`,
+                                            )
+                                              .replace(/_/g, ' ') // Replace underscores with spaces (even though there are no underscores in the priorities array)
+                                              .replace(/^\w/, (c) =>
+                                                c.toUpperCase(),
+                                              )}
+                                          </DropdownMenuItem>
+                                        );
+                                      })}
                                     </DropdownMenuContent>
                                   </DropdownMenu>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell">
+                                <TableCell className="hidden flex-1 md:table-cell">
                                   <div className="flex -space-x-1">
                                     {order.assigned_to?.map((assignee) => (
                                       <Avatar
-                                        key={assignee}
+                                        key={assignee.agency_member?.email}
                                         className="h-6 max-h-6 w-6 max-w-6 border-2 border-white"
                                       >
                                         <AvatarFallback>
-                                          {assignee.charAt(0)}
+                                          {assignee.agency_member.name.charAt(
+                                            0,
+                                          )}
                                         </AvatarFallback>
                                       </Avatar>
                                     ))}
                                   </div>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell">
+                                <TableCell className="hidden flex-1 md:table-cell">
                                   <DatePicker
                                     updateFn={(dueDate: string) =>
                                       updateOrderDate(dueDate, order.id)
@@ -433,7 +516,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                           <TableRow>
                             <TableCell
                               colSpan={6}
-                              className="py-10 text-center"
+                              className="flex-1 py-10 text-center"
                             >
                               <div className="flex h-[493px] flex-col place-content-center items-center">
                                 <Image
@@ -540,24 +623,26 @@ export function OrderList({ orders }: OrdersTableProps) {
                           </TableHead>
                         </TableRow>
                       </TableHeader>
-                      <TableBody>
+                      <TableBody className="py-2">
                         {filteredOrders.length > 0 ? (
                           filteredOrders.map((order) => (
                             <TableRow key={order.id}>
-                              <TableCell className="">
-                                <span className="block font-medium">
-                                  {order.title}
-                                </span>
+                              <TableCell className="flex-1">
+                                <Link href={`/orders/${order.id}`}>
+                                  <span className="block font-medium underline">
+                                    {order.title}
+                                  </span>
+                                </Link>
                                 <span className="block text-sm">
                                   {order.description ?? 'Sin descripción'}
                                 </span>
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="flex-1">
                                 <span className="block text-sm">
                                   #{order.id}
                                 </span>
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="flex-1">
                                 <span className="block font-medium">
                                   {order.customer_name ?? 'Sin nombre'}
                                 </span>
@@ -566,55 +651,70 @@ export function OrderList({ orders }: OrdersTableProps) {
                                     'Sin organización'}
                                 </span>
                               </TableCell>
-                              <TableCell className="hidden md:table-cell">
+                              <TableCell className="hidden flex-1 md:table-cell">
                                 <DropdownMenu>
-                                  <DropdownMenuTrigger className="m-2 flex inline-flex items-center rounded-lg bg-warning-100 p-2 text-warning-700">
+                                  <DropdownMenuTrigger
+                                    className={`m-2 flex inline-flex items-center rounded-lg p-2 ${order.status ? statusColors[order.status] : ''}`}
+                                  >
                                     <span className="pl-2 pr-2">
-                                      {order.status}
+                                      {order.status
+                                        ?.replace(/_/g, ' ')
+                                        .replace(/^\w/, (c) => c.toUpperCase())}
                                     </span>
                                     <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem className="m-2 rounded-lg bg-warning-100 p-2 text-warning-700">
-                                      En revisión
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="m-2 rounded-lg bg-brand-100 p-2 text-brand-700">
-                                      En progreso
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="m-2 rounded-lg bg-yellow-100 p-2 text-yellow-700">
-                                      Esperando respuesta
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="m-2 rounded-lg bg-success-100 p-2 text-success-700">
-                                      Completado
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="m-2 rounded-lg bg-error-100 p-2 text-error-700">
-                                      En pausa
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="m-2 rounded-lg bg-gray-100 p-2 text-gray-700">
-                                      En cola
-                                    </DropdownMenuItem>
+                                    {statuses.map((status, statusIndex) => {
+                                      const camelCaseStatus = status?.replace(
+                                        /_./g,
+                                        (match) =>
+                                          match.charAt(1).toUpperCase(),
+                                      );
+                                      if (!status) return null;
+                                      return (
+                                        <DropdownMenuItem
+                                          className={`m-2 rounded-lg p-2 ${statusColors[status]} cursor-pointer`}
+                                          key={status + statusIndex}
+                                          onClick={() => {
+                                            changeStatus.mutate({
+                                              orderId: order.id,
+                                              status,
+                                            });
+                                          }}
+                                        >
+                                          {t(
+                                            `details.statuses.${camelCaseStatus}`,
+                                          )
+                                            .replace(/_/g, ' ') // Replace underscores with spaces (even though there are no underscores in the priorities array)
+                                            .replace(/^\w/, (c) =>
+                                              c.toUpperCase(),
+                                            )}
+                                        </DropdownMenuItem>
+                                      );
+                                    })}
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </TableCell>
-                              <TableCell className="hidden md:table-cell">
+                              <TableCell className="hidden flex-1 md:table-cell">
                                 <div className="flex -space-x-1">
                                   {order.assigned_to?.map((assignee) => (
                                     <Avatar
-                                      key={assignee}
+                                      key={assignee.agency_member?.email}
                                       className="h-6 max-h-6 w-6 max-w-6 border-2 border-white"
                                     >
                                       <AvatarFallback>
-                                        {assignee.charAt(0)}
+                                        {assignee.agency_member.name.charAt(0)}
                                       </AvatarFallback>
                                     </Avatar>
                                   ))}
                                 </div>
                               </TableCell>
-                              <TableCell className="hidden md:table-cell">
+                              <TableCell className="hidden flex-1 md:table-cell">
                                 <DatePicker
                                   updateFn={(dueDate: string) =>
                                     updateOrderDate(dueDate, order.id)
                                   }
+                                  defaultDate={order.due_date}
                                 />
                               </TableCell>
                             </TableRow>
@@ -623,7 +723,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                           <TableRow>
                             <TableCell
                               colSpan={6}
-                              className="py-10 text-center"
+                              className="flex-1 py-10 text-center"
                             >
                               <div className="flex h-[493px] flex-col place-content-center items-center">
                                 <Image

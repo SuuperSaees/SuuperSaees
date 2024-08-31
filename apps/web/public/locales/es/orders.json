@@ -38,7 +38,8 @@
       "pending": "Pendiente",
       "inProgress": "En progreso",
       "completed": "Completado",
-      "inReview": "En revisión"
+      "inReview": "En revisión",
+      "annulled": "Cancelado"
     },
     "priorities": {
       "low": "Baja",
