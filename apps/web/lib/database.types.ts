@@ -1791,6 +1791,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_same_role_hierarchy_level_or_lower: {
+        Args: {
+          target_user_id: string
+          target_account_id: string
+          role_name: string
+        }
+        Returns: boolean
+      }
       is_account_owner: {
         Args: {
           account_id: string
