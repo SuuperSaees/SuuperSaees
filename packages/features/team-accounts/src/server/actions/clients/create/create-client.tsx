@@ -4,25 +4,32 @@ import React from 'react';
 
 
 
-import { useRouter } from 'next/navigation';
-
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-
-
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@kit/ui/alert-dialog';
 import { Button } from '@kit/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
-
-
 
 // import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
 // import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
@@ -38,7 +45,6 @@ const formSchema = z.object({
 const CreateClientDialog = () => {
   // const [selectedRole, setSelectedRole] = useState('');
   const { t } = useTranslation('clients');
-  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,7 +67,7 @@ const CreateClientDialog = () => {
       toast.success('success', {
         description: 'Client created successfully',
       });
-      router.refresh();
+      window.location.reload();
     } catch (error) {
       toast.error('error', {
         description: 'Something went wrong while creating the client',
