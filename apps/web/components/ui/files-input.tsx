@@ -170,7 +170,9 @@ export default function UploadFileComponent({
         type: file.type,
         url: fileUrl,
       };
-
+      
+      if(data?.error) return;
+      
       const createdFiles = await createFile([newFileData]);
       setFileIds((prevFileIds) => {
         const newFileIds = [
@@ -246,7 +248,7 @@ export default function UploadFileComponent({
           onChange={handleFileChange}
         />
       </div>
-      <div ref={containerRef} className="overflow-y-auto">
+      <div ref={containerRef} className="overflow-y-auto flex flex-col gap-2">
         {Object.entries(filesWithId).map(([id, file]) => (
           <div
             key={id}
@@ -271,7 +273,7 @@ export default function UploadFileComponent({
                 {errors[id] ? (
                   <>
                     <div className="flex-1 text-red-500">
-                      {errors[id]}
+                      Try again
                     </div>
                     <div className="absolute right-4 top-4">
                     <Trash2 className="text-red-500 cursor-pointer" onClick={() => handleDelete(id)} />

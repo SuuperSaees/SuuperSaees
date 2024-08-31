@@ -14,8 +14,6 @@ drop view if exists "public"."user_account_workspace";
 
 drop view if exists "public"."user_accounts";
 
-alter table "public"."accounts" drop column "stripe_id";
-
 -- Function "public.has_same_role_hierarchy_level_or_lower"
 -- Check if a user has the same role hierarchy level as the target role
 create
