@@ -4,6 +4,10 @@ import React from 'react';
 
 
 
+import { useRouter } from 'next/navigation';
+
+
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +28,6 @@ import { Separator } from '@kit/ui/separator';
 // import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
 import { createClient } from './create-client-server';
 
-
 const formSchema = z.object({
   name: z.string().min(2).max(50),
   slug: z.string().min(2).max(50),
@@ -35,6 +38,7 @@ const formSchema = z.object({
 const CreateClientDialog = () => {
   // const [selectedRole, setSelectedRole] = useState('');
   const { t } = useTranslation('clients');
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,12 +53,15 @@ const CreateClientDialog = () => {
       const newClient = { ...values };
       // delete newClient?.role;
       await createClient({ client: newClient, role: values.role });
-      console.log('values client', values);
+      // console.log('values client', values);
       // sendClientInvitations(
       //   [{ email: values.email, role: selectedRole }],
       //   client?.slug ?? '',
       // );
-      window.location.reload();
+      toast.success('success', {
+        description: 'Client created successfully',
+      });
+      router.refresh();
     } catch (error) {
       toast.error('error', {
         description: 'Something went wrong while creating the client',
@@ -152,10 +159,10 @@ const CreateClientDialog = () => {
                           return (
                             <FormItem>
                               {/* <If condition={isFirst}> */}
-                              {/* <FormLabel>{t('team:roleLabel')}</FormLabel> */}
-                              {/* </If> */}
+                {/* <FormLabel>{t('team:roleLabel')}</FormLabel> */}
+                {/* </If> */}
 
-                              {/* <FormControl>
+                {/* <FormControl>
                                 <MembershipRoleSelector
                                   roles={roles}
                                   value={field.value}
@@ -167,12 +174,12 @@ const CreateClientDialog = () => {
 
                               <FormMessage />
                             </FormItem> */}
-                          {/* );
+                {/* );
                         }}
                       /> */}
-                    {/* ); */}
-                  {/* }} */}
-                {/* </RolesDataProvider> */} 
+                {/* ); */}
+                {/* }} */}
+                {/* </RolesDataProvider> */}
 
                 <Separator />
                 <Button type="submit" className="w-full">

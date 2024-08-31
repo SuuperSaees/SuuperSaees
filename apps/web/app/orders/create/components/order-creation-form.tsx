@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 
+
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/create/create-order';
 import { useForm } from 'react-hook-form';
@@ -9,20 +11,18 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+
+
 // import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { Button } from '@kit/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 import { Textarea } from '@kit/ui/textarea';
 
+
+
 import UploadFileComponent from '~/components/ui/files-input';
+
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -71,7 +71,7 @@ const OrderCreationForm = () => {
       const result = await createOrders([
         { ...values, fileIds: uploadedFileIds, propietary_organization_id: '' },
       ]);
-      console.log('submit', result);
+      // console.log('submit', result);
     } catch (error) {
       toast('Error', {
         description: 'There was an error creating the order.',

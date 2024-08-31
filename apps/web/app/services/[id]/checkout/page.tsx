@@ -21,7 +21,7 @@ async function ServiceCheckoutPage({
   params: { id: string };
 }) {
   const service = await getServiceById(Number(id));
-  console.log(service)
+  // console.log(service)
 
   return (
     <PageBody className="lg:px-0">
