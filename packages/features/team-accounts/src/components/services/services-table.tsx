@@ -251,9 +251,12 @@ export function ServicesTable({ services }: ServicesTableProps) {
           />
         </div>
         {services.length > 0 ? (
+           <Link href="/services/create">
           <Button>
-            <Link href="/services/create">{t('createService')}</Link>
+            
+           {t('createService')}
           </Button>
+          </Link>
         ) : null}
       </div>
       <Separator />
