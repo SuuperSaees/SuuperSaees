@@ -257,7 +257,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
         ) : null}
       </div>
       <Separator />
-      <div className="mt-4 rounded-md border">
+      <div className="mt-4 rounded-md border px-4">
         <Table>
           {table.getRowModel().rows?.length ? (
             <>
@@ -329,7 +329,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
           <>
             <div className="flex items-center justify-between py-4">
               <Pagination>
-                <PaginationContent className="flex w-full items-center justify-between">
+                <PaginationContent className="flex w-full items-center justify-between ">
                   <PaginationItem>
                     <PaginationPrevious
                       href="#"
