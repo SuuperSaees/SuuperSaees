@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardContent,
@@ -8,8 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@kit/ui/card';
-import { If } from '@kit/ui/if';
-import { LanguageSelector } from '@kit/ui/language-selector';
+// import { If } from '@kit/ui/if';
+// import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
@@ -56,7 +56,7 @@ export function PersonalAccountSettingsContainer(
     id: "",
     charges_enabled: false,
   });
-  const supportsLanguageSelection = useSupportMultiLanguage();
+  // const supportsLanguageSelection = useSupportMultiLanguage();
   useEffect(() => {
     let user;
     void fetchUserAccount().then((data)=> {
@@ -127,8 +127,8 @@ export function PersonalAccountSettingsContainer(
             <UpdateAccountDetailsFormContainer user={user} />
           </CardContent>
         </Card>
-
-        <If condition={supportsLanguageSelection}>
+        {/* SUPPORT LANGUAGE, PENDING */}
+        {/* <If condition={supportsLanguageSelection}>
           <Card>
             <CardHeader>
               <CardTitle>
@@ -142,7 +142,7 @@ export function PersonalAccountSettingsContainer(
               <LanguageSelector />
             </CardContent>
           </Card>
-        </If>
+        </If> */}
 
         <Card>
           <CardHeader>
@@ -210,11 +210,11 @@ export function PersonalAccountSettingsContainer(
   );
 }
 
-function useSupportMultiLanguage() {
-  const { i18n } = useTranslation();
-  const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
+// function useSupportMultiLanguage() {
+//   const { i18n } = useTranslation();
+//   const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
 
-  const supportedLangs = langs.filter((lang) => lang !== 'cimode');
+//   const supportedLangs = langs.filter((lang) => lang !== 'cimode');
 
-  return supportedLangs.length > 1;
-}
+//   return supportedLangs.length > 1;
+// }

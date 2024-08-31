@@ -10,7 +10,7 @@ import {
   EllipsisVertical,
   Home,
   LogOut,
-  MessageCircleQuestion,
+  // MessageCircleQuestion,
   Shield,
 } from 'lucide-react';
 
@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 import { If } from '@kit/ui/if';
-import { SubMenuModeToggle } from '@kit/ui/mode-toggle';
+// import { SubMenuModeToggle } from '@kit/ui/mode-toggle';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
@@ -35,7 +35,6 @@ export function PersonalAccountDropdown({
   signOutRequested,
   showProfileName,
   paths,
-  features,
   account,
 }: {
   user: User;
@@ -50,6 +49,7 @@ export function PersonalAccountDropdown({
 
   paths: {
     home: string;
+    orders: string;
   };
 
   features: {
@@ -148,7 +148,7 @@ export function PersonalAccountDropdown({
         <DropdownMenuItem asChild>
           <Link
             className={'s-full flex items-center space-x-2'}
-            href={paths.home}
+            href={paths.orders}
           >
             <Home className={'h-5'} />
 
@@ -158,9 +158,8 @@ export function PersonalAccountDropdown({
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
 
-        <DropdownMenuItem asChild>
+        {/* <DropdownMenuItem asChild>
           <Link className={'s-full flex items-center space-x-2'} href={'/docs'}>
             <MessageCircleQuestion className={'h-5'} />
 
@@ -168,7 +167,7 @@ export function PersonalAccountDropdown({
               <Trans i18nKey={'common:documentation'} />
             </span>
           </Link>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
 
         <If condition={isSuperAdmin}>
           <DropdownMenuSeparator />
@@ -185,11 +184,10 @@ export function PersonalAccountDropdown({
           </DropdownMenuItem>
         </If>
 
-        <DropdownMenuSeparator />
 
-        <If condition={features.enableThemeToggle}>
+        {/* <If condition={features.enableThemeToggle}>
           <SubMenuModeToggle />
-        </If>
+        </If> */}
 
         <DropdownMenuSeparator />
 
