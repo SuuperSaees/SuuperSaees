@@ -334,7 +334,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
               <Pagination>
                 <PaginationContent className="flex w-full items-center justify-between ">
 
-                  {<PaginationItem>
+                  {pageIndex > 0 && <PaginationItem>
                     <PaginationPrevious
                       href="#"
                       onClick={(e) => {
@@ -366,6 +366,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
                       </PaginationItem>
                     )}
                   </div>
+                  {pageIndex < pageCount - 1 && 
                   <PaginationItem>
                     <PaginationNext
                       href="#"
@@ -377,6 +378,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
                       }}
                     />
                   </PaginationItem>
+                  }
                 </PaginationContent>
               </Pagination>
             </div>
