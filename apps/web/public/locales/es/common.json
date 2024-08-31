@@ -63,5 +63,6 @@
     "client_member": {
       "label": "Miembro"
     }
-  }
+  },
+  "clear": "Eliminar"
 }

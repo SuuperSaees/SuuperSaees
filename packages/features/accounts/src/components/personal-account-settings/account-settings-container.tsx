@@ -93,8 +93,8 @@ export function PersonalAccountSettingsContainer(
   }
 
   return (
-    <div className="flex w-full space-x-6 pb-32">
-      <div className="flex flex-col space-y-6 w-[87%]">
+    <div className="flex lg:flex-nowrap flex-wrap w-full  pb-32 gap-6">
+      <div className="flex flex-col space-y-6 w-full">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -177,7 +177,7 @@ export function PersonalAccountSettingsContainer(
         </Card>
       </div>
 
-      <div className="flex flex-col space-y-6 w-[26%]">
+      <div className="flex flex-col space-y-6 max-w-full lg:max-w-[350px] w-full">
         <Card>
           <CardHeader>
             <CardTitle>
