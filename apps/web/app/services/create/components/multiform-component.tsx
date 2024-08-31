@@ -2,35 +2,37 @@
 
 import React, { useState } from 'react';
 
+
+
 import Image from 'next/image';
+// import BriefConnectionStep from './step-brief-connection';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
+
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { useMutation } from '@tanstack/react-query';
+import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
+
+
 import { Button } from '@kit/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
-import {
-  MultiStepForm,
-  MultiStepFormContextProvider,
-  MultiStepFormHeader,
-  MultiStepFormStep,
-  createStepSchema,
-  useMultiStepFormContext,
-} from '@kit/ui/multi-step-form';
+import { MultiStepForm, MultiStepFormContextProvider, MultiStepFormHeader, MultiStepFormStep, createStepSchema, useMultiStepFormContext } from '@kit/ui/multi-step-form';
+import { Spinner } from '@kit/ui/spinner';
 import { Stepper } from '@kit/ui/stepper';
 import { Textarea } from '@kit/ui/textarea';
-import { BellIcon } from 'lucide-react';
+
+
+
 import UploadImageComponent from '../../../../../../packages/features/team-accounts/src/server/actions/services/create/upload-image';
 import CreditBasedRecurringSubscription from './recurring_subscription/credit_based';
 import StandardRecurringSubscription from './recurring_subscription/standard';
@@ -38,14 +40,10 @@ import TimeBasedRecurringSubscription from './recurring_subscription/time_based'
 import CreditBased from './single_sale/credit_based';
 import Standard from './single_sale/standard';
 import TimeBased from './single_sale/time_based';
-// import BriefConnectionStep from './step-brief-connection';
-import Link from 'next/link';
-import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
-  throw new Error("Stripe public key is not defined in environment variables");
+  throw new Error('Stripe public key is not defined in environment variables');
 }
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
@@ -118,8 +116,8 @@ export function MultiStepFormDemo() {
         max_number_of_monthly_orders: 0,
       },
     },
-    reValidateMode: 'onBlur',
-    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    mode: 'onChange',
   });
 
   async function onSubmit() {
@@ -142,28 +140,20 @@ export function MultiStepFormDemo() {
         <MultiStepFormContextProvider>
           {({ currentStepIndex }) => (
             <>
-              <div className='flex justify-between items-center mb-[32px]'>
-                <h2 className={'text-gray-900 font-inter text-[30px] font-semibold leading-8'}>
+              <div className="mb-[32px] flex items-center justify-between">
+                <h2
+                  className={
+                    'font-inter text-[30px] font-semibold leading-8 text-gray-900'
+                  }
+                >
                   {currentStepIndex === 0
                     ? t('step_type_of_service_title')
                     : currentStepIndex === 1
-                    ? t('step_service_details')
-                    : currentStepIndex === 2
-                    ? t('step_service_price')
-                    : t('step_connect_briefs')}
+                      ? t('step_service_details')
+                      : currentStepIndex === 2
+                        ? t('step_service_price')
+                        : t('step_connect_briefs')}
                 </h2>
-                <div className="flex space-x-4">
-                    <span>
-                        <Button variant="outline">
-                            Tu prueba gratuita termina en xx dias
-                        </Button>
-                    </span>
-                    <span>
-                        <Button variant="outline" size="icon">
-                            <BellIcon className="h-4 w-4" />
-                        </Button>
-                    </span>
-                </div>
               </div>
               <Stepper
                 variant={'customDots'}
@@ -225,7 +215,7 @@ function TypeOfServiceStep() {
       </div>
       <Form {...form}>
         <div className={'flex flex-col gap-4'}>
-          <div className="flex items-center gap-[47.17px] justify-center">
+          <div className="flex items-center justify-center gap-[47.17px]">
             <FormField
               control={form.control}
               name="step_type_of_service.single_sale"
@@ -307,8 +297,7 @@ function TypeOfServiceStep() {
             <Link
               type="button"
               href={'/services'}
-              className="border border-gray-300 inline-flex items-center justify-center whitespace-nowrap rounded-md bg-white text-sm font-medium text-gray-700 shadow transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50
-              px-4"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 shadow transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
             >
               {t('previous')}
             </Link>
@@ -324,11 +313,11 @@ function TypeOfServiceStep() {
 
 function DetailsStep() {
   const { t } = useTranslation('services');
-  const { form, nextStep, prevStep } = useMultiStepFormContext();
+  const { form, nextStep, prevStep, isStepValid } = useMultiStepFormContext();
   const [selectedImage, setSelectedImage] = useState<
     string | ArrayBuffer | null
-  >(null);
-  
+  >(form.getValues('step_service_details.service_image') || null);
+
   const handleImageUpload = (imageUrl: string) => {
     setSelectedImage(imageUrl);
     form.setValue('step_service_details.service_image', imageUrl);
@@ -380,7 +369,9 @@ function DetailsStep() {
         <Button type="button" variant="outline" onClick={prevStep}>
           {t('previous')}
         </Button>
-        <Button onClick={nextStep}>{t('next')}</Button>
+        <Button onClick={nextStep} disabled={!isStepValid()}>
+          {t('next')}
+        </Button>
       </div>
     </Form>
   );
@@ -536,56 +527,49 @@ function DetailsStep() {
 //             )}
 //           />
 //         </div>
-        
+
 //           {form.watch('step_service_price.standard') &&
 //             form.watch('step_type_of_service.single_sale') && (
 //               <>
 //                 <Standard />
 //               </>
 //             )}
-        
-        
+
 //           {form.watch('step_service_price.standard') &&
 //             form.watch('step_type_of_service.recurring_subscription') && (
 //               <>
 //                 <StandardRecurringSubscription />
 //               </>
 //             )}
-        
-        
+
 //           {form.watch('step_service_price.time_based') &&
 //             form.watch('step_type_of_service.single_sale') && (
 //               <>
 //                 <TimeBased />
 //               </>
 //             )}
-        
-        
+
 //           {form.watch('step_service_price.time_based') &&
 //             form.watch('step_type_of_service.recurring_subscription') && (
 //               <>
 //                 <TimeBasedRecurringSubscription />
 //               </>
 //             )}
-        
 
-        
 //           {form.watch('step_service_price.credit_based') &&
 //             form.watch('step_type_of_service.single_sale') && (
 //               <>
 //                 <CreditBased />
 //               </>
 //             )}
-        
 
-       
 //           {form.watch('step_service_price.credit_based') &&
 //             form.watch('step_type_of_service.recurring_subscription') && (
 //               <>
 //                 <CreditBasedRecurringSubscription />
 //               </>
 //             )}
-        
+
 //       </div>
 
 //       <div className="mt-4 flex justify-between space-x-2">
@@ -608,11 +592,11 @@ function DetailsStep() {
 //   );
 // }
 
-
 function PricingStep() {
   const { t } = useTranslation('services');
   // const { form, nextStep, prevStep } = useMultiStepFormContext();
   const { form, prevStep } = useMultiStepFormContext();
+  const router = useRouter();
 
   // type CheckboxName =
   //   | 'step_service_price.standard'
@@ -631,16 +615,25 @@ function PricingStep() {
   //     ? 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[2.948px] border-brand-600 bg-white'
   //     : 'flex flex-col w-[340px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[1.474px] border-gray-200 bg-white';
 
-  async function createServiceFunction() {
-    await createService({
-      ...form.getValues(),
-    });
-    window.location.href = '/services';
+  async function handleCreateService() {
+    try {
+      await createService({
+        ...form.getValues(),
+      });
+      toast('Success', {
+        description: 'Service created successfully',
+      });
+
+      router.push('/services');
+    } catch (error) {
+      toast('Error', {
+        description: 'Error creating service',
+      });
+    }
   }
-
- 
-
-  
+  const createServiceMutation = useMutation({
+    mutationFn: handleCreateService,
+  });
 
   return (
     <Form {...form}>
@@ -761,63 +754,63 @@ function PricingStep() {
             )}
           />
         </div> */}
-        
-          {form.watch('step_service_price.standard') &&
-            form.watch('step_type_of_service.single_sale') && (
-              <>
-                <Standard />
-              </>
-            )}
-        
-        
-          {form.watch('step_service_price.standard') &&
-            form.watch('step_type_of_service.recurring_subscription') && (
-              <>
-                <StandardRecurringSubscription />
-              </>
-            )}
-        
-        
-          {form.watch('step_service_price.time_based') &&
-            form.watch('step_type_of_service.single_sale') && (
-              <>
-                <TimeBased />
-              </>
-            )}
-        
-        
-          {form.watch('step_service_price.time_based') &&
-            form.watch('step_type_of_service.recurring_subscription') && (
-              <>
-                <TimeBasedRecurringSubscription />
-              </>
-            )}
-        
 
-        
-          {form.watch('step_service_price.credit_based') &&
-            form.watch('step_type_of_service.single_sale') && (
-              <>
-                <CreditBased />
-              </>
-            )}
-        
+        {form.watch('step_service_price.standard') &&
+          form.watch('step_type_of_service.single_sale') && (
+            <>
+              <Standard />
+            </>
+          )}
 
-       
-          {form.watch('step_service_price.credit_based') &&
-            form.watch('step_type_of_service.recurring_subscription') && (
-              <>
-                <CreditBasedRecurringSubscription />
-              </>
-            )}
-        
+        {form.watch('step_service_price.standard') &&
+          form.watch('step_type_of_service.recurring_subscription') && (
+            <>
+              <StandardRecurringSubscription />
+            </>
+          )}
+
+        {form.watch('step_service_price.time_based') &&
+          form.watch('step_type_of_service.single_sale') && (
+            <>
+              <TimeBased />
+            </>
+          )}
+
+        {form.watch('step_service_price.time_based') &&
+          form.watch('step_type_of_service.recurring_subscription') && (
+            <>
+              <TimeBasedRecurringSubscription />
+            </>
+          )}
+
+        {form.watch('step_service_price.credit_based') &&
+          form.watch('step_type_of_service.single_sale') && (
+            <>
+              <CreditBased />
+            </>
+          )}
+
+        {form.watch('step_service_price.credit_based') &&
+          form.watch('step_type_of_service.recurring_subscription') && (
+            <>
+              <CreditBasedRecurringSubscription />
+            </>
+          )}
       </div>
 
       <div className="mt-4 flex justify-between space-x-2">
         <Button type="button" variant="outline" onClick={prevStep}>
           {t('previous')}
         </Button>
-        <Button onClick={createServiceFunction}>{t('createService')}</Button>
+        <Button
+          onClick={() => createServiceMutation.mutate()}
+          className="flex gap-2"
+        >
+          <span>{t('createService')}</span>
+          {createServiceMutation.isPending && (
+            <Spinner className="h-4 w-4 text-white" />
+          )}
+        </Button>
       </div>
     </Form>
   );
