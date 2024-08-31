@@ -14,7 +14,7 @@ export function RolesDataProvider(props: {
 }) {
   const rolesQuery = useFetchRoles(props);
 
-  if (rolesQuery.isLoading) {
+  if (rolesQuery.isLoading || rolesQuery.isPending) {
     return <LoadingOverlay fullPage={false} />;
   }
 

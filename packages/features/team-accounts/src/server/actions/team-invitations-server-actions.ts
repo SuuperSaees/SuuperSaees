@@ -49,7 +49,7 @@ export const createInvitationsAction = enhanceAction(
 
     // Map existing invitations to an array of emails
     const existingEmails = existingMembers?.map((member) => member.email) ?? [];
-    console.log('existingEmails', existingEmails, params.invitations);
+    // console.log('existingEmails', existingEmails, params.invitations);
     // Filter out the emails that are already invited
     const filteredInvitations = params.invitations.filter(
       (invitation) => !existingEmails.includes(invitation.email),
@@ -57,7 +57,7 @@ export const createInvitationsAction = enhanceAction(
 
     // If there are no new invitations to send, return early
     if (filteredInvitations.length === 0) {
-      console.log('No new invitations to send');
+      // console.log('No new invitations to send');
       return { success: true };
     }
 

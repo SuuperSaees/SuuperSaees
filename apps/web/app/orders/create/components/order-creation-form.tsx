@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react';
 
+
+
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { createOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/create/create-order';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +23,7 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
+import { Spinner } from '@kit/ui/spinner';
 import { Textarea } from '@kit/ui/textarea';
 
 import UploadFileComponent from '~/components/ui/files-input';
@@ -53,7 +57,6 @@ const orderCreationFormSchema = z.object({
 const OrderCreationForm = () => {
   const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const uniqueId = generateUUID();
-  console.log('uniqueId', uniqueId);
   const { t } = useTranslation('orders');
   // const supabase = useSupabase();
   const form = useForm<z.infer<typeof orderCreationFormSchema>>({
@@ -66,17 +69,30 @@ const OrderCreationForm = () => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
-    try {
-      const result = await createOrders([
-        { ...values, fileIds: uploadedFileIds, propietary_organization_id: '' },
+  const createOrdersMutations = useMutation({
+    mutationFn: async (values: z.infer<typeof orderCreationFormSchema>) => {
+      await createOrders([
+        {
+          ...values,
+          fileIds: uploadedFileIds,
+          propietary_organization_id: '',
+        },
       ]);
-      console.log('submit', result);
-    } catch (error) {
+    },
+    onError: () => {
       toast('Error', {
         description: 'There was an error creating the order.',
       });
-    }
+    },
+    onSuccess: () => {
+      toast('Success', {
+        description: 'The order has been created.',
+      });
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
+    createOrdersMutations.mutate(values);
   };
 
   const handleFileIdsChange = (fileIds: string[]) => {
@@ -126,7 +142,12 @@ const OrderCreationForm = () => {
           uuid={uniqueId}
           onFileIdsChange={handleFileIdsChange}
         />
-        <Button type="submit">{t('creation.form.submitMessage')}</Button>
+        <Button type="submit" className="flex gap-2">
+          <span>{t('creation.form.submitMessage')}</span>
+          {createOrdersMutations.isPending && (
+            <Spinner className="h-4 w-4 text-white" />
+          )}
+        </Button>
       </form>
     </Form>
   );

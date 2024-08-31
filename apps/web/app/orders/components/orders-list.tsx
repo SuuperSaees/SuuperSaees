@@ -16,41 +16,28 @@ import { updateOrder } from 'node_modules/@kit/team-accounts/src/server/actions/
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+
+
 import { Avatar, AvatarFallback } from '@kit/ui/avatar';
 import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardFooter } from '@kit/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@kit/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@kit/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@kit/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
+
+
 
 import { Order } from '~/lib/order.types';
 import { statuses } from '~/lib/orders-data';
 
+
+
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '../../../../../packages/ui/src/shadcn/pagination';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../packages/ui/src/shadcn/pagination';
 import { statusColors } from '../[id]/utils/get-color-class-styles';
+
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -158,9 +145,9 @@ export function OrderList({ orders }: OrdersTableProps) {
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
                 {orders.length > 0 ? (
-                  <Button>
-                    <Link href="/orders/create">Crear pedido</Link>
-                  </Button>
+                  <Link href="/orders/create">
+                    <Button>Crear pedido</Button>
+                  </Link>
                 ) : null}
                 <div className="relative ml-auto flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

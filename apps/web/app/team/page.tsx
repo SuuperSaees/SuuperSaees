@@ -1,5 +1,3 @@
-import { BellIcon } from '@radix-ui/react-icons';
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import {
   AccountInvitationsTable,
@@ -102,7 +100,6 @@ async function ClientsMembersPage() {
 
   const slug = organizationAccount.data?.slug ?? '';
 
-
   const [members, invitations, canAddMember, { user }] =
     await loadMembersPageData(client, slug);
 
@@ -111,7 +108,7 @@ async function ClientsMembersPage() {
 
   const isPrimaryOwner = account.primary_owner_user_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
-  console.log('orgnazation account ', organizationAccount, slug);
+  // console.log('orgnazation account ', organizationAccount, slug);
   return (
     <>
       <PageBody>
@@ -128,26 +125,24 @@ async function ClientsMembersPage() {
 
           <div className="w-full">
             <div className="flex items-center justify-between py-4">
-
-          
-
               <If condition={canManageInvitations && (await canAddMember())}>
-
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold">
-                  <Trans i18nKey={'common:membersTabLabel'} />
-                </h3>
-                {members && (
-                  <div className="rounded-full border border-brand-700 bg-brand-50 px-2 py-0 text-brand-700">
-                    <span className="inline-flex gap-2 text-[12px]">
-                      <span>{members.length}</span>
-                      <Trans i18nKey={'team:labelNumberOfUsers'} />
-                    </span>
-                  </div>
-                )}
-              </div>
-
-        
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold">
+                    <Trans i18nKey={'common:membersTabLabel'} />
+                  </h3>
+                  {members && (
+                    <div className="rounded-full border border-brand-700 bg-brand-50 px-2 py-0 text-brand-700">
+                      <span className="inline-flex gap-2 text-[12px]">
+                        <span>{members.length}</span>
+                        {members.length === 1 ? (
+                          <Trans i18nKey={'team:labelNumberOfUsers.singular'} />
+                        ) : (
+                          <Trans i18nKey={'team:labelNumberOfUsers.plural'} />
+                        )}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
                 <InviteMembersDialogContainer
                   userRoleHierarchy={currentUserRoleHierarchy ?? 0}

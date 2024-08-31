@@ -248,7 +248,7 @@ export default function UploadFileComponent({
           onChange={handleFileChange}
         />
       </div>
-      <div ref={containerRef} className="overflow-y-auto flex flex-col gap-2">
+      <div ref={containerRef} className="overflow-y-auto flex flex-col gap-2 max-h-[240px] thin-scrollbar">
         {Object.entries(filesWithId).map(([id, file]) => (
           <div
             key={id}
