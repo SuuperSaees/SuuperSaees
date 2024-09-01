@@ -1,20 +1,33 @@
 'use client';
 
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@kit/ui/alert-dialog'; // Asegúrate de ajustar la importación según tu configuración
+// Asegúrate de ajustar la importación según tu configuración
 import { Trash2 } from 'lucide-react';
-import { deleteService } from './delete-service-server';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+
+
+
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
+
+
+
+import { deleteService } from './delete-service-server';
+
 
 const DeleteserviceDialog = ({ serviceId }: { serviceId: number }) => {
   const { t } = useTranslation('services');
 
   const handleDelete = async () => {
     try {
-      await deleteService(serviceId);
-      window.location.reload();
+      await deleteService(Number(serviceId));
+
+      toast('Success', {
+        description: 'The service has been deleted!',
+      });
     } catch (error) {
-      console.error('Error al eliminar el usuario:', error);
-      alert('Error al eliminar el usuario');
+      toast('Error', {
+        description: 'The service could not be deleted',
+      });
     }
   };
 
@@ -22,21 +35,23 @@ const DeleteserviceDialog = ({ serviceId }: { serviceId: number }) => {
     <>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Trash2 className="h-4 w-4 text-gray-600" />
+          <Trash2 className="h-4 w-4 cursor-pointer text-gray-600" />
         </AlertDialogTrigger>
         <AlertDialogContent>
-          <div className='flex '>
-          <Trash2 className="h-4 w-4 text-error-600 " />
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("deleteService")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("deleteServiceDescription")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+          <div className="flex">
+            <Trash2 className="text-error-600 h-4 w-4" />
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('deleteService')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('deleteServiceDescription')}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>{t("delete")}</AlertDialogAction>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
+              {t('delete')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

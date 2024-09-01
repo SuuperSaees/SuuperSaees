@@ -66,10 +66,10 @@ select is_empty(
     'foreigner cannot read other users notifications'
 );
 
--- foreigner cannot read other teams notifications
+-- foreigner cannot read other team notifications
 select is_empty(
     $$ select account_id, body from public.notifications where account_id = makerkit.get_account_id_by_slug('makerkit'); $$,
-    'foreigner cannot read other teams notifications'
+    'foreigner cannot read other team notifications'
 );
 
 select * from finish();

@@ -18,6 +18,8 @@ import { Order } from '~/lib/order.types';
 import { Review as ServerReview } from '~/lib/review.types';
 import { User as ServerUser } from '~/lib/user.types';
 
+
+
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
 
 export enum ActivityType {
@@ -149,9 +151,9 @@ export const ActivityProvider = ({
 
       if (!newDataUser) {
         try {
-          console.log('Fetching user...');
+          // console.log('Fetching user...');
           newDataUser = await getUserById(pureDataSource.user_id);
-          console.log('User fetched:', newDataUser);
+          // console.log('User fetched:', newDataUser);
         } catch (err) {
           console.log('Error fetching user:', err);
           throw err; // Rethrow the error if you want the caller to handle it
@@ -177,7 +179,7 @@ export const ActivityProvider = ({
         user: newDataUser,
         files: nestedFiles,
       };
-      console.log('Reconciled Data:', reconciledData);
+      // console.log('Reconciled Data:', reconciledData);
       return reconciledData;
     },
     [files], // Dependency array to ensure that `files` is up-to-date
@@ -221,8 +223,8 @@ export const ActivityProvider = ({
     setFiles,
   );
 
-  console.log('messages', messages);
-  console.log('files', files);
+  // console.log('messages', messages);
+  // console.log('files', files);
   return (
     <ActivityContext.Provider
       value={{

@@ -10,6 +10,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 
+
 type OrderInsert = Omit<Order.Insert, 'customer_id'> & {
   fileIds?: string[];
 };
@@ -21,17 +22,28 @@ export const createOrders = async (orders: OrderInsert[]) => {
     if (userError) throw userError.message;
     const userId = userData.user.id;
 
+    const { data: accountData, error: accountError } = await client
+      .from('accounts')
+      .select()
+      .eq('id', userId)
+      .single();
+
+    if (accountError) throw accountError.message;
     // console.log('userId', userId);
     const { data: clientData, error: clientError } = await client
       .from('clients')
       .select('*')
       .eq('user_client_id', userId)
       .single();
-    if (clientError) {
+    if (clientError && clientError.code !== 'PGRST116') {
       console.error('clientError', clientError);
       throw clientError.message;
     }
-    const agency_client_id = clientData.agency_id;
+
+    const agency_client_id =
+      clientData?.agency_id ?? accountData.organization_id ?? '';
+    const clientOrganizationId =
+      clientData?.organization_client_id ?? accountData.organization_id;
     // const primary_owner_user_id = agency_client_id;
 
     const { data: agencyOrganizationData, error: agencyOrganizationError } =
@@ -42,16 +54,11 @@ export const createOrders = async (orders: OrderInsert[]) => {
         .single();
     if (agencyOrganizationError) throw agencyOrganizationError.message;
 
-    // const ordersToInsert = orders.map((order) => ({
-    //   ...order,
-    //   customer_id: userId,
-    //   propietary_organization_id: primary_owner_user_id,
-    // }));
     const ordersToInsert = orders.map(
       ({ fileIds, ...orderWithoutFileIds }) => ({
         ...orderWithoutFileIds,
         customer_id: userId,
-        client_organization_id: clientData.organization_client_id,
+        client_organization_id: clientOrganizationId,
         propietary_organization_id:
           agencyOrganizationData.primary_owner_user_id,
         agency_id: agencyOrganizationData.id,

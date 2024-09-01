@@ -11,6 +11,7 @@ import pathsConfig from '~/config/paths.config';
 
 const paths = {
   home: pathsConfig.app.home,
+  orders: pathsConfig.app.orders
 };
 
 const features = {

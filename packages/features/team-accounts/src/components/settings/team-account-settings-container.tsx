@@ -31,11 +31,11 @@ export function TeamAccountSettingsContainer(props: {
       <Card>
         <CardHeader>
           <CardTitle>
-            <Trans i18nKey={'teams:settings.teamLogo'} />
+            <Trans i18nKey={'team:settings.teamLogo'} />
           </CardTitle>
 
           <CardDescription>
-            <Trans i18nKey={'teams:settings.teamLogoDescription'} />
+            <Trans i18nKey={'team:settings.teamLogoDescription'} />
           </CardDescription>
         </CardHeader>
 
@@ -47,11 +47,11 @@ export function TeamAccountSettingsContainer(props: {
       <Card>
         <CardHeader>
           <CardTitle>
-            <Trans i18nKey={'teams:settings.teamName'} />
+            <Trans i18nKey={'team:settings.teamName'} />
           </CardTitle>
 
           <CardDescription>
-            <Trans i18nKey={'teams:settings.teamNameDescription'} />
+            <Trans i18nKey={'team:settings.teamNameDescription'} />
           </CardDescription>
         </CardHeader>
 
@@ -66,11 +66,11 @@ export function TeamAccountSettingsContainer(props: {
       <Card className={'border-destructive border-2'}>
         <CardHeader>
           <CardTitle>
-            <Trans i18nKey={'teams:settings.dangerZone'} />
+            <Trans i18nKey={'team:settings.dangerZone'} />
           </CardTitle>
 
           <CardDescription>
-            <Trans i18nKey={'teams:settings.dangerZoneDescription'} />
+            <Trans i18nKey={'team:settings.dangerZoneDescription'} />
           </CardDescription>
         </CardHeader>
 

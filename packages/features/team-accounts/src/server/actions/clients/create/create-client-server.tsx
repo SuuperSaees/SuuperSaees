@@ -80,7 +80,7 @@ export const createClient = async (clientData: CreateClient) => {
     const { error: accountRoleError } = await supabase
       .from('accounts_memberships')
       .insert({
-        account_id: primary_owner_user_id,
+        account_id: clientOrganizationAccount.id,
         user_id: clientOrganizationUser.user!.id,
         account_role: clientData.role,
       });

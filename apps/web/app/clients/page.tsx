@@ -1,8 +1,5 @@
-import { BellIcon } from 'lucide-react';
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { ClientsTable } from '@kit/team-accounts/components';
-import { Button } from '@kit/ui/button';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
@@ -72,18 +69,6 @@ async function ClientsMembersPage() {
               <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
                 <Trans i18nKey={'clients:client'} />
               </div>
-            </span>
-          </div>
-          <div className="flex space-x-4">
-            <span>
-              <Button variant="outline">
-                Tu prueba gratuita termina en xx dias
-              </Button>
-            </span>
-            <span>
-              <Button variant="outline" size="icon">
-                <BellIcon className="h-4 w-4" />
-              </Button>
             </span>
           </div>
         </div>

@@ -33,7 +33,7 @@ interface Params {
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
-  const title = i18n.t('teams:members.pageTitle');
+  const title = i18n.t('team:members.pageTitle');
 
   return {
     title,
@@ -86,7 +86,7 @@ async function TeamAccountMembersPage({ params }: Params) {
                     <PlusCircle className={'mr-2 w-4'} />
 
                     <span>
-                      <Trans i18nKey={'teams:inviteMembersButton'} />
+                      <Trans i18nKey={'team:inviteMembersButton'} />
                     </span>
                   </Button>
                 </InviteMembersDialogContainer>
@@ -109,11 +109,11 @@ async function TeamAccountMembersPage({ params }: Params) {
             <CardHeader className={'flex flex-row justify-between'}>
               <div className={'flex flex-col space-y-1.5'}>
                 <CardTitle>
-                  <Trans i18nKey={'teams:pendingInvitesHeading'} />
+                  <Trans i18nKey={'team:pendingInvitesHeading'} />
                 </CardTitle>
 
                 <CardDescription>
-                  <Trans i18nKey={'teams:pendingInvitesDescription'} />
+                  <Trans i18nKey={'team:pendingInvitesDescription'} />
                 </CardDescription>
               </div>
             </CardHeader>

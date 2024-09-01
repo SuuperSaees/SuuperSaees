@@ -22,6 +22,8 @@
   "pageNotFoundSubHeading": "Lo sentimos, la página que buscabas no fue encontrada",
   "genericError": "Lo siento, algo salió mal.",
   "genericErrorSubHeading": "Lo sentimos, ocurrió un error al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
+  "goBack": "Volver",
+  "backToHomePage": "Regresar a la página principal",
   "anonymousUser": "Anónimo",
   "tryAgain": "Intentar de Nuevo",
   "theme": "Tema",
@@ -47,19 +49,20 @@
   "namePortalInput": "Nombre del portal",
   "roles": {
     "agency_owner": {
-      "label": "Agencía - Propietario"
+      "label": "Propietario"
     },
     "agency_member": {
-      "label": "Agencía - Miembro"
+      "label": "Miembro"
     },
     "agency_project_manager": {
-      "label": "Agencía - Gestor de proyectos"
+      "label": "Gestor de proyectos"
     },
     "client_owner": {
-      "label": "Cliente - Lider"
+      "label": "Lider"
     },
     "client_member": {
-      "label": "Cliente - Miembro"
+      "label": "Miembro"
     }
-  }
+  },
+  "clear": "Eliminar"
 }

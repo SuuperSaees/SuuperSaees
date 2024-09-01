@@ -36,7 +36,7 @@ export function RemoveMemberDialog({
           </AlertDialogTitle>
 
           <AlertDialogDescription>
-            <Trans i18nKey={'teams:removeMemberModalDescription'} />
+            <Trans i18nKey={'team:removeMemberModalDescription'} />
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -95,7 +95,7 @@ function RemoveMemberForm({
             variant={'destructive'}
             disabled={isSubmitting}
           >
-            <Trans i18nKey={'teams:removeMemberSubmitLabel'} />
+            <Trans i18nKey={'team:removeMemberSubmitLabel'} />
           </Button>
         </AlertDialogFooter>
       </div>
@@ -107,11 +107,11 @@ function RemoveMemberErrorAlert() {
   return (
     <Alert variant={'destructive'}>
       <AlertTitle>
-        <Trans i18nKey={'teams:removeMemberErrorHeading'} />
+        <Trans i18nKey={'team:removeMemberErrorHeading'} />
       </AlertTitle>
 
       <AlertDescription>
-        <Trans i18nKey={'teams:removeMemberErrorMessage'} />
+        <Trans i18nKey={'team:removeMemberErrorMessage'} />
       </AlertDescription>
     </Alert>
   );

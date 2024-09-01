@@ -18,18 +18,6 @@ const PageHeader = ({ i18nKey }: PageHeaderProps) => {
           </div>
         </span>
       </div>
-      <div className="flex space-x-4">
-        <span>
-          <Button variant="outline">
-            Tu prueba gratuita termina en xx dias
-          </Button>
-        </span>
-        <span>
-          <Button variant="outline" size="icon">
-            <BellIcon className="h-4 w-4" />
-          </Button>
-        </span>
-      </div>
     </div>
   );
 };

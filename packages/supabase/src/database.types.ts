@@ -47,6 +47,7 @@ export type Database = {
           primary_owner_user_id: string
           public_data: Json
           slug: string | null
+          stripe_id: string | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -62,6 +63,7 @@ export type Database = {
           primary_owner_user_id?: string
           public_data?: Json
           slug?: string | null
+          stripe_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -77,6 +79,7 @@ export type Database = {
           primary_owner_user_id?: string
           public_data?: Json
           slug?: string | null
+          stripe_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -1346,6 +1349,7 @@ export type Database = {
           name: string | null
           number_of_clients: number | null
           price: number | null
+          price_id: string | null
           propietary_organization_id: string | null
           purchase_limit: number
           recurrence: string | null
@@ -1373,6 +1377,7 @@ export type Database = {
           name?: string | null
           number_of_clients?: number | null
           price?: number | null
+          price_id?: string | null
           propietary_organization_id?: string | null
           purchase_limit?: number
           recurrence?: string | null
@@ -1400,6 +1405,7 @@ export type Database = {
           name?: string | null
           number_of_clients?: number | null
           price?: number | null
+          price_id?: string | null
           propietary_organization_id?: string | null
           purchase_limit?: number
           recurrence?: string | null
@@ -1687,6 +1693,7 @@ export type Database = {
           primary_owner_user_id: string
           public_data: Json
           slug: string | null
+          stripe_id: string | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -1777,6 +1784,14 @@ export type Database = {
         Returns: boolean
       }
       has_same_role_hierarchy_level: {
+        Args: {
+          target_user_id: string
+          target_account_id: string
+          role_name: string
+        }
+        Returns: boolean
+      }
+      has_same_role_hierarchy_level_or_lower: {
         Args: {
           target_user_id: string
           target_account_id: string
@@ -1909,6 +1924,8 @@ export type Database = {
         | "invites.manage"
         | "tasks.write"
         | "tasks.delete"
+        | "messages.write"
+        | "messages.read"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
       field_types: "date" | "multiple_choice" | "select" | "text"
@@ -2016,7 +2033,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2030,7 +2046,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2044,7 +2059,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2066,7 +2080,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2077,7 +2090,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2088,7 +2100,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2224,10 +2235,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {
