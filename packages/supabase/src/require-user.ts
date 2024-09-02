@@ -28,7 +28,6 @@ export async function requireUser(client: SupabaseClient): Promise<
         }
     )
 > {
-  console.time('client.auth.getUser();');
   const { data, error } = await client.auth.getUser();
 
   if (!data.user || error) {
