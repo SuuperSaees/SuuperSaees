@@ -1,5 +1,0 @@
-alter table "public"."accounts" add column "stripe_id" text not null default ''::text;
-
-
-
-
