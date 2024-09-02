@@ -196,7 +196,6 @@ function getPatterns() {
           );
         }
 
-        console.timeEnd('middleware');
       },
     },
   ];
