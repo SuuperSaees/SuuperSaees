@@ -50,7 +50,6 @@ export async function requireUser(client: SupabaseClient): Promise<
     };
   }
 
-  console.timeEnd('client.auth.getUser();');
 
   return {
     error: null,

@@ -25,7 +25,7 @@ const PathsSchema = z.object({
     accountMembers: z.string().min(1),
     accountBillingReturn: z.string().min(1),
     joinTeam: z.string().min(1),
-    team: z.string().min(1).optional(),
+    team: z.string().min(1),
     clients: z.string().min(1),
     // briefs: z.string().min(1),
   }),

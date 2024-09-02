@@ -125,7 +125,6 @@ export class TeamAccountsApi {
       };
     }
 
-    console.timeEnd('getAccountWorkspace');
 
     return {
       data: {
