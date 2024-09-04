@@ -91,7 +91,6 @@ async function ClientsMembersPage() {
     permissions: userPermissions,
     role_hierarchy_level: roleHierarchyLevel,
   };
-  if (true) throw new Error(JSON.stringify(data))
   const organizationAccount = await client
     .from('accounts')
     .select()
