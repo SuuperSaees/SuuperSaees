@@ -1,19 +1,20 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import {
-  AccountInvitationsTable,
-  AccountMembersTable,
-  InviteMembersDialogContainer,
-} from '@kit/team-accounts/components';
+import { AccountInvitationsTable, AccountMembersTable, InviteMembersDialogContainer } from '@kit/team-accounts/components';
 import { Button } from '@kit/ui/button';
 import { If } from '@kit/ui/if';
 import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 
+
+
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+
+
 import { loadMembersPageData } from './_lib/server/members-page.loader';
+
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -22,93 +23,94 @@ export const generateMetadata = async () => {
   };
 };
 
-type Account = {
-  id: string;
-  primary_owner_user_id: string;
-  name: string;
-  slug: string;
-  email: string | null;
-  is_personal_account: boolean;
-  updated_at: string | null;
-  created_at: string | null;
-  created_by: string | null;
-  updated_by: string | null;
-  picture_url: string | null;
-  public_data: object;
-  role_hierarchy_level: number;
-  permissions: Array<
-    | 'roles.manage'
-    | 'billing.manage'
-    | 'settings.manage'
-    | 'members.manage'
-    | 'invites.manage'
-  >;
-};
-
 async function ClientsMembersPage() {
   const client = getSupabaseServerComponentClient();
 
-  const { data: userData } = await client.auth.getUser();
+  const { data: authenticatedUser, error: authenticatedUserError } =
+    await client.auth.getUser();
+  if (authenticatedUserError) {
+    console.error(
+      'Error fetching authenticated user:',
+      authenticatedUserError.message,
+    );
+  }
 
-  const { data } = await client
+  const { data: accountData, error: accountError } = await client
     .from('accounts')
     .select()
-    .eq('primary_owner_user_id', userData.user!.id);
-
-  const { data: data2 } = await client
-    .from('accounts_memberships')
-    .select()
-    .eq('user_id', userData.user!.id);
-
-  const account_role = data2!.length > 0 ? data2![0]?.account_role : null;
-
-  const { data: data3 } = await client
-    .from('role_permissions')
-    .select('permission')
-    .eq('role', account_role!);
-
-  const userPermissions = data3!.map((permission) => permission.permission);
-
-  const { data: data4 } = await client
-    .from('roles')
-    .select('hierarchy_level')
-    .eq('name', account_role!);
-
-  const roleHierarchies = data4!.map(
-    (roleHierarchy) => roleHierarchy.hierarchy_level,
-  );
-  const roleHierarchyLevel =
-    roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
-
-  const filteredData = data
-    ? data.filter((item) => item.id !== userData.user!.id)
-    : [];
-
-  const accountData = filteredData.length > 0 ? filteredData[0] : {};
-
-  const account = {
-    ...(accountData as Account),
-    permissions: userPermissions,
-    role_hierarchy_level: roleHierarchyLevel,
-  };
-
-  const organizationAccount = await client
-    .from('accounts')
-    .select()
-    .eq('id', data?.[0]?.organization_id ?? '')
+    .eq('id', authenticatedUser.user?.id ?? '')
     .single();
 
-  const slug = organizationAccount.data?.slug ?? '';
+  if (accountError) {
+    console.error('Error fetching account:', accountError.message);
+  }
+
+  const { data: organizationAccount, error: organizationAccountError } =
+    await client
+      .from('accounts')
+      .select()
+      .eq('id', accountData?.organization_id ?? '')
+      .single();
+
+  if (organizationAccountError) {
+    console.error(
+      'Error fetching organization account:',
+      organizationAccountError.message,
+    );
+  }
+  const { data: accountMembership, error: accountMembershipError } =
+    await client
+      .from('accounts_memberships')
+      .select()
+      .eq('user_id', accountData?.id ?? '')
+      .single();
+
+  if (accountMembershipError) {
+    console.error(
+      'Error fetching account membership:',
+      accountMembershipError.message,
+    );
+  }
+  const { data: accountRole, error: accountRoleError } = await client
+    .from('roles')
+    .select()
+    .eq('name', accountMembership?.account_role ?? '')
+    .single();
+
+  if (accountRoleError) {
+    console.error('Error fetching account role:', accountRoleError.message);
+  }
+
+  const { data: userPermissions, error: userPermissionsError } = await client
+    .from('role_permissions')
+    .select()
+    .eq('role', accountRole?.name ?? '');
+
+  if (userPermissionsError) {
+    console.error(
+      'Error fetching user permissions:',
+      userPermissionsError.message,
+    );
+  }
+
+  const account = {
+    ...accountData,
+    permissions: userPermissions?.map((permission) => permission.permission),
+    role_hierarchy_level: accountRole?.hierarchy_level,
+  };
+
+  const slug = organizationAccount?.slug ?? '';
 
   const [members, invitations, canAddMember, { user }] =
     await loadMembersPageData(client, slug);
 
-  const canManageRoles = account.permissions.includes('roles.manage');
-  const canManageInvitations = account.permissions.includes('invites.manage');
+  const canManageRoles =
+    account?.permissions?.includes('roles.manage') ?? false;
+  const canManageInvitations =
+    account?.permissions?.includes('invites.manage') ?? false;
 
   const isPrimaryOwner = account.primary_owner_user_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
-  // console.log('orgnazation account ', organizationAccount, slug);
   return (
     <>
       <PageBody>
@@ -163,7 +165,7 @@ async function ClientsMembersPage() {
             <AccountMembersTable
               userRoleHierarchy={currentUserRoleHierarchy ?? 0}
               currentUserId={user.id}
-              currentAccountId={account.id}
+              currentAccountId={account.id ?? ''}
               members={members}
               isPrimaryOwner={isPrimaryOwner}
               canManageRoles={canManageRoles}
