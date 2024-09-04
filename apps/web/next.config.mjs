@@ -1,4 +1,7 @@
 import withBundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs';
+ 
+
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -65,9 +68,24 @@ const config = {
   typescript: { ignoreBuildErrors: true },
 };
 
-export default withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})(config);
+
+
+const sentryOptions = {
+  org: 'grayola',
+  project: process.env.SENTRY_PROJECT_NAME,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !IS_PRODUCTION,
+  autoInstrumentServerFunctions: false,
+  widenClientFileUpload: true,
+};
+
+// Exporta la configuración de Sentry envuelta en la configuración de Analyzer
+export default withSentryConfig(
+  withBundleAnalyzer({
+    enabled: process.env.ANALYZE === 'true',
+  })(config),
+  sentryOptions
+);
 
 
 
