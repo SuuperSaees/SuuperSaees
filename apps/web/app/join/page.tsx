@@ -104,11 +104,15 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
   const signOutNext = `${pathsConfig.auth.signIn}?invite_token=${token}`;
 
   // once the user accepts the invitation, we redirect them to the account home page
-  const accountHome = pathsConfig.app.accountHome.replace(
-    '[account]',
-    invitation.account.slug,
-  );
+  // const accountHome = pathsConfig.app.accountHome.replace(
+  //   '[account]',
+  //   invitation.account.slug,
+  // );
 
+  
+  // once the user accepts the invitation, we redirect them to home page
+
+  const accountHome = pathsConfig.app.orders;
   const email = auth.data.email ?? '';
 
   return (
