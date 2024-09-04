@@ -1346,11 +1346,11 @@ export type Database = {
           id: number
           max_number_of_monthly_orders: number | null
           max_number_of_simultaneous_orders: number | null
-          name: string | null
+          name: string
           number_of_clients: number | null
-          price: number | null
+          price: number
           price_id: string | null
-          propietary_organization_id: string | null
+          propietary_organization_id: string
           purchase_limit: number
           recurrence: string | null
           recurring_subscription: boolean | null
@@ -1358,7 +1358,7 @@ export type Database = {
           service_image: string | null
           single_sale: boolean | null
           standard: boolean
-          status: string | null
+          status: string
           test_period: boolean | null
           test_period_duration: number | null
           test_period_duration_unit_of_measurement: string | null
@@ -1374,11 +1374,11 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string | null
+          name?: string
           number_of_clients?: number | null
-          price?: number | null
+          price: number
           price_id?: string | null
-          propietary_organization_id?: string | null
+          propietary_organization_id?: string
           purchase_limit?: number
           recurrence?: string | null
           recurring_subscription?: boolean | null
@@ -1386,7 +1386,7 @@ export type Database = {
           service_image?: string | null
           single_sale?: boolean | null
           standard: boolean
-          status?: string | null
+          status?: string
           test_period?: boolean | null
           test_period_duration?: number | null
           test_period_duration_unit_of_measurement?: string | null
@@ -1402,11 +1402,11 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string | null
+          name?: string
           number_of_clients?: number | null
-          price?: number | null
+          price?: number
           price_id?: string | null
-          propietary_organization_id?: string | null
+          propietary_organization_id?: string
           purchase_limit?: number
           recurrence?: string | null
           recurring_subscription?: boolean | null
@@ -1414,7 +1414,7 @@ export type Database = {
           service_image?: string | null
           single_sale?: boolean | null
           standard?: boolean
-          status?: string | null
+          status?: string
           test_period?: boolean | null
           test_period_duration?: number | null
           test_period_duration_unit_of_measurement?: string | null
@@ -2033,6 +2033,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2046,6 +2047,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2059,6 +2061,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2080,6 +2083,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2090,6 +2094,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2100,6 +2105,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2235,6 +2241,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {

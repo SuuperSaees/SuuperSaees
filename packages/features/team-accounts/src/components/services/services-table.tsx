@@ -147,6 +147,7 @@ const servicesColumns = (
     header: t('actions'),
     enableHiding: false,
     cell: ({ row }) => {
+      const rowId = Number(row.id)
       const service = row.original;
 
       const handleCheckout = async (priceId: string) => {
@@ -190,8 +191,8 @@ const servicesColumns = (
               className="h-6 w-6 cursor-pointer text-gray-500"
             />
           </div>
-          <UpdateServiceDialog values={service} id={service.id} />
-          <DeleteserviceDialog serviceId={service.id} />
+          <UpdateServiceDialog valuesOfServiceStripe={service} id={rowId} />
+          <DeleteserviceDialog serviceId={rowId} />
         </div>
       );
     },
