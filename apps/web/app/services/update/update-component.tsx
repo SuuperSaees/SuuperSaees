@@ -29,7 +29,7 @@ import {
 } from "@kit/ui/dropdown-menu";
 import { useTranslation } from 'react-i18next';
 import { Service } from '~/lib/services.types';
-import { useRouter } from 'next/navigation';
+import { useServicesContext } from '../contexts/services-context';
 
 const formSchema = z.object({
     name: z.string().min(2).max(50),
@@ -42,8 +42,8 @@ type UpdateServiceProps = {
 };
 
 const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
-    const router = useRouter();
     const { t } = useTranslation('services');
+    const { updateServices } = useServicesContext();
     const [selectedStatus, setSelectedStatus] = useState(valuesOfServiceStripe.status);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -68,7 +68,7 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
              }   
             },
     );
-    router.push('/services');
+    await updateServices(false);
     }
 
     const handleRoleSelect = (status: string) => {

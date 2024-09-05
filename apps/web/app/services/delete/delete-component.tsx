@@ -6,11 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
 import { deleteService } from 'node_modules/@kit/team-accounts/src/server/actions/services/delete/delete-service-server';
-import { useRouter } from 'next/navigation';
+import { useServicesContext } from '../contexts/services-context';
 
 const DeleteServiceDialog = ({ priceId }: { priceId: string }) => {
   const { t } = useTranslation('services');
-  const router = useRouter();
+  const { updateServices } = useServicesContext();
 
   const handleDelete = async () => {
     try {
@@ -19,7 +19,7 @@ const DeleteServiceDialog = ({ priceId }: { priceId: string }) => {
       toast('Success', {
         description: 'The service has been deleted!',
       });
-      router.push('/services');
+      await updateServices(false);
 
     } catch (error) {
       toast('Error', {

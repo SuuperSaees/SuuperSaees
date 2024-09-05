@@ -1,6 +1,6 @@
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import ServicesPageClient from './components/ServicesPageClient';
+import {ServicesPageClient} from './components/services-page-client';
 import { loadStripe } from '@stripe/stripe-js';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {

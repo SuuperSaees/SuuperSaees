@@ -4,24 +4,20 @@ import { PageBody } from '@kit/ui/page';
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
 import { Elements } from '@stripe/react-stripe-js';
 import { Stripe } from '@stripe/stripe-js';
-import { useEffect, useState } from 'react';
-import { Service } from '~/lib/services.types';
-import {getServicesByOrganizationId} from "../../../../../packages/features/team-accounts/src/server/actions/services/get/get-services-by-organization-id"
+import { useEffect } from 'react';
+import { ServicesContextProvider, useServicesContext } from '../contexts/services-context';
+
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
 }
 
-const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ stripePromise }) => {
-  const [services, setServices] = useState<Service.Type[]>([])
-  const [loading, setLoading] = useState(true)
-  useEffect(()=> {
-    const fetchedServicesByOrganizationId = async () => {
-      const resultFetchedServicesByOrganizationId = await getServicesByOrganizationId()
-      setServices([...resultFetchedServicesByOrganizationId.products])
-      setLoading(false)
-    }
-    void fetchedServicesByOrganizationId()
-  }, [])
+const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePromise }) => {
+  const { services, loading, error, updateServices } = useServicesContext();
+
+  useEffect(() => {
+    updateServices(true).catch((error)=> {console.log(error.message)});
+  }, []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -37,6 +33,10 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ stripePromise }
     );
   }
 
+  if (error) {
+    return <div>Error loading services. Please try again.</div>;
+  }
+
   return (
     <Elements stripe={stripePromise}>
       <PageBody>
@@ -50,11 +50,17 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ stripePromise }
               </span>
             </div>
           </div>
-          <ServicesTable services={services}  />
+          <ServicesTable services={services} />
         </div>
       </PageBody>
     </Elements>
   );
 };
 
-export default ServicesPageClient;
+const ServicesPageClient: React.FC<ServicesPageClientProps> = (props) => (
+  <ServicesContextProvider>
+    <ServicesPageClientContent {...props} />
+  </ServicesContextProvider>
+);
+
+export { ServicesPageClient };
