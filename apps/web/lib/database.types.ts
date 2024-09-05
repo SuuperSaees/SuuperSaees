@@ -1346,11 +1346,11 @@ export type Database = {
           id: number
           max_number_of_monthly_orders: number | null
           max_number_of_simultaneous_orders: number | null
-          name: string
+          name: string | null
           number_of_clients: number | null
-          price: number
+          price: number | null
           price_id: string | null
-          propietary_organization_id: string
+          propietary_organization_id: string | null
           purchase_limit: number
           recurrence: string | null
           recurring_subscription: boolean | null
@@ -1358,7 +1358,7 @@ export type Database = {
           service_image: string | null
           single_sale: boolean | null
           standard: boolean
-          status: string
+          status: string | null
           test_period: boolean | null
           test_period_duration: number | null
           test_period_duration_unit_of_measurement: string | null
@@ -1374,11 +1374,11 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string
+          name?: string | null
           number_of_clients?: number | null
-          price: number
+          price?: number | null
           price_id?: string | null
-          propietary_organization_id?: string
+          propietary_organization_id?: string | null
           purchase_limit?: number
           recurrence?: string | null
           recurring_subscription?: boolean | null
@@ -1386,7 +1386,7 @@ export type Database = {
           service_image?: string | null
           single_sale?: boolean | null
           standard: boolean
-          status?: string
+          status?: string | null
           test_period?: boolean | null
           test_period_duration?: number | null
           test_period_duration_unit_of_measurement?: string | null
@@ -1402,11 +1402,11 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string
+          name?: string | null
           number_of_clients?: number | null
-          price?: number
+          price?: number | null
           price_id?: string | null
-          propietary_organization_id?: string
+          propietary_organization_id?: string | null
           purchase_limit?: number
           recurrence?: string | null
           recurring_subscription?: boolean | null
@@ -1414,7 +1414,7 @@ export type Database = {
           service_image?: string | null
           single_sale?: boolean | null
           standard?: boolean
-          status?: string
+          status?: string | null
           test_period?: boolean | null
           test_period_duration?: number | null
           test_period_duration_unit_of_measurement?: string | null
