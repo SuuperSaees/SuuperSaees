@@ -1168,21 +1168,21 @@ export type Database = {
           {
             foreignKeyName: "organization_settings_account_id_fkey"
             columns: ["account_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "organization_settings_account_id_fkey"
             columns: ["account_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "organization_settings_account_id_fkey"
             columns: ["account_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
