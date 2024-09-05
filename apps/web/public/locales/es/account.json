@@ -148,5 +148,10 @@
   "continueWithOnboardingStripe": "Completa el Onboarding de Stripe",
   "continueWithOnboardingStripeDescription": "Tu cuenta aún no ha completado el proceso de onboarding con Stripe. Por favor, termina el onboarding para habilitar todas las funciones de facturación y pagos.",
   "stripeNotConnected": "Conectar con Stripe",
-  "stripeNotConnectedDescription": "Aún no has conectado tu cuenta con Stripe. Conéctate para poder gestionar productos, servicios y procesar pagos en nuestra plataforma."
+  "stripeNotConnectedDescription": "Aún no has conectado tu cuenta con Stripe. Conéctate para poder gestionar productos, servicios y procesar pagos en nuestra plataforma.",
+  "brandColor": "Color de marca",
+  "brandColorDescription": "Selecciona el color que representa y define la identidad de tu marca.",
+  "brandColorSelectLabel": "Selecciona un color",
+  "brandColorSubmit": "Actualizar color"
+
 }
