@@ -3,15 +3,20 @@
 import { PageBody } from '@kit/ui/page';
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
 import { Elements } from '@stripe/react-stripe-js';
-import { useStripeProducts } from '../hooks/use-stripe';
 import { Stripe } from '@stripe/stripe-js';
+import { useEffect } from 'react';
+import { ServicesContextProvider, useServicesContext } from '../contexts/services-context';
+
 interface ServicesPageClientProps {
-  stripeId?: string | null;
   stripePromise: Promise<Stripe | null>;
 }
 
-const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ stripeId, stripePromise }) => {
-  const { products, loading } = useStripeProducts(stripeId!);
+const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePromise }) => {
+  const { services, loading, error, updateServices } = useServicesContext();
+
+  useEffect(() => {
+    updateServices(true).catch((error)=> {console.log(error.message)});
+  }, []);
 
   if (loading) {
     return (
@@ -28,6 +33,10 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ stripeId, strip
     );
   }
 
+  if (error) {
+    return <div>Error loading services. Please try again.</div>;
+  }
+
   return (
     <Elements stripe={stripePromise}>
       <PageBody>
@@ -41,11 +50,17 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ stripeId, strip
               </span>
             </div>
           </div>
-          <ServicesTable services={products}  />
+          <ServicesTable services={services} />
         </div>
       </PageBody>
     </Elements>
   );
 };
 
-export default ServicesPageClient;
+const ServicesPageClient: React.FC<ServicesPageClientProps> = (props) => (
+  <ServicesContextProvider>
+    <ServicesPageClientContent {...props} />
+  </ServicesContextProvider>
+);
+
+export { ServicesPageClient };
