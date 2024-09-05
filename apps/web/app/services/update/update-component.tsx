@@ -5,6 +5,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { Pen } from 'lucide-react';
 import { updateService } from 'node_modules/@kit/team-accounts/src/server/actions/services/update/update-service-server';
 import { Button } from '@kit/ui/button';
+import { toast } from 'sonner';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -55,20 +56,29 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
         await updateService(
             values.status,
             {
-            step_service_details:{
-                service_image: valuesOfServiceStripe.service_image!,
-                service_name: values.name,
-            },
-            step_service_price: {
-                price: Number(values.price),
-                price_id: valuesOfServiceStripe.price_id!,
-             }   
-            },
-    );
-    await updateServices(false);
+                step_service_details:{
+                    service_image: valuesOfServiceStripe.service_image!,
+                    service_name: values.name,
+                },
+                step_service_price: {
+                    price: Number(values.price),
+                    price_id: valuesOfServiceStripe.price_id!,
+                }   
+            },);
+        toast('Success', {
+          description: 'The service has been updated!',
+        });
+        await updateServices(false);
+  
+      } catch (error) {
+        toast('Error', {
+          description: 'The service could not be updated',
+        });
+      }
     }
 
     const handleRoleSelect = (status: string) => {
