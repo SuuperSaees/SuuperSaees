@@ -71,7 +71,7 @@ export const createService = async (clientData: {
     };
     
     // Inserta en Supabase
-    const { error, data } = await client
+    const { error, data: dataResponseCreateService } = await client
       .from('services')
       .insert(newService)
       .select()
@@ -136,7 +136,6 @@ export const createService = async (clientData: {
 
     const unitAmount = clientData.step_service_price.price * 100; 
     const currency = 'usd'; 
-
     const stripePriceResponse = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
       method: "POST",
       headers: {
@@ -158,8 +157,17 @@ export const createService = async (clientData: {
       throw new Error(`Stripe error: ${stripePriceData.error.message}`);
     }
 
+    const {error: errorResponseUpdateService} = await client
+    .from('services')
+    .update({price_id: stripePriceData?.priceId})
+    .eq('id', dataResponseCreateService.id);
+
+  if (errorResponseUpdateService) {
+    throw new Error(errorResponseUpdateService?.message);
+  }
+
     return {
-      supabase: data,
+      supabase: dataResponseCreateService,
       stripeProduct: stripeData,
       stripePrice: stripePriceData
     };

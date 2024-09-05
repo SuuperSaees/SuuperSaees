@@ -14,7 +14,7 @@ export const getServiceById = async (serviceId: Service.Type['id']) => {
 
     const { data: serviceData, error: orderError } = await client
       .from('services')
-      .select()
+      .select("*")
       .eq('id', serviceId)
       .single();
 

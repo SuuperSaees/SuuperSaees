@@ -29,7 +29,6 @@ import {
 } from "@kit/ui/dropdown-menu";
 import { useTranslation } from 'react-i18next';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
     name: z.string().min(2).max(50),
@@ -38,14 +37,12 @@ const formSchema = z.object({
 });
 
 type UpdateServiceProps = {
-    id: number,
     valuesOfServiceStripe: Service.Type
 };
 
-const UpdateServiceDialog = ({ id, valuesOfServiceStripe }: UpdateServiceProps) => {
+const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
     const { t } = useTranslation('services');
     const [selectedStatus, setSelectedStatus] = useState(valuesOfServiceStripe.status);
-    const router = useRouter()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -57,7 +54,6 @@ const UpdateServiceDialog = ({ id, valuesOfServiceStripe }: UpdateServiceProps) 
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         await updateService(
-            id,
             values.status,
             {
             step_service_details:{
@@ -70,7 +66,6 @@ const UpdateServiceDialog = ({ id, valuesOfServiceStripe }: UpdateServiceProps) 
              }   
             },
     );
-    router.refresh()
     }
 
     const handleRoleSelect = (status: string) => {
@@ -157,7 +152,7 @@ const UpdateServiceDialog = ({ id, valuesOfServiceStripe }: UpdateServiceProps) 
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                                 <Separator />
-                                <Button type="submit" className='w-full '>{t("updateService")}</Button>
+                                <AlertDialogCancel className="w-full p-0"><Button type="submit" className='w-full '>{t("updateService")}</Button></AlertDialogCancel>
                             </form>
                         </Form>
                     </AlertDialogDescription>

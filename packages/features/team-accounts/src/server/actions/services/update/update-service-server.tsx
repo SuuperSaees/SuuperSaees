@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
-export const updateService = async (id: number, status: string, clientData: {
+export const updateService = async (status: string, clientData: {
   step_service_details?: {
   service_image?: string;
   service_name?: string;
@@ -27,23 +27,19 @@ export const updateService = async (id: number, status: string, clientData: {
       name: clientData.step_service_details?.service_name,
       price: clientData.step_service_price?.price,
     };
-    console.log(serviceUpdated, id)
+    const priceId= clientData?.step_service_price?.price_id as string;
 
     // Update service in Supabase, services row.
     const { error } = await client
       .from('services')
       .update(serviceUpdated)
-      .eq('id', id);
+      .eq('price_id', priceId);
 
     if (error) {
       throw new Error(error.message);
     }
 
-    console.log("HOLAAAAA")
-    
-
     // Get Price in Stripe to get productId.
-    const priceId= clientData?.step_service_price?.price_id as string;
     const getPriceResponse = await fetch(`${baseUrl}/api/stripe/get-price?accountId=${encodeURIComponent(stripe_account_id)}&priceId=${encodeURIComponent(priceId)}`, {
       method: "GET",
       headers: {
@@ -58,7 +54,7 @@ export const updateService = async (id: number, status: string, clientData: {
     }
 
     // Update Service in Stripe.
-    const stripeResponse = await fetch(`${baseUrl}/api/stripe/update-service?productId=${encodeURIComponent(getPriceData?.product)}`, {
+    const stripeResponse = await fetch(`${baseUrl}/api/stripe/update-service?productId=${encodeURIComponent(getPriceData?.price?.product)}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -90,7 +86,7 @@ export const updateService = async (id: number, status: string, clientData: {
           },
           body: JSON.stringify({
             accountId: stripe_account_id,
-            productId: getPriceData?.product,
+            productId: getPriceData?.price?.product,
             unitAmount: unitAmount,
             currency: currency,
             isRecurring,
@@ -103,7 +99,14 @@ export const updateService = async (id: number, status: string, clientData: {
         if (!stripePriceResponse.ok) {
           throw new Error(`Stripe error: ${stripePriceData.error.message}`);
         }
+        const { error: errorResponseUpdateService } = await client
+        .from('services')
+        .update({price_id: stripePriceData?.priceId})
+        .eq('price_id', priceId);
 
+        if (errorResponseUpdateService) {
+          throw new Error(errorResponseUpdateService.message)
+        }
         revalidatePath("/services")
 
   } catch (error) {

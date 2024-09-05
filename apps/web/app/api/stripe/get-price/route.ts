@@ -6,8 +6,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const stripeId = searchParams.get('accountId');
-    const priceId = searchParams.get('priceId')
-  
+    const priceId = searchParams.get('priceId');
     if (!stripeId || !priceId) {
         return NextResponse.json(
             { error: { message: "Account ID is required" } },

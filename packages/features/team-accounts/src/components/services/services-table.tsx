@@ -147,7 +147,7 @@ const servicesColumns = (
     header: t('actions'),
     enableHiding: false,
     cell: ({ row }) => {
-      const rowId = Number(row.id)
+      const rowId = Number(row.original.id)
       const service = row.original;
 
       const handleCheckout = async (priceId: string) => {
@@ -191,7 +191,7 @@ const servicesColumns = (
               className="h-6 w-6 cursor-pointer text-gray-500"
             />
           </div>
-          <UpdateServiceDialog valuesOfServiceStripe={service} id={rowId} />
+          <UpdateServiceDialog valuesOfServiceStripe={service} />
           <DeleteserviceDialog serviceId={rowId} />
         </div>
       );
@@ -347,7 +347,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
                     />
                   </PaginationItem>}
                   <div className="flex flex-1 justify-center">
-                    {pages.map((page) => (
+                    {pages.length > 1 && pages.map((page) => (
                       <PaginationItem key={page}>
                         <PaginationLink
                           href="#"
