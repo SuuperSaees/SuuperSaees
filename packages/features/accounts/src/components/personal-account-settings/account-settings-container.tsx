@@ -51,7 +51,7 @@ export function PersonalAccountSettingsContainer(
     return user
   }
 
-
+////////////////////////////////////////// Pasarlo a un custom hook
   const [accountStripe, setAccountStripe] = useState<AccountStripe>({
     id: "",
     charges_enabled: false,
@@ -87,7 +87,7 @@ export function PersonalAccountSettingsContainer(
       void fetchAccountStripe();
     })
   }, []);
-
+//////////////////////////////////////
   if (!user) {
     return <LoadingOverlay fullPage />;
   }
