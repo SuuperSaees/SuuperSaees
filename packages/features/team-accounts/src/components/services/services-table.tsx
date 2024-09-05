@@ -38,7 +38,7 @@ import {
 
 import { Service } from '../../../../../../apps/web/lib/services.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
-import DeleteserviceDialog from '../../../../../../packages/features/team-accounts/src/server/actions/services/delete/delete-service';
+import DeleteServiceDialog from '../../../../../../apps/web/app/services/delete/delete-component';
 import {
   Pagination,
   PaginationContent,
@@ -49,7 +49,7 @@ import {
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
 import { getStripeAccountID } from '../../server/actions/members/get/get-member-account';
-import UpdateServiceDialog from '../../server/actions/services/update/update-service';
+import UpdateServiceDialog from '../../../../../../apps/web/app/services/update/update-component';
 
 type ServicesTableProps = {
   services: Service.Type[];
@@ -147,9 +147,8 @@ const servicesColumns = (
     header: t('actions'),
     enableHiding: false,
     cell: ({ row }) => {
-      const rowId = Number(row.original.id)
       const service = row.original;
-
+      const priceId = service.price_id as string;
       const handleCheckout = async (priceId: string) => {
         try {
           const stripeId = await getStripeAccountID();
@@ -192,7 +191,7 @@ const servicesColumns = (
             />
           </div>
           <UpdateServiceDialog valuesOfServiceStripe={service} />
-          <DeleteserviceDialog serviceId={rowId} />
+          <DeleteServiceDialog priceId={priceId} />
         </div>
       );
     },

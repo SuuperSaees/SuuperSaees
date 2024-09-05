@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Definición de tipos para los datos entrantes
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
                 };
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         const price = await stripe.prices.create(priceData, {
             stripeAccount: accountId, 
         });

@@ -39,7 +39,7 @@ type Role = string;
 const MAX_INVITES = 5;
 
 export function InviteMembersDialogContainer({
-  ,
+  accountSlug,
   userRoleHierarchy,
   children,
 }: React.PropsWithChildren<{

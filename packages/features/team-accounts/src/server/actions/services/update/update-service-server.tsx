@@ -1,7 +1,7 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { getPrimaryOwnerId, getStripeAccountID } from '../../members/get/get-member-account';
+import { getStripeAccountID } from '../../members/get/get-member-account';
 import { revalidatePath } from 'next/cache';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -18,8 +18,6 @@ export const updateService = async (status: string, clientData: {
 }) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const primary_owner_user_id = await getPrimaryOwnerId()
-    if (!primary_owner_user_id) throw new Error('No primary owner found');
     const stripe_account_id = await getStripeAccountID();
     if (!stripe_account_id) throw new Error('No stripe account found');      
     const serviceUpdated = {

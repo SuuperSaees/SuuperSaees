@@ -41,7 +41,6 @@ export const createService = async (clientData: {
     if (!primary_owner_user_id) throw new Error('No primary owner found');
 
     let stripe_account_id = await getStripeAccountID();
-    if (!stripe_account_id) throw new Error('No stripe account found');
 
     const newService = {
       created_at: new Date().toISOString(),

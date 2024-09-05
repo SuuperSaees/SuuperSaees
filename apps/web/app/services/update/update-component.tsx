@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel} from '@kit/ui/alert-dialog';
 import { Pen } from 'lucide-react';
-import { updateService } from './update-service-server';
+import { updateService } from 'node_modules/@kit/team-accounts/src/server/actions/services/update/update-service-server';
 import { Button } from '@kit/ui/button';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +28,8 @@ import {
     DropdownMenuTrigger,
 } from "@kit/ui/dropdown-menu";
 import { useTranslation } from 'react-i18next';
-import { Service } from '../../../../../../../../apps/web/lib/services.types';
+import { Service } from '~/lib/services.types';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
     name: z.string().min(2).max(50),
@@ -41,6 +42,7 @@ type UpdateServiceProps = {
 };
 
 const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
+    const router = useRouter();
     const { t } = useTranslation('services');
     const [selectedStatus, setSelectedStatus] = useState(valuesOfServiceStripe.status);
     const form = useForm<z.infer<typeof formSchema>>({
@@ -66,6 +68,7 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
              }   
             },
     );
+    router.push('/services');
     }
 
     const handleRoleSelect = (status: string) => {
