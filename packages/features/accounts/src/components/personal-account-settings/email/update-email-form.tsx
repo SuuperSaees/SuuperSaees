@@ -2,28 +2,30 @@
 
 import type { User } from '@supabase/supabase-js';
 
+
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+
+
 import { useUpdateUser } from '@kit/supabase/hooks/use-update-user-mutation';
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
 import { Button } from '@kit/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
-import { Input } from '@kit/ui/input';
+// import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
+
+
+import { useOrganizationSettings } from '../../../context/organization-settings-context';
 import { UpdateEmailSchema } from '../../../schema/update-email.schema';
+import { ThemedInput } from '../../ui/input-themed-with-settings';
+
 
 function createEmailResolver(currentEmail: string, errorMessage: string) {
   return zodResolver(
@@ -42,7 +44,7 @@ export function UpdateEmailForm({
 }) {
   const { t } = useTranslation('account');
   const updateUserMutation = useUpdateUser();
-
+  const { brandThemeColor } = useOrganizationSettings();
   const updateEmail = ({ email }: { email: string }) => {
     // then, we update the user's email address
     const promise = async () => {
@@ -101,7 +103,7 @@ export function UpdateEmailForm({
                 </FormLabel>
 
                 <FormControl>
-                  <Input
+                  <ThemedInput
                     data-test={'account-email-form-email-input'}
                     required
                     type={'email'}
@@ -124,7 +126,7 @@ export function UpdateEmailForm({
                 </FormLabel>
 
                 <FormControl>
-                  <Input
+                  <ThemedInput
                     {...field}
                     data-test={'account-email-form-repeat-email-input'}
                     required
@@ -139,7 +141,14 @@ export function UpdateEmailForm({
           />
 
           <div>
-            <Button disabled={updateUserMutation.isPending}>
+            <Button
+              disabled={updateUserMutation.isPending}
+              style={
+                brandThemeColor
+                  ? { backgroundColor: brandThemeColor }
+                  : undefined
+              }
+            >
               <Trans i18nKey={'account:updateEmailSubmitLabel'} />
             </Button>
           </div>

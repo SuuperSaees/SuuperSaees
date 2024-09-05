@@ -1,13 +1,19 @@
 import { use } from 'react';
 
+
+
+// import { OrganizationSettingsProvider } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { PersonalAccountSettingsContainer } from '@kit/accounts/personal-account-settings';
 import { PageBody } from '@kit/ui/page';
+
+
 
 import featureFlagsConfig from '~/config/feature-flags.config';
 import pathsConfig from '~/config/paths.config';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+
 
 const features = {
   enableAccountDeletion: featureFlagsConfig.enableAccountDeletion,
@@ -41,11 +47,13 @@ function PersonalAccountSettingsPage() {
             </span>
           </div>
         </div>
+        {/* <OrganizationSettingsProvider> */}
         <PersonalAccountSettingsContainer
           userId={user.id}
           features={features}
           paths={paths}
         />
+        {/* </OrganizationSettingsProvider> */}
       </div>
     </PageBody>
   );

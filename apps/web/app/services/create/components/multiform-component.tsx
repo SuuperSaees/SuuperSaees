@@ -15,23 +15,35 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useMutation } from '@tanstack/react-query';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-
-
-import { Button } from '@kit/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
-import { MultiStepForm, MultiStepFormContextProvider, MultiStepFormHeader, MultiStepFormStep, createStepSchema, useMultiStepFormContext } from '@kit/ui/multi-step-form';
+import {
+  MultiStepForm,
+  MultiStepFormContextProvider,
+  MultiStepFormHeader,
+  MultiStepFormStep,
+  createStepSchema,
+  useMultiStepFormContext,
+} from '@kit/ui/multi-step-form';
 import { Spinner } from '@kit/ui/spinner';
 import { Stepper } from '@kit/ui/stepper';
 import { Textarea } from '@kit/ui/textarea';
-
-
 
 import UploadImageComponent from '../../../../../../packages/features/team-accounts/src/server/actions/services/create/upload-image';
 import CreditBasedRecurringSubscription from './recurring_subscription/credit_based';
@@ -40,7 +52,6 @@ import TimeBasedRecurringSubscription from './recurring_subscription/time_based'
 import CreditBased from './single_sale/credit_based';
 import Standard from './single_sale/standard';
 import TimeBased from './single_sale/time_based';
-
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error('Stripe public key is not defined in environment variables');
@@ -192,7 +203,7 @@ export function MultiStepFormDemo() {
 function TypeOfServiceStep() {
   const { form, nextStep, isStepValid } = useMultiStepFormContext();
   const { t } = useTranslation('services');
-
+  const { brandThemeColor } = useOrganizationSettings();
   type CheckboxName =
     | 'step_type_of_service.single_sale'
     | 'step_type_of_service.recurring_subscription';
@@ -208,9 +219,13 @@ function TypeOfServiceStep() {
       ? 'flex flex-col w-[505.564px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[2.948px] border-brand-600 bg-white'
       : 'flex flex-col w-[505.564px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[1.474px] border-gray-200 bg-white';
 
+  const getStyles = (isSelected: boolean) => ({
+    borderColor: isSelected ? (brandThemeColor ?? '#1f1f1f') : '#d9d9d9',
+  });
+
   return (
     <div className="">
-      <div className="mb-[32px] h-[20px] w-[343px] text-[16px] font-bold leading-[44px] tracking-[-0.32px] text-brand-600">
+      <div className="text-black-600 mb-[32px] h-[20px] w-[343px] text-[16px] font-bold leading-[44px] tracking-[-0.32px]">
         {t('step_type_of_service')}
       </div>
       <Form {...form}>
@@ -220,7 +235,10 @@ function TypeOfServiceStep() {
               control={form.control}
               name="step_type_of_service.single_sale"
               render={({ field }) => (
-                <FormItem className={getCheckboxClass(field.value)}>
+                <FormItem
+                  className={getCheckboxClass(field.value)}
+                  style={getStyles(field.value)}
+                >
                   <FormControl>
                     <div className="flex gap-[11.792px]">
                       <div
@@ -229,6 +247,14 @@ function TypeOfServiceStep() {
                             ? 'flex h-[23.583px] w-[23.583px] items-center justify-center rounded-[11.792px] border-[1.474px] border-brand-600 bg-brand-600 p-[7.37px]'
                             : 'h-[23.583px] w-[47.166px] rounded-[5.896px] border-[1.474px] border-gray-300'
                         }`}
+                        style={
+                          field.value
+                            ? {
+                                borderColor: brandThemeColor ?? '#1f1f1f',
+                                backgroundColor: brandThemeColor ?? '#1f1f1f',
+                              }
+                            : undefined
+                        }
                         onClick={() =>
                           handleCheckboxChange(
                             'step_type_of_service.single_sale',
@@ -258,7 +284,10 @@ function TypeOfServiceStep() {
               control={form.control}
               name="step_type_of_service.recurring_subscription"
               render={({ field }) => (
-                <FormItem className={getCheckboxClass(field.value)}>
+                <FormItem
+                  className={getCheckboxClass(field.value)}
+                  style={getStyles(field.value)}
+                >
                   <FormControl>
                     <div className="flex gap-[11.792px]">
                       <div
@@ -267,6 +296,14 @@ function TypeOfServiceStep() {
                             ? 'flex h-[23.583px] w-[23.583px] items-center justify-center rounded-[11.792px] border-[1.474px] border-brand-600 bg-brand-600 p-[7.37px]'
                             : 'h-[23.583px] w-[47.166px] rounded-[5.896px] border-[1.474px] border-gray-300'
                         }`}
+                        style={
+                          field.value
+                            ? {
+                                borderColor: brandThemeColor ?? '#1f1f1f',
+                                backgroundColor: brandThemeColor ?? '#1f1f1f',
+                              }
+                            : undefined
+                        }
                         onClick={() =>
                           handleCheckboxChange(
                             'step_type_of_service.recurring_subscription',
@@ -301,9 +338,9 @@ function TypeOfServiceStep() {
             >
               {t('previous')}
             </Link>
-            <Button onClick={nextStep} disabled={!isStepValid()}>
+            <ThemedButton onClick={nextStep} disabled={!isStepValid()}>
               {t('next')}
-            </Button>
+            </ThemedButton>
           </div>
         </div>
       </Form>
@@ -366,12 +403,12 @@ function DetailsStep() {
         )}
       />
       <div className="mt-4 flex justify-between space-x-2">
-        <Button type="button" variant="outline" onClick={prevStep}>
+        <ThemedButton type="button" variant="outline" onClick={prevStep}>
           {t('previous')}
-        </Button>
-        <Button onClick={nextStep} disabled={!isStepValid()}>
+        </ThemedButton>
+        <ThemedButton onClick={nextStep} disabled={!isStepValid()}>
           {t('next')}
-        </Button>
+        </ThemedButton>
       </div>
     </Form>
   );
@@ -573,12 +610,12 @@ function DetailsStep() {
 //       </div>
 
 //       <div className="mt-4 flex justify-between space-x-2">
-//         <Button type="button" variant="outline" onClick={prevStep}>
+//         <ThemedButton type="button" variant="outline" onClick={prevStep}>
 //           {t('previous')}
-//         </Button>
+//         </ThemedButton>
 
-//         {/* <Button onClick={nextStep}>{t('next')}</Button> */}
-//         {/* <Button type='submit' >{t('createService')}</Button> */}
+//         {/* <ThemedButton onClick={nextStep}>{t('next')}</ThemedButton> */}
+//         {/* <ThemedButton type='submit' >{t('createService')}</ThemedButton> */}
 //         <Link
 //           // type="button"
 //           onClick={createServiceFunction}
@@ -799,10 +836,10 @@ function PricingStep() {
       </div>
 
       <div className="mt-4 flex justify-between space-x-2">
-        <Button type="button" variant="outline" onClick={prevStep}>
+        <ThemedButton type="button" variant="outline" onClick={prevStep}>
           {t('previous')}
-        </Button>
-        <Button
+        </ThemedButton>
+        <ThemedButton
           onClick={() => createServiceMutation.mutate()}
           className="flex gap-2"
         >
@@ -810,7 +847,7 @@ function PricingStep() {
           {createServiceMutation.isPending && (
             <Spinner className="h-4 w-4 text-white" />
           )}
-        </Button>
+        </ThemedButton>
       </div>
     </Form>
   );

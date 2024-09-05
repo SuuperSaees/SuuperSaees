@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from 'react';
 
-
-
 import Link from 'next/link';
-
-
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { Button } from '@kit/ui/button';
 // import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@kit/ui/card';
 // import { If } from '@kit/ui/if';
 // import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 
-
-
-import { OrganizationSettingsProvider } from '../../context/organization-settings-context';
+import { useOrganizationSettings } from '../../context/organization-settings-context';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
 import UpdateAccountColorBrand from './update-account-color-brand';
@@ -44,6 +44,7 @@ export function PersonalAccountSettingsContainer(
 ) {
   const [user, setUser] = useState();
   const client = useSupabase();
+  const { brandThemeColor } = useOrganizationSettings();
 
   const fetchUserAccount = async () => {
     const { data: user, error: userAccountError } = await client
@@ -163,9 +164,7 @@ export function PersonalAccountSettingsContainer(
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <OrganizationSettingsProvider>
-              <UpdateAccountColorBrand />
-            </OrganizationSettingsProvider>
+            <UpdateAccountColorBrand />
           </CardContent>
         </Card>
 
@@ -197,7 +196,14 @@ export function PersonalAccountSettingsContainer(
           </CardHeader>
           <CardContent>
             {(!accountStripe?.id || !accountStripe.charges_enabled) && (
-              <Button className="bg-brand">
+              <Button
+                className="bg-brand"
+                style={
+                  brandThemeColor
+                    ? { backgroundColor: brandThemeColor }
+                    : undefined
+                }
+              >
                 <Link href={'/stripe'}>
                   {accountStripe?.id ? 'Continuar' : 'Conectar'}
                 </Link>

@@ -12,21 +12,38 @@ import { toast } from 'sonner';
 
 
 
-import { Button } from '@kit/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@kit/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@kit/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@kit/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@kit/ui/tooltip';
 import { Trans } from '@kit/ui/trans';
 
-
-
+import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
+import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { InviteMembersSchema } from '../../schema/invite-members.schema';
 import { createInvitationsAction } from '../../server/actions/team-invitations-server-actions';
 import { MembershipRoleSelector } from './membership-role-selector';
 import { RolesDataProvider } from './roles-data-provider';
-
 
 type InviteModel = ReturnType<typeof createEmptyInviteModel>;
 
@@ -147,7 +164,7 @@ function InviteMembersForm({
                             </If>
 
                             <FormControl>
-                              <Input
+                              <ThemedInput
                                 data-test={'invite-email-input'}
                                 placeholder={t('emailPlaceholder')}
                                 type="email"
@@ -196,7 +213,7 @@ function InviteMembersForm({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
+                          <ThemedButton
                             variant={'ghost'}
                             size={'icon'}
                             type={'button'}
@@ -209,7 +226,7 @@ function InviteMembersForm({
                             }}
                           >
                             <X className={'h-4 lg:h-5'} />
-                          </Button>
+                          </ThemedButton>
                         </TooltipTrigger>
 
                         <TooltipContent>
@@ -225,7 +242,7 @@ function InviteMembersForm({
 
           <If condition={fieldArray.fields.length < MAX_INVITES}>
             <div>
-              <Button
+              <ThemedButton
                 data-test={'add-new-invite-button'}
                 type={'button'}
                 variant={'link'}
@@ -240,20 +257,18 @@ function InviteMembersForm({
                 <span>
                   <Trans i18nKey={'team:addAnotherMemberButtonLabel'} />
                 </span>
-              </Button>
+              </ThemedButton>
             </div>
           </If>
         </div>
 
-        <Button type={'submit'} disabled={pending}>
+        <ThemedButton type={'submit'} disabled={pending}>
           <Trans
             i18nKey={
-              pending
-                ? 'team:invitingMembers'
-                : 'team:inviteMembersButtonLabel'
+              pending ? 'team:invitingMembers' : 'team:inviteMembersButtonLabel'
             }
           />
-        </Button>
+        </ThemedButton>
       </form>
     </Form>
   );

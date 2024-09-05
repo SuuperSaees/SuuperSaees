@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import {
@@ -56,7 +58,13 @@ export const OrganizationSettingsProvider = ({
   children: React.ReactNode;
 }) => {
   // State to store the theme color for the brand
-  const [brandColorTheme, setBrandColorTheme] = useState<string | null>(null);
+  const [brandColorTheme, setBrandColorTheme] = useState<string | null>(
+    (
+      JSON.parse(
+        localStorage.getItem('organizationSettings') ?? 'null',
+      ) as OrganizationSettingsContextType
+    ).brandThemeColor ?? null,
+  );
 
   // Query to fetch organization settings from the server
   const organizationSettings = useQuery({

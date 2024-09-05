@@ -6,6 +6,9 @@ import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import ThemedButtonWithSettings from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import ThemedInputWithSettings from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import ThemedTextareaWithSettings from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
 import { createOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/create/create-order';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +16,6 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 // import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { Button } from '@kit/ui/button';
 import {
   Form,
   FormControl,
@@ -22,9 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-import { Input } from '@kit/ui/input';
 import { Spinner } from '@kit/ui/spinner';
-import { Textarea } from '@kit/ui/textarea';
 
 import UploadFileComponent from '~/components/ui/files-input';
 
@@ -111,9 +111,10 @@ const OrderCreationForm = () => {
             <FormItem>
               <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
               <FormControl>
-                <Input
+                <ThemedInputWithSettings
                   {...field}
                   placeholder={t('creation.form.titlePlaceholder')}
+                  className="focus-visible:ring-none"
                 />
               </FormControl>
               <FormMessage />
@@ -127,10 +128,11 @@ const OrderCreationForm = () => {
             <FormItem>
               <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
               <FormControl>
-                <Textarea
+                <ThemedTextareaWithSettings
                   {...field}
                   placeholder={t('creation.form.descriptionPlaceholder')}
                   rows={5}
+                  className="focus-visible:ring-none"
                 />
               </FormControl>
               <FormMessage />
@@ -142,12 +144,12 @@ const OrderCreationForm = () => {
           uuid={uniqueId}
           onFileIdsChange={handleFileIdsChange}
         />
-        <Button type="submit" className="flex gap-2">
+        <ThemedButtonWithSettings type="submit" className="flex gap-2">
           <span>{t('creation.form.submitMessage')}</span>
           {createOrdersMutations.isPending && (
             <Spinner className="h-4 w-4 text-white" />
           )}
-        </Button>
+        </ThemedButtonWithSettings>
       </form>
     </Form>
   );

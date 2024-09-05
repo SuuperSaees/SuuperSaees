@@ -159,7 +159,7 @@ async function ClientsMembersPage() {
                     <Trans i18nKey={'common:membersTabLabel'} />
                   </h3>
                   {members && (
-                    <div className="rounded-full border border-brand-700 bg-brand-50 px-2 py-0 text-brand-700">
+                    <div className="rounded-full border border-brand-700 bg-brand-50 px-2 py-0 text-black-700">
                       <span className="inline-flex gap-2 text-[12px]">
                         <span>{members.length}</span>
                         <Trans i18nKey={'team:labelNumberOfUsers'} />

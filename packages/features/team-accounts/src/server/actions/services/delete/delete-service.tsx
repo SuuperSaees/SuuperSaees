@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 
 
+import { ThemedButton } from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
 import { deleteService } from './delete-service-server';
 
 
@@ -49,9 +50,12 @@ const DeleteserviceDialog = ({ serviceId }: { serviceId: number }) => {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
+            <ThemedButton className='w-fit'>
+
+            <AlertDialogAction onClick={handleDelete} className='bg-transparent w-full hover:bg-transparent'>
               {t('delete')}
             </AlertDialogAction>
+            </ThemedButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

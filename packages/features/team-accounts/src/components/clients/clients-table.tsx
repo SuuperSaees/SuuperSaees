@@ -3,6 +3,8 @@
 import { useMemo, useState } from 'react';
 import * as React from 'react';
 
+
+
 import Image from 'next/image';
 
 import {
@@ -17,11 +19,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, Pen, Search } from 'lucide-react';
+import { ArrowDown, ArrowUp, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
-import { Input } from '@kit/ui/input';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 import { Separator } from '@kit/ui/separator';
 import {
@@ -45,6 +46,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
+import ThemedeInputWithSettings from '../../../../accounts/src/components/ui/input-themed-with-settings';
+
 
 // import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 
@@ -345,14 +348,14 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
         <div className='flex'>
           <Button
           variant='ghost'
-            className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'clientes' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+            className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'clientes' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
             onClick={() => handleButtonClick('clientes')}
           >
             <span className="text-sm font-semibold leading-5">Clientes</span>
           </Button>
           <Button
             variant='ghost'
-            className={`ml-[20px] flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'organizaciones' ? 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
+            className={`ml-[20px] flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'organizaciones' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
             onClick={() => handleButtonClick('organizaciones')}
           >
             <span className="text-sm font-semibold leading-5">Organizaciones</span>
@@ -361,7 +364,7 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
         <div className='flex px-2 gap-4'>
           <div className='relative max-w-sm'>
             <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
-            <Input
+            <ThemedeInputWithSettings
               placeholder={activeButton === 'clientes' ? "Buscar clientes..." : "Buscar organizaciones..."}
               value={
                 activeButton === 'clientes'

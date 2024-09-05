@@ -12,32 +12,47 @@ import Link from 'next/link';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { useMutation } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
+import ThemedInputWithSettings from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { updateOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-
-
 import { Avatar, AvatarFallback } from '@kit/ui/avatar';
 import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardFooter } from '@kit/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@kit/ui/dropdown-menu';
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@kit/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@kit/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
-
-
 
 import { Order } from '~/lib/order.types';
 import { statuses } from '~/lib/orders-data';
 
-
-
+import ThemedButtonWithSettings from '../../../../../packages/features/accounts/src/components/ui/button-themed-with-settings';
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../packages/ui/src/shadcn/pagination';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../../../../../packages/ui/src/shadcn/pagination';
 import { statusColors } from '../[id]/utils/get-color-class-styles';
-
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -146,15 +161,17 @@ export function OrderList({ orders }: OrdersTableProps) {
               <div className="ml-auto flex items-center gap-2">
                 {orders.length > 0 ? (
                   <Link href="/orders/create">
-                    <Button>Crear pedido</Button>
+                    <ThemedButtonWithSettings>
+                      Crear pedido
+                    </ThemedButtonWithSettings>
                   </Link>
                 ) : null}
                 <div className="relative ml-auto flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
+                  <ThemedInputWithSettings
                     type="search"
                     placeholder="Buscar..."
-                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                    className="focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />

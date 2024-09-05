@@ -3,21 +3,21 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+
+
 import { Database } from '@kit/supabase/database';
 import { Button } from '@kit/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
-import { Input } from '@kit/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+// import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
+
+
+import { useOrganizationSettings } from '../../context/organization-settings-context';
 import { useUpdateAccountData } from '../../hooks/use-update-account';
 import { AccountDetailsSchema } from '../../schema/account-details.schema';
+import { ThemedInput } from '../ui/input-themed-with-settings';
+
 
 type UpdateUserDataParams = Database['public']['Tables']['accounts']['Update'];
 
@@ -32,7 +32,7 @@ export function UpdateAccountDetailsForm({
 }) {
   const updateAccountMutation = useUpdateAccountData(userId);
   const { t } = useTranslation('account');
-
+  const { brandThemeColor } = useOrganizationSettings();
   const form = useForm({
     resolver: zodResolver(AccountDetailsSchema),
     defaultValues: {
@@ -71,7 +71,7 @@ export function UpdateAccountDetailsForm({
                 </FormLabel>
 
                 <FormControl>
-                  <Input
+                  <ThemedInput
                     data-test={'account-display-name'}
                     minLength={2}
                     placeholder={''}
@@ -86,7 +86,14 @@ export function UpdateAccountDetailsForm({
           />
 
           <div>
-            <Button disabled={updateAccountMutation.isPending}>
+            <Button
+              disabled={updateAccountMutation.isPending}
+              style={
+                brandThemeColor
+                  ? { backgroundColor: brandThemeColor }
+                  : undefined
+              }
+            >
               <Trans i18nKey={'account:updateProfileSubmitLabel'} />
             </Button>
           </div>

@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+
+
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -31,6 +33,7 @@ import {
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
 
+import ThemedButtonWithSettings from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
 // import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
 // import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
 import { createClient } from './create-client-server';
@@ -84,7 +87,9 @@ const CreateClientDialog = () => {
     <>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button>{t('createClient')}</Button>
+          <ThemedButtonWithSettings>
+            {t('createClient')}
+          </ThemedButtonWithSettings>
         </AlertDialogTrigger>
         <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
           <div className="flex w-full items-center justify-between">
@@ -188,9 +193,9 @@ const CreateClientDialog = () => {
                 {/* </RolesDataProvider> */}
 
                 <Separator />
-                <Button type="submit" className="w-full">
+                <ThemedButtonWithSettings type="submit" className="w-full">
                   Crear cliente
-                </Button>
+                </ThemedButtonWithSettings>
               </form>
             </Form>
           </AlertDialogDescription>

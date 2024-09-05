@@ -2,10 +2,17 @@
 
 import { useMemo } from 'react';
 
+
+
 import dynamic from 'next/dynamic';
+
+
 
 import { ReactQueryStreamedHydration } from '@tanstack/react-query-next-experimental';
 import { ThemeProvider } from 'next-themes';
+import { OrganizationSettingsProvider } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+
+
 
 import { CaptchaProvider } from '@kit/auth/captcha/client';
 import { I18nProvider } from '@kit/i18n/provider';
@@ -13,6 +20,8 @@ import { MonitoringProvider } from '@kit/monitoring/components';
 import { AppEventsProvider } from '@kit/shared/events';
 import { If } from '@kit/ui/if';
 import { VersionUpdater } from '@kit/ui/version-updater';
+
+
 
 import { AnalyticsProvider } from '~/components/analytics-provider';
 import { AuthProvider } from '~/components/auth-provider';
@@ -59,15 +68,17 @@ export function RootProviders({
                   <CaptchaTokenSetter siteKey={captchaSiteKey} />
 
                   <AuthProvider>
-                    <ThemeProvider
-                      attribute="class"
-                      enableSystem
-                      disableTransitionOnChange
-                      defaultTheme={theme}
-                      enableColorScheme={false}
-                    >
-                      {children}
-                    </ThemeProvider>
+                    <OrganizationSettingsProvider>
+                      <ThemeProvider
+                        attribute="class"
+                        enableSystem
+                        disableTransitionOnChange
+                        defaultTheme={theme}
+                        enableColorScheme={false}
+                      >
+                        {children}
+                      </ThemeProvider>
+                    </OrganizationSettingsProvider>
                   </AuthProvider>
                 </CaptchaProvider>
 

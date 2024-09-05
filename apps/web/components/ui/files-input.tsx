@@ -289,7 +289,7 @@ export default function UploadFileComponent({
                     </span>
                     {uploadProgress[id] === 100 && (
                       <div className="absolute right-4 top-4">
-                        <CheckSquare className="text-brand" />
+                        <CheckSquare className="text-primary" />
                       </div>
                     )}
                   </>

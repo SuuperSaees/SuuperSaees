@@ -112,7 +112,7 @@ export function PasswordSignInForm({
                   type={'button'}
                   size={'sm'}
                   variant={'link'}
-                  className={'text-brand-700 font-inter font-semibold text-xs leading-[20px] tracking-normal leading-[20px] space-y-3 block flex items-center'}
+                  className={'text-black-700 font-inter font-semibold text-xs leading-[20px] tracking-normal leading-[20px] space-y-3 block flex items-center'}
                 >
                   <Link href={'/auth/password-reset'}>
                     <Trans i18nKey={'auth:passwordForgottenQuestion'} />
