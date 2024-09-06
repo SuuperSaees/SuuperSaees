@@ -10,10 +10,19 @@ export async function POST(req: NextRequest) {
 
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        const account = await stripe.accounts.create({
-        type: 'standard', 
-        email: email,
-        });
+        const bodyToCreateAccountWithoutEmail = {
+            type: 'standard'
+        }
+        const bodyToCreateAccountWithEmail ={
+            ...bodyToCreateAccountWithoutEmail,
+            email
+        }
+        let account;
+        if(email) {    
+            account = await stripe.accounts.create(bodyToCreateAccountWithEmail);
+        } else {
+            account = await stripe.accounts.create(bodyToCreateAccountWithoutEmail);
+        }
 
         return NextResponse.json({ accountId: account.id });
     } catch (error) {

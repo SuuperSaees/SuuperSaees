@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel} from '@kit/ui/alert-dialog';
 import { Pen } from 'lucide-react';
 import { updateService } from 'node_modules/@kit/team-accounts/src/server/actions/services/update/update-service-server';
@@ -18,16 +18,6 @@ import {
     FormMessage,
 } from "@kit/ui/form";
 import { Input } from "@kit/ui/input";
-import { Separator } from '@kit/ui/separator';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@kit/ui/dropdown-menu";
 import { useTranslation } from 'react-i18next';
 import { Service } from '~/lib/services.types';
 import { useServicesContext } from '../contexts/services-context';
@@ -45,13 +35,13 @@ type UpdateServiceProps = {
 const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
     const { t } = useTranslation('services');
     const { updateServices } = useServicesContext();
-    const [selectedStatus, setSelectedStatus] = useState(valuesOfServiceStripe.status);
+    // const [selectedStatus, setSelectedStatus] = useState(valuesOfServiceStripe.status);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: valuesOfServiceStripe.name,
-            price: valuesOfServiceStripe.price,
-            status: valuesOfServiceStripe.status,
+            name: valuesOfServiceStripe.name!,
+            price: valuesOfServiceStripe.price!,
+            status: valuesOfServiceStripe.status!,
         },
     });
 
@@ -81,10 +71,10 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
       }
     }
 
-    const handleRoleSelect = (status: string) => {
-        setSelectedStatus(status);
-        form.setValue("status", status);
-    };
+    // const handleRoleSelect = (status: string) => {
+    //     setSelectedStatus(status);
+    //     form.setValue("status", status);
+    // };
 
     return (
         <>
@@ -132,7 +122,7 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
                                         </FormItem>
                                     )}
                                 />
-                                <FormField
+                                {/* <FormField
                                     control={form.control}
                                     name="status"
                                     render={({ field }) => (
@@ -144,8 +134,8 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                />
-                                <DropdownMenu>
+                                /> */}
+                                {/* <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="outline">
                                             {selectedStatus ? t(selectedStatus) : t("status")}
@@ -163,8 +153,8 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
                                             </DropdownMenuItem>
                                         </DropdownMenuGroup>
                                     </DropdownMenuContent>
-                                </DropdownMenu>
-                                <Separator />
+                                </DropdownMenu> */}
+                                {/* <Separator /> */}
                                 <AlertDialogCancel className="w-full p-0"><Button type="submit" className='w-full '>{t("updateService")}</Button></AlertDialogCancel>
                             </form>
                         </Form>

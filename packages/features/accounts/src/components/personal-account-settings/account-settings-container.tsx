@@ -20,6 +20,8 @@ import { Button } from '@kit/ui/button';
 import Link from 'next/link';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
 type AccountStripe = {
   id: string;
   charges_enabled: boolean;
@@ -67,7 +69,7 @@ export function PersonalAccountSettingsContainer(
         const stripeId = user?.stripe_id as string;
         if (stripeId) {
           try {
-            const response = await fetch(`/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`, {
+            const response = await fetch(`${baseUrl}/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`, {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',

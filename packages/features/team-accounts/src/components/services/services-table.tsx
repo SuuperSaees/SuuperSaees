@@ -50,11 +50,10 @@ import {
 } from '../../../../../../packages/ui/src/shadcn/pagination';
 import { getStripeAccountID } from '../../server/actions/members/get/get-member-account';
 import UpdateServiceDialog from '../../../../../../apps/web/app/services/update/update-component';
+import { useServicesContext } from '../../../../../../apps/web/app/services/contexts/services-context';
 
 type ServicesTableProps = {
   services: Service.Type[];
-  // accountIds: string[];
-  // accountNames: string[];
 };
 
 // SERVICES TABLE
@@ -149,10 +148,13 @@ const servicesColumns = (
     cell: ({ row }) => {
       const service = row.original;
       const priceId = service.price_id as string;
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { fetchAccountStripeConnect, hasTheEmailAssociatedWithStripe } = useServicesContext();
+      void fetchAccountStripeConnect()
       const handleCheckout = async (priceId: string) => {
         try {
+          
           const stripeId = await getStripeAccountID();
-
           const response = await fetch('/api/stripe/checkout-session', {
             method: 'POST',
             headers: {
@@ -183,12 +185,12 @@ const servicesColumns = (
       return (
         <div className="h-18 flex items-center gap-4 self-stretch p-4">
           <div>
-            <Link2
+            {hasTheEmailAssociatedWithStripe && <Link2
               onClick={() =>
                 service.price_id && handleCheckout(service.price_id)
               }
               className="h-6 w-6 cursor-pointer text-gray-500"
-            />
+            />}
           </div>
           <UpdateServiceDialog valuesOfServiceStripe={service} />
           <DeleteServiceDialog priceId={priceId} />
@@ -207,7 +209,6 @@ export function ServicesTable({ services }: ServicesTableProps) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-
   const columns = useMemo<ColumnDef<Service.Type>[]>(
     () => servicesColumns(t),
     [t],
