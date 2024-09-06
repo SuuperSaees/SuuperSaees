@@ -6,6 +6,8 @@ import { useCallback } from 'react';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -19,11 +21,9 @@ import { useOrganizationSettings } from '../../context/organization-settings-con
 const ORGANIZATION_BUCKET = 'organization';
 
 export default function UpdateAccountOrganizationLogo(props: {
-  value: string | null;
   organizationId: string;
-  onLogoUpdated: () => void;
 }) {
-  const { logo_url } = useOrganizationSettings();
+  const { logo_url, updateOrganizationSetting } = useOrganizationSettings();
   const client = useSupabase();
   const { t } = useTranslation('account');
   const createToaster = useCallback(
@@ -49,45 +49,42 @@ export default function UpdateAccountOrganizationLogo(props: {
 
       if (file) {
         const promise = () =>
-          removeExistingStorageFile().then(() =>
-            uploadOrganizationLogo(client, file, props.organizationId)
-              .then((value) => {
-                return client
-                  .from('organization_settings')
-                  .update({
+          removeExistingStorageFile().then(
+            () =>
+              uploadOrganizationLogo(client, file, props.organizationId).then(
+                (value) => {
+                  updateOrganizationSetting.mutate({
                     key: 'logo_url',
-                    value: value,
-                  })
-                  .eq('account_id', props.organizationId)
-                  .throwOnError();
-              })
-              .then(() => {
-                props.onLogoUpdated();
-              }),
+                    value,
+                  });
+                },
+              ),
+            // .then(() => {
+            //   props.onLogoUpdated();
+            // }),
           );
 
         createToaster(promise);
       } else {
         const promise = () =>
-          removeExistingStorageFile()
-            .then(() => {
-              return client
-                .from('organization_settings')
-                .update({
-                  key: 'logo_url',
-                  value: '',
-                })
-                .eq('account_id', props.organizationId)
-                .throwOnError();
-            })
-            .then(() => {
-              props.onLogoUpdated();
-            });
+          removeExistingStorageFile().then(() => {
+            return client
+              .from('organization_settings')
+              .update({
+                key: 'logo_url',
+                value: '',
+              })
+              .eq('account_id', props.organizationId)
+              .throwOnError();
+          });
+        // .then(() => {
+        //   props.onLogoUpdated();
+        // });
 
         createToaster(promise);
       }
     },
-    [client, createToaster, logo_url, props],
+    [client, createToaster, logo_url, props, updateOrganizationSetting],
   );
   // console.log('logo_url', logo_url);
   return (

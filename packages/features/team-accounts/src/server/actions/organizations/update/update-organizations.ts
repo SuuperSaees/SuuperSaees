@@ -6,6 +6,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 
+
 // type OrganizationSettingKey =
 //   Database['public']['Enums']['organization_setting_key'];
 // Hex color validation regex
@@ -86,7 +87,7 @@ export const upsertOrganizationSettings = async (
 
     return insertedSetting;
   } catch (error) {
-    console.error('Error while updating the organization settings');
+    console.error('Error while updating the organization settings', error);
     throw error;
   }
 };

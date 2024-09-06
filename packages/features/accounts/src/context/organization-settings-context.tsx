@@ -2,16 +2,17 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
-import {
-  UseMutationResult,
-  useMutation,
-  useQuery,
-} from '@tanstack/react-query';
+
+
+import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
+
 
 import { Database } from '../../../../../apps/web/lib/database.types';
 import { getOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/get/get-organizations';
 import { upsertOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/update/update-organizations';
+
 
 export type OrganizationSettingKeys =
   Database['public']['Enums']['organization_setting_key'];
@@ -148,6 +149,9 @@ const OrganizationSettingsProvider = ({
           }));
           updateLocalStorage(key, newValue);
         });
+      } else {
+        // if no settings, clean
+        localStorage?.setItem('organizationSettings', '{}');
       }
     }
   }, [fetchedSettings]);

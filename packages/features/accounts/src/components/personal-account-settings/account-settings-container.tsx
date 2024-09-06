@@ -207,8 +207,6 @@ export function PersonalAccountSettingsContainer(
           <CardContent>
             <UpdateAccountOrganizationLogo
               organizationId={user?.organization_id ?? ''}
-              onLogoUpdated={() => console.log('logo updated!')}
-              value={''}
             />
           </CardContent>
         </Card>
