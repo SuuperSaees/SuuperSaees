@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { Button } from '@kit/ui/button';
+import { Sidebar } from '@kit/ui/sidebar';
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
 import withOrganizationSettings from '../../hoc/with-organization-settings';
@@ -23,29 +23,39 @@ function getTextColorBasedOnBackground(backgroundColor: string) {
   return luminance > 186 ? 'black' : 'white'; // 186 is a common threshold for readability
 }
 // Example component that uses organization settings and accepts children for customization
-export const ThemedButton: React.FC<{
+export const ThemedSidebar: React.FC<{
   children: React.ReactNode;
   className?: string;
   [key: string]: unknown;
 }> = ({ children, className, ...rest }) => {
-  const { theme_color } = useOrganizationSettings();
-  const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
+  const { sidebar_background_color, theme_color } = useOrganizationSettings();
+  const textColor = getTextColorBasedOnBackground(
+    sidebar_background_color ?? '#ffffff',
+  );
   return (
-    <Button
-      className={`bg-brand flex gap-2 ${className}`}
+    <Sidebar
+      className={` ${className}`}
       style={
-        theme_color
-          ? { backgroundColor: theme_color, color: textColor }
+        sidebar_background_color
+          ? { backgroundColor: sidebar_background_color, color: textColor }
+          : undefined
+      }
+      itemActiveStyle={
+        sidebar_background_color
+          ? {
+              backgroundColor: theme_color,
+              color: getTextColorBasedOnBackground(theme_color ?? ''),
+            }
           : undefined
       }
       {...rest}
     >
       {children}
-    </Button>
+    </Sidebar>
   );
 };
 
-// Wrapping the ThemedButton component with the HOC
-const ThemedButtonWithSettings = withOrganizationSettings(ThemedButton);
+// Wrapping the ThemedSidebar component with the HOC
+const ThemedSidebarWithSettings = withOrganizationSettings(ThemedSidebar);
 
-export default ThemedButtonWithSettings;
+export default ThemedSidebarWithSettings;

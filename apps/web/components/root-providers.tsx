@@ -10,7 +10,6 @@ import dynamic from 'next/dynamic';
 
 import { ReactQueryStreamedHydration } from '@tanstack/react-query-next-experimental';
 import { ThemeProvider } from 'next-themes';
-import { OrganizationSettingsProvider } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
 
 
@@ -31,7 +30,18 @@ import featuresFlagConfig from '~/config/feature-flags.config';
 import { i18nResolver } from '~/lib/i18n/i18n.resolver';
 import { getI18nSettings } from '~/lib/i18n/i18n.settings';
 
+
+
 import { ReactQueryProvider } from './react-query-provider';
+
+
+// import OrganizationSettingsProvider  from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+
+const OrganizationSettingsProvider = dynamic(
+  () => import('node_modules/@kit/accounts/src/context/organization-settings-context').then((mod) => mod.default),
+  { ssr: false }
+);
+
 
 const captchaSiteKey = authConfig.captchaTokenSiteKey;
 
@@ -46,6 +56,7 @@ const CaptchaTokenSetter = dynamic(async () => {
     default: CaptchaTokenSetter,
   };
 });
+
 
 export function RootProviders({
   lang,

@@ -6,9 +6,9 @@ import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import ThemedButtonWithSettings from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import ThemedInputWithSettings from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
-import ThemedTextareaWithSettings from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
 import { createOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/create/create-order';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -111,7 +111,7 @@ const OrderCreationForm = () => {
             <FormItem>
               <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
               <FormControl>
-                <ThemedInputWithSettings
+                <ThemedInput
                   {...field}
                   placeholder={t('creation.form.titlePlaceholder')}
                   className="focus-visible:ring-none"
@@ -128,7 +128,7 @@ const OrderCreationForm = () => {
             <FormItem>
               <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
               <FormControl>
-                <ThemedTextareaWithSettings
+                <ThemedTextarea
                   {...field}
                   placeholder={t('creation.form.descriptionPlaceholder')}
                   rows={5}
@@ -144,12 +144,12 @@ const OrderCreationForm = () => {
           uuid={uniqueId}
           onFileIdsChange={handleFileIdsChange}
         />
-        <ThemedButtonWithSettings type="submit" className="flex gap-2">
+        <ThemedButton type="submit" className="flex gap-2">
           <span>{t('creation.form.submitMessage')}</span>
           {createOrdersMutations.isPending && (
             <Spinner className="h-4 w-4 text-white" />
           )}
-        </ThemedButtonWithSettings>
+        </ThemedButton>
       </form>
     </Form>
   );

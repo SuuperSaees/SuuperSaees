@@ -2,27 +2,26 @@
 
 import Link from 'next/link';
 
+
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 
+
+
 import { Button } from '@kit/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
+
+
 import { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
-import { Separator } from '@kit/ui/separator';
+
 
 export function PasswordSignInForm({
   onSubmit,
@@ -52,14 +51,13 @@ export function PasswordSignInForm({
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className='text-sm font-normal'>
+              <FormLabel className="text-sm font-normal">
                 <Trans i18nKey={'common:plsDetailInputs'} />
               </FormLabel>
-              
-              <div className='text-left text-sm' style={{ marginTop: '30px' }}>
+
+              <div className="text-left text-sm" style={{ marginTop: '30px' }}>
                 <Trans i18nKey={'common:emailLabel'} />
               </div>
-              
 
               <FormControl>
                 <Input
@@ -67,6 +65,7 @@ export function PasswordSignInForm({
                   required
                   type="email"
                   placeholder={t('emailPlaceholder')}
+                  className="focus-visible:ring-brand"
                   {...field}
                 />
               </FormControl>
@@ -81,7 +80,7 @@ export function PasswordSignInForm({
           name={'password'}
           render={({ field }) => (
             <FormItem>
-              <div className='text-left text-sm'>
+              <div className="text-left text-sm">
                 <Trans i18nKey={'common:password'} />
               </div>
 
@@ -92,16 +91,19 @@ export function PasswordSignInForm({
                   type="password"
                   placeholder={''}
                   {...field}
+                  className="focus-visible:ring-brand"
                 />
               </FormControl>
 
               <FormMessage />
-      
 
-              <div className="flex justify-between items-center w-full">
-
+              <div className="flex w-full items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="rememberMe" className="form-checkbox"/>
+                  <input
+                    type="checkbox"
+                    id="rememberMe"
+                    className="form-checkbox"
+                  />
                   <label htmlFor="rememberMe" className="text-xs">
                     <Trans i18nKey={'auth:rememberMe'} />
                   </label>
@@ -112,29 +114,25 @@ export function PasswordSignInForm({
                   type={'button'}
                   size={'sm'}
                   variant={'link'}
-                  className={'text-black-700 font-inter font-semibold text-xs leading-[20px] tracking-normal leading-[20px] space-y-3 block flex items-center'}
+                  className={
+                    'text-brand-700 font-inter block flex items-center space-y-3 text-xs font-semibold leading-[20px] tracking-normal'
+                  }
                 >
                   <Link href={'/auth/password-reset'}>
                     <Trans i18nKey={'auth:passwordForgottenQuestion'} />
                   </Link>
                 </Button>
-            </div>
-
-
-
+              </div>
             </FormItem>
           )}
         />
 
-
-
         <Button
           data-test="auth-submit-button"
-          className={'group w-full'}
+          className={'bg-brand group w-full'}
           type="submit"
           disabled={loading}
         >
-          
           <If
             condition={loading}
             fallback={

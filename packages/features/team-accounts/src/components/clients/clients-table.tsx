@@ -7,46 +7,26 @@ import * as React from 'react';
 
 import Image from 'next/image';
 
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+
+
+import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+
 
 import { Button } from '@kit/ui/button';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 import { Separator } from '@kit/ui/separator';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@kit/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@kit/ui/table';
+
+
 
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
 import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/delete/delete-client';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '../../../../../../packages/ui/src/shadcn/pagination';
-import ThemedeInputWithSettings from '../../../../accounts/src/components/ui/input-themed-with-settings';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../../packages/ui/src/shadcn/pagination';
+import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 
 
 // import UpdateClientDialog from '../../server/actions/clients/update/update-client';
@@ -364,7 +344,7 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
         <div className='flex px-2 gap-4'>
           <div className='relative max-w-sm'>
             <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
-            <ThemedeInputWithSettings
+            <ThemedInput
               placeholder={activeButton === 'clientes' ? "Buscar clientes..." : "Buscar organizaciones..."}
               value={
                 activeButton === 'clientes'

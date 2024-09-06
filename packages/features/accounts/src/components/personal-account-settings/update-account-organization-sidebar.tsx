@@ -5,8 +5,6 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-
-
 import { Button } from '@kit/ui/button';
 import {
   Form,
@@ -22,33 +20,36 @@ import { Spinner } from '@kit/ui/spinner';
 import { useOrganizationSettings } from '../../context/organization-settings-context';
 import { ThemedButton } from '../ui/button-themed-with-settings';
 
-const KeyEnum = z.enum(['theme_color']);
+// import type { Database } from '../../../../../../apps/web/lib/database.types'
+const KeyEnum = z.enum(['sidebar_background_color']);
 
 const colorBrandSchema = z.object({
   key: KeyEnum,
   value: z.string(),
 });
 
-export default function UpdateAccountColorBrand() {
+export default function UpdateAccountOrganizationSidebar() {
   const { t } = useTranslation();
-  const { theme_color, updateOrganizationSetting, resetOrganizationSetting } =
-    useOrganizationSettings();
-
+  const {
+    sidebar_background_color,
+    updateOrganizationSetting,
+    resetOrganizationSetting,
+  } = useOrganizationSettings();
+  // console.log('sidebar_background_color', sidebar_background_color);
   const form = useForm<z.infer<typeof colorBrandSchema>>({
     resolver: zodResolver(colorBrandSchema),
     defaultValues: {
-      key: 'theme_color',
-      value: theme_color ?? '#2B47DA',
+      key: 'sidebar_background_color',
+      value: sidebar_background_color ?? '#ffffff',
     },
   });
 
   const onSubmit = (values: z.infer<typeof colorBrandSchema>) => {
     updateOrganizationSetting.mutate(values);
   };
-
   const onReset = () => {
-    resetOrganizationSetting('theme_color');
-    form.reset({ key: 'theme_color', value: '#2B47DA' }); // Reset the form to the default color or your desired value
+    resetOrganizationSetting('sidebar_background_color');
+    form.reset({ key: 'sidebar_background_color', value: '#ffffff' }); // Reset the form to the default color or your desired value
   };
 
   return (
@@ -59,10 +60,10 @@ export default function UpdateAccountColorBrand() {
           name="value"
           render={({ field }) => (
             <FormItem className="w-fit">
-              <FormLabel>{t('account:brandColorSelectLabel')}</FormLabel>
+              <FormLabel>{t('account:brandSidebarLabel')}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Color Brand"
+                  placeholder="Sidebar Color"
                   {...field}
                   type="color"
                   className="max-w-14"
@@ -73,10 +74,11 @@ export default function UpdateAccountColorBrand() {
           )}
         />
         <div className="flex gap-4">
-          <ThemedButton type="submit" className={`bg-brand flex gap-2`}>
-            <span>{t('account:brandColorSubmit')}</span>
+          <ThemedButton className={`bg-brand flex gap-2`}>
+            <span>{t('account:brandSidebarSubmit')}</span>
             {updateOrganizationSetting.isPending &&
-              updateOrganizationSetting.variables?.key === 'theme_color' && (
+              updateOrganizationSetting.variables.key ===
+                'sidebar_background_color' && (
                 <Spinner className="h-4 w-4 text-white" />
               )}
           </ThemedButton>

@@ -153,13 +153,24 @@
   "brandColorDescription": "Selecciona el color que representa y define la identidad de tu marca.",
   "brandColorSelectLabel": "Selecciona un color",
   "brandColorSubmit": "Actualizar color",
+  "brandColorReset": "Restablecer color",
   "brandLogo": "Logotipo de marca",
-  "brandLogoDescription": "Sube un logotipo que represente tu marca.",
+  "brandLogoDescription": "Sube un logotipo que represente tu marca. Se recomienda que el fondo sea transparente. Tamaño recomendado: 200x100 píxeles.",
   "brandLogoSelectLabel": "Selecciona un logotipo",
   "brandLogoSubmit": "Actualizar logotipo",
   "brandLogoSuccess": "Logotipo actualizado con éxito",
   "brandLogoError": "Error al actualizar el logotipo",
-  "brandLogoLoading": "Actualizando logotipo..."
-
-
+  "brandLogoLoading": "Actualizando logotipo...",
+  "brandName": "Nombre de marca",
+  "brandNameDescription": "Selecciona el nombre que represente a tu marca.",
+  "brandNameInputLabel": "Nombre de marca",
+  "brandNameSubmit": "Actualizar nombre",
+  "brandSidebar": "Barra lateral",
+  "brandSidebarDescription": "Personaliza la barra lateral de tu sitio web.",
+  "brandSidebarSuccess": "Barra lateral actualizada con éxito",
+  "brandSidebarError": "Error al actualizar la barra lateral",
+  "brandSidebarLoading": "Actualizando barra lateral...",
+  "brandSidebarSubmit": "Actualizar barra lateral",
+  "brandSidebarLabel": "Selecciona el color de la barra lateral",
+  "brandSidebarReset": "Restablecer color"
 }

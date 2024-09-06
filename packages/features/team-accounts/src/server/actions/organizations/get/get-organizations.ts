@@ -2,6 +2,7 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
 export const getOrganizationSettings = async () => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -27,8 +28,7 @@ export const getOrganizationSettings = async () => {
     const { data: organizationSettings, error: settingsError } = await client
       .from('organization_settings')
       .select()
-      .eq('account_id', accountData.organization_id ?? '')
-      .single();
+      .eq('account_id', accountData.organization_id ?? '');
 
     if (settingsError) {
       throw settingsError.message;

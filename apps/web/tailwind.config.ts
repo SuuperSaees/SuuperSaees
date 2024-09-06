@@ -38,6 +38,12 @@ export default {
           900: '#202020', // Very dark gray
           950: '#181818', // Almost black
         },
+        secondary: {
+          DEFAULT: 'hsla(0, 0%, 91%, 0.65)',
+        },
+        accent: {
+          DEFAULT: 'hsla(0, 0%, 91%, 0.65)',
+        },
         gray: {
           DEFAULT: '#667085',
           25: '#FCFCFD',

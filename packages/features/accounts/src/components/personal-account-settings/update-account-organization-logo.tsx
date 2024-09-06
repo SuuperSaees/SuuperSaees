@@ -2,6 +2,8 @@
 
 import { useCallback } from 'react';
 
+
+
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { useTranslation } from 'react-i18next';
@@ -12,6 +14,8 @@ import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { ImageUploader } from '@kit/ui/image-uploader';
 import { Trans } from '@kit/ui/trans';
 
+import { useOrganizationSettings } from '../../context/organization-settings-context';
+
 const ORGANIZATION_BUCKET = 'organization';
 
 export default function UpdateAccountOrganizationLogo(props: {
@@ -19,9 +23,9 @@ export default function UpdateAccountOrganizationLogo(props: {
   organizationId: string;
   onLogoUpdated: () => void;
 }) {
+  const { logo_url } = useOrganizationSettings();
   const client = useSupabase();
   const { t } = useTranslation('account');
-
   const createToaster = useCallback(
     (promise: () => Promise<unknown>) => {
       return toast.promise(promise, {
@@ -36,8 +40,8 @@ export default function UpdateAccountOrganizationLogo(props: {
   const onValueChange = useCallback(
     (file: File | null) => {
       const removeExistingStorageFile = () => {
-        if (props.value) {
-          return deleteLogoImage(client, props.value) ?? Promise.resolve();
+        if (logo_url) {
+          return deleteLogoImage(client, logo_url) ?? Promise.resolve();
         }
 
         return Promise.resolve();
@@ -83,11 +87,11 @@ export default function UpdateAccountOrganizationLogo(props: {
         createToaster(promise);
       }
     },
-    [client, createToaster, props],
+    [client, createToaster, logo_url, props],
   );
-
+  // console.log('logo_url', logo_url);
   return (
-    <ImageUploader value={props.value} onValueChange={onValueChange}>
+    <ImageUploader value={logo_url} onValueChange={onValueChange}>
       <div className={'flex flex-col space-y-1'}>
         <span className={'text-sm'}>
           <Trans i18nKey={'account:brandLogoSelectLabel'} />

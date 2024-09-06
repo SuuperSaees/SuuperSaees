@@ -20,16 +20,10 @@ export type OrganizationSettingValue =
   Database['public']['Tables']['organization_settings']['Row']['value'];
 
 export type OrganizationSettingsContextType = {
-  brandThemeColor?: OrganizationSettingValue | null;
-  updateBrandColorTheme: UseMutationResult<
-    {
-      account_id: string;
-      created_at: string;
-      id: string;
-      key: OrganizationSettingKeys;
-      updated_at: string | null;
-      value: string;
-    },
+  [key in OrganizationSettingKeys]?: OrganizationSettingValue;
+} & {
+  updateOrganizationSetting: UseMutationResult<
+    Database['public']['Tables']['organization_settings']['Row'],
     Error,
     {
       key: OrganizationSettingKeys;
@@ -37,11 +31,7 @@ export type OrganizationSettingsContextType = {
     },
     unknown
   >;
-  backgroundColor?: OrganizationSettingValue | null;
-  logoUrl?: OrganizationSettingValue | null;
-  timezone?: OrganizationSettingValue | null;
-  language?: OrganizationSettingValue | null;
-  dateFormat?: OrganizationSettingValue | null;
+  resetOrganizationSetting: (key: OrganizationSettingKeys) => void; // Add reset function type
 };
 
 // Create context with initial value as undefined, to be properly set in the provider
@@ -52,99 +42,125 @@ export const OrganizationSettingsContext = createContext<
 // Function to validate a hex color string
 const isValidHexColor = (color: string) => /^#([0-9A-F]{3}){1,2}$/i.test(color);
 
-export const OrganizationSettingsProvider = ({
+const OrganizationSettingsProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  // State to store the theme color for the brand
-  const [brandColorTheme, setBrandColorTheme] = useState<string | null>(
-    (
-      JSON.parse(
-        localStorage.getItem('organizationSettings') ?? 'null',
-      ) as OrganizationSettingsContextType
-    ).brandThemeColor ?? null,
-  );
+  // State to store organization settings
+  const [organizationSettings, setOrganizationSettings] =
+    useState<OrganizationSettingsContextType>(
+      JSON.parse(localStorage.getItem('organizationSettings') ?? '{}'),
+    );
 
   // Query to fetch organization settings from the server
-  const organizationSettings = useQuery({
+  const { data: fetchedSettings } = useQuery({
     queryKey: ['organizationSettings'],
     queryFn: async () => getOrganizationSettings(),
   });
 
-  const updateBrandColorTheme = useMutation({
+  // Mutation to update a single setting
+  const updateOrganizationSetting = useMutation({
     mutationFn: async (organizationSetting: {
       key: OrganizationSettingKeys;
       value: string;
     }) => await upsertOrganizationSettings(organizationSetting),
 
-    onSuccess: (colorTheme) => {
-      console.log('colorTheme', colorTheme);
-      const newColor = isValidHexColor(colorTheme.value)
-        ? colorTheme.value
-        : null;
-      updateLocalStorage(newColor); // Update localStorage
-      setBrandColorTheme(newColor); // Update state
+    onSuccess: (updatedSetting) => {
+      console.log('Updated Setting', updatedSetting);
+      const { key, value } = updatedSetting;
+
+      // Update only if valid color when it's the theme color
+      const newValue =
+        key === 'theme_color' && !isValidHexColor(value) ? '' : value;
+
+      updateLocalStorage(key, newValue);
+      setOrganizationSettings((prev) => ({
+        ...prev,
+        [key]: newValue,
+      }));
+
       toast.success('Success', {
-        description: 'Organization color updated',
+        description: `Organization setting updated`,
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'The organization color could not be updated',
+        description: 'The organization setting could not be updated',
       });
     },
   });
 
-  // Function to update localStorage with the new theme color
-  const updateLocalStorage = (newColor: string | null) => {
+  // Function to update localStorage with the new setting
+  const updateLocalStorage = (
+    key: OrganizationSettingKeys,
+    value: OrganizationSettingValue,
+  ) => {
     const prevSettings = JSON.parse(
-      localStorage.getItem('organizationSettings') ?? 'null',
-    ) as OrganizationSettingsContextType;
-    localStorage.setItem(
+      localStorage?.getItem('organizationSettings') ?? '{}',
+    );
+    localStorage?.setItem(
       'organizationSettings',
       JSON.stringify({
         ...prevSettings,
-        brandThemeColor: newColor,
+        [key]: value,
       }),
     );
   };
 
-  // Effect to load theme color from localStorage on component mount
+  // Function to reset a specific setting to its default value (empty string)
+  const resetOrganizationSetting = (key: OrganizationSettingKeys) => {
+    const defaultValue = ''; // Default value for all settings
+
+    // Update local storage and state
+    updateOrganizationSetting.mutate({ key, value: defaultValue });
+
+    updateLocalStorage(key, defaultValue);
+    setOrganizationSettings((prev) => ({
+      ...prev,
+      [key]: defaultValue,
+    }));
+    toast.success('Reset Success', {
+      description: `Organization setting has been reset to default.`,
+    });
+  };
+
+  // Effect to load settings from localStorage on component mount
   useEffect(() => {
-    const organizationSettings = JSON.parse(
-      localStorage.getItem('organizationSettings') ?? 'null',
-    ) as OrganizationSettingsContextType;
-    if (
-      organizationSettings &&
-      isValidHexColor(organizationSettings.brandThemeColor ?? '')
-    ) {
-      setBrandColorTheme(organizationSettings.brandThemeColor ?? null);
+    if (typeof window !== 'undefined') {
+      const storedSettings = JSON.parse(
+        localStorage?.getItem('organizationSettings') ?? '{}',
+      );
+      setOrganizationSettings(storedSettings);
     }
   }, []);
 
-  // Effect to update localStorage and state when fetched data changes
+  // Effect to update state and localStorage when fetched data changes
   useEffect(() => {
-    const organizationSettingsData = organizationSettings.data;
-
-    if (
-      organizationSettingsData &&
-      organizationSettingsData.key === 'theme_color'
-    ) {
-      const newColor = isValidHexColor(organizationSettingsData.value)
-        ? organizationSettingsData.value
-        : null;
-      setBrandColorTheme(newColor);
-      updateLocalStorage(newColor);
+    if (typeof window !== 'undefined') {
+      if (fetchedSettings) {
+        fetchedSettings.forEach(({ key, value }) => {
+          const newValue =
+            key === 'theme_color' && !isValidHexColor(value) ? '' : value;
+          setOrganizationSettings((prev) => ({
+            ...prev,
+            [key]: newValue,
+          }));
+          updateLocalStorage(key, newValue);
+        });
+      }
     }
-  }, [organizationSettings.data]);
+  }, [fetchedSettings]);
+
+  if (!localStorage) return null;
 
   // Provide the context to children components
   return (
     <OrganizationSettingsContext.Provider
       value={{
-        brandThemeColor: brandColorTheme,
-        updateBrandColorTheme,
+        ...organizationSettings,
+        updateOrganizationSetting,
+        resetOrganizationSetting, // Provide the reset function to the context
       }}
     >
       {children}
@@ -162,3 +178,5 @@ export const useOrganizationSettings = () => {
   }
   return context;
 };
+
+export default OrganizationSettingsProvider;

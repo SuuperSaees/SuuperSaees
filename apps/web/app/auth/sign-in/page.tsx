@@ -59,7 +59,7 @@ function SignInPage({ searchParams }: SignInPageProps) {
                       <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
 
                   <Button asChild variant={'link'} size={'sm'} className='text-indigo-500'>
-                    <Link href={signUpPath} className='text-black-700 font-inter font-semibold text-xs leading-[20px] tracking-normal leading-[20px] space-y-3 block'>
+                    <Link href={signUpPath} className='text-brand-700 font-inter font-semibold text-xs leading-[20px] tracking-normal leading-[20px] space-y-3 block'>
                       <Trans i18nKey={'auth:signInAlreadyHaveAnAccount'} />
                     </Link>
                   </Button>

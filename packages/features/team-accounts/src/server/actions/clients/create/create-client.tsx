@@ -21,7 +21,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@kit/ui/alert-dialog';
-import { Button } from '@kit/ui/button';
 import {
   Form,
   FormControl,
@@ -33,7 +32,7 @@ import {
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
 
-import ThemedButtonWithSettings from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
+import { ThemedButton } from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
 // import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
 // import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
 import { createClient } from './create-client-server';
@@ -87,9 +86,7 @@ const CreateClientDialog = () => {
     <>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <ThemedButtonWithSettings>
-            {t('createClient')}
-          </ThemedButtonWithSettings>
+          <ThemedButton>{t('createClient')}</ThemedButton>
         </AlertDialogTrigger>
         <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
           <div className="flex w-full items-center justify-between">
@@ -193,9 +190,9 @@ const CreateClientDialog = () => {
                 {/* </RolesDataProvider> */}
 
                 <Separator />
-                <ThemedButtonWithSettings type="submit" className="w-full">
+                <ThemedButton type="submit" className="w-full">
                   Crear cliente
-                </ThemedButtonWithSettings>
+                </ThemedButton>
               </form>
             </Form>
           </AlertDialogDescription>

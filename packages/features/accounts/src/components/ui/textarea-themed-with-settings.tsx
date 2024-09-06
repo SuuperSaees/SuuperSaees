@@ -12,12 +12,12 @@ export const ThemedTextarea: React.FC<{
   [key: string]: unknown;
 }> = ({ className, ...rest }) => {
   // Use the hook correctly inside the component
-  const { brandThemeColor } = useOrganizationSettings();
+  const { theme_color } = useOrganizationSettings();
 
   return (
     <Textarea
       className={`focus-visible:ring-none focus-visible:ring-0 ${className}`}
-      style={brandThemeColor ? { outlineColor: brandThemeColor } : undefined}
+      style={theme_color ? { outlineColor: theme_color } : undefined}
       {...rest}
     />
   );

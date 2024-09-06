@@ -1168,21 +1168,21 @@ export type Database = {
           {
             foreignKeyName: "organization_settings_account_id_fkey"
             columns: ["account_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "organization_settings_account_id_fkey"
             columns: ["account_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "organization_settings_account_id_fkey"
             columns: ["account_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -1994,6 +1994,8 @@ export type Database = {
         | "timezone"
         | "language"
         | "date_format"
+        | "sidebar_background_color"
+        | "portal_name"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"

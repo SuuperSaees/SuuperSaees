@@ -12,31 +12,15 @@ import { toast } from 'sonner';
 
 
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@kit/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Button } from '@kit/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@kit/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@kit/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@kit/ui/tooltip';
 import { Trans } from '@kit/ui/trans';
+
+
 
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
@@ -242,7 +226,7 @@ function InviteMembersForm({
 
           <If condition={fieldArray.fields.length < MAX_INVITES}>
             <div>
-              <ThemedButton
+              <Button
                 data-test={'add-new-invite-button'}
                 type={'button'}
                 variant={'link'}
@@ -257,7 +241,7 @@ function InviteMembersForm({
                 <span>
                   <Trans i18nKey={'team:addAnotherMemberButtonLabel'} />
                 </span>
-              </ThemedButton>
+              </Button>
             </div>
           </If>
         </div>

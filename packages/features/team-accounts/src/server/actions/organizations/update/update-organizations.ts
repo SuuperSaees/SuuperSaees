@@ -2,6 +2,8 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 
 // type OrganizationSettingKey =
@@ -32,7 +34,8 @@ export const upsertOrganizationSettings = async (
         .select('id')
         .eq('primary_owner_user_id', user.id)
         .eq('is_personal_account', false)
-        .single();
+        .single()
+        .throwOnError();
 
     if (organizationAccountError) {
       throw organizationAccountError.message;
@@ -40,6 +43,7 @@ export const upsertOrganizationSettings = async (
     // Validate hex color if key is 'theme_color'
     if (
       organizationSetting.key === 'theme_color' &&
+      organizationSetting.value !== '' && // Allow empty string
       !isValidHexColor(organizationSetting.value)
     ) {
       throw new Error('Invalid hex color value for theme_color');
@@ -49,21 +53,38 @@ export const upsertOrganizationSettings = async (
       key: organizationSetting.key,
       value: organizationSetting.value,
     };
+    console.log('newSetting', newSetting);
+    // Update if exists
+    const { data: updatedSetting, error: updateError } = await client
+      .from('organization_settings')
+      .update({ value: organizationSetting.value })
+      .eq('account_id', organizationAccount.id)
+      .eq('key', organizationSetting.key)
+      .select()
+      .single();
 
-    const { data: organizationSettings, error: organizationSettingsError } =
-      await client
-        .from('organization_settings')
-        .upsert(newSetting, {
-          onConflict: 'account_id',
-        })
-        .select()
-        .single();
-
-    if (organizationSettingsError) {
-      throw organizationSettingsError.message;
+    if (updateError && updateError.code !== 'PGRST116') {
+      // If not a "No rows updated" error, throw
+      throw new Error(updateError.message);
     }
 
-    return organizationSettings;
+    if (updatedSetting) {
+      // Return updated setting if exists
+      return updatedSetting;
+    }
+
+    // Insert if no existing setting was updated
+    const { data: insertedSetting, error: insertError } = await client
+      .from('organization_settings')
+      .insert(newSetting)
+      .select()
+      .single();
+
+    if (insertError) {
+      throw new Error(insertError.message);
+    }
+
+    return insertedSetting;
   } catch (error) {
     console.error('Error while updating the organization settings');
     throw error;

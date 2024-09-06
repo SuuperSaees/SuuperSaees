@@ -18,6 +18,7 @@ import { Trans } from '@kit/ui/trans';
 
 
 
+import type { Account } from '../../../../../../apps/web/lib/account.types';
 import { ThemedButton } from '../ui/button-themed-with-settings';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
@@ -25,7 +26,8 @@ import UpdateAccountColorBrand from './update-account-color-brand';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
-
+// import { UpdateAccountOrganizationName } from './update-account-organization-name';
+import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 
 type AccountStripe = {
   id: string;
@@ -43,7 +45,7 @@ export function PersonalAccountSettingsContainer(
     };
   }>,
 ) {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState<Account.Type | null>();
   const client = useSupabase();
 
   const fetchUserAccount = async () => {
@@ -63,7 +65,7 @@ export function PersonalAccountSettingsContainer(
   });
   // const supportsLanguageSelection = useSupportMultiLanguage();
   useEffect(() => {
-    let user;
+    let user: Account.Type | null;
     void fetchUserAccount()
       .then((data) => {
         setUser(data);
@@ -137,6 +139,19 @@ export function PersonalAccountSettingsContainer(
             <UpdateAccountDetailsFormContainer user={user} />
           </CardContent>
         </Card>
+        {/* <Card>
+          <CardHeader>
+            <CardTitle>
+              <Trans i18nKey={'account:brandName'} />
+            </CardTitle>
+            <CardDescription>
+              <Trans i18nKey={'account:brandNameDescription'} />
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UpdateAccountOrganizationName />
+          </CardContent>
+        </Card> */}
         {/* SUPPORT LANGUAGE, PENDING */}
         {/* <If condition={supportsLanguageSelection}>
           <Card>
@@ -167,7 +182,36 @@ export function PersonalAccountSettingsContainer(
             <UpdateAccountColorBrand />
           </CardContent>
         </Card>
-
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Trans i18nKey={'account:brandSidebar'} />
+            </CardTitle>
+            <CardDescription>
+              <Trans i18nKey={'account:brandSidebarDescription'} />
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UpdateAccountOrganizationSidebar />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Trans i18nKey={'account:brandLogo'} />
+            </CardTitle>
+            <CardDescription>
+              <Trans i18nKey={'account:brandLogoDescription'} />
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UpdateAccountOrganizationLogo
+              organizationId={user?.organization_id ?? ''}
+              onLogoUpdated={() => console.log('logo updated!')}
+              value={''}
+            />
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>
@@ -202,19 +246,6 @@ export function PersonalAccountSettingsContainer(
                 </Link>
               </ThemedButton>
             )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:brandLogo'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:brandLogoDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdateAccountOrganizationLogo />
           </CardContent>
         </Card>
       </div>
