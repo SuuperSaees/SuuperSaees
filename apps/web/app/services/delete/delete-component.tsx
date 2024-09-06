@@ -4,27 +4,30 @@
 import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
-
-
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
+import { useServicesContext } from '../contexts/services-context';
 
 
 
-import { ThemedButton } from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
-import { deleteService } from './delete-service-server';
+
+import { deleteService } from '../../../../../packages/features/team-accounts/src/server/actions/services/delete/delete-service-server'
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 
-const DeleteserviceDialog = ({ serviceId }: { serviceId: number }) => {
+
+const DeleteServiceDialog = ({ priceId }: { priceId: string }) => {
   const { t } = useTranslation('services');
+  const { updateServices } = useServicesContext();
 
   const handleDelete = async () => {
     try {
-      await deleteService(Number(serviceId));
+      await deleteService(priceId);
 
       toast('Success', {
         description: 'The service has been deleted!',
       });
+      await updateServices(false);
+
     } catch (error) {
       toast('Error', {
         description: 'The service could not be deleted',
@@ -63,4 +66,4 @@ const DeleteserviceDialog = ({ serviceId }: { serviceId: number }) => {
   );
 };
 
-export default DeleteserviceDialog;
+export default DeleteServiceDialog;

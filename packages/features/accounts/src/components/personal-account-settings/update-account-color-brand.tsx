@@ -15,6 +15,7 @@ import { Spinner } from '@kit/ui/spinner';
 
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
+import { ThemedButton } from '../ui/button-themed-with-settings';
 
 
 // import ThemedButtonWithSettings from '../ui/button-themed-with-settings';
@@ -64,17 +65,15 @@ export default function UpdateAccountColorBrand() {
             </FormItem>
           )}
         />
-        <Button
+        <ThemedButton
           className={`bg-brand flex gap-2`}
-          style={
-            brandThemeColor ? { backgroundColor: brandThemeColor } : undefined
-          }
+
         >
           <span>{t('account:brandColorSubmit')}</span>
           {updateBrandColorTheme.isPending && (
             <Spinner className="h-4 w-4 text-white" />
           )}
-        </Button>
+        </ThemedButton>
       </form>
     </Form>
   );

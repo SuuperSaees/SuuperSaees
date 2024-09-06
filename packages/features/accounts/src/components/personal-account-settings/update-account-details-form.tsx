@@ -6,18 +6,21 @@ import { toast } from 'sonner';
 
 
 import { Database } from '@kit/supabase/database';
-import { Button } from '@kit/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 // import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
-
-
-import { useOrganizationSettings } from '../../context/organization-settings-context';
 import { useUpdateAccountData } from '../../hooks/use-update-account';
 import { AccountDetailsSchema } from '../../schema/account-details.schema';
+import { ThemedButton } from '../ui/button-themed-with-settings';
 import { ThemedInput } from '../ui/input-themed-with-settings';
-
 
 type UpdateUserDataParams = Database['public']['Tables']['accounts']['Update'];
 
@@ -32,7 +35,6 @@ export function UpdateAccountDetailsForm({
 }) {
   const updateAccountMutation = useUpdateAccountData(userId);
   const { t } = useTranslation('account');
-  const { brandThemeColor } = useOrganizationSettings();
   const form = useForm({
     resolver: zodResolver(AccountDetailsSchema),
     defaultValues: {
@@ -86,16 +88,9 @@ export function UpdateAccountDetailsForm({
           />
 
           <div>
-            <Button
-              disabled={updateAccountMutation.isPending}
-              style={
-                brandThemeColor
-                  ? { backgroundColor: brandThemeColor }
-                  : undefined
-              }
-            >
+            <ThemedButton disabled={updateAccountMutation.isPending}>
               <Trans i18nKey={'account:updateProfileSubmitLabel'} />
-            </Button>
+            </ThemedButton>
           </div>
         </form>
       </Form>

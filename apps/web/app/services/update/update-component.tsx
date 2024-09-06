@@ -2,57 +2,96 @@
 
 import React, { useState } from 'react';
 
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pen } from 'lucide-react';
+import { updateService } from 'node_modules/@kit/team-accounts/src/server/actions/services/update/update-service-server';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
-
-
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@kit/ui/alert-dialog';
 import { Button } from '@kit/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@kit/ui/dropdown-menu';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
 
+import { Service } from '~/lib/services.types';
 
-
-import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import { ThemedButton } from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
-import { ThemedInput } from '../../../../../../accounts/src/components/ui/input-themed-with-settings';
-import { updateService } from './update-service-server';
-
+import { useServicesContext } from '../contexts/services-context';
+import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 const formSchema = z.object({
-  id: z.number(),
-  created_at: z.string(),
   name: z.string().min(2).max(50),
-  price: z.number().min(2).max(15),
-  number_of_clients: z.number(),
+  price: z.number().min(0),
   status: z.string().min(2).max(20),
-  propietary_organization_id: z.string(),
 });
 
 type UpdateServiceProps = {
-  id: number;
-  values: Service.Update;
+  valuesOfServiceStripe: Service.Type;
 };
 
-const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
+const UpdateServiceDialog = ({ valuesOfServiceStripe }: UpdateServiceProps) => {
   const { t } = useTranslation('services');
-  const [selectedStatus, setSelectedStatus] = useState(status);
+  const { updateServices } = useServicesContext();
+  const [selectedStatus, setSelectedStatus] = useState(
+    valuesOfServiceStripe.status,
+  );
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: values,
+    defaultValues: {
+      name: valuesOfServiceStripe.name,
+      price: valuesOfServiceStripe.price,
+      status: valuesOfServiceStripe.status,
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await updateService(id, values);
-    window.location.reload();
+    try {
+      await updateService(values.status, {
+        step_service_details: {
+          service_image: valuesOfServiceStripe.service_image!,
+          service_name: values.name,
+        },
+        step_service_price: {
+          price: Number(values.price),
+          price_id: valuesOfServiceStripe.price_id!,
+        },
+      });
+      toast('Success', {
+        description: 'The service has been updated!',
+      });
+      await updateServices(false);
+    } catch (error) {
+      toast('Error', {
+        description: 'The service could not be updated',
+      });
+    }
   }
 
   const handleRoleSelect = (status: string) => {
@@ -97,13 +136,18 @@ const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
                 <FormField
                   control={form.control}
                   name="price"
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem>
                       <FormLabel>{t('servicePrice')}</FormLabel>
                       <FormControl>
                         <ThemedInput
                           placeholder={t('servicepriceLabel')}
-                          {...field}
+                          defaultValue={form.getValues().price}
+                          onChange={(event) => {
+                            const { value } = event.target;
+                            form.setValue('price', Number(value));
+                          }}
+                          type="number"
                         />
                       </FormControl>
                       <FormMessage />
@@ -117,7 +161,7 @@ const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
                     <FormItem>
                       <FormLabel>{t('statusSelection')}</FormLabel>
                       <FormControl>
-                        <Input
+                        <ThemedInput
                           className="hidden"
                           {...field}
                           value={selectedStatus}
@@ -153,13 +197,11 @@ const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Separator />
-                <ThemedButton
-                  type="submit"
-                  className="w-full"
-                  onClick={() => console.log('Submit button clicked')}
-                >
-                  {t('updateService')}
-                </ThemedButton>
+                <AlertDialogCancel className="w-full p-0">
+                  <ThemedButton type="submit" className="w-full">
+                    {t('updateService')}
+                  </ThemedButton>
+                </AlertDialogCancel>
               </form>
             </Form>
           </AlertDialogDescription>

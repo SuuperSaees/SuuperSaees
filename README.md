@@ -10,7 +10,7 @@ This repository is the demo version hosted on Cloudflare Pages. Please use the v
 
 [Please follow the documentation to get started](https://makerkit.dev/docs/next-supabase-turbo/introduction).
 
-**Stripe Integration**
+# Stripe Integration
 
 ```mermaid
 graph TD;
@@ -30,3 +30,22 @@ graph TD;
     J --> K;
     L --> K;
 ```
+
+## Update service stripe
+
+```mermaid
+graph TD;
+    A[Inicio] --> B[Obtención de los datos en <strong>update-service.tsx</strong>]
+    B --> C[Llamada a updateService en update-service-server.tsx]
+    subgraph "Actualización"
+        direction TB
+        style Actualización fill:#6A5ACD,stroke:#333,stroke-width:4px
+        C -->D[Actualizar servicio en la base de datos]
+        D -->E[GET de price para obtener el productId, Llamada a /api/stripe/create-service-price]
+        E --> F[Actualización del nuevo Price en Stripe]
+        F --> G[Llamada a /api/stripe/update-service]
+        G --> H[Actualización del servicio en Stripe]
+    end
+    H --> I[Fin]
+```
+Files: [update-service.tsx](./packages/features/team-accounts/src/server/actions/services/update/update-service.tsx)
