@@ -31,7 +31,7 @@ const colorBrandSchema = z.object({
 export default function UpdateAccountColorBrand() {
   const { t } = useTranslation();
   const { brandThemeColor, updateBrandColorTheme } = useOrganizationSettings();
-  console.log('brandThemeColor', brandThemeColor);
+  // console.log('brandThemeColor', brandThemeColor);
   const form = useForm<z.infer<typeof colorBrandSchema>>({
     resolver: zodResolver(colorBrandSchema),
     defaultValues: {

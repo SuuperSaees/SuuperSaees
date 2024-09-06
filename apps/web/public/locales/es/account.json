@@ -152,6 +152,14 @@
   "brandColor": "Color de marca",
   "brandColorDescription": "Selecciona el color que representa y define la identidad de tu marca.",
   "brandColorSelectLabel": "Selecciona un color",
-  "brandColorSubmit": "Actualizar color"
+  "brandColorSubmit": "Actualizar color",
+  "brandLogo": "Logotipo de marca",
+  "brandLogoDescription": "Sube un logotipo que represente tu marca.",
+  "brandLogoSelectLabel": "Selecciona un logotipo",
+  "brandLogoSubmit": "Actualizar logotipo",
+  "brandLogoSuccess": "Logotipo actualizado con éxito",
+  "brandLogoError": "Error al actualizar el logotipo",
+  "brandLogoLoading": "Actualizando logotipo..."
+
 
 }

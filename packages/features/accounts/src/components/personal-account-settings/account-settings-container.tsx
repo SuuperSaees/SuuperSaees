@@ -2,29 +2,30 @@
 
 import { useEffect, useState } from 'react';
 
+
+
 import Link from 'next/link';
 
-import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
+
+import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 // import { useTranslation } from 'react-i18next';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@kit/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
 // import { If } from '@kit/ui/if';
 // import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 
+
+
+import { ThemedButton } from '../ui/button-themed-with-settings';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
 import UpdateAccountColorBrand from './update-account-color-brand';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
-import { ThemedButton } from '../ui/button-themed-with-settings';
+import UpdateAccountOrganizationLogo from './update-account-organization-logo';
+
 
 type AccountStripe = {
   id: string;
@@ -96,7 +97,7 @@ export function PersonalAccountSettingsContainer(
         void fetchAccountStripe();
       });
   }, []);
-//////////////////////////////////////
+  //////////////////////////////////////
   if (!user) {
     return <LoadingOverlay fullPage />;
   }
@@ -195,14 +196,25 @@ export function PersonalAccountSettingsContainer(
           </CardHeader>
           <CardContent>
             {(!accountStripe?.id || !accountStripe.charges_enabled) && (
-              <ThemedButton
-              className='bg-brand'
-              >
+              <ThemedButton className="bg-brand">
                 <Link href={'/stripe'}>
                   {accountStripe?.id ? 'Continuar' : 'Conectar'}
                 </Link>
               </ThemedButton>
             )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Trans i18nKey={'account:brandLogo'} />
+            </CardTitle>
+            <CardDescription>
+              <Trans i18nKey={'account:brandLogoDescription'} />
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UpdateAccountOrganizationLogo />
           </CardContent>
         </Card>
       </div>

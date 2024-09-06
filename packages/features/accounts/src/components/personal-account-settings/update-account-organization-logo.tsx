@@ -1,0 +1,145 @@
+'use client';
+
+import { useCallback } from 'react';
+
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+
+import { Database } from '@kit/supabase/database';
+import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+import { ImageUploader } from '@kit/ui/image-uploader';
+import { Trans } from '@kit/ui/trans';
+
+const ORGANIZATION_BUCKET = 'organization';
+
+export default function UpdateAccountOrganizationLogo(props: {
+  value: string | null;
+  organizationId: string;
+  onLogoUpdated: () => void;
+}) {
+  const client = useSupabase();
+  const { t } = useTranslation('account');
+
+  const createToaster = useCallback(
+    (promise: () => Promise<unknown>) => {
+      return toast.promise(promise, {
+        success: t(`updateProfileSuccess`),
+        error: t(`updateProfileError`),
+        loading: t(`updateProfileLoading`),
+      });
+    },
+    [t],
+  );
+
+  const onValueChange = useCallback(
+    (file: File | null) => {
+      const removeExistingStorageFile = () => {
+        if (props.value) {
+          return deleteLogoImage(client, props.value) ?? Promise.resolve();
+        }
+
+        return Promise.resolve();
+      };
+
+      if (file) {
+        const promise = () =>
+          removeExistingStorageFile().then(() =>
+            uploadOrganizationLogo(client, file, props.organizationId)
+              .then((value) => {
+                return client
+                  .from('organization_settings')
+                  .update({
+                    key: 'logo_url',
+                    value: value,
+                  })
+                  .eq('account_id', props.organizationId)
+                  .throwOnError();
+              })
+              .then(() => {
+                props.onLogoUpdated();
+              }),
+          );
+
+        createToaster(promise);
+      } else {
+        const promise = () =>
+          removeExistingStorageFile()
+            .then(() => {
+              return client
+                .from('organization_settings')
+                .update({
+                  key: 'logo_url',
+                  value: '',
+                })
+                .eq('account_id', props.organizationId)
+                .throwOnError();
+            })
+            .then(() => {
+              props.onLogoUpdated();
+            });
+
+        createToaster(promise);
+      }
+    },
+    [client, createToaster, props],
+  );
+
+  return (
+    <ImageUploader value={props.value} onValueChange={onValueChange}>
+      <div className={'flex flex-col space-y-1'}>
+        <span className={'text-sm'}>
+          <Trans i18nKey={'account:brandLogoSelectLabel'} />
+        </span>
+
+        {/* <span className={'text-xs'}>
+          <Trans i18nKey={'account:profilePictureSubheading'} />
+        </span> */}
+      </div>
+    </ImageUploader>
+  );
+}
+
+function deleteLogoImage(client: SupabaseClient<Database>, url: string) {
+  const bucket = client.storage.from(ORGANIZATION_BUCKET);
+  const fileName = url.split('/').pop()?.split('?')[0];
+
+  if (!fileName) {
+    return;
+  }
+
+  return bucket.remove([fileName]);
+}
+
+async function uploadOrganizationLogo(
+  client: SupabaseClient<Database>,
+  photoFile: File,
+  organizationId: string,
+) {
+  const bytes = await photoFile.arrayBuffer();
+  const bucket = client.storage.from(ORGANIZATION_BUCKET);
+  const extension = photoFile.name.split('.').pop();
+  const fileName = await getAvatarFileName(organizationId, extension);
+
+  const result = await bucket.upload(fileName, bytes);
+
+  if (!result.error) {
+    return bucket.getPublicUrl(fileName).data.publicUrl;
+  }
+
+  throw result.error;
+}
+
+async function getAvatarFileName(
+  organizationId: string,
+  extension: string | undefined,
+) {
+  const { nanoid } = await import('nanoid');
+
+  // we add a version to the URL to ensure
+  // the browser always fetches the latest image
+  const uniqueId = nanoid(16);
+
+  return `${organizationId}.${extension}?v=${uniqueId}`;
+}
