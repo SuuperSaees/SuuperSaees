@@ -14,27 +14,55 @@ export const createOrganizationServer = async (clientData: {
     } = await client.auth.getUser();
 
     if (!user) {
-      throw new Error('Usuario no autenticado');
+      throw new Error('Error to get user account');
     }
 
-    const newAccount = {
-      name: clientData.organization_name,
-      primary_owner_user_id: user.id,
-      is_personal_account: false,
-    };
+    const {data: userAccount, error: userAccountError} = await client
+    .from('accounts')
+    .select("organization_id")
+    .eq('id', user.id)
+    .single()
 
-    const { data: OrganizationAccountData, error: OrganizationAccountError } =
-      await client.from('accounts').insert(newAccount).select().single();
-
-    if (OrganizationAccountError) {
-      throw new Error(OrganizationAccountError.message);
+    if(userAccountError) {
+      throw new Error(userAccountError.message)
     }
-    console.log('ORGANIZATION CREATED')
+      // upsert - create o change organization name
+      let organizationAccountData;
+      let organizationAccountError;
+      if(userAccount.organization_id) {
+        const { data, error } = await client
+        .from('accounts')
+        .update({ name: clientData.organization_name })
+        .select()
+        .single();
+    
+      organizationAccountData = data;
+      organizationAccountError = error;
+      } else {
+        const newAccount = {
+          name: clientData.organization_name,
+          primary_owner_user_id: user.id,
+          is_personal_account: false,
+        };
+      
+        const { data, error } = await client
+          .from('accounts')
+          .insert(newAccount)
+          .select()
+          .single();
+      
+        organizationAccountData = data;
+        organizationAccountError = error;
+      }
+
+    if (organizationAccountError) {
+      throw new Error(organizationAccountError.message);
+    }
     // associate user
     const { data: updatedUserOwnerAccount, error: updatedUserOwnerAccountError } =
       await client
         .from('accounts')
-        .update({ organization_id: OrganizationAccountData.id })
+        .update({ organization_id: organizationAccountData?.id })
         .eq('id', user.id)
         .select()
         .single();
