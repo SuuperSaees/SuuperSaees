@@ -2,15 +2,18 @@
 
 import { createContext, useContext, useState } from 'react';
 
-import {
-  UseMutationResult,
-  useMutation, // useQuery,
+
+
+import { UseMutationResult, useMutation // useQuery,
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
+
 
 import { Database } from '../../../../../apps/web/lib/database.types';
 // import { getOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/get/get-organizations';
 import { upsertOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/update/update-organizations';
+
 
 export type OrganizationSettingKeys =
   Database['public']['Enums']['organization_setting_key'];
@@ -90,7 +93,7 @@ const OrganizationSettingsProvider = ({
     }) => await upsertOrganizationSettings(organizationSetting),
 
     onSuccess: (updatedSetting) => {
-      console.log('Updated Setting', updatedSetting);
+      // console.log('Updated Setting', updatedSetting);
       const { key, value } = updatedSetting;
 
       // Update only if valid color when it's the theme color

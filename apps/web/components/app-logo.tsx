@@ -83,7 +83,7 @@ export function AppLogo({
       {logo_url ? (
         <CustomLogoImage url={logo_url} className="h-full w-full" />
       ) : (
-        <LogoImage className="h-full w-full object-contain" />
+        <LogoImage className="h-[32px] w-full object-contain" />
       )}
     </Link>
   );

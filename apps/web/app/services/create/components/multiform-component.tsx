@@ -23,6 +23,8 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+
+
 import {
   Form,
   FormControl,
@@ -203,7 +205,7 @@ export function MultiStepFormDemo() {
 function TypeOfServiceStep() {
   const { form, nextStep, isStepValid } = useMultiStepFormContext();
   const { t } = useTranslation('services');
-  const { brandThemeColor } = useOrganizationSettings();
+  const { theme_color } = useOrganizationSettings();
   type CheckboxName =
     | 'step_type_of_service.single_sale'
     | 'step_type_of_service.recurring_subscription';
@@ -220,7 +222,7 @@ function TypeOfServiceStep() {
       : 'flex flex-col w-[505.564px] p-[23.583px] items-start flex-shrink-0 rounded-[17.687px] border-[1.474px] border-gray-200 bg-white';
 
   const getStyles = (isSelected: boolean) => ({
-    borderColor: isSelected ? (brandThemeColor ?? '#1f1f1f') : '#d9d9d9',
+    borderColor: isSelected ? (theme_color ?? '#1f1f1f') : '#d9d9d9',
   });
 
   return (
@@ -250,8 +252,8 @@ function TypeOfServiceStep() {
                         style={
                           field.value
                             ? {
-                                borderColor: brandThemeColor ?? '#1f1f1f',
-                                backgroundColor: brandThemeColor ?? '#1f1f1f',
+                                borderColor: theme_color ?? '#1f1f1f',
+                                backgroundColor: theme_color ?? '#1f1f1f',
                               }
                             : undefined
                         }
@@ -299,8 +301,8 @@ function TypeOfServiceStep() {
                         style={
                           field.value
                             ? {
-                                borderColor: brandThemeColor ?? '#1f1f1f',
-                                backgroundColor: brandThemeColor ?? '#1f1f1f',
+                                borderColor: theme_color ?? '#1f1f1f',
+                                backgroundColor: theme_color ?? '#1f1f1f',
                               }
                             : undefined
                         }
