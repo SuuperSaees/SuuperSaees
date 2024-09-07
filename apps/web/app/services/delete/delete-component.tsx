@@ -5,8 +5,15 @@ import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
-import { deleteService } from 'node_modules/@kit/team-accounts/src/server/actions/services/delete/delete-service-server';
 import { useServicesContext } from '../contexts/services-context';
+
+
+
+
+import { deleteService } from '../../../../../packages/features/team-accounts/src/server/actions/services/delete/delete-service-server'
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+
+
 
 const DeleteServiceDialog = ({ priceId }: { priceId: string }) => {
   const { t } = useTranslation('services');
@@ -46,9 +53,12 @@ const DeleteServiceDialog = ({ priceId }: { priceId: string }) => {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
+            <ThemedButton className='w-fit'>
+
+            <AlertDialogAction onClick={handleDelete} className='bg-transparent w-full hover:bg-transparent'>
               {t('delete')}
             </AlertDialogAction>
+            </ThemedButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

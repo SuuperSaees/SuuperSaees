@@ -1,11 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { z } from 'zod';
 
-
-
-import { Database } from '@kit/supabase/database';
 import {
   Form,
   FormControl,
@@ -17,42 +13,27 @@ import {
 // import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
-import { useUpdateAccountData } from '../../hooks/use-update-account';
-import { AccountDetailsSchema } from '../../schema/account-details.schema';
+import { useOrganizationSettings } from '../../context/organization-settings-context';
 import { ThemedButton } from '../ui/button-themed-with-settings';
 import { ThemedInput } from '../ui/input-themed-with-settings';
 
-type UpdateUserDataParams = Database['public']['Tables']['accounts']['Update'];
+const AccountOrganizationNameSchem = z.object({
+  name: z.string().min(2).max(100),
+});
+export function UpdateAccountOrganizationName() {
+  const { updateOrganizationSetting, portal_name } = useOrganizationSettings();
 
-export function UpdateAccountDetailsForm({
-  displayName,
-  onUpdate,
-  userId,
-}: {
-  displayName: string;
-  userId: string;
-  onUpdate: (user: Partial<UpdateUserDataParams>) => void;
-}) {
-  const updateAccountMutation = useUpdateAccountData(userId);
-  const { t } = useTranslation('account');
   const form = useForm({
-    resolver: zodResolver(AccountDetailsSchema),
+    resolver: zodResolver(AccountOrganizationNameSchem),
     defaultValues: {
-      displayName,
+      name: portal_name ?? '',
     },
   });
 
-  const onSubmit = ({ displayName }: { displayName: string }) => {
-    const data = { name: displayName };
-
-    const promise = updateAccountMutation.mutateAsync(data).then(() => {
-      onUpdate(data);
-    });
-
-    return toast.promise(() => promise, {
-      success: t(`updateProfileSuccess`),
-      error: t(`updateProfileError`),
-      loading: t(`updateProfileLoading`),
+  const onSubmit = ({ name }: { name: string }) => {
+    updateOrganizationSetting.mutate({
+      key: 'portal_name',
+      value: name,
     });
   };
 
@@ -65,11 +46,11 @@ export function UpdateAccountDetailsForm({
           onSubmit={form.handleSubmit(onSubmit)}
         >
           <FormField
-            name={'displayName'}
+            name={'name'}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  <Trans i18nKey={'account:name'} />
+                  <Trans i18nKey={'account:brandName'} />
                 </FormLabel>
 
                 <FormControl>
@@ -88,8 +69,13 @@ export function UpdateAccountDetailsForm({
           />
 
           <div>
-            <ThemedButton disabled={updateAccountMutation.isPending}>
-              <Trans i18nKey={'account:updateProfileSubmitLabel'} />
+            <ThemedButton
+              disabled={
+                updateOrganizationSetting.isPending &&
+                updateOrganizationSetting.variables.key === 'portal_name'
+              }
+            >
+              <Trans i18nKey={'account:brandNameSubmit'} />
             </ThemedButton>
           </div>
         </form>

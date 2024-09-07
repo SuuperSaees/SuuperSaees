@@ -33,8 +33,6 @@ const formSchema = z.object({
     organization_name: z.string().min(2).max(50),
 })
 
-
-
 const CreateOrganization = ( ) => {
     const { t } = useTranslation('organizations');
     const form = useForm<z.infer<typeof formSchema>>({

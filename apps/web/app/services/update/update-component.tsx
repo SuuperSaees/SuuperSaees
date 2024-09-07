@@ -23,13 +23,13 @@ import { Service } from '~/lib/services.types';
 import { useServicesContext } from '../contexts/services-context';
 
 const formSchema = z.object({
-    name: z.string().min(2).max(50),
-    price: z.number().min(0),
-    status: z.string().min(2).max(20),
+  name: z.string().min(2).max(50),
+  price: z.number().min(0),
+  status: z.string().min(2).max(20),
 });
 
 type UpdateServiceProps = {
-    valuesOfServiceStripe: Service.Type
+  valuesOfServiceStripe: Service.Type;
 };
 
 const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
@@ -45,31 +45,28 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
         },
     });
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-        await updateService(
-            values.status,
-            {
-                step_service_details:{
-                    service_image: valuesOfServiceStripe.service_image!,
-                    service_name: values.name,
-                },
-                step_service_price: {
-                    price: Number(values.price),
-                    price_id: valuesOfServiceStripe.price_id!,
-                }   
-            },);
-        toast('Success', {
-          description: 'The service has been updated!',
-        });
-        await updateServices(false);
-  
-      } catch (error) {
-        toast('Error', {
-          description: 'The service could not be updated',
-        });
-      }
+      await updateService(values.status, {
+        step_service_details: {
+          service_image: valuesOfServiceStripe.service_image!,
+          service_name: values.name,
+        },
+        step_service_price: {
+          price: Number(values.price),
+          price_id: valuesOfServiceStripe.price_id!,
+        },
+      });
+      toast('Success', {
+        description: 'The service has been updated!',
+      });
+      await updateServices(false);
+    } catch (error) {
+      toast('Error', {
+        description: 'The service could not be updated',
+      });
     }
+  }
 
     // const handleRoleSelect = (status: string) => {
     //     setSelectedStatus(status);
