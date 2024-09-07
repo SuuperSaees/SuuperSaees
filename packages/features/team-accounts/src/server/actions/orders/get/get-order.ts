@@ -149,7 +149,7 @@ export const getOrders = async () => {
       const { data: orderData, error: clientError } = await client
         .from('orders_v2')
         .select(
-          '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
+          '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name), ',
         )
         // necessary to specify which relation to use, so tell exact the name of the foreign key
         .eq('customer_id', userId);
@@ -176,7 +176,7 @@ export const getOrders = async () => {
         .from('orders_v2')
         .select(
           `*, organization:accounts!client_organization_id(slug, name), 
-        customer:accounts!customer_id(name)`,
+        customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`,
         )
         .eq('agency_id', agencyUserAccount?.organization_id ?? ''); // error here
 

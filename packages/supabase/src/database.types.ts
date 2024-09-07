@@ -1139,6 +1139,55 @@ export type Database = {
           },
         ]
       }
+      organization_settings: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          key: Database["public"]["Enums"]["organization_setting_key"]
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          key: Database["public"]["Enums"]["organization_setting_key"]
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          key?: Database["public"]["Enums"]["organization_setting_key"]
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           name: string
@@ -1938,6 +1987,15 @@ export type Database = {
         | "pending"
         | "completed"
         | "annulled"
+      organization_setting_key:
+        | "theme_color"
+        | "background_color"
+        | "logo_url"
+        | "timezone"
+        | "language"
+        | "date_format"
+        | "sidebar_background_color"
+        | "portal_name"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"
