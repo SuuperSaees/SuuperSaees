@@ -1,20 +1,20 @@
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { AccountInvitationsTable, AccountMembersTable, InviteMembersDialogContainer } from '@kit/team-accounts/components';
-import { Button } from '@kit/ui/button';
+import {
+  AccountInvitationsTable,
+  AccountMembersTable,
+  InviteMembersDialogContainer,
+} from '@kit/team-accounts/components';
 import { If } from '@kit/ui/if';
 import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 
-
-
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
-
-
 import { loadMembersPageData } from './_lib/server/members-page.loader';
-
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -150,11 +150,14 @@ async function ClientsMembersPage() {
                   userRoleHierarchy={currentUserRoleHierarchy ?? 0}
                   accountSlug={slug}
                 >
-                  <Button size={'sm'} data-test={'invite-members-form-trigger'}>
+                  <ThemedButton
+                    size={'sm'}
+                    data-test={'invite-members-form-trigger'}
+                  >
                     <span>
                       <Trans i18nKey={'team:inviteMembersButton'} />
                     </span>
-                  </Button>
+                  </ThemedButton>
                 </InviteMembersDialogContainer>
               </If>
             </div>

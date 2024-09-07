@@ -8,6 +8,8 @@ import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -25,7 +27,6 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Button } from '@kit/ui/button';
-import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
 import {
   Table,
@@ -48,6 +49,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
+import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
+import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { getStripeAccountID } from '../../server/actions/members/get/get-member-account';
 import UpdateServiceDialog from '../../../../../../apps/web/app/services/update/update-component';
 
@@ -241,7 +244,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
       <div className="flex items-center justify-end gap-4 py-4">
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
-          <Input
+          <ThemedInput
             placeholder="Buscar servicios"
             value={table.getColumn('name')?.getFilterValue() as string}
             onChange={(event) => {
@@ -251,11 +254,8 @@ export function ServicesTable({ services }: ServicesTableProps) {
           />
         </div>
         {services.length > 0 ? (
-           <Link href="/services/create">
-          <Button>
-            
-           {t('createService')}
-          </Button>
+          <Link href="/services/create">
+            <ThemedButton>{t('createService')}</ThemedButton>
           </Link>
         ) : null}
       </div>
@@ -319,7 +319,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
                       clic a continuación.
                     </p>
                     <Link href="/services/create">
-                      <Button>{t('createService')}</Button>
+                      <ThemedButton>{t('createService')}</ThemedButton>
                     </Link>
                   </div>
                 </TableCell>
@@ -332,19 +332,20 @@ export function ServicesTable({ services }: ServicesTableProps) {
           <>
             <div className="flex items-center justify-between py-4">
               <Pagination>
-                <PaginationContent className="flex w-full items-center justify-between ">
-
-                  {pageIndex > 0 && <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (table.getCanPreviousPage()) {
-                          table.previousPage();
-                        }
-                      }}
-                    />
-                  </PaginationItem>}
+                <PaginationContent className="flex w-full items-center justify-between">
+                  {pageIndex > 0 && (
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (table.getCanPreviousPage()) {
+                            table.previousPage();
+                          }
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
                   <div className="flex flex-1 justify-center">
                     {pages.length > 1 && pages.map((page) => (
                       <PaginationItem key={page}>
@@ -366,19 +367,19 @@ export function ServicesTable({ services }: ServicesTableProps) {
                       </PaginationItem>
                     )}
                   </div>
-                  {pageIndex < pageCount - 1 && 
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (table.getCanNextPage()) {
-                          table.nextPage();
-                        }
-                      }}
-                    />
-                  </PaginationItem>
-                  }
+                  {pageIndex < pageCount - 1 && (
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (table.getCanNextPage()) {
+                            table.nextPage();
+                          }
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
                 </PaginationContent>
               </Pagination>
             </div>

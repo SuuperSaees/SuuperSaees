@@ -22,11 +22,12 @@ import { Trans } from '@kit/ui/trans';
 
 
 
+import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
+import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { InviteMembersSchema } from '../../schema/invite-members.schema';
 import { createInvitationsAction } from '../../server/actions/team-invitations-server-actions';
 import { MembershipRoleSelector } from './membership-role-selector';
 import { RolesDataProvider } from './roles-data-provider';
-
 
 type InviteModel = ReturnType<typeof createEmptyInviteModel>;
 
@@ -147,7 +148,7 @@ function InviteMembersForm({
                             </If>
 
                             <FormControl>
-                              <Input
+                              <ThemedInput
                                 data-test={'invite-email-input'}
                                 placeholder={t('emailPlaceholder')}
                                 type="email"
@@ -196,7 +197,7 @@ function InviteMembersForm({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
+                          <ThemedButton
                             variant={'ghost'}
                             size={'icon'}
                             type={'button'}
@@ -209,7 +210,7 @@ function InviteMembersForm({
                             }}
                           >
                             <X className={'h-4 lg:h-5'} />
-                          </Button>
+                          </ThemedButton>
                         </TooltipTrigger>
 
                         <TooltipContent>
@@ -245,15 +246,13 @@ function InviteMembersForm({
           </If>
         </div>
 
-        <Button type={'submit'} disabled={pending}>
+        <ThemedButton type={'submit'} disabled={pending}>
           <Trans
             i18nKey={
-              pending
-                ? 'team:invitingMembers'
-                : 'team:inviteMembersButtonLabel'
+              pending ? 'team:invitingMembers' : 'team:inviteMembersButtonLabel'
             }
           />
-        </Button>
+        </ThemedButton>
       </form>
     </Form>
   );

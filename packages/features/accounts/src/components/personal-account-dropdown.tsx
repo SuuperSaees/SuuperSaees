@@ -112,7 +112,7 @@ export function PersonalAccountDropdown({
 
             <span
               data-test={'account-dropdown-email'}
-              className={'text-muted-foreground truncate text-xs'}
+              className={'truncate text-xs'}
             >
               {signedInAsLabel}
             </span>

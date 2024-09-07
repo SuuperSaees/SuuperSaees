@@ -1,14 +1,16 @@
 "use client";
 
-import React, {useEffect, useState} from "react";
-import {
-    useStripe,
-    useElements,
-} from "@stripe/react-stripe-js"
-import { Button } from "@kit/ui/button";
-import Link from "next/link";
+import React, { useEffect, useState } from 'react';
+
+// import { Button } from "@kit/ui/button";
+import Link from 'next/link';
+
+import { useElements, useStripe } from '@stripe/react-stripe-js';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
+
 import { updateTeamAccountStripeId } from '../../../../../packages/features/team-accounts/src/server/actions/team-details-server-actions';
+
 
 type AccountSchema = {
   email: string | null | undefined;
@@ -114,9 +116,9 @@ const RegisterStripePage = ({ email, stripeId, id}: AccountSchema) => {
         <form onSubmit={handleSubmit} className="flex flex-col items-center">
           {email ? <div>{t('email')} {email}</div> : <div>Loading...</div>}
           {linkData ? (
-            <Button>
+            <ThemedButton>
               <Link href={linkData}>{t('completeRegister')}</Link>
-            </Button>
+            </ThemedButton>
           ) : (
             <div className="flex items-center justify-center">
               <div

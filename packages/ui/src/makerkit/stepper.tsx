@@ -2,8 +2,11 @@
 
 import { Fragment, useCallback } from 'react';
 
+
+
 import { cva } from 'class-variance-authority';
 import { Check } from 'lucide-react';
+
 import { cn } from '../utils';
 import { If } from './if';
 import { Trans } from './trans';
@@ -54,18 +57,20 @@ export function Stepper(props: {
           <div className="relative flex flex-col items-center">
             <div aria-selected={selected} className={className}>
               {isCustomDotsVariant && selected && !complete && (
-                <span className="w-3 h-3 bg-white rounded-full"></span> 
+                <span className="h-3 w-3 rounded-full bg-white"></span>
               )}
               {isCustomDotsVariant && !selected && !complete && (
-                <span className="w-3 h-3 bg-gray-200 rounded-full"></span> 
+                <span className="h-3 w-3 rounded-full bg-gray-200"></span>
               )}
               {isCustomDotsVariant && complete && (
-                <Check className="w-4 h-4 text-white" /> 
+                <Check className="h-4 w-4 text-white" />
               )}
             </div>
 
             {isCustomDotsVariant && (
-              <span className={`text-center font-inter text-base font-semibold leading-6 ${selected ? 'text-brand-600' : 'text-gray-700'}`}>
+              <span
+                className={`font-inter text-center text-base font-semibold leading-6 ${selected ? 'text-black' : 'text-gray-700'}`}
+              >
                 {label}
               </span>
             )}
@@ -89,7 +94,8 @@ export function Stepper(props: {
   }, [props.steps, props.currentStep, variant]);
 
   const containerClassName = cn('w-full', {
-    ['flex items-center justify-between px-32']: variant === 'numbers' || variant === 'customDots',
+    ['flex items-center justify-between px-32']:
+      variant === 'numbers' || variant === 'customDots',
     ['flex space-x-0.5']: variant === 'default',
     ['flex space-x-2.5 self-center']: variant === 'dots',
   });
@@ -100,8 +106,6 @@ export function Stepper(props: {
     </div>
   );
 }
-
-
 
 function getClassNameBuilder() {
   return cva(``, {
@@ -190,13 +194,14 @@ function getClassNameBuilder() {
         variant: 'customDots',
         selected: true,
         complete: false,
-        className: 'flex justify-center items-center w-8 h-8 rounded-full bg-brand-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand',
+        className:
+          'flex justify-center items-center w-8 h-8 rounded-full bg-black/70 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand',
       },
       {
         variant: 'customDots',
         selected: false,
         complete: true,
-        className: 'bg-brand-600 flex items-center justify-center w-8 h-8', // Punto morado con check
+        className: 'bg-black/70 flex items-center justify-center w-8 h-8', // Punto morado con check
       },
       {
         variant: 'customDots',

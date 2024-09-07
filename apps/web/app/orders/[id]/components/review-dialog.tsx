@@ -2,14 +2,17 @@
 
 import { useState } from 'react';
 
+
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StarFilledIcon } from '@radix-ui/react-icons';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Button } from '@kit/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -22,9 +25,9 @@ import {
 } from '@kit/ui/dialog';
 import { Form, FormField } from '@kit/ui/form';
 import { Label } from '@kit/ui/label';
-import { Textarea } from '@kit/ui/textarea';
 
 import { createReview } from '../../../../../../packages/features/team-accounts/src/server/actions/review/create/create.review';
+
 
 const reviewSchema = z.object({
   rating: z.number().max(5).optional().nullable(),
@@ -75,12 +78,12 @@ export function ReviewDialog({ orderId }: { orderId: number }) {
       <form className="flex flex-col gap-4">
         <Dialog>
           <DialogTrigger asChild>
-            <Button
+            <ThemedButton
               variant="outline"
               className="w-fit bg-primary text-white hover:bg-primary/90 hover:text-white"
             >
               {t('details.dialog.button')}
-            </Button>
+            </ThemedButton>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader className="flex flex-col gap-2">
@@ -125,7 +128,7 @@ export function ReviewDialog({ orderId }: { orderId: number }) {
                   name="content"
                   control={form.control}
                   render={({ field }) => (
-                    <Textarea
+                    <ThemedTextarea
                       id="content"
                       className="col-span-3"
                       placeholder={t('details.dialog.placeholder')}
@@ -138,9 +141,11 @@ export function ReviewDialog({ orderId }: { orderId: number }) {
             </div>
             <DialogFooter>
               <DialogClose>
-                <Button type="button" onClick={onSubmit}>
+                <ThemedButton type="button" onClick={onSubmit}
+                
+                >
                   {t('details.dialog.button')}
-                </Button>
+                </ThemedButton>
               </DialogClose>
             </DialogFooter>
           </DialogContent>
