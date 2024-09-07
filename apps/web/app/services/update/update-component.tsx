@@ -4,7 +4,6 @@ import React from 'react';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel} from '@kit/ui/alert-dialog';
 import { Pen } from 'lucide-react';
 import { updateService } from 'node_modules/@kit/team-accounts/src/server/actions/services/update/update-service-server';
-import { Button } from '@kit/ui/button';
 import { toast } from 'sonner';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,10 +16,11 @@ import {
     FormLabel,
     FormMessage,
 } from "@kit/ui/form";
-import { Input } from "@kit/ui/input";
 import { useTranslation } from 'react-i18next';
 import { Service } from '~/lib/services.types';
 import { useServicesContext } from '../contexts/services-context';
+import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 const formSchema = z.object({
   name: z.string().min(2).max(50),
@@ -98,7 +98,7 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
                                         <FormItem>
                                             <FormLabel>{t("serviceName")}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder={t("serviceNameLabel")} {...field} />
+                                                <ThemedInput placeholder={t("serviceNameLabel")} {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -111,7 +111,7 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
                                         <FormItem>
                                             <FormLabel>{t("servicePrice")}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder={t("servicepriceLabel")} defaultValue={form.getValues().price} onChange={(event)=>{
+                                                <ThemedInput placeholder={t("servicepriceLabel")} defaultValue={form.getValues().price} onChange={(event)=>{
                                                     const {value} = event.target
                                                     form.setValue("price", Number(value))}} type='number' />
                                             </FormControl>
@@ -152,7 +152,7 @@ const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
                                     </DropdownMenuContent>
                                 </DropdownMenu> */}
                                 {/* <Separator /> */}
-                                <AlertDialogCancel className="w-full p-0"><Button type="submit" className='w-full '>{t("updateService")}</Button></AlertDialogCancel>
+                                <AlertDialogCancel className="w-full p-0"><ThemedButton type="submit" className='w-full '>{t("updateService")}</ThemedButton></AlertDialogCancel>
                             </form>
                         </Form>
                     </AlertDialogDescription>
