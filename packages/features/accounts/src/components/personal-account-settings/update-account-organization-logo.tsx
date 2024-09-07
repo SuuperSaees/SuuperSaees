@@ -11,12 +11,17 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+
+
 import { Database } from '@kit/supabase/database';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { ImageUploader } from '@kit/ui/image-uploader';
 import { Trans } from '@kit/ui/trans';
 
+
+
 import { useOrganizationSettings } from '../../context/organization-settings-context';
+
 
 const ORGANIZATION_BUCKET = 'organization';
 
@@ -68,14 +73,10 @@ export default function UpdateAccountOrganizationLogo(props: {
       } else {
         const promise = () =>
           removeExistingStorageFile().then(() => {
-            return client
-              .from('organization_settings')
-              .update({
-                key: 'logo_url',
-                value: '',
-              })
-              .eq('account_id', props.organizationId)
-              .throwOnError();
+            return updateOrganizationSetting.mutate({
+              key: 'logo_url',
+              value: '',
+            });
           });
         // .then(() => {
         //   props.onLogoUpdated();

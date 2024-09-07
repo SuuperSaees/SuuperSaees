@@ -1,18 +1,16 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
-
-
-import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
+import {
+  UseMutationResult,
+  useMutation, // useQuery,
+} from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-
-
 import { Database } from '../../../../../apps/web/lib/database.types';
-import { getOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/get/get-organizations';
+// import { getOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/get/get-organizations';
 import { upsertOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/update/update-organizations';
-
 
 export type OrganizationSettingKeys =
   Database['public']['Enums']['organization_setting_key'];
@@ -43,22 +41,46 @@ export const OrganizationSettingsContext = createContext<
 // Function to validate a hex color string
 const isValidHexColor = (color: string) => /^#([0-9A-F]{3}){1,2}$/i.test(color);
 
+// Function to map initialSettings (fetched data) to key-value format
+const mapInitialSettingsToKeyValue = (
+  initialSettings: {
+    account_id: string;
+    created_at: string;
+    id: string;
+    key: OrganizationSettingKeys;
+    updated_at: string | null;
+    value: string;
+  }[],
+): OrganizationSettingsContextType => {
+  return initialSettings.reduce((acc, setting) => {
+    // Ensure unique keys
+    if (!acc[setting.key]) {
+      acc[setting.key] = setting.value;
+    }
+    return acc;
+  }, {} as OrganizationSettingsContextType);
+};
+
 const OrganizationSettingsProvider = ({
   children,
+  initialSettings,
 }: {
   children: React.ReactNode;
+  initialSettings: {
+    account_id: string;
+    created_at: string;
+    id: string;
+    key: OrganizationSettingKeys;
+    updated_at: string | null;
+    value: string;
+  }[];
 }) => {
-  // State to store organization settings
-  const [organizationSettings, setOrganizationSettings] =
-    useState<OrganizationSettingsContextType>(
-      JSON.parse(localStorage.getItem('organizationSettings') ?? '{}'),
-    );
+  // Transform initialSettings from array to key-value format
+  const mappedSettings = mapInitialSettingsToKeyValue(initialSettings);
 
-  // Query to fetch organization settings from the server
-  const { data: fetchedSettings } = useQuery({
-    queryKey: ['organizationSettings'],
-    queryFn: async () => getOrganizationSettings(),
-  });
+  // State to store organization settings initialized with transformed settings
+  const [organizationSettings, setOrganizationSettings] =
+    useState<OrganizationSettingsContextType>(mappedSettings);
 
   // Mutation to update a single setting
   const updateOrganizationSetting = useMutation({
@@ -75,7 +97,6 @@ const OrganizationSettingsProvider = ({
       const newValue =
         key === 'theme_color' && !isValidHexColor(value) ? '' : value;
 
-      updateLocalStorage(key, newValue);
       setOrganizationSettings((prev) => ({
         ...prev,
         [key]: newValue,
@@ -92,31 +113,12 @@ const OrganizationSettingsProvider = ({
     },
   });
 
-  // Function to update localStorage with the new setting
-  const updateLocalStorage = (
-    key: OrganizationSettingKeys,
-    value: OrganizationSettingValue,
-  ) => {
-    const prevSettings = JSON.parse(
-      localStorage?.getItem('organizationSettings') ?? '{}',
-    );
-    localStorage?.setItem(
-      'organizationSettings',
-      JSON.stringify({
-        ...prevSettings,
-        [key]: value,
-      }),
-    );
-  };
-
   // Function to reset a specific setting to its default value (empty string)
   const resetOrganizationSetting = (key: OrganizationSettingKeys) => {
     const defaultValue = ''; // Default value for all settings
 
-    // Update local storage and state
+    // Update state
     updateOrganizationSetting.mutate({ key, value: defaultValue });
-
-    updateLocalStorage(key, defaultValue);
     setOrganizationSettings((prev) => ({
       ...prev,
       [key]: defaultValue,
@@ -126,39 +128,8 @@ const OrganizationSettingsProvider = ({
     });
   };
 
-  // Effect to load settings from localStorage on component mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedSettings = JSON.parse(
-        localStorage?.getItem('organizationSettings') ?? '{}',
-      );
-      setOrganizationSettings(storedSettings);
-    }
-  }, []);
-
-  // Effect to update state and localStorage when fetched data changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (fetchedSettings) {
-        fetchedSettings.forEach(({ key, value }) => {
-          const newValue =
-            key === 'theme_color' && !isValidHexColor(value) ? '' : value;
-          setOrganizationSettings((prev) => ({
-            ...prev,
-            [key]: newValue,
-          }));
-          updateLocalStorage(key, newValue);
-        });
-      } else {
-        // if no settings, clean
-        localStorage?.setItem('organizationSettings', '{}');
-      }
-    }
-  }, [fetchedSettings]);
-
-  if (!localStorage) return null;
-
   // Provide the context to children components
+  // console.log('organizationSettingsR', organizationSettings);
   return (
     <OrganizationSettingsContext.Provider
       value={{

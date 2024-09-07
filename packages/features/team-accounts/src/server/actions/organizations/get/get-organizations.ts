@@ -12,7 +12,8 @@ export const getOrganizationSettings = async () => {
     } = await client.auth.getUser();
 
     if (!user) {
-      throw new Error('User not authenticated');
+      console.error('User not found');
+      return [];
     }
 
     const { data: accountData, error: accountError } = await client
