@@ -29,6 +29,8 @@ import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 // import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
 type AccountStripe = {
   id: string;
   charges_enabled: boolean;
@@ -77,7 +79,7 @@ export function PersonalAccountSettingsContainer(
           if (stripeId) {
             try {
               const response = await fetch(
-                `/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`,
+                `${baseUrl}/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`,
                 {
                   method: 'GET',
                   headers: {
