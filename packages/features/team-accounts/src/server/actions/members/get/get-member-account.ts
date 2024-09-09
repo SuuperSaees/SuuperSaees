@@ -100,3 +100,40 @@ export async function getStripeAccountID() {
     console.error('Error fetching primary owner:', error);
   }
 }
+
+export async function getOrganizationName() {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: userData, error: userError } = await client.auth.getUser();
+    if (userError) throw userError;
+
+    const { data: accountsData , error: accountsError } = await client
+      .from('accounts')
+      .select()
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (accountsError) throw accountsError;
+    
+    const organizationId = accountsData?.organization_id;
+
+    if (!organizationId) {
+      throw new Error('Organization ID is null');
+    }
+
+    const { data: organizationsData , error: organizationsError } = await client
+      .from('accounts')
+      .select()
+      .eq('id', organizationId)
+      .single();
+    
+    if (organizationsError) throw organizationsError;
+
+    const organizationName = organizationsData?.name;
+
+    return organizationName;
+
+  } catch (error) {
+    console.error('Error fetching primary owner:', error);
+  }
+}

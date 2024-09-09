@@ -1,5 +1,9 @@
 import { Container } from '@react-email/components';
 
-export function EmailHeader(props: React.PropsWithChildren) {
-  return <Container>{props.children}</Container>;
+interface EmailHeaderProps extends React.PropsWithChildren {
+  className?: string;
+}
+
+export function EmailHeader({ className, children }: EmailHeaderProps) {
+  return <Container className={className}>{children}</Container>;
 }

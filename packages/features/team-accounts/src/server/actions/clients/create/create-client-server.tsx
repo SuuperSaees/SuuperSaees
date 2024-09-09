@@ -6,7 +6,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 import { User } from '../../../../../../../../apps/web/lib/user.types';
-import { getPrimaryOwnerId } from '../../members/get/get-member-account';
+import { getPrimaryOwnerId, getOrganizationName } from '../../members/get/get-member-account';
 
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
@@ -32,6 +32,7 @@ export const createClient = async (clientData: CreateClient) => {
   try {
     const supabase = getSupabaseServerComponentClient();
     const primary_owner_user_id = await getPrimaryOwnerId();
+    const organization_name = await getOrganizationName();
 
     if (!primary_owner_user_id)
       throw new Error('No primary owner user id found');
@@ -43,6 +44,17 @@ export const createClient = async (clientData: CreateClient) => {
         password,
         options: {
           emailRedirectTo: `${baseUrl}set-password`,
+          data: {
+            ClientContent: 'Hi',
+            ClientContent1: 'Welcome to ',
+            ClientContent2: organization_name,
+            ClientContent3: ', please activate your account to get started.',
+            ClientContent4: 'Your username:',
+            ClientContent5: 'Thanks,',
+            ClientContent6: 'The Team',
+            
+
+          }
         },
       });
 
