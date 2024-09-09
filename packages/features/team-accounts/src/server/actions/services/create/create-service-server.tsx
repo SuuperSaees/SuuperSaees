@@ -1,9 +1,12 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { getPrimaryOwnerId } from '../../members/get/get-member-account';
+import { getPrimaryOwnerId, getStripeAccountID } from '../../members/get/get-member-account';
+import { updateTeamAccountStripeId } from '../../team-details-server-actions';
 
-export const createService = async (clientData: {
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
+interface ServiceData {
   step_type_of_service: {
     single_sale: boolean;
     recurring_subscription: boolean;
@@ -30,13 +33,16 @@ export const createService = async (clientData: {
     max_number_of_simultaneous_orders: number;
     max_number_of_monthly_orders: number;
   };
-}) => {
+}
+
+export const createService = async (clientData: ServiceData) => {
+  const client = getSupabaseServerComponentClient();
+  
   try {
-    const client = getSupabaseServerComponentClient();
- 
-    const primary_owner_user_id = await getPrimaryOwnerId()
-    if(!primary_owner_user_id) throw new Error('No primary owner found');
-    // console.log('userData', primary_owner_user_id);
+    const primary_owner_user_id = await getPrimaryOwnerId();
+    if (!primary_owner_user_id) throw new Error('No primary owner found');
+
+    let stripe_account_id = await getStripeAccountID() as string;
 
     const newService = {
       created_at: new Date().toISOString(),
@@ -44,8 +50,7 @@ export const createService = async (clientData: {
       propietary_organization_id: primary_owner_user_id,
       number_of_clients: 0,
       single_sale: clientData.step_type_of_service.single_sale,
-      recurring_subscription:
-        clientData.step_type_of_service.recurring_subscription,
+      recurring_subscription: clientData.step_type_of_service.recurring_subscription,
       service_image: clientData.step_service_details.service_image,
       name: clientData.step_service_details.service_name,
       service_description: clientData.step_service_details.service_description,
@@ -60,28 +65,98 @@ export const createService = async (clientData: {
       recurrence: clientData.step_service_price.recurrence,
       test_period: clientData.step_service_price.test_period,
       test_period_duration: clientData.step_service_price.test_period_duration,
-      test_period_duration_unit_of_measurement:
-        clientData.step_service_price.test_period_duration_unit_of_measurement,
+      test_period_duration_unit_of_measurement: clientData.step_service_price.test_period_duration_unit_of_measurement,
       test_period_price: clientData.step_service_price.test_period_price,
-      max_number_of_simultaneous_orders:
-        clientData.step_service_price.max_number_of_simultaneous_orders,
-      max_number_of_monthly_orders:
-        clientData.step_service_price.max_number_of_monthly_orders,
+      max_number_of_simultaneous_orders: clientData.step_service_price.max_number_of_simultaneous_orders,
+      max_number_of_monthly_orders: clientData.step_service_price.max_number_of_monthly_orders,
     };
 
-    const { error, data } = await client
+    const { error, data: dataResponseCreateService } = await client
       .from('services')
       .insert(newService)
       .select()
       .single();
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
-    return data;
+    if (!stripe_account_id) {
+      const user = await fetchUserAccount(client);
+      const stripeAccount = await createStripeAccount("");
+      await updateTeamAccountStripeId({
+        stripe_id: stripeAccount.accountId,
+        id: user?.id as string
+      });
+      stripe_account_id = stripeAccount.accountId;
+    }
+    const stripeProduct = await createStripeProduct(stripe_account_id, clientData);
+    const stripePrice = await createStripePrice(stripe_account_id, stripeProduct.productId, clientData);
+
+    await updateServiceWithPriceId(client, dataResponseCreateService.id, stripePrice.priceId);
+
+    return {
+      supabase: dataResponseCreateService,
+      stripeProduct,
+      stripePrice
+    };
+
   } catch (error) {
     console.error('Error al crear el servicio:', error);
     throw error;
   }
 };
+
+async function fetchUserAccount(client) {
+  const { data: { user }, error } = await client.auth.getUser();
+  if (error) throw error;
+  return user;
+}
+
+async function createStripeAccount(email: string) {
+  const response = await fetch(`${baseUrl}/api/stripe/create-account`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!response.ok) throw new Error('Failed to create Stripe account');
+  return response.json();
+}
+
+async function createStripeProduct(accountId: string, clientData: ServiceData) {
+  const response = await fetch(`${baseUrl}/api/stripe/create-service`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      accountId,
+      name: clientData.step_service_details.service_name,
+      description: clientData.step_service_details.service_description,
+      imageUrl: clientData.step_service_details.service_image,
+    }),
+  });
+  if (!response.ok) throw new Error('Failed to create Stripe product');
+  return response.json();
+}
+
+async function createStripePrice(accountId: string, productId: string, clientData: ServiceData) {
+  const response = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      accountId,
+      productId,
+      unitAmount: clientData.step_service_price.price * 100,
+      currency: 'usd',
+      isRecurring: clientData.step_type_of_service.recurring_subscription,
+      interval: clientData.step_service_price.recurrence,
+    }),
+  });
+  if (!response.ok) throw new Error('Failed to create Stripe price');
+  return response.json();
+}
+
+async function updateServiceWithPriceId(client, serviceId: number, priceId: string) {
+  const { error } = await client
+    .from('services')
+    .update({ price_id: priceId })
+    .eq('id', serviceId);
+  if (error) throw new Error(error.message);
+}

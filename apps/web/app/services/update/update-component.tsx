@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel} from '@kit/ui/alert-dialog';
 import { Pen } from 'lucide-react';
-import { updateService } from './update-service-server';
-import { Button } from '@kit/ui/button';
+import { updateService } from 'node_modules/@kit/team-accounts/src/server/actions/services/update/update-service-server';
+import { toast } from 'sonner';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -16,55 +16,62 @@ import {
     FormLabel,
     FormMessage,
 } from "@kit/ui/form";
-import { Input } from "@kit/ui/input";
-import { Separator } from '@kit/ui/separator';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@kit/ui/dropdown-menu";
 import { useTranslation } from 'react-i18next';
-import { Service } from '../../../../../../../../apps/web/lib/services.types';
+import { Service } from '~/lib/services.types';
+import { useServicesContext } from '../contexts/services-context';
+import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 const formSchema = z.object({
-    id: z.number(),
-    created_at: z.string(),
-    name: z.string().min(2).max(50),
-    price: z.number().min(2).max(15),
-    number_of_clients: z.number(),
-    status: z.string().min(2).max(20),
-    propietary_organization_id: z.string(),
+  name: z.string().min(2).max(50),
+  price: z.number().min(0),
+  status: z.string().min(2).max(20),
 });
 
 type UpdateServiceProps = {
-    id: number,
-    values: Service.Update
+  valuesOfServiceStripe: Service.Type;
 };
 
-const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
+const UpdateServiceDialog = ({valuesOfServiceStripe }: UpdateServiceProps) => {
     const { t } = useTranslation('services');
-    const [selectedStatus, setSelectedStatus] = useState(status);
+    const { updateServices } = useServicesContext();
+    // const [selectedStatus, setSelectedStatus] = useState(valuesOfServiceStripe.status);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: values,
+        defaultValues: {
+            name: valuesOfServiceStripe.name!,
+            price: valuesOfServiceStripe.price!,
+            status: valuesOfServiceStripe.status!,
+        },
     });
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-        await updateService(
-            id,
-            values,
-    );
-        window.location.reload();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await updateService(values.status, {
+        step_service_details: {
+          service_image: valuesOfServiceStripe.service_image!,
+          service_name: values.name,
+        },
+        step_service_price: {
+          price: Number(values.price),
+          price_id: valuesOfServiceStripe.price_id!,
+        },
+      });
+      toast('Success', {
+        description: 'The service has been updated!',
+      });
+      await updateServices(false);
+    } catch (error) {
+      toast('Error', {
+        description: 'The service could not be updated',
+      });
     }
+  }
 
-    const handleRoleSelect = (status: string) => {
-        setSelectedStatus(status);
-        form.setValue("status", status);
-    };
+    // const handleRoleSelect = (status: string) => {
+    //     setSelectedStatus(status);
+    //     form.setValue("status", status);
+    // };
 
     return (
         <>
@@ -91,7 +98,7 @@ const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
                                         <FormItem>
                                             <FormLabel>{t("serviceName")}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder={t("serviceNameLabel")} {...field} />
+                                                <ThemedInput placeholder={t("serviceNameLabel")} {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -100,17 +107,19 @@ const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
                                 <FormField
                                     control={form.control}
                                     name="price"
-                                    render={({ field }) => (
+                                    render={() => (
                                         <FormItem>
                                             <FormLabel>{t("servicePrice")}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder={t("servicepriceLabel")} {...field} />
+                                                <ThemedInput placeholder={t("servicepriceLabel")} defaultValue={form.getValues().price} onChange={(event)=>{
+                                                    const {value} = event.target
+                                                    form.setValue("price", Number(value))}} type='number' />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-                                <FormField
+                                {/* <FormField
                                     control={form.control}
                                     name="status"
                                     render={({ field }) => (
@@ -122,8 +131,8 @@ const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                />
-                                <DropdownMenu>
+                                /> */}
+                                {/* <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="outline">
                                             {selectedStatus ? t(selectedStatus) : t("status")}
@@ -141,9 +150,9 @@ const UpdateServiceDialog = ({ id, values }: UpdateServiceProps) => {
                                             </DropdownMenuItem>
                                         </DropdownMenuGroup>
                                     </DropdownMenuContent>
-                                </DropdownMenu>
-                                <Separator />
-                                <Button type="submit" className='w-full ' onClick={() => console.log("Submit button clicked")}>{t("updateService")}</Button>
+                                </DropdownMenu> */}
+                                {/* <Separator /> */}
+                                <AlertDialogCancel className="w-full p-0"><ThemedButton type="submit" className='w-full '>{t("updateService")}</ThemedButton></AlertDialogCancel>
                             </form>
                         </Form>
                     </AlertDialogDescription>

@@ -52,11 +52,11 @@ export function UpdateMemberRoleDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            <Trans i18nKey={'teams:updateMemberRoleModalHeading'} />
+            <Trans i18nKey={'team:updateMemberRoleModalHeading'} />
           </DialogTitle>
 
           <DialogDescription>
-            <Trans i18nKey={'teams:updateMemberRoleModalDescription'} />
+            <Trans i18nKey={'team:updateMemberRoleModalDescription'} />
           </DialogDescription>
         </DialogHeader>
 
@@ -91,7 +91,7 @@ function UpdateMemberForm({
 }>) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<boolean>();
-  const { t } = useTranslation('teams');
+  const { t } = useTranslation('team');
 
   const onSubmit = ({ role }: { role: Role }) => {
     startTransition(async () => {
@@ -164,7 +164,7 @@ function UpdateMemberForm({
         />
 
         <Button data-test={'confirm-update-member-role'} disabled={pending}>
-          <Trans i18nKey={'teams:updateRoleSubmitLabel'} />
+          <Trans i18nKey={'team:updateRoleSubmitLabel'} />
         </Button>
       </form>
     </Form>
@@ -175,11 +175,11 @@ function UpdateRoleErrorAlert() {
   return (
     <Alert variant={'destructive'}>
       <AlertTitle>
-        <Trans i18nKey={'teams:updateRoleErrorHeading'} />
+        <Trans i18nKey={'team:updateRoleErrorHeading'} />
       </AlertTitle>
 
       <AlertDescription>
-        <Trans i18nKey={'teams:updateRoleErrorMessage'} />
+        <Trans i18nKey={'team:updateRoleErrorMessage'} />
       </AlertDescription>
     </Alert>
   );

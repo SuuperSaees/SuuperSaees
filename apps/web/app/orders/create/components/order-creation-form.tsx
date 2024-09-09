@@ -1,25 +1,40 @@
 'use client';
 
+import React, { useState } from 'react';
+
+
+
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
 import { createOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/create/create-order';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { z } from 'zod';
+
 // import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { Button } from '@kit/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
-import { Input } from '@kit/ui/input';
-import { Textarea } from '@kit/ui/textarea';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
+import { Spinner } from '@kit/ui/spinner';
+
 import UploadFileComponent from '~/components/ui/files-input';
-import React, {useState} from 'react';
 
 function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
-
 
 // import { mapMimeTypeToFileType } from '../utils/map-mime-type';
 
@@ -37,12 +52,11 @@ const orderCreationFormSchema = z.object({
     .max(500, {
       message: 'Description must be at most 500 characters.',
     }),
-    fileIds: z.array(z.string()),
+  fileIds: z.array(z.string()),
 });
 const OrderCreationForm = () => {
   const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const uniqueId = generateUUID();
-  console.log('uniqueId', uniqueId);
   const { t } = useTranslation('orders');
   // const supabase = useSupabase();
   const form = useForm<z.infer<typeof orderCreationFormSchema>>({
@@ -55,23 +69,36 @@ const OrderCreationForm = () => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
-    try {
-      const result = await createOrders([
-        {...values,
-        fileIds: uploadedFileIds,
-        propietary_organization_id: '',}
+  const createOrdersMutations = useMutation({
+    mutationFn: async (values: z.infer<typeof orderCreationFormSchema>) => {
+      await createOrders([
+        {
+          ...values,
+          fileIds: uploadedFileIds,
+          propietary_organization_id: '',
+        },
       ]);
-      console.log('submit', result);
-    } catch (error) {
-      console.log(error);
-    }
+    },
+    onError: () => {
+      toast('Error', {
+        description: 'There was an error creating the order.',
+      });
+    },
+    onSuccess: () => {
+      toast('Success', {
+        description: 'The order has been created.',
+      });
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
+    createOrdersMutations.mutate(values);
   };
 
   const handleFileIdsChange = (fileIds: string[]) => {
     setUploadedFileIds(fileIds);
     form.setValue('fileIds', fileIds);
-    console.log('Uploaded File IDs:', fileIds);
+    // console.log('Uploaded File IDs:', fileIds);
   };
 
   return (
@@ -84,9 +111,10 @@ const OrderCreationForm = () => {
             <FormItem>
               <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
               <FormControl>
-                <Input
+                <ThemedInput
                   {...field}
                   placeholder={t('creation.form.titlePlaceholder')}
+                  className="focus-visible:ring-none"
                 />
               </FormControl>
               <FormMessage />
@@ -100,18 +128,28 @@ const OrderCreationForm = () => {
             <FormItem>
               <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
               <FormControl>
-                <Textarea
+                <ThemedTextarea
                   {...field}
                   placeholder={t('creation.form.descriptionPlaceholder')}
                   rows={5}
+                  className="focus-visible:ring-none"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <UploadFileComponent bucketName='orders' uuid={uniqueId} onFileIdsChange={handleFileIdsChange}/>
-        <Button type="submit">{t('creation.form.submitMessage')}</Button>
+        <UploadFileComponent
+          bucketName="orders"
+          uuid={uniqueId}
+          onFileIdsChange={handleFileIdsChange}
+        />
+        <ThemedButton type="submit" className="flex gap-2">
+          <span>{t('creation.form.submitMessage')}</span>
+          {createOrdersMutations.isPending && (
+            <Spinner className="h-4 w-4 text-white" />
+          )}
+        </ThemedButton>
       </form>
     </Form>
   );

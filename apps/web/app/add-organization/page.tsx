@@ -1,16 +1,13 @@
 import { PageBody } from '@kit/ui/page';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import CreateOrganization from './components/add-organization-form';
-
+import { redirect } from 'next/navigation';
+import { getOrganization } from '../../../../packages/features/team-accounts/src/server/actions/organizations/get/get-organization'
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   const title = i18n.t('organizations:title');
-<<<<<<< Updated upstream
 
-=======
-  
->>>>>>> Stashed changes
   return {
     title,
   };

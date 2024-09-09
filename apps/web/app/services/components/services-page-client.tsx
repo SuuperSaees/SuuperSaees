@@ -1,0 +1,66 @@
+"use client";
+
+import { PageBody } from '@kit/ui/page';
+import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
+import { Elements } from '@stripe/react-stripe-js';
+import { Stripe } from '@stripe/stripe-js';
+import { useEffect } from 'react';
+import { ServicesContextProvider, useServicesContext } from '../contexts/services-context';
+
+interface ServicesPageClientProps {
+  stripePromise: Promise<Stripe | null>;
+}
+
+const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePromise }) => {
+  const { services, loading, error, updateServices } = useServicesContext();
+
+  useEffect(() => {
+    updateServices(true).catch((error)=> {console.log(error.message)});
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div
+          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+          role="status"
+        >
+          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>Error loading services. Please try again.</div>;
+  }
+
+  return (
+    <Elements stripe={stripePromise}>
+      <PageBody>
+        <div className='p-[35px]'>
+          <div className="flex justify-between items-center mb-[32px]">
+            <div className="flex-grow">
+              <span>
+                <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
+                  Servicios
+                </div>
+              </span>
+            </div>
+          </div>
+          <ServicesTable services={services} />
+        </div>
+      </PageBody>
+    </Elements>
+  );
+};
+
+const ServicesPageClient: React.FC<ServicesPageClientProps> = (props) => (
+  <ServicesContextProvider>
+    <ServicesPageClientContent {...props} />
+  </ServicesContextProvider>
+);
+
+export { ServicesPageClient };

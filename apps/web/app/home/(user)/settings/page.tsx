@@ -1,5 +1,7 @@
 import { use } from 'react';
 
+
+
 import { PersonalAccountSettingsContainer } from '@kit/accounts/personal-account-settings';
 import { PageBody } from '@kit/ui/page';
 
@@ -8,8 +10,6 @@ import pathsConfig from '~/config/paths.config';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { Button } from '@kit/ui/button';
-import { BellIcon } from '@radix-ui/react-icons';
 
 const features = {
   enableAccountDeletion: featureFlagsConfig.enableAccountDeletion,
@@ -33,28 +33,17 @@ function PersonalAccountSettingsPage() {
 
   return (
     <PageBody>
-      <div className='p-[35px]'>
-            <div className="flex justify-between items-center mb-[32px]">
-                <div className="flex-grow">
-                    <span>
-                    <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
-                      Configuraciones
-                    </div>
-                    </span>
-                </div>
-                <div className="flex space-x-4">
-                    <span>
-                        <Button variant="outline">
-                            Tu prueba gratuita termina en xx dias
-                        </Button>
-                    </span>
-                    <span>
-                        <Button variant="outline" size="icon">
-                            <BellIcon className="h-4 w-4" />
-                        </Button>
-                    </span>
-                </div>
-            </div>
+      <div className="p-[35px]">
+        <div className="mb-[32px] flex items-center justify-between">
+          <div className="flex-grow">
+            <span>
+              <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
+                Configuraciones
+              </div>
+            </span>
+          </div>
+        </div>
+
         <PersonalAccountSettingsContainer
           userId={user.id}
           features={features}

@@ -2,12 +2,16 @@
 
 import React, { useState } from 'react';
 
+
+
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { Button } from '@kit/ui/button';
+import { Input } from '@kit/ui/input';
 import { Label } from '@kit/ui/label';
+
+import { ThemedButton } from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
 
 interface UploadImageComponentProps {
   onImageUpload: (imageUrl: string) => void;
@@ -23,7 +27,8 @@ export default function UploadImageComponent({
     'Debe seleccionar una imagen',
   );
 
-  const handleButtonClick = () => {
+  const handleButtonClick = (e) => {
+    e.preventDefault();
     const fileInput = document.getElementById('file-input');
     if (fileInput) {
       fileInput.click();
@@ -81,11 +86,11 @@ export default function UploadImageComponent({
         {t('service_image_recommendation')}
       </Label>
       <div>
-        <Button onClick={handleButtonClick}>
+        <ThemedButton onClick={handleButtonClick}>
           <Plus size={16} className="mr-2" />
           {t('upload_image')}
-        </Button>
-        <input
+        </ThemedButton>
+        <Input
           type="file"
           accept="image/*"
           id="file-input"
@@ -93,7 +98,12 @@ export default function UploadImageComponent({
           style={{ display: 'none' }}
         />
       </div>
-      <span className="text-sm text-gray-500">{fileName}</span>
+      <span
+        className={`text-sm ${fileName === 'Debe seleccionar una imagen' ? 'text-red-500' : 'text-gray-500'}`}
+      >
+        {fileName}
+      </span>
+
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );

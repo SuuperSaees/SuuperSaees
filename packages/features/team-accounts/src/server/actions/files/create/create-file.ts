@@ -42,6 +42,7 @@ export const createUploadBucketURL = async (
     return urlData;
   } catch (error) {
     console.error('Error creating signed upload URL:', error);
-    throw error;
+    // throw error;
+    return { error: 'Generic error message' };
   }
 };

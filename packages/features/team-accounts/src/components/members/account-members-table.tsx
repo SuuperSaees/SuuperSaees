@@ -53,7 +53,7 @@ export function AccountMembersTable({
   canManageRoles,
 }: AccountMembersTableProps) {
   const [search, setSearch] = useState('');
-  const { t } = useTranslation('teams');
+  const { t } = useTranslation('team');
 
   const permissions = {
     canUpdateRole: (targetRole: number) => {
@@ -118,7 +118,7 @@ function useGetColumns(
     currentRoleHierarchy: number;
   },
 ): ColumnDef<Members[0]>[] {
-  const { t } = useTranslation('teams');
+  const { t } = useTranslation('team');
 
   return useMemo(
     () => [
@@ -254,19 +254,19 @@ function ActionsDropdown({
         <DropdownMenuContent>
           <If condition={canUpdateRole}>
             <DropdownMenuItem onClick={() => setIsUpdatingRole(true)}>
-              <Trans i18nKey={'teams:updateRole'} />
+              <Trans i18nKey={'team:updateRole'} />
             </DropdownMenuItem>
           </If>
 
           <If condition={permissions.canTransferOwnership}>
             <DropdownMenuItem onClick={() => setIsTransferring(true)}>
-              <Trans i18nKey={'teams:transferOwnership'} />
+              <Trans i18nKey={'team:transferOwnership'} />
             </DropdownMenuItem>
           </If>
 
           <If condition={canRemoveFromAccount}>
             <DropdownMenuItem onClick={() => setIsRemoving(true)}>
-              <Trans i18nKey={'teams:removeMember'} />
+              <Trans i18nKey={'team:removeMember'} />
             </DropdownMenuItem>
           </If>
         </DropdownMenuContent>

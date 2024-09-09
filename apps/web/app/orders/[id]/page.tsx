@@ -27,11 +27,11 @@ async function OrderDetailsPage({
 }) {
   // const orderDetail = mockedOrder;
   // On the future for better performance each request can be made individually
-  const order = await getOrderById(Number(id));
-  const messages = order.messages ? order.messages : [];
-  const files = order.files ? order.files : [];
-  const activities = order.activities ? order.activities : [];
-  const reviews = order.reviews ? order.reviews : [];
+  const order = await getOrderById(Number(id)).catch((err) => console.error(err));
+  const messages = order?.messages ? order.messages : [];
+  const files = order?.files ? order.files : [];
+  const activities = order?.activities ? order.activities : [];
+  const reviews = order?.reviews ? order.reviews : [];
 
   return (
     <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
@@ -44,7 +44,7 @@ async function OrderDetailsPage({
             reviews={reviews}
             order={order}
           >
-            <div className="flex w-full flex-grow min-w-0 flex-col gap-6">
+            <div className="flex w-full min-w-0 flex-grow flex-col gap-6">
               {/* <div className="flex w-full min-w-full gap-4">
                 <div className="mb-[16px] w-full rounded-lg border border-gray-500 px-[12px] py-[8px]">
                   <span className="font-inter text-md overflow-hidden text-ellipsis leading-6 text-gray-500">

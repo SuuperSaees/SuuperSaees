@@ -3,6 +3,10 @@ import { cookies } from 'next/headers';
 
 
 
+import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
+
+
+
 import { Toaster } from '@kit/ui/sonner';
 import { cn } from '@kit/ui/utils';
 
@@ -24,15 +28,17 @@ export default async function RootLayout({
   const { language } = await createI18nServerInstance();
   const theme = getTheme();
   const className = getClassName(theme);
-<<<<<<< Updated upstream
-=======
+
   const organizationSettings = await getOrganizationSettings().catch(() => ([]));
->>>>>>> Stashed changes
 
   return (
     <html lang={language} className={`${className} ${epilogue.className}`}>
       <body>
-        <RootProviders theme={theme} lang={language}>
+        <RootProviders
+          theme={theme}
+          lang={language}
+          organizationSettings={organizationSettings}
+        >
           {children}
         </RootProviders>
 

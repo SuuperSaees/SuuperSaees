@@ -132,6 +132,13 @@ async function adminMiddleware(request: NextRequest, response: NextResponse) {
 function getPatterns() {
   return [
     {
+      // partially removing accesss to '/', since landing page is on construction.
+      pattern: new URLPattern({ pathname: '/' }),
+      handler:  (req: NextRequest) => {
+        return NextResponse.redirect(new URL(pathsConfig.app.home, req.nextUrl.origin).href);
+      },
+    },
+    {
       pattern: new URLPattern({ pathname: '/admin/*?' }),
       handler: adminMiddleware,
     },
@@ -189,7 +196,6 @@ function getPatterns() {
           );
         }
 
-        console.timeEnd('middleware');
       },
     },
   ];

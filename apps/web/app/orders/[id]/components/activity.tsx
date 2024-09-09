@@ -92,6 +92,7 @@ const ActivityPage = () => {
             bucketName="orders"
             onFileIdsChange={handleFileIdsChange}
             uuid={generateUUID()}
+            removeResults
           />
         )}
         <RichTextEditor

@@ -1,23 +1,27 @@
-import { PageBody } from '@kit/ui/page';
-import { Trans } from '@kit/ui/trans';
-import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
-import { withI18n } from '~/lib/i18n/with-i18n';
+import { BellIcon } from '@radix-ui/react-icons';
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import {
   AccountInvitationsTable,
   AccountMembersTable,
   InviteMembersDialogContainer,
 } from '@kit/team-accounts/components';
-import { If } from '@kit/ui/if';
 import { Button } from '@kit/ui/button';
-import { loadMembersPageData } from './_lib/server/members-page.loader';
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { BellIcon } from '@radix-ui/react-icons';
+import { If } from '@kit/ui/if';
+import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
+import { Trans } from '@kit/ui/trans';
+
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+import { withI18n } from '~/lib/i18n/with-i18n';
+
+import { loadMembersPageData } from './_lib/server/members-page.loader';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   return {
-    title: i18n.t('teams:team'),
+    title: i18n.t('team:team'),
   };
 };
 
@@ -35,109 +39,142 @@ type Account = {
   picture_url: string | null;
   public_data: object;
   role_hierarchy_level: number;
-  permissions: Array<'roles.manage' | 'billing.manage' | 'settings.manage' | 'members.manage' | 'invites.manage'>;
+  permissions: Array<
+    | 'roles.manage'
+    | 'billing.manage'
+    | 'settings.manage'
+    | 'members.manage'
+    | 'invites.manage'
+  >;
 };
 
 async function ClientsMembersPage() {
-
   const client = getSupabaseServerComponentClient();
 
-  const { data: userData } = await client.auth.getUser();
+  const { data: authenticatedUser, error: authenticatedUserError } =
+    await client.auth.getUser();
+  if (authenticatedUserError) {
+    console.error(
+      'Error fetching authenticated user:',
+      authenticatedUserError.message,
+    );
+  }
 
-  const { data } = await client
+  const { data: accountData, error: accountError } = await client
     .from('accounts')
     .select()
-    .eq('primary_owner_user_id', userData.user!.id);
+    .eq('id', authenticatedUser.user?.id ?? '')
+    .single();
 
-  const { data: data2 } = await client
-    .from('accounts_memberships')
-    .select()
-    .eq('user_id', userData.user!.id);
+  if (accountError) {
+    console.error('Error fetching account:', accountError.message);
+  }
 
-  const account_role = data2!.length > 0 ? data2![0]?.account_role : null;
+  const { data: organizationAccount, error: organizationAccountError } =
+    await client
+      .from('accounts')
+      .select()
+      .eq('id', accountData?.organization_id ?? '')
+      .single();
 
-  const { data: data3 } = await client
-    .from('role_permissions')
-    .select('permission')
-    .eq('role', account_role!);
+  if (organizationAccountError) {
+    console.error(
+      'Error fetching organization account:',
+      organizationAccountError.message,
+    );
+  }
+  const { data: accountMembership, error: accountMembershipError } =
+    await client
+      .from('accounts_memberships')
+      .select()
+      .eq('account_id', accountData?.id ?? '')
+      .single();
 
-  const userPermissions = data3!.map(permission => permission.permission);
-
-  const { data: data4 } = await client
+  if (accountMembershipError) {
+    console.error(
+      'Error fetching account membership:',
+      accountMembershipError.message,
+    );
+  }
+  const { data: accountRole, error: accountRoleError } = await client
     .from('roles')
-    .select('hierarchy_level')
-    .eq('name', account_role!);
+    .select()
+    .eq('name', accountMembership?.account_role ?? '')
+    .single();
 
-  const roleHierarchies = data4!.map(roleHierarchy => roleHierarchy.hierarchy_level);
-  const roleHierarchyLevel = roleHierarchies.length > 0 ? roleHierarchies[0] : 0;
+  if (accountRoleError) {
+    console.error('Error fetching account role:', accountRoleError.message);
+  }
 
-  const filteredData = data ? data.filter(item => item.id !== userData.user!.id) : [];
+  const { data: userPermissions, error: userPermissionsError } = await client
+    .from('role_permissions')
+    .select()
+    .eq('role', accountRole?.name ?? '');
 
-  const accountData = filteredData.length > 0 ? filteredData[0] : {};
+  if (userPermissionsError) {
+    console.error(
+      'Error fetching user permissions:',
+      userPermissionsError.message,
+    );
+  }
 
   const account = {
-    ...(accountData as Account),
-    permissions: userPermissions,
-    role_hierarchy_level: roleHierarchyLevel,
+    ...accountData,
+    permissions: userPermissions?.map((permission) => permission.permission),
+    role_hierarchy_level: accountRole?.hierarchy_level,
   };
 
-  const slug = account.slug;
-
+  const slug = organizationAccount?.slug ?? '';
 
   const [members, invitations, canAddMember, { user }] =
     await loadMembersPageData(client, slug);
 
-
-  const canManageRoles = account.permissions.includes('roles.manage');
-  const canManageInvitations = account.permissions.includes('invites.manage');
+  const canManageRoles =
+    account?.permissions?.includes('roles.manage') ?? false;
+  const canManageInvitations =
+    account?.permissions?.includes('invites.manage') ?? false;
 
   const isPrimaryOwner = account.primary_owner_user_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
-
+  // console.log('orgnazation account ', organizationAccount, slug);
   return (
     <>
       <PageBody>
-        <div className='p-[35px]'>
-          <div className="flex justify-between items-center mb-[32px]">
+        <div className="p-[35px]">
+          <div className="mb-[32px] flex items-center justify-between">
             <div className="flex-grow">
               <span>
-                <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
-                  <Trans i18nKey={'teams:team'} />
+                <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
+                  <Trans i18nKey={'team:team'} />
                 </div>
-              </span>
-            </div>
-            <div className="flex space-x-4">
-              <span>
-                <Button variant="outline">
-                  Tu prueba gratuita termina en xx dias
-                </Button>
-              </span>
-              <span>
-                <Button variant="outline" size="icon">
-                  <BellIcon className="h-4 w-4" />
-                </Button>
               </span>
             </div>
           </div>
 
           <div className="w-full">
-            <div className="flex items-center py-4 justify-between">
+            <div className="flex items-center justify-between py-4">
+              <If condition={canManageInvitations && (await canAddMember())}>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold">
+                    <Trans i18nKey={'common:membersTabLabel'} />
+                  </h3>
+                  {members && (
+                    <div className="rounded-full border border-brand-700 bg-brand-50 px-2 py-0 text-black-700">
+                      <span className="inline-flex gap-2 text-[12px]">
+                        <span>{members.length}</span>
+                        <Trans i18nKey={'team:labelNumberOfUsers'} />
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-              <Button
-                variant='ghost'
-                className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md 'bg-brand-50 text-brand-700' : 'bg-transparent text-gray-500'}`}
-              >
-                <span className="text-sm font-semibold leading-5"><Trans i18nKey={'common:membersTabLabel'} /></span>
-              </Button>
-              
-              <If condition={canManageInvitations && canAddMember}>
                 <InviteMembersDialogContainer
                   userRoleHierarchy={currentUserRoleHierarchy ?? 0}
-                  accountSlug={account.slug}
+                  accountSlug={slug}
                 >
                   <Button size={'sm'} data-test={'invite-members-form-trigger'}>
                     <span>
-                      <Trans i18nKey={'teams:inviteMembersButton'} />
+                      <Trans i18nKey={'team:inviteMembersButton'} />
                     </span>
                   </Button>
                 </InviteMembersDialogContainer>
@@ -146,7 +183,7 @@ async function ClientsMembersPage() {
           </div>
 
           <Separator />
-          <div className='mt-4'>
+          <div className="mt-4">
             <AccountMembersTable
               userRoleHierarchy={currentUserRoleHierarchy ?? 0}
               currentUserId={user.id}
@@ -157,9 +194,7 @@ async function ClientsMembersPage() {
             />
           </div>
 
-
-          
-          <div className='mt-12'>
+          <div className="mt-12">
             <AccountInvitationsTable
               permissions={{
                 canUpdateInvitation: canManageRoles,

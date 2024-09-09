@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+
+
 import { z } from 'zod';
 
 import { enhanceAction } from '@kit/next/actions';
@@ -16,20 +18,62 @@ import { UpdateInvitationSchema } from '../../schema/update-invitation.schema';
 import { createAccountInvitationsService } from '../services/account-invitations.service';
 import { createAccountPerSeatBillingService } from '../services/account-per-seat-billing.service';
 
-/**
- * @name createInvitationsAction
- * @description Creates invitations for inviting members.
- */
 export const createInvitationsAction = enhanceAction(
   async (params) => {
     const client = getSupabaseServerActionClient();
 
+    // Check if the user is authenticated
+    const {
+      data: { user },
+      error: userError,
+    } = await client.auth.getUser();
+
+    if (userError) throw userError.message;
+
+    const { data: userAccount, error: userAccountError } = await client
+      .from('accounts')
+      .select('organization_id')
+      .eq('id', user?.id ?? '')
+      .single();
+    if (userAccountError) throw userAccountError.message;
+    // Fetch all existing members for the account
+    const { data: existingMembers, error: existingMembersError } = await client
+      .from('accounts')
+      .select('email')
+      .eq('organization_id', userAccount.organization_id ?? ''); // Adjust if needed to `organization_id` or a specific `account_id`
+
+    if (existingMembersError) {
+      console.error('Failed to retrieve existing members');
+      throw new Error(existingMembersError.message);
+    }
+
+    // Map existing invitations to an array of emails
+    const existingEmails = existingMembers?.map((member) => member.email) ?? [];
+    // console.log('existingEmails', existingEmails, params.invitations);
+    // Filter out the emails that are already invited
+    const filteredInvitations = params.invitations.filter(
+      (invitation) => !existingEmails.includes(invitation.email),
+    );
+
+    // If there are no new invitations to send, return early
+    if (filteredInvitations.length === 0) {
+      // console.log('No new invitations to send');
+      return { success: true };
+    }
+
+    // Update params with the filtered invitations
+    const updatedParams = {
+      ...params,
+      invitations: filteredInvitations,
+    };
+
     // Create the service
     const service = createAccountInvitationsService(client);
 
-    // send invitations
-    await service.sendInvitations(params);
+    // Send the filtered invitations
+    await service.sendInvitations(updatedParams);
 
+    // Revalidate the member page
     revalidateMemberPage();
 
     return {

@@ -12,18 +12,30 @@ import { z } from 'zod';
 
 
 
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
-import { Button } from '@kit/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@kit/ui/alert-dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
 
-
-
-import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
-import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
+import { ThemedButton } from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
+// import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
+// import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
 import { createClient } from './create-client-server';
-
 
 const formSchema = z.object({
   name: z.string().min(2).max(50),
@@ -49,11 +61,14 @@ const CreateClientDialog = () => {
       const newClient = { ...values };
       // delete newClient?.role;
       await createClient({ client: newClient, role: values.role });
-      console.log('values client', values);
+      // console.log('values client', values);
       // sendClientInvitations(
       //   [{ email: values.email, role: selectedRole }],
       //   client?.slug ?? '',
       // );
+      toast.success('success', {
+        description: 'Client created successfully',
+      });
       window.location.reload();
     } catch (error) {
       toast.error('error', {
@@ -71,7 +86,7 @@ const CreateClientDialog = () => {
     <>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button>{t('createClient')}</Button>
+          <ThemedButton>{t('createClient')}</ThemedButton>
         </AlertDialogTrigger>
         <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
           <div className="flex w-full items-center justify-between">
@@ -130,7 +145,7 @@ const CreateClientDialog = () => {
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="role"
                   render={({ field }) => (
@@ -142,8 +157,8 @@ const CreateClientDialog = () => {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
-                <RolesDataProvider maxRoleHierarchy={5}>
+                /> */}
+                {/* <RolesDataProvider maxRoleHierarchy={5}>
                   {(roles) => {
                     return (
                       <FormField
@@ -152,10 +167,10 @@ const CreateClientDialog = () => {
                           return (
                             <FormItem>
                               {/* <If condition={isFirst}> */}
-                              <FormLabel>{t('teams:roleLabel')}</FormLabel>
-                              {/* </If> */}
+                {/* <FormLabel>{t('team:roleLabel')}</FormLabel> */}
+                {/* </If> */}
 
-                              <FormControl>
+                {/* <FormControl>
                                 <MembershipRoleSelector
                                   roles={roles}
                                   value={field.value}
@@ -166,18 +181,18 @@ const CreateClientDialog = () => {
                               </FormControl>
 
                               <FormMessage />
-                            </FormItem>
-                          );
+                            </FormItem> */}
+                {/* );
                         }}
-                      />
-                    );
-                  }}
-                </RolesDataProvider>
+                      /> */}
+                {/* ); */}
+                {/* }} */}
+                {/* </RolesDataProvider> */}
 
                 <Separator />
-                <Button type="submit" className="w-full">
+                <ThemedButton type="submit" className="w-full">
                   Crear cliente
-                </Button>
+                </ThemedButton>
               </form>
             </Form>
           </AlertDialogDescription>

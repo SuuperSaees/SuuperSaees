@@ -90,7 +90,7 @@ function DeleteInvitationForm({
             variant={'destructive'}
             disabled={isSubmitting}
           >
-            <Trans i18nKey={'teams:deleteInvitation'} />
+            <Trans i18nKey={'team:deleteInvitation'} />
           </Button>
         </AlertDialogFooter>
       </div>
@@ -102,11 +102,11 @@ function RemoveInvitationErrorAlert() {
   return (
     <Alert variant={'destructive'}>
       <AlertTitle>
-        <Trans i18nKey={'teams:deleteInvitationErrorTitle'} />
+        <Trans i18nKey={'team:deleteInvitationErrorTitle'} />
       </AlertTitle>
 
       <AlertDescription>
-        <Trans i18nKey={'teams:deleteInvitationErrorMessage'} />
+        <Trans i18nKey={'team:deleteInvitationErrorMessage'} />
       </AlertDescription>
     </Alert>
   );

@@ -1,10 +1,14 @@
 'use client';
+
 import { useContext, useId, useState } from 'react';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
 import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
 import { z } from 'zod';
+
 import { Button } from '../shadcn/button';
 import {
   Tooltip,
@@ -17,6 +21,7 @@ import { SidebarContext } from './context/sidebar.context';
 import { If } from './if';
 import { NavigationConfigSchema } from './navigation-config.schema';
 import { Trans } from './trans';
+
 export type SidebarConfig = z.infer<typeof NavigationConfigSchema>;
 export function Sidebar(props: {
   collapsed?: boolean;
@@ -27,15 +32,21 @@ export function Sidebar(props: {
         collapsed: boolean;
         setCollapsed: (collapsed: boolean) => void;
       }) => React.ReactNode);
+  style?: React.CSSProperties; // Adding style prop explicitly
+  itemActiveStyle?: React.CSSProperties;
 }) {
   const [collapsed, setCollapsed] = useState(props.collapsed ?? false);
   const className = getClassNameBuilder(props.className ?? '')({
     collapsed,
   });
-  const ctx = { collapsed, setCollapsed };
+  const ctx = {
+    collapsed,
+    setCollapsed,
+    itemActiveStyle: props.itemActiveStyle,
+  };
   return (
     <SidebarContext.Provider value={ctx}>
-      <div className={className}>
+      <div className={className} style={props.style}>
         {typeof props.children === 'function'
           ? props.children(ctx)
           : props.children}
@@ -71,12 +82,9 @@ export function SidebarGroup({
   const [isGroupCollapsed, setIsGroupCollapsed] = useState(collapsed);
   const id = useId();
   const Wrapper = () => {
-    const className = cn(
-      'flex w-full text-md shadow-none',
-      {
-        'justify-between space-x-2.5': !sidebarCollapsed,
-      },
-    );
+    const className = cn('flex w-full text-md shadow-none', {
+      'justify-between space-x-2.5': !sidebarCollapsed,
+    });
     if (collapsible) {
       return (
         <Button
@@ -87,7 +95,7 @@ export function SidebarGroup({
           variant="ghost"
           size="sm"
         >
-          <div className='flex gap-2'>
+          <div className="flex gap-2">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>{Icon}</TooltipTrigger>
@@ -113,7 +121,7 @@ export function SidebarGroup({
     <div className={'flex flex-col space-y-1 py-1'}>
       <Wrapper />
       <If condition={collapsible ? !isGroupCollapsed : true}>
-        <div id={id} className={'flex flex-col space-y-1.5 px-6.5'}>
+        <div id={id} className={'px-6.5 flex flex-col space-y-1.5'}>
           {children}
         </div>
       </If>
@@ -130,12 +138,14 @@ export function SidebarItem({
   path,
   children,
   Icon,
+  className,
 }: React.PropsWithChildren<{
   path: string;
   Icon: React.ReactNode;
   end?: boolean | ((path: string) => boolean);
+  className?: string;
 }>) {
-  const { collapsed } = useContext(SidebarContext);
+  const { collapsed, itemActiveStyle } = useContext(SidebarContext);
   const currentPath = usePathname() ?? '';
   const active = isRouteActive(path, currentPath, end ?? false);
   const variant = active ? 'secondary' : 'ghost';
@@ -143,11 +153,12 @@ export function SidebarItem({
   return (
     <Button
       asChild
-      className={cn('flex w-full text-md shadow-none', {
+      className={cn(`text-md flex w-full shadow-none ${className}`, {
         'justify-start space-x-2.5': !collapsed,
       })}
       size={size}
       variant={variant}
+      style={active && itemActiveStyle ? itemActiveStyle : undefined}
     >
       <Link key={path} href={path}>
         <If condition={collapsed} fallback={Icon}>
@@ -198,7 +209,13 @@ export function SidebarNavigation({
           return (
             <SidebarGroup
               key={item.label}
-              label={<Trans i18nKey={item.label} defaults={item.label} key={item.label + index}/>}
+              label={
+                <Trans
+                  i18nKey={item.label}
+                  defaults={item.label}
+                  key={item.label + index}
+                />
+              }
               collapsible={item.collapsible}
               collapsed={item.collapsed}
               Icon={item.Icon}

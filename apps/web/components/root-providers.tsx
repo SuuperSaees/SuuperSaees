@@ -2,11 +2,14 @@
 
 import { useMemo } from 'react';
 
+
+
 import dynamic from 'next/dynamic';
 
 import { ReactQueryStreamedHydration } from '@tanstack/react-query-next-experimental';
 import { ThemeProvider } from 'next-themes';
 
+// import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { CaptchaProvider } from '@kit/auth/captcha/client';
 import { I18nProvider } from '@kit/i18n/provider';
 import { MonitoringProvider } from '@kit/monitoring/components';
@@ -19,10 +22,19 @@ import { AuthProvider } from '~/components/auth-provider';
 import appConfig from '~/config/app.config';
 import authConfig from '~/config/auth.config';
 import featuresFlagConfig from '~/config/feature-flags.config';
+import { Database } from '~/lib/database.types';
 import { i18nResolver } from '~/lib/i18n/i18n.resolver';
 import { getI18nSettings } from '~/lib/i18n/i18n.settings';
 
 import { ReactQueryProvider } from './react-query-provider';
+
+const OrganizationSettingsProvider = dynamic(
+  () =>
+    import(
+      'node_modules/@kit/accounts/src/context/organization-settings-context'
+    ).then((mod) => mod.default),
+  { ssr: false },
+);
 
 const captchaSiteKey = authConfig.captchaTokenSiteKey;
 
@@ -42,9 +54,18 @@ export function RootProviders({
   lang,
   theme = appConfig.theme,
   children,
+  organizationSettings,
 }: React.PropsWithChildren<{
   lang: string;
   theme?: string;
+  organizationSettings: {
+    account_id: string;
+    created_at: string;
+    id: string;
+    key: Database['public']['Enums']['organization_setting_key'];
+    updated_at: string | null;
+    value: string;
+  }[];
 }>) {
   const i18nSettings = useMemo(() => getI18nSettings(lang), [lang]);
 
@@ -59,15 +80,19 @@ export function RootProviders({
                   <CaptchaTokenSetter siteKey={captchaSiteKey} />
 
                   <AuthProvider>
-                    <ThemeProvider
-                      attribute="class"
-                      enableSystem
-                      disableTransitionOnChange
-                      defaultTheme={theme}
-                      enableColorScheme={false}
+                    <OrganizationSettingsProvider
+                      initialSettings={organizationSettings}
                     >
-                      {children}
-                    </ThemeProvider>
+                      <ThemeProvider
+                        attribute="class"
+                        enableSystem
+                        disableTransitionOnChange
+                        defaultTheme={theme}
+                        enableColorScheme={false}
+                      >
+                        {children}
+                      </ThemeProvider>
+                    </OrganizationSettingsProvider>
                   </AuthProvider>
                 </CaptchaProvider>
 

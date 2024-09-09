@@ -47,6 +47,7 @@ export type Database = {
           primary_owner_user_id: string
           public_data: Json
           slug: string | null
+          stripe_id: string | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -62,6 +63,7 @@ export type Database = {
           primary_owner_user_id?: string
           public_data?: Json
           slug?: string | null
+          stripe_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -77,6 +79,7 @@ export type Database = {
           primary_owner_user_id?: string
           public_data?: Json
           slug?: string | null
+          stripe_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -1136,6 +1139,55 @@ export type Database = {
           },
         ]
       }
+      organization_settings: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          key: Database["public"]["Enums"]["organization_setting_key"]
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          key: Database["public"]["Enums"]["organization_setting_key"]
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          key?: Database["public"]["Enums"]["organization_setting_key"]
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           name: string
@@ -1346,6 +1398,7 @@ export type Database = {
           name: string | null
           number_of_clients: number | null
           price: number | null
+          price_id: string | null
           propietary_organization_id: string | null
           purchase_limit: number
           recurrence: string | null
@@ -1373,6 +1426,7 @@ export type Database = {
           name?: string | null
           number_of_clients?: number | null
           price?: number | null
+          price_id?: string | null
           propietary_organization_id?: string | null
           purchase_limit?: number
           recurrence?: string | null
@@ -1400,6 +1454,7 @@ export type Database = {
           name?: string | null
           number_of_clients?: number | null
           price?: number | null
+          price_id?: string | null
           propietary_organization_id?: string | null
           purchase_limit?: number
           recurrence?: string | null
@@ -1687,6 +1742,7 @@ export type Database = {
           primary_owner_user_id: string
           public_data: Json
           slug: string | null
+          stripe_id: string | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -1777,6 +1833,14 @@ export type Database = {
         Returns: boolean
       }
       has_same_role_hierarchy_level: {
+        Args: {
+          target_user_id: string
+          target_account_id: string
+          role_name: string
+        }
+        Returns: boolean
+      }
+      has_same_role_hierarchy_level_or_lower: {
         Args: {
           target_user_id: string
           target_account_id: string
@@ -1909,6 +1973,8 @@ export type Database = {
         | "invites.manage"
         | "tasks.write"
         | "tasks.delete"
+        | "messages.write"
+        | "messages.read"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
       field_types: "date" | "multiple_choice" | "select" | "text"
@@ -1921,6 +1987,15 @@ export type Database = {
         | "pending"
         | "completed"
         | "annulled"
+      organization_setting_key:
+        | "theme_color"
+        | "background_color"
+        | "logo_url"
+        | "timezone"
+        | "language"
+        | "date_format"
+        | "sidebar_background_color"
+        | "portal_name"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"
