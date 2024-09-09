@@ -12,6 +12,7 @@ import { Review } from '../../../../../../../../apps/web/lib/review.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
+
 type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url'>;
 
 type OrderWithAllRelations = Order.Relationships.All & {
@@ -149,7 +150,7 @@ export const getOrders = async () => {
       const { data: orderData, error: clientError } = await client
         .from('orders_v2')
         .select(
-          '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name), ',
+          '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name) ',
         )
         // necessary to specify which relation to use, so tell exact the name of the foreign key
         .eq('customer_id', userId);
