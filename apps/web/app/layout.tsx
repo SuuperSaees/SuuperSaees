@@ -28,7 +28,8 @@ export default async function RootLayout({
   const { language } = await createI18nServerInstance();
   const theme = getTheme();
   const className = getClassName(theme);
-  const organizationSettings = await getOrganizationSettings();
+
+  const organizationSettings = await getOrganizationSettings().catch(() => ([]));
 
   return (
     <html lang={language} className={`${className} ${epilogue.className}`}>

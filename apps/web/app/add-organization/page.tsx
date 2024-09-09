@@ -7,16 +7,17 @@ import { getOrganization } from '../../../../packages/features/team-accounts/src
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   const title = i18n.t('organizations:title');
-  const {organization_id} = await getOrganization()
-  if (organization_id) {
-    redirect("/orders")
-  }
+
   return {
     title,
   };
 };
 
-export default function UserAddOrganizationPage() {
+export default async function UserAddOrganizationPage() {
+  const {organization_id} = await getOrganization()
+  if (organization_id) {
+    redirect("/orders")
+  }
   return (
     <>
       <PageBody className={''}>
