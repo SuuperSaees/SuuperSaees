@@ -17,60 +17,51 @@ export const createOrganizationServer = async (clientData: {
       throw new Error('Error to get user account');
     }
 
-    const {data: userAccount, error: userAccountError} = await client
-    .from('accounts')
-    .select("organization_id")
-    .eq('id', user.id)
-    .single()
+    // Fetch the user's account to check for an existing organization
+    const { data: userAccount, error: userAccountError } = await client
+      .from('accounts')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single();
 
-    if(userAccountError) {
-      throw new Error(userAccountError.message)
+    if (userAccountError) {
+      throw new Error(userAccountError.message);
     }
-      // upsert - create o change organization name
-      let organizationAccountData;
-      let organizationAccountError;
-      if(userAccount.organization_id) {
-        const { data, error } = await client
-        .from('accounts')
-        .update({ name: clientData.organization_name })
-        .select()
-        .single();
-    
-      organizationAccountData = data;
-      organizationAccountError = error;
-      } else {
-        const newAccount = {
-          name: clientData.organization_name,
-          primary_owner_user_id: user.id,
-          is_personal_account: false,
-        };
-      
-        const { data, error } = await client
-          .from('accounts')
-          .insert(newAccount)
-          .select()
-          .single();
-      
-        organizationAccountData = data;
-        organizationAccountError = error;
-      }
+
+    // Prevent creation if an organization already exists
+    if (userAccount.organization_id) {
+      throw new Error('This account already has an organization associated.');
+    }
+
+    // Create a new organization account
+    const newAccount = {
+      name: clientData.organization_name,
+      primary_owner_user_id: user.id,
+      is_personal_account: false,
+    };
+
+    const { data: organizationAccountData, error: organizationAccountError } =
+      await client.from('accounts').insert(newAccount).select().single();
 
     if (organizationAccountError) {
       throw new Error(organizationAccountError.message);
     }
-    // associate user
-    const { data: updatedUserOwnerAccount, error: updatedUserOwnerAccountError } =
-      await client
-        .from('accounts')
-        .update({ organization_id: organizationAccountData?.id })
-        .eq('id', user.id)
-        .select()
-        .single();
 
-    if(updatedUserOwnerAccountError) throw new Error(updatedUserOwnerAccountError.message)
-    return updatedUserOwnerAccount;
-    
+    // Associate the new organization with the user
+    const { error: updatedUserOwnerAccountError } = await client
+      .from('accounts')
+      .update({ organization_id: organizationAccountData?.id })
+      .eq('id', user.id)
+      .select()
+      .single();
+
+    if (updatedUserOwnerAccountError) {
+      throw new Error(updatedUserOwnerAccountError.message);
+    }
+
+    return organizationAccountData;
   } catch (error) {
     console.error('Error while creating the organization account:', error);
+    throw error;  // Throw the error to ensure the caller knows the function failed
   }
 };
