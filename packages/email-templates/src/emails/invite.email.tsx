@@ -50,7 +50,6 @@ function getTextColorBasedOnBackground(backgroundColor: string) {
   return luminance > 186 ? 'black' : 'white'; // 186 is a common threshold for readability
 }
 
-
 export async function renderInviteEmail(props: Props) {
   const namespace = 'invite-email';
 
@@ -92,7 +91,7 @@ export async function renderInviteEmail(props: Props) {
                   background-color: #fff;
                   margin: auto;
                   font-family: sans-serif;
-                  color: ${getTextColorBasedOnBackground(props.primaryColor ? props.primaryColor: '#484848' )};
+                  color: ${getTextColorBasedOnBackground(props.primaryColor ? props.primaryColor : '#484848')};
                 }
                 .cta-button {
                   background-color: ${props.primaryColor ? props.primaryColor : '#1A38D7'};
@@ -102,10 +101,6 @@ export async function renderInviteEmail(props: Props) {
                   border-radius: 5px;
                 }
                 
-                .img-welcome {
-                  filter hue-rotate(90deg);
-                  -webkit-filter: hue-rotate(90deg);
-                }
        
             </style>
           </head>
@@ -137,7 +132,12 @@ export async function renderInviteEmail(props: Props) {
                                       <img
                                         src=${props.logoUrl ? props.logoUrl : 'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg'}
                                         alt="Company Logo"
-                                        style="max-height: 142px; height:100%; width:auto; margin-bottom: 20px;"
+                                        style="
+                                        max-height: 142px; 
+                                        height:100%; 
+                                        width:auto; 
+                                        margin-bottom: 20px;
+                                        "
                                       />
 
                                       <!-- Hola Text -->
@@ -170,8 +170,8 @@ export async function renderInviteEmail(props: Props) {
                                 <tbody>
                                   <tr style="width:100%">
                                     <td>
-                                      <p style="font-size:14px;line-height:24px; 0;color:rgb(0,0,0);">${mainText}</p>
-                                      <table align="left" width="163px" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="text-align:center;margin-top:32px;margin-bottom:32px">
+                                      <p style="font-size:16px;line-height:24px; 0;color:rgb(0,0,0);">${mainText}</p>
+                                      <table align="left" width="163px" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin-top:32px;margin-bottom:32px">
                                         <tbody>
                                           <tr>
                                             <td>
@@ -201,7 +201,7 @@ export async function renderInviteEmail(props: Props) {
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        Este correo fue enviado a ${props.invitedUserEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias.
+                                        This email was sent to ${props.invitedUserEmail}. If you prefer not to receive these emails, you can unsubscribe or manage your preferences.
                                       </p>
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         © 2024 Suuper, soporte@suuper.co
