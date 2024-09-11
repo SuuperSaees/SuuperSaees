@@ -2,7 +2,7 @@ import { PageBody } from '@kit/ui/page';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-
+import { redirect } from "next/navigation"
 import { InvoicesTable } from './components/invoices-table';
 
 export const generateMetadata = async () => {
@@ -15,6 +15,7 @@ export const generateMetadata = async () => {
 };
 
 function UserHomePage() {
+  return redirect("/orders")
   return (
     <>
       <PageBody>

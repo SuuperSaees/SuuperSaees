@@ -5,7 +5,7 @@ import {
   Settings,
   SquareCheck,
   Users,
-  Wallet,
+  // Wallet,
 } from 'lucide-react';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
@@ -47,11 +47,11 @@ const routes = [
     path: pathsConfig.app.services,
     Icon: <SquareCheck className={iconClasses} />,
   },
-  {
-    label: 'Facturas',
-    path: pathsConfig.app.invoices,
-    Icon: <Wallet className={iconClasses} />,
-  },
+  // {
+  //   label: 'Facturas',
+  //   path: pathsConfig.app.invoices,
+  //   Icon: <Wallet className={iconClasses} />,
+  // },
   {
     label: 'Configuraciones',
     path: pathsConfig.app.personalAccountSettings,

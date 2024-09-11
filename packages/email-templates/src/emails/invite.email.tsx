@@ -13,7 +13,6 @@
 //   Text,
 //   render,
 // } from '@react-email/components';
-
 // import { BodyStyle } from '../components/body-style';
 // import { EmailContent } from '../components/content';
 // import { CtaButton } from '../components/cta-button';
@@ -23,6 +22,7 @@
 // import { EmailWrapper } from '../components/wrapper';
 import { initializeEmailI18n } from '../lib/i18n';
 
+
 interface Props {
   teamName: string;
   teamLogo?: string;
@@ -31,6 +31,23 @@ interface Props {
   link: string;
   productName: string;
   language?: string;
+  logoUrl?: string;
+  primaryColor?: string;
+}
+function getTextColorBasedOnBackground(backgroundColor: string) {
+  // Remove any hash symbol if it exists
+  const color = backgroundColor.replace('#', '');
+
+  // Convert the hex color to RGB
+  const r = parseInt(color.substring(0, 2), 16);
+  const g = parseInt(color.substring(2, 4), 16);
+  const b = parseInt(color.substring(4, 6), 16);
+
+  // Calculate the luminance
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+  // Return 'black' for lighter backgrounds and 'white' for darker backgrounds
+  return luminance > 186 ? 'black' : 'white'; // 186 is a common threshold for readability
 }
 
 export async function renderInviteEmail(props: Props) {
@@ -75,15 +92,17 @@ export async function renderInviteEmail(props: Props) {
                   background-color: #fff;
                   margin: auto;
                   font-family: sans-serif;
-                  color: #484848;
+                  color: ${getTextColorBasedOnBackground(props.primaryColor ? props.primaryColor : '#484848')};
                 }
                 .cta-button {
-                  background-color:#1A38D7;
+                  background-color: ${props.primaryColor ? props.primaryColor : '#1A38D7'};
                   color: #ffffff;
                   padding: 10px 20px;
                   text-decoration: none;
                   border-radius: 5px;
                 }
+                
+       
             </style>
           </head>
             <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0">
@@ -112,10 +131,30 @@ export async function renderInviteEmail(props: Props) {
                                     <td style="text-align: left;">
                                       <!-- Logo -->
                                       <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Vector%20(1).svg"
-                                        alt="Suuper Logo"
-                                        style="width: 142px; height: 32px; margin-bottom: 20px;"
+                                        src=${props.logoUrl ? props.logoUrl : 'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg'}
+                                        alt="Company Logo"
+                                        style="
+                                        max-height: 142px; 
+                                        height:100%; 
+                                        width:auto; 
+                                        margin-bottom: 20px;
+                                        "
                                       />
+
+                                      <!-- Hola Text -->
+                                  <p
+                                    style="
+                                      color: var(--Gray-700, #344054);
+                                      font-size: 16px;
+                                      font-style: normal;
+                                      font-weight: 700;
+                                      line-height: 24px;
+                                      margin-bottom: 20px;
+                                    "
+                                  >
+                                    ${hello}
+                            </p>
+                                      
                                     </td>
                                   </tr>
                                 </tbody>
@@ -128,22 +167,20 @@ export async function renderInviteEmail(props: Props) {
                                 cellPadding="0" 
                                 cellSpacing="0" 
                                 role="presentation" 
-                                style="max-width:37.5em;border-radius:0.75rem;margin-top:8px;margin-bottom:8px;padding-top:12px;padding-bottom:12px;margin-left:auto;margin-right:auto;border-width:1px;border-style:solid;border-color:rgb(238,238,238)">
+                                style="max-width:37.5em;border-radius:0.75rem;margin-top:8px;margin-bottom:8px;padding-top:12px;">
                                 <tbody>
                                   <tr style="width:100%">
                                     <td>
-                                      <table align="left" width="full" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="text-align:left;margin-top:32px;margin-bottom:32px">
+                                      <p style="font-size:16px;line-height:24px; 0;color:rgb(0,0,0);">${mainText}</p>
+                                      <table align="left" width="163px" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin-top:32px;margin-bottom:32px">
                                         <tbody>
                                           <tr>
                                             <td>
-                                              <p 
-                                                style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">
-                                                ${hello}
-                                              </p>
-                                              <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${mainText}</p>
-                                              <a href="${props.link}" class="cta-button">${joinTeam}</a>
-                                              <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">Thanks,</p>
-                                              <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">The team</p>
+                                              <a href="${props.link}" class="cta-button"
+                                              style="background-color:${props.primaryColor ? props.primaryColor : '#1A38D7'}; color: ${getTextColorBasedOnBackground(props.primaryColor ? props.primaryColor : '#1A38D7')}; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                                              ${joinTeam}
+                                              </a>
+                                          
                                             </td>
                                           </tr>
                                         </tbody>
@@ -165,7 +202,7 @@ export async function renderInviteEmail(props: Props) {
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        This email was sent to ${props.invitedUserEmail}. If you'd rather not receive this kind of email, you can unsubscribe or manage your email preferences.
+                                        This email was sent to ${props.invitedUserEmail}. If you prefer not to receive these emails, you can unsubscribe or manage your preferences.
                                       </p>
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         © 2024 Suuper, soporte@suuper.co

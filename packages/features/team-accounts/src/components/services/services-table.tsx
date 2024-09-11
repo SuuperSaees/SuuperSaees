@@ -152,7 +152,7 @@ const servicesColumns = (
       const service = row.original;
       const priceId = service.price_id as string;
       // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { fetchAccountStripeConnect, hasTheEmailAssociatedWithStripe } = useServicesContext();
+      const { fetchAccountStripeConnect, hasTheEmailAssociatedWithStripe, accountRole } = useServicesContext();
       void fetchAccountStripeConnect()
       const handleCheckout = async (priceId: string) => {
         try {
@@ -187,16 +187,16 @@ const servicesColumns = (
 
       return (
         <div className="h-18 flex items-center gap-4 self-stretch p-4">
-          <div>
+          {accountRole === "agency_owner" && <div>
             {hasTheEmailAssociatedWithStripe && <Link2
               onClick={() =>
                 service.price_id && handleCheckout(service.price_id)
               }
               className="h-6 w-6 cursor-pointer text-gray-500"
             />}
-          </div>
-          <UpdateServiceDialog valuesOfServiceStripe={service} />
-          <DeleteServiceDialog priceId={priceId} />
+          </div>} 
+        {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />}
+        {accountRole === "agency_owner" && <DeleteServiceDialog priceId={priceId} />}
         </div>
       );
     },
@@ -205,6 +205,7 @@ const servicesColumns = (
 
 export function ServicesTable({ services }: ServicesTableProps) {
   const { t } = useTranslation('services');
+  const {accountRole} = useServicesContext()
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -254,7 +255,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
             className="pl-10"
           />
         </div>
-        {services.length > 0 ? (
+        {(services.length > 0 && accountRole == "agency_owner") ? (
           <Link href="/services/create">
             <ThemedButton>{t('createService')}</ThemedButton>
           </Link>
@@ -319,9 +320,9 @@ export function ServicesTable({ services }: ServicesTableProps) {
                       Aún no has creado ningún servicio, agrega uno haciendo
                       clic a continuación.
                     </p>
-                    <Link href="/services/create">
+                    { accountRole === "agency_owner" && <Link href="/services/create">
                       <ThemedButton>{t('createService')}</ThemedButton>
-                    </Link>
+                    </Link>}
                   </div>
                 </TableCell>
               </TableRow>
