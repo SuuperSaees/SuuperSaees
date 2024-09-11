@@ -12,7 +12,7 @@ interface ServicesPageClientProps {
 }
 
 const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePromise }) => {
-  const { services, loading, error, updateServices } = useServicesContext();
+  const { services, loading, updateServices } = useServicesContext();
 
   useEffect(() => {
     updateServices(true).catch((error)=> {console.log(error.message)});
@@ -31,10 +31,6 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePr
         </div>
       </div>
     );
-  }
-
-  if (error) {
-    return <div>Error loading services. Please try again.</div>;
   }
 
   return (
