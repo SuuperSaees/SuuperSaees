@@ -134,9 +134,9 @@ export async function renderInviteEmail(props: Props) {
                                         src=${props.logoUrl ? props.logoUrl : 'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg'}
                                         alt="Company Logo"
                                         style="
-                                        max-height: 142px; 
-                                        height:100%; 
-                                        width:auto; 
+                                        max-width: 142px; 
+                                        height:auto;
+                                        width:100%; 
                                         margin-bottom: 20px;
                                         "
                                       />

@@ -16,6 +16,20 @@ import { sendOrderMessageEmail } from '../send-mail/send-order-message-email'
 import { sendOrderStatusPriorityEmail } from '../send-mail/send-order-status-priority'
 import { getUserById, getEmails, getOrganizationName } from '../get/get-mail-info';
 
+const statusTranslations = {
+  pending: 'Pendiente',
+  in_progress: 'En progreso',
+  in_review: 'En revisión',
+  completed: 'Completado',
+  annulled: 'Anulado',
+};
+
+const priorityTranslations = {
+  high: 'Alta',
+  medium: 'Media',
+  low: 'Baja',
+};
+
 export const updateOrder = async (
   orderId: Order.Type['id'],
   order: Order.Update,
@@ -128,7 +142,12 @@ const logOrderActivities = async (
         };
         await addActivityAction(activity);
         // console.log('addedActivity:', message, userNameOrEmail);
+
+        let translatedValue = value;
+
+        
         if (field === 'status') {
+          translatedValue = statusTranslations[value as keyof typeof statusTranslations] || value;
           const emailsData = await getEmails(orderId.toString());
           const organizationName = await getOrganizationName();
           const agencyName = organizationName ?? '';
@@ -139,7 +158,7 @@ const logOrderActivities = async (
                 email,
                 `${type}`,
                 orderId.toString(),
-                `El estado ha sido cambiado a  ${value}`,
+                `El estado ha sido cambiado a  ${translatedValue}`,
                 agencyName,
                 new Date().toLocaleDateString() // Or format as needed
               );
@@ -148,6 +167,7 @@ const logOrderActivities = async (
             }
           }
         } else if (field === 'priority') {
+          translatedValue = priorityTranslations[value as keyof typeof priorityTranslations] || value;
           const emailsData = await getEmails(orderId.toString());
           const organizationName = await getOrganizationName();
           const agencyName = organizationName ?? '';
@@ -158,7 +178,7 @@ const logOrderActivities = async (
                 email,
                 `${type}`,
                 orderId.toString(),
-                `La prioridad ha sido cambiada a ${value}`,
+                `La prioridad ha sido cambiada a ${translatedValue}`,
                 agencyName,
                 new Date().toLocaleDateString() // Or format as needed
               );

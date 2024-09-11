@@ -41,6 +41,7 @@ export async function sendOrderMessageEmail(toEmail: string, userName: string, o
                 .message {
                   overflow: auto;
                   margin: 16px 0;
+                  line-height: 1.6;
                   line-clamp-3;
                 }
             </style>
@@ -77,7 +78,7 @@ export async function sendOrderMessageEmail(toEmail: string, userName: string, o
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">Hola ${toEmail}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${userName} comentó en el pedido ${orderId} el ${date}</p>
                                       <div class="message">
-                                        <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${message}</p>
+                                        <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:30px;">${message}</p>
                                       </div>
 
                                       <!-- Contenedor centrado para el botón -->
