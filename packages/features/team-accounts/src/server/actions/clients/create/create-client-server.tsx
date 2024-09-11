@@ -10,11 +10,9 @@ import {
   getOrganizationName,
   getPrimaryOwnerId,
 } from '../../members/get/get-member-account';
-import { getOrganizationSettings } from '../../organizations/get/get-organizations';
+// import { getOrganizationSettings } from '../../organizations/get/get-organizations';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
-
-console.log('Base URL:', baseUrl);
 
 // Define la función createClient
 type CreateClient = {
@@ -22,21 +20,21 @@ type CreateClient = {
   role: string;
 };
 
-function getTextColorBasedOnBackground(backgroundColor: string) {
-  // Remove any hash symbol if it exists
-  const color = backgroundColor.replace('#', '');
+// function getTextColorBasedOnBackground(backgroundColor: string) {
+//   // Remove any hash symbol if it exists
+//   const color = backgroundColor.replace('#', '');
 
-  // Convert the hex color to RGB
-  const r = parseInt(color.substring(0, 2), 16);
-  const g = parseInt(color.substring(2, 4), 16);
-  const b = parseInt(color.substring(4, 6), 16);
+//   // Convert the hex color to RGB
+//   const r = parseInt(color.substring(0, 2), 16);
+//   const g = parseInt(color.substring(2, 4), 16);
+//   const b = parseInt(color.substring(4, 6), 16);
 
-  // Calculate the luminance
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+//   // Calculate the luminance
+//   const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
-  // Return 'black' for lighter backgrounds and 'white' for darker backgrounds
-  return luminance > 186 ? 'black' : 'white'; // 186 is a common threshold for readability
-}
+//   // Return 'black' for lighter backgrounds and 'white' for darker backgrounds
+//   return luminance > 186 ? 'black' : 'white'; // 186 is a common threshold for readability
+// }
 
 function generateRandomPassword(length: number) {
   const chars =
@@ -52,17 +50,17 @@ export const createClient = async (clientData: CreateClient) => {
     const supabase = getSupabaseServerComponentClient();
     const primary_owner_user_id = await getPrimaryOwnerId();
     const organization_name = await getOrganizationName();
-    const organizationSettings = await getOrganizationSettings();
+    // const organizationSettings = await getOrganizationSettings();
     if (!primary_owner_user_id)
       throw new Error('No primary owner user id found');
     // pre-authentication of the user
     const password = generateRandomPassword(12);
-    const organizationLogo = organizationSettings.find(
-      (setting) => setting.key === 'logo_url',
-    );
-    const organizationColor = organizationSettings.find(
-      (setting) => setting.key === 'theme_color',
-    );
+    // const organizationLogo = organizationSettings.find(
+    //   (setting) => setting.key === 'logo_url',
+    // );
+    // const organizationColor = organizationSettings.find(
+    //   (setting) => setting.key === 'theme_color',
+    // );
 
     const { data: clientOrganizationUser, error: clientOrganizationUserError } =
       await supabase.auth.signUp({
@@ -78,11 +76,11 @@ export const createClient = async (clientData: CreateClient) => {
             ClientContent4: 'Your username:',
             ClientContent5: 'Thanks,',
             ClientContent6: 'The Team',
-            OrganizationSenderLogo: organizationLogo?.value ?? '',
-            OrganizationSenderColor: organizationColor?.value ?? '',
-            ButtonTextColor: organizationColor
-              ? getTextColorBasedOnBackground(organizationColor.value)
-              : '',
+          //   OrganizationSenderLogo: organizationLogo?.value ?? '',
+          //   OrganizationSenderColor: organizationColor?.value ?? '',
+          //   ButtonTextColor: organizationColor
+          //     ? getTextColorBasedOnBackground(organizationColor.value)
+          //     : '',
           },
         },
       });
