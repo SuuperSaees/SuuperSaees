@@ -2,53 +2,66 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-export async function getPrimaryOwnerId() {
+export async function getPrimaryOwnerId(): Promise<string | undefined> {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError;
 
-    const { data: accountsData } = await client
+    // first we get the user account
+    const { data: userAccountData, error: userAccountError } = await client
       .from('accounts')
-      .select()
-      .eq('primary_owner_user_id', userData.user.id);
+      .select('organization_id')
+      .eq('id', userData.user?.id)
+      .single();
 
-    const filteredAccounts = accountsData?.filter(
-      (account) => account.id !== userData.user.id,
-    );
-    const accountIds = filteredAccounts?.map((account) => account.id) ?? [];
+    if (userAccountError)
+      throw new Error(
+        `Couldn't get the user account: ${userAccountError.message}`,
+      );
 
-    if (accountIds.length > 0) {
-      const firstAccountId = accountIds[0];
+    // we get the organization account in order to obtain the propietary
+    const { data: orgnaizationAccountData, error: orgnaizationAccountError } =
+      await client
+        .from('accounts')
+        .select('primary_owner_user_id')
+        .eq('id', userAccountData?.organization_id ?? '')
+        .single();
 
-      return firstAccountId;
-    }
-    throw new Error('Error fetching primary owner');
+    if (orgnaizationAccountError)
+      throw new Error(
+        `Couldn't get the organization account: ${orgnaizationAccountError.message}`,
+      );
+
+    return orgnaizationAccountData.primary_owner_user_id; // don't change this line
   } catch (error) {
     console.error('Error fetching primary owner:', error);
     // throw error;
   }
 }
 
-export async function getUserIdOfAgencyOwner(){
+export async function getUserIdOfAgencyOwner() {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
-    
+
     if (userError) throw userError;
 
-    const { data: accountMemberShipCurrentUserData, error: accountMemberShipCurrentUserError } = await client
-    .from('accounts_memberships')
-    .select('account_id')
-    .eq('user_id', userData.user.id)
-    .single()
+    const {
+      data: accountMemberShipCurrentUserData,
+      error: accountMemberShipCurrentUserError,
+    } = await client
+      .from('accounts_memberships')
+      .select('account_id')
+      .eq('user_id', userData.user.id)
+      .single();
 
-    if (accountMemberShipCurrentUserError) throw accountMemberShipCurrentUserError;
-    
-    return accountMemberShipCurrentUserData
+    if (accountMemberShipCurrentUserError)
+      throw accountMemberShipCurrentUserError;
+
+    return accountMemberShipCurrentUserData;
   } catch (error) {
-    console.error('Error fetching Agency Owner User Id:', error)
+    console.error('Error fetching Agency Owner User Id:', error);
   }
 }
 
@@ -105,18 +118,17 @@ export async function getStripeAccountID() {
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError;
 
-    const { data: accountsData , error: accountsError } = await client
+    const { data: accountsData, error: accountsError } = await client
       .from('accounts')
       .select()
       .eq('id', userData.user.id)
       .single();
-    
+
     if (accountsError) throw accountsError;
-    
+
     const stripetId = accountsData?.stripe_id;
 
     return stripetId;
-
   } catch (error) {
     console.error('Error fetching primary owner:', error);
   }
@@ -128,32 +140,31 @@ export async function getOrganizationName() {
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError;
 
-    const { data: accountsData , error: accountsError } = await client
+    const { data: accountsData, error: accountsError } = await client
       .from('accounts')
       .select()
       .eq('id', userData.user.id)
       .single();
-    
+
     if (accountsError) throw accountsError;
-    
+
     const organizationId = accountsData?.organization_id;
 
     if (!organizationId) {
       throw new Error('Organization ID is null');
     }
 
-    const { data: organizationsData , error: organizationsError } = await client
+    const { data: organizationsData, error: organizationsError } = await client
       .from('accounts')
       .select()
       .eq('id', organizationId)
       .single();
-    
+
     if (organizationsError) throw organizationsError;
 
     const organizationName = organizationsData?.name;
 
     return organizationName;
-
   } catch (error) {
     console.error('Error fetching primary owner:', error);
   }

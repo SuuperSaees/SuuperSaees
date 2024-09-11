@@ -17,7 +17,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { useMutation } from '@tanstack/react-query';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
-import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
+import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';

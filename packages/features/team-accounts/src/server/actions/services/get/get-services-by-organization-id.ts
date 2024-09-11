@@ -1,18 +1,18 @@
 'use server';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { getUserIdOfAgencyOwner } from '../../members/get/get-member-account';
+import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
 export const getServicesByOrganizationId = async ():Promise<{products: Service.Type[]; }> => {
     const client = getSupabaseServerComponentClient();
-    // const primary_owner_user_id = await getPrimaryOwnerId() // WE NEED PROPIETARY ORGANIZATION ID
-    const accountMemberShipData = await getUserIdOfAgencyOwner()
-    if (!accountMemberShipData?.account_id) throw new Error('No primary owner found')
+    const primary_owner_user_id = await getPrimaryOwnerId()
+    // const accountMemberShipData = await getUserIdOfAgencyOwner()
+    // if (!primary_owner_user_id) throw new Error('No primary owner found')
             try {
                const {data: fetchedProducts, error} = await client
                .from('services')
                .select("*")
-               .eq("propietary_organization_id", accountMemberShipData?.account_id)
+               .eq("propietary_organization_id", primary_owner_user_id ?? "")
 
                if (error) throw new Error(error.message);
 
