@@ -65,6 +65,8 @@ export const ServicesContextProvider: React.FC<ServicesContextProviderProps> = (
     } 
   }
 
+  void fetchAccountMemberShipRole()
+
   const value: ServicesContextValue = {
     services,
     hasTheEmailAssociatedWithStripe,
