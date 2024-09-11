@@ -31,6 +31,27 @@ export async function getPrimaryOwnerId() {
   }
 }
 
+export async function getUserIdOfAgencyOwner(){
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: userData, error: userError } = await client.auth.getUser();
+    
+    if (userError) throw userError;
+
+    const { data: accountMemberShipCurrentUserData, error: accountMemberShipCurrentUserError } = await client
+    .from('accounts_memberships')
+    .select('account_id')
+    .eq('user_id', userData.user.id)
+    .single()
+
+    if (accountMemberShipCurrentUserError) throw accountMemberShipCurrentUserError;
+    
+    return accountMemberShipCurrentUserData
+  } catch (error) {
+    console.error('Error fetching Agency Owner User Id:', error)
+  }
+}
+
 // get a given user
 
 export async function getUserById(userId: string) {
