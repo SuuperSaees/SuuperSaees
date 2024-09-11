@@ -63,6 +63,7 @@ export async function renderInviteEmail(props: Props) {
     const joinTeam = t(`${namespace}:joinTeam`, {
       teamName: props.teamName,
     });
+
     const html = `
       <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><!DOCTYPE html>
         <html dir="ltr" lang="en">
@@ -89,11 +90,11 @@ export async function renderInviteEmail(props: Props) {
               Confirma tu correo - Suuper
             </div>
             <body>
-              <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;background-color:#fff;margin:auto;font-family:sans-serif;color:#484848">
+              <table align="left" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;background-color:#fff;margin:auto;font-family:sans-serif;color:#484848">
                 <tbody>
                   <tr style="width:100%">
                     <td>
-                      <table align="center" width="100%" class="undefined" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:535px;background-color:#fff;margin:auto;margin-top:36px;margin-bottom:36px;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem">
+                      <table align="left" width="100%" class="undefined" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:535px;background-color:#fff;margin:auto;margin-top:36px;margin-bottom:36px;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem">
                         <tbody>
                           <tr style="width:100%">
                             <td>
@@ -111,30 +112,16 @@ export async function renderInviteEmail(props: Props) {
                                     <td style="text-align: left;">
                                       <!-- Logo -->
                                       <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg"
+                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Vector%20(1).svg"
                                         alt="Suuper Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
-
-                                      <!-- New Image -->
-                                      <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/a81567d28893e15cd0baf517c39f52ee.jpg"
-                                        alt="Welcome"
-                                        style="width: 100%; max-width: 100%; height: auto; margin-bottom: 20px;"
-                                      />
-
-                                      <!-- Hola Text -->
-                                      <h1 
-                                        style="color: var(--Gray-900, #101828); font-size: 36px; font-style: normal; font-weight: 600; line-height: 44px; letter-spacing: -0.72px; margin-left: 0px; margin-right: 0px;">
-                                        ${hello}
-                                      </h1>
-                                      
                                     </td>
                                   </tr>
                                 </tbody>
                               </table>
                               <table 
-                                align="center" 
+                                align="left" 
                                 width="100%" 
                                 class="undefined" 
                                 border="0" 
@@ -145,13 +132,18 @@ export async function renderInviteEmail(props: Props) {
                                 <tbody>
                                   <tr style="width:100%">
                                     <td>
-                                      <p style="font-size:14px;line-height:24px;margin:16px 0;color:rgb(0,0,0)">${mainText}</p>
-                                      <table align="left" width="163px" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="text-align:center;margin-top:32px;margin-bottom:32px">
+                                      <table align="left" width="full" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="text-align:left;margin-top:32px;margin-bottom:32px">
                                         <tbody>
                                           <tr>
                                             <td>
+                                              <p 
+                                                style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">
+                                                ${hello}
+                                              </p>
+                                              <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${mainText}</p>
                                               <a href="${props.link}" class="cta-button">${joinTeam}</a>
-                                              </a>
+                                              <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">Thanks,</p>
+                                              <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">The team</p>
                                             </td>
                                           </tr>
                                         </tbody>
@@ -173,33 +165,11 @@ export async function renderInviteEmail(props: Props) {
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        Este correo fue enviado a ${props.invitedUserEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias.
+                                        This email was sent to ${props.invitedUserEmail}. If you'd rather not receive this kind of email, you can unsubscribe or manage your email preferences.
                                       </p>
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         © 2024 Suuper, soporte@suuper.co
                                       </p>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                              <table
-                                align="left"
-                                width="100%"
-                                border="0"
-                                cellPadding="0"
-                                cellSpacing="0"
-                                role="presentation"
-                                style="max-width:37.5em"
-                              >
-                                <tbody>
-                                  <tr style="width:100%">
-                                    <td style="text-align: left;">
-                                      <!-- Logo -->
-                                      <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg"
-                                        alt="Suuper Logo"
-                                        style="width: 142px; height: 32px; margin-bottom: 20px;"
-                                      />
                                     </td>
                                   </tr>
                                 </tbody>

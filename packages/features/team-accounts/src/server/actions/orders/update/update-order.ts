@@ -12,7 +12,9 @@ import { Activity } from '../../../../../../../../apps/web/lib/activity.types';
 import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { addActivityAction } from '../../activity/create/create-activity';
-
+import { sendOrderMessageEmail } from '../send-mail/send-order-message-email'
+import { sendOrderStatusPriorityEmail } from '../send-mail/send-order-status-priority'
+import { getUserById, getEmails, getOrganizationName } from '../get/get-mail-info';
 
 export const updateOrder = async (
   orderId: Order.Type['id'],
@@ -29,7 +31,7 @@ export const updateOrder = async (
       .eq('id', orderId);
 
     if (orderError) throw orderError.message;
-    console.log('updatedOrder:', orderData);
+    // console.log('updatedOrder:', orderData);
 
     const userNameOrEmail =
       userData?.user.user_metadata?.name || userData?.user.user_metadata?.email;
@@ -125,7 +127,46 @@ const logOrderActivities = async (
           user_id: userId,
         };
         await addActivityAction(activity);
-        console.log('addedActivity:', message, userNameOrEmail);
+        // console.log('addedActivity:', message, userNameOrEmail);
+        if (field === 'status') {
+          const emailsData = await getEmails(orderId.toString());
+          const organizationName = await getOrganizationName();
+          const agencyName = organizationName ?? '';
+
+          for (const email of emailsData) {
+            if (email) {
+              await sendOrderStatusPriorityEmail(
+                email,
+                `${type}`,
+                orderId.toString(),
+                `El estado ha sido cambiado a  ${value}`,
+                agencyName,
+                new Date().toLocaleDateString() // Or format as needed
+              );
+            } else {
+              console.warn('Email is null or undefined, skipping...');
+            }
+          }
+        } else if (field === 'priority') {
+          const emailsData = await getEmails(orderId.toString());
+          const organizationName = await getOrganizationName();
+          const agencyName = organizationName ?? '';
+
+          for (const email of emailsData) {
+            if (email) {
+              await sendOrderStatusPriorityEmail(
+                email,
+                `${type}`,
+                orderId.toString(),
+                `La prioridad ha sido cambiada a ${value}`,
+                agencyName,
+                new Date().toLocaleDateString() // Or format as needed
+              );
+            } else {
+              console.warn('Email is null or undefined, skipping...');
+            }
+          }
+        }
       }
     };
 
@@ -170,6 +211,13 @@ export const addOrderMessage = async (
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
 
+    const clientData = await getUserById(userData.user.id);
+    const emailsData = await getEmails(orderId.toString());
+    const organizationName = await getOrganizationName();
+
+    const agencyName = organizationName ?? '';
+    const clientName = clientData?.name ?? '';
+
     const { data: messageData, error: messageError } = await client
       .from('messages')
       .insert({
@@ -179,9 +227,26 @@ export const addOrderMessage = async (
       })
       .select()
       .single();
-    console.log('messageData:', orderId, message);
+    // console.log('messageData:', orderId, message);
     if (messageError) throw messageError.message;
-    console.log('addedMessage:', messageData);
+    
+
+    for (const email of emailsData) {
+      if (email) {
+        const messageContent = messageData.content ?? 'No message content';
+        await sendOrderMessageEmail(
+          email,
+          clientName,
+          orderId.toString(),
+          messageContent,
+          agencyName,
+          new Date().toLocaleDateString()  
+        );
+      } else {
+        console.warn('Email is null or undefined, skipping...');
+      }
+    }
+    
     // revalidatePath(`/orders/${orderId}`);
     return messageData
   } catch (error) {

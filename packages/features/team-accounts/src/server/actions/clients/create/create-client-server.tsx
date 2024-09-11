@@ -2,16 +2,11 @@
 
 // import { redirect } from 'next/navigation';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
-
 import { User } from '../../../../../../../../apps/web/lib/user.types';
 import { getPrimaryOwnerId, getOrganizationName } from '../../members/get/get-member-account';
 
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
-
-console.log('Base URL:', baseUrl);
 
 // Define la función createClient
 type CreateClient = {
@@ -52,8 +47,6 @@ export const createClient = async (clientData: CreateClient) => {
             ClientContent4: 'Your username:',
             ClientContent5: 'Thanks,',
             ClientContent6: 'The Team',
-            
-
           }
         },
       });
