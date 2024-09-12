@@ -37,34 +37,27 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
 
   // no token, redirect to 404
   if (!token) {
-    console.log('No invite token provided in the query params');
     notFound();
   }
 
   const client = getSupabaseServerComponentClient();
   const auth = await requireUser(client);
 
-  console.log('Auth Data', auth);
-
   // if the user is not logged in or there is an error
   // redirect to the sign up page with the invite token
   // so that they will get back to this page after signing up
   if (auth.error ?? !auth.data) {
-    console.log("User not authenticated, redirecting to sign-up");
     const urlParams = new URLSearchParams({
       invite_token: token,
       email: searchParams.email ?? '',
     });
 
     const signUpPath = `${pathsConfig.auth.signUp}?${urlParams.toString()}`;
-    console.log("Redirecting to: ", signUpPath);
 
     // redirect to the sign up page with the invite token
     redirect(signUpPath);
     return;
-  } else {
-    console.log("User is authenticated");
-  }
+  } 
 
 
   // get api to interact with team accounts
@@ -74,11 +67,8 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
   // the user is logged in, we can now check if the token is valid
   const invitation = await api.getInvitation(adminClient, token);
 
-  console.log("Invitation data: ", invitation);
-
   // the invitation is not found or expired
   if (!invitation) {
-    console.log("Invitation not found or expired, rendering error UI");
     return (
       <AuthLayoutShell Logo={AppLogo}>
         <InviteNotFoundOrExpired />
@@ -126,8 +116,6 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
 
   const accountHome = pathsConfig.app.orders;
   const email = auth.data.email ?? '';
-
-  console.log("User accepted invitation, rendering UI");
 
   return (
     <AuthLayoutShell Logo={AppLogo}>
