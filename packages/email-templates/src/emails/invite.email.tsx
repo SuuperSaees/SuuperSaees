@@ -131,7 +131,7 @@ export async function renderInviteEmail(props: Props) {
                                     <td style="text-align: left;">
                                       <!-- Logo -->
                                       <img
-                                        src=${props.logoUrl ? props.logoUrl : 'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg'}
+                                        src=${props.logoUrl ? props.logoUrl : 'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png'}
                                         alt="Company Logo"
                                         style="
                                         max-width: 142px; 

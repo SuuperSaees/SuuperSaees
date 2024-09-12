@@ -1,20 +1,27 @@
 'use server';
 
+import { getMailer } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
-import { getMailer } from '@kit/mailers'; 
+
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 
 const emailSender = process.env.EMAIL_SENDER ?? '';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
-export async function sendOrderCreationEmail(toEmail: string, orderId: string, orderData: Order.Type, agencyName: string) {
+export async function sendOrderCreationEmail(
+  toEmail: string,
+  orderId: string,
+  orderData: Order.Type,
+  agencyName: string,
+) {
   const logger = await getLogger();
   const mailer = await getMailer();
-  await mailer.sendEmail({
-    to: toEmail,
-    from: emailSender,
-    subject: 'Nuevo pedido creado',
-    html: `
+  await mailer
+    .sendEmail({
+      to: toEmail,
+      from: emailSender,
+      subject: 'Nuevo pedido creado',
+      html: `
        <!DOCTYPE html>
         <html dir="ltr" lang="en">
           <head>
@@ -54,7 +61,7 @@ export async function sendOrderCreationEmail(toEmail: string, orderId: string, o
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg"
+                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png"
                                         alt="Suuper Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
@@ -106,12 +113,12 @@ export async function sendOrderCreationEmail(toEmail: string, orderId: string, o
             </body>
           </html>
     `,
-  })
-  .then(() => {
-    logger.info('Order email successfully sent!');
-  })
-  .catch((error) => {
-    console.error(error);
-    logger.error({ error }, 'Failed to send order email');
-  });
+    })
+    .then(() => {
+      logger.info('Order email successfully sent!');
+    })
+    .catch((error) => {
+      console.error(error);
+      logger.error({ error }, 'Failed to send order email');
+    });
 }

@@ -1,29 +1,30 @@
 'use server';
 
+import { getMailer } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
-import { getMailer } from '@kit/mailers'; 
 
 const emailSender = process.env.EMAIL_SENDER ?? '';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
 export async function sendOrderCompleted(
-    toEmail: string, 
-    actualName: string, 
-    orderId: string, 
-    orderTitle: string, 
-    agencyName: string, 
+  toEmail: string,
+  actualName: string,
+  orderId: string,
+  orderTitle: string,
+  agencyName: string,
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
 
   const subject = `${actualName} has marked '${orderTitle}' request as completed.`;
-  const bodyMessage= `${actualName} has marked '${orderTitle}' request as completed.`;
+  const bodyMessage = `${actualName} has marked '${orderTitle}' request as completed.`;
 
-  await mailer.sendEmail({
-    to: toEmail,
-    from: emailSender,
-    subject: subject,
-    html: `
+  await mailer
+    .sendEmail({
+      to: toEmail,
+      from: emailSender,
+      subject: subject,
+      html: `
        <!DOCTYPE html>
         <html dir="ltr" lang="es">
           <head>
@@ -81,7 +82,7 @@ export async function sendOrderCompleted(
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg"
+                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png"
                                         alt="Suuper Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
@@ -142,12 +143,14 @@ export async function sendOrderCompleted(
             </body>
           </html>
     `,
-  })
-  .then(() => {
-    logger.info(`Correo de Marcado como completado en el pedido enviado con éxito.`);
-  })
-  .catch((error) => {
-    console.error(error);
-    logger.error({ error }, 'Error al enviar el correo de pedido');
-  });
+    })
+    .then(() => {
+      logger.info(
+        `Correo de Marcado como completado en el pedido enviado con éxito.`,
+      );
+    })
+    .catch((error) => {
+      console.error(error);
+      logger.error({ error }, 'Error al enviar el correo de pedido');
+    });
 }
