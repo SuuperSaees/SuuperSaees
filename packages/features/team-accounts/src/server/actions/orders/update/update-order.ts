@@ -14,19 +14,20 @@ import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { addActivityAction } from '../../activity/create/create-activity';
 import { sendOrderMessageEmail } from '../send-mail/send-order-message-email'
 import { sendOrderStatusPriorityEmail } from '../send-mail/send-order-status-priority'
-import { getUserById, getEmails, getOrganizationName } from '../get/get-mail-info';
+import { getEmails, getOrderInfo } from '../get/get-mail-info';
+import { getUserById, getOrganizationName } from '../../members/get/get-member-account';
 
 const statusTranslations = {
-  pending: 'Pendiente',
-  in_progress: 'En progreso',
-  in_review: 'En revisión',
-  completed: 'Completado',
-  annulled: 'Anulado',
+  pending: 'Pending',
+  in_progress: 'In progres',
+  in_review: 'In review',
+  completed: 'Completed',
+  annulled: 'Annulled',
 };
 
 const priorityTranslations = {
-  high: 'Alta',
-  medium: 'Media',
+  high: 'High',
+  medium: 'Medium',
   low: 'Baja',
 };
 
@@ -116,6 +117,49 @@ export const updateOrderAssigns = async (
   }
 };
 
+const handleFieldUpdate = async (
+  field: keyof Order.Update,
+  value: string,
+  orderId: Order.Type['id'],
+  type: Activity.Enums.ActivityType
+) => {
+  const client = getSupabaseServerComponentClient();
+  const { data: userData, error: userError } = await client.auth.getUser();
+  if (userError) throw userError.message
+
+  let translatedValue = value;
+
+  if (field === 'status') {
+    translatedValue = statusTranslations[value as keyof typeof statusTranslations] || value;
+  } else if (field === 'priority') {
+    translatedValue = priorityTranslations[value as keyof typeof priorityTranslations] || value;
+  }
+
+  const emailsData = await getEmails(orderId.toString());
+  const actualName = await getUserById(userData.user.id);
+  const organizationName = await getOrganizationName();
+  const agencyName = organizationName ?? '';
+  const orderInfo = await getOrderInfo(orderId.toString());
+
+  for (const email of emailsData) {
+    if (email) {
+      await sendOrderStatusPriorityEmail(
+        email,
+        `${actualName?.name ?? ''}`,
+        `${type}`,
+        orderId.toString(),
+        orderInfo?.title ?? '',
+        field === 'status' 
+          ? `${translatedValue}` 
+          : `${translatedValue}`,
+        agencyName,
+      );
+    } else {
+      console.warn('Email is null or undefined, skipping...');
+    }
+  }
+};
+
 const logOrderActivities = async (
   orderId: Order.Type['id'],
   order: Order.Update,
@@ -143,50 +187,7 @@ const logOrderActivities = async (
         await addActivityAction(activity);
         // console.log('addedActivity:', message, userNameOrEmail);
 
-        let translatedValue = value;
-
-        
-        if (field === 'status') {
-          translatedValue = statusTranslations[value as keyof typeof statusTranslations] || value;
-          const emailsData = await getEmails(orderId.toString());
-          const organizationName = await getOrganizationName();
-          const agencyName = organizationName ?? '';
-
-          for (const email of emailsData) {
-            if (email) {
-              await sendOrderStatusPriorityEmail(
-                email,
-                `${type}`,
-                orderId.toString(),
-                `El estado ha sido cambiado a  ${translatedValue}`,
-                agencyName,
-                new Date().toLocaleDateString() // Or format as needed
-              );
-            } else {
-              console.warn('Email is null or undefined, skipping...');
-            }
-          }
-        } else if (field === 'priority') {
-          translatedValue = priorityTranslations[value as keyof typeof priorityTranslations] || value;
-          const emailsData = await getEmails(orderId.toString());
-          const organizationName = await getOrganizationName();
-          const agencyName = organizationName ?? '';
-
-          for (const email of emailsData) {
-            if (email) {
-              await sendOrderStatusPriorityEmail(
-                email,
-                `${type}`,
-                orderId.toString(),
-                `La prioridad ha sido cambiada a ${translatedValue}`,
-                agencyName,
-                new Date().toLocaleDateString() // Or format as needed
-              );
-            } else {
-              console.warn('Email is null or undefined, skipping...');
-            }
-          }
-        }
+        await handleFieldUpdate(field, value, orderId, type);
       }
     };
 
@@ -234,7 +235,7 @@ export const addOrderMessage = async (
     const clientData = await getUserById(userData.user.id);
     const emailsData = await getEmails(orderId.toString());
     const organizationName = await getOrganizationName();
-
+    const orderInfo = await getOrderInfo(orderId.toString());
     const agencyName = organizationName ?? '';
     const clientName = clientData?.name ?? '';
 
@@ -258,6 +259,7 @@ export const addOrderMessage = async (
           email,
           clientName,
           orderId.toString(),
+          orderInfo?.title ?? '',
           messageContent,
           agencyName,
           new Date().toLocaleDateString()  

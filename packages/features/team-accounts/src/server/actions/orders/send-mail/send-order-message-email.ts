@@ -6,13 +6,21 @@ import { getMailer } from '@kit/mailers';
 const emailSender = process.env.EMAIL_SENDER ?? '';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
-export async function sendOrderMessageEmail(toEmail: string, userName: string, orderId: string, message: string, agencyName: string, date: string) {
+export async function sendOrderMessageEmail(
+  toEmail: string, 
+  userName: string, 
+  orderId: string, 
+  orderTitle: string,
+  message: string, 
+  agencyName: string, 
+  date: string
+) {
   const logger = await getLogger();
   const mailer = await getMailer();
   await mailer.sendEmail({
     to: toEmail,
     from: emailSender,
-    subject: `Nuevo mensaje en el pedido ${orderId} añadido`,
+    subject: `${userName} commented in ${orderTitle} on ${date}.`,
     html: `
        <!DOCTYPE html>
         <html dir="ltr" lang="es">
@@ -27,7 +35,7 @@ export async function sendOrderMessageEmail(toEmail: string, userName: string, o
                   color: #484848;
                 }
                 .button-container {
-                  text-align: center;
+                  text-align: left;
                   margin: 20px 0;
                 }
                 .button {
@@ -47,7 +55,7 @@ export async function sendOrderMessageEmail(toEmail: string, userName: string, o
             </style>
           </head>
             <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0">
-              Tienes un mensaje en el pedido ${orderId}
+              ${userName} commented in ${orderTitle} on ${date}.
             </div>
             <body>
               <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;background-color:#fff;margin:auto;font-family:sans-serif;color:#484848">
@@ -75,8 +83,8 @@ export async function sendOrderMessageEmail(toEmail: string, userName: string, o
                                         alt="Suuper Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">Hola ${toEmail}</p>
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${userName} comentó en el pedido ${orderId} el ${date}</p>
+                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">Hi ${toEmail}</p>
+                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${userName} commented in ${orderTitle} on ${date}.</p>
                                       <div class="message">
                                         <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:30px;">${message}</p>
                                       </div>
@@ -84,12 +92,14 @@ export async function sendOrderMessageEmail(toEmail: string, userName: string, o
                                       <!-- Contenedor centrado para el botón -->
                                       <div class="button-container">
                                         <a href="${siteURL}orders/${orderId}" class="button">
-                                          Ver pedido
+                                          Reply
                                         </a>
                                       </div>
 
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">Saludos,</p>
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${agencyName}</p>
+                                      <div class="">
+                                        <p style="color: var(--Gray-700, #344054); font-size: 16px; font-style: normal; font-weight: 400; margin:0;">Regards,</p>
+                                        <p style="color: var(--Gray-700, #344054); font-size: 16px; font-style: normal; font-weight: 700; margin:0;">${agencyName}</p>
+                                      </div>
 
                                     </td>
                                   </tr>
@@ -109,7 +119,7 @@ export async function sendOrderMessageEmail(toEmail: string, userName: string, o
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias.
+                                        This email was sent to ${toEmail}. If you'd rather not receive this kind of email, you can unsubscribe or manage your email preferences.
                                       </p>
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         © 2024 Suuper, soporte@suuper.co

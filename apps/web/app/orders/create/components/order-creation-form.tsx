@@ -28,7 +28,7 @@ import { Spinner } from '@kit/ui/spinner';
 
 import UploadFileComponent from '~/components/ui/files-input';
 
-import {sendOrderCreationEmail} from './send-mail';
+// import {sendOrderCreationEmail} from './send-mail';
 
 
 
@@ -53,8 +53,8 @@ const orderCreationFormSchema = z.object({
   description: z
     .string()
     .min(2, { message: 'Description must be at least 2 characters.' })
-    .max(500, {
-      message: 'Description must be at most 500 characters.',
+    .max(1000, {
+      message: 'Description must be at most 1000 characters.',
     }),
   fileIds: z.array(z.string()),
 });
