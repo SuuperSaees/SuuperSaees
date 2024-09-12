@@ -2,7 +2,8 @@ import { PageBody } from '@kit/ui/page';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import MultiStepFormDemo from './components/multiform-component';
-
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import {redirect} from "next/navigation"
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -13,7 +14,11 @@ export const generateMetadata = async () => {
   };
 };
 
-function CreateServicePage() {
+async function CreateServicePage() {
+  const accountRole = await getUserRole()
+  if(accountRole !== "agency_owner"){
+    return redirect("/orders")
+  }
   return (
     <>
     <PageBody>

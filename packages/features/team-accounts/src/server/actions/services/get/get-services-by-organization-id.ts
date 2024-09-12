@@ -6,12 +6,13 @@ import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 export const getServicesByOrganizationId = async ():Promise<{products: Service.Type[]; }> => {
     const client = getSupabaseServerComponentClient();
     const primary_owner_user_id = await getPrimaryOwnerId()
-    if (!primary_owner_user_id) throw new Error('No primary owner found')
+    // const accountMemberShipData = await getUserIdOfAgencyOwner()
+    // if (!primary_owner_user_id) throw new Error('No primary owner found')
             try {
                const {data: fetchedProducts, error} = await client
                .from('services')
                .select("*")
-               .eq("propietary_organization_id", primary_owner_user_id)
+               .eq("propietary_organization_id", primary_owner_user_id ?? "")
 
                if (error) throw new Error(error.message);
 
