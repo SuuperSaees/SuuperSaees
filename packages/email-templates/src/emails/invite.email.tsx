@@ -178,7 +178,7 @@ export async function renderInviteEmail(props: Props) {
                                             <td>
                                               <a href="${props.link}" class="cta-button"
                                               style="background-color:${props.primaryColor ? props.primaryColor : '#1A38D7'}; color: ${getTextColorBasedOnBackground(props.primaryColor ? props.primaryColor : '#1A38D7')}; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                                              ${joinTeam}
+                                              Accept the invite
                                               </a>
                                           
                                             </td>
