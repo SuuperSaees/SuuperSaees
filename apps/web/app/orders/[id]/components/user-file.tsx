@@ -1,8 +1,12 @@
 import { format } from 'date-fns';
 import { DownloadIcon, StickyNote } from 'lucide-react';
 
+
+
 import { File } from '../context/activity-context';
+import ImageWithOptions from '../hoc/with-image-options';
 import AvatarDisplayer from './ui/avatar-displayer';
+
 
 interface UserFileProps {
   file: File;
@@ -22,14 +26,7 @@ const getFileTypeClass = (fileName: string) => {
 const UserFile = ({ file }: UserFileProps) => {
   const renderFilePreview = (file: File) => {
     if (file.type.startsWith('image/')) {
-      return (
-        /*eslint-disable @next/next/no-img-element */
-        <img
-          src={file?.url}
-          alt="image"
-          className="aspect-square h-full w-auto object-cover"
-        />
-      );
+      return <ImageWithOptions src={file?.url} alt="image" bucketName='orders' />;
     } else if (file.type.startsWith('video/')) {
       return (
         <video className="w-full max-w-[400px] rounded-lg" controls>
@@ -74,7 +71,6 @@ const UserFile = ({ file }: UserFileProps) => {
       <AvatarDisplayer
         displayName={null}
         pictureUrl={file?.user?.picture_url}
-        status="online"
         text={file?.user.name ? file.user.name : undefined}
       />
       <div className="flex flex-col gap-1">
@@ -85,7 +81,7 @@ const UserFile = ({ file }: UserFileProps) => {
           </small>
         </div>
 
-        <div className="flex max-h-72 w-full max-w-full flex-wrap gap-4 overflow-hidden rounded-md">
+        <div className="flex max-h-72 w-fit max-w-full flex-wrap gap-4 overflow-hidden rounded-md">
           {/*conditional rendering must be added */}
           {/* <img
             src={file?.url}

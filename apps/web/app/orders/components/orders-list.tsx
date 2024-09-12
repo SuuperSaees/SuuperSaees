@@ -151,11 +151,6 @@ export function OrderList({ orders }: OrdersTableProps) {
                 </DropdownMenu> */}
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
-                {orders.length > 0 ? (
-                  <Link href="/orders/create">
-                    <ThemedButton>Crear pedido</ThemedButton>
-                  </Link>
-                ) : null}
                 <div className="relative ml-auto flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <ThemedInput
@@ -166,6 +161,11 @@ export function OrderList({ orders }: OrdersTableProps) {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
+                {orders.length > 0 ? (
+                  <Link href="/orders/create">
+                    <ThemedButton>Crear pedido</ThemedButton>
+                  </Link>
+                ) : null}
               </div>
             </div>
             <Separator />

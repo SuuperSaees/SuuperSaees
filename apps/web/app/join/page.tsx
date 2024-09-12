@@ -56,7 +56,9 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
 
     // redirect to the sign up page with the invite token
     redirect(signUpPath);
-  }
+    return;
+  } 
+
 
   // get api to interact with team accounts
   const adminClient = getSupabaseServerComponentClient({ admin: true });

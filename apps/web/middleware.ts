@@ -12,9 +12,32 @@ import pathsConfig from '~/config/paths.config';
 const CSRF_SECRET_COOKIE = 'csrfSecret';
 const NEXT_ACTION_HEADER = 'next-action';
 
+const CLIENT_ID = 'suuper-client-id';
+const CLIENT_SECRET = 'suuper-client-secret';
+
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|images|locales|assets|api/*).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|images|locales|assets|api).*)', 
+    '/api/v1/:path*'
+  ],
 };
+
+// function to verify the basic auth credentials to api use. 
+function isValidBasicAuth(request: NextRequest): boolean {
+  const authorizationHeader = request.headers.get('authorization');
+
+  if (!authorizationHeader?.startsWith('Basic ')) {
+    return false;
+  }
+
+  const base64Credentials = authorizationHeader.split(' ')[1];
+  const credentials = atob(base64Credentials!).split(':');
+
+  const clientId = credentials[0];
+  const clientSecret = credentials[1];
+
+  return clientId === CLIENT_ID && clientSecret === CLIENT_SECRET;
+}
 
 const getUser = (request: NextRequest, response: NextResponse) => {
   const supabase = createMiddlewareClient(request, response);
@@ -24,6 +47,14 @@ const getUser = (request: NextRequest, response: NextResponse) => {
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  // Verify route /api/v1
+  if (request.nextUrl.pathname.startsWith('/api/v1')) {
+    // Verify route authentication
+    if (!isValidBasicAuth(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.next();
+  }
 
   // set a unique request ID for each request
   // this helps us log and trace requests
@@ -178,8 +209,10 @@ function getPatterns() {
 
         // If user is not logged in, redirect to sign in page.
         if (!user) {
-          const signIn = pathsConfig.auth.signIn;
-          const redirectPath = `${signIn}?next=${next}`;
+          // const signIn = pathsConfig.auth.signIn;
+          // const redirectPath = `${signIn}?next=${next}`;
+          const signUp = pathsConfig.auth.signUp;
+          const redirectPath = `${signUp}?next=${next}`;
 
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
@@ -198,6 +231,9 @@ function getPatterns() {
 
       },
     },
+    {
+      pattern: new URLPattern({pathname: '/api/v1'})
+    },
   ];
 }
 
@@ -208,7 +244,6 @@ function getPatterns() {
 function matchUrlPattern(url: string) {
   const patterns = getPatterns();
   const input = url.split('?')[0];
-
   for (const pattern of patterns) {
     const patternResult = pattern.pattern.exec(input);
 

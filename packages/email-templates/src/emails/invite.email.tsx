@@ -80,6 +80,7 @@ export async function renderInviteEmail(props: Props) {
     const joinTeam = t(`${namespace}:joinTeam`, {
       teamName: props.teamName,
     });
+
     const html = `
       <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><!DOCTYPE html>
         <html dir="ltr" lang="en">
@@ -108,11 +109,11 @@ export async function renderInviteEmail(props: Props) {
               Confirma tu correo - Suuper
             </div>
             <body>
-              <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;background-color:#fff;margin:auto;font-family:sans-serif;color:#484848">
+              <table align="left" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;background-color:#fff;margin:auto;font-family:sans-serif;color:#484848">
                 <tbody>
                   <tr style="width:100%">
                     <td>
-                      <table align="center" width="100%" class="undefined" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:535px;background-color:#fff;margin:auto;margin-top:36px;margin-bottom:36px;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem">
+                      <table align="left" width="100%" class="undefined" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:535px;background-color:#fff;margin:auto;margin-top:36px;margin-bottom:36px;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem">
                         <tbody>
                           <tr style="width:100%">
                             <td>
@@ -133,9 +134,9 @@ export async function renderInviteEmail(props: Props) {
                                         src=${props.logoUrl ? props.logoUrl : 'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg'}
                                         alt="Company Logo"
                                         style="
-                                        max-height: 142px; 
-                                        height:100%; 
-                                        width:auto; 
+                                        max-width: 142px; 
+                                        height:auto;
+                                        width:100%; 
                                         margin-bottom: 20px;
                                         "
                                       />
@@ -159,7 +160,7 @@ export async function renderInviteEmail(props: Props) {
                                 </tbody>
                               </table>
                               <table 
-                                align="center" 
+                                align="left" 
                                 width="100%" 
                                 class="undefined" 
                                 border="0" 
@@ -177,7 +178,7 @@ export async function renderInviteEmail(props: Props) {
                                             <td>
                                               <a href="${props.link}" class="cta-button"
                                               style="background-color:${props.primaryColor ? props.primaryColor : '#1A38D7'}; color: ${getTextColorBasedOnBackground(props.primaryColor ? props.primaryColor : '#1A38D7')}; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                                              ${joinTeam}
+                                              Accept the invite
                                               </a>
                                           
                                             </td>
