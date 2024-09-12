@@ -59,10 +59,10 @@ async function OrderDetailsPage({
               >
                 <TabsList className="flex">
                   <TabsTrigger value="activity" className="flex-1">
-                    Activity
+                    Actividad
                   </TabsTrigger>
                   <TabsTrigger value="details" className="flex-1">
-                    Details
+                    Detalles
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
