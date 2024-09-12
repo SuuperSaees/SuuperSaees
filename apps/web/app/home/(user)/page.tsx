@@ -52,13 +52,10 @@ export default async function UserHomePage() {
   .single();
 
   if (availableInvitations) {
-    console.log('Tiene invitaciones pendientes');
     const invite_token = availableInvitations.invite_token;
     const email = availableInvitations.email;
     return redirect('/join?invite_token=' + invite_token + '&email=' + email);
-  } else {
-    console.log('No tiene invitaciones pendientes');
-  }
+  } 
 
 
   
@@ -70,7 +67,6 @@ export default async function UserHomePage() {
   //   .eq('is_personal_account', false);
 
   if (!userAccount.organization_id) {
-    console.log('No tiene organizaciones');
     return redirect('/add-organization');
   }
   return redirect('/orders')
