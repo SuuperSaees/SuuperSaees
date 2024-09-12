@@ -28,6 +28,10 @@ import { Spinner } from '@kit/ui/spinner';
 
 import UploadFileComponent from '~/components/ui/files-input';
 
+import {sendOrderCreationEmail} from './send-mail';
+
+
+
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0,
