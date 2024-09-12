@@ -31,3 +31,7 @@ sequenceDiagram
     Service-->>API: Confirmación de Envío de Correo
     API-->>Client: Respuesta HTTP
 ```
+
+## Routes
+
+## Secularization

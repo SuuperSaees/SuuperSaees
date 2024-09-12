@@ -259,6 +259,9 @@ importers:
       '@types/node':
         specifier: ^20.14.11
         version: 20.14.11
+      '@types/nodemailer':
+        specifier: 6.4.15
+        version: 6.4.15
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -11979,7 +11982,7 @@ snapshots:
   '@types/glob@7.2.0':
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 22.5.1
+      '@types/node': 20.14.11
 
   '@types/hast@3.0.4':
     dependencies:
@@ -12069,7 +12072,7 @@ snapshots:
 
   '@types/through@0.0.33':
     dependencies:
-      '@types/node': 22.5.1
+      '@types/node': 20.14.11
 
   '@types/tinycolor2@1.4.6': {}
 
