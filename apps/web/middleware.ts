@@ -16,7 +16,10 @@ const CLIENT_ID = 'suuper-client-id';
 const CLIENT_SECRET = 'suuper-client-secret';
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|images|locales|assets).*)', '/api/:path*'],
+  matcher: [
+    '/((?!_next/static|_next/image|images|locales|assets|api).*)', 
+    '/api/v1/:path*'
+  ],
 };
 
 // function to verify the basic auth credentials to api use. 
