@@ -1,27 +1,28 @@
 'use server';
 
+import { getMailer } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
-import { getMailer } from '@kit/mailers'; 
 
 const emailSender = process.env.EMAIL_SENDER ?? '';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
 export async function sendOrderMessageEmail(
-  toEmail: string, 
-  userName: string, 
-  orderId: string, 
+  toEmail: string,
+  userName: string,
+  orderId: string,
   orderTitle: string,
-  message: string, 
-  agencyName: string, 
-  date: string
+  message: string,
+  agencyName: string,
+  date: string,
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
-  await mailer.sendEmail({
-    to: toEmail,
-    from: emailSender,
-    subject: `${userName} commented in ${orderTitle} on ${date}.`,
-    html: `
+  await mailer
+    .sendEmail({
+      to: toEmail,
+      from: emailSender,
+      subject: `${userName} commented in ${orderTitle} on ${date}.`,
+      html: `
        <!DOCTYPE html>
         <html dir="ltr" lang="es">
           <head>
@@ -79,7 +80,7 @@ export async function sendOrderMessageEmail(
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/Suuper%20Logo.svg"
+                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png"
                                         alt="Suuper Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
@@ -140,12 +141,12 @@ export async function sendOrderMessageEmail(
             </body>
           </html>
     `,
-  })
-  .then(() => {
-    logger.info('Correo de mensaje de pedido enviado con éxito.');
-  })
-  .catch((error) => {
-    console.error(error);
-    logger.error({ error }, 'Error al enviar el correo de pedido');
-  });
+    })
+    .then(() => {
+      logger.info('Correo de mensaje de pedido enviado con éxito.');
+    })
+    .catch((error) => {
+      console.error(error);
+      logger.error({ error }, 'Error al enviar el correo de pedido');
+    });
 }
