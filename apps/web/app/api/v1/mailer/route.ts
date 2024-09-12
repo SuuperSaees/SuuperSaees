@@ -2,7 +2,6 @@ import nodemailer from 'nodemailer';
 import { NextResponse, NextRequest} from 'next/server';
 
 export async function POST(req: NextRequest) {
-  console.log("HOLAAAAAAAAAAAAAAAAAA")
   const { from, to, subject, text, html } = await req.json();
   const missingFields = [];
   if (!from) missingFields.push('from');

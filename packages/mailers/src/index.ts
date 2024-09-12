@@ -9,7 +9,6 @@ const MAILER_PROVIDER = z
  * @description Get the mailer based on the environment variable.
  */
 export async function getMailer() {
-  console.log(MAILER_PROVIDER, "SIIIUUU")
   switch (MAILER_PROVIDER) {
     case 'nodemailer':
       return getNodemailer();
