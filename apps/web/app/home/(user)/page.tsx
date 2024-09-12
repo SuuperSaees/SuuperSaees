@@ -40,7 +40,25 @@ export default async function UserHomePage() {
     console.error('Error al obtener la cuenta del usuario', userAccountError);
     return;
   }
+
   const name = userAccount.name;
+  const email = user.email ?? '';
+
+
+  const { data: availableInvitations, error: availableInvitationsError } = await supabase
+  .from('invitations')
+  .select('*')
+  .eq('email', email)
+  .single();
+
+  if (availableInvitations) {
+    const invite_token = availableInvitations.invite_token;
+    const email = availableInvitations.email;
+    return redirect('/join?invite_token=' + invite_token + '&email=' + email);
+  } 
+
+
+  
 
   // const { data: accounts } = await supabase
   //   .from('accounts')
@@ -49,7 +67,6 @@ export default async function UserHomePage() {
   //   .eq('is_personal_account', false);
 
   if (!userAccount.organization_id) {
-    console.log('No tiene organizaciones');
     return redirect('/add-organization');
   }
   return redirect('/orders')
