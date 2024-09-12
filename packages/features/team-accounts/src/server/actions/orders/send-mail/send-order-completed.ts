@@ -6,34 +6,18 @@ import { getMailer } from '@kit/mailers';
 const emailSender = process.env.EMAIL_SENDER ?? '';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
-export async function sendOrderStatusPriorityEmail(
+export async function sendOrderCompleted(
     toEmail: string, 
     actualName: string, 
-    field: string, 
     orderId: string, 
     orderTitle: string, 
-    message: string, 
     agencyName: string, 
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
 
-  // Define subject and body based on field value
-  let subject;
-  let bodyMessage;
-
-  if (field === 'status') {
-    // subject = `Se ha cambiado el estado de la orden ${orderId}`;
-    subject = `${actualName} has changed '${orderTitle}' request status to ${message}`; 
-    bodyMessage = `${actualName} has changed '${orderTitle}' request status to ${message}`; 
-  } else if (field === 'priority') {
-    subject = `${actualName} has changed '${orderTitle}' request priority to ${message}`;
-    bodyMessage = `${actualName} has changed '${orderTitle}' request priority to ${message}`;
-  } else {
-    console.log('field', field)
-    subject = `Nuevo mensaje en el pedido ${orderId} añadido`;
-    bodyMessage = `Tienes un mensaje en el pedido ${orderId}.`;
-  }
+  const subject = `${actualName} has marked '${orderTitle}' request as completed.`;
+  const bodyMessage= `${actualName} has marked '${orderTitle}' request as completed.`;
 
   await mailer.sendEmail({
     to: toEmail,
@@ -102,7 +86,7 @@ export async function sendOrderStatusPriorityEmail(
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">Hi ${actualName}</p>
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${bodyMessage}.</p>
+                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${bodyMessage}</p>
 
                                       <!-- Contenedor centrado para el botón -->
                                       <div class="button-container">
@@ -160,7 +144,7 @@ export async function sendOrderStatusPriorityEmail(
     `,
   })
   .then(() => {
-    logger.info(`Correo de cambio de ${field} en el pedido enviado con éxito.`);
+    logger.info(`Correo de Marcado como completado en el pedido enviado con éxito.`);
   })
   .catch((error) => {
     console.error(error);

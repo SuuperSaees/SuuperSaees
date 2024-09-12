@@ -206,8 +206,10 @@ function getPatterns() {
 
         // If user is not logged in, redirect to sign in page.
         if (!user) {
-          const signIn = pathsConfig.auth.signIn;
-          const redirectPath = `${signIn}?next=${next}`;
+          // const signIn = pathsConfig.auth.signIn;
+          // const redirectPath = `${signIn}?next=${next}`;
+          const signUp = pathsConfig.auth.signUp;
+          const redirectPath = `${signUp}?next=${next}`;
 
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }

@@ -59,7 +59,7 @@ export async function sendOrderCreationEmail(toEmail: string, orderId: string, o
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">Hi ${toEmail}</p>
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">You have a new Order from ${emailSender}</p>
+                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">You have a new order from ${emailSender}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${orderData.title}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;margin-bottom:60px;">${orderData.description}</p>
                                       <a href="${siteURL}orders/${orderId}" style="padding: 10px 20px; background-color: #1A38D7; color: white; text-decoration: none; border-radius: 5px;">
