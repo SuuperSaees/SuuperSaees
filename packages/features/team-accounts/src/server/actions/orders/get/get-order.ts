@@ -65,7 +65,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       }),
     };
 
-    console.log('a', proccesedData);
+    // console.log('a', proccesedData);
 
     return proccesedData as OrderWithAllRelations;
   } catch (error) {

@@ -13,18 +13,7 @@ import Youtube from '@tiptap/extension-youtube';
 import { Editor, EditorContent, Extension, ReactNodeViewRenderer, useEditor } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import {
-  Bold,
-  Heading1,
-  Heading2,
-  Image,
-  Italic,
-  List,
-  ListOrdered,
-  Quote,
-  SendHorizontalIcon,
-  Strikethrough,
-} from 'lucide-react';
+import { Bold, Heading1, Heading2, Image, Italic, List, ListOrdered, Quote, SendHorizontalIcon, Strikethrough } from 'lucide-react';
 
 
 
@@ -261,7 +250,7 @@ const RichTextEditor = ({
       Link.configure({
         autolink: true,
         HTMLAttributes: {
-          class: 'text-primary underline',
+          class: 'text-brand underline',
         },
       }),
 
