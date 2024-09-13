@@ -2,11 +2,15 @@
 
 import { revalidatePath } from 'next/cache';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
 import { Review } from '../../../../../../../../apps/web/lib/review.types';
+import { getUserById } from '../../members/get/get-member-account';
+import { getEmails, getOrderInfo } from '../../orders/get/get-mail-info';
 import { sendOrderCompleted } from '../../orders/send-mail/send-order-completed';
-import { getOrderInfo, getEmails  } from '../../orders/get/get-mail-info';
-import { getUserById, getOrganizationName } from '../../members/get/get-member-account';
+import { getOrganization } from '../../organizations/get/get-organizations';
 
 // omit user_id from review
 type CreateReviewProps = Omit<Review.Insert, 'user_id'>;
@@ -23,7 +27,6 @@ export const createReview = async (review: CreateReviewProps) => {
       .single();
     if (reviewError) throw reviewError.message;
 
-    // console.log('addedReview:', reviewData);
     // mark the order as completed
     await client
       .from('orders_v2')
@@ -32,7 +35,8 @@ export const createReview = async (review: CreateReviewProps) => {
 
     const userInfo = await getUserById(userData.user.id);
     const orderInfo = await getOrderInfo(review.order_id.toString());
-    const agencyName = await getOrganizationName();
+    const agency = await getOrganization();
+    const agencyName = agency?.name;
     const emailsData = await getEmails(review.order_id.toString());
 
     for (const email of emailsData) {

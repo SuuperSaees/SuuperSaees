@@ -12,10 +12,11 @@ import { Activity } from '../../../../../../../../apps/web/lib/activity.types';
 import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { addActivityAction } from '../../activity/create/create-activity';
-import { sendOrderMessageEmail } from '../send-mail/send-order-message-email'
-import { sendOrderStatusPriorityEmail } from '../send-mail/send-order-status-priority'
+import { getUserById } from '../../members/get/get-member-account';
+import { getOrganization } from '../../organizations/get/get-organizations';
 import { getEmails, getOrderInfo } from '../get/get-mail-info';
-import { getUserById, getOrganizationName } from '../../members/get/get-member-account';
+import { sendOrderMessageEmail } from '../send-mail/send-order-message-email';
+import { sendOrderStatusPriorityEmail } from '../send-mail/send-order-status-priority';
 
 const statusTranslations = {
   pending: 'Pending',
@@ -40,7 +41,7 @@ export const updateOrder = async (
     const { error: userError, data: userData } = await client.auth.getUser();
     if (userError) throw userError.message;
 
-    const { data: orderData, error: orderError } = await client
+    const { error: orderError } = await client
       .from('orders_v2')
       .update(order)
       .eq('id', orderId);
@@ -121,23 +122,26 @@ const handleFieldUpdate = async (
   field: keyof Order.Update,
   value: string,
   orderId: Order.Type['id'],
-  type: Activity.Enums.ActivityType
+  type: Activity.Enums.ActivityType,
 ) => {
   const client = getSupabaseServerComponentClient();
   const { data: userData, error: userError } = await client.auth.getUser();
-  if (userError) throw userError.message
+  if (userError) throw userError.message;
 
   let translatedValue = value;
 
   if (field === 'status') {
-    translatedValue = statusTranslations[value as keyof typeof statusTranslations] || value;
+    translatedValue =
+      statusTranslations[value as keyof typeof statusTranslations] || value;
   } else if (field === 'priority') {
-    translatedValue = priorityTranslations[value as keyof typeof priorityTranslations] || value;
+    translatedValue =
+      priorityTranslations[value as keyof typeof priorityTranslations] || value;
   }
 
   const emailsData = await getEmails(orderId.toString());
   const actualName = await getUserById(userData.user.id);
-  const organizationName = await getOrganizationName();
+  const organization = await getOrganization();
+  const organizationName = organization?.name;
   const agencyName = organizationName ?? '';
   const orderInfo = await getOrderInfo(orderId.toString());
 
@@ -149,9 +153,7 @@ const handleFieldUpdate = async (
         `${type}`,
         orderId.toString(),
         orderInfo?.title ?? '',
-        field === 'status' 
-          ? `${translatedValue}` 
-          : `${translatedValue}`,
+        field === 'status' ? `${translatedValue}` : `${translatedValue}`,
         agencyName,
       );
     } else {
@@ -234,9 +236,9 @@ export const addOrderMessage = async (
 
     const clientData = await getUserById(userData.user.id);
     const emailsData = await getEmails(orderId.toString());
-    const organizationName = await getOrganizationName();
     const orderInfo = await getOrderInfo(orderId.toString());
-    const agencyName = organizationName ?? '';
+    const agency = await getOrganization();
+    const agencyName = agency?.name ?? '';
     const clientName = clientData?.name ?? '';
 
     const { data: messageData, error: messageError } = await client
@@ -250,7 +252,6 @@ export const addOrderMessage = async (
       .single();
     // console.log('messageData:', orderId, message);
     if (messageError) throw messageError.message;
-    
 
     for (const email of emailsData) {
       if (email) {
@@ -262,15 +263,15 @@ export const addOrderMessage = async (
           orderInfo?.title ?? '',
           messageContent,
           agencyName,
-          new Date().toLocaleDateString()  
+          new Date().toLocaleDateString(),
         );
       } else {
         console.warn('Email is null or undefined, skipping...');
       }
     }
-    
+
     // revalidatePath(`/orders/${orderId}`);
-    return messageData
+    return messageData;
   } catch (error) {
     console.error('Error adding message:', error);
     throw error;
