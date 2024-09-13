@@ -17,37 +17,29 @@ export default createBillingSchema({
   // products configuration
   products: [
     {
-      id: 'starter',
-      name: 'billing:plans.starter.name',
-      description: 'billing:plans.starter.description',
+      id: 'free',
+      name: 'Free',
+      description: '',
       currency: 'USD',
-      badge: `billing:plans.starter.badge`,
+      badge: `Popular`,
       plans: [
         {
-          name: 'Starter Monthly',
-          id: 'starter-monthly',
+          name: 'Free Monthly',
+          id: 'free-monthly',
+          trialDays: 7,
           paymentType: 'recurring',
           interval: 'month',
           lineItems: [
             {
-              id: 'price_1PBZTjKgHmU99VeOMbvSb4pO',
-              name: 'billing:plans.starter.base',
-              cost: 9.99,
-              type: 'flat' as const,
-            },
-          ],
-        },
-        {
-          name: 'Starter Yearly',
-          id: 'starter-yearly',
-          paymentType: 'recurring',
-          interval: 'year',
-          lineItems: [
-            {
-              id: 'price_1PBZTjKgHmU99VeOjAIBIT6r',
-              name: 'billing:plans.starter.base',
-              cost: 99.99,
-              type: 'flat' as const,
+              id: 'price_12345', // ID del precio en tu proveedor (Stripe)
+              name: 'Pro Plan Per Seat',
+              cost: 10, // Costo por asiento
+              type: 'per_seat',
+              tiers: [
+                { upTo: 3, cost: 0 },  // Primeros 3 asientos gratis
+                { upTo: 10, cost: 7.99 },  // Precio por asiento del 4 al 10
+                { upTo: 'unlimited', cost: 5.99 },  // Precio por asiento a partir del 11
+              ],
             },
           ],
         },
@@ -58,78 +50,112 @@ export default createBillingSchema({
       ],
     },
     {
-      id: 'pro',
-      name: 'billing:plans.pro.name',
-      badge: 'billing:plans.pro.badge',
-      highlighted: true,
-      description: 'billing:plans.pro.description',
+      id: 'pro-plan',
+      name: 'Pro Plan',
+      description: 'Plan avanzado para usuarios Pro',
       currency: 'USD',
+      badge: `Popular`,
       plans: [
         {
           name: 'Pro Monthly',
           id: 'pro-monthly',
+          trialDays: 7,
           paymentType: 'recurring',
           interval: 'month',
           lineItems: [
             {
-              id: 'price_1PBZWOKgHmU99VeOYvZAKi20',
-              name: 'Base',
-              cost: 19.99,
-              type: 'flat',
-            },
-          ],
-        },
-        {
-          name: 'Pro Yearly',
-          id: 'pro-yearly',
-          paymentType: 'recurring',
-          interval: 'year',
-          lineItems: [
-            {
-              id: 'price_1PBZWyKgHmU99VeOgHd1RdNG',
-              name: 'Base',
-              cost: 199.99,
-              type: 'flat',
+              id: 'price_12345', // ID del precio en tu proveedor (Stripe)
+              name: 'Pro Plan Per Seat',
+              cost: 10, // Costo por asiento
+              type: 'per_seat',
+              tiers: [
+                { upTo: 3, cost: 0 },  // Primeros 3 asientos gratis
+                { upTo: 10, cost: 7.99 },  // Precio por asiento del 4 al 10
+                { upTo: 'unlimited', cost: 5.99 },  // Precio por asiento a partir del 11
+              ],
             },
           ],
         },
       ],
       features: [
-        'billing:plans.pro.features.maxTokens',
+        'billing:plans.starter.features.maxTokens',
         'billing:plans.features.chatSupport',
       ],
     },
-    {
-      id: 'enterprise',
-      name: 'billing:plans.enterprise.name',
-      description: 'billing:plans.enterprise.description',
-      currency: 'USD',
-      plans: [
-        {
-          name: 'Enterprise Monthly',
-          id: 'enterprise-monthly',
-          paymentType: 'recurring',
-          label: 'common:contactUs',
-          href: '/contact',
-          custom: true,
-          interval: 'month',
-          lineItems: [],
-        },
-        {
-          name: 'Enterprise Yearly',
-          id: 'enterprise-yearly',
-          paymentType: 'recurring',
-          label: 'common:contactUs',
-          href: '/contact',
-          custom: true,
-          interval: 'year',
-          lineItems: [],
-        },
-      ],
-      features: [
-        'billing:plans.enterprise.features.maxTokens',
-        'billing:plans.enterprise.features.chatSupport',
-      ],
-    },
+    // {
+    //   id: 'pro',
+    //   name: 'billing:plans.pro.name',
+    //   badge: 'billing:plans.pro.badge',
+    //   highlighted: true,
+    //   description: 'billing:plans.pro.description',
+    //   currency: 'USD',
+    //   plans: [
+    //     {
+    //       name: 'Pro Monthly',
+    //       id: 'pro-monthly',
+    //       paymentType: 'recurring',
+    //       interval: 'month',
+    //       lineItems: [
+    //         {
+    //           id: 'price_1PBZWOKgHmU99VeOYvZAKi20',
+    //           name: 'Base',
+    //           cost: 19.99,
+    //           type: 'flat',
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       name: 'Pro Yearly',
+    //       id: 'pro-yearly',
+    //       paymentType: 'recurring',
+    //       interval: 'year',
+    //       lineItems: [
+    //         {
+    //           id: 'price_1PBZWyKgHmU99VeOgHd1RdNG',
+    //           name: 'Base',
+    //           cost: 199.99,
+    //           type: 'flat',
+    //         },
+    //       ],
+    //     },
+    //   ],
+    //   features: [
+    //     'billing:plans.pro.features.maxTokens',
+    //     'billing:plans.features.chatSupport',
+    //   ],
+    // },
+    // {
+    //   id: 'enterprise',
+    //   name: 'billing:plans.enterprise.name',
+    //   description: 'billing:plans.enterprise.description',
+    //   currency: 'USD',
+    //   plans: [
+    //     {
+    //       name: 'Enterprise Monthly',
+    //       id: 'enterprise-monthly',
+    //       paymentType: 'recurring',
+    //       label: 'common:contactUs',
+    //       href: '/contact',
+    //       custom: true,
+    //       interval: 'month',
+    //       lineItems: [],
+    //     },
+    //     {
+    //       name: 'Enterprise Yearly',
+    //       id: 'enterprise-yearly',
+    //       paymentType: 'recurring',
+    //       label: 'common:contactUs',
+    //       href: '/contact',
+    //       custom: true,
+    //       interval: 'year',
+    //       lineItems: [],
+    //     },
+    //   ],
+    //   features: [
+    //     'billing:plans.enterprise.features.maxTokens',
+    //     'billing:plans.enterprise.features.chatSupport',
+    //   ],
+    // },
   ],
 });
+

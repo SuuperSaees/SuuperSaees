@@ -64,18 +64,18 @@ const CheckoutPage = ({ amount, priceId }: { amount: number, priceId: string }) 
       return;
     }
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      clientSecret,
-      confirmParams: {
-        return_url: `http://www.localhost:3000/payment-success?amount=${amount}`,
-      },
-    });
+    // const { error } = await stripe.confirmPayment({
+    //   elements,
+    //   clientSecret,
+    //   confirmParams: {
+    //     return_url: `http://www.localhost:3000/payment-success?amount=${amount}`,
+    //   },
+    // });
 
-    if (error) {
-      console.error("Payment failed:", error);
-      setErrorMessage(error.message);
-    } 
+    // if (error) {
+    //   console.error("Payment failed:", error);
+    //   setErrorMessage(error.message);
+    // } 
 
     setLoading(false);
   };

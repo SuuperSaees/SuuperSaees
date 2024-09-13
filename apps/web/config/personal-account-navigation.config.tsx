@@ -57,12 +57,11 @@ const routes = [
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
   },
-  {
-    label: 'Facturación',
-    path: pathsConfig.app.personalAccountBilling,
-    Icon: <CreditCard className={iconClasses} />,
-    // Icon: </>
-  }
+  // {
+  //   label: 'Facturación',
+  //   path: pathsConfig.app.personalAccountBilling,
+  //   // Icon: </>
+  // }
   // {
   //   label: 'Briefs',
   //   path: pathsConfig.app.briefs,

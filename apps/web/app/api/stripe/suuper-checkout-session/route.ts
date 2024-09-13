@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
                 },
             ],
             mode: type === "recurring" ? "subscription" : "payment",
-            success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/billing`, 
-            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/billing`,
+            success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings`, 
+            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings`,
         }
     );
         console.log("SessionURL: ", session.url);
