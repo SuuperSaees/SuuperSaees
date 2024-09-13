@@ -1,8 +1,11 @@
-import { PageBody } from '@kit/ui/page';
-import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
-import CreateOrganization from './components/add-organization-form';
 import { redirect } from 'next/navigation';
-import { getOrganization } from '../../../../packages/features/team-accounts/src/server/actions/organizations/get/get-organization'
+
+import { PageBody } from '@kit/ui/page';
+
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+
+import { getOrganization } from '../../../../packages/features/team-accounts/src/server/actions/organizations/get/get-organizations';
+import CreateOrganization from './components/add-organization-form';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -14,9 +17,11 @@ export const generateMetadata = async () => {
 };
 
 export default async function UserAddOrganizationPage() {
-  const {organization_id} = await getOrganization()
-  if (organization_id) {
-    redirect("/orders")
+  const organization = await getOrganization();
+  const organizationId = organization?.id;
+
+  if (organizationId) {
+    redirect('/orders');
   }
   return (
     <>
@@ -26,6 +31,3 @@ export default async function UserAddOrganizationPage() {
     </>
   );
 }
-
-
-
