@@ -50,7 +50,7 @@ export async function getOrganization() {
 
     const { data: userAccountData, error: accountsError } = await client
       .from('accounts')
-      .select()
+      .select('id, organization_id')
       .eq('id', userData.user.id)
       .single();
 
