@@ -1,7 +1,6 @@
 import { PageBody } from '@kit/ui/page';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
-
-
+import { Trans } from '@kit/ui/trans';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
@@ -11,7 +10,6 @@ import ActivityPage from './components/activity';
 import AsideOrderInformation from './components/aside-order-information';
 import DetailsPage from './components/details';
 import { ActivityProvider } from './context/activity-context';
-
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -27,7 +25,9 @@ async function OrderDetailsPage({
 }) {
   // const orderDetail = mockedOrder;
   // On the future for better performance each request can be made individually
-  const order = await getOrderById(Number(id)).catch((err) => console.error(err));
+  const order = await getOrderById(Number(id)).catch((err) =>
+    console.error(err),
+  );
   const messages = order?.messages ? order.messages : [];
   const files = order?.files ? order.files : [];
   const activities = order?.activities ? order.activities : [];
@@ -59,10 +59,10 @@ async function OrderDetailsPage({
               >
                 <TabsList className="flex">
                   <TabsTrigger value="activity" className="flex-1">
-                    Activity
+                    <Trans i18nKey={'orders:details.navigation.activity'} />
                   </TabsTrigger>
                   <TabsTrigger value="details" className="flex-1">
-                    Details
+                    <Trans i18nKey={'orders:details.navigation.details'} />
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">

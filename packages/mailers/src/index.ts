@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 const MAILER_PROVIDER = z
-  .enum(['nodemailer', 'cloudflare', 'resend'])
-  .default('nodemailer')
+  .enum(['nodemailer', 'cloudflare', 'resend', 'suupermailer'])
+  .default('suupermailer')
   .parse(process.env.MAILER_PROVIDER);
 
 /**
@@ -18,6 +18,9 @@ export async function getMailer() {
 
     case 'resend':
       return getResendMailer();
+
+    case 'suupermailer':
+      return getSuuperMailer();
 
     default:
       throw new Error(`Invalid mailer: ${MAILER_PROVIDER as string}`);
@@ -46,4 +49,10 @@ async function getResendMailer() {
   const { ResendMailer } = await import('./impl/resend');
 
   return new ResendMailer();
+}
+
+async function getSuuperMailer() {
+  const {SuuperMailer} = await import('./impl/suuper-mailer');
+
+  return new SuuperMailer()
 }
