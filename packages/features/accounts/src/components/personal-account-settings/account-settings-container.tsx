@@ -19,6 +19,8 @@ import { Trans } from '@kit/ui/trans';
 
 
 import type { Account } from '../../../../../../apps/web/lib/account.types';
+import type { Database } from '../../../../../../apps/web/lib/database.types';
+import { getUserRole } from '../../../../team-accounts/src/server/actions/members/get/get-member-account';
 import { ThemedButton } from '../ui/button-themed-with-settings';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
@@ -48,6 +50,8 @@ export function PersonalAccountSettingsContainer(
   }>,
 ) {
   const [user, setUser] = useState<Account.Type | null>();
+  const [role, setRole] =
+    useState<Database['public']['Tables']['roles']['Row']['name']>();
   const client = useSupabase();
 
   const fetchUserAccount = async () => {
@@ -101,8 +105,21 @@ export function PersonalAccountSettingsContainer(
         void fetchAccountStripe();
       });
   }, []);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const role = await getUserRole();
+        setRole(role);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    void fetchUserRole();
+  });
   //////////////////////////////////////
-  if (!user) {
+  if (!user || !role) {
     return <LoadingOverlay fullPage />;
   }
 
@@ -171,33 +188,35 @@ export function PersonalAccountSettingsContainer(
           </Card>
         </If> */}
         {/* Brand color section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:brandColor'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:brandColorDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdateAccountColorBrand />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:brandSidebar'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:brandSidebarDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdateAccountOrganizationSidebar />
-          </CardContent>
-        </Card>
-        {/* <Card>
+        {role === 'agency_owner' && (
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <Trans i18nKey={'account:brandColor'} />
+                </CardTitle>
+                <CardDescription>
+                  <Trans i18nKey={'account:brandColorDescription'} />
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <UpdateAccountColorBrand />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <Trans i18nKey={'account:brandSidebar'} />
+                </CardTitle>
+                <CardDescription>
+                  <Trans i18nKey={'account:brandSidebarDescription'} />
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <UpdateAccountOrganizationSidebar />
+              </CardContent>
+            </Card>
+            {/* <Card>
           <CardHeader>
             <CardTitle>
               <Trans i18nKey={'account:brandLogo'} />
@@ -212,6 +231,9 @@ export function PersonalAccountSettingsContainer(
             />
           </CardContent> 
         </Card> */}
+          </>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle>
