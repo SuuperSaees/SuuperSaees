@@ -60,6 +60,7 @@ const routes = [
   {
     label: 'Facturación',
     path: pathsConfig.app.personalAccountBilling,
+    Icon: <CreditCard className={iconClasses} />,
     // Icon: </>
   }
   // {
