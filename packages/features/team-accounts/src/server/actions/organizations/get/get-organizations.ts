@@ -68,7 +68,7 @@ export async function getOrganization() {
 
     const { data: organizationsData, error: organizationError } = await client
       .from('accounts')
-      .select()
+      .select('id, name, primary_owner_user_id, slug, email, picture_url')
       .eq('id', organizationId)
       .single();
 
@@ -92,7 +92,7 @@ export async function getOrganizations() {
     // Get all organizations
     const { data: organizationsData, error: organizationError } = await client
       .from('accounts')
-      .select();
+      .select('id, name, primary_owner_user_id, slug, email, picture_url');
 
     if (organizationError) {
       console.error('Error fetching organizations:', organizationError);
