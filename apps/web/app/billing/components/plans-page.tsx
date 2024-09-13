@@ -16,6 +16,7 @@ const PlansPage = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null); 
+  const [selectedPriceId, setSelectedPriceId] = useState(''); 
 
   useEffect(() => {
     setLoading(true);
@@ -34,9 +35,10 @@ const PlansPage = () => {
       });
   }, []);
 
-  const handleCheckout = (amount: number) => {
+  const handleCheckout = (amount: number, priceID: string) => {
     const real_amount = amount / 100; 
     setSelectedAmount(real_amount); 
+    setSelectedPriceId(priceID);
   };
 
   if (loading) {
@@ -75,7 +77,7 @@ const PlansPage = () => {
                 </p>
                 <Button
                   className="mt-2 p-2 bg-blue-500 text-white rounded"
-                  onClick={() => handleCheckout(product.unit_amount)}
+                  onClick={() => handleCheckout(product.unit_amount, product.default_price)}
                 >
                   Buy Now
                 </Button>
@@ -94,7 +96,7 @@ const PlansPage = () => {
               currency: "usd",
             }}
           >
-            <CheckoutPage amount={selectedAmount} />
+            <CheckoutPage amount={selectedAmount} priceId={selectedPriceId} />
           </Elements>
         </div>
       )}

@@ -28,6 +28,8 @@ export async function GET(request: NextRequest) {
             };
         }));
 
+        console.log("Productos con precios: ", productsWithPrices);
+
         return NextResponse.json(productsWithPrices);
 
     } catch (error) {

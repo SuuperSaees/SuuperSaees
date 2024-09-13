@@ -6,31 +6,47 @@ import {
   useElements,
   PaymentElement,
 } from "@stripe/react-stripe-js";
-import convertToSubcurrency from "./convertToSubcurrency";
+// import convertToSubcurrency from "./convertToSubcurrency";
 import { Button } from "@kit/ui/button";
 
-const CheckoutPage = ({ amount }: { amount: number }) => {
+const CheckoutPage = ({ amount, priceId }: { amount: number, priceId: string }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [clientSecret, setClientSecret] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // useEffect(() => {
+  //   // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  //   fetch("/api/stripe/create-payment-intent", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ amount: convertToSubcurrency(amount) }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       console.log("Response data:", data); // Agregado para depuración
+  //       setClientSecret(data.clientSecret);
+  //     })
+  // }, [amount]);
+
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    fetch("/api/stripe/create-payment-intent", {
+    fetch("/api/stripe/suuper-checkout-session", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ amount: convertToSubcurrency(amount) }),
+      body: JSON.stringify({ priceId }),
     })
       .then((res) => res.json())
       .then((data) => {
         console.log("Response data:", data); // Agregado para depuración
-        setClientSecret(data.clientSecret);
-      })
-  }, [amount]);
+        setClientSecret(data.sessionUrl);
+      });
+  }, [priceId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -79,18 +95,41 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
     );
   }
 
+  // return (
+  //   <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md border mt-10 w-full">
+  //     {clientSecret && <PaymentElement />}
+
+  //     {errorMessage && <div>{errorMessage}</div>}
+
+  //     <Button
+  //       disabled={!stripe || loading || !clientSecret}
+  //       className="w-full p-5 mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
+  //     >
+  //       {!loading  ? `Pay $${amount} USD` : "Processing..."}
+  //     </Button>
+  //   </form>
+  // );
   return (
     <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md border mt-10 w-full">
-      {clientSecret && <PaymentElement />}
-
-      {errorMessage && <div>{errorMessage}</div>}
-
-      <Button
-        disabled={!stripe || loading || !clientSecret}
-        className="w-full p-5 mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
-      >
-        {!loading  ? `Pay $${amount} USD` : "Processing..."}
-      </Button>
+      {clientSecret.startsWith("http") ? (
+        <Button
+          onClick={() => window.open(clientSecret, "_blank")}
+          className="w-full p-5 mt-2 rounded-md font-bold"
+        >
+          Go to Payment Page
+        </Button>
+      ) : (
+        <>
+          <PaymentElement />
+          {errorMessage && <div>{errorMessage}</div>}
+          <Button
+            disabled={!stripe || loading || !clientSecret}
+            className="w-full p-5 mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
+          >
+            {!loading ? `Pay $${amount} USD` : "Processing..."}
+          </Button>
+        </>
+      )}
     </form>
   );
 };
