@@ -9,28 +9,23 @@ export async function GET(request: NextRequest) {
         });
 
         // Crea una lista de promesas para obtener los precios
-        const productsWithPrices = await Promise.all(products.data.map(async (product) => {
-            const priceId = product.default_price;
-            let price = null;
-
-            if (priceId) {
-                // Obtén la información del precio
+        const productsWithPlans = await Promise.all(products.data.map(async (product) => {
+                // Obtén la información del plan
                 try {
-                    price = await stripe.prices.retrieve(priceId);
+                    const plans = await stripe.plans.list({
+                        active: true,
+                        product: product.id
+                    });
+                    return {
+                        ...product,
+                        plan: plans?.data[0] 
+                    };
                 } catch (error) {
                     console.error(`Error al obtener el precio para el producto ${product.id}: `, error);
                 }
-            }
-
-            return {
-                ...product,
-                unit_amount: price ? price.unit_amount : null,
-            };
         }));
 
-        console.log("Productos con precios: ", productsWithPrices);
-
-        return NextResponse.json(productsWithPrices);
+        return NextResponse.json(productsWithPlans);
 
     } catch (error) {
         console.error("Error al obtener productos y precios: ", error);

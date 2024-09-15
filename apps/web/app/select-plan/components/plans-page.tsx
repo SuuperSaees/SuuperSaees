@@ -3,6 +3,9 @@ import CheckoutPage from "./checkout-page";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { Button } from "@kit/ui/button";
+import { PricingTable } from '@kit/billing-gateway/marketing';
+import billingConfig from '../../../../../apps/web/config/billing.config';
+import pathsConfig from '../../../../../apps/web/config/paths.config';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error("Stripe public key is not defined in environment variables");
@@ -35,9 +38,9 @@ const PlansPage = () => {
       });
   }, []);
 
-  const handleCheckout = (amount: number, priceID: string) => {
-    const real_amount = amount / 100; 
-    setSelectedAmount(real_amount); 
+  const handleCheckout = (amount: number | undefined, priceID: string) => {
+    console.log("HOLAAAA")
+    setSelectedAmount(amount ?? 0); 
     setSelectedPriceId(priceID);
   };
 
@@ -62,31 +65,7 @@ const PlansPage = () => {
 
   return (
     <div className="items-center justify-center flex flex-col mt-10 w-full">
-      <h2 className="text-xl font-bold mb-4">Available Plans</h2>
-      {products.length === 0 ? (
-        <div>No products available.</div>
-      ) : (
-        <ul className="flex justify-center space-x-4">
-          {products.map((product) => (
-            <li key={product.id} className="w-full">
-              <div className="bg-gray-100 p-4 rounded-lg items-center justify-center flex flex-col">
-                <h3 className="text-lg font-semibold">{product.name}</h3>
-                <p className="items-center justify-center mx-10">{product.description}</p>
-                <p className="font-bold">
-                  Price: ${(product.unit_amount / 100).toFixed(2)} USD
-                </p>
-                <Button
-                  className="mt-2 p-2 bg-blue-500 text-white rounded"
-                  onClick={() => handleCheckout(product.unit_amount, product.default_price)}
-                >
-                  Buy Now
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      {selectedAmount !== null && (
+      {selectedAmount ? (
         <div>
           <Elements
             stripe={stripePromise}
@@ -99,7 +78,14 @@ const PlansPage = () => {
             <CheckoutPage amount={selectedAmount} priceId={selectedPriceId} />
           </Elements>
         </div>
-      )}
+      ) : <PricingTable
+      config={billingConfig}
+      paths={{
+        signUp: pathsConfig.auth.signUp,
+        return: pathsConfig.app.home,
+      }}
+      CheckoutButtonRenderer={handleCheckout}
+    />}
     </div>
   );
 };

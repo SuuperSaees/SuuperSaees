@@ -39,21 +39,14 @@ export function PricingTable({
   config: BillingConfig;
   paths: Paths;
   displayPlanDetails?: boolean;
-
   redirectToCheckout?: boolean;
-
-  CheckoutButtonRenderer?: React.ComponentType<{
-    planId: string;
-    productId: string;
-    highlighted?: boolean;
-  }>;
+  CheckoutButtonRenderer?: (amount: number, priceId: string)=> void;
 }) {
   const intervals = getPlanIntervals(config).filter(Boolean) as string[];
-  const [interval, setInterval] = useState(intervals[0]!);
-
+  const [interval, setInterval] = useState(intervals[0] || ''); // Maneja el caso si intervals está vacío
   return (
     <div className={'flex flex-col space-y-8 xl:space-y-12'}>
-      <div className={'flex justify-center'}>
+      {/* <div className={'flex justify-center'}>
         {intervals.length > 1 ? (
           <PlanIntervalSwitcher
             intervals={intervals}
@@ -61,51 +54,60 @@ export function PricingTable({
             setInterval={setInterval}
           />
         ) : null}
-      </div>
+      </div> */}
 
       <div
         className={
-          'flex flex-col items-start space-y-6 lg:space-y-0' +
+          'flex flex-col items-start space-y-6 lg:space-y-0 mt-4 mb-4' +
           ' justify-center lg:flex-row lg:space-x-4'
         }
       >
-        {config.products.map((product) => {
-          const plan = product.plans.find((plan) => {
-            if (plan.paymentType === 'recurring') {
-              return plan.interval === interval;
+        {Array.isArray(config.products) && config.products.length > 0 ? (
+          config.products.map((product) => {
+            // Verifica si product.plans es un arreglo antes de usarlo
+            if (!Array.isArray(product.plans)) {
+              return null; // Retorna null si plans no es un arreglo
             }
 
-            return plan;
-          });
+            const plan = product.plans.find((plan) => {
+              if (plan.paymentType === 'recurring') {
+                return plan.interval === interval;
+              }
+              return plan;
+            });
 
-          if (!plan) {
-            return null;
-          }
+            if (!plan) {
+              return null;
+            }
 
-          const primaryLineItem = getPrimaryLineItem(config, plan.id);
+            const primaryLineItem = getPrimaryLineItem(config, plan.id);
 
-          if (!plan.custom && !primaryLineItem) {
-            throw new Error(`Primary line item not found for plan ${plan.id}`);
-          }
+            if (!plan.custom && !primaryLineItem) {
+              throw new Error(`Primary line item not found for plan ${plan.id}`);
+            }
 
-          return (
-            <PricingItem
-              selectable
-              key={plan.id}
-              plan={plan}
-              redirectToCheckout={redirectToCheckout}
-              primaryLineItem={primaryLineItem}
-              product={product}
-              paths={paths}
-              displayPlanDetails={displayPlanDetails}
-              CheckoutButton={CheckoutButtonRenderer}
-            />
-          );
-        })}
+            return (
+              <PricingItem
+                selectable
+                key={plan.id}
+                plan={plan}
+                redirectToCheckout={redirectToCheckout}
+                primaryLineItem={primaryLineItem}
+                product={product}
+                paths={paths}
+                displayPlanDetails={displayPlanDetails}
+                CheckoutButtonRenderer={CheckoutButtonRenderer}
+              />
+            );
+          })
+        ) : (
+          <div>No hay productos disponibles.</div> 
+        )}
       </div>
     </div>
   );
 }
+
 
 function PricingItem(
   props: React.PropsWithChildren<{
@@ -129,11 +131,7 @@ function PricingItem(
       label?: string;
     };
 
-    CheckoutButton?: React.ComponentType<{
-      planId: string;
-      productId: string;
-      highlighted?: boolean;
-    }>;
+    CheckoutButtonRenderer?: (amount: number, priceId: string)=> void;
 
     product: {
       id: string;
@@ -161,7 +159,7 @@ function PricingItem(
       data-cy={'subscription-plan'}
       className={cn(
         props.className,
-        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-xl border p-8 lg:w-4/12 xl:max-w-[20rem]`,
+        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-xl border p-8 lg:w-4/12 xl:max-w-[18rem]`,
         {
           ['border-primary']: highlighted,
           ['border-border']: !highlighted,
@@ -199,12 +197,6 @@ function PricingItem(
             </b>
           </div>
 
-          <span className={cn(`text-muted-foreground h-6 text-sm`)}>
-            <Trans
-              i18nKey={props.product.description}
-              defaults={props.product.description}
-            />
-          </span>
         </div>
 
         <Separator />
@@ -262,29 +254,7 @@ function PricingItem(
             </span>
           </If>
         </div>
-
-        <If condition={props.selectable}>
-          <If
-            condition={props.plan.id && props.CheckoutButton}
-            fallback={
-              <DefaultCheckoutButton
-                paths={props.paths}
-                product={props.product}
-                highlighted={highlighted}
-                plan={props.plan}
-                redirectToCheckout={props.redirectToCheckout}
-              />
-            }
-          >
-            {(CheckoutButton) => (
-              <CheckoutButton
-                highlighted={highlighted}
-                planId={props.plan.id}
-                productId={props.product.id}
-              />
-            )}
-          </If>
-        </If>
+        <Button onClick={()=>props.CheckoutButtonRenderer(lineItem?.cost, props.plan.id)}>Continuar</Button>
 
         <Separator />
 
@@ -325,9 +295,9 @@ function FeaturesList(
     <ul className={'flex flex-col space-y-2'}>
       {props.features.map((feature) => {
         return (
-          <ListItem key={feature}>
+          <>{feature ? <ListItem key={feature}>
             <Trans i18nKey={feature} defaults={feature} />
-          </ListItem>
+          </ListItem> : <div></div>}</>
         );
       })}
     </ul>

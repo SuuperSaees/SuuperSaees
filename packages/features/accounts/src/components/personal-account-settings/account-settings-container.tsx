@@ -16,9 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
-
-
-
+import { Button } from '@kit/ui/button';
 import type { Account } from '../../../../../../apps/web/lib/account.types';
 import { ThemedButton } from '../ui/button-themed-with-settings';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
@@ -29,10 +27,6 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 // import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 // import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
-import { Button } from '@kit/ui/button';
-import { PricingTable } from '@kit/billing-gateway/marketing';
-import billingConfig from '../../../../../../apps/web/config/billing.config';
-import pathsConfig from '../../../../../../apps/web/config/paths.config';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -110,7 +104,6 @@ export function PersonalAccountSettingsContainer(
   if (!user) {
     return <LoadingOverlay fullPage />;
   }
-
   return (
     <div className="">
       <Tabs defaultValue='account'>
@@ -262,7 +255,7 @@ export function PersonalAccountSettingsContainer(
         </Card>
       </div>
 
-      <div className="flex w-full max-w-full flex-col space-y-6 lg:max-w-[350px]">
+      <div className="flex mt-6 w-full max-w-full flex-col space-y-6 lg:max-w-[350px]">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -295,18 +288,11 @@ export function PersonalAccountSettingsContainer(
         </TabsContent>
         <TabsContent value='billing'>
           <div className="flex w-full flex-col space-y-6">
-            {/* <Button>
+            <Button>
               <Link href="/select-plan">
                 Upgrade your plan
               </Link>
-            </Button> */}
-            <PricingTable
-              config={billingConfig}
-              paths={{
-                signUp: pathsConfig.auth.signUp,
-                return: pathsConfig.app.home,
-              }}
-            />
+            </Button>
               
             </div>
         </TabsContent>

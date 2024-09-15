@@ -58,7 +58,7 @@ const CreateOrganization = () => {
       toast.success('Success', {
         description: 'Organization created successfully',
       });
-      //   router.push('/orders');
+      // await createCustomerId
     } catch (error) {
       toast.error('Error', {
         description: 'Error creating organization',
