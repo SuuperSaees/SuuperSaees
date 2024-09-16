@@ -41,8 +41,6 @@ async function TeamAccountBillingPage({ params }: Params) {
   const workspace = await loadTeamWorkspace(params.account);
   const accountId = workspace.account.id;
 
-  console.log('workspace', workspace);
-
   const [data, customerId] = await loadTeamAccountBillingPage(accountId);
 
   const canManageBilling =
