@@ -50,12 +50,47 @@ export const createSubscription = async () => {
     const subscriptionData = (await subscriptionResponse.json())
 
    // Create subscription in db
+  const newSubscription: {
+    id: string;
+    account_id: string;
+    billing_customer_id: string;
+    active: boolean;
+    billing_provider: "stripe" | "lemon-squeezy" | "paddle";
+    currency: string;
+    status: "active"
+    | "trialing"
+    | "past_due"
+    | "canceled"
+    | "unpaid"
+    | "incomplete"
+    | "incomplete_expired"
+    | "paused";
+    cancel_at_period_end: boolean;
+    period_starts_at: string; 
+    period_ends_at?: string | null; 
+    trial_ends_at: string | null;
+    trial_starts_at: string | null;
+    updated_at: string;
+    created_at?: string;
+} = {
+    id: subscriptionData?.id as string,
+    account_id: user?.id as string,
+    billing_customer_id: customerData?.id as string,
+    active: true,
+    billing_provider: "stripe",
+    currency: "usd",
+    cancel_at_period_end: false,
+    status: "active",
+    period_ends_at: "",
+    period_starts_at: "", 
+    trial_ends_at: "",
+    trial_starts_at: "",
+    updated_at: "",
+    created_at: ""
+};
     const {data: subscriptionCreateData, error: subscriptionCreateError} = await client
     .from('subscriptions')
-    .insert({
-        id: subscriptionData?.id,
-        account_id: user?.id,
-    })
+    .insert(newSubscription)
     .select('*')
     .single();
 
