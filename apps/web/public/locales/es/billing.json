@@ -26,6 +26,7 @@
     "month": "Facturado mensualmente",
     "year": "Facturado anualmente"
   },
+  "billingTitle": "Facturación",
   "custom": "Personalizado",
   "lifetime": "De por vida",
   "trialPeriod": "Prueba de {{period}} días",

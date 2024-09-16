@@ -7,7 +7,7 @@ export enum LineItemType {
 }
 
 const BillingIntervalSchema = z.enum(['month', 'year']);
-const LineItemTypeSchema = z.enum(['flat', 'per_seat', 'metered']);
+const LineItemTypeSchema = z.enum(['flat', 'per_seat', 'metered', 'per_unit']);
 
 export const BillingProviderSchema = z.enum([
   'stripe',
@@ -40,8 +40,7 @@ export const LineItemSchema = z
     cost: z
       .number({
         description: 'Cost of the line item. Displayed to the user.',
-      })
-      .min(0),
+      }),
     type: LineItemTypeSchema,
     unit: z
       .string({
@@ -98,8 +97,7 @@ export const PlanSchema = z
     name: z
       .string({
         description: 'Name of the plan. Displayed to the user.',
-      })
-      .min(1),
+      }),
     interval: BillingIntervalSchema.optional(),
     custom: z.boolean().default(false).optional(),
     label: z.string().min(1).optional(),
@@ -127,83 +125,9 @@ export const PlanSchema = z
         description:
           'Number of days for the trial period. Leave empty for no trial.',
       })
-      .positive()
       .optional(),
     paymentType: PaymentTypeSchema,
-  })
-  .refine(
-    (data) => {
-      if (data.custom) {
-        return data.lineItems.length === 0;
-      }
-
-      return data.lineItems.length > 0;
-    },
-    {
-      message: 'Non-Custom Plans must have at least one line item',
-      path: ['lineItems'],
-    },
-  )
-  .refine(
-    (data) => {
-      if (data.custom) {
-        return data.lineItems.length === 0;
-      }
-
-      return data.lineItems.length > 0;
-    },
-    {
-      message: 'Custom Plans must have 0 line items',
-      path: ['lineItems'],
-    },
-  )
-  .refine(
-    (data) => data.paymentType !== 'one-time' || data.interval === undefined,
-    {
-      message: 'One-time plans must not have an interval',
-      path: ['paymentType', 'interval'],
-    },
-  )
-  .refine(
-    (data) => data.paymentType !== 'recurring' || data.interval !== undefined,
-    {
-      message: 'Recurring plans must have an interval',
-      path: ['paymentType', 'interval'],
-    },
-  )
-  .refine(
-    (item) => {
-      // metered line items can be shared across plans
-      const lineItems = item.lineItems.filter(
-        (item) => item.type !== LineItemType.Metered,
-      );
-
-      const ids = lineItems.map((item) => item.id);
-
-      return ids.length === new Set(ids).size;
-    },
-    {
-      message: 'Line item IDs must be unique',
-      path: ['lineItems'],
-    },
-  )
-  .refine(
-    (data) => {
-      if (data.paymentType === 'one-time') {
-        const nonFlatLineItems = data.lineItems.filter(
-          (item) => item.type !== LineItemType.Flat,
-        );
-
-        return nonFlatLineItems.length === 0;
-      }
-
-      return true;
-    },
-    {
-      message: 'One-time plans must not have non-flat line items',
-      path: ['paymentType', 'lineItems'],
-    },
-  );
+  });
 
 const ProductSchema = z
   .object({
@@ -254,10 +178,6 @@ const ProductSchema = z
       .optional(),
     plans: z.array(PlanSchema),
   })
-  .refine((data) => data.plans.length > 0, {
-    message: 'Products must have at least one plan',
-    path: ['plans'],
-  })
   .refine(
     (item) => {
       const planIds = item.plans.map((plan) => plan.id);
@@ -275,19 +195,6 @@ const BillingSchema = z
     provider: BillingProviderSchema,
     products: z.array(ProductSchema).nonempty(),
   })
-  .refine(
-    (data) => {
-      const ids = data.products.flatMap((product) =>
-        product.plans.flatMap((plan) => plan.lineItems.map((item) => item.id)),
-      );
-
-      return ids.length === new Set(ids).size;
-    },
-    {
-      message: 'Line item IDs must be unique',
-      path: ['products'],
-    },
-  )
   .refine(
     (schema) => {
       if (schema.provider === 'lemon-squeezy') {
@@ -307,31 +214,6 @@ const BillingSchema = z
       path: ['provider', 'products'],
     },
   )
-  .refine(
-    (schema) => {
-      if (schema.provider !== 'lemon-squeezy') {
-        // Check if there are any flat fee metered items
-        const setupFeeItems = schema.products.flatMap((product) =>
-          product.plans.flatMap((plan) =>
-            plan.lineItems.filter((item) => item.setupFee),
-          ),
-        );
-
-        // If there are any flat fee metered items, return an error
-        if (setupFeeItems.length > 0) {
-          return false;
-        }
-      }
-
-      return true;
-    },
-    {
-      message:
-        'Setup fee metered items are only supported by Lemon Squeezy. For Stripe and Paddle, please use a separate line item for the setup fee.',
-      path: ['products', 'plans', 'lineItems'],
-    },
-  );
-
 export function createBillingSchema(config: z.infer<typeof BillingSchema>) {
   return BillingSchema.parse(config);
 }
@@ -340,11 +222,21 @@ export type BillingConfig = z.infer<typeof BillingSchema>;
 export type ProductSchema = z.infer<typeof ProductSchema>;
 
 export function getPlanIntervals(config: z.infer<typeof BillingSchema>) {
-  const intervals = config.products
-    .flatMap((product) => product.plans.map((plan) => plan.interval))
-    .filter(Boolean);
+  // Verifica si config.products es un arreglo y no está vacío
+  if (!Array.isArray(config.products)) {
+    return []; // Retorna un arreglo vacío si products no es un arreglo
+  }
 
-  return Array.from(new Set(intervals));
+  const intervals = config.products
+    .flatMap((product) => {
+      // Verifica si plans existe y no está vacío
+      return product?.plans && product.plans.length > 0
+        ? product.plans.map((plan) => plan.interval)
+        : []; // Retorna un arreglo vacío si plans está vacío
+    })
+    .filter(Boolean); // Filtra cualquier valor falsy
+
+  return intervals; // Retorna los intervalos
 }
 
 /**
