@@ -2,10 +2,13 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { User } from '../../../../../../../../apps/web/lib/user.types';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 import { getOrganization } from '../../organizations/get/get-organizations';
+
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
@@ -148,5 +151,6 @@ export const createClient = async (clientData: CreateClient) => {
     return client;
   } catch (error) {
     console.error('Error al crear el cliente:', error);
+    throw error;
   }
 };
