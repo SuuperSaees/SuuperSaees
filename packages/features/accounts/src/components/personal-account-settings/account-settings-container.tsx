@@ -29,6 +29,7 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 // import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 // import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
+import BillingContainerConfig  from './billing/billing-container';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -309,14 +310,15 @@ export function PersonalAccountSettingsContainer(
           </div>
         </TabsContent>
         <TabsContent value='billing'>
-          <div className="flex w-full flex-col space-y-6">
+          {/* <div className="flex w-full flex-col space-y-6">
             <Button>
               <Link href="/select-plan">
                 Upgrade your plan
               </Link>
             </Button>
               
-            </div>
+            </div> */}
+            <BillingContainerConfig />
         </TabsContent>
           
 
