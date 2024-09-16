@@ -135,7 +135,7 @@ export default function BillingContainerConfig() {
                                                 {invoice.paymentStatus} <CheckIcon size={16} />
                                             </div>
                                         </TableCell>
-                                        <TableCell className="display: flex;padding: 8px;justify-content: center;align-items: center;gap: 8px; flex justify-center items-center gap-2 p-2"><DownloadCloud/></TableCell>
+                                        <TableCell className="display: flex;padding: 8px;justify-content: center;align-items: center;gap: 8px; flex justify-center items-center gap-2 p-2 cursor-pointer"><DownloadCloud/></TableCell>
                                     </TableRow>
                                     ))}
                                 </TableBody>
