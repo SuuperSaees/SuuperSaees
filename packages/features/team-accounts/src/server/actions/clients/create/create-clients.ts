@@ -150,7 +150,7 @@ export const createClient = async (clientData: CreateClient) => {
     }
     return client;
   } catch (error) {
-    console.error('Error al crear el cliente:', error);
+    console.error('Error creating the client', error);
     throw error;
   }
 };
