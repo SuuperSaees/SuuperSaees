@@ -30,6 +30,7 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 // import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import BillingContainerConfig  from './billing/billing-container';
+import RegisterAccountContainer from '../../../../../../apps/web/app/stripe/components/register-stripe-account-container';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -268,11 +269,12 @@ export function PersonalAccountSettingsContainer(
           </CardHeader>
           <CardContent>
             {(!accountStripe?.id || !accountStripe.charges_enabled) && (
-              <ThemedButton className="bg-brand">
-                <Link href={'/stripe'}>
-                  {accountStripe?.id ? 'Continuar' : 'Conectar'}
-                </Link>
-              </ThemedButton>
+              // <ThemedButton className="bg-brand">
+              //   <Link href={'/stripe'}>
+              //     {accountStripe?.id ? 'Continuar' : 'Conectar'}
+              //   </Link>
+              // </ThemedButton>
+              <RegisterAccountContainer />
             )}
           </CardContent>
         </Card>

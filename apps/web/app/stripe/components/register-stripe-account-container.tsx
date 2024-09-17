@@ -58,12 +58,12 @@ export default function RegisterAccountContainer() {
     }, [supabase]);
     
     return (
-        <div>
+        <>
             <Elements stripe={stripePromise}>
                {account?.email && account?.id && <RegisterStripePage  email={account?.email} stripeId={account?.stripeId} id={account?.id}/>}
             </Elements>
 
-        </div>
+        </>
         
     );
 }
