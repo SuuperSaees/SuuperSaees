@@ -25,9 +25,10 @@ import { UpdatePasswordFormContainer } from './password/update-password-containe
 import UpdateAccountColorBrand from './update-account-color-brand';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
-// import UpdateAccountOrganizationLogo from './update-account-organization-logo';
+import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 // import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
+
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -197,7 +198,7 @@ export function PersonalAccountSettingsContainer(
             <UpdateAccountOrganizationSidebar />
           </CardContent>
         </Card>
-        {/* <Card>
+        <Card>
           <CardHeader>
             <CardTitle>
               <Trans i18nKey={'account:brandLogo'} />
@@ -206,12 +207,12 @@ export function PersonalAccountSettingsContainer(
               <Trans i18nKey={'account:brandLogoDescription'} />
             </CardDescription>
           </CardHeader>
-          {/* <CardContent>
+         <CardContent>
             <UpdateAccountOrganizationLogo
               organizationId={user?.organization_id ?? ''}
             />
           </CardContent> 
-        </Card> */}
+        </Card> 
         <Card>
           <CardHeader>
             <CardTitle>
