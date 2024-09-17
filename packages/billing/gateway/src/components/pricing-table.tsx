@@ -23,7 +23,7 @@ import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
 import { LineItemDetails } from './line-item-details';
-
+import { useBillingContext } from '../../../../../apps/web/app/home/[account]/contexts/billing-context'
 interface Paths {
   signUp: string;
   return: string;
@@ -145,9 +145,8 @@ function PricingItem(
   }>,
 ) {
   const highlighted = props.product.highlighted ?? false;
-
+  const { subscriptionFetchedStripe } = useBillingContext()
   const lineItem = props.primaryLineItem;
-
   // we exclude flat line items from the details since
   // it doesn't need further explanation
   const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
@@ -254,7 +253,7 @@ function PricingItem(
             </span>
           </If>
         </div>
-        <Button onClick={()=>props.CheckoutButtonRenderer(lineItem?.cost, props.plan.id)}>Continuar</Button>
+        <Button onClick={()=>props.CheckoutButtonRenderer(lineItem?.cost, props.plan.id)} disabled={props.plan.id === subscriptionFetchedStripe?.plan.id}>{props.plan.id === subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</Button>
 
         <Separator />
 

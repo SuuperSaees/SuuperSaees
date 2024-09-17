@@ -28,6 +28,7 @@ export default function BillingContainerConfig() {
     const { subscription, subscriptionFetchedStripe, productSubscription, invoices, upcomingInvoice } = useBillingContext();
 
     const formatUnixToMonthYear = (unixTimestamp: number, includeDay: boolean) => {
+        if (!unixTimestamp) return '';
         const date = new Date(unixTimestamp * 1000);
         
         const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -57,7 +58,7 @@ export default function BillingContainerConfig() {
           enterprise: 20
         };
       
-        return planValues[plan.toLowerCase()] || 0;
+        return planValues[plan?.toLowerCase()] || 0;
       };
 
       const getProgressPercentage = (occupied: any, available: any) => {

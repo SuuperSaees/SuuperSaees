@@ -9,6 +9,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 
 // local imports
 import { TeamAccountLayoutPageHeader } from '../_components/team-account-layout-page-header';
+import { BillingContextProvider, useBillingContext } from '../contexts/billing-context'
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -32,7 +33,7 @@ const paths = {
 async function TeamAccountSettingsPage(props: Props) {
   const api = createTeamAccountsApi(getSupabaseServerComponentClient());
   const data = await api.getTeamAccount(props.params.account);
-
+  const {} = useBillingContext();
   const account = {
     id: data.id,
     name: data.name,
@@ -42,7 +43,7 @@ async function TeamAccountSettingsPage(props: Props) {
   };
 
   return (
-    <>
+    <BillingContextProvider>
       <TeamAccountLayoutPageHeader
         account={account.slug}
         title={<Trans i18nKey={'team:settings.pageTitle'} />}
@@ -53,7 +54,7 @@ async function TeamAccountSettingsPage(props: Props) {
           <TeamAccountSettingsContainer account={account} paths={paths} />
         </div>
       </PageBody>
-    </>
+    </BillingContextProvider>
   );
 }
 

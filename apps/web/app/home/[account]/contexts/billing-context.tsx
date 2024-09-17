@@ -34,6 +34,8 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
+
+
   const fetchInvoices = async (customerId: string): Promise<void> => {
     setLoading(true);
     setError(false);
@@ -89,7 +91,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
       const result = await getSubscriptionByOrganizationId();
       setSubscription(result);
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-      const responseSubscription = await fetch(`${baseUrl}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(result?.id ?? "")}`, {
+      const responseSubscription = await fetch(`${baseUrl}/api/stripe/get-subscription-by-customer?customerId=${encodeURIComponent(result?.billing_customer_id ?? "")}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -121,6 +123,32 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
       setLoading(false);
     }
   };
+
+  // const upgradeSubscription = async (priceId: string): Promise<void> => {
+  //   setLoading(true);
+  //   setError(false);
+  //   try {
+  //     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  //     const result = await getSubscriptionByOrganizationId();
+
+  //     const response = await fetch(`${baseUrl}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(result?.id)}`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ priceId }),
+  //     });
+  //     if (!response.ok) {
+  //       throw new Error('Failed to upgrade subscription');
+  //     }
+  //     await updateSubscription();
+  //   } catch (error) {
+  //     console.error("Error upgrading subscription:", error);
+  //     setError(true);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
 
   useEffect(() => {

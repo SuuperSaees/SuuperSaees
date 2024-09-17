@@ -10,7 +10,7 @@ export async function DELETE(req: NextRequest) {
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
            const subscription = await stripe.subscriptions.cancel(subscriptionId);
-           console.log(subscription, "HOLAAA SUBSCRIPTION CANCELED")
+
         return NextResponse.json(subscription);
     } catch (error) {
         return NextResponse.json(
