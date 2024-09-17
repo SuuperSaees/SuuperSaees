@@ -10,7 +10,7 @@ import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Review } from '../../../../../../../../apps/web/lib/review.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
-import { hasPermissionToReadOrders } from '../../permissions/permissions';
+import { hasPermissionToReadOrderDetails, hasPermissionToReadOrders } from '../../permissions/permissions';
 
 
 type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url'>;
@@ -45,7 +45,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       .eq('id', orderId)
       .single();
 
-    const userHasReadMessagePermission = await hasPermissionToReadOrders(
+    const userHasReadMessagePermission = await hasPermissionToReadOrderDetails(
       orderId,
       orderData?.propietary_organization_id ?? '',
       orderData?.client_organization_id ?? '',
@@ -93,6 +93,14 @@ export async function getOrderAgencyMembers(
 
     if (accountError) throw accountError;
 
+    const { data: accountMembershipsData, error: accountMembershipsDataError } = await client
+      .from('accounts_memberships')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (accountMembershipsDataError) throw accountMembershipsDataError;
+
     // Retrieve the order
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
@@ -102,13 +110,20 @@ export async function getOrderAgencyMembers(
 
     if (orderError) throw orderError;
 
-    // Verify that the order organization_id matches the authenticated account's organization_id
-    if (
-      orderData.propietary_organization_id !== accountData.primary_owner_user_id
-    ) {
+    if (accountMembershipsData.account_role !== 'agency_owner' && accountMembershipsData.account_role !== 'agency_member') {
       throw new Error('Unauthorized access to order agency members');
     }
-    // console.log('aid', accountData.id);
+
+    if (orderData.propietary_organization_id === accountData.organization_id) {
+      const { data: agencyMembersData, error: agencyMembersError } = await client
+      .from('accounts')
+      .select()
+      .eq('organization_id', agencyId ?? accountData.organization_id);
+
+      if (agencyMembersError) throw agencyMembersError;
+      return agencyMembersData;
+    }
+    
     const { data: agencyMembersData, error: agencyMembersError } = await client
       .from('accounts')
       .select()
@@ -125,70 +140,8 @@ export async function getOrderAgencyMembers(
 
 export const getOrders = async () => {
   try {
-    const client = getSupabaseServerComponentClient();
-    const { data: userData } = await client.auth.getUser();
-
-    const userId = userData.user!.id;
-
-    // Getting the role
-    const { data: role, error: roleError } = await client
-      .from('accounts_memberships')
-      .select('account_role')
-      .eq('user_id', userId)
-      .single();
-
-    if (roleError) console.error(roleError.message);
-    let ordersData = [];
-
-    const isClient =
-      (role && role.account_role === 'client_owner') ||
-      (role && role.account_role === 'client_member');
-
-    if (isClient) {
-      const { data: orderData, error: clientError } = await client
-        .from('orders_v2')
-        .select(
-          '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name) '
-        )
-        .eq('customer_id', userId)
-        .order('created_at', { ascending: false }); // Sorting by created_at in descending order
-
-      ordersData = orderData ?? [];
-
-      if (clientError) {
-        console.error(clientError.message);
-        throw clientError.message;
-      }
-    } else {
-      const { data: agencyUserAccount, error: accountError } = await client
-        .from('accounts')
-        .select('organization_id')
-        .eq('id', userId)
-        .single();
-
-      if (accountError) {
-        console.error(accountError.message);
-        throw accountError.message;
-      }
-
-      const { data: orderData, error: ownerError } = await client
-        .from('orders_v2')
-        .select(
-          `*, organization:accounts!client_organization_id(slug, name), 
-          customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`
-        )
-        .eq('agency_id', agencyUserAccount?.organization_id ?? '')
-        .order('created_at', { ascending: false }); // Sorting by created_at in descending order
-
-      ordersData = orderData ?? [];
-
-      if (ownerError) {
-        console.error('Error in the agency owner');
-        throw ownerError.message;
-      }
-    }
-
-    return ordersData;
+    const orders = await hasPermissionToReadOrders();
+    return orders;
   } catch (error) {
     console.error('Error fetching orders:', error);
     throw error;

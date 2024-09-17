@@ -54,11 +54,12 @@ type ExtendedOrderType = Order.Type & {
 // Use the extended type
 type OrdersTableProps = {
   orders: ExtendedOrderType[];
+  role: string;
 };
 
 const PAGE_SIZE = 10;
 
-export function OrderList({ orders }: OrdersTableProps) {
+export function OrderList({ orders, role }: OrdersTableProps) {
   const { t } = useTranslation('orders');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -163,7 +164,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                 </div>
                 {orders.length > 0 ? (
                   <Link href="/orders/create">
-                    <ThemedButton>Crear pedido</ThemedButton>
+                    <ThemedButton>{t('creation.title')}</ThemedButton>
                   </Link>
                 ) : null}
               </div>
@@ -226,50 +227,49 @@ export function OrderList({ orders }: OrdersTableProps) {
                                   </span>
                                 </TableCell>
                                 <TableCell className="hidden flex-1 md:table-cell">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger
-                                      className={`m-2 flex inline-flex items-center rounded-lg p-2 ${order.status ? statusColors[order.status] : ''}`}
-                                    >
-                                      <span className="pl-2 pr-2">
-                                        {order.status
-                                          ?.replace(/_/g, ' ')
-                                          .replace(/^\w/, (c) =>
-                                            c.toUpperCase(),
-                                          )}
-                                      </span>
-                                      <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      {statuses.map((status, statusIndex) => {
-                                        const camelCaseStatus = status?.replace(
-                                          /_./g,
-                                          (match) =>
-                                            match.charAt(1).toUpperCase(),
-                                        );
-                                        if (!status) return null;
-                                        return (
-                                          <DropdownMenuItem
-                                            className={`m-2 rounded-lg p-2 ${statusColors[status]} cursor-pointer`}
-                                            key={status + statusIndex}
-                                            onClick={() => {
-                                              changeStatus.mutate({
-                                                orderId: order.id,
-                                                status,
-                                              });
-                                            }}
-                                          >
-                                            {t(
-                                              `details.statuses.${camelCaseStatus}`,
-                                            )
-                                              .replace(/_/g, ' ') // Replace underscores with spaces (even though there are no underscores in the priorities array)
-                                              .replace(/^\w/, (c) =>
-                                                c.toUpperCase(),
-                                              )}
-                                          </DropdownMenuItem>
-                                        );
-                                      })}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
+                                  {['agency_member', 'agency_owner', 'agency_project_manager'].includes(role) ? (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger
+                                        className={`m-2 flex inline-flex items-center rounded-lg p-2 ${order.status ? statusColors[order.status] : ''}`}
+                                      >
+                                        <span className="pl-2 pr-2">
+                                          {order.status
+                                            ?.replace(/_/g, ' ')
+                                            .replace(/^\w/, (c) => c.toUpperCase())}
+                                        </span>
+                                        <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        {statuses.map((status, statusIndex) => {
+                                          const camelCaseStatus = status?.replace(/_./g, (match) => match.charAt(1).toUpperCase());
+                                          if (!status) return null;
+                                          return (
+                                            <DropdownMenuItem
+                                              className={`m-2 rounded-lg p-2 ${statusColors[status]} cursor-pointer`}
+                                              key={status + statusIndex}
+                                              onClick={() => {
+                                                changeStatus.mutate({
+                                                  orderId: order.id,
+                                                  status,
+                                                });
+                                              }}
+                                            >
+                                              {t(`details.statuses.${camelCaseStatus}`)
+                                                .replace(/_/g, ' ')
+                                                .replace(/^\w/, (c) => c.toUpperCase())}
+                                            </DropdownMenuItem>
+                                          );
+                                        })}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  ) : (
+                                    // Mostrar la fecha o un espacio vacío si no hay fecha
+                                    <span className="pl-2 pr-2">
+                                      {order.status
+                                        ?.replace(/_/g, ' ')
+                                        .replace(/^\w/, (c) => c.toUpperCase())}
+                                    </span>
+                                  )}
                                 </TableCell>
                                 <TableCell className="hidden flex-1 md:table-cell">
                                   <div className="flex -space-x-1">
@@ -288,12 +288,19 @@ export function OrderList({ orders }: OrdersTableProps) {
                                   </div>
                                 </TableCell>
                                 <TableCell className="hidden flex-1 md:table-cell">
-                                  <DatePicker
-                                    updateFn={(dueDate: string) =>
-                                      updateOrderDate(dueDate, order.id)
-                                    }
-                                    defaultDate={order.due_date}
-                                  />
+                                  {['agency_member', 'agency_owner', 'agency_project_manager'].includes(role) ? (
+                                    <DatePicker
+                                      updateFn={(dueDate: string) =>
+                                        updateOrderDate(dueDate, order.id)
+                                      }
+                                      defaultDate={order.due_date}
+                                    />
+                                  ) : (
+                                    // Mostrar la fecha o un espacio vacío si no hay fecha
+                                    <span className="pl-2 pr-2">
+                                      {order.due_date ?? 'Sin fecha'}
+                                    </span>
+                                  )}
                                 </TableCell>
                               </TableRow>
                             ))
@@ -318,7 +325,7 @@ export function OrderList({ orders }: OrdersTableProps) {
                                   haciendo clic a continuación.
                                 </p>
                                 <Link href="/orders/create">
-                                  <Button className="po">Crear pedido</Button>
+                                  <Button className="po">{t('creation.title')}</Button>
                                 </Link>
                               </div>
                             </TableCell>

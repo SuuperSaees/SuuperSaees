@@ -54,10 +54,13 @@ export default async function UserHomePage() {
   if (availableInvitations) {
     const invite_token = availableInvitations.invite_token;
     const email = availableInvitations.email;
-    return redirect('/join?invite_token=' + invite_token + '&email=' + email);
-  } 
-
-
+  
+    if (invite_token && email) {
+      return redirect('/join?invite_token=' + invite_token + '&email=' + email);
+    } else {
+      console.error('Faltan los datos de invitación'+ availableInvitationsError);
+    }
+  }
   
 
   // const { data: accounts } = await supabase
