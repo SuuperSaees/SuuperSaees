@@ -41,12 +41,6 @@ export default function BillingContainerConfig() {
       
         return `${month} ${year}`;
       }
-
-    console.log(subscription);
-    console.log(subscriptionFetchedStripe)
-    console.log(productSubscription, " HOLAAA PRODUCT")
-    console.log(invoices, " HOLAAA INVOICES")
-    console.log(upcomingInvoice, " HOLAAA UPCOMING INVOICE")
     const handleUpgradeClick = () => {
         setShowUpgradeComponent(true);
     };
@@ -66,7 +60,7 @@ export default function BillingContainerConfig() {
         return planValues[plan.toLowerCase()] || 0;
       };
 
-      const getProgressPercentage = (occupied, available) => {
+      const getProgressPercentage = (occupied: any, available: any) => {
         if (available <= 0) return 0;
         if (occupied < 0) occupied = 0;
         
