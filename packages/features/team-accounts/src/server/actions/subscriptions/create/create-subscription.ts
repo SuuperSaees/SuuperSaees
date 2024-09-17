@@ -52,7 +52,7 @@ export const createSubscription = async () => {
 
    // Create subscription in db
    const primary_owner_user_id = await getPrimaryOwnerId();
-  const newSubscription: {
+   const newSubscription: {
     id: string;
     propietary_organization_id: string;
     billing_customer_id: string;
@@ -68,12 +68,12 @@ export const createSubscription = async () => {
     | "incomplete_expired"
     | "paused";
     cancel_at_period_end: boolean;
-    period_starts_at: string; 
+    period_starts_at: string | null; 
     period_ends_at?: string | null; 
     trial_ends_at: string | null;
     trial_starts_at: string | null;
-    updated_at: string;
-    created_at?: string;
+    updated_at: string | null;
+    created_at?: string | null;
 } = {
     id: subscriptionData?.id as string,
     propietary_organization_id: primary_owner_user_id as string,
@@ -83,19 +83,24 @@ export const createSubscription = async () => {
     currency: "usd",
     cancel_at_period_end: false,
     status: "active",
-    period_ends_at: "",
-    period_starts_at: "", 
-    trial_ends_at: "",
-    trial_starts_at: "",
-    updated_at: "",
-    created_at: ""
+    period_ends_at: null, // Cambia "" a null
+    period_starts_at: null, // Cambia "" a null
+    trial_ends_at: null, // Cambia "" a null
+    trial_starts_at: null, // Cambia "" a null
+    updated_at: null, // Cambia "" a null
+    created_at: null // Cambia "" a null
 };
-    const {data: subscriptionCreateData, error: subscriptionCreateError} = await client
+
+    const { error: subscriptionCreateError} = await client
     .from('subscriptions')
     .insert(newSubscription)
     .select('*')
     .single();
 
+    console.log('subscriptionCreateError', subscriptionCreateError)
+    if (subscriptionCreateError) {
+      console.error('Error creating subscription:', subscriptionCreateError.message);
+    }
   } catch (error) {
     console.error('Error while creating the organization account:', error);
     throw error;  // Throw the error to ensure the caller knows the function failed

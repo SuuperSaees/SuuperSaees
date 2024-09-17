@@ -11,14 +11,13 @@ export async function POST(req: NextRequest) {
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
            const subscription = await stripe.subscriptions.create({
-            customer,
+            customer: customer,
             items: [
                 {
-                  price,
+                  price: price,
                 },
               ],
            });
-
         return NextResponse.json(subscription);
     } catch (error) {
         return NextResponse.json(

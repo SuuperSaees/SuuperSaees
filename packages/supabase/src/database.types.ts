@@ -1528,48 +1528,48 @@ export type Database = {
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
           cancel_at_period_end: boolean
-          created_at: string
+          created_at: string | null
           currency: string
           id: string
           period_ends_at: string | null
-          period_starts_at: string
+          period_starts_at: string | null
           propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at: string | null
           trial_starts_at: string | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
           cancel_at_period_end: boolean
-          created_at?: string
+          created_at?: string | null
           currency: string
           id: string
           period_ends_at?: string | null
-          period_starts_at: string
+          period_starts_at?: string | null
           propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at?: string | null
           trial_starts_at?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           active?: boolean
           billing_customer_id?: string
           billing_provider?: Database["public"]["Enums"]["billing_provider"]
           cancel_at_period_end?: boolean
-          created_at?: string
+          created_at?: string | null
           currency?: string
           id?: string
           period_ends_at?: string | null
-          period_starts_at?: string
+          period_starts_at?: string | null
           propietary_organization_id?: string
           status?: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at?: string | null
           trial_starts_at?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1933,16 +1933,16 @@ export type Database = {
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
           cancel_at_period_end: boolean
-          created_at: string
+          created_at: string | null
           currency: string
           id: string
           period_ends_at: string | null
-          period_starts_at: string
+          period_starts_at: string | null
           propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at: string | null
           trial_starts_at: string | null
-          updated_at: string
+          updated_at: string | null
         }
       }
     }

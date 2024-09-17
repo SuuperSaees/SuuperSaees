@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
            const customer = await stripe.customers.create({
             email
            });
-
         return NextResponse.json(customer);
     } catch (error) {
         return NextResponse.json(

@@ -1,11 +1,13 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import { Subscription } from '~/lib/subscriptions.types';
 import { getSubscriptionByOrganizationId } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/get/get-subscrioption-by-organization-id';
 
 interface BillingContextValue {
   subscription: Subscription.Type; 
+  subscriptionFetchedStripe: any;
+  productSubscription: any;
   invoices: any[]; 
   upcomingInvoice: any; 
   totalBilled: number;
@@ -24,25 +26,13 @@ interface BillingContextProviderProps {
 
 export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ children }) => {
   const [subscription, setSubscription] = useState<any>(null); 
+  const [subscriptionFetchedStripe, setSubscriptionFetchedStripe] = useState<any>(null);
+  const [productSubscription, setProductSubscription] = useState<any>(null);
   const [invoices, setInvoices] = useState<any[]>([]); 
   const [upcomingInvoice, setUpcomingInvoice] = useState<any>(null); 
   const [totalBilled, setTotalBilled] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
-
-  const updateSubscription = async (): Promise<void> => {
-    setLoading(true);
-    setError(false);
-    try {
-      const result = await getSubscriptionByOrganizationId();
-      setSubscription(result);
-    } catch (error) {
-      console.error("Error fetching subscription:", error);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchInvoices = async (customerId: string): Promise<void> => {
     setLoading(true);
@@ -59,7 +49,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
         throw new Error('Failed to fetch invoices');
       }
       const data = await response.json();
-      setInvoices(data.invoices); 
+      setInvoices(data); 
     } catch (error) {
       console.error("Error fetching invoices:", error);
       setError(true);
@@ -83,7 +73,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
         throw new Error('Failed to fetch upcoming invoice');
       }
       const data = await response.json();
-      setUpcomingInvoice(data.upcomingInvoice);
+      setUpcomingInvoice(data);
     } catch (error) {
       console.error("Error fetching upcoming invoice:", error);
       setError(true);
@@ -92,8 +82,57 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
     }
   };
 
+  const updateSubscription = async (): Promise<void> => {
+    setLoading(true);
+    setError(false);
+    try {
+      const result = await getSubscriptionByOrganizationId();
+      setSubscription(result);
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+      const responseSubscription = await fetch(`${baseUrl}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(result?.id ?? "")}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!responseSubscription.ok) {
+        throw new Error('Failed to fetch subscription');
+      }
+      const dataSubscription = await responseSubscription.json();
+      setSubscriptionFetchedStripe(dataSubscription); 
+      //////////////////////////////////////
+      const responseProduct = await fetch(`${baseUrl}/api/stripe/get-product?productId=${encodeURIComponent(dataSubscription?.plan?.product ?? "")}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!responseProduct.ok) {
+        throw new Error('Failed to fetch product');
+      }
+      const dataProduct = await responseProduct.json();
+      setProductSubscription(dataProduct)
+      fetchInvoices(result?.billing_customer_id ?? "");
+      fetchUpcomingInvoice(result?.billing_customer_id ?? "")
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    if (!subscriptionFetchedStripe) {
+        updateSubscription();
+    }
+}, [subscriptionFetchedStripe]);
+
   const value: BillingContextValue = {
     subscription,
+    subscriptionFetchedStripe,
+    productSubscription,
     invoices,
     upcomingInvoice,
     totalBilled,

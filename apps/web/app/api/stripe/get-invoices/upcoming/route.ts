@@ -12,7 +12,6 @@ export async function GET(req: NextRequest) {
            const upcomingInvoice = await stripe.invoices.retrieveUpcoming({
             customer,
            });
-           console.log(upcomingInvoice, "HOLAAA DATAAA INVOICE UPCOMING")
         return NextResponse.json(upcomingInvoice);
     } catch (error) {
         return NextResponse.json(

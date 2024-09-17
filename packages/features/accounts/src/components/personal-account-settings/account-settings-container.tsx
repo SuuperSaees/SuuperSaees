@@ -31,6 +31,7 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import BillingContainerConfig  from './billing/billing-container';
 import RegisterAccountContainer from '../../../../../../apps/web/app/stripe/components/register-stripe-account-container';
+import { BillingContextProvider } from '../../../../../../apps/web/app/home/[account]/contexts/billing-context'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -124,6 +125,7 @@ export function PersonalAccountSettingsContainer(
     return <LoadingOverlay fullPage />;
   }
   return (
+    <BillingContextProvider>
     <div className="">
       <Tabs defaultValue='account'>
         <TabsList>
@@ -326,6 +328,7 @@ export function PersonalAccountSettingsContainer(
 
       </Tabs>
     </div>
+    </BillingContextProvider>
   );
 }
 

@@ -12,7 +12,6 @@ export async function GET(req: NextRequest) {
            const invoices = await stripe.invoices.list({
             customer,
            });
-           console.log(invoices.data, "HOLAAA DATAAA INVOICES")
         return NextResponse.json(invoices.data);
     } catch (error) {
         return NextResponse.json(
