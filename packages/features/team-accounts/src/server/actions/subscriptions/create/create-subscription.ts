@@ -1,6 +1,7 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -50,9 +51,10 @@ export const createSubscription = async () => {
     const subscriptionData = (await subscriptionResponse.json())
 
    // Create subscription in db
+   const primary_owner_user_id = await getPrimaryOwnerId();
   const newSubscription: {
     id: string;
-    account_id: string;
+    propietary_organization_id: string;
     billing_customer_id: string;
     active: boolean;
     billing_provider: "stripe" | "lemon-squeezy" | "paddle";
@@ -74,7 +76,7 @@ export const createSubscription = async () => {
     created_at?: string;
 } = {
     id: subscriptionData?.id as string,
-    account_id: user?.id as string,
+    propietary_organization_id: primary_owner_user_id as string,
     billing_customer_id: customerData?.id as string,
     active: true,
     billing_provider: "stripe",

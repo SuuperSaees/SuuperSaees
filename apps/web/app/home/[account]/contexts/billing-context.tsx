@@ -1,96 +1,122 @@
 'use client';
 
-import { Service } from '../../../lib/services.types';
-import { getServicesByOrganizationId } from '../../../../../packages/features/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { getStripeAccountID, getUserRole} from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
-interface ServicesContextValue {
-  services: Service.Type[];
-  hasTheEmailAssociatedWithStripe: boolean;
+import { Subscription } from '~/lib/subscriptions.types';
+import { getSubscriptionByOrganizationId } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/get/get-subscrioption-by-organization-id';
+
+interface BillingContextValue {
+  subscription: Subscription.Type; 
+  invoices: any[]; 
+  upcomingInvoice: any; 
+  totalBilled: number;
   loading: boolean;
   error: boolean;
-  accountRole: string;
-  updateServices: (showLoader:boolean) => Promise<void>;
-  fetchAccountStripeConnect: () => Promise<void>;
-  fetchAccountMemberShipRole: () => Promise<void>;
+  updateSubscription: () => Promise<void>;
+  fetchInvoices: (customerId: string) => Promise<void>;
+  fetchUpcomingInvoice: (customerId: string) => Promise<void>;
 }
 
-const ServicesContext = createContext<ServicesContextValue | undefined>(undefined);
+const BillingContext = createContext<BillingContextValue | undefined>(undefined);
 
-interface ServicesContextProviderProps {
+interface BillingContextProviderProps {
   children: ReactNode;
 }
 
-export const ServicesContextProvider: React.FC<ServicesContextProviderProps> = ({ children }) => {
-  const [services, setServices] = useState<Service.Type[]>([]);
+export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ children }) => {
+  const [subscription, setSubscription] = useState<any>(null); 
+  const [invoices, setInvoices] = useState<any[]>([]); 
+  const [upcomingInvoice, setUpcomingInvoice] = useState<any>(null); 
+  const [totalBilled, setTotalBilled] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
-  const [hasTheEmailAssociatedWithStripe, setHasTheEmailAssociatedWithStripe] = useState<boolean>(false)
-  const [accountRole, setAccountRole] = useState<string>("")
 
-  const updateServices = async (showLoader:boolean): Promise<void> => {
-    setLoading(showLoader);
+  const updateSubscription = async (): Promise<void> => {
+    setLoading(true);
     setError(false);
     try {
-      const result = await getServicesByOrganizationId();
-      setServices(result.products);
+      const result = await getSubscriptionByOrganizationId();
+      setSubscription(result);
     } catch (error) {
-      console.error("Error fetching services:", error);
+      console.error("Error fetching subscription:", error);
       setError(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAccountMemberShipRole = async (): Promise<void> => {
-    const accountRole = await getUserRole()
-    setAccountRole(accountRole)
-  }
-
-  const fetchAccountStripeConnect = async () => {
-    if(accountRole === "agency_owner"){
+  const fetchInvoices = async (customerId: string): Promise<void> => {
+    setLoading(true);
+    setError(false);
+    try {
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-      const fetchedStripeId = await getStripeAccountID() as string;
-      const response = await fetch(`${baseUrl}/api/stripe/get-account?accountId=${encodeURIComponent(fetchedStripeId)}`, {
+      const response = await fetch(`${baseUrl}/api/stripe/get-invoices?customerId=${encodeURIComponent(customerId)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch account data from Stripe');
+        throw new Error('Failed to fetch invoices');
       }
-      const data: {email: string | null} = await response.json();
-      setHasTheEmailAssociatedWithStripe(!!data.email)
-    } 
-  }
+      const data = await response.json();
+      setInvoices(data.invoices); 
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  void fetchAccountMemberShipRole()
+  const fetchUpcomingInvoice = async (customerId: string): Promise<void> => {
+    setLoading(true);
+    setError(false);
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+      const response = await fetch(`${baseUrl}/api/stripe/get-invoices/upcoming?customerId=${encodeURIComponent(customerId)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch upcoming invoice');
+      }
+      const data = await response.json();
+      setUpcomingInvoice(data.upcomingInvoice);
+    } catch (error) {
+      console.error("Error fetching upcoming invoice:", error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const value: ServicesContextValue = {
-    services,
-    hasTheEmailAssociatedWithStripe,
+  const value: BillingContextValue = {
+    subscription,
+    invoices,
+    upcomingInvoice,
+    totalBilled,
     loading,
     error,
-    accountRole,
-    updateServices,
-    fetchAccountStripeConnect,
-    fetchAccountMemberShipRole
+    updateSubscription,
+    fetchInvoices,
+    fetchUpcomingInvoice
   };
 
   return (
-    <ServicesContext.Provider value={value}>
+    <BillingContext.Provider value={value}>
       {children}
-    </ServicesContext.Provider>
+    </BillingContext.Provider>
   );
 };
 
-export const useServicesContext = (): ServicesContextValue => {
-  const context = useContext(ServicesContext);
+export const useBillingContext = (): BillingContextValue => {
+  const context = useContext(BillingContext);
   if (context === undefined) {
-    throw new Error('useServicesContext must be used within a ServicesContextProvider');
+    throw new Error('useBillingContext must be used within a BillingContextProvider');
   }
   return context;
 };
 
-export default ServicesContext;
+export default BillingContext;

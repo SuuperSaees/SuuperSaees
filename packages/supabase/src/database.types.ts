@@ -1524,7 +1524,6 @@ export type Database = {
       }
       subscriptions: {
         Row: {
-          account_id: string
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
@@ -1534,13 +1533,13 @@ export type Database = {
           id: string
           period_ends_at: string | null
           period_starts_at: string
+          propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at: string | null
           trial_starts_at: string | null
           updated_at: string
         }
         Insert: {
-          account_id: string
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
@@ -1550,13 +1549,13 @@ export type Database = {
           id: string
           period_ends_at?: string | null
           period_starts_at: string
+          propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at?: string | null
           trial_starts_at?: string | null
           updated_at?: string
         }
         Update: {
-          account_id?: string
           active?: boolean
           billing_customer_id?: string
           billing_provider?: Database["public"]["Enums"]["billing_provider"]
@@ -1566,6 +1565,7 @@ export type Database = {
           id?: string
           period_ends_at?: string | null
           period_starts_at?: string
+          propietary_organization_id?: string
           status?: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at?: string | null
           trial_starts_at?: string | null
@@ -1573,22 +1573,22 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "subscriptions_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
             isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "subscriptions_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "subscriptions_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
@@ -1929,7 +1929,6 @@ export type Database = {
           trial_ends_at?: string
         }
         Returns: {
-          account_id: string
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
@@ -1939,6 +1938,7 @@ export type Database = {
           id: string
           period_ends_at: string | null
           period_starts_at: string
+          propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at: string | null
           trial_starts_at: string | null
