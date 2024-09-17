@@ -1524,6 +1524,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          account_id: number | null
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
@@ -1540,6 +1541,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          account_id?: number | null
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
@@ -1556,6 +1558,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          account_id?: number | null
           active?: boolean
           billing_customer_id?: string
           billing_provider?: Database["public"]["Enums"]["billing_provider"]
@@ -1929,6 +1932,7 @@ export type Database = {
           trial_ends_at?: string
         }
         Returns: {
+          account_id: number | null
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
