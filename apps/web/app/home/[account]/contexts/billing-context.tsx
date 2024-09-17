@@ -91,7 +91,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
       const result = await getSubscriptionByOrganizationId();
       setSubscription(result);
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-      const responseSubscription = await fetch(`${baseUrl}/api/stripe/get-subscription-by-customer?customerId=${encodeURIComponent(result?.billing_customer_id ?? "")}`, {
+      const responseSubscription = await fetch(`${baseUrl}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(result?.id ?? "")}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
