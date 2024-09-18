@@ -37,7 +37,7 @@ export default async function UserHomePage() {
     .single();
 
   if (userAccountError) {
-    console.error('Error al obtener la cuenta del usuario', userAccountError);
+    console.error('Error getting user account', userAccountError);
     return;
   }
 
@@ -54,10 +54,13 @@ export default async function UserHomePage() {
   if (availableInvitations) {
     const invite_token = availableInvitations.invite_token;
     const email = availableInvitations.email;
-    return redirect('/join?invite_token=' + invite_token + '&email=' + email);
-  } 
-
-
+  
+    if (invite_token && email) {
+      return redirect('/join?invite_token=' + invite_token + '&email=' + email);
+    } else {
+      console.error('Invitation data is missing'+ availableInvitationsError);
+    }
+  }
   
 
   // const { data: accounts } = await supabase
