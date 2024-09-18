@@ -12,6 +12,7 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 
 
 import { OrderList } from './components/orders-list';
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 
 
 export const generateMetadata = async () => {
@@ -25,7 +26,8 @@ export const generateMetadata = async () => {
 //   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 // };
 
-async function UserHomePage() {
+
+async function OrdersPage() {
   const ordersData = await getOrders().catch((err) => console.error(err));
   const processedOrders =
     ordersData?.map((order) => ({
@@ -33,6 +35,8 @@ async function UserHomePage() {
       customer_organization: order.organization.name ?? '',
       customer_name: order.customer.name ?? '',
     })) ?? [];
+
+  const role = await getUserRole();
 
   // console.log('processedOrders', processedOrders);
 
@@ -50,7 +54,7 @@ async function UserHomePage() {
             </div>
           </div>
           <div>
-            <OrderList orders={processedOrders ?? []}></OrderList>
+            <OrderList orders={processedOrders ?? []} role={role}></OrderList>
           </div>
         </div>
       </PageBody>
@@ -58,4 +62,4 @@ async function UserHomePage() {
   );
 }
 
-export default withI18n(UserHomePage);
+export default withI18n(OrdersPage);

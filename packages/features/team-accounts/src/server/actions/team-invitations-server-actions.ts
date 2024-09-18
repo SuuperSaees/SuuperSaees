@@ -7,6 +7,8 @@ import { redirect } from 'next/navigation';
 
 import { z } from 'zod';
 
+
+
 import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
@@ -23,42 +25,34 @@ export const createInvitationsAction = enhanceAction(
     const client = getSupabaseServerActionClient();
 
     // Check if the user is authenticated
-    const {
-      data: { user },
-      error: userError,
-    } = await client.auth.getUser();
+    const { error: userError } = await client.auth.getUser();
 
-    if (userError) throw userError.message;
+    if (userError) throw new Error(userError.message);
 
-    const { data: userAccount, error: userAccountError } = await client
+    // Fetch users who already belong to an organization (using their email)
+    const { data: invitedUsers, error: invitedUsersError } = await client
       .from('accounts')
-      .select('organization_id')
-      .eq('id', user?.id ?? '')
-      .single();
-    if (userAccountError) throw userAccountError.message;
-    // Fetch all existing members for the account
-    const { data: existingMembers, error: existingMembersError } = await client
-      .from('accounts')
-      .select('email')
-      .eq('organization_id', userAccount.organization_id ?? ''); // Adjust if needed to `organization_id` or a specific `account_id`
+      .select('email, organization_id')
+      .in(
+        'email',
+        params.invitations.map((invitation) => invitation.email),
+      );
 
-    if (existingMembersError) {
-      console.error('Failed to retrieve existing members');
-      throw new Error(existingMembersError.message);
+    if (invitedUsersError) {
+      console.error('Failed to retrieve invited users');
+      throw new Error(invitedUsersError.message);
     }
 
-    // Map existing invitations to an array of emails
-    const existingEmails = existingMembers?.map((member) => member.email) ?? [];
-    // console.log('existingEmails', existingEmails, params.invitations);
-    // Filter out the emails that are already invited
-    const filteredInvitations = params.invitations.filter(
-      (invitation) => !existingEmails.includes(invitation.email),
-    );
+    // Filter out invitations where the user already belongs to any organization
+    const filteredInvitations = params.invitations.filter((invitation) => {
+      const user = invitedUsers.find((u) => u.email === invitation.email);
+      return !user ?? !user?.organization_id; // Only invite if the user is not part of any organization
+    });
 
     // If there are no new invitations to send, return early
     if (filteredInvitations.length === 0) {
-      // console.log('No new invitations to send');
-      return { success: true };
+      console.error('Failed to send the invitation');
+      throw new Error('No users available to send the invitation');
     }
 
     // Update params with the filtered invitations
@@ -146,11 +140,30 @@ export const acceptInvitationAction = enhanceAction(
       Object.fromEntries(data),
     );
 
-    // create the services
+    // Create the services
     const perSeatBillingService = createAccountPerSeatBillingService(client);
     const service = createAccountInvitationsService(client);
 
-    // get the organization of the sender
+    // Check if the user already belongs to any organization
+    const { data: existingUser, error: existingUserError } = await client
+      .from('accounts')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single();
+
+    if (existingUserError) {
+      console.error('Failed to retrieve user organization data');
+      throw new Error(existingUserError.message);
+    }
+
+    // If the user already belongs to an organization, deny the invitation
+    if (existingUser?.organization_id) {
+      throw new Error(
+        'You are already a member of an organization and cannot accept this invitation.',
+      );
+    }
+
+    // Get the organization of the sender
     const { data: senderAccount, error: senderAccountError } = await client
       .from('invitations')
       .select('invited_by')
@@ -158,11 +171,11 @@ export const acceptInvitationAction = enhanceAction(
       .single();
 
     if (senderAccountError) {
-      console.error('Fail to obtainer the sender account');
+      console.error('Failed to obtain the sender account');
       throw new Error(senderAccountError.message);
     }
 
-    // get the organization id of the sender
+    // Get the organization ID of the sender
     const { data: senderOrganization, error: senderOrganizationError } =
       await client
         .from('accounts')
@@ -171,7 +184,7 @@ export const acceptInvitationAction = enhanceAction(
         .single();
 
     if (senderOrganizationError) {
-      console.error('Fail to obtainer the sender organization');
+      console.error('Failed to obtain the sender organization');
       throw new Error(senderOrganizationError.message);
     }
 
@@ -189,7 +202,7 @@ export const acceptInvitationAction = enhanceAction(
       throw new Error('Failed to accept invitation');
     }
 
-    // Associate the new member with the organization
+    // Associate the new member with the sender's organization
     await client
       .from('accounts')
       .update({ organization_id: senderOrganization?.organization_id })
@@ -198,6 +211,7 @@ export const acceptInvitationAction = enhanceAction(
     // Increase the seats for the account
     await perSeatBillingService.increaseSeats(accountId);
 
+    // Redirect to the next path
     return redirect(nextPath);
   },
   {},

@@ -30,11 +30,11 @@ class DatabaseWebhookRouterService {
         return this.handleInvitationsWebhook(payload);
       }
 
-      case 'subscriptions': {
-        const payload = body as RecordChange<typeof body.table>;
+      // case 'subscriptions': {
+      //   const payload = body as RecordChange<typeof body.table>;
 
-        return this.handleSubscriptionsWebhook(payload);
-      }
+      //   return this.handleSubscriptionsWebhook(payload);
+      // }
 
       case 'accounts': {
         const payload = body as RecordChange<typeof body.table>;
@@ -84,3 +84,6 @@ class DatabaseWebhookRouterService {
     }
   }
 }
+
+
+// Here manage the cancel subscription and update subscription of upgrade 

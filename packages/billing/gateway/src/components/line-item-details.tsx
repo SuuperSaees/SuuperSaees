@@ -128,7 +128,7 @@ export function LineItemDetails(
               </span>
 
               <If condition={!item.tiers?.length}>
-                <span className={'font-semibold'}>
+                <span className={'font-semibold ml-2'}>
                   {formatCurrency(props.currency.toLowerCase(), item.cost)}
                 </span>
               </If>

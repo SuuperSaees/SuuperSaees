@@ -11,6 +11,7 @@ import {
   getOrganization, // getOrganizationSettings,
 } from '../../organizations/get/get-organizations';
 
+
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
 // Define la función createClient
@@ -180,6 +181,7 @@ export const createClient = async (clientData: CreateClient) => {
     }
     return client;
   } catch (error) {
-    console.error('Error al crear el cliente:', error);
+    console.error('Error creating the client', error);
+    throw error;
   }
 };

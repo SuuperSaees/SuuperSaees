@@ -24,8 +24,6 @@ export const getServiceById = async (serviceId: Service.Type['id']) => {
       ...serviceData,
     };
 
-    console.log('Servicio:', proccesedData)
-
     return proccesedData
   } catch (error) {
     console.error('Error fetching order:', error);
