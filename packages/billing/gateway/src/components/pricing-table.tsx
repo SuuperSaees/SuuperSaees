@@ -23,7 +23,6 @@ import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
 import { LineItemDetails } from './line-item-details';
-// import { useBillingContext } from '../../../../../apps/web/app/home/[account]/contexts/billing-context'
 import { useBilling } from '../../../../../apps/web/app/home/[account]/hooks/use-billing';
 interface Paths {
   signUp: string;

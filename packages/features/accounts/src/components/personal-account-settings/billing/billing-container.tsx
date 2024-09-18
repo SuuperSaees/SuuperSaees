@@ -15,7 +15,6 @@ import { Table,
 import { Button } from "@kit/ui/button";
 import { ThemedProgress } from "../../ui/progress-themed-with-settings";
 import PlansContainer from '../../../../../../../apps/web/app/select-plan/components/plans-container';
-// import { useBillingContext } from '../../../../../../../apps/web/app/home/[account]/contexts/billing-context';
 import { useBilling } from '../../../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { cancelSubscription } from '../../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/delete/cancel-subscription'
 function UpgradePlanComponent() {
