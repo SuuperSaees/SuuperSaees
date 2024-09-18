@@ -9,11 +9,11 @@ const createBillingConfig = (): BillingConfig => {
   // Datos de productos estáticos
   const products = [
     {
-      id: "prod_QqXPKWORe2Vq8C",
+      id: process.env.PLAN_FREE_PROD,
       name: "Starter",
       description: "Free. Up to 1 seat. Unlimited clients. Unlimited services. Unlimited orders. Brand assets.",
       plan: {
-        id: "price_1PyqKoKTZtw7WxHovnSnApiM",
+        id: process.env.PLAN_FREE_ID,
         currency: "USD",
         amount: 0, 
         interval: "month",
@@ -22,11 +22,11 @@ const createBillingConfig = (): BillingConfig => {
       },
     },
     {
-      id: "prod_QqXR8jY2WvtCEY",
+      id: process.env.PLAN_STANDARD_PROD,
       name: "Standard",
       description: "Up to 5 seats. Unlimited services. Unlimited clients. Unlimited orders. Brand assets. Powerful Reports.",
       plan: {
-        id: "price_1PyqMDKTZtw7WxHoShIV9x7i",
+        id: process.env.PLAN_STANDARD_ID,
         currency: "USD",
         amount: 2500,
         interval: "month",
@@ -35,11 +35,11 @@ const createBillingConfig = (): BillingConfig => {
       },
     },
     {
-      id: "prod_QqXS8aIy5zt7c0",
+      id: process.env.PLAN_PREMIUM_PROD,
       name: "Premium",
       description: "Up to 10 seats. Unlimited services. Unlimited clients. Unlimited orders. Brand assets. Powerful Reports. Time Tracking. Task lists.",
       plan: {
-        id: "price_1PyqN7KTZtw7WxHoeRJjdBGL",
+        id: process.env.PLAN_PREMIUM_ID,
         currency: "USD",
         amount: 4500,
         interval: "month",
@@ -48,11 +48,11 @@ const createBillingConfig = (): BillingConfig => {
       },
     },
     {
-      id: "prod_QqXTb5kIjd3g6z",
+      id: process.env.PLAN_ENTERPRISE_PROD,
       name: "Enterprise",
       description: "More than 20 seats. Unlimited services. Unlimited clients. Unlimited orders. Brand assets. Powerful Reports. Time Tracking. Task lists. Advanced Security & SSO. API Integrations. Premium consulting and support services.",
       plan: {
-        id: "price_1PyqORKTZtw7WxHo733q1DWn",
+        id: process.env.PLAN_ENTERPRISE_ID,
         currency: "USD",
         amount: 7500,
         interval: "month",
