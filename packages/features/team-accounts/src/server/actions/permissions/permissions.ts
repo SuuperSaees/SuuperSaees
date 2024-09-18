@@ -7,7 +7,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { getUserRole } from '../members/get/get-member-account';
 
 
-export const hasPermissionToReadOrders = async (
+export const hasPermissionToReadOrderDetails = async (
   message_order_id: number,
   message_order_propietary_organization_id: string,
   message_order_client_organization_id: string,
@@ -100,6 +100,106 @@ export const hasPermissionToReadOrders = async (
     throw error;
   }
 };
+
+export const hasPermissionToReadOrders = async () => {
+  const client = getSupabaseServerComponentClient();
+  const { data: userData } = await client.auth.getUser();
+  const userId = userData.user!.id;
+
+  // Obtener el rol
+  const { data: role, error: roleError } = await client
+    .from('accounts_memberships')
+    .select('account_role')
+    .eq('user_id', userId)
+    .single();
+
+  if (roleError) {
+    console.error(roleError.message);
+    throw new Error('Error fetching user role');
+  }
+
+  const isClient =
+    (role && role.account_role === 'client_owner') ||
+    (role && role.account_role === 'client_member');
+  
+  const isTeamMember = role && role.account_role === 'agency_member';
+  const isAgency = !isClient && !isTeamMember;
+
+  let ordersData = [];
+
+  if (isClient) {
+    const { data: orderData, error: clientError } = await client
+      .from('orders_v2')
+      .select(
+        '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)'
+      )
+      .eq('customer_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (clientError) {
+      console.error(clientError.message);
+      throw clientError.message;
+    }
+
+    ordersData = orderData ?? [];
+  } else if (isTeamMember) {
+    const { data: orderAssignedData, error: orderAssignedError } = await client
+      .from('order_assignations')
+      .select('order_id')
+      .eq('agency_member_id', userId);
+
+    if (orderAssignedError) {
+      console.error(orderAssignedError.message);
+      throw orderAssignedError.message;
+    }
+
+    const { data: orderData, error: teamOwnerError } = await client
+      .from('orders_v2')
+      .select(
+        `*, organization:accounts!client_organization_id(slug, name), 
+        customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`
+      )
+      .in('id', orderAssignedData.map((assign) => assign.order_id))
+      .order('created_at', { ascending: false });
+
+    if (teamOwnerError) {
+      console.error(teamOwnerError.message);
+      throw teamOwnerError.message;
+    }
+
+    ordersData = orderData ?? [];
+  } else if (isAgency) {
+    const { data: agencyUserAccount, error: accountError } = await client
+      .from('accounts')
+      .select('organization_id')
+      .eq('id', userId)
+      .single();
+
+    if (accountError) {
+      console.error(accountError.message);
+      throw accountError.message;
+    }
+
+    const { data: orderData, error: ownerError } = await client
+      .from('orders_v2')
+      .select(
+        `*, organization:accounts!client_organization_id(slug, name), 
+        customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`
+      )
+      .eq('agency_id', agencyUserAccount?.organization_id ?? '')
+      .order('created_at', { ascending: false });
+
+    if (ownerError) {
+      console.error(ownerError.message);
+      throw ownerError.message;
+    }
+
+    ordersData = orderData ?? [];
+  }
+
+  return ordersData;
+};
+
 
 export const hasPermissionToAddTeamMembers = async () => {
   const client = getSupabaseServerComponentClient();

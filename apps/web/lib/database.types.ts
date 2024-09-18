@@ -587,6 +587,55 @@ export type Database = {
           },
         ]
       }
+      customers: {
+        Row: {
+          created_at: string | null
+          current_subscription_id: string | null
+          current_subscription_name: string | null
+          customer_id: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_subscription_id?: string | null
+          current_subscription_name?: string | null
+          customer_id?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_subscription_id?: string | null
+          current_subscription_name?: string | null
+          customer_id?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       files: {
         Row: {
           created_at: string

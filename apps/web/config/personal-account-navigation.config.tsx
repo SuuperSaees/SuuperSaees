@@ -58,6 +58,11 @@ const routes = [
     Icon: <Settings className={iconClasses} />,
   },
   // {
+  //   label: 'Facturación',
+  //   path: pathsConfig.app.personalAccountBilling,
+  //   // Icon: </>
+  // }
+  // {
   //   label: 'Briefs',
   //   path: pathsConfig.app.briefs,
   //   Icon: <Briefcase className={iconClasses} />,
