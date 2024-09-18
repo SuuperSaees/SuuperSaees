@@ -145,16 +145,35 @@ export default function UploadFileComponent({
     xhr.onreadystatechange = () => {
       if (xhr.readyState === XMLHttpRequest.DONE) {
         if (xhr.status !== 200) {
-          setErrors((prevErrors) => ({
-            ...prevErrors,
-            [id]: `Error al subir el archivo ${file.name}: ${xhr.statusText}`,
-          }));
+          try {
+            const response = JSON.parse(xhr.responseText); // Parse the response as JSON
+            const errorMessage = response.message || 'Unknown error'; // Extract the message
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              [id]: `Error uploading file ${file.name}: ${errorMessage}`,
+            }));
+          } catch (e) {
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              [id]: `Error uploading file ${file.name}: Failed to process server response`,
+            }));
+          }
         }
       }
     };
+    
+    
 
     try {
       const data = await createUploadBucketURL(bucketName, filePath);
+      if ('error' in data) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [id]: `Error to obtain the URL: ${data.error}`,
+        }));
+        return;
+      }
+
       xhr.open('PUT', data.signedUrl, true);
       xhr.setRequestHeader('Content-Type', file.type);
       xhr.send(file);
@@ -171,7 +190,6 @@ export default function UploadFileComponent({
         url: fileUrl,
       };
       
-      if(data?.error) return;
       
       const createdFiles = await createFile([newFileData]);
       setFileIds((prevFileIds) => {
@@ -185,7 +203,7 @@ export default function UploadFileComponent({
     } catch (error) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        [id]: `Error al obtener la URL de carga: ${error.message}`,
+        [id]: `Error to obtain the URL`,
       }));
     }
   };
@@ -272,8 +290,13 @@ export default function UploadFileComponent({
               <div className="mt-2 flex items-center gap-2">
                 {errors[id] ? (
                   <>
-                    <div className="flex-1 text-red-500">
-                      Try again
+                    <div className='flex flex-col'>
+                      <div className="flex-1 text-red-500">
+                        Try again
+                      </div>
+                      <div className='text-red-500 text-sm'>
+                        {errors[id]}
+                      </div>
                     </div>
                     <div className="absolute right-4 top-4">
                     <Trash2 className="text-red-500 cursor-pointer" onClick={() => handleDelete(id)} />
@@ -288,8 +311,9 @@ export default function UploadFileComponent({
                       {Math.round(uploadProgress[id] ?? 0)}%
                     </span>
                     {uploadProgress[id] === 100 && (
-                      <div className="absolute right-4 top-4">
+                      <div className="absolute right-4 top-4 flex gap-4">
                         <CheckSquare className="text-primary" />
+                        <Trash2 className="text-red-500 cursor-pointer" onClick={() => handleDelete(id)} />
                       </div>
                     )}
                   </>
