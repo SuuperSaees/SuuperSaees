@@ -136,7 +136,11 @@ const handleFieldUpdate = async (
   } else if (field === 'priority') {
     translatedValue =
       priorityTranslations[value as keyof typeof priorityTranslations] || value;
+  } else if (field === 'due_date'){
+    translatedValue = new Date(value).toLocaleDateString();
   }
+
+  
 
   const emailsData = await getEmails(orderId.toString());
   const actualName = await getUserById(userData.user.id);

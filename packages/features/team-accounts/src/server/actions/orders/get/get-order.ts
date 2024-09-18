@@ -95,7 +95,7 @@ export async function getOrderAgencyMembers(
 
     const { data: accountMembershipsData, error: accountMembershipsDataError } = await client
       .from('accounts_memberships')
-      .select('*')
+      .select('account_role')
       .eq('user_id', userId)
       .single();
 
@@ -126,7 +126,7 @@ export async function getOrderAgencyMembers(
     
     const { data: agencyMembersData, error: agencyMembersError } = await client
       .from('accounts')
-      .select()
+      .select('id, name, email, picture_url')
       .eq('organization_id', agencyId ?? accountData.primary_owner_user_id);
 
     if (agencyMembersError) throw agencyMembersError;
