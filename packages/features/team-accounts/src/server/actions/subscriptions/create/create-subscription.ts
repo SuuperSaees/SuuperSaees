@@ -2,6 +2,7 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
+import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions.types';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -52,44 +53,23 @@ export const createSubscription = async () => {
 
    // Create subscription in db
    const primary_owner_user_id = await getPrimaryOwnerId();
-   const newSubscription: {
-    id: string;
-    propietary_organization_id: string;
-    billing_customer_id: string;
-    active: boolean;
-    billing_provider: "stripe" | "lemon-squeezy" | "paddle";
-    currency: string;
-    status: "active"
-    | "trialing"
-    | "past_due"
-    | "canceled"
-    | "unpaid"
-    | "incomplete"
-    | "incomplete_expired"
-    | "paused";
-    cancel_at_period_end: boolean;
-    period_starts_at: string | null; 
-    period_ends_at?: string | null; 
-    trial_ends_at: string | null;
-    trial_starts_at: string | null;
-    updated_at: string | null;
-    created_at?: string | null;
-} = {
-    id: subscriptionData?.id as string,
-    propietary_organization_id: primary_owner_user_id as string,
-    billing_customer_id: customerData?.id as string,
-    active: true,
-    billing_provider: "stripe",
-    currency: "usd",
-    cancel_at_period_end: false,
-    status: "active",
-    period_ends_at: null, 
-    period_starts_at: null, 
-    trial_ends_at: null, 
-    trial_starts_at: null, 
-    updated_at: null, 
-    created_at: null 
-};
+   const newSubscription: Subscription.Type = {
+     id: subscriptionData?.id as string,
+     propietary_organization_id: primary_owner_user_id as string,
+     billing_customer_id: customerData?.id as string,
+     active: true,
+     billing_provider: "stripe",
+     currency: "usd",
+     cancel_at_period_end: false,
+     status: "active",
+     period_ends_at: null,
+     period_starts_at: null,
+     trial_ends_at: null,
+     trial_starts_at: null,
+     updated_at: null,
+     created_at: null,
+     account_id: null
+   };
 
     const { error: subscriptionCreateError} = await client
     .from('subscriptions')
