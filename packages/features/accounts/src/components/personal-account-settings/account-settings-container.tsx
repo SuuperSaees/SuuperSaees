@@ -125,7 +125,7 @@ export function PersonalAccountSettingsContainer(
     return <LoadingOverlay fullPage />;
   }
   return (
-    <BillingContextProvider>
+    <BillingContextProvider> 
     <div className="">
       <Tabs defaultValue='account'>
         <TabsList>
@@ -313,6 +313,7 @@ export function PersonalAccountSettingsContainer(
       </div>
           </div>
         </TabsContent>
+        
         <TabsContent value='billing'>
           {/* <div className="flex w-full flex-col space-y-6">
             <Button>

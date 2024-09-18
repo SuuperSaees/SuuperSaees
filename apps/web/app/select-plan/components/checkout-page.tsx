@@ -7,6 +7,7 @@ import {
   PaymentElement,
 } from "@stripe/react-stripe-js";
 import { Button } from "@kit/ui/button";
+import { useRouter } from 'next/router';
 
 const CheckoutPage = ({ amount, priceId }: { amount: number, priceId: string }) => {
   const stripe = useStripe();
@@ -14,6 +15,7 @@ const CheckoutPage = ({ amount, priceId }: { amount: number, priceId: string }) 
   const [errorMessage, setErrorMessage] = useState<string>();
   const [clientSecret, setClientSecret] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -32,7 +34,7 @@ const CheckoutPage = ({ amount, priceId }: { amount: number, priceId: string }) 
 
   useEffect(() => {
     if (clientSecret.startsWith("http")) {
-      window.location.href = clientSecret; 
+      router.push(clientSecret);
     }
   }, [clientSecret]);
 
