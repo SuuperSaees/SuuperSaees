@@ -190,7 +190,6 @@ export default function UploadFileComponent({
         url: fileUrl,
       };
       
-      if(data?.error) return;
       
       const createdFiles = await createFile([newFileData]);
       setFileIds((prevFileIds) => {
@@ -204,7 +203,7 @@ export default function UploadFileComponent({
     } catch (error) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        [id]: `Error al obtener la URL de carga: ${error.message}`,
+        [id]: `Error to obtain the URL`,
       }));
     }
   };
