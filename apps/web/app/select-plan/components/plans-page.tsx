@@ -39,7 +39,6 @@ const PlansPage = () => {
   }, []);
 
   const handleCheckout = (amount: number | undefined, priceID: string) => {
-    console.log("HOLAAAA")
     setSelectedAmount(amount ?? 0); 
     setSelectedPriceId(priceID);
   };

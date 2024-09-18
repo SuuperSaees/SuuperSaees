@@ -23,7 +23,7 @@ import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
 import { LineItemDetails } from './line-item-details';
-
+import { useBilling } from '../../../../../apps/web/app/home/[account]/hooks/use-billing';
 interface Paths {
   signUp: string;
   return: string;
@@ -32,7 +32,7 @@ interface Paths {
 export function PricingTable({
   config,
   paths,
-  CheckoutButtonRenderer,
+  checkoutButtonRenderer,
   redirectToCheckout = true,
   displayPlanDetails = true,
 }: {
@@ -40,10 +40,10 @@ export function PricingTable({
   paths: Paths;
   displayPlanDetails?: boolean;
   redirectToCheckout?: boolean;
-  CheckoutButtonRenderer?: (amount: number, priceId: string)=> void;
+  checkoutButtonRenderer: (amount: number, priceId: string)=> void;
 }) {
   const intervals = getPlanIntervals(config).filter(Boolean) as string[];
-  const [interval, setInterval] = useState(intervals[0] || ''); // Maneja el caso si intervals está vacío
+  const [interval, setInterval] = useState(intervals[0] || ''); 
   return (
     <div className={'flex flex-col space-y-8 xl:space-y-12'}>
       {/* <div className={'flex justify-center'}>
@@ -85,18 +85,18 @@ export function PricingTable({
             if (!plan.custom && !primaryLineItem) {
               throw new Error(`Primary line item not found for plan ${plan.id}`);
             }
-
+            
             return (
               <PricingItem
                 selectable
-                key={plan.id}
-                plan={plan}
+                key={plan?.id}
+                plan={plan!}
                 redirectToCheckout={redirectToCheckout}
                 primaryLineItem={primaryLineItem}
                 product={product}
                 paths={paths}
                 displayPlanDetails={displayPlanDetails}
-                CheckoutButtonRenderer={CheckoutButtonRenderer}
+                checkoutButtonRenderer={checkoutButtonRenderer}
               />
             );
           })
@@ -131,7 +131,7 @@ function PricingItem(
       label?: string;
     };
 
-    CheckoutButtonRenderer?: (amount: number, priceId: string)=> void;
+    checkoutButtonRenderer: (amount: number, priceId: string)=> void;
 
     product: {
       id: string;
@@ -145,14 +145,14 @@ function PricingItem(
   }>,
 ) {
   const highlighted = props.product.highlighted ?? false;
-
   const lineItem = props.primaryLineItem;
-
+  const { subscriptionFetchedStripe } = useBilling()
   // we exclude flat line items from the details since
   // it doesn't need further explanation
   const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
     return item.type !== 'flat';
   });
+
 
   return (
     <div
@@ -254,7 +254,7 @@ function PricingItem(
             </span>
           </If>
         </div>
-        <Button onClick={()=>props.CheckoutButtonRenderer(lineItem?.cost, props.plan.id)}>Continuar</Button>
+        <Button onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost!, props.plan.id)} disabled={props.plan.id === subscriptionFetchedStripe?.plan.id}>{props.plan.id === subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</Button>
 
         <Separator />
 

@@ -587,55 +587,6 @@ export type Database = {
           },
         ]
       }
-      customers: {
-        Row: {
-          created_at: string | null
-          current_subscription_id: string | null
-          current_subscription_name: string | null
-          customer_id: string | null
-          id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          current_subscription_id?: string | null
-          current_subscription_name?: string | null
-          customer_id?: string | null
-          id?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          current_subscription_id?: string | null
-          current_subscription_name?: string | null
-          customer_id?: string | null
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_user"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_user"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_user"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       files: {
         Row: {
           created_at: string
@@ -1573,80 +1524,76 @@ export type Database = {
       }
       subscriptions: {
         Row: {
-          account_id: string
+          account_id: number | null
           active: boolean
-          billing_customer_id: number
+          billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
           cancel_at_period_end: boolean
-          created_at: string
+          created_at: string | null
           currency: string
           id: string
-          period_ends_at: string
-          period_starts_at: string
+          period_ends_at: string | null
+          period_starts_at: string | null
+          propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at: string | null
           trial_starts_at: string | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          account_id: string
+          account_id?: number | null
           active: boolean
-          billing_customer_id: number
+          billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
           cancel_at_period_end: boolean
-          created_at?: string
+          created_at?: string | null
           currency: string
           id: string
-          period_ends_at: string
-          period_starts_at: string
+          period_ends_at?: string | null
+          period_starts_at?: string | null
+          propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at?: string | null
           trial_starts_at?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          account_id?: string
+          account_id?: number | null
           active?: boolean
-          billing_customer_id?: number
+          billing_customer_id?: string
           billing_provider?: Database["public"]["Enums"]["billing_provider"]
           cancel_at_period_end?: boolean
-          created_at?: string
+          created_at?: string | null
           currency?: string
           id?: string
-          period_ends_at?: string
-          period_starts_at?: string
+          period_ends_at?: string | null
+          period_starts_at?: string | null
+          propietary_organization_id?: string
           status?: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at?: string | null
           trial_starts_at?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "subscriptions_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
             isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "subscriptions_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "subscriptions_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_billing_customer_id_fkey"
-            columns: ["billing_customer_id"]
-            isOneToOne: false
-            referencedRelation: "billing_customers"
             referencedColumns: ["id"]
           },
         ]
@@ -1985,20 +1932,21 @@ export type Database = {
           trial_ends_at?: string
         }
         Returns: {
-          account_id: string
+          account_id: number | null
           active: boolean
-          billing_customer_id: number
+          billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
           cancel_at_period_end: boolean
-          created_at: string
+          created_at: string | null
           currency: string
           id: string
-          period_ends_at: string
-          period_starts_at: string
+          period_ends_at: string | null
+          period_starts_at: string | null
+          propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
           trial_ends_at: string | null
           trial_starts_at: string | null
-          updated_at: string
+          updated_at: string | null
         }
       }
     }
@@ -2140,7 +2088,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2154,7 +2101,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2168,7 +2114,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2190,7 +2135,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2201,7 +2145,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2212,7 +2155,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2348,10 +2290,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {

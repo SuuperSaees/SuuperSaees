@@ -29,6 +29,8 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 // import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 // import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
+import BillingContainerConfig  from './billing/billing-container';
+import RegisterAccountContainer from '../../../../../../apps/web/app/stripe/components/register-stripe-account-container';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -122,7 +124,7 @@ export function PersonalAccountSettingsContainer(
     return <LoadingOverlay fullPage />;
   }
   return (
-    <div className="">
+    <div>
       <Tabs defaultValue='account'>
         {role !== 'client_member' && role !== 'client_owner' && (
           <TabsList>
@@ -314,15 +316,17 @@ export function PersonalAccountSettingsContainer(
       </div>
           </div>
         </TabsContent>
+        
         <TabsContent value='billing'>
-          <div className="flex w-full flex-col space-y-6">
+          {/* <div className="flex w-full flex-col space-y-6">
             <Button>
               <Link href="/select-plan">
                 Upgrade your plan
               </Link>
             </Button>
               
-            </div>
+            </div> */}
+            <BillingContainerConfig />
         </TabsContent>
           
 

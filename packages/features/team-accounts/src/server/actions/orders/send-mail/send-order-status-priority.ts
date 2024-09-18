@@ -31,7 +31,6 @@ export async function sendOrderStatusPriorityEmail(
     subject = `${actualName} has changed '${orderTitle}' due date to ${message}`;
     bodyMessage = `${actualName} has changed '${orderTitle}' due date to ${message}`;
   } else {
-    console.log('field', field);
     subject = `Nuevo mensaje en el pedido ${orderId} añadido`;
     bodyMessage = `Tienes un mensaje en el pedido ${orderId}.`;
   }

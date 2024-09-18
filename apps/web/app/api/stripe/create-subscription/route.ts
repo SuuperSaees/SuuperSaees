@@ -5,13 +5,20 @@ import { NextRequest, NextResponse } from "next/server";
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
-    const { email } = await req.json();
+    const { searchParams } = new URL(req.url);
+  const customer = searchParams.get('customerId');
+  const price = searchParams.get('priceId');
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-           const customer = await stripe.customers.create({
-            email
+           const subscription = await stripe.subscriptions.create({
+            customer: customer,
+            items: [
+                {
+                  price: price,
+                },
+              ],
            });
-        return NextResponse.json(customer);
+        return NextResponse.json(subscription);
     } catch (error) {
         return NextResponse.json(
             {error: {message: "Internal Server Error"}},

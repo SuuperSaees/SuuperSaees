@@ -1,6 +1,8 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { getPrimaryOwnerId } from '../../members/get/get-member-account';
+import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions.types';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -50,15 +52,35 @@ export const createSubscription = async () => {
     const subscriptionData = (await subscriptionResponse.json())
 
    // Create subscription in db
-    const {data: subscriptionCreateData, error: subscriptionCreateError} = await client
+   const primary_owner_user_id = await getPrimaryOwnerId();
+   const newSubscription: Subscription.Type = {
+     id: subscriptionData?.id as string,
+     propietary_organization_id: primary_owner_user_id as string,
+     billing_customer_id: customerData?.id as string,
+     active: true,
+     billing_provider: "stripe",
+     currency: "usd",
+     cancel_at_period_end: false,
+     status: "active",
+     period_ends_at: null,
+     period_starts_at: null,
+     trial_ends_at: null,
+     trial_starts_at: null,
+     updated_at: null,
+     created_at: null,
+     account_id: null
+   };
+
+    const { error: subscriptionCreateError} = await client
     .from('subscriptions')
-    .insert({
-        id: subscriptionData?.id,
-        account_id: user?.id,
-    })
+    .insert(newSubscription)
     .select('*')
     .single();
 
+    console.log('subscriptionCreateError', subscriptionCreateError)
+    if (subscriptionCreateError) {
+      console.error('Error creating subscription:', subscriptionCreateError.message);
+    }
   } catch (error) {
     console.error('Error while creating the organization account:', error);
     throw error;  // Throw the error to ensure the caller knows the function failed

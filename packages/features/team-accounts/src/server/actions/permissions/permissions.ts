@@ -40,7 +40,6 @@ export const hasPermissionToReadOrderDetails = async (
         permission_name: 'messages.read',
       },
     );
-    console.log('hasPermission', hasPermission);
     if (permissionError) {
       console.error('Error checking permission:', permissionError);
       throw new Error('The account has not permissions to READ messages');
