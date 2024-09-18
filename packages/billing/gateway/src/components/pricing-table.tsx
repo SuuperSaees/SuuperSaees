@@ -23,7 +23,8 @@ import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
 import { LineItemDetails } from './line-item-details';
-import { useBillingContext } from '../../../../../apps/web/app/home/[account]/contexts/billing-context'
+// import { useBillingContext } from '../../../../../apps/web/app/home/[account]/contexts/billing-context'
+import { useBilling } from '../../../../../apps/web/app/home/[account]/hooks/use-billing';
 interface Paths {
   signUp: string;
   return: string;
@@ -32,7 +33,7 @@ interface Paths {
 export function PricingTable({
   config,
   paths,
-  CheckoutButtonRenderer,
+  checkoutButtonRenderer,
   redirectToCheckout = true,
   displayPlanDetails = true,
 }: {
@@ -40,7 +41,7 @@ export function PricingTable({
   paths: Paths;
   displayPlanDetails?: boolean;
   redirectToCheckout?: boolean;
-  CheckoutButtonRenderer?: (amount: number, priceId: string)=> void;
+  checkoutButtonRenderer: (amount: number, priceId: string)=> void;
 }) {
   const intervals = getPlanIntervals(config).filter(Boolean) as string[];
   const [interval, setInterval] = useState(intervals[0] || ''); 
@@ -96,7 +97,7 @@ export function PricingTable({
                 product={product}
                 paths={paths}
                 displayPlanDetails={displayPlanDetails}
-                CheckoutButtonRenderer={CheckoutButtonRenderer}
+                checkoutButtonRenderer={checkoutButtonRenderer}
               />
             );
           })
@@ -131,7 +132,7 @@ function PricingItem(
       label?: string;
     };
 
-    CheckoutButtonRenderer?: (amount: number, priceId: string)=> void;
+    checkoutButtonRenderer: (amount: number, priceId: string)=> void;
 
     product: {
       id: string;
@@ -146,7 +147,7 @@ function PricingItem(
 ) {
   const highlighted = props.product.highlighted ?? false;
   const lineItem = props.primaryLineItem;
-  const { subscriptionFetchedStripe } = useBillingContext()
+  const { subscriptionFetchedStripe } = useBilling()
   // we exclude flat line items from the details since
   // it doesn't need further explanation
   const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
@@ -254,7 +255,7 @@ function PricingItem(
             </span>
           </If>
         </div>
-        <Button onClick={()=>props.CheckoutButtonRenderer(lineItem?.cost, props.plan.id)} disabled={props.plan.id === subscriptionFetchedStripe?.plan.id}>{props.plan.id === subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</Button>
+        <Button onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost!, props.plan.id)} disabled={props.plan.id === subscriptionFetchedStripe?.plan.id}>{props.plan.id === subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</Button>
 
         <Separator />
 
