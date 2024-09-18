@@ -37,7 +37,7 @@ export default async function UserHomePage() {
     .single();
 
   if (userAccountError) {
-    console.error('Error al obtener la cuenta del usuario', userAccountError);
+    console.error('Error getting user account', userAccountError);
     return;
   }
 
@@ -58,7 +58,7 @@ export default async function UserHomePage() {
     if (invite_token && email) {
       return redirect('/join?invite_token=' + invite_token + '&email=' + email);
     } else {
-      console.error('Faltan los datos de invitación'+ availableInvitationsError);
+      console.error('Invitation data is missing'+ availableInvitationsError);
     }
   }
   
