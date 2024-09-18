@@ -224,7 +224,7 @@ export function PersonalAccountSettingsContainer(
                 <UpdateAccountOrganizationSidebar />
               </CardContent>
             </Card>
-            {/* <Card>
+            <Card>
           <CardHeader>
             <CardTitle>
               <Trans i18nKey={'account:brandLogo'} />
@@ -238,7 +238,7 @@ export function PersonalAccountSettingsContainer(
               organizationId={user?.organization_id ?? ''}
             />
           </CardContent> 
-        </Card> */}
+        </Card>
           </>
         )}
 
