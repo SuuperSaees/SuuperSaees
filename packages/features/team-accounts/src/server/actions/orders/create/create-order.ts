@@ -82,9 +82,6 @@ export const createOrders = async (orders: OrderInsert[]) => {
       .single();
     if (orderError) throw orderError.message;
 
-    console.log('orderData', orderData);
-
-    
     if (emailData.email) {
       await sendOrderCreationEmail(emailData.email, orderData.id.toString(), orderData, agencyOrganizationData.name ?? "");
     }

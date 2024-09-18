@@ -54,10 +54,6 @@ export default function UploadImageComponent({
         .from('services')
         .upload(filePath, file);
 
-      if (data) {
-        console.log('Imagen subida:', data);
-      }
-
       if (uploadError) {
         throw new Error(`Error al subir la imagen: ${uploadError.message}`);
       }

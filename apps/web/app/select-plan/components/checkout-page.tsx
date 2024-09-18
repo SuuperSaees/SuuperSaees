@@ -26,7 +26,6 @@ const CheckoutPage = ({ amount, priceId }: { amount: number, priceId: string }) 
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Response data:", data); 
         setClientSecret(data.sessionUrl);
       });
   }, [priceId]);

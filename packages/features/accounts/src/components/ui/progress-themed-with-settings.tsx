@@ -31,7 +31,6 @@ export const ThemedProgress: React.FC<{
 }> = ({ value, className, ...rest }) => {
   const { theme_color } = useOrganizationSettings();
   const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
-  console.log('theme_color', theme_color);
   return (
     <Progress
       value={value}
