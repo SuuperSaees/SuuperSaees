@@ -73,7 +73,7 @@ const CheckoutPage = ({ amount, priceId }: { amount: number, priceId: string }) 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="">
+    <form onSubmit={handleSubmit}>
       {!clientSecret.startsWith("http") ? (
         <>
           <PaymentElement />
