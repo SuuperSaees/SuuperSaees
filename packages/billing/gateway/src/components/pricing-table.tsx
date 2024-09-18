@@ -43,7 +43,7 @@ export function PricingTable({
   CheckoutButtonRenderer?: (amount: number, priceId: string)=> void;
 }) {
   const intervals = getPlanIntervals(config).filter(Boolean) as string[];
-  const [interval, setInterval] = useState(intervals[0] || ''); // Maneja el caso si intervals está vacío
+  const [interval, setInterval] = useState(intervals[0] || ''); 
   return (
     <div className={'flex flex-col space-y-8 xl:space-y-12'}>
       {/* <div className={'flex justify-center'}>
@@ -85,12 +85,12 @@ export function PricingTable({
             if (!plan.custom && !primaryLineItem) {
               throw new Error(`Primary line item not found for plan ${plan.id}`);
             }
-
+            
             return (
               <PricingItem
                 selectable
-                key={plan.id}
-                plan={plan}
+                key={plan?.id}
+                plan={plan!}
                 redirectToCheckout={redirectToCheckout}
                 primaryLineItem={primaryLineItem}
                 product={product}
@@ -145,13 +145,14 @@ function PricingItem(
   }>,
 ) {
   const highlighted = props.product.highlighted ?? false;
-  const { subscriptionFetchedStripe } = useBillingContext()
   const lineItem = props.primaryLineItem;
+  const { subscriptionFetchedStripe } = useBillingContext()
   // we exclude flat line items from the details since
   // it doesn't need further explanation
   const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
     return item.type !== 'flat';
   });
+
 
   return (
     <div

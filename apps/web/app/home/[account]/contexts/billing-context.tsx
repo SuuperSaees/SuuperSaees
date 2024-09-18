@@ -2,8 +2,8 @@
 
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import { Subscription } from '~/lib/subscriptions.types';
-import { getSubscriptionByOrganizationId } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/get/get-subscrioption-by-organization-id';
-
+import { getSubscriptionByOrganizationId } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/get/get-subscription-by-organization-id';
+import { updateSubscription } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/update/update-subscription';
 interface BillingContextValue {
   subscription: Subscription.Type; 
   subscriptionFetchedStripe: any;
@@ -13,9 +13,10 @@ interface BillingContextValue {
   totalBilled: number;
   loading: boolean;
   error: boolean;
-  updateSubscription: () => Promise<void>;
+  updateSubscriptionContext: () => Promise<void>;
   fetchInvoices: (customerId: string) => Promise<void>;
   fetchUpcomingInvoice: (customerId: string) => Promise<void>;
+  upgradeSubscription: () => Promise<void>;
 }
 
 const BillingContext = createContext<BillingContextValue | undefined>(undefined);
@@ -84,7 +85,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
     }
   };
 
-  const updateSubscription = async (): Promise<void> => {
+  const updateSubscriptionContext = async (): Promise<void> => {
     setLoading(true);
     setError(false);
     try {
@@ -124,38 +125,64 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
     }
   };
 
-  // const upgradeSubscription = async (priceId: string): Promise<void> => {
-  //   setLoading(true);
-  //   setError(false);
-  //   try {
-  //     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-  //     const result = await getSubscriptionByOrganizationId();
+  const upgradeSubscription = async (): Promise<void> => {
+    setLoading(true);
+    setError(false);
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+      const result = await getSubscriptionByOrganizationId();
 
-  //     const response = await fetch(`${baseUrl}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(result?.id)}`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ priceId }),
-  //     });
-  //     if (!response.ok) {
-  //       throw new Error('Failed to upgrade subscription');
-  //     }
-  //     await updateSubscription();
-  //   } catch (error) {
-  //     console.error("Error upgrading subscription:", error);
-  //     setError(true);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      const responseSubscriptionsByCustomer = await fetch(`${baseUrl}/api/stripe/get-subscription-by-customer?customerId=${encodeURIComponent(result?.billing_customer_id ?? "")}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!responseSubscriptionsByCustomer.ok) {
+        throw new Error('Failed to upgrade subscription');
+      }
+
+      const dataSubscriptionsByCustomer = await responseSubscriptionsByCustomer.json();
+      
+      if (dataSubscriptionsByCustomer.length > 1) {
+        let newSubscriptionId = ""; 
+        dataSubscriptionsByCustomer.forEach((subscription: any) => {
+          if (subscription.id !== result?.id) {
+            newSubscriptionId = subscription.id;
+          }
+        });
+      // cancel the other subscription
+      const responseCancelSubscription = await fetch(`${baseUrl}/api/stripe/cancel-subscription?subscriptionId=${encodeURIComponent(result?.id ?? "")}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!responseCancelSubscription.ok) {
+        throw new Error('Failed to upgrade subscription');
+      }
+
+      // save the new subscription id
+      await updateSubscription({
+        id: newSubscriptionId
+      });
+      await updateSubscriptionContext();
+      }
+    } catch (error) {
+      console.error("Error upgrading subscription:", error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   useEffect(() => {
     if (!subscriptionFetchedStripe) {
-        updateSubscription();
+      updateSubscriptionContext();
+        upgradeSubscription();
     }
-}, [subscriptionFetchedStripe]);
+}, []);
 
   const value: BillingContextValue = {
     subscription,
@@ -166,9 +193,10 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
     totalBilled,
     loading,
     error,
-    updateSubscription,
+    updateSubscriptionContext,
     fetchInvoices,
-    fetchUpcomingInvoice
+    fetchUpcomingInvoice,
+    upgradeSubscription
   };
 
   return (

@@ -6,7 +6,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 export async function GET(req: NextRequest) {
   // Obtiene el `accountId` de la consulta
   const { searchParams } = new URL(req.url);
-  const customerId = searchParams.get('customerId');
+  const customerId = searchParams.get('customerId') as string;
 
   if (!customerId) {
       return NextResponse.json(
@@ -17,11 +17,12 @@ export async function GET(req: NextRequest) {
 
   try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      const subscriptions = await stripe.subscriptions.retrieve(customerId);
-    console.log(subscriptions, "SUBSCRIPTIONS FOUND")
-      return NextResponse.json(subscriptions);
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customerId
+      });
+      return NextResponse.json(subscriptions.data);
   } catch (error) {
-      console.error('Error retrieving products:', error);
+      console.error('Error retrieving subscriptions:', error);
       return NextResponse.json(
           { error: { message: "Internal Server Error" } },
           { status: 500 }

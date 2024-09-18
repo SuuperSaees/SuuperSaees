@@ -3,14 +3,19 @@ import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
-export const getSubscriptionByOrganizationId = async ():Promise<Subscription.Type | null> => {
+export const getSubscriptionByOrganizationId = async ():Promise<{
+    billing_customer_id: string;
+    id: string;
+    propietary_organization_id: string;
+} | null> => {
     const client = getSupabaseServerComponentClient();
     const primary_owner_user_id = await getPrimaryOwnerId();
             try {
                const {data: fetchedSubscription, error} = await client
                .from('subscriptions')
-               .select("*")
+               .select("billing_customer_id, id, propietary_organization_id")
                .eq("propietary_organization_id", primary_owner_user_id ?? "")
+               .eq("status", "active")
                .single()
 
                if (error) throw new Error(error.message);

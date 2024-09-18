@@ -16,7 +16,7 @@ import { Button } from "@kit/ui/button";
 import { ThemedProgress } from "../../ui/progress-themed-with-settings";
 import PlansContainer from '../../../../../../../apps/web/app/select-plan/components/plans-container';
 import { useBillingContext } from '../../../../../../../apps/web/app/home/[account]/contexts/billing-context';
-   
+import { cancelSubscription } from '../../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/delete/cancel-subscription'
 function UpgradePlanComponent() {
     return (
         <PlansContainer />
@@ -25,8 +25,7 @@ function UpgradePlanComponent() {
 
 export default function BillingContainerConfig() {
     const [showUpgradeComponent, setShowUpgradeComponent] = useState(false);
-    const { subscription, subscriptionFetchedStripe, productSubscription, invoices, upcomingInvoice } = useBillingContext();
-
+    const { subscriptionFetchedStripe, productSubscription, invoices, upcomingInvoice } = useBillingContext();
     const formatUnixToMonthYear = (unixTimestamp: number, includeDay: boolean) => {
         if (!unixTimestamp) return '';
         const date = new Date(unixTimestamp * 1000);
@@ -42,7 +41,7 @@ export default function BillingContainerConfig() {
       
         return `${month} ${year}`;
       }
-    const handleUpgradeClick = () => {
+    const handleUpgradeClick = (subscriptionId: any) => {
         setShowUpgradeComponent(true);
     };
     
@@ -70,6 +69,10 @@ export default function BillingContainerConfig() {
         return Math.max(1, Math.min(100, Math.round(percentage)));
       };
       
+      const handleCancelSubscription = async (subscriptionId: any) => {
+        // Implement cancel subscription logic here
+        await cancelSubscription(subscriptionId)
+      };
     return (
         
         <div className="flex flex-col">
@@ -145,7 +148,7 @@ export default function BillingContainerConfig() {
                             <div className="text-gray-900 font-inter text-lg font-semibold leading-7 mb-[2px]">Gestionar suscripción</div>
                             <div className="overflow-hidden text-[var(--Gray-600,#475467)] truncate font-inter text-sm font-normal leading-5">Update your photo and personal details here.</div>
                         </div>
-                        <Button className="rounded-md border border-[var(--Gray-300,#D0D5DD)] bg-[var(--Base-White,#FFF)] shadow-xs"><div className="text-[var(--Gray-700,#344054)] font-inter text-sm font-semibold leading-5">Cancelar suscripción</div></Button>
+                        <Button className="rounded-md border border-[var(--Gray-300,#D0D5DD)] bg-[var(--Base-White,#FFF)] shadow-xs"><div className="text-[var(--Gray-700,#344054)] font-inter text-sm font-semibold leading-5" onClick={()=>handleCancelSubscription(subscriptionFetchedStripe?.id)}>Cancelar suscripción</div></Button>
 
                     </div> */}
                 </>

@@ -83,12 +83,12 @@ export const createSubscription = async () => {
     currency: "usd",
     cancel_at_period_end: false,
     status: "active",
-    period_ends_at: null, // Cambia "" a null
-    period_starts_at: null, // Cambia "" a null
-    trial_ends_at: null, // Cambia "" a null
-    trial_starts_at: null, // Cambia "" a null
-    updated_at: null, // Cambia "" a null
-    created_at: null // Cambia "" a null
+    period_ends_at: null, 
+    period_starts_at: null, 
+    trial_ends_at: null, 
+    trial_starts_at: null, 
+    updated_at: null, 
+    created_at: null 
 };
 
     const { error: subscriptionCreateError} = await client
