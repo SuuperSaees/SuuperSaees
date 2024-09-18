@@ -126,10 +126,12 @@ export function PersonalAccountSettingsContainer(
   return (
     <div>
       <Tabs defaultValue='account'>
-        <TabsList>
-          <TabsTrigger value='account'>Mi perfil</TabsTrigger>
-          <TabsTrigger value='billing'>Facturación</TabsTrigger>
-        </TabsList>
+        {role !== 'client_member' && role !== 'client_owner' && (
+          <TabsList>
+            <TabsTrigger value='account'>Mi perfil</TabsTrigger>
+            <TabsTrigger value='billing'>Facturación</TabsTrigger>
+          </TabsList>
+        )}
         <TabsContent value='account'>
           <div className='"flex w-full flex-wrap gap-6 pb-32 lg:flex-nowrap'>
           <div className="flex w-full flex-col space-y-6">
@@ -241,43 +243,46 @@ export function PersonalAccountSettingsContainer(
           </>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {!accountStripe?.id ? (
-                <Trans i18nKey={'account:connectToStripe'} />
-              ) : accountStripe.charges_enabled ? (
-                <Trans i18nKey={'account:stripeConnected'} />
-              ) : (
-                <Trans i18nKey={'account:continueWithOnboardingStripe'} />
-              )}
-            </CardTitle>
-            <CardDescription>
-              {!accountStripe?.id ? (
-                <Trans
-                  i18nKey={'account:connectToStripeDescription'}
-                  key={'s'}
-                />
-              ) : accountStripe.charges_enabled ? (
-                <Trans i18nKey={'account:stripeConnectedDescription'} />
-              ) : (
-                <Trans
-                  i18nKey={'account:continueWithOnboardingStripeDescription'}
-                />
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {(!accountStripe?.id || !accountStripe.charges_enabled) && (
-              // <ThemedButton className="bg-brand">
-              //   <Link href={'/stripe'}>
-              //     {accountStripe?.id ? 'Continuar' : 'Conectar'}
-              //   </Link>
-              // </ThemedButton>
-              <RegisterAccountContainer />
-            )}
-          </CardContent>
-        </Card>
+        {role !== 'client_member' && role !== 'client_owner' && (
+           <Card>
+           <CardHeader>
+             <CardTitle>
+               {!accountStripe?.id ? (
+                 <Trans i18nKey={'account:connectToStripe'} />
+               ) : accountStripe.charges_enabled ? (
+                 <Trans i18nKey={'account:stripeConnected'} />
+               ) : (
+                 <Trans i18nKey={'account:continueWithOnboardingStripe'} />
+               )}
+             </CardTitle>
+             <CardDescription>
+               {!accountStripe?.id ? (
+                 <Trans
+                   i18nKey={'account:connectToStripeDescription'}
+                   key={'s'}
+                 />
+               ) : accountStripe.charges_enabled ? (
+                 <Trans i18nKey={'account:stripeConnectedDescription'} />
+               ) : (
+                 <Trans
+                   i18nKey={'account:continueWithOnboardingStripeDescription'}
+                 />
+               )}
+             </CardDescription>
+           </CardHeader>
+           <CardContent>
+             {(!accountStripe?.id || !accountStripe.charges_enabled) && (
+               <ThemedButton className="bg-brand">
+                 <Link href={'/stripe'}>
+                   {accountStripe?.id ? 'Continuar' : 'Conectar'}
+                 </Link>
+               </ThemedButton>
+             )}
+           </CardContent>
+         </Card>
+        )}
+
+       
       </div>
 
       <div className="flex mt-6 w-full max-w-full flex-col space-y-6 lg:max-w-[350px]">

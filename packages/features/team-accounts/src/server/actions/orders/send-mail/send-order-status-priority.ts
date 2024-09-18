@@ -18,17 +18,18 @@ export async function sendOrderStatusPriorityEmail(
   const logger = await getLogger();
   const mailer = await getMailer();
 
-  // Define subject and body based on field value
   let subject;
   let bodyMessage;
 
   if (field === 'status') {
-    // subject = `Se ha cambiado el estado de la orden ${orderId}`;
     subject = `${actualName} has changed '${orderTitle}' request status to ${message}`;
     bodyMessage = `${actualName} has changed '${orderTitle}' request status to ${message}`;
   } else if (field === 'priority') {
     subject = `${actualName} has changed '${orderTitle}' request priority to ${message}`;
     bodyMessage = `${actualName} has changed '${orderTitle}' request priority to ${message}`;
+  } else if (field === 'due_date') {
+    subject = `${actualName} has changed '${orderTitle}' due date to ${message}`;
+    bodyMessage = `${actualName} has changed '${orderTitle}' due date to ${message}`;
   } else {
     subject = `Nuevo mensaje en el pedido ${orderId} añadido`;
     bodyMessage = `Tienes un mensaje en el pedido ${orderId}.`;
