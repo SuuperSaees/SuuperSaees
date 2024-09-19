@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import {
-  BillingConfig,
   LineItemSchema,
   getPlanIntervals,
   getPrimaryLineItem,
@@ -30,46 +29,56 @@ interface Paths {
 }
 
 export function PricingTable({
-  config,
   paths,
   checkoutButtonRenderer,
   redirectToCheckout = true,
   displayPlanDetails = true,
+  productsDataConfig
 }: {
-  config: BillingConfig;
   paths: Paths;
   displayPlanDetails?: boolean;
   redirectToCheckout?: boolean;
-  checkoutButtonRenderer: (amount: number, priceId: string)=> void;
+  productsDataConfig:  {
+    products: any[];
+} | null;
+  checkoutButtonRenderer?: (amount: number, priceId: string)=> void;
 }) {
-  const intervals = getPlanIntervals(config).filter(Boolean) as string[];
+  const { subscriptionFetchedStripe } = useBilling()
+  
+  if (!productsDataConfig) {
+    return (
+      <div className="items-center justify-center flex flex-col mt-10">
+        <div
+          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+          role="status"
+        >
+          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const intervals = getPlanIntervals(productsDataConfig).filter(Boolean) as string[];
   const [interval, setInterval] = useState(intervals[0] || ''); 
   return (
     <div className={'flex flex-col space-y-8 xl:space-y-12'}>
-      {/* <div className={'flex justify-center'}>
-        {intervals.length > 1 ? (
-          <PlanIntervalSwitcher
-            intervals={intervals}
-            interval={interval}
-            setInterval={setInterval}
-          />
-        ) : null}
-      </div> */}
-
-      <div
+{ productsDataConfig?.products.length ?
+      (<div
         className={
           'flex flex-col items-start space-y-6 lg:space-y-0 mt-4 mb-4' +
           ' justify-center lg:flex-row lg:space-x-4'
         }
       >
-        {Array.isArray(config.products) && config.products.length > 0 ? (
-          config.products.map((product) => {
+        {Array.isArray(productsDataConfig.products) && productsDataConfig.products.length > 0 ? (
+          productsDataConfig.products.map((product: { plans?: any; id?: string; name?: string; currency?: string; description?: string; badge?: string | undefined; highlighted?: boolean | undefined; features?: string[]; }) => {
             // Verifica si product.plans es un arreglo antes de usarlo
             if (!Array.isArray(product.plans)) {
               return null; // Retorna null si plans no es un arreglo
             }
 
-            const plan = product.plans.find((plan) => {
+            const plan = product.plans.find((plan: { paymentType: string; interval: string; }) => {
               if (plan.paymentType === 'recurring') {
                 return plan.interval === interval;
               }
@@ -80,7 +89,7 @@ export function PricingTable({
               return null;
             }
 
-            const primaryLineItem = getPrimaryLineItem(config, plan.id);
+            const primaryLineItem = getPrimaryLineItem(productsDataConfig, plan.id);
 
             if (!plan.custom && !primaryLineItem) {
               throw new Error(`Primary line item not found for plan ${plan.id}`);
@@ -95,6 +104,7 @@ export function PricingTable({
                 primaryLineItem={primaryLineItem}
                 product={product}
                 paths={paths}
+                subscriptionFetchedStripe={subscriptionFetchedStripe}
                 displayPlanDetails={displayPlanDetails}
                 checkoutButtonRenderer={checkoutButtonRenderer}
               />
@@ -103,7 +113,7 @@ export function PricingTable({
         ) : (
           <div>No hay productos disponibles.</div> 
         )}
-      </div>
+      </div>) : <div></div>}
     </div>
   );
 }
@@ -113,7 +123,7 @@ function PricingItem(
   props: React.PropsWithChildren<{
     className?: string;
     displayPlanDetails: boolean;
-
+    subscriptionFetchedStripe: any;
     paths: Paths;
 
     selectable: boolean;
@@ -131,7 +141,7 @@ function PricingItem(
       label?: string;
     };
 
-    checkoutButtonRenderer: (amount: number, priceId: string)=> void;
+    checkoutButtonRenderer?: (amount: number, priceId: string)=> void;
 
     product: {
       id: string;
@@ -146,7 +156,6 @@ function PricingItem(
 ) {
   const highlighted = props.product.highlighted ?? false;
   const lineItem = props.primaryLineItem;
-  const { subscriptionFetchedStripe } = useBilling()
   // we exclude flat line items from the details since
   // it doesn't need further explanation
   const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
@@ -254,7 +263,7 @@ function PricingItem(
             </span>
           </If>
         </div>
-        <Button onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost!, props.plan.id)} disabled={props.plan.id === subscriptionFetchedStripe?.plan.id}>{props.plan.id === subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</Button>
+        <Button onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost!, props.plan.id)} disabled={props.plan.id === props.subscriptionFetchedStripe?.plan.id}>{props.plan.id === props.subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</Button>
 
         <Separator />
 
