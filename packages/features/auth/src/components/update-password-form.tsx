@@ -113,7 +113,7 @@ export function UpdatePasswordForm(params: { redirectTo: string }) {
 
 function SuccessState(props: { redirectTo: string }) {
   return (
-    <div className={'flex flex-col space-y-4'}>
+    <div className={'flex flex-col space-y-4 items-center justify-center w-full'}>
       <Alert variant={'success'}>
         <CheckIcon className={'s-6'} />
 
