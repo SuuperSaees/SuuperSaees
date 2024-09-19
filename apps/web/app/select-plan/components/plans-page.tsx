@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import CheckoutPage from "./checkout-page"; 
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { Button } from "@kit/ui/button";
 import { PricingTable } from '@kit/billing-gateway/marketing';
-import billingConfig from '../../../../../apps/web/config/billing.config';
 import pathsConfig from '../../../../../apps/web/config/paths.config';
+import useBilling from "~/home/[account]/hooks/use-billing";
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error("Stripe public key is not defined in environment variables");
@@ -15,28 +14,11 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 const PlansPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [products, setProducts] = useState<any[]>([]); 
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { loading, errorMessage, productsDataConfig } = useBilling()
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null); 
   const [selectedPriceId, setSelectedPriceId] = useState(''); 
-
-  useEffect(() => {
-    setLoading(true);
-    fetch("/api/stripe/suuper-products", {
-      method: "GET",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setProducts(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching products: ", error);
-        setErrorMessage("Error loading products");
-        setLoading(false);
-      });
-  }, []);
+// USAREMOS LOS PRODUCTOS QUE VIENEN CON EL FETCH
+ 
 
   const handleCheckout = (amount: number | undefined, priceID: string) => {
     setSelectedAmount(amount ?? 0); 
@@ -78,12 +60,12 @@ const PlansPage = () => {
           </Elements>
         </div>
       ) : <PricingTable
-      config={billingConfig}
       paths={{
         signUp: pathsConfig.auth.signUp,
         return: pathsConfig.app.home,
       }}
-      CheckoutButtonRenderer={handleCheckout}
+      productsDataConfig={productsDataConfig}
+      checkoutButtonRenderer={handleCheckout}
     />}
     </div>
   );

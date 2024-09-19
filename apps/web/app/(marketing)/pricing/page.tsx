@@ -1,10 +1,11 @@
 import { PricingTable } from '@kit/billing-gateway/marketing';
 
 import { SitePageHeader } from '~/(marketing)/_components/site-page-header';
-import billingConfig from '~/config/billing.config';
+import { BillingProviderSchema, createBillingSchema, BillingConfig } from '@kit/billing';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+import useBilling from '~/home/[account]/hooks/use-billing';
 
 export const generateMetadata = async () => {
   const { t } = await createI18nServerInstance();
@@ -22,6 +23,8 @@ const paths = {
 async function PricingPage() {
   const { t } = await createI18nServerInstance();
 
+  const { productsDataConfig } = useBilling()
+
   return (
     <div className={'flex flex-col space-y-12'}>
       <SitePageHeader
@@ -30,7 +33,7 @@ async function PricingPage() {
       />
 
       <div className={'container mx-auto pb-8 xl:pb-16'}>
-        <PricingTable paths={paths} config={billingConfig} />
+        <PricingTable paths={paths} productsDataConfig={productsDataConfig} />
       </div>
     </div>
   );
