@@ -121,9 +121,10 @@ const ImageComponent: React.FC<ImageProps> = ({ src, alt }) => (
   <img
     src={src}
     alt={alt}
-    className="aspect-square h-full w-full object-cover"
+    className="aspect-square h-full max-h-[70vh] w-full"
   />
 );
+
 
 // Create the HOC-enhanced component
 const ImageWithOptions = withImageOptions(ImageComponent);
@@ -187,13 +188,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
       }}
     >
       <DialogTrigger>{triggerComponent}</DialogTrigger>
-      <DialogContent className="w-full sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Image view</DialogTitle>
-          <DialogDescription>
-            This is a full image view of the image you are viewing.
-          </DialogDescription>
-        </DialogHeader>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-4">
         <div
           className="relative flex h-full w-full items-center justify-center overflow-hidden"
           ref={containerRef}
@@ -207,7 +202,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
               transform: isZoomedIn
                 ? `scale(2) translate(-${mousePosition.x}%, -${mousePosition.y}%)`
                 : 'scale(1)',
-              transformOrigin: '0 0', // Ensures zoom is relative to the top-left corner
+              transformOrigin: '0 0', // Asegura que el zoom sea desde la esquina superior izquierda
               cursor: isZoomedIn ? 'zoom-out' : 'zoom-in',
             }}
           >

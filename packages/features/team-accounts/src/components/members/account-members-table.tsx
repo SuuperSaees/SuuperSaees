@@ -258,11 +258,11 @@ function ActionsDropdown({
             </DropdownMenuItem>
           </If>
 
-          <If condition={permissions.canTransferOwnership}>
+          {/* <If condition={permissions.canTransferOwnership}>
             <DropdownMenuItem onClick={() => setIsTransferring(true)}>
               <Trans i18nKey={'team:transferOwnership'} />
             </DropdownMenuItem>
-          </If>
+          </If> */}
 
           <If condition={canRemoveFromAccount}>
             <DropdownMenuItem onClick={() => setIsRemoving(true)}>

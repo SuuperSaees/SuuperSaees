@@ -67,7 +67,7 @@
       "high": "Alto",
       "in_progress": "En progreso",
       "completed": "Completado",
-      "pending": "Pendiente",
+      "pending": "Esperando respuesta",
       "annulled": "Anulado",
       "in_review": "En revisión"
     }

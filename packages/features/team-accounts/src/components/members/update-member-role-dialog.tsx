@@ -96,6 +96,7 @@ function UpdateMemberForm({
   const onSubmit = ({ role }: { role: Role }) => {
     startTransition(async () => {
       try {
+        console.log('New role:', role);
         await updateMemberRoleAction({
           accountId: teamAccountId,
           userId,

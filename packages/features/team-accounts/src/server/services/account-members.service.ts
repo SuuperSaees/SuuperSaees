@@ -111,6 +111,7 @@ class AccountMembersService {
     // since we do not set any RLS policies on the accounts_memberships table
     // for updating accounts_memberships. Instead, we use the can_action_account_member
     // RPC to validate permissions to update the role
+
     const { data, error } = await adminClient
       .from('accounts_memberships')
       .update({
@@ -120,6 +121,16 @@ class AccountMembersService {
         account_id: params.accountId,
         user_id: params.userId,
       });
+
+    const { data: newRole, error: newRoleError } = await this.client
+      .from('accounts_memberships')
+      .update(
+        {
+          account_role: params.role,
+        },
+      )
+      .eq('user_id', params.userId)
+      .single();
 
     if (error) {
       logger.error(
@@ -133,7 +144,20 @@ class AccountMembersService {
       throw error;
     }
 
+    if (newRoleError) {
+      logger.error(
+        {
+          ...ctx,
+          newRoleError,
+        },
+        `Failed to update member role`,
+      );
+
+      throw newRoleError;
+    }
+
     logger.info(ctx, `Successfully updated member role`);
+    logger.info(ctx, `New role updated`);
 
     return data;
   }
