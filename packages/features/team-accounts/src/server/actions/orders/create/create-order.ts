@@ -114,16 +114,16 @@ export const createOrders = async (orders: OrderInsert[]) => {
     
 
     if (roleData.account_role === 'agency_owner' || roleData.account_role === 'agency_member' || roleData.account_role === 'agency_project_manager') {
-      const assinationData = {
+      const assignationData = {
         agency_member_id: userId,
         order_id: orderData.id,
       }
-      const { data: assignedOrdersData, error: assignedOrdersError } = await client
+      const {error: assignedOrdersError } = await client
         .from('order_assignations')
-        .insert(assinationData)
-        .select()
-        .single();
+        .insert(assignationData);
       if (assignedOrdersError) throw assignedOrdersError.message;
+
+
     }
 
     
