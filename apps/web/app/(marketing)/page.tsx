@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { ArrowRightIcon, LayoutDashboard } from 'lucide-react';
 
-// import { PricingTable } from '@kit/billing-gateway/marketing';
+import { PricingTable } from '@kit/billing-gateway/marketing';
 import {
   CtaButton,
   FeatureCard,
@@ -17,8 +17,8 @@ import {
 } from '@kit/ui/marketing';
 import { Trans } from '@kit/ui/trans';
 
-// import billingConfig from '~/config/billing.config';
-// import pathsConfig from '~/config/paths.config';
+import billingConfig from '~/config/billing.config';
+import pathsConfig from '~/config/paths.config';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 function Home() {
@@ -160,7 +160,7 @@ function Home() {
             subheading="Get started on our free plan and upgrade when you are ready."
           />
 
-          {/* <div className={'w-full'}>
+          <div className={'w-full'}>
             <PricingTable
               config={billingConfig}
               paths={{
@@ -168,7 +168,7 @@ function Home() {
                 return: pathsConfig.app.home,
               }}
             />
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
