@@ -197,11 +197,11 @@ function MainCallToActionButton() {
         </Link>
       </CtaButton>
 
-      <CtaButton variant={'link'}>
+      {/* <CtaButton variant={'link'}>
         <Link href={'/contact'}>
           <Trans i18nKey={'common:contactUs'} />
         </Link>
-      </CtaButton>
+      </CtaButton> */}
     </div>
   );
 }

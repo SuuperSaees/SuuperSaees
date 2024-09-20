@@ -140,12 +140,21 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({ orders, role, updateOrder
                     <TableCell className="hidden flex-1 md:table-cell">
                       {['agency_member', 'agency_owner', 'agency_project_manager'].includes(role) ? (
                         <DropdownMenu>
-                          <DropdownMenuTrigger
+                          {/* <DropdownMenuTrigger
                             className={`m-2 flex inline-flex items-center rounded-lg p-2 ${order.status ? statusColors[order.status] : ''}`}
+                          > */}
+                          <DropdownMenuTrigger
+                            className={`m-2 flex inline-flex items-center rounded-lg p-2 ${
+                              order.status === 'in_progress' 
+                                ? 'bg-purple-300 text-purple-700' 
+                                : order.status 
+                                  ? statusColors[order.status] 
+                                  : ''
+                            }`}
                           >
                             <span className="pl-2 pr-2">
-                              {order.status
-                                ?.replace(/_/g, ' ')
+                              {t(`details.statuses.${order.status?.replace(/_./g, (match) => match.charAt(1).toUpperCase())}`)
+                                .replace(/_/g, ' ')
                                 .replace(/^\w/, (c) => c.toUpperCase())}
                             </span>
                             <ChevronDownIcon className="flex items-center"></ChevronDownIcon>

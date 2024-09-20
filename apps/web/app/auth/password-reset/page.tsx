@@ -22,7 +22,7 @@ const redirectPath = `${callback}?next=${passwordUpdate}`;
 
 function PasswordResetPage() {
   return (
-    <>
+    <div className='flex flex-col items-center justify-center w-full'>
       <Heading level={4}>
         <Trans i18nKey={'auth:passwordResetLabel'} />
       </Heading>
@@ -38,7 +38,7 @@ function PasswordResetPage() {
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

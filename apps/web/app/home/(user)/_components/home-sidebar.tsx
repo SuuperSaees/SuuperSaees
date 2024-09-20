@@ -7,6 +7,7 @@ import { AppLogo } from '~/components/app-logo';
 import { ProfileAccountDropdownContainer } from '~/components/personal-account-dropdown-container';
 import { clientAccountNavigationConfig } from '~/config/client-account-navigation.config';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
+import { teamMemberAccountNavigationConfig } from '../../../../config/member-team-account-navigation.config';
 
 // home imports
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
@@ -25,7 +26,9 @@ export async function HomeSidebar(props: { workspace: UserWorkspace }) {
       <SidebarContent className={`mt-5 h-[calc(100%-160px)] overflow-y-auto`}>
         <SidebarNavigation
           config={
-            userRole === 'client_owner' || userRole === 'client_member'
+            userRole === 'agency_member'
+              ? teamMemberAccountNavigationConfig
+              : userRole === 'client_owner' || userRole === 'client_member'
               ? clientAccountNavigationConfig
               : personalAccountNavigationConfig
           }

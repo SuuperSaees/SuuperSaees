@@ -68,13 +68,13 @@ const GlobalErrorPage = ({
                     </Link>
                   </Button>
 
-                  <Button className={'w-full'} variant={'outline'} asChild>
+                  {/* <Button className={'w-full'} variant={'outline'} asChild>
                     <Link href={'/contact'}>
                       <MessageCircle className={'mr-2 h-4'} />
 
                       <Trans i18nKey={'common:contactUs'} />
                     </Link>
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             </div>

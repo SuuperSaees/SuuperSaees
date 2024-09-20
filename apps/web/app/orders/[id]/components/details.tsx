@@ -47,6 +47,11 @@ const getFilePreviewComponent = (file: ServerFile.Type) => {
 const DetailsPage = () => {
   const { order } = useActivityContext();
 
+  const convertLinks = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" class="text-blue-600 underline">${url}</a>`);
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex w-full min-w-full gap-2">
@@ -63,13 +68,10 @@ const DetailsPage = () => {
           </span>
           <CircleHelp className="ml-1 h-4 w-4 text-gray-500" />
         </div>
-        <textarea
+        <div
           className="rounded-lg border border-gray-300 px-[14px] py-[12px]"
-          rows={10}
-          disabled={true}
-        >
-          {order.description}
-        </textarea>
+          dangerouslySetInnerHTML={{ __html: convertLinks(order.description) }}
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -79,7 +81,7 @@ const DetailsPage = () => {
             className="flex w-[220px] flex-col items-start gap-[8px] rounded-none rounded-bl-md rounded-br-md rounded-tr-md border border-gray-200 bg-white p-[10px] px-[14px]"
           >
             {getFilePreviewComponent(file)}
-            <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 text-gray-700">
+            <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 text-gray-700 h-[30px]">
               {file.name}
             </span>
             <span className="text-sm font-normal leading-5 text-gray-600">
@@ -88,24 +90,9 @@ const DetailsPage = () => {
           </div>
         ))}
       </div>
-
-      {/* <div className="grid grid-cols-3 gap-2">
-        {order?.files?.map((file) => (
-          <div
-            key={file.id}
-            className="flex h-56 w-full flex-col items-start gap-2 rounded-none rounded-bl-md rounded-br-md rounded-tr-md border border-gray-200 bg-white p-[10px] px-[14px]"
-          >
-            {getFilePreviewComponent(file)}
-            <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 text-gray-700">
-              {file.name}
-            </span>
-            <span className="text-sm font-normal leading-5 text-gray-600">
-              {formatFileSize(file.size)}
-            </span>
-          </div>
-        ))}
-      </div> */}
     </div>
   );
 };
+
+
 export default DetailsPage;

@@ -18,10 +18,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from '@kit/ui/dialog';
 
@@ -121,9 +118,10 @@ const ImageComponent: React.FC<ImageProps> = ({ src, alt }) => (
   <img
     src={src}
     alt={alt}
-    className="aspect-square h-full w-full object-cover"
+    className="object-contain aspect-square h-full max-h-[70vh] w-full"
   />
 );
+
 
 // Create the HOC-enhanced component
 const ImageWithOptions = withImageOptions(ImageComponent);
@@ -187,13 +185,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
       }}
     >
       <DialogTrigger>{triggerComponent}</DialogTrigger>
-      <DialogContent className="w-full sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Image view</DialogTitle>
-          <DialogDescription>
-            This is a full image view of the image you are viewing.
-          </DialogDescription>
-        </DialogHeader>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-4">
         <div
           className="relative flex h-full w-full items-center justify-center overflow-hidden"
           ref={containerRef}

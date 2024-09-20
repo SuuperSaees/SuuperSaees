@@ -66,7 +66,7 @@ export const FormSchema = createStepSchema({
     recurring_subscription: z.boolean().default(false),
   }),
   step_service_details: z.object({
-    service_image: z.string(),
+    service_image: z.string().optional(),
     service_name: z.string().min(2).max(50),
     service_description: z.string().min(2).max(500),
   }),

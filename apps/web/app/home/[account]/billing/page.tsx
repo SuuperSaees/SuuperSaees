@@ -2,16 +2,16 @@ import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 
 import {
   BillingPortalCard,
-  CurrentLifetimeOrderCard,
-  CurrentSubscriptionCard,
+  // CurrentLifetimeOrderCard,
+  // CurrentSubscriptionCard,
 } from '@kit/billing-gateway/components';
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
-import { If } from '@kit/ui/if';
+// import { If } from '@kit/ui/if';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
-import billingConfig from '~/config/billing.config';
+// import billingConfig from '~/config/billing.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
@@ -85,7 +85,7 @@ async function TeamAccountBillingPage({ params }: Params) {
             'max-w-2xl': data,
           })}
         >
-          <If
+          {/* <If
             condition={data}
             fallback={
               <div>
@@ -107,7 +107,7 @@ async function TeamAccountBillingPage({ params }: Params) {
                 <CurrentLifetimeOrderCard order={data} config={billingConfig} />
               );
             }}
-          </If>
+          </If> */}
 
           <BillingPortal />
         </div>
