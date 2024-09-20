@@ -10,7 +10,7 @@ import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-
 import { updateOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Avatar, AvatarFallback } from '@kit/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardFooter } from '@kit/ui/card';
 import {
@@ -198,10 +198,9 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({ orders, role, updateOrder
                             key={assignee.agency_member.email}
                             className="h-6 max-h-6 w-6 max-w-6 border-2 border-white"
                           >
+                            <AvatarImage src={assignee.agency_member.picture_url} />
                             <AvatarFallback>
-                              {assignee.agency_member.name.charAt(
-                                0,
-                              )}
+                              {assignee.agency_member.name.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                         ))}
