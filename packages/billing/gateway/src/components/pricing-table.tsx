@@ -44,6 +44,7 @@ export function PricingTable({
   checkoutButtonRenderer?: (amount: number, priceId: string)=> void;
 }) {
   const { subscriptionFetchedStripe } = useBilling()
+
   
   if (!productsDataConfig) {
     return (
@@ -64,7 +65,7 @@ export function PricingTable({
   const [interval, setInterval] = useState(intervals[0] || ''); 
   return (
     <div className={'flex flex-col space-y-8 xl:space-y-12'}>
-{ productsDataConfig?.products.length ?
+{ productsDataConfig?.products?.length ?
       (<div
         className={
           'flex flex-col items-start space-y-6 lg:space-y-0 mt-4 mb-4' +
@@ -73,9 +74,8 @@ export function PricingTable({
       >
         {Array.isArray(productsDataConfig.products) && productsDataConfig.products.length > 0 ? (
           productsDataConfig.products.map((product: { plans?: any; id?: string; name?: string; currency?: string; description?: string; badge?: string | undefined; highlighted?: boolean | undefined; features?: string[]; }) => {
-            // Verifica si product.plans es un arreglo antes de usarlo
             if (!Array.isArray(product.plans)) {
-              return null; // Retorna null si plans no es un arreglo
+              return null; 
             }
 
             const plan = product.plans.find((plan: { paymentType: string; interval: string; }) => {
@@ -88,27 +88,28 @@ export function PricingTable({
             if (!plan) {
               return null;
             }
-
+            
             const primaryLineItem = getPrimaryLineItem(productsDataConfig, plan.id);
 
             if (!plan.custom && !primaryLineItem) {
               throw new Error(`Primary line item not found for plan ${plan.id}`);
             }
-            
-            return (
-              <PricingItem
-                selectable
-                key={plan?.id}
-                plan={plan!}
-                redirectToCheckout={redirectToCheckout}
-                primaryLineItem={primaryLineItem}
-                product={product}
-                paths={paths}
-                subscriptionFetchedStripe={subscriptionFetchedStripe}
-                displayPlanDetails={displayPlanDetails}
-                checkoutButtonRenderer={checkoutButtonRenderer}
-              />
-            );
+            if (plan.id !== subscriptionFetchedStripe?.plan?.id) {
+              return (
+                <PricingItem
+                  selectable
+                  key={plan?.id}
+                  plan={plan!}
+                  redirectToCheckout={redirectToCheckout}
+                  primaryLineItem={primaryLineItem}
+                  product={product}
+                  paths={paths}
+                  subscriptionFetchedStripe={subscriptionFetchedStripe}
+                  displayPlanDetails={displayPlanDetails}
+                  checkoutButtonRenderer={checkoutButtonRenderer}
+                />
+              );
+            }
           })
         ) : (
           <div>No hay productos disponibles.</div> 
