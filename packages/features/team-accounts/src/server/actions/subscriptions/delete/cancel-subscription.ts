@@ -1,37 +1,121 @@
 'use server';
-import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions.types';
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions.types';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
-export const cancelSubscription = async (subscriptionId: any):Promise<Subscription.Type | null> => {
-    const client = getSupabaseServerComponentClient();
-    const primary_owner_user_id = await getPrimaryOwnerId();
-    const newSubscription: {
-        status: "active"
-        | "trialing"
-        | "past_due"
-        | "canceled"
-        | "unpaid"
-        | "incomplete"
-        | "incomplete_expired"
-        | "paused";
-        active: boolean;
-    } = {
-        active: true,
-        status: "canceled",
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
+export const cancelSubscription = async (subscriptionId: any) => {
+  const client = getSupabaseServerComponentClient();
+  const primary_owner_user_id = await getPrimaryOwnerId();
+  const newSubscription: {
+    status:
+      | 'active'
+      | 'trialing'
+      | 'past_due'
+      | 'canceled'
+      | 'unpaid'
+      | 'incomplete'
+      | 'incomplete_expired'
+      | 'paused';
+    active: boolean;
+  } = {
+    active: false,
+    status: 'canceled',
+  };
+  try {
+    const { error: updatedSubscriptionError } =
+      await client
+        .from('subscriptions')
+        .update(newSubscription)
+        .eq('id', subscriptionId ?? '')
+        .eq('propietary_organization_id', primary_owner_user_id ?? '')
+        .single();
+
+    if (updatedSubscriptionError)
+      throw new Error(updatedSubscriptionError.message);
+
+    // Get subscription data
+    const { data: getSubscriptionData, error: subscriptionError } =
+      await client
+        .from('subscriptions')
+        .select('billing_customer_id')
+        .eq('id', subscriptionId ?? '')
+        .eq('propietary_organization_id', primary_owner_user_id ?? '')
+        .eq('active', false)
+        .single();
+
+    console.log('getSubscriptionData', getSubscriptionData);
+
+    // Generate new susbcription free. See how use platform with new stripe flow ==> Redirect to landing page.
+    // Cancel Subscrption on stripe
+    const responseCancelSubscription = await fetch(
+      `${baseUrl}/api/stripe/cancel-subscription?subscriptionId=${encodeURIComponent(subscriptionId ?? '')}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    if (!responseCancelSubscription.ok) {
+      throw new Error('Failed to upgrade subscription');
+    }
+
+    // Search Free Subscription
+    const priceId = process.env.PLAN_FREE_ID as string;
+
+    // create subscription in stripe
+    const subscriptionResponse = await fetch(
+      `${baseUrl}/api/stripe/create-subscription?customerId=${encodeURIComponent(getSubscriptionData?.billing_customer_id!)}&priceId=${encodeURIComponent(priceId)}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    if (!subscriptionResponse.ok) {
+      throw new Error('Failed to create subscription');
+    }
+
+    const subscriptionData = await subscriptionResponse.json();
+    const newDate = new Date().toISOString();
+    // Create subscription in db
+    const createNewSubscription: Subscription.Type = {
+      id: subscriptionData?.id as string,
+      propietary_organization_id: primary_owner_user_id as string,
+      billing_customer_id:
+      getSubscriptionData?.billing_customer_id as string,
+      active: true,
+      billing_provider: 'stripe',
+      currency: 'usd',
+      cancel_at_period_end: false,
+      status: 'active',
+      period_ends_at: null,
+      period_starts_at: null,
+      trial_ends_at: null,
+      trial_starts_at: null,
+      updated_at: newDate,
+      created_at: newDate,
+      account_id: null,
     };
-            try {
-               const {data: updatedSubscription, error} = await client
-               .from('subscriptions')
-               .update(newSubscription)
-               .eq("propietary_organization_id", primary_owner_user_id ?? "")
-               .single()
 
-               if (error) throw new Error(error.message);
+    const { error: subscriptionCreateError } = await client
+      .from('subscriptions')
+      .insert(createNewSubscription)
+      .single();
 
-               return updatedSubscription
-            } catch (error) {
-                console.error("Error fetching products or prices:", error);
-                return null;
-            }
-}
+    if (subscriptionCreateError) {
+      console.error(
+        'Error creating subscription:',
+        subscriptionCreateError.message,
+      );
+    }
+  } catch (error) {
+    console.error('Error fetching products or prices:', error);
+    return null;
+  }
+};
