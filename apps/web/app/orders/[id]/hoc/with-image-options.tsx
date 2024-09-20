@@ -18,10 +18,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from '@kit/ui/dialog';
 
@@ -121,7 +118,7 @@ const ImageComponent: React.FC<ImageProps> = ({ src, alt }) => (
   <img
     src={src}
     alt={alt}
-    className="aspect-square h-full max-h-[70vh] w-full"
+    className="object-contain aspect-square h-full max-h-[70vh] w-full"
   />
 );
 
@@ -202,7 +199,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
               transform: isZoomedIn
                 ? `scale(2) translate(-${mousePosition.x}%, -${mousePosition.y}%)`
                 : 'scale(1)',
-              transformOrigin: '0 0', // Asegura que el zoom sea desde la esquina superior izquierda
+              transformOrigin: '0 0', // Ensures zoom is relative to the top-left corner
               cursor: isZoomedIn ? 'zoom-out' : 'zoom-in',
             }}
           >
