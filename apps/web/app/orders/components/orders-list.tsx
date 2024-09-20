@@ -146,7 +146,7 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({ orders, role, updateOrder
                           <DropdownMenuTrigger
                             className={`m-2 flex inline-flex items-center rounded-lg p-2 ${
                               order.status === 'in_progress' 
-                                ? 'bg-cyan-300 text-cyan-700' 
+                                ? 'bg-purple-300 text-purple-700' 
                                 : order.status 
                                   ? statusColors[order.status] 
                                   : ''

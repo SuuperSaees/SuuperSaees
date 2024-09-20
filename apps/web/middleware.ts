@@ -8,7 +8,6 @@ import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
 import appConfig from '~/config/app.config';
 import pathsConfig from '~/config/paths.config';
-// import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 const CSRF_SECRET_COOKIE = 'csrfSecret';
 const NEXT_ACTION_HEADER = 'next-action';
