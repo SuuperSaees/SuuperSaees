@@ -185,7 +185,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
       }}
     >
       <DialogTrigger>{triggerComponent}</DialogTrigger>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-4">
+        <DialogContent className="max-w-[90vw] h-[80vh] max-h-[90vh] p-8">
         <div
           className="relative flex h-full w-full items-center justify-center overflow-hidden"
           ref={containerRef}
@@ -206,7 +206,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
             {imageContentComponent}
           </div>
         </div>
-        <DialogFooter className="flex w-full flex-row sm:justify-start sm:justify-between">
+        <DialogFooter className="flex w-full flex-row sm:justify-start sm:justify-between mt-auto">
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
