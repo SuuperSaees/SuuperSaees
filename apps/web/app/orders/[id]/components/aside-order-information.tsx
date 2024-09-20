@@ -99,13 +99,11 @@ const AsideOrderInformation = ({
       return updateOrder(order.id, { due_date });
     },
     onSuccess: () => {
-      console.log('date changed');
       toast.success('Success', {
         description: 'Date updated successfully!',
       });
     },
     onError: (error) => {
-      console.log('error', error);
       toast.error('Error', {
         description: 'The date could not be updated.',
       });

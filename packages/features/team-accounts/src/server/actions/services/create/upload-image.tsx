@@ -24,7 +24,7 @@ export default function UploadImageComponent({
   const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>(
-    'Debe seleccionar una imagen',
+    'Seleccionar una imagen',
   );
 
   const handleButtonClick = (e) => {

@@ -15,6 +15,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { loadMembersPageData } from './_lib/server/members-page.loader';
+import { RoleBadge } from 'node_modules/@kit/team-accounts/src/components/members/role-badge';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -146,19 +147,23 @@ async function ClientsMembersPage() {
                   )}
                 </div>
 
-                <InviteMembersDialogContainer
-                  userRoleHierarchy={currentUserRoleHierarchy ?? 0}
-                  accountSlug={slug}
-                >
-                  <ThemedButton
-                    size={'sm'}
-                    data-test={'invite-members-form-trigger'}
+                {account.role_hierarchy_level === 2 && (
+                  <InviteMembersDialogContainer
+                    userRoleHierarchy={currentUserRoleHierarchy ?? 0}
+                    accountSlug={slug}
                   >
-                    <span>
-                      <Trans i18nKey={'team:inviteMembersButton'} />
-                    </span>
-                  </ThemedButton>
-                </InviteMembersDialogContainer>
+                    <ThemedButton
+                      size={'sm'}
+                      data-test={'invite-members-form-trigger'}
+                    >
+                      <span>
+                        <Trans i18nKey={'team:inviteMembersButton'} />
+                      </span>
+                    </ThemedButton>
+                  </InviteMembersDialogContainer>
+                )}
+
+                
               </If>
             </div>
           </div>

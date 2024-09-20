@@ -221,7 +221,7 @@ export function createBillingSchema(config: z.infer<typeof BillingSchema>) {
 export type BillingConfig = z.infer<typeof BillingSchema>;
 export type ProductSchema = z.infer<typeof ProductSchema>;
 
-export function getPlanIntervals(config: z.infer<typeof BillingSchema>) {
+export function getPlanIntervals(config: {products: any[]}) {
   // Verifica si config.products es un arreglo y no está vacío
   if (!Array.isArray(config.products)) {
     return []; // Retorna un arreglo vacío si products no es un arreglo
@@ -231,7 +231,7 @@ export function getPlanIntervals(config: z.infer<typeof BillingSchema>) {
     .flatMap((product) => {
       // Verifica si plans existe y no está vacío
       return product?.plans && product.plans.length > 0
-        ? product.plans.map((plan) => plan.interval)
+        ? product.plans.map((plan: any) => plan.interval)
         : []; // Retorna un arreglo vacío si plans está vacío
     })
     .filter(Boolean); // Filtra cualquier valor falsy
@@ -250,19 +250,19 @@ export function getPlanIntervals(config: z.infer<typeof BillingSchema>) {
  * @param planId
  */
 export function getPrimaryLineItem(
-  config: z.infer<typeof BillingSchema>,
+  config: {products: any[]},
   planId: string,
 ) {
   for (const product of config.products) {
     for (const plan of product.plans) {
       if (plan.id === planId) {
         // Lemon Squeezy only supports one line item per plan
-        if (config.provider === 'lemon-squeezy') {
-          return plan.lineItems[0];
-        }
+        // if (config.provider === 'lemon-squeezy') {
+        //   return plan.lineItems[0];
+        // }
 
         const flatLineItem = plan.lineItems.find(
-          (item) => item.type === LineItemType.Flat,
+          (item: { type: LineItemType; }) => item.type === LineItemType.Flat,
         );
 
         if (flatLineItem) {

@@ -1,5 +1,6 @@
 'use client';
 
+import { Avatar, AvatarImage, AvatarFallback } from '@kit/ui/avatar';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
 
@@ -22,7 +23,7 @@ const AvatarDisplayer = ({
 }: AvatarDisplayerProps) => {
   return (
     <div className={`relative flex h-fit w-fit items-start gap-2`}>
-      <ProfileAvatar
+      {/* <ProfileAvatar
         displayName={!displayName ? null : displayName}
         pictureUrl={pictureUrl}
         className={`relative ${
@@ -31,12 +32,26 @@ const AvatarDisplayer = ({
             : ''
         } ${status === 'online' ? 'after:bg-green-400' : 'after:bg-gray-400'} ${className} `}
         {...rest}
-      />
+      /> */}
+      <Avatar>
+        <AvatarImage src={pictureUrl} />
+        {/* <AvatarFallback>{displayName}</AvatarFallback> */}
+        {displayName && (
+          <AvatarFallback>
+            {displayName ? displayName.charAt(0).toUpperCase() : 'N/A'}
+          </AvatarFallback>
+        )}
+        {nickname && (
+          <AvatarFallback>
+            {nickname ? nickname.charAt(0).toUpperCase() : 'N/A'}
+          </AvatarFallback>
+        )}
+      </Avatar>
       <div className="flex flex-col">
         {displayName && (
           <span className="text-sm font-semibold">{displayName}</span>
         )}
-        {nickname && <span className="text-sm text-gray-600">{nickname}</span>}
+        {/* {nickname && <span className="text-sm text-gray-600">{nickname}</span>} */}
         {/* <AvatarFallback>SD</AvatarFallback> */}
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { BillingProviderSchema, createBillingSchema, BillingConfig } from '@kit/billing';
 
-// Obtener el proveedor de facturación desde las variables de entorno
+// Obtener el proveedor de facturación desde las variables de sssss
 const provider = BillingProviderSchema.parse(
   process.env.NEXT_PUBLIC_BILLING_PROVIDER,
 );
