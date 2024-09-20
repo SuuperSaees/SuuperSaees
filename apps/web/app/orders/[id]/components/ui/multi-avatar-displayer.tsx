@@ -34,6 +34,7 @@ const MultiAvatarDisplayer = ({
     <div className={`relative flex items-center ${className} w-fit`}>
       {avatars.slice(0, maxAvatars).map((avatar, index) => (
         <AvatarDisplayer
+          nickname={avatar?.name}
           pictureUrl={avatar?.picture_url}
           key={index + avatar?.name}
           status={avatar?.status}
