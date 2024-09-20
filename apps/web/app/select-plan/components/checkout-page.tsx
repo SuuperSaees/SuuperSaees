@@ -7,7 +7,7 @@ import {
   PaymentElement,
 } from "@stripe/react-stripe-js";
 import { Button } from "@kit/ui/button";
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 const CheckoutPage = ({ amount, priceId }: { amount: number, priceId: string }) => {
   const stripe = useStripe();

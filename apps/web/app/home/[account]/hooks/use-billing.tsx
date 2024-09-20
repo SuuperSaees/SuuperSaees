@@ -23,7 +23,7 @@ export const useBilling = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [hasFetched, setHasFetched] = useState(false);
 
-  const fetchInvoices = async (customerId: string): Promise<void> => {
+  const fetchInvoices = async (customerId: string): Promise<void> => { 
     setLoading(true);
     setError(false);
     try {
@@ -214,7 +214,7 @@ export const useBilling = () => {
     }
   };
 
-  const upgradeSubscription = async (): Promise<void> => {
+  const upgradeSubscription = async (): Promise<void> => { // Use this with a webhook.
     setLoading(true);
     setError(false);
     try {

@@ -18,7 +18,8 @@ export async function GET(req: NextRequest) {
   try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const subscriptions = await stripe.subscriptions.list({
-        customer: customerId
+        customer: customerId,
+        status: "active"
       });
       return NextResponse.json(subscriptions.data);
   } catch (error) {

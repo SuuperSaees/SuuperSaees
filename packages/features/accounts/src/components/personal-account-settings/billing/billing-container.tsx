@@ -17,6 +17,8 @@ import { ThemedProgress } from "../../ui/progress-themed-with-settings";
 import PlansContainer from '../../../../../../../apps/web/app/select-plan/components/plans-container';
 import { useBilling } from '../../../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { cancelSubscription } from '../../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/delete/cancel-subscription'
+import { toast } from 'sonner';
+
 function UpgradePlanComponent() {
     return (
         <PlansContainer />
@@ -25,7 +27,10 @@ function UpgradePlanComponent() {
 
 export default function BillingContainerConfig() {
     const [showUpgradeComponent, setShowUpgradeComponent] = useState(false);
-    const { subscriptionFetchedStripe, productSubscription, invoices, upcomingInvoice } = useBilling();
+    const [modalCancelSubscription, setModalCancelSubscription] = useState(false)
+    const [cancelSubscriptionInput, setCancelSubscriptionInput] = useState("")
+    const { subscriptionFetchedStripe, productSubscription, invoices, upcomingInvoice, updateSubscriptionContext } = useBilling();
+
     const formatUnixToMonthYear = (unixTimestamp: number, includeDay: boolean) => {
         if (!unixTimestamp) return '';
         const date = new Date(unixTimestamp * 1000);
@@ -41,7 +46,7 @@ export default function BillingContainerConfig() {
       
         return `${month} ${year}`;
       }
-    const handleUpgradeClick = (subscriptionId: any) => {
+    const handleUpgradeClick = () => {
         setShowUpgradeComponent(true);
     };
     
@@ -71,7 +76,18 @@ export default function BillingContainerConfig() {
       
       const handleCancelSubscription = async (subscriptionId: any) => {
         // Implement cancel subscription logic here
-        await cancelSubscription(subscriptionId)
+        try {
+            await cancelSubscription(subscriptionId)
+            toast.success('Success', {
+              description: 'Subscription canceled successfully',
+            });
+            updateSubscriptionContext()
+            setModalCancelSubscription(false)
+          } catch (error) {
+            toast.error('Error', {
+              description: 'Error trying to cancel subscription',
+            });
+          }
       };
     return (
         
@@ -143,14 +159,33 @@ export default function BillingContainerConfig() {
                             </CardContent>
                         </Card>
                     </div>
-                    {/* <div className="flex justify-between">
+                   {(productSubscription?.name.toLowerCase() === "standard" || productSubscription?.name.toLowerCase() === "premium" || productSubscription?.name.toLowerCase() === "enterprise") && <div className="flex justify-between">
                         <div className="flex flex-col">
                             <div className="text-gray-900 font-inter text-lg font-semibold leading-7 mb-[2px]">Gestionar suscripción</div>
-                            <div className="overflow-hidden text-[var(--Gray-600,#475467)] truncate font-inter text-sm font-normal leading-5">Update your photo and personal details here.</div>
+                            <div className="overflow-hidden text-[var(--Gray-600,#475467)] truncate font-inter text-sm font-normal leading-5">Actualizar estado de suscripción</div>
                         </div>
-                        <Button className="rounded-md border border-[var(--Gray-300,#D0D5DD)] bg-[var(--Base-White,#FFF)] shadow-xs"><div className="text-[var(--Gray-700,#344054)] font-inter text-sm font-semibold leading-5" onClick={()=>handleCancelSubscription(subscriptionFetchedStripe?.id)}>Cancelar suscripción</div></Button>
+                        <Button variant={"ghost"} className="rounded-md border border-[var(--Gray-300,#D0D5DD)] bg-[var(--Base-White,#FFF)] shadow-xs"><div className="text-[var(--Gray-700,#344054)] font-inter text-sm font-semibold leading-5" onClick={()=>setModalCancelSubscription(true)}>Cancelar suscripción</div></Button>
 
-                    </div> */}
+                    </div>}
+                    {modalCancelSubscription && <div className='fixed w-[100vw] h-[100vh] bg-slate-50 bg-opacity-50 z-40'>
+                        <Card className="flex flex-col absolute z-50 top-[35%] right-[50%] p-6 shadow-md">
+                        <div className="text-gray-900 font-inter text-lg font-semibold leading-7 mb-4">Cancelar suscripción</div>
+                        <div className="overflow-hidden text-slate-950 truncate font-inter text-sm font-normal leading-5 mb-4">¿Estás seguro de que quieres cancelar tu suscripción?</div>
+                        <div className="overflow-hidden text-slate-950 truncate font-inter text-sm font-normal leading-5 mb-4">
+                         Escribe <strong>"cancel_subscription"</strong> para confirmar.
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Escribe 'cancel_subscription'"
+                            value={cancelSubscriptionInput}
+                            onChange={(e) => setCancelSubscriptionInput(e.target.value)}
+                            className="mb-4 p-2 border border-gray-300 rounded"
+                        />
+                        <div className="flex gap-2 justify-end">
+                            <Button disabled={!(cancelSubscriptionInput === "cancel_subscription")} variant={"destructive"} onClick={()=>handleCancelSubscription(subscriptionFetchedStripe?.id)}><div className="text-[var(--Gray-700, #344054)] font-inter text-sm font-semibold leading-5">Cancelar</div></Button>
+                            <Button variant={"ghost"} onClick={()=>setModalCancelSubscription(false)} className="rounded-md border border-[var(--Gray-300, #D0D5DD)] bg-[var(--Base-White, #FFF)] shadow-xs"><div className="text-[var(--Gray-700, #344054)] font-inter text-sm font-semibold leading-5">Volver</div></Button>
+                        </div>
+                    </Card></div>}
                 </>
             )
                 
