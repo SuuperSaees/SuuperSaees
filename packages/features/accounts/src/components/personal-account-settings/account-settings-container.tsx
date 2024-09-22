@@ -9,10 +9,10 @@ import Link from 'next/link';
 
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
-// import { If } from '@kit/ui/if';
-// import { LanguageSelector } from '@kit/ui/language-selector';
+import { If } from '@kit/ui/if';
+import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
@@ -27,9 +27,10 @@ import UpdateAccountColorBrand from './update-account-color-brand';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
-// import { UpdateAccountOrganizationName } from './update-account-organization-name';
+import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import BillingContainerConfig  from './billing/billing-container';
+
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -69,7 +70,7 @@ export function PersonalAccountSettingsContainer(
     id: '',
     charges_enabled: false,
   });
-  // const supportsLanguageSelection = useSupportMultiLanguage();
+   const supportsLanguageSelection = useSupportMultiLanguage();
   useEffect(() => {
     let user: Account.Type | null;
     void fetchUserAccount()
@@ -166,7 +167,7 @@ export function PersonalAccountSettingsContainer(
             <UpdateAccountDetailsFormContainer user={user} />
           </CardContent>
         </Card>
-        {/* <Card>
+        <Card>
           <CardHeader>
             <CardTitle>
               <Trans i18nKey={'account:brandName'} />
@@ -178,9 +179,9 @@ export function PersonalAccountSettingsContainer(
           <CardContent>
             <UpdateAccountOrganizationName />
           </CardContent>
-        </Card> */}
-        {/* SUPPORT LANGUAGE, PENDING */}
-        {/* <If condition={supportsLanguageSelection}>
+        </Card>
+       
+        <If condition={supportsLanguageSelection}>
           <Card>
             <CardHeader>
               <CardTitle>
@@ -194,7 +195,7 @@ export function PersonalAccountSettingsContainer(
               <LanguageSelector />
             </CardContent>
           </Card>
-        </If> */}
+        </If>
         {/* Brand color section */}
         {role === 'agency_owner' && (
           <>
@@ -334,11 +335,10 @@ export function PersonalAccountSettingsContainer(
   );
 }
 
-// function useSupportMultiLanguage() {
-//   const { i18n } = useTranslation();
-//   const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
+ function useSupportMultiLanguage() {
+   const { i18n } = useTranslation();
+   const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
+   const supportedLangs = langs.filter((lang) => lang !== 'cimode');
 
-//   const supportedLangs = langs.filter((lang) => lang !== 'cimode');
-
-//   return supportedLangs.length > 1;
-// }
+   return supportedLangs.length > 1;
+ }

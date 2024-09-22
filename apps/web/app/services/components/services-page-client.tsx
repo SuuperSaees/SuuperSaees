@@ -6,14 +6,14 @@ import { Elements } from '@stripe/react-stripe-js';
 import { Stripe } from '@stripe/stripe-js';
 import { useEffect } from 'react';
 import { ServicesContextProvider, useServicesContext } from '../contexts/services-context';
-
+import { useTranslation } from 'react-i18next';
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
 }
 
 const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePromise }) => {
   const { services, loading, updateServices } = useServicesContext();
-
+  const { t } = useTranslation('orders');
   useEffect(() => {
     updateServices(true).catch((error)=> {console.log(error.message)});
   }, []);
@@ -41,7 +41,7 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePr
             <div className="flex-grow">
               <span>
                 <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
-                  Servicios
+                {t('services:title')} 
                 </div>
               </span>
             </div>

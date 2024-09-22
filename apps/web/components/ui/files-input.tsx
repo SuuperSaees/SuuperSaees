@@ -3,6 +3,7 @@ import { CheckSquare, CloudUpload, StickyNote, Trash2 } from 'lucide-react';
 import { createFile, createUploadBucketURL } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { File } from '../../../web/lib/file.types';
+import { useTranslation } from 'react-i18next';
 
 const fileTypeColors: Record<string, string> = {
   pdf: 'fill-pdf',
@@ -26,11 +27,12 @@ export default function UploadFileComponent({
   onFileIdsChange,
   removeResults = false,
 }: UploadFileComponentProps) {
+  const { t } = useTranslation(); // Usa el hook para traducción
   const [filesWithId, setFilesWithId] = useState<Map<string, File>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isDragging, setIsDragging] = useState(false);
-  const [dragMessage, setDragMessage] = useState('Arrastra los archivos o dale click aquí para subir archivos');
+  const [dragMessage, setDragMessage] = useState(t('dragAndDrop'));
   const [fileIds, setFileIds] = useState<string[]>([]);
   
   const handleFileInputClick = () => {
@@ -43,7 +45,7 @@ export default function UploadFileComponent({
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []);
     if (selectedFiles.length === 0) {
-      setErrors((prevErrors) => ({ ...prevErrors, '': 'Debes seleccionar al menos un archivo' }));
+      setErrors((prevErrors) => ({ ...prevErrors, '': t('selectFile') }));
       return;
     }
 
@@ -66,7 +68,7 @@ export default function UploadFileComponent({
     setIsDragging(false);
     const droppedFiles = Array.from(event.dataTransfer.files);
     if (droppedFiles.length === 0) {
-      setErrors((prevErrors) => ({ ...prevErrors, '': 'Debes seleccionar al menos un archivo' }));
+      setErrors((prevErrors) => ({ ...prevErrors, '': t('selectFile') }));
       return;
     }
 
@@ -87,12 +89,12 @@ export default function UploadFileComponent({
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(true);
-    setDragMessage('Suelta aquí para subir los archivos');
+    setDragMessage(t('orders:dropHere'));
   };
 
   const handleDragLeave = () => {
     setIsDragging(false);
-    setDragMessage('Arrastra los archivos o dale click aquí para subir archivos');
+    setDragMessage(t('orders:dragAndDrop'));
   };
 
   const generateFileId = () => Date.now() + Math.random().toString(36).substr(2, 9);
@@ -119,7 +121,7 @@ export default function UploadFileComponent({
     xhr.upload.addEventListener('error', () => {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        [id]: `Error al subir el archivo ${file.name}`,
+        [id]: t('orders:uploadError', { fileName: file.name }),
       }));
     });
 
@@ -147,7 +149,7 @@ export default function UploadFileComponent({
         if (xhr.status !== 200) {
           setErrors((prevErrors) => ({
             ...prevErrors,
-            [id]: `Error al subir el archivo ${file.name}: ${xhr.statusText}`,
+            [id]: t('orders:uploadError', { fileName: file.name }) + `: ${xhr.statusText}`,
           }));
         }
       }
@@ -185,7 +187,7 @@ export default function UploadFileComponent({
     } catch (error) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        [id]: `Error al obtener la URL de carga: ${error.message}`,
+        [id]: t('orders:uploadURLError', { error: error.message }),
       }));
     }
   };

@@ -28,9 +28,10 @@ export const generateMetadata = async () => {
   };
 };
 
-function PersonalAccountSettingsPage() {
+async function PersonalAccountSettingsPage() {
   const { user } = use(loadUserWorkspace());
-
+  const i18n = await createI18nServerInstance();
+  const title = i18n.t('account:settingsTab');
   return (
     <PageBody>
       <div className="p-[35px]">
@@ -38,7 +39,7 @@ function PersonalAccountSettingsPage() {
           <div className="flex-grow">
             <span>
               <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
-                Configuraciones
+                {i18n.t('account:settingsTab')}
               </div>
             </span>
           </div>

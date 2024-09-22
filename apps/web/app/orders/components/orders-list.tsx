@@ -258,14 +258,14 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({
                       height={160}
                     />
                     <h3 className="mb-[20px] w-[352px] text-center text-[20px] font-semibold leading-[30px] text-[#101828]">
-                      Comencemos con tu primer pedido
+                      {t('startFirstOrderTitle')}
                     </h3>
                     <p className="mb-[16px] w-[352px] text-center text-[16px] leading-[24px] text-[#475467]">
-                      Aún no haz creado ningún pedido, agrega uno haciendo clic
-                      a continuación.
+                      {t('startFirstOrderDescription')}
                     </p>
+
                     <Link href="/orders/create">
-                      <Button className="po">{t('creation.title')}</Button>
+                      <ThemedButton className="po">{t('creation.title')}</ThemedButton>
                     </Link>
                   </div>
                 </TableCell>
@@ -400,7 +400,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <ThemedInput
                     type="search"
-                    placeholder="Buscar..."
+                    placeholder={t('searchPlaceholderTasks')}
                     className="focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
