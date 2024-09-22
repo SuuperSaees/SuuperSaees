@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 
 
@@ -26,6 +26,8 @@ import ActivityAssignations from './activity-assignations';
 import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+
 
 
 interface AsideOrderInformationProps {
@@ -41,6 +43,20 @@ const AsideOrderInformation = ({
   const { t } = useTranslation('orders');
   const [selectedStatus, setSelectedStatus] = useState(order.status);
   const [selectedPriority, setSelectedPriority] = useState(order.priority);
+  const [userRole, setUserRole] = useState('');
+  
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const role = await getUserRole();
+        setUserRole(role);
+      } catch (error) {
+        console.error('Error al obtener el rol del usuario:', error);
+      }
+    };
+
+    fetchUserRole();
+  }, []);
 
   const changeStatus = useMutation({
     mutationFn: (status: Order.Type['status']) => {
@@ -83,13 +99,11 @@ const AsideOrderInformation = ({
       return updateOrder(order.id, { due_date });
     },
     onSuccess: () => {
-      console.log('date changed');
       toast.success('Success', {
         description: 'Date updated successfully!',
       });
     },
     onError: (error) => {
-      console.log('error', error);
       toast.error('Error', {
         description: 'The date could not be updated.',
       });
@@ -118,11 +132,6 @@ const AsideOrderInformation = ({
     retry: 5,
   });
 
-  // console.log(
-  //   'orderAgencyMembers',
-  //   orderAgencyMembersError,
-  //   orderAgencyMembers,
-  // );
   const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
   const priorities = ['low', 'medium', 'high'];
 
@@ -133,7 +142,7 @@ const AsideOrderInformation = ({
     return {
       value: status,
       label: t(`details.statuses.${camelCaseStatus}`)
-        .replace(/_/g, ' ') // Replace underscores with spaces (even though there are no underscores in the priorities array)
+        .replace(/_/g, ' ') 
         .replace(/^\w/, (c) => c.toUpperCase()),
     };
   });
@@ -141,7 +150,7 @@ const AsideOrderInformation = ({
   const priorityOptions = priorities.map((priority) => ({
     value: priority,
     label: t(`details.priorities.${priority}`)
-      .replace(/_/g, ' ') // Replace underscores with spaces (even though there are no underscores in the priorities array)
+      .replace(/_/g, ' ') 
       .replace(/^\w/, (c) => c.toUpperCase()),
   }));
 
@@ -177,44 +186,83 @@ const AsideOrderInformation = ({
         // status="online"
       />
 
-      <Separator />
-
-      <SelectAction
-        options={statusOptions}
-        groupName={t('details.status')}
-        defaultValue={selectedStatus}
-        className={selectedStatus ? statusColors[selectedStatus] : undefined}
-        onSelectHandler={(status) => {
-          changeStatus.mutate(status as Order.Type['status']);
-        }}
-        disabled={changeStatus.isPending}
-      />
-      <Separator />
-      <SelectAction
-        options={priorityOptions}
-        groupName={t('details.priority')}
-        defaultValue={selectedPriority}
-        className={
-          selectedPriority ? priorityColors[selectedPriority] : undefined
-        }
-        onSelectHandler={(priority) => {
-          changePriority.mutate(priority as Order.Type['priority']);
-        }}
-        disabled={changePriority.isPending}
-      />
-      <Separator />
-
-      <ActivityAssignations
-        searchUserOptions={searchUserOptions}
-        assignedTo={order.assigned_to}
-        updateFunction={changeAgencyMembersAssigned.mutate}
-      />
-      <Separator />
-      <div className="flex flex-col gap-2">
-        <span>{t('details.dueDate')}</span>
-        <DatePicker updateFn={changeDate.mutate} defaultDate={order.due_date} />
-      </div>
-      <Separator />
+      
+      {['agency_member', 'agency_owner', 'agency_project_manager'].includes(userRole) ? (
+        <>
+          <Separator />
+          <SelectAction
+            options={statusOptions}
+            groupName={t('details.status')}
+            defaultValue={selectedStatus}
+            className={selectedStatus ? statusColors[selectedStatus] : undefined}
+            onSelectHandler={(status) => {
+              changeStatus.mutate(status as Order.Type['status']);
+            }}
+            disabled={changeStatus.isPending}
+          />
+          <Separator />
+          <SelectAction
+            options={priorityOptions}
+            groupName={t('details.priority')}
+            defaultValue={selectedPriority}
+            className={
+              selectedPriority ? priorityColors[selectedPriority] : undefined
+            }
+            onSelectHandler={(priority) => {
+              changePriority.mutate(priority as Order.Type['priority']);
+            }}
+            disabled={changePriority.isPending}
+          />
+          <Separator />
+          <ActivityAssignations
+            searchUserOptions={searchUserOptions}
+            assignedTo={order.assigned_to}
+            updateFunction={changeAgencyMembersAssigned.mutate}
+          />
+          <Separator />
+          <div className="flex flex-col gap-2">
+            <span>{t('details.dueDate')}</span>
+            <DatePicker updateFn={changeDate.mutate} defaultDate={order.due_date} />
+          </div>
+          <Separator />
+        </>
+        
+      ) : (
+        <div className="flex flex-col gap-2">
+          <Separator />
+          <span className="font-semibold">{t('details.status')}</span>
+          <span className="pl-2 pr-2">
+            {order.status
+              ?.replace(/_/g, ' ')
+              .replace(/^\w/, (c) => c.toUpperCase())}
+          </span>
+          <Separator />
+          <span className="font-semibold">{t('details.priority')}</span>
+          <span className="pl-2 pr-2">
+            {order.priority
+              ?.replace(/_/g, ' ')
+              .replace(/^\w/, (c) => c.toUpperCase())}
+          </span>
+          <Separator />
+          <ActivityAssignations
+            searchUserOptions={searchUserOptions}
+            assignedTo={order.assigned_to}
+            updateFunction={changeAgencyMembersAssigned.mutate}
+          />
+          <Separator />
+          <span className="font-semibold">{t('details.dueDate')}</span>
+          <span className="pl-2 pr-2">
+            {order.due_date
+              ? new Date(order.due_date).toLocaleDateString()
+              : '-'}
+          </span>
+          <Separator />
+        </div>
+      )}
+      
+      
+      
+      
     </div>
   );
 };

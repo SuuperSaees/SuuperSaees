@@ -24,7 +24,7 @@ export default function UploadImageComponent({
   const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>(
-    'Debe seleccionar una imagen',
+    'Seleccionar una imagen',
   );
 
   const handleButtonClick = (e) => {
@@ -53,10 +53,6 @@ export default function UploadImageComponent({
       const { data, error: uploadError } = await supabase.storage
         .from('services')
         .upload(filePath, file);
-
-      if (data) {
-        console.log('Imagen subida:', data);
-      }
 
       if (uploadError) {
         throw new Error(`Error al subir la imagen: ${uploadError.message}`);

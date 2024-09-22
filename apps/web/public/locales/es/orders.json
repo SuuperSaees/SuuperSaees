@@ -35,7 +35,7 @@
     "priority": "Prioridad",
     "dueDate": "Fecha de vencimiento",
     "statuses": {
-      "pending": "Pendiente",
+      "pending": "Esperando respuesta",
       "inProgress": "En progreso",
       "completed": "Completado",
       "inReview": "En revisión",

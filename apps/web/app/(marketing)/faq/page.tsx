@@ -86,7 +86,7 @@ async function FAQPage() {
             })}
           </div>
 
-          <div>
+          {/* <div>
             <Button asChild variant={'outline'}>
               <Link href={'/contact'}>
                 <span>
@@ -96,7 +96,7 @@ async function FAQPage() {
                 <ArrowRight className={'ml-2 w-4'} />
               </Link>
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
     </>

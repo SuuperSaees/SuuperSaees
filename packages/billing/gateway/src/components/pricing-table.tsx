@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import {
-  BillingConfig,
   LineItemSchema,
   getPlanIntervals,
   getPrimaryLineItem,
@@ -23,95 +22,109 @@ import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
 import { LineItemDetails } from './line-item-details';
-
+import { useBilling } from '../../../../../apps/web/app/home/[account]/hooks/use-billing';
 interface Paths {
   signUp: string;
   return: string;
 }
 
 export function PricingTable({
-  config,
   paths,
-  CheckoutButtonRenderer,
+  checkoutButtonRenderer,
   redirectToCheckout = true,
   displayPlanDetails = true,
+  productsDataConfig
 }: {
-  config: BillingConfig;
   paths: Paths;
   displayPlanDetails?: boolean;
-
   redirectToCheckout?: boolean;
-
-  CheckoutButtonRenderer?: React.ComponentType<{
-    planId: string;
-    productId: string;
-    highlighted?: boolean;
-  }>;
+  productsDataConfig:  {
+    products: any[];
+} | null;
+  checkoutButtonRenderer?: (amount: number, priceId: string)=> void;
 }) {
-  const intervals = getPlanIntervals(config).filter(Boolean) as string[];
-  const [interval, setInterval] = useState(intervals[0]!);
+  const { subscriptionFetchedStripe } = useBilling()
 
+  
+  if (!productsDataConfig) {
+    return (
+      <div className="items-center justify-center flex flex-col mt-10">
+        <div
+          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+          role="status"
+        >
+          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const intervals = getPlanIntervals(productsDataConfig).filter(Boolean) as string[];
+  const [interval, setInterval] = useState(intervals[0] || ''); 
   return (
     <div className={'flex flex-col space-y-8 xl:space-y-12'}>
-      <div className={'flex justify-center'}>
-        {intervals.length > 1 ? (
-          <PlanIntervalSwitcher
-            intervals={intervals}
-            interval={interval}
-            setInterval={setInterval}
-          />
-        ) : null}
-      </div>
-
-      <div
+{ productsDataConfig?.products?.length ?
+      (<div
         className={
-          'flex flex-col items-start space-y-6 lg:space-y-0' +
+          'flex flex-col items-start space-y-6 lg:space-y-0 mt-4 mb-4' +
           ' justify-center lg:flex-row lg:space-x-4'
         }
       >
-        {config.products.map((product) => {
-          const plan = product.plans.find((plan) => {
-            if (plan.paymentType === 'recurring') {
-              return plan.interval === interval;
+        {Array.isArray(productsDataConfig.products) && productsDataConfig.products.length > 0 ? (
+          productsDataConfig.products.map((product: { plans?: any; id?: string; name?: string; currency?: string; description?: string; badge?: string | undefined; highlighted?: boolean | undefined; features?: string[]; }) => {
+            if (!Array.isArray(product.plans)) {
+              return null; 
             }
 
-            return plan;
-          });
+            const plan = product.plans.find((plan: { paymentType: string; interval: string; }) => {
+              if (plan.paymentType === 'recurring') {
+                return plan.interval === interval;
+              }
+              return plan;
+            });
 
-          if (!plan) {
-            return null;
-          }
+            if (!plan) {
+              return null;
+            }
+            
+            const primaryLineItem = getPrimaryLineItem(productsDataConfig, plan.id);
 
-          const primaryLineItem = getPrimaryLineItem(config, plan.id);
-
-          if (!plan.custom && !primaryLineItem) {
-            throw new Error(`Primary line item not found for plan ${plan.id}`);
-          }
-
-          return (
-            <PricingItem
-              selectable
-              key={plan.id}
-              plan={plan}
-              redirectToCheckout={redirectToCheckout}
-              primaryLineItem={primaryLineItem}
-              product={product}
-              paths={paths}
-              displayPlanDetails={displayPlanDetails}
-              CheckoutButton={CheckoutButtonRenderer}
-            />
-          );
-        })}
-      </div>
+            if (!plan.custom && !primaryLineItem) {
+              throw new Error(`Primary line item not found for plan ${plan.id}`);
+            }
+            if (plan.id !== subscriptionFetchedStripe?.plan?.id) {
+              return (
+                <PricingItem
+                  selectable
+                  key={plan?.id}
+                  plan={plan!}
+                  redirectToCheckout={redirectToCheckout}
+                  primaryLineItem={primaryLineItem}
+                  product={product}
+                  paths={paths}
+                  subscriptionFetchedStripe={subscriptionFetchedStripe}
+                  displayPlanDetails={displayPlanDetails}
+                  checkoutButtonRenderer={checkoutButtonRenderer}
+                />
+              );
+            }
+          })
+        ) : (
+          <div>No hay productos disponibles.</div> 
+        )}
+      </div>) : <div></div>}
     </div>
   );
 }
+
 
 function PricingItem(
   props: React.PropsWithChildren<{
     className?: string;
     displayPlanDetails: boolean;
-
+    subscriptionFetchedStripe: any;
     paths: Paths;
 
     selectable: boolean;
@@ -129,11 +142,7 @@ function PricingItem(
       label?: string;
     };
 
-    CheckoutButton?: React.ComponentType<{
-      planId: string;
-      productId: string;
-      highlighted?: boolean;
-    }>;
+    checkoutButtonRenderer?: (amount: number, priceId: string)=> void;
 
     product: {
       id: string;
@@ -147,21 +156,20 @@ function PricingItem(
   }>,
 ) {
   const highlighted = props.product.highlighted ?? false;
-
   const lineItem = props.primaryLineItem;
-
   // we exclude flat line items from the details since
   // it doesn't need further explanation
   const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
     return item.type !== 'flat';
   });
 
+
   return (
     <div
       data-cy={'subscription-plan'}
       className={cn(
         props.className,
-        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-xl border p-8 lg:w-4/12 xl:max-w-[20rem]`,
+        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-xl border p-8 lg:w-4/12 xl:max-w-[18rem]`,
         {
           ['border-primary']: highlighted,
           ['border-border']: !highlighted,
@@ -199,12 +207,6 @@ function PricingItem(
             </b>
           </div>
 
-          <span className={cn(`text-muted-foreground h-6 text-sm`)}>
-            <Trans
-              i18nKey={props.product.description}
-              defaults={props.product.description}
-            />
-          </span>
         </div>
 
         <Separator />
@@ -262,29 +264,7 @@ function PricingItem(
             </span>
           </If>
         </div>
-
-        <If condition={props.selectable}>
-          <If
-            condition={props.plan.id && props.CheckoutButton}
-            fallback={
-              <DefaultCheckoutButton
-                paths={props.paths}
-                product={props.product}
-                highlighted={highlighted}
-                plan={props.plan}
-                redirectToCheckout={props.redirectToCheckout}
-              />
-            }
-          >
-            {(CheckoutButton) => (
-              <CheckoutButton
-                highlighted={highlighted}
-                planId={props.plan.id}
-                productId={props.product.id}
-              />
-            )}
-          </If>
-        </If>
+        <Button onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost!, props.plan.id)} disabled={props.plan.id === props.subscriptionFetchedStripe?.plan.id}>{props.plan.id === props.subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</Button>
 
         <Separator />
 
@@ -325,9 +305,9 @@ function FeaturesList(
     <ul className={'flex flex-col space-y-2'}>
       {props.features.map((feature) => {
         return (
-          <ListItem key={feature}>
+          <>{feature ? <ListItem key={feature}>
             <Trans i18nKey={feature} defaults={feature} />
-          </ListItem>
+          </ListItem> : <div></div>}</>
         );
       })}
     </ul>

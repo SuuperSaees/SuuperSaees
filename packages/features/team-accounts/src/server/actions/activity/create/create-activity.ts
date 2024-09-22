@@ -18,7 +18,6 @@ export const addActivityAction = async (activity: Activity.Insert) => {
       .select('*')
       .single();
     if (activityError) throw activityError.message;
-    console.log('addedActivity:', activityData);
     revalidatePath(`/orders/${activity.order_id}`);
   } catch (error) {
     console.error('Error adding activity:', error);

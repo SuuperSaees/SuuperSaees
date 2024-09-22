@@ -112,9 +112,8 @@ const RegisterStripePage = ({ email, stripeId, id}: AccountSchema) => {
       );
     }
     return (
-      <div className="flex items-center justify-center h-screen">
-        <form onSubmit={handleSubmit} className="flex flex-col items-center">
-          {email ? <div>{t('email')} {email}</div> : <div>Loading...</div>}
+      <div>
+        <form onSubmit={handleSubmit} className="">
           {linkData ? (
             <ThemedButton>
               <Link href={linkData}>{t('completeRegister')}</Link>

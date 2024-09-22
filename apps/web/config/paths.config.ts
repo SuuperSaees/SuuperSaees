@@ -50,6 +50,7 @@ const pathsConfig = PathsSchema.parse({
     invoices: '/invoices',
     personalAccountSettings: '/home/settings',
     personalAccountBilling: '/home/billing',
+    // personalAccountBilling: '/billing',
     personalAccountBillingReturn: '/home/billing/return',
     accountHome: '/home/[account]',
     accountSettings: `/home/[account]/settings`,

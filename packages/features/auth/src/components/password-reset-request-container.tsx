@@ -21,6 +21,7 @@ import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
 import { AuthErrorAlert } from './auth-error-alert';
+import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
 
 const PasswordResetSchema = z.object({
   email: z.string().email(),
@@ -93,10 +94,9 @@ export function PasswordResetRequestContainer(params: {
                   </FormItem>
                 )}
               />
-
-              <Button disabled={resetPasswordMutation.isPending} type="submit">
+              <ThemedButton>
                 <Trans i18nKey={'auth:passwordResetLabel'} />
-              </Button>
+              </ThemedButton>
             </div>
           </form>
         </Form>

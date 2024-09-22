@@ -61,6 +61,13 @@ export const createOrders = async (orders: OrderInsert[]) => {
         .single();
     if (emailError) throw emailError.message;
 
+    const { data: roleData, error: roleError } = await client
+      .from('accounts_memberships')
+      .select('account_role')
+      .eq('user_id', userId)
+      .single();
+    if (roleError) throw roleError.message
+
 
     const ordersToInsert = orders.map(
       ({ fileIds, ...orderWithoutFileIds }) => ({
@@ -82,9 +89,6 @@ export const createOrders = async (orders: OrderInsert[]) => {
       .single();
     if (orderError) throw orderError.message;
 
-    console.log('orderData', orderData);
-
-    
     if (emailData.email) {
       await sendOrderCreationEmail(emailData.email, orderData.id.toString(), orderData, agencyOrganizationData.name ?? "");
     }
@@ -105,6 +109,21 @@ export const createOrders = async (orders: OrderInsert[]) => {
           if (orderFilesError) throw orderFilesError.message;
         }
       }
+    }
+
+    
+
+    if (roleData.account_role === 'agency_owner' || roleData.account_role === 'agency_member' || roleData.account_role === 'agency_project_manager') {
+      const assignationData = {
+        agency_member_id: userId,
+        order_id: orderData.id,
+      }
+      const {error: assignedOrdersError } = await client
+        .from('order_assignations')
+        .insert(assignationData);
+      if (assignedOrdersError) throw assignedOrdersError.message;
+
+
     }
 
     

@@ -15,10 +15,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/
 // import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
-
-
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
+import { Button } from '@kit/ui/button';
 import type { Account } from '../../../../../../apps/web/lib/account.types';
+import type { Database } from '../../../../../../apps/web/lib/database.types';
+import { getUserRole } from '../../../../team-accounts/src/server/actions/members/get/get-member-account';
 import { ThemedButton } from '../ui/button-themed-with-settings';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
@@ -28,6 +29,7 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 // import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
+import BillingContainerConfig  from './billing/billing-container';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -48,6 +50,8 @@ export function PersonalAccountSettingsContainer(
   }>,
 ) {
   const [user, setUser] = useState<Account.Type | null>();
+  const [role, setRole] =
+    useState<Database['public']['Tables']['roles']['Row']['name']>();
   const client = useSupabase();
 
   const fetchUserAccount = async () => {
@@ -101,14 +105,35 @@ export function PersonalAccountSettingsContainer(
         void fetchAccountStripe();
       });
   }, []);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const role = await getUserRole();
+        setRole(role);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    void fetchUserRole();
+  });
   //////////////////////////////////////
-  if (!user) {
+  if (!user || !role) {
     return <LoadingOverlay fullPage />;
   }
-
   return (
-    <div className="flex w-full flex-wrap gap-6 pb-32 lg:flex-nowrap">
-      <div className="flex w-full flex-col space-y-6">
+    <div>
+      <Tabs defaultValue='account'>
+        {role === "agency_owner" && (
+          <TabsList>
+            <TabsTrigger value='account'>Mi perfil</TabsTrigger>
+            <TabsTrigger value='billing'>Facturación</TabsTrigger>
+          </TabsList>
+        )}
+        <TabsContent value='account'>
+          <div className='"flex w-full flex-wrap gap-6 pb-32 lg:flex-nowrap'>
+          <div className="flex w-full flex-col space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -171,6 +196,7 @@ export function PersonalAccountSettingsContainer(
           </Card>
         </If> */}
         {/* Brand color section */}
+<<<<<<< HEAD
         <Card>
           <CardHeader>
             <CardTitle>
@@ -198,6 +224,37 @@ export function PersonalAccountSettingsContainer(
           </CardContent>
         </Card>
         <Card>
+=======
+        {role === 'agency_owner' && (
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <Trans i18nKey={'account:brandColor'} />
+                </CardTitle>
+                <CardDescription>
+                  <Trans i18nKey={'account:brandColorDescription'} />
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <UpdateAccountColorBrand />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <Trans i18nKey={'account:brandSidebar'} />
+                </CardTitle>
+                <CardDescription>
+                  <Trans i18nKey={'account:brandSidebarDescription'} />
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <UpdateAccountOrganizationSidebar />
+              </CardContent>
+            </Card>
+            <Card>
+>>>>>>> 298fa37123f75611cd0e9fdd90b49ec77dbad25b
           <CardHeader>
             <CardTitle>
               <Trans i18nKey={'account:brandLogo'} />
@@ -206,11 +263,16 @@ export function PersonalAccountSettingsContainer(
               <Trans i18nKey={'account:brandLogoDescription'} />
             </CardDescription>
           </CardHeader>
+<<<<<<< HEAD
           <CardContent>
+=======
+         <CardContent>
+>>>>>>> 298fa37123f75611cd0e9fdd90b49ec77dbad25b
             <UpdateAccountOrganizationLogo
               organizationId={user?.organization_id ?? ''}
             />
           </CardContent> 
+<<<<<<< HEAD
         </Card>
         <Card>
           <CardHeader>
@@ -247,10 +309,55 @@ export function PersonalAccountSettingsContainer(
               </ThemedButton>
             )}
           </CardContent>
+=======
+>>>>>>> 298fa37123f75611cd0e9fdd90b49ec77dbad25b
         </Card>
+          </>
+        )}
+
+        {role !== 'client_member' && role !== 'client_owner' && (
+           <Card>
+           <CardHeader>
+             <CardTitle>
+               {!accountStripe?.id ? (
+                 <Trans i18nKey={'account:connectToStripe'} />
+               ) : accountStripe.charges_enabled ? (
+                 <Trans i18nKey={'account:stripeConnected'} />
+               ) : (
+                 <Trans i18nKey={'account:continueWithOnboardingStripe'} />
+               )}
+             </CardTitle>
+             <CardDescription>
+               {!accountStripe?.id ? (
+                 <Trans
+                   i18nKey={'account:connectToStripeDescription'}
+                   key={'s'}
+                 />
+               ) : accountStripe.charges_enabled ? (
+                 <Trans i18nKey={'account:stripeConnectedDescription'} />
+               ) : (
+                 <Trans
+                   i18nKey={'account:continueWithOnboardingStripeDescription'}
+                 />
+               )}
+             </CardDescription>
+           </CardHeader>
+           <CardContent>
+             {(!accountStripe?.id || !accountStripe.charges_enabled) && (
+               <ThemedButton className="bg-brand">
+                 <Link href={'/stripe'}>
+                   {accountStripe?.id ? 'Continuar' : 'Conectar'}
+                 </Link>
+               </ThemedButton>
+             )}
+           </CardContent>
+         </Card>
+        )}
+
+       
       </div>
 
-      <div className="flex w-full max-w-full flex-col space-y-6 lg:max-w-[350px]">
+      <div className="flex mt-6 w-full max-w-full flex-col space-y-6 lg:max-w-[350px]">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -279,6 +386,23 @@ export function PersonalAccountSettingsContainer(
           </CardContent>
         </Card>
       </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value='billing'>
+          {/* <div className="flex w-full flex-col space-y-6">
+            <Button>
+              <Link href="/select-plan">
+                Upgrade your plan
+              </Link>
+            </Button>
+              
+            </div> */}
+            <BillingContainerConfig />
+        </TabsContent>
+          
+
+      </Tabs>
     </div>
   );
 }
