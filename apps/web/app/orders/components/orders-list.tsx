@@ -62,7 +62,11 @@ export function OrderList({ orders }: OrdersTableProps) {
   const { t } = useTranslation('orders');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>('open'); // Initial state
 
+  const handleTabClick = (value: 'open' | 'completed' | 'all') => {
+    setActiveTab(value);
+  };
   // const filteredOrders = orders.filter(order =>
   //   order.title.toLowerCase().includes(searchTerm.toLowerCase())
   // );
@@ -122,12 +126,36 @@ export function OrderList({ orders }: OrdersTableProps) {
         <main className="grid flex-1 items-start gap-4 md:gap-8">
           <Tabs defaultValue="open">
             <div className="mb-4 flex flex-wrap items-center gap-4">
-              <TabsList>
-                <TabsTrigger value="open">{t('openOrders')}</TabsTrigger>
-                <TabsTrigger value="completed">
-                  {t('completedOrders')}
-                </TabsTrigger>
-                <TabsTrigger value="all">{t('allOrders')}</TabsTrigger>
+              <TabsList className='bg-transparent'>
+              <TabsTrigger
+    value="open"
+    className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${
+      activeTab === 'open' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'
+    } hover:bg-primary/20 cursor-pointer ml-5`} // Margen izquierdo de 20px
+    onClick={() => handleTabClick('open')}
+  >
+    {t('openOrders')}
+  </TabsTrigger>
+  
+  <TabsTrigger
+    value="completed"
+    className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${
+      activeTab === 'completed' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'
+    } hover:bg-primary/20 cursor-pointer ml-5`} // Margen izquierdo de 20px
+    onClick={() => handleTabClick('completed')}
+  >
+    {t('completedOrders')}
+  </TabsTrigger>
+  
+  <TabsTrigger
+    value="all"
+    className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${
+      activeTab === 'all' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'
+    } hover:bg-primary/20 cursor-pointer ml-5`} // Margen izquierdo de 20px
+    onClick={() => handleTabClick('all')}
+  >
+    {t('allOrders')}
+  </TabsTrigger>
                 {/* <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-7 gap-1">
