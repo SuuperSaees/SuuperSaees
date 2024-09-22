@@ -325,8 +325,7 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({
 export function OrderList({ orders, role }: OrdersTableProps) {
   const { t } = useTranslation('orders');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('open');
-
+  const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>('open');
   // Filtra las órdenes basadas en el término de búsqueda
   const filteredOrders = orders.filter((order) =>
     order.title.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -367,15 +366,35 @@ export function OrderList({ orders, role }: OrdersTableProps) {
     <div className="flex min-h-screen w-full flex-col">
       <div className="flex flex-col py-4">
         <main className="grid flex-1 items-start gap-4 md:gap-8">
-          <Tabs defaultValue="open" onValueChange={setActiveTab}>
+          <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
             <div className="mb-4 flex flex-wrap items-center gap-4">
-              <TabsList>
-                <TabsTrigger value="open">{t('openOrders')}</TabsTrigger>
-                <TabsTrigger value="completed">
-                  {t('completedOrders')}
-                </TabsTrigger>
-                <TabsTrigger value="all">{t('allOrders')}</TabsTrigger>
-              </TabsList>
+            <div className='bg-transparent flex'>
+  <Button
+    variant='ghost'
+    className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeTab === 'open' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
+    onClick={() => setActiveTab('open')}
+  >
+    <span className="text-sm font-semibold leading-5">{t('openOrders')}</span>
+  </Button>
+  <Button
+    variant='ghost'
+    className={`ml-5 flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeTab === 'completed' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
+    onClick={() => setActiveTab('completed')}
+  >
+    <span className="text-sm font-semibold leading-5">{t('completedOrders')}</span>
+  </Button>
+  <Button
+    variant='ghost'
+    className={`ml-5 flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeTab === 'all' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
+    onClick={() => setActiveTab('all')}
+  >
+    <span className="text-sm font-semibold leading-5">{t('allOrders')}</span>
+  </Button>
+</div>
+
+
+
+
               <div className="ml-auto flex items-center gap-2">
                 <div className="relative ml-auto flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
