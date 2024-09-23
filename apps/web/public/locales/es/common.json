@@ -64,5 +64,9 @@
       "label": "Miembro"
     }
   },
-  "clear": "Eliminar"
+  "clear": "Eliminar",
+  "pagination": {
+    "next": "Siguiente",
+    "previous": "Anterior"
+  }
 }

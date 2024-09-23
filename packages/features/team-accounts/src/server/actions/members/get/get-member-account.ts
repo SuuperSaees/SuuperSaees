@@ -1,7 +1,11 @@
 'use server';
 
+import { SupabaseClient } from '@supabase/supabase-js';
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+import { Account } from '../../../../../../../../apps/web/lib/account.types';
+import { Database } from '../../../../../../../../apps/web/lib/database.types';
 
 export async function getPrimaryOwnerId(): Promise<string | undefined> {
   try {
@@ -101,7 +105,7 @@ export async function getUserRole() {
     const { error: userAccountError, data: userAccountData } = await client
       .from('accounts_memberships')
       .select('account_role')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single();
 
     if (userAccountError) throw userAccountError;
@@ -134,3 +138,135 @@ export async function getStripeAccountID() {
     console.error('Error fetching primary owner:', error);
   }
 }
+
+export async function getClientMembers() {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: userData, error: userError } = await client.auth.getUser();
+    if (userError) {
+      console.error('Error trying to get the user data', userError.message);
+      throw userError;
+    }
+
+    const { data: userAccountData, error: userAccountError } = await client
+      .from('accounts')
+      .select('organization_id')
+      .eq('id', userData.user.id)
+      .single();
+
+    if (userAccountError) {
+      console.error(
+        'Error trying to get the user account data',
+        userAccountError.message,
+      );
+      throw userAccountError;
+    }
+
+    const { data: agencyClients, error: agencyClientsError } = await client
+      .from('clients')
+      .select()
+      .eq('agency_id', userAccountData?.organization_id ?? '');
+
+    if (agencyClientsError) {
+      console.error('Error trying to get agency clients', agencyClientsError);
+      throw agencyClientsError;
+    }
+
+    const clientOrganizationIds =
+      agencyClients?.map((client) => client.organization_client_id) ?? [];
+
+    const clientuserIds =
+      agencyClients?.map((client) => client.user_client_id) ?? [];
+    // bring the agencyClients
+
+    const { data: clientOwners, error: clientOwnersError } = await client
+      .from('accounts')
+      .select('*, rol:accounts_memberships(*)')
+      .in('id', clientuserIds);
+
+    if (clientOwnersError) {
+      console.error('Error trying to get clien owners', clientOwnersError);
+      throw clientOwnersError;
+    }
+
+    const { data: clientOrganizations } = await client
+      .from('accounts')
+      .select()
+      .in('id', clientOrganizationIds)
+      .eq('is_personal_account', false);
+
+    const clientsWithOrganizations = clientOwners?.map((clientOwner) => {
+      const organization = clientOrganizations?.find(
+        (org) => org.id === clientOwner.organization_id,
+      );
+      const organizationName = organization?.name ?? '';
+      return { ...clientOwner, client_organization: organizationName };
+    });
+
+    return clientsWithOrganizations;
+  } catch (error) {
+    console.error('Error fetching client members:', error);
+    throw error;
+  }
+}
+
+export async function getUserAccountById(
+  databaseClient: SupabaseClient<Database>,
+  userId: Account.Type['id'],
+) {
+  try {
+    // Fetch the user's account to check for an existing organization
+    const { data: userAccount, error: userAccountError } = await databaseClient
+      .from('accounts')
+      .select(
+        'organization_id, name, email, id, picture_url, primary_owner_user_id',
+      )
+      .eq('id', userId)
+      .eq('is_personal_account', true)
+      .single();
+
+    if (userAccountError) {
+      throw new Error(userAccountError.message);
+    }
+    if (!userAccount?.organization_id) return null;
+
+    return userAccount;
+  } catch (error) {
+    console.error('Error checking user organization:', error);
+    throw error;
+  }
+}
+
+export const getUserAccountByEmail = async (
+  databaseClient: SupabaseClient<Database>,
+  email: Account.Type['email'],
+) => {
+  try {
+    if (!email) return null;
+    const { data: userAccountData, error: clientAccountError } =
+      await databaseClient
+        .from('accounts')
+        .select(
+          'organization_id, name, email, id, picture_url, primary_owner_user_id',
+        )
+        .eq('email', email)
+        .eq('is_personal_account', true)
+        .single();
+
+    if (clientAccountError && clientAccountError.code !== 'PGRST116') {
+      throw new Error(
+        `Error obtaining the user client account ${clientAccountError.message}`,
+      );
+    }
+
+    if (!userAccountData?.organization_id) return null;
+
+    return userAccountData;
+  } catch (error) {
+    console.error(
+      'Error occurred while checking the existence of the user organization ',
+      error,
+    );
+    throw error;
+  }
+};
