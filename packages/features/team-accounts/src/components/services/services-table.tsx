@@ -63,149 +63,149 @@ type ServicesTableProps = {
 const servicesColumns = (
   t: TFunction<'services', undefined>,
 ): ColumnDef<Service.Type>[] => [
-  {
-    accessorKey: 'name',
-    header: t('name'),
-    cell: ({ row }) => {
-      return <div className="capitalize">{row.getValue('name')}</div>;
+    {
+      accessorKey: 'name',
+      header: t('name'),
+      cell: ({ row }) => {
+        return <div className="capitalize">{row.getValue('name')}</div>;
+      },
     },
-  },
-  {
-    accessorKey: 'price',
-    header: t('price'),
-    cell: ({ row }) => (
-      <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
-        ${row.getValue('price')} USD/mes
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'price_id',
-    header: 'Price ID',
-    cell: ({ row }) => (
-      <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
-        {row.getValue('price_id')}
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'number_of_clients',
-    header: t('clients'),
-    cell: ({ row }) => (
-      <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
-        {row.getValue('number_of_clients')}
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'status',
-    header: t('status'),
-    cell: ({ row }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const status = row.getValue('status') as string;
-      const displayStatus =
-        status === 'active'
-          ? 'Activo'
-          : status === 'draft'
-            ? 'En borrador'
-            : status;
-      return <div>{displayStatus}</div>;
-    },
-  },
-  {
-    accessorKey: 'created_at_column',
-    header: ({ column }) => {
-      return (
-        <div>
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            <div className="flex items-center justify-between">
-              <span>{t('createdAt')}</span>
-              <ArrowUp className="ml-2 h-4 w-4" />
-            </div>
-          </Button>
+    {
+      accessorKey: 'price',
+      header: t('price'),
+      cell: ({ row }) => (
+        <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
+          ${row.getValue('price')} USD/mes
         </div>
-      );
+      ),
     },
-    cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-
-      const formattedDate = `${day}-${month}-${year}`;
-
-      return (
-        <span className="text-sm font-medium text-gray-900">
-          {formattedDate}
-        </span>
-      );
+    {
+      accessorKey: 'price_id',
+      header: 'Price ID',
+      cell: ({ row }) => (
+        <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
+          {row.getValue('price_id')}
+        </div>
+      ),
     },
-  },
-  {
-    id: 'actions',
-    header: t('actions'),
-    enableHiding: false,
-    cell: ({ row }) => {
-      const service = row.original;
-      const priceId = service.price_id as string;
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { fetchAccountStripeConnect, hasTheEmailAssociatedWithStripe, accountRole } = useServicesContext();
-      void fetchAccountStripeConnect()
-      const handleCheckout = async (priceId: string) => {
-        try {
-          
-          const stripeId = await getStripeAccountID();
-          const response = await fetch('/api/stripe/checkout-session', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ priceId, stripeId }),
-          });
+    {
+      accessorKey: 'number_of_clients',
+      header: t('clients'),
+      cell: ({ row }) => (
+        <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
+          {row.getValue('number_of_clients')}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'status',
+      header: t('status'),
+      cell: ({ row }) => {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        const status = row.getValue('status') as string;
+        const displayStatus =
+          status === 'active'
+            ? 'Activo'
+            : status === 'draft'
+              ? 'En borrador'
+              : status;
+        return <div>{displayStatus}</div>;
+      },
+    },
+    {
+      accessorKey: 'created_at_column',
+      header: ({ column }) => {
+        return (
+          <div>
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            >
+              <div className="flex items-center justify-between">
+                <span>{t('createdAt')}</span>
+                <ArrowUp className="ml-2 h-4 w-4" />
+              </div>
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const date = new Date(row.original.created_at);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
 
-          if (!response.ok) {
-            throw new Error('Failed to create checkout session');
-          }
+        const formattedDate = `${day}-${month}-${year}`;
 
-          const { sessionUrl } = await response.json();
+        return (
+          <span className="text-sm font-medium text-gray-900">
+            {formattedDate}
+          </span>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      header: t('actions'),
+      enableHiding: false,
+      cell: ({ row }) => {
+        const service = row.original;
+        const priceId = service.price_id as string;
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { fetchAccountStripeConnect, hasTheEmailAssociatedWithStripe, accountRole } = useServicesContext();
+        void fetchAccountStripeConnect()
+        const handleCheckout = async (priceId: string) => {
+          try {
 
-          navigator.clipboard
-            .writeText(sessionUrl)
-            .then(() => {
-              toast.success('URL copiado en el portapapeles');
-            })
-            .catch((err) => {
-              console.error('Error al copiar al portapapeles:', err);
+            const stripeId = await getStripeAccountID();
+            const response = await fetch('/api/stripe/checkout-session', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ priceId, stripeId }),
             });
-        } catch (error) {
-          console.error(error);
-        }
-      };
 
-      return (
-        <div className="h-18 flex items-center gap-4 self-stretch p-4">
-          {accountRole === "agency_owner" && <div>
-            {hasTheEmailAssociatedWithStripe && <Link2
-              onClick={() =>
-                service.price_id && handleCheckout(service.price_id)
-              }
-              className="h-6 w-6 cursor-pointer text-gray-500"
-            />}
-          </div>} 
-        {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />}
-        {accountRole === "agency_owner" && <DeleteServiceDialog priceId={priceId} />}
-        </div>
-      );
+            if (!response.ok) {
+              throw new Error('Failed to create checkout session');
+            }
+
+            const { sessionUrl } = await response.json();
+
+            navigator.clipboard
+              .writeText(sessionUrl)
+              .then(() => {
+                toast.success('URL copiado en el portapapeles');
+              })
+              .catch((err) => {
+                console.error('Error al copiar al portapapeles:', err);
+              });
+          } catch (error) {
+            console.error(error);
+          }
+        };
+
+        return (
+          <div className="h-18 flex items-center gap-4 self-stretch p-4">
+            {accountRole === "agency_owner" && <div>
+              {hasTheEmailAssociatedWithStripe && <Link2
+                onClick={() =>
+                  service.price_id && handleCheckout(service.price_id)
+                }
+                className="h-6 w-6 cursor-pointer text-gray-500"
+              />}
+            </div>}
+            {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />}
+            {accountRole === "agency_owner" && <DeleteServiceDialog priceId={priceId} />}
+          </div>
+        );
+      },
     },
-  },
-];
+  ];
 
 export function ServicesTable({ services }: ServicesTableProps) {
   const { t } = useTranslation('services');
-  const {accountRole} = useServicesContext()
+  const { accountRole } = useServicesContext()
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -247,7 +247,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
           <ThemedInput
-            placeholder="Buscar servicios"
+            placeholder={t('searchServices')}
             value={table.getColumn('name')?.getFilterValue() as string}
             onChange={(event) => {
               table.getColumn('name')?.setFilterValue(event.target.value);
@@ -275,9 +275,9 @@ export function ServicesTable({ services }: ServicesTableProps) {
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
                         </TableHead>
                       );
                     })}
@@ -314,13 +314,12 @@ export function ServicesTable({ services }: ServicesTableProps) {
                       height={160}
                     />
                     <h3 className="mb-[20px] w-[352px] text-center text-[20px] font-semibold leading-[30px] text-[#101828]">
-                      Comencemos con tu primer servicio
+                      {t('startFirstService')} {/* Usar la clave de traducción */}
                     </h3>
                     <p className="mb-[16px] w-[352px] text-center text-[16px] leading-[24px] text-[#475467]">
-                      Aún no has creado ningún servicio, agrega uno haciendo
-                      clic a continuación.
+                      {t('noServicesMessage')} {/* Usar la clave de traducción */}
                     </p>
-                    { accountRole === "agency_owner" && <Link href="/services/create">
+                    {accountRole === "agency_owner" && <Link href="/services/create">
                       <ThemedButton>{t('createService')}</ThemedButton>
                     </Link>}
                   </div>

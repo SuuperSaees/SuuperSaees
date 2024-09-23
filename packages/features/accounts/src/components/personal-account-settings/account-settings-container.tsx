@@ -9,10 +9,10 @@ import Link from 'next/link';
 
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
-// import { If } from '@kit/ui/if';
-// import { LanguageSelector } from '@kit/ui/language-selector';
+import { If } from '@kit/ui/if';
+import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
@@ -27,9 +27,11 @@ import UpdateAccountColorBrand from './update-account-color-brand';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
-// import { UpdateAccountOrganizationName } from './update-account-organization-name';
+import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
-import BillingContainerConfig  from './billing/billing-container';
+import BillingContainerConfig from './billing/billing-container';
+import RegisterAccountContainer from '../../../../../../apps/web/app/stripe/components/register-stripe-account-container';
+
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -125,197 +127,197 @@ export function PersonalAccountSettingsContainer(
   return (
     <div>
       <Tabs defaultValue='account'>
-        {role === "agency_owner" && (
+        {role !== 'client_member' && role !== 'client_owner' && (
           <TabsList>
-            <TabsTrigger value='account'>Mi perfil</TabsTrigger>
-            <TabsTrigger value='billing'>Facturación</TabsTrigger>
+            <TabsTrigger value='account'><Trans i18nKey={'account:profile'} /></TabsTrigger>
+            <TabsTrigger value='billing'><Trans i18nKey={'account:billing'} /></TabsTrigger>
           </TabsList>
         )}
         <TabsContent value='account'>
           <div className='"flex w-full flex-wrap gap-6 pb-32 lg:flex-nowrap'>
-          <div className="flex w-full flex-col space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:accountImage'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:accountImageDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdateAccountImageContainer
-              user={{
-                pictureUrl: user.picture_url,
-                id: user.id,
-              }}
-            />
-          </CardContent>
-        </Card>
+            <div className="flex w-full flex-col space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <Trans i18nKey={'account:accountImage'} />
+                  </CardTitle>
+                  <CardDescription>
+                    <Trans i18nKey={'account:accountImageDescription'} />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <UpdateAccountImageContainer
+                    user={{
+                      pictureUrl: user.picture_url,
+                      id: user.id,
+                    }}
+                  />
+                </CardContent>
+              </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:name'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:nameDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdateAccountDetailsFormContainer user={user} />
-          </CardContent>
-        </Card>
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:brandName'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:brandNameDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdateAccountOrganizationName />
-          </CardContent>
-        </Card> */}
-        {/* SUPPORT LANGUAGE, PENDING */}
-        {/* <If condition={supportsLanguageSelection}>
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <Trans i18nKey={'account:language'} />
-              </CardTitle>
-              <CardDescription>
-                <Trans i18nKey={'account:languageDescription'} key={'s'} />
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <LanguageSelector />
-            </CardContent>
-          </Card>
-        </If> */}
-        {/* Brand color section */}
-        {role === 'agency_owner' && (
-          <>
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  <Trans i18nKey={'account:brandColor'} />
-                </CardTitle>
-                <CardDescription>
-                  <Trans i18nKey={'account:brandColorDescription'} />
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <UpdateAccountColorBrand />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  <Trans i18nKey={'account:brandSidebar'} />
-                </CardTitle>
-                <CardDescription>
-                  <Trans i18nKey={'account:brandSidebarDescription'} />
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <UpdateAccountOrganizationSidebar />
-              </CardContent>
-            </Card>
-            <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:brandLogo'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:brandLogoDescription'} />
-            </CardDescription>
-          </CardHeader>
-         <CardContent>
-            <UpdateAccountOrganizationLogo
-              organizationId={user?.organization_id ?? ''}
-            />
-          </CardContent> 
-        </Card>
-          </>
-        )}
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <Trans i18nKey={'account:name'} />
+                  </CardTitle>
+                  <CardDescription>
+                    <Trans i18nKey={'account:nameDescription'} />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <UpdateAccountDetailsFormContainer user={user} />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <Trans i18nKey={'account:brandName'} />
+                  </CardTitle>
+                  <CardDescription>
+                    <Trans i18nKey={'account:brandNameDescription'} />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <UpdateAccountOrganizationName />
+                </CardContent>
+              </Card>
+              {/* SUPPORT LANGUAGE, PENDING */}
 
-        {role !== 'client_member' && role !== 'client_owner' && (
-           <Card>
-           <CardHeader>
-             <CardTitle>
-               {!accountStripe?.id ? (
-                 <Trans i18nKey={'account:connectToStripe'} />
-               ) : accountStripe.charges_enabled ? (
-                 <Trans i18nKey={'account:stripeConnected'} />
-               ) : (
-                 <Trans i18nKey={'account:continueWithOnboardingStripe'} />
-               )}
-             </CardTitle>
-             <CardDescription>
-               {!accountStripe?.id ? (
-                 <Trans
-                   i18nKey={'account:connectToStripeDescription'}
-                   key={'s'}
-                 />
-               ) : accountStripe.charges_enabled ? (
-                 <Trans i18nKey={'account:stripeConnectedDescription'} />
-               ) : (
-                 <Trans
-                   i18nKey={'account:continueWithOnboardingStripeDescription'}
-                 />
-               )}
-             </CardDescription>
-           </CardHeader>
-           <CardContent>
-             {(!accountStripe?.id || !accountStripe.charges_enabled) && (
-               <ThemedButton className="bg-brand">
-                 <Link href={'/stripe'}>
-                   {accountStripe?.id ? 'Continuar' : 'Conectar'}
-                 </Link>
-               </ThemedButton>
-             )}
-           </CardContent>
-         </Card>
-        )}
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <Trans i18nKey={'account:language'} />
+                  </CardTitle>
+                  <CardDescription>
+                    <Trans i18nKey={'account:languageDescription'} key={'s'} />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <LanguageSelector />
+                </CardContent>
+              </Card>
 
-       
-      </div>
+              {/* Brand color section */}
+              {role === 'agency_owner' && (
+                <>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandColor'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandColorDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountColorBrand />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandSidebar'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandSidebarDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationSidebar />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandLogo'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandLogoDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationLogo
+                        organizationId={user?.organization_id ?? ''}
+                      />
+                    </CardContent>
+                  </Card>
+                </>
+              )}
 
-      <div className="flex mt-6 w-full max-w-full flex-col space-y-6 lg:max-w-[350px]">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:updateEmailCardTitle'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:updateEmailCardDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdateEmailFormContainer callbackPath={props.paths.callback} />
-          </CardContent>
-        </Card>
+              {role !== 'client_member' && role !== 'client_owner' && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      {!accountStripe?.id ? (
+                        <Trans i18nKey={'account:connectToStripe'} />
+                      ) : accountStripe.charges_enabled ? (
+                        <Trans i18nKey={'account:stripeConnected'} />
+                      ) : (
+                        <Trans i18nKey={'account:continueWithOnboardingStripe'} />
+                      )}
+                    </CardTitle>
+                    <CardDescription>
+                      {!accountStripe?.id ? (
+                        <Trans
+                          i18nKey={'account:connectToStripeDescription'}
+                          key={'s'}
+                        />
+                      ) : accountStripe.charges_enabled ? (
+                        <Trans i18nKey={'account:stripeConnectedDescription'} />
+                      ) : (
+                        <Trans
+                          i18nKey={'account:continueWithOnboardingStripeDescription'}
+                        />
+                      )}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {(!accountStripe?.id || !accountStripe.charges_enabled) && (
+                      <ThemedButton className="bg-brand">
+                        <Link href={'/stripe'}>
+                          {accountStripe?.id ? 'Continuar' : 'Conectar'}
+                        </Link>
+                      </ThemedButton>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:updatePasswordCardTitle'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:updatePasswordCardDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdatePasswordFormContainer callbackPath={props.paths.callback} />
-          </CardContent>
-        </Card>
-      </div>
+
+            </div>
+
+            <div className="flex mt-6 w-full max-w-full flex-col space-y-6 lg:max-w-[350px]">
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <Trans i18nKey={'account:updateEmailCardTitle'} />
+                  </CardTitle>
+                  <CardDescription>
+                    <Trans i18nKey={'account:updateEmailCardDescription'} />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <UpdateEmailFormContainer callbackPath={props.paths.callback} />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <Trans i18nKey={'account:updatePasswordCardTitle'} />
+                  </CardTitle>
+                  <CardDescription>
+                    <Trans i18nKey={'account:updatePasswordCardDescription'} />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <UpdatePasswordFormContainer callbackPath={props.paths.callback} />
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </TabsContent>
-        
+
         <TabsContent value='billing'>
           {/* <div className="flex w-full flex-col space-y-6">
             <Button>
@@ -325,20 +327,19 @@ export function PersonalAccountSettingsContainer(
             </Button>
               
             </div> */}
-            <BillingContainerConfig />
+          <BillingContainerConfig />
         </TabsContent>
-          
+
 
       </Tabs>
     </div>
   );
 }
 
-// function useSupportMultiLanguage() {
-//   const { i18n } = useTranslation();
-//   const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
+function useSupportMultiLanguage() {
+  const { i18n } = useTranslation();
+  const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
+  const supportedLangs = langs.filter((lang) => lang !== 'cimode');
 
-//   const supportedLangs = langs.filter((lang) => lang !== 'cimode');
-
-//   return supportedLangs.length > 1;
-// }
+  return supportedLangs.length > 1;
+}

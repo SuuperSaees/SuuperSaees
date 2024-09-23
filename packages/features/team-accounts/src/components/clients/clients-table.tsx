@@ -83,141 +83,131 @@ type Client = {
 const clientColumns = (
   t: TFunction<'clients', undefined>,
 ): ColumnDef<Client>[] => [
-  {
-    accessorKey: 'name',
-    header: t('clientName'),
-    cell: ({ row }) => (
-      <span className={'flex items-center space-x-4 text-left'}>
-        <span>
-          <ProfileAvatar
-            displayName={row.original.name}
-            pictureUrl={row.original.picture_url}
-          />
-        </span>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium leading-[1.42857] text-gray-900">
-            {row.original.name}
+    {
+      accessorKey: 'name',
+      header: t('clientName'),
+      cell: ({ row }) => (
+        <span className={'flex items-center space-x-4 text-left'}>
+          <span>
+            <ProfileAvatar
+              displayName={row.original.name}
+              pictureUrl={row.original.picture_url}
+            />
           </span>
-          <span className="text-sm font-normal leading-[1.42857] text-gray-600">
-            {row.original.email}
+          <div className="flex flex-col">
+            <span className="text-sm font-medium leading-[1.42857] text-gray-900">
+              {row.original.name}
+            </span>
+            <span className="text-sm font-normal leading-[1.42857] text-gray-600">
+              {row.original.email}
+            </span>
+          </div>
+        </span>
+      ),
+    },
+    // {
+    //   accessorKey: "role",
+    //   header: t("role"),
+    //   cell: ({ row }) => {
+    //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    //     const role = row.getValue("role") as string;
+    //     return (
+    //       <div className="capitalize">
+    //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
+    //       </div>
+    //     );
+    //   },
+    // },
+    {
+      accessorKey: 'client_organization',
+      header: t('organization'),
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue('client_organization')}</div>
+      ),
+    },
+    {
+      accessorKey: 'last_login',
+      header: ({ column }) => {
+        return (
+          <div>
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            >
+              <div className="flex items-center justify-between">
+                <span>{t('lastLogin')}</span>
+                <ArrowDown className="ml-2 h-4 w-4" />
+              </div>
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const date = new Date(row.original.created_at);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        const formattedDate = `${day}-${month}-${year}`;
+
+        return (
+          <span className="text-sm font-medium text-gray-900">
+            {formattedDate}
           </span>
-        </div>
-      </span>
-    ),
-  },
-  // {
-  //   accessorKey: "role",
-  //   header: t("role"),
-  //   cell: ({ row }) => {
-  //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  //     const role = row.getValue("role") as string;
-  //     return (
-  //       <div className="capitalize">
-  //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
-  //       </div>
-  //     );
-  //   },
-  // },
-  {
-    accessorKey: 'client_organization',
-    header: t('organization'),
-    cell: ({ row }) => {
-      return (
-        <div className="capitalize">
-          <Link
-            href={`clients/organizations/${row.original.organization_id ?? ''}`}
-          >
-            {row.getValue('client_organization')}
-          </Link>
-        </div>
-      );
+        );
+      },
     },
-  },
-  {
-    accessorKey: 'last_login',
-    header: ({ column }) => {
-      return (
-        <div>
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            <div className="flex items-center justify-between">
-              <span>{t('lastLogin')}</span>
-              <ArrowDown className="ml-2 h-4 w-4" />
-            </div>
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
+    {
+      accessorKey: 'created_at_column',
+      header: ({ column }) => {
+        return (
+          <div>
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            >
+              <div className="flex items-center justify-between">
+                <span>{t('createdAt')}</span>
+                <ArrowUp className="ml-2 h-4 w-4" />
+              </div>
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const date = new Date(row.original.created_at);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
 
-      const formattedDate = `${day}-${month}-${year}`;
+        const formattedDate = `${day}-${month}-${year}`;
 
-      return (
-        <span className="text-sm font-medium text-gray-900">
-          {formattedDate}
-        </span>
-      );
+        return (
+          <span className="text-sm font-medium text-gray-900">
+            {formattedDate}
+          </span>
+        );
+      },
     },
-  },
-  {
-    accessorKey: 'created_at_column',
-    header: ({ column }) => {
-      return (
-        <div>
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            <div className="flex items-center justify-between">
-              <span>{t('createdAt')}</span>
-              <ArrowUp className="ml-2 h-4 w-4" />
-            </div>
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
+    {
+      id: 'actions',
+      header: t('actions'),
+      enableHiding: false,
+      cell: ({ row }) => {
+        const client = row.original;
 
-      const formattedDate = `${day}-${month}-${year}`;
-
-      return (
-        <span className="text-sm font-medium text-gray-900">
-          {formattedDate}
-        </span>
-      );
+        return (
+          <div className="h-18 flex items-center gap-4 self-stretch p-4">
+            {/* <UpdateClientDialog {...client} /> */}
+            <DeleteUserDialog userId={client.id} />
+          </div>
+        );
+      },
     },
-  },
-  {
-    id: 'actions',
-    header: t('actions'),
-    enableHiding: false,
-    cell: ({ row }) => {
-      const client = row.original;
-
-      return (
-        <div className="h-18 flex items-center gap-4 self-stretch p-4">
-          {/* <UpdateClientDialog {...client} /> */}
-          <DeleteUserDialog userId={client.id} />
-        </div>
-      );
-    },
-  },
-];
+  ];
 
 // ORGANIZATIONS TABLE
-const organizationColumns = (
-  t: TFunction<'clients', undefined>,
-): ColumnDef<Client>[] => [
+const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
   {
     accessorKey: 'client_organization',
     header: t('organizationName'),
@@ -296,7 +286,7 @@ const organizationColumns = (
   },
 ];
 // accountIds, accountNames
-export function ClientsTable({ clients, view }: ClientsTableProps) {
+export function ClientsTable({ clients, view}: ClientsTableProps) {
   const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clients' | 'organizations'>(
     'clients',
@@ -309,15 +299,10 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const uniqueClients = useMemo(
-    () => getUniqueOrganizations(clients),
-    [clients],
-  );
-  const columns = useMemo<ColumnDef<Client>[]>(
-    () =>
-      activeButton === 'clients' ? clientColumns(t) : organizationColumns(t),
-    [t, activeButton],
-  );
+  const uniqueClients = useMemo(() => getUniqueOrganizations(clients), [clients]);
+  const columns = useMemo<ColumnDef<Client>[]>(() => activeButton === 'clients' ? clientColumns(t) : organizationColumns(t), [t, activeButton]);
+
+
 
   const table = useReactTable({
     data: activeButton === 'organizations' ? uniqueClients : clients,
@@ -379,7 +364,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
               className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'clients' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
               onClick={() => handleButtonClick('clients')}
             >
-              <span className="text-sm font-semibold leading-5">Clients</span>
+              <span className="text-sm font-semibold leading-5">{t('clients:clients')}</span>
             </Button>
             <Button
               variant="ghost"
@@ -387,7 +372,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
               onClick={() => handleButtonClick('organizations')}
             >
               <span className="text-sm font-semibold leading-5">
-                Organizations
+                {t('clients:organizations.title')}
               </span>
             </Button>
             </>
@@ -399,8 +384,8 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
             <ThemedInput
               placeholder={
                 activeButton === 'clients'
-                  ? 'Buscar clients...'
-                  : 'Buscar organizations...'
+                  ? t('clients:searchClients')
+                  : t('clients:searchOrganizations')
               }
               value={
                 activeButton === 'clients'
@@ -410,7 +395,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
                       .getColumn('client_organization')
                       ?.getFilterValue() as string) ?? '')
               }
-              onChange={(event) => {
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 if (activeButton === 'clients') {
                   table.getColumn('name')?.setFilterValue(event.target.value);
                 } else {
@@ -441,9 +426,9 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}
@@ -455,13 +440,13 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}
@@ -470,19 +455,18 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={table.getAllColumns().length}>
-                  <div className="flex h-[493px] flex-col place-content-center items-center">
+                  <div className='flex flex-col place-content-center items-center h-[493px]'>
                     <Image
                       src="/images/illustrations/Illustration-cloud.svg"
                       alt="Illustration Card"
                       width={220}
                       height={160}
                     />
-                    <h3 className="mb-[20px] w-[352px] text-center text-[20px] font-semibold leading-[30px] text-[#101828]">
-                      Comencemos con tu primer cliente
+                    <h3 className='w-[352px] text-center text-[20px] text-[#101828] leading-[30px] mb-[20px] font-semibold'>
+                      {t('startWithFirstClientTitle')}
                     </h3>
-                    <p className="mb-[16px] w-[352px] text-center text-[16px] leading-[24px] text-[#475467]">
-                      Aún no has creado ningún cliente, agrega uno haciendo clic
-                      a continuación.
+                    <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
+                      {t('noClientsDescription')}
                     </p>
                     <CreateClientDialog />
                   </div>
@@ -494,9 +478,9 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
       </div>
       {table.getRowModel().rows?.length ? (
         <>
-          <div className="flex items-center justify-between py-4">
+          <div className="flex justify-between items-center py-4">
             <Pagination>
-              <PaginationContent className="flex w-full items-center justify-between">
+              <PaginationContent className="flex justify-between items-center w-full">
                 <PaginationItem>
                   <PaginationPrevious
                     href="#"
@@ -508,7 +492,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
                     }}
                   />
                 </PaginationItem>
-                <div className="flex flex-1 justify-center">
+                <div className="flex-1 flex justify-center">
                   {pages.map((page) => (
                     <PaginationItem key={page}>
                       <PaginationLink
@@ -544,9 +528,9 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
             </Pagination>
           </div>
         </>
-      ) : (
-        <></>
-      )}
+      ) :
+        (<>
+        </>)}
     </div>
   );
 }

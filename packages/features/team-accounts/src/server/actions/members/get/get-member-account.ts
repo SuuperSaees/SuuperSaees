@@ -2,6 +2,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
@@ -100,12 +102,12 @@ export async function getUserRole() {
     const { error: userAuthenticatedError, data: userAuthenticatedData } =
       await client.auth.getUser();
     const userId = userAuthenticatedData?.user?.id;
-
+    console.log('userId', userId);
     if (userAuthenticatedError ?? !userId) throw userAuthenticatedError;
     const { error: userAccountError, data: userAccountData } = await client
       .from('accounts_memberships')
       .select('account_role')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .single();
 
     if (userAccountError) throw userAccountError;

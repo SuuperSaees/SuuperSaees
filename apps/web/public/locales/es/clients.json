@@ -36,6 +36,7 @@
   "member": "Miembro",
   "updateClient": "Actualizar cliente",
   "organizations": {
+    "title": "Oraganizaciones",
     "members": {
       "title": "Miembros",
       "owner": "Lider",
@@ -66,5 +67,11 @@
       "title": "Facturas"
     }
 
-  }
+  },
+  "startWithFirstClientTitle": "Comencemos con tu primer cliente",
+  "noClientsDescription": "Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.",
+  "clients": "Clientes",
+  "searchClients": "Buscar clientes...",
+  "searchOrganizations": "Buscar organizaciones..."
 }
+
