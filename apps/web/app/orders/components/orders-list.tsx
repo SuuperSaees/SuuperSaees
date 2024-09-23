@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-
 import Image from 'next/image';
 import Link from 'next/link';
-
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { useMutation } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
@@ -12,9 +10,7 @@ import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-
 import { updateOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
-import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardFooter } from '@kit/ui/card';
 import {
   DropdownMenu,
@@ -32,21 +28,13 @@ import {
   TableRow,
 } from '@kit/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
-
 import { Order } from '~/lib/order.types';
 import { statuses } from '~/lib/orders-data';
-
 import { ThemedButton } from '../../../../../packages/features/accounts/src/components/ui/button-themed-with-settings';
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '../../../../../packages/ui/src/shadcn/pagination';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../packages/ui/src/shadcn/pagination';
 import { statusColors } from '../[id]/utils/get-color-class-styles';
+import { useRouter } from 'next/navigation';
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -60,32 +48,31 @@ type OrdersTableProps = {
   updateOrderDate: (dueDate: string, orderId: number) => Promise<void>;
 };
 
-const OrdersCardTable: React.FC<OrdersTableProps> = ({
-  orders,
-  role,
-  updateOrderDate,
-}) => {
+
+
+const OrdersCardTable: React.FC<OrdersTableProps> = ({ orders, role, updateOrderDate }) => {
   const { t } = useTranslation('orders');
 
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
-  // Calcula los datos de la página actual
+  // Calculate the data for the current page
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const currentOrders = orders.slice(startIndex, endIndex);
 
   const totalPages = Math.ceil(orders.length / rowsPerPage);
-
+  const router = useRouter();
   const changeStatus = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       orderId,
       status,
     }: {
       orderId: Order.Type['id'];
       status: Order.Type['status'];
     }) => {
-      return updateOrder(orderId, { status });
+    await  updateOrder(orderId, { status });
+     return router.push(`/orders`);
     },
     onSuccess: () => {
       toast.success('Success', {
@@ -98,6 +85,7 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({
       });
     },
   });
+
 
   return (
     <Card x-chunk="dashboard-06-chunk-0">
@@ -121,135 +109,123 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({
           </TableHeader>
           <TableBody>
             {currentOrders.length > 0 ? (
-              currentOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="flex-1">
-                    <Link href={`/orders/${order.id}`}>
+              currentOrders
+                .map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="flex-1">
+                      <Link href={`/orders/${order.id}`}>
+                        <span className="block max-w-[200px] truncate font-medium">
+                          {order.title}
+                        </span>
+                      </Link>
+                      <span className="block max-w-[150px] truncate text-sm">
+                        {order.customer_organization ??
+                          'Sin descripción'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="flex-1">
+                      <span className="block text-sm">
+                        #{order.id}
+                      </span>
+                    </TableCell>
+                    <TableCell className="flex-1">
                       <span className="block max-w-[200px] truncate font-medium">
-                        {order.title}
+                        {order.customer_name ?? 'Sin nombre'}
                       </span>
-                    </Link>
-                    <span className="block max-w-[150px] truncate text-sm">
-                      {order.customer_organization ?? 'Sin descripción'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="flex-1">
-                    <span className="block text-sm">#{order.id}</span>
-                  </TableCell>
-                  <TableCell className="flex-1">
-                    <span className="block max-w-[200px] truncate font-medium">
-                      {order.customer_name ?? 'Sin nombre'}
-                    </span>
-                    <span className="block text-sm">
-                      {order.customer_organization ?? 'Sin organización'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="hidden flex-1 md:table-cell">
-                    {[
-                      'agency_member',
-                      'agency_owner',
-                      'agency_project_manager',
-                    ].includes(role) ? (
-                      <DropdownMenu>
-                        {/* <DropdownMenuTrigger
-                            className={`m-2 flex inline-flex items-center rounded-lg p-2 ${order.status ? statusColors[order.status] : ''}`}
-                          > */}
-                        <DropdownMenuTrigger
-                          className={`m-2 flex inline-flex items-center rounded-lg p-2 ${
-                            order.status === 'in_progress'
-                              ? 'bg-[#F4EBFF] text-purple-700'
-                              : order.status
-                                ? statusColors[order.status]
-                                : ''
-                          }`}
-                        >
-                          <span className="pl-2 pr-2">
-                            {t(
-                              `details.statuses.${order.status?.replace(/_./g, (match) => match.charAt(1).toUpperCase())}`,
-                            )
-                              .replace(/_/g, ' ')
-                              .replace(/^\w/, (c) => c.toUpperCase())}
-                          </span>
-                          <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {statuses.map((status, statusIndex) => {
-                            const camelCaseStatus = status?.replace(
-                              /_./g,
-                              (match) => match.charAt(1).toUpperCase(),
-                            );
-                            if (!status) return null;
-                            return (
-                              <DropdownMenuItem
-                                className={`m-2 rounded-lg p-2 ${statusColors[status]} cursor-pointer`}
-                                key={status + statusIndex}
-                                onClick={() => {
-                                  changeStatus.mutate({
-                                    orderId: order.id,
-                                    status,
-                                  });
-                                }}
-                              >
-                                {t(`details.statuses.${camelCaseStatus}`)
-                                  .replace(/_/g, ' ')
-                                  .replace(/^\w/, (c) => c.toUpperCase())}
-                              </DropdownMenuItem>
-                            );
-                          })}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : (
-                      // Mostrar la fecha o un espacio vacío si no hay fecha
-                      <span className="pl-2 pr-2">
-                        {order.status
-                          ?.replace(/_/g, ' ')
-                          .replace(/^\w/, (c) => c.toUpperCase())}
+                      <span className="block text-sm">
+                        {order.customer_organization ??
+                          'Sin organización'}
                       </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="hidden flex-1 md:table-cell">
-                    <div className="flex -space-x-1">
-                      {order.assigned_to?.map((assignee) => (
-                        <Avatar
-                          key={assignee.agency_member.email}
-                          className="h-9 max-h-9 w-9 max-w-9 border-2 border-white"
-                        >
-                          <AvatarImage
-                            src={assignee.agency_member.picture_url ?? ''}
-                          />
-                          <AvatarFallback>
-                            {assignee.agency_member.name
-                              .charAt(0)
-                              .toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden flex-1 md:table-cell">
-                    {[
-                      'agency_member',
-                      'agency_owner',
-                      'agency_project_manager',
-                    ].includes(role) ? (
-                      <DatePicker
-                        updateFn={(dueDate: string) =>
-                          updateOrderDate(dueDate, order.id)
-                        }
-                        defaultDate={order.due_date}
-                      />
-                    ) : (
-                      // Mostrar la fecha o un espacio vacío si no hay fecha
-                      <span className="pl-2 pr-2">
-                        {order.due_date ?? 'Sin fecha'}
-                      </span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
+                    </TableCell>
+                    <TableCell className="hidden flex-1 md:table-cell">
+                      {['agency_member', 'agency_owner', 'agency_project_manager'].includes(role) ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            className={`m-2 inline-flex items-center rounded-lg p-2 ${
+                              order.status === 'in_progress' 
+                                ? 'bg-[#F4EBFF] text-[#6941C6]' 
+                                : order.status 
+                                  ? statusColors[order.status] 
+                                  : ''
+                            }`}
+                          >
+                            <span className="pl-2 pr-2">
+                              {t(`details.statuses.${order.status?.replace(/_./g, (match) => match.charAt(1).toUpperCase())}`)
+                                .replace(/_/g, ' ')
+                                .replace(/^\w/, (c) => c.toUpperCase())}
+                            </span>
+                            <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {statuses.map((status, statusIndex) => {
+                              const camelCaseStatus = status?.replace(/_./g, (match) => match.charAt(1).toUpperCase());
+                              if (!status) return null;
+                              return (
+                                <DropdownMenuItem
+                                  className={`m-2 rounded-lg p-2 ${statusColors[status]} cursor-pointer`}
+                                  key={status + statusIndex}
+                                  onClick={() => {
+                                    changeStatus.mutate({
+                                      orderId: order.id,
+                                      status,
+                                    });
+                                  }}
+                                >
+                                  {t(`details.statuses.${camelCaseStatus}`)
+                                    .replace(/_/g, ' ')
+                                    .replace(/^\w/, (c) => c.toUpperCase())}
+                                </DropdownMenuItem>
+                              );
+                            })}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        // Display the status or an empty space if there is no status
+                        <span className="pl-2 pr-2">
+                          {order.status
+                            ?.replace(/_/g, ' ')
+                            .replace(/^\w/, (c) => c.toUpperCase())}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="hidden flex-1 md:table-cell">
+                      <div className="flex -space-x-1">
+                        {order.assigned_to?.map((assignee) => (
+                          <Avatar
+                            key={assignee.agency_member.email}
+                            className="h-6 max-h-6 w-6 max-w-6 border-2 border-white"
+                          >
+                            <AvatarImage src={assignee.agency_member.picture_url ?? ''} />
+                            <AvatarFallback>
+                              {assignee.agency_member.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden flex-1 md:table-cell">
+                      {['agency_member', 'agency_owner', 'agency_project_manager'].includes(role) ? (
+                        <DatePicker
+                          updateFn={(dueDate: string) =>
+                            updateOrderDate(dueDate, order.id)
+                          }
+                          defaultDate={order.due_date}
+                        />
+                      ) : (
+                        // Display the date or an empty space if there is no date
+                        <span className="pl-2 pr-2">
+                          {order.due_date ?? 'Sin fecha'}
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="flex-1 py-10 text-center">
+                <TableCell
+                  colSpan={6}
+                  className="flex-1 py-10 text-center"
+                >
                   <div className="flex h-[493px] flex-col place-content-center items-center">
                     <Image
                       src="/images/illustrations/Illustration-files.svg"
@@ -277,50 +253,54 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({
       <CardFooter>
         {totalPages > 1 && (
           <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  className="cursor-pointer"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                >
-                  Anterior
-                </PaginationPrevious>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                className='cursor-pointer'
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                Anterior
+              </PaginationPrevious>
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <PaginationItem key={index}>
+                {index + 1 === currentPage ? (
+                  <PaginationLink
+                    className='cursor-pointer'
+                    isActive
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                ) : (
+                  <PaginationLink
+                    className='cursor-pointer'
+                    onClick={() => setCurrentPage(index + 1)}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                )}
               </PaginationItem>
-              {Array.from({ length: totalPages }, (_, index) => (
-                <PaginationItem key={index}>
-                  {index + 1 === currentPage ? (
-                    <PaginationLink className="cursor-pointer" isActive>
-                      {index + 1}
-                    </PaginationLink>
-                  ) : (
-                    <PaginationLink
-                      className="cursor-pointer"
-                      onClick={() => setCurrentPage(index + 1)}
-                    >
-                      {index + 1}
-                    </PaginationLink>
-                  )}
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  className="cursor-pointer"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                >
-                  Siguiente
-                </PaginationNext>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                className='cursor-pointer'
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              >
+                Siguiente
+              </PaginationNext>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
         )}
       </CardFooter>
     </Card>
-  );
-};
+  )
+}
+
+
+
+
+
 
 export function OrderList({ orders, role }: OrdersTableProps) {
   const { t } = useTranslation('orders');
@@ -331,16 +311,13 @@ export function OrderList({ orders, role }: OrdersTableProps) {
     order.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // Filtra las órdenes según la pestaña activa
+  // Filter orders by active tab
   const getTabFilteredOrders = (tab: string) => {
     switch (tab) {
       case 'completed':
-        return filteredOrders.filter((order) => order.status === 'completed');
+        return filteredOrders.filter(order => order.status === 'completed');
       case 'open':
-        return filteredOrders.filter(
-          (order) =>
-            order.status !== 'completed' && order.status !== 'annulled',
-        );
+        return filteredOrders.filter(order => order.status !== 'completed' && order.status !== 'annulled');
       case 'all':
       default:
         return filteredOrders;
@@ -348,6 +325,8 @@ export function OrderList({ orders, role }: OrdersTableProps) {
   };
 
   const tabFilteredOrders = getTabFilteredOrders(activeTab);
+
+
 
   const updateOrderDate = async (due_date: string, orderId: number) => {
     try {
@@ -366,35 +345,15 @@ export function OrderList({ orders, role }: OrdersTableProps) {
     <div className="flex min-h-screen w-full flex-col">
       <div className="flex flex-col py-4">
         <main className="grid flex-1 items-start gap-4 md:gap-8">
-          <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+          <Tabs defaultValue={activeTab} onValueChange={(value: string) => {
+            setActiveTab(value as 'open' | 'completed' | 'all');
+            }}>
             <div className="mb-4 flex flex-wrap items-center gap-4">
-            <div className='bg-transparent flex'>
-  <Button
-    variant='ghost'
-    className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeTab === 'open' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
-    onClick={() => setActiveTab('open')}
-  >
-    <span className="text-sm font-semibold leading-5">{t('openOrders')}</span>
-  </Button>
-  <Button
-    variant='ghost'
-    className={`ml-5 flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeTab === 'completed' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
-    onClick={() => setActiveTab('completed')}
-  >
-    <span className="text-sm font-semibold leading-5">{t('completedOrders')}</span>
-  </Button>
-  <Button
-    variant='ghost'
-    className={`ml-5 flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeTab === 'all' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
-    onClick={() => setActiveTab('all')}
-  >
-    <span className="text-sm font-semibold leading-5">{t('allOrders')}</span>
-  </Button>
-</div>
-
-
-
-
+              <TabsList>
+                <TabsTrigger value="open">{t('openOrders')}</TabsTrigger>
+                <TabsTrigger value="completed">{t('completedOrders')}</TabsTrigger>
+                <TabsTrigger value="all">{t('allOrders')}</TabsTrigger>
+              </TabsList>
               <div className="ml-auto flex items-center gap-2">
                 <div className="relative ml-auto flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -403,7 +362,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                     placeholder={t('searchPlaceholderTasks')}
                     className="focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setSearchTerm(e.target.value)}
                   />
                 </div>
                 {orders.length > 0 ? (
@@ -416,25 +375,13 @@ export function OrderList({ orders, role }: OrdersTableProps) {
             <Separator />
             <div className="mt-4">
               <TabsContent value="open">
-                <OrdersCardTable
-                  orders={tabFilteredOrders}
-                  role={role}
-                  updateOrderDate={updateOrderDate}
-                />
+                <OrdersCardTable orders={tabFilteredOrders} role={role} updateOrderDate={updateOrderDate} />
               </TabsContent>
               <TabsContent value="completed">
-                <OrdersCardTable
-                  orders={tabFilteredOrders}
-                  role={role}
-                  updateOrderDate={updateOrderDate}
-                />
+                <OrdersCardTable orders={tabFilteredOrders} role={role} updateOrderDate={updateOrderDate} />
               </TabsContent>
               <TabsContent value="all">
-                <OrdersCardTable
-                  orders={tabFilteredOrders}
-                  role={role}
-                  updateOrderDate={updateOrderDate}
-                />
+                <OrdersCardTable orders={tabFilteredOrders} role={role} updateOrderDate={updateOrderDate} />
               </TabsContent>
             </div>
           </Tabs>

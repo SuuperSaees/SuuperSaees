@@ -13,14 +13,12 @@ const fileTypeColors: Record<string, string> = {
   doc: 'fill-doc',
   docx: 'fill-docx',
 };
-
 interface UploadFileComponentProps {
   bucketName: string;
   uuid: string;
   onFileIdsChange: (fileIds: string[]) => void;
   removeResults?: boolean;
 }
-
 export default function UploadFileComponent({
   bucketName,
   uuid,
@@ -41,28 +39,23 @@ export default function UploadFileComponent({
       fileInput.click();
     }
   };
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []);
     if (selectedFiles.length === 0) {
       setErrors((prevErrors) => ({ ...prevErrors, '': t('selectFile') }));
       return;
     }
-
     const filesWithIds = selectedFiles.reduce((acc, file) => {
       const id = generateFileId();
       acc[id] = file;
       return acc;
     }, {} as Record<string, File>);
-
     setFilesWithId((prevFiles) => ({ ...prevFiles, ...filesWithIds }));
     setErrors((prevErrors) => ({ ...prevErrors, ...Object.fromEntries(Object.keys(filesWithIds).map(id => [id, null])) }));
-
     for (const [id, file] of Object.entries(filesWithIds)) {
       await uploadFile(id, file);
     }
   };
-
   const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
@@ -71,43 +64,34 @@ export default function UploadFileComponent({
       setErrors((prevErrors) => ({ ...prevErrors, '': t('selectFile') }));
       return;
     }
-
     const filesWithIds = droppedFiles.reduce((acc, file) => {
       const id = generateFileId();
       acc[id] = file;
       return acc;
     }, {} as Record<string, File>);
-
     setFilesWithId((prevFiles) => ({ ...prevFiles, ...filesWithIds }));
     setErrors((prevErrors) => ({ ...prevErrors, ...Object.fromEntries(Object.keys(filesWithIds).map(id => [id, null])) }));
-
     for (const [id, file] of Object.entries(filesWithIds)) {
       await uploadFile(id, file);
     }
   };
-
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(true);
     setDragMessage(t('orders:dropHere'));
   };
-
   const handleDragLeave = () => {
     setIsDragging(false);
     setDragMessage(t('orders:dragAndDrop'));
   };
-
   const generateFileId = () => Date.now() + Math.random().toString(36).substr(2, 9);
-
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
   };
-
   const uploadFile = async (id: string, file: File) => {
     const sanitizedFileName = sanitizeFileName(file.name);
     const filePath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
     const xhr = new XMLHttpRequest();
-
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable) {
         const progress = (event.loaded / event.total) * 100;
@@ -117,14 +101,12 @@ export default function UploadFileComponent({
         }));
       }
     });
-
     xhr.upload.addEventListener('error', () => {
       setErrors((prevErrors) => ({
         ...prevErrors,
         [id]: t('orders:uploadError', { fileName: file.name }),
       }));
     });
-
     xhr.upload.addEventListener('load', () => {
       setUploadProgress((prev) => ({
         ...prev,
@@ -143,29 +125,43 @@ export default function UploadFileComponent({
           });
         }, 1000); // Delay to let the user see the 100% state
     });
-
     xhr.onreadystatechange = () => {
       if (xhr.readyState === XMLHttpRequest.DONE) {
         if (xhr.status !== 200) {
-          setErrors((prevErrors) => ({
-            ...prevErrors,
-            [id]: t('orders:uploadError', { fileName: file.name }) + `: ${xhr.statusText}`,
-          }));
+          try {
+            const response = JSON.parse(xhr.responseText); // Parse the response as JSON
+            const errorMessage = response.message || 'Unknown error'; // Extract the message
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              [id]: t('orders:uploadError', { fileName: file.name }) + `: ${errorMessage}`,
+            }));
+          } catch (e) {
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              [id]: t('orders:uploadError', { fileName: file.name }) + `: ${xhr.statusText}`,
+            }));
+          }
         }
       }
     };
-
+    
+    
     try {
       const data = await createUploadBucketURL(bucketName, filePath);
+      if ('error' in data) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [id]: `Error to obtain the URL: ${data.error}`,
+        }));
+        return;
+      }
       xhr.open('PUT', data.signedUrl, true);
       xhr.setRequestHeader('Content-Type', file.type);
       xhr.send(file);
-
       const fileUrl =
         process.env.NEXT_PUBLIC_SUPABASE_URL +
         '/storage/v1/object/public/orders/' +
         filePath;
-
       const newFileData = {
         name: file.name,
         size: file.size,
@@ -173,7 +169,6 @@ export default function UploadFileComponent({
         url: fileUrl,
       };
       
-      if(data?.error) return;
       
       const createdFiles = await createFile([newFileData]);
       setFileIds((prevFileIds) => {
@@ -191,7 +186,6 @@ export default function UploadFileComponent({
       }));
     }
   };
-
   const handleDelete = (id: string) => {
     setFilesWithId((prevFiles) => {
       const updatedFiles = { ...prevFiles };
@@ -209,26 +203,21 @@ export default function UploadFileComponent({
       return updatedProgress;
     });
   };
-
   const getFileTypeClass = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
     return fileTypeColors[extension] ?? 'fill-unknown';
   };
-
   const formatFileSize = (size: number) => {
     if (size < 1024) return `${size} B`;
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB`;
     return `${(size / (1024 * 1024)).toFixed(2)} MB`;
   };
-
   const containerRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [filesWithId]);
-
   return (
     <div className="flex flex-col gap-2">
       <div
@@ -274,8 +263,13 @@ export default function UploadFileComponent({
               <div className="mt-2 flex items-center gap-2">
                 {errors[id] ? (
                   <>
-                    <div className="flex-1 text-red-500">
-                      Try again
+                    <div className='flex flex-col'>
+                      <div className="flex-1 text-red-500">
+                        Try again
+                      </div>
+                      <div className='text-red-500 text-sm'>
+                        {errors[id]}
+                      </div>
                     </div>
                     <div className="absolute right-4 top-4">
                     <Trash2 className="text-red-500 cursor-pointer" onClick={() => handleDelete(id)} />
@@ -290,8 +284,9 @@ export default function UploadFileComponent({
                       {Math.round(uploadProgress[id] ?? 0)}%
                     </span>
                     {uploadProgress[id] === 100 && (
-                      <div className="absolute right-4 top-4">
+                      <div className="absolute right-4 top-4 flex gap-4">
                         <CheckSquare className="text-primary" />
+                        <Trash2 className="text-red-500 cursor-pointer" onClick={() => handleDelete(id)} />
                       </div>
                     )}
                   </>

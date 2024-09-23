@@ -55,7 +55,6 @@ export const updateOrder = async (
     // Call the abstracted activity logging function
     await logOrderActivities(orderId, order, userData.user.id, userNameOrEmail);
 
-    revalidatePath(`/orders/${orderId}`);
   } catch (error) {
     console.error('Error updating order:', error);
     throw error;

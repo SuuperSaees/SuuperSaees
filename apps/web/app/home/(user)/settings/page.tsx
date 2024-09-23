@@ -9,6 +9,7 @@ import featureFlagsConfig from '~/config/feature-flags.config';
 import pathsConfig from '~/config/paths.config';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+import { Trans } from '@kit/ui/trans';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 const features = {
@@ -22,16 +23,15 @@ const paths = {
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   const title = i18n.t('account:settingsTab');
-
+  
   return {
     title,
   };
 };
 
-async function PersonalAccountSettingsPage() {
+function PersonalAccountSettingsPage() {
   const { user } = use(loadUserWorkspace());
-  const i18n = await createI18nServerInstance();
-  const title = i18n.t('account:settingsTab');
+
   return (
     <PageBody>
       <div className="p-[35px]">
@@ -39,7 +39,7 @@ async function PersonalAccountSettingsPage() {
           <div className="flex-grow">
             <span>
               <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
-                {i18n.t('account:settingsTab')}
+                <Trans i18nKey={'account:settingsTab'} />
               </div>
             </span>
           </div>
@@ -56,3 +56,4 @@ async function PersonalAccountSettingsPage() {
 }
 
 export default withI18n(PersonalAccountSettingsPage);
+
