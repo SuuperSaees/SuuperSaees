@@ -3,6 +3,8 @@ import { CheckSquare, CloudUpload, StickyNote, Trash2 } from 'lucide-react';
 import { createFile, createUploadBucketURL } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { File } from '../../../web/lib/file.types';
+import { useTranslation } from 'react-i18next';
+
 const fileTypeColors: Record<string, string> = {
   pdf: 'fill-pdf',
   png: 'fill-png',
@@ -23,11 +25,12 @@ export default function UploadFileComponent({
   onFileIdsChange,
   removeResults = false,
 }: UploadFileComponentProps) {
+  const { t } = useTranslation(); // Usa el hook para traducción
   const [filesWithId, setFilesWithId] = useState<Map<string, File>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isDragging, setIsDragging] = useState(false);
-  const [dragMessage, setDragMessage] = useState('Drag files or click here to upload files');
+  const [dragMessage, setDragMessage] = useState(t('dragAndDrop'));
   const [fileIds, setFileIds] = useState<string[]>([]);
   
   const handleFileInputClick = () => {
@@ -39,7 +42,7 @@ export default function UploadFileComponent({
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []);
     if (selectedFiles.length === 0) {
-      setErrors((prevErrors) => ({ ...prevErrors, '': 'You must select at least one file' }));
+      setErrors((prevErrors) => ({ ...prevErrors, '': t('selectFile') }));
       return;
     }
     const filesWithIds = selectedFiles.reduce((acc, file) => {
@@ -58,7 +61,7 @@ export default function UploadFileComponent({
     setIsDragging(false);
     const droppedFiles = Array.from(event.dataTransfer.files);
     if (droppedFiles.length === 0) {
-      setErrors((prevErrors) => ({ ...prevErrors, '': 'You must select at least one file' }));
+      setErrors((prevErrors) => ({ ...prevErrors, '': t('selectFile') }));
       return;
     }
     const filesWithIds = droppedFiles.reduce((acc, file) => {
@@ -75,11 +78,11 @@ export default function UploadFileComponent({
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(true);
-    setDragMessage('Drop here to upload files');
+    setDragMessage(t('orders:dropHere'));
   };
   const handleDragLeave = () => {
     setIsDragging(false);
-    setDragMessage('Drag files or click here to upload files');
+    setDragMessage(t('orders:dragAndDrop'));
   };
   const generateFileId = () => Date.now() + Math.random().toString(36).substr(2, 9);
   const sanitizeFileName = (fileName: string) => {
@@ -101,7 +104,7 @@ export default function UploadFileComponent({
     xhr.upload.addEventListener('error', () => {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        [id]: `Error uploading file ${file.name}`,
+        [id]: t('orders:uploadError', { fileName: file.name }),
       }));
     });
     xhr.upload.addEventListener('load', () => {
@@ -130,12 +133,12 @@ export default function UploadFileComponent({
             const errorMessage = response.message || 'Unknown error'; // Extract the message
             setErrors((prevErrors) => ({
               ...prevErrors,
-              [id]: `Error uploading file ${file.name}: ${errorMessage}`,
+              [id]: t('orders:uploadError', { fileName: file.name }) + `: ${errorMessage}`,
             }));
           } catch (e) {
             setErrors((prevErrors) => ({
               ...prevErrors,
-              [id]: `Error uploading file ${file.name}: Failed to process server response`,
+              [id]: t('orders:uploadError', { fileName: file.name }) + `: ${xhr.statusText}`,
             }));
           }
         }
@@ -179,7 +182,7 @@ export default function UploadFileComponent({
     } catch (error) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        [id]: `Error to obtain the URL`,
+        [id]: t('orders:uploadURLError', { error: error.message }),
       }));
     }
   };

@@ -11,7 +11,6 @@ import { updateOrder } from 'node_modules/@kit/team-accounts/src/server/actions/
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
-import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardFooter } from '@kit/ui/card';
 import {
   DropdownMenu,
@@ -35,7 +34,7 @@ import { ThemedButton } from '../../../../../packages/features/accounts/src/comp
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../packages/ui/src/shadcn/pagination';
 import { statusColors } from '../[id]/utils/get-color-class-styles';
-
+import { useRouter } from 'next/navigation';
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -63,16 +62,17 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({ orders, role, updateOrder
   const currentOrders = orders.slice(startIndex, endIndex);
 
   const totalPages = Math.ceil(orders.length / rowsPerPage);
-
+  const router = useRouter();
   const changeStatus = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       orderId,
       status,
     }: {
       orderId: Order.Type['id'];
       status: Order.Type['status'];
     }) => {
-      return updateOrder(orderId, { status });
+    await  updateOrder(orderId, { status });
+     return router.push(`/orders`);
     },
     onSuccess: () => {
       toast.success('Success', {
@@ -141,9 +141,9 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({ orders, role, updateOrder
                       {['agency_member', 'agency_owner', 'agency_project_manager'].includes(role) ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger
-                            className={`m-2 flex inline-flex items-center rounded-lg p-2 ${
+                            className={`m-2 inline-flex items-center rounded-lg p-2 ${
                               order.status === 'in_progress' 
-                                ? 'bg-purple-300 text-purple-700' 
+                                ? 'bg-[#F4EBFF] text-[#6941C6]' 
                                 : order.status 
                                   ? statusColors[order.status] 
                                   : ''
@@ -234,14 +234,14 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({ orders, role, updateOrder
                       height={160}
                     />
                     <h3 className="mb-[20px] w-[352px] text-center text-[20px] font-semibold leading-[30px] text-[#101828]">
-                      Comencemos con tu primer pedido
+                      {t('startFirstOrderTitle')}
                     </h3>
                     <p className="mb-[16px] w-[352px] text-center text-[16px] leading-[24px] text-[#475467]">
-                      Aún no haz creado ningún pedido, agrega uno
-                      haciendo clic a continuación.
+                      {t('startFirstOrderDescription')}
                     </p>
+
                     <Link href="/orders/create">
-                      <Button className="po">{t('creation.title')}</Button>
+                      <ThemedButton className="po">{t('creation.title')}</ThemedButton>
                     </Link>
                   </div>
                 </TableCell>
@@ -305,11 +305,10 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({ orders, role, updateOrder
 export function OrderList({ orders, role }: OrdersTableProps) {
   const { t } = useTranslation('orders');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('open');
-
-  // Filter orders based on the search term
-  const filteredOrders = orders.filter(order =>
-    order.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>('open');
+  // Filtra las órdenes basadas en el término de búsqueda
+  const filteredOrders = orders.filter((order) =>
+    order.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Filter orders by active tab
@@ -346,7 +345,9 @@ export function OrderList({ orders, role }: OrdersTableProps) {
     <div className="flex min-h-screen w-full flex-col">
       <div className="flex flex-col py-4">
         <main className="grid flex-1 items-start gap-4 md:gap-8">
-          <Tabs defaultValue="open" onValueChange={setActiveTab}>
+          <Tabs defaultValue={activeTab} onValueChange={(value: string) => {
+            setActiveTab(value as 'open' | 'completed' | 'all');
+            }}>
             <div className="mb-4 flex flex-wrap items-center gap-4">
               <TabsList>
                 <TabsTrigger value="open">{t('openOrders')}</TabsTrigger>
@@ -358,10 +359,10 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <ThemedInput
                     type="search"
-                    placeholder="Buscar..."
+                    placeholder={t('searchPlaceholderTasks')}
                     className="focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setSearchTerm(e.target.value)}
                   />
                 </div>
                 {orders.length > 0 ? (

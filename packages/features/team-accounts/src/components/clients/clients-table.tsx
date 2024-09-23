@@ -79,131 +79,131 @@ type Client = {
 const clientColumns = (
   t: TFunction<'clients', undefined>,
 ): ColumnDef<Client>[] => [
-  {
-    accessorKey: 'name',
-    header: t('clientName'),
-    cell: ({ row }) => (
-      <span className={'flex items-center space-x-4 text-left'}>
-        <span>
-          <ProfileAvatar
-            displayName={row.original.name}
-            pictureUrl={row.original.picture_url}
-          />
-        </span>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium leading-[1.42857] text-gray-900">
-            {row.original.name}
+    {
+      accessorKey: 'name',
+      header: t('clientName'),
+      cell: ({ row }) => (
+        <span className={'flex items-center space-x-4 text-left'}>
+          <span>
+            <ProfileAvatar
+              displayName={row.original.name}
+              pictureUrl={row.original.picture_url}
+            />
           </span>
-          <span className="text-sm font-normal leading-[1.42857] text-gray-600">
-            {row.original.email}
+          <div className="flex flex-col">
+            <span className="text-sm font-medium leading-[1.42857] text-gray-900">
+              {row.original.name}
+            </span>
+            <span className="text-sm font-normal leading-[1.42857] text-gray-600">
+              {row.original.email}
+            </span>
+          </div>
+        </span>
+      ),
+    },
+    // {
+    //   accessorKey: "role",
+    //   header: t("role"),
+    //   cell: ({ row }) => {
+    //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    //     const role = row.getValue("role") as string;
+    //     return (
+    //       <div className="capitalize">
+    //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
+    //       </div>
+    //     );
+    //   },
+    // },
+    {
+      accessorKey: 'client_organization',
+      header: t('organization'),
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue('client_organization')}</div>
+      ),
+    },
+    {
+      accessorKey: 'last_login',
+      header: ({ column }) => {
+        return (
+          <div>
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            >
+              <div className="flex items-center justify-between">
+                <span>{t('lastLogin')}</span>
+                <ArrowDown className="ml-2 h-4 w-4" />
+              </div>
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const date = new Date(row.original.created_at);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        const formattedDate = `${day}-${month}-${year}`;
+
+        return (
+          <span className="text-sm font-medium text-gray-900">
+            {formattedDate}
           </span>
-        </div>
-      </span>
-    ),
-  },
-  // {
-  //   accessorKey: "role",
-  //   header: t("role"),
-  //   cell: ({ row }) => {
-  //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  //     const role = row.getValue("role") as string;
-  //     return (
-  //       <div className="capitalize">
-  //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
-  //       </div>
-  //     );
-  //   },
-  // },
-  {
-    accessorKey: 'client_organization',
-    header: t('organization'),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue('client_organization')}</div>
-    ),
-  },
-  {
-    accessorKey: 'last_login',
-    header: ({ column }) => {
-      return (
-        <div>
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            <div className="flex items-center justify-between">
-              <span>{t('lastLogin')}</span>
-              <ArrowDown className="ml-2 h-4 w-4" />
-            </div>
-          </Button>
-        </div>
-      );
+        );
+      },
     },
-    cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
+    {
+      accessorKey: 'created_at_column',
+      header: ({ column }) => {
+        return (
+          <div>
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            >
+              <div className="flex items-center justify-between">
+                <span>{t('createdAt')}</span>
+                <ArrowUp className="ml-2 h-4 w-4" />
+              </div>
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const date = new Date(row.original.created_at);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
 
-      const formattedDate = `${day}-${month}-${year}`;
+        const formattedDate = `${day}-${month}-${year}`;
 
-      return (
-        <span className="text-sm font-medium text-gray-900">
-          {formattedDate}
-        </span>
-      );
+        return (
+          <span className="text-sm font-medium text-gray-900">
+            {formattedDate}
+          </span>
+        );
+      },
     },
-  },
-  {
-    accessorKey: 'created_at_column',
-    header: ({ column }) => {
-      return (
-        <div>
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            <div className="flex items-center justify-between">
-              <span>{t('createdAt')}</span>
-              <ArrowUp className="ml-2 h-4 w-4" />
-            </div>
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
+    {
+      id: 'actions',
+      header: t('actions'),
+      enableHiding: false,
+      cell: ({ row }) => {
+        const client = row.original;
 
-      const formattedDate = `${day}-${month}-${year}`;
-
-      return (
-        <span className="text-sm font-medium text-gray-900">
-          {formattedDate}
-        </span>
-      );
+        return (
+          <div className="h-18 flex items-center gap-4 self-stretch p-4">
+            {/* <UpdateClientDialog {...client} /> */}
+            <DeleteUserDialog userId={client.id} />
+          </div>
+        );
+      },
     },
-  },
-  {
-    id: 'actions',
-    header: t('actions'),
-    enableHiding: false,
-    cell: ({ row }) => {
-      const client = row.original;
-
-      return (
-        <div className="h-18 flex items-center gap-4 self-stretch p-4">
-          {/* <UpdateClientDialog {...client} /> */}
-          <DeleteUserDialog userId={client.id} />
-        </div>
-      );
-    },
-  },
-];
+  ];
 
 // ORGANIZATIONS TABLE
-  const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
+const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
   {
     accessorKey: "client_organization",
     header: t("organizationName"),
@@ -220,7 +220,7 @@ const clientColumns = (
         </div>
       </span>
     ),
-},
+  },
   {
     accessorKey: "members",
     header: t("organizationMembers"),
@@ -250,9 +250,9 @@ const clientColumns = (
       const day = date.getDate().toString().padStart(2, '0');
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear();
-  
+
       const formattedDate = `${day}-${month}-${year}`;
-  
+
       return (
         <span className="text-gray-900 text-sm font-medium">
           {formattedDate}
@@ -274,7 +274,7 @@ const clientColumns = (
   },
 ];
 // accountIds, accountNames
-export function ClientsTable({ clients,}: ClientsTableProps) {
+export function ClientsTable({ clients, }: ClientsTableProps) {
   const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clientes' | 'organizaciones'>('clientes');
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -284,8 +284,8 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
 
   const uniqueClients = useMemo(() => getUniqueOrganizations(clients), [clients]);
   const columns = useMemo<ColumnDef<Client>[]>(() => activeButton === 'clientes' ? clientColumns(t) : organizationColumns(t), [t, activeButton]);
-  
-  
+
+
 
   const table = useReactTable({
     data: activeButton === 'organizaciones' ? uniqueClients : clients,
@@ -327,25 +327,29 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
       <div className="flex items-center py-4 justify-between flex-wrap gap-4">
         <div className='flex'>
           <Button
-          variant='ghost'
+            variant='ghost'
             className={`flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'clientes' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
             onClick={() => handleButtonClick('clientes')}
           >
-            <span className="text-sm font-semibold leading-5">Clientes</span>
+            <span className="text-sm font-semibold leading-5">{t('clients:clients')}</span>
           </Button>
           <Button
             variant='ghost'
             className={`ml-[20px] flex h-9 p-2 px-3 items-center gap-2 rounded-md ${activeButton === 'organizaciones' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
             onClick={() => handleButtonClick('organizaciones')}
           >
-            <span className="text-sm font-semibold leading-5">Organizaciones</span>
+            <span className="text-sm font-semibold leading-5">{t('clients:organizations')}</span>
           </Button>
         </div>
         <div className='flex px-2 gap-4'>
           <div className='relative max-w-sm'>
             <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-[20px] h-[20px]' />
             <ThemedInput
-              placeholder={activeButton === 'clientes' ? "Buscar clientes..." : "Buscar organizaciones..."}
+              placeholder={
+                activeButton === 'clientes'
+                  ? t('clients:searchClients')
+                  : t('clients:searchOrganizations')
+              }
               value={
                 activeButton === 'clientes'
                   ? (table.getColumn("name")?.getFilterValue() as string) ?? ""
@@ -376,111 +380,111 @@ export function ClientsTable({ clients,}: ClientsTableProps) {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}
               </TableRow>
             ))}
-    </TableHeader>
-  <TableBody>
-    {table.getRowModel().rows?.length ? (
-      table.getRowModel().rows.map((row) => (
-        <TableRow
-          key={row.id}
-          data-state={row.getIsSelected() && "selected"}
-        >
-          {row.getVisibleCells().map((cell) => (
-            <TableCell key={cell.id}>
-              {flexRender(
-                cell.column.columnDef.cell,
-                cell.getContext()
-              )}
-            </TableCell>
-          ))}
-        </TableRow>
-      ))
-    ) : (
-      <TableRow>
-        <TableCell colSpan={table.getAllColumns().length}>
-          <div className='flex flex-col place-content-center items-center h-[493px]'>
-            <Image
-              src="/images/illustrations/Illustration-cloud.svg"
-              alt="Illustration Card"
-              width={220}
-              height={160}
-            />
-            <h3 className='w-[352px] text-center text-[20px] text-[#101828] leading-[30px] mb-[20px] font-semibold'>
-              Comencemos con tu primer cliente
-            </h3>
-            <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
-              Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.
-            </p>
-            <CreateClientDialog />
-          </div>
-        </TableCell>
-      </TableRow>
-    )}
-  </TableBody>
-</Table>
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={table.getAllColumns().length}>
+                  <div className='flex flex-col place-content-center items-center h-[493px]'>
+                    <Image
+                      src="/images/illustrations/Illustration-cloud.svg"
+                      alt="Illustration Card"
+                      width={220}
+                      height={160}
+                    />
+                    <h3 className='w-[352px] text-center text-[20px] text-[#101828] leading-[30px] mb-[20px] font-semibold'>
+                      {t('startWithFirstClientTitle')}
+                    </h3>
+                    <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
+                      {t('noClientsDescription')}
+                    </p>
+                    <CreateClientDialog />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
       {table.getRowModel().rows?.length ? (
-    <>
-    <div className="flex justify-between items-center py-4">
-        <Pagination>
-          <PaginationContent className="flex justify-between items-center w-full">
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (table.getCanPreviousPage()) {
-                    table.previousPage();
-                  }
-                }}
-              />
-            </PaginationItem>
-            <div className="flex-1 flex justify-center">
-              {pages.map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
+        <>
+          <div className="flex justify-between items-center py-4">
+            <Pagination>
+              <PaginationContent className="flex justify-between items-center w-full">
+                <PaginationItem>
+                  <PaginationPrevious
                     href="#"
-                    isActive={pageIndex === page - 1}
                     onClick={(e) => {
                       e.preventDefault();
-                      table.setPageIndex(page - 1);
+                      if (table.getCanPreviousPage()) {
+                        table.previousPage();
+                      }
                     }}
-                  >
-                    {page}
-                  </PaginationLink>
+                  />
                 </PaginationItem>
-              ))}
-              {pageCount > 3 && pageIndex < pageCount - 2 && (
+                <div className="flex-1 flex justify-center">
+                  {pages.map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        href="#"
+                        isActive={pageIndex === page - 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          table.setPageIndex(page - 1);
+                        }}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  {pageCount > 3 && pageIndex < pageCount - 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+                </div>
                 <PaginationItem>
-                  <PaginationEllipsis />
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (table.getCanNextPage()) {
+                        table.nextPage();
+                      }
+                    }}
+                  />
                 </PaginationItem>
-              )}
-            </div>
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (table.getCanNextPage()) {
-                    table.nextPage();
-                  }
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
-</>
-      ) : 
-      (<>
-      </>)}
+              </PaginationContent>
+            </Pagination>
+          </div>
+        </>
+      ) :
+        (<>
+        </>)}
     </div>
   );
 }

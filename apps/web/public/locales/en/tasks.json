@@ -5,13 +5,13 @@
   "noTasksFound": "No tasks found for the search query \"{{query}}\"",
   "clearSearch": "Clear search",
   "addNewTask": "Add new task",
-  "addNewTaskDescription": "Fill out the form below to add a new task",
+  "addNewTaskDescription": "Fill out the following form to add a new task",
   "addTask": "Add task",
   "addingTask": "Adding task...",
   "taskTitle": "Task",
   "taskTitleDescription": "Enter a name for your task",
-  "taskDescription": "Task Description",
-  "taskDescriptionDescription": "Enter a description for your task",
+  "taskDescription": "Task description",
+  "taskDescriptionDescription": "Enter a description for your task.",
   "updatingTask": "Updating task...",
   "updateTask": "Update task",
   "task": "Task",
@@ -19,5 +19,8 @@
   "updatedAt": "Updated at",
   "deleteTask": "Delete task",
   "deletingTask": "Deleting task...",
-  "deleteTaskConfirmation": "Are you sure you want to delete this task?"
+  "deleteTaskConfirmation": "Are you sure you want to delete this task?",
+  "searchPlaceholderTasks": "Search...",
+  "startFirstOrderTitle": "Let’s start with your first order",
+  "startFirstOrderDescription": "You haven’t created any orders yet, add one by clicking below."
 }

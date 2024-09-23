@@ -22,7 +22,7 @@ const routes = [
   //   end: true,
   // },
   {
-    label: 'Pedidos',
+    label: 'common:orders',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
   },
@@ -43,7 +43,7 @@ const routes = [
   //   Icon: <Wallet className={iconClasses} />,
   // },
   {
-    label: 'Configuraciones',
+    label: 'common:settings',
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
   },
