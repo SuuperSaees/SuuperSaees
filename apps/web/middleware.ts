@@ -17,7 +17,7 @@ const CLIENT_SECRET = 'suuper-client-secret';
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|images|locales|assets|api).*)', 
+    '/((?!_next/static|_next/image|images|locales|assets|api/v1/webhook|api).*)', 
     '/api/v1/:path*'
   ],
 };
@@ -47,6 +47,11 @@ const getUser = (request: NextRequest, response: NextResponse) => {
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  // bypass middlware api/v1/webhook and api. 
+  if (request.nextUrl.pathname === '/api/v1/webhook' || request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
   // Verify route /api/v1
   if (request.nextUrl.pathname.startsWith('/api/v1')) {
     // Verify route authentication
