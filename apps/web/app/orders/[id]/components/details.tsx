@@ -14,6 +14,7 @@ import { useActivityContext } from '../context/activity-context';
 import PreviewImage from './file-types/preview-image';
 import PreviewPDF from './file-types/preview-pdf';
 import PreviewVideo from './file-types/preview-video';
+import { Trans } from '@kit/ui/trans';
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -64,9 +65,8 @@ const DetailsPage = () => {
       <div className="flex flex-col gap-2">
         <div className="mb-[6px] flex">
           <span className="font-inter text-sm font-medium leading-5 text-gray-700">
-            Descripción del pedido{' '}
+             <Trans i18nKey="orders:OrderDescriptionTitle" />{' '}
           </span>
-          <CircleHelp className="ml-1 h-4 w-4 text-gray-500" />
         </div>
         <div
           className="rounded-lg border border-gray-300 px-[14px] py-[12px]"
