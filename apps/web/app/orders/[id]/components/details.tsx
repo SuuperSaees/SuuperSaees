@@ -64,9 +64,8 @@ const DetailsPage = () => {
       <div className="flex flex-col gap-2">
         <div className="mb-[6px] flex">
           <span className="font-inter text-sm font-medium leading-5 text-gray-700">
-            Descripción del pedido{' '}
+            Order details{' '}
           </span>
-          <CircleHelp className="ml-1 h-4 w-4 text-gray-500" />
         </div>
         <div
           className="rounded-lg border border-gray-300 px-[14px] py-[12px]"

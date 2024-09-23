@@ -15,6 +15,7 @@
   "settingsTabDescription": "Manage your settings and preferences.",
   "emailAddress": "Email",
   "password": "Password",
+  "plsDetailInputs": "Please enter your details",
   "modalConfirmationQuestion": "Are you sure you want to continue?",
   "loading": "Loading the page...",
   "genericServerErrorHeading": "Sorry, something went wrong while processing your request. Please contact us if the issue persists.",
@@ -51,6 +52,8 @@
   "settingsName": "Settings",
   "usersName": "Users",
   "ordersName": "Orders",
+    "profile": "My profile",
+  "billing": "Billing",
   "roles": {
     "agency_owner": {
       "label": "Owner"
