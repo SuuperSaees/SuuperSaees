@@ -83,128 +83,133 @@ type Client = {
 const clientColumns = (
   t: TFunction<'clients', undefined>,
 ): ColumnDef<Client>[] => [
-    {
-      accessorKey: 'name',
-      header: t('clientName'),
-      cell: ({ row }) => (
-        <span className={'flex items-center space-x-4 text-left'}>
-          <span>
-            <ProfileAvatar
-              displayName={row.original.name}
-              pictureUrl={row.original.picture_url}
-            />
-          </span>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium leading-[1.42857] text-gray-900">
-              {row.original.name}
-            </span>
-            <span className="text-sm font-normal leading-[1.42857] text-gray-600">
-              {row.original.email}
-            </span>
-          </div>
+  {
+    accessorKey: 'name',
+    header: t('clientName'),
+    cell: ({ row }) => (
+      <span className={'flex items-center space-x-4 text-left'}>
+        <span>
+          <ProfileAvatar
+            displayName={row.original.name}
+            pictureUrl={row.original.picture_url}
+          />
         </span>
-      ),
-    },
-    // {
-    //   accessorKey: "role",
-    //   header: t("role"),
-    //   cell: ({ row }) => {
-    //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    //     const role = row.getValue("role") as string;
-    //     return (
-    //       <div className="capitalize">
-    //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
-    //       </div>
-    //     );
-    //   },
-    // },
-    {
-      accessorKey: 'client_organization',
-      header: t('organization'),
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue('client_organization')}</div>
-      ),
-    },
-    {
-      accessorKey: 'last_login',
-      header: ({ column }) => {
-        return (
-          <div>
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              <div className="flex items-center justify-between">
-                <span>{t('lastLogin')}</span>
-                <ArrowDown className="ml-2 h-4 w-4" />
-              </div>
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        const date = new Date(row.original.created_at);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-
-        const formattedDate = `${day}-${month}-${year}`;
-
-        return (
-          <span className="text-sm font-medium text-gray-900">
-            {formattedDate}
+        <div className="flex flex-col">
+          <span className="text-sm font-medium leading-[1.42857] text-gray-900">
+            {row.original.name}
           </span>
-        );
-      },
-    },
-    {
-      accessorKey: 'created_at_column',
-      header: ({ column }) => {
-        return (
-          <div>
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              <div className="flex items-center justify-between">
-                <span>{t('createdAt')}</span>
-                <ArrowUp className="ml-2 h-4 w-4" />
-              </div>
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        const date = new Date(row.original.created_at);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-
-        const formattedDate = `${day}-${month}-${year}`;
-
-        return (
-          <span className="text-sm font-medium text-gray-900">
-            {formattedDate}
+          <span className="text-sm font-normal leading-[1.42857] text-gray-600">
+            {row.original.email}
           </span>
-        );
-      },
+        </div>
+      </span>
+    ),
+  },
+  // {
+  //   accessorKey: "role",
+  //   header: t("role"),
+  //   cell: ({ row }) => {
+  //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  //     const role = row.getValue("role") as string;
+  //     return (
+  //       <div className="capitalize">
+  //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
+  //       </div>
+  //     );
+  //   },
+  // },
+  {
+    accessorKey: 'client_organization',
+    header: t('organization'),
+    cell: ({ row }) => (
+      <Link
+        href={`clients/organizations/${row.original.organization_id}`}
+        className="capitalize"
+      >
+        {row.getValue('client_organization')}
+      </Link>
+    ),
+  },
+  {
+    accessorKey: 'last_login',
+    header: ({ column }) => {
+      return (
+        <div>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            <div className="flex items-center justify-between">
+              <span>{t('lastLogin')}</span>
+              <ArrowDown className="ml-2 h-4 w-4" />
+            </div>
+          </Button>
+        </div>
+      );
     },
-    {
-      id: 'actions',
-      header: t('actions'),
-      enableHiding: false,
-      cell: ({ row }) => {
-        const client = row.original;
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
 
-        return (
-          <div className="h-18 flex items-center gap-4 self-stretch p-4">
-            {/* <UpdateClientDialog {...client} /> */}
-            <DeleteUserDialog userId={client.id} />
-          </div>
-        );
-      },
+      const formattedDate = `${day}-${month}-${year}`;
+
+      return (
+        <span className="text-sm font-medium text-gray-900">
+          {formattedDate}
+        </span>
+      );
     },
-  ];
+  },
+  {
+    accessorKey: 'created_at_column',
+    header: ({ column }) => {
+      return (
+        <div>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            <div className="flex items-center justify-between">
+              <span>{t('createdAt')}</span>
+              <ArrowUp className="ml-2 h-4 w-4" />
+            </div>
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+
+      const formattedDate = `${day}-${month}-${year}`;
+
+      return (
+        <span className="text-sm font-medium text-gray-900">
+          {formattedDate}
+        </span>
+      );
+    },
+  },
+  {
+    id: 'actions',
+    header: t('actions'),
+    enableHiding: false,
+    cell: ({ row }) => {
+      const client = row.original;
+
+      return (
+        <div className="h-18 flex items-center gap-4 self-stretch p-4">
+          {/* <UpdateClientDialog {...client} /> */}
+          <DeleteUserDialog userId={client.id} />
+        </div>
+      );
+    },
+  },
+];
 
 // ORGANIZATIONS TABLE
 const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
