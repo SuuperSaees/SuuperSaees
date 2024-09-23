@@ -3,7 +3,6 @@ import { CheckSquare, CloudUpload, StickyNote, Trash2 } from 'lucide-react';
 import { createFile, createUploadBucketURL } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { File } from '../../../web/lib/file.types';
-
 const fileTypeColors: Record<string, string> = {
   pdf: 'fill-pdf',
   png: 'fill-png',
@@ -12,14 +11,12 @@ const fileTypeColors: Record<string, string> = {
   doc: 'fill-doc',
   docx: 'fill-docx',
 };
-
 interface UploadFileComponentProps {
   bucketName: string;
   uuid: string;
   onFileIdsChange: (fileIds: string[]) => void;
   removeResults?: boolean;
 }
-
 export default function UploadFileComponent({
   bucketName,
   uuid,
@@ -30,7 +27,7 @@ export default function UploadFileComponent({
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isDragging, setIsDragging] = useState(false);
-  const [dragMessage, setDragMessage] = useState('Arrastra los archivos o dale click aquí para subir archivos');
+  const [dragMessage, setDragMessage] = useState('Drag files or click here to upload files');
   const [fileIds, setFileIds] = useState<string[]>([]);
   
   const handleFileInputClick = () => {
@@ -39,73 +36,59 @@ export default function UploadFileComponent({
       fileInput.click();
     }
   };
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []);
     if (selectedFiles.length === 0) {
-      setErrors((prevErrors) => ({ ...prevErrors, '': 'Debes seleccionar al menos un archivo' }));
+      setErrors((prevErrors) => ({ ...prevErrors, '': 'You must select at least one file' }));
       return;
     }
-
     const filesWithIds = selectedFiles.reduce((acc, file) => {
       const id = generateFileId();
       acc[id] = file;
       return acc;
     }, {} as Record<string, File>);
-
     setFilesWithId((prevFiles) => ({ ...prevFiles, ...filesWithIds }));
     setErrors((prevErrors) => ({ ...prevErrors, ...Object.fromEntries(Object.keys(filesWithIds).map(id => [id, null])) }));
-
     for (const [id, file] of Object.entries(filesWithIds)) {
       await uploadFile(id, file);
     }
   };
-
   const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
     const droppedFiles = Array.from(event.dataTransfer.files);
     if (droppedFiles.length === 0) {
-      setErrors((prevErrors) => ({ ...prevErrors, '': 'Debes seleccionar al menos un archivo' }));
+      setErrors((prevErrors) => ({ ...prevErrors, '': 'You must select at least one file' }));
       return;
     }
-
     const filesWithIds = droppedFiles.reduce((acc, file) => {
       const id = generateFileId();
       acc[id] = file;
       return acc;
     }, {} as Record<string, File>);
-
     setFilesWithId((prevFiles) => ({ ...prevFiles, ...filesWithIds }));
     setErrors((prevErrors) => ({ ...prevErrors, ...Object.fromEntries(Object.keys(filesWithIds).map(id => [id, null])) }));
-
     for (const [id, file] of Object.entries(filesWithIds)) {
       await uploadFile(id, file);
     }
   };
-
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(true);
-    setDragMessage('Suelta aquí para subir los archivos');
+    setDragMessage('Drop here to upload files');
   };
-
   const handleDragLeave = () => {
     setIsDragging(false);
-    setDragMessage('Arrastra los archivos o dale click aquí para subir archivos');
+    setDragMessage('Drag files or click here to upload files');
   };
-
   const generateFileId = () => Date.now() + Math.random().toString(36).substr(2, 9);
-
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
   };
-
   const uploadFile = async (id: string, file: File) => {
     const sanitizedFileName = sanitizeFileName(file.name);
     const filePath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
     const xhr = new XMLHttpRequest();
-
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable) {
         const progress = (event.loaded / event.total) * 100;
@@ -115,14 +98,12 @@ export default function UploadFileComponent({
         }));
       }
     });
-
     xhr.upload.addEventListener('error', () => {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        [id]: `Error al subir el archivo ${file.name}`,
+        [id]: `Error uploading file ${file.name}`,
       }));
     });
-
     xhr.upload.addEventListener('load', () => {
       setUploadProgress((prev) => ({
         ...prev,
@@ -141,7 +122,6 @@ export default function UploadFileComponent({
           });
         }, 1000); // Delay to let the user see the 100% state
     });
-
     xhr.onreadystatechange = () => {
       if (xhr.readyState === XMLHttpRequest.DONE) {
         if (xhr.status !== 200) {
@@ -163,7 +143,6 @@ export default function UploadFileComponent({
     };
     
     
-
     try {
       const data = await createUploadBucketURL(bucketName, filePath);
       if ('error' in data) {
@@ -173,16 +152,13 @@ export default function UploadFileComponent({
         }));
         return;
       }
-
       xhr.open('PUT', data.signedUrl, true);
       xhr.setRequestHeader('Content-Type', file.type);
       xhr.send(file);
-
       const fileUrl =
         process.env.NEXT_PUBLIC_SUPABASE_URL +
         '/storage/v1/object/public/orders/' +
         filePath;
-
       const newFileData = {
         name: file.name,
         size: file.size,
@@ -207,7 +183,6 @@ export default function UploadFileComponent({
       }));
     }
   };
-
   const handleDelete = (id: string) => {
     setFilesWithId((prevFiles) => {
       const updatedFiles = { ...prevFiles };
@@ -225,26 +200,21 @@ export default function UploadFileComponent({
       return updatedProgress;
     });
   };
-
   const getFileTypeClass = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
     return fileTypeColors[extension] ?? 'fill-unknown';
   };
-
   const formatFileSize = (size: number) => {
     if (size < 1024) return `${size} B`;
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB`;
     return `${(size / (1024 * 1024)).toFixed(2)} MB`;
   };
-
   const containerRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [filesWithId]);
-
   return (
     <div className="flex flex-col gap-2">
       <div

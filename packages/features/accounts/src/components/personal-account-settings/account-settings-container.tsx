@@ -30,6 +30,8 @@ import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 // import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import BillingContainerConfig  from './billing/billing-container';
+import RegisterAccountContainer from '../../../../../../apps/web/app/stripe/components/register-stripe-account-container';
+
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -125,7 +127,7 @@ export function PersonalAccountSettingsContainer(
   return (
     <div>
       <Tabs defaultValue='account'>
-        {role === "agency_owner" && (
+        {role !== 'client_member' && role !== 'client_owner' && (
           <TabsList>
             <TabsTrigger value='account'>Mi perfil</TabsTrigger>
             <TabsTrigger value='billing'>Facturación</TabsTrigger>
@@ -196,35 +198,6 @@ export function PersonalAccountSettingsContainer(
           </Card>
         </If> */}
         {/* Brand color section */}
-<<<<<<< HEAD
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:brandColor'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:brandColorDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdateAccountColorBrand />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Trans i18nKey={'account:brandSidebar'} />
-            </CardTitle>
-            <CardDescription>
-              <Trans i18nKey={'account:brandSidebarDescription'} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UpdateAccountOrganizationSidebar />
-          </CardContent>
-        </Card>
-        <Card>
-=======
         {role === 'agency_owner' && (
           <>
             <Card>
@@ -254,7 +227,6 @@ export function PersonalAccountSettingsContainer(
               </CardContent>
             </Card>
             <Card>
->>>>>>> 298fa37123f75611cd0e9fdd90b49ec77dbad25b
           <CardHeader>
             <CardTitle>
               <Trans i18nKey={'account:brandLogo'} />
@@ -263,54 +235,11 @@ export function PersonalAccountSettingsContainer(
               <Trans i18nKey={'account:brandLogoDescription'} />
             </CardDescription>
           </CardHeader>
-<<<<<<< HEAD
-          <CardContent>
-=======
          <CardContent>
->>>>>>> 298fa37123f75611cd0e9fdd90b49ec77dbad25b
             <UpdateAccountOrganizationLogo
               organizationId={user?.organization_id ?? ''}
             />
           </CardContent> 
-<<<<<<< HEAD
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {!accountStripe?.id ? (
-                <Trans i18nKey={'account:connectToStripe'} />
-              ) : accountStripe.charges_enabled ? (
-                <Trans i18nKey={'account:stripeConnected'} />
-              ) : (
-                <Trans i18nKey={'account:continueWithOnboardingStripe'} />
-              )}
-            </CardTitle>
-            <CardDescription>
-              {!accountStripe?.id ? (
-                <Trans
-                  i18nKey={'account:connectToStripeDescription'}
-                  key={'s'}
-                />
-              ) : accountStripe.charges_enabled ? (
-                <Trans i18nKey={'account:stripeConnectedDescription'} />
-              ) : (
-                <Trans
-                  i18nKey={'account:continueWithOnboardingStripeDescription'}
-                />
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {(!accountStripe?.id || !accountStripe.charges_enabled) && (
-              <ThemedButton className="bg-brand">
-                <Link href={'/stripe'}>
-                  {accountStripe?.id ? 'Continuar' : 'Conectar'}
-                </Link>
-              </ThemedButton>
-            )}
-          </CardContent>
-=======
->>>>>>> 298fa37123f75611cd0e9fdd90b49ec77dbad25b
         </Card>
           </>
         )}
