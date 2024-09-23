@@ -192,7 +192,7 @@ const CreateClientDialog = () => {
 
                 <Separator />
                 <ThemedButton type="submit" className="w-full">
-                  Crear cliente
+                {t('clients:createClient')}
                 </ThemedButton>
               </form>
             </Form>

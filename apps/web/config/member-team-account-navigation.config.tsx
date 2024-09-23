@@ -23,20 +23,20 @@ const routes = [
   //   end: true,
   // },
   {
-    label: 'Pedidos',
+    label: 'common:orders',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
   },
   {
-    label: 'Usuarios',
+    label: 'common:users',
     Icon: <Users className={iconClasses} />,
     children: [
       {
-        label: 'Clientes',
+        label: 'common:clients',
         path: pathsConfig.app.clients,
       },
       {
-        label: 'Equipo',
+        label: 'common:team',
         path: pathsConfig.app.team,
       },
     ],

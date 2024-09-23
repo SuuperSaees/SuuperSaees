@@ -23,27 +23,27 @@ const routes = [
   //   end: true,
   // },
   {
-    label: 'Pedidos',
+    label: 'common:ordersName',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
   },
   {
-    label: 'Usuarios',
+    label: 'common:usersName',
     Icon: <Users className={iconClasses} />,
     children: [
       {
-        label: 'Clientes',
+        label: 'common:clients',
         path: pathsConfig.app.clients,
       },
       {
-        label: 'Equipo',
+        label: 'common:team',
         path: pathsConfig.app.team,
       },
     ],
   },
 
   {
-    label: 'Servicios',
+    label: 'common:servicesName',
     path: pathsConfig.app.services,
     Icon: <SquareCheck className={iconClasses} />,
   },
@@ -53,7 +53,7 @@ const routes = [
   //   Icon: <Wallet className={iconClasses} />,
   // },
   {
-    label: 'Configuraciones',
+    label: 'common:settingsName',
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
   },

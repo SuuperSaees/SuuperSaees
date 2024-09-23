@@ -45,6 +45,10 @@
   "noData": "No hay datos disponibles",
   "pageNotFoundHeading": "¡Ay! :|",
   "errorPageHeading": "¡Ay! :|",
+  "servicesName": "Servicios",
+  "settingsName": "Configuraciones",
+  "usersName": "Usuarios",
+  "ordersName": "Pedidos",
   "nameInput": "Nombre",
   "namePortalInput": "Nombre del portal",
   "roles": {
