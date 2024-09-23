@@ -66,6 +66,7 @@
   "dropMessage": "Suelta aquí para subir los archivos",
   "dragAndDrop": "Arrastra los archivos aquí o haz clic para subir",
   "dropHere": "Suelta aquí para subir archivos",
-  "tryAgain": "Inténtalo de nuevo"
+  "tryAgain": "Inténtalo de nuevo",
+  "OrderDescriptionTitle": "Detalles del pedido"
   
 }
