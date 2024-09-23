@@ -52,6 +52,9 @@
   "settingsName": "Settings",
   "usersName": "Users",
   "ordersName": "Orders",
+  "clientsName": "Clients",
+  "teamName": "Team",
+  "orders": "Orders",
     "profile": "My profile",
   "billing": "Billing",
   "roles": {

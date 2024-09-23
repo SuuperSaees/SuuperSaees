@@ -32,11 +32,11 @@ const routes = [
     Icon: <Users className={iconClasses} />,
     children: [
       {
-        label: 'common:clients',
+        label: 'common:clientsName',
         path: pathsConfig.app.clients,
       },
       {
-        label: 'common:team',
+        label: 'common:teamName',
         path: pathsConfig.app.team,
       },
     ],
