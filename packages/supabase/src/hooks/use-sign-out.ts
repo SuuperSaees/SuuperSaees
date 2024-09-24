@@ -2,11 +2,11 @@ import { useMutation } from '@tanstack/react-query';
 
 import { useSupabase } from './use-supabase';
 
-if (!process.env.NEXT_PUBLIC_LANDING_URL) {
+if (!process.env.NEXT_PUBLIC_SITE_URL) {
   throw new Error("Redirect URL is not in environment variables");
 }
 
-const landing_page = process.env.NEXT_PUBLIC_LANDING_URL;
+const landing_page = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
 
 export function useSignOut() {
   const client = useSupabase();
