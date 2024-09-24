@@ -47,7 +47,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
 
     const userHasReadMessagePermission = await hasPermissionToReadOrderDetails(
       orderId,
-      orderData?.propietary_organization_id ?? '',
+      orderData?.agency_id ?? '',
       orderData?.client_organization_id ?? '',
     );
 
