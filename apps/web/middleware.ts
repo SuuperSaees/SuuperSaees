@@ -12,8 +12,8 @@ import pathsConfig from '~/config/paths.config';
 const CSRF_SECRET_COOKIE = 'csrfSecret';
 const NEXT_ACTION_HEADER = 'next-action';
 
-const CLIENT_ID = 'suuper-client-id';
-const CLIENT_SECRET = 'suuper-client-secret';
+const CLIENT_ID = 'dev_b9806c46-8348-4347-a639-7ac223f17546suuper.co';
+const CLIENT_SECRET = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkwMjk0ZmM2LWJlODItNGE5Zi04ZDIyLTNjZDc0ZDAwODJjZSIsIm5hbWUiOiJzYW11ZWwiLCJlbWFpbCI6InNhbXVlbEBzdXVwZXIuY28iLCJkb21haW4iOiJzdXVwZXIuY28ifQ.Q3rEzb3evSkVZgJeIYtJtRn_5f2xUG1HHxRnVoACDV0';
 
 export const config = {
   matcher: [

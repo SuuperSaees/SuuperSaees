@@ -33,7 +33,6 @@ import {
 import { Input } from '@kit/ui/input';
 
 import { createOrganizationServer } from '../../../../../packages/features/team-accounts/src/server/actions/organizations/create/create-organization-server';
-import { createSubscription } from '../../../../../packages/features/team-accounts/src/server/actions/subscriptions/create/create-subscription'
 
 const formSchema = z.object({
   organization_name: z.string().min(2).max(50),
@@ -59,7 +58,6 @@ const CreateOrganization = () => {
       toast.success('Success', {
         description: 'Organization created successfully',
       });
-      await createSubscription()
     } catch (error) {
       toast.error('Error', {
         description: 'Error creating organization',
