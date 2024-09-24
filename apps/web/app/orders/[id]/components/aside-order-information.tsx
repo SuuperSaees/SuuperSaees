@@ -27,6 +27,7 @@ import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
 import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import { useRouter } from 'next/navigation';
 
 
 
@@ -44,24 +45,24 @@ const AsideOrderInformation = ({
   const [selectedStatus, setSelectedStatus] = useState(order.status);
   const [selectedPriority, setSelectedPriority] = useState(order.priority);
   const [userRole, setUserRole] = useState('');
-  
+  const router = useRouter();
   useEffect(() => {
     const fetchUserRole = async () => {
-      try {
-        const role = await getUserRole();
-        setUserRole(role);
-      } catch (error) {
+      await getUserRole().then((data)=> {
+        setUserRole(data);
+      }).catch((error) => {
         console.error('Error al obtener el rol del usuario:', error);
-      }
+      })
     };
 
-    fetchUserRole();
+    void fetchUserRole();
   }, []);
 
   const changeStatus = useMutation({
-    mutationFn: (status: Order.Type['status']) => {
+    mutationFn: async (status: Order.Type['status']) => {
       setSelectedStatus(status);
-      return updateOrder(order.id, { status });
+      await updateOrder(order.id, { status });
+      return router.push(`/orders/${order.id}`);
     },
     onSuccess: () => {
       toast.success('Success', {
@@ -77,9 +78,10 @@ const AsideOrderInformation = ({
   });
 
   const changePriority = useMutation({
-    mutationFn: (priority: Order.Type['priority']) => {
+    mutationFn: async (priority: Order.Type['priority']) => {
       setSelectedPriority(priority);
-      return updateOrder(order.id, { priority });
+      await updateOrder(order.id, { priority });
+      return router.push(`/orders/${order.id}`);
     },
     onSuccess: () => {
       toast.success('Success', {
@@ -95,17 +97,16 @@ const AsideOrderInformation = ({
   });
 
   const changeDate = useMutation({
-    mutationFn: (due_date: Order.Type['due_date']) => {
-      return updateOrder(order.id, { due_date });
+    mutationFn: async (due_date: Order.Type['due_date']) => {
+      await updateOrder(order.id, { due_date });
+      return router.push(`/orders/${order.id}`);
     },
     onSuccess: () => {
-      console.log('date changed');
       toast.success('Success', {
         description: 'Date updated successfully!',
       });
     },
-    onError: (error) => {
-      console.log('error', error);
+    onError: () => {
       toast.error('Error', {
         description: 'The date could not be updated.',
       });

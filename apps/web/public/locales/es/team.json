@@ -143,6 +143,7 @@
     "resendInvitation": "Reenviar invitacíon",
     "expiresAtLabel": "Vence en",
     "expired": "Venció",
+    "title": "Equipo",
     "active": "Activo",
     "inviteStatus": "Estado",
     "inviteNotFoundOrExpired": "Invitación no encontrada o caducada",

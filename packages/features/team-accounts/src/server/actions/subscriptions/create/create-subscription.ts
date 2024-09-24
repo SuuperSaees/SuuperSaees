@@ -53,6 +53,7 @@ export const createSubscription = async () => {
 
    // Create subscription in db
    const primary_owner_user_id = await getPrimaryOwnerId();
+   const newDate = new Date().toISOString();
    const newSubscription: Subscription.Type = {
      id: subscriptionData?.id as string,
      propietary_organization_id: primary_owner_user_id as string,
@@ -66,8 +67,8 @@ export const createSubscription = async () => {
      period_starts_at: null,
      trial_ends_at: null,
      trial_starts_at: null,
-     updated_at: null,
-     created_at: null,
+     updated_at: newDate,
+     created_at: newDate,
      account_id: null
    };
 
@@ -77,7 +78,6 @@ export const createSubscription = async () => {
     .select('*')
     .single();
 
-    console.log('subscriptionCreateError', subscriptionCreateError)
     if (subscriptionCreateError) {
       console.error('Error creating subscription:', subscriptionCreateError.message);
     }

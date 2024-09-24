@@ -14,12 +14,7 @@ const defaultLanguage = process.env.NEXT_PUBLIC_LOCALE ?? 'es';
  */
 export const languages: string[] = [
   defaultLanguage,
-  'es',
-  'it',
-  'de',
-  'fr',
-  'zh',
-  'ja',
+  'en',
 ];
 
 /**

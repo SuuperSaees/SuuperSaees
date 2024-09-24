@@ -26,16 +26,49 @@ export const getOrganizationSettings = async () => {
       throw accountError.message;
     }
 
-    const { data: organizationSettings, error: settingsError } = await client
+    const { data: roleData, error: roleError } = await client
+      .from('accounts_memberships')
+      .select('account_role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (roleError) { 
+      throw roleError.message;
+    }
+
+    if (roleData?.account_role !== 'agency_member' && roleData?.account_role !== 'agency_owner' && roleData?.account_role !== 'agency_project_manager' && roleData?.account_role !== 'super_admin' && roleData?.account_role !== 'custom-role') {
+      const { data: agencyOwnerClient, error: agencyOwnerClientError } = await client
+      .from('clients')
+      .select('agency_id')
+      .eq('user_client_id', user.id)
+      .single();
+
+      if (agencyOwnerClientError) {
+        throw agencyOwnerClientError.message;
+      }
+
+
+      const { data: organizationSettings, error: settingsError } = await client
+      .from('organization_settings')
+      .select()
+      .eq('account_id', agencyOwnerClient.agency_id ?? '');
+
+      if (settingsError) {
+        throw settingsError.message;
+      }
+      return organizationSettings;
+    } else {
+      const { data: organizationSettings, error: settingsError } = await client
       .from('organization_settings')
       .select()
       .eq('account_id', accountData.organization_id ?? '');
 
-    if (settingsError) {
-      throw settingsError.message;
-    }
+      if (settingsError) {
+        throw settingsError.message;
+      }
 
-    return organizationSettings;
+      return organizationSettings;
+    }
   } catch (error) {
     console.error('Error fetching organization settings:', error);
     throw error;

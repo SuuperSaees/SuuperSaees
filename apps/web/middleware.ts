@@ -61,6 +61,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+
+
   // set a unique request ID for each request
   // this helps us log and trace requests
   setRequestId(request);
