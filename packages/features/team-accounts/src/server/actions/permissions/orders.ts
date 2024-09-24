@@ -6,6 +6,7 @@ import { Database } from '../../../../../../../apps/web/lib/database.types';
 import {
   fetchCurrentUser,
   fetchCurrentUserAccount,
+  getUserRole,
 } from '../members/get/get-member-account';
 import { checkGeneralPermission } from './permissions';
 
@@ -17,9 +18,11 @@ export const hasPermissionToReadOrderDetails = async (
   try {
     const client = getSupabaseServerComponentClient();
 
-    // Step 1: Fetch user and account data
+    // Step 1: Fetch user, account data and user role
     const user = await fetchCurrentUser(client);
     const account = await fetchCurrentUserAccount(client, user.id);
+    const userRole = await getUserRole();
+
     if (!account.organization_id) return false;
 
     // Step 2: Check general permission
@@ -31,6 +34,10 @@ export const hasPermissionToReadOrderDetails = async (
     );
 
     // Step 3: Check for agency permission
+    if(userRole === 'agency_owner' && account.organization_id === message_order_propietary_organization_id) {
+      return true
+    } 
+
     if (message_order_propietary_organization_id === account.organization_id) {
       const agencyPermission = await checkAgencyOrderPermissions(
         client,
