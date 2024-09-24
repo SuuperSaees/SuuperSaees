@@ -33,6 +33,9 @@ type UserAccount = Pick<
   | 'organization_id'
   | 'picture_url'
 >;
+
+type ClientsWithOrganization = UserAccount & { client_organization: string };
+
 async function fetchClientMembers(
   client: SupabaseClient<Database>,
   currentUserOrganizationId: string,
@@ -202,7 +205,7 @@ function combineClientData(
 }
 
 // Main function to get all clients with owners and their organizations
-export async function getAllClients() {
+export async function getAllClients(): Promise<ClientsWithOrganization[]> {
   try {
     const client = getSupabaseServerComponentClient();
 

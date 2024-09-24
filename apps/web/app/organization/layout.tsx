@@ -1,19 +1,23 @@
 import { use } from 'react';
 
+
+
 import { cookies } from 'next/headers';
+
+
 
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
-import {
-  Page,
-  PageLayoutStyle,
-  PageMobileNavigation,
-  PageNavigation,
-} from '@kit/ui/page';
+import { Page, PageLayoutStyle, PageMobileNavigation, PageNavigation } from '@kit/ui/page';
+
+
 
 import { AppLogo } from '~/components/app-logo';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
+import RootLayout from '~/layout';
 import { withI18n } from '~/lib/i18n/with-i18n';
+
+
 
 // home imports
 import { HomeMenuNavigation } from '../home/(user)/_components/home-menu-navigation';
@@ -26,26 +30,28 @@ function UserHomeLayout({ children }: React.PropsWithChildren) {
   const style = getLayoutStyle();
 
   return (
-    <Page style={style}>
-      <PageNavigation>
-        <If condition={style === 'header'}>
-          <HomeMenuNavigation workspace={workspace} />
-        </If>
+    <RootLayout>
+      <Page style={style}>
+        <PageNavigation>
+          <If condition={style === 'header'}>
+            <HomeMenuNavigation workspace={workspace} />
+          </If>
 
-        <If condition={style === 'sidebar'}>
-          <HomeSidebar workspace={workspace} />
-        </If>
-      </PageNavigation>
+          <If condition={style === 'sidebar'}>
+            <HomeSidebar workspace={workspace} />
+          </If>
+        </PageNavigation>
 
-      <PageMobileNavigation className={'flex items-center justify-between'}>
-        <AppLogo />
-        <HomeMobileNavigation workspace={workspace} />
-      </PageMobileNavigation>
+        <PageMobileNavigation className={'flex items-center justify-between'}>
+          <AppLogo />
+          <HomeMobileNavigation workspace={workspace} />
+        </PageMobileNavigation>
 
-      <UserWorkspaceContextProvider value={workspace}>
-        {children}
-      </UserWorkspaceContextProvider>
-    </Page>
+        <UserWorkspaceContextProvider value={workspace}>
+          {children}
+        </UserWorkspaceContextProvider>
+      </Page>
+    </RootLayout>
   );
 }
 
