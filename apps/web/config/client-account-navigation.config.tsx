@@ -50,6 +50,7 @@ const routes = [
     Icon: <Users className={iconClasses} />,
   },
   {
+
     label: 'common:settingsName',
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
