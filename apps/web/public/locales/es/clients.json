@@ -35,10 +35,43 @@
   "leader": "Líder",
   "member": "Miembro",
   "updateClient": "Actualizar cliente",
+  "organizations": {
+    "title": "Oraganizaciones",
+    "members": {
+      "title": "Miembros",
+      "owner": "Lider",
+      "invite": {
+        "title": "Invita miembros",
+        "description": "Invita miembros a formar parte de la organización.",
+        "email": "Correo electrónico",  
+        "sendInvite": "Enviar invitaciones",
+        "cancel": "Cancelar",
+        "success": "Invitación enviada correctamente.",
+        "error": "Error al enviar la invitación.",
+        "inviting": "Invitando miembros...",
+        "addAnother": "Agregar otro",
+        "add": "Añadir miembro",
+        "search": "Buscar miembros..."
+      }
+    },
+    "services": {
+      "title": "Servicios"
+    },
+    "reviews": {
+      "title": "Reseñas"
+    },
+    "files": {
+      "title": "Archivos"
+    },
+    "invoices": {
+      "title": "Facturas"
+    }
+
+  },
   "startWithFirstClientTitle": "Comencemos con tu primer cliente",
   "noClientsDescription": "Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.",
   "clients": "Clientes",
-  "organizations": "Organizationes",
   "searchClients": "Buscar clientes...",
   "searchOrganizations": "Buscar organizaciones..."
 }
+
