@@ -9,14 +9,14 @@ import Link from 'next/link';
 
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
-import { If } from '@kit/ui/if';
+// import { If } from '@kit/ui/if';
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
-import { Button } from '@kit/ui/button';
+// import { Button } from '@kit/ui/button';
 import type { Account } from '../../../../../../apps/web/lib/account.types';
 import type { Database } from '../../../../../../apps/web/lib/database.types';
 import { getUserRole } from '../../../../team-accounts/src/server/actions/members/get/get-member-account';
@@ -30,7 +30,7 @@ import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import BillingContainerConfig from './billing/billing-container';
-import RegisterAccountContainer from '../../../../../../apps/web/app/stripe/components/register-stripe-account-container';
+// import RegisterAccountContainer from '../../../../../../apps/web/app/stripe/components/register-stripe-account-container';
 
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -336,10 +336,10 @@ export function PersonalAccountSettingsContainer(
   );
 }
 
-function useSupportMultiLanguage() {
-  const { i18n } = useTranslation();
-  const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
-  const supportedLangs = langs.filter((lang) => lang !== 'cimode');
+// function useSupportMultiLanguage() {
+//   const { i18n } = useTranslation();
+//   const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
+//   const supportedLangs = langs.filter((lang) => lang !== 'cimode');
 
-  return supportedLangs.length > 1;
-}
+//   return supportedLangs.length > 1;
+// }

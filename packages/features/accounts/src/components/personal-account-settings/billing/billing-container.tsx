@@ -50,9 +50,13 @@ export default function BillingContainerConfig() {
         setShowUpgradeComponent(true);
     };
     
-    const calculateTotalAmountPaid = (invoices: any[]): number => {
-        return invoices?.reduce((total, invoice) => total + invoice.total, 0);
-      };
+    interface Invoice {
+        total: number;
+    }
+
+    const calculateTotalAmountPaid = (invoices: Invoice[]): number => {
+        return invoices?.reduce((total, invoice) => total + invoice.total, 0)/100;
+    };
 
       const getPlanValue = (plan: string): number => {
         const planValues: Record<string, number> = {
@@ -62,7 +66,7 @@ export default function BillingContainerConfig() {
           enterprise: 20
         };
       
-        return planValues[plan?.toLowerCase()] || 0;
+        return planValues[plan?.toLowerCase()] ?? 0;
       };
 
       const getProgressPercentage = (occupied: any, available: any) => {
@@ -81,7 +85,7 @@ export default function BillingContainerConfig() {
             toast.success('Success', {
               description: 'Subscription canceled successfully',
             });
-            updateSubscriptionContext()
+            void updateSubscriptionContext()
             setModalCancelSubscription(false)
           } catch (error) {
             toast.error('Error', {
