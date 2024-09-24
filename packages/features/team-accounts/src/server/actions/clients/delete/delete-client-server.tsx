@@ -43,20 +43,7 @@ export const deleteClient = async (clientId: string) => {
     }
 
     const currentUserRole = currentUserAccountRole?.account_role;
-    console.log('currentUserRole', currentUserAccountRole);
-    // Fetch the account information for the client to be deleted
-    // const { data: clientAccount, error: clientAccountError } = await client
-    //   .from('accounts')
-    //   .select(
-    //     'organization_id, id, role:accounts_memberships(account_role, account_id)',
-    //   )
-    //   .eq('id', clientId)
-    //   .single();
 
-    // if (clientAccountError)
-    //   throw new Error(
-    //     `Error fetching client account: ${clientAccountError.message}`,
-    //   );
 
     // Check if the current user is trying to delete themselves
     if (userData.user.id === clientId) {

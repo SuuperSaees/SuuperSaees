@@ -10,8 +10,8 @@ import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Review } from '../../../../../../../../apps/web/lib/review.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
-import { hasPermissionToReadOrderDetails, hasPermissionToReadOrders } from '../../permissions/permissions';
-
+import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
+import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
 type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url'>;
 

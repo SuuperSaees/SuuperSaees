@@ -2,6 +2,10 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
+import { hasPermissionToViewOrganization } from '../../permissions/organization';
+
 export const getOrganizationSettings = async () => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -148,10 +152,17 @@ export async function getOrganizations() {
 export async function getOrganizationById(organizationId: string) {
   try {
     const client = getSupabaseServerComponentClient();
-    const { error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
 
-    const { data: clientOrganizationData, error: clientOrganizationError } =
+    // Step 1: Check if the user has permission to view the organization
+    const hasPermission = await hasPermissionToViewOrganization(organizationId);
+    if (!hasPermission) {
+      throw new Error(
+        'You do not have the required permissions to view this organization',
+      );
+    }
+
+    // Step 2: Fetch the organization data
+    const { data: organizationData, error: clientOrganizationError } =
       await client
         .from('accounts')
         .select('id, name, primary_owner_user_id, slug, email, picture_url')
@@ -160,15 +171,15 @@ export async function getOrganizationById(organizationId: string) {
         .single();
 
     if (clientOrganizationError) {
-      console.error(
-        'Error fetching client organization:',
-        clientOrganizationError,
+      throw new Error(
+        `Error getting the organization, ${clientOrganizationError.message}`,
       );
-      throw clientOrganizationError;
     }
-    return clientOrganizationData;
+
+    return organizationData;
   } catch (error) {
-    console.error('Error trying to get the organizations');
+    console.error('Error trying to get the organization details:', error);
+    throw error;
   }
 }
 

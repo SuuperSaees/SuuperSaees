@@ -6,8 +6,43 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
+
+// Helper function to fetch current user data
+export async function fetchCurrentUser(client: SupabaseClient<Database>) {
+  const { data: userData, error: userError } = await client.auth.getUser();
+  if (userError) {
+    throw new Error(`Error getting user data: ${userError.message}`);
+  }
+  return userData.user;
+}
+
+// Helper function to fetch the current user's account details
+export async function fetchCurrentUserAccount(
+  client: SupabaseClient<Database>,
+  userId: string,
+) {
+  const { data: currentUserAccount, error: currentUserError } = await client
+    .from('accounts')
+    .select('organization_id')
+    .eq('id', userId)
+    .eq('is_personal_account', true)
+    .single();
+
+  if (currentUserError) {
+    throw new Error(
+      `Error fetching current user account data: ${currentUserError.message}`,
+    );
+  }
+  if (!currentUserAccount?.organization_id) {
+    throw new Error('Current user account has no associated organization.');
+  }
+
+  return currentUserAccount;
+}
 
 export async function getPrimaryOwnerId(): Promise<string | undefined> {
   try {
@@ -102,7 +137,7 @@ export async function getUserRole() {
     const { error: userAuthenticatedError, data: userAuthenticatedData } =
       await client.auth.getUser();
     const userId = userAuthenticatedData?.user?.id;
-    console.log('userId', userId);
+
     if (userAuthenticatedError ?? !userId) throw userAuthenticatedError;
     const { error: userAccountError, data: userAccountData } = await client
       .from('accounts_memberships')
@@ -138,77 +173,6 @@ export async function getStripeAccountID() {
     return stripetId;
   } catch (error) {
     console.error('Error fetching primary owner:', error);
-  }
-}
-
-export async function getClientMembers() {
-  try {
-    const client = getSupabaseServerComponentClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) {
-      console.error('Error trying to get the user data', userError.message);
-      throw userError;
-    }
-
-    const { data: userAccountData, error: userAccountError } = await client
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', userData.user.id)
-      .single();
-
-    if (userAccountError) {
-      console.error(
-        'Error trying to get the user account data',
-        userAccountError.message,
-      );
-      throw userAccountError;
-    }
-
-    const { data: agencyClients, error: agencyClientsError } = await client
-      .from('clients')
-      .select()
-      .eq('agency_id', userAccountData?.organization_id ?? '');
-
-    if (agencyClientsError) {
-      console.error('Error trying to get agency clients', agencyClientsError);
-      throw agencyClientsError;
-    }
-
-    const clientOrganizationIds =
-      agencyClients?.map((client) => client.organization_client_id) ?? [];
-
-    const clientuserIds =
-      agencyClients?.map((client) => client.user_client_id) ?? [];
-    // bring the agencyClients
-
-    const { data: clientOwners, error: clientOwnersError } = await client
-      .from('accounts')
-      .select('*, rol:accounts_memberships(*)')
-      .in('id', clientuserIds);
-
-    if (clientOwnersError) {
-      console.error('Error trying to get clien owners', clientOwnersError);
-      throw clientOwnersError;
-    }
-
-    const { data: clientOrganizations } = await client
-      .from('accounts')
-      .select()
-      .in('id', clientOrganizationIds)
-      .eq('is_personal_account', false);
-
-    const clientsWithOrganizations = clientOwners?.map((clientOwner) => {
-      const organization = clientOrganizations?.find(
-        (org) => org.id === clientOwner.organization_id,
-      );
-      const organizationName = organization?.name ?? '';
-      return { ...clientOwner, client_organization: organizationName };
-    });
-
-    return clientsWithOrganizations;
-  } catch (error) {
-    console.error('Error fetching client members:', error);
-    throw error;
   }
 }
 
