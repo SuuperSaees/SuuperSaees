@@ -168,19 +168,7 @@ export function PersonalAccountSettingsContainer(
                   <UpdateAccountDetailsFormContainer user={user} />
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    <Trans i18nKey={'account:brandName'} />
-                  </CardTitle>
-                  <CardDescription>
-                    <Trans i18nKey={'account:brandNameDescription'} />
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <UpdateAccountOrganizationName />
-                </CardContent>
-              </Card>
+
               {/* SUPPORT LANGUAGE, PENDING */}
 
               <Card>
@@ -200,6 +188,19 @@ export function PersonalAccountSettingsContainer(
               {/* Brand color section */}
               {role === 'agency_owner' && (
                 <>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandName'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandNameDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationName />
+                    </CardContent>
+                  </Card>
                   <Card>
                     <CardHeader>
                       <CardTitle>
