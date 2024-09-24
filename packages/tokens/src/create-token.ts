@@ -4,14 +4,14 @@ import { createHmac } from 'crypto';
 import { getSupabaseServerComponentClient } from '../../../packages/supabase/src/clients/server-component.client';
 import { Token } from './domain/token-type';
 
-const client = getSupabaseServerComponentClient();
-
 export async function createToken(payload: Token): Promise<{accessToken: string, tokenId: string}> {
   const header = {
     alg: 'HS256',
     typ: 'JWT',
   };
-
+  const client = getSupabaseServerComponentClient({
+    admin: true,
+  },);
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour
 
@@ -30,7 +30,6 @@ export async function createToken(payload: Token): Promise<{accessToken: string,
     access_token: accessToken,
     created_at: now.toISOString(),
     expires_at: expiresAt.toISOString(),
-    id: uuidv4(),
     id_token_provider: idTokenProvider,
     provider: 'suuper',
     refresh_token: refreshToken,
@@ -43,5 +42,5 @@ export async function createToken(payload: Token): Promise<{accessToken: string,
     throw new Error(`Error inserting token: ${error.message}`);
   }
 
-  return {accessToken, tokenId: tokenData.id!};
+  return {accessToken, tokenId: idTokenProvider};
 }
