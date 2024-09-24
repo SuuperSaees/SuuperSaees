@@ -1,16 +1,18 @@
-import {
-  // Briefcase,
-  CreditCard, // Home,
-  Layers,
-  Settings, // SquareCheck,
-  // Users,
-  // Wallet,
+import { // Briefcase,
+CreditCard, // Home,
+Layers, Settings, // SquareCheck,
+Users // Wallet,
 } from 'lucide-react';
+
+
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
+
+
 import featureFlagsConfig from '~/config/feature-flags.config';
 import pathsConfig from '~/config/paths.config';
+
 
 const iconClasses = 'w-4';
 
@@ -22,7 +24,7 @@ const routes = [
   //   end: true,
   // },
   {
-    label: 'common:orders',
+    label: 'common:ordersName',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
   },
@@ -43,7 +45,12 @@ const routes = [
   //   Icon: <Wallet className={iconClasses} />,
   // },
   {
-    label: 'common:settings',
+    label: 'common:organizationName',
+    path: pathsConfig.app.organization,
+    Icon: <Users className={iconClasses} />,
+  },
+  {
+    label: 'common:settingsName',
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
   },
@@ -52,6 +59,7 @@ const routes = [
   //   path: pathsConfig.app.briefs,
   //   Icon: <Briefcase className={iconClasses} />,
   // },
+
 ];
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {

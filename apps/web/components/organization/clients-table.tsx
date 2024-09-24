@@ -11,21 +11,34 @@ import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-
 import DeleteUserDialog from 'node_modules/@kit/team-accounts/src/server/actions/clients/delete/delete-client';
 import { useTranslation } from 'react-i18next';
 
+
+
 import { DataTable } from '@kit/ui/data-table';
 // import { Badge } from '@kit/ui/badge';
 // import { If } from '@kit/ui/if';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
-import { Database } from '~/lib/database.types';
+import { Account } from '~/lib/account.types';
 
-type Members = Database['public']['Tables']['accounts']['Row'][];
+type Members = Pick<
+  Account.Type,
+  | 'created_at'
+  | 'email'
+  | 'id'
+  | 'is_personal_account'
+  | 'name'
+  | 'organization_id'
+  | 'picture_url'
+> & {
+  client_organization?: string;
+};
 
 interface Permissions {
   canRemoveFromAccount: (roleHierarchy: number) => boolean;
 }
 
 type AccountMembersTableProps = {
-  members: Members;
+  members: Members[];
   currentUserId: string;
   currentAccountId: string;
   userRoleHierarchy: number;
@@ -46,7 +59,7 @@ function useGetColumns(
     currentAccountId: string;
     currentRoleHierarchy: number;
   },
-): ColumnDef<Members[0]>[] {
+): ColumnDef<Members[][0]>[] {
   const { t } = useTranslation('clients');
 
   return useMemo(

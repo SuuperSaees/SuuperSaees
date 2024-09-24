@@ -2,24 +2,29 @@
 
 import { Dispatch, SetStateAction } from 'react';
 
+
+
 import { useQuery } from '@tanstack/react-query';
-import { getClientMembers } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+// import { getClientMembers } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import { getClientMembersForOrganization } from 'node_modules/@kit/team-accounts/src/server/actions/clients/get/get-clients';
 
 import { ClientsTable } from './clients-table';
 
 function MemberSection({
   search,
   setSearch,
+  clientOrganizationId,
 }: {
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
+  clientOrganizationId?: string;
 }) {
   const clientsWithOrganizations =
     useQuery({
       queryKey: ['clientsWithOrganizations'],
-      queryFn: async () => await getClientMembers(),
+      queryFn: async () =>
+        await getClientMembersForOrganization(clientOrganizationId ?? ''),
     }) ?? [];
-  console.log('cc', clientsWithOrganizations.data);
 
   if (!clientsWithOrganizations.data) return null;
 

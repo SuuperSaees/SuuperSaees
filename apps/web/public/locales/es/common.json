@@ -75,5 +75,6 @@
   "pagination": {
     "next": "Siguiente",
     "previous": "Anterior"
-  }
+  },
+  "organizationName": "Organización"
 }

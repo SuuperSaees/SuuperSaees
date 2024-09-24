@@ -1,11 +1,13 @@
 import Header from './header';
-import Navigation from './section-view';
-
+import SectionView from './section-view';
 
 interface OrganizationSectionProps {
   name: string;
   logo?: string;
-  owner: string;
+  owner: {
+    name: string;
+    email: string;
+  };
   clientOrganizationId: string;
 }
 function OrganizationSection({
@@ -17,7 +19,7 @@ function OrganizationSection({
   return (
     <div className="flex flex-col gap-8 p-8">
       <Header name={name} logo={logo} owner={owner} />
-      <Navigation clientOrganizationId={clientOrganizationId} />
+      <SectionView clientOrganizationId={clientOrganizationId} />
     </div>
   );
 }

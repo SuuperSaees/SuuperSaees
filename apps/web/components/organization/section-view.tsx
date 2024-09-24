@@ -5,10 +5,11 @@ import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 
 // import { Input } from '@kit/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
+import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 import FileSection from './files';
 import { InviteClientMembersDialogContainer } from './invite-client-members-dialog';
@@ -27,32 +28,46 @@ function SectionView({
 }) {
   const [search, setSearch] = useState('');
   const { t } = useTranslation('clients');
+
   const navigationOptionsMap = new Map<string, JSX.Element>([
     [
       'members',
-      <MemberSection key={'members'} search={search} setSearch={setSearch} />,
+      <MemberSection
+        key={'members'}
+        search={search}
+        setSearch={setSearch}
+        clientOrganizationId={clientOrganizationId}
+      />,
     ],
     ['services', <ServiceSection key={'services'} />],
     ['files', <FileSection key={'files'} />],
     ['reviews', <ReviewSection key={'reviews'} />],
     ['invoices', <InvoiceSection key={'invoices'} />],
   ]);
+  const [activeTab, setActiveTab] = useState(
+    navigationOptionsMap.keys().next().value,
+  );
 
   return (
-    <Tabs defaultValue={Array.from(navigationOptionsMap.keys())[0]}>
+    <Tabs
+      defaultValue={Array.from(navigationOptionsMap.keys())[0]}
+      onValueChange={(value) => setActiveTab(value)}
+    >
       <div className="flex justify-between">
         <TabsList className="gap-2 bg-transparent">
           {Array.from(navigationOptionsMap.keys()).map((option) => (
-            <TabsTrigger
+            <ThemedTabTrigger
+              activeTab={activeTab}
+              option={option}
               value={option}
               key={option + 'tab'}
-              className="font-semibold hover:bg-brand-50/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
+              className="font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
             >
               {t(`organizations.${option}.title`)
                 .split('')
                 .map((char, index) => (index === 0 ? char.toUpperCase() : char))
                 .join('')}
-            </TabsTrigger>
+            </ThemedTabTrigger>
           ))}
         </TabsList>
         <div className="flex gap-4">
