@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
   }
-
+try {
   // Manage and respond to the event
   if (event.type === 'checkout.session.async_payment_failed') {
     console.log('Async payment failed:', event.data.object);
@@ -110,7 +110,6 @@ export async function POST(req: NextRequest) {
         privateKey: process.env.EMAIL_DKIM, // DKIM private key from environment variables
       },
     } as nodemailer.TransportOptions);
-    console.log('Sending email to:', tokenData.customer_email);
     const from = emailSender;
     const to = tokenData.customer_email;
     const subject = 'Create your account';
@@ -185,7 +184,7 @@ export async function POST(req: NextRequest) {
                                     <!-- Contenedor centrado para el botón -->
                                     <div class="button-container">
                                       <a href="${siteURL}auth/sign-up?access-token=${accessToken}" class="button">
-                                        View order
+                                        Create account
                                       </a>
                                     </div>
                                   </td>
@@ -227,13 +226,7 @@ export async function POST(req: NextRequest) {
           </body>
         </html>
     `;
-    console.log('Sending email to:', {
-      from,
-      to,
-      subject,
-      text,
-      html,
-    });
+
     await transporter.sendMail({
       from,
       to,
@@ -247,5 +240,9 @@ export async function POST(req: NextRequest) {
     console.log(`Unhandled event type ${event.type}`);
   }
 
-  return NextResponse.json({ received: true }, { status: 200 });
+  return NextResponse.json({}, { status: 200 });
+} catch (error) {
+  console.error('Error processing event:', error);
+  return NextResponse.json({}, { status: 200 });
+}
 }
