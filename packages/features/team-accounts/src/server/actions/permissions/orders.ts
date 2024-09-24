@@ -33,10 +33,6 @@ export const hasPermissionToReadOrderDetails = async (
       'messages.read',
     );
 
-    console.log('role', userRole);
-    console.log('Organization id', account.organization_id);
-    console.log('Message order propietary organization id', message_order_propietary_organization_id);
-
     // Step 3: Check for agency permission
     if(userRole === 'agency_owner' && account.organization_id === message_order_propietary_organization_id) {
       return true
