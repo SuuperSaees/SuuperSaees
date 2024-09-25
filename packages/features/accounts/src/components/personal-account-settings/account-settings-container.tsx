@@ -23,7 +23,7 @@ import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -44,8 +44,9 @@ export function PersonalAccountSettingsContainer(
   }>,
 ) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const tab = searchParams.get('tab');
-  const checkoutResult = searchParams.get('checkout')
+  const checkoutResult = searchParams.get('checkout');
   const [user, setUser] = useState<Account.Type | null>();
   const {accountBillingTab, setAccountBillingTab, upgradeSubscription } = useBilling();
   const [role, setRole] =
@@ -106,6 +107,10 @@ export function PersonalAccountSettingsContainer(
     const fetchUserRole = async () => {
       try {
         const role = await getUserRole();
+        if (checkoutResult === 'success') {
+          await upgradeSubscription();
+          router.push('/home/settings')
+        }
         setRole(role);
       } catch (error) {
         console.error(error);
@@ -113,9 +118,6 @@ export function PersonalAccountSettingsContainer(
     };
     if (tab){
       setAccountBillingTab(tab);
-    }
-    if (checkoutResult === 'success'){
-      void upgradeSubscription();
     }
     void fetchUserRole();
   }, [tab, checkoutResult]);

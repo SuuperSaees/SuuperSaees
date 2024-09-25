@@ -224,11 +224,12 @@ export const useBilling = () => {
       const dataSubscriptionsByCustomer = await responseSubscriptionsByCustomer.json();
       console.log("dataSubscriptionsByCustomer", dataSubscriptionsByCustomer);
       if (dataSubscriptionsByCustomer.length > 1) {
-        let newSubscriptionId = "";
-        dataSubscriptionsByCustomer.forEach((subscription: any) => {
+        dataSubscriptionsByCustomer.forEach(async (subscription: any) => {
           if (subscription.id !== result?.id) {
-            newSubscriptionId = subscription.id;
-            console.log("newSubscriptionId", newSubscriptionId);
+              // Save the new subscription id
+            await updateSubscription({
+              id: subscription.id,
+            });
           }
         });
         // Cancel the other subscription
@@ -241,11 +242,6 @@ export const useBilling = () => {
         if (!responseCancelSubscription.ok) {
           throw new Error('Failed to upgrade subscription');
         }
-
-        // Save the new subscription id
-        await updateSubscription({
-          id: newSubscriptionId,
-        });
         await updateSubscriptionContext();
       }
     } catch (error) {
