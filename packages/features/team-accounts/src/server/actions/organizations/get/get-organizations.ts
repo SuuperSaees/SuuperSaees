@@ -6,6 +6,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
 
+
 export const getOrganizationSettings = async () => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -84,7 +85,14 @@ export const getOrganizationSettings = async () => {
   }
 };
 
-export async function getOrganization() {
+export async function getOrganization(): Promise<{
+  id: string;
+  name: string;
+  primary_owner_user_id: string;
+  slug: string | null;
+  email: string | null;
+  picture_url: string | null;
+}> {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
@@ -121,7 +129,8 @@ export async function getOrganization() {
 
     return organizationsData;
   } catch (error) {
-    console.error('Error fetching primary owner:', error);
+    console.error('Error getting the organization:', error);
+    throw error;
   }
 }
 

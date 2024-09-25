@@ -6,7 +6,7 @@ interface OrganizationHeaderProps {
   logo?: string;
   owner: {
     name: string;
-    email: string;
+    email?: string | null;
     picture_url?: string;
   };
 }

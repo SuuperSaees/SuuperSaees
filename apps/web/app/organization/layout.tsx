@@ -1,36 +1,39 @@
-import { use } from 'react';
-
-
-
 import { cookies } from 'next/headers';
 
-
+import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
-import { Page, PageLayoutStyle, PageMobileNavigation, PageNavigation } from '@kit/ui/page';
-
-
+import {
+  Page,
+  PageLayoutStyle,
+  PageMobileNavigation,
+  PageNavigation,
+} from '@kit/ui/page';
 
 import { AppLogo } from '~/components/app-logo';
+import { RootProviders } from '~/components/root-providers';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
-import RootLayout from '~/layout';
+import { HomeMenuNavigation } from '~/home/(user)/_components/home-menu-navigation';
+import { HomeMobileNavigation } from '~/home/(user)/_components/home-mobile-navigation';
+import { HomeSidebar } from '~/home/(user)/_components/home-sidebar';
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
-
-
-// home imports
-import { HomeMenuNavigation } from '../home/(user)/_components/home-menu-navigation';
-import { HomeMobileNavigation } from '../home/(user)/_components/home-mobile-navigation';
-import { HomeSidebar } from '../home/(user)/_components/home-sidebar';
-import { loadUserWorkspace } from '../home/(user)/_lib/server/load-user-workspace';
-
-function UserHomeLayout({ children }: React.PropsWithChildren) {
-  const workspace = use(loadUserWorkspace());
+async function OrganizationsLayout({ children }: React.PropsWithChildren) {
+  const workspace = await loadUserWorkspace();
   const style = getLayoutStyle();
+  const organizationSettings = await loadOrganizationSettings();
+  const { language } = await createI18nServerInstance();
+  const theme = getTheme();
 
   return (
-    <RootLayout>
+    <RootProviders
+      theme={theme}
+      lang={language}
+      organizationSettings={organizationSettings}
+    >
       <Page style={style}>
         <PageNavigation>
           <If condition={style === 'header'}>
@@ -51,15 +54,29 @@ function UserHomeLayout({ children }: React.PropsWithChildren) {
           {children}
         </UserWorkspaceContextProvider>
       </Page>
-    </RootLayout>
+    </RootProviders>
   );
 }
 
-export default withI18n(UserHomeLayout);
+export default withI18n(OrganizationsLayout);
 
 function getLayoutStyle() {
   return (
     (cookies().get('layout-style')?.value as PageLayoutStyle) ??
     personalAccountNavigationConfig.style
   );
+}
+
+async function loadOrganizationSettings() {
+  console.log('Cargando los organizationSettings');
+  try {
+    return await getOrganizationSettings();
+  } catch (error) {
+    console.error('Error cargando los organizationSettings', error);
+    return [];
+  }
+}
+
+function getTheme() {
+  return cookies().get('theme')?.value;
 }

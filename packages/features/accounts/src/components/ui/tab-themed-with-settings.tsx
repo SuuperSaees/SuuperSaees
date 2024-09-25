@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { TabsTrigger } from '@kit/ui/tabs';
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
@@ -18,7 +20,7 @@ function getTextColorBasedOnBackground(backgroundColor: string) {
   const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
   // Return 'black' for lighter backgrounds and 'white' for darker backgrounds
-  return luminance > 186 ? 'black' : 'white'; // 186 is a common threshold for readability
+  return luminance > 186 ? '#475467' : 'white'; // 186 is a common threshold for readability
 }
 
 // Function to convert hex color to rgba with specified opacity
@@ -44,22 +46,30 @@ export const ThemedTabTrigger: React.FC<{
   activeTab: string;
   option: string;
 }> = ({ className, activeTab, option, ...rest }) => {
-  // Use the hook correctly inside the component
   const { theme_color } = useOrganizationSettings();
-  const textColor = getTextColorBasedOnBackground(
-    hexToRgba(theme_color ?? '', 0.3) ?? '#000000',
-  );
+  const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
+
+  // State for hover detection
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <TabsTrigger
-      className={`hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900 font-semibold hover:bg-gray-50/30 ${className}`}
+      className={`hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900 font-semibold ${className}`}
       style={
-        activeTab === option && theme_color
+        theme_color
           ? {
-              backgroundColor: hexToRgba(theme_color, 0.2), // Apply 0.6 opacity
+              backgroundColor:
+                activeTab === option
+                  ? hexToRgba(theme_color, 0.6) // Apply 0.6 opacity if active
+                  : isHovered
+                    ? hexToRgba(theme_color ?? '#000000', 0.3) // Apply 0.3 opacity on hover
+                    : undefined,
               color: textColor,
             }
           : undefined
       }
+      onMouseEnter={() => setIsHovered(true)} // Set hover state
+      onMouseLeave={() => setIsHovered(false)} // Reset hover state
       {...rest}
     >
       {rest.children}

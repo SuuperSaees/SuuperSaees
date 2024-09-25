@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
 
+
+
 import { PageBody } from '@kit/ui/page';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
@@ -17,11 +19,24 @@ export const generateMetadata = async () => {
 };
 
 export default async function UserAddOrganizationPage() {
-  const organization = await getOrganization();
-  const organizationId = organization?.id;
+  let organization = null;
 
-  if (organizationId) {
-    redirect('/orders');
+  try {
+    organization = await getOrganization();
+    const organizationId = organization?.id;
+
+    if (organizationId) {
+      redirect('/orders');
+    }
+  } catch (error) {
+    // Handle the error by redirecting to a specific page
+    return (
+      <>
+        <PageBody className={''}>
+          <CreateOrganization />
+        </PageBody>
+      </>
+    );
   }
   return (
     <>

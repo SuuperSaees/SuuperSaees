@@ -2,15 +2,17 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-import {
-  fetchCurrentUser,
-  fetchCurrentUserAccount,
-  getUserRole,
-} from '../../members/get/get-member-account';
+import { fetchCurrentUser, fetchCurrentUserAccount, getUserRole } from '../../members/get/get-member-account';
+import { hasPermissionToReadAgencyClients } from '../../permissions/clients';
+
 
 // Helper function to fetch client members based on user role (agency or client)
 type Organization = Pick<
@@ -215,7 +217,15 @@ export async function getAllClients(): Promise<ClientsWithOrganization[]> {
     // Step 2: Fetch the current user's account data
     const userAccountData = await fetchCurrentUserAccount(client, userData.id);
 
-    // Step 3: Fetch agency clients
+    // Step 3: Check permission to read agency clients
+    const hasPermission = await hasPermissionToReadAgencyClients(
+      userAccountData.organization_id ?? '',
+    );
+    if (!hasPermission) {
+      throw new Error('You do not have permission to read agency clients');
+    }
+
+    // Step 4: Fetch agency clients
     const agencyClients = await fetchAgencyClients(
       client,
       userAccountData?.organization_id ?? '',
@@ -226,13 +236,13 @@ export async function getAllClients(): Promise<ClientsWithOrganization[]> {
     );
     const clientUserIds = agencyClients.map((client) => client.user_client_id);
 
-    // Step 4: Fetch client owners and organizations
+    // Step 5: Fetch client owners and organizations
     const [clientOwners, clientOrganizations] = await Promise.all([
       fetchClientOwners(client, clientUserIds),
       fetchClientOrganizations(client, clientOrganizationIds),
     ]);
 
-    // Step 5: Combine the data
+    // Step 6: Combine the data
     const clientsWithOrganizations = combineClientData(
       clientOwners,
       clientOrganizations,

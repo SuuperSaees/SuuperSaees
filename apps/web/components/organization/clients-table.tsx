@@ -18,6 +18,8 @@ import { DataTable } from '@kit/ui/data-table';
 // import { If } from '@kit/ui/if';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
+
+
 import { Account } from '~/lib/account.types';
 
 type Members = Pick<
@@ -34,16 +36,12 @@ type Members = Pick<
 };
 
 interface Permissions {
-  canRemoveFromAccount: (roleHierarchy: number) => boolean;
+  canRemoveFromAccount: (userId: string) => boolean;
 }
 
 type AccountMembersTableProps = {
   members: Members[];
-  currentUserId: string;
-  currentAccountId: string;
-  userRoleHierarchy: number;
-  isPrimaryOwner: boolean;
-  canManageRoles: boolean;
+  userRole: string;
   searchController?: {
     search: string;
     setSearch: Dispatch<SetStateAction<string>>;
@@ -52,14 +50,7 @@ type AccountMembersTableProps = {
     onAddRow: () => void;
   };
 };
-function useGetColumns(
-  permissions: Permissions,
-  params: {
-    currentUserId: string;
-    currentAccountId: string;
-    currentRoleHierarchy: number;
-  },
-): ColumnDef<Members[][0]>[] {
+function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
   const { t } = useTranslation('clients');
 
   return useMemo(
@@ -115,36 +106,32 @@ function useGetColumns(
           const client = row.original;
 
           return (
-            <div className="h-18 flex items-center gap-4 self-stretch p-4">
-              {/* <UpdateClientDialog {...client} /> */}
-              <DeleteUserDialog userId={client.id} />
-            </div>
+            permissions.canRemoveFromAccount(row.original.id) && (
+              <div className="h-18 flex items-center gap-4 self-stretch p-4">
+                {/* <UpdateClientDialog {...client} /> */}
+                <DeleteUserDialog userId={client.id} />
+              </div>
+            )
           );
         },
       },
     ],
-    [t, params],
+    [t],
   );
 }
 
 export function ClientsTable({
   members,
-  currentUserId,
-  currentAccountId,
-  isPrimaryOwner,
-  userRoleHierarchy,
-  canManageRoles,
+  userRole,
   searchController,
   addRowController,
 }: AccountMembersTableProps) {
   const [search, setSearch] = useState(searchController?.search ?? '');
   const { t } = useTranslation('clients');
-
+  const validRoles = ['agency_owner', 'client_owner'];
   const permissions = {
-    canRemoveFromAccount: (targetRole: number) => {
-      return (
-        isPrimaryOwner || (canManageRoles && userRoleHierarchy < targetRole)
-      );
+    canRemoveFromAccount: () => {
+      return validRoles.includes(userRole);
     },
   };
 
@@ -160,11 +147,7 @@ export function ClientsTable({
       setSearch(searchController.search);
     }
   }, [searchController]);
-  const columns = useGetColumns(permissions, {
-    currentUserId,
-    currentAccountId,
-    currentRoleHierarchy: userRoleHierarchy,
-  });
+  const columns = useGetColumns(permissions);
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-4">

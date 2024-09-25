@@ -57,11 +57,11 @@ async function OrderDetailsPage({
                 defaultValue="activity"
                 className="flex h-full flex-grow flex-col gap-6"
               >
-                <TabsList className="flex">
-                  <TabsTrigger value="activity" className="flex-1">
+                <TabsList className="flex w-fit">
+                  <TabsTrigger value="activity" >
                     <Trans i18nKey={'orders:details.navigation.activity'} />
                   </TabsTrigger>
-                  <TabsTrigger value="details" className="flex-1">
+                  <TabsTrigger value="details" >
                     <Trans i18nKey={'orders:details.navigation.details'} />
                   </TabsTrigger>
                 </TabsList>

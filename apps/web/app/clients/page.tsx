@@ -15,8 +15,7 @@ export const generateMetadata = async () => {
 };
 
 async function ClientsMembersPage() {
-  const clientsWithOrganizations = await getAllClients().catch(() => []);
-
+  const clientsWithOrganizations = await getAllClients();
 
   return (
     <PageBody>
