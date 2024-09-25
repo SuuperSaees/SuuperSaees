@@ -134,7 +134,7 @@ export function PersonalAccountSettingsContainer(
         }}
       >
         {role !== 'client_member' && role !== 'client_owner' && (
-          <TabsList>
+          <TabsList className='gap-2 bg-transparent'>
             <ThemedTabTrigger
               value="account"
               option="account"

@@ -368,7 +368,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
             }}
           >
             <div className="mb-4 flex flex-wrap items-center gap-4">
-              <TabsList>
+              <TabsList className='gap-2 bg-transparent'>
                 <ThemedTabTrigger value="open" activeTab={activeTab} option={'open'}>
                   {t('openOrders')}
                 </ThemedTabTrigger>
