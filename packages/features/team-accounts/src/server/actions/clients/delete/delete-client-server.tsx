@@ -3,70 +3,68 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
+
+import {
+  getAgencyForClient,
+  getOrganizationById,
+} from '../../organizations/get/get-organizations';
+import { hasPermissionToDeleteClient } from '../../permissions/clients';
+
 // Define la función handleDelete
 export const deleteClient = async (clientId: string) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const allowedRolesToDeleteMembers = ['agency_owner', 'client_owner'];
 
-    // Get current user data
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw new Error(`Error fetching user: ${userError.message}`);
+    // Step 1: Get the client's account details (for permissions)
+    const { data: clientAccount, error: clientAccountError } = await client
+      .from('accounts')
+      .select('organization_id')
+      .eq('id', clientId)
+      .single();
 
-    // Get the current user's account details
-    const { data: currentUserAccount, error: currentAccountError } =
-      await client
-        .from('accounts')
-        .select('organization_id, id')
-        .eq('id', userData.user.id)
-        .single();
-
-    if (currentAccountError)
+    if (clientAccountError ?? !clientAccount?.organization_id) {
       throw new Error(
-        `Error fetching user account: ${currentAccountError.message}`,
-      );
-    if (!currentUserAccount?.organization_id) {
-      throw new Error('Error fetching user account');
-    }
-
-    const { data: currentUserAccountRole, error: currentAccountRoleError } =
-      await client
-        .from('accounts_memberships')
-        .select('account_role')
-        .eq('user_id', currentUserAccount.id)
-        .single();
-
-    if (currentAccountRoleError) {
-      throw new Error(
-        `Error fetching user account role: ${currentAccountRoleError.message}`,
+        `Error fetching client account: ${clientAccountError?.message ?? 'No organization found'}`,
       );
     }
+    // Step 2: Get the current user's account details
+    const agencyAccount = await getAgencyForClient(
+      clientAccount.organization_id,
+    );
 
-    const currentUserRole = currentUserAccountRole?.account_role;
-
-
-    // Check if the current user is trying to delete themselves
-    if (userData.user.id === clientId) {
-      // Prevent client_owner from deleting their own account
-      if (currentUserRole === 'client_owner') {
-        throw new Error('A client owner cannot delete their own account');
-      }
+    if (!agencyAccount) {
+      throw new Error('Error fetching agency account');
     }
 
-    // Ensure only allowed roles can delete the client
-    if (!allowedRolesToDeleteMembers.includes(currentUserRole)) {
+    // Step 3: Get the client's organization details (for permissions)
+    const clientOrganizationAccount = await getOrganizationById(
+      clientAccount.organization_id,
+    );
+
+    const clientOrganizationId = clientAccount.organization_id;
+    const agencyOrganizationId = agencyAccount.id;
+
+    // Step 4: Check if the user has permission to delete the client
+    const hasPermission = await hasPermissionToDeleteClient(
+      agencyOrganizationId,
+      clientOrganizationId,
+      clientId,
+      clientOrganizationAccount.primary_owner_user_id,
+    );
+
+    if (!hasPermission) {
       throw new Error('You do not have permission to delete this client');
     }
 
-    // Proceed to delete the client
+    // Step 5: Proceed to delete the client
     const { error: deleteError } = await client
       .from('clients')
       .delete()
       .eq('user_client_id', clientId)
-      .eq('agency_id', currentUserAccount.organization_id);
+      .eq('agency_id', agencyOrganizationId);
 
     if (deleteError) {
-      throw new Error(`Error deleting the client: ${deleteError.message}`);
+      throw new Error(`Error deleting the client, ${deleteError.message}`);
     }
   } catch (error) {
     console.error('Error deleting client:', error);

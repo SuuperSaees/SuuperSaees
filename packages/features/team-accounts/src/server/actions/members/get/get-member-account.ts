@@ -137,18 +137,39 @@ export async function getUserById(userId: string) {
 export async function getUserRole() {
   try {
     const client = getSupabaseServerComponentClient();
-    const { error: userAuthenticatedError, data: userAuthenticatedData } =
-      await client.auth.getUser();
-    const userId = userAuthenticatedData?.user?.id;
+    const userAuthenticatedData = await fetchCurrentUser(client);
+    const userId = userAuthenticatedData?.id;
 
-    if (userAuthenticatedError ?? !userId) throw userAuthenticatedError;
-    const { error: userAccountError, data: userAccountData } = await client
+    const { data: userAccountData, error: userAccountError } = await client
       .from('accounts_memberships')
       .select('account_role')
       .eq('user_id', userId)
       .single();
 
     if (userAccountError) throw userAccountError;
+
+    return userAccountData?.account_role;
+  } catch (error) {
+    console.error('Error fetching user role:', error);
+    throw error;
+  }
+}
+
+export async function getUserRoleById(userId: string) {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    const { error: userAccountError, data: userAccountData } = await client
+      .from('accounts_memberships')
+      .select('account_role')
+      .eq('user_id', userId)
+      .single();
+
+    if (userAccountError) {
+      throw new Error(
+        `Error fetching the user role, ${userAccountError.message}`,
+      );
+    }
 
     return userAccountData?.account_role;
   } catch (error) {
