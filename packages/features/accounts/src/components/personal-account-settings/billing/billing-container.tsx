@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent } from "@kit/ui/card";
 import { ArrowUpRight, CheckIcon, Link2Icon } from "lucide-react";
 // import Link from "next/link";
@@ -18,6 +18,7 @@ import PlansContainer from '../../../../../../../apps/web/app/select-plan/compon
 import { useBilling } from '../../../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { cancelSubscription } from '../../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/delete/cancel-subscription'
 import { toast } from 'sonner';
+import { useEffect } from 'react';
 
 function UpgradePlanComponent() {
     return (
@@ -25,12 +26,15 @@ function UpgradePlanComponent() {
     );
 }
 
-export default function BillingContainerConfig() {
-    const [showUpgradeComponent, setShowUpgradeComponent] = useState(false);
+export default function BillingContainerConfig({ tab }: { tab: string }) {
     const [modalCancelSubscription, setModalCancelSubscription] = useState(false)
     const [cancelSubscriptionInput, setCancelSubscriptionInput] = useState("")
-    const { subscriptionFetchedStripe, productSubscription, invoices, upcomingInvoice, updateSubscriptionContext } = useBilling();
-
+    const { subscriptionFetchedStripe, productSubscription, invoices, upcomingInvoice, updateSubscriptionContext, showUpgradeComponent, setShowUpgradeComponent } = useBilling();
+    useEffect(() => {
+        if (tab === 'billing') {
+            setShowUpgradeComponent(true);
+        }
+      });
     const formatUnixToMonthYear = (unixTimestamp: number, includeDay: boolean) => {
         if (!unixTimestamp) return '';
         const date = new Date(unixTimestamp * 1000);
@@ -51,7 +55,7 @@ export default function BillingContainerConfig() {
     };
     
     const calculateTotalAmountPaid = (invoices: any[]): number => {
-        return invoices?.reduce((total, invoice) => total + invoice.total, 0);
+        return invoices?.reduce((total, invoice) => total + invoice.total, 0)/100;
       };
 
       const getPlanValue = (plan: string): number => {
@@ -81,7 +85,7 @@ export default function BillingContainerConfig() {
             toast.success('Success', {
               description: 'Subscription canceled successfully',
             });
-            updateSubscriptionContext()
+            void updateSubscriptionContext()
             setModalCancelSubscription(false)
           } catch (error) {
             toast.error('Error', {
@@ -141,7 +145,7 @@ export default function BillingContainerConfig() {
                                     {invoices?.map((invoice) => (
                                     <TableRow key={invoice?.id}>
                                         <TableCell className="font-medium">{productSubscription?.name} Plan - {formatUnixToMonthYear(invoice?.created, false)}</TableCell>
-                                        <TableCell>{invoice.total}</TableCell>
+                                        <TableCell>{invoice.total/100}</TableCell>
                                         <TableCell>{formatUnixToMonthYear(invoice?.created, true)}</TableCell>
                                         <TableCell>
                                             <div className="rounded-xl border border-[var(--Success-200,#ABEFC6)] bg-[var(--Success-50,#ECFDF3)] h-[22px] inline-flex items-center gap-1 px-2 py-0.5 pl-[var(--spacing-sm,6px)] text-[var(--Success-700,#067647)] text-center font-inter text-xs font-medium leading-4">

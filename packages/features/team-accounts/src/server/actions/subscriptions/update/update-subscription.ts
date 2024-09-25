@@ -40,8 +40,8 @@ export const updateSubscription = async (subscriptionData: {
                .from('subscriptions')
                .update(newSubscription)
                .eq("propietary_organization_id", primary_owner_user_id ?? "")
+               .eq("status", "active")
                .single()
-
                if (error) throw new Error(error.message);
 
                return updatedSubscription

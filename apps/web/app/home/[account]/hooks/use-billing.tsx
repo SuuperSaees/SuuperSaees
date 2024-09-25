@@ -10,6 +10,8 @@ export const useBilling = () => {
     id: string;
     propietary_organization_id: string;
 } | null>(null);
+  const [showUpgradeComponent, setShowUpgradeComponent] = useState(false);
+  const [accountBillingTab, setAccountBillingTab] = useState("account");
   const [subscriptionFetchedStripe, setSubscriptionFetchedStripe] = useState<any>(null);
   const [productSubscription, setProductSubscription] = useState<any>(null);
   const [productsDataConfig, setProductsDataConfig] = useState<{
@@ -87,18 +89,6 @@ export const useBilling = () => {
         process.env.NEXT_PUBLIC_BILLING_PROVIDER,
       );
       const productsDataConfigBase = [
-        {
-          id: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === "starter")?.id,
-          name: "Starter",
-          plan: {
-            id: data?.find((productCurrent: { name: string; default_price: string; }) => productCurrent?.name.toLowerCase() === "starter")?.default_price,
-            currency: "USD",
-            amount: 0, 
-            interval: "month",
-            trial_period_days: 0,
-            billing_scheme: "per_seat",
-          },
-        },
         {
           id: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === "standard")?.id,
           name: "Standard",
@@ -204,8 +194,8 @@ export const useBilling = () => {
       const dataProduct = await responseProduct.json();
       setProductSubscription(dataProduct);
 
-      fetchInvoices(result?.billing_customer_id ?? "");
-      fetchUpcomingInvoice(result?.billing_customer_id ?? "");
+      void fetchInvoices(result?.billing_customer_id ?? "");
+      void fetchUpcomingInvoice(result?.billing_customer_id ?? "");
     } catch (error) {
       console.error("Error fetching subscription:", error);
       setError(true);
@@ -232,12 +222,13 @@ export const useBilling = () => {
       }
 
       const dataSubscriptionsByCustomer = await responseSubscriptionsByCustomer.json();
-
       if (dataSubscriptionsByCustomer.length > 1) {
-        let newSubscriptionId = "";
-        dataSubscriptionsByCustomer.forEach((subscription: any) => {
+        dataSubscriptionsByCustomer.forEach(async (subscription: any) => {
           if (subscription.id !== result?.id) {
-            newSubscriptionId = subscription.id;
+              // Save the new subscription id
+            await updateSubscription({
+              id: subscription.id,
+            });
           }
         });
         // Cancel the other subscription
@@ -250,11 +241,6 @@ export const useBilling = () => {
         if (!responseCancelSubscription.ok) {
           throw new Error('Failed to upgrade subscription');
         }
-
-        // Save the new subscription id
-        await updateSubscription({
-          id: newSubscriptionId,
-        });
         await updateSubscriptionContext();
       }
     } catch (error) {
@@ -266,11 +252,10 @@ export const useBilling = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = () => {
     if (!hasFetched) {
-      updateSubscriptionContext();
-      upgradeSubscription();
-      fetchProducts();
+      void updateSubscriptionContext();
+      void fetchProducts();
       setHasFetched(true);
     }
   };
@@ -284,14 +269,18 @@ export const useBilling = () => {
     subscriptionFetchedStripe,
     productSubscription,
     invoices,
+    showUpgradeComponent,
     upcomingInvoice,
     totalBilled,
     loading,
     error,
     errorMessage,
+    accountBillingTab,
+    setAccountBillingTab,
     updateSubscriptionContext,
     fetchInvoices,
     fetchUpcomingInvoice,
+    setShowUpgradeComponent,
     upgradeSubscription,
   };
 };

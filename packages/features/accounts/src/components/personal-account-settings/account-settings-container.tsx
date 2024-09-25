@@ -1,23 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-
-
 import Link from 'next/link';
-
-
-
-// import { useTranslation } from 'react-i18next';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 import { Trans } from '@kit/ui/trans';
-
-
-
 import type { Account } from '../../../../../../apps/web/lib/account.types';
 import type { Database } from '../../../../../../apps/web/lib/database.types';
 import { getUserRole } from '../../../../team-accounts/src/server/actions/members/get/get-member-account';
@@ -32,7 +22,8 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
-
+import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -52,11 +43,15 @@ export function PersonalAccountSettingsContainer(
     };
   }>,
 ) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tab = searchParams.get('tab');
+  const checkoutResult = searchParams.get('checkout');
   const [user, setUser] = useState<Account.Type | null>();
+  const {accountBillingTab, setAccountBillingTab, upgradeSubscription } = useBilling();
   const [role, setRole] =
     useState<Database['public']['Tables']['roles']['Row']['name']>();
   const client = useSupabase();
-  const [activeTab, setActiveTab] = useState('account');
   const fetchUserAccount = async () => {
     const { data: user, error: userAccountError } = await client
       .from('accounts')
@@ -72,7 +67,6 @@ export function PersonalAccountSettingsContainer(
     id: '',
     charges_enabled: false,
   });
-  // const supportsLanguageSelection = useSupportMultiLanguage();
   useEffect(() => {
     let user: Account.Type | null;
     void fetchUserAccount()
@@ -113,39 +107,40 @@ export function PersonalAccountSettingsContainer(
     const fetchUserRole = async () => {
       try {
         const role = await getUserRole();
+        if (checkoutResult === 'success') {
+          await upgradeSubscription();
+          router.push('/home/settings')
+        }
         setRole(role);
       } catch (error) {
         console.error(error);
       }
     };
-
+    if (tab){
+      setAccountBillingTab(tab);
+    }
     void fetchUserRole();
-  });
+  }, [tab, checkoutResult]);
   //////////////////////////////////////
   if (!user || !role) {
     return <LoadingOverlay fullPage />;
   }
   return (
     <div>
-      <Tabs
-        defaultValue="account"
-        onValueChange={(value: string) => {
-          setActiveTab(value);
-        }}
-      >
+      <Tabs defaultValue={"account"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
           <TabsList>
             <ThemedTabTrigger
               value="account"
               option="account"
-              activeTab={activeTab}
+              activeTab={accountBillingTab}
             >
               <Trans i18nKey={'account:profile'} />
             </ThemedTabTrigger>
             <ThemedTabTrigger
               value="billing"
               option="billing"
-              activeTab={activeTab}
+              activeTab={accountBillingTab}
             >
               <Trans i18nKey={'account:billing'} />
             </ThemedTabTrigger>
@@ -352,7 +347,7 @@ export function PersonalAccountSettingsContainer(
             </Button>
               
             </div> */}
-          <BillingContainerConfig />
+          <BillingContainerConfig tab={tab ?? ''} />
         </TabsContent>
       </Tabs>
     </div>

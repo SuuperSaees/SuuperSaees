@@ -14,15 +14,18 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 const PlansPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { loading, errorMessage, productsDataConfig } = useBilling()
+  const { loading, errorMessage, productsDataConfig, subscription } = useBilling()
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null); 
   const [selectedPriceId, setSelectedPriceId] = useState(''); 
+  const [billingCustomerId, setBillingCustomerId] = useState<string | null>(null);
 // USAREMOS LOS PRODUCTOS QUE VIENEN CON EL FETCH
  
 
   const handleCheckout = (amount: number | undefined, priceID: string) => {
     setSelectedAmount(amount ?? 0); 
     setSelectedPriceId(priceID);
+    setBillingCustomerId(subscription?.billing_customer_id ?? "")
+
   };
 
   if (loading) {
@@ -56,7 +59,7 @@ const PlansPage = () => {
               currency: "usd",
             }}
           >
-            <CheckoutPage amount={selectedAmount} priceId={selectedPriceId} />
+            <CheckoutPage amount={selectedAmount} priceId={selectedPriceId} billingCustomerId={billingCustomerId!} />
           </Elements>
         </div>
       ) : <PricingTable

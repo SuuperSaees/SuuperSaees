@@ -4,8 +4,21 @@ import { NextRequest, NextResponse } from "next/server";
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
-    const { priceId } = await req.json(); 
+    const { priceId, customer } = await req.json(); 
+    if (!priceId) {
+        return NextResponse.json(
+            { error: { message: "Price ID is required" } },
+            { status: 400 }
+        );
+    }
 
+    if (!customer) {
+        return NextResponse.json(
+            { error: { message: "Customer ID is required" } },
+            { status: 400 }
+        );
+    }
+    
     try {
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -23,9 +36,10 @@ export async function POST(req: NextRequest) {
                     quantity: 1, 
                 },
             ],
+            customer,
             mode: type === "recurring" ? "subscription" : "payment",
-            success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings`, 
-            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings`,
+            success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings?checkout=success`, 
+            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings?checkout=cancel`,
         }
     );
         console.log("SessionURL: ", session.url);
