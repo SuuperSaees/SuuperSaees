@@ -68,9 +68,9 @@ export const ThemedTabTrigger: React.FC<{
           ? {
               backgroundColor:
                 activeTab === option
-                  ? hexToRgba('#667085', 0.1) // Apply 0.6 opacity if active
+                  ? hexToRgba('#667085', 0.1) // Apply 0.1 opacity if active
                   : isHovered
-                    ? hexToRgba('#667085', 0.1) // Apply 0.3 opacity on hover
+                    ? hexToRgba('#667085', 0.1) // Apply 0.1 opacity on hover
                     : undefined,
               color: '#667085',
             }
