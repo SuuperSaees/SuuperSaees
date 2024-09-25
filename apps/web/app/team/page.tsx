@@ -1,21 +1,9 @@
-import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-
+import React from 'react';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import {
-  AccountInvitationsTable,
-  AccountMembersTable,
-  InviteMembersDialogContainer,
-} from '@kit/team-accounts/components';
-import { If } from '@kit/ui/if';
-import { PageBody } from '@kit/ui/page';
-import { Separator } from '@kit/ui/separator';
-import { Trans } from '@kit/ui/trans';
-
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-
 import { loadMembersPageData } from './_lib/server/members-page.loader';
-import { RoleBadge } from 'node_modules/@kit/team-accounts/src/components/members/role-badge';
+import ClientsMembersPagePresentation from './components/clients-members-page-presentation';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -112,87 +100,20 @@ async function ClientsMembersPage() {
 
   const isPrimaryOwner = account.primary_owner_user_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
+
   return (
-    <>
-      <PageBody>
-        <div className="p-[35px]">
-          <div className="mb-[32px] flex items-center justify-between">
-            <div className="flex-grow">
-              <span>
-                <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
-                  <Trans i18nKey={'team:team'} />
-                </div>
-              </span>
-            </div>
-          </div>
-
-          <div className="w-full">
-            <div className="flex items-center justify-between py-4">
-              <If condition={canManageInvitations && (await canAddMember())}>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold">
-                    <Trans i18nKey={'common:membersTabLabel'} />
-                  </h3>
-                  {members && (
-                    <div className="rounded-full border border-brand-700 bg-brand-50 px-2 py-0 text-brand-700">
-                      <span className="inline-flex gap-2 text-[12px]">
-                        <span>{members.length}</span>
-                        {members.length === 1 ? (
-                          <Trans i18nKey={'team:labelNumberOfUsers.singular'} />
-                        ) : (
-                          <Trans i18nKey={'team:labelNumberOfUsers.plural'} />
-                        )}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {account.role_hierarchy_level === 2 && (
-                  <InviteMembersDialogContainer
-                    userRoleHierarchy={currentUserRoleHierarchy ?? 0}
-                    accountSlug={slug}
-                  >
-                    <ThemedButton
-                      size={'sm'}
-                      data-test={'invite-members-form-trigger'}
-                    >
-                      <span>
-                        <Trans i18nKey={'team:inviteMembersButton'} />
-                      </span>
-                    </ThemedButton>
-                  </InviteMembersDialogContainer>
-                )}
-
-                
-              </If>
-            </div>
-          </div>
-
-          <Separator />
-          <div className="mt-4">
-            <AccountMembersTable
-              userRoleHierarchy={currentUserRoleHierarchy ?? 0}
-              currentUserId={user.id}
-              currentAccountId={account.id ?? ''}
-              members={members}
-              isPrimaryOwner={isPrimaryOwner}
-              canManageRoles={canManageRoles}
-            />
-          </div>
-
-          <div className="mt-12">
-            <AccountInvitationsTable
-              permissions={{
-                canUpdateInvitation: canManageRoles,
-                canRemoveInvitation: canManageRoles,
-                currentUserRoleHierarchy: currentUserRoleHierarchy ?? 0,
-              }}
-              invitations={invitations}
-            />
-          </div>
-        </div>
-      </PageBody>
-    </>
+    <ClientsMembersPagePresentation
+      account={account}
+      currentUserRoleHierarchy={currentUserRoleHierarchy}
+      slug={slug}
+      members={members}
+      invitations={invitations}
+      canAddMember={await canAddMember()}
+      user={user}
+      canManageRoles={canManageRoles}
+      canManageInvitations={canManageInvitations}
+      isPrimaryOwner={isPrimaryOwner}
+    />
   );
 }
 

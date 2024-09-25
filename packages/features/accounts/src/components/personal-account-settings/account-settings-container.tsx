@@ -1,22 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-
-
 import Link from 'next/link';
-
-
-
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
-import { If } from '@kit/ui/if';
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Trans } from '@kit/ui/trans';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
-import { Button } from '@kit/ui/button';
 import type { Account } from '../../../../../../apps/web/lib/account.types';
 import type { Database } from '../../../../../../apps/web/lib/database.types';
 import { getUserRole } from '../../../../team-accounts/src/server/actions/members/get/get-member-account';
@@ -30,8 +21,8 @@ import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import BillingContainerConfig from './billing/billing-container';
-import RegisterAccountContainer from '../../../../../../apps/web/app/stripe/components/register-stripe-account-container';
-
+import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
+import { useSearchParams } from 'next/navigation';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -51,7 +42,11 @@ export function PersonalAccountSettingsContainer(
     };
   }>,
 ) {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+  const checkoutResult = searchParams.get('checkout')
   const [user, setUser] = useState<Account.Type | null>();
+  const {accountBillingTab, setAccountBillingTab, upgradeSubscription } = useBilling();
   const [role, setRole] =
     useState<Database['public']['Tables']['roles']['Row']['name']>();
   const client = useSupabase();
@@ -71,7 +66,6 @@ export function PersonalAccountSettingsContainer(
     id: '',
     charges_enabled: false,
   });
-  // const supportsLanguageSelection = useSupportMultiLanguage();
   useEffect(() => {
     let user: Account.Type | null;
     void fetchUserAccount()
@@ -117,16 +111,21 @@ export function PersonalAccountSettingsContainer(
         console.error(error);
       }
     };
-
+    if (tab){
+      setAccountBillingTab(tab);
+    }
+    if (checkoutResult === 'success'){
+      void upgradeSubscription();
+    }
     void fetchUserRole();
-  });
+  }, [tab, checkoutResult]);
   //////////////////////////////////////
   if (!user || !role) {
     return <LoadingOverlay fullPage />;
   }
   return (
     <div>
-      <Tabs defaultValue='account'>
+      <Tabs defaultValue={"account"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
           <TabsList>
             <TabsTrigger value='account'><Trans i18nKey={'account:profile'} /></TabsTrigger>
@@ -328,7 +327,7 @@ export function PersonalAccountSettingsContainer(
             </Button>
               
             </div> */}
-          <BillingContainerConfig />
+          <BillingContainerConfig tab={tab ?? ''} />
         </TabsContent>
 
 
@@ -337,10 +336,10 @@ export function PersonalAccountSettingsContainer(
   );
 }
 
-function useSupportMultiLanguage() {
-  const { i18n } = useTranslation();
-  const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
-  const supportedLangs = langs.filter((lang) => lang !== 'cimode');
+// function useSupportMultiLanguage() {
+//   const { i18n } = useTranslation();
+//   const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
+//   const supportedLangs = langs.filter((lang) => lang !== 'cimode');
 
-  return supportedLangs.length > 1;
-}
+//   return supportedLangs.length > 1;
+// }
