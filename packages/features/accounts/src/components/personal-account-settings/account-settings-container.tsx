@@ -8,19 +8,22 @@ import Link from 'next/link';
 
 
 
+// import { useTranslation } from 'react-i18next';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
-import { If } from '@kit/ui/if';
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
+import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 import { Trans } from '@kit/ui/trans';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
-import { Button } from '@kit/ui/button';
+
+
+
 import type { Account } from '../../../../../../apps/web/lib/account.types';
 import type { Database } from '../../../../../../apps/web/lib/database.types';
 import { getUserRole } from '../../../../team-accounts/src/server/actions/members/get/get-member-account';
 import { ThemedButton } from '../ui/button-themed-with-settings';
+import { ThemedTabTrigger } from '../ui/tab-themed-with-settings';
+import BillingContainerConfig from './billing/billing-container';
 import { UpdateEmailFormContainer } from './email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './password/update-password-container';
 import UpdateAccountColorBrand from './update-account-color-brand';
@@ -29,8 +32,6 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
-import BillingContainerConfig from './billing/billing-container';
-import RegisterAccountContainer from '../../../../../../apps/web/app/stripe/components/register-stripe-account-container';
 
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -55,7 +56,7 @@ export function PersonalAccountSettingsContainer(
   const [role, setRole] =
     useState<Database['public']['Tables']['roles']['Row']['name']>();
   const client = useSupabase();
-
+  const [activeTab, setActiveTab] = useState('account');
   const fetchUserAccount = async () => {
     const { data: user, error: userAccountError } = await client
       .from('accounts')
@@ -126,14 +127,31 @@ export function PersonalAccountSettingsContainer(
   }
   return (
     <div>
-      <Tabs defaultValue='account'>
+      <Tabs
+        defaultValue="account"
+        onValueChange={(value: string) => {
+          setActiveTab(value);
+        }}
+      >
         {role !== 'client_member' && role !== 'client_owner' && (
           <TabsList>
-            <TabsTrigger value='account'><Trans i18nKey={'account:profile'} /></TabsTrigger>
-            <TabsTrigger value='billing'><Trans i18nKey={'account:billing'} /></TabsTrigger>
+            <ThemedTabTrigger
+              value="account"
+              option="account"
+              activeTab={activeTab}
+            >
+              <Trans i18nKey={'account:profile'} />
+            </ThemedTabTrigger>
+            <ThemedTabTrigger
+              value="billing"
+              option="billing"
+              activeTab={activeTab}
+            >
+              <Trans i18nKey={'account:billing'} />
+            </ThemedTabTrigger>
           </TabsList>
         )}
-        <TabsContent value='account'>
+        <TabsContent value="account">
           <div className='"flex w-full flex-wrap gap-6 pb-32 lg:flex-nowrap'>
             <div className="flex w-full flex-col space-y-6">
               <Card>
@@ -254,7 +272,9 @@ export function PersonalAccountSettingsContainer(
                       ) : accountStripe.charges_enabled ? (
                         <Trans i18nKey={'account:stripeConnected'} />
                       ) : (
-                        <Trans i18nKey={'account:continueWithOnboardingStripe'} />
+                        <Trans
+                          i18nKey={'account:continueWithOnboardingStripe'}
+                        />
                       )}
                     </CardTitle>
                     <CardDescription>
@@ -267,7 +287,9 @@ export function PersonalAccountSettingsContainer(
                         <Trans i18nKey={'account:stripeConnectedDescription'} />
                       ) : (
                         <Trans
-                          i18nKey={'account:continueWithOnboardingStripeDescription'}
+                          i18nKey={
+                            'account:continueWithOnboardingStripeDescription'
+                          }
                         />
                       )}
                     </CardDescription>
@@ -283,11 +305,9 @@ export function PersonalAccountSettingsContainer(
                   </CardContent>
                 </Card>
               )}
-
-
             </div>
 
-            <div className="flex mt-6 w-full max-w-full flex-col space-y-6 lg:max-w-[350px]">
+            <div className="mt-6 flex w-full max-w-full flex-col space-y-6 lg:max-w-[350px]">
               <Card>
                 <CardHeader>
                   <CardTitle>
@@ -298,7 +318,9 @@ export function PersonalAccountSettingsContainer(
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <UpdateEmailFormContainer callbackPath={props.paths.callback} />
+                  <UpdateEmailFormContainer
+                    callbackPath={props.paths.callback}
+                  />
                 </CardContent>
               </Card>
 
@@ -312,14 +334,16 @@ export function PersonalAccountSettingsContainer(
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <UpdatePasswordFormContainer callbackPath={props.paths.callback} />
+                  <UpdatePasswordFormContainer
+                    callbackPath={props.paths.callback}
+                  />
                 </CardContent>
               </Card>
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value='billing'>
+        <TabsContent value="billing">
           {/* <div className="flex w-full flex-col space-y-6">
             <Button>
               <Link href="/select-plan">
@@ -330,17 +354,15 @@ export function PersonalAccountSettingsContainer(
             </div> */}
           <BillingContainerConfig />
         </TabsContent>
-
-
       </Tabs>
     </div>
   );
 }
 
-function useSupportMultiLanguage() {
-  const { i18n } = useTranslation();
-  const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
-  const supportedLangs = langs.filter((lang) => lang !== 'cimode');
+// function useSupportMultiLanguage() {
+//   const { i18n } = useTranslation();
+//   const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
+//   const supportedLangs = langs.filter((lang) => lang !== 'cimode');
 
-  return supportedLangs.length > 1;
-}
+//   return supportedLangs.length > 1;
+// }

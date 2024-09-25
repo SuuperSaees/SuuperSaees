@@ -8,15 +8,20 @@ import { useQuery } from '@tanstack/react-query';
 // import { getClientMembers } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getClientMembersForOrganization } from 'node_modules/@kit/team-accounts/src/server/actions/clients/get/get-clients';
 
+
+
 import { ClientsTable } from './clients-table';
+
 
 function MemberSection({
   search,
   setSearch,
   clientOrganizationId,
+  currentUserRole,
 }: {
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
+  currentUserRole: string;
   clientOrganizationId?: string;
 }) {
   const clientsWithOrganizations =
@@ -36,6 +41,7 @@ function MemberSection({
       ) : (
         <ClientsTable
           members={clientsWithOrganizations.data}
+          userRole={currentUserRole}
           searchController={{
             search,
             setSearch,
