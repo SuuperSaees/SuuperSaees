@@ -2,26 +2,28 @@
 
 import { useState } from 'react';
 
+
+
 import { TabsTrigger } from '@kit/ui/tabs';
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
 import withOrganizationSettings from '../../hoc/with-organization-settings';
 
-function getTextColorBasedOnBackground(backgroundColor: string) {
-  // Remove any hash symbol if it exists
-  const color = backgroundColor.replace('#', '');
+// function getTextColorBasedOnBackground(backgroundColor: string) {
+//   // Remove any hash symbol if it exists
+//   const color = backgroundColor.replace('#', '');
 
-  // Convert the hex color to RGB
-  const r = parseInt(color.substring(0, 2), 16);
-  const g = parseInt(color.substring(2, 4), 16);
-  const b = parseInt(color.substring(4, 6), 16);
+//   // Convert the hex color to RGB
+//   const r = parseInt(color.substring(0, 2), 16);
+//   const g = parseInt(color.substring(2, 4), 16);
+//   const b = parseInt(color.substring(4, 6), 16);
 
-  // Calculate the luminance
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+//   // Calculate the luminance
+//   const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
-  // Return 'black' for lighter backgrounds and 'white' for darker backgrounds
-  return luminance > 186 ? '#475467' : 'white'; // 186 is a common threshold for readability
-}
+//   // Return 'black' for lighter backgrounds and 'white' for darker backgrounds
+//   return luminance > 186 ? '#475467' : 'white'; // 186 is a common threshold for readability
+// }
 
 // Function to convert hex color to rgba with specified opacity
 const hexToRgba = (hex: string, opacity: number) => {
@@ -29,13 +31,19 @@ const hexToRgba = (hex: string, opacity: number) => {
   hex = hex.replace('#', '');
 
   // Parse the hex color into RGB
-  const bigint = parseInt(hex, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
+  // const bigint = parseInt(hex, 16);
+  // const r = (bigint >> 16) & 255;
+  // const g = (bigint >> 8) & 255;
+  // const b = bigint & 255;
 
-  // Return the rgba color string
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  // Convert the opacity (0-1) to a hex value (00-FF)
+  const alpha = Math.round(opacity * 255)
+    .toString(16)
+    .padStart(2, '0')
+    .toUpperCase();
+
+  // Return the hex color with the opacity as the alpha channel
+  return `#${hex}${alpha}`;
 };
 // Ensure the component name starts with an uppercase letter
 export const ThemedTabTrigger: React.FC<{
@@ -47,7 +55,7 @@ export const ThemedTabTrigger: React.FC<{
   option: string;
 }> = ({ className, activeTab, option, ...rest }) => {
   const { theme_color } = useOrganizationSettings();
-  const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
+  // const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
 
   // State for hover detection
   const [isHovered, setIsHovered] = useState(false);
@@ -60,11 +68,11 @@ export const ThemedTabTrigger: React.FC<{
           ? {
               backgroundColor:
                 activeTab === option
-                  ? hexToRgba(theme_color, 0.6) // Apply 0.6 opacity if active
+                  ? hexToRgba('#667085', 0.1) // Apply 0.1 opacity if active
                   : isHovered
-                    ? hexToRgba(theme_color ?? '#000000', 0.3) // Apply 0.3 opacity on hover
+                    ? hexToRgba('#667085', 0.1) // Apply 0.1 opacity on hover
                     : undefined,
-              color: textColor,
+              color: '#667085',
             }
           : undefined
       }
