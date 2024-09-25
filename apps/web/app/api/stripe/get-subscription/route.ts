@@ -18,7 +18,6 @@ export async function GET(req: NextRequest) {
   try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-
       return NextResponse.json(subscription);
   } catch (error) {
       console.error('Error retrieving products:', error);

@@ -1,65 +1,68 @@
-import * as React from "react"
+import * as React from 'react';
+
+import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+
 import {
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons"
+  ButtonProps,
+  buttonVariants,
+} from '../../../../packages/ui/src/shadcn/button-shadcn';
+import { cn } from '../../../../packages/ui/src/utils/cn';
 
-import { cn } from "../../../../packages/ui/src/utils/cn"
-import { ButtonProps, buttonVariants } from "../../../../packages/ui/src/shadcn/button-shadcn"
-
-const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
+const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   <nav
     role="navigation"
     aria-label="pagination"
-    className={cn("mx-auto flex w-full", className)}
+    className={cn('mx-auto flex w-full', className)}
     {...props}
   />
-)
-Pagination.displayName = "Pagination"
+);
+Pagination.displayName = 'Pagination';
 
 const PaginationContent = React.forwardRef<
   HTMLUListElement,
-  React.ComponentProps<"ul">
+  React.ComponentProps<'ul'>
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("flex flex-row gap-1 w-full", className)}
+    className={cn('flex w-full flex-row gap-1', className)}
     {...props}
   />
-))
-PaginationContent.displayName = "PaginationContent"
+));
+PaginationContent.displayName = 'PaginationContent';
 
 const PaginationItem = React.forwardRef<
   HTMLLIElement,
-  React.ComponentProps<"li">
+  React.ComponentProps<'li'>
 >(({ className, ...props }, ref) => (
-  <li ref={ref} className={cn("", className)} {...props} />
-))
-PaginationItem.displayName = "PaginationItem"
+  <li ref={ref} className={cn('', className)} {...props} />
+));
+PaginationItem.displayName = 'PaginationItem';
 
 type PaginationLinkProps = {
-  isActive?: boolean
-} & Pick<ButtonProps, "size"> &
-  React.ComponentProps<"a">
+  isActive?: boolean;
+} & Pick<ButtonProps, 'size'> &
+  React.ComponentProps<'a'>;
 
 const PaginationLink = ({
   className,
   isActive,
-  size = "icon",
+  size = 'icon',
   ...props
 }: PaginationLinkProps) => (
   <a
-    aria-current={isActive ? "page" : undefined}
+    aria-current={isActive ? 'page' : undefined}
     className={cn(
       buttonVariants({
-        variant: isActive ? "outline" : "ghost",
+        variant: isActive ? 'outline' : 'ghost',
         size,
       }),
-      className
+      className,
     )}
     {...props}
   />
-)
-PaginationLink.displayName = "PaginationLink"
+);
+PaginationLink.displayName = 'PaginationLink';
 
 const PaginationPrevious = ({
   className,
@@ -68,13 +71,18 @@ const PaginationPrevious = ({
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
-    className={cn("gap-1 pl-2.5 border border-gray-300", className)}
+    className={cn('gap-1 border border-gray-300 pl-2.5', className)}
     {...props}
   >
-    <span>Anterior</span>
+    <ArrowLeft className="h-5 w-5 text-gray-600" />
+    {props.children ?? (
+      <>
+        <span>Previous</span>
+      </>
+    )}
   </PaginationLink>
-)
-PaginationPrevious.displayName = "PaginationPrevious"
+);
+PaginationPrevious.displayName = 'PaginationPrevious';
 
 const PaginationNext = ({
   className,
@@ -83,28 +91,33 @@ const PaginationNext = ({
   <PaginationLink
     aria-label="Go to next page"
     size="default"
-    className={cn("gap-1 pl-2.5 border border-gray-300 ml-3", className)}
+    className={cn('ml-3 gap-1 border border-gray-300 pr-2.5', className)}
     {...props}
   >
-    <span>Siguiente</span>
+    {props.children ?? (
+      <>
+        <span>Next</span>
+      </>
+    )}
+    <ArrowRight className="h-5 w-5 text-gray-600" />
   </PaginationLink>
-)
-PaginationNext.displayName = "PaginationNext"
+);
+PaginationNext.displayName = 'PaginationNext';
 
 const PaginationEllipsis = ({
   className,
   ...props
-}: React.ComponentProps<"span">) => (
+}: React.ComponentProps<'span'>) => (
   <span
     aria-hidden
-    className={cn("flex h-9 w-9 items-center justify-center", className)}
+    className={cn('flex h-9 w-9 items-center justify-center', className)}
     {...props}
   >
     <DotsHorizontalIcon className="h-4 w-4" />
     <span className="sr-only">Más paginas</span>
   </span>
-)
-PaginationEllipsis.displayName = "PaginationEllipsis"
+);
+PaginationEllipsis.displayName = 'PaginationEllipsis';
 
 export {
   Pagination,
@@ -114,4 +127,4 @@ export {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
-}
+};
