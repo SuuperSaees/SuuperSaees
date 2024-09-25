@@ -1,7 +1,4 @@
 import { redirect } from 'next/navigation';
-
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 

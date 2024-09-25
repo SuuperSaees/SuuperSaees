@@ -1,17 +1,16 @@
-import {
-  // Briefcase,
-  CreditCard,
-  Layers,
-  Settings,
-  SquareCheck,
-  Users,
-  // Wallet,
+import { // Briefcase,
+CreditCard, Layers, Settings, Users // Wallet,
 } from 'lucide-react';
+
+
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
+
+
 import featureFlagsConfig from './feature-flags.config';
 import pathsConfig from './paths.config';
+
 
 const iconClasses = 'w-4';
 
@@ -23,20 +22,20 @@ const routes = [
   //   end: true,
   // },
   {
-    label: 'common:orders',
+    label: 'common:ordersName',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
   },
   {
-    label: 'common:users',
+    label: 'common:usersName',
     Icon: <Users className={iconClasses} />,
     children: [
       {
-        label: 'common:clients',
+        label: 'common:clientsName',
         path: pathsConfig.app.clients,
       },
       {
-        label: 'common:team',
+        label: 'common:teamName',
         path: pathsConfig.app.team,
       },
     ],

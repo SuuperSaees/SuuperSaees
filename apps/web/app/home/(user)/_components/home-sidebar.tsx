@@ -1,22 +1,54 @@
 import { ThemedSidebar } from 'node_modules/@kit/accounts/src/components/ui/sidebar-themed-with-settings';
 import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import { z } from 'zod';
 
+import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 import { SidebarContent, SidebarNavigation } from '@kit/ui/sidebar';
 
 import { AppLogo } from '~/components/app-logo';
 import { ProfileAccountDropdownContainer } from '~/components/personal-account-dropdown-container';
 import { clientAccountNavigationConfig } from '~/config/client-account-navigation.config';
+import pathsConfig from '~/config/paths.config';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
-import { teamMemberAccountNavigationConfig } from '../../../../config/member-team-account-navigation.config';
 
+import { teamMemberAccountNavigationConfig } from '../../../../config/member-team-account-navigation.config';
 // home imports
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
 import './styles/home-sidebar.css';
 
-
+type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 export async function HomeSidebar(props: { workspace: UserWorkspace }) {
   const { workspace, user } = props.workspace;
   const userRole = await getUserRole().catch(() => null);
+
+  // Filter the navigation config to remove the /clients path if userRole is 'agency_owner' or 'client_owner'
+  const filterNavigationConfig = (config: NavigationConfig) => {
+    if (userRole !== 'agency_owner') {
+      return {
+        ...config,
+        routes: config.routes.map((item) => {
+          // Check if the item has children
+          if ('children' in item) {
+            return {
+              ...item,
+              children: item.children.filter(
+                (child) => child.path !== pathsConfig.app.clients,
+              ),
+            };
+          }
+          return item; // Return item unchanged if it doesn't have children
+        }),
+      };
+    }
+    return config;
+  };
+
+  const selectedNavigationConfig =
+    userRole === 'agency_member'
+      ? filterNavigationConfig(teamMemberAccountNavigationConfig)
+      : userRole === 'client_owner' || userRole === 'client_member'
+        ? clientAccountNavigationConfig
+        : personalAccountNavigationConfig;
   return (
     <ThemedSidebar>
       <div className="padding-24">
@@ -24,15 +56,7 @@ export async function HomeSidebar(props: { workspace: UserWorkspace }) {
       </div>
 
       <SidebarContent className={`mt-5 h-[calc(100%-160px)] overflow-y-auto`}>
-        <SidebarNavigation
-          config={
-            userRole === 'agency_member'
-              ? teamMemberAccountNavigationConfig
-              : userRole === 'client_owner' || userRole === 'client_member'
-              ? clientAccountNavigationConfig
-              : personalAccountNavigationConfig
-          }
-        />
+        <SidebarNavigation config={selectedNavigationConfig} />
         <SidebarContent></SidebarContent>
       </SidebarContent>
 

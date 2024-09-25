@@ -1,20 +1,13 @@
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 
-
-
 import { PageBody } from '@kit/ui/page';
-
-
+import { Trans } from '@kit/ui/trans';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
-
-
 import { OrderList } from './components/orders-list';
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
-
-
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -27,9 +20,7 @@ export const generateMetadata = async () => {
 //   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 // };
 
-
 async function OrdersPage() {
-  const i18n = await createI18nServerInstance();
   const ordersData = await getOrders().catch((err) => console.error(err));
   const processedOrders =
     ordersData?.map((order) => ({
@@ -39,7 +30,7 @@ async function OrdersPage() {
     })) ?? [];
 
   const role = await getUserRole();
-  const pageTitle = i18n.t('orders:title');
+
   // console.log('processedOrders', processedOrders);
 
   return (
@@ -49,8 +40,10 @@ async function OrdersPage() {
           <div className="mb-[32px] flex items-center justify-between">
             <div className="flex-grow">
               <span>
-                <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
-                  <h1>{i18n.t('orders:title')}</h1>
+                <div className="font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
+                  <h1>
+                    <Trans i18nKey={'orders:title'} />
+                  </h1>
                 </div>
               </span>
             </div>
@@ -65,4 +58,3 @@ async function OrdersPage() {
 }
 
 export default withI18n(OrdersPage);
-

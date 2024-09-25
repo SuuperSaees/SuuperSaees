@@ -28,6 +28,7 @@
   "anonymousUser": "Anónimo",
     "profile": "Mi perfil",
   "billing": "Facturación",
+  "orders": "Pedidos",
   "tryAgain": "Intentar de Nuevo",
   "theme": "Tema",
   "contactUs": "Contactanos",
@@ -52,6 +53,8 @@
   "settingsName": "Configuraciones",
   "usersName": "Usuarios",
   "ordersName": "Pedidos",
+  "clientsName": "Clientes",
+  "teamName": "Team",
   "nameInput": "Nombre",
   "namePortalInput": "Nombre del portal",
   "roles": {
@@ -71,5 +74,10 @@
       "label": "Miembro"
     }
   },
-  "clear": "Eliminar"
+  "clear": "Eliminar",
+  "pagination": {
+    "next": "Siguiente",
+    "previous": "Anterior"
+  },
+  "organizationName": "Organización"
 }

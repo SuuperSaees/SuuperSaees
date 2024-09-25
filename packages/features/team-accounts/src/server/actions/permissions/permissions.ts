@@ -1,104 +1,43 @@
 'use server';
 
+import { SupabaseClient } from '@supabase/supabase-js';
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
+import { Database } from '../../../../../../../apps/web/lib/database.types';
 import { getUserRole } from '../members/get/get-member-account';
 
-
-export const hasPermissionToReadOrderDetails = async (
-  message_order_id: number,
-  message_order_propietary_organization_id: string,
-  message_order_client_organization_id: string,
+// Generic permission check
+export const checkGeneralPermission = async (
+  client: SupabaseClient<Database>,
+  userId: string,
+  accountId: string,
+  permissionName:
+    | 'roles.manage'
+    | 'billing.manage'
+    | 'settings.manage'
+    | 'members.manage'
+    | 'invites.manage'
+    | 'tasks.write'
+    | 'tasks.delete'
+    | 'messages.write'
+    | 'messages.read',
 ) => {
-  try {
-    // Only client members/owners of the order and agency members assigned to the order can interact
-
-    const client = getSupabaseServerComponentClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-
-    if (userError) throw userError.message;
-
-    const userId = userData.user.id;
-    const { data: accountData, error: accountError } = await client
-      .from('accounts')
-      .select('id, organization_id')
-      .eq('id', userId)
-      .eq('is_personal_account', true)
-      .single();
-
-    if (accountError) throw accountError.message;
-    const accountId = accountData.organization_id;
-
-    // First check for general permission on the account, be either client or agency
-    const { data: hasPermission, error: permissionError } = await client.rpc(
-      'has_permission',
-      {
-        user_id: userId,
-        account_id: accountId ?? '',
-        permission_name: 'messages.read',
-      },
-    );
-    if (permissionError) {
-      console.error('Error checking permission:', permissionError);
-      throw new Error('The account has not permissions to READ messages');
-    }
-
-    // Add extra security or specific permissions for the order and user
-    let hasStrictPermission = false;
-
-    // Restriction for agency team:
-    let hasAgencyPermission = false;
-    // The agency owner can read messages if the order was made to its organization
-    if (message_order_propietary_organization_id === userData.user.id) {
-      hasStrictPermission = true;
-      hasAgencyPermission = hasPermission && hasStrictPermission;
-      if (hasAgencyPermission) return hasAgencyPermission;
-    }
-
-    // The agency team members can read messages if they were assigned to the order
-    const {
-      data: agencyMemberAssignedToOrder,
-      error: agencyOrderAssignationsError,
-    } = await client
-      .from('order_assignations')
-      .select()
-      .eq('agency_member_id', userData.user.id)
-      .eq('order_id', message_order_id)
-      .single();
-
-    if (
-      agencyOrderAssignationsError &&
-      agencyOrderAssignationsError.code !== 'PGRST116'
-    ) {
-      console.error(
-        'Error fetching agency order assignations:',
-        agencyOrderAssignationsError,
-      );
-      throw agencyOrderAssignationsError.message;
-    }
-
-    if (agencyMemberAssignedToOrder) {
-      hasStrictPermission = true;
-      hasAgencyPermission = hasPermission && hasStrictPermission;
-      if (hasAgencyPermission) return hasAgencyPermission;
-    }
-
-    // Restriction for client team:
-    let hasClientPermission = false;
-
-    // For the moment => all client users have permission
-    if (message_order_client_organization_id === accountData.organization_id) {
-      hasStrictPermission = true;
-      hasClientPermission = hasPermission && hasStrictPermission;
-      if (hasClientPermission) return hasClientPermission;
-    }
-  } catch (error) {
-    console.error('Error checking permissions:', error);
-    throw error;
+  const { data: hasPermission, error: permissionError } = await client.rpc(
+    'has_permission',
+    {
+      user_id: userId,
+      account_id: accountId ?? '',
+      permission_name: permissionName,
+    },
+  );
+  if (permissionError) {
+    console.error('Permission error:', permissionError);
+    throw new Error(`No permission for ${permissionName}`);
   }
+  return hasPermission;
 };
+
 
 export const hasPermissionToReadOrders = async () => {
   const client = getSupabaseServerComponentClient();
@@ -120,7 +59,7 @@ export const hasPermissionToReadOrders = async () => {
   const isClient =
     (role && role.account_role === 'client_owner') ||
     (role && role.account_role === 'client_member');
-  
+
   const isTeamMember = role && role.account_role === 'agency_member';
   const isAgency = !isClient && !isTeamMember;
 
@@ -130,7 +69,7 @@ export const hasPermissionToReadOrders = async () => {
     const { data: orderData, error: clientError } = await client
       .from('orders_v2')
       .select(
-        '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)'
+        '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
       )
       .eq('customer_id', userId)
       .order('created_at', { ascending: false });
@@ -156,9 +95,12 @@ export const hasPermissionToReadOrders = async () => {
       .from('orders_v2')
       .select(
         `*, organization:accounts!client_organization_id(slug, name), 
-        customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`
+        customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`,
       )
-      .in('id', orderAssignedData.map((assign) => assign.order_id))
+      .in(
+        'id',
+        orderAssignedData.map((assign) => assign.order_id),
+      )
       .order('created_at', { ascending: false });
 
     if (teamOwnerError) {
@@ -183,7 +125,7 @@ export const hasPermissionToReadOrders = async () => {
       .from('orders_v2')
       .select(
         `*, organization:accounts!client_organization_id(slug, name), 
-        customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`
+        customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`,
       )
       .eq('agency_id', agencyUserAccount?.organization_id ?? '')
       .order('created_at', { ascending: false });
@@ -198,7 +140,6 @@ export const hasPermissionToReadOrders = async () => {
 
   return ordersData;
 };
-
 
 export const hasPermissionToAddTeamMembers = async () => {
   const client = getSupabaseServerComponentClient();
@@ -223,7 +164,6 @@ export const hasPermissionToAddTeamMembers = async () => {
   if (role === 'agency_project_manager') {
     return true;
   } else {
-
     // check for general permission on the account, be either client or agency
     const { data: hasPermission, error: permissionError } = await client.rpc(
       'has_permission',
@@ -238,7 +178,7 @@ export const hasPermissionToAddTeamMembers = async () => {
       console.error('Error checking permission:', permissionError);
       throw new Error('The account has not permissions to MANAGE team members');
     }
-  
+
     return hasPermission;
   }
 };
