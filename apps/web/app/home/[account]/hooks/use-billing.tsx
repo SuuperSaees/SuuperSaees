@@ -222,7 +222,6 @@ export const useBilling = () => {
       }
 
       const dataSubscriptionsByCustomer = await responseSubscriptionsByCustomer.json();
-      console.log("dataSubscriptionsByCustomer", dataSubscriptionsByCustomer);
       if (dataSubscriptionsByCustomer.length > 1) {
         dataSubscriptionsByCustomer.forEach(async (subscription: any) => {
           if (subscription.id !== result?.id) {
