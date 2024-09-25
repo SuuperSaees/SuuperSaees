@@ -1,17 +1,16 @@
-import {
-  // Briefcase,
-  CreditCard,
-  Layers,
-  Settings,
-  SquareCheck,
-  Users,
-  // Wallet,
+import { // Briefcase,
+CreditCard, Layers, Settings, Users // Wallet,
 } from 'lucide-react';
+
+
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
+
+
 import featureFlagsConfig from './feature-flags.config';
 import pathsConfig from './paths.config';
+
 
 const iconClasses = 'w-4';
 
