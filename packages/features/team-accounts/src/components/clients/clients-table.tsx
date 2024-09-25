@@ -87,7 +87,10 @@ const clientColumns = (
     accessorKey: 'name',
     header: t('clientName'),
     cell: ({ row }) => (
-      <span className={'flex items-center space-x-4 text-left'}>
+      <Link
+        href={`clients/organizations/${row.original.organization_id}`}
+        className={'flex items-center space-x-4 text-left'}
+      >
         <span>
           <ProfileAvatar
             displayName={row.original.name}
@@ -102,7 +105,7 @@ const clientColumns = (
             {row.original.email}
           </span>
         </div>
-      </span>
+      </Link>
     ),
   },
   // {
