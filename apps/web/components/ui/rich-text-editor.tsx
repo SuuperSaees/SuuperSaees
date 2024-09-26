@@ -253,19 +253,10 @@ const RichTextEditor = ({
           class: 'text-brand underline',
         },
       }),
-
+      
       Placeholder.configure({
         // Use a placeholder:
         placeholder: 'Write a message...',
-
-        // Use different placeholders depending on the node type:
-        // placeholder: ({ node }) => {
-        //   if (node.type.name === 'heading') {
-        //     return 'What’s the title?'
-        //   }
-
-        //   return 'Can you add some further context?'
-        // },
       }),
       CustomShortcuts,
     ],
@@ -319,12 +310,12 @@ const RichTextEditor = ({
       editor.commands.focus();
     }
   }, [editor]);
-
   return (
-    <div className="relative h-fit gap-4 grid grid-rows-[1fr_auto] rounded border border-input p-4">
+    <div className="relative h-fit gap-4 grid grid-rows-[1fr_auto] rounded-2xl shadow-md p-4">
+      <input type="text" placeholder={editor?.getHTML().trim() === "<p></p>" && !editor?.isFocused ? `Escribe un mensaje...` : ``} disabled={true} className={`${styles['scrollbar-thin']} bg-transparent fixed border-none outline-none placeholder:text-gray-400 placeholder:pl-4 placeholder:pb-4 h-28 overflow-y-auto w-full pb-16`} />
       <EditorContent
         editor={editor}
-        className={`${styles['scrollbar-thin']} h-28 overflow-y-auto w-full`}
+        className={`${styles['scrollbar-thin']} placeholder:text-gray-400 h-28 overflow-y-auto w-full`}
       />
       <div>
       <Toolbar
@@ -333,7 +324,7 @@ const RichTextEditor = ({
         uploadFileIsExternal={uploadFileIsExternal}
       />
       <button
-        className="bg-purple absolute bottom-2 right-2 h-fit w-fit rounded-md bg-black p-2 shadow-sm"
+        className="bg-purple absolute bottom-2 right-2 h-fit w-fit rounded-xl bg-black p-2 shadow-sm"
         onClick={sendContent}
       >
         <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />

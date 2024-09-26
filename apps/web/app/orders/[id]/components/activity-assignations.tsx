@@ -65,7 +65,7 @@ const ActivityAssignations = ({
   };
   // console.log('assignedTo', assignedTo);
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 mb-2">
       <span className="font-semibold">{t('details.assignedTo')}</span>
       <div className="flex flex-wrap items-center">
         <MultiAvatarDisplayer avatars={avatarsWithStatus} maxAvatars={4} />

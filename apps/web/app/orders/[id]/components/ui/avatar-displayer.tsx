@@ -1,11 +1,10 @@
 'use client';
 
 import { Avatar, AvatarImage, AvatarFallback } from '@kit/ui/avatar';
-import { ProfileAvatar } from '@kit/ui/profile-avatar';
-
 
 interface AvatarDisplayerProps {
   displayName?: string | null;
+  isAssignedOrFollower?: boolean;
   pictureUrl?: string | null;
   nickname?: string;
   status?: 'online' | 'offline';
@@ -16,13 +15,14 @@ interface AvatarDisplayerProps {
 const AvatarDisplayer = ({
   pictureUrl,
   displayName,
+  isAssignedOrFollower,
   nickname,
   status,
   className,
   ...rest
 }: AvatarDisplayerProps) => {
   return (
-    <div className={`relative flex h-fit w-fit items-start gap-2`}>
+    <div className={`relative flex h-fit w-fit items-start gap-2 ${isAssignedOrFollower ? "scale-75 bg-slate-50 px-4 rounded-full" : ""}`}>
       {/* <ProfileAvatar
         displayName={!displayName ? null : displayName}
         pictureUrl={pictureUrl}
@@ -33,7 +33,7 @@ const AvatarDisplayer = ({
         } ${status === 'online' ? 'after:bg-green-400' : 'after:bg-gray-400'} ${className} `}
         {...rest}
       /> */}
-      <Avatar>
+      <Avatar className={`${isAssignedOrFollower ? "scale-75" : ""}`}>
         <AvatarImage src={pictureUrl} />
         {/* <AvatarFallback>{displayName}</AvatarFallback> */}
         {displayName && (
