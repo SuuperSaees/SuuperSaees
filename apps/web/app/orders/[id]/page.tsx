@@ -35,6 +35,7 @@ async function OrderDetailsPage({
 
   return (
     <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
+      <h3 className="fixed top-20 md:top-20"><Trans i18nKey="details.orderId" /> {order?.id}</h3>
       <div className="flex h-full max-h-full w-full flex-col text-gray-700">
         <div className="flex h-full max-h-full w-full justify-between gap-6">
           <ActivityProvider
@@ -45,14 +46,7 @@ async function OrderDetailsPage({
             order={order}
           >
             <div className="flex w-full min-w-0 flex-grow flex-col gap-6">
-              {/* <div className="flex w-full min-w-full gap-4">
-                <div className="mb-[16px] w-full rounded-lg border border-gray-500 px-[12px] py-[8px]">
-                  <span className="font-inter text-md overflow-hidden text-ellipsis leading-6 text-gray-500">
-                    {order.title}
-                  </span>
-                </div>
-           
-              </div> */}
+
               <Tabs
                 defaultValue="activity"
                 className="flex h-full flex-grow flex-col gap-6"

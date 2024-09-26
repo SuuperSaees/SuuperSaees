@@ -29,11 +29,15 @@
   "details": {
     "title": "Detalles del pedido",
     "summary": "Resumen",
+    "createdBy": "Creado por",
+    "orderId": "Pedido ID",
     "createdAt": "Creado",
     "assignedTo": "Asignado a",
+    "followedBy": "Seguido por",
     "status": "Estado",
     "priority": "Prioridad",
     "dueDate": "Fecha de vencimiento",
+    "deadline": "Fecha límite",
     "statuses": {
       "pending": "Esperando respuesta",
       "inProgress": "En progreso",

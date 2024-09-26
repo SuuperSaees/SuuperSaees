@@ -29,11 +29,15 @@
     "details": {
       "title": "Order details",
       "summary": "Summary",
+      "createdBy": "Created by",
+      "orderId": "Order ID",
       "createdAt": "Created",
       "assignedTo": "Assigned to",
+      "followedBy": "Followed by",	
       "status": "Status",
       "priority": "Priority",
       "dueDate": "Due date",
+      "deadline": "Deadline",
       "statuses": {
         "pending": "Pending response",
         "inProgress": "In progress",

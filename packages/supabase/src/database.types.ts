@@ -942,6 +942,53 @@ export type Database = {
           },
         ]
       }
+      order_followers: {
+        Row: {
+          client_member_id: string | null
+          created_at: string | null
+          order_id: number | null
+        }
+        Insert: {
+          client_member_id?: string | null
+          created_at?: string | null
+          order_id?: number | null
+        }
+        Update: {
+          client_member_id?: string | null
+          created_at?: string | null
+          order_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_followers_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -1531,13 +1578,11 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string | null
           currency: string
-          days_used: number
           id: string
           period_ends_at: string | null
           period_starts_at: string | null
-          propietary_organization_id: string | null
+          propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
-          token_id: string
           trial_ends_at: string | null
           trial_starts_at: string | null
           updated_at: string | null
@@ -1550,13 +1595,11 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at?: string | null
           currency: string
-          days_used?: number
           id: string
           period_ends_at?: string | null
           period_starts_at?: string | null
-          propietary_organization_id?: string | null
+          propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
-          token_id?: string
           trial_ends_at?: string | null
           trial_starts_at?: string | null
           updated_at?: string | null
@@ -1569,18 +1612,38 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string | null
           currency?: string
-          days_used?: number
           id?: string
           period_ends_at?: string | null
           period_starts_at?: string | null
-          propietary_organization_id?: string | null
+          propietary_organization_id?: string
           status?: Database["public"]["Enums"]["subscription_status"]
-          token_id?: string
           trial_ends_at?: string | null
           trial_starts_at?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tasks: {
         Row: {
@@ -1633,39 +1696,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      tokens: {
-        Row: {
-          access_token: string
-          created_at: string
-          expires_at: string | null
-          id: string
-          id_token_provider: string
-          provider: string
-          refresh_token: string
-          updated_at: string | null
-        }
-        Insert: {
-          access_token?: string
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          id_token_provider?: string
-          provider?: string
-          refresh_token?: string
-          updated_at?: string | null
-        }
-        Update: {
-          access_token?: string
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          id_token_provider?: string
-          provider?: string
-          refresh_token?: string
-          updated_at?: string | null
-        }
-        Relationships: []
       }
     }
     Views: {
@@ -1956,13 +1986,11 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string | null
           currency: string
-          days_used: number
           id: string
           period_ends_at: string | null
           period_starts_at: string | null
-          propietary_organization_id: string | null
+          propietary_organization_id: string
           status: Database["public"]["Enums"]["subscription_status"]
-          token_id: string
           trial_ends_at: string | null
           trial_starts_at: string | null
           updated_at: string | null

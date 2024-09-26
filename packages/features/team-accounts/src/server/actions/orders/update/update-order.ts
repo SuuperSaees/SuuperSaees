@@ -280,3 +280,55 @@ export const addOrderMessage = async (
     throw error;
   }
 };
+
+export const updateOrderFollowers = async (
+  orderId: Order.Type['id'],
+  followerIds: string[],
+) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    
+    // 1. Fetch existing followers to determine if you need to delete any
+    const { data: existingFollowers, error: fetchError } = await client
+      .from('order_followers')
+      .select('client_member_id')
+      .eq('order_id', orderId);
+
+    if (fetchError) throw fetchError;
+
+    // Extract existing IDs
+    const existingIds = existingFollowers?.map((follower) => follower.client_member_id as string) || [];
+
+    // Determine IDs to add and remove
+    const idsToAdd = followerIds.filter((id) => !existingIds.includes(id));
+    const idsToRemove = existingIds.filter((id) => !followerIds.includes(id))
+
+    // Remove old followers
+    if (idsToRemove.length > 0) {
+      const { error: deleteError } = await client
+        .from('order_followers')
+        .delete()
+        .in('client_member_id', idsToRemove)
+        .eq('order_id', orderId);
+
+      if (deleteError) throw deleteError;
+    }
+
+    // Add new followers
+    const newFollowers = idsToAdd.map((id) => ({
+      order_id: orderId,
+      client_member_id: id,
+    }));
+
+    const { error: upsertError } = await client
+      .from('order_followers')
+      .upsert(newFollowers);
+
+    if (upsertError) throw upsertError;
+
+    revalidatePath(`/orders/${orderId}`);
+  } catch (error) {
+    console.error('Error updating order followers:', error);
+    throw error;
+  }
+}

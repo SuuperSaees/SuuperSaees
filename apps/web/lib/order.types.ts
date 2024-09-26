@@ -12,6 +12,7 @@ export namespace Order {
     messages?: Message.Type[];
     files?: File.Type[];
     assigned_to?: { agency_member: User.Type }[];
+    followers?: { client_follower: User.Type }[];
   };
   export type Insert = Database['public']['Tables']['orders_v2']['Insert'];
   export type Update = Database['public']['Tables']['orders_v2']['Update'];
