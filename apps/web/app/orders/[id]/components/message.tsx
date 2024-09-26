@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-
 import { Message } from '../context/activity-context';
 import ImageContainer from './ui/image-container';
 
@@ -14,14 +13,14 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
   const content = message.content ?? '';
 
   return (
-    <div className="flex w-auto flex-col p-2 bg-red-500 rounded-sm hover:bg-slate-50 gap-1">
-      <div className="flex justify-between w-full gap-4"> 
+    <div className="flex flex-col w-full p-2 rounded-sm hover:bg-slate-50 gap-4">
+      <div className="flex justify-between w-full">
         <span className="font-semibold">{message.user.name}</span>
         <small>{`${date}`}</small>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg rounded-ss-none bg-slate-0 p-4 max-w-[62rem] overflow-hidden overflow-ellipsis">
-        <div className='w-[62rem] overflow-hidden overflow-ellipsis break-words whitespace-normal pr-4' dangerouslySetInnerHTML={{ __html: content }} />
+      <div className="flex flex-col gap-2 rounded-lg rounded-ss-none w-full bg-slate-0 p-4 overflow-hidden">
+        <div className="w-full overflow-hidden break-words whitespace-normal pr-2" dangerouslySetInnerHTML={{ __html: content }} />
         {message.files && message.files.length > 0 && (
           <div className="flex flex-wrap gap-4">
             {message.files.map((file) => (

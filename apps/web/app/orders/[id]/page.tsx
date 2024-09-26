@@ -23,8 +23,6 @@ async function OrderDetailsPage({
 }: {
   params: { id: string };
 }) {
-  // const orderDetail = mockedOrder;
-  // On the future for better performance each request can be made individually
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
   );
@@ -46,16 +44,15 @@ async function OrderDetailsPage({
             order={order}
           >
             <div className="flex w-full min-w-0 flex-grow flex-col gap-6">
-
               <Tabs
                 defaultValue="activity"
                 className="flex h-full flex-grow flex-col gap-6"
               >
                 <TabsList className="flex w-fit">
-                  <TabsTrigger value="activity" >
+                  <TabsTrigger value="activity">
                     <Trans i18nKey={'orders:details.navigation.activity'} />
                   </TabsTrigger>
-                  <TabsTrigger value="details" >
+                  <TabsTrigger value="details">
                     <Trans i18nKey={'orders:details.navigation.details'} />
                   </TabsTrigger>
                 </TabsList>
