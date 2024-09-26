@@ -4,5 +4,12 @@
     "continue": "Continue",
     "title": "Create organizations",
     "successAgency": "Agency created successfully",
-    "successAgencyDescription": "Your new agency has been created successfully."
+    "successAgencyDescription": "Your new agency has been created successfully.",
+    "files": {
+        "all": "All",
+        "team_uploaded": "Uploaded by the team",
+        "client_uploaded": "Uploaded by the client",
+        "download_files": "Download all files",
+        "new": "New"
+    }
 }

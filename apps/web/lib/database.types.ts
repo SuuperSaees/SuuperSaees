@@ -649,6 +649,86 @@ export type Database = {
           },
         ]
       }
+      folder_files: {
+        Row: {
+          agency_id: string | null
+          client_organization_id: string | null
+          created_at: string
+          file_id: string | null
+          folder_id: string | null
+          id: string
+        }
+        Insert: {
+          agency_id?: string | null
+          client_organization_id?: string | null
+          created_at?: string
+          file_id?: string | null
+          folder_id?: string | null
+          id?: string
+        }
+        Update: {
+          agency_id?: string | null
+          client_organization_id?: string | null
+          created_at?: string
+          file_id?: string | null
+          folder_id?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folder_files_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folder_files_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folders: {
+        Row: {
+          agency_id: string
+          client_organization_id: string
+          created_at: string
+          id: string
+          is_subfolder: boolean | null
+          name: string | null
+          parent_folder_id: string | null
+        }
+        Insert: {
+          agency_id: string
+          client_organization_id: string
+          created_at?: string
+          id?: string
+          is_subfolder?: boolean | null
+          name?: string | null
+          parent_folder_id?: string | null
+        }
+        Update: {
+          agency_id?: string
+          client_organization_id?: string
+          created_at?: string
+          id?: string
+          is_subfolder?: boolean | null
+          name?: string | null
+          parent_folder_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       form_fields: {
         Row: {
           created_at: string

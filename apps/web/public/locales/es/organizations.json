@@ -4,6 +4,30 @@
     "continue": "Continuar",
     "title": "Crear organizaciones",
     "successAgency": "Agencia creada con éxito",
-    "successAgencyDescription": "Tu nueva agencia ha sido creada exitosamente."
+    "successAgencyDescription": "Tu nueva agencia ha sido creada exitosamente.",
+    "files": {
+        "all": "Todos",
+        "team_uploaded": "Subidos por el equipo",
+        "client_uploaded": "Subidos por el cliente",
+        "download_files": "Descargar todos los archivos",
+        "new": {
+            "title": "Nuevo",
+            "file": "Subir archivo",
+            "folder": "Crear carpeta"
+        },
+        "orders": "Pedidos"
+    },
+    "folders": {
+        "title": "Carpetas",
+        "new": {
+            "title": "Nueva carpeta",
+            "folder": "Nombre de la carpeta",
+            "name": "Ingresa el nombre de la carpeta",
+            "create": "Crear",
+            "accept": "Aceptar",
+            "cancel": "Cancelar"
+        }
+    }
+    
 }
   

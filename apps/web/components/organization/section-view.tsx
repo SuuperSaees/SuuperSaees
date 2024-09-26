@@ -13,7 +13,8 @@ import { useTranslation } from 'react-i18next';
 // import { Input } from '@kit/ui/input';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
-// import FileSection from './files';
+import FileSection from './files';
+import { OptionFiles } from './files/option-files';
 import { InviteClientMembersDialogContainer } from './invite-client-members-dialog';
 // import InvoiceSection from './invoices';
 import MemberSection from './members';
@@ -62,7 +63,14 @@ function SectionView({
       </>,
     ],
     ['services', null],
-    ['files', null],
+    [
+      'files', 
+      <>
+        <OptionFiles
+          clientOrganizationId={clientOrganizationId}
+        />
+      </>
+    ],
     ['reviews', null],
     ['invoices', null],
   ]);
@@ -79,7 +87,13 @@ function SectionView({
       />,
     ],
     // ['services', <ServiceSection key={'services'} />],
-    // ['files', <FileSection key={'files'} />],
+    [
+      'files', 
+      <FileSection 
+        key={'files'}
+        clientOrganizationId={clientOrganizationId}   
+      />
+    ],
     // ['reviews', <ReviewSection key={'reviews'} />],
     // ['invoices', <InvoiceSection key={'invoices'} />],
   ]);
