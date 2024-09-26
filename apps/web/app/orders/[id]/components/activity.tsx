@@ -62,19 +62,8 @@ const ActivityPage = () => {
       // Step 1: Create the message and get the messageId
       await writeMessage(messageContent);
 
-      // // Step 2: If files are uploaded, update them with the message_id
-      // if (uploadedFileIds.length > 0) {
-      //   const filesToUpdate = uploadedFileIds.map((fileId) => ({
-      //     id: fileId,
-      //     message_id: newMessage.id,
-      //   }));
-      //   // console.log('Files to update:', filesToUpdate);
-      //   for (const fileToUpdate of filesToUpdate) {
-      //     await updateFile(fileToUpdate.id, fileToUpdate.message_id);
-      //   }
-
+      // Step 2: If files are uploaded, update them with the message_id
       // Update files in the database with the message_id
-
       // Optionally: Update the UI to replace placeholders with actual files
       // updateFilesInUI(newMessage.id, updatedFiles);
       // }
@@ -84,7 +73,7 @@ const ActivityPage = () => {
   };
 
   return (
-    <div className="flex h-full w-full min-w-0 max-w-full flex-col gap-4 flex-grow shrink">
+    <div className="flex h-full w-full pr-8 min-w-0 max-w-full flex-col gap-4 flex-grow shrink">
       <Interactions />
       <div className="mt-auto flex max-h-full flex-grow max-w-full min-w-0 flex-col gap-4">
         {showFileUploader && (

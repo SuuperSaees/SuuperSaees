@@ -942,6 +942,53 @@ export type Database = {
           },
         ]
       }
+      order_followers: {
+        Row: {
+          client_member_id: string | null
+          created_at: string | null
+          order_id: number | null
+        }
+        Insert: {
+          client_member_id?: string | null
+          created_at?: string | null
+          order_id?: number | null
+        }
+        Update: {
+          client_member_id?: string | null
+          created_at?: string | null
+          order_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_followers_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string

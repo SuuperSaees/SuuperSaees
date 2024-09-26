@@ -47,7 +47,7 @@ const AvatarDisplayer = ({
           </AvatarFallback>
         )}
       </Avatar>
-      <div className="flex flex-col">
+      <div className="flex py-2 justify-center items-center">
         {displayName && (
           <span className="text-sm font-semibold">{displayName}</span>
         )}

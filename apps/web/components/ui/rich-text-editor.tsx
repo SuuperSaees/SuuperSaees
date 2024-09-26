@@ -293,10 +293,16 @@ const RichTextEditor = ({
   });
 
   const sendContent = useCallback(() => {
+
     void (async () => {
+      
       try {
         cleanupImages();
         const content = editor ? editor.getHTML() : '';
+        // <p></p> is the default content of the editor
+        if (content.trim() === '<p></p>') {
+          return;
+        }
         editor?.commands.clearContent();
         await onComplete(content);
         insertedImages.current = new Set<string>();
@@ -308,12 +314,19 @@ const RichTextEditor = ({
 
   // Implement sanitizer to ensure the content to be nested is secure before sending to server
 
+  useEffect(() => {
+    if (editor) {
+      editor.commands.focus();
+    }
+  }, [editor]);
+
   return (
-    <div className="relative flex h-fit flex-col gap-4 rounded border border-input p-4">
+    <div className="relative h-fit gap-4 grid grid-rows-[1fr_auto] rounded border border-input p-4">
       <EditorContent
         editor={editor}
-        className={styles['image-input-text-editor'] + 'h-fit w-full'}
+        className={`${styles['scrollbar-thin']} h-28 overflow-y-auto w-full`}
       />
+      <div>
       <Toolbar
         editor={editor}
         toggleExternalUpload={toggleExternalUpload}
@@ -323,8 +336,9 @@ const RichTextEditor = ({
         className="bg-purple absolute bottom-2 right-2 h-fit w-fit rounded-md bg-black p-2 shadow-sm"
         onClick={sendContent}
       >
-        <SendHorizontalIcon className="h-5 w-5 text-white" />
+        <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
       </button>
+      </div>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 
 
 import { addHours, format, parseISO } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+
 import { useTranslation } from 'react-i18next';
 
 
@@ -64,11 +64,10 @@ const DatePicker = ({ updateFn, defaultDate }: DatePickerProps) => {
           <Button
             variant={'outline'}
             className={cn(
-              'w-[240px] justify-start text-left font-normal',
+              'w-fit justify-start bg-gray-50 shadow-none border-none text-left font-normal',
               !date && 'text-muted-foreground',
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
             {date ? format(date, 'dd-MM-yyyy') : t('selectDateLabel')}
           </Button>
         </PopoverTrigger>

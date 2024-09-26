@@ -14,15 +14,14 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
   const content = message.content ?? '';
 
   return (
-    <div className="flex w-fit flex-col gap-1">
-      <div className="flex justify-between gap-4">
+    <div className="flex w-auto flex-col p-2 bg-red-500 rounded-sm hover:bg-slate-50 gap-1">
+      <div className="flex justify-between w-full gap-4"> 
         <span className="font-semibold">{message.user.name}</span>
         <small>{`${date}`}</small>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg rounded-ss-none bg-gray-50 p-4">
-        <div dangerouslySetInnerHTML={{ __html: content }} />
-        {/* <p className="max-w-xs">{message.content}</p> */}
+      <div className="flex flex-col gap-2 rounded-lg rounded-ss-none bg-slate-0 p-4 max-w-[62rem] overflow-hidden overflow-ellipsis">
+        <div className='w-[62rem] overflow-hidden overflow-ellipsis break-words whitespace-normal pr-4' dangerouslySetInnerHTML={{ __html: content }} />
         {message.files && message.files.length > 0 && (
           <div className="flex flex-wrap gap-4">
             {message.files.map((file) => (

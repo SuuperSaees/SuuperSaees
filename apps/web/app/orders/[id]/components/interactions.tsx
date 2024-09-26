@@ -61,7 +61,7 @@ const Interactions = () => {
 
   return (
     <div
-      className="no-scrollbar flex h-full max-h-full w-full min-w-0 shrink flex-col gap-4 overflow-y-auto rounded-lg border border-gray-200 p-4"
+      className="no-scrollbar flex h-full max-h-full w-full min-w-0 shrink flex-col gap-4 overflow-y-auto border-t border-r-0 border-l-0 border-gray-200 border-b-0 p-4"
       ref={interactionsContainerRef}
     >
       {Object.entries(groupedInteractions).map(([date, interactions]) => (
