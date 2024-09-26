@@ -1,7 +1,7 @@
 import { PageBody } from '@kit/ui/page';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
 import { Trans } from '@kit/ui/trans';
-
+import { OrderHeader } from './components/order-header';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
@@ -15,6 +15,7 @@ export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   return {
     title: i18n.t('orders:details.title'),
+    // Puedes agregar más metadatos aquí si es necesario
   };
 };
 
@@ -26,21 +27,20 @@ async function OrderDetailsPage({
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
   );
-  const messages = order?.messages ? order.messages : [];
-  const files = order?.files ? order.files : [];
-  const activities = order?.activities ? order.activities : [];
-  const reviews = order?.reviews ? order.reviews : [];
 
+  // Asegúrate de que no estás utilizando el resultado de generateMetadata aquí
+  // Solo renderiza el contenido de la página
   return (
-    <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
-      <h3 className="fixed top-20 md:top-20"><Trans i18nKey="details.orderId" /> {order?.id}</h3>
+    <PageBody className="h-[100vh] max-h-full min-h-0 flex-grow lg:px-0">
+      <OrderHeader order={order!} />
+    
       <div className="flex h-full max-h-full w-full flex-col text-gray-700">
         <div className="flex h-full max-h-full w-full justify-between gap-6">
           <ActivityProvider
-            messages={messages}
-            files={files}
-            activities={activities}
-            reviews={reviews}
+            messages={order?.messages || []}
+            files={order?.files || []}
+            activities={order?.activities || []}
+            reviews={order?.reviews || []}
             order={order}
           >
             <div className="flex w-full min-w-0 flex-grow flex-col gap-6">

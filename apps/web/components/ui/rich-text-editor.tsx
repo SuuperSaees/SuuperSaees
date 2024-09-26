@@ -312,11 +312,15 @@ const RichTextEditor = ({
   }, [editor]);
   return (
     <div className="relative h-fit gap-4 grid grid-rows-[1fr_auto] rounded-2xl shadow-md p-4">
-      <input type="text" placeholder={editor?.getHTML().trim() === "<p></p>" && !editor?.isFocused ? `Escribe un mensaje...` : ``} disabled={true} className={`${styles['scrollbar-thin']} bg-transparent fixed border-none outline-none placeholder:text-gray-400 placeholder:pl-4 placeholder:pb-4 h-28 overflow-y-auto w-full pb-16`} />
-      <EditorContent
-        editor={editor}
-        className={`${styles['scrollbar-thin']} placeholder:text-gray-400 h-28 overflow-y-auto w-full`}
-      />
+      <div onClick={() => editor?.commands.focus()} className={`${styles['scrollbar-thin']} bg-transparent relative border-none outline-none placeholder:text-gray-400 placeholder:pl-4 placeholder:pb-4 h-fit overflow-y-hidden w-full pb-2`}>
+      {editor?.getHTML().trim() === "<p></p>" && !editor?.isFocused ? (
+      <span className="text-gray-400 absolute left-2 top-4 transform -translate-y-1/2">Escribe un mensaje...</span>
+    ) : null}
+        <EditorContent
+          editor={editor}
+          className={`${styles['scrollbar-thin']} placeholder:text-gray-400 h-16 overflow-y-auto w-full`}
+        />
+      </div>
       <div>
       <Toolbar
         editor={editor}
