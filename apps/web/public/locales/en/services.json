@@ -6,7 +6,8 @@
     "status": "Status",
     "createdAt": "Created At",
     "actions": "Actions",
-    "createService": "Create Service",
+    "createService": "Create service",
+    "addService": "Add service",
     "serviceNameLabel": "Enter the service name",
     "serviceName": "Name",
     "servicePrice": "Price",
@@ -101,5 +102,16 @@
     "max_number_of_monthly_orders": "Maximum Number of Orders per Month *",
     "max_number_of_monthly_orders_description": "Leave it blank if you allow unlimited orders per month for this subscription.",
     "select_unit_of_measurement": "Days",
-    "upload_image": "Upload"
+    "upload_image": "Upload",
+    "dialogs": {
+        "add": {
+            "title": "Add a new service",
+             "description": "Choose one of the options below.",
+            "select": {
+                "label": "Select a service",
+                "error": "You must select a service to continue",
+                "submit": "Add service"
+            }
+        }
+    }
 }

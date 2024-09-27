@@ -7,6 +7,7 @@
     "createdAt": "Creado en",
     "actions": "Acciones",
     "createService": "Crear servicio",
+    "addService": "Agregar servicio",
     "serviceNameLabel": "Ingresa el nombre del servicio",
     "serviceName": "Nombre",
     "servicePrice": "Precio",
@@ -101,7 +102,19 @@
     "max_number_of_monthly_orders": "Máximo número de pedidos al mes *",
     "max_number_of_monthly_orders_description": "Déjalo en blanco si permites pedidos ilimitados por mes para esta suscripción.",
     "select_unit_of_measurement": "Días",
-    "upload_image": "Subir"
+    "upload_image": "Subir",
+    "dialogs": {
+        "add": {
+            "title": "Añade un nuevo servicio",
+            "description": "Elige una de las opciones a continuación.",
+            "select": {
+                "label": "Selecciona un servicio",
+            "error": "Debes seleccionar un servicio para continuar.",
+            "submit": "Añadir servicio"
+            }
+        }
+    }
+    
 
 }
   
