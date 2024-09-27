@@ -6,6 +6,7 @@ import { Download, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { createFile, createUploadBucketURL } from 'node_modules/@kit/team-accounts/src/server/actions/files/create/create-file';
 import { createFolder } from 'node_modules/@kit/team-accounts/src/server/actions/folders/create/create-folder';
+import { CheckIfItIsAnOrderFolder } from 'node_modules/@kit/team-accounts/src/server/actions/folders/get/get-folders';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -30,7 +31,7 @@ function generateUUID() {
   });
 }
 
-export function OptionFiles({ clientOrganizationId }: { clientOrganizationId: string }) {
+export function OptionFiles({ clientOrganizationId, currentPath }: { clientOrganizationId: string, currentPath: Array<{ title: string; uuid?: string }> }) {
   const { t } = useTranslation('organizations');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -50,7 +51,7 @@ export function OptionFiles({ clientOrganizationId }: { clientOrganizationId: st
       const bucketName = 'agency_files';
       const urlData = await createUploadBucketURL(bucketName, filePath);
 
-      if (!urlData ?? !urlData.signedUrl) {
+      if (!urlData || 'error' in urlData || !urlData.signedUrl) {
         throw new Error('No se pudo generar la URL de subida');
       }
 
@@ -79,17 +80,17 @@ export function OptionFiles({ clientOrganizationId }: { clientOrganizationId: st
             type: selectedFile.type,
             url: fileUrl,
           }],
-          clientOrganizationId 
+          clientOrganizationId,
+          currentPath, 
         );
 
       if (!fileData) {
         throw new Error('No se pudo crear la entrada en la base de datos');
       }
 
-      toast.success(`File uploaded successfully`);
-      window.location.reload();
+      toast.success(t('files.new.uploadSuccess'));
     } catch (error) {
-      toast.error('Error during upload');
+      toast.error(t('files.new.error'));
       console.error('Error during upload:', error);
     }
   };
@@ -100,28 +101,55 @@ export function OptionFiles({ clientOrganizationId }: { clientOrganizationId: st
     }
   };
 
-  const handleCreateFolder = () => {
+  const handleCreateFolder = async () => {
+    // Verificar si el nombre de la carpeta está vacío
     if (folderName.trim() === '') {
-      toast.error('Folder name cannot be empty');
+      toast.error(t('folders.new.emptyName'));
       return;
     }
-
-    const folderData = createFolder(
-      folderName,
-      clientOrganizationId,
-    );
-
-    if (!folderData) {
-      toast.error('Error creating folder');
-      return;
+  
+    try {
+      // Si hay un path actual, verificar si es un pedido
+      if (currentPath.length > 0) {
+        const lastFolder = currentPath[currentPath.length - 1];
+        const isOrderFolder = await CheckIfItIsAnOrderFolder(lastFolder!.uuid! ?? '');
+  
+        if (isOrderFolder) {
+          toast.error(t('folders.new.cannotCreateInOrderFolder'));
+          setFolderName('');
+          setDialogOpen(false);
+          return;
+        }
+  
+        // Crear la carpeta dentro del path actual si no es un pedido
+        const folderData = await createFolder(folderName, clientOrganizationId, true, currentPath);
+  
+        if (!folderData) {
+          toast.error(t('folders.new.error'));
+          return;
+        }
+  
+        toast.success(t('folders.new.successSubfolder', { folderName, lastPath: lastFolder?.title }));
+      } else {
+        // Si no hay path, crear la carpeta en la raíz
+        const folderData = await createFolder(folderName, clientOrganizationId);
+  
+        if (!folderData) {
+          toast.error(t('folders.new.error'));
+          return;
+        }
+  
+        toast.success(t('folders.new.success', { folderName }));
+      }
+  
+      setDialogOpen(false);
+      setFolderName('');
+    } catch (error) {
+      toast.error(t('folders.new.error'));
+      console.error('Error during folder creation:', error);
     }
-
-    
-    toast.success(`Folder "${folderName}" created successfully`);
-    setDialogOpen(false); 
-    setFolderName(''); 
-    window.location.reload();
   };
+  
 
   return (
     <div className='flex space-x-[16px]'>

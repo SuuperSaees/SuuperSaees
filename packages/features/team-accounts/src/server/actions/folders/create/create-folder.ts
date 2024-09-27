@@ -4,8 +4,12 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 // import { Folder } from '../../../../../../../../apps/web/lib/folder.types';
 
-export const createFolder = async (folderName: string, client_organization_id: string, isSubfolder?: boolean, parentFolder?: string) => {
+export const createFolder = async (folderName: string, client_organization_id: string, isSubfolder?: boolean, currentPath?: Array<{ title: string; uuid?: string }>) => {
   try {
+    console.log('client_organization_id', client_organization_id);
+    console.log('isSubfolder', isSubfolder);
+    console.log('currentPath', currentPath);
+
     const client = getSupabaseServerComponentClient();
 
     // Fetch the current user data
@@ -54,13 +58,23 @@ export const createFolder = async (folderName: string, client_organization_id: s
     let folderToInsert = {};
 
     if ( isSubfolder ){
+
       folderToInsert = {
         name: folderName,
         agency_id: agencyId,
         client_organization_id: client_organization_id,
-        parent_folder_id: parentFolder,
+        parent_folder_id: currentPath && currentPath.length > 0 ? currentPath[currentPath.length - 1]?.uuid : undefined,
         is_subfolder: true,
       };
+
+      const { data: folderData, error: folderDataError } = await client
+      .from('folders')
+      .insert(folderToInsert)
+      .select();
+
+      if (folderDataError) throw folderDataError.message;
+
+      return folderData;
     }
 
     folderToInsert = {

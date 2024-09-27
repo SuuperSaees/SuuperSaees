@@ -2,42 +2,6 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-export async function getAllFolders(
-    clientOrganizationId: string
-){
-    const client = getSupabaseServerComponentClient();
-
-    // Fetch the current user data
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
-
-    // Fecth the agencies of the user
-    const { data: agencies, error: agenciesError } = await client
-        .from('accounts')
-        .select('id')
-        .eq('primary_owner_user_id', userData.user.id)
-        .eq('is_personal_account', false);
-
-    if (agenciesError) throw agenciesError;
-
-    // Fetch the folders without order
-    const { data: foldersWithoutOrder, error: foldersWithoutOrderError } = await client
-        .from('folders')
-        .select('name, id')
-        .eq('client_organization_id', clientOrganizationId)
-        .eq('agency_id', agencies?.[0]?.id ?? '');
-
-    if (foldersWithoutOrderError) throw foldersWithoutOrderError;
-
-    const folders = foldersWithoutOrder.map((folder) => ({
-        title: folder.name,
-        uuid: folder.id
-    }));
-
-    return folders;
-}
-
 export async function getFilesWithoutFolder(
     clientOrganizationId: string
 ){
@@ -72,7 +36,9 @@ export async function getFilesWithoutFolder(
             .from('folder_files')
             .select('file_id')
             .eq('client_organization_id', clientOrganizationId)
-            .eq('agency_id', agencies?.[0]?.id ?? '');
+            .eq('agency_id', agencies?.[0]?.id ?? '')
+            .is('folder_id', null);
+            ;
 
         if (filesWithoutOrderError) throw filesWithoutOrderError;
 
@@ -115,40 +81,6 @@ export async function getFilesWithoutFolder(
     if (filesError) throw filesError;
 
     return files;
-}
-
-
-export async function getOrdersFolders(
-    clientOrganizationId: string
-){
-    const client = getSupabaseServerComponentClient();
-
-    // Fetch the current user data
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
-
-    // Fecth the agencies of the user
-    const { data: agencies, error: agenciesError } = await client
-        .from('accounts')
-        .select('id')
-        .eq('primary_owner_user_id', userData.user.id)
-        .eq('is_personal_account', false);
-
-    if (agenciesError) throw agenciesError;
-
-
-    // Fetch the orders to create the folders 
-    const { data: folders, error:  foldersError} = await client
-        .from('orders_v2')
-        .select('title, uuid')
-        .eq('agency_id', agencies?.[0]?.id ?? '')
-        .eq('client_organization_id', clientOrganizationId);
-    
-    if (foldersError) throw foldersError;
-
-
-    return folders;
-
 }
 
 
@@ -214,4 +146,99 @@ export async function getFilesByFolder(folderId: string,) {
 
     return files;
     
+}
+
+
+export async function verifyItIsOrderFile(fileId: string) {
+    const client = getSupabaseServerComponentClient();
+
+
+    // Checking if the file is out of order
+    const { data: fileData, error: fileDataError } = await client
+        .from('order_files')
+        .select('file_id')
+        .eq('file_id', fileId);
+
+    if (fileDataError) throw fileDataError;
+
+    if (fileData.length === 0) {
+        return false;
+    }
+
+    return true;
+    
+}
+
+export async function getMemberFiles(clientOrganizationId: string) {
+    const client = getSupabaseServerComponentClient();
+
+    const { data: fileData, error: fileDataError } = await client
+        .from('folder_files')
+        .select('file_id')
+        .eq('client_organization_id', clientOrganizationId);
+
+    if (fileDataError) throw fileDataError;
+
+    if (!fileData || fileData.length === 0) {
+        return [];
+    }
+
+    const { data: files, error: filesError } = await client
+        .from('files')
+        .select('url, id, name, type, user_id')
+        .in('id', fileData.map((file) => file.file_id));
+
+    if (filesError) throw filesError;
+
+    const { data: verifyIfIsClient, error: verifyIfIsClientError } = await client
+        .from('clients')
+        .select('id')
+        .eq('user_client_id', files[0]!.user_id);
+    
+    if (verifyIfIsClientError) throw verifyIfIsClientError;
+
+    if (verifyIfIsClient.length === 0) {
+        console.log('files', files);
+        return files;
+    }
+
+    return [];
+}
+
+export async function getClientFiles(clientOrganizationId: string) {
+    const client = getSupabaseServerComponentClient();
+
+    const { data: fileData, error: fileDataError } = await client
+        .from('folder_files')
+        .select('file_id')
+        .eq('client_organization_id', clientOrganizationId);
+
+    if (fileDataError) throw fileDataError;
+
+    if (!fileData || fileData.length === 0) {
+        return [];
+    }
+
+    const { data: files, error: filesError } = await client
+        .from('files')
+        .select('url, id, name, type, user_id')
+        .in('id', fileData.map((file) => file.file_id));
+
+    if (filesError) throw filesError;
+
+    const { data: verifyIfIsClient, error: verifyIfIsClientError } = await client
+        .from('clients')
+        .select('id')
+        .eq('user_client_id', files[0]!.user_id);
+    
+    if (verifyIfIsClientError) throw verifyIfIsClientError;
+
+    console.log('files in clients', files);
+
+    if (verifyIfIsClient.length > 0) {
+        console.log('files in clients', files);
+        return files;
+    }
+
+    return [];
 }

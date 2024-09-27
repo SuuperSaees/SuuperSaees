@@ -5,7 +5,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { File } from '../../../../../../../../apps/web/lib/file.types';
 
 type CreateFileProps = Omit<File.Insert, 'user_id'>;
-export const createFile = async (files: CreateFileProps[], client_organization_id?: string) => {
+export const createFile = async (files: CreateFileProps[], client_organization_id?: string, currentPath?: Array<{ title: string; uuid?: string }>) => {
   try {
     const client = getSupabaseServerComponentClient();
     // Fetch the current user data
@@ -21,6 +21,45 @@ export const createFile = async (files: CreateFileProps[], client_organization_i
         .single();
 
       if (agenciesError) throw agenciesError.message;
+
+      if (currentPath){
+        // Insert the files
+        const filesToInsert = files.map((file) => ({
+          ...file,
+          user_id: userData.user.id,
+
+        }));
+
+
+        const { data: fileData, error: fileError } = await client
+          .from('files')
+          .insert(filesToInsert)
+          .select();
+
+        if (fileError) throw fileError;
+
+        console.log('currentPath in File', currentPath);
+
+        const folderFilesToInsert = fileData.map((file) => ({
+          file_id: file.id,
+          client_organization_id,
+          agency_id: agencies?.agency_id,
+          folder_id: currentPath && currentPath.length > 0 ? currentPath[currentPath.length - 1]?.uuid : undefined,
+        }));
+    
+        // Insert the files in folder_files table
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { data: folderFilesData, error: folderFilesError } = await client
+          .from('folder_files')
+          .insert(
+            folderFilesToInsert
+          )
+          .select();
+    
+        if (folderFilesError) throw folderFilesError;
+
+        return fileData;
+      }
 
       // Insert the files
       const filesToInsert = files.map((file) => ({
@@ -43,6 +82,7 @@ export const createFile = async (files: CreateFileProps[], client_organization_i
       }));
   
       // Insert the files in folder_files table
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data: folderFilesData, error: folderFilesError } = await client
         .from('folder_files')
         .insert(

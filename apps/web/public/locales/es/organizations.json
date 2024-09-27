@@ -13,9 +13,13 @@
         "new": {
             "title": "Nuevo",
             "file": "Subir archivo",
-            "folder": "Crear carpeta"
+            "folder": "Crear carpeta",
+            "uploadSuccess": "Archivo subido",
+            "error": "Error al subir archivo"
         },
-        "orders": "Pedidos"
+        "orders": "Pedidos",
+        "delete": "Eliminar archivo",
+        "deleteSuccess": "Archivo eliminado"
     },
     "folders": {
         "title": "Carpetas",
@@ -25,9 +29,16 @@
             "name": "Ingresa el nombre de la carpeta",
             "create": "Crear",
             "accept": "Aceptar",
-            "cancel": "Cancelar"
-        }
+            "cancel": "Cancelar",
+            "emptyName": "El nombre de la carpeta no puede estar vacío",
+            "error": "Error al crear carpeta",
+            "successSubfolder": "Carpeta \"{{folderName}}\" creada exitosamente en \"{{lastPath}}\"",
+            "success": "Carpeta \"{{folderName}}\" creada exitosamente.",
+            "cannotCreateInOrderFolder": "No puedes crear carpetas en la carpeta de pedidos"
+        },
+        "delete": "Eliminar carpeta",
+        "deleteSuccess": "Carpeta eliminada"
     }
-    
+
 }
   

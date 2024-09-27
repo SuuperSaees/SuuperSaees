@@ -34,6 +34,9 @@ function SectionView({
   const [search, setSearch] = useState('');
   const { t } = useTranslation('clients');
 
+  // This is the actual path of the current folder
+  const [currentPath, setCurrentPath] = useState<{ title: string; uuid?: string }[]>([]);
+
   const buttonControllersMap = new Map<string, JSX.Element | null>([
     [
       'members',
@@ -68,6 +71,7 @@ function SectionView({
       <>
         <OptionFiles
           clientOrganizationId={clientOrganizationId}
+          currentPath={currentPath}
         />
       </>
     ],
@@ -91,7 +95,8 @@ function SectionView({
       'files', 
       <FileSection 
         key={'files'}
-        clientOrganizationId={clientOrganizationId}   
+        clientOrganizationId={clientOrganizationId}
+        setCurrentPath={setCurrentPath}   
       />
     ],
     // ['reviews', <ReviewSection key={'reviews'} />],
