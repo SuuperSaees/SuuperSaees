@@ -1,6 +1,9 @@
 import type { Config } from 'tailwindcss';
 
+
+
 import baseConfig from '@kit/tailwind-config';
+
 
 const defaultTheme = require('tailwindcss/defaultTheme');
 
@@ -104,7 +107,7 @@ export default {
           900: '#7A2E0E',
           950: '#4E1D09',
         },
-        pur: {
+        purple: {
           DEFAULT: '#6941C6', // Base color
           100: '#F4EBFF', // Lightest shade
           200: '#E3D0FF', // Very light lavender
