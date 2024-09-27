@@ -44,9 +44,9 @@ const ActivityPage = () => {
 
   const { writeMessage } = useActivityContext();
 
-  const handleOnCompleteMessageSend = async (messageContent: string, isInternalMessagingEnabled: boolean) => {
+  const handleOnCompleteMessageSend = async (messageContent: string) => {
     try {
-      await writeMessage(messageContent, isInternalMessagingEnabled);
+      await writeMessage(messageContent);
     } catch (error) {
       console.error('Failed to send message or upload files:', error);
     }

@@ -119,7 +119,7 @@ const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
 };
 
 interface RichTextEditorProps {
-  onComplete: (richText: string, isInternalMessagingEnabled: boolean) => void | Promise<void>;
+  onComplete: (richText: string) => void | Promise<void>;
   content?: string;
   onChange?: (richText: string) => void;
   uploadFileIsExternal?: boolean;
@@ -280,7 +280,6 @@ const RichTextEditor = ({
       imagesInText && debounceHandleImageUrl(editor)(text);
     },
   });
-  const {isInternalMessagingEnabled} = useInternalMessaging();
   const sendContent = useCallback(() => {
 
     void (async () => {
@@ -293,7 +292,7 @@ const RichTextEditor = ({
           return;
         }
         editor?.commands.clearContent();
-        await onComplete(content, isInternalMessagingEnabled);
+        await onComplete(content);
         insertedImages.current = new Set<string>();
       } finally {
         // cleanupImages();

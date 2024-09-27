@@ -7,9 +7,7 @@ import { ReactNode, createContext, useCallback, useContext, useState } from 'rea
 import { getUserById } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { addOrderMessage } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { toast } from 'sonner';
-
-
-
+import useInternalMessaging from '../hooks/use-messages';
 import { Activity as ServerActivity } from '~/lib/activity.types';
 import { Database } from '~/lib/database.types';
 import { Message } from '~/lib/message.types';
@@ -84,7 +82,7 @@ interface ActivityContextType {
   reviews: Review[];
   files: File[];
   order: Order.Type;
-  writeMessage: (message: string, isInternalMessagingEnabled: boolean) => Promise<ServerMessage.Type>;
+  writeMessage: (message: string) => Promise<ServerMessage.Type>;
 }
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -118,7 +116,8 @@ export const ActivityProvider = ({
   const [reviews, setReviews] = useState<Review[]>(serverReviews);
   const [files, setFiles] = useState<File[]>(serverFiles);
 
-  const writeMessage = async (message: string, isInternalMessagingEnabled: boolean) => {
+  const { isInternalMessagingEnabled } = useInternalMessaging();
+  const writeMessage = async (message: string) => {
     try {
       const messageToSend = {
         content: message,
