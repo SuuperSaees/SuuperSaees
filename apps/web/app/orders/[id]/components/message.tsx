@@ -1,21 +1,43 @@
 import { format } from 'date-fns';
 import { Message } from '../context/activity-context';
 import ImageContainer from './ui/image-container';
+import { useEffect, useState } from 'react';
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import { KeyIcon } from 'lucide-react';
 
 interface ChatMessageProps {
   message: Message;
 }
 
 const ChatMessage = ({ message }: ChatMessageProps) => {
+  const [userRole, setUserRole] = useState('');
   const date = format(new Date(message.created_at), 'MMM dd, p');
-
   // Ensure content is a string
   const content = message.content ?? '';
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+        await getUserRole().then((data)=> {
+          setUserRole(data);
+        }).catch((error) => {
+          console.error('Error al obtener el rol del usuario:', error);
+        })
+      };
+
+    void fetchUserRole();
+}, []);
 
   return (
     <div className="flex flex-col w-full p-2 rounded-sm hover:bg-slate-50 gap-4">
       <div className="flex justify-between w-full">
-        <span className="font-semibold">{message.user.name}</span>
+      <div className="flex gap-2">
+      <span className="font-semibold">{message.user.name}</span>
+      { ["agency_owner", "agency_member", "agency_project_manager"].includes(userRole) && message.visibility === "internal_agency" &&
+        <span className="text-gray-400 flex items-center gap-1">
+          {' '} <KeyIcon className="w-4 h-4" /> Internal message
+        </span>
+        }
+      </div>
         <small>{`${date}`}</small>
       </div>
 

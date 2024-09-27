@@ -12,14 +12,12 @@ import { toast } from 'sonner';
 
 import { Activity as ServerActivity } from '~/lib/activity.types';
 import { Database } from '~/lib/database.types';
+import { Message } from '~/lib/message.types';
 import { File as ServerFile } from '~/lib/file.types';
 import { Message as ServerMessage } from '~/lib/message.types';
 import { Order } from '~/lib/order.types';
 import { Review as ServerReview } from '~/lib/review.types';
 import { User as ServerUser } from '~/lib/user.types';
-
-
-
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
 
 export enum ActivityType {
@@ -86,7 +84,7 @@ interface ActivityContextType {
   reviews: Review[];
   files: File[];
   order: Order.Type;
-  writeMessage: (message: string) => Promise<ServerMessage.Type>;
+  writeMessage: (message: string, isInternalMessagingEnabled: boolean) => Promise<ServerMessage.Type>;
 }
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -120,13 +118,14 @@ export const ActivityProvider = ({
   const [reviews, setReviews] = useState<Review[]>(serverReviews);
   const [files, setFiles] = useState<File[]>(serverFiles);
 
-  const writeMessage = async (message: string) => {
+  const writeMessage = async (message: string, isInternalMessagingEnabled: boolean) => {
     try {
       const messageToSend = {
         content: message,
         order_id: Number(order.id),
+        visibility: isInternalMessagingEnabled ? 'internal_agency' : 'public',
       };
-      const newMessage = await addOrderMessage(Number(order.id), messageToSend);
+      const newMessage = await addOrderMessage(Number(order.id), messageToSend, messageToSend.visibility as Message.Type['visibility']);
       toast.success('Success', {
         description: 'The message has been sent.',
       });

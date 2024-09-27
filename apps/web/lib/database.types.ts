@@ -759,6 +759,7 @@ export type Database = {
           order_id: number
           updated_at: string
           user_id: string
+          visibility: Database["public"]["Enums"]["messages_types"] | null
         }
         Insert: {
           content?: string | null
@@ -767,6 +768,7 @@ export type Database = {
           order_id: number
           updated_at?: string
           user_id: string
+          visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Update: {
           content?: string | null
@@ -775,6 +777,7 @@ export type Database = {
           order_id?: number
           updated_at?: string
           user_id?: string
+          visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Relationships: [
           {
@@ -2023,6 +2026,7 @@ export type Database = {
       chat_role: "user" | "assistant"
       field_types: "date" | "multiple_choice" | "select" | "text"
       file_types: "image" | "video" | "pdf" | "fig"
+      messages_types: "public" | "internal_agency"
       notification_channel: "in_app" | "email"
       notification_type: "info" | "warning" | "error"
       order_status_types:

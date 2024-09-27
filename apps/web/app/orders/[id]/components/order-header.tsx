@@ -88,12 +88,12 @@ export const OrderHeader = ({ order }: { order: OrderWithAllRelations }) => {
                     onChange={(event) => setOrderName(event.target.value)}
                 />
                 {
-                    isEditing && ["agency_member", "agency_owner"].includes(userRole) ? (
+                    isEditing && ["agency_member", "agency_project_manager", "agency_owner"].includes(userRole) ? (
                         <Button variant="ghost" className="text-slate-500 h-15 m-0" onClick={handleSave}>
                             <Check />
                         </Button>
                     ) : (
-                        ["agency_member", "agency_owner"].includes(userRole) && <Button variant="ghost" className="text-slate-500 h-15 m-0" onClick={() => setIsEditing(true)}>
+                        ["agency_member", "agency_project_manager", "agency_owner"].includes(userRole) && <Button variant="ghost" className="text-slate-500 h-15 m-0" onClick={() => setIsEditing(true)}>
                             <PenLine />
                         </Button>
                     )

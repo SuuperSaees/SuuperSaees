@@ -231,6 +231,7 @@ const logOrderActivities = async (
 export const addOrderMessage = async (
   orderId: Order.Type['id'],
   message: Omit<Message.Insert, Message.Insert['user_id']>,
+  visibility: Message.Type['visibility'],
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -250,11 +251,12 @@ export const addOrderMessage = async (
         ...message,
         user_id: userData.user.id,
         order_id: orderId,
+        visibility,
       })
       .select()
       .single();
-    // console.log('messageData:', orderId, message);
-    if (messageError) throw messageError.message;
+
+      if (messageError) throw messageError.message;
 
     for (const email of emailsData) {
       if (email) {

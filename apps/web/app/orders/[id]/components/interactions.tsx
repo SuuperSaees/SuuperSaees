@@ -11,14 +11,35 @@ import ActivityAction from './activity-actions';
 import UserFile from './user-file';
 import UserMessage from './user-message';
 import UserReviewMessage from './user-review-message';
+import { useState } from 'react';
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 
 const Interactions = () => {
   const { messages, files, activities, reviews } = useActivityContext();
   const interactionsContainerRef = useRef<HTMLDivElement>(null);
+  const [userRole, setUserRole] = useState('');
 
-  // Combine all items into a single array
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      await getUserRole().then((data) => {
+        setUserRole(data);
+      }).catch((error) => {
+        console.error('Error al obtener el rol del usuario:', error);
+      });
+    };
+
+    void fetchUserRole();
+  }, []);
+
+  // Combine all items into a single array with filtering based on user role
   const combinedInteractions = [
-    ...messages.map((message) => ({ ...message, class: 'message' })),
+    ...messages
+      .filter(message => 
+        !["agency_owner", "agency_member", "agency_project_manager"].includes(userRole) 
+        ? message.visibility !== "internal_agency" 
+        : true
+      )
+      .map((message) => ({ ...message, class: 'message' })),
     ...files.map((file) => ({ ...file, class: 'file' })),
     ...activities.map((activity) => ({ ...activity, class: 'activity' })),
     ...reviews.map((review) => ({ ...review, class: 'review' })),
@@ -67,21 +88,20 @@ const Interactions = () => {
           </div>
           {interactions.map((interaction) => {
             return interaction.class === 'message' ? (
-              <div className="flex w-full">
+              <div className="flex w-full" key={interaction.id}>
                 <UserMessage
-                  key={interaction.id}
                   message={interaction as Message}
                 />
               </div>
             ) : interaction.class === 'activity' ? (
-              <ActivityAction activity={interaction as Activity} />
+              <ActivityAction activity={interaction as Activity} key={interaction.id} />
             ) : interaction.class === 'review' ? (
               <UserReviewMessage
                 review={interaction as Review}
                 key={interaction.id}
               />
             ) : interaction.class === 'file' ? (
-              <UserFile file={interaction as File} />
+              <UserFile file={interaction as File} key={interaction.id} />
             ) : null;
           })}
         </div>

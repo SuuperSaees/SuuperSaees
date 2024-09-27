@@ -1,10 +1,10 @@
 'use client';
 
 // import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 
 
-
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import Heading from '@tiptap/extension-heading';
 import { Image as ImageInsert } from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -14,11 +14,9 @@ import { Editor, EditorContent, Extension, ReactNodeViewRenderer, useEditor } fr
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Bold, Heading1, Heading2, Image, Italic, List, ListOrdered, Quote, SendHorizontalIcon, Strikethrough } from 'lucide-react';
-
-
-
 import styles from './styles.module.css';
-
+import { Switch } from '@kit/ui/switch';
+import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -121,7 +119,7 @@ const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
 };
 
 interface RichTextEditorProps {
-  onComplete: (richText: string) => void | Promise<void>;
+  onComplete: (richText: string, isInternalMessagingEnabled: boolean) => void | Promise<void>;
   content?: string;
   onChange?: (richText: string) => void;
   uploadFileIsExternal?: boolean;
@@ -282,7 +280,7 @@ const RichTextEditor = ({
       imagesInText && debounceHandleImageUrl(editor)(text);
     },
   });
-
+  const {isInternalMessagingEnabled} = useInternalMessaging();
   const sendContent = useCallback(() => {
 
     void (async () => {
@@ -295,7 +293,7 @@ const RichTextEditor = ({
           return;
         }
         editor?.commands.clearContent();
-        await onComplete(content);
+        await onComplete(content, isInternalMessagingEnabled);
         insertedImages.current = new Set<string>();
       } finally {
         // cleanupImages();
@@ -349,6 +347,21 @@ export const Toolbar = ({
   uploadFileIsExternal,
   toggleExternalUpload,
 }: ToolbarProps) => {
+  const {isInternalMessagingEnabled, handleSwitchChange} = useInternalMessaging();
+  const [userRole, setUserRole] = useState('');
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+        await getUserRole().then((data)=> {
+          setUserRole(data);
+        }).catch((error) => {
+          console.error('Error al obtener el rol del usuario:', error);
+        })
+      };
+
+    void fetchUserRole();
+}, []);
+
   if (!editor) {
     return null;
   }
@@ -437,6 +450,18 @@ export const Toolbar = ({
       >
         <Image className="h-4 w-4" />
       </button>
+
+      {["agency_member", "agency_project_manager", "agency_owner"].includes(userRole) &&
+        <button
+        onClick={handleSwitchChange}
+        className={isInternalMessagingEnabled ? 'text-gray-700' : 'text-gray-400'}
+      >
+        <Switch checked={isInternalMessagingEnabled} />
+      </button>}
+      {
+        ["agency_member", "agency_project_manager", "agency_owner"].includes(userRole) && isInternalMessagingEnabled && 
+        <span className="text-gray-400">Internal messaging enabled</span>
+      }
     </div>
   );
 };
