@@ -1,7 +1,9 @@
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+
 import { PageBody } from '@kit/ui/page';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
 import { Trans } from '@kit/ui/trans';
-import { OrderHeader } from './components/order-header';
+
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
@@ -9,6 +11,7 @@ import { getOrderById } from '../../../../../packages/features/team-accounts/src
 import ActivityPage from './components/activity';
 import AsideOrderInformation from './components/aside-order-information';
 import DetailsPage from './components/details';
+import { OrderHeader } from './components/order-header';
 import { ActivityProvider } from './context/activity-context';
 
 export const generateMetadata = async () => {
@@ -27,19 +30,21 @@ async function OrderDetailsPage({
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
   );
+  const role = await getUserRole();
   return (
     <PageBody className="h-[100vh] max-h-full min-h-0 flex-grow lg:px-0">
-      <OrderHeader order={order!} />
-    
-      <div className="flex h-full max-h-full w-full flex-col text-gray-700">
-        <div className="flex h-full max-h-full w-full justify-between gap-6">
-          <ActivityProvider
-            messages={order?.messages || []}
-            files={order?.files || []}
-            activities={order?.activities || []}
-            reviews={order?.reviews || []}
-            order={order}
-          >
+      <ActivityProvider
+        messages={order?.messages ?? []}
+        files={order?.files ?? []}
+        activities={order?.activities ?? []}
+        reviews={order?.reviews ?? []}
+        order={order}
+        userRole={role}
+      >
+        <OrderHeader order={order!} />
+
+        <div className="flex h-full max-h-full w-full flex-col text-gray-700">
+          <div className="flex h-full max-h-full w-full justify-between gap-6">
             <div className="flex w-full min-w-0 flex-grow flex-col gap-6">
               <Tabs
                 defaultValue="activity"
@@ -64,10 +69,10 @@ async function OrderDetailsPage({
                 </TabsContent>
               </Tabs>
             </div>
-          </ActivityProvider>
-          <AsideOrderInformation order={order} className="hidden lg:flex" />
+            <AsideOrderInformation order={order} className="hidden lg:flex" />
+          </div>
         </div>
-      </div>
+      </ActivityProvider>
     </PageBody>
   );
 }

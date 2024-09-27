@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getOrderAgencyMembers, getAgencyClients} from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/orders/pick-date/pick-date';
@@ -14,9 +14,9 @@ import { CalendarIcon, Loader, FlagIcon } from 'lucide-react';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { useRouter } from 'next/navigation';
 import { Trans } from '@kit/ui/trans';
+import { useActivityContext } from '../context/activity-context';
 interface AsideOrderInformationProps {
   order: Order.Type;
   className?: string;
@@ -30,19 +30,9 @@ const AsideOrderInformation = ({
   const { t } = useTranslation('orders');
   const [selectedStatus, setSelectedStatus] = useState(order.status);
   const [selectedPriority, setSelectedPriority] = useState(order.priority);
-  const [userRole, setUserRole] = useState('');
-  const router = useRouter();
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      await getUserRole().then((data)=> {
-        setUserRole(data);
-      }).catch((error) => {
-        console.error('Error al obtener el rol del usuario:', error);
-      })
-    };
 
-    void fetchUserRole();
-  }, []);
+  const router = useRouter();
+  const { userRole } = useActivityContext();
 
   const changeStatus = useMutation({
     mutationFn: async (status: Order.Type['status']) => {
@@ -301,5 +291,8 @@ const AsideOrderInformation = ({
     </div>
   );
 };
+
+// IMPORTANT: don't add any more functionalities to this component
+// IMPORTANT: Modularize this component to be able to reuse it in the chat component
 
 export default AsideOrderInformation;

@@ -1,8 +1,7 @@
 import { format } from 'date-fns';
 import { Message } from '../context/activity-context';
 import ImageContainer from './ui/image-container';
-import { useEffect, useState } from 'react';
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import { useActivityContext } from '../context/activity-context';
 import { KeyIcon } from 'lucide-react';
 
 interface ChatMessageProps {
@@ -10,23 +9,10 @@ interface ChatMessageProps {
 }
 
 const ChatMessage = ({ message }: ChatMessageProps) => {
-  const [userRole, setUserRole] = useState('');
+  const { userRole } = useActivityContext();
   const date = format(new Date(message.created_at), 'MMM dd, p');
   // Ensure content is a string
   const content = message.content ?? '';
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-        await getUserRole().then((data)=> {
-          setUserRole(data);
-        }).catch((error) => {
-          console.error('Error al obtener el rol del usuario:', error);
-        })
-      };
-
-    void fetchUserRole();
-}, []);
-
   return (
     <div className="flex flex-col w-full p-2 rounded-sm hover:bg-slate-50 gap-4">
       <div className="flex justify-between w-full">

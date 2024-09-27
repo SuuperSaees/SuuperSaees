@@ -11,9 +11,9 @@ type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url'>;
 import { toast } from 'sonner';
 import { PenLine, Check } from 'lucide-react';
 import { Button } from '@kit/ui/button';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { updateOrder } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import { useActivityContext } from '../context/activity-context';
 
 type OrderWithAllRelations = Order.Relationships.All & {
     messages: (Message.Type & { user: User; files: File.Type[] })[];
@@ -29,33 +29,10 @@ type OrderWithAllRelations = Order.Relationships.All & {
     }[];
   };
 
-
-//   useEffect(() => {
-//     const fetchUserRole = async () => {
-//       await getUserRole().then((data)=> {
-//         setUserRole(data);
-//       }).catch((error) => {
-//         console.error('Error al obtener el rol del usuario:', error);
-//       })
-//     };
-
 export const OrderHeader = ({ order }: { order: OrderWithAllRelations }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [orderName, setOrderName] = useState(order?.title);
-    const [userRole, setUserRole] = useState('');
-
-    useEffect(() => {
-        const fetchUserRole = async () => {
-            await getUserRole().then((data)=> {
-              setUserRole(data);
-            }).catch((error) => {
-              console.error('Error al obtener el rol del usuario:', error);
-            })
-          };
-
-        void fetchUserRole();
-    }, []);
-
+    const { userRole } = useActivityContext();
     const handleSave = async () => {
         if (orderName === '') {
             setIsEditing(false);    

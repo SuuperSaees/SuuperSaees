@@ -11,27 +11,13 @@ import ActivityAction from './activity-actions';
 import UserFile from './user-file';
 import UserMessage from './user-message';
 import UserReviewMessage from './user-review-message';
-import { useState } from 'react';
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 
 const Interactions = () => {
-  const { messages, files, activities, reviews } = useActivityContext();
+  const { messages, files, activities, reviews, userRole} = useActivityContext();
   const interactionsContainerRef = useRef<HTMLDivElement>(null);
-  const [userRole, setUserRole] = useState('');
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      await getUserRole().then((data) => {
-        setUserRole(data);
-      }).catch((error) => {
-        console.error('Error al obtener el rol del usuario:', error);
-      });
-    };
-
-    void fetchUserRole();
-  }, []);
 
   // Combine all items into a single array with filtering based on user role
+
   const combinedInteractions = [
     ...messages
       .filter(message => 
