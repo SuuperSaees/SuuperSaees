@@ -72,34 +72,34 @@ class AccountInvitationsWebhookService {
       throw inviter.error;
     }
 
-    // let inviterOrganizationLogo = '';
-    // let inviterOrganizationThemeColor = '';
+    let inviterOrganizationLogo = '';
+    let inviterOrganizationThemeColor = '';
 
-    // const inviterOrganizationSettings = await this.adminClient
-    //   .from('organization_settings')
-    //   .select('key, value')
-    //   .eq('account_id', inviter?.data.organization_id ?? '')
-    //   .in('key', ['logo_url', 'theme_color']);
+    const inviterOrganizationSettings = await this.adminClient
+      .from('organization_settings')
+      .select('key, value')
+      .eq('account_id', inviter?.data.organization_id ?? '')
+      .in('key', ['logo_url', 'theme_color']);
 
-    // if (inviterOrganizationSettings.error) {
-    //   logger.error(
-    //     {
-    //       error: inviterOrganizationSettings.error,
-    //       name: this.namespace,
-    //     },
-    //     'Failed to fetch inviter organization logo',
-    //   );
-    // }
+    if (inviterOrganizationSettings.error) {
+      logger.error(
+        {
+          error: inviterOrganizationSettings.error,
+          name: this.namespace,
+        },
+        'Failed to fetch inviter organization logo',
+      );
+    }
 
-    // if (inviterOrganizationSettings && !inviterOrganizationSettings.error) {
-    //   inviterOrganizationSettings.data.forEach((setting) => {
-    //     // if (setting.key === 'logo_url') {
-    //     //   // inviterOrganizationLogo = setting.value;
-    //     // } else if (setting.key === 'theme_color') {
-    //     //   // inviterOrganizationThemeColor = setting.value;
-    //     // }
-    //   });
-    // }
+    if (inviterOrganizationSettings && !inviterOrganizationSettings.error) {
+      inviterOrganizationSettings.data.forEach((setting) => {
+        if (setting.key === 'logo_url') {
+          inviterOrganizationLogo = setting.value;
+        } else if (setting.key === 'theme_color') {
+          inviterOrganizationThemeColor = setting.value;
+        }
+      });
+    }
 
     const team = await this.adminClient
       .from('accounts')
@@ -141,8 +141,8 @@ class AccountInvitationsWebhookService {
         inviter: inviter.data.name ?? inviter.data.email ?? '',
         productName: env.productName,
         teamName: team.data.name,
-        // logoUrl: inviterOrganizationLogo,
-        // primaryColor: inviterOrganizationThemeColor,
+        logoUrl: inviterOrganizationLogo,
+        primaryColor: inviterOrganizationThemeColor,
       });
 
       await mailer
