@@ -33,11 +33,12 @@ export const hasPermissionToReadOrderDetails = async (
       'messages.read',
     );
 
+    
     // Step 3: Check for agency permission
     if(userRole === 'agency_owner' && account.organization_id === message_order_propietary_organization_id) {
       return true
-    } 
-
+    }
+    
     if (message_order_propietary_organization_id === account.organization_id) {
       const agencyPermission = await checkAgencyOrderPermissions(
         client,
@@ -46,11 +47,21 @@ export const hasPermissionToReadOrderDetails = async (
       );
       if (agencyPermission) return true;
     }
-
+    
     // Step 4: Check for client permission
     if (message_order_client_organization_id === account.organization_id) {
       return hasPermission;
     }
+    
+    // Step 5: Check for follower permission
+    const { data: followerPermission, error: followerPermissionError } = await client
+      .from('order_followers')
+      .select('order_id')
+      .eq('order_id', message_order_id)
+      .eq('client_member_id', user.id)
+      .single();
+      
+    if (followerPermission && !followerPermissionError) return true;
 
     return false;
   } catch (error) {

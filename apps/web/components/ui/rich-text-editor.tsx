@@ -318,7 +318,7 @@ const RichTextEditor = ({
     ) : null}
         <EditorContent
           editor={editor}
-          className={`${styles['scrollbar-thin']} placeholder:text-gray-400 h-16 overflow-y-auto w-full`}
+          className={`${styles['scrollbar-thin']} flex flex-col-reverse placeholder:text-gray-400 h-fit max-h-[9vh] overflow-y-auto w-full`}
         />
       </div>
       <div>

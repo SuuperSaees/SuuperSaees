@@ -181,7 +181,7 @@ const AsideOrderInformation = ({
 
   return (
     <div
-      className={`flex h-[90vh] w-full min-w-0 max-w-80 relative left-7 bottom-10 border-gray-200 border-l border-t-0 border-r-0 border-b-0 pl-4 shrink-0 flex-col gap-4 text-gray-700 ${className}`}
+      className={`flex h-[90vh] w-full min-w-0 max-w-80 relative bottom-10 border-gray-200 border-l border-t-0 border-r-0 border-b-0 pl-4 shrink-0 flex-col gap-4 text-gray-700 ${className}`}
       {...rest}
     >
       <div className="border-b border-gray-200 pb-7">
@@ -248,20 +248,38 @@ const AsideOrderInformation = ({
         
       ) : (
         <div className="flex flex-col gap-2">
-        
-          <span className="font-semibold">{t('details.status')}</span>
-          <span className="pl-2 pr-2">
-            {order.status
-              ?.replace(/_/g, ' ')
-              .replace(/^\w/, (c) => c.toUpperCase())}
+
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-sm font-semibold flex"><CalendarIcon className="mr-2 h-4 w-4" />  {t('details.deadline')} </span>
+            <span className="pl-2 pr-2">
+            {order.due_date
+              ? new Date(order.due_date).toLocaleDateString()
+              : '-- / -- / --'}
           </span>
-        
-          <span className="font-semibold">{t('details.priority')}</span>
-          <span className="pl-2 pr-2">
-            {order.priority
-              ?.replace(/_/g, ' ')
-              .replace(/^\w/, (c) => c.toUpperCase())}
-          </span>
+          </div>
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex">
+            <Loader className="mr-2 h-4 w-4" />
+            <span className="font-semibold">{t('details.status')}</span>
+            </div>
+            <span className="pl-2 pr-2">
+              {order.status
+                ?.replace(/_/g, ' ')
+                .replace(/^\w/, (c) => c.toUpperCase())}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center mb-4">
+           <div className="flex">
+           <FlagIcon className="mr-2 h-4 w-4" />
+           <span className="font-semibold">{t('details.priority')}</span>
+           </div>
+            <span className="pl-2 pr-2">
+              {order.priority
+                ?.replace(/_/g, ' ')
+                .replace(/^\w/, (c) => c.toUpperCase())}
+            </span>
+          </div>
         
           <ActivityAssignations
             searchUserOptions={searchUserOptions}
@@ -274,13 +292,6 @@ const AsideOrderInformation = ({
             followers={order.followers}
             updateFunction={changeAgencyMembersFollowers.mutate}
           />
-        
-          <span className="font-semibold">{t('details.deadline')}</span>
-          <span className="pl-2 pr-2">
-            {order.due_date
-              ? new Date(order.due_date).toLocaleDateString()
-              : '-'}
-          </span>
         </div>
       )}
       

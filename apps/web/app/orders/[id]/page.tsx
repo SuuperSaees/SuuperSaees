@@ -27,7 +27,7 @@ async function OrderDetailsPage({
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
   );
-
+  console.log(id);
   // Asegúrate de que no estás utilizando el resultado de generateMetadata aquí
   // Solo renderiza el contenido de la página
   return (
