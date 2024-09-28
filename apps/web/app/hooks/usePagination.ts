@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface UsePaginationProps {
   totalItems: number;
@@ -16,6 +16,13 @@ export function usePagination({
 
   const startIndex = currentPage * pageSize;
   const endIndex = startIndex + pageSize;
+
+  // Move to the previous page if current page becomes empty after deletion
+  useEffect(() => {
+    if (currentPage > 0 && startIndex >= totalItems) {
+      setCurrentPage(currentPage - 1);
+    }
+  }, [totalItems, currentPage, pageSize, startIndex]);
 
   const nextPage = () => {
     if (currentPage < totalPages - 1) {

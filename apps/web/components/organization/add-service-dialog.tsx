@@ -29,32 +29,38 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
+import { Spinner } from '@kit/ui/spinner';
 
 import SelectAction from '../ui/select';
 
 type ServiceOption = {
-  value: string;
+  value: number;
   label: string;
   action?: () => void;
 };
 interface AddServiceDialogProps {
   children: React.ReactNode;
-  serviceOptions: ServiceOption[];
+  serviceOptions?: ServiceOption[];
   clientOrganizationId: string;
+  isPending: boolean;
 }
 
 export function AddServiceDialog({
   children,
   serviceOptions,
   clientOrganizationId,
+  isPending,
 }: AddServiceDialogProps) {
   // const [pending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation('services');
+
   const queryClient = useQueryClient();
+
   const addService = useMutation({
     mutationFn: async ({ serviceSelected }: { serviceSelected: number }) =>
       await addServiceToClient(clientOrganizationId, serviceSelected),
+
     onSuccess: async () => {
       toast.success('Success', {
         description: 'Service added successfully!',
@@ -64,6 +70,7 @@ export function AddServiceDialog({
         queryKey: ['services', clientOrganizationId],
       });
     },
+
     onError: () => {
       toast.error('Error', {
         description: 'Service could not be added!',
@@ -71,7 +78,6 @@ export function AddServiceDialog({
     },
   });
 
-  // Dynamically create schema with the translated error message
   const addServiceSchema = z.object({
     serviceSelected: z
       .number()
@@ -80,7 +86,6 @@ export function AddServiceDialog({
 
   const onSubmit = async (values: z.infer<typeof addServiceSchema>) => {
     // Use transition to avoid blocking the UI thread
-    console.log('values', values);
     await addService.mutateAsync({ serviceSelected: values.serviceSelected });
     setIsOpen(false);
   };
@@ -98,11 +103,22 @@ export function AddServiceDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <AddServiceForm
-          onSubmit={onSubmit}
-          serviceOptions={serviceOptions}
-          addServiceSchema={addServiceSchema}
-        />
+        {isPending ? (
+          <Spinner className="mx-auto h-10 w-10" />
+        ) : !serviceOptions?.length ? (
+          <div className="flex h-full w-full items-center justify-center">
+            <span className="text-muted-foreground">
+              {t('dialogs.add.select.notFound')}
+            </span>
+          </div>
+        ) : (
+          <AddServiceForm
+            onSubmit={onSubmit}
+            serviceOptions={serviceOptions}
+            addServiceSchema={addServiceSchema}
+            isPending={addService.isPending}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -112,10 +128,12 @@ function AddServiceForm({
   onSubmit,
   serviceOptions,
   addServiceSchema,
+  isPending,
 }: {
   onSubmit: (values: z.infer<typeof addServiceSchema>) => void;
   serviceOptions: ServiceOption[];
   addServiceSchema: z.ZodSchema;
+  isPending: boolean;
 }) {
   const { t } = useTranslation('services');
 
@@ -124,7 +142,7 @@ function AddServiceForm({
     shouldUseNativeValidation: true,
     reValidateMode: 'onSubmit',
     defaultValues: {
-      serviceSelected: '',
+      serviceSelected: -1,
     },
   });
 
@@ -139,7 +157,7 @@ function AddServiceForm({
               <FormControl>
                 <SelectAction
                   options={serviceOptions}
-                  className="bg-white"
+                  className="w-full bg-white"
                   groupName={t('dialogs.add.select.label')}
                   onSelectHandler={(value: string) => {
                     form.setValue('serviceSelected', Number(value));
@@ -153,7 +171,7 @@ function AddServiceForm({
             </FormItem>
           )}
         />
-        <ThemedButton type="submit" className="w-full">
+        <ThemedButton type="submit" className="w-full" disabled={isPending}>
           {t('dialogs.add.select.submit')}
         </ThemedButton>
       </form>

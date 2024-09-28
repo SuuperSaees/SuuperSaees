@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import {
   Select,
   SelectContent,
@@ -13,7 +15,7 @@ import {
 
 type Option = {
   label: string;
-  value: string;
+  value: string | number;
 };
 
 interface SelectActionProps {
@@ -37,7 +39,7 @@ const SelectAction = ({
 }: SelectActionProps) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
-
+  const { t } = useTranslation();
   // Set the label based on the defaultValue initially
   useEffect(() => {
     const defaultOption = options.find(
@@ -58,18 +60,16 @@ const SelectAction = ({
             (option) => option.value === value,
           );
           if (selectedOption) {
-            setSelectedValue(selectedOption.value);
+            setSelectedValue(String(selectedOption.value));
             setSelectedLabel(selectedOption.label);
           }
           onSelectHandler && onSelectHandler(value);
         }}
         {...rest}
       >
-        <SelectTrigger
-          className={'w-full max-w-[240px] border-none bg-black ' + className}
-        >
-          <SelectValue placeholder="Select an option">
-            {selectedLabel ?? 'Select an option'}
+        <SelectTrigger className={'w-full border-none bg-black ' + className}>
+          <SelectValue placeholder={t('common:selectOption')}>
+            {selectedLabel ?? t('common:selectOption')}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -77,7 +77,7 @@ const SelectAction = ({
             {options.map((option) => (
               <SelectItem
                 key={option.value}
-                value={option.value}
+                value={option.value as string}
                 className="pointer-events-auto cursor-pointer"
               >
                 {option.label}

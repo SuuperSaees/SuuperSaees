@@ -110,8 +110,19 @@
             "select": {
                 "label": "Select a service",
                 "error": "You must select a service to continue",
-                "submit": "Add service"
+                "submit": "Add service",
+                "notFound": "No services found"
             }
+        }
+    },
+    "empty": {
+        "client": {
+            "title": "No Services Assigned",
+            "description": "Currently, no services have been added to your account. Please contact your agency for further assistance."
+        },
+        "agency": {
+            "title": "Let’s start by adding a service",
+            "description": "You have not yet added any services for this client, add one by clicking the 'Add service' button."
         }
     }
 }

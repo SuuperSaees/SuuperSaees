@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getClientServices } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service';
+import { getClientServices } from 'node_modules/@kit/team-accounts/src/server/actions/services/get/get-services';
 import {
   Pagination,
   PaginationContent,
@@ -11,28 +11,32 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from 'node_modules/@kit/ui/src/shadcn/pagination';
+import { useTranslation } from 'react-i18next';
 
 import { Trans } from '@kit/ui/trans';
 
 import { usePagination } from '~/hooks/usePagination';
-import { Service } from '~/lib/services.types';
 
+import EmptyState from '../ui/empty-state';
+import { SkeletonCards } from '../ui/skeleton';
 import ServiceCard from './service-card';
+import { SkeletonCardService } from './skeleton-card-image';
 
 // import { getServicesByOrganizationId } from "node_modules/@kit/team-accounts/src/server/actions/services/get/get-services-by-organization-id";
 interface ServiceSectionProps {
   organizationId: string;
-  services: Service.Type[];
+  currentUserRole: string;
 }
-function ServiceSection({ organizationId }: ServiceSectionProps) {
-  const {
-    data: services,
-    isLoading,
-    error,
-  } = useQuery({
+function ServiceSection({
+  organizationId,
+  currentUserRole,
+}: ServiceSectionProps) {
+  const { data: services, isLoading } = useQuery({
     queryKey: ['services', organizationId],
     queryFn: async () => await getClientServices(organizationId),
   });
+
+  const { t } = useTranslation('services');
 
   const totalItems = services?.length ?? 0;
 
@@ -52,24 +56,38 @@ function ServiceSection({ organizationId }: ServiceSectionProps) {
 
   // Slice the services data for the current page
   const paginatedServices = services?.slice(startIndex, endIndex) ?? [];
-
+  const role = 'agency_owner';
   return (
     <div className="flex h-full flex-col gap-8">
-      {isLoading && <div>Loading...</div>}
-      {error && <div>Error loading services</div>}
-
-      <div className="flex h-full w-full flex-wrap gap-8">
-        {paginatedServices.map((service) => (
-          <ServiceCard
-            service={service.info}
-            key={service.id}
-            clientOrganizationId={organizationId}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <SkeletonCards count={8} className="flex h-full w-full flex-wrap gap-8">
+          <SkeletonCardService />
+        </SkeletonCards>
+      ) : (paginatedServices.length === 0 ?? !paginatedServices) ? (
+        <EmptyState
+          imageSrc="/images/illustrations/Illustration-card.svg"
+          title={t(
+            `${role === 'agency_owner' || role === 'agency_project_manager' ? 'empty.agency.title' : 'empty.client.title'}`,
+          )}
+          description={t(
+            `${role === 'agency_owner' || role === 'agency_project_manager' ? 'empty.agency.description' : 'empty.client.description'}`,
+          )}
+        />
+      ) : (
+        <div className="flex h-full w-full flex-wrap gap-8">
+          {paginatedServices.map((service) => (
+            <ServiceCard
+              currentUserRole={currentUserRole}
+              service={service}
+              key={service.subscription_id}
+              clientOrganizationId={organizationId}
+            />
+          ))}
+        </div>
+      )}
 
       {totalPages > 1 && (
-        <Pagination className="border-t p-4">
+        <Pagination className="mt-auto border-t p-4">
           <PaginationContent className="flex w-full items-center justify-between">
             <PaginationItem>
               <PaginationPrevious

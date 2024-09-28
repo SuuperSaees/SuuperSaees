@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useTransition } from 'react';
 
 import {
   DropdownMenu,
@@ -10,13 +10,26 @@ import { Separator } from '@kit/ui/separator';
 
 export type DropdownOption = {
   value: string | JSX.Element;
-  actionFn: () => void;
+  actionFn: () => Promise<void>;
 };
 interface DropdownProps {
   children: React.ReactNode;
   options: DropdownOption[];
 }
 export default function Dropdown({ children, options }: DropdownProps) {
+  const [isPending, startTransition] = useTransition();
+  const [disabledIndices, setDisabledIndices] = useState<number[]>([]);
+
+  const handleClick = (option: DropdownOption, index: number) => {
+    setDisabledIndices((prev) => [...prev, index]);
+
+    startTransition(async () => {
+      await option.actionFn().finally(() => {
+        setDisabledIndices((prev) => prev.filter((i) => i !== index));
+      });
+    });
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="w-fit">
@@ -32,8 +45,9 @@ export default function Dropdown({ children, options }: DropdownProps) {
             }
           >
             <DropdownMenuItem
-              className="min-w-32 cursor-pointer"
-              onClick={option.actionFn}
+              className={`min-w-32 cursor-pointer ${disabledIndices.includes(index) ? 'cursor-not-allowed opacity-50' : ''}`}
+              onClick={() => handleClick(option, index)}
+              disabled={isPending || disabledIndices.includes(index)}
             >
               {option.value}
             </DropdownMenuItem>

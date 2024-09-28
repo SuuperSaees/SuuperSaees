@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ban, MoreVertical } from 'lucide-react';
-import { deleteClientService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service';
+import { deleteClientService } from 'node_modules/@kit/team-accounts/src/server/actions/services/delete/delete-service-server';
 import { toast } from 'sonner';
 
 import { Button } from '@kit/ui/button';
@@ -13,29 +13,24 @@ import { Service } from '~/lib/services.types';
 import Dropdown from '../ui/dropdown';
 
 type ServiceCardProps = {
-  service: Pick<
-    Service.Type,
-    | 'created_at'
-    | 'id'
-    | 'name'
-    | 'price'
-    | 'number_of_clients'
-    | 'status'
-    | 'propietary_organization_id'
-    | 'service_image'
-    | 'service_description'
-  >;
+  service: Service.Relationships.Client.Response;
   clientOrganizationId: string;
+  currentUserRole: string;
 };
 export default function ServiceCard({
   service,
   clientOrganizationId,
+  currentUserRole,
 }: ServiceCardProps) {
   const queryClient = useQueryClient();
 
   const cancelClientService = useMutation({
     mutationFn: async () =>
-      await deleteClientService(clientOrganizationId, service.id),
+      await deleteClientService(
+        clientOrganizationId,
+        service.id,
+        service.subscription_id,
+      ),
 
     onSuccess: async () => {
       toast.success('Success', {
@@ -61,12 +56,12 @@ export default function ServiceCard({
           <Trans i18nKey={'service:cancel'} />
         </span>
       ),
-      actionFn: async () => await cancelClientService.mutateAsync(),
+      actionFn: async () => void (await cancelClientService.mutateAsync()),
     },
   ];
 
   return (
-    <div className="relative flex h-fit max-h-96 w-fit max-w-xs flex-col gap-2">
+    <div className="relative flex h-fit max-h-96 w-full max-w-xs flex-col gap-2">
       <div className="w-xs h-60 w-full overflow-hidden rounded-xl">
         {/* eslint-disable @next/next/no-img-element */}
         <img
@@ -76,22 +71,26 @@ export default function ServiceCard({
         />
       </div>
       <div className="line-clamp-4">
-        <small className="font-semibold text-purple">
+        {/* <small className="font-semibold text-purple">
           {service.created_at}
-        </small>
+        </small> */}
         <h3 className="text-lg font-semibold">{service.name}</h3>
         <p className="mt-2 text-sm text-gray-600">
           {service.service_description}
         </p>
       </div>
-      <Dropdown options={serviceOptions}>
-        <Button
-          className="absolute right-4 top-4 h-10 w-10 rounded-full bg-white/70 p-0"
-          variant={'ghost'}
-        >
-          <MoreVertical className="h-5 w-5" />
-        </Button>
-      </Dropdown>
+      {(currentUserRole === 'agency_owner' ??
+        currentUserRole === 'agency_project_manager') && (
+        <Dropdown options={serviceOptions}>
+          <Button
+            className="absolute right-4 top-4 h-10 w-10 rounded-full bg-white/70 p-0"
+            variant={'ghost'}
+            disabled={cancelClientService.isPending}
+          >
+            <MoreVertical className="h-5 w-5" />
+          </Button>
+        </Dropdown>
+      )}
     </div>
   );
 }

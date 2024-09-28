@@ -9,7 +9,8 @@ import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/t
 import { getServices } from 'node_modules/@kit/team-accounts/src/server/actions/services/get/get-services';
 import { useTranslation } from 'react-i18next';
 
-// import { Input } from '@kit/ui/input';
+
+
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 // import FileSection from './files';
@@ -45,8 +46,6 @@ function SectionView({
     return { value: service.id, label: service.name };
   });
 
-  console.log('services', services.data);
-
   const buttonControllersMap = new Map<string, JSX.Element | null>([
     [
       'members',
@@ -64,6 +63,8 @@ function SectionView({
         key={'services'}
         serviceOptions={serviceOptions}
         clientOrganizationId={clientOrganizationId}
+        isPending={services.isPending}
+        currentUserRole={currentUserRole}
       />,
     ],
     ['files', null],
@@ -86,8 +87,8 @@ function SectionView({
       'services',
       <ServiceSection
         key={'services'}
-        services={services.data ?? []}
         organizationId={clientOrganizationId}
+        currentUserRole={currentUserRole}
       />,
     ],
     // ['files', <FileSection key={'files'} />],
@@ -120,6 +121,7 @@ function SectionView({
         </TabsList>
         <div className="flex gap-4">{buttonControllersMap.get(activeTab)}</div>
       </div>
+
       {Array.from(navigationOptionsMap.values()).map((option) => (
         <TabsContent
           value={option.key ?? ''}
