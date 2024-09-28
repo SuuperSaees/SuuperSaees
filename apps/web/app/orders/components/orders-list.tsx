@@ -39,6 +39,7 @@ import { ThemedButton } from '../../../../../packages/features/accounts/src/comp
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../packages/ui/src/shadcn/pagination';
 import { statusColors } from '../[id]/utils/get-color-class-styles';
+import { Trans } from '@kit/ui/trans';
 
 
 type ExtendedOrderType = Order.Type & {
@@ -50,10 +51,15 @@ type ExtendedOrderType = Order.Type & {
 type OrdersTableProps = {
   orders: ExtendedOrderType[];
   role: string;
+};
+
+type OrdersCardTableProps = {
+  orders: ExtendedOrderType[];
+  role: string;
   updateOrderDate: (dueDate: string, orderId: number) => Promise<void>;
 };
 
-const OrdersCardTable: React.FC<OrdersTableProps> = ({
+const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   orders,
   role,
   updateOrderDate,
@@ -232,7 +238,7 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({
                     ) : (
                       // Display the date or an empty space if there is no date
                       <span className="pl-2 pr-2">
-                        {order.due_date ?? 'Sin fecha'}
+                        {order.due_date ?? <Trans i18nKey="orders:details.deadlineNotSet" />}
                       </span>
                     )}
                   </TableCell>

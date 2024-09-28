@@ -34,6 +34,16 @@
           "masculine": "the",
           "feminine": "the"
         }
+      },
+      "title": {
+        "singular": {
+          "masculine": "the",
+          "feminine": "the"
+        },
+        "plural": {
+          "masculine": "the",
+          "feminine": "the"
+        }
       }
     },
     "types": {

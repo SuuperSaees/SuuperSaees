@@ -29,6 +29,7 @@
   "details": {
     "title": "Detalles del pedido",
     "summary": "Resumen",
+    "deadlineNotSet": "Sin asignar",
     "createdBy": "Creado por",
     "orderId": "Pedido ID",
     "createdAt": "Creado",

@@ -244,7 +244,7 @@ const AsideOrderInformation = ({
             <span className="pl-2 pr-2">
             {order.due_date
               ? new Date(order.due_date).toLocaleDateString()
-              : '-- / -- / --'}
+              : <Trans i18nKey="orders:details.deadlineNotSet" />}
           </span>
           </div>
           <div className="flex justify-between items-center mb-4">

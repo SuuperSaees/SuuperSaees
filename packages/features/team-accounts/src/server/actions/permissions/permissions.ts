@@ -2,11 +2,16 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
+import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 // import { Database } from '../../../../../../../apps/web/lib/database.types';
 import { getUserRole } from '../members/get/get-member-account';
-import { Database } from '@kit/supabase/database';
+
 
 // Generic permission check
 export const checkGeneralPermission = async (
@@ -93,26 +98,48 @@ export const hasPermissionToReadOrders = async () => {
     }
   
   if (followerOrders?.length > 0) {
-    const followerOrderIds = followerOrders?.map(order => order.order_id);
-    const followerOrdersData: { agency_id: string; client_organization_id: string; created_at: string; customer_id: string; description: string; due_date: string | null; id: number; priority: Database["public"]["Enums"]["priority_types"] | null; propietary_organization_id: string; status: Database["public"]["Enums"]["order_status_types"] | null; stripe_account_id: string | null; title: string; uuid: string; }[] = [];
-    
-    await Promise.all(followerOrderIds?.map(async (orderId) => {
-      const { data: followerOrderData, error: followerOrderError } = await client
-        .from('orders_v2')
-        .select('*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)') 
-        .eq('id', orderId as number)
-        .single();
-        
-      if (followerOrderError) {
-        console.error(followerOrderError.message);
-        throw new Error('Error fetching orders for followers');
-      }
-  
-      if (followerOrderData) {
-        followerOrdersData.push(followerOrderData);
-      }
-    }) ?? []);
-  
+    // map the follower orders to get the order ids and filter the orders that are not equal to the orders in the ordersData array by id
+    const followerOrderIds = followerOrders
+      ?.map((order) => order.order_id)
+      .filter((orderId) => !ordersData.some((order) => order.id === orderId));
+    const followerOrdersData: {
+      agency_id: string;
+      client_organization_id: string;
+      created_at: string;
+      customer_id: string;
+      description: string;
+      due_date: string | null;
+      id: number;
+      priority: Database['public']['Enums']['priority_types'] | null;
+      propietary_organization_id: string;
+      status: Database['public']['Enums']['order_status_types'] | null;
+      stripe_account_id: string | null;
+      title: string;
+      uuid: string;
+    }[] = [];
+
+    await Promise.all(
+      followerOrderIds?.map(async (orderId) => {
+        const { data: followerOrderData, error: followerOrderError } =
+          await client
+            .from('orders_v2')
+            .select(
+              '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
+            )
+            .eq('id', orderId as number)
+            .single();
+
+        if (followerOrderError) {
+          console.error(followerOrderError.message);
+          throw new Error('Error fetching orders for followers');
+        }
+
+        if (followerOrderData) {
+          followerOrdersData.push(followerOrderData);
+        }
+      }) ?? [],
+    );
+
     ordersData = [...ordersData, ...followerOrdersData];
   }
   } else if (isTeamMember) {

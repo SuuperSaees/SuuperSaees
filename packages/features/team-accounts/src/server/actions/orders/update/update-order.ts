@@ -18,6 +18,7 @@ import { getEmails, getOrderInfo } from '../get/get-mail-info';
 import { sendOrderMessageEmail } from '../send-mail/send-order-message-email';
 import { sendOrderStatusPriorityEmail } from '../send-mail/send-order-status-priority';
 
+
 const statusTranslations = {
   pending: 'Pending',
   in_progress: 'In progres',
@@ -185,7 +186,7 @@ const logOrderActivities = async (
           type,
           message,
           value,
-          preposition: `to`,
+          preposition: `to the`,
           order_id: orderId,
           user_id: userId,
         };
