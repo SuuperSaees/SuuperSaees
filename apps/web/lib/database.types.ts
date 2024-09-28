@@ -507,6 +507,7 @@ export type Database = {
       }
       client_services: {
         Row: {
+          agency_id: string
           client_id: string
           client_organization_id: string
           created_at: string
@@ -515,6 +516,7 @@ export type Database = {
           service_id: number
         }
         Insert: {
+          agency_id: string
           client_id: string
           client_organization_id: string
           created_at?: string
@@ -523,6 +525,7 @@ export type Database = {
           service_id: number
         }
         Update: {
+          agency_id?: string
           client_id?: string
           client_organization_id?: string
           created_at?: string
@@ -531,6 +534,27 @@ export type Database = {
           service_id?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "client_services_client_id_fkey"
             columns: ["client_id"]
@@ -1479,7 +1503,7 @@ export type Database = {
           id: number
           max_number_of_monthly_orders: number | null
           max_number_of_simultaneous_orders: number | null
-          name: string | null
+          name: string
           number_of_clients: number | null
           price: number | null
           price_id: string | null
@@ -1507,7 +1531,7 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string | null
+          name: string
           number_of_clients?: number | null
           price?: number | null
           price_id?: string | null
@@ -1535,7 +1559,7 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string | null
+          name?: string
           number_of_clients?: number | null
           price?: number | null
           price_id?: string | null

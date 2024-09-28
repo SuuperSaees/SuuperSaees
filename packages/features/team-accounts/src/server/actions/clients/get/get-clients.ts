@@ -254,3 +254,26 @@ export async function getAllClients(): Promise<ClientsWithOrganization[]> {
     throw error;
   }
 }
+
+export async function fetchClientByOrgId(
+  client: SupabaseClient<Database>,
+  clientOrganizationId: string,
+) {
+  try {
+    const { data: clientData, error: clientError } = await client
+      .from('clients')
+      .select('id, agency_id')
+      .eq('organization_client_id', clientOrganizationId);
+
+    if (clientError) {
+      throw new Error(
+        `Error while trying to find the client, ${clientError.message}`,
+      );
+    }
+
+    return clientData;
+  } catch (error) {
+    console.error('Error while trying to find the client:', error);
+    throw error;
+  }
+}

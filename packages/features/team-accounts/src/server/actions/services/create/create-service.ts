@@ -1,15 +1,20 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+import { Account } from '../../../../../../../../apps/web/lib/account.types';
+import { Client } from '../../../../../../../../apps/web/lib/client.types';
+import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
+import { fetchClientByOrgId } from '../../clients/get/get-clients';
 import {
   fetchCurrentUser,
   getPrimaryOwnerId,
   getStripeAccountID,
 } from '../../members/get/get-member-account';
+import { hasPermissionToAddClientServices } from '../../permissions/services';
 import { updateTeamAccountStripeId } from '../../team-details-server-actions';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -205,42 +210,36 @@ export async function addServiceToClient(
     if (!user) throw new Error('No user found');
 
     // Step 2: Getting the client identifier
-
-    const { data: clientData, error: clientError } = await client
-      .from('clients')
-      .select('id')
-      .eq('organization_client_id', clientOrganizationId);
-
-    if (clientError)
-      throw new Error(
-        `Error while trying to find the client, ${clientError.message}`,
-      );
+    const clientData = await fetchClientByOrgId(client, clientOrganizationId);
 
     const clientId = clientData[0]?.id;
-    if (!clientId) throw new Error('No client found');
+    const clientAgencyId = clientData[0]?.agency_id;
 
-    // Step 3: Add to specified service to the client organization
-    const { data: serviceAddedData, error: serviceAddedError } = await client
-      .from('client_services')
-      .insert({
-        client_organization_id: clientOrganizationId,
-        service_id: serviceId,
-        client_id: clientId,
-        created_by: user.id,
-      })
-      .select();
+    if (!clientId ?? !clientAgencyId) throw new Error('No client found');
 
-    // Step 4: Update service clients count
+    // Step 3: Verify the permissions to add service to client
+    const hasPermission =
+      await hasPermissionToAddClientServices(clientAgencyId);
+
+    if (!hasPermission)
+      throw new Error('No permission to add services to client');
+
+    // Step 4: Add to specified service to the client organization
+    const serviceAddedData = await insertServiceToClient(
+      client,
+      clientOrganizationId,
+      serviceId,
+      clientId ?? '',
+      user.id,
+      clientAgencyId,
+    );
+
+    // Step 5: Update service clients count
     // const { error: updateServiceError } = await client
     //   .from('services')
     //   .update({ number_of_clients: 1})
     //   .increment('number_of_clients')
 
-    if (serviceAddedError)
-      throw new Error(
-        `Error while trying to add service to client, ${serviceAddedError.message}`,
-      );
-    revalidatePath(`/clients/organizations`);
     return serviceAddedData;
   } catch (error) {
     console.error('Error while adding service to client', error);
@@ -248,78 +247,35 @@ export async function addServiceToClient(
   }
 }
 
-export async function getClientServices(clientOrganizationId: string) {
-  const client = getSupabaseServerComponentClient();
-  try {
-    // Step 1: Verify the user
-    const user = await fetchCurrentUser(client);
-    if (!user) throw new Error('No user found');
-
-    // Step 2: Get the client's service
-    const { data: clientServiceData, error: clientServiceError } = await client
-      .from('client_services')
-      .select(
-        'id, created_at, info:services(id, name, price, service_description, service_image)',
-      )
-      .eq('client_organization_id', clientOrganizationId);
-
-    if (clientServiceError) {
-      throw new Error(
-        `Error while getting client services, ${clientServiceError.message}`,
-      );
-    }
-    console.log('clienServicetData', clientServiceData);
-
-    return clientServiceData;
-  } catch (error) {
-    console.error('Error while getting client services', error);
-    throw error;
-  }
-}
-
-export async function deleteClientService(
+export async function insertServiceToClient(
+  client: SupabaseClient<Database>,
   clientOrganizationId: string,
   serviceId: Service.Type['id'],
+  clientId: Client.Type['id'],
+  userId: Account.Type['id'],
+  agencyId: string,
 ) {
-  const client = getSupabaseServerComponentClient();
   try {
-    // Step 1: Verify the user
-    const user = await fetchCurrentUser(client);
-    if (!user) throw new Error('No user found');
-
-    // Step 2: Get the client ID
-    const { data: clientData, error: clientError } = await client
-      .from('clients')
-      .select('id')
-      .eq('organization_client_id', clientOrganizationId);
-
-    if (clientError)
-      throw new Error(
-        `Error while trying to find the client, ${clientError.message}`,
-      );
-
-    const clientId = clientData[0]?.id;
-    if (!clientId) throw new Error('No client found');
-
-    // Step 3: Delete the specified service from the client organization
-    const { data: deleteData, error: deleteError } = await client
+    const { data: serviceAddedData, error: serviceAddedError } = await client
       .from('client_services')
-      .delete()
-      .eq('client_organization_id', clientOrganizationId)
-      .eq('service_id', serviceId)
-      .eq('client_id', clientId);
+      .insert({
+        client_organization_id: clientOrganizationId,
+        service_id: serviceId,
+        client_id: clientId,
+        created_by: userId,
+        agency_id: agencyId,
+      })
+      .select();
 
-    if (deleteError)
+    if (serviceAddedError) {
       throw new Error(
-        `Error while trying to delete service from client, ${deleteError.message}`,
+        `Error while trying to add service to client, ${serviceAddedError.message}`,
       );
+    }
 
-    // Step 4: Optionally, you can revalidate the path or update the number of clients
-    revalidatePath(`/clients/`);
-
-    return deleteData;
+    return serviceAddedData;
   } catch (error) {
-    console.error('Error while deleting service from client', error);
+    console.error('Error while adding service to client', error);
     throw error;
   }
 }
