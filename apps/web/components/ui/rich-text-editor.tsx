@@ -34,6 +34,7 @@ import { Switch } from '@kit/ui/switch';
 import { useActivityContext } from '../../app/orders/[id]/context/activity-context';
 import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
+import { Trans } from '@kit/ui/trans';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -330,7 +331,7 @@ const RichTextEditor = ({
       >
         {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
           <span className="absolute left-2 top-4 -translate-y-1/2 transform text-gray-400">
-            Escribe un mensaje...
+            <Trans i18nKey="placeholder" />
           </span>
         ) : null}
         <EditorContent
@@ -474,7 +475,9 @@ export const Toolbar = ({
         userRole,
       ) &&
         isInternalMessagingEnabled && (
-          <span className="text-gray-400">Internal messaging enabled</span>
+          <span className="text-gray-400">
+            <Trans i18nKey="internalMessagingEnabled" />
+          </span>
         )}
     </div>
   );

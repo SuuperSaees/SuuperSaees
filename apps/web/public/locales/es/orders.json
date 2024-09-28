@@ -72,6 +72,9 @@
   "dragAndDrop": "Arrastra los archivos aquí o haz clic para subir",
   "dropHere": "Suelta aquí para subir archivos",
   "tryAgain": "Inténtalo de nuevo",
-  "OrderDescriptionTitle": "Detalles del pedido"
-  
+  "OrderDescriptionTitle": "Detalles del pedido",
+  "internalMessagingEnabled": "Habilitado el envío de mensajes internos",
+  "internalMessagingDisabled": "Deshabilitado el envío de mensajes internos",
+  "internalMessage": "Mensaje interno",
+  "placeholder": "Escribe un mensaje..."
 }
