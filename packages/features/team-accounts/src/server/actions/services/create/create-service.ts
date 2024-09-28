@@ -2,6 +2,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
@@ -233,12 +235,6 @@ export async function addServiceToClient(
       user.id,
       clientAgencyId,
     );
-
-    // Step 5: Update service clients count
-    // const { error: updateServiceError } = await client
-    //   .from('services')
-    //   .update({ number_of_clients: 1})
-    //   .increment('number_of_clients')
 
     return serviceAddedData;
   } catch (error) {
