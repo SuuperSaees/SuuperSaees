@@ -252,7 +252,7 @@ const AsideOrderInformation = ({
             <Loader className="mr-2 h-4 w-4" />
             <span className="font-semibold">{t('details.status')}</span>
             </div>
-            <span className="pl-2 pr-2">
+            <span className={`px-2 py-1 rounded-full font-semibold ${order.status ? statusColors[order.status] : undefined}`}>
               {order.status
                 ?.replace(/_/g, ' ')
                 .replace(/^\w/, (c) => c.toUpperCase())}
@@ -264,7 +264,8 @@ const AsideOrderInformation = ({
            <FlagIcon className="mr-2 h-4 w-4" />
            <span className="font-semibold">{t('details.priority')}</span>
            </div>
-            <span className="pl-2 pr-2">
+            <span className={`px-2 py-1 flex items-center rounded-full font-semibold ${order.priority ? priorityColors[order.priority] : undefined}`}>
+            <div className='h-2 w-2 mr-2 rounded-full bg-current'></div>
               {order.priority
                 ?.replace(/_/g, ' ')
                 .replace(/^\w/, (c) => c.toUpperCase())}

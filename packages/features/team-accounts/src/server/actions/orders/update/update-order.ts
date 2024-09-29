@@ -186,7 +186,7 @@ const logOrderActivities = async (
           type,
           message,
           value,
-          preposition: `to the`,
+          preposition: `to`,
           order_id: orderId,
           user_id: userId,
         };
