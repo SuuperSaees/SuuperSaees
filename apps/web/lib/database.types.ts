@@ -505,6 +505,114 @@ export type Database = {
           },
         ]
       }
+      client_services: {
+        Row: {
+          agency_id: string
+          client_id: string
+          client_organization_id: string
+          created_at: string
+          created_by: string
+          id: number
+          service_id: number
+        }
+        Insert: {
+          agency_id: string
+          client_id: string
+          client_organization_id: string
+          created_at?: string
+          created_by: string
+          id?: number
+          service_id: number
+        }
+        Update: {
+          agency_id?: string
+          client_id?: string
+          client_organization_id?: string
+          created_at?: string
+          created_by?: string
+          id?: number
+          service_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           agency_id: string
@@ -1445,7 +1553,7 @@ export type Database = {
           id: number
           max_number_of_monthly_orders: number | null
           max_number_of_simultaneous_orders: number | null
-          name: string | null
+          name: string
           number_of_clients: number | null
           price: number | null
           price_id: string | null
@@ -1473,7 +1581,7 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string | null
+          name: string
           number_of_clients?: number | null
           price?: number | null
           price_id?: string | null
@@ -1501,7 +1609,7 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string | null
+          name?: string
           number_of_clients?: number | null
           price?: number | null
           price_id?: string | null
@@ -2139,6 +2247,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2152,6 +2261,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2165,6 +2275,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2186,6 +2297,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2196,6 +2308,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2206,6 +2319,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2341,6 +2455,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {
