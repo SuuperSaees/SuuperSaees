@@ -1,11 +1,15 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
+
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
-
-
 
 
 type OrderInsert = Omit<Order.Insert, 'customer_id'> & {
@@ -113,20 +117,38 @@ export const createOrders = async (orders: OrderInsert[]) => {
 
     
 
-    if (roleData.account_role === 'agency_owner' || roleData.account_role === 'agency_member' || roleData.account_role === 'agency_project_manager') {
+    if (
+      roleData.account_role === 'agency_owner' ||
+      roleData.account_role === 'agency_member' ||
+      roleData.account_role === 'agency_project_manager'
+    ) {
       const assignationData = {
         agency_member_id: userId,
         order_id: orderData.id,
-      }
-      const {error: assignedOrdersError } = await client
+      };
+      const { error: assignedOrdersError } = await client
         .from('order_assignations')
         .insert(assignationData);
       if (assignedOrdersError) throw assignedOrdersError.message;
-
-
     }
 
-    
+    // HERE add a follow up to the order, if account role is client owner or client member insert a follow up in the order_followers table
+
+    if (
+      roleData.account_role === 'client_owner' ||
+      roleData.account_role === 'client_member'
+    ) {
+      const followUpData = {
+        order_id: orderData.id,
+        client_member_id: userId,
+      };
+
+      const { error: followUpError } = await client
+        .from('order_followers')
+        .insert(followUpData);
+      if (followUpError) throw followUpError.message;
+    }
+
     redirect('/orders');
   } catch (error) {
     console.error(error);

@@ -1,14 +1,15 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Database } from '../../../../../../../apps/web/lib/database.types';
-import {
-  fetchCurrentUser,
-  fetchCurrentUserAccount,
-  getUserRole,
-} from '../members/get/get-member-account';
+import { fetchCurrentUser, fetchCurrentUserAccount, getUserRole } from '../members/get/get-member-account';
 import { checkGeneralPermission } from './permissions';
+
 
 export const hasPermissionToReadOrderDetails = async (
   message_order_id: number,
@@ -34,9 +35,12 @@ export const hasPermissionToReadOrderDetails = async (
     );
 
     // Step 3: Check for agency permission
-    if(userRole === 'agency_owner' && account.organization_id === message_order_propietary_organization_id) {
-      return true
-    } 
+    if (
+      userRole === 'agency_owner' &&
+      account.organization_id === message_order_propietary_organization_id
+    ) {
+      return true;
+    }
 
     if (message_order_propietary_organization_id === account.organization_id) {
       const agencyPermission = await checkAgencyOrderPermissions(
@@ -52,6 +56,14 @@ export const hasPermissionToReadOrderDetails = async (
       return hasPermission;
     }
 
+    // Step 5: Check for follower permission
+    const followerPermission = await checkFollowerOrderPermissions(
+      client,
+      user.id,
+      message_order_id,
+    );
+    if (followerPermission) return true;
+ 
     return false;
   } catch (error) {
     console.error('Error checking permissions:', error);
@@ -85,4 +97,29 @@ const checkAgencyOrderPermissions = async (
   }
 
   return Boolean(agencyMemberAssignedToOrder);
+};
+
+// Additional check for follower order permissions
+const checkFollowerOrderPermissions = async (
+  client: SupabaseClient<Database>,
+  userId: string,
+  orderId: number,
+) => {
+  try {
+    const { data, error } = await client
+      .from('order_followers')
+      .select('order_id')
+      .eq('order_id', orderId)
+      .eq('client_member_id', userId)
+      .single()
+
+    if (error)
+      throw new Error(
+        `Error checking follower order permissions: ${error.message}`,
+      );
+    return data;
+  } catch (error) {
+    console.error(`Error checking follower order permissions: `, error);
+    throw error;
+  }
 };

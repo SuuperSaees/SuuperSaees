@@ -29,7 +29,7 @@ const CustomUserItem: React.FC<
   </div>
 );
 interface ActivityAssignationProps {
-  assignedTo: Order.Type['assigned_to'];
+  followers: Order.Type['followers'];
   updateFunction: (data: string[]) => void;
   searchUserOptions: {
     picture_url: string | null;
@@ -38,16 +38,16 @@ interface ActivityAssignationProps {
   }[];
 }
 
-const ActivityAssignations = ({
-  assignedTo,
+const ActivityFollowers = ({
+  followers,
   updateFunction,
   searchUserOptions,
 }: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
 
   const avatarsWithStatus =
-    assignedTo?.map((account) => ({
-      ...account.agency_member,
+  followers?.map((account) => ({
+      ...account.client_follower,
       status: undefined,
     })) ?? [];
 
@@ -59,14 +59,14 @@ const ActivityAssignations = ({
     updateFunction(data.agency_members);
   }
   const defaultValues = {
-    agency_members: assignedTo
-      ? assignedTo.map((option) => option.agency_member.id)
+    agency_members: followers
+      ? followers.map((option) => option.client_follower.id)
       : [],
   };
   // console.log('assignedTo', assignedTo);
   return (
-    <div className="flex flex-col gap-2 mb-2">
-      <span className="font-semibold">{t('details.assignedTo')}</span>
+    <div className="flex flex-col gap-2">
+      <span className="font-semibold">{t('details.followedBy')}</span>
       <div className="flex flex-wrap items-center">
         <MultiAvatarDisplayer avatars={avatarsWithStatus} maxAvatars={4} />
         {/* <button className="flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-gray-300 text-gray-300">
@@ -83,4 +83,4 @@ const ActivityAssignations = ({
     </div>
   );
 };
-export default ActivityAssignations;
+export default ActivityFollowers;

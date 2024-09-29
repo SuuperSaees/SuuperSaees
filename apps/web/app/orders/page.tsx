@@ -31,8 +31,6 @@ async function OrdersPage() {
 
   const role = await getUserRole();
 
-  // console.log('processedOrders', processedOrders);
-
   return (
     <>
       <PageBody>

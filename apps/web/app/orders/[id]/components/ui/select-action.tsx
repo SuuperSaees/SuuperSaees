@@ -1,11 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
-
-
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@kit/ui/select';
-
 
 type Option = {
   label: string;
@@ -30,7 +26,7 @@ const SelectAction = ({
 }: SelectActionProps) => {
   const [selectedOption, setSelectedOption] = useState(defaultValue);
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex justify-between items-center w-full">
       <span className="font-semibold">
         {groupName ? groupName : 'Select an option'}
       </span>
@@ -43,9 +39,12 @@ const SelectAction = ({
         }}
       >
         <SelectTrigger
-          className={'w-full max-w-[240px] border-none bg-black ' + className}
+          className={'w-fit rounded-full border-none bg-black ' + className}
         >
-          <SelectValue placeholder="Select an option" />
+          {
+            (groupName === 'Priority' || groupName === 'Prioridad') && <div className='h-2 w-2 mr-2 rounded-full bg-current'></div>
+          }
+          <SelectValue placeholder="Select an option"  className="p-0 m-0" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>

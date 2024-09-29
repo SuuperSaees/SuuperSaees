@@ -759,6 +759,7 @@ export type Database = {
           order_id: number
           updated_at: string
           user_id: string
+          visibility: Database["public"]["Enums"]["messages_types"] | null
         }
         Insert: {
           content?: string | null
@@ -767,6 +768,7 @@ export type Database = {
           order_id: number
           updated_at?: string
           user_id: string
+          visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Update: {
           content?: string | null
@@ -775,6 +777,7 @@ export type Database = {
           order_id?: number
           updated_at?: string
           user_id?: string
+          visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Relationships: [
           {
@@ -939,6 +942,53 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orders_v2"
             referencedColumns: ["uuid"]
+          },
+        ]
+      }
+      order_followers: {
+        Row: {
+          client_member_id: string | null
+          created_at: string | null
+          order_id: number | null
+        }
+        Insert: {
+          client_member_id?: string | null
+          created_at?: string | null
+          order_id?: number | null
+        }
+        Update: {
+          client_member_id?: string | null
+          created_at?: string | null
+          order_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_followers_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1976,6 +2026,7 @@ export type Database = {
       chat_role: "user" | "assistant"
       field_types: "date" | "multiple_choice" | "select" | "text"
       file_types: "image" | "video" | "pdf" | "fig"
+      messages_types: "public" | "internal_agency"
       notification_channel: "in_app" | "email"
       notification_type: "info" | "warning" | "error"
       order_status_types:
