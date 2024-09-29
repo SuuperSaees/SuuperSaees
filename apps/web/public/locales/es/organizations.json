@@ -10,6 +10,7 @@
         "team_uploaded": "Subidos por el equipo",
         "client_uploaded": "Subidos por el cliente",
         "download_files": "Descargar todos los archivos",
+        "download_error": "Error al descargar archivos o la carpeta está vacía",
         "new": {
             "title": "Nuevo",
             "file": "Subir archivo",

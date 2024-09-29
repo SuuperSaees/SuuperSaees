@@ -6,6 +6,7 @@ import { Download, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { createFile, createUploadBucketURL } from 'node_modules/@kit/team-accounts/src/server/actions/files/create/create-file';
 import { createFolder } from 'node_modules/@kit/team-accounts/src/server/actions/folders/create/create-folder';
+import { downloadFiles } from 'node_modules/@kit/team-accounts/src/server/actions/files/download/download-files';
 import { CheckIfItIsAnOrderFolder } from 'node_modules/@kit/team-accounts/src/server/actions/folders/get/get-folders';
 import { toast } from 'sonner';
 import {
@@ -102,14 +103,12 @@ export function OptionFiles({ clientOrganizationId, currentPath }: { clientOrgan
   };
 
   const handleCreateFolder = async () => {
-    // Verificar si el nombre de la carpeta está vacío
     if (folderName.trim() === '') {
       toast.error(t('folders.new.emptyName'));
       return;
     }
   
     try {
-      // Si hay un path actual, verificar si es un pedido
       if (currentPath.length > 0) {
         const lastFolder = currentPath[currentPath.length - 1];
         const isOrderFolder = await CheckIfItIsAnOrderFolder(lastFolder!.uuid! ?? '');
@@ -121,7 +120,6 @@ export function OptionFiles({ clientOrganizationId, currentPath }: { clientOrgan
           return;
         }
   
-        // Crear la carpeta dentro del path actual si no es un pedido
         const folderData = await createFolder(folderName, clientOrganizationId, true, currentPath);
   
         if (!folderData) {
@@ -131,7 +129,6 @@ export function OptionFiles({ clientOrganizationId, currentPath }: { clientOrgan
   
         toast.success(t('folders.new.successSubfolder', { folderName, lastPath: lastFolder?.title }));
       } else {
-        // Si no hay path, crear la carpeta en la raíz
         const folderData = await createFolder(folderName, clientOrganizationId);
   
         if (!folderData) {
@@ -149,12 +146,46 @@ export function OptionFiles({ clientOrganizationId, currentPath }: { clientOrgan
       console.error('Error during folder creation:', error);
     }
   };
+
+const downloadFile = async (url: string) => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch file');
+
+    const blob = await response.blob();
+    const objectUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = objectUrl;
+
+    link.download = url.split('/').pop() ?? 'downloaded-file'; 
+    link.click();
+
+    window.URL.revokeObjectURL(objectUrl);
+  } catch (error) {
+    console.error(`Error downloading file from ${url}:`, error);
+  }
+};
+
+
+const handleDownloadFiles = async (currentPath: Array<{ title: string; uuid?: string }> ) => { 
+  try {
+    const files = await downloadFiles(currentPath); 
+    for (const file of files!) {
+      await downloadFile(file.url); 
+    }
+  } catch (error) {
+    toast.error(t('files.download_error'));
+    console.error('Error during download:', error);
+  }
+};
+
   
 
   return (
     <div className='flex space-x-[16px]'>
       <Button variant='ghost'>
-        <div className='flex items-center'>
+        <div className='flex items-center' onClick={() => handleDownloadFiles(currentPath)}>
           <Download className='w-[20px] h-[20px] mr-[4px]' />
           {t('files.download_files')}
         </div>

@@ -5,11 +5,16 @@ import { Trans } from '@kit/ui/trans';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+import {
+  getUserIdOfAgencyOwner,
+} from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getOrderById } from '../../../../../packages/features/team-accounts/src/server/actions/orders/get/get-order';
 import ActivityPage from './components/activity';
 import AsideOrderInformation from './components/aside-order-information';
 import DetailsPage from './components/details';
 import { ActivityProvider } from './context/activity-context';
+import { OptionFiles } from '~/components/organization/files/option-files';
+import FileSection from '~/components/organization/files';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -32,6 +37,13 @@ async function OrderDetailsPage({
   const files = order?.files ? order.files : [];
   const activities = order?.activities ? order.activities : [];
   const reviews = order?.reviews ? order.reviews : [];
+
+  const organizationId = await getUserIdOfAgencyOwner();
+  const orderTitle = order?.title ?? '';
+  const orderUuid = order?.uuid ?? '';
+  const i18n = await createI18nServerInstance();
+  const ordersTitle = i18n.t('orders:title');
+  const currentPath = [{ title: ordersTitle }, { title: orderTitle, uuid: orderUuid }];
 
   return (
     <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
@@ -64,6 +76,9 @@ async function OrderDetailsPage({
                   <TabsTrigger value="details" >
                     <Trans i18nKey={'orders:details.navigation.details'} />
                   </TabsTrigger>
+                  <TabsTrigger value="files" >
+                    <Trans i18nKey={'orders:details.navigation.files'} />
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
                   <DetailsPage />
@@ -73,6 +88,21 @@ async function OrderDetailsPage({
                   className="h-full max-h-full min-h-0"
                 >
                   <ActivityPage />
+                </TabsContent>
+                <TabsContent value="files">
+                <div className='w-full'>
+                  <div className='justify-end flex'>
+                    <OptionFiles
+                      clientOrganizationId={organizationId?.account_id ?? ''}
+                      currentPath={currentPath}
+                    />
+                  </div>
+                  <FileSection
+                      key={'files'}
+                      clientOrganizationId={organizationId?.account_id ?? ''}
+                      currentPath={currentPath}
+                    />
+                </div>
                 </TabsContent>
               </Tabs>
             </div>

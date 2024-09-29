@@ -56,6 +56,7 @@
   "clientsName": "Clientes",
   "teamName": "Team",
   "nameInput": "Nombre",
+  "storage": "Almacenamiento",
   "namePortalInput": "Nombre del portal",
   "roles": {
     "agency_owner": {

@@ -1,8 +1,8 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
 import { File } from '../../../../../../../../apps/web/lib/file.types';
+import { CheckIfItIsAnOrderFolder } from '../../folders/get/get-folders';
 
 type CreateFileProps = Omit<File.Insert, 'user_id'>;
 export const createFile = async (files: CreateFileProps[], client_organization_id?: string, currentPath?: Array<{ title: string; uuid?: string }>) => {
@@ -23,6 +23,15 @@ export const createFile = async (files: CreateFileProps[], client_organization_i
       if (agenciesError) throw agenciesError.message;
 
       if (currentPath){
+        console.log('currentPath', currentPath);
+
+        const folderUuid = currentPath[currentPath.length - 1]?.uuid ?? '';
+        const isOrderFolder = await CheckIfItIsAnOrderFolder(folderUuid);
+
+        if (!isOrderFolder){
+          return [];
+        }
+
         // Insert the files
         const filesToInsert = files.map((file) => ({
           ...file,
@@ -30,15 +39,12 @@ export const createFile = async (files: CreateFileProps[], client_organization_i
 
         }));
 
-
         const { data: fileData, error: fileError } = await client
           .from('files')
           .insert(filesToInsert)
           .select();
 
         if (fileError) throw fileError;
-
-        console.log('currentPath in File', currentPath);
 
         const folderFilesToInsert = fileData.map((file) => ({
           file_id: file.id,
@@ -101,17 +107,12 @@ export const createFile = async (files: CreateFileProps[], client_organization_i
       user_id: userData.user.id,
     }));
 
-
     const { data: fileData, error: fileError } = await client
       .from('files')
       .insert(filesToInsert)
       .select();
 
     if (fileError) throw fileError;
-
-
-    
-
 
     return fileData;
   } catch (error) {
@@ -132,7 +133,7 @@ export const createUploadBucketURL = async (
       .from(bucketName)
       .createSignedUploadUrl(filePath);
     if (urlError) throw urlError.message;
-    // console.log('URL data:', urlData);
+
     return urlData;
   } catch (error) {
     return { error: 'Error creating signed upload URL' };

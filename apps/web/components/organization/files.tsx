@@ -9,10 +9,11 @@ import FileItem from './files/file-item';
 import RadioOptions from './files/radio-options';
 interface FileSectionProps {
   clientOrganizationId: string;
-  setCurrentPath: React.Dispatch<React.SetStateAction<Array<{ title: string; uuid?: string }>>>;
+  setCurrentPath?: React.Dispatch<React.SetStateAction<Array<{ title: string; uuid?: string }>>>;
+  currentPath?: Array<{ title: string; uuid?: string }>;
 }
 
-const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurrentPath }) => {
+const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurrentPath, currentPath }) => {
   const { t } = useTranslation('organizations');
   const [selectedOption, setSelectedOption] = useState('all');
   const [mainFolders, setMainFolders] = useState<Array<{ title: string | null; uuid: string }>>([]);
@@ -25,27 +26,10 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
   const [showSubFolders, setShowSubFolders] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // useEffect(() => {
-  //   const fetchFoldersandFiles = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const fetchedFolders = await getAllFolders(clientOrganizationId);
-  //       setMainFolders(fetchedFolders);
-  //       const fetchedFiles = await getFilesWithoutFolder(clientOrganizationId);
-  //       setMainFiles(fetchedFiles);
-  //     } catch (error) {
-  //       console.error('Error fetching folders:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchFoldersandFiles().catch((error) => console.error('Error fetching folders:', error));
-  // }, [clientOrganizationId]);
-
   useEffect(() => {
     const fetchFiles = async () => {
       setLoading(true);
+      setCurrentPath && setCurrentPath([]);
       try {
         let fetchedFiles;
         if (selectedOption === 'all') {
@@ -66,8 +50,40 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
     };
   
     fetchFiles().catch((error) => console.error('Error fetching files:', error));
-  }, [clientOrganizationId, selectedOption]); // Ahora depende de `selectedOption`
+  }, [clientOrganizationId, selectedOption, setCurrentPath]); // Ahora depende de `selectedOption`
   
+  useEffect(() => {
+    const fetchFilesFromCurrentPath = async () => {
+      if (currentPath && currentPath.length > 0) {
+        const lastFolder = currentPath[currentPath.length - 1];
+        if (lastFolder!.uuid) {
+          setLoading(true);
+          try {
+            // Limpiar archivos y carpetas principales antes de cargar los nuevos
+            setMainFiles([]);
+            setSubFolders([]);
+            setFiles([]);
+            setShowFolders(true);
+
+            const fetchedFiles = await getFilesByFolder(lastFolder!.uuid);
+            setFiles(fetchedFiles);
+            const fetchedSubFolders = await getFoldersByFolder(lastFolder!.uuid);
+            setShowSubFolders(fetchedSubFolders.length > 0);
+            setSubFolders(fetchedSubFolders.map(folder => ({ title: folder.name, uuid: folder.id })));
+            // setCurrentPath && setCurrentPath(prevPath => [...prevPath, { title: lastFolder!.title, uuid: lastFolder!.uuid }]);
+            setPath([{title: t('files.orders')}, { title: lastFolder!.title, uuid: lastFolder!.uuid }]);
+          } catch (error) {
+            console.error('Error fetching files from current path:', error);
+          } finally {
+            setLoading(false);
+          }
+        }
+      }
+    };
+
+    fetchFilesFromCurrentPath().catch((error) => console.error('Error fetching files from current path:', error));
+  }, [currentPath, setCurrentPath, t]);
+
 
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedOption(event.target.value);
@@ -77,14 +93,14 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
     setLoading(true);
     try {
       if (folderUuid === '' && isOrderFolder) {
-        setCurrentPath([]); 
+        setCurrentPath && setCurrentPath([]);
         setPath([]);        
         setShowFolders(false);
         setShowSubFolders(false);
         setFolders([]);
         setFiles([]);
         setSubFolders([]);
-        setCurrentPath([{ title: folderTitle }]); 
+        setCurrentPath && setCurrentPath([{ title: folderTitle }]); 
         setPath([{ title: folderTitle }]);
         setShowSubFolders(false);
         setSubFolders([]);
@@ -105,7 +121,7 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
         
         setShowFolders(true); 
 
-        setCurrentPath(prevPath => {
+        setCurrentPath && setCurrentPath(prevPath => {
           if (isOrderFolder) {
             return [...prevPath, { title: folderTitle, uuid: folderUuid }];
           } else {
@@ -140,7 +156,7 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
         
         setShowFolders(true); 
 
-        setCurrentPath(prevPath => {
+        setCurrentPath && setCurrentPath(prevPath => {
           if (isOrderFolder) {
             return [...prevPath, { title: folderTitle, uuid: folderUuid }];
           } else {
@@ -164,7 +180,7 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
         setShowSubFolders(fetchedSubFolders.length > 0);
         setSubFolders(fetchedSubFolders.map(folder => ({ title: folder.name, uuid: folder.id })));
       } else {
-        setCurrentPath([]); 
+        setCurrentPath && setCurrentPath([]); 
         setPath([]);        
         setShowFolders(false);
         setShowSubFolders(false);
@@ -186,7 +202,7 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
   const handlePathClick = async (index: number) => {
     if (index === -1) {
       setPath([]); 
-      setCurrentPath([]); 
+      setCurrentPath && setCurrentPath([]); 
       setShowFolders(false);
       setShowSubFolders(false);
       setFolders([]); 
@@ -198,7 +214,7 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
     } else {
       const newPath = path.slice(0, index + 1); 
       setPath(newPath);
-      setCurrentPath(newPath); 
+      setCurrentPath && setCurrentPath(newPath); 
   
       const folderUuid = newPath[newPath.length - 1]?.uuid;
   
@@ -352,7 +368,6 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
         ): (
           <>
           <div>
-            {t('files.team_uploaded')}
             {mainFiles.length > 0 && (
               <div>
                 <div className='mt-4 flex flex-wrap gap-8'>
@@ -379,7 +394,6 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
         ): (
           <>
           <div>
-            {t('files.client_uploaded')}
             {mainFiles.length > 0 && (
               <div>
                 <div className='mt-4 flex flex-wrap gap-8'>

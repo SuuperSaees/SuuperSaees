@@ -55,7 +55,6 @@ export async function getFilesWithoutFolder(
         
         if (filesError) throw filesError;
 
-        console.log(files);
         return files;
     }
 
@@ -63,7 +62,8 @@ export async function getFilesWithoutFolder(
     const { data: filesWithoutOrder, error: filesWithoutOrderError } = await client
         .from('folder_files')
         .select('file_id')
-        .eq('client_organization_id', clientOrganizationId);
+        .eq('client_organization_id', clientOrganizationId)
+        .is('folder_id', null); 
 
     if (filesWithoutOrderError) throw filesWithoutOrderError;
 
@@ -172,6 +172,7 @@ export async function verifyItIsOrderFile(fileId: string) {
 export async function getMemberFiles(clientOrganizationId: string) {
     const client = getSupabaseServerComponentClient();
 
+    // Fetch the files associated with the client organization
     const { data: fileData, error: fileDataError } = await client
         .from('folder_files')
         .select('file_id')
@@ -179,35 +180,53 @@ export async function getMemberFiles(clientOrganizationId: string) {
 
     if (fileDataError) throw fileDataError;
 
-    if (!fileData || fileData.length === 0) {
-        return [];
-    }
+    // Fetch the orders of the client organization
+    const { data: ordersData, error: ordersDataError } = await client
+        .from('orders_v2')
+        .select('uuid')
+        .eq('client_organization_id', clientOrganizationId);
 
+    if (ordersDataError) throw ordersDataError;
+
+    // Fetch the files associated with the orders
+    const { data: orderFilesData, error: orderFilesDataError } = await client
+        .from('order_files')
+        .select('file_id')
+        .in('order_id', ordersData.map((orderData) => orderData.uuid));
+
+    if (orderFilesDataError) throw orderFilesDataError;
+
+    // Combine the file data
+    const allFileIds = [...fileData.map(f => f.file_id), ...orderFilesData.map(f => f.file_id)];
+
+    // Fetch file details
     const { data: files, error: filesError } = await client
         .from('files')
         .select('url, id, name, type, user_id')
-        .in('id', fileData.map((file) => file.file_id));
+        .in('id', allFileIds);
 
     if (filesError) throw filesError;
 
-    const { data: verifyIfIsClient, error: verifyIfIsClientError } = await client
+    // Fetch the list of client user_ids
+    const { data: clientUsers, error: clientUsersError } = await client
         .from('clients')
-        .select('id')
-        .eq('user_client_id', files[0]!.user_id);
-    
-    if (verifyIfIsClientError) throw verifyIfIsClientError;
+        .select('user_client_id');
 
-    if (verifyIfIsClient.length === 0) {
-        console.log('files', files);
-        return files;
-    }
+    if (clientUsersError) throw clientUsersError;
 
-    return [];
+    const clientUserIds = clientUsers.map(client => client.user_client_id);
+
+    // Filter files that are not associated with clients
+    const nonClientFiles = files.filter(file => !clientUserIds.includes(file.user_id));
+
+    return nonClientFiles;
 }
+
 
 export async function getClientFiles(clientOrganizationId: string) {
     const client = getSupabaseServerComponentClient();
 
+    // Fetch the files associated with the client organization
     const { data: fileData, error: fileDataError } = await client
         .from('folder_files')
         .select('file_id')
@@ -215,30 +234,44 @@ export async function getClientFiles(clientOrganizationId: string) {
 
     if (fileDataError) throw fileDataError;
 
-    if (!fileData || fileData.length === 0) {
-        return [];
-    }
+    // Fetch the orders of the client organization
+    const { data: ordersData, error: ordersDataError } = await client
+        .from('orders_v2')
+        .select('uuid')
+        .eq('client_organization_id', clientOrganizationId);
 
+    if (ordersDataError) throw ordersDataError;
+
+    // Fetch the files associated with the orders
+    const { data: orderFilesData, error: orderFilesDataError } = await client
+        .from('order_files')
+        .select('file_id')
+        .in('order_id', ordersData.map((orderData) => orderData.uuid));
+
+    if (orderFilesDataError) throw orderFilesDataError;
+
+    // Combine the file data
+    const allFileIds = [...fileData.map(f => f.file_id), ...orderFilesData.map(f => f.file_id)];
+
+    // Fetch file details
     const { data: files, error: filesError } = await client
         .from('files')
         .select('url, id, name, type, user_id')
-        .in('id', fileData.map((file) => file.file_id));
+        .in('id', allFileIds);
 
     if (filesError) throw filesError;
 
-    const { data: verifyIfIsClient, error: verifyIfIsClientError } = await client
+    // Fetch the list of client user_ids
+    const { data: clientUsers, error: clientUsersError } = await client
         .from('clients')
-        .select('id')
-        .eq('user_client_id', files[0]!.user_id);
-    
-    if (verifyIfIsClientError) throw verifyIfIsClientError;
+        .select('user_client_id');
 
-    console.log('files in clients', files);
+    if (clientUsersError) throw clientUsersError;
 
-    if (verifyIfIsClient.length > 0) {
-        console.log('files in clients', files);
-        return files;
-    }
+    const clientUserIds = clientUsers.map(client => client.user_client_id);
 
-    return [];
+    // Filter files that are associated with clients
+    const clientFiles = files.filter(file => clientUserIds.includes(file.user_id));
+
+    return clientFiles;
 }
