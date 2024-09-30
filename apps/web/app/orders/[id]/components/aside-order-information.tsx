@@ -16,8 +16,6 @@ import { toast } from 'sonner';
 
 import { Trans } from '@kit/ui/trans';
 
-import { Order } from '~/lib/order.types';
-
 import {
   updateOrder,
   updateOrderAssigns,
@@ -30,9 +28,36 @@ import ActivityFollowers from './activity-followers';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
+import { Activity } from '~/lib/activity.types';
+import { File } from '~/lib/file.types';
+import { Message } from '~/lib/message.types';
+import { Order } from '~/lib/order.types';
+import { Review } from '~/lib/review.types';
+import { User as ServerUser } from '~/lib/user.types';
+import deduceNameFromEmail from '../utils/deduce-name-from-email';
+
+type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url' | 'organization_id'>;
+
+type OrderWithAllRelations = Order.Relationships.All & {
+  messages: (Message.Type & { user: User; files: File.Type[] })[];
+  files: (File.Type & { user: User })[];
+  activities: (Activity.Type & { user: User })[];
+  reviews: (Review.Type & { user: User })[];
+  client: User;
+  assigned_to: {
+    agency_member: User;
+  }[];
+  followers: {
+    client_follower: User;
+  }[];
+  client_organization: {
+    name: string;
+    slug: string;
+  };
+};
 
 interface AsideOrderInformationProps {
-  order: Order.Type;
+  order: OrderWithAllRelations;
   className?: string;
   [key: string]: unknown;
 }
@@ -201,12 +226,13 @@ const AsideOrderInformation = ({
           <Trans i18nKey="details.createdBy" />
         </h3>
         <AvatarDisplayer
-          displayName={order.client ? order.client?.name : undefined}
+          displayName={order.client?.email ? deduceNameFromEmail(order.client.email) : ''}
           pictureUrl={
             order.client
               ? order.client?.picture_url && order.client?.picture_url
               : undefined
           }
+          organizationName={order.client_organization?.name}
           // status="online"
         />
       </div>
@@ -288,24 +314,20 @@ const AsideOrderInformation = ({
               <Loader className="mr-2 h-4 w-4" />
               <span className="font-semibold">{t('details.status')}</span>
             </div>
-            <span
-              className={`rounded-full px-2 py-1 font-semibold ${order.status ? statusColors[order.status] : undefined}`}
-            >
+            <span className={`px-2 py-1 rounded-full ${order.status ? statusColors[order.status] : undefined}`}>
               {order.status
                 ?.replace(/_/g, ' ')
                 .replace(/^\w/, (c) => c.toUpperCase())}
             </span>
           </div>
 
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex">
-              <FlagIcon className="mr-2 h-4 w-4" />
-              <span className="font-semibold">{t('details.priority')}</span>
-            </div>
-            <span
-              className={`flex items-center rounded-full px-2 py-1 font-semibold ${order.priority ? priorityColors[order.priority] : undefined}`}
-            >
-              <div className="mr-2 h-2 w-2 rounded-full bg-current"></div>
+          <div className="flex justify-between items-center mb-4">
+           <div className="flex">
+           <FlagIcon className="mr-2 h-4 w-4" />
+           <span className="font">{t('details.priority')}</span>
+           </div>
+            <span className={`px-2 py-1 flex items-center rounded-full ${order.priority ? priorityColors[order.priority] : undefined}`}>
+            <div className='h-2 w-2 mr-2 rounded-full bg-current'></div>
               {order.priority
                 ?.replace(/_/g, ' ')
                 .replace(/^\w/, (c) => c.toUpperCase())}

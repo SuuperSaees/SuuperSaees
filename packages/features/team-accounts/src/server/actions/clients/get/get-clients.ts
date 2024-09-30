@@ -121,7 +121,6 @@ export async function getClientMembersForOrganization(
       clientRoles,
     );
 
-    console.log('clientOrganizationMembers', clientOrganizationMembers);
     return clientOrganizationMembers;
   } catch (error) {
     console.error('Error fetching client members:', error);
@@ -182,7 +181,6 @@ async function fetchClientOrganizations(
       )
       .in('id', clientOrganizationIds)
       .eq('is_personal_account', false);
-
   if (clientOrganizationsError) {
     throw new Error(
       `Error fetching client organizations: ${clientOrganizationsError.message}`,
@@ -248,6 +246,7 @@ export async function getAllClients(): Promise<ClientsWithOrganization[]> {
       clientOrganizations,
     );
 
+    console.log('clientsWithOrganizations', clientsWithOrganizations);
     return clientsWithOrganizations;
   } catch (error) {
     console.error('Error fetching clients:', error);

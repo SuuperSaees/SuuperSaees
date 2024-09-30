@@ -9,12 +9,14 @@ interface AvatarDisplayerProps {
   nickname?: string;
   status?: 'online' | 'offline';
   className?: string;
+  organizationName?: string;
   [key: string]: unknown;
   fallbackInitials?: string;
 }
 const AvatarDisplayer = ({
   pictureUrl,
   displayName,
+  organizationName,
   isAssignedOrFollower,
   nickname,
   status,
@@ -22,7 +24,7 @@ const AvatarDisplayer = ({
   ...rest
 }: AvatarDisplayerProps) => {
   return (
-    <div className={`relative flex h-fit w-fit items-start gap-2 ${isAssignedOrFollower ? "scale-75 bg-slate-50 px-4 rounded-full" : ""}`}>
+    <div className={`relative flex h-fit w-fit items-center gap-2 ${isAssignedOrFollower ? "scale-75 bg-slate-50 px-4 rounded-full" : ""}`}>
       {/* <ProfileAvatar
         displayName={!displayName ? null : displayName}
         pictureUrl={pictureUrl}
@@ -47,12 +49,11 @@ const AvatarDisplayer = ({
           </AvatarFallback>
         )}
       </Avatar>
-      <div className="flex py-2 justify-center items-center">
-        {displayName && (
-          <span className="text-sm font-semibold">{displayName}</span>
-        )}
+      <div className={`${organizationName ? "grid grid-rows-2 grid-cols-1" : "flex py-2 justify-center items-center"}`}>
+        {displayName && <span className="whitespace-nowrap text-sm font-semibold">{displayName}</span>}
         {/* {nickname && <span className="text-sm text-gray-600">{nickname}</span>} */}
         {/* <AvatarFallback>SD</AvatarFallback> */}
+      {organizationName && <span className="text-sm text-gray-600">{organizationName}</span>}
       </div>
     </div>
   );
