@@ -65,7 +65,7 @@ function ServiceSection({
         </SkeletonCards>
       ) : (paginatedServices.length === 0 ?? !paginatedServices) ? (
         <EmptyState
-          imageSrc="/images/illustrations/Illustration-card.svg"
+          imageSrc="/images/illustrations/Illustration-box.svg"
           title={t(
             `${role === 'agency_owner' || role === 'agency_project_manager' ? 'empty.agency.title' : 'empty.client.title'}`,
           )}
