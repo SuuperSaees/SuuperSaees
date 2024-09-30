@@ -12,9 +12,9 @@ import { checkGeneralPermission } from './permissions';
 
 
 export const hasPermissionToReadOrderDetails = async (
-  order_id: number,
-  order_propietary_organization_id: string,
-  order_client_organization_id: string,
+  orderId: number,
+  orderPropietaryOrganizationId: string,
+  orderClientOganization_id: string,
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -37,22 +37,22 @@ export const hasPermissionToReadOrderDetails = async (
     // Step 3: Check for agency permission
     if (
       userRole === 'agency_owner' &&
-      account.organization_id === order_propietary_organization_id
+      account.organization_id === orderPropietaryOrganizationId
     ) {
       return true;
     }
     // Step 4: Check for agency member permissions
-    if (order_propietary_organization_id === account.organization_id) {
+    if (orderPropietaryOrganizationId === account.organization_id) {
       const agencyPermission = await checkAgencyOrderPermissions(
         client,
         user.id,
-        order_id,
+        orderId,
       );
       if (agencyPermission) return true;
     }
 
     // Step 4: Check for client permission
-    if (order_client_organization_id === account.organization_id) {
+    if (orderClientOganization_id === account.organization_id) {
       return hasPermission;
     }
 
@@ -60,7 +60,7 @@ export const hasPermissionToReadOrderDetails = async (
     const followerPermission = await checkFollowerOrderPermissions(
       client,
       user.id,
-      order_id,
+      orderId,
     );
     if (followerPermission) return true;
 

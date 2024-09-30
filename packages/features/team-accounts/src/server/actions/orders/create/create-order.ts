@@ -12,6 +12,7 @@ import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { hasPermissionToCreateOrder } from '../../permissions/orders';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
 
+
 type OrderInsert = Omit<Order.Insert, 'customer_id'> & {
   fileIds?: string[];
 };
@@ -126,11 +127,13 @@ export const createOrders = async (orders: OrderInsert[]) => {
     }
 
     // Step 6: Assign agency members to the order
-    if (
-      ['agency_owner', 'agency_member', 'agency_project_manager'].includes(
-        roleData.account_role,
-      )
-    ) {
+    const agencyRoles = new Set([
+      'agency_owner',
+      'agency_member',
+      'agency_project_manager',
+    ]);
+
+    if (agencyRoles.has(roleData.account_role)) {
       const assignationData = {
         agency_member_id: userId,
         order_id: orderData.id,
