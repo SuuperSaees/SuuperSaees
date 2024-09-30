@@ -3,6 +3,7 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { File } from '../../../../../../../../apps/web/lib/file.types';
 import { CheckIfItIsAnOrderFolder } from '../../folders/get/get-folders';
+import { fetchAgencyClients } from '../../../actions/clients/get/get-clients';
 
 type CreateFileProps = Omit<File.Insert, 'user_id'>;
 export const createFile = async (files: CreateFileProps[], client_organization_id?: string, currentPath?: Array<{ title: string; uuid?: string }>) => {
@@ -14,21 +15,16 @@ export const createFile = async (files: CreateFileProps[], client_organization_i
 
     if (client_organization_id !== undefined) {
       // Fetch the agencies of the user
-      const { data: agencies, error: agenciesError } = await client
-        .from('clients')
-        .select('agency_id')
-        .eq('organization_client_id', client_organization_id ?? '')
-        .single();
+      const agencies = await fetchAgencyClients(
+        client,
+        client_organization_id ?? '',
+      );
 
-      if (agenciesError) throw agenciesError.message;
-
-      if (currentPath){
-        console.log('currentPath', currentPath);
-
-        const folderUuid = currentPath[currentPath.length - 1]?.uuid ?? '';
+      if (currentPath!.length > 0) {
+        const folderUuid = currentPath![currentPath!.length - 1]?.uuid ?? '';
         const isOrderFolder = await CheckIfItIsAnOrderFolder(folderUuid);
 
-        if (!isOrderFolder){
+        if (isOrderFolder){
           return [];
         }
 
@@ -49,7 +45,7 @@ export const createFile = async (files: CreateFileProps[], client_organization_i
         const folderFilesToInsert = fileData.map((file) => ({
           file_id: file.id,
           client_organization_id,
-          agency_id: agencies?.agency_id,
+          agency_id: agencies?.[0]?.agency_id,
           folder_id: currentPath && currentPath.length > 0 ? currentPath[currentPath.length - 1]?.uuid : undefined,
         }));
     
@@ -84,7 +80,7 @@ export const createFile = async (files: CreateFileProps[], client_organization_i
       const folderFilesToInsert = fileData.map((file) => ({
         file_id: file.id,
         client_organization_id,
-        agency_id: agencies?.agency_id,
+        agency_id: agencies?.[0]?.agency_id,
       }));
   
       // Insert the files in folder_files table

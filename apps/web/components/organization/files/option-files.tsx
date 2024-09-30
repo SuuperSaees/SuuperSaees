@@ -90,6 +90,7 @@ export function OptionFiles({ clientOrganizationId, currentPath }: { clientOrgan
       }
 
       toast.success(t('files.new.uploadSuccess'));
+      window.location.reload();
     } catch (error) {
       toast.error(t('files.new.error'));
       console.error('Error during upload:', error);
@@ -128,6 +129,7 @@ export function OptionFiles({ clientOrganizationId, currentPath }: { clientOrgan
         }
   
         toast.success(t('folders.new.successSubfolder', { folderName, lastPath: lastFolder?.title }));
+        window.location.reload();
       } else {
         const folderData = await createFolder(folderName, clientOrganizationId);
   
@@ -137,6 +139,9 @@ export function OptionFiles({ clientOrganizationId, currentPath }: { clientOrgan
         }
   
         toast.success(t('folders.new.success', { folderName }));
+        setDialogOpen(false);
+        setFolderName('');
+        window.location.reload();
       }
   
       setDialogOpen(false);

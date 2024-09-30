@@ -20,9 +20,6 @@ export async function deleteFile(
     const bucket = 'agency_files';
     const folderPath = file_url.replace('http://127.0.0.1:54321/storage/v1/object/public/agency_files/', '').split('/').slice(0, -1).join('/') + '/';
 
-    console.log('bucket', bucket);
-    console.log('folderPath', folderPath);
-
     // Listar y eliminar todos los archivos en la carpeta
     const { data: filesInFolder, error: listError } = await client
         .storage
@@ -31,8 +28,6 @@ export async function deleteFile(
 
 
     if (listError) throw listError;
-
-    console.log('filesInFolder', filesInFolder);
 
     if (filesInFolder.length > 0) {
         const filePaths = filesInFolder.map(file => `${folderPath}${file.name}`);

@@ -9,41 +9,37 @@ export async function downloadFiles(
     const client = getSupabaseServerComponentClient();
   
     if (currentPath.length > 0) {
-      const firstItem = currentPath[0];
-      const title = firstItem!.title || '';
-      const uuid = firstItem!.uuid ?? 'orders';
-  
-      if (uuid === 'orders' && title !== '') {
+        const firstItem = currentPath[0];
+        const title = firstItem!.title || '';
+        const uuid = firstItem!.uuid ?? '';
+        
+        if (!uuid && title) {
             const lastItem = currentPath[currentPath.length - 1];
             const orderUuid = lastItem!.uuid ?? '';
-    
-            if (orderUuid === '') {
-            console.log('El último elemento del array currentPath no tiene UUID.');
-            return;
+            if (!orderUuid) {
+                return;
             } else {
-            const { data: files, error: filesError } = await client
+                const { data: files, error: filesError } = await client
                 .from('order_files')
                 .select('file_id')
                 .eq('order_id', orderUuid);
-    
-            if (filesError) throw filesError;
-    
-            if (files.length === 0) {
-                console.log('No hay archivos en la orden.');
-                return;
-            }
-    
-            const fileIds = files.map((file) => file.file_id);
-    
-            const { data: filesData, error: filesDataError } = await client
+                
+                if (filesError) throw filesError;
+                
+                if (files.length === 0) {
+                    return;
+                }
+                
+                const fileIds = files.map((file) => file.file_id);
+                
+                const { data: filesData, error: filesDataError } = await client
                 .from('files')
                 .select('url')
                 .in('id', fileIds);
-    
-            if (filesDataError) throw filesDataError;
-
-    
-            return filesData;
+                
+                if (filesDataError) throw filesDataError;
+                
+                return filesData;
             }
         }
         
@@ -58,7 +54,6 @@ export async function downloadFiles(
         if (folderFilesError) throw folderFilesError;
 
         if (folderFiles.length === 0) {
-            console.log('No hay archivos en la carpeta.');
             return;
         }
 
@@ -74,7 +69,6 @@ export async function downloadFiles(
         return filesData;
   
     } else {
-        console.log("El array currentPath está vacío.");
         const { data: filesWithoutFolder, error: filesWithoutFolderError } = await client
             .from('folder_files')
             .select('file_id')
@@ -82,7 +76,6 @@ export async function downloadFiles(
         if (filesWithoutFolderError) throw filesWithoutFolderError;
 
         if (filesWithoutFolder.length === 0) {
-            console.log('No hay archivos en la carpeta raíz.');
             return;
         }
 
@@ -96,7 +89,6 @@ export async function downloadFiles(
         if (filesError) throw filesError;
 
         if (files.length === 0) {
-            console.log('No hay archivos en la carpeta raíz.');
             return;
         }
 

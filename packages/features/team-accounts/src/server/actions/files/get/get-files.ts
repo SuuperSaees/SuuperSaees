@@ -87,7 +87,6 @@ export async function getFilesWithoutFolder(
 export async function getFilesByFolder(folderId: string,) {
     const client = getSupabaseServerComponentClient();
 
-
     // Checking if the folder is out of order
     const { data: foldersWithoutOrder, error: folderError } = await client
         .from('folders')
@@ -127,7 +126,6 @@ export async function getFilesByFolder(folderId: string,) {
         .from('folder_files')
         .select('file_id')
         .eq('folder_id', folderId);
-
     
     if (folderFilesError) throw folderFilesError;
 

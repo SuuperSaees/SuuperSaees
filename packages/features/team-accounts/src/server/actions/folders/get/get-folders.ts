@@ -82,9 +82,6 @@ export async function getOrdersFolders(
 
         if (agenciesError) throw agenciesError;
 
-        console.log(agencies);
-
-
         // Fetch the orders to create the folders 
         const { data: folders, error:  foldersError} = await client
             .from('orders_v2')
@@ -93,9 +90,6 @@ export async function getOrdersFolders(
             .eq('client_organization_id', clientOrganizationId);
 
         if (foldersError) throw foldersError;
-
-        console.log(folders);
-
 
         return folders;
     }
@@ -108,13 +102,7 @@ export async function getOrdersFolders(
     
     if (foldersError) throw foldersError;
 
-    console.log(folders);
-
-
     return folders;
-
-    
-
 }
 
 export async function getFoldersByFolder(

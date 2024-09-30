@@ -13,7 +13,7 @@ import ActivityPage from './components/activity';
 import AsideOrderInformation from './components/aside-order-information';
 import DetailsPage from './components/details';
 import { ActivityProvider } from './context/activity-context';
-import { OptionFiles } from '~/components/organization/files/option-files';
+// import { OptionFiles } from '~/components/organization/files/option-files';
 import FileSection from '~/components/organization/files';
 
 export const generateMetadata = async () => {
@@ -91,12 +91,12 @@ async function OrderDetailsPage({
                 </TabsContent>
                 <TabsContent value="files">
                 <div className='w-full'>
-                  <div className='justify-end flex'>
+                  {/* <div className='justify-end flex'>
                     <OptionFiles
                       clientOrganizationId={organizationId?.account_id ?? ''}
                       currentPath={currentPath}
                     />
-                  </div>
+                  </div> */}
                   <FileSection
                       key={'files'}
                       clientOrganizationId={organizationId?.account_id ?? ''}
