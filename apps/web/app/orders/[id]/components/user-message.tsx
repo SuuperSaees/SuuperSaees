@@ -8,7 +8,7 @@ interface UserMessageProps {
 
 const UserMessage = ({ message }: UserMessageProps) => {
   return (
-    <div className="flex gap-1">
+    <div className="grid grid-cols-[5%_94%] grid-rows-1 items-start gap-2 w-full"> 
       <AvatarDisplayer
         displayName={null}
         pictureUrl={message?.user.picture_url}

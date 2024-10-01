@@ -5,37 +5,47 @@
     "delete": "ha eliminado"
   },
   "articles": {
-      "due_date": {
-        "singular": {
-          "masculine": "el",
-          "feminine": "la"
-        },
-        "plural": {
-          "masculine": "los",
-          "feminine": "las"
-        }
+    "due_date": {
+      "singular": {
+        "masculine": "el",
+        "feminine": "la"
       },
-      "priority": {
-        "singular": {
-          "masculine": "el",
-          "feminine": "la"
-        },
-        "plural": {
-          "masculine": "los",
-          "feminine": "las"
-        }
-      },
-      "status": {
-        "singular": {
-          "masculine": "el",
-          "feminine": "la"
-        },
-        "plural": {
-          "masculine": "los",
-          "feminine": "las"
-        }
+      "plural": {
+        "masculine": "los",
+        "feminine": "las"
       }
     },
+    "priority": {
+      "singular": {
+        "masculine": "el",
+        "feminine": "la"
+      },
+      "plural": {
+        "masculine": "los",
+        "feminine": "las"
+      }
+    },
+    "status": {
+      "singular": {
+        "masculine": "el",
+        "feminine": "la"
+      },
+      "plural": {
+        "masculine": "los",
+        "feminine": "las"
+      }
+    },
+    "title": {
+      "singular": {
+        "masculine": "el",
+        "feminine": "la"
+      },
+      "plural": {
+        "masculine": "los",
+        "feminine": "las"
+      }
+    }
+  },
     "types": {
       "due_date": "Fecha de vencimiento",
       "priority": "Prioridad",

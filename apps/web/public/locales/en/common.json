@@ -80,5 +80,6 @@
     "next": "Next",
     "previous": "Previous"
   },
-  "organizationName": "Organization"
+  "organizationName": "Organization",
+  "selectOption": "Select an option"
 }

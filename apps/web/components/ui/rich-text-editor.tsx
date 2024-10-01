@@ -3,22 +3,38 @@
 // import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef } from 'react';
 
-
-
 import Heading from '@tiptap/extension-heading';
 import { Image as ImageInsert } from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Youtube from '@tiptap/extension-youtube';
-import { Editor, EditorContent, Extension, ReactNodeViewRenderer, useEditor } from '@tiptap/react';
+import {
+  Editor,
+  EditorContent,
+  Extension,
+  ReactNodeViewRenderer,
+  useEditor,
+} from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, Heading1, Heading2, Image, Italic, List, ListOrdered, Quote, SendHorizontalIcon, Strikethrough } from 'lucide-react';
+import {
+  Bold,
+  Heading1,
+  Heading2,
+  Image,
+  Italic,
+  List,
+  ListOrdered,
+  Quote,
+  SendHorizontalIcon,
+  Strikethrough,
+} from 'lucide-react';
 
-
-
+import { Switch } from '@kit/ui/switch';
+import { useActivityContext } from '../../app/orders/[id]/context/activity-context';
+import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
-
+import { Trans } from '@kit/ui/trans';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -133,6 +149,7 @@ function extractImageUrls(text: string) {
   return matches ?? []; // Return an empty array if no matches are found
 }
 
+// TODO: remove not related logic for this presentation component !IMPORTANT- TECHDEBT
 const RichTextEditor = ({
   content,
   onComplete,
@@ -186,7 +203,6 @@ const RichTextEditor = ({
         // },
         // Insert new paragraph on Ctrl + Enter or Cmd + Enter
         'Mod-Enter': () => {
-          console.log('ctrl + enter');
           this.editor.commands.splitBlock();
           return true;
         },
@@ -257,15 +273,6 @@ const RichTextEditor = ({
       Placeholder.configure({
         // Use a placeholder:
         placeholder: 'Write a message...',
-
-        // Use different placeholders depending on the node type:
-        // placeholder: ({ node }) => {
-        //   if (node.type.name === 'heading') {
-        //     return 'What’s the title?'
-        //   }
-
-        //   return 'Can you add some further context?'
-        // },
       }),
       CustomShortcuts,
     ],
@@ -291,12 +298,15 @@ const RichTextEditor = ({
       imagesInText && debounceHandleImageUrl(editor)(text);
     },
   });
-
   const sendContent = useCallback(() => {
     void (async () => {
       try {
         cleanupImages();
         const content = editor ? editor.getHTML() : '';
+        // <p></p> is the default content of the editor
+        if (content.trim() === '<p></p>') {
+          return;
+        }
         editor?.commands.clearContent();
         await onComplete(content);
         insertedImages.current = new Set<string>();
@@ -308,27 +318,43 @@ const RichTextEditor = ({
 
   // Implement sanitizer to ensure the content to be nested is secure before sending to server
 
+  useEffect(() => {
+    if (editor) {
+      editor.commands.focus();
+    }
+  }, [editor]);
   return (
-    <div className="relative flex h-fit flex-col gap-4 rounded border border-input p-4">
-      <EditorContent
-        editor={editor}
-        className={styles['image-input-text-editor'] + 'h-fit w-full'}
-      />
-      <Toolbar
-        editor={editor}
-        toggleExternalUpload={toggleExternalUpload}
-        uploadFileIsExternal={uploadFileIsExternal}
-      />
-      <button
-        className="bg-purple absolute bottom-2 right-2 h-fit w-fit rounded-md bg-black p-2 shadow-sm"
-        onClick={sendContent}
+    <div className="relative grid h-fit grid-rows-[1fr_auto] gap-4 rounded-2xl p-4 shadow-md">
+      <div
+        onClick={() => editor?.commands.focus()}
+        className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-2 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
       >
-        <SendHorizontalIcon className="h-5 w-5 text-white" />
-      </button>
+        {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
+          <span className="absolute left-2 top-4 -translate-y-1/2 transform text-gray-400">
+            <Trans i18nKey="placeholder" />
+          </span>
+        ) : null}
+        <EditorContent
+          editor={editor}
+          className={`${styles['scrollbar-thin']} flex h-fit max-h-[9vh] w-full flex-col-reverse overflow-y-auto placeholder:text-gray-400`}
+        />
+      </div>
+      <div>
+        <Toolbar
+          editor={editor}
+          toggleExternalUpload={toggleExternalUpload}
+          uploadFileIsExternal={uploadFileIsExternal}
+        />
+        <button
+          className="bg-purple absolute bottom-2 right-2 h-fit w-fit rounded-xl bg-black p-2 shadow-sm"
+          onClick={sendContent}
+        >
+          <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
+        </button>
+      </div>
     </div>
   );
 };
-
 interface ToolbarProps {
   editor: Editor | null;
   uploadFileIsExternal?: boolean;
@@ -340,6 +366,10 @@ export const Toolbar = ({
   uploadFileIsExternal,
   toggleExternalUpload,
 }: ToolbarProps) => {
+  const { isInternalMessagingEnabled, handleSwitchChange } =
+    useInternalMessaging();
+  const { userRole } = useActivityContext();
+
   if (!editor) {
     return null;
   }
@@ -428,6 +458,27 @@ export const Toolbar = ({
       >
         <Image className="h-4 w-4" />
       </button>
+
+      {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
+        userRole,
+      ) && (
+        <button
+          onClick={handleSwitchChange}
+          className={
+            isInternalMessagingEnabled ? 'text-gray-700' : 'text-gray-400'
+          }
+        >
+          <Switch checked={isInternalMessagingEnabled} />
+        </button>
+      )}
+      {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
+        userRole,
+      ) &&
+        isInternalMessagingEnabled && (
+          <span className="text-gray-400">
+            <Trans i18nKey="internalMessagingEnabled" />
+          </span>
+        )}
     </div>
   );
 };

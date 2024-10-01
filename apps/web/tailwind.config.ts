@@ -1,6 +1,9 @@
 import type { Config } from 'tailwindcss';
 
+
+
 import baseConfig from '@kit/tailwind-config';
+
 
 const defaultTheme = require('tailwindcss/defaultTheme');
 
@@ -8,6 +11,13 @@ export default {
   content: [...baseConfig.content],
   theme: {
     extend: {
+      keyframes: {
+        shimmer: {
+          '100%': {
+            transform: 'translateX(100%)',
+          },
+        },
+      },
       spacing: {
         '6.5': '1.625rem', // 6.5 * 0.25rem = 1.625rem
       },
@@ -104,7 +114,7 @@ export default {
           900: '#7A2E0E',
           950: '#4E1D09',
         },
-        pur: {
+        purple: {
           DEFAULT: '#6941C6', // Base color
           100: '#F4EBFF', // Lightest shade
           200: '#E3D0FF', // Very light lavender

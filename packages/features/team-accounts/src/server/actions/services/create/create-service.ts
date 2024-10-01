@@ -1,7 +1,22 @@
 'use server';
 
+import { SupabaseClient } from '@supabase/supabase-js';
+
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { getPrimaryOwnerId, getStripeAccountID } from '../../members/get/get-member-account';
+
+import { Account } from '../../../../../../../../apps/web/lib/account.types';
+import { Client } from '../../../../../../../../apps/web/lib/client.types';
+import { Database } from '../../../../../../../../apps/web/lib/database.types';
+import { Service } from '../../../../../../../../apps/web/lib/services.types';
+import { fetchClientByOrgId } from '../../clients/get/get-clients';
+import {
+  fetchCurrentUser,
+  getPrimaryOwnerId,
+  getStripeAccountID,
+} from '../../members/get/get-member-account';
+import { hasPermissionToAddClientServices } from '../../permissions/services';
 import { updateTeamAccountStripeId } from '../../team-details-server-actions';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -37,12 +52,12 @@ interface ServiceData {
 
 export const createService = async (clientData: ServiceData) => {
   const client = getSupabaseServerComponentClient();
-  
+
   try {
     const primary_owner_user_id = await getPrimaryOwnerId();
     if (!primary_owner_user_id) throw new Error('No primary owner found');
 
-    let stripe_account_id = await getStripeAccountID() as string;
+    let stripe_account_id = (await getStripeAccountID()) as string;
 
     const newService = {
       created_at: new Date().toISOString(),
@@ -50,7 +65,8 @@ export const createService = async (clientData: ServiceData) => {
       propietary_organization_id: primary_owner_user_id,
       number_of_clients: 0,
       single_sale: clientData.step_type_of_service.single_sale,
-      recurring_subscription: clientData.step_type_of_service.recurring_subscription,
+      recurring_subscription:
+        clientData.step_type_of_service.recurring_subscription,
       service_image: clientData.step_service_details.service_image,
       name: clientData.step_service_details.service_name,
       service_description: clientData.step_service_details.service_description,
@@ -65,10 +81,13 @@ export const createService = async (clientData: ServiceData) => {
       recurrence: clientData.step_service_price.recurrence,
       test_period: clientData.step_service_price.test_period,
       test_period_duration: clientData.step_service_price.test_period_duration,
-      test_period_duration_unit_of_measurement: clientData.step_service_price.test_period_duration_unit_of_measurement,
+      test_period_duration_unit_of_measurement:
+        clientData.step_service_price.test_period_duration_unit_of_measurement,
       test_period_price: clientData.step_service_price.test_period_price,
-      max_number_of_simultaneous_orders: clientData.step_service_price.max_number_of_simultaneous_orders,
-      max_number_of_monthly_orders: clientData.step_service_price.max_number_of_monthly_orders,
+      max_number_of_simultaneous_orders:
+        clientData.step_service_price.max_number_of_simultaneous_orders,
+      max_number_of_monthly_orders:
+        clientData.step_service_price.max_number_of_monthly_orders,
     };
 
     const { error, data: dataResponseCreateService } = await client
@@ -81,24 +100,34 @@ export const createService = async (clientData: ServiceData) => {
 
     if (!stripe_account_id) {
       const user = await fetchUserAccount(client);
-      const stripeAccount = await createStripeAccount("");
+      const stripeAccount = await createStripeAccount('');
       await updateTeamAccountStripeId({
         stripe_id: stripeAccount.accountId,
-        id: user?.id as string
+        id: user?.id as string,
       });
       stripe_account_id = stripeAccount.accountId;
     }
-    const stripeProduct = await createStripeProduct(stripe_account_id, clientData);
-    const stripePrice = await createStripePrice(stripe_account_id, stripeProduct.productId, clientData);
+    const stripeProduct = await createStripeProduct(
+      stripe_account_id,
+      clientData,
+    );
+    const stripePrice = await createStripePrice(
+      stripe_account_id,
+      stripeProduct.productId,
+      clientData,
+    );
 
-    await updateServiceWithPriceId(client, dataResponseCreateService.id, stripePrice.priceId);
+    await updateServiceWithPriceId(
+      client,
+      dataResponseCreateService.id,
+      stripePrice.priceId,
+    );
 
     return {
       supabase: dataResponseCreateService,
       stripeProduct,
-      stripePrice
+      stripePrice,
     };
-
   } catch (error) {
     console.error('Error al crear el servicio:', error);
     throw error;
@@ -106,15 +135,18 @@ export const createService = async (clientData: ServiceData) => {
 };
 
 async function fetchUserAccount(client) {
-  const { data: { user }, error } = await client.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await client.auth.getUser();
   if (error) throw error;
   return user;
 }
 
 async function createStripeAccount(email: string) {
   const response = await fetch(`${baseUrl}/api/stripe/create-account`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
   });
   if (!response.ok) throw new Error('Failed to create Stripe account');
@@ -123,8 +155,8 @@ async function createStripeAccount(email: string) {
 
 async function createStripeProduct(accountId: string, clientData: ServiceData) {
   const response = await fetch(`${baseUrl}/api/stripe/create-service`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       accountId,
       name: clientData.step_service_details.service_name,
@@ -136,10 +168,14 @@ async function createStripeProduct(accountId: string, clientData: ServiceData) {
   return response.json();
 }
 
-async function createStripePrice(accountId: string, productId: string, clientData: ServiceData) {
+async function createStripePrice(
+  accountId: string,
+  productId: string,
+  clientData: ServiceData,
+) {
   const response = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       accountId,
       productId,
@@ -153,10 +189,89 @@ async function createStripePrice(accountId: string, productId: string, clientDat
   return response.json();
 }
 
-async function updateServiceWithPriceId(client, serviceId: number, priceId: string) {
+async function updateServiceWithPriceId(
+  client,
+  serviceId: number,
+  priceId: string,
+) {
   const { error } = await client
     .from('services')
     .update({ price_id: priceId })
     .eq('id', serviceId);
   if (error) throw new Error(error.message);
+}
+
+export async function addServiceToClient(
+  clientOrganizationId: string,
+  serviceId: Service.Type['id'],
+) {
+  const client = getSupabaseServerComponentClient();
+  try {
+    // Step 1: Verify the user
+    const user = await fetchCurrentUser(client);
+    if (!user) throw new Error('No user found');
+
+    // Step 2: Getting the client identifier
+    const clientData = await fetchClientByOrgId(client, clientOrganizationId);
+
+    const clientId = clientData[0]?.id;
+    const clientAgencyId = clientData[0]?.agency_id;
+
+    if (!clientId ?? !clientAgencyId) throw new Error('No client found');
+
+    // Step 3: Verify the permissions to add service to client
+    const hasPermission =
+      await hasPermissionToAddClientServices(clientAgencyId);
+
+    if (!hasPermission)
+      throw new Error('No permission to add services to client');
+
+    // Step 4: Add to specified service to the client organization
+    const serviceAddedData = await insertServiceToClient(
+      client,
+      clientOrganizationId,
+      serviceId,
+      clientId ?? '',
+      user.id,
+      clientAgencyId,
+    );
+
+    return serviceAddedData;
+  } catch (error) {
+    console.error('Error while adding service to client', error);
+    throw error;
+  }
+}
+
+export async function insertServiceToClient(
+  client: SupabaseClient<Database>,
+  clientOrganizationId: string,
+  serviceId: Service.Type['id'],
+  clientId: Client.Type['id'],
+  userId: Account.Type['id'],
+  agencyId: string,
+) {
+  try {
+    const { data: serviceAddedData, error: serviceAddedError } = await client
+      .from('client_services')
+      .insert({
+        client_organization_id: clientOrganizationId,
+        service_id: serviceId,
+        client_id: clientId,
+        created_by: userId,
+        agency_id: agencyId,
+      })
+      .select();
+
+    if (serviceAddedError) {
+      throw new Error(
+        `Error while trying to add service to client, ${serviceAddedError.message}`,
+      );
+    }
+
+    return serviceAddedData;
+  } catch (error) {
+    console.error('Error while adding service to client', error);
+    throw error;
+  }
 }

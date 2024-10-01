@@ -121,7 +121,6 @@ export async function getClientMembersForOrganization(
       clientRoles,
     );
 
-    console.log('clientOrganizationMembers', clientOrganizationMembers);
     return clientOrganizationMembers;
   } catch (error) {
     console.error('Error fetching client members:', error);
@@ -182,7 +181,6 @@ async function fetchClientOrganizations(
       )
       .in('id', clientOrganizationIds)
       .eq('is_personal_account', false);
-
   if (clientOrganizationsError) {
     throw new Error(
       `Error fetching client organizations: ${clientOrganizationsError.message}`,
@@ -248,9 +246,33 @@ export async function getAllClients(): Promise<ClientsWithOrganization[]> {
       clientOrganizations,
     );
 
+    console.log('clientsWithOrganizations', clientsWithOrganizations);
     return clientsWithOrganizations;
   } catch (error) {
     console.error('Error fetching clients:', error);
+    throw error;
+  }
+}
+
+export async function fetchClientByOrgId(
+  client: SupabaseClient<Database>,
+  clientOrganizationId: string,
+) {
+  try {
+    const { data: clientData, error: clientError } = await client
+      .from('clients')
+      .select('id, agency_id')
+      .eq('organization_client_id', clientOrganizationId);
+
+    if (clientError) {
+      throw new Error(
+        `Error while trying to find the client, ${clientError.message}`,
+      );
+    }
+
+    return clientData;
+  } catch (error) {
+    console.error('Error while trying to find the client:', error);
     throw error;
   }
 }
