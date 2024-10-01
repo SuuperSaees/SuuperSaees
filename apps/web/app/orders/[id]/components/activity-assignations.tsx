@@ -6,14 +6,14 @@ import { z } from 'zod';
 
 
 
-import CheckboxCombobox, {
-  CustomItemProps,
-  Option,
-} from '~/components/ui/checkbox-combobox';
+import CheckboxCombobox, { CustomItemProps, Option } from '~/components/ui/checkbox-combobox';
 import { Order } from '~/lib/order.types';
+
+
 
 import deduceNameFromEmail from '../utils/deduce-name-from-email';
 import AvatarDisplayer from './ui/avatar-displayer';
+
 
 const CustomUserItem: React.FC<
   CustomItemProps<
@@ -28,7 +28,7 @@ const CustomUserItem: React.FC<
       pictureUrl={option?.picture_url ?? null}
       displayName={deduceNameFromEmail(option.label) ?? option.label}
     />
-    <span>{option.label}</span>
+    <span>{deduceNameFromEmail(option.label)}</span>
   </div>
 );
 interface ActivityAssignationProps {

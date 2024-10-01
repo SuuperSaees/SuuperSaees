@@ -28,7 +28,7 @@ const CustomUserItem: React.FC<
       pictureUrl={option?.picture_url ?? null}
       displayName={option.label}
     />
-    <span>{option.label}</span>
+    <span>{deduceNameFromEmail(option.label)}</span>
   </div>
 );
 interface ActivityAssignationProps {
