@@ -13,7 +13,11 @@ import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.ty
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
-type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url'>;
+
+type User = Pick<
+  ServerUser.Type,
+  'email' | 'id' | 'name' | 'picture_url' | 'organization_id'
+>;
 
 type OrderWithAllRelations = Order.Relationships.All & {
   messages: (Message.Type & { user: User; files: File.Type[] })[];
@@ -27,6 +31,10 @@ type OrderWithAllRelations = Order.Relationships.All & {
   followers: {
     client_follower: User;
   }[];
+  client_organization: {
+    name: string;
+    slug: string | null;
+  };
 };
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
@@ -37,7 +45,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
       .select(
-        `*, client:accounts!customer_id(id, name, email, picture_url, created_at), 
+        `*, client:accounts!customer_id(id, name, email, picture_url, organization_id, created_at), 
         messages(*, user:accounts(id, name, email, picture_url), files(*)), 
         activities(*, user:accounts(id, name, email, picture_url)),
           reviews(*, user:accounts(id, name, email, picture_url)), 
@@ -59,6 +67,18 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
 
     if (orderError) throw orderError.message;
 
+    // fetch client organization with the order
+    const { data: clientOrganizationData, error: clientOrganizationError } =
+      await client
+        .from('accounts')
+        .select('name, slug')
+        .eq('id', orderData.client_organization_id)
+        .single();
+
+    if (clientOrganizationError) throw clientOrganizationError;
+
+    console.log('clientOrganizationData', clientOrganizationData);
+
     const proccesedData = {
       ...orderData,
       messages: orderData.messages.map((message) => {
@@ -67,6 +87,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
           user: message.user,
         };
       }),
+      client_organization: clientOrganizationData,
     };
 
     return proccesedData as OrderWithAllRelations;

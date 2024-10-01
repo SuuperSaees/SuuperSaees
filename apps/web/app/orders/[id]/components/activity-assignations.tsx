@@ -12,6 +12,7 @@ import { Order } from '~/lib/order.types';
 
 import AvatarDisplayer from './ui/avatar-displayer';
 import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
+import deduceNameFromEmail from '../utils/deduce-name-from-email';
 
 const CustomUserItem: React.FC<
   CustomItemProps<
@@ -24,7 +25,7 @@ const CustomUserItem: React.FC<
     <AvatarDisplayer
       className="font-normal"
       pictureUrl={option?.picture_url ?? null}
-      displayName={option.label}
+      displayName={deduceNameFromEmail(option.label) ?? option.label}
     />
   </div>
 );
