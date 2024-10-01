@@ -124,13 +124,13 @@ export const ActivityProvider = ({
   const [activities, setActivities] = useState<Activity[]>(serverActivities);
   const [reviews, setReviews] = useState<Review[]>(serverReviews);
   const [files, setFiles] = useState<File[]>(serverFiles);
-  const { isInternalMessagingEnabled } = useInternalMessaging();
+  const { getInternalMessagingEnabled } = useInternalMessaging();
   const writeMessage = async (message: string) => {
     try {
       const messageToSend = {
         content: message,
         order_id: Number(order.id),
-        visibility: isInternalMessagingEnabled ? 'internal_agency' : 'public',
+        visibility: getInternalMessagingEnabled() ? 'internal_agency' : 'public',
       };
       const newMessage = await addOrderMessage(
         Number(order.id),

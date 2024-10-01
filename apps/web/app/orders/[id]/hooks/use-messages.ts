@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-
-
 import { toast } from 'sonner';
 
 const useInternalMessaging = () => {
@@ -37,9 +35,29 @@ const useInternalMessaging = () => {
     toastShownRef.current = false; // Reset the ref when the state changes
   }, [isInternalMessagingEnabled]);
 
+  // Sync state with localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedState = localStorage.getItem('internalMessagingEnabled');
+      setIsInternalMessagingEnabled(savedState === 'true');
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  // Getter function to get the current state
+  const getInternalMessagingEnabled = useCallback(() => {
+    const savedState = localStorage.getItem('internalMessagingEnabled');
+    return savedState === 'true';
+  }, []);
+
   return {
     isInternalMessagingEnabled,
     handleSwitchChange,
+    getInternalMessagingEnabled,
   };
 };
 
