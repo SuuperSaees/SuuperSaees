@@ -99,14 +99,14 @@ export const hasPermissionToCreateOrder = async (
       ['client_owner', 'client_member'].includes(userRole) &&
       clientOrganizationId === account.organization_id
     ) {
-      const clientServicePermissions = await checkClientServiceOrderPermissions(
-        client,
-        clientOrganizationId,
-        agencyId,
-      );
-      if (clientServicePermissions) {
+      // const clientServicePermissions = await checkClientServiceOrderPermissions(
+      //   client,
+      //   clientOrganizationId,
+      //   agencyId,
+      // );
+      // if (clientServicePermissions) {
         return true;
-      }
+      // }
     }
 
     return false;
@@ -170,28 +170,28 @@ const checkFollowerOrderPermissions = async (
 };
 
 // Additional check for services order permissions
-const checkClientServiceOrderPermissions = async (
-  client: SupabaseClient<Database>,
-  clientOrganizationId: string,
-  clientAgencyId: string,
-) => {
-  // For now the check is general =>
-  // If the client has some service subscribed to, he can make a order
-  // On the nearly future, depending on brief/service. A specific service for order
-  try {
-    const { data, error } = await client
-      .from('client_services')
-      .select('id')
-      .eq('client_organization_id', clientOrganizationId)
-      .eq('agency_id', clientAgencyId);
+// const checkClientServiceOrderPermissions = async (
+//   client: SupabaseClient<Database>,
+//   clientOrganizationId: string,
+//   clientAgencyId: string,
+// ) => {
+//   // For now the check is general =>
+//   // If the client has some service subscribed to, he can make a order
+//   // On the nearly future, depending on brief/service. A specific service for order
+//   try {
+//     const { data, error } = await client
+//       .from('client_services')
+//       .select('id')
+//       .eq('client_organization_id', clientOrganizationId)
+//       .eq('agency_id', clientAgencyId);
 
-    if (error)
-      throw new Error(
-        `Error checking services order permissions: ${error.message}`,
-      );
-    return data.length > 0;
-  } catch (error) {
-    console.error(`Error checking services order permissions: `, error);
-    throw error;
-  }
-};
+//     if (error)
+//       throw new Error(
+//         `Error checking services order permissions: ${error.message}`,
+//       );
+//     return data.length > 0;
+//   } catch (error) {
+//     console.error(`Error checking services order permissions: `, error);
+//     throw error;
+//   }
+// };
