@@ -371,7 +371,7 @@ function DetailsStep() {
               alt="Selected"
               width={390}
               height={190}
-              className="h-[190px] w-[390px] rounded-md bg-gray-300"
+              className="h-[190px] w-[390px] rounded-md bg-gray-300 object-cover"
             />
           )}
         </div>

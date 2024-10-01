@@ -12,9 +12,9 @@ import { checkGeneralPermission } from './permissions';
 
 
 export const hasPermissionToReadOrderDetails = async (
-  message_order_id: number,
-  message_order_propietary_organization_id: string,
-  message_order_client_organization_id: string,
+  orderId: number,
+  orderPropietaryOrganizationId: string,
+  orderClientOganization_id: string,
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -37,22 +37,22 @@ export const hasPermissionToReadOrderDetails = async (
     // Step 3: Check for agency permission
     if (
       userRole === 'agency_owner' &&
-      account.organization_id === message_order_propietary_organization_id
+      account.organization_id === orderPropietaryOrganizationId
     ) {
       return true;
     }
-
-    if (message_order_propietary_organization_id === account.organization_id) {
+    // Step 4: Check for agency member permissions
+    if (orderPropietaryOrganizationId === account.organization_id) {
       const agencyPermission = await checkAgencyOrderPermissions(
         client,
         user.id,
-        message_order_id,
+        orderId,
       );
       if (agencyPermission) return true;
     }
 
     // Step 4: Check for client permission
-    if (message_order_client_organization_id === account.organization_id) {
+    if (orderClientOganization_id === account.organization_id) {
       return hasPermission;
     }
 
@@ -60,14 +60,59 @@ export const hasPermissionToReadOrderDetails = async (
     const followerPermission = await checkFollowerOrderPermissions(
       client,
       user.id,
-      message_order_id,
+      orderId,
     );
     if (followerPermission) return true;
- 
+
     return false;
   } catch (error) {
     console.error('Error checking permissions:', error);
     throw error;
+  }
+};
+export const hasPermissionToCreateOrder = async (
+  agencyId: string,
+  clientOrganizationId: string,
+): Promise<boolean> => {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    // Step 1: Fetch user, account data, and user role
+    const user = await fetchCurrentUser(client);
+    const account = await fetchCurrentUserAccount(client, user.id);
+    const userRole = await getUserRole();
+
+    if (!account.organization_id) return false;
+
+    // Step 2: Check if the user is part of an agency and can create orders for the client
+    if (
+      ['agency_owner', 'agency_project_manager', 'agency_member'].includes(
+        userRole,
+      ) &&
+      agencyId === account.organization_id
+    ) {
+      return true;
+    }
+
+    // Step 3: Check for client permissions to create orders
+    if (
+      ['client_owner', 'client_member'].includes(userRole) &&
+      clientOrganizationId === account.organization_id
+    ) {
+      const clientServicePermissions = await checkClientServiceOrderPermissions(
+        client,
+        clientOrganizationId,
+        agencyId,
+      );
+      if (clientServicePermissions) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error checking permissions to create order:', error);
+    throw new Error('Error checking permissions to create order');
   }
 };
 
@@ -111,7 +156,7 @@ const checkFollowerOrderPermissions = async (
       .select('order_id')
       .eq('order_id', orderId)
       .eq('client_member_id', userId)
-      .single()
+      .single();
 
     if (error)
       throw new Error(
@@ -120,6 +165,33 @@ const checkFollowerOrderPermissions = async (
     return data;
   } catch (error) {
     console.error(`Error checking follower order permissions: `, error);
+    throw error;
+  }
+};
+
+// Additional check for services order permissions
+const checkClientServiceOrderPermissions = async (
+  client: SupabaseClient<Database>,
+  clientOrganizationId: string,
+  clientAgencyId: string,
+) => {
+  // For now the check is general =>
+  // If the client has some service subscribed to, he can make a order
+  // On the nearly future, depending on brief/service. A specific service for order
+  try {
+    const { data, error } = await client
+      .from('client_services')
+      .select('id')
+      .eq('client_organization_id', clientOrganizationId)
+      .eq('agency_id', clientAgencyId);
+
+    if (error)
+      throw new Error(
+        `Error checking services order permissions: ${error.message}`,
+      );
+    return data.length > 0;
+  } catch (error) {
+    console.error(`Error checking services order permissions: `, error);
     throw error;
   }
 };
