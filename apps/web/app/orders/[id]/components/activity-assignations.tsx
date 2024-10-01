@@ -4,6 +4,8 @@
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
+
+
 import CheckboxCombobox, {
   CustomItemProps,
   Option,
@@ -26,6 +28,7 @@ const CustomUserItem: React.FC<
       pictureUrl={option?.picture_url ?? null}
       displayName={deduceNameFromEmail(option.label) ?? option.label}
     />
+    <span>{option.label}</span>
   </div>
 );
 interface ActivityAssignationProps {

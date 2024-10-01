@@ -95,7 +95,7 @@ export default function CheckboxCombobox<
                 <Popover onOpenChange={handlePopoverClose}>
                   <PopoverTrigger asChild>
                     {options.length && (
-                      <button className="mr-auto flex h-7 w-7 items-center justify-center text-2xl rounded-full font-semibold border-none text-slate-500 bg-slate-50 hover:scale-105 transition-transform duration-100 hover:shadow-sm">
+                      <button className="mr-auto flex h-7 w-7 items-center justify-center rounded-full border-none bg-slate-50 text-2xl font-semibold text-slate-500 transition-transform duration-100 hover:scale-105 hover:shadow-sm">
                         +
                       </button>
                     )}
@@ -110,39 +110,41 @@ export default function CheckboxCombobox<
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="mb-2"
                     />
-                    {filteredOptions.length ? (
-                      filteredOptions.map((option) => (
-                        <FormItem
-                          key={option.value}
-                          className="flex flex-row items-center space-x-3 space-y-0 rounded-md p-2 hover:bg-gray-100"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value.includes(option.value)}
-                              onCheckedChange={(checked) => {
-                                const newValue = checked
-                                  ? [...field.value, option.value]
-                                  : field.value.filter(
-                                      (value) => value !== option.value,
-                                    );
-                                field.onChange(newValue);
-                              }}
-                            />
-                          </FormControl>
-                          {CustomItemComponent ? (
-                            <FormLabel className="h-full w-full font-normal text-gray">
-                              <CustomItemComponent option={option} />
-                            </FormLabel>
-                          ) : (
-                            <FormLabel>{option.label}</FormLabel>
-                          )}
-                        </FormItem>
-                      ))
-                    ) : (
-                      <p className="p-2 text-sm text-gray-500">
-                        No results found.
-                      </p>
-                    )}
+                    <div className='max-h-[250px] overflow-y-auto no-scrollbar'>
+                      {filteredOptions.length ? (
+                        filteredOptions.map((option) => (
+                          <FormItem
+                            key={option.value}
+                            className="flex flex-row items-center space-x-3 space-y-0 rounded-md p-2 hover:bg-gray-100"
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value.includes(option.value)}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...field.value, option.value]
+                                    : field.value.filter(
+                                        (value) => value !== option.value,
+                                      );
+                                  field.onChange(newValue);
+                                }}
+                              />
+                            </FormControl>
+                            {CustomItemComponent ? (
+                              <FormLabel className="h-full w-full font-normal text-gray">
+                                <CustomItemComponent option={option} />
+                              </FormLabel>
+                            ) : (
+                              <FormLabel>{option.label}</FormLabel>
+                            )}
+                          </FormItem>
+                        ))
+                      ) : (
+                        <p className="p-2 text-sm text-gray-500">
+                          No results found.
+                        </p>
+                      )}
+                    </div>
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
