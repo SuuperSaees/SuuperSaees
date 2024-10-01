@@ -1,13 +1,16 @@
 import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import { getUserIdOfAgencyOwner } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+
 import { PageBody } from '@kit/ui/page';
+
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { getOrderById } from '../../../../../packages/features/team-accounts/src/server/actions/orders/get/get-order';
 import AsideOrderInformation from './components/aside-order-information';
 import { OrderHeader } from './components/order-header';
-import { ActivityProvider } from './context/activity-context';
 import { OrderTabs } from './components/order-tabs';
+import { ActivityProvider } from './context/activity-context';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -25,7 +28,15 @@ async function OrderDetailsPage({
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
   );
+  const organizationId = await getUserIdOfAgencyOwner();
+  const i18n = await createI18nServerInstance();
+  const ordersTitle = i18n.t('orders:title');
+  const currentPath = [
+    { title: ordersTitle },
+    { title: order?.title ?? '', uuid: order?.uuid ?? '' },
+  ];
   const role = await getUserRole();
+
   return (
     <PageBody className="h-[100vh] max-h-full min-h-0 flex-grow lg:px-0">
       <ActivityProvider
@@ -41,7 +52,10 @@ async function OrderDetailsPage({
         <div className="flex h-full max-h-full w-full flex-col text-gray-700">
           <div className="flex h-full max-h-full w-full justify-between gap-6">
             <div className="flex w-full min-w-0 flex-grow flex-col gap-6">
-              <OrderTabs />
+              <OrderTabs
+                organizationId={organizationId}
+                currentPath={currentPath}
+              />
             </div>
             <AsideOrderInformation order={order!} className="hidden lg:flex" />
           </div>

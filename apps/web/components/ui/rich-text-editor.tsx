@@ -35,6 +35,7 @@ import { useActivityContext } from '../../app/orders/[id]/context/activity-conte
 import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
 import { Trans } from '@kit/ui/trans';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -324,7 +325,7 @@ const RichTextEditor = ({
     }
   }, [editor]);
   return (
-    <div className="relative grid h-fit grid-rows-[1fr_auto] gap-4 rounded-2xl p-4 shadow-md">
+    <div className="relative grid h-fit w-full grid-rows-[1fr_auto] gap-4 rounded-2xl p-4 shadow-md">
       <div
         onClick={() => editor?.commands.focus()}
         className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-2 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
@@ -345,12 +346,12 @@ const RichTextEditor = ({
           toggleExternalUpload={toggleExternalUpload}
           uploadFileIsExternal={uploadFileIsExternal}
         />
-        <button
-          className="bg-purple absolute bottom-2 right-2 h-fit w-fit rounded-xl bg-black p-2 shadow-sm"
+        <ThemedButton
+          className="absolute bottom-2 right-2 h-fit w-fit rounded-xl p-2 shadow-sm"
           onClick={sendContent}
         >
           <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
-        </button>
+        </ThemedButton>
       </div>
     </div>
   );

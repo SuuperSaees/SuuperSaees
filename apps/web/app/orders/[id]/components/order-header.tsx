@@ -5,36 +5,11 @@ import { Check, PenLine } from 'lucide-react';
 import { Trans } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@kit/ui/button';
-import { Activity } from '~/lib/activity.types';
-import { File } from '~/lib/file.types';
-import { Message } from '~/lib/message.types';
 import { Order } from '~/lib/order.types';
-import { Review } from '~/lib/review.types';
-import { User as ServerUser } from '~/lib/user.types';
 import { updateOrder } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { useActivityContext } from '../context/activity-context';
 
-type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url' | 'organization_id'>;
-
-type OrderWithAllRelations = Order.Relationships.All & {
-  messages: (Message.Type & { user: User; files: File.Type[] })[];
-  files: (File.Type & { user: User })[];
-  activities: (Activity.Type & { user: User })[];
-  reviews: (Review.Type & { user: User })[];
-  client: User;
-  assigned_to: {
-    agency_member: User;
-  }[];
-  followers: {
-    client_follower: User;
-  }[];
-  client_organization: {
-    name: string;
-    slug: string;
-  };
-};
-
-export const OrderHeader = ({ order }: { order: OrderWithAllRelations }) => {
+export const OrderHeader = ({ order }: { order: Order.Relational }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [orderName, setOrderName] = useState(order?.title);
   const { userRole } = useActivityContext();
@@ -86,13 +61,13 @@ export const OrderHeader = ({ order }: { order: OrderWithAllRelations }) => {
                 type="text"
                 ref={inputRef}
                 disabled={!isEditing}
-                className="h-15 flex min-w-0 max-w-full items-center justify-between rounded-md border-none bg-slate-50 px-2 text-[36px] font-semibold text-primary-900 outline-none overflow-x-auto disabled:bg-transparent disabled:pl-0 disabled:pr-2 disabled:text-primary-900"
+                className="h-15 flex min-w-0 max-w-full items-center justify-between rounded-md border-none bg-slate-50 text-[36px] font-semibold text-primary-900 outline-none overflow-x-auto disabled:bg-transparent disabled:pl-0 disabled:pr-2 disabled:text-primary-900"
                 value={orderName}
                 onChange={(event) => setOrderName(event.target.value)}
               />
               <span
                 ref={spanRef}
-                className="absolute invisible min-w-0 max-w-[60vw] whitespace-nowrap px-2 text-[36px] font-semibold text-primary-900 overflow-x-auto"
+                className="absolute invisible min-w-0 max-w-[60vw] whitespace-nowrap text-[36px] font-semibold text-primary-900 overflow-x-auto"
               >
                 {orderName}
               </span>
@@ -106,7 +81,7 @@ export const OrderHeader = ({ order }: { order: OrderWithAllRelations }) => {
             </>
           ) : (
             <>
-              <span className="min-w-0 max-w-[60vw] overflow-x-auto whitespace-nowrap px-2 text-[36px] font-semibold text-primary-900">
+              <span className="min-w-0 max-w-[60vw] overflow-x-auto whitespace-nowrap text-[36px] font-semibold text-primary-900">
                 {orderName.slice(0, 45).trim()}
                 {orderName.length > 45 && '...'}
               </span>

@@ -129,7 +129,7 @@ export async function getClientMembersForOrganization(
 }
 
 // Helper function to fetch agency clients
-async function fetchAgencyClients(
+export async function fetchAgencyClients(
   client: SupabaseClient<Database>,
   agencyId: string,
 ) {

@@ -8,9 +8,9 @@ interface UserMessageProps {
 
 const UserMessage = ({ message }: UserMessageProps) => {
   return (
-    <div className="grid grid-cols-[5%_94%] grid-rows-1 items-start gap-2 w-full"> 
+    <div className="flex items-start gap-4 w-full"> 
       <AvatarDisplayer
-        displayName={null}
+        displayName={message?.user.picture_url ? null : message?.user.name}
         pictureUrl={message?.user.picture_url}
         text={message?.user.name ? message.user.name : undefined}
       />

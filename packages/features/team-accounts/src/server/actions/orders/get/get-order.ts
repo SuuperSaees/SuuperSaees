@@ -2,40 +2,11 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
-import { Activity } from '../../../../../../../../apps/web/lib/activity.types';
-import { File } from '../../../../../../../../apps/web/lib/file.types';
-import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
-import { Review } from '../../../../../../../../apps/web/lib/review.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
-
-type User = Pick<
-  ServerUser.Type,
-  'email' | 'id' | 'name' | 'picture_url' | 'organization_id'
->;
-
-type OrderWithAllRelations = Order.Relationships.All & {
-  messages: (Message.Type & { user: User; files: File.Type[] })[];
-  files: (File.Type & { user: User })[];
-  activities: (Activity.Type & { user: User })[];
-  reviews: (Review.Type & { user: User })[];
-  client: User;
-  assigned_to: {
-    agency_member: User;
-  }[];
-  followers: {
-    client_follower: User;
-  }[];
-  client_organization: {
-    name: string;
-    slug: string | null;
-  };
-};
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -77,8 +48,6 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
 
     if (clientOrganizationError) throw clientOrganizationError;
 
-    console.log('clientOrganizationData', clientOrganizationData);
-
     const proccesedData = {
       ...orderData,
       messages: orderData.messages.map((message) => {
@@ -90,7 +59,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       client_organization: clientOrganizationData,
     };
 
-    return proccesedData as OrderWithAllRelations;
+    return proccesedData as Order.Relational;
   } catch (error) {
     console.error('Error fetching order:', error);
     throw error;
@@ -118,11 +87,12 @@ export async function getOrderAgencyMembers(
 
     if (accountError) throw accountError;
 
-    const { data: accountMembershipsData, error: accountMembershipsDataError } = await client
-      .from('accounts_memberships')
-      .select('account_role')
-      .eq('user_id', userId)
-      .single();
+    const { data: accountMembershipsData, error: accountMembershipsDataError } =
+      await client
+        .from('accounts_memberships')
+        .select('account_role')
+        .eq('user_id', userId)
+        .single();
 
     if (accountMembershipsDataError) throw accountMembershipsDataError;
 
@@ -135,20 +105,24 @@ export async function getOrderAgencyMembers(
 
     if (orderError) throw orderError;
 
-    if (accountMembershipsData.account_role !== 'agency_owner' && accountMembershipsData.account_role !== 'agency_member') {
+    if (
+      accountMembershipsData.account_role !== 'agency_owner' &&
+      accountMembershipsData.account_role !== 'agency_member'
+    ) {
       throw new Error('Unauthorized access to order agency members');
     }
 
     if (orderData.propietary_organization_id === accountData.organization_id) {
-      const { data: agencyMembersData, error: agencyMembersError } = await client
-      .from('accounts')
-      .select('id, name, email, picture_url')
-      .eq('organization_id', agencyId ?? accountData.organization_id);
+      const { data: agencyMembersData, error: agencyMembersError } =
+        await client
+          .from('accounts')
+          .select('id, name, email, picture_url')
+          .eq('organization_id', agencyId ?? accountData.organization_id);
 
       if (agencyMembersError) throw agencyMembersError;
       return agencyMembersData;
     }
-    
+
     const { data: agencyMembersData, error: agencyMembersError } = await client
       .from('accounts')
       .select('id, name, email, picture_url')
@@ -195,15 +169,19 @@ export async function getAgencyClients(
 
     if (accountError) throw accountError;
 
-    const { data: accountMembershipsData, error: accountMembershipsDataError } = await client
-      .from('accounts_memberships')
-      .select('account_role')
-      .eq('user_id', userId)
-      .single();
+    const { data: accountMembershipsData, error: accountMembershipsDataError } =
+      await client
+        .from('accounts_memberships')
+        .select('account_role')
+        .eq('user_id', userId)
+        .single();
 
     if (accountMembershipsDataError) throw accountMembershipsDataError;
 
-    if (accountMembershipsData.account_role !== 'agency_owner' && accountMembershipsData.account_role !== 'agency_member') {
+    if (
+      accountMembershipsData.account_role !== 'agency_owner' &&
+      accountMembershipsData.account_role !== 'agency_member'
+    ) {
       throw new Error('Unauthorized access to agency clients');
     }
 
@@ -219,21 +197,19 @@ export async function getAgencyClients(
       throw new Error('Unauthorized access to this order');
     }
 
-  
     const { data: clientsData, error: clientsError } = await client
       .from('clients')
       .select('user_client_id')
-      .eq('agency_id', agencyId as string); 
+      .eq('agency_id', agencyId as string);
 
     if (clientsError) throw clientsError;
-
 
     const clientDetailsPromises = clientsData.map(async (clientCurrent) => {
       const { data: accountData, error: accountError } = await client
         .from('accounts')
         .select('id, name, email, picture_url')
         .eq('id', clientCurrent.user_client_id)
-        .eq('is_personal_account', true) 
+        .eq('is_personal_account', true)
         .single();
 
       if (accountError) throw accountError;
@@ -243,7 +219,7 @@ export async function getAgencyClients(
 
     const clientDetails = await Promise.all(clientDetailsPromises);
 
-    return clientDetails; 
+    return clientDetails;
   } catch (error) {
     console.error('Error fetching agency clients:', error);
     throw error;

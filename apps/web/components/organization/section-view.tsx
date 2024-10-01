@@ -2,18 +2,14 @@
 
 import { useState } from 'react';
 
-
-
 import { useQuery } from '@tanstack/react-query';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 import { getServices } from 'node_modules/@kit/team-accounts/src/server/actions/services/get/get-services';
 import { useTranslation } from 'react-i18next';
 
-
-
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
-// import FileSection from './files';
+import FileSection from './files';
 import MemberButtonTriggers from './member-button-triggers';
 // import InvoiceSection from './invoices';
 import MemberSection from './members';
@@ -45,6 +41,9 @@ function SectionView({
   const serviceOptions = services?.data?.map((service) => {
     return { value: service.id, label: service.name };
   });
+
+  // This is the actual path of the current folder
+  // const [currentPath, setCurrentPath] = useState<{ title: string; uuid?: string }[]>([]); It's not used in the code for now
 
   const buttonControllersMap = new Map<string, JSX.Element | null>([
     [
@@ -84,6 +83,14 @@ function SectionView({
       />,
     ],
     [
+      'files',
+      <FileSection
+        key={'files'}
+        clientOrganizationId={clientOrganizationId}
+        // setCurrentPath={setCurrentPath}  it's not used in the code for now
+      />,
+    ],
+    [
       'services',
       <ServiceSection
         key={'services'}
@@ -91,7 +98,6 @@ function SectionView({
         currentUserRole={currentUserRole}
       />,
     ],
-    // ['files', <FileSection key={'files'} />],
     // ['reviews', <ReviewSection key={'reviews'} />],
     // ['invoices', <InvoiceSection key={'invoices'} />],
   ]);

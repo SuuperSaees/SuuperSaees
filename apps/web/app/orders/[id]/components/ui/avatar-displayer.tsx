@@ -7,7 +7,7 @@ interface AvatarDisplayerProps {
   isAssignedOrFollower?: boolean;
   pictureUrl?: string | null;
   nickname?: string;
-  status?: 'online' | 'offline';
+  // status?: 'online' | 'offline'; this is not used anywhere for now
   className?: string;
   organizationName?: string;
   [key: string]: unknown;
@@ -19,12 +19,12 @@ const AvatarDisplayer = ({
   organizationName,
   isAssignedOrFollower,
   nickname,
-  status,
+  // status, this is not used anywhere for now
   className,
   ...rest
 }: AvatarDisplayerProps) => {
   return (
-    <div className={`relative flex h-fit w-fit items-center gap-2 ${isAssignedOrFollower ? "scale-75 bg-slate-50 px-4 rounded-full" : ""}`}>
+    <div className={`relative flex h-fit w-fit items-center ${isAssignedOrFollower ? "scale-75 bg-slate-50 px-4 rounded-full" : ""} ${className}`} {...rest}>
       {/* <ProfileAvatar
         displayName={!displayName ? null : displayName}
         pictureUrl={pictureUrl}
@@ -36,7 +36,7 @@ const AvatarDisplayer = ({
         {...rest}
       /> */}
       <Avatar className={`${isAssignedOrFollower ? "scale-75" : ""}`}>
-        <AvatarImage src={pictureUrl} />
+        <AvatarImage src={pictureUrl ?? ''} />
         {/* <AvatarFallback>{displayName}</AvatarFallback> */}
         {displayName && (
           <AvatarFallback>
@@ -50,7 +50,7 @@ const AvatarDisplayer = ({
         )}
       </Avatar>
       <div className={`${organizationName ? "grid grid-rows-2 grid-cols-1" : "flex py-2 justify-center items-center"}`}>
-        {displayName && <span className="whitespace-nowrap text-sm font-semibold">{displayName}</span>}
+        {displayName && isAssignedOrFollower && <span className="whitespace-nowrap text-sm font-semibold">{displayName}</span>}
         {/* {nickname && <span className="text-sm text-gray-600">{nickname}</span>} */}
         {/* <AvatarFallback>SD</AvatarFallback> */}
       {organizationName && <span className="text-sm text-gray-600">{organizationName}</span>}

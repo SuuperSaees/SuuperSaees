@@ -7,10 +7,22 @@ import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/t
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 import { Trans } from '@kit/ui/trans';
 
+import FileSection from '~/components/organization/files';
+
 import ActivityPage from './activity';
 import DetailsPage from './details';
 
-export const OrderTabs = () => {
+type OrderTabsProps = {
+  organizationId: {
+    account_id: string;
+  } | undefined;
+  currentPath: {
+    title: string;
+    uuid?: string;
+  }[];
+};
+
+export const OrderTabs = ({ organizationId, currentPath}: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
@@ -37,12 +49,24 @@ export const OrderTabs = () => {
         >
           <Trans i18nKey={'orders:details.navigation.details'} />
         </ThemedTabTrigger>
+        <ThemedTabTrigger value="files" activeTab={activeTab} option={'files'}>
+          <Trans i18nKey={'orders:details.navigation.files'} />
+        </ThemedTabTrigger>
       </TabsList>
       <TabsContent value="details">
         <DetailsPage />
       </TabsContent>
       <TabsContent value="activity" className="h-full max-h-full min-h-0">
         <ActivityPage />
+      </TabsContent>
+      <TabsContent value="files">
+        <div className="w-full">
+          <FileSection
+            key={'files'}
+            clientOrganizationId={organizationId?.account_id ?? ''}
+            currentPath={currentPath}
+          />
+        </div>
       </TabsContent>
     </Tabs>
   );

@@ -1,7 +1,8 @@
 import { // Briefcase,
-CreditCard, // Home,
-Layers, Settings, // SquareCheck,
-Users // Wallet,
+  CreditCard, // Home,
+  Layers, Settings, // SquareCheck,
+  Users, // Wallet,
+  FolderClosed,
 } from 'lucide-react';
 
 
@@ -48,6 +49,18 @@ const routes = [
     label: 'common:organizationName',
     path: pathsConfig.app.organization,
     Icon: <Users className={iconClasses} />,
+  },
+  {
+    label: 'common:storage',
+    path: pathsConfig.app.storage,
+    Icon: (
+      // <img
+      //   src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/cloud-01.svg?t=2024-09-28T19%3A16%3A08.869Z"
+      //   className={iconClasses}
+      //   alt="Cloud Icon"
+      // />
+      <FolderClosed className={iconClasses} />
+    ),
   },
   {
 
