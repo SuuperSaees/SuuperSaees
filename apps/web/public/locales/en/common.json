@@ -55,8 +55,9 @@
   "clientsName": "Clients",
   "teamName": "Team",
   "orders": "Orders",
-    "profile": "My profile",
+  "profile": "My profile",
   "billing": "Billing",
+  "storage": "Storage",
   "roles": {
     "agency_owner": {
       "label": "Owner"
@@ -74,5 +75,10 @@
       "label": "Member"
     }
   },
-  "clear": "Clear"
+  "clear": "Clear",
+  "pagination": {
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "organizationName": "Organization"
 }

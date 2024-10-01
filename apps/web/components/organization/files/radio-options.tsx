@@ -8,7 +8,7 @@ interface RadioOptionsProps {
 }
 
 const RadioOptions: React.FC<RadioOptionsProps> = ({ options, selectedOption, onChange }) => (
-  <div className="flex gap-4 items-center justify-center">
+  <div className='flex gap-4 items-center'>
     {options.map(option => (
       <RadioOption
         key={option.value}

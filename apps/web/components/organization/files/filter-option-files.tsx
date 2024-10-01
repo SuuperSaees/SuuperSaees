@@ -23,7 +23,7 @@ export function RadioOption({ value, selectedOption, onChange, label }: RadioOpt
   const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
 
   return (
-    <label className="flex items-center space-x-2">
+    <label className="flex items-center justify-center">
       <input
         type="radio"
         value={value}

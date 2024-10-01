@@ -11,7 +11,6 @@ import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 import FileSection from './files';
-import { OptionFiles } from './files/option-files';
 import { InviteClientMembersDialogContainer } from './invite-client-members-dialog';
 // import InvoiceSection from './invoices';
 import MemberSection from './members';
@@ -31,8 +30,7 @@ function SectionView({
   const [search, setSearch] = useState('');
   const { t } = useTranslation('clients');
 
-  // This is the actual path of the current folder
-  const [currentPath, setCurrentPath] = useState<{ title: string; uuid?: string }[]>([]);
+  // const [currentPath, setCurrentPath] = useState<{ title: string; uuid?: string }[]>([]);
 
   const buttonControllersMap = new Map<string, JSX.Element | null>([
     [
@@ -63,15 +61,7 @@ function SectionView({
       </>,
     ],
     ['services', null],
-    [
-      'files', 
-      <>
-        <OptionFiles
-          clientOrganizationId={clientOrganizationId}
-          currentPath={currentPath}
-        />
-      </>
-    ],
+    ['files', null],
     ['reviews', null],
     ['invoices', null],
   ]);
@@ -93,7 +83,7 @@ function SectionView({
       <FileSection 
         key={'files'}
         clientOrganizationId={clientOrganizationId}
-        setCurrentPath={setCurrentPath}   
+        // setCurrentPath={setCurrentPath}   
       />
     ],
     // ['reviews', <ReviewSection key={'reviews'} />],
