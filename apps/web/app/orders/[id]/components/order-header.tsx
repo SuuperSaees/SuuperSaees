@@ -1,27 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-
 import { Check, PenLine } from 'lucide-react';
 import { Trans } from 'react-i18next';
 import { toast } from 'sonner';
-
 import { Button } from '@kit/ui/button';
-
 import { Activity } from '~/lib/activity.types';
 import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
 import { Order } from '~/lib/order.types';
 import { Review } from '~/lib/review.types';
 import { User as ServerUser } from '~/lib/user.types';
-
 import { updateOrder } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { useActivityContext } from '../context/activity-context';
 
-type User = Pick<
-  ServerUser.Type,
-  'email' | 'id' | 'name' | 'picture_url' | 'organization_id'
->;
+type User = Pick<ServerUser.Type, 'email' | 'id' | 'name' | 'picture_url' | 'organization_id'>;
 
 type OrderWithAllRelations = Order.Relationships.All & {
   messages: (Message.Type & { user: User; files: File.Type[] })[];
@@ -69,72 +62,67 @@ export const OrderHeader = ({ order }: { order: OrderWithAllRelations }) => {
     }
   };
 
-  useEffect(() => {
+  const updateInputWidth = () => {
     if (spanRef.current && inputRef.current) {
       const spanWidth = spanRef.current.offsetWidth;
       inputRef.current.style.width = `${Math.min(spanWidth, window.innerWidth * 0.6)}px`;
     }
-  }, [orderName]);
+  };
+
+  useEffect(() => {
+    updateInputWidth();
+  }, [orderName, isEditing]);
 
   const rolesThatCanEdit = new Set(['agency_member', 'agency_project_manager', 'agency_owner']);
+  const canEdit = rolesThatCanEdit.has(userRole);
 
   return (
     <div>
       <div className="mb-2 flex max-w-[60vw] items-center justify-start gap-2">
         <div className="inline-flex w-full">
-        {
-            rolesThatCanEdit.has(userRole) && (
-            <input
-            type="text"
-            ref={inputRef}
-            disabled={!isEditing}
-            className="h-15 flex min-w-0 max-w-full items-center justify-between overflow-x-hidden rounded-md border-none bg-slate-50 px-2 text-[36px] font-semibold text-primary-900 outline-none disabled:bg-transparent disabled:pl-0 disabled:pr-2 disabled:text-primary-900 disabled:overflow-x-hidden"
-            value={orderName}
-            onChange={(event) => setOrderName(event.target.value)}
-          />
-          )}
-        { rolesThatCanEdit.has(userRole) ? (
-          <span
-            ref={spanRef}
-            className="invisible absolute min-w-0 max-w-[60vw] overflow-x-auto whitespace-nowrap px-2 text-[36px] font-semibold text-primary-900"
-          >
-            {/* add three points if the text is too long */}
-            {orderName}
-          </span>
-        ) : (
-          <span
-            className="min-w-0 max-w-[60vw] overflow-x-auto whitespace-nowrap px-2 text-[36px] font-semibold text-primary-900"
-          >
-            {orderName.slice(0, 45).trim()}...
-          </span>
-        )}
-
-          {!isEditing && orderName.length > 55 && rolesThatCanEdit.has(userRole) && (
-            <span className="text-primary-900 self-end pb-1 text-[36px]">...</span>
-          )}
-
-          {isEditing && rolesThatCanEdit.has(userRole) ? (
-            <Button
-              variant="ghost"
-              className="h-15 m-0 text-slate-500"
-              onClick={handleSave}
-            >
-              <Check />
-            </Button>
-          ) : (
-            [
-              'agency_member',
-              'agency_project_manager',
-              'agency_owner',
-            ].includes(userRole) && (
+          {canEdit && isEditing ? (
+            <>
+              <input
+                type="text"
+                ref={inputRef}
+                disabled={!isEditing}
+                className="h-15 flex min-w-0 max-w-full items-center justify-between rounded-md border-none bg-slate-50 px-2 text-[36px] font-semibold text-primary-900 outline-none overflow-x-auto disabled:bg-transparent disabled:pl-0 disabled:pr-2 disabled:text-primary-900"
+                value={orderName}
+                onChange={(event) => setOrderName(event.target.value)}
+              />
+              <span
+                ref={spanRef}
+                className="absolute invisible min-w-0 max-w-[60vw] whitespace-nowrap px-2 text-[36px] font-semibold text-primary-900 overflow-x-auto"
+              >
+                {orderName}
+              </span>
               <Button
                 variant="ghost"
                 className="h-15 m-0 text-slate-500"
-                onClick={() => setIsEditing(true)}
+                onClick={handleSave}
               >
-                <PenLine />
+                <Check />
               </Button>
-            )
+            </>
+          ) : (
+            <>
+              <span className="min-w-0 max-w-[60vw] overflow-x-auto whitespace-nowrap px-2 text-[36px] font-semibold text-primary-900">
+                {orderName.slice(0, 45).trim()}
+                {orderName.length > 45 && '...'}
+              </span>
+              {canEdit && (
+                <Button
+                  variant="ghost"
+                  className="h-15 m-0 text-slate-500"
+                  onClick={() => {
+                    setIsEditing(true);
+                    updateInputWidth();
+                  }}
+                >
+                  <PenLine />
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
