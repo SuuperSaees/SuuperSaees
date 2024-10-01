@@ -134,7 +134,7 @@ const FileSection: React.FC<FileSectionProps> = ({ clientOrganizationId, setCurr
   return (
     <div>
 
-      <div className='flex justify-between mb-[32px]'>
+      <div className='flex flex-wrap space-y-4 justify-between mb-[32px]'>
         <RadioOptions options={options} selectedOption={selectedOption} onChange={handleOptionChange} />
         {selectedOption === 'all' && <OptionFiles clientOrganizationId={clientOrganizationId} currentPath={path ?? []} />}
       </div>

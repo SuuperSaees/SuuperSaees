@@ -67,13 +67,13 @@ const UserFile = ({ file }: UserFileProps) => {
     }
   };
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-4 w-full">
       <AvatarDisplayer
-        displayName={null}
+        displayName={file?.user?.picture_url ? null : file?.user?.name}
         pictureUrl={file?.user?.picture_url}
         text={file?.user.name ? file.user.name : undefined}
       />
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-full">
         <div className="flex w-full justify-between gap-4">
           <span className="font-semibold">{file?.user?.name}</span>
           <small className="text-gray-400">

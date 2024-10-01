@@ -48,8 +48,6 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
 
     if (clientOrganizationError) throw clientOrganizationError;
 
-    console.log('clientOrganizationData', clientOrganizationData);
-
     const proccesedData = {
       ...orderData,
       messages: orderData.messages.map((message) => {

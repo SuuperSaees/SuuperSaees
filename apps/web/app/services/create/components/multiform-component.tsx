@@ -6,7 +6,6 @@ import React, { useState } from 'react';
 
 import Image from 'next/image';
 // import BriefConnectionStep from './step-brief-connection';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 
@@ -205,6 +204,7 @@ function TypeOfServiceStep() {
   const { form, nextStep, isStepValid } = useMultiStepFormContext();
   const { t } = useTranslation('services');
   const { theme_color } = useOrganizationSettings();
+  const router = useRouter();
   type CheckboxName =
     | 'step_type_of_service.single_sale'
     | 'step_type_of_service.recurring_subscription';
@@ -332,13 +332,9 @@ function TypeOfServiceStep() {
             />
           </div>
           <div className="mt-4 flex justify-between space-x-2">
-            <Link
-              type="button"
-              href={'/services'}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 shadow transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            >
+            <ThemedButton type="button" onClick={()=> router.push('/services')}>
               {t('previous')}
-            </Link>
+            </ThemedButton>
             <ThemedButton onClick={nextStep} disabled={!isStepValid()}>
               {t('next')}
             </ThemedButton>
@@ -404,7 +400,7 @@ function DetailsStep() {
         )}
       />
       <div className="mt-4 flex justify-between space-x-2">
-        <ThemedButton type="button" variant="outline" onClick={prevStep}>
+        <ThemedButton type="button" onClick={prevStep}>
           {t('previous')}
         </ThemedButton>
         <ThemedButton onClick={nextStep} disabled={!isStepValid()}>
@@ -837,7 +833,7 @@ function PricingStep() {
       </div>
 
       <div className="mt-4 flex justify-between space-x-2">
-        <ThemedButton type="button" variant="outline" onClick={prevStep}>
+        <ThemedButton type="button" disabled={createServiceMutation.isPending} onClick={prevStep}>
           {t('previous')}
         </ThemedButton>
         <ThemedButton

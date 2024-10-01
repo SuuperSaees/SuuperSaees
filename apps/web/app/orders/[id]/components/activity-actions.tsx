@@ -178,9 +178,9 @@ export const DefaultAction = ({
 }: ActivityActionProps) => {
   return (
     <div className="flex h-fit w-full justify-between gap-4 text-gray-400">
-      <div className="flex gap-1">
+      <div className="flex gap-4">
         <AvatarDisplayer
-          displayName={null}
+          displayName={formattedActivity.user.picture_url ? null : formattedActivity.user.name}
           pictureUrl={formattedActivity.user.picture_url}
         />
         <span className="flex flex-wrap gap-1">

@@ -16,20 +16,21 @@ import { toast } from 'sonner';
 
 import { Trans } from '@kit/ui/trans';
 
+import { Order } from '~/lib/order.types';
+
 import {
   updateOrder,
   updateOrderAssigns,
   updateOrderFollowers,
 } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { useActivityContext } from '../context/activity-context';
+import deduceNameFromEmail from '../utils/deduce-name-from-email';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import ActivityAssignations from './activity-assignations';
 import ActivityFollowers from './activity-followers';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
-import { Order } from '~/lib/order.types';
-import deduceNameFromEmail from '../utils/deduce-name-from-email';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -200,16 +201,26 @@ const AsideOrderInformation = ({
         <h3 className="pb-4 font-bold">
           <Trans i18nKey="details.createdBy" />
         </h3>
-        <AvatarDisplayer
-          displayName={order.client?.email ? deduceNameFromEmail(order.client.email) : ''}
-          pictureUrl={
-            order.client
-              ? order.client?.picture_url && order.client?.picture_url
-              : undefined
-          }
-          organizationName={order.client_organization?.name}
-          // status="online"
-        />
+        <div className="flex gap-3">
+          <AvatarDisplayer
+            displayName={order.client?.name ? order.client?.name : deduceNameFromEmail(order.client?.email ?? '')}
+            pictureUrl={
+              order.client
+                ? order.client?.picture_url && order.client?.picture_url
+                : undefined
+            }
+          />
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-600 font-semibold">
+              {order.client?.email ? deduceNameFromEmail(order.client?.email ?? '') : ''}
+            </span>
+            <span className="text-sm text-gray-600">
+              {order.client_organization?.name
+                ? order.client_organization?.name
+                : ''}
+            </span>
+          </div>
+        </div>
       </div>
       <h3 className="font-bold">{t('details.summary')}</h3>
 
@@ -289,20 +300,24 @@ const AsideOrderInformation = ({
               <Loader className="mr-2 h-4 w-4" />
               <span className="font-semibold">{t('details.status')}</span>
             </div>
-            <span className={`px-2 py-1 rounded-full ${order.status ? statusColors[order.status] : undefined}`}>
+            <span
+              className={`rounded-full px-2 py-1 ${order.status ? statusColors[order.status] : undefined}`}
+            >
               {order.status
                 ?.replace(/_/g, ' ')
                 .replace(/^\w/, (c) => c.toUpperCase())}
             </span>
           </div>
 
-          <div className="flex justify-between items-center mb-4">
-           <div className="flex">
-           <FlagIcon className="mr-2 h-4 w-4" />
-           <span className="font">{t('details.priority')}</span>
-           </div>
-            <span className={`px-2 py-1 flex items-center rounded-full ${order.priority ? priorityColors[order.priority] : undefined}`}>
-            <div className='h-2 w-2 mr-2 rounded-full bg-current'></div>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex">
+              <FlagIcon className="mr-2 h-4 w-4" />
+              <span className="font">{t('details.priority')}</span>
+            </div>
+            <span
+              className={`flex items-center rounded-full px-2 py-1 ${order.priority ? priorityColors[order.priority] : undefined}`}
+            >
+              <div className="mr-2 h-2 w-2 rounded-full bg-current"></div>
               {order.priority
                 ?.replace(/_/g, ' ')
                 .replace(/^\w/, (c) => c.toUpperCase())}

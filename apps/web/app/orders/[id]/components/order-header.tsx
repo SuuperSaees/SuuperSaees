@@ -61,13 +61,13 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
                 type="text"
                 ref={inputRef}
                 disabled={!isEditing}
-                className="h-15 flex min-w-0 max-w-full items-center justify-between rounded-md border-none bg-slate-50 px-2 text-[36px] font-semibold text-primary-900 outline-none overflow-x-auto disabled:bg-transparent disabled:pl-0 disabled:pr-2 disabled:text-primary-900"
+                className="h-15 flex min-w-0 max-w-full items-center justify-between rounded-md border-none bg-slate-50 text-[36px] font-semibold text-primary-900 outline-none overflow-x-auto disabled:bg-transparent disabled:pl-0 disabled:pr-2 disabled:text-primary-900"
                 value={orderName}
                 onChange={(event) => setOrderName(event.target.value)}
               />
               <span
                 ref={spanRef}
-                className="absolute invisible min-w-0 max-w-[60vw] whitespace-nowrap px-2 text-[36px] font-semibold text-primary-900 overflow-x-auto"
+                className="absolute invisible min-w-0 max-w-[60vw] whitespace-nowrap text-[36px] font-semibold text-primary-900 overflow-x-auto"
               >
                 {orderName}
               </span>
@@ -81,7 +81,7 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
             </>
           ) : (
             <>
-              <span className="min-w-0 max-w-[60vw] overflow-x-auto whitespace-nowrap px-2 text-[36px] font-semibold text-primary-900">
+              <span className="min-w-0 max-w-[60vw] overflow-x-auto whitespace-nowrap text-[36px] font-semibold text-primary-900">
                 {orderName.slice(0, 45).trim()}
                 {orderName.length > 45 && '...'}
               </span>
