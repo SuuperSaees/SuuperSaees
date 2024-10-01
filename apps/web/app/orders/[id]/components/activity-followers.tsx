@@ -10,8 +10,8 @@ import CheckboxCombobox, {
 } from '~/components/ui/checkbox-combobox';
 import { Order } from '~/lib/order.types';
 
+import deduceNameFromEmail from '../utils/deduce-name-from-email';
 import AvatarDisplayer from './ui/avatar-displayer';
-import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
 
 const CustomUserItem: React.FC<
   CustomItemProps<
@@ -46,7 +46,7 @@ const ActivityFollowers = ({
   const { t } = useTranslation('orders');
 
   const avatarsWithStatus =
-  followers?.map((account) => ({
+    followers?.map((account) => ({
       ...account.client_follower,
       status: undefined,
     })) ?? [];
@@ -67,19 +67,29 @@ const ActivityFollowers = ({
   return (
     <div className="flex flex-col gap-2">
       <span className="font-semibold">{t('details.followedBy')}</span>
-      <div className="flex flex-wrap items-center">
-        <MultiAvatarDisplayer avatars={avatarsWithStatus} maxAvatars={4} />
-        {/* <button className="flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-gray-300 text-gray-300">
-          <Plus />
-        </button> */}
-        <CheckboxCombobox
-          options={searchUserOptions ?? []}
-          onSubmit={handleFormSubmit}
-          schema={membersAssignedSchema}
-          defaultValues={defaultValues}
-          customItem={CustomUserItem}
-        />
+      <div className="no-scrollbar flex max-h-[300px] flex-wrap items-center justify-start gap-2 overflow-y-auto">
+        {avatarsWithStatus.map((avatar, index) => {
+          return (
+            <AvatarDisplayer
+              displayName={
+                deduceNameFromEmail(avatar?.email ?? '') ?? avatar?.name
+              }
+              isAssignedOrFollower={true}
+              pictureUrl={avatar?.picture_url}
+              key={index + avatar?.name}
+              status={avatar?.status}
+              className={'h-8 w-8 border-2 border-white'}
+            />
+          );
+        })}
       </div>
+      <CheckboxCombobox
+        options={searchUserOptions ?? []}
+        onSubmit={handleFormSubmit}
+        schema={membersAssignedSchema}
+        defaultValues={defaultValues}
+        customItem={CustomUserItem}
+      />
     </div>
   );
 };
