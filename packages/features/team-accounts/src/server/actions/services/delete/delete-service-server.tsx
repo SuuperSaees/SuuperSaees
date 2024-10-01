@@ -1,15 +1,25 @@
 'use server';
 
+import { SupabaseClient } from '@supabase/supabase-js';
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { getStripeAccountID } from '../../members/get/get-member-account';
+
+import { Client } from '../../../../../../../../apps/web/lib/client.types';
+import { Database } from '../../../../../../../../apps/web/lib/database.types';
+import { Service } from '../../../../../../../../apps/web/lib/services.types';
+import { fetchClientByOrgId } from '../../clients/get/get-clients';
+import {
+  fetchCurrentUser,
+  getStripeAccountID,
+} from '../../members/get/get-member-account';
+import { hasPermissionToDeleteClientService } from '../../permissions/services';
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export const deleteService = async (priceId: string) => {
   try {
-
     const stripe_account_id = await getStripeAccountID();
-    if (!stripe_account_id) throw new Error('No stripe account found');      
+    if (!stripe_account_id) throw new Error('No stripe account found');
 
     const client = getSupabaseServerComponentClient();
     // Delete From DB
@@ -26,3 +36,67 @@ export const deleteService = async (priceId: string) => {
     throw error;
   }
 };
+
+export async function deleteClientService(
+  clientOrganizationId: string,
+  serviceId: Service.Type['id'],
+  serviceSubscriptionId: Service.Relationships.Client.Response['id'],
+) {
+  const client = getSupabaseServerComponentClient();
+  try {
+    // Step 1: Verify the user
+    const user = await fetchCurrentUser(client);
+    if (!user) throw new Error('No user found');
+
+    // Step 2: Get the client ID
+    const clientData = await fetchClientByOrgId(client, clientOrganizationId);
+
+    const clientId = clientData[0]?.id;
+    const clientAgencyId = clientData[0]?.agency_id;
+    if (!clientId ?? !clientAgencyId) throw new Error('No client found');
+
+    // Step 3: Verify the permision to delete
+    const hasPermission =
+      await hasPermissionToDeleteClientService(clientAgencyId);
+    if (!hasPermission) throw new Error('No permission to delete services');
+
+    // Step 4: Delete the specified service from the client organization
+    const deleteData = await deleteServiceFromClient(
+      client,
+      clientOrganizationId,
+      serviceId,
+      clientId ?? '',
+      serviceSubscriptionId,
+    );
+
+    return deleteData;
+  } catch (error) {
+    console.error('Error while deleting service from client', error);
+    throw error;
+  }
+}
+
+export async function deleteServiceFromClient(
+  client: SupabaseClient<Database>,
+  clientOrganizationId: string,
+  serviceId: Service.Type['id'],
+  clientId: Client.Type['id'],
+  subscriptionId: Service.Relationships.Client.Response['id'],
+) {
+  try {
+    const { data: deleteData, error: deleteError } = await client
+      .from('client_services')
+      .delete()
+      .eq('id', subscriptionId);
+
+    if (deleteError)
+      throw new Error(
+        `Error while trying to delete service from client, ${deleteError.message}`,
+      );
+
+    return deleteData;
+  } catch (error) {
+    console.error('Error while deleting service from client', error);
+    throw error;
+  }
+}

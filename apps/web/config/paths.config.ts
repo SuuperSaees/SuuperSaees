@@ -29,6 +29,7 @@ const PathsSchema = z.object({
     clients: z.string().min(1),
     // briefs: z.string().min(1),
     organization: z.string().min(1),
+    storage: z.string().min(1),
   }),
 });
 
@@ -60,6 +61,7 @@ const pathsConfig = PathsSchema.parse({
     accountBillingReturn: `/home/[account]/billing/return`,
     joinTeam: '/join',
     organization: '/organization',
+    storage: '/storage',
     // briefs: '/briefs',
   },
 } satisfies z.infer<typeof PathsSchema>);

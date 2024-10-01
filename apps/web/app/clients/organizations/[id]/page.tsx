@@ -18,6 +18,8 @@ export const generateMetadata = async () => {
 async function OrganizationsPage({ params }: { params: { id: string } }) {
   const organization = await getOrganizationById(params.id);
 
+  // console.log('organization', organization);
+
   const organizationOwner = await getUserById(
     organization.primary_owner_user_id,
   );

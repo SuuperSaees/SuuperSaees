@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus } from 'lucide-react';
+// import { Plus } from 'lucide-react';
 import { DefaultValues, Path, SubmitHandler, useForm } from 'react-hook-form';
 import { ZodType, ZodTypeDef, z } from 'zod';
 
@@ -95,8 +95,8 @@ export default function CheckboxCombobox<
                 <Popover onOpenChange={handlePopoverClose}>
                   <PopoverTrigger asChild>
                     {options.length && (
-                      <button className="mr-auto flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-gray-300 text-gray-300 hover:border-gray-500 hover:text-gray-500">
-                        <Plus />
+                      <button className="mr-auto flex h-7 w-7 items-center justify-center text-2xl rounded-full font-semibold border-none text-slate-500 bg-slate-50 hover:scale-105 transition-transform duration-100 hover:shadow-sm">
+                        +
                       </button>
                     )}
                   </PopoverTrigger>

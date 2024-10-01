@@ -16,10 +16,6 @@ export const generateMetadata = async () => {
   };
 };
 
-// const capitalizeFirstLetter = (string: string) => {
-//   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-// };
-
 async function OrdersPage() {
   const ordersData = await getOrders().catch((err) => console.error(err));
   const processedOrders =
@@ -30,8 +26,6 @@ async function OrdersPage() {
     })) ?? [];
 
   const role = await getUserRole();
-
-  // console.log('processedOrders', processedOrders);
 
   return (
     <>

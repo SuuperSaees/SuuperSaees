@@ -12,6 +12,7 @@ import { Order } from '~/lib/order.types';
 
 import AvatarDisplayer from './ui/avatar-displayer';
 import MultiAvatarDisplayer from './ui/multi-avatar-displayer';
+import deduceNameFromEmail from '../utils/deduce-name-from-email';
 
 const CustomUserItem: React.FC<
   CustomItemProps<
@@ -24,7 +25,7 @@ const CustomUserItem: React.FC<
     <AvatarDisplayer
       className="font-normal"
       pictureUrl={option?.picture_url ?? null}
-      displayName={option.label}
+      displayName={deduceNameFromEmail(option.label) ?? option.label}
     />
   </div>
 );
@@ -65,8 +66,8 @@ const ActivityAssignations = ({
   };
   // console.log('assignedTo', assignedTo);
   return (
-    <div className="flex flex-col gap-2">
-      <span className="font-semibold">{t('details.assignedTo')}: </span>
+    <div className="flex flex-col gap-2 mb-2">
+      <span className="font-semibold">{t('details.assignedTo')}</span>
       <div className="flex flex-wrap items-center">
         <MultiAvatarDisplayer avatars={avatarsWithStatus} maxAvatars={4} />
         {/* <button className="flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-gray-300 text-gray-300">

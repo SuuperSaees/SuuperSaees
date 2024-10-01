@@ -26,7 +26,7 @@
   "plsDetailInputs": "Por favor ingresa tus detalles",
   "backToHomePage": "Regresar a la página principal",
   "anonymousUser": "Anónimo",
-    "profile": "Mi perfil",
+  "profile": "Mi perfil",
   "billing": "Facturación",
   "orders": "Pedidos",
   "tryAgain": "Intentar de Nuevo",
@@ -54,8 +54,9 @@
   "usersName": "Usuarios",
   "ordersName": "Pedidos",
   "clientsName": "Clientes",
-  "teamName": "Team",
+  "teamName": "Equipo",
   "nameInput": "Nombre",
+  "storage": "Almacenamiento",
   "namePortalInput": "Nombre del portal",
   "roles": {
     "agency_owner": {
@@ -79,5 +80,6 @@
     "next": "Siguiente",
     "previous": "Anterior"
   },
-  "organizationName": "Organización"
+  "organizationName": "Organización",
+  "selectOption": "Seleccionar una opción"
 }
