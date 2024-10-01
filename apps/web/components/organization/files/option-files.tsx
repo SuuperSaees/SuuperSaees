@@ -37,6 +37,7 @@ export function OptionFiles({ clientOrganizationId, currentPath }: { clientOrgan
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
+  const showDropdown = !(currentPath.length > 0 && currentPath[0]?.uuid === '');
 
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -196,58 +197,63 @@ const handleDownloadFiles = async (currentPath: Array<{ title: string; uuid?: st
         </div>
       </Button>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button className='bg-brand'>
-            <div className='flex items-center'>
-              <Plus className='w-[20px] h-[20px] mr-[4px]' />
-              {t('files.new.title')}
-            </div>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className='w-56'>
-          <DropdownMenuGroup>
-            <DropdownMenuItem className='cursor-pointer' onClick={triggerFileInput}>
-              {t('files.new.file')}
-            </DropdownMenuItem>
-            <DropdownMenuItem className='cursor-pointer' onClick={() => setDialogOpen(true)}>
-              {t('files.new.folder')}
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
 
-      <input
-        type='file'
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        className='hidden'
-      />
+      {showDropdown && (
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className='bg-brand'>
+                <div className='flex items-center'>
+                  <Plus className='w-[20px] h-[20px] mr-[4px]' />
+                  {t('files.new.title')}
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='w-56'>
+              <DropdownMenuGroup>
+                <DropdownMenuItem className='cursor-pointer' onClick={triggerFileInput}>
+                  {t('files.new.file')}
+                </DropdownMenuItem>
+                <DropdownMenuItem className='cursor-pointer' onClick={() => setDialogOpen(true)}>
+                  {t('files.new.folder')}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-      <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('folders.new.folder')}</DialogTitle>
-          </DialogHeader>
-          <div className='space-y-4'>
-            <input
-              type='text'
-              placeholder={t('folders.new.name')}
-              value={folderName}
-              onChange={(e) => setFolderName(e.target.value)}
-              className='w-full p-2 border border-gray-300 rounded-md'
-            />
-          </div>
-          <DialogFooter>
-            <Button variant='ghost' onClick={() => setDialogOpen(false)}>
-              {t('folders.new.cancel')}
-            </Button>
-            <Button onClick={handleCreateFolder}>
-              {t('folders.new.accept')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <input
+            type='file'
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className='hidden'
+          />
+
+          <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t('folders.new.folder')}</DialogTitle>
+              </DialogHeader>
+              <div className='space-y-4'>
+                <input
+                  type='text'
+                  placeholder={t('folders.new.name')}
+                  value={folderName}
+                  onChange={(e) => setFolderName(e.target.value)}
+                  className='w-full p-2 border border-gray-300 rounded-md'
+                />
+              </div>
+              <DialogFooter>
+                <Button variant='ghost' onClick={() => setDialogOpen(false)}>
+                  {t('folders.new.cancel')}
+                </Button>
+                <Button onClick={handleCreateFolder}>
+                  {t('folders.new.accept')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 }
