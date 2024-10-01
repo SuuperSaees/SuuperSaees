@@ -5,6 +5,7 @@ import { Message } from './message.types';
 import { Review } from './review.types';
 import { User } from './user.types';
 
+
 export namespace Order {
   export type Type = Database['public']['Tables']['orders_v2']['Row'] & {
     client?: Database['public']['Tables']['clients']['Update'] | null;
@@ -12,6 +13,24 @@ export namespace Order {
     messages?: Message.Type[];
     files?: File.Type[];
     assigned_to?: { agency_member: User.Type }[];
+    followers?: { client_follower: User.Type }[];
+  };
+  export type Relational = Order.Relationships.All & {
+    messages: (Message.Type & { user: User.Response; files: File.Type[] })[];
+    files: (File.Type & { user: User.Response })[];
+    activities: (Activity.Type & { user: User.Response })[];
+    reviews: (Review.Type & { user: User.Response })[];
+    client: User.Response;
+    assigned_to: {
+      agency_member: User.Response;
+    }[];
+    followers: {
+      client_follower: User.Response;
+    }[];
+    client_organization: {
+      name: string;
+      slug: string;
+    };
   };
   export type Insert = Database['public']['Tables']['orders_v2']['Insert'];
   export type Update = Database['public']['Tables']['orders_v2']['Update'];

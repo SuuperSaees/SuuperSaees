@@ -74,5 +74,11 @@
       "label": "Member"
     }
   },
-  "clear": "Clear"
+  "clear": "Clear",
+  "pagination": {
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "organizationName": "Organization",
+  "selectOption": "Select an option"
 }

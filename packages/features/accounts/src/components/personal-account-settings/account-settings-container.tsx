@@ -129,7 +129,7 @@ export function PersonalAccountSettingsContainer(
     <div>
       <Tabs defaultValue={"account"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
-          <TabsList>
+          <TabsList className='gap-2 bg-transparent'>
             <ThemedTabTrigger
               value="account"
               option="account"

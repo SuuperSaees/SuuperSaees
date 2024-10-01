@@ -1,38 +1,38 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-
+import { useRouter } from 'next/navigation';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getOrderAgencyMembers } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
+import { CalendarIcon, FlagIcon, Loader } from 'lucide-react';
+import {
+  getAgencyClients,
+  getOrderAgencyMembers,
+} from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { Trans } from '@kit/ui/trans';
 
-
-import { Separator } from '@kit/ui/separator';
-
-
-
-import { Order } from '~/lib/order.types';
-
-
-
-import { updateOrder, updateOrderAssigns } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
+import {
+  updateOrder,
+  updateOrderAssigns,
+  updateOrderFollowers,
+} from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
+import { useActivityContext } from '../context/activity-context';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import ActivityAssignations from './activity-assignations';
-import { ReviewDialog } from './review-dialog';
+import ActivityFollowers from './activity-followers';
+// import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
-import { useRouter } from 'next/navigation';
-
-
+import { Order } from '~/lib/order.types';
+import deduceNameFromEmail from '../utils/deduce-name-from-email';
 
 interface AsideOrderInformationProps {
-  order: Order.Type;
+  order: Order.Relational;
   className?: string;
   [key: string]: unknown;
 }
@@ -44,19 +44,9 @@ const AsideOrderInformation = ({
   const { t } = useTranslation('orders');
   const [selectedStatus, setSelectedStatus] = useState(order.status);
   const [selectedPriority, setSelectedPriority] = useState(order.priority);
-  const [userRole, setUserRole] = useState('');
-  const router = useRouter();
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      await getUserRole().then((data)=> {
-        setUserRole(data);
-      }).catch((error) => {
-        console.error('Error al obtener el rol del usuario:', error);
-      })
-    };
 
-    void fetchUserRole();
-  }, []);
+  const router = useRouter();
+  const { userRole } = useActivityContext();
 
   const changeStatus = useMutation({
     mutationFn: async (status: Order.Type['status']) => {
@@ -129,9 +119,31 @@ const AsideOrderInformation = ({
     },
   });
 
+  const changeAgencyMembersFollowers = useMutation({
+    mutationFn: (agencyMemberIds: string[]) => {
+      return updateOrderFollowers(order.id, agencyMemberIds);
+    },
+    onSuccess: () => {
+      toast.success('Success', {
+        description: 'Clients followers updated successfully!',
+      });
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: 'The clients followers could not be updated.',
+      });
+    },
+  });
+
   const { data: orderAgencyMembers } = useQuery({
     queryKey: ['order-agency-members', order.id],
     queryFn: () => getOrderAgencyMembers(order.agency_id, order.id),
+    retry: 5,
+  });
+
+  const { data: orderAgencyClientsFollowers } = useQuery({
+    queryKey: ['order-agency-clients-followers', order.id],
+    queryFn: () => getAgencyClients(order.agency_id, order.id),
     retry: 5,
   });
 
@@ -145,17 +157,25 @@ const AsideOrderInformation = ({
     return {
       value: status,
       label: t(`details.statuses.${camelCaseStatus}`)
-        .replace(/_/g, ' ') 
+        .replace(/_/g, ' ')
         .replace(/^\w/, (c) => c.toUpperCase()),
     };
   });
 
+  const getStatusClassName = (status: string) =>
+    statusColors[
+      status as 'pending' | 'in_progress' | 'completed' | 'in_review'
+    ] ?? '';
+
   const priorityOptions = priorities.map((priority) => ({
     value: priority,
     label: t(`details.priorities.${priority}`)
-      .replace(/_/g, ' ') 
+      .replace(/_/g, ' ')
       .replace(/^\w/, (c) => c.toUpperCase()),
   }));
+
+  const getPriorityClassName = (priority: string) =>
+    priorityColors[priority as 'low' | 'medium' | 'high'] ?? '';
 
   const searchUserOptions =
     orderAgencyMembers?.map((user) => ({
@@ -164,110 +184,149 @@ const AsideOrderInformation = ({
       label: user.name,
     })) ?? [];
 
+  const searchUserOptionsFollowers =
+    orderAgencyClientsFollowers?.map((user) => ({
+      picture_url: user.picture_url,
+      value: user.id,
+      label: user.name,
+    })) ?? [];
+
   return (
     <div
-      className={`flex w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 text-gray-700 ${className}`}
+      className={`relative bottom-10 flex h-[90vh] w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 text-gray-700 ${className}`}
       {...rest}
     >
-      <ReviewDialog orderId={order.id} />
-      <h3 className="font-bold">{t('details.summary')}</h3>
-      <div>
-        <p>{`#${order.id}`}</p>
-        <p>{order.title}</p>
-        <p>
-          {t('details.createdAt')}:{' '}
-          {new Date(order.created_at).toLocaleString()}
-        </p>
+      <div className="border-b border-gray-200 pb-7">
+        <h3 className="pb-4 font-bold">
+          <Trans i18nKey="details.createdBy" />
+        </h3>
+        <AvatarDisplayer
+          displayName={order.client?.email ? deduceNameFromEmail(order.client.email) : ''}
+          pictureUrl={
+            order.client
+              ? order.client?.picture_url && order.client?.picture_url
+              : undefined
+          }
+          organizationName={order.client_organization?.name}
+          // status="online"
+        />
       </div>
-      <AvatarDisplayer
-        displayName={order.client ? order.client?.name : undefined}
-        pictureUrl={
-          order.client
-            ? order.client?.picture_url && order.client?.picture_url
-            : undefined
-        }
-        // status="online"
-      />
+      <h3 className="font-bold">{t('details.summary')}</h3>
 
-      
-      {['agency_member', 'agency_owner', 'agency_project_manager'].includes(userRole) ? (
+      {['agency_member', 'agency_owner', 'agency_project_manager'].includes(
+        userRole,
+      ) ? (
         <>
-          <Separator />
-          <SelectAction
-            options={statusOptions}
-            groupName={t('details.status')}
-            defaultValue={selectedStatus}
-            className={selectedStatus ? statusColors[selectedStatus] : undefined}
-            onSelectHandler={(status) => {
-              changeStatus.mutate(status as Order.Type['status']);
-            }}
-            disabled={changeStatus.isPending}
-          />
-          <Separator />
-          <SelectAction
-            options={priorityOptions}
-            groupName={t('details.priority')}
-            defaultValue={selectedPriority}
-            className={
-              selectedPriority ? priorityColors[selectedPriority] : undefined
-            }
-            onSelectHandler={(priority) => {
-              changePriority.mutate(priority as Order.Type['priority']);
-            }}
-            disabled={changePriority.isPending}
-          />
-          <Separator />
+          <div className="flex items-center justify-between">
+            <span className="flex text-sm font-semibold">
+              <CalendarIcon className="mr-2 h-4 w-4" /> {t('details.deadline')}{' '}
+            </span>
+            <DatePicker
+              updateFn={changeDate.mutate}
+              defaultDate={order.due_date}
+            />
+          </div>
+          <div className="flex items-center text-sm">
+            <Loader className="mr-2 h-4 w-4" />
+            <SelectAction
+              options={statusOptions}
+              groupName={t('details.status')}
+              defaultValue={selectedStatus}
+              className={
+                selectedStatus ? statusColors[selectedStatus] : undefined
+              }
+              onSelectHandler={(status) => {
+                changeStatus.mutate(status as Order.Type['status']);
+              }}
+              getitemClassName={getStatusClassName}
+              disabled={changeStatus.isPending}
+            />
+          </div>
+          <div className="flex items-center text-sm">
+            <FlagIcon className="mr-2 h-4 w-4" />
+            <SelectAction
+              options={priorityOptions}
+              groupName={t('details.priority')}
+              defaultValue={selectedPriority}
+              className={
+                selectedPriority ? priorityColors[selectedPriority] : undefined
+              }
+              onSelectHandler={(priority) => {
+                changePriority.mutate(priority as Order.Type['priority']);
+              }}
+              disabled={changePriority.isPending}
+              getitemClassName={getPriorityClassName}
+            />
+          </div>
           <ActivityAssignations
             searchUserOptions={searchUserOptions}
             assignedTo={order.assigned_to}
             updateFunction={changeAgencyMembersAssigned.mutate}
           />
-          <Separator />
-          <div className="flex flex-col gap-2">
-            <span>{t('details.dueDate')}</span>
-            <DatePicker updateFn={changeDate.mutate} defaultDate={order.due_date} />
-          </div>
-          <Separator />
+
+          <ActivityFollowers
+            searchUserOptions={searchUserOptionsFollowers}
+            followers={order.followers}
+            updateFunction={changeAgencyMembersFollowers.mutate}
+          />
         </>
-        
       ) : (
         <div className="flex flex-col gap-2">
-          <Separator />
-          <span className="font-semibold">{t('details.status')}</span>
-          <span className="pl-2 pr-2">
-            {order.status
-              ?.replace(/_/g, ' ')
-              .replace(/^\w/, (c) => c.toUpperCase())}
-          </span>
-          <Separator />
-          <span className="font-semibold">{t('details.priority')}</span>
-          <span className="pl-2 pr-2">
-            {order.priority
-              ?.replace(/_/g, ' ')
-              .replace(/^\w/, (c) => c.toUpperCase())}
-          </span>
-          <Separator />
+          <div className="mb-4 flex items-center justify-between">
+            <span className="flex text-sm font-semibold">
+              <CalendarIcon className="mr-2 h-4 w-4" /> {t('details.deadline')}{' '}
+            </span>
+            <span className="pl-2 pr-2">
+              {order.due_date ? (
+                new Date(order.due_date).toLocaleDateString()
+              ) : (
+                <Trans i18nKey="orders:details.deadlineNotSet" />
+              )}
+            </span>
+          </div>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex">
+              <Loader className="mr-2 h-4 w-4" />
+              <span className="font-semibold">{t('details.status')}</span>
+            </div>
+            <span className={`px-2 py-1 rounded-full ${order.status ? statusColors[order.status] : undefined}`}>
+              {order.status
+                ?.replace(/_/g, ' ')
+                .replace(/^\w/, (c) => c.toUpperCase())}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center mb-4">
+           <div className="flex">
+           <FlagIcon className="mr-2 h-4 w-4" />
+           <span className="font">{t('details.priority')}</span>
+           </div>
+            <span className={`px-2 py-1 flex items-center rounded-full ${order.priority ? priorityColors[order.priority] : undefined}`}>
+            <div className='h-2 w-2 mr-2 rounded-full bg-current'></div>
+              {order.priority
+                ?.replace(/_/g, ' ')
+                .replace(/^\w/, (c) => c.toUpperCase())}
+            </span>
+          </div>
+
           <ActivityAssignations
             searchUserOptions={searchUserOptions}
             assignedTo={order.assigned_to}
             updateFunction={changeAgencyMembersAssigned.mutate}
           />
-          <Separator />
-          <span className="font-semibold">{t('details.dueDate')}</span>
-          <span className="pl-2 pr-2">
-            {order.due_date
-              ? new Date(order.due_date).toLocaleDateString()
-              : '-'}
-          </span>
-          <Separator />
+
+          <ActivityFollowers
+            searchUserOptions={searchUserOptionsFollowers}
+            followers={order.followers}
+            updateFunction={changeAgencyMembersFollowers.mutate}
+          />
         </div>
       )}
-      
-      
-      
-      
     </div>
   );
 };
+
+// IMPORTANT: don't add any more functionalities to this component
+// IMPORTANT: Modularize this component to be able to reuse it in the chat component
 
 export default AsideOrderInformation;

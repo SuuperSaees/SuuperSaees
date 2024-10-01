@@ -1,72 +1,81 @@
 {
-    "title": "Orders",
-    "selectDateLabel": "Select a date",
-    "confirmDateTitle": "Confirm date",
-    "confirmDateMessage": "Are you sure you want to update the due date?",
-    "accept": "Accept",
-    "cancel": "Cancel",
-    "openOrders": "Open",
-    "completedOrders": "Completed",
-    "allOrders": "All",
-    "titleLabel": "Title",
-    "idLabel": "ID",
-    "clientLabel": "Client",
-    "statusLabel": "Status",
-    "assignedToLabel": "Assigned to",
-    "dueDateLabel": "Due date",
-    "creation": {
-      "title": "Create order",
-      "form": {
-        "titleLabel": "Order name",
-        "titlePlaceholder": "Enter the name of your order",
-        "descriptionLabel": "Order description",
-        "descriptionPlaceholder": "Add a description for this order",
-        "filesLabel": "Files",
-        "filesPlaceholder": "Click or drag to upload an SVG, PNG, JPG, or GIF file (max. 800x400px)",
-        "submitMessage": "Create order"
-      }
+  "title": "Orders",
+  "selectDateLabel": "Select a date",
+  "confirmDateTitle": "Confirm date",
+  "confirmDateMessage": "Are you sure you want to update the due date?",
+  "accept": "Accept",
+  "cancel": "Cancel",
+  "openOrders": "Open",
+  "completedOrders": "Completed",
+  "allOrders": "All",
+  "titleLabel": "Title",
+  "idLabel": "ID",
+  "clientLabel": "Client",
+  "statusLabel": "Status",
+  "assignedToLabel": "Assigned to",
+  "dueDateLabel": "Due date",
+  "creation": {
+    "title": "Create order",
+    "form": {
+      "titleLabel": "Order name",
+      "titlePlaceholder": "Enter the name of your order",
+      "descriptionLabel": "Order description",
+      "descriptionPlaceholder": "Add a description for this order",
+      "filesLabel": "Files",
+      "filesPlaceholder": "Click or drag to upload an SVG, PNG, JPG, or GIF file (max. 800x400px)",
+      "submitMessage": "Create order"
+    }
+  },
+  "details": {
+    "title": "Order details",
+    "deadlineNotSet": "Unassigned",
+    "summary": "Summary",
+    "createdBy": "Created by",
+    "orderId": "Order ID",
+    "createdAt": "Created",
+    "assignedTo": "Assigned to",
+    "followedBy": "Followed by",
+    "status": "Status",
+    "priority": "Priority",
+    "dueDate": "Due date",
+    "deadline": "Deadline",
+    "statuses": {
+      "pending": "Pending response",
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "inReview": "In review",
+      "annulled": "Cancelled"
     },
-    "details": {
-      "title": "Order details",
-      "summary": "Summary",
-      "createdAt": "Created",
-      "assignedTo": "Assigned to",
-      "status": "Status",
-      "priority": "Priority",
-      "dueDate": "Due date",
-      "statuses": {
-        "pending": "Pending response",
-        "inProgress": "In progress",
-        "completed": "Completed",
-        "inReview": "In review",
-        "annulled": "Cancelled"
-      },
-      "priorities": {
-        "low": "Low",
-        "medium": "Medium",
-        "high": "High"
-      },
-      "navigation": {
-        "details": "Details",
-        "activity": "Activity",
-        "files": "Files"
-      },
-      "dialog": {
-        "button": "Mark as completed",
-        "title": "Leave a review",
-        "description": "Tell us about your experience with this order!",
-        "label": "Write a review",
-        "placeholder": "What did you think of this order?"
-      }
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
     },
-    "selectFile": "Please select at least one file",
-    "uploadError": "Error uploading file {{fileName}}",
-    "uploadURLError": "Error getting upload URL: {{error}}",
-    "dragMessage": "Drag files here or click to upload files",
-    "dropMessage": "Release here to upload files",
-    "dragAndDrop": "Drag files here or click to upload",
-    "dropHere": "Drop here to upload files",
-    "tryAgain": "Try again",
-    "OrderDescriptionTitle": "Order description"
-  }
+    "navigation": {
+      "details": "Details",
+      "activity": "Activity",
+      "files": "Files"
+    },
+    "dialog": {
+      "button": "Mark as completed",
+      "title": "Leave a review",
+      "description": "Tell us about your experience with this order!",
+      "label": "Write a review",
+      "placeholder": "What did you think of this order?"
+    }
+  },
+  "selectFile": "Please select at least one file",
+  "uploadError": "Error uploading file {{fileName}}",
+  "uploadURLError": "Error getting upload URL: {{error}}",
+  "dragMessage": "Drag files here or click to upload files",
+  "dropMessage": "Release here to upload files",
+  "dragAndDrop": "Drag files here or click to upload",
+  "dropHere": "Drop here to upload files",
+  "tryAgain": "Try again",
+  "OrderDescriptionTitle": "Order description",
+  "internalMessagingEnabled": "Internal messaging enabled",
+  "internalMessagingDisabled": "Internal messaging disabled",
+  "internalMessage": "Internal message",
+  "placeholder": "Write a message..."
+}
   
