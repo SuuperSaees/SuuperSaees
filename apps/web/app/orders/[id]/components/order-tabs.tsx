@@ -53,9 +53,9 @@ export const OrderTabs = ({ organizationId, currentPath}: OrderTabsProps) => {
           <Trans i18nKey={'orders:details.navigation.files'} />
         </ThemedTabTrigger>
       </TabsList>
-      <TabsContent value="details">
+      <TabsContent value="details" className="h-full max-h-full min-h-0 overflow-y-auto no-scrollbar">
         <DetailsPage />
-      </TabsContent>
+      </TabsContent>  
       <TabsContent value="activity" className="h-full max-h-full min-h-0">
         <ActivityPage />
       </TabsContent>
