@@ -192,6 +192,8 @@ const AsideOrderInformation = ({
       label: user.name,
     })) ?? [];
 
+  const userRoles = new Set(['agency_member', 'agency_owner', 'agency_project_manager']);
+
   return (
     <div
       className={`relative bottom-10 flex h-[90vh] w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 text-gray-700 ${className}`}
@@ -224,9 +226,7 @@ const AsideOrderInformation = ({
       </div>
       <h3 className="font-bold">{t('details.summary')}</h3>
 
-      {['agency_member', 'agency_owner', 'agency_project_manager'].includes(
-        userRole,
-      ) ? (
+      {userRoles.has(userRole) ? (
         <>
           <div className="flex items-center justify-between">
             <span className="flex text-sm font-semibold">
@@ -298,7 +298,7 @@ const AsideOrderInformation = ({
           <div className="mb-4 flex items-center justify-between">
             <div className="flex">
               <Loader className="mr-2 h-4 w-4" />
-              <span className="font-semibold">{t('details.status')}</span>
+              <span className="text-sm font-semibold">{t('details.status')}</span>
             </div>
             <span
               className={`rounded-full px-2 py-1 ${order.status ? statusColors[order.status] : undefined}`}
@@ -312,7 +312,7 @@ const AsideOrderInformation = ({
           <div className="mb-4 flex items-center justify-between">
             <div className="flex">
               <FlagIcon className="mr-2 h-4 w-4" />
-              <span className="font">{t('details.priority')}</span>
+              <span className="text-sm font-semibold">{t('details.priority')}</span>
             </div>
             <span
               className={`flex items-center rounded-full px-2 py-1 ${order.priority ? priorityColors[order.priority] : undefined}`}
