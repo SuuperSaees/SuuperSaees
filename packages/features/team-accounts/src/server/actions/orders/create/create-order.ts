@@ -8,16 +8,19 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 
+import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { hasPermissionToCreateOrder } from '../../permissions/orders';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
-
 
 type OrderInsert = Omit<Order.Insert, 'customer_id'> & {
   fileIds?: string[];
 };
 
-export const createOrders = async (orders: OrderInsert[]) => {
+export const createOrders = async (
+  orders: OrderInsert[],
+  briefResponses?: Brief.Relationships.FormFieldResponses[],
+) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
@@ -97,6 +100,20 @@ export const createOrders = async (orders: OrderInsert[]) => {
       .select()
       .single();
     if (orderError) throw new Error(orderError.message);
+
+    // Step 3.5: Insert brief responses if present
+    if (briefResponses && briefResponses.length > 0) {
+      const briefResponsesToInsert = briefResponses.map((response) => ({
+        order_id: orderData.id,
+        form_field_response_id: response.id,
+      }));
+
+      const { error: briefResponsesError } = await client
+        .from('brief')
+        .insert(briefResponsesToInsert);
+
+      if (briefResponsesError) throw new Error(briefResponsesError.message);
+    }
 
     // Step 4: Send email notification
     if (emailData.email) {

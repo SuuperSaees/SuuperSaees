@@ -15,21 +15,16 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+
+
 // import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
 
+
+
 import UploadFileComponent from '~/components/ui/files-input';
-
-// import {sendOrderCreationEmail} from './send-mail';
-
+import { Brief } from '~/lib/brief.types';
 
 
 function generateUUID() {
@@ -40,26 +35,39 @@ function generateUUID() {
   });
 }
 
-// import { mapMimeTypeToFileType } from '../utils/map-mime-type';
 
-const orderCreationFormSchema = z.object({
-  uuid: z.string(),
-  title: z
-    .string()
-    .min(2, { message: 'Title must be at least 2 characters.' })
-    .max(200, {
-      message: 'Title must be at most 200 characters.',
-    }),
-  description: z
-    .string()
-    .min(2, { message: 'Description must be at least 2 characters.' }),
-  fileIds: z.array(z.string()),
-});
-const OrderCreationForm = () => {
+const OrderCreationForm = ({ briefs }: {
+  briefs: Brief.BriefResponse[]
+}) => {
   const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const uniqueId = generateUUID();
   const { t } = useTranslation('orders');
-  // const supabase = useSupabase();
+
+  const orderCreationFormSchema = z.object({
+    uuid: z.string(),
+    title: z
+      .string()
+      .min(2, { message: 'Title must be at least 2 characters.' })
+      .max(200, {
+        message: 'Title must be at most 200 characters.',
+      }),
+    description: z
+      .string()
+      .min(2, { message: 'Description must be at least 2 characters.' }),
+    fileIds: z.array(z.string()),
+    brief_responses: z.array(z.object({
+      brief_id: z.string(),
+      response: z.string().min(2, {
+        message: `${t('validation.minCharacters')}`,
+      })
+      .max(3000, {
+        message: `${t('validation.maxCharacters')}`,
+      })
+    })).optional(),
+  
+  
+  });
+
   const form = useForm<z.infer<typeof orderCreationFormSchema>>({
     resolver: zodResolver(orderCreationFormSchema),
     defaultValues: {
@@ -93,6 +101,7 @@ const OrderCreationForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
+
     createOrdersMutations.mutate(values);
   };
 
@@ -101,7 +110,7 @@ const OrderCreationForm = () => {
     form.setValue('fileIds', fileIds);
     // console.log('Uploaded File IDs:', fileIds);
   };
-
+  console.log('values', form.getValues());
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
@@ -140,6 +149,44 @@ const OrderCreationForm = () => {
             </FormItem>
           )}
         />
+        {/* Brief form fields */}
+        <div className='flex flex-col gap-8'>
+
+        {briefs?.map((brief, index) => (
+          <div key={index} className='flex flex-col gap-8'>
+            <h3 className='font-bold text-lg'>{brief.name}</h3>
+            <div className='flex flex-col gap-4'>
+
+            {brief?.form_fields?.map((formField, fieldIndex) => (
+              <FormField
+                key={fieldIndex}
+                control={form.control}
+                name={`brief_responses.${fieldIndex}.response`}
+                render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>{formField.field?.label}</FormLabel>
+    
+                  <FormControl>
+                    <ThemedInput
+                      placeholder={
+                        formField.field?.placeholder ? formField.field?.placeholder : undefined
+                      }
+                      {...field}
+                    />
+                  </FormControl>
+    
+                  {formField.field?.description && (
+                    <FormDescription>{formField.field?.description}</FormDescription>
+                  )}
+                  <FormMessage />
+                </FormItem>
+                )}
+              />
+            ))}
+            </div>
+          </div>
+        ))}
+        </div>
         <UploadFileComponent
           bucketName="orders"
           uuid={uniqueId}
