@@ -148,7 +148,7 @@ export const getOrders = async () => {
 };
 
 export async function getAgencyClients(
-  agencyId: ServerUser.Type['organization_id'],
+  agencyId: string,
   orderId: Order.Type['id'],
 ) {
   try {
@@ -187,7 +187,7 @@ export async function getAgencyClients(
 
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
-      .select('agency_id')
+      .select('agency_id, client_organization_id')
       .eq('id', orderId)
       .single();
 
@@ -200,7 +200,8 @@ export async function getAgencyClients(
     const { data: clientsData, error: clientsError } = await client
       .from('clients')
       .select('user_client_id')
-      .eq('agency_id', agencyId as string);
+      .eq('agency_id', agencyId)
+      .eq('organization_client_id', orderData.client_organization_id);
 
     if (clientsError) throw clientsError;
 
