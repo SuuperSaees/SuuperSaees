@@ -2,6 +2,8 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
@@ -148,7 +150,7 @@ export const getOrders = async () => {
 };
 
 export async function getAgencyClients(
-  agencyId: ServerUser.Type['organization_id'],
+  agencyId: string,
   orderId: Order.Type['id'],
 ) {
   try {
@@ -178,29 +180,37 @@ export async function getAgencyClients(
 
     if (accountMembershipsDataError) throw accountMembershipsDataError;
 
-    if (
-      accountMembershipsData.account_role !== 'agency_owner' &&
-      accountMembershipsData.account_role !== 'agency_member'
-    ) {
+    const userRoles = new Set([
+      'agency_owner',
+      'agency_member',
+      'client_owner',
+    ]);
+
+    if (!userRoles.has(accountMembershipsData.account_role)) {
       throw new Error('Unauthorized access to agency clients');
     }
 
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
-      .select('agency_id')
+      .select('agency_id, client_organization_id')
       .eq('id', orderId)
       .single();
 
     if (orderError) throw orderError;
 
-    if (orderData.agency_id !== accountData.organization_id) {
+    if (
+      orderData.agency_id !== accountData.organization_id &&
+      accountMembershipsData.account_role !== 'client_owner'
+    ) {
       throw new Error('Unauthorized access to this order');
     }
 
     const { data: clientsData, error: clientsError } = await client
       .from('clients')
       .select('user_client_id')
-      .eq('agency_id', agencyId as string);
+      .eq('agency_id', agencyId)
+      .eq('organization_client_id', orderData.client_organization_id)
+      .neq('user_client_id', userId);
 
     if (clientsError) throw clientsError;
 
