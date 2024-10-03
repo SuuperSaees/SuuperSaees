@@ -41,7 +41,7 @@ export const withImageOptions = <P extends ImageProps>(
     });
 
     return (
-      <div className="group relative inline-block h-full max-h-[2000px] w-auto overflow-hidden">
+      <div className="group relative inline-block h-full max-h-[2000px] w-full min-w-[200px] overflow-hidden">
         <WrappedComponent {...props} />
         <div className="absolute right-0 top-0 flex items-center">
           <button

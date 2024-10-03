@@ -39,5 +39,6 @@
         },
         "delete": "Delete folder",
         "deleteSuccess": "Folder deleted"
-    }
+    },
+    "loading": "Loading..."
 }

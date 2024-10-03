@@ -39,7 +39,7 @@
         },
         "delete": "Eliminar carpeta",
         "deleteSuccess": "Carpeta eliminada"
-    }
-
+    },
+    "loading": "Cargando..."
 }
   
