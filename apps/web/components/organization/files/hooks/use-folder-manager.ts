@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react';
-
-
+import { useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
-import { getClientFiles, getFilesByFolder, getFilesWithoutFolder, getMemberFiles } from 'node_modules/@kit/team-accounts/src/server/actions/files/get/get-files';
+import {
+  getClientFiles,
+  getFilesByFolder,
+  getFilesWithoutFolder,
+  getMemberFiles,
+} from 'node_modules/@kit/team-accounts/src/server/actions/files/get/get-files';
 import {
   getAllFolders,
   getFoldersByFolder,
@@ -26,11 +29,10 @@ interface FileManagementHook {
     folderUuid: string,
     folderTitle: string,
     isOrderFolder?: boolean,
-  ) => Promise<void>;
-  handlePathClick: (index: number) => Promise<void>;
-  initializeWithPath: (
-    path: Array<{ title: string; uuid?: string }>,
-  ) => Promise<void>;
+  ) => void;
+  handlePathClick: (index: number) => void;
+  initializeWithPath: (path: Array<{ title: string; uuid?: string }>) => void;
+  currentFolderType: 'main' | 'orders' | 'sub';
 }
 
 export const useFileManagement = (
@@ -41,175 +43,129 @@ export const useFileManagement = (
   initialPath?: Array<{ title: string; uuid?: string }>,
 ): FileManagementHook => {
   const [selectedOption, setSelectedOption] = useState('all');
-  const [mainFolders, setMainFolders] = useState<
-    Array<{ title: string | null; uuid: string }>
-  >([]);
-  // const [mainFiles, setMainFiles] = useState<Array<{ id: string; url: string; name: string; type: string }>>([]);
-  const [folders, setFolders] = useState<
-    Array<{ title: string | null; uuid: string }>
-  >([]);
-  const [subFolders, setSubFolders] = useState<
-    Array<{ title: string | null; uuid: string }>
-  >([]);
-  const [files, setFiles] = useState<
-    Array<{ id: string; url: string; name: string; type: string }>
-  >([]);
-  const [path, setPath] = useState<Array<{ title: string; uuid?: string }>>([]);
+  const [path, setPath] = useState<Array<{ title: string; uuid?: string }>>(
+    initialPath ?? [],
+  );
   const [showFolders, setShowFolders] = useState(false);
   const [showSubFolders, setShowSubFolders] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [currentFolderType, setCurrentFolderType] = useState<
+    'main' | 'orders' | 'sub'
+  >('main');
 
-  const initializeWithPath = async (
+  const initializeWithPath = (
     pathToInitialize: Array<{ title: string; uuid?: string }>,
   ) => {
     setPath(pathToInitialize);
     const lastFolder = pathToInitialize[pathToInitialize.length - 1];
-    await handleFolderClick(
-      lastFolder!.uuid ?? '',
-      lastFolder!.title,
-      true,
-      true,
-    );
+    handleFolderClick(lastFolder!.uuid ?? '', lastFolder!.title, true, true);
   };
-  const { data: mainFiles = [], refetch: refetchFiles } = useQuery({
-    queryKey: ['files', clientOrganizationId],
-    enabled: selectedOption === 'all',
-    queryFn: () => getFilesWithoutFolder(clientOrganizationId),
+  const {
+    data: mainFiles = [],
+    refetch: _refetchFiles,
+    isLoading: loadingFiles,
+  } = useQuery({
+    queryKey: ['files', clientOrganizationId, selectedOption],
+    queryFn: () => {
+      if (selectedOption === 'client_uploaded') {
+        return getClientFiles(clientOrganizationId);
+      } else if (selectedOption === 'team_uploaded') {
+        return getMemberFiles(clientOrganizationId);
+      } else {
+        return getFilesWithoutFolder(clientOrganizationId);
+      }
+    },
+    enabled: selectedOption !== '',
   });
 
-  useEffect(() => {
-    if (initialPath && initialPath.length > 0) {
-      initializeWithPath(initialPath).catch((error) =>
-        console.error('Error initializing with path:', error),
-      );
-    } else {
-      const fetchRootLevel = async () => {
-        setLoading(true);
-        setCurrentPath && setCurrentPath([]);
-        try {
-          let fetchedFiles;
-          if (selectedOption === 'all') {
-            const fetchedFolders = await getAllFolders(clientOrganizationId);
-            setMainFolders(fetchedFolders);
-            fetchedFiles = await getFilesWithoutFolder(clientOrganizationId);
-          } else if (selectedOption === 'team_uploaded') {
-            setLoading(true);
-            resetState();
-            fetchedFiles = await getMemberFiles(clientOrganizationId);
-          } else if (selectedOption === 'client_uploaded') {
-            setLoading(true);
-            resetState();
-            fetchedFiles = await getClientFiles(clientOrganizationId);
-          }
-          // setMainFiles(fetchedFiles ?? []);
-        } catch (error) {
-          console.error('Error fetching files:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchRootLevel().catch((error) =>
-        console.error('Error fetching root level:', error),
-      );
-    }
-  }, [clientOrganizationId, initialPath, selectedOption]);
+  // useQuery for mainFolders
+  const {
+    data: mainFolders = [],
+    refetch: _refetchFolders,
+    isLoading: loadingFolders,
+  } = useQuery({
+    queryKey: ['folders', clientOrganizationId],
+    queryFn: () => getAllFolders(clientOrganizationId),
+    enabled: selectedOption === 'all',
+  });
 
-  const handleFolderClick = async (
+  // useQuery for folders
+  const { data: folders = [], isLoading: loadingSubFolders } = useQuery({
+    queryKey: ['foldersByFolder', clientOrganizationId, selectedOption],
+    queryFn: () => getOrdersFolders(clientOrganizationId),
+    enabled: selectedOption === 'all',
+  });
+
+  // useQuery for subFolders
+  const lastFolderUuid = path.length > 0 ? path[path.length - 1]!.uuid : '';
+
+  const { data: subFoldersData = [], isLoading: loadingNestedFolders } =
+    useQuery({
+      queryKey: ['subFolders', lastFolderUuid],
+      queryFn: () => {
+        const folderUuid = path.length > 0 ? path[path.length - 1]!.uuid : '';
+        if (!folderUuid) {
+          throw new Error('Folder UUID is undefined');
+        }
+        return getFoldersByFolder(folderUuid);
+      },
+      enabled: Boolean(path.length > 0),
+    });
+
+  const subFolders = subFoldersData.map((folder) => ({
+    title: folder.name,
+    uuid: folder.id,
+  }));
+
+  // useQuery for files
+  const { data: files = [], isLoading: loadingFolderFiles } = useQuery({
+    queryKey: ['files', path.length > 0 ? path[path.length - 1]!.uuid : ''],
+    queryFn: () =>
+      getFilesByFolder(path.length > 0 ? path[path.length - 1]!.uuid! : ''),
+    enabled: Boolean(path.length > 0),
+  });
+
+  const handleFolderClick = (
     folderUuid: string,
     folderTitle: string,
     isOrderFolder = false,
     noUpdatePath?: boolean,
   ) => {
-    setLoading(true);
-    setFiles([]);
-    setFolders([]);
-    try {
-      if (folderUuid === '' && isOrderFolder) {
-        path.length > 1 && path.pop();
-        resetState();
-        updatePath(folderTitle, folderUuid, true);
-        const fetchedOrderFolders =
-          await getOrdersFolders(clientOrganizationId);
-        setFolders(fetchedOrderFolders);
-        setShowFolders(true);
-      } else if (folderUuid) {
-        // setMainFiles([]);
-        setMainFolders([]);
+    if (path.length === 0) {
+      // Clicking a main folder
+      if (folderTitle === 'Orders' || isOrderFolder) {
+        setCurrentFolderType('orders');
         setShowFolders(true);
         setShowSubFolders(false);
-        if (!noUpdatePath) {
-          updatePath(folderTitle, folderUuid, isOrderFolder);
-        }
-        const [fetchedFiles, fetchedSubFolders] = await Promise.all([
-          getFilesByFolder(folderUuid),
-          getFoldersByFolder(folderUuid),
-        ]);
-        setFiles(fetchedFiles);
-        setSubFolders(
-          fetchedSubFolders.map((folder) => ({
-            title: folder.name,
-            uuid: folder.id,
-          })),
-        );
-        setShowSubFolders(fetchedSubFolders.length > 0);
       } else {
-        resetState();
-        const fetchedFolders = await getAllFolders(clientOrganizationId);
-        setFolders(fetchedFolders);
-        setShowFolders(true);
+        setCurrentFolderType('main');
+        setShowFolders(false);
+        setShowSubFolders(true);
       }
-    } catch (error) {
-      console.error('Error fetching files or folders:', error);
-    } finally {
-      setLoading(false);
+    } else {
+      // Clicking a subfolder
+      setCurrentFolderType('sub');
+      setShowSubFolders(true);
+    }
+
+    if (!noUpdatePath) {
+      updatePath(folderTitle, folderUuid);
     }
   };
-
-  const handlePathClick = async (index: number) => {
+  const handlePathClick = (index: number) => {
     if (index === -1) {
-      setCurrentPath && setCurrentPath([]);
-      setPath([]);
       resetState();
-      const fetchedFolders = await getAllFolders(clientOrganizationId);
-      setMainFolders(fetchedFolders);
     } else {
       const newPath = path.slice(0, index + 1);
       setPath(newPath);
       setCurrentPath && setCurrentPath(newPath);
 
-      const folderUuid = newPath[newPath.length - 1]?.uuid;
-
-      if (folderUuid) {
-        setLoading(true);
-        try {
-          const fetchedFiles = await getFilesByFolder(folderUuid);
-          setFiles(fetchedFiles);
-
-          const fetchedSubFolders = await getFoldersByFolder(folderUuid);
-          setShowSubFolders(fetchedSubFolders.length > 0);
-          setSubFolders(
-            fetchedSubFolders.map((folder) => ({
-              title: folder.name,
-              uuid: folder.id,
-            })),
-          );
-        } catch (error) {
-          console.error('Error fetching files or folders:', error);
-        } finally {
-          setLoading(false);
-        }
+      // Update folder type based on level
+      if (newPath.length === 0) {
+        setCurrentFolderType('main');
+      } else if (newPath[0]!.title === 'Orders') {
+        setCurrentFolderType('orders');
       } else {
-        setLoading(true);
-        try {
-          setFiles([]);
-          // setMainFiles([]);
-          const fetchedFolders = await getOrdersFolders(clientOrganizationId);
-          setFolders(fetchedFolders);
-        } catch (error) {
-          console.error('Error fetching folders:', error);
-        } finally {
-          setLoading(false);
-        }
+        setCurrentFolderType('sub');
       }
     }
   };
@@ -219,35 +175,19 @@ export const useFileManagement = (
     setCurrentPath && setCurrentPath([]);
     setShowFolders(false);
     setShowSubFolders(false);
-    setFolders([]);
-    setFiles([]);
-    // setMainFiles([]);
-    setMainFolders([]);
-    setSubFolders([]);
+    setCurrentFolderType('main');
   };
 
-  const updatePath = (
-    folderTitle: string,
-    folderUuid: string,
-    isOrderFolder: boolean,
-  ) => {
+  const updatePath = (folderTitle: string, folderUuid: string) => {
     const newPathItem = { title: folderTitle, uuid: folderUuid };
 
     setPath((prevPath) => {
-      if (isOrderFolder) {
-        return [...prevPath, newPathItem];
-      } else {
-        return [newPathItem];
-      }
+      return [...prevPath, newPathItem];
     });
 
     setCurrentPath &&
       setCurrentPath((prevPath) => {
-        if (isOrderFolder) {
-          return [...prevPath, newPathItem];
-        } else {
-          return [newPathItem];
-        }
+        return [...prevPath, newPathItem];
       });
   };
 
@@ -262,7 +202,13 @@ export const useFileManagement = (
     path,
     showFolders,
     showSubFolders,
-    loading,
+    currentFolderType,
+    loading:
+      loadingFiles ||
+      loadingFolders ||
+      loadingSubFolders ||
+      loadingNestedFolders ||
+      loadingFolderFiles,
     handleFolderClick,
     handlePathClick,
     initializeWithPath,

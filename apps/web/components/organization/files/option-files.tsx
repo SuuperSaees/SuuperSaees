@@ -95,13 +95,34 @@ export function OptionFiles({
     onSuccess: async () => {
       const lastFolder = currentPath[currentPath.length - 1];
 
-      t('folders.new.successSubfolder', {
-        folderName,
-        lastPath: lastFolder?.title,
-      });
+      toast.success(
+        t('folders.new.successSubfolder', {
+          folderName,
+          lastPath: lastFolder?.title,
+        }),
+      );
 
+      // Override relevant queries based on the current folder type
+      if (currentPath.length === 0) {
+        // If we are at the root level
+        await queryClient.invalidateQueries({
+          queryKey: ['folders', clientOrganizationId],
+        });
+      } else if (currentPath[0]?.title === 'Orders') {
+        // If we are in an Orders folder
+        await queryClient.invalidateQueries({
+          queryKey: ['foldersByFolder', clientOrganizationId],
+        });
+      } else {
+        // If we are in a subfolder
+        await queryClient.invalidateQueries({
+          queryKey: ['subFolders', lastFolder?.uuid],
+        });
+      }
+
+      // Also invalidate the query for files in the current folder
       await queryClient.invalidateQueries({
-        queryKey: ['folders', lastFolder?.uuid],
+        queryKey: ['files', lastFolder?.uuid ?? clientOrganizationId],
       });
     },
 
@@ -124,7 +145,7 @@ export function OptionFiles({
     onSuccess: async () => {
       toast.success(t('files.new.uploadSuccess'));
       const lastFolder = currentPath[currentPath.length - 1];
-      
+
       await queryClient.invalidateQueries({
         queryKey: ['files', lastFolder?.uuid ?? clientOrganizationId],
       });
@@ -182,9 +203,6 @@ export function OptionFiles({
       if (!fileData) {
         throw new Error('No se pudo crear la entrada en la base de datos');
       }
-
-      toast.success(t('files.new.uploadSuccess'));
-      // window.location.reload();
     } catch (error) {
       toast.error(t('files.new.error'));
       console.error('Error during upload:', error);
@@ -217,40 +235,17 @@ export function OptionFiles({
           return;
         }
 
-        const folderData = await insertSubFolder.mutateAsync({
+        await insertSubFolder.mutateAsync({
           folderName,
           clientOrganizationId,
           isSubfolder: true,
           currentPath,
         });
-
-        if (!folderData) {
-          toast.error(t('folders.new.error'));
-          return;
-        }
-
-        // toast.success(
-        //   t('folders.new.successSubfolder', {
-        //     folderName,
-        //     lastPath: lastFolder?.title,
-        //   }),
-        // );
-        // window.location.reload();
       } else {
-        const folderData = await insertFolder.mutateAsync({
+        await insertFolder.mutateAsync({
           folderName,
           clientOrganizationId,
         });
-
-        if (!folderData) {
-          toast.error(t('folders.new.error'));
-          return;
-        }
-
-        toast.success(t('folders.new.success', { folderName }));
-        setDialogOpen(false);
-        setFolderName('');
-        // window.location.reload();
       }
 
       setDialogOpen(false);
