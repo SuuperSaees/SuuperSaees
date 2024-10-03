@@ -7,6 +7,8 @@ import FolderItem from './files/folder-item';
 import { useFileManagement } from './files/hooks/use-folder-manager';
 import { OptionFiles } from './files/option-files';
 import RadioOptions from './files/radio-options';
+import { SkeletonCardFile } from './skeleton-card-file';
+import { SkeletonCards } from '../ui/skeleton';
 
 // import React, { useEffect } from 'react';
 
@@ -78,16 +80,9 @@ const FileSection: React.FC<FileSectionProps> = ({
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="flex h-full w-full items-center justify-center">
-          <div
-            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-gray-500 dark:text-white"
-            role="status"
-          >
-            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-              {t('organizations:loading')}
-            </span>
-          </div>
-        </div>
+          <SkeletonCards count={7} className="mt-4 flex flex-wrap gap-8">
+            <SkeletonCardFile className="h-[170px] w-[184px]" classNameBox="h-[132px] w-[184px]" classNameLineText="h-[16px] w-14" /> 
+          </SkeletonCards>
       );
     }
 
