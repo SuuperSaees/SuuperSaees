@@ -2,17 +2,8 @@
 
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
-// import { useMutation } from '@tanstack/react-query';
-import {
-  Check,
-  Copy,
-  Download,
-  Eye,
-  MoreVertical, // TrashIcon,
-} from 'lucide-react';
+import { Check, Copy, Download, Eye, MoreVertical } from 'lucide-react';
 
-// import { toast } from 'sonner';
-// import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { Button } from '@kit/ui/button';
 import {
   Dialog,
@@ -26,14 +17,14 @@ import Tooltip from '~/components/ui/tooltip';
 
 import { useImageActions } from '../hooks/use-image-actions';
 
-// Define the props for the wrapped component
 interface ImageProps {
   src: string;
   alt?: string;
+  className?: string;
+  dialogClassName?: string; // New prop for dialog-specific class
   bucketName?: string;
 }
 
-// Define the HOC to add options for image interactions
 export const withImageOptions = <P extends ImageProps>(
   WrappedComponent: ComponentType<P>,
 ) => {
@@ -52,17 +43,14 @@ export const withImageOptions = <P extends ImageProps>(
     return (
       <div className="group relative inline-block h-full max-h-[2000px] w-auto overflow-hidden">
         <WrappedComponent {...props} />
-        {/* Button and Options Container */}
         <div className="absolute right-0 top-0 flex items-center">
-          {/* Three-dot menu button (only visible on small screens) */}
           <button
             onClick={handleToggleMenu}
-            className="p-2 text-black sm:hidden" // Show this only on small screens
+            className="p-2 text-black sm:hidden"
           >
             <MoreVertical className="h-6 w-6" />
           </button>
 
-          {/* Options Container */}
           <div
             className={`${
               isMenuOpen ? 'flex' : 'hidden'
@@ -89,7 +77,12 @@ export const withImageOptions = <P extends ImageProps>(
                   </button>
                 </Tooltip>
               }
-              imageContentComponent={<WrappedComponent {...props} />}
+              imageContentComponent={
+                <WrappedComponent
+                  {...props}
+                  className={props.dialogClassName}
+                />
+              }
               handleCopyLink={handleCopyLink}
               handleDownload={handleDownload}
               isLinkCopied={isLinkCopied}
@@ -112,18 +105,14 @@ export const withImageOptions = <P extends ImageProps>(
   return WithImageOptions;
 };
 
-// Basic Image component
-const ImageComponent: React.FC<ImageProps> = ({ src, alt }) => (
-  /*eslint-disable @next/next/no-img-element */
+const ImageComponent: React.FC<ImageProps> = ({ src, alt, className }) => (
   <img
     src={src}
     alt={alt}
-    className="object-contain aspect-square h-full max-h-[70vh] w-full"
+    className={`aspect-square h-full max-h-[70vh] w-full object-contain ${className}`}
   />
 );
 
-
-// Create the HOC-enhanced component
 const ImageWithOptions = withImageOptions(ImageComponent);
 
 interface ImageDialogViewProps {
@@ -163,7 +152,6 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
     setIsZoomedIn((prev) => !prev);
   };
 
-  // Reset zoom when the dialog is closed
   useEffect(() => {
     const handleDialogClose = () => {
       setIsZoomedIn(false);
@@ -180,12 +168,12 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
     <Dialog
       onOpenChange={(open) => {
         if (!open) {
-          setIsZoomedIn(false); // Reset zoom when the dialog is closed
+          setIsZoomedIn(false);
         }
       }}
     >
       <DialogTrigger>{triggerComponent}</DialogTrigger>
-        <DialogContent className="max-w-[90vw] h-[80vh] max-h-[90vh] p-8">
+      <DialogContent className="h-[80vh] max-h-[90vh] max-w-[90vw] p-8">
         <div
           className="relative flex h-full w-full items-center justify-center overflow-hidden"
           ref={containerRef}
@@ -199,14 +187,14 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
               transform: isZoomedIn
                 ? `scale(2) translate(-${mousePosition.x}%, -${mousePosition.y}%)`
                 : 'scale(1)',
-              transformOrigin: '0 0', // Ensures zoom is relative to the top-left corner
+              transformOrigin: '0 0',
               cursor: isZoomedIn ? 'zoom-out' : 'zoom-in',
             }}
           >
             {imageContentComponent}
           </div>
         </div>
-        <DialogFooter className="flex w-full flex-row sm:justify-start sm:justify-between mt-auto">
+        <DialogFooter className="mt-auto flex w-full flex-row sm:justify-start sm:justify-between">
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
@@ -230,14 +218,6 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
               )}
               <span>{isLinkCopied ? 'Link copied!' : 'Copy link'}</span>
             </Button>
-            {/* <Button
-              type="button"
-              variant="outline"
-              className="flex items-center"
-            >
-              <TrashIcon className="mr-2 h-5 w-5" />
-              <span>Delete</span>
-            </Button> */}
           </div>
           <DialogClose asChild className="ml-auto">
             <Button type="button" variant="secondary" className="ml-auto">
@@ -249,4 +229,5 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
     </Dialog>
   );
 };
+
 export default ImageWithOptions;

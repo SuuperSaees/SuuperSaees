@@ -196,7 +196,7 @@ const AsideOrderInformation = ({
 
   return (
     <div
-      className={`relative bottom-10 flex h-[90vh] w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 text-gray-700 ${className}`}
+      className={`relative overflow-y-auto no-scrollbar bottom-10 flex h-[90vh] w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 text-gray-700 ${className}`}
       {...rest}
     >
       <div className="border-b border-gray-200 pb-7">

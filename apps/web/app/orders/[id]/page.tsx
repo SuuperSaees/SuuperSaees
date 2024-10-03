@@ -49,7 +49,7 @@ async function OrderDetailsPage({
       >
         <OrderHeader order={order!} />
 
-        <div className="flex h-full max-h-full w-full flex-col text-gray-700">
+        <div className="flex h-full min-h-0 max-h-full w-full flex-col text-gray-700">
           <div className="flex h-full max-h-full w-full justify-between gap-6">
             <div className="flex w-full min-w-0 flex-grow flex-col gap-6">
               <OrderTabs
