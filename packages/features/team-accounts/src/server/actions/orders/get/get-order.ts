@@ -8,7 +8,7 @@ import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
 export const getBriefQuestionsAndAnswers = async (
-  briefId: string,
+  briefIds: string[],
   orderId: string,
 ) => {
   const client = getSupabaseServerComponentClient();
@@ -17,7 +17,7 @@ export const getBriefQuestionsAndAnswers = async (
   const { data: briefFormFilesData, error: briefFormFilesError } = await client
     .from('brief_form_fields')
     .select('form_field_id')
-    .eq('brief_id', briefId);
+    .in('brief_id', briefIds);
 
   if (briefFormFilesError) throw briefFormFilesError;
 
@@ -125,9 +125,9 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       client_organization: clientOrganizationData,
     };
 
-    if (proccesedData.brief_id) {
+    if (proccesedData.brief_ids) {
       const description = await getBriefQuestionsAndAnswers(
-        proccesedData.brief_id,
+        proccesedData.brief_ids ? proccesedData.brief_ids : [],
         orderData.uuid,
       );
       proccesedData.description = description ?? '';

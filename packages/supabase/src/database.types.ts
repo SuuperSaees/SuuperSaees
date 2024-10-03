@@ -1299,7 +1299,7 @@ export type Database = {
       orders_v2: {
         Row: {
           agency_id: string
-          brief_id: string | null
+          brief_ids: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -1315,7 +1315,7 @@ export type Database = {
         }
         Insert: {
           agency_id: string
-          brief_id?: string | null
+          brief_ids?: string[] | null
           client_organization_id: string
           created_at?: string
           customer_id: string
@@ -1331,7 +1331,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string
-          brief_id?: string | null
+          brief_ids?: string[] | null
           client_organization_id?: string
           created_at?: string
           customer_id?: string
