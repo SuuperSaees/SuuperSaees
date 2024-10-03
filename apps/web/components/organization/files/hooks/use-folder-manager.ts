@@ -30,7 +30,7 @@ interface FileManagementHook {
     folderTitle: string,
     isOrderFolder?: boolean,
   ) => void;
-  handlePathClick: (index: number) => void;
+  handlePathClick: (index: number) => Promise<void>;
   initializeWithPath: (path: Array<{ title: string; uuid?: string }>) => void;
   currentFolderType: 'main' | 'orders' | 'sub';
 }
@@ -61,7 +61,7 @@ export const useFileManagement = (
   };
   const {
     data: mainFiles = [],
-    refetch: _refetchFiles,
+    refetch: refetchFiles,
     isLoading: loadingFiles,
   } = useQuery({
     queryKey: ['files', clientOrganizationId, selectedOption],
@@ -80,7 +80,7 @@ export const useFileManagement = (
   // useQuery for mainFolders
   const {
     data: mainFolders = [],
-    refetch: _refetchFolders,
+    refetch: refetchFolders,
     isLoading: loadingFolders,
   } = useQuery({
     queryKey: ['folders', clientOrganizationId],
@@ -151,9 +151,9 @@ export const useFileManagement = (
       updatePath(folderTitle, folderUuid);
     }
   };
-  const handlePathClick = (index: number) => {
+  const handlePathClick = async (index: number) => {
     if (index === -1) {
-      resetState();
+      await resetState();
     } else {
       const newPath = path.slice(0, index + 1);
       setPath(newPath);
@@ -170,12 +170,14 @@ export const useFileManagement = (
     }
   };
 
-  const resetState = () => {
+  const resetState = async () => {
     setPath([]);
     setCurrentPath && setCurrentPath([]);
     setShowFolders(false);
     setShowSubFolders(false);
     setCurrentFolderType('main');
+    await refetchFiles();
+    await refetchFolders();
   };
 
   const updatePath = (folderTitle: string, folderUuid: string) => {
