@@ -346,6 +346,7 @@ export type Database = {
           created_at: string
           form_field_id: string
           id: string
+          order_id: string | null
           response: string
         }
         Insert: {
@@ -353,6 +354,7 @@ export type Database = {
           created_at?: string
           form_field_id: string
           id?: string
+          order_id?: string | null
           response: string
         }
         Update: {
@@ -360,6 +362,7 @@ export type Database = {
           created_at?: string
           form_field_id?: string
           id?: string
+          order_id?: string | null
           response?: string
         }
         Relationships: [
@@ -376,6 +379,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "form_fields"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brief_responses_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["uuid"]
           },
         ]
       }
@@ -1289,6 +1299,7 @@ export type Database = {
       orders_v2: {
         Row: {
           agency_id: string
+          brief_id: string | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -1304,6 +1315,7 @@ export type Database = {
         }
         Insert: {
           agency_id: string
+          brief_id?: string | null
           client_organization_id: string
           created_at?: string
           customer_id: string
@@ -1319,6 +1331,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string
+          brief_id?: string | null
           client_organization_id?: string
           created_at?: string
           customer_id?: string
@@ -2082,6 +2095,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_service_brief_relation: {
+        Args: {
+          service_id: number
+          brief_id: string
+        }
+        Returns: undefined
+      }
       is_account_owner: {
         Args: {
           account_id: string
@@ -2327,7 +2347,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2341,7 +2360,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2355,7 +2373,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2377,7 +2394,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2388,7 +2404,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2399,7 +2414,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2535,10 +2549,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {
