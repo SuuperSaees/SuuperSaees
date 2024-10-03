@@ -2,15 +2,10 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-
 
 // Helper function to fetch current user data
 export async function fetchCurrentUser(client: SupabaseClient<Database>) {
@@ -21,8 +16,15 @@ export async function fetchCurrentUser(client: SupabaseClient<Database>) {
   return userData.user;
 }
 // organization_id, name, email, id, picture_url, primary_owner_user_id
-type AccountGet = Pick<Account.Type, 
-  'organization_id' | 'name' | 'email' | 'id' | 'picture_url' | 'primary_owner_user_id'>;
+type AccountGet = Pick<
+  Account.Type,
+  | 'organization_id'
+  | 'name'
+  | 'email'
+  | 'id'
+  | 'picture_url'
+  | 'primary_owner_user_id'
+>;
 // Helper function to fetch the current user's account details
 export async function fetchCurrentUserAccount(
   client: SupabaseClient<Database>,
@@ -105,28 +107,6 @@ export async function getUserIdOfAgencyOwner() {
       throw accountMemberShipCurrentUserError;
 
     return accountMemberShipCurrentUserData;
-  } catch (error) {
-    console.error('Error fetching Agency Owner User Id:', error);
-  }
-}
-
-export async function getPropietaryOrganizationIdOfOrder(orderId: string) {
-  try {
-    const client = getSupabaseServerComponentClient();
-
-    const {
-      data: clientOrganizationData,
-      error: clientOrganizationDataError,
-    } = await client
-      .from('orders_v2')
-      .select('client_organization_id')
-      .eq('id', orderId)
-      .single();
-
-    if (clientOrganizationDataError) throw clientOrganizationDataError;
-
-    return clientOrganizationData;
-
   } catch (error) {
     console.error('Error fetching Agency Owner User Id:', error);
   }

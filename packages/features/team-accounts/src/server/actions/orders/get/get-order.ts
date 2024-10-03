@@ -2,8 +2,6 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
@@ -233,5 +231,24 @@ export async function getAgencyClients(
   } catch (error) {
     console.error('Error fetching agency clients:', error);
     throw error;
+  }
+}
+
+export async function getPropietaryOrganizationIdOfOrder(orderId: string) {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    const { data: clientOrganizationData, error: clientOrganizationDataError } =
+      await client
+        .from('orders_v2')
+        .select('client_organization_id')
+        .eq('id', orderId)
+        .single();
+
+    if (clientOrganizationDataError) throw clientOrganizationDataError;
+
+    return clientOrganizationData;
+  } catch (error) {
+    console.error('Error fetching Agency Owner User Id:', error);
   }
 }

@@ -1,7 +1,5 @@
-import {
-  getPropietaryOrganizationIdOfOrder,
-  getUserRole,
-} from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import { getPropietaryOrganizationIdOfOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 
 import { PageBody } from '@kit/ui/page';
 
