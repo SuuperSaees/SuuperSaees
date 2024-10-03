@@ -17,15 +17,20 @@ import { z } from 'zod';
 
 
 
-// import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
-
-
 
 import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
 
+import { OrderBriefs } from './order-briefs';
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -57,6 +62,7 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
         z.object({
           form_field_id: z.string(),
           brief_id: z.string(),
+          order_id: z.string(),
           response: z
             .string()
             .min(2, {
@@ -77,7 +83,9 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
       title: '',
       description: '',
       fileIds: [],
+      brief_responses: undefined,
     },
+    mode: 'onChange',
   });
 
   const createOrdersMutations = useMutation({
@@ -101,7 +109,7 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
+  const onSubmit = (values: z.infer<typeof orderCreationFormSchema>) => {
     createOrdersMutations.mutate(values);
   };
 
@@ -151,57 +159,13 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
           )}
         />
         {/* Brief form fields */}
-        <div className="flex flex-col gap-8">
-          {briefs?.map((brief, briefIndex) => (
-            <div key={brief.id} className="flex flex-col gap-8">
-              <h3 className="text-lg font-bold">{brief.name}</h3>
-              <div className="flex flex-col gap-4">
-                {brief?.form_fields?.map((formField, fieldIndex) => (
-                  <FormField
-                    key={formField.field?.id}
-                    control={form.control}
-                    // Use array index as expected by TypeScript in `brief_responses`
-                    name={`brief_responses.${briefIndex * briefs.length + fieldIndex}.response`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{formField.field?.label}</FormLabel>
 
-                        <FormControl>
-                          <ThemedInput
-                            placeholder={
-                              formField.field?.placeholder ?? undefined
-                            }
-                            {...field}
-                            onChange={(e) => {
-                              const responseValue = e.target.value;
+        <OrderBriefs
+          briefs={briefs}
+          form={form}
+          orderId={form.getValues('uuid')}
+        />
 
-                              // Update the form value with correct `brief_id`, `form_field_id`, and `response`
-                              form.setValue(
-                                `brief_responses.${briefIndex * briefs.length + fieldIndex}`,
-                                {
-                                  form_field_id: formField.field?.id ?? '',
-                                  brief_id: brief.id,
-                                  response: responseValue,
-                                },
-                              );
-                            }}
-                          />
-                        </FormControl>
-
-                        {formField.field?.description && (
-                          <FormDescription>
-                            {formField.field?.description}
-                          </FormDescription>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
         <UploadFileComponent
           bucketName="orders"
           uuid={uniqueId}
