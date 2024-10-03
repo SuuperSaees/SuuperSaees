@@ -1,5 +1,7 @@
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
-import { getUserIdOfAgencyOwner } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+import {
+  getPropietaryOrganizationIdOfOrder,
+  getUserRole,
+} from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 
 import { PageBody } from '@kit/ui/page';
 
@@ -28,7 +30,7 @@ async function OrderDetailsPage({
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
   );
-  const organizationId = await getUserIdOfAgencyOwner();
+  const organizationId = await getPropietaryOrganizationIdOfOrder(id);
   const i18n = await createI18nServerInstance();
   const ordersTitle = i18n.t('orders:title');
   const currentPath = [
@@ -53,7 +55,11 @@ async function OrderDetailsPage({
           <div className="flex h-full max-h-full w-full justify-between gap-6">
             <div className="flex w-full min-w-0 flex-grow flex-col gap-6">
               <OrderTabs
-                organizationId={organizationId}
+                organizationId={
+                  organizationId
+                    ? { account_id: organizationId.client_organization_id }
+                    : undefined
+                }
                 currentPath={currentPath}
               />
             </div>

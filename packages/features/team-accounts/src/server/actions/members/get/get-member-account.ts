@@ -110,6 +110,28 @@ export async function getUserIdOfAgencyOwner() {
   }
 }
 
+export async function getPropietaryOrganizationIdOfOrder(orderId: string) {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    const {
+      data: clientOrganizationData,
+      error: clientOrganizationDataError,
+    } = await client
+      .from('orders_v2')
+      .select('client_organization_id')
+      .eq('id', orderId)
+      .single();
+
+    if (clientOrganizationDataError) throw clientOrganizationDataError;
+
+    return clientOrganizationData;
+
+  } catch (error) {
+    console.error('Error fetching Agency Owner User Id:', error);
+  }
+}
+
 // get a given user
 
 export async function getUserById(userId: string) {
