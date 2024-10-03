@@ -62,6 +62,7 @@ const ActivityPage = () => {
             onFileIdsChange={handleFileIdsChange}
             uuid={generateUUID()}
             removeResults
+            toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
           />
         )}
         <RichTextEditor
