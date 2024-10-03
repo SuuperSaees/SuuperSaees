@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CheckSquare, CloudUpload, StickyNote, Trash2 } from 'lucide-react';
+import { CheckSquare, CloudUpload, StickyNote, Trash2, XIcon } from 'lucide-react';
 import { createFile, createUploadBucketURL } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { File } from '../../../web/lib/file.types';
@@ -18,12 +18,14 @@ interface UploadFileComponentProps {
   uuid: string;
   onFileIdsChange: (fileIds: string[]) => void;
   removeResults?: boolean;
+  toggleExternalUpload?: () => void;
 }
 export default function UploadFileComponent({
   bucketName,
   uuid,
   onFileIdsChange,
   removeResults = false,
+  toggleExternalUpload,
 }: UploadFileComponentProps) {
   const { t } = useTranslation(); // Usa el hook para traducción
   const [filesWithId, setFilesWithId] = useState<Map<string, File>>({});
@@ -220,6 +222,9 @@ export default function UploadFileComponent({
   }, [filesWithId]);
   return (
     <div className="flex flex-col gap-2">
+      <button onClick={toggleExternalUpload} className="self-end">
+          <XIcon className="h-4 w-4" />
+      </button>
       <div
         className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 ${isDragging ? 'bg-gray-300' : 'bg-gray-100'} `}
         onClick={handleFileInputClick}

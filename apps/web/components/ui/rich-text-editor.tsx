@@ -325,10 +325,10 @@ const RichTextEditor = ({
     }
   }, [editor]);
   return (
-    <div className="relative grid h-fit w-full grid-rows-[1fr_auto] gap-4 rounded-2xl p-4 shadow-md">
+    <div className="relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 shadow-md">
       <div
         onClick={() => editor?.commands.focus()}
-        className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-2 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
+        className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
       >
         {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
           <span className="absolute left-2 top-4 -translate-y-1/2 transform text-gray-400">
@@ -337,7 +337,7 @@ const RichTextEditor = ({
         ) : null}
         <EditorContent
           editor={editor}
-          className={`${styles['scrollbar-thin']} flex h-fit max-h-[9vh] w-full flex-col-reverse overflow-y-auto placeholder:text-gray-400`}
+          className={`${styles['scrollbar-thin']} flex h-fit max-h-96 w-full whitespace-normal flex-col-reverse overflow-y-auto placeholder:text-gray-400`}
         />
       </div>
       <div>
