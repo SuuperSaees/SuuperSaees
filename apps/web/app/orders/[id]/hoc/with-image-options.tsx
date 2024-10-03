@@ -50,7 +50,7 @@ export const withImageOptions = <P extends ImageProps>(
     });
 
     return (
-      <div className="group relative inline-block h-full max-h-[2000px] w-auto overflow-hidden">
+      <div className="group relative inline-block h-full max-h-[2000px] w-full min-w-[200px] overflow-hidden">
         <WrappedComponent {...props} />
         {/* Button and Options Container */}
         <div className="absolute right-0 top-0 flex items-center">
@@ -118,10 +118,9 @@ const ImageComponent: React.FC<ImageProps> = ({ src, alt }) => (
   <img
     src={src}
     alt={alt}
-    className="object-contain aspect-square h-full max-h-[70vh] w-full"
+    className="aspect-square h-full max-h-[70vh] w-full object-contain"
   />
 );
-
 
 // Create the HOC-enhanced component
 const ImageWithOptions = withImageOptions(ImageComponent);
@@ -185,7 +184,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
       }}
     >
       <DialogTrigger>{triggerComponent}</DialogTrigger>
-        <DialogContent className="max-w-[90vw] h-[80vh] max-h-[90vh] p-8">
+      <DialogContent className="h-[80vh] max-h-[90vh] max-w-[90vw] p-8">
         <div
           className="relative flex h-full w-full items-center justify-center overflow-hidden"
           ref={containerRef}
@@ -206,7 +205,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
             {imageContentComponent}
           </div>
         </div>
-        <DialogFooter className="flex w-full flex-row sm:justify-start sm:justify-between mt-auto">
+        <DialogFooter className="mt-auto flex w-full flex-row sm:justify-start sm:justify-between">
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"

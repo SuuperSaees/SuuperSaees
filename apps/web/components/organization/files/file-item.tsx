@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import React from 'react';
 
-import Image from 'next/image';
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileIcon } from 'lucide-react';
 import { Ban, EllipsisVertical } from 'lucide-react';
@@ -19,6 +17,8 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
+
+import ImageWithOptions from '~/orders/[id]/hoc/with-image-options';
 
 interface File {
   id: string;
@@ -62,12 +62,10 @@ const FileItem = ({ file }: { file: File }) => {
     <div>
       <div className="flex h-[132.9px] w-[184.317px] items-center justify-center rounded-[8.86px] bg-[#E1E2E4]">
         {file.type.startsWith('image/') ? (
-          <Image
+          <ImageWithOptions
             src={file.url}
-            alt={file.id}
-            width={200}
-            height={200}
-            className="h-full w-full rounded-[8.86px] object-contain px-2"
+            alt="image"
+            bucketName="agency_files"
           />
         ) : file.type.startsWith('video/') ? (
           <video
