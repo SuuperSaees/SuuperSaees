@@ -22,6 +22,7 @@ import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
 import { Account } from '~/lib/account.types';
 
+
 type Members = Pick<
   Account.Type,
   | 'created_at'
@@ -37,6 +38,7 @@ type Members = Pick<
 
 interface Permissions {
   canRemoveFromAccount: (userId: string) => boolean;
+  queryKey?: string;
 }
 
 type AccountMembersTableProps = {
@@ -49,6 +51,7 @@ type AccountMembersTableProps = {
   addRowController?: {
     onAddRow: () => void;
   };
+  queryKey?: string;
 };
 function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
   const { t } = useTranslation('clients');
@@ -109,7 +112,10 @@ function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
             permissions.canRemoveFromAccount(row.original.id) && (
               <div className="h-18 flex items-center gap-4 self-stretch p-4">
                 {/* <UpdateClientDialog {...client} /> */}
-                <DeleteUserDialog userId={client.id} />
+                <DeleteUserDialog
+                  userId={client.id}
+                  queryKey={permissions.queryKey}
+                />
               </div>
             )
           );
@@ -125,6 +131,7 @@ export function ClientsTable({
   userRole,
   searchController,
   addRowController,
+  queryKey,
 }: AccountMembersTableProps) {
   const [search, setSearch] = useState(searchController?.search ?? '');
   const { t } = useTranslation('clients');
@@ -133,6 +140,7 @@ export function ClientsTable({
     canRemoveFromAccount: () => {
       return validRoles.includes(userRole);
     },
+    queryKey: queryKey,
   };
 
   const filteredMembers = members.filter((member) => {

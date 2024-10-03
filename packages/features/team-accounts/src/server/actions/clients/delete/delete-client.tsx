@@ -3,6 +3,7 @@
 // Asegúrate de ajustar la importación según tu configuración
 import { useRouter } from 'next/navigation';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,8 +21,38 @@ import {
 
 import { deleteClient } from './delete-client-server';
 
-const DeleteUserDialog = ({ userId }: { userId: string }) => {
+const DeleteUserDialog = ({
+  userId,
+  queryKey,
+}: {
+  userId: string;
+  queryKey?: string;
+}) => {
+  const queryClient = useQueryClient();
   const router = useRouter();
+
+  // Client version
+  const deleteClientFn = useMutation({
+    mutationFn: async (userId: string) => await deleteClient(userId),
+    onSuccess: async () => {
+      toast('Success', {
+        description: 'User deleted successfully',
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: [queryKey ?? 'clients'],
+      });
+    },
+
+    onError: () => {
+      toast('Error', {
+        description: 'Error deleting user',
+      });
+    },
+  });
+
+  // Server version, when not querykey is present due
+  // to the data was fetched directly from the server
   const handleDelete = async () => {
     try {
       await deleteClient(userId);
@@ -55,7 +86,13 @@ const DeleteUserDialog = ({ userId }: { userId: string }) => {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
+            <AlertDialogAction
+              onClick={
+                queryKey
+                  ? async () => await deleteClientFn.mutateAsync(userId)
+                  : handleDelete
+              }
+            >
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
