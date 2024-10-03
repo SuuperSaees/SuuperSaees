@@ -70,6 +70,12 @@ function SectionView({
     ['reviews', null],
     ['invoices', null],
   ]);
+  
+  const availableTabsBasedOnRole = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
+  const availableTabs =
+    availableTabsBasedOnRole.has(currentUserRole)
+      ? ['members', 'services', 'files']
+      : ['members', 'services'];
 
   const navigationOptionsMap = new Map<string, JSX.Element>([
     [
@@ -102,15 +108,17 @@ function SectionView({
     // ['invoices', <InvoiceSection key={'invoices'} />],
   ]);
 
+  const navigationOptionKeys = Array.from(navigationOptionsMap.keys()).filter(key => availableTabs.includes(key));
+
   return (
     <Tabs
-      defaultValue={Array.from(navigationOptionsMap.keys())[0]}
+      defaultValue={navigationOptionKeys[0]}
       onValueChange={(value) => setActiveTab(value)}
       className="h-full"
     >
       <div className="flex justify-between">
         <TabsList className="gap-2 bg-transparent">
-          {Array.from(navigationOptionsMap.keys()).map((option) => (
+          {navigationOptionKeys.map((option) => (
             <ThemedTabTrigger
               activeTab={activeTab}
               option={option}
