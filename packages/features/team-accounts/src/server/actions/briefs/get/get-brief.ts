@@ -5,6 +5,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { fetchCurrentUser } from '../../members/get/get-member-account';
 import { getOrganization } from '../../organizations/get/get-organizations';
 
+
 export const getBriefFormFields = async () => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -66,7 +67,7 @@ export const getClientBriefs = async () => {
     const { data: briefs, error: errorBriefs } = await client
       .from('briefs')
       .select(
-        '*, form_fields:brief_form_fields(field:form_fields(description, label))',
+        '*, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder))',
       )
       .in('id', briefIds);
 

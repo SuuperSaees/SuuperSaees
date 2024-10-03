@@ -35,10 +35,7 @@ function generateUUID() {
   });
 }
 
-
-const OrderCreationForm = ({ briefs }: {
-  briefs: Brief.BriefResponse[]
-}) => {
+const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
   const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const uniqueId = generateUUID();
   const { t } = useTranslation('orders');
@@ -55,17 +52,22 @@ const OrderCreationForm = ({ briefs }: {
       .string()
       .min(2, { message: 'Description must be at least 2 characters.' }),
     fileIds: z.array(z.string()),
-    brief_responses: z.array(z.object({
-      brief_id: z.string(),
-      response: z.string().min(2, {
-        message: `${t('validation.minCharacters')}`,
-      })
-      .max(3000, {
-        message: `${t('validation.maxCharacters')}`,
-      })
-    })).optional(),
-  
-  
+    brief_responses: z
+      .array(
+        z.object({
+          form_field_id: z.string(),
+          brief_id: z.string(),
+          response: z
+            .string()
+            .min(2, {
+              message: `${t('validation.minCharacters')}`,
+            })
+            .max(3000, {
+              message: `${t('validation.maxCharacters')}`,
+            }),
+        }),
+      )
+      .optional(),
   });
 
   const form = useForm<z.infer<typeof orderCreationFormSchema>>({
@@ -80,13 +82,12 @@ const OrderCreationForm = ({ briefs }: {
 
   const createOrdersMutations = useMutation({
     mutationFn: async (values: z.infer<typeof orderCreationFormSchema>) => {
-      await createOrders([
-        {
-          ...values,
-          fileIds: uploadedFileIds,
-          propietary_organization_id: '',
-        },
-      ]);
+      const newOrder = {
+        ...values,
+        fileIds: uploadedFileIds,
+      };
+      delete newOrder.brief_responses;
+      await createOrders([newOrder], values.brief_responses);
     },
     onError: () => {
       toast('Error', {
@@ -101,7 +102,6 @@ const OrderCreationForm = ({ briefs }: {
   });
 
   const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
-
     createOrdersMutations.mutate(values);
   };
 
@@ -110,6 +110,7 @@ const OrderCreationForm = ({ briefs }: {
     form.setValue('fileIds', fileIds);
     // console.log('Uploaded File IDs:', fileIds);
   };
+
   console.log('values', form.getValues());
   return (
     <Form {...form}>
@@ -150,42 +151,56 @@ const OrderCreationForm = ({ briefs }: {
           )}
         />
         {/* Brief form fields */}
-        <div className='flex flex-col gap-8'>
+        <div className="flex flex-col gap-8">
+          {briefs?.map((brief, briefIndex) => (
+            <div key={brief.id} className="flex flex-col gap-8">
+              <h3 className="text-lg font-bold">{brief.name}</h3>
+              <div className="flex flex-col gap-4">
+                {brief?.form_fields?.map((formField, fieldIndex) => (
+                  <FormField
+                    key={formField.field?.id}
+                    control={form.control}
+                    // Use array index as expected by TypeScript in `brief_responses`
+                    name={`brief_responses.${briefIndex * briefs.length + fieldIndex}.response`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{formField.field?.label}</FormLabel>
 
-        {briefs?.map((brief, index) => (
-          <div key={index} className='flex flex-col gap-8'>
-            <h3 className='font-bold text-lg'>{brief.name}</h3>
-            <div className='flex flex-col gap-4'>
+                        <FormControl>
+                          <ThemedInput
+                            placeholder={
+                              formField.field?.placeholder ?? undefined
+                            }
+                            {...field}
+                            onChange={(e) => {
+                              const responseValue = e.target.value;
 
-            {brief?.form_fields?.map((formField, fieldIndex) => (
-              <FormField
-                key={fieldIndex}
-                control={form.control}
-                name={`brief_responses.${fieldIndex}.response`}
-                render={({ field }) => (
-                  <FormItem>
-                  <FormLabel>{formField.field?.label}</FormLabel>
-    
-                  <FormControl>
-                    <ThemedInput
-                      placeholder={
-                        formField.field?.placeholder ? formField.field?.placeholder : undefined
-                      }
-                      {...field}
-                    />
-                  </FormControl>
-    
-                  {formField.field?.description && (
-                    <FormDescription>{formField.field?.description}</FormDescription>
-                  )}
-                  <FormMessage />
-                </FormItem>
-                )}
-              />
-            ))}
+                              // Update the form value with correct `brief_id`, `form_field_id`, and `response`
+                              form.setValue(
+                                `brief_responses.${briefIndex * briefs.length + fieldIndex}`,
+                                {
+                                  form_field_id: formField.field?.id ?? '',
+                                  brief_id: brief.id,
+                                  response: responseValue,
+                                },
+                              );
+                            }}
+                          />
+                        </FormControl>
+
+                        {formField.field?.description && (
+                          <FormDescription>
+                            {formField.field?.description}
+                          </FormDescription>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
         </div>
         <UploadFileComponent
           bucketName="orders"

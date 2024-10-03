@@ -23,6 +23,7 @@ export namespace Brief {
   export type BriefResponse = Database['public']['Tables']['briefs']['Row'] & {
     form_fields?: {
       field: {
+        id: string;
         label: string;
         description: string | null;
         type: string;
