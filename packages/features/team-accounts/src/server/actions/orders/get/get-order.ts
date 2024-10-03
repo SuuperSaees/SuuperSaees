@@ -2,6 +2,8 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
@@ -27,7 +29,7 @@ export const getBriefQuestionsAndAnswers = async (
   // Get the questions from the form_fields table
   const { data: formFieldsData, error: formFieldsError } = await client
     .from('form_fields')
-    .select('id, description, label')
+    .select('id, description, label, type')
     .in('id', formFieldIds);
 
   if (formFieldsError) throw formFieldsError;
@@ -46,29 +48,34 @@ export const getBriefQuestionsAndAnswers = async (
     const response = briefResponsesData.find(
       (res) => res.form_field_id === question.id,
     );
+    // Check if the response is a valid JSON (object type)
+    const unvalidResponseTypes = new Set(['h1', 'h2', 'h3', 'h4']);
 
-    let respuesta;
+    if (unvalidResponseTypes.has(question.type)) return;
+    let result;
 
     if (response) {
-      // Check if the response is a valid JSON (object type)
       try {
         const parsedResponse = JSON.parse(response.response);
+
         // If the object has a 'label' field, extract it
         if (parsedResponse.label) {
-          respuesta = parsedResponse.label;
+          result = parsedResponse.label;
         } else {
-          respuesta = response.response; // If it is not an object or has no label, use the original string
+          result = response.response; // If it is not an object or has no label, use the original string
         }
       } catch (error) {
         // If it is not a JSON, treat it as plain text
-        respuesta = response.response;
+        // quit the "_" if contains, and replace with " "
+
+        result = response.response.replace(/_/g, ' ');
       }
     } else {
-      respuesta = 'No se proporcionó información';
+      result = 'No se proporcionó información';
     }
 
     //Concatenate question and answer
-    descriptionContent += `<strong>${question.label}:</strong><br/>${respuesta}<br/><br/>`;
+    descriptionContent += `<strong>${question.label}:</strong><br/>${result}<br/><br/>`;
   });
   return descriptionContent;
 };

@@ -386,19 +386,19 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          name: string
+          name: string | null
           propietary_organization_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
-          name: string
+          name?: string | null
           propietary_organization_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
-          name?: string
+          name?: string | null
           propietary_organization_id?: string | null
         }
         Relationships: []
@@ -842,6 +842,7 @@ export type Database = {
       }
       form_fields: {
         Row: {
+          alert_message: string | null
           created_at: string
           description: string | null
           id: string
@@ -851,6 +852,7 @@ export type Database = {
           type: Database["public"]["Enums"]["field_types"]
         }
         Insert: {
+          alert_message?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -860,6 +862,7 @@ export type Database = {
           type?: Database["public"]["Enums"]["field_types"]
         }
         Update: {
+          alert_message?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -2225,7 +2228,18 @@ export type Database = {
         | "messages.read"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
-      field_types: "date" | "multiple_choice" | "select" | "text"
+      field_types:
+        | "date"
+        | "multiple_choice"
+        | "select"
+        | "text"
+        | "h1"
+        | "h2"
+        | "h3"
+        | "h4"
+        | "text-short"
+        | "text-large"
+        | "number"
       file_types: "image" | "video" | "pdf" | "fig"
       messages_types: "public" | "internal_agency"
       notification_channel: "in_app" | "email"

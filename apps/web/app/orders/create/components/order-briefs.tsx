@@ -1,3 +1,6 @@
+import React from 'react';
+
+import { InfoIcon } from 'lucide-react';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { UseFormReturn } from 'react-hook-form';
 
@@ -9,11 +12,25 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
+import { Textarea } from '@kit/ui/textarea';
 
 import RadioOptions from '~/components/single-choice';
 import { Brief } from '~/lib/brief.types';
 
 import VideoDescriptionRenderer from './video-description-renderer';
+
+type ValidElements = keyof JSX.IntrinsicElements;
+
+interface TagProps {
+  Type: ValidElements;
+  children: React.ReactNode;
+  className?: string;
+}
+
+type Option = {
+  value: string;
+  label: string;
+};
 
 export const OrderBriefs = ({
   briefs,
@@ -23,16 +40,16 @@ export const OrderBriefs = ({
   briefs: Brief.BriefResponse[];
   form: UseFormReturn<
     {
-      title: string;
-      description: string;
       uuid: string;
+      title: string;
       fileIds: string[];
+      description?: string | undefined;
       brief_responses?:
         | {
-            response: string;
             form_field_id: string;
             brief_id: string;
             order_id: string;
+            response: string;
           }[]
         | undefined;
     },
@@ -46,6 +63,12 @@ export const OrderBriefs = ({
       /(youtube\.com|youtu\.be|instagram\.com|drive\.google\.com)/;
     return videoRegex.test(description);
   };
+  const notValidFormTypes = new Set(['h1', 'h2', 'h3', 'h4']);
+
+  const Tag = ({ Type, children, className }: TagProps) => {
+    return React.createElement(Type, { className }, children);
+  };
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -57,10 +80,24 @@ export const OrderBriefs = ({
             <h3 className="text-lg font-bold">{brief.name}</h3>
             <div className="flex flex-col gap-8">
               {brief?.form_fields?.map((formField) => {
-                const currentFieldIndex = uniqueIndexCounter++; // Increment the counter for each form field
+                const currentFieldIndex = notValidFormTypes.has(
+                  formField.field?.type ?? '',
+                )
+                  ? uniqueIndexCounter
+                  : uniqueIndexCounter++; // Increment the counter for each form field
 
                 // Function to check if the description contains any video links (YouTube or similar)
-
+                if (notValidFormTypes.has(formField.field?.type ?? '')) {
+                  return (
+                    <Tag
+                      Type={(formField.field?.type as ValidElements) ?? 'p'}
+                      key={formField.field?.id}
+                      className="text-lg font-bold"
+                    >
+                      {formField.field?.label}
+                    </Tag>
+                  );
+                }
                 return (
                   <FormField
                     key={formField.field?.id}
@@ -86,7 +123,9 @@ export const OrderBriefs = ({
                         <FormControl>
                           {formField.field?.type === 'select' ? (
                             <RadioOptions
-                              options={formField.field?.options ?? []}
+                              options={
+                                (formField.field?.options as Option[]) ?? []
+                              }
                               onChange={(
                                 event: React.ChangeEvent<HTMLInputElement>,
                               ) => {
@@ -108,7 +147,7 @@ export const OrderBriefs = ({
                                 ) || '' // Ensure a selected option exists
                               }
                             />
-                          ) : (
+                          ) : formField.field?.type === 'text-short' ? (
                             <ThemedInput
                               placeholder={
                                 formField.field?.placeholder ?? undefined
@@ -131,10 +170,41 @@ export const OrderBriefs = ({
                                 );
                               }}
                             />
-                          )}
+                          ) : formField.field?.type === 'text-large' ? (
+                            <Textarea
+                              placeholder={
+                                formField.field?.placeholder ?? undefined
+                              }
+                              {...field}
+                              onChange={(
+                                e: React.ChangeEvent<HTMLTextAreaElement>,
+                              ) => {
+                                const responseValue = e.target.value;
+
+                                // Update the form value with correct `brief_id`, `form_field_id`, and `response`
+                                form.setValue(
+                                  `brief_responses.${currentFieldIndex}`,
+                                  {
+                                    form_field_id: formField.field?.id ?? '',
+                                    brief_id: brief.id,
+                                    order_id: orderId,
+                                    response: responseValue,
+                                  },
+                                );
+                              }}
+                            >
+                              {field.value}
+                            </Textarea>
+                          ) : null}
                         </FormControl>
 
                         <FormMessage />
+                        {formField.field?.alert_message && (
+                          <div className="flex items-center gap-3 rounded-md bg-accent p-3 px-5 text-sm text-foreground">
+                            <InfoIcon size="16" strokeWidth={2} />
+                            {formField.field?.alert_message}
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />

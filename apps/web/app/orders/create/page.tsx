@@ -17,7 +17,7 @@ export const generateMetadata = async () => {
 
 async function CreateOrderPage() {
   const briefs = await getClientBriefs();
-  console.log('BRIEFStt', briefs.length);
+
   return (
     <PageBody className="mx-auto flex w-full max-w-7xl p-8">
       <div className="mb-[32px] flex w-full items-center justify-between">

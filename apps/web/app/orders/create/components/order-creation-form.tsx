@@ -17,18 +17,14 @@ import { z } from 'zod';
 
 
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
+
+
 
 import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
+import { Order } from '~/lib/order.types';
 
 import { OrderBriefs } from './order-briefs';
 
@@ -39,6 +35,16 @@ function generateUUID() {
     return v.toString(16);
   });
 }
+
+type OrderInsert = Omit<
+  Order.Insert,
+  | 'customer_id'
+  | 'client_organization_id'
+  | 'agency_id'
+  | 'propietary_organization_id'
+> & {
+  fileIds?: string[];
+};
 
 const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
   const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
@@ -53,9 +59,12 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
       .max(200, {
         message: 'Title must be at most 200 characters.',
       }),
-    description: z
-      .string()
-      .min(2, { message: 'Description must be at least 2 characters.' }),
+    description:
+      briefs.length > 0
+        ? z.string().optional()
+        : z
+            .string()
+            .min(2, { message: 'Description must be at least 2 characters.' }),
     fileIds: z.array(z.string()),
     brief_responses: z
       .array(
@@ -66,10 +75,10 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
           response: z
             .string()
             .min(2, {
-              message: `${t('validation.minCharacters')}`,
+              message: t('validation.minCharacters'),
             })
             .max(3000, {
-              message: `${t('validation.maxCharacters')}`,
+              message: t('validation.maxCharacters'),
             }),
         }),
       )
@@ -95,7 +104,7 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
         fileIds: uploadedFileIds,
       };
       delete newOrder.brief_responses;
-      await createOrders([newOrder], values.brief_responses);
+      await createOrders([newOrder as OrderInsert], values.brief_responses);
     },
     onError: () => {
       toast('Error', {
@@ -140,24 +149,26 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
-              <FormControl>
-                <ThemedTextarea
-                  {...field}
-                  placeholder={t('creation.form.descriptionPlaceholder')}
-                  rows={5}
-                  className="focus-visible:ring-none"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!briefs.length && (
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
+                <FormControl>
+                  <ThemedTextarea
+                    {...field}
+                    placeholder={t('creation.form.descriptionPlaceholder')}
+                    rows={5}
+                    className="focus-visible:ring-none"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         {/* Brief form fields */}
 
         <OrderBriefs

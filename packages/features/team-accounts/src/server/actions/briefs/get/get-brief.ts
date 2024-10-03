@@ -67,7 +67,7 @@ export const getClientBriefs = async () => {
     const { data: briefs, error: errorBriefs } = await client
       .from('briefs')
       .select(
-        '*, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder))',
+        '*, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, alert_message))',
       )
       .in('id', briefIds);
 

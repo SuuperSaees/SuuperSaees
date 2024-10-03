@@ -8,28 +8,9 @@ export namespace Brief {
   export type Insert = Database['public']['Tables']['briefs']['Insert'];
   export type Update = Database['public']['Tables']['briefs']['Update'];
 
-  //   const briefs: {
-  //     created_at: string;
-  //     id: string;
-  //     name: string;
-  //     propietary_organization_id: string | null;
-  //     form_fields: {
-  //         field: {
-  //             description: string | null;
-  //             label: string;
-  //         } | null;
-  //     }[];
-  // }[] | null
   export type BriefResponse = Database['public']['Tables']['briefs']['Row'] & {
     form_fields?: {
-      field: {
-        id: string;
-        label: string;
-        description: string | null;
-        type: string;
-        options?: [] | null;
-        placeholder: string | null;
-      } | null;
+      field: Database['public']['Tables']['form_fields']['Row'];
     }[];
   };
   export namespace Relationships {
@@ -37,5 +18,7 @@ export namespace Brief {
       Database['public']['Tables']['service_briefs']['Insert'];
     export type FormFieldResponses =
       Database['public']['Tables']['brief_responses']['Insert'];
+    export type FormField =
+      Database['public']['Tables']['form_fields']['Insert'];
   }
 }
