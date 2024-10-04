@@ -71,7 +71,6 @@ export const getClientBriefs = async () => {
       )
       .in('id', briefIds);
 
-    console.log('briefs', JSON.stringify(briefs));
 
     if (errorBriefs) {
       throw new Error(errorBriefs.message);
