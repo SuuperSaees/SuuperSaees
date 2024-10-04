@@ -8,16 +8,26 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 
+import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { hasPermissionToCreateOrder } from '../../permissions/orders';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
 
 
-type OrderInsert = Omit<Order.Insert, 'customer_id'> & {
+type OrderInsert = Omit<
+  Order.Insert,
+  | 'customer_id'
+  | 'client_organization_id'
+  | 'agency_id'
+  | 'propietary_organization_id'
+> & {
   fileIds?: string[];
 };
 
-export const createOrders = async (orders: OrderInsert[]) => {
+export const createOrders = async (
+  orders: OrderInsert[],
+  briefResponses?: Brief.Relationships.FormFieldResponses[],
+) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
@@ -79,14 +89,19 @@ export const createOrders = async (orders: OrderInsert[]) => {
     }
 
     // Step 2: Prepare the orders for insertion
+    const briefIds = new Set<string>(
+      briefResponses?.map((response) => response.brief_id) ?? [],
+    );
     const ordersToInsert = orders.map(
-      ({ fileIds, ...orderWithoutFileIds }) => ({
+      ({ fileIds: _fileIds, ...orderWithoutFileIds }) => ({
         ...orderWithoutFileIds,
         customer_id: userId,
-        client_organization_id: clientOrganizationId,
+        client_organization_id: clientOrganizationId ?? '',
         propietary_organization_id:
           agencyOrganizationData.primary_owner_user_id,
         agency_id: agencyOrganizationData.id,
+        brief_ids:
+          Array.from(briefIds).length > 0 ? Array.from(briefIds) : undefined,
       }),
     );
 
@@ -97,6 +112,18 @@ export const createOrders = async (orders: OrderInsert[]) => {
       .select()
       .single();
     if (orderError) throw new Error(orderError.message);
+
+    // Step 3.5: Insert brief responses if present
+    if (briefResponses && briefResponses.length > 0) {
+      const { error: briefResponsesError } = await client
+        .from('brief_responses')
+        .insert(briefResponses);
+
+      if (briefResponsesError)
+        throw new Error(
+          `Error creating the order brief, ${briefResponsesError.message}`,
+        );
+    }
 
     // Step 4: Send email notification
     if (emailData.email) {
