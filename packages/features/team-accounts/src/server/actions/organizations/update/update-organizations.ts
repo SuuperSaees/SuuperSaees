@@ -2,10 +2,8 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-
+import { hasPermissionToViewOrganization } from '../../permissions/organization';
 
 // Hex color validation regex
 const isValidHexColor = (color: string) => /^#([0-9A-F]{3}){1,2}$/i.test(color);
@@ -112,79 +110,26 @@ export const updateOrganization = async (
 ) => {
   const client = getSupabaseServerComponentClient();
 
-  // get the current user and the account asociated
   try {
-    const {
-      data: { user },
-    } = await client.auth.getUser();
-
-    if (!user) {
-      console.error('User not found');
-      return [];
-    }
-
-    const { data: accountData, error: accountError } = await client
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', user.id)
-      .single();
-
-    if (accountError) {
-      throw accountError.message;
-    }
-
-    const { data: roleData, error: roleError } = await client
-      .from('accounts_memberships')
-      .select('account_role')
-      .eq('user_id', user.id)
-      .single();
-
-    if (roleError) {
-      throw roleError.message;
-    }
-
-    const rolesAvailable = new Set([
-      'agency_member',
-      'agency_owner',
-      'agency_project_manager',
-      'super_admin',
-      'custom-role',
-    ]);
-    // verify if the current user is agency_owner, agency_member, agency_project_manager
-
-    if (rolesAvailable.has(roleData?.account_role ?? '')) {
-      // verify in the clients table if the owner client is asociated with the organization
-      const { data: organizationSettings, error: settingsError } = await client
-        .from('clients')
-        .select('agency_id')
-        .eq('user_client_id', ownerUserId)
-        .single();
-
-      if (settingsError) {
-        throw settingsError.message;
-      }
-
-      if (organizationSettings.agency_id !== accountData.organization_id) {
-        throw new Error('User not authorized');
-      }
-
-      const { data: updatedOrganization, error: updateError } = await client
-        .from('accounts')
-        .update(data)
-        .eq('id', id)
-        .select()
-        .maybeSingle(); // Expecting a single result or no result
-
-      if (updateError) {
-        throw new Error(updateError.message);
-      }
-
-      return updatedOrganization;
-    } else {
+    const hasPermission = await hasPermissionToViewOrganization(id);
+    if (!hasPermission) {
       throw new Error('User not authorized');
     }
+
+    const { data: updatedOrganizationData, error: updatedOrganizationError } = await client
+      .from('accounts')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .maybeSingle(); // Expecting a single result or no result
+
+    if (updatedOrganizationError) {
+      throw new Error(updatedOrganizationError.message);
+    }
+
+    return updatedOrganizationData;
   } catch (error) {
     console.error('Error updating organization:', error);
-    throw error; // Re-throw error for higher-level handling
+    throw error;
   }
 };
