@@ -164,6 +164,7 @@ export function PersonalAccountSettingsContainer(
                       pictureUrl: user.picture_url,
                       id: user.id,
                     }}
+                    className='h-20 w-20'
                   />
                 </CardContent>
               </Card>

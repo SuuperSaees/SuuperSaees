@@ -1,6 +1,7 @@
 import Header from './header';
 import SectionView from './section-view';
 
+
 interface OrganizationSectionProps {
   name: string;
   logo?: string;
@@ -20,7 +21,7 @@ function OrganizationSection({
 }: OrganizationSectionProps) {
   return (
     <div className="flex h-full flex-col gap-8 p-8">
-      <Header name={name} logo={logo} owner={owner} />
+      <Header name={name} logo={logo} owner={owner} id={clientOrganizationId} />
       <SectionView
         clientOrganizationId={clientOrganizationId}
         currentUserRole={currentUserRole}
