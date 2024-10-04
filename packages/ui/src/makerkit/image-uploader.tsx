@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import Image from 'next/image';
 
-import { Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '../shadcn/button';
@@ -15,6 +15,8 @@ export function ImageUploader(
   props: React.PropsWithChildren<{
     value: string | null | undefined;
     onValueChange: (value: File | null) => unknown;
+    floatingDeleteButton?: boolean;
+    className?: string;
   }>,
 ) {
   const [image, setImage] = useState(props.value);
@@ -63,24 +65,50 @@ export function ImageUploader(
 
   if (!image) {
     return (
-      <FallbackImage descriptionSection={props.children}>
+      <FallbackImage
+        descriptionSection={props.children}
+        className={props.className}
+      >
         <Input />
       </FallbackImage>
     );
   }
 
   return (
-    <div className={'flex items-center space-x-4'}>
-      <label className={'relative h-20 w-20 animate-in fade-in zoom-in-50'}>
-        <Image fill className={'h-20 w-20 rounded-full object-cover'} src={image} alt={''} />
+    <div className={'relative flex items-center space-x-4'}>
+      <label
+        className={`relative animate-in fade-in zoom-in-50 ${props.className}`}
+      >
+        <Image
+          fill
+          className={'h-full w-full rounded-full object-cover'}
+          src={image}
+          alt={''}
+        />
 
         <Input />
       </label>
 
       <div>
-        <Button onClick={onClear} size={'sm'} variant={'ghost'}>
-          <Trans i18nKey={'common:clear'} />
-        </Button>
+        {props.floatingDeleteButton ? (
+          <Button
+            onClick={onClear}
+            size={'sm'}
+            variant={'ghost'}
+            className="absolute right-0 top-0 h-5 w-5 rounded-full bg-transparent p-1 text-primary hover:bg-primary/10 hover:text-primary"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            onClick={onClear}
+            size={'sm'}
+            variant={'ghost'}
+            className={'absolute right-0 top-0'}
+          >
+            <Trans i18nKey={'common:clear'} />
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -89,14 +117,13 @@ export function ImageUploader(
 function FallbackImage(
   props: React.PropsWithChildren<{
     descriptionSection?: React.ReactNode;
+    className?: string;
   }>,
 ) {
   return (
     <div className={'flex items-center space-x-4'}>
       <label
-        className={
-          'relative flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-full border border-border animate-in fade-in zoom-in-50 hover:border-primary'
-        }
+        className={`relative flex cursor-pointer flex-col items-center justify-center rounded-full border border-border animate-in fade-in zoom-in-50 hover:border-primary ${props.className}`}
       >
         <ImageIcon className={'h-8 text-primary'} />
 

@@ -1,30 +1,31 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
+import { UpdateAccountImageContainer } from 'node_modules/@kit/accounts/src/components/personal-account-settings/update-account-image-container';
+
 import { Trans } from '@kit/ui/trans';
 
 interface OrganizationHeaderProps {
+  id: string;
   name: string;
   logo?: string;
   owner: {
     name: string;
     email?: string | null;
-    picture_url?: string;
   };
 }
-function Header({ name, logo, owner }: OrganizationHeaderProps) {
+
+function Header({ id, name, logo, owner }: OrganizationHeaderProps) {
   return (
     <div className="flex w-full gap-4">
-      <Avatar className="aspect-square h-16 w-16">
-        {!logo ? (
-          <AvatarFallback className="text-bold text-lg">
-            {name
-              .split(' ')
-              .map((word) => word[0])
-              .join('')}
-          </AvatarFallback>
-        ) : (
-          <AvatarImage src={logo} alt={name + 'logo'} />
-        )}
-      </Avatar>
+      <UpdateAccountImageContainer
+        user={{
+          id,
+          pictureUrl: logo ?? '',
+        }}
+        bucketName="organization"
+        showDescriptions={false}
+        floatingDeleteButton={true}
+        className="aspect-square h-16 w-16"
+      />
+
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-bold">{name}</h1>
         <p className="text-sm text-gray-600">
