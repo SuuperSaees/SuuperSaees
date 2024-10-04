@@ -107,23 +107,82 @@ export const upsertOrganizationSettings = async (
 
 export const updateOrganization = async (
   id: string,
+  ownerUserId: string,
   data: { name?: string },
 ) => {
   const client = getSupabaseServerComponentClient();
 
+  // get the current user and the account asociated
   try {
-    const { data: updatedOrganization, error: updateError } = await client
-      .from('accounts')
-      .update(data)
-      .eq('id', id)
-      .select()
-      .maybeSingle(); // Expecting a single result or no result
+    const {
+      data: { user },
+    } = await client.auth.getUser();
 
-    if (updateError) {
-      throw new Error(updateError.message);
+    if (!user) {
+      console.error('User not found');
+      return [];
     }
 
-    return updatedOrganization;
+    const { data: accountData, error: accountError } = await client
+      .from('accounts')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single();
+
+    if (accountError) {
+      throw accountError.message;
+    }
+
+    const { data: roleData, error: roleError } = await client
+      .from('accounts_memberships')
+      .select('account_role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (roleError) {
+      throw roleError.message;
+    }
+
+    const rolesAvailable = new Set([
+      'agency_member',
+      'agency_owner',
+      'agency_project_manager',
+      'super_admin',
+      'custom-role',
+    ]);
+    // verify if the current user is agency_owner, agency_member, agency_project_manager
+
+    if (rolesAvailable.has(roleData?.account_role ?? '')) {
+      // verify in the clients table if the owner client is asociated with the organization
+      const { data: organizationSettings, error: settingsError } = await client
+        .from('clients')
+        .select('agency_id')
+        .eq('user_client_id', ownerUserId)
+        .single();
+
+      if (settingsError) {
+        throw settingsError.message;
+      }
+
+      if (organizationSettings.agency_id !== accountData.organization_id) {
+        throw new Error('User not authorized');
+      }
+
+      const { data: updatedOrganization, error: updateError } = await client
+        .from('accounts')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .maybeSingle(); // Expecting a single result or no result
+
+      if (updateError) {
+        throw new Error(updateError.message);
+      }
+
+      return updatedOrganization;
+    } else {
+      throw new Error('User not authorized');
+    }
   } catch (error) {
     console.error('Error updating organization:', error);
     throw error; // Re-throw error for higher-level handling

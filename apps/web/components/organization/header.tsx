@@ -11,6 +11,7 @@ interface OrganizationHeaderProps {
   currentUserRole: string;
   logo?: string;
   owner: {
+    id: string;
     name: string;
     email?: string | null;
     picture_url?: string;
@@ -19,7 +20,7 @@ interface OrganizationHeaderProps {
 
 function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderProps) {
   const rolesThatCanEdit = new Set(['agency_member', 'agency_project_manager', 'agency_owner']);
-
+  const ownerUserId = owner.id;
   return (
     <div className="flex w-full gap-4">
       <Avatar className="aspect-square h-16 w-16">
@@ -40,7 +41,7 @@ function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderPr
           id={id}
           userRole={currentUserRole}
           updateFunction={async (id, data) => {
-            await updateOrganization(id as string, data);
+            await updateOrganization(id as string, ownerUserId, data);
           }}
           rolesThatCanEdit={rolesThatCanEdit}
           label="Organization name"

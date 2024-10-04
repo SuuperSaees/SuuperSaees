@@ -5,6 +5,7 @@ interface OrganizationSectionProps {
   name: string;
   logo?: string;
   owner: {
+    id: string;
     name: string;
     email?: string | null;
   };

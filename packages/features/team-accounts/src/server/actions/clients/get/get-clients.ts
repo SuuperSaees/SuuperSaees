@@ -246,7 +246,6 @@ export async function getAllClients(): Promise<ClientsWithOrganization[]> {
       clientOrganizations,
     );
 
-    console.log('clientsWithOrganizations', clientsWithOrganizations);
     return clientsWithOrganizations;
   } catch (error) {
     console.error('Error fetching clients:', error);
