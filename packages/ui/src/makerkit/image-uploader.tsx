@@ -75,7 +75,7 @@ export function ImageUploader(
   }
 
   return (
-    <div className={'relative flex items-center space-x-4'}>
+    <div className='relative flex items-center space-x-4'>
       <label
         className={`relative animate-in fade-in zoom-in-50 ${props.className}`}
       >
