@@ -1,20 +1,20 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
+import { UpdateAccountImageContainer } from 'node_modules/@kit/accounts/src/components/personal-account-settings/update-account-image-container';
+
 import { Trans } from '@kit/ui/trans';
 import { updateOrganization } from '../../../../packages/features/team-accounts/src/server/actions/organizations/update/update-organizations';
 import EditableHeader from '../editable-header';
 
 interface OrganizationHeaderProps {
-  name: string;
   id: string;
+  name: string;
   currentUserRole: string;
   logo?: string;
   owner: {
     id: string;
     name: string;
     email?: string | null;
-    picture_url?: string;
   };
 }
 
@@ -23,18 +23,17 @@ function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderPr
   const ownerUserId = owner.id;
   return (
     <div className="flex w-full gap-4">
-      <Avatar className="aspect-square h-16 w-16">
-        {!logo ? (
-          <AvatarFallback className="text-bold text-lg">
-            {name
-              .split(' ')
-              .map((word) => word[0])
-              .join('')}
-          </AvatarFallback>
-        ) : (
-          <AvatarImage src={logo} alt={`${name} logo`} />
-        )}
-      </Avatar>
+      <UpdateAccountImageContainer
+        user={{
+          id,
+          pictureUrl: logo ?? '',
+        }}
+        bucketName="organization"
+        showDescriptions={false}
+        floatingDeleteButton={true}
+        className="aspect-square h-16 w-16"
+      />
+
       <div className="flex flex-col gap-1">
         <EditableHeader
           initialName={name}

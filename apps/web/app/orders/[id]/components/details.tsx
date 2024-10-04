@@ -6,12 +6,17 @@ import React from 'react';
 
 import { Trans } from '@kit/ui/trans';
 
+
+
 import { File as ServerFile } from '~/lib/file.types';
+
+
 
 import { useActivityContext } from '../context/activity-context';
 import PreviewImage from './file-types/preview-image';
 import PreviewPDF from './file-types/preview-pdf';
 import PreviewVideo from './file-types/preview-video';
+
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -46,11 +51,12 @@ const DetailsPage = () => {
   const { order } = useActivityContext();
 
   const convertLinks = (text: string) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urlRegex =
+      /\b(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*))/gi;
     return text.replace(
       urlRegex,
       (url) =>
-        `<a href="${url}" target="_blank" class="text-blue-600 underline">${url}</a>`,
+        `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">${url}</a>`,
     );
   };
 

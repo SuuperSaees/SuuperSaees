@@ -7,6 +7,77 @@ import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.ty
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
+export const getBriefQuestionsAndAnswers = async (
+  briefIds: string[],
+  orderId: string,
+) => {
+  const client = getSupabaseServerComponentClient();
+
+  // Get the relationships of brief_form_files for the brief_id
+  const { data: briefFormFilesData, error: briefFormFilesError } = await client
+    .from('brief_form_fields')
+    .select('form_field_id')
+    .in('brief_id', briefIds);
+
+  if (briefFormFilesError) throw briefFormFilesError;
+
+  // Extract form_field_id from relationships
+  const formFieldIds = briefFormFilesData.map((file) => file.form_field_id);
+
+  // Get the questions from the form_fields table
+  const { data: formFieldsData, error: formFieldsError } = await client
+    .from('form_fields')
+    .select('id, description, label, type')
+    .in('id', formFieldIds);
+
+  if (formFieldsError) throw formFieldsError;
+
+  // Get the responses corresponding to the orderID
+  const { data: briefResponsesData, error: briefResponsesError } = await client
+    .from('brief_responses')
+    .select('response, form_field_id')
+    .in('form_field_id', formFieldIds)
+    .eq('order_id', orderId);
+
+  if (briefResponsesError) throw briefResponsesError;
+
+  let descriptionContent = '';
+  formFieldsData.forEach((question) => {
+    const response = briefResponsesData.find(
+      (res) => res.form_field_id === question.id,
+    );
+    // Check if the response is a valid JSON (object type)
+    const unvalidResponseTypes = new Set(['h1', 'h2', 'h3', 'h4']);
+
+    if (unvalidResponseTypes.has(question.type)) return;
+    let result;
+
+    if (response) {
+      try {
+        const parsedResponse = JSON.parse(response.response);
+
+        // If the object has a 'label' field, extract it
+        if (parsedResponse.label) {
+          result = parsedResponse.label;
+        } else {
+          result = response.response; // If it is not an object or has no label, use the original string
+        }
+      } catch (error) {
+        // If it is not a JSON, treat it as plain text
+        // quit the "_" if contains, and replace with " "
+
+        result = response.response.replace(/_/g, ' ');
+      }
+    } else {
+      result = 'No se proporcionó información';
+    }
+
+    //Concatenate question and answer
+    descriptionContent += `<strong>${question.label}:</strong><br/>${result}<br/><br/>`;
+  });
+  return descriptionContent;
+};
+
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -46,7 +117,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
         .eq('id', orderData.client_organization_id)
         .single();
 
-    if (clientOrganizationError) throw clientOrganizationError;
+    if (clientOrganizationError) throw clientOrganizationError.message;
 
     const proccesedData = {
       ...orderData,
@@ -58,6 +129,14 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       }),
       client_organization: clientOrganizationData,
     };
+
+    if (proccesedData.brief_ids) {
+      const description = await getBriefQuestionsAndAnswers(
+        proccesedData.brief_ids ? proccesedData.brief_ids : [],
+        orderData.uuid,
+      );
+      proccesedData.description = description ?? '';
+    }
 
     return proccesedData as Order.Relational;
   } catch (error) {

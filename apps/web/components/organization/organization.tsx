@@ -1,6 +1,7 @@
 import Header from './header';
 import SectionView from './section-view';
 
+
 interface OrganizationSectionProps {
   name: string;
   logo?: string;
