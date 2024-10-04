@@ -24,19 +24,18 @@ export const upsertOrganizationSettings = async (
       error: authError,
     } = await client.auth.getUser();
 
-    if (authError || !user) {
+    if (authError ?? !user) {
       throw new Error('User not authenticated');
     }
 
     // Fetch the organization account for the current user
-    const { data: organizationAccount} =
-      await client
-        .from('accounts')
-        .select('id')
-        .eq('primary_owner_user_id', user.id)
-        .eq('is_personal_account', false)
-        .single()
-        .throwOnError();
+    const { data: organizationAccount } = await client
+      .from('accounts')
+      .select('id')
+      .eq('primary_owner_user_id', user.id)
+      .eq('is_personal_account', false)
+      .single()
+      .throwOnError();
 
     if (!organizationAccount) {
       throw new Error(
@@ -102,6 +101,31 @@ export const upsertOrganizationSettings = async (
     }
   } catch (error) {
     console.error('Error while updating the organization settings', error);
+    throw error; // Re-throw error for higher-level handling
+  }
+};
+
+export const updateOrganization = async (
+  id: string,
+  data: { name?: string },
+) => {
+  const client = getSupabaseServerComponentClient();
+
+  try {
+    const { data: updatedOrganization, error: updateError } = await client
+      .from('accounts')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .maybeSingle(); // Expecting a single result or no result
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    return updatedOrganization;
+  } catch (error) {
+    console.error('Error updating organization:', error);
     throw error; // Re-throw error for higher-level handling
   }
 };
