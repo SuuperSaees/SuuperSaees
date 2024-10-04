@@ -128,7 +128,6 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
     // console.log('Uploaded File IDs:', fileIds);
   };
 
-  console.log('values', form.getValues());
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
