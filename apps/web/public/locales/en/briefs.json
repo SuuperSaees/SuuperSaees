@@ -17,5 +17,19 @@
     "validation": {
        "minCharacters" : "Minimum 2 characters required",
        "maxCharacters" : "Maximum 3000 characters allowed"
+    },
+    "creation": {
+    "title": "Create brief",
+    "form": {
+        "addQuestion": "Add question",
+        "submit": "Create brief",
+        "titleLabel": "Brief name",
+        "titlePlaceholder": "Enter the name of your brief",
+        "questionLabel": "Question",
+        "labelPlaceholder": "Put your question here *",
+        "descriptionPlaceholder": "Add a description",
+        "placeholderPlaceholder": "Add a placeholder"
+
     }
+  }
 }

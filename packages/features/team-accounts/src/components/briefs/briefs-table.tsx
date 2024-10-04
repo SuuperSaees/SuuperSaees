@@ -3,6 +3,8 @@
 import { useMemo } from 'react';
 import * as React from 'react';
 
+import Link from 'next/link';
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -36,7 +38,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
-import CreateBriefDialog from '../../server/actions/briefs/create/create-brief-ui';
+import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
+// import CreateBriefDialog from '../../server/actions/briefs/create/create-brief-ui';
 import DeleteBriefDialog from '../../server/actions/briefs/delete/delete-brief-ui';
 import UpdateBriefDialog from '../../server/actions/briefs/update/update-brief-ui';
 
@@ -201,7 +204,7 @@ export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
     },
   });
 
-  const importantPropietaryOrganizationId = accountIds[0];
+  // const importantPropietaryOrganizationId = accountIds[0];
 
   return (
     <div className="w-full">
@@ -218,9 +221,12 @@ export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
               className="pl-10"
             />
           </div>
-          <CreateBriefDialog
+          {/* <CreateBriefDialog
             propietary_organization_id={importantPropietaryOrganizationId ?? ''}
-          />
+          /> */}
+          <Link href="/briefs/create">
+            <ThemedButton>{t('createBrief')}</ThemedButton>
+          </Link>
         </div>
       </div>
       <Separator />
