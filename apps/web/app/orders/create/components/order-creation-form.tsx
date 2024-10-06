@@ -15,22 +15,18 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-// import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+
+
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
 
+
+
 import UploadFileComponent from '~/components/ui/files-input';
+import { Brief } from '~/lib/brief.types';
+import { Order } from '~/lib/order.types';
 
-// import {sendOrderCreationEmail} from './send-mail';
-
-
+import { OrderBriefs } from './order-briefs';
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -40,26 +36,55 @@ function generateUUID() {
   });
 }
 
-// import { mapMimeTypeToFileType } from '../utils/map-mime-type';
+type OrderInsert = Omit<
+  Order.Insert,
+  | 'customer_id'
+  | 'client_organization_id'
+  | 'agency_id'
+  | 'propietary_organization_id'
+> & {
+  fileIds?: string[];
+};
 
-const orderCreationFormSchema = z.object({
-  uuid: z.string(),
-  title: z
-    .string()
-    .min(2, { message: 'Title must be at least 2 characters.' })
-    .max(200, {
-      message: 'Title must be at most 200 characters.',
-    }),
-  description: z
-    .string()
-    .min(2, { message: 'Description must be at least 2 characters.' }),
-  fileIds: z.array(z.string()),
-});
-const OrderCreationForm = () => {
+const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
   const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const uniqueId = generateUUID();
   const { t } = useTranslation('orders');
-  // const supabase = useSupabase();
+
+  const orderCreationFormSchema = z.object({
+    uuid: z.string(),
+    title: z
+      .string()
+      .min(2, { message: 'Title must be at least 2 characters.' })
+      .max(200, {
+        message: 'Title must be at most 200 characters.',
+      }),
+    description:
+      briefs.length > 0
+        ? z.string().optional()
+        : z
+            .string()
+            .min(2, { message: 'Description must be at least 2 characters.' }),
+    fileIds: z.array(z.string()),
+    brief_responses: z
+      .array(
+        z.object({
+          form_field_id: z.string(),
+          brief_id: z.string(),
+          order_id: z.string(),
+          response: z
+            .string()
+            .min(2, {
+              message: t('validation.minCharacters'),
+            })
+            .max(3000, {
+              message: t('validation.maxCharacters'),
+            }),
+        }),
+      )
+      .optional(),
+  });
+
   const form = useForm<z.infer<typeof orderCreationFormSchema>>({
     resolver: zodResolver(orderCreationFormSchema),
     defaultValues: {
@@ -67,18 +92,19 @@ const OrderCreationForm = () => {
       title: '',
       description: '',
       fileIds: [],
+      brief_responses: undefined,
     },
+    mode: 'onChange',
   });
 
   const createOrdersMutations = useMutation({
     mutationFn: async (values: z.infer<typeof orderCreationFormSchema>) => {
-      await createOrders([
-        {
-          ...values,
-          fileIds: uploadedFileIds,
-          propietary_organization_id: '',
-        },
-      ]);
+      const newOrder = {
+        ...values,
+        fileIds: uploadedFileIds,
+      };
+      delete newOrder.brief_responses;
+      await createOrders([newOrder as OrderInsert], values.brief_responses);
     },
     onError: () => {
       toast('Error', {
@@ -92,7 +118,7 @@ const OrderCreationForm = () => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof orderCreationFormSchema>) => {
+  const onSubmit = (values: z.infer<typeof orderCreationFormSchema>) => {
     createOrdersMutations.mutate(values);
   };
 
@@ -122,24 +148,34 @@ const OrderCreationForm = () => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
-              <FormControl>
-                <ThemedTextarea
-                  {...field}
-                  placeholder={t('creation.form.descriptionPlaceholder')}
-                  rows={5}
-                  className="focus-visible:ring-none"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        {!briefs.length && (
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
+                <FormControl>
+                  <ThemedTextarea
+                    {...field}
+                    placeholder={t('creation.form.descriptionPlaceholder')}
+                    rows={5}
+                    className="focus-visible:ring-none"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        {/* Brief form fields */}
+
+        <OrderBriefs
+          briefs={briefs}
+          form={form}
+          orderId={form.getValues('uuid')}
         />
+
         <UploadFileComponent
           bucketName="orders"
           uuid={uniqueId}

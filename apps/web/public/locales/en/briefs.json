@@ -13,5 +13,9 @@
     "cancel": "Cancel",
     "updateBrief": "Update Brief",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "validation": {
+       "minCharacters" : "Minimum 2 characters required",
+       "maxCharacters" : "Maximum 3000 characters allowed"
+    }
 }

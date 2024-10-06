@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react';
 
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, X } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
@@ -59,6 +59,7 @@ export function InviteClientMembersDialogContainer({
   const [pending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation('clients');
+  const queryClient = useQueryClient();
 
   const inviteClientMembers = useMutation({
     mutationFn: async ({
@@ -69,6 +70,7 @@ export function InviteClientMembersDialogContainer({
       clientOrganizationId: string;
     }) => await addClientMember({ email, clientOrganizationId }),
   });
+
   const onSubmit = ({ invitations }: { invitations: InviteModel[] }) => {
     // Use transition to avoid blocking the UI thread
 
@@ -79,8 +81,12 @@ export function InviteClientMembersDialogContainer({
           inviteClientMembers.mutateAsync({ email, clientOrganizationId }),
         ),
       )
-        .then(() => {
+        .then(async () => {
           toast.success(t('clients:organizations.members.invite.success'));
+
+          await queryClient.invalidateQueries({
+            queryKey: ['clientsWithOrganizations'],
+          });
         })
         .catch(() =>
           toast.error(t('clients:organizations.members.invite.error')),

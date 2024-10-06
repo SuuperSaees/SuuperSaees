@@ -46,6 +46,7 @@ function MemberSection({
             search,
             setSearch,
           }}
+          queryKey='clientsWithOrganizations'
         />
       )}
     </>
