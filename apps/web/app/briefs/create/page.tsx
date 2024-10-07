@@ -34,7 +34,7 @@ async function CreateBriefsPage() {
         </h2>
       </div>
 
-      <BriefCreationForm propietary_organization_id={propietary_organization_id}/>
+      <BriefCreationForm propietaryOrganizationId={propietary_organization_id}/>
     </PageBody>
   );
 }

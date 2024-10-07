@@ -72,8 +72,6 @@ export const addFormFieldsToBriefs = async (
   formFields: FormField.Insert[],
   briefId: Brief.Type['id'],
 ) => {
-  console.log('formFields', formFields);
-  console.log('briefId', briefId);
   try {
     const formFieldData = await createFormFields(formFields);
     const briefFormFields = formFieldData?.map((field) => ({

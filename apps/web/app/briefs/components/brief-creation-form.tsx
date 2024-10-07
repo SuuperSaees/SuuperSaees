@@ -18,11 +18,11 @@ import { Button } from '@kit/ui/button';
 
 
 type CreateBriefDialogProps = {
-  propietary_organization_id: string;
+  propietaryOrganizationId: string;
 };
 
 const BriefCreationForm = ({
-  propietary_organization_id,
+  propietaryOrganizationId,
 }: CreateBriefDialogProps) => {
   const { t } = useTranslation('briefs');
 
@@ -93,7 +93,7 @@ const BriefCreationForm = ({
     mutationFn: async (values: z.infer<typeof briefCreationFormSchema>) => {
       const newBrief = {
         name: values.name,
-        propietary_organization_id: propietary_organization_id,
+        propietary_organization_id: propietaryOrganizationId,
       };
       const briefId = await createBrief(newBrief);
       if (briefId?.id) {
@@ -140,7 +140,6 @@ const BriefCreationForm = ({
           )}
         />
 
-        {/* Inputs dinámicos para preguntas */}
         {questions.map((question, index) => (
           <FormItem key={index} className="space-y-4">
             <div className="flex flex-col gap-2">
