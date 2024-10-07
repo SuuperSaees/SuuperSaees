@@ -29,7 +29,7 @@ async function BriefsPage() {
     .eq('primary_owner_user_id', userData.user!.id);
 
   const filteredAccounts = accountsData?.filter(
-    (account) => account.id !== userData.user!.id,
+    (account) => account.id === userData.user!.id,
   );
 
   const accountIds = filteredAccounts?.map((account) => account.id) ?? [];
