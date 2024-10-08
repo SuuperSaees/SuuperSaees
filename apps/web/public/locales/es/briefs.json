@@ -1,8 +1,8 @@
 {
-    "briefTitle": "Brief",
+    "briefTitle": "Resumen",
     "name": "Nombre",
-    "services": "Servicios conectados",
-    "createdAt": "Creado en",
+    "services": "Servicios Conectados",
+    "createdAt": "Creado El",
     "actions": "Acciones",
     "createBrief": "Crear brief",
     "briefNameLabel": "Ingrese el nombre del brief",
@@ -11,7 +11,7 @@
     "deleteDescription": "¿Estás seguro de que deseas eliminar este brief?",
     "delete": "Eliminar",
     "cancel": "Cancelar",
-    "updateBrief": "Actualizar brief",
+    "updateBrief": "Actualizar Resumen",
     "previous": "Anterior",
     "next": "Siguiente",
     "validation": {
@@ -42,3 +42,4 @@
     "placeholder": "Agregar nueva opción"
   }
 }
+
