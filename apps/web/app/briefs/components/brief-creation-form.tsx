@@ -2,29 +2,29 @@
 
 import React, { useEffect } from 'react';
 
+
+
+import { useRouter } from 'next/navigation';
+
+
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
-import {
-  addFormFieldsToBriefs,
-  createBrief,
-} from 'node_modules/@kit/team-accounts/src/server/actions/briefs/create/create-briefs';
+import { addFormFieldsToBriefs, createBrief } from 'node_modules/@kit/team-accounts/src/server/actions/briefs/create/create-briefs';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+
+
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
+
+
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { isContentType, isInputType } from '../utils/type-guards';
@@ -82,6 +82,8 @@ const BriefCreationForm = ({
   propietaryOrganizationId,
 }: CreateBriefDialogProps) => {
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
+  const router = useRouter();
+
   const {
     addFormField,
     removeFormField,
@@ -123,7 +125,7 @@ const BriefCreationForm = ({
     onSuccess: () => {
       // Show success toast notification and redirect on successful brief creation
       toast('Success', { description: 'The brief has been created.' });
-      window.location.href = '/briefs'; // Redirect to briefs page
+      router.push('/briefs'); // Redirect to briefs page
     },
   });
 
