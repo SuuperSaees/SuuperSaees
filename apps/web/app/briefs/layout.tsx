@@ -1,6 +1,6 @@
 import { use } from 'react';
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
@@ -19,9 +19,16 @@ import { HomeSidebar } from '~/home/(user)/_components/home-sidebar';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+import Widgets from './components/widgets';
+import { BriefsProvider } from './contexts/briefs-context';
+
 function BriefsLayout({ children }: React.PropsWithChildren) {
   const workspace = use(loadUserWorkspace());
   const style = getLayoutStyle();
+
+  const pathname = headers().get('x-current-path');
+
+  const showWidgets = pathname !== '/briefs'; // Logic to hide Widgets for /orders only
 
   return (
     <Page style={style}>
@@ -41,7 +48,13 @@ function BriefsLayout({ children }: React.PropsWithChildren) {
       </PageMobileNavigation>
 
       <UserWorkspaceContextProvider value={workspace}>
-        {children}
+        <BriefsProvider>
+          <div className="flex gap-8">
+            {children}
+
+            {showWidgets && <Widgets />}
+          </div>
+        </BriefsProvider>
       </UserWorkspaceContextProvider>
     </Page>
   );

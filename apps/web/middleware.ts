@@ -56,7 +56,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-
+  // set current path
+  response.headers.set('x-current-path', request.nextUrl.pathname);
 
   // set a unique request ID for each request
   // this helps us log and trace requests
@@ -82,6 +83,7 @@ export async function middleware(request: NextRequest) {
   // which is useful for knowing the action path in server actions
   if (isServerAction(request)) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
+    
   }
 
   // if no pattern handler returned a response,
