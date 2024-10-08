@@ -1,35 +1,44 @@
 {
-    "briefTitle": "Brief",
-    "name": "Name",
-    "services": "Connected Services",
-    "createdAt": "Created At",
-    "actions": "Actions",
-    "createBrief": "Create Brief",
-    "briefNameLabel": "Enter the brief name",
-    "briefName": "Name",
-    "deleteBrief": "Delete Brief",
-    "deleteDescription": "Are you sure you want to delete this brief?",
-    "delete": "Delete",
-    "cancel": "Cancel",
-    "updateBrief": "Update Brief",
-    "previous": "Previous",
-    "next": "Next",
-    "validation": {
-       "minCharacters" : "Minimum 2 characters required",
-       "maxCharacters" : "Maximum 3000 characters allowed"
-    },
-    "creation": {
-    "title": "Create brief",
-    "form": {
-        "addQuestion": "Add question",
-        "submit": "Create brief",
-        "titleLabel": "Brief name",
-        "titlePlaceholder": "Enter the name of your brief",
-        "questionLabel": "Question",
-        "labelPlaceholder": "Put your question here *",
-        "descriptionPlaceholder": "Add a description",
-        "placeholderPlaceholder": "Add a placeholder"
-
-    }
+  "briefTitle": "Brief",
+  "name": "Name",
+  "services": "Connected Services",
+  "createdAt": "Created At",
+  "actions": "Actions",
+  "createBrief": "Create Brief",
+  "briefNameLabel": "Enter the brief name",
+  "briefName": "Name",
+  "deleteBrief": "Delete Brief",
+  "deleteDescription": "Are you sure you want to delete this brief?",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "updateBrief": "Update Brief",
+  "previous": "Previous",
+  "next": "Next",
+  "validation": {
+     "minCharacters" : "Minimum 2 characters required",
+     "maxCharacters" : "Maximum 3000 characters allowed"
+  },
+  "creation": {
+  "title": "Create brief",
+  "form": {
+      "addQuestion": "Add question",
+      "submit": "Create brief",
+      "titleLabel": "Brief name",
+      "titlePlaceholder": "Enter the name of your brief",
+      "questionLabel": "Question",
+      "labelPlaceholder": "Put your question here *",
+      "descriptionPlaceholder": "Add a description",
+      "placeholderPlaceholder": "Add a placeholder"
+  }
+  },
+  "singleChoice": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option"
+  },
+  "multipleChoice": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option"
   }
 }
