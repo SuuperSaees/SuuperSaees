@@ -1,13 +1,20 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse, URLPattern } from 'next/server';
 
+
+
 import { CsrfError, createCsrfProtect } from '@edge-csrf/nextjs';
+
+
 
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
+
+
 import appConfig from '~/config/app.config';
 import pathsConfig from '~/config/paths.config';
+
 
 const CSRF_SECRET_COOKIE = 'csrfSecret';
 const NEXT_ACTION_HEADER = 'next-action';
@@ -56,7 +63,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow cors for all requests
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*', // TODO: change to the specific origin with the right domain. IMPORTANT: this should be changed to the DINAMIC domain.
+        'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  }
 
+  response.headers.set('Access-Control-Allow-Origin', '*'); // TODO: change to the specific origin with the right domain. IMPORTANT: this should be changed to the DINAMIC domain.
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // set a unique request ID for each request
   // this helps us log and trace requests
