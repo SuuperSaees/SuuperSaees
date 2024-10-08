@@ -1,6 +1,7 @@
 'use client';
 
 import { useOrganizationSettings } from "node_modules/@kit/accounts/src/context/organization-settings-context";
+import { getTextColorBasedOnBackground } from "~/utils/generate-colors";
 interface RadioOptionProps {
   value: string;
   selectedOption: string | null;
@@ -8,17 +9,9 @@ interface RadioOptionProps {
   label: string;
 }
 
-function getTextColorBasedOnBackground(backgroundColor: string) {
-  const color = backgroundColor.replace('#', '');
-  const r = parseInt(color.substring(0, 2), 16);
-  const g = parseInt(color.substring(2, 4), 16);
-  const b = parseInt(color.substring(4, 6), 16);
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return luminance > 186 ? 'black' : 'white';
-}
+
 
 export function RadioOption({ value, selectedOption, onChange, label }: RadioOptionProps) {
-  // const { theme_color } = useOrganizationSettings();
   const { theme_color } = useOrganizationSettings();
   const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
 
