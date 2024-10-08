@@ -7,7 +7,8 @@
       "~/config/*": ["./config/*"],
       "~/components/*": ["./components/*"],
       "~/lib/*": ["./lib/*"],
-      "~/multitenancy/*": ["../../packages/multitenancy/*"]
+      "~/multitenancy/*": ["../../packages/multitenancy/*"],
+      "~/team-accounts/*": ["../../packages/features/team-accounts/*"]
     },
     "plugins": [
       {
