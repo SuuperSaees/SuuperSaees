@@ -29,7 +29,16 @@
         "labelPlaceholder": "Put your question here *",
         "descriptionPlaceholder": "Add a description",
         "placeholderPlaceholder": "Add a placeholder"
-
     }
+  },
+  "singleChoice": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option"
+  },
+  "multipleChoice": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option"
   }
 }
