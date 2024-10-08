@@ -6,13 +6,13 @@ interface Item {
     label: string,
 }
 
-interface CheckboxListProps {
+interface BriefFormMultipleChoiceProps {
     items: Item[],
     title: string,
     description: string,
 }
 
-export function CheckboxList({ items, title, description }: CheckboxListProps) {
+export function BriefFormMultipleChoice({ items, title, description }: BriefFormMultipleChoiceProps) {
   const { t } = useTranslation('briefs');
     return (
       <div>
