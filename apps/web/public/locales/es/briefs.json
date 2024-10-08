@@ -4,11 +4,11 @@
     "services": "Servicios Conectados",
     "createdAt": "Creado El",
     "actions": "Acciones",
-    "createBrief": "Crear Resumen",
-    "briefNameLabel": "Ingrese el nombre del resumen",
+    "createBrief": "Crear brief",
+    "briefNameLabel": "Ingrese el nombre del brief",
     "briefName": "Nombre",
-    "deleteBrief": "Eliminar Resumen",
-    "deleteDescription": "¿Estás seguro de que deseas eliminar este resumen?",
+    "deleteBrief": "Eliminar brief",
+    "deleteDescription": "¿Estás seguro de que deseas eliminar este brief?",
     "delete": "Eliminar",
     "cancel": "Cancelar",
     "updateBrief": "Actualizar Resumen",
@@ -19,12 +19,12 @@
        "maxCharacters": "Se permiten un máximo de 3000 caracteres"
     },
     "creation": {
-    "title": "Crear resumen",
+    "title": "Crear brief",
     "form": {
         "addQuestion": "Agregar pregunta",
         "submit": "Crear resumen",
-        "titleLabel": "Nombre del resumen",
-        "titlePlaceholder": "Ingrese el nombre de su resumen",
+        "titleLabel": "Nombre del brief",
+        "titlePlaceholder": "Ingrese el nombre de su brief",
         "questionLabel": "Pregunta",
         "labelPlaceholder": "Escribe tu pregunta aquí *",
         "descriptionPlaceholder": "Agregar una descripción",
@@ -35,5 +35,11 @@
     "title": "Título",
     "description": "Descripción",
     "placeholder": "Agregar nueva opción"
+  },
+  "multipleChoice": {
+    "title": "Título",
+    "description": "Descripción",
+    "placeholder": "Agregar nueva opción"
   }
 }
+

@@ -35,5 +35,10 @@
     "title": "Title",
     "description": "Description",
     "placeholder": "Add new option"
+  },
+  "multipleChoice": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option"
   }
 }
