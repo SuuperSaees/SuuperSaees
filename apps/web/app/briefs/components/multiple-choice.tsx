@@ -97,7 +97,7 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                           e.target.value,
                         )
                       }
-                      style={{ width: `${Math.max(question.label.length, t('multipleChoice.description').length) + 1}ch` }}
+                      style={{ width: `${Math.max(question.description!.length, t('multipleChoice.description').length) + 1}ch` }}
                       placeholder={t('multipleChoice.description')}
                       className="border-none focus:outline-none text-gray-600 text-sm font-medium"
                     />
@@ -124,7 +124,7 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                     }}
                   />
                 </div>
-                <label className="text-gray-700 text-[16px] font-medium leading-[1.5]">
+                <label className="text-gray-700 text-base font-medium leading-6">
                   {option.label}
                 </label>
               </div>

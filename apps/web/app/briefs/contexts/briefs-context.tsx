@@ -30,8 +30,8 @@ export type ComponentProps = {
   form: UseFormReturn<BriefCreationForm>;
   handleQuestionChange: (
     index: number,
-    field: 'label' | 'description' | 'placeholder',
-    value: string,
+    field: 'label' | 'description' | 'placeholder' | `options.${number}.selected`,
+    value: string | boolean,
   ) => void;
   handleRemoveQuestion: (index: number) => void;
 };

@@ -34,7 +34,7 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
   handleRemoveQuestion,
 }) => {
   const { t } = useTranslation('briefs');
-  const [selectedOption, setSelectedOption] = useState<string | null>(question.options![0]!.value ?? null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(question.options?.[0]?.value ?? null);
 
   const handleOptionChange = (value: string, optIndex: number) => {
     setSelectedOption(value);
@@ -101,7 +101,7 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
                         handleQuestionChange(index, 'description', e.target.value)
                       }
                       placeholder={t('singleChoice.description')}
-                      style={{ width: `${Math.max(question.description!.length, t('singleChoice.description').length) + 1}ch` }}
+                      style={{ width: `${Math.max(question?.description?.length ?? 5, t('singleChoice.description').length) + 1}ch` }}
                       className="border-none focus:outline-none text-gray-600 text-sm font-medium"
                     />
                   </FormControl>
