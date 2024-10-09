@@ -2,6 +2,7 @@ import { ALargeSmall, AlignCenter, Image, Play } from 'lucide-react';
 import { ComponentProps } from '../contexts/briefs-context';
 import { Content, ContentTypes } from '../contexts/briefs-context';
 import FormTitleComponent from '../components/title-content';
+import FormRichTextComponent from '../components/rich-text-content';
 
 type ContentKey = ContentTypes;
 type ContentValue = Content;
@@ -40,12 +41,21 @@ export const generateContent = (
         name: 'Rich text',
         icon: <AlignCenter className="h-8 w-8" />,
         action: () => action('rich-text'), // Action passed dynamically,
-        component: <></>, // Custom component
         content: {
           label: 'Rich text',
           placeholder: '',
           description: '',
+          type: 'rich-text',
         },
+        component: (props: ComponentProps) => (
+          <FormRichTextComponent
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+          />
+        ),
       },
     ],
     [
