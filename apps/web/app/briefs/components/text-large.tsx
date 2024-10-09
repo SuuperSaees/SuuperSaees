@@ -13,7 +13,7 @@ import {
 import { Textarea } from '@kit/ui/textarea';
 import { cn } from '@kit/ui/utils';
 
-import { FormField as FormFieldType } from '../contexts/briefs-context';
+import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
 
 export interface FormFieldTextLargeProps {
@@ -117,10 +117,11 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                 <FormItem>
                   <FormControl>
                     <Textarea
-                    className={cn(
-                      "focus-visible:ring-0 focus-visible:ring-offset-0",
-                    )}
-                      placeholder={t('textLarge.descriptionHint')}
+                      className={cn(
+                        'focus-visible:ring-0 focus-visible:ring-offset-0',
+                      )}
+
+                      placeholder={question.placeholder ?? ''}
                       rows={5}
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         handleQuestionChange(
