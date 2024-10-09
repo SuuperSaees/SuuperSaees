@@ -1,4 +1,4 @@
-import { ContentTypes, InputTypes } from '../contexts/briefs-context';
+import { ContentTypes, InputTypes } from '../types/brief.types';
 
 export const isInputType = (type: string): type is InputTypes => {
   return [

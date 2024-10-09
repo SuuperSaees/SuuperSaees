@@ -4,6 +4,8 @@ import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+
+
 import {
   FormControl,
   FormField,
@@ -12,11 +14,10 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 
-import {
-  BriefsProvider,
-  FormField as FormFieldType,
-} from '../contexts/briefs-context';
+import { BriefsProvider } from '../contexts/briefs-context';
+import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
+
 
 export interface FormFieldShortTextProps {
   index: number;
