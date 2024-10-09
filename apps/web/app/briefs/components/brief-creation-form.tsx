@@ -151,7 +151,7 @@ const BriefCreationForm = ({
       | 'description'
       | 'placeholder'
       | `options.${number}.selected`,
-    value: string | boolean,
+    value: string | boolean | Date,
   ) => {
     // Update question in context if it exists
     if (formFields[index]) {

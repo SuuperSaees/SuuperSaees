@@ -41,6 +41,9 @@
     "description": "Description",
     "placeholder": "Add new option"
   },
+  "datePicker": {
+    "selectTitle": "Select date"
+  },
   "dropdown": {
     "title": "Title",
     "description": "Description",

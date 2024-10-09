@@ -13,6 +13,7 @@ import { ComponentProps, Input, InputTypes } from '../contexts/briefs-context';
 import FormFieldMultipleChoice from '../components/multiple-choice';
 import FormFieldSingleChoice from '../components/single-choice';
 import FormFieldDropdown from '../components/dropdown';
+import FormFieldDatePicker from '../components/date-picker';
 
 // Import your custom components
 
@@ -186,7 +187,7 @@ export const generateInputs = (
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
             />
-        ), // Custom component
+        ), 
       },
     ],
     [
@@ -201,7 +202,15 @@ export const generateInputs = (
           description: 'Description of the date',
           type: 'date',
         },
-        component: <></>, // Custom component
+        component: (props: ComponentProps) => (
+          <FormFieldDatePicker
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+            />
+        ), // Custom component
       },
     ],
   ]);
