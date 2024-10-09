@@ -46,6 +46,11 @@
     "description": "Descripción",
     "placeholder": "Agregar nueva opción"
   },
+  "textLarge" : {
+    "title":"Título",
+    "description":"Descripción",
+    "descriptionHint":"Escribe una descripción..."
+  },
   "datePicker": {
     "selectTitle": "Seleccionar fecha"
   },
