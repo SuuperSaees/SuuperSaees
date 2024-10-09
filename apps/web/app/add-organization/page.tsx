@@ -30,17 +30,11 @@ export default async function UserAddOrganizationPage() {
     }
   } catch (error) {
     // Handle the error by redirecting to a specific page
-    return (
-      <>
-        <PageBody className={''}>
-          <CreateOrganization />
-        </PageBody>
-      </>
-    );
+    console.error('Error getting organization:', error);
   }
   return (
     <>
-      <PageBody className={''}>
+      <PageBody>
         <CreateOrganization />
       </PageBody>
     </>

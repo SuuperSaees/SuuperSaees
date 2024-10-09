@@ -32,14 +32,17 @@ import {
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 
-import { createOrganizationServer } from '../../../../../packages/features/team-accounts/src/server/actions/organizations/create/create-organization-server';
-import { createSubscription } from '../../../../../packages/features/team-accounts/src/server/actions/subscriptions/create/create-subscription'
+import { createOrganizationServer } from '~/team-accounts/src/server/actions/organizations/create/create-organization-server';
+import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
+import { createIngress } from '~/multitenancy/aws-cluster-ingress/src/actions/create';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   organization_name: z.string().min(2).max(50),
 });
 
 const CreateOrganization = () => {
+  const router = useRouter();
   const { t } = useTranslation('organizations');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,7 +62,13 @@ const CreateOrganization = () => {
       toast.success('Success', {
         description: 'Organization created successfully',
       });
-      await createSubscription()
+      await createSubscription();
+      const cleanedDomain = values.organization_name
+      .trim()
+      .replace(/[^a-zA-Z0-9-]/g, '');
+      const data = await createIngress({ domain: cleanedDomain, isCustom: false},);
+      // redirect to the new organization with the new domain
+      router.push(`https://${data.domain}/orders`);
     } catch (error) {
       toast.error('Error', {
         description: 'Error creating organization',
