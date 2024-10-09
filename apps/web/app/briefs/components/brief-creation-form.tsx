@@ -2,35 +2,34 @@
 
 import React, { useEffect } from 'react';
 
-
-
 import { useRouter } from 'next/navigation';
-
-
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
-import { addFormFieldsToBriefs, createBrief } from 'node_modules/@kit/team-accounts/src/server/actions/briefs/create/create-briefs';
+import {
+  addFormFieldsToBriefs,
+  createBrief,
+} from 'node_modules/@kit/team-accounts/src/server/actions/briefs/create/create-briefs';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-
-
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
-
-
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { isContentType, isInputType } from '../utils/type-guards';
-import { FormFieldShortText } from './form-field-short-text';
-import FormFieldMultipleChoice from './multiple-choice';
-import FormFieldSingleChoice from './single-choice';
 
 type CreateBriefDialogProps = {
   propietaryOrganizationId: string;
@@ -147,7 +146,11 @@ const BriefCreationForm = ({
   // Handle changes to a specific question field
   const handleQuestionChange = (
     index: number,
-    field: 'label' | 'description' | 'placeholder' | `options.${number}.selected`,
+    field:
+      | 'label'
+      | 'description'
+      | 'placeholder'
+      | `options.${number}.selected`,
     value: string | boolean,
   ) => {
     // Update question in context if it exists
@@ -203,69 +206,32 @@ const BriefCreationForm = ({
         />
 
         {formFields.map((question, index) => {
-          if (question.type === 'text-short') {
-            return(
-              <FormFieldShortText
-                key={'q' + index}
-                index={index}
-                question={question}
-                form={form}
-                handleQuestionChange={handleQuestionChange}
-                handleRemoveQuestion={handleRemoveQuestion}
-              />
-            );
-            
-            // const inputEntry = isInputType(question.type)
-            //   ? inputsMap.get(question.type)
-            //   : isContentType(question.type)
-            //     ? contentMap.get(question.type)
-            //     : undefined;
-            // const FormFieldComponent = inputEntry?.component;
-
-            // if (!FormFieldComponent) {
-            //   return null; // If no component found, skip rendering
-            // }
-
-            // // Check if FormFieldComponent is a function
-            // if (typeof FormFieldComponent === 'function') {
-            //   return (
-            //     <FormFieldComponent
-            //       key={'q' + index}
-            //       index={index}
-            //       question={question}
-            //       form={form}
-            //       handleQuestionChange={handleQuestionChange}
-            //       handleRemoveQuestion={handleRemoveQuestion}
-            //     />
-            //   );
-            // }
-
-            // // If it's a JSX element, render it directly
-            // return <div key={'q' + index}>{FormFieldComponent}</div>;
-          } else if (question.type === 'multiple_choice') {
-            return (
-              <FormFieldMultipleChoice
-                key={'q' + index}
-                index={index}
-                question={question}
-                form={form}
-                handleQuestionChange={handleQuestionChange}
-                handleRemoveQuestion={handleRemoveQuestion}
-              />
-            )
-          } else if (question.type === 'select') {
-            return (
-              <FormFieldSingleChoice
-                key={'q' + index}
-                index={index}
-                question={question}
-                form={form}
-                handleQuestionChange={handleQuestionChange}
-                handleRemoveQuestion={handleRemoveQuestion}
-              />
-            )
-          } 
-
+          if (question.type) {
+            const inputEntry = isInputType(question.type)
+              ? inputsMap.get(question.type)
+              : isContentType(question.type)
+                ? contentMap.get(question.type)
+                : undefined;
+            const FormFieldComponent = inputEntry?.component;
+            if (!FormFieldComponent) {
+              return null; // If no component found, skip rendering
+            }
+            // Check if FormFieldComponent is a function
+            if (typeof FormFieldComponent === 'function') {
+              return (
+                <FormFieldComponent
+                  key={'q' + index}
+                  index={index}
+                  question={question}
+                  form={form}
+                  handleQuestionChange={handleQuestionChange}
+                  handleRemoveQuestion={handleRemoveQuestion}
+                />
+              );
+            }
+            // If it's a JSX element, render it directly
+            return <div key={'q' + index}>{FormFieldComponent}</div>;
+          }
           return null;
         })}
         {/* Add Question Button */}

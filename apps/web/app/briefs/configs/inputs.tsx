@@ -10,6 +10,9 @@ import {
 
 import { FormFieldShortText } from '../components/form-field-short-text';
 import { ComponentProps, Input, InputTypes } from '../contexts/briefs-context';
+import FormFieldMultipleChoice from '../components/multiple-choice';
+import FormFieldSingleChoice from '../components/single-choice';
+import FormFieldDropdown from '../components/dropdown';
 
 // Import your custom components
 
@@ -101,7 +104,15 @@ export const generateInputs = (
             },
           ],
         },
-        component: <></>, // Custom component
+        component: (props: ComponentProps) => (
+          <FormFieldMultipleChoice
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+            />
+        ), // Custom component
       },
     ],
     [
@@ -130,7 +141,15 @@ export const generateInputs = (
             },
           ],
         },
-        component: <></>, // Custom component
+        component: (props: ComponentProps) => (
+          <FormFieldSingleChoice
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+            />
+        ), // Custom component
       },
     ],
     [
@@ -159,7 +178,15 @@ export const generateInputs = (
             },
           ],
         },
-        component: <></>, // Custom component
+        component: (props: ComponentProps) => (
+          <FormFieldDropdown
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+            />
+        ), // Custom component
       },
     ],
     [
