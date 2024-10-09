@@ -8,20 +8,18 @@ import {
   Upload,
 } from 'lucide-react';
 
+import FormFieldDatePicker from '../components/date-picker';
+import FormFieldDropdown from '../components/dropdown';
 import { FormFieldShortText } from '../components/form-field-short-text';
-import { ComponentProps, Input, InputTypes } from '../contexts/briefs-context';
 import FormFieldMultipleChoice from '../components/multiple-choice';
 import FormFieldSingleChoice from '../components/single-choice';
-import FormFieldDropdown from '../components/dropdown';
-import FormFieldDatePicker from '../components/date-picker';
+import { ComponentProps, Input, InputTypes } from '../types/brief.types';
 import TextLarge from '../components/text-large';
 
 // Import your custom components
-
 type InputKey = InputTypes;
 type InputValue = Input;
 type InputMap = Map<InputKey, InputValue>;
-
 // Generator function to create the inputs Map
 export const generateInputs = (
   action: (inputName: InputTypes) => void,
@@ -121,7 +119,7 @@ export const generateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
-            />
+          />
         ), // Custom component
       },
     ],
@@ -158,7 +156,7 @@ export const generateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
-            />
+          />
         ), // Custom component
       },
     ],
@@ -195,7 +193,7 @@ export const generateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
-            />
+          />
         ),
       },
     ],
@@ -218,7 +216,7 @@ export const generateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
-            />
+          />
         ), // Custom component
       },
     ],

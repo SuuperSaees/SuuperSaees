@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { RadioOption } from './options';
-import { useTranslation } from 'react-i18next';
-import { UseFormReturn } from 'react-hook-form';
-import { Button } from '@kit/ui/button';
+
 import { X } from 'lucide-react';
+import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
+import { Button } from '@kit/ui/button';
 import {
   FormControl,
   FormField,
@@ -11,8 +12,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-import { FormField as FormFieldType } from '../contexts/briefs-context';
+
+import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
+import { RadioOption } from './options';
 
 export interface FormFieldSingleChoiceProps {
   index: number;
@@ -20,7 +23,11 @@ export interface FormFieldSingleChoiceProps {
   form: UseFormReturn<BriefCreationForm>;
   handleQuestionChange: (
     index: number,
-    field: 'label' | 'description' | 'placeholder' | `options.${number}.selected`,
+    field:
+      | 'label'
+      | 'description'
+      | 'placeholder'
+      | `options.${number}.selected`,
     value: string | boolean,
   ) => void;
   handleRemoveQuestion: (index: number) => void;
@@ -34,11 +41,13 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
   handleRemoveQuestion,
 }) => {
   const { t } = useTranslation('briefs');
-  const [selectedOption, setSelectedOption] = useState<string | null>(question.options?.[0]?.value ?? null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(
+    question.options?.[0]?.value ?? null,
+  );
 
   const handleOptionChange = (value: string, optIndex: number) => {
     setSelectedOption(value);
-    handleQuestionChange(index, `options.${optIndex}.selected`, true); 
+    handleQuestionChange(index, `options.${optIndex}.selected`, true);
   };
 
   return (
@@ -63,7 +72,7 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
               )}
             </div>
 
-            <div className='flex'>
+            <div className="flex">
               <FormField
                 control={form.control}
                 name={`questions.${index}.label`}
@@ -76,18 +85,20 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           handleQuestionChange(index, 'label', e.target.value)
                         }
-                        style={{ width: `${Math.max(question.label.length, t('singleChoice.title').length) + 1}ch` }}
+                        style={{
+                          width: `${Math.max(question.label.length, t('singleChoice.title').length) + 1}ch`,
+                        }}
                         placeholder={t('singleChoice.title')}
-                        className="border-none focus:outline-none text-gray-600 text-sm font-medium"
+                        className="border-none text-sm font-medium text-gray-600 focus:outline-none"
                       />
                     </FormControl>
                     <FormMessage>{fieldState.error?.message}</FormMessage>
                   </FormItem>
                 )}
               />
-              <span className='font-bold'>*</span>
+              <span className="font-bold">*</span>
             </div>
-            
+
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
@@ -98,11 +109,17 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
                       {...field}
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        handleQuestionChange(index, 'description', e.target.value)
+                        handleQuestionChange(
+                          index,
+                          'description',
+                          e.target.value,
+                        )
                       }
                       placeholder={t('singleChoice.description')}
-                      style={{ width: `${Math.max(question?.description?.length ?? 5, t('singleChoice.description').length) + 1}ch` }}
-                      className="border-none focus:outline-none text-gray-600 text-sm font-medium"
+                      style={{
+                        width: `${Math.max(question?.description?.length ?? 5, t('singleChoice.description').length) + 1}ch`,
+                      }}
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -110,16 +127,21 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
               )}
             />
 
-            <div className="flex flex-col gap-3 mt-4">
-              {question.options?.map((option: { value: string; label: string }, optIndex: number) => (
-                <RadioOption
-                  key={option.value}
-                  value={option.value}
-                  selectedOption={selectedOption}
-                  onChange={() => handleOptionChange(option.value, optIndex)}
-                  label={option.label}
-                />
-              ))}
+            <div className="mt-4 flex flex-col gap-3">
+              {question.options?.map(
+                (
+                  option: { value: string; label: string },
+                  optIndex: number,
+                ) => (
+                  <RadioOption
+                    key={option.value}
+                    value={option.value}
+                    selectedOption={selectedOption}
+                    onChange={() => handleOptionChange(option.value, optIndex)}
+                    label={option.label}
+                  />
+                ),
+              )}
             </div>
           </div>
         </FormItem>

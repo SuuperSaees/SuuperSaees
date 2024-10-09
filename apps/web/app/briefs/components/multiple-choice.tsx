@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
-import { ThemedCheckbox } from '../../../../../packages/features/accounts/src/components/ui/checkbox-themed-with-settings';
-import { useTranslation } from 'react-i18next';
-import { UseFormReturn } from 'react-hook-form';
-import { Button } from '@kit/ui/button';
+
 import { X } from 'lucide-react';
+import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
+import { Button } from '@kit/ui/button';
 import {
   FormControl,
   FormField,
@@ -13,7 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-import { FormField as FormFieldType, Option } from '../contexts/briefs-context';
+
+import { ThemedCheckbox } from '../../../../../packages/features/accounts/src/components/ui/checkbox-themed-with-settings';
+import { FormField as FormFieldType, Option } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
 
 export interface FormFieldMultipleChoiceProps {
@@ -22,7 +25,11 @@ export interface FormFieldMultipleChoiceProps {
   form: UseFormReturn<BriefCreationForm>;
   handleQuestionChange: (
     index: number,
-    field: 'label' | 'description' | 'placeholder' | `options.${number}.selected`,
+    field:
+      | 'label'
+      | 'description'
+      | 'placeholder'
+      | `options.${number}.selected`,
     value: string | boolean,
   ) => void;
   handleRemoveQuestion: (index: number) => void;
@@ -71,9 +78,11 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(index, 'label', e.target.value)
                       }
-                      style={{ width: `${Math.max(question.label.length, t('multipleChoice.title').length) + 1}ch` }}
+                      style={{
+                        width: `${Math.max(question.label.length, t('multipleChoice.title').length) + 1}ch`,
+                      }}
                       placeholder={t('multipleChoice.title')}
-                      className="border-none focus:outline-none text-gray-600 text-sm font-medium"
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -97,9 +106,11 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                           e.target.value,
                         )
                       }
-                      style={{ width: `${Math.max(question.description!.length, t('multipleChoice.description').length) + 1}ch` }}
+                      style={{
+                        width: `${Math.max(question.description!.length, t('multipleChoice.description').length) + 1}ch`,
+                      }}
                       placeholder={t('multipleChoice.description')}
-                      className="border-none focus:outline-none text-gray-600 text-sm font-medium"
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -119,12 +130,12 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                       handleQuestionChange(
                         index,
                         `options.${optIndex}.selected`,
-                        checked
+                        checked,
                       );
                     }}
                   />
                 </div>
-                <label className="text-gray-700 text-base font-medium leading-6">
+                <label className="text-base font-medium leading-6 text-gray-700">
                   {option.label}
                 </label>
               </div>
