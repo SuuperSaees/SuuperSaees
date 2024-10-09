@@ -1,6 +1,7 @@
 import { ALargeSmall, AlignCenter, Image, Play } from 'lucide-react';
-
+import { ComponentProps } from '../contexts/briefs-context';
 import { Content, ContentTypes } from '../contexts/briefs-context';
+import FormTitleComponent from '../components/title-content';
 
 type ContentKey = ContentTypes;
 type ContentValue = Content;
@@ -20,8 +21,17 @@ export const generateContent = (
           label: 'Title',
           placeholder: '',
           description: '',
+          type: 'h1',
         },
-        component: <></>, // Custom component
+        component: (props: ComponentProps) => (
+          <FormTitleComponent
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+          />
+        ),
       },
     ],
     [
