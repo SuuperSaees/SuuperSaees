@@ -29,6 +29,11 @@
         "labelPlaceholder": "Escribe tu pregunta aquí *",
         "descriptionPlaceholder": "Agregar una descripción",
         "placeholderPlaceholder": "Agregar un marcador de posición"
+    },
+    "widgets": {
+      "edit": {
+        "title": "Editar widget"
+      }
     }
   },
   "singleChoice": {
@@ -45,6 +50,15 @@
     "title":"Título",
     "description":"Descripción",
     "descriptionHint":"Escribe una descripción..."
+  },
+  "datePicker": {
+    "selectTitle": "Seleccionar fecha"
+  },
+  "dropdown": {
+    "title": "Título",
+    "description": "Descripción",
+    "placeholder": "Agregar nueva opción",
+    "selectAnOption": "Seleccione una opción"
   }
 }
 

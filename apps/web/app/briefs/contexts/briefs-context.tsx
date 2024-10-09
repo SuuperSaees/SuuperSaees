@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState } from 'react';
 
+import { Copy, Edit, Trash } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 
 import { Brief } from '~/lib/brief.types';
@@ -21,6 +22,7 @@ export type FormField = Omit<
   Brief.Relationships.FormField,
   'created_at' | 'id'
 > & {
+  id: number;
   options?: Option[];
 };
 
@@ -31,7 +33,7 @@ export type ComponentProps = {
   handleQuestionChange: (
     index: number,
     field: 'label' | 'description' | 'placeholder' | `options.${number}.selected`,
-    value: string | boolean,
+    value: string | boolean | Date,
   ) => void;
   handleRemoveQuestion: (index: number) => void;
 };
@@ -80,9 +82,18 @@ interface BriefsContext {
   formFields: FormField[];
   inputsMap: Map<InputTypes, Input>;
   contentMap: Map<ContentTypes, Content>;
+  isEditing: boolean;
+  currentFormField: FormField | undefined;
   addFormField: (formFieldType: FormField['type']) => FormField;
   removeFormField: (index: number) => void;
-  updateFormField: (index: number, updatedFormField: FormField) => FormField;
+  updateFormField: (
+    index: number,
+    updatedFormField: FormField,
+  ) => FormField | undefined;
+  duplicateFormField: (id: number) => void;
+  editFormField: (id: number) => void;
+  stopEditing: () => void;
+  startEditing: () => void;
 }
 
 export const BriefsContext = createContext<BriefsContext | undefined>(
@@ -91,6 +102,12 @@ export const BriefsContext = createContext<BriefsContext | undefined>(
 
 export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   const [formFields, setFormFields] = useState<FormField[]>([]);
+
+  const [currentFormField, setCurrentFormField] = useState<
+    FormField | undefined
+  >(undefined);
+
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const inputsMap = generateInputs((inputName: InputTypes) => {
     addFormField(inputName);
@@ -106,7 +123,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   // title, enriched text, image, video
   const content = Array.from(contentMap.values());
 
-  // Add a new form field
+  // Add a new form field using index as id (number)
   const addFormField = (formFieldType: FormField['type']) => {
     let newFormField: FormField | undefined;
 
@@ -116,12 +133,22 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
       newFormField = contentMap.get(formFieldType)?.content;
     }
 
+    const nextIndexId = formFields.length; // Use the current length as the number-based id
+
     if (newFormField) {
+      newFormField = {
+        ...newFormField,
+        id: nextIndexId, // Assign index as a number ID
+      };
       setFormFields([...formFields, newFormField]);
     }
 
+    setCurrentFormField(newFormField);
+    setIsEditing(true);
+
     return (
       newFormField ?? {
+        id: nextIndexId, // Ensure even empty form fields have a number id
         type: formFieldType,
         label: '',
         placeholder: '',
@@ -130,18 +157,51 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
-  // Remove a form field
-  const removeFormField = (index: number) => {
-    const updatedFormFields = formFields.filter((_, i) => i !== index);
+  // Remove a form field by number id
+  const removeFormField = (id: number) => {
+    const updatedFormFields = formFields.filter((_, i) => i !== id);
     setFormFields(updatedFormFields);
   };
 
-  // Update a form field
-  const updateFormField = (index: number, updatedFormField: FormField) => {
-    const updatedFormFields = [...formFields];
-    updatedFormFields[index] = updatedFormField;
-    setFormFields(updatedFormFields);
-    return updatedFormField;
+  // Update a form field by number id
+  const updateFormField = (id: number, updatedFormField: FormField) => {
+    if (id >= 0 && id < formFields.length) {
+      const updatedFormFields = [...formFields];
+      updatedFormFields[id] = updatedFormField;
+      setFormFields(updatedFormFields);
+      return updatedFormField;
+    }
+  };
+
+  // Stop editing
+  const stopEditing = () => {
+    setIsEditing(false);
+  };
+
+  // Start editing
+  const startEditing = () => {
+    setIsEditing(true);
+  };
+
+  // Edit form field
+  const editFormField = (id: number) => {
+    setCurrentFormField(formFields[id]);
+    startEditing();
+  };
+
+  // Duplicate form field
+  const duplicateFormField = (id: number) => {
+    const formField = formFields[id];
+    if (!formField) return;
+
+    // Clone the selected form field
+    const duplicatedFormField = {
+      ...formField,
+      id: formFields.length, // Assign a new unique id based on the current length
+    };
+
+    // Add the duplicated form field to the formFields array
+    setFormFields([...formFields, duplicatedFormField]);
   };
 
   const value = {
@@ -150,9 +210,15 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
     formFields,
     inputsMap,
     contentMap,
+    isEditing,
+    currentFormField,
     addFormField,
     removeFormField,
     updateFormField,
+    editFormField,
+    duplicateFormField,
+    stopEditing,
+    startEditing,
   };
 
   return (
@@ -167,3 +233,72 @@ export const useBriefsContext = () => {
   }
   return context;
 };
+
+const Options = ({
+  formFieldId,
+  className,
+  ...rest
+}: {
+  formFieldId: number;
+  className?: string;
+  [key: string]: unknown;
+}) => {
+  const { duplicateFormField, removeFormField, editFormField } =
+    useBriefsContext();
+
+  const editItem = () => {
+    editFormField(formFieldId);
+    // You can add any additional logic here related to editing
+  };
+
+  const duplicateItem = () => {
+    duplicateFormField(formFieldId);
+  };
+
+  const removeItem = () => {
+    removeFormField(formFieldId);
+  };
+
+  const options = new Map([
+    [
+      'duplicate',
+      {
+        label: 'Duplicate',
+        action: duplicateItem,
+        icon: <Copy className="h-5 w-5" />,
+      },
+    ],
+    [
+      'edit',
+      {
+        label: 'Edit',
+        action: editItem,
+        icon: <Edit className="h-5 w-5" />,
+      },
+    ],
+    [
+      'remove',
+      {
+        label: 'Remove',
+        action: removeItem,
+        icon: <Trash className="h-5 w-5" />,
+      },
+    ],
+  ]);
+
+  return (
+    <div className={`flex gap-2 ${className}`} {...rest}>
+      {Array.from(options.values()).map((option, index) => (
+        <button
+          key={index}
+          onClick={option.action}
+          className="text-gray-600 hover:text-gray-800"
+        >
+          {option.icon}
+        </button>
+      ))}
+    </div>
+  );
+};
+
+BriefsProvider.Options = Options;
