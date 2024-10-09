@@ -99,7 +99,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                         )
                       }
                       style={{
-                        width: `${Math.max(question.label.length, t('textLarge.description').length) + 1}ch`,
+                        width: `${Math.max(question.description!.length, t('textLarge.description').length) + 1}ch`,
                       }}
                       placeholder={t('textLarge.description')}
                       className="border-none text-sm font-medium text-gray-600 focus:outline-none"
