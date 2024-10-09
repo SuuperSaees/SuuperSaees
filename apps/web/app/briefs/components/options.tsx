@@ -42,7 +42,7 @@ export function RadioOption({ value, selectedOption, onChange, label }: RadioOpt
         )}
         
       </div>
-      <span className="text-gray-700 font-medium text-sm font-inter">{label}</span>
+      <span className="text-gray-700 text-[16px] font-medium leading-[1.5]">{label}</span>
     </label>
   );
 }

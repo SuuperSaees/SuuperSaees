@@ -28,6 +28,9 @@ import { Spinner } from '@kit/ui/spinner';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { isContentType, isInputType } from '../utils/type-guards';
+import { FormFieldShortText } from './form-field-short-text';
+import FormFieldMultipleChoice from './multiple-choice';
+import FormFieldSingleChoice from './single-choice';
 
 type CreateBriefDialogProps = {
   propietaryOrganizationId: string;
@@ -144,8 +147,8 @@ const BriefCreationForm = ({
   // Handle changes to a specific question field
   const handleQuestionChange = (
     index: number,
-    field: 'label' | 'description' | 'placeholder',
-    value: string,
+    field: 'label' | 'description' | 'placeholder' | `options.${number}.selected`,
+    value: string | boolean,
   ) => {
     // Update question in context if it exists
     if (formFields[index]) {
@@ -200,35 +203,68 @@ const BriefCreationForm = ({
         />
 
         {formFields.map((question, index) => {
-          if (question.type) {
-            const inputEntry = isInputType(question.type)
-              ? inputsMap.get(question.type)
-              : isContentType(question.type)
-                ? contentMap.get(question.type)
-                : undefined;
-            const FormFieldComponent = inputEntry?.component;
+          if (question.type === 'text-short') {
+            return(
+              <FormFieldShortText
+                key={'q' + index}
+                index={index}
+                question={question}
+                form={form}
+                handleQuestionChange={handleQuestionChange}
+                handleRemoveQuestion={handleRemoveQuestion}
+              />
+            );
+            
+            // const inputEntry = isInputType(question.type)
+            //   ? inputsMap.get(question.type)
+            //   : isContentType(question.type)
+            //     ? contentMap.get(question.type)
+            //     : undefined;
+            // const FormFieldComponent = inputEntry?.component;
 
-            if (!FormFieldComponent) {
-              return null; // If no component found, skip rendering
-            }
+            // if (!FormFieldComponent) {
+            //   return null; // If no component found, skip rendering
+            // }
 
-            // Check if FormFieldComponent is a function
-            if (typeof FormFieldComponent === 'function') {
-              return (
-                <FormFieldComponent
-                  key={'q' + index}
-                  index={index}
-                  question={question}
-                  form={form}
-                  handleQuestionChange={handleQuestionChange}
-                  handleRemoveQuestion={handleRemoveQuestion}
-                />
-              );
-            }
+            // // Check if FormFieldComponent is a function
+            // if (typeof FormFieldComponent === 'function') {
+            //   return (
+            //     <FormFieldComponent
+            //       key={'q' + index}
+            //       index={index}
+            //       question={question}
+            //       form={form}
+            //       handleQuestionChange={handleQuestionChange}
+            //       handleRemoveQuestion={handleRemoveQuestion}
+            //     />
+            //   );
+            // }
 
-            // If it's a JSX element, render it directly
-            return <div key={'q' + index}>{FormFieldComponent}</div>;
-          }
+            // // If it's a JSX element, render it directly
+            // return <div key={'q' + index}>{FormFieldComponent}</div>;
+          } else if (question.type === 'multiple_choice') {
+            return (
+              <FormFieldMultipleChoice
+                key={'q' + index}
+                index={index}
+                question={question}
+                form={form}
+                handleQuestionChange={handleQuestionChange}
+                handleRemoveQuestion={handleRemoveQuestion}
+              />
+            )
+          } else if (question.type === 'select') {
+            return (
+              <FormFieldSingleChoice
+                key={'q' + index}
+                index={index}
+                question={question}
+                form={form}
+                handleQuestionChange={handleQuestionChange}
+                handleRemoveQuestion={handleRemoveQuestion}
+              />
+            )
+          } 
 
           return null;
         })}
