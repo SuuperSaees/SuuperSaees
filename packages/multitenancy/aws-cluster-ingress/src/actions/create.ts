@@ -23,6 +23,5 @@ export async function createIngress({
     throw new Error('Failed to create ingress');
   }
   const data = await response.json();
-  console.log(data);
   return data;
 }
