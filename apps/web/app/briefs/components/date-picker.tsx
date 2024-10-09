@@ -42,7 +42,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date ?? null);
     if (date) {
-      handleQuestionChange(index, `options.0.selected`, date); // Actualiza con la fecha seleccionada
+      handleQuestionChange(index, `options.0.selected`, date);
     }
   };
 
