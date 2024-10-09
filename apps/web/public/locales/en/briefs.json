@@ -40,5 +40,11 @@
     "title": "Title",
     "description": "Description",
     "placeholder": "Add new option"
+  },
+  "dropdown": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option",
+    "selectAnOption": "Select an option"
   }
 }
