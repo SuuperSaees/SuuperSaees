@@ -31,7 +31,7 @@ export type ComponentProps = {
   handleQuestionChange: (
     index: number,
     field: 'label' | 'description' | 'placeholder' | `options.${number}.selected`,
-    value: string | boolean,
+    value: string | boolean | Date,
   ) => void;
   handleRemoveQuestion: (index: number) => void;
 };
