@@ -63,7 +63,10 @@ const CreateOrganization = () => {
         description: 'Organization created successfully',
       });
       await createSubscription();
-      const data = await createIngress({ domain: values.organization_name });
+      const cleanedDomain = values.organization_name
+      .trim()
+      .replace(/[^a-zA-Z0-9-]/g, '');
+      const data = await createIngress({ domain: cleanedDomain, isCustom: false},);
       // redirect to the new organization with the new domain
       router.push(`https://${data.domain}/orders`);
     } catch (error) {

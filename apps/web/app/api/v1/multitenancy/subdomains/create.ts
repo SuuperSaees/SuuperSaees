@@ -1,8 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
+
+
 import { Subdomain } from 'lib/subdomain.types';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { createIngress } from '~/multitenancy/aws-cluster-ingress/src';
 
@@ -31,13 +37,17 @@ export const createSubdomain = async (
   try {
     // Step 2: Upsert the subdomain in the Kubernetes cluster.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const ingress = await createIngress(subdomainDataBody);
+    const ingress = await createIngress({
+      domain: subdomainDataBody.domain,
+      namespace: subdomainDataBody.namespace,
+      service_name: subdomainDataBody.service_name
+    });
 
     // Step 3: Upsert the subdomain in the database.
     const { data: subdomainData, error: subdomainError } = await client
       .from('subdomains')
       .select('id')
-      .eq('domain', ingress.domain)
+      .eq('domain', subdomainDataBody.isCustom ? ingress.domain : `${ingress.domain}.suuper.co`)
       .single();
 
     if (subdomainError) {
@@ -50,7 +60,7 @@ export const createSubdomain = async (
         namespace: ingress.namespace,
         provider: 'c4c7us',
         provider_id: ingress.id,
-        domain: ingress.domain,
+        domain: subdomainDataBody.isCustom ? ingress.domain : `${ingress.domain}.suuper.co`,
         service_name: ingress.service_name,
         status: ingress.status,
       };
@@ -71,7 +81,7 @@ export const createSubdomain = async (
         provider_id: ingress.id,
         service_name: ingress.service_name,
         status: ingress.status,
-        domain: ingress.domain,
+        domain: subdomainDataBody.isCustom ? ingress.domain : `${ingress.domain}.suuper.co`,
         deleted_on: null,
       };
       const { error: updateSubdomainError } = await client

@@ -1,18 +1,59 @@
 {
-    "briefTitle": "Brief",
+    "briefTitle": "Resumen",
     "name": "Nombre",
-    "services": "Servicios conectados",
-    "createdAt": "Creado en",
+    "services": "Servicios Conectados",
+    "createdAt": "Creado El",
     "actions": "Acciones",
     "createBrief": "Crear brief",
-    "briefNameLabel": "Ingresa el nombre del brief",
+    "briefNameLabel": "Ingrese el nombre del brief",
     "briefName": "Nombre",
     "deleteBrief": "Eliminar brief",
-    "deleteDescription": "¿Está seguro de que desea eliminar este brief?",
+    "deleteDescription": "¿Estás seguro de que deseas eliminar este brief?",
     "delete": "Eliminar",
     "cancel": "Cancelar",
-    "updateBrief": "Actualizar brief",
+    "updateBrief": "Actualizar Resumen",
     "previous": "Anterior",
-    "next": "Siguiente"
+    "next": "Siguiente",
+    "validation": {
+       "minCharacters": "Se requieren al menos 2 caracteres",
+       "maxCharacters": "Se permiten un máximo de 3000 caracteres"
+    },
+    "creation": {
+    "title": "Crear brief",
+    "form": {
+        "addQuestion": "Agregar pregunta",
+        "submit": "Crear resumen",
+        "titleLabel": "Nombre del brief",
+        "titlePlaceholder": "Ingrese el nombre de su brief",
+        "questionLabel": "Pregunta",
+        "labelPlaceholder": "Escribe tu pregunta aquí *",
+        "descriptionPlaceholder": "Agregar una descripción",
+        "placeholderPlaceholder": "Agregar un marcador de posición"
+    },
+    "widgets": {
+      "edit": {
+        "title": "Editar widget"
+      }
+    }
+  },
+  "singleChoice": {
+    "title": "Título",
+    "description": "Descripción",
+    "placeholder": "Agregar nueva opción"
+  },
+  "multipleChoice": {
+    "title": "Título",
+    "description": "Descripción",
+    "placeholder": "Agregar nueva opción"
+  },
+  "datePicker": {
+    "selectTitle": "Seleccionar fecha"
+  },
+  "dropdown": {
+    "title": "Título",
+    "description": "Descripción",
+    "placeholder": "Agregar nueva opción",
+    "selectAnOption": "Seleccione una opción"
+  }
 }
-  
+

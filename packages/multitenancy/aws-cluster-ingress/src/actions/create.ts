@@ -1,13 +1,16 @@
 export async function createIngress({
   domain,
+  isCustom,
 }: {
   domain: string;
+  isCustom: boolean;
 }): Promise<any> {
   const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL;
   const newDomainCreate = {
     domain: `${domain}.suuper.co`,
     namespace: 'prod',
     service_name: 'ms-suuper-prod',
+    isCustom,
   };
   const response = await fetch(`${BASE_URL}/api/v1/multitenancy/subdomains`, {
     method: 'POST',

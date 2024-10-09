@@ -5,16 +5,11 @@ import { NextResponse, URLPattern } from 'next/server';
 
 import { CsrfError, createCsrfProtect } from '@edge-csrf/nextjs';
 
-
-
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
-
-
 import appConfig from '~/config/app.config';
 import pathsConfig from '~/config/paths.config';
-
 
 const CSRF_SECRET_COOKIE = 'csrfSecret';
 const NEXT_ACTION_HEADER = 'next-action';
@@ -24,12 +19,12 @@ const CLIENT_SECRET = 'suuper-client-secret';
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|images|locales|assets|api).*)', 
-    '/api/v1/:path*'
+    '/((?!_next/static|_next/image|images|locales|assets|api).*)',
+    '/api/v1/:path*',
   ],
 };
 
-// function to verify the basic auth credentials to api use. 
+// function to verify the basic auth credentials to api use.
 function isValidBasicAuth(request: NextRequest): boolean {
   const authorizationHeader = request.headers.get('authorization');
 
@@ -63,20 +58,64 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow cors for all requests
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*', // TODO: change to the specific origin with the right domain. IMPORTANT: this should be changed to the DINAMIC domain.
-        'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    });
-  }
+  const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
-  response.headers.set('Access-Control-Allow-Origin', '*'); // TODO: change to the specific origin with the right domain. IMPORTANT: this should be changed to the DINAMIC domain.
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (IS_PRODUCTION) {
+    const supabase = createMiddlewareClient(request, response);
+    const userData = await getUser(request, response);
+    const userId = userData.data?.user?.id ?? '';
+    const { data: accountData, error: accountError } = await supabase
+      .from('accounts')
+      .select('organization_id')
+      .eq('id', userId)
+      .single();
+
+    if (accountError) {
+      throw new Error(`Unauthorized: ${accountError.message}`);
+    }
+
+    const { data: domainsData, error: domainsError } = await supabase
+      .from('organization_subdomains')
+      .select('subdomains(domain)')
+      .eq('organization_id', accountData.organization_id ?? '')
+      .single();
+
+    if (domainsError) {
+      throw new Error(`Error fetching domains: ${domainsError.message}`);
+    }
+
+    const origin = request.headers.get('Origin');
+
+    if (origin === `https://${domainsData.subdomains?.domain}`) {
+      response.headers.set('Access-Control-Allow-Origin', origin);
+    } else {
+      throw new Error('Unauthorized: Invalid Origin');
+    }
+    // Allow cors for all requests
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        headers: {
+          'Access-Control-Allow-Origin':
+            origin === `https://${domainsData.subdomains?.domain}`
+              ? origin
+              : '',
+          'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+      });
+    }
+
+    response.headers.set(
+      'Access-Control-Allow-Methods',
+      'GET, POST, DELETE, OPTIONS',
+    );
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization',
+    );
+  }
+  // set current path
+  response.headers.set('x-current-path', request.nextUrl.pathname);
 
   // set a unique request ID for each request
   // this helps us log and trace requests
@@ -187,8 +226,10 @@ function getPatterns() {
     {
       // partially removing accesss to '/', since landing page is on construction.
       pattern: new URLPattern({ pathname: '/' }),
-      handler:  (req: NextRequest) => {
-        return NextResponse.redirect(new URL(pathsConfig.app.home, req.nextUrl.origin).href);
+      handler: (req: NextRequest) => {
+        return NextResponse.redirect(
+          new URL(pathsConfig.app.home, req.nextUrl.origin).href,
+        );
       },
     },
     {
@@ -250,11 +291,10 @@ function getPatterns() {
             new URL(pathsConfig.auth.verifyMfa, origin).href,
           );
         }
-
       },
     },
     {
-      pattern: new URLPattern({pathname: '/api/v1'})
+      pattern: new URLPattern({ pathname: '/api/v1' }),
     },
   ];
 }

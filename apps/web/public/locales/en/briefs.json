@@ -29,7 +29,30 @@
         "labelPlaceholder": "Put your question here *",
         "descriptionPlaceholder": "Add a description",
         "placeholderPlaceholder": "Add a placeholder"
-
+    },
+    "widgets": {
+      "edit": {
+        "title": "Edit widget"
+      }
     }
+  },
+  "singleChoice": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option"
+  },
+  "multipleChoice": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option"
+  },
+  "datePicker": {
+    "selectTitle": "Select date"
+  },
+  "dropdown": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option",
+    "selectAnOption": "Select an option"
   }
 }

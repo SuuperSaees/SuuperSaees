@@ -1,5 +1,6 @@
 import { Database } from './database.types';
 
+
 export namespace Subdomain {
   export type Type = Database['public']['Tables']['subdomains']['Row'];
   export type Insert = Database['public']['Tables']['subdomains']['Insert'];
@@ -10,6 +11,7 @@ export namespace Subdomain {
       domain: string;
       namespace: string;
       service_name: string;
+      isCustom?: boolean;
     };
   }
 }
