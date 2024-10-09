@@ -12,7 +12,8 @@ import { FormFieldShortText } from '../components/form-field-short-text';
 import { ComponentProps, Input, InputTypes } from '../contexts/briefs-context';
 import FormFieldMultipleChoice from '../components/multiple-choice';
 import FormFieldSingleChoice from '../components/single-choice';
-import FormFieldDropdown from '../components/dropdown';
+// import FormFieldDropdown from '../components/dropdown';
+import TextLarge from '../components/text-large';
 
 // Import your custom components
 
@@ -60,7 +61,15 @@ export const generateInputs = (
           description: 'This is a hint text for help user',
           type: 'text-large',
         },
-        component: <></>, // Custom component
+        component: (props: ComponentProps) => (
+          <TextLarge
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+          />
+        ), // Custom component
       },
     ],
     [
@@ -178,7 +187,7 @@ export const generateInputs = (
             },
           ],
         },
-        component: (props: ComponentProps) => (
+        component: <></>/*(props: ComponentProps) => (
           <FormFieldDropdown
             index={props.index}
             question={props.question}
@@ -186,7 +195,7 @@ export const generateInputs = (
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
             />
-        ), // Custom component
+        ), // Custom component*/
       },
     ],
     [
