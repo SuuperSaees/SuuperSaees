@@ -2,29 +2,31 @@
 
 import React, { useEffect } from 'react';
 
-
-
 import { useRouter } from 'next/navigation';
-
-
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
-import { addFormFieldsToBriefs, createBrief } from 'node_modules/@kit/team-accounts/src/server/actions/briefs/create/create-briefs';
+import {
+  addFormFieldsToBriefs,
+  createBrief,
+} from 'node_modules/@kit/team-accounts/src/server/actions/briefs/create/create-briefs';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-
-
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
-
-
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { isContentType, isInputType } from '../utils/type-guards';
@@ -144,8 +146,12 @@ const BriefCreationForm = ({
   // Handle changes to a specific question field
   const handleQuestionChange = (
     index: number,
-    field: 'label' | 'description' | 'placeholder',
-    value: string,
+    field:
+      | 'label'
+      | 'description'
+      | 'placeholder'
+      | `options.${number}.selected`,
+    value: string | boolean,
   ) => {
     // Update question in context if it exists
     if (formFields[index]) {
@@ -207,11 +213,9 @@ const BriefCreationForm = ({
                 ? contentMap.get(question.type)
                 : undefined;
             const FormFieldComponent = inputEntry?.component;
-
             if (!FormFieldComponent) {
               return null; // If no component found, skip rendering
             }
-
             // Check if FormFieldComponent is a function
             if (typeof FormFieldComponent === 'function') {
               return (
@@ -225,11 +229,9 @@ const BriefCreationForm = ({
                 />
               );
             }
-
             // If it's a JSX element, render it directly
             return <div key={'q' + index}>{FormFieldComponent}</div>;
           }
-
           return null;
         })}
         {/* Add Question Button */}
