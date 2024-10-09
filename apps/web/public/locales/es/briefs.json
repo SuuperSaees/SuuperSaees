@@ -29,6 +29,11 @@
         "labelPlaceholder": "Escribe tu pregunta aquí *",
         "descriptionPlaceholder": "Agregar una descripción",
         "placeholderPlaceholder": "Agregar un marcador de posición"
+    },
+    "widgets": {
+      "edit": {
+        "title": "Editar widget"
+      }
     }
   },
   "singleChoice": {

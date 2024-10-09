@@ -29,6 +29,11 @@
         "labelPlaceholder": "Put your question here *",
         "descriptionPlaceholder": "Add a description",
         "placeholderPlaceholder": "Add a placeholder"
+    },
+    "widgets": {
+      "edit": {
+        "title": "Edit widget"
+      }
     }
   },
   "singleChoice": {
