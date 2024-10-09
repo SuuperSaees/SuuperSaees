@@ -35,3 +35,30 @@ sequenceDiagram
 ## Routes
 
 ## Secularization
+
+## Multitenancy- Subdomains
+
+```mermaid 
+graph TD;
+    A[Modelado de Datos] --> B[Tabla subdomains]
+    B --> C[Tabla organization_subdomains]
+    B --> D[Función handle_deleted_on]
+    D --> E[Trigger check_deleted_on]
+    
+    subgraph Multitenancy
+        F[Gestión de Tenants]
+        G[Gestión de Subdominios]
+        H[Configuración de DNS]
+        I[Gestión de Usuarios]
+        J[Monitoreo y Reportes]
+    end
+    
+    F --> K[Crear Tenant]
+    F --> L[Listar Tenants]
+    G --> M[Crear Subdominio]
+    G --> N[Eliminar Subdominio]
+    H --> O[Actualizar Configuración DNS]
+    I --> P[Agregar Usuario a Tenant]
+    J --> Q[Estadísticas de Uso]
+    J --> R[Logs de Actividad]
+```

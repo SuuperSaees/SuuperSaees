@@ -1,0 +1,1 @@
+alter table "public"."subdomains" add column "domain" text not null;

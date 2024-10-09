@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { UseFormReturn } from 'react-hook-form';
-import { Button } from '@kit/ui/button';
+
+import { CalendarIcon } from '@radix-ui/react-icons';
+import { format } from 'date-fns';
 import { X } from 'lucide-react';
+import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
+import { Button } from '@kit/ui/button';
+import { Calendar } from '@kit/ui/calendar';
 import {
   FormControl,
   FormField,
@@ -10,12 +15,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-import { FormField as FormFieldType } from '../contexts/briefs-context';
-import { BriefCreationForm } from './brief-creation-form';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
-import { Calendar } from '@kit/ui/calendar';
-import { CalendarIcon } from '@radix-ui/react-icons';
-import { format } from 'date-fns';
+
+import { FormField as FormFieldType } from '../types/brief.types';
+import { BriefCreationForm } from './brief-creation-form';
 
 export interface FormFieldDatePickerProps {
   index: number;
@@ -23,7 +26,11 @@ export interface FormFieldDatePickerProps {
   form: UseFormReturn<BriefCreationForm>;
   handleQuestionChange: (
     index: number,
-    field: 'label' | 'description' | 'placeholder' | `options.${number}.selected`,
+    field:
+      | 'label'
+      | 'description'
+      | 'placeholder'
+      | `options.${number}.selected`,
     value: string | boolean | Date,
   ) => void;
   handleRemoveQuestion: (index: number) => void;
@@ -81,9 +88,11 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           handleQuestionChange(index, 'label', e.target.value)
                         }
-                        style={{ width: `${Math.max(question.label.length, t('singleChoice.title').length) + 1}ch` }}
+                        style={{
+                          width: `${Math.max(question.label.length, t('singleChoice.title').length) + 1}ch`,
+                        }}
                         placeholder={t('singleChoice.title')}
-                        className="border-none focus:outline-none text-gray-600 text-sm font-medium"
+                        className="border-none text-sm font-medium text-gray-600 focus:outline-none"
                       />
                     </FormControl>
                     <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -103,11 +112,17 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                       {...field}
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        handleQuestionChange(index, 'description', e.target.value)
+                        handleQuestionChange(
+                          index,
+                          'description',
+                          e.target.value,
+                        )
                       }
                       placeholder={t('singleChoice.description')}
-                      style={{ width: `${Math.max(question?.description?.length ?? 5, t('singleChoice.description').length) + 1}ch` }}
-                      className="border-none focus:outline-none text-gray-600 text-sm font-medium"
+                      style={{
+                        width: `${Math.max(question?.description?.length ?? 5, t('singleChoice.description').length) + 1}ch`,
+                      }}
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -115,7 +130,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
               )}
             />
 
-            <div className=" w-full">
+            <div className="w-full">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -123,7 +138,11 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                     className={`w-full justify-start text-left font-normal ${!selectedDate ? 'text-muted-foreground' : ''}`}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, 'PPP') : <span>{t('datePicker.selectTitle')}</span>}
+                    {selectedDate ? (
+                      format(selectedDate, 'PPP')
+                    ) : (
+                      <span>{t('datePicker.selectTitle')}</span>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
