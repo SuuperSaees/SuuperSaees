@@ -40,6 +40,12 @@
     "title": "Título",
     "description": "Descripción",
     "placeholder": "Agregar nueva opción"
+  },
+  "dropdown": {
+    "title": "Título",
+    "description": "Descripción",
+    "placeholder": "Agregar nueva opción",
+    "selectAnOption": "Seleccione una opción"
   }
 }
 
