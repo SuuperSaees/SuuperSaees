@@ -31,6 +31,7 @@ import { isContentType, isInputType } from '../utils/type-guards';
 import { FormFieldShortText } from './form-field-short-text';
 import FormFieldMultipleChoice from './multiple-choice';
 import FormFieldSingleChoice from './single-choice';
+import TextLarge from './text-large';
 
 type CreateBriefDialogProps = {
   propietaryOrganizationId: string;
@@ -179,7 +180,6 @@ const BriefCreationForm = ({
   useEffect(() => {
     form.setValue('questions', formFields); // Ensure form state stays in sync with context
   }, [formFields, form]); // Re-run effect when formFields or form change
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
@@ -242,6 +242,18 @@ const BriefCreationForm = ({
 
             // // If it's a JSX element, render it directly
             // return <div key={'q' + index}>{FormFieldComponent}</div>;
+          }
+          else if(question.type === 'text-large'){
+            return(
+              <TextLarge 
+                key={'q' + index}
+                index={index}
+                question={question}
+                form={form}
+                handleQuestionChange={handleQuestionChange}
+                handleRemoveQuestion={handleRemoveQuestion}
+              />
+            )
           } else if (question.type === 'multiple_choice') {
             return (
               <FormFieldMultipleChoice
