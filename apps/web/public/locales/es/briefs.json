@@ -46,6 +46,11 @@
     "description": "Descripción",
     "placeholder": "Agregar nueva opción"
   },
+  "textLarge" : {
+    "title":"Título",
+    "description":"Descripción",
+    "descriptionHint":"Escribe una descripción..."
+  },
   "datePicker": {
     "selectTitle": "Seleccionar fecha"
   },
@@ -54,6 +59,20 @@
     "description": "Descripción",
     "placeholder": "Agregar nueva opción",
     "selectAnOption": "Seleccione una opción"
+  },
+  "title": {
+    "title": "Título",
+    "placeholder": "Introduzca el título"
+  },
+  "richText": {
+    "title": "Texto enriquecido",
+    "placeholder": "Introduzca el texto enriquecido"
+  },
+  "uploadFiles" : {
+    "title" : "Título",
+    "description" : "Descripción",
+    "placeholder": "Haz clic o arrastra para subir un archivo",
+    "fileTypes": "SVG, PNG, JPG o GIF (max. 800x400px)"
   }
 }
 

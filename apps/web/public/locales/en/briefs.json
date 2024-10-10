@@ -46,6 +46,11 @@
     "description": "Description",
     "placeholder": "Add new option"
   },
+  "textLarge" : {
+    "title":"Title",
+    "description":"Description",
+    "descriptionHint":"Enter a description..."
+  },
   "datePicker": {
     "selectTitle": "Select date"
   },
@@ -54,5 +59,19 @@
     "description": "Description",
     "placeholder": "Add new option",
     "selectAnOption": "Select an option"
+  },
+  "title": {
+    "title": "Title",
+    "placeholder": "Enter the title"
+  },
+  "richText": {
+    "title": "Rich text",
+    "placeholder": "Enter the rich text"
+  },
+  "uploadFiles" : {
+    "title" : "Title",
+    "description" : "Description",
+    "placeholder": "Click here or drag a file to upload",
+    "fileTypes": "SVG, PNG, JPG or GIF (max. 800x400px)"
   }
 }

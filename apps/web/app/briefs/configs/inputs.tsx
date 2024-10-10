@@ -14,6 +14,8 @@ import { FormFieldShortText } from '../components/form-field-short-text';
 import FormFieldMultipleChoice from '../components/multiple-choice';
 import FormFieldSingleChoice from '../components/single-choice';
 import { ComponentProps, Input, InputTypes } from '../types/brief.types';
+import TextLarge from '../components/text-large';
+import UploadFiles from '../components/upload-files';
 
 // Import your custom components
 type InputKey = InputTypes;
@@ -59,7 +61,15 @@ export const generateInputs = (
           description: 'This is a hint text for help user',
           type: 'text-large',
         },
-        component: <></>, // Custom component
+        component: (props: ComponentProps) => (
+          <TextLarge
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+          />
+        ), // Custom component
       },
     ],
     [
@@ -74,7 +84,15 @@ export const generateInputs = (
           description: 'Description of the file upload',
           type: 'file',
         },
-        component: <></>, // Custom component
+        component: (props: ComponentProps) => (
+          <UploadFiles
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+          />
+        ), // Custom component
       },
     ],
     [

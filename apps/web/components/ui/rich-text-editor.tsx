@@ -31,7 +31,6 @@ import {
 } from 'lucide-react';
 
 import { Switch } from '@kit/ui/switch';
-import { useActivityContext } from '../../app/orders/[id]/context/activity-context';
 import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
 import { Trans } from '@kit/ui/trans';
@@ -143,6 +142,8 @@ interface RichTextEditorProps {
   onChange?: (richText: string) => void;
   uploadFileIsExternal?: boolean;
   toggleExternalUpload?: () => void;
+  userRole: string;
+  hideSubmitButton?: boolean;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
 function extractImageUrls(text: string) {
@@ -154,8 +155,11 @@ function extractImageUrls(text: string) {
 const RichTextEditor = ({
   content,
   onComplete,
+  onChange,
   uploadFileIsExternal,
   toggleExternalUpload,
+  userRole,
+  hideSubmitButton = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
   const cleanupImages = () => {
@@ -297,6 +301,9 @@ const RichTextEditor = ({
       const text = editor.getText();
       const imagesInText = extractImageUrls(text);
       imagesInText && debounceHandleImageUrl(editor)(text);
+      if (onChange){
+        onChange(editor.getHTML()); 
+      }
     },
   });
   const sendContent = useCallback(() => {
@@ -310,12 +317,15 @@ const RichTextEditor = ({
         }
         editor?.commands.clearContent();
         await onComplete(content);
+        if (onChange){
+          onChange(content); 
+        }
         insertedImages.current = new Set<string>();
       } finally {
         // cleanupImages();
       }
     })();
-  }, [editor, onComplete]);
+   }, [editor, onComplete, onChange]); 
 
   // Implement sanitizer to ensure the content to be nested is secure before sending to server
 
@@ -341,35 +351,43 @@ const RichTextEditor = ({
         />
       </div>
       <div>
-        <Toolbar
-          editor={editor}
-          toggleExternalUpload={toggleExternalUpload}
-          uploadFileIsExternal={uploadFileIsExternal}
-        />
-        <ThemedButton
-          className="absolute bottom-2 right-2 h-fit w-fit rounded-xl p-2 shadow-sm"
-          onClick={sendContent}
-        >
-          <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
-        </ThemedButton>
-      </div>
+          <Toolbar
+            editor={editor}
+            toggleExternalUpload={toggleExternalUpload}
+            uploadFileIsExternal={uploadFileIsExternal}
+            userRole={userRole}
+            onChange={onChange}
+          />
+          {!hideSubmitButton && ( 
+            <ThemedButton
+              className="absolute bottom-2 right-2 h-fit w-fit rounded-xl p-2 shadow-sm"
+              onClick={sendContent}
+            >
+              <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
+            </ThemedButton>
+          )}
+        </div>
     </div>
   );
 };
 interface ToolbarProps {
+  userRole: string;
   editor: Editor | null;
   uploadFileIsExternal?: boolean;
   toggleExternalUpload?: () => void;
+  onChange?: (richText: string) => void;
 }
 
 export const Toolbar = ({
+  userRole,
   editor,
   uploadFileIsExternal,
   toggleExternalUpload,
+  onChange,
 }: ToolbarProps) => {
   const { isInternalMessagingEnabled, handleSwitchChange } =
     useInternalMessaging();
-  const { userRole } = useActivityContext();
+
 
   if (!editor) {
     return null;
@@ -377,6 +395,7 @@ export const Toolbar = ({
   return (
     <div className="flex items-center gap-2 bg-transparent">
       <button
+      type='button'
         className={
           editor.isActive('heading', { level: 1 })
             ? 'text-gray-700'
@@ -388,6 +407,7 @@ export const Toolbar = ({
       </button>
 
       <button
+        type='button'
         className={
           editor.isActive('heading', { level: 2 })
             ? 'text-gray-700'
@@ -399,6 +419,7 @@ export const Toolbar = ({
       </button>
 
       <button
+        type='button'
         onClick={() => editor.chain().focus().toggleBold().run()}
         className={editor.isActive('bold') ? 'text-gray-700' : 'text-gray-400'}
       >
@@ -406,6 +427,7 @@ export const Toolbar = ({
       </button>
 
       <button
+        type='button'
         onClick={() => editor.chain().focus().toggleStrike().run()}
         className={
           editor.isActive('strike') ? 'text-gray-700' : 'text-gray-400'
@@ -415,6 +437,7 @@ export const Toolbar = ({
       </button>
 
       <button
+        type='button'
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className={
           editor.isActive('italic') ? 'text-gray-700' : 'text-gray-400'
@@ -423,6 +446,7 @@ export const Toolbar = ({
         <Italic className="h-4 w-4" />
       </button>
       <button
+        type='button'
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={
           editor.isActive('bulletList') ? 'text-gray-700' : 'text-gray-400'
@@ -432,6 +456,7 @@ export const Toolbar = ({
       </button>
 
       <button
+        type='button'
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         className={
           editor.isActive('orderedList') ? 'text-gray-700' : 'text-gray-400'
@@ -441,6 +466,7 @@ export const Toolbar = ({
       </button>
 
       <button
+        type='button'
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         className={
           editor.isActive('blockquote') ? 'text-gray-700' : 'text-gray-400'
@@ -448,17 +474,20 @@ export const Toolbar = ({
       >
         <Quote className="h-4 w-4" />
       </button>
-
-      <button
-        onClick={
-          uploadFileIsExternal && toggleExternalUpload
-            ? () => toggleExternalUpload()
-            : undefined
-        }
-        className={editor.isActive('image') ? 'text-gray-700' : 'text-gray-400'}
-      >
-        <Image className="h-4 w-4" />
-      </button>
+      
+      {!onChange && (
+        <button
+          type='button'
+          onClick={
+            uploadFileIsExternal && toggleExternalUpload
+              ? () => toggleExternalUpload()
+              : undefined
+          }
+          className={editor.isActive('image') ? 'text-gray-700' : 'text-gray-400'}
+        >
+          <Image className="h-4 w-4" />
+        </button>
+      )}
 
       {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
         userRole,
