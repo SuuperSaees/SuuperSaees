@@ -31,7 +31,6 @@ import {
 } from 'lucide-react';
 
 import { Switch } from '@kit/ui/switch';
-import { useActivityContext } from '../../app/orders/[id]/context/activity-context';
 import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
 import { Trans } from '@kit/ui/trans';
@@ -143,6 +142,7 @@ interface RichTextEditorProps {
   onChange?: (richText: string) => void;
   uploadFileIsExternal?: boolean;
   toggleExternalUpload?: () => void;
+  userRole: string;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
 function extractImageUrls(text: string) {
@@ -156,6 +156,7 @@ const RichTextEditor = ({
   onComplete,
   uploadFileIsExternal,
   toggleExternalUpload,
+  userRole
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
   const cleanupImages = () => {
@@ -345,6 +346,7 @@ const RichTextEditor = ({
           editor={editor}
           toggleExternalUpload={toggleExternalUpload}
           uploadFileIsExternal={uploadFileIsExternal}
+          userRole={userRole}
         />
         <ThemedButton
           className="absolute bottom-2 right-2 h-fit w-fit rounded-xl p-2 shadow-sm"
@@ -357,19 +359,21 @@ const RichTextEditor = ({
   );
 };
 interface ToolbarProps {
+  userRole: string;
   editor: Editor | null;
   uploadFileIsExternal?: boolean;
   toggleExternalUpload?: () => void;
 }
 
 export const Toolbar = ({
+  userRole,
   editor,
   uploadFileIsExternal,
   toggleExternalUpload,
 }: ToolbarProps) => {
   const { isInternalMessagingEnabled, handleSwitchChange } =
     useInternalMessaging();
-  const { userRole } = useActivityContext();
+
 
   if (!editor) {
     return null;

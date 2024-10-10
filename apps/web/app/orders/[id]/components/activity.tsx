@@ -1,11 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+
+
+
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+
+
+
 import UploadFileComponent from '~/components/ui/files-input';
 import RichTextEditor from '~/components/ui/rich-text-editor';
+
+
+
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
+
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -42,7 +52,7 @@ const ActivityPage = () => {
     }
   };
 
-  const { writeMessage } = useActivityContext();
+  const { writeMessage, userRole } = useActivityContext();
 
   const handleOnCompleteMessageSend = async (messageContent: string) => {
     try {
@@ -69,6 +79,7 @@ const ActivityPage = () => {
           onComplete={handleOnCompleteMessageSend}
           uploadFileIsExternal
           toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
+          userRole={userRole}
         />
       </div>
     </div>
