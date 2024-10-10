@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { CloudUpload } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +11,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-import { CloudUpload } from 'lucide-react';
 
 import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
@@ -114,10 +114,10 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
-                    <div className='flex flex-col justify-center items-center border-[1.5px] rounded-xl border-slate-200 py-4'>
-											<div className='border-[1.5px] border-slate-200 rounded-xl p-2 drop-shadow-sm mb-3'>
-												<CloudUpload color="#667085" size={25} />
-											</div>
+                    <div className="flex flex-col items-center justify-center rounded-xl border-[1.5px] border-slate-200 py-4">
+                      <div className="mb-3 rounded-xl border-[1.5px] border-slate-200 p-2 drop-shadow-sm">
+                        <CloudUpload color="#667085" size={25} />
+                      </div>
                       <input
                         {...field}
                         value={question.placeholder ?? ''}
@@ -132,11 +132,11 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                           width: `${Math.max(question.placeholder!.length, t('uploadFiles.placeholder').length) + 1}ch`,
                         }}
                         placeholder={t('uploadFiles.placeholder')}
-                        className="border-none text-sm font-normal text-gray-400 focus:outline-none text-center mb-[0.30rem]"
+                        className="mb-[0.30rem] border-none text-center text-sm font-normal text-gray-400 focus:outline-none"
                       />
-											<p className='text-center border-none text-sm font-normal text-gray-400 focus:outline-none'>
-												{t('uploadFiles.fileTypes')}
-											</p>
+                      <p className="border-none text-center text-sm font-normal text-gray-400 focus:outline-none">
+                        {t('uploadFiles.fileTypes')}
+                      </p>
                     </div>
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
