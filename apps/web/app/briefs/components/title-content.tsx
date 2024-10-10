@@ -5,6 +5,7 @@ import { Button } from '@kit/ui/button';
 import { FormField as FormFieldType } from '../contexts/briefs-context';
 import { BriefCreationForm } from './brief-creation-form';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export interface FormTitleComponentProps {
     index: number;
@@ -21,10 +22,11 @@ export interface FormTitleComponentProps {
     handleQuestionChange,
     handleRemoveQuestion,
   }) => {
+    const { t } = useTranslation('briefs');
     return (
       <FormItem className="space-y-4">
         <div className="flex items-center justify-between">
-          <FormLabel>Title {index + 1}</FormLabel>
+          <FormLabel>{t('title.title')} {index + 1}</FormLabel>
           {index > 0 && (
             <Button
               type="button"
@@ -48,8 +50,13 @@ export interface FormTitleComponentProps {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     handleQuestionChange(index, 'label', e.target.value)
                   }
-                  placeholder="Enter the title"
-                  className="text-gray-500 font-inter text-2xl font-semibold leading-9"
+                  style={{
+                    maxWidth: '100%', 
+                    overflowWrap: 'break-word', 
+                    wordBreak: 'break-word', 
+                  }}
+                  placeholder={t('title.placeholder')}
+                  className="text-gray-500 text-2xl font-semibold leading-9"
                 />
               </FormControl>
               <FormMessage>{fieldState.error?.message}</FormMessage>
