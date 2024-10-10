@@ -1,0 +1,153 @@
+import { X } from 'lucide-react';
+import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
+import { Button } from '@kit/ui/button';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
+import { CloudUpload } from 'lucide-react';
+
+import { FormField as FormFieldType } from '../types/brief.types';
+import { BriefCreationForm } from './brief-creation-form';
+
+export interface UploadFilesProps {
+  index: number;
+  question: FormFieldType;
+  form: UseFormReturn<BriefCreationForm>;
+  handleQuestionChange: (
+    index: number,
+    field: 'label' | 'description' | 'placeholder',
+    value: string,
+  ) => void;
+  handleRemoveQuestion: (index: number) => void;
+}
+
+const UploadFiles: React.FC<UploadFilesProps> = ({
+  index,
+  question,
+  form,
+  handleQuestionChange,
+  handleRemoveQuestion,
+}) => {
+  const { t } = useTranslation('briefs');
+  return (
+    <FormField
+      control={form.control}
+      name={`questions.${index}`}
+      render={() => (
+        <FormItem className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <FormLabel>
+                {t('creation.form.questionLabel')} {index + 1}
+              </FormLabel>
+              {index > 0 && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => handleRemoveQuestion(index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            <FormField
+              control={form.control}
+              name={`questions.${index}.label`}
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormControl>
+                    <input
+                      {...field}
+                      value={question.label}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleQuestionChange(index, 'label', e.target.value)
+                      }
+                      style={{
+                        width: `${Math.max(question.label.length, t('uploadFiles.title').length) + 1}ch`,
+                      }}
+                      placeholder={t('uploadFiles.title')}
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                    />
+                  </FormControl>
+                  <FormMessage>{fieldState.error?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name={`questions.${index}.description`}
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormControl>
+                    <input
+                      {...field}
+                      value={question.description ?? ''}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleQuestionChange(
+                          index,
+                          'description',
+                          e.target.value,
+                        )
+                      }
+                      style={{
+                        width: `${Math.max(question.description!.length, t('uploadFiles.description').length) + 1}ch`,
+                      }}
+                      placeholder={t('uploadFiles.description')}
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                    />
+                  </FormControl>
+                  <FormMessage>{fieldState.error?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`questions.${index}.placeholder`}
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className='flex flex-col justify-center items-center border-[1.5px] rounded-xl border-slate-200 py-4'>
+											<div className='border-[1.5px] border-slate-200 rounded-xl p-2 drop-shadow-sm mb-3'>
+												<CloudUpload color="#667085" size={25} />
+											</div>
+                      <input
+                        {...field}
+                        value={question.placeholder ?? ''}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          handleQuestionChange(
+                            index,
+                            'placeholder',
+                            e.target.value,
+                          )
+                        }
+                        style={{
+                          width: `${Math.max(question.placeholder!.length, t('uploadFiles.placeholder').length) + 1}ch`,
+                        }}
+                        placeholder={t('uploadFiles.placeholder')}
+                        className="border-none text-sm font-normal text-gray-400 focus:outline-none text-center mb-[0.30rem]"
+                      />
+											<p className='text-center border-none text-sm font-normal text-gray-400 focus:outline-none'>
+												{t('uploadFiles.fileTypes')}
+											</p>
+                    </div>
+                  </FormControl>
+                  <FormMessage>{fieldState.error?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
+          </div>
+        </FormItem>
+      )}
+    />
+  );
+};
+
+export default UploadFiles;
