@@ -1,6 +1,7 @@
 import { CloudUpload } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+
 import {
   FormControl,
   FormField,
@@ -37,7 +38,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
       control={form.control}
       name={`questions.${index}`}
       render={() => (
-        <FormItem className="space-y-4">
+        <FormItem className="flex w-full flex-col gap-2 space-y-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <FormLabel>
@@ -132,12 +133,10 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
               )}
             />
           </div>
-          <div className='flex justify-end'>
-            <BriefsProvider.Options
-              formFieldId={question.id}
-              className="ml-auto"
-            />
-          </div>
+          <BriefsProvider.Options
+            formFieldId={question.id}
+            className="ml-auto"
+          />
         </FormItem>
       )}
     />
