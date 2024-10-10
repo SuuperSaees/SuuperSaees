@@ -1786,7 +1786,7 @@ export type Database = {
           id?: string
           namespace: string
           provider?: string
-          provider_id: string
+          provider_id?: string
           service_name?: string | null
           status: string
           updated_at?: string
@@ -2334,11 +2334,6 @@ export type Database = {
         | "text-short"
         | "text-large"
         | "number"
-        | "file"
-        | "dropdown"
-        | "rich-text"
-        | "image"
-        | "video"
       file_types: "image" | "video" | "pdf" | "fig"
       messages_types: "public" | "internal_agency"
       notification_channel: "in_app" | "email"

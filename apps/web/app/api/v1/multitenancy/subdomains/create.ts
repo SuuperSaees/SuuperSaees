@@ -1,122 +1,111 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-
-
+import { NextRequest, NextResponse } from 'next/server';
 
 import { Subdomain } from 'lib/subdomain.types';
 
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
 
 import { createIngress } from '~/multitenancy/aws-cluster-ingress/src';
 
-
-export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
-  // Step 1: Obtain the subdomain from the request body.
-  const subdomainDataBody = req.body as Subdomain.Api.Create;
-  // Validate the request body.
-  if (
-    !subdomainDataBody.namespace ||
-    !subdomainDataBody.domain ||
-    !subdomainDataBody.service_name
-  ) {
-    const errorResponse = {
-      code: 400,
-      message: 'Invalid request body',
-      error: 'Bad Request',
-      details: ['Namespace, domain, and service name are required'],
-    };
-
-    return res.status(400).json(errorResponse);
+export async function createIngressAndSubdomain(req: NextRequest) {
+  // Step 1: Obtain and validate the subdomain data from the request body
+  const subdomainDataBody = (await req.json()) as Subdomain.Api.Create;
+  if (!subdomainDataBody.namespace || !subdomainDataBody.service_name) {
+    return NextResponse.json(
+      {
+        code: 400,
+        message: 'Invalid request body',
+        error: 'Bad Request',
+        details: ['Namespace, domain, and service name are required'],
+      },
+      { status: 400 },
+    );
   }
+
   const client = getSupabaseServerComponentClient();
   try {
-    // Step 2: Upsert the subdomain in the Kubernetes cluster.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const ingress = await createIngress({
-      domain: subdomainDataBody.domain,
-      namespace: subdomainDataBody.namespace,
-      service_name: subdomainDataBody.service_name,
-    });
+    let ingress;
+    let domain = subdomainDataBody.domain;
 
-    console.log('ingress', ingress);
-
-    // Step 3: Upsert the subdomain in the database.
-    const { data: subdomainData, error: subdomainError } = await client
-      .from('subdomains')
-      .select('id')
-      .eq(
-        'domain',
-        subdomainDataBody.isCustom
-          ? ingress.domain
-          : `${ingress.domain}.suuper.co`,
-      )
-      .single();
-
-    if (subdomainError) {
-      throw new Error(`Error getting subdomain: ${subdomainError.message}`);
-    }
-
-    if (!subdomainData.id) {
-      // Create the subdomain in the database.
-      const newSubdomainData: Subdomain.Insert = {
-        namespace: ingress.namespace,
-        provider: 'c4c7us',
-        provider_id: ingress.id,
-        domain: subdomainDataBody.isCustom
-          ? ingress.domain
-          : `${ingress.domain}.suuper.co`,
-        service_name: ingress.service_name,
-        status: ingress.status,
-      };
-      const { error: newSubdomainError } = await client
+    // Function to check if a subdomain already exists
+    const checkSubdomainExists = async (
+      domainToCheck: string,
+      isCustom: boolean,
+    ) => {
+      const { data } = await client
         .from('subdomains')
-        .insert(newSubdomainData);
+        .select('id')
+        .eq('domain', isCustom ? domainToCheck : `${domainToCheck}.suuper.co`)
+        .single();
+      return !!data;
+    };
 
-      if (newSubdomainError) {
-        throw new Error(
-          `Error creating subdomain: ${newSubdomainError.message}`,
-        );
+    // Function to generate a unique domain name
+    const generateUniqueDomain = async (
+      baseDomain: string,
+      isCustom: boolean,
+    ) => {
+      let newDomain = baseDomain;
+      let suffix = 1;
+      while (await checkSubdomainExists(newDomain, isCustom)) {
+        newDomain = `${baseDomain}-${suffix}`;
+        suffix++;
       }
+      return newDomain;
+    };
+
+    // Generate a unique domain name
+    domain = await generateUniqueDomain(
+      domain,
+      subdomainDataBody.isCustom ?? false,
+    );
+
+    // Step 2: Create ingress or use provided data based on isCustom flag
+    if (subdomainDataBody.isCustom) {
+      ingress = await createIngress({
+        domain,
+        namespace: subdomainDataBody.namespace,
+        service_name: subdomainDataBody.service_name,
+      });
     } else {
-      // Update the subdomain in the database.
-      const updateSubdomainData: Subdomain.Update = {
-        namespace: ingress.namespace,
-        provider: 'c4c7us',
-        provider_id: ingress.id,
-        service_name: ingress.service_name,
-        status: ingress.status,
-        domain: subdomainDataBody.isCustom
-          ? ingress.domain
-          : `${ingress.domain}.suuper.co`,
-        deleted_on: null,
+      ingress = {
+        domain,
+        namespace: subdomainDataBody.namespace,
+        service_name: subdomainDataBody.service_name,
+        status: 'no-custom',
+        id: null,
       };
-      const { error: updateSubdomainError } = await client
-        .from('subdomains')
-        .update(updateSubdomainData)
-        .eq('id', subdomainData.id);
-
-      if (updateSubdomainError) {
-        throw new Error(
-          `Error updating subdomain: ${updateSubdomainError.message}`,
-        );
-      }
     }
 
-    // Step 4: Update the DNS.
-    // WORK IN PROGRESS
+    // Step 3: Create the new subdomain in the database
+    const newSubdomainData: Subdomain.Insert = {
+      namespace: ingress.namespace,
+      provider: 'c4c7us',
+      domain: subdomainDataBody.isCustom
+        ? ingress.domain
+        : `${ingress.domain}.suuper.co`,
+      service_name: ingress.service_name,
+      status: ingress.status,
+    };
 
-    // Step 5: Create row in organization_subdomains table.
-    // WORK IN PROGRESS
+    const { error: insertError } = await client
+      .from('subdomains')
+      .insert(newSubdomainData);
 
-    // Step 6: Return the subdomain from the database.
+    if (insertError) {
+      throw new Error(`Error creating subdomain: ${insertError.message}`);
+    }
+
+    // Step 4: Return the created subdomain
     const { data: subdomainFetchData, error: subdomainFetchError } =
       await client
         .from('subdomains')
         .select('*')
-        .eq('provider_id', ingress.id)
+        .eq(
+          'domain',
+          subdomainDataBody.isCustom
+            ? ingress.domain
+            : `${ingress.domain}.suuper.co`,
+        )
         .single();
 
     if (subdomainFetchError) {
@@ -125,15 +114,17 @@ export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
       );
     }
 
-    return res.status(201).json(subdomainFetchData);
+    return NextResponse.json(subdomainFetchData, { status: 201 });
   } catch (error) {
-    const errorResponse = {
-      code: 500,
-      message: 'Error creating subdomain',
-      error: 'Internal Server Error',
-      details: [(error as Error).message],
-    };
-
-    return res.status(500).json(errorResponse);
+    // Error handling
+    return NextResponse.json(
+      {
+        code: 500,
+        message: 'Error creating subdomain',
+        error: 'Internal Server Error',
+        details: [(error as Error).message],
+      },
+      { status: 500 },
+    );
   }
-};
+}

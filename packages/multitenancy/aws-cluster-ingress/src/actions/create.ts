@@ -9,7 +9,7 @@ export async function createIngress({
   const SUUPER_CLIENT_ID = process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID;
   const SUUPER_CLIENT_SECRET = process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET;
   const newDomainCreate = {
-    domain: `${domain}.suuper.co`,
+    domain: `${domain}`,
     namespace: 'prod',
     service_name: 'ms-suuper-prod',
     isCustom,

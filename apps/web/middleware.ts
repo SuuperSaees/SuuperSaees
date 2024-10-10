@@ -15,7 +15,6 @@ import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 import appConfig from '~/config/app.config';
 import pathsConfig from '~/config/paths.config';
 
-
 const CSRF_SECRET_COOKIE = 'csrfSecret';
 const NEXT_ACTION_HEADER = 'next-action';
 
@@ -64,61 +63,87 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+  const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
 
-  if (IS_PRODUCTION) {
-    const supabase = createMiddlewareClient(request, response);
-    const userData = await getUser(request, response);
-    const userId = userData.data?.user?.id ?? '';
-    const { data: accountData, error: accountError } = await supabase
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', userId)
-      .single();
+  // ignore if request path has auth
 
-    if (accountError) {
-      throw new Error(`Unauthorized: ${accountError.message}`);
+  const ignorePath = new Set(['auth', 'add-organization', 'api', 'home']);
+
+  const shouldIgnorePath = (pathname: string) => {
+    return Array.from(ignorePath).some((path) => pathname.includes(path));
+  };
+
+  const ignoreRole = new Set(['client_owner', 'client_member']);
+
+  if (IS_PROD && !shouldIgnorePath(request.nextUrl.pathname)) {
+    try {
+      const supabase = createMiddlewareClient(request, response);
+      const userData = await getUser(request, response);
+      const userId = userData.data?.user?.id ?? '';
+      const { data: accountData, error: accountError } = await supabase
+        .from('accounts')
+        .select('organization_id, accounts_memberships(account_role)')
+        .eq('id', userId)
+        .single();
+
+      if (accountError) {
+        throw new Error(`Unauthorized: ${accountError?.message}`);
+      }
+      if (
+        accountData?.accounts_memberships?.some((membership) =>
+          ignoreRole.has(membership.account_role),
+        )
+      ) {
+        const { data: domainsData, error: domainsError } = await supabase
+          .from('organization_subdomains')
+          .select('subdomains(domain)')
+          .eq('organization_id', accountData?.organization_id ?? '')
+          .single();
+
+        if (domainsError) {
+          throw new Error(`Error fetching domains: ${domainsError.message}`);
+        }
+
+        const origin = request.nextUrl.origin;
+
+        const originDomain = new URL(origin).host;
+        if (originDomain === domainsData?.subdomains?.domain) {
+          response.headers.set('Access-Control-Allow-Origin', origin);
+        } else {
+          throw new Error('Unauthorized: Invalid Origin');
+        }
+        // Allow cors for all requests
+        if (request.method === 'OPTIONS') {
+          return new Response(null, {
+            headers: {
+              'Access-Control-Allow-Origin':
+                origin === `https://${domainsData?.subdomains?.domain}`
+                  ? origin
+                  : '',
+              'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            },
+          });
+        }
+
+        response.headers.set(
+          'Access-Control-Allow-Methods',
+          'GET, POST, DELETE, OPTIONS',
+        );
+        response.headers.set(
+          'Access-Control-Allow-Headers',
+          'Content-Type, Authorization',
+        );
+      }
+    } catch (error) {
+      console.error('Error in middleware', error);
+      // redirect to landing page
+      // sign out user
+      // const landing_page = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
+      const supabase = createMiddlewareClient(request, response);
+      await supabase.auth.signOut();
+      // return NextResponse.redirect(new URL(landing_page, request.nextUrl.origin).href);
     }
-
-    const { data: domainsData, error: domainsError } = await supabase
-      .from('organization_subdomains')
-      .select('subdomains(domain)')
-      .eq('organization_id', accountData.organization_id ?? '')
-      .single();
-
-    if (domainsError) {
-      throw new Error(`Error fetching domains: ${domainsError.message}`);
-    }
-
-    const origin = request.headers.get('Origin');
-
-    if (origin === `https://${domainsData.subdomains?.domain}`) {
-      response.headers.set('Access-Control-Allow-Origin', origin);
-    } else {
-      throw new Error('Unauthorized: Invalid Origin');
-    }
-    // Allow cors for all requests
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: {
-          'Access-Control-Allow-Origin':
-            origin === `https://${domainsData.subdomains?.domain}`
-              ? origin
-              : '',
-          'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
-      });
-    }
-
-    response.headers.set(
-      'Access-Control-Allow-Methods',
-      'GET, POST, DELETE, OPTIONS',
-    );
-    response.headers.set(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization',
-    );
   }
   // set current path
   response.headers.set('x-current-path', request.nextUrl.pathname);
