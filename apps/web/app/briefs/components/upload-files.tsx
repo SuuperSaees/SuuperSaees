@@ -1,9 +1,6 @@
-import { X } from 'lucide-react';
 import { CloudUpload } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-
-import { Button } from '@kit/ui/button';
 import {
   FormControl,
   FormField,
@@ -12,6 +9,7 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 
+import { BriefsProvider } from '../contexts/briefs-context';
 import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
 
@@ -32,7 +30,6 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
   question,
   form,
   handleQuestionChange,
-  handleRemoveQuestion,
 }) => {
   const { t } = useTranslation('briefs');
   return (
@@ -46,15 +43,6 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
               <FormLabel>
                 {t('creation.form.questionLabel')} {index + 1}
               </FormLabel>
-              {index > 0 && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => handleRemoveQuestion(index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
             </div>
 
             <FormField
@@ -142,6 +130,12 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                   <FormMessage>{fieldState.error?.message}</FormMessage>
                 </FormItem>
               )}
+            />
+          </div>
+          <div className='flex justify-end'>
+            <BriefsProvider.Options
+              formFieldId={question.id}
+              className="ml-auto"
             />
           </div>
         </FormItem>
