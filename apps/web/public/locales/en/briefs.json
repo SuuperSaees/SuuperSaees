@@ -67,5 +67,11 @@
   "richText": {
     "title": "Rich text",
     "placeholder": "Enter the rich text"
+  },
+  "uploadFiles" : {
+    "title" : "Title",
+    "description" : "Description",
+    "placeholder": "Click here or drag a file to upload",
+    "fileTypes": "SVG, PNG, JPG or GIF (max. 800x400px)"
   }
 }
