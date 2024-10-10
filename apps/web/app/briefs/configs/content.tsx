@@ -54,6 +54,7 @@ export const generateContent = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
+            userRole={props.userRole}
           />
         ),
       },
