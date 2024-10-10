@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 
-import { FormField as FormFieldType } from '../contexts/briefs-context';
+import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
 
 export interface FormRichTextComponentProps {
