@@ -61,13 +61,8 @@ export interface FormTitleComponentProps {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     handleQuestionChange(index, 'label', e.target.value)
                   }
-                  style={{
-                    maxWidth: '100%', 
-                    overflowWrap: 'break-word', 
-                    wordBreak: 'break-word', 
-                  }}
                   placeholder={t('title.placeholder')}
-                  className="text-gray-500 text-2xl font-semibold leading-9"
+                  className="w-full break-words text-gray-500 text-2xl font-semibold leading-9"
                 />
               </FormControl>
               <FormMessage>{fieldState.error?.message}</FormMessage>
