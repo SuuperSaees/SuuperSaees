@@ -1,8 +1,8 @@
 import { ALargeSmall, AlignCenter, Image, Play } from 'lucide-react';
-import { ComponentProps } from '../contexts/briefs-context';
-import { Content, ContentTypes } from '../contexts/briefs-context';
+
 import FormTitleComponent from '../components/title-content';
 import FormRichTextComponent from '../components/rich-text-content';
+import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
 
 type ContentKey = ContentTypes;
 type ContentValue = Content;

@@ -1,10 +1,18 @@
 'use client';
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { UseFormReturn } from 'react-hook-form';
-import { Button } from '@kit/ui/button';
+
 import { ChevronDown, X } from 'lucide-react';
+import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
+import { Button } from '@kit/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@kit/ui/dropdown-menu';
 import {
   FormControl,
   FormField,
@@ -12,14 +20,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-import { FormField as FormFieldType, Option } from '../contexts/briefs-context';
-import { BriefCreationForm } from './brief-creation-form';
-import { DropdownMenu, 
-    DropdownMenuTrigger, 
-    DropdownMenuContent, 
-    DropdownMenuItem
- } from '@kit/ui/dropdown-menu';
 
+import { FormField as FormFieldType, Option } from '../types/brief.types';
+import { BriefCreationForm } from './brief-creation-form';
 
 export interface FormFieldDropdownProps {
   index: number;
@@ -27,7 +30,11 @@ export interface FormFieldDropdownProps {
   form: UseFormReturn<BriefCreationForm>;
   handleQuestionChange: (
     index: number,
-    field: 'label' | 'description' | 'placeholder' | `options.${number}.selected`,
+    field:
+      | 'label'
+      | 'description'
+      | 'placeholder'
+      | `options.${number}.selected`,
     value: string | boolean,
   ) => void;
   handleRemoveQuestion: (index: number) => void;
@@ -45,7 +52,7 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
   const handleOptionSelect = (optIndex: number) => {
     const newOptions = question.options?.map((option, i) => ({
       ...option,
-      selected: i === optIndex, 
+      selected: i === optIndex,
     }));
     handleQuestionChange(index, `options.${optIndex}.selected`, true);
   };
@@ -84,9 +91,11 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(index, 'label', e.target.value)
                       }
-                      style={{ width: `${Math.max(question.label.length, t('multipleChoice.title').length) + 1}ch` }}
+                      style={{
+                        width: `${Math.max(question.label.length, t('multipleChoice.title').length) + 1}ch`,
+                      }}
                       placeholder={t('multipleChoice.title')}
-                      className="border-none focus:outline-none text-gray-600 text-sm font-medium"
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -110,9 +119,11 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                           e.target.value,
                         )
                       }
-                      style={{ width: `${Math.max(question.description!.length, t('multipleChoice.description').length) + 1}ch` }}
+                      style={{
+                        width: `${Math.max(question.description!.length, t('multipleChoice.description').length) + 1}ch`,
+                      }}
                       placeholder={t('multipleChoice.description')}
-                      className="border-none focus:outline-none text-gray-600 text-sm font-medium"
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -120,17 +131,16 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
               )}
             />
 
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">
-                    <div className='flex justify-between items-center w-full'>
-                        {t('dropdown.selectAnOption')}
-                        <ChevronDown className="h-4 w-4" />
-                    </div>
+                  <div className="flex w-full items-center justify-between">
+                    {t('dropdown.selectAnOption')}
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent >
+              <DropdownMenuContent>
                 {question.options?.map((option: Option, optIndex) => (
                   <DropdownMenuItem
                     key={option.value}

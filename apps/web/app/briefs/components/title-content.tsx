@@ -1,19 +1,30 @@
 import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { FormControl, FormItem, FormLabel, FormMessage, FormField } from '@kit/ui/form';
-import { Button } from '@kit/ui/button';
-import { FormField as FormFieldType } from '../contexts/briefs-context';
-import { BriefCreationForm } from './brief-creation-form';
+
+
+
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { UseFormReturn } from 'react-hook-form';
+
+import { Button } from '@kit/ui/button';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
+
+import { FormField as FormFieldType } from '../types/brief.types';
+import { BriefCreationForm } from './brief-creation-form';
 
 export interface FormTitleComponentProps {
-    index: number;
-    question: FormFieldType;
-    form: UseFormReturn<BriefCreationForm>;
-    handleQuestionChange: (index: number, field: 'label', value: string) => void;
-    handleRemoveQuestion: (index: number) => void;
-  }
+  index: number;
+  question: FormFieldType;
+  form: UseFormReturn<BriefCreationForm>;
+  handleQuestionChange: (index: number, field: 'label', value: string) => void;
+  handleRemoveQuestion: (index: number) => void;
+}
   
   const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
     index,
