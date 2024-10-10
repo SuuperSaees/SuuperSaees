@@ -182,7 +182,6 @@ const BriefCreationForm = ({
   useEffect(() => {
     form.setValue('questions', formFields); // Ensure form state stays in sync with context
   }, [formFields, form]); // Re-run effect when formFields or form change
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">

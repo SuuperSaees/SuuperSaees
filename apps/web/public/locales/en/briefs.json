@@ -46,6 +46,11 @@
     "description": "Description",
     "placeholder": "Add new option"
   },
+  "textLarge" : {
+    "title":"Title",
+    "description":"Description",
+    "descriptionHint":"Enter a description..."
+  },
   "datePicker": {
     "selectTitle": "Select date"
   },
