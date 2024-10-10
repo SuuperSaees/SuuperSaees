@@ -32,6 +32,7 @@ export type ComponentProps = {
     value: string | boolean | Date,
   ) => void;
   handleRemoveQuestion: (index: number) => void;
+  userRole: string;
 };
 
 export type InputTypes =

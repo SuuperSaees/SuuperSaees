@@ -60,6 +60,14 @@
     "placeholder": "Agregar nueva opción",
     "selectAnOption": "Seleccione una opción"
   },
+  "title": {
+    "title": "Título",
+    "placeholder": "Introduzca el título"
+  },
+  "richText": {
+    "title": "Texto enriquecido",
+    "placeholder": "Introduzca el texto enriquecido"
+  },
   "uploadFiles" : {
     "title" : "Título",
     "description" : "Descripción",

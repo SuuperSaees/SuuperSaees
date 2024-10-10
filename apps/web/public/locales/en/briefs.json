@@ -60,6 +60,14 @@
     "placeholder": "Add new option",
     "selectAnOption": "Select an option"
   },
+  "title": {
+    "title": "Title",
+    "placeholder": "Enter the title"
+  },
+  "richText": {
+    "title": "Rich text",
+    "placeholder": "Enter the rich text"
+  },
   "uploadFiles" : {
     "title" : "Title",
     "description" : "Description",
