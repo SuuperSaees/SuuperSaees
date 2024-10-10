@@ -115,7 +115,22 @@ export const useBriefFormFields = () => {
     setFormFields([...formFields, duplicatedFormField]);
   };
 
+   // Swap two form fields
+   const swapFormFields = (fromId: number, toId: number) => {
+    const updatedFormFields = [...formFields];
+    const [movedField] = updatedFormFields.splice(fromId, 1); // Remove the field from its original position
+    if(movedField) {
+
+      updatedFormFields.splice(toId, 0, movedField); // Insert it at the new position
+      setFormFields(updatedFormFields);
+    }
+  };
+
   return {
+    inputs,
+    content,
+    inputsMap,
+    contentMap,
     formFields,
     currentFormField,
     isEditing,
@@ -126,9 +141,7 @@ export const useBriefFormFields = () => {
     editFormField,
     stopEditing,
     startEditing,
-    inputs,
-    content,
-    inputsMap,
-    contentMap,
+    swapFormFields
+ 
   };
 };

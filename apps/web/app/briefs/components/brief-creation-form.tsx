@@ -30,6 +30,8 @@ import { Spinner } from '@kit/ui/spinner';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { isContentType, isInputType } from '../utils/type-guards';
+import Draggable from './draggable';
+import Droppable from './droppable';
 
 type CreateBriefDialogProps = {
   propietaryOrganizationId: string;
@@ -219,14 +221,24 @@ const BriefCreationForm = ({
             // Check if FormFieldComponent is a function
             if (typeof FormFieldComponent === 'function') {
               return (
-                <FormFieldComponent
+                <Droppable
+                  id={'droppable-form-field-' + question.id}
                   key={'q' + index}
-                  index={index}
-                  question={question}
-                  form={form}
-                  handleQuestionChange={handleQuestionChange}
-                  handleRemoveQuestion={handleRemoveQuestion}
-                />
+                  data={{ id: question.id }}
+                >
+                  <Draggable
+                    id={'draggable-form-field-' + question.id}
+                    data={{ id: question.id }}
+                  >
+                    <FormFieldComponent
+                      index={index}
+                      question={question}
+                      form={form}
+                      handleQuestionChange={handleQuestionChange}
+                      handleRemoveQuestion={handleRemoveQuestion}
+                    />
+                  </Draggable>
+                </Droppable>
               );
             }
             // If it's a JSX element, render it directly
@@ -234,6 +246,7 @@ const BriefCreationForm = ({
           }
           return null;
         })}
+
         {/* Add Question Button */}
         <div className="flex items-center justify-center">
           <ThemedButton type="button" onClick={handleAddQuestion}>
