@@ -12,10 +12,8 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { createIngress } from '~/multitenancy/aws-cluster-ingress/src';
 
-export const createSubdomain = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-) => {
+
+export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
   // Step 1: Obtain the subdomain from the request body.
   const subdomainDataBody = req.body as Subdomain.Api.Create;
   // Validate the request body.
@@ -40,14 +38,21 @@ export const createSubdomain = async (
     const ingress = await createIngress({
       domain: subdomainDataBody.domain,
       namespace: subdomainDataBody.namespace,
-      service_name: subdomainDataBody.service_name
+      service_name: subdomainDataBody.service_name,
     });
+
+    console.log('ingress', ingress);
 
     // Step 3: Upsert the subdomain in the database.
     const { data: subdomainData, error: subdomainError } = await client
       .from('subdomains')
       .select('id')
-      .eq('domain', subdomainDataBody.isCustom ? ingress.domain : `${ingress.domain}.suuper.co`)
+      .eq(
+        'domain',
+        subdomainDataBody.isCustom
+          ? ingress.domain
+          : `${ingress.domain}.suuper.co`,
+      )
       .single();
 
     if (subdomainError) {
@@ -60,7 +65,9 @@ export const createSubdomain = async (
         namespace: ingress.namespace,
         provider: 'c4c7us',
         provider_id: ingress.id,
-        domain: subdomainDataBody.isCustom ? ingress.domain : `${ingress.domain}.suuper.co`,
+        domain: subdomainDataBody.isCustom
+          ? ingress.domain
+          : `${ingress.domain}.suuper.co`,
         service_name: ingress.service_name,
         status: ingress.status,
       };
@@ -81,7 +88,9 @@ export const createSubdomain = async (
         provider_id: ingress.id,
         service_name: ingress.service_name,
         status: ingress.status,
-        domain: subdomainDataBody.isCustom ? ingress.domain : `${ingress.domain}.suuper.co`,
+        domain: subdomainDataBody.isCustom
+          ? ingress.domain
+          : `${ingress.domain}.suuper.co`,
         deleted_on: null,
       };
       const { error: updateSubdomainError } = await client

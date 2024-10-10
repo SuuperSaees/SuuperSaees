@@ -5,10 +5,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { deleteIngress } from '~/multitenancy/aws-cluster-ingress/src';
 
-export const deleteSubdomain = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-) => {
+export const DELETE = async (req: NextApiRequest, res: NextApiResponse) => {
   // Step 1: Obtain subdomain id from request params
   const subdomainId = req.query.subdomainId;
   if (!subdomainId) {

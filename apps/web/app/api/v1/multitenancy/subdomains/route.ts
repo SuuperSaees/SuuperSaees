@@ -1,17 +1,21 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import { createSubdomain } from './create';
-import { deleteSubdomain } from './delete';
-import { getSubdomain } from './get';
+
+
+import { POST } from './create';
+import { DELETE } from './delete';
+import { GET } from './get';
+
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('req.method', req.method);
   switch (req.method) {
     case 'POST':
-      return createSubdomain(req, res);
+      return POST(req, res);
     case 'GET':
-      return getSubdomain(req, res);
+      return GET(req, res);
     case 'DELETE':
-      return deleteSubdomain(req, res);
+      return DELETE(req, res);
     default:
       res.setHeader('Allow', ['POST', 'GET', 'DELETE']);
       res.status(405).end(`Method ${req.method} Not Allowed`);
