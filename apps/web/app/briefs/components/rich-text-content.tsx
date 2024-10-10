@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -27,24 +27,11 @@ export interface FormRichTextComponentProps {
 
 const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
   index,
-  question,
   form,
   handleRemoveQuestion,
   userRole,
 }) => {
   const { t } = useTranslation('briefs');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const adjustTextareaHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'; 
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  };
-
-  useEffect(() => {
-    adjustTextareaHeight(); 
-  }, [question.label]);
 
   const currentValue = form.getValues(`questions.${index}.label`);
 
