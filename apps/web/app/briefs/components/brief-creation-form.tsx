@@ -33,6 +33,7 @@ import { isContentType, isInputType } from '../utils/type-guards';
 
 type CreateBriefDialogProps = {
   propietaryOrganizationId: string;
+  userRole: string;
 };
 const briefCreationFormSchema = z.object({
   name: z
@@ -82,6 +83,7 @@ export type BriefCreationForm = z.infer<typeof briefCreationFormSchema>;
 
 const BriefCreationForm = ({
   propietaryOrganizationId,
+  userRole,
 }: CreateBriefDialogProps) => {
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
   const router = useRouter();
@@ -225,6 +227,7 @@ const BriefCreationForm = ({
                   form={form}
                   handleQuestionChange={handleQuestionChange}
                   handleRemoveQuestion={handleRemoveQuestion}
+                  userRole={userRole}
                 />
               );
             }

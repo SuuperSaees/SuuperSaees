@@ -1,10 +1,7 @@
 import React from 'react';
-
-
-
 import { X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
 import {
@@ -17,27 +14,38 @@ import {
 
 import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
+import RichTextEditor from '~/components/ui/rich-text-editor';
 
-export interface FormTitleComponentProps {
+export interface FormRichTextComponentProps {
   index: number;
   question: FormFieldType;
   form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (index: number, field: 'label', value: string) => void;
+  handleQuestionChange?: (index: number, field: 'label', value: string) => void;
   handleRemoveQuestion: (index: number) => void;
+  userRole: string;
 }
-  
-  const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
-    index,
-    question,
-    form,
-    handleQuestionChange,
-    handleRemoveQuestion,
-  }) => {
-    const { t } = useTranslation('briefs');
-    return (
+
+const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
+  index,
+  form,
+  handleRemoveQuestion,
+  userRole,
+}) => {
+  const { t } = useTranslation('briefs');
+
+  const currentValue = form.getValues(`questions.${index}.label`);
+
+  const handleChange = (richText: string) => {
+    form.setValue(`questions.${index}.label`, richText);
+  };
+
+  return (
+    <>
       <FormItem className="space-y-4">
         <div className="flex items-center justify-between">
-          <FormLabel>{t('title.title')} {index + 1}</FormLabel>
+          <FormLabel>
+            {t('richText.title')} {index + 1}
+          </FormLabel>
           {index > 0 && (
             <Button
               type="button"
@@ -48,21 +56,19 @@ export interface FormTitleComponentProps {
             </Button>
           )}
         </div>
-  
         <FormField
           control={form.control}
           name={`questions.${index}.label`}
           render={({ field, fieldState }) => (
             <FormItem>
               <FormControl>
-                <input
+                <RichTextEditor
                   {...field}
-                  value={question.label}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleQuestionChange(index, 'label', e.target.value)
-                  }
-                  placeholder={t('title.placeholder')}
-                  className="w-full break-words text-gray-500 text-2xl font-semibold leading-9"
+                  content={currentValue} 
+                  onComplete={() => {}} 
+                  onChange={handleChange} 
+                  userRole={userRole}
+                  hideSubmitButton={true}
                 />
               </FormControl>
               <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -70,7 +76,8 @@ export interface FormTitleComponentProps {
           )}
         />
       </FormItem>
-    );
-  };
-  
-  export default FormTitleComponent;
+    </>
+  );
+};
+
+export default FormRichTextComponent;
