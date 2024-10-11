@@ -3,8 +3,11 @@
 import { getMailer } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
 
+
+
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get-domain-by-user-id';
+
 const emailSender = process.env.EMAIL_SENDER ?? '';
-const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
 export async function sendOrderCompleted(
   toEmail: string,
@@ -12,13 +15,14 @@ export async function sendOrderCompleted(
   orderId: string,
   orderTitle: string,
   agencyName: string,
+  userId: string,
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
 
   const subject = `${actualName} has marked '${orderTitle}' request as completed.`;
   const bodyMessage = `${actualName} has marked '${orderTitle}' request as completed.`;
-
+  const siteURL = await getDomainByUserId(userId, true);
   await mailer
     .sendEmail({
       to: toEmail,

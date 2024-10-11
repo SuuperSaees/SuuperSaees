@@ -3,8 +3,11 @@
 import { getMailer } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
 
+
+
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get-domain-by-user-id';
+
 const emailSender = process.env.EMAIL_SENDER ?? '';
-const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
 export async function sendOrderStatusPriorityEmail(
   toEmail: string,
@@ -14,10 +17,11 @@ export async function sendOrderStatusPriorityEmail(
   orderTitle: string,
   message: string,
   agencyName: string,
+  userId: string,
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
-
+  const siteURL = await getDomainByUserId(userId, true);
   let subject;
   let bodyMessage;
 

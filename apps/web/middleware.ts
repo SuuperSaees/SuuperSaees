@@ -9,8 +9,7 @@ import { CsrfError, createCsrfProtect } from '@edge-csrf/nextjs';
 
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
-
-
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import appConfig from '~/config/app.config';
 import pathsConfig from '~/config/paths.config';
@@ -75,25 +74,54 @@ export async function middleware(request: NextRequest) {
 
   const ignoreRole = new Set(['client_owner', 'client_member']);
 
+  const origin = request.nextUrl.origin;
+  const originDomain = new URL(origin).host;
+
+  const supabase = createMiddlewareClient(request, response);
+  const baseUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? '').host;
+  if (IS_PROD && originDomain !== baseUrl) {
+    const supabaseClient = getSupabaseServerComponentClient({
+      admin: true,
+    });
+    // verify if host exists in allowed domains
+    const { error: domainsError } = await supabaseClient
+      .from('subdomains')
+      .select('domain')
+      .eq('domain', originDomain)
+      .single();
+
+    if (domainsError) {
+      // if it isn't ignore path, redirect to landing page
+      const landingPage = process.env.NEXT_PUBLIC_LANDING_URL ?? '';
+      return NextResponse.redirect(new URL(landingPage, origin).href);
+    }
+  }
+
   if (IS_PROD && !shouldIgnorePath(request.nextUrl.pathname)) {
     try {
-      const supabase = createMiddlewareClient(request, response);
       const userData = await getUser(request, response);
       const userId = userData.data?.user?.id ?? '';
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .select('organization_id, accounts_memberships(account_role)')
+        .select('organization_id')
         .eq('id', userId)
         .single();
 
       if (accountError) {
-        throw new Error(`Unauthorized: ${accountError?.message}`);
+        throw new Error(`Unauthorized: ${accountError.message}`);
       }
-      if (
-        accountData?.accounts_memberships?.some((membership) =>
-          ignoreRole.has(membership.account_role),
-        )
-      ) {
+
+      const { data: accountsMembershipsData, error: accountsMembershipsError } =
+        await supabase
+          .from('accounts_memberships')
+          .select('account_role')
+          .eq('user_id', userId)
+          .single();
+
+      if (accountsMembershipsError)
+        throw new Error(`Unauthorized: ${accountsMembershipsError.message}`);
+
+      if (!ignoreRole.has(accountsMembershipsData?.account_role ?? '')) {
         const { data: domainsData, error: domainsError } = await supabase
           .from('organization_subdomains')
           .select('subdomains(domain)')
@@ -139,10 +167,12 @@ export async function middleware(request: NextRequest) {
       console.error('Error in middleware', error);
       // redirect to landing page
       // sign out user
-      // const landing_page = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
+      const landingPage = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
       const supabase = createMiddlewareClient(request, response);
       await supabase.auth.signOut();
-      // return NextResponse.redirect(new URL(landing_page, request.nextUrl.origin).href);
+      return NextResponse.redirect(
+        new URL(landingPage, request.nextUrl.origin).href,
+      );
     }
   }
   // set current path

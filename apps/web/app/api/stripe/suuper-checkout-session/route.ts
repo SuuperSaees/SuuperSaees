@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-
+import { getDomainByUserId } from '~/multitenancy/utils/get-domain-by-user-id';
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
     const { priceId, customer } = await req.json(); 
+    const supabase = getSupabaseServerComponentClient();
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError.message;
+    const userId = userData?.user.id;
+
+    const baseUrl = await getDomainByUserId(userId, true);
     if (!priceId) {
         return NextResponse.json(
             { error: { message: "Price ID is required" } },
@@ -38,8 +45,8 @@ export async function POST(req: NextRequest) {
             ],
             customer,
             mode: type === "recurring" ? "subscription" : "payment",
-            success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings?checkout=success`, 
-            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings?checkout=cancel`,
+            success_url: `${baseUrl}/home/settings?checkout=success`, 
+            cancel_url: `${baseUrl}/home/settings?checkout=cancel`,
         }
     );
         console.log("SessionURL: ", session.url);

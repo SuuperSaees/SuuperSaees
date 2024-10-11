@@ -2,12 +2,15 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions.types';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
+
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
-export const cancelSubscription = async (subscriptionId: any) => {
+export const cancelSubscription = async (subscriptionId: string) => {
   const client = getSupabaseServerComponentClient();
   const primary_owner_user_id = await getPrimaryOwnerId();
   const newSubscription: {
@@ -26,28 +29,27 @@ export const cancelSubscription = async (subscriptionId: any) => {
     status: 'canceled',
   };
   try {
-    const { error: updatedSubscriptionError } =
-      await client
-        .from('subscriptions')
-        .update(newSubscription)
-        .eq('id', subscriptionId ?? '')
-        .eq('propietary_organization_id', primary_owner_user_id ?? '')
-        .single();
+    const { error: updatedSubscriptionError } = await client
+      .from('subscriptions')
+      .update(newSubscription)
+      .eq('id', subscriptionId ?? '')
+      .eq('propietary_organization_id', primary_owner_user_id ?? '')
+      .single();
 
     if (updatedSubscriptionError)
       throw new Error(updatedSubscriptionError.message);
 
     // Get subscription data
-    const { data: getSubscriptionData, error: subscriptionError } =
-      await client
-        .from('subscriptions')
-        .select('billing_customer_id')
-        .eq('id', subscriptionId ?? '')
-        .eq('propietary_organization_id', primary_owner_user_id ?? '')
-        .eq('active', false)
-        .single();
+    const { data: getSubscriptionData, error: subscriptionError } = await client
+      .from('subscriptions')
+      .select('billing_customer_id')
+      .eq('id', subscriptionId ?? '')
+      .eq('propietary_organization_id', primary_owner_user_id ?? '')
+      .eq('active', false)
+      .single();
 
-    console.log('getSubscriptionData', getSubscriptionData);
+    if (subscriptionError)
+      throw new Error(`Subscription not found ${subscriptionError.message}`);
 
     // Generate new susbcription free. See how use platform with new stripe flow ==> Redirect to landing page.
     // Cancel Subscrption on stripe
@@ -69,7 +71,7 @@ export const cancelSubscription = async (subscriptionId: any) => {
 
     // create subscription in stripe
     const subscriptionResponse = await fetch(
-      `${baseUrl}/api/stripe/create-subscription?customerId=${encodeURIComponent(getSubscriptionData?.billing_customer_id!)}&priceId=${encodeURIComponent(priceId)}`,
+      `${baseUrl}/api/stripe/create-subscription?customerId=${encodeURIComponent(getSubscriptionData?.billing_customer_id ?? '')}&priceId=${encodeURIComponent(priceId)}`,
       {
         method: 'POST',
         headers: {
@@ -87,8 +89,7 @@ export const cancelSubscription = async (subscriptionId: any) => {
     const createNewSubscription: Subscription.Type = {
       id: subscriptionData?.id as string,
       propietary_organization_id: primary_owner_user_id as string,
-      billing_customer_id:
-      getSubscriptionData?.billing_customer_id as string,
+      billing_customer_id: getSubscriptionData?.billing_customer_id ?? '',
       active: true,
       billing_provider: 'stripe',
       currency: 'usd',

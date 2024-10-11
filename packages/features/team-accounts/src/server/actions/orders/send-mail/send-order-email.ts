@@ -5,17 +5,20 @@ import { getLogger } from '@kit/shared/logger';
 
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get-domain-by-user-id';
+
 const emailSender = process.env.EMAIL_SENDER ?? '';
-const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
 export async function sendOrderCreationEmail(
   toEmail: string,
   orderId: string,
   orderData: Order.Type,
   agencyName: string,
+  userId: string,
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
+  const siteURL = await getDomainByUserId(userId, true);
   await mailer
     .sendEmail({
       to: toEmail,

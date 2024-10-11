@@ -11,18 +11,26 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import type { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-import { generateRandomPassword // getTextColorBasedOnBackground
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get-domain-by-user-id';
+import {
+  generateRandomPassword, // getTextColorBasedOnBackground
 } from '../../../utils/generate-colors';
 import { addUserAccountRole } from '../../members/create/create-account';
-import { getPrimaryOwnerId, getUserAccountByEmail } from '../../members/get/get-member-account';
+import {
+  getPrimaryOwnerId,
+  getUserAccountByEmail,
+} from '../../members/get/get-member-account';
 import { updateUserAccount } from '../../members/update/update-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
-import { getAgencyForClient, getOrganization, // getOrganizationSettings,
-getOrganizationById } from '../../organizations/get/get-organizations';
-import { hasPermissionToAddClientMembers, hasPermissionToCreateClientOrg } from '../../permissions/clients';
-
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+import {
+  getAgencyForClient,
+  getOrganization, // getOrganizationSettings,
+  getOrganizationById,
+} from '../../organizations/get/get-organizations';
+import {
+  hasPermissionToAddClientMembers,
+  hasPermissionToCreateClientOrg,
+} from '../../permissions/clients';
 
 // Define la función createClient
 type CreateClient = {
@@ -40,6 +48,10 @@ const createClientUserAccount = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
+    const { data: userData, error: userError } = await client.auth.getUser();
+    if (userError) throw new Error(`Error getting user: ${userError.message}`);
+    const baseUrl = await getDomainByUserId(userData.user.id, true);
+
     // const organizationSettings = await getOrganizationSettings();
 
     // pre-authentication of the user
@@ -140,6 +152,7 @@ export const createClient = async (clientData: CreateClient) => {
     const clientOrganizationUser = await createClientUserAccount(
       clientData.client.email,
       organization.name,
+      userId,
     );
     const userId = clientOrganizationUser.user?.id;
     if (!userId) throw new Error('No user id provided');
@@ -236,6 +249,7 @@ export const addClientMember = async ({
     const clientOrganizationUser = await createClientUserAccount(
       email,
       clientOrganization.name,
+      userId,
     );
     const clientUserId = clientOrganizationUser.user?.id;
     if (!clientUserId) {

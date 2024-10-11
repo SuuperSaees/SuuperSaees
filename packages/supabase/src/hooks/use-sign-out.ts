@@ -23,33 +23,42 @@ export function useSignOut() {
         const userId = userData?.user?.id;
         const { data: accountData, error: accountError } = await client
           .from('accounts')
-          .select('organization_id, accounts_memberships(account_role)')
+          .select('organization_id')
           .eq('id', userId)
           .single();
 
         if (accountError)
           throw new Error(`Unauthorized: ${accountError.message}`);
-        if (
-          accountData?.accounts_memberships?.some((membership) =>
-            ignoreRole.has(membership.account_role),
-          )
-        ) {
-        const { data: domainsData, error: domainsError } = await client
-          .from('organization_subdomains')
-          .select('subdomains(domain)')
-          .eq('organization_id', accountData?.organization_id ?? '')
+
+        const {
+          data: accountsMembershipsData,
+          error: accountsMembershipsError,
+        } = await client
+          .from('accounts_memberships')
+          .select('account_role')
+          .eq('user_id', userId)
           .single();
 
-        if (domainsError)
-          throw new Error(`Error fetching domains: ${domainsError.message}`);
+        if (accountsMembershipsError)
+          throw new Error(`Unauthorized: ${accountsMembershipsError.message}`);
 
-        const landingPageParsed = IS_PROD
-          ? `https://${domainsData?.subdomains?.domain}/auth/sign-in`
-          : landingPage;
+        if (!ignoreRole.has(accountsMembershipsData?.account_role ?? '')) {
+          const { data: domainsData, error: domainsError } = await client
+            .from('organization_subdomains')
+            .select('subdomains(domain)')
+            .eq('organization_id', accountData?.organization_id ?? '')
+            .single();
 
-        await client.auth.signOut();
-        localStorage.removeItem('internalMessagingEnabled');
-        window.location.href = landingPageParsed;
+          if (domainsError)
+            throw new Error(`Error fetching domains: ${domainsError.message}`);
+
+          const landingPageParsed = IS_PROD
+            ? `https://${domainsData?.subdomains?.domain}/auth/sign-in`
+            : landingPage;
+
+          await client.auth.signOut();
+          localStorage.removeItem('internalMessagingEnabled');
+          window.location.href = landingPageParsed;
         } else {
           const currentHost = window.location.origin;
           await client.auth.signOut();
@@ -62,7 +71,7 @@ export function useSignOut() {
       }
     },
     onError: (error: Error) => {
-      console.error('Error al cerrar sesión:', error.message);
+      console.error('Error during sign out process:', error.message);
     },
   });
 }
