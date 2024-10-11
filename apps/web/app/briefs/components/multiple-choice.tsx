@@ -2,11 +2,9 @@
 
 import React from 'react';
 
-import { X } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@kit/ui/button';
 import {
   FormControl,
   FormField,
@@ -16,6 +14,7 @@ import {
 } from '@kit/ui/form';
 
 import { ThemedCheckbox } from '../../../../../packages/features/accounts/src/components/ui/checkbox-themed-with-settings';
+import { BriefsProvider } from '../contexts/briefs-context';
 import { FormField as FormFieldType, Option } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
 
@@ -40,7 +39,6 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
   question,
   form,
   handleQuestionChange,
-  handleRemoveQuestion,
 }) => {
   const { t } = useTranslation('briefs');
 
@@ -49,22 +47,11 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
       control={form.control}
       name={`questions.${index}`}
       render={() => (
-        <FormItem className="space-y-4">
+        <FormItem className="flex w-full flex-col gap-2 space-y-4">
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <FormLabel>
-                {t('creation.form.questionLabel')} {index + 1}
-              </FormLabel>
-              {index > 0 && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => handleRemoveQuestion(index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            <FormLabel>
+              {t('creation.form.questionLabel')} {index + 1}
+            </FormLabel>
 
             <FormField
               control={form.control}
@@ -78,11 +65,8 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(index, 'label', e.target.value)
                       }
-                      style={{
-                        width: `${Math.max(question.label.length, t('multipleChoice.title').length) + 1}ch`,
-                      }}
                       placeholder={t('multipleChoice.title')}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none w-full"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -106,11 +90,8 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                           e.target.value,
                         )
                       }
-                      style={{
-                        width: `${Math.max(question.description!.length, t('multipleChoice.description').length) + 1}ch`,
-                      }}
                       placeholder={t('multipleChoice.description')}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none w-full"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -141,6 +122,10 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
               </div>
             ))}
           </div>
+          <BriefsProvider.Options
+            formFieldId={question.id}
+            className="ml-auto"
+          />
         </FormItem>
       )}
     />

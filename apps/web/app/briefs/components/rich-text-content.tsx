@@ -1,9 +1,8 @@
 import React from 'react';
-import { X } from 'lucide-react';
+
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@kit/ui/button';
 import {
   FormControl,
   FormField,
@@ -12,9 +11,11 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 
+import RichTextEditor from '~/components/ui/rich-text-editor';
+
+import { BriefsProvider } from '../contexts/briefs-context';
 import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
-import RichTextEditor from '~/components/ui/rich-text-editor';
 
 export interface FormRichTextComponentProps {
   index: number;
@@ -27,8 +28,8 @@ export interface FormRichTextComponentProps {
 
 const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
   index,
+  question,
   form,
-  handleRemoveQuestion,
   userRole,
 }) => {
   const { t } = useTranslation('briefs');
@@ -40,43 +41,42 @@ const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
   };
 
   return (
-    <>
-      <FormItem className="space-y-4">
-        <div className="flex items-center justify-between">
-          <FormLabel>
-            {t('richText.title')} {index + 1}
-          </FormLabel>
-          {index > 0 && (
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={() => handleRemoveQuestion(index)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-        <FormField
-          control={form.control}
-          name={`questions.${index}.label`}
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormControl>
-                <RichTextEditor
-                  {...field}
-                  content={currentValue} 
-                  onComplete={() => {}} 
-                  onChange={handleChange} 
-                  userRole={userRole}
-                  hideSubmitButton={true}
-                />
-              </FormControl>
-              <FormMessage>{fieldState.error?.message}</FormMessage>
-            </FormItem>
-          )}
-        />
-      </FormItem>
-    </>
+    <FormField
+      control={form.control}
+      name={`questions.${index}.label`}
+      render={({ field, fieldState }) => (
+        <FormItem className="flex w-full flex-col gap-2 space-y-4">
+          <div className="flex flex-col gap-2">
+            <FormLabel>
+              {t('richText.title')} {index + 1}
+            </FormLabel>
+            <FormField
+              control={form.control}
+              name={`questions.${index}.label`}
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormControl>
+                    <RichTextEditor
+                      {...field}
+                      content={currentValue}
+                      onComplete={() => {}}
+                      onChange={handleChange}
+                      userRole={userRole}
+                      hideSubmitButton={true}
+                    />
+                  </FormControl>
+                  <FormMessage>{fieldState.error?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
+          </div>
+          <BriefsProvider.Options
+            formFieldId={question.id}
+            className="ml-auto"
+          />
+        </FormItem>
+      )}
+    />
   );
 };
 
