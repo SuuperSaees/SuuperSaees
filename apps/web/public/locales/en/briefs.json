@@ -73,5 +73,9 @@
     "description" : "Description",
     "placeholder": "Click here or drag a file to upload",
     "fileTypes": "SVG, PNG, JPG or GIF (max. 800x400px)"
+  },
+  "uploadImage":{
+    "placeholder": "Click here or drag an image to upload",
+    "fileTypes": "PNG, JPG(max. 800x400px)"
   }
 }

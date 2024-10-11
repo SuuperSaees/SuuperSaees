@@ -73,6 +73,10 @@
     "description" : "Descripción",
     "placeholder": "Haz clic o arrastra para subir un archivo",
     "fileTypes": "SVG, PNG, JPG o GIF (max. 800x400px)"
+  },
+  "uploadImage":{
+    "placeholder": "Haz clic o arrastra para subir una imagen",
+    "fileTypes": "PNG, JPG(max. 800x400px)"
   }
 }
 
