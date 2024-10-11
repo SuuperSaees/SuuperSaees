@@ -85,6 +85,7 @@
     "remove": "Delete video",
     "dragOrClick": "Drag a video here or click to select",
     "dropHere": "Drop the video here",
-    "invalidFileType": "Please select a valid video file"
+    "invalidFileType": "Please select a valid video file",
+    "youtubePlaceholder": "Or enter a YouTube video URL"
   }
 }

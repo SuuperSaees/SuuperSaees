@@ -23,6 +23,7 @@ import { generateUUID } from '~/utils/generate-uuid';
 
 import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
+import { BriefsProvider } from '../contexts/briefs-context';
 
 export interface FormVideoUploadProps {
   index: number;
@@ -168,6 +169,12 @@ const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
     return url.toLowerCase() !== 'video';
   };
 
+  const isYouTubeUrl = (url: string) => {
+    const youtubeRegex =
+      /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
+    return youtubeRegex.test(url);
+  };
+
   return (
     <FormItem className="space-y-4">
       <div className="flex items-center justify-between">
@@ -187,7 +194,20 @@ const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
       <div>
         {isValidVideoUrl(videoUrl) ? (
           <div className="space-y-2">
-            <video controls src={videoUrl!} className="h-96 w-full" />
+            {isYouTubeUrl(videoUrl!) ? (
+              <iframe
+                width="100%"
+                height="400"
+                src={`https://www.youtube.com/embed/${new URL(
+                  videoUrl!
+                ).searchParams.get('v')}`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            ) : (
+              <video controls src={videoUrl!} className="h-96 w-full" />
+            )}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-500">{selectedFileName}</span>
               <Button
@@ -242,9 +262,16 @@ const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
               />
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>
+
           </FormItem>
         )}
       />
+      <div>
+        <BriefsProvider.Options
+          formFieldId={index}
+          className='justify-end flex'
+        />
+      </div>
     </FormItem>
   );
 };
