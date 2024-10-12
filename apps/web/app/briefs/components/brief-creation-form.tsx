@@ -30,8 +30,7 @@ import { Spinner } from '@kit/ui/spinner';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { isContentType, isInputType } from '../utils/type-guards';
-import Draggable from './draggable';
-import Droppable from './droppable';
+import { Sortable } from './sortable';
 
 type CreateBriefDialogProps = {
   propietaryOrganizationId: string;
@@ -44,6 +43,7 @@ const briefCreationFormSchema = z.object({
     .max(200, { message: 'Name must be at most 200 characters.' }),
   questions: z.array(
     z.object({
+      position: z.number(),
       label: z.string().min(1, { message: 'Question label cannot be empty.' }),
       description: z.string().optional().nullable(),
       placeholder: z.string().optional().nullable(),
@@ -188,7 +188,7 @@ const BriefCreationForm = ({
   }, [formFields, form]); // Re-run effect when formFields or form change
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8 h-full">
         {/* Brief Name Input */}
         <FormField
           control={form.control}
@@ -222,25 +222,17 @@ const BriefCreationForm = ({
             // Check if FormFieldComponent is a function
             if (typeof FormFieldComponent === 'function') {
               return (
-                <Droppable
-                  id={'droppable-form-field-' + question.id}
-                  key={'q' + index}
-                  data={{ id: question.id }}
-                >
-                  <Draggable
-                    id={'draggable-form-field-' + question.id}
-                    data={{ id: question.id }}
-                  >
-                    <FormFieldComponent
-                      index={index}
-                      question={question}
-                      form={form}
-                      handleQuestionChange={handleQuestionChange}
-                      handleRemoveQuestion={handleRemoveQuestion}
-                      userRole={userRole}
-                    />
-                  </Draggable>
-                </Droppable>
+  
+                <Sortable key={'q' + index} id={question.id}>
+                  <FormFieldComponent
+                    index={index}
+                    question={question}
+                    form={form}
+                    handleQuestionChange={handleQuestionChange}
+                    handleRemoveQuestion={handleRemoveQuestion}
+                    userRole={userRole}
+                  />
+                </Sortable>
               );
             }
             // If it's a JSX element, render it directly

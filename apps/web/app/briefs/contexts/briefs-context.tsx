@@ -1,20 +1,14 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useCallback, useContext } from 'react';
 
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
+import { Plus } from 'lucide-react';
 
 import Options from '../components/form-field-actions';
 import InputCard from '../components/input-card';
+import { useBriefDragAndDrop } from '../hooks/use-brief-drag-and-drop';
 import { useBriefFormFields } from '../hooks/use-brief-form-fields';
 import {
   Content,
@@ -23,6 +17,7 @@ import {
   Input,
   InputTypes,
 } from '../types/brief.types';
+import { isContentType, isInputType } from '../utils/type-guards';
 
 interface BriefsContext {
   inputs: Input[];
@@ -51,64 +46,54 @@ export const BriefsContext = createContext<BriefsContext | undefined>(
 export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   const formFieldsContext = useBriefFormFields();
 
-  const mouseSensor = useSensor(MouseSensor, {
-    // Require the mouse to move by 10 pixels before activating
-    activationConstraint: {
-      distance: 10,
-    },
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    // Press delay of 250ms, with tolerance of 5px of movement
-    activationConstraint: {
-      delay: 250,
-      tolerance: 5,
-    },
-  });
+  const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
+    useBriefDragAndDrop({
+      swapFormFields: formFieldsContext.swapFormFields,
+      formFields: formFieldsContext.formFields,
+      addFormField: formFieldsContext.addFormField,
+    });
 
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const WidgetComponent = useCallback(() => {
+    const widgetType = widget.type ?? '';
+    const widgetEntry = isInputType(widgetType)
+      ? formFieldsContext.inputsMap.get(widgetType)
+      : isContentType(widgetType)
+        ? formFieldsContext.contentMap.get(widgetType)
+        : undefined;
 
-  const [isDropped, setIsDropped] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
+    if (!widgetEntry) return null;
 
-  function handleDragEnd(event: DragEndEvent) {
-    if (event.over?.data?.current && event.active?.data?.current) {
-      const droppableId =
-        'droppable-form-field-' + event.over?.data?.current.id;
-      if (event.over.id === droppableId) {
-        console.log('droppable-data', event.over, event.active);
-        setIsDropped(true);
-        setIsDragging(false);
-        formFieldsContext.swapFormFields(
-          event.over.data.current.id,
-          event.active.data.current.id,
-        );
-      }
-    }
-  }
-  function handleDragStart() {
-    setIsDragging(true);
-  }
+    return (
+      <div className="relative">
+        <InputCard
+          name={widgetEntry?.name}
+          icon={widgetEntry?.icon}
+          action={widgetEntry?.action}
+          className="cursor-move border-none bg-white/70 text-gray-600 hover:border-gray-300"
+        />
+        <Plus className="absolute right-2 top-2 h-5 w-5 text-gray-500" />
+      </div>
+    );
+  }, [widget.type, formFieldsContext.inputsMap, formFieldsContext.contentMap]);
 
   return (
-    <DndContext
-      onDragEnd={handleDragEnd}
-      onDragStart={handleDragStart}
-      sensors={sensors}
-    >
-      <BriefsContext.Provider value={{ ...formFieldsContext }}>
-        {children}
-
-        <DragOverlay className="border-gray-300 text-gray-300 grayscale-0 hover:border-gray-300">
-          {isDragging ? (
-            <InputCard
-              icon={formFieldsContext?.inputs[0]?.icon}
-              name={formFieldsContext?.inputs[0]?.name}
-              action={() => {}}
-            />
+    <BriefsContext.Provider value={{ ...formFieldsContext }}>
+      <DndContext
+        onDragEnd={handleDragEnd}
+        onDragStart={handleDragStart}
+        sensors={sensors}
+        collisionDetection={closestCorners}
+      >
+        <SortableContext items={formFieldsContext.formFields}>
+          {children}
+          {isDragging && widget.isDragging ? (
+            <DragOverlay>
+              <WidgetComponent />
+            </DragOverlay>
           ) : null}
-        </DragOverlay>
-      </BriefsContext.Provider>
-    </DndContext>
+        </SortableContext>
+      </DndContext>
+    </BriefsContext.Provider>
   );
 };
 
