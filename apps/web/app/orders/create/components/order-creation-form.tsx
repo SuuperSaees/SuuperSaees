@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
@@ -15,12 +13,15 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-
-
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
-
-
 
 import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
@@ -125,7 +126,6 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
   const handleFileIdsChange = (fileIds: string[]) => {
     setUploadedFileIds(fileIds);
     form.setValue('fileIds', fileIds);
-    // console.log('Uploaded File IDs:', fileIds);
   };
 
   return (
@@ -149,24 +149,31 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
           )}
         />
         {!briefs.length && (
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
-                <FormControl>
-                  <ThemedTextarea
-                    {...field}
-                    placeholder={t('creation.form.descriptionPlaceholder')}
-                    rows={5}
-                    className="focus-visible:ring-none"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
+                  <FormControl>
+                    <ThemedTextarea
+                      {...field}
+                      placeholder={t('creation.form.descriptionPlaceholder')}
+                      rows={5}
+                      className="focus-visible:ring-none"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <UploadFileComponent
+              bucketName="orders"
+              uuid={uniqueId}
+              onFileIdsChange={handleFileIdsChange}
+            />
+          </>
         )}
         {/* Brief form fields */}
 
@@ -176,11 +183,6 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
           orderId={form.getValues('uuid')}
         />
 
-        <UploadFileComponent
-          bucketName="orders"
-          uuid={uniqueId}
-          onFileIdsChange={handleFileIdsChange}
-        />
         <ThemedButton type="submit" className="flex gap-2">
           <span>{t('creation.form.submitMessage')}</span>
           {createOrdersMutations.isPending && (
