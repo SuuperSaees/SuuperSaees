@@ -73,5 +73,19 @@
     "description" : "Description",
     "placeholder": "Click here or drag a file to upload",
     "fileTypes": "SVG, PNG, JPG or GIF (max. 800x400px)"
+  },
+  "video": {
+    "title": "Video",
+    "uploadSuccess": "Video uploaded successfully",
+    "uploadError": "Error uploading video",
+    "uploadUrlError": "Failed to generate upload URL",
+    "databaseEntryError": "Failed to create database entry",
+    "description": "Description",
+    "placeholder": "Upload a video",
+    "remove": "Delete video",
+    "dragOrClick": "Drag a video here or click to select",
+    "dropHere": "Drop the video here",
+    "invalidFileType": "Please select a valid video file",
+    "youtubePlaceholder": "Or enter a YouTube video URL"
   }
 }

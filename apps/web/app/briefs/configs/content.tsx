@@ -3,6 +3,7 @@ import { ALargeSmall, AlignCenter, Image, Play } from 'lucide-react';
 import FormTitleComponent from '../components/title-content';
 import FormRichTextComponent from '../components/rich-text-content';
 import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
+import FormVideoUpload from '../components/video-content';
 
 type ContentKey = ContentTypes;
 type ContentValue = Content;
@@ -78,13 +79,22 @@ export const generateContent = (
       {
         name: 'Video',
         icon: <Play className="h-8 w-8" />,
-        action: () => action('video'), // Action passed dynamically,
-        component: <></>, // Custom component,
+        action: () => action('video'), 
         content: {
           label: 'Video',
           placeholder: '',
           description: '',
+          type: 'video',
         },
+        component: (props: ComponentProps) => (
+          <FormVideoUpload
+            index={props.index}
+            question={props.question}
+            form={props.form}
+            handleQuestionChange={props.handleQuestionChange}
+            handleRemoveQuestion={props.handleRemoveQuestion}
+          />
+        )
       },
     ],
     // Add other content...

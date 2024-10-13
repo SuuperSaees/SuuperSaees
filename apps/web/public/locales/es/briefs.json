@@ -73,6 +73,20 @@
     "description" : "Descripción",
     "placeholder": "Haz clic o arrastra para subir un archivo",
     "fileTypes": "SVG, PNG, JPG o GIF (max. 800x400px)"
+  },
+  "video": {
+    "title": "Video",
+    "uploadSuccess": "Vídeo subido con éxito",
+    "uploadError": "Error al cargar el video",
+    "uploadUrlError": "No se pudo generar la URL de carga",
+    "databaseEntryError": "No se pudo crear la entrada de la base de datos",
+    "description": "Descripción",
+    "placeholder": "Subir un video",
+    "remove": "Eliminar video",
+    "dragOrClick": "Arrastre un video aquí o haga clic para seleccionarlo",
+    "dropHere": "Deja el video aquí",
+    "invalidFileType": "Por favor seleccione un archivo de vídeo válido",
+    "youtubePlaceholder": "O ingresa una URL de video de YouTube"
   }
 }
 
