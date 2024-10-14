@@ -11,7 +11,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import type { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get-domain-by-user-id';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { generateRandomPassword // getTextColorBasedOnBackground
 } from '../../../utils/generate-colors';
 import { addUserAccountRole } from '../../members/create/create-account';
@@ -21,7 +21,7 @@ import { insertOrganization } from '../../organizations/create/create-organizati
 import { getAgencyForClient, getOrganization, // getOrganizationSettings,
 getOrganizationById } from '../../organizations/get/get-organizations';
 import { hasPermissionToAddClientMembers, hasPermissionToCreateClientOrg } from '../../permissions/clients';
-
+import { fetchCurrentUser } from '../../members/get/get-member-account';
 
 // Define la función createClient
 type CreateClient = {
@@ -39,9 +39,10 @@ const createClientUserAccount = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw new Error(`Error getting user: ${userError.message}`);
-    const baseUrl = await getDomainByUserId(userData.user.id, true);
+    const userData = await fetchCurrentUser(client);
+    const userId = userData?.id;
+    if (!userId) throw new Error('No user id provided');
+    const baseUrl = await getDomainByUserId(userId, true);
 
     // const organizationSettings = await getOrganizationSettings();
 
@@ -239,7 +240,6 @@ export const addClientMember = async ({
     const clientOrganizationUser = await createClientUserAccount(
       email,
       clientOrganization.name,
-      userId,
     );
     const clientUserId = clientOrganizationUser.user?.id;
     if (!clientUserId) {

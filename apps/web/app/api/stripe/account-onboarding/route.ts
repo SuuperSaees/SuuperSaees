@@ -4,16 +4,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { getDomainByUserId } from '~/multitenancy/utils/get-domain-by-user-id';
+
+
+import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
+
+import { fetchCurrentUser } from '../../../../../../packages/features/team-accounts/src/server/actions/members/get/get-member-account';
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
   const { accountId } = await req.json();
   const supabase = getSupabaseServerComponentClient();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError) throw userError.message;
-  const userId = userData?.user.id;
+  const userData = await fetchCurrentUser(supabase);
+  const userId = userData.id;
 
   const baseUrl = await getDomainByUserId(userId, true);
 

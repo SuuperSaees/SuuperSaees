@@ -4,7 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { getDomainByUserId } from '~/multitenancy/utils/get-domain-by-user-id';
+
+
+import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
+
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);

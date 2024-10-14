@@ -6,13 +6,18 @@ import { NextResponse, URLPattern } from 'next/server';
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
+
+
 import pathsConfig from '~/config/paths.config';
-import { getDomainByUserId } from '~/multitenancy/utils/get-domain-by-user-id';
+import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
+
+
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
 import { handleDomainCheck } from './handlers/domain-check-handler';
+
 
 export const config = {
   matcher: [
@@ -20,6 +25,20 @@ export const config = {
     '/api/v1/:path*',
   ],
 };
+
+function getCachedDomain(request: NextRequest, userId: string): string | null {
+  const domainCookie = request.cookies.get(`domain_${userId}`);
+  return domainCookie ? domainCookie.value : null;
+}
+
+function setCachedDomain(
+  response: NextResponse,
+  userId: string,
+  domain: string,
+) {
+  // Cache the domain for 1 hour (you can adjust this time as needed)
+  response.cookies.set(`domain_${userId}`, domain, { maxAge: 60 * 60 });
+}
 
 const getUser = (request: NextRequest, response: NextResponse) => {
   const supabase = createMiddlewareClient(request, response);
@@ -56,7 +75,15 @@ export async function middleware(request: NextRequest) {
         data: { user },
       } = await supabase.auth.getUser();
       const userId = user?.id ?? '';
-      const domain = await getDomainByUserId(userId, false);
+      // Try to get the domain from cache (cookie)
+      let domain = getCachedDomain(request, userId);
+
+      if (!domain) {
+        // If not in cache, fetch the domain
+        domain = await getDomainByUserId(userId, false);
+        // Cache the domain in a cookie
+        setCachedDomain(response, userId, domain);
+      }
 
       const corsResult = handleCors(request, response, domain);
       if (corsResult) return corsResult;

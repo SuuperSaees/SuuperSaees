@@ -5,7 +5,8 @@ import { getLogger } from '@kit/shared/logger';
 
 
 
-import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get-domain-by-user-id';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+
 
 const emailSender = process.env.EMAIL_SENDER ?? '';
 

@@ -4,7 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { getDomainByUserId } from '~/multitenancy/utils/get-domain-by-user-id';
+
+
+import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
+
+import { fetchCurrentUser } from '../../../../../../packages/features/team-accounts/src/server/actions/members/get/get-member-account';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -12,9 +16,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 export async function POST(req: NextRequest) {
   const { priceId, customer } = await req.json();
   const supabase = getSupabaseServerComponentClient();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError) throw userError.message;
-  const userId = userData?.user.id;
+  const userData = await fetchCurrentUser(supabase);
+  const userId = userData.id;
 
   const baseUrl = await getDomainByUserId(userId, true);
   if (!priceId) {
