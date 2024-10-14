@@ -188,7 +188,7 @@ const BriefCreationForm = ({
   }, [formFields, form]); // Re-run effect when formFields or form change
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8 h-full">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8 h-full overflow-y-auto no-scrollbar">
         {/* Brief Name Input */}
         <FormField
           control={form.control}

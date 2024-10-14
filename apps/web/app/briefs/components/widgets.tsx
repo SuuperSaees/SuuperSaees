@@ -37,7 +37,7 @@ export default function Widgets() {
   });
 
   return (
-    <div className="flex w-full max-w-80 flex-col gap-4 p-4 border border-l-1 border-slate-gray-300 max-h-full h-full overflow-y-auto">
+    <div className="flex w-full max-w-80 flex-col gap-4 p-4 border border-l-1 border-slate-gray-300 max-h-full h-full ">
       {isEditing ? (
         <>
         <div className='flex gap-2 items-center'>
@@ -54,8 +54,11 @@ export default function Widgets() {
       ) : (
         <>
           <h1 className="text-2xl font-bold">Widgets</h1>
-          <Inputs inputs={mappedInputs} />
-          <Content content={mappedContent} />
+          <div className='flex flex-col gap-4 max-h-full overflow-y-auto no-scrollbar'>
+
+            <Inputs inputs={mappedInputs} />
+            <Content content={mappedContent} />
+          </div>
         </>
       )}
     </div>
