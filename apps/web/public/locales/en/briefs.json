@@ -34,6 +34,14 @@
       "edit": {
         "title": "Edit widget"
       }
+    }, 
+    "panel": {
+      "widgets": {
+        "title": "Widgets"
+      }, 
+      "settings": {
+        "title": "Settings"
+      }
     }
   },
   "singleChoice": {

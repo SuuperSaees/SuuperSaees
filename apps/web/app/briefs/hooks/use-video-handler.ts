@@ -14,7 +14,7 @@ type TranslationFunction = (key: string) => string;
 export function useVideoHandler(t: TranslationFunction, form: UseFormReturn<z.infer<typeof widgetEditSchema>>, currentFormField: FormField | undefined, updateFormField: (
   index: number,
   updatedFormField: FormField,
-) => FormField | undefined) {
+) => void) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [selectedFileName, setSelectedFileName] = useState<string>('');

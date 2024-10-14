@@ -8,9 +8,11 @@ import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 import Widgets from './widgets';
 import BriefCreationForm from './brief-creation-form';
+import { useTranslation } from 'react-i18next';
 
 export default function Panel() {
   const [activeTab, setActiveTab] = useState<'widgets' | 'settings'>('widgets');
+  const {t} = useTranslation('briefs');
   return (
     <Tabs
       className="border-l-1 border-slate-gray-300 flex h-full max-h-full w-full max-w-80 flex-col gap-4 overflow-y-auto border p-4"
@@ -26,8 +28,8 @@ export default function Panel() {
           option={'widgets'}
           className="w-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-brand data-[state=active]:bg-transparent"
         >
-          {/* <Trans i18nKey={'orders:details.navigation.activity'} /> */}
-          Wigets
+
+          {t('creation.panel.widgets.title')}
         </ThemedTabTrigger>
         <ThemedTabTrigger
           value="settings"
@@ -35,8 +37,7 @@ export default function Panel() {
           option={'settings'}
           className="w-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-brand data-[state=active]:bg-transparent"
         >
-          {/* <Trans i18nKey={'orders:details.navigation.details'} /> */}
-          Settings
+          {t('creation.panel.settings.title')}
         </ThemedTabTrigger>
       </TabsList>
 
