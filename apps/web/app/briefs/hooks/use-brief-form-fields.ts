@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { arrayMove } from '@dnd-kit/sortable';
+
 import { generateContent } from '../configs/content';
 import { generateInputs } from '../configs/inputs';
 import {
@@ -35,7 +37,10 @@ export const useBriefFormFields = () => {
   const content = Array.from(contentMap.values());
 
   // Add a new form field using index as id (number)
-  const addFormField = (formFieldType: FormField['type']) => {
+  const addFormField = (
+    formFieldType: FormField['type'],
+    insertAtIndex?: number, // Optional parameter to insert at a specific index
+  ): FormField => {
     let newFormField: FormField | undefined;
 
     if (formFieldType && isInputType(formFieldType)) {
@@ -44,41 +49,69 @@ export const useBriefFormFields = () => {
       newFormField = contentMap.get(formFieldType)?.content;
     }
 
-    const nextIndexId = formFields.length; // Use the current length as the number-based id
+    const nextIndexId = formFields.length + 1;
 
-    if (newFormField) {
+    // Ensure newFormField is defined or create a default object
+    if (!newFormField) {
       newFormField = {
-        ...newFormField,
-        id: nextIndexId, // Assign index as a number ID
-      };
-      setFormFields([...formFields, newFormField]);
-    }
-
-    setCurrentFormField(newFormField);
-    setIsEditing(true);
-
-    return (
-      newFormField ?? {
-        id: nextIndexId, // Ensure even empty form fields have a number id
+        id: nextIndexId,
         type: formFieldType,
         label: '',
         placeholder: '',
         description: '',
+        position: nextIndexId,
+      };
+    } else {
+      newFormField = {
+        ...newFormField,
+        id: nextIndexId,
+        position: nextIndexId,
+      };
+    }
+
+    setFormFields((prevFields) => {
+      const updatedFields = [...prevFields];
+
+      if (typeof insertAtIndex === 'number') {
+        // Insert the new field at the specific index
+        updatedFields.splice(insertAtIndex, 0, newFormField);
+      } else {
+        // Append at the end if no specific index
+        updatedFields.push(newFormField);
       }
-    );
+
+      // Update positions based on the new array order
+      const fieldsWithUpdatedPositions = updatedFields.map((field, index) => ({
+        ...field,
+        position: index + 1, // Set position to index + 1 (1-based indexing)
+      }));
+
+      return fieldsWithUpdatedPositions;
+    });
+
+    setCurrentFormField(newFormField);
+    setIsEditing(true);
+
+    return newFormField;
   };
 
   // Remove a form field by number id
   const removeFormField = (id: number) => {
     const updatedFormFields = formFields.filter((_, i) => i !== id);
     setFormFields(updatedFormFields);
+    setCurrentFormField(undefined);
+    stopEditing();
   };
 
   // Update a form field by number id
   const updateFormField = (id: number, updatedFormField: FormField) => {
-    if (id >= 0 && id < formFields.length) {
+    // Find the index of the form field with the given id
+    const index = formFields.findIndex((field) => field.id === id);
+
+    if (index !== -1) {
       const updatedFormFields = [...formFields];
-      updatedFormFields[id] = updatedFormField;
+      updatedFormFields[index] = updatedFormField;
+
       setFormFields(updatedFormFields);
       return updatedFormField;
     }
@@ -115,10 +148,33 @@ export const useBriefFormFields = () => {
     setFormFields([...formFields, duplicatedFormField]);
   };
 
+  // Swap two form fields and update their positions
+  const swapFormFields = (fromIndex: number, toIndex: number) => {
+    setFormFields((prevFields) => {
+      // Use arrayMove to reorder the formFields array
+      const reorderedFields = arrayMove(prevFields, fromIndex, toIndex);
+
+      // Update positions based on the new array order
+      const fieldsWithUpdatedPositions = reorderedFields.map(
+        (field, index) => ({
+          ...field,
+          position: index + 1, // Set position to index + 1 (1-based indexing)
+        }),
+      );
+
+      return fieldsWithUpdatedPositions;
+    });
+  };
+
   return {
+    inputs,
+    content,
+    inputsMap,
+    contentMap,
     formFields,
     currentFormField,
     isEditing,
+    setFormFields,
     addFormField,
     removeFormField,
     updateFormField,
@@ -126,9 +182,6 @@ export const useBriefFormFields = () => {
     editFormField,
     stopEditing,
     startEditing,
-    inputs,
-    content,
-    inputsMap,
-    contentMap,
+    swapFormFields,
   };
 };
