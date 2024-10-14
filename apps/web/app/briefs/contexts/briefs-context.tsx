@@ -32,7 +32,7 @@ interface BriefsContext {
   updateFormField: (
     index: number,
     updatedFormField: FormField,
-  ) => FormField | undefined;
+  ) => void;
   duplicateFormField: (id: number) => void;
   editFormField: (id: number) => void;
   stopEditing: () => void;
@@ -55,11 +55,17 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const WidgetComponent = useCallback(() => {
     const widgetType = widget.type ?? '';
-    const widgetEntry = isInputType(widgetType)
-      ? formFieldsContext.inputsMap.get(widgetType)
-      : isContentType(widgetType)
-        ? formFieldsContext.contentMap.get(widgetType)
-        : undefined;
+    
+    const getWidgetEntry = (widgetType: string) => {
+      if (isInputType(widgetType)) {
+          return formFieldsContext.inputsMap.get(widgetType);
+      } else if (isContentType(widgetType)) {
+          return formFieldsContext.contentMap.get(widgetType);
+      }
+      return undefined;
+  };
+
+    const widgetEntry = getWidgetEntry(widgetType)
 
     if (!widgetEntry) return null;
 
