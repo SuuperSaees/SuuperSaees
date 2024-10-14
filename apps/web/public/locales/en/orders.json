@@ -77,6 +77,8 @@
   "internalMessagingDisabled": "Internal messaging disabled",
   "internalMessage": "Internal message",
   "placeholder": "Write a message...",
-  "dropdown": "Select an option"
+  "dropdown": "Select an option",
+  "deletedFile": "File deleted",
+  "deletedFileDescription": "The file was deleted successfully"
 }
   

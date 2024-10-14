@@ -45,7 +45,6 @@ export async function deleteFile(
 
 
 export async function deleteOrderBriefFile(file_id: string) {
-    // console.log('file_id', file_id);
     const client = getSupabaseServerComponentClient();
 
     // Obtener los datos del archivo
@@ -86,8 +85,6 @@ export async function deleteOrderBriefFile(file_id: string) {
 
         if (storageError) throw storageError;
     }
-
-    console.log('fileData', fileData);
 
     return fileData;
 }

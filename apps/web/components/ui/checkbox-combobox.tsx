@@ -65,7 +65,6 @@ export default function CheckboxCombobox<
     option.label.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   const handlePopoverClose = async (open: boolean) => {
-    // console.log('v', defaultValues);
     if (!open) {
       const currentValues = form.getValues();
       const hasChanges = Object.keys(currentValues).some(

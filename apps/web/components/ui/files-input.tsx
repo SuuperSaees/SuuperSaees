@@ -4,6 +4,7 @@ import { createFile, createUploadBucketURL } from '../../../../packages/features
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { useTranslation } from 'react-i18next';
 import { deleteOrderBriefFile } from '~/team-accounts/src/server/actions/files/delete/delete-file';
+import { toast } from 'sonner';
 
 const fileTypeColors: Record<string, string> = {
   pdf: 'fill-pdf',
@@ -207,7 +208,11 @@ export default function UploadFileComponent({
     });
     if (files[id]?.serverId) {
       const deletedFile = await deleteOrderBriefFile(files[id].serverId);
-      console.log('deletedFile', deletedFile);
+      if (deletedFile) {
+        toast(t('orders:deletedFile'), {
+          description: t('orders:deletedFileDescription'),
+        });
+      }
     }
   };
 
