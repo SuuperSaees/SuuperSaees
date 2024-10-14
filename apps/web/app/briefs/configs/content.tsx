@@ -4,7 +4,7 @@ import FormTitleComponent from '../components/title-content';
 import FormRichTextComponent from '../components/rich-text-content';
 import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
 import FormVideoUpload from '../components/video-content';
-import UploadImage from '../components/upload-image';
+import UploadImagePreview from '../components/upload-image-preview';
 
 type ContentKey = ContentTypes;
 type ContentValue = Content;
@@ -70,11 +70,10 @@ export const generateContent = (
         content: {
           label: 'Image',
           placeholder: '',
-          description: '',
           type:'image'
         },
         component: (props: ComponentProps) => (
-          <UploadImage
+          <UploadImagePreview
             index={props.index}
             question={props.question}
             form={props.form}

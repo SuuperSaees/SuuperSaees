@@ -20,7 +20,10 @@ import {
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { widgetEditSchema } from '../schemas/widget-edit-schema';
+import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
+import UploadImageDropzone from './upload-image-dropzone';
 
+export type WidgetCreationForm = z.infer<typeof widgetEditSchema>;
 export function WidgetEditForm() {
   const { currentFormField, updateFormField } = useBriefsContext();
 
@@ -42,7 +45,7 @@ export function WidgetEditForm() {
   });
 
   // Helper for updating form and context state
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement>) => {
     const { name, value } = e.target;
     form.setValue(name as keyof z.infer<typeof widgetEditSchema>, value);
 
@@ -53,6 +56,20 @@ export function WidgetEditForm() {
         [name]: value,
       });
     }
+  };
+
+  const handleChangeImage = (urlImage:string) => {
+    
+    form.setValue('label' as keyof z.infer<typeof widgetEditSchema>, urlImage);
+
+    if (currentFormField) {
+      updateFormField(currentFormField.id, {
+        ...form.getValues(),
+        id: currentFormField.id,
+        'label': urlImage,
+      });
+    }
+    
   };
 
   // Submit handler
@@ -110,14 +127,28 @@ export function WidgetEditForm() {
     />
   );
 
+  const renderImageInput = () => (
+    <UploadImageDropzone
+      form = {form}
+      index = {currentFormField?.id}
+      nameField={'label'}
+      handleQuestionChange={handleChangeImage}
+    />
+  );
+
   // Render logic based on type
   const renderFormFields = () => {
     if (!currentFormField) return null;
+    const type = form.getValues('type');
+    console.log(type);
 
     return Object.keys(currentFormField)
       .filter((key) => key !== 'id')
       .map((fieldName) => {
+        console.log(fieldName);
         if (fieldName === 'options') return renderOptionFields();
+        if (type === 'image' && fieldName == 'placeholder') return renderImageInput();
+        if (type === 'image' && fieldName == 'label') return null;
         return renderFieldInput(
           fieldName,
           fieldName.charAt(0).toUpperCase() + fieldName.slice(1),
