@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ChangeEvent, useEffect } from 'react';
+import React, { ChangeEvent, useEffect  } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
@@ -17,29 +17,29 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-
 import { useBriefsContext } from '../contexts/briefs-context';
 import { widgetEditSchema } from '../schemas/widget-edit-schema';
 import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
 import UploadImageDropzone from './upload-image-dropzone';
+import { useVideoHandler } from '../hooks/use-video-handler';
+import { RenderVideoContent } from './render-video-content';
 
 export type WidgetCreationForm = z.infer<typeof widgetEditSchema>;
 export function WidgetEditForm() {
   const { currentFormField, updateFormField } = useBriefsContext();
-
   const { t } = useTranslation('briefs');
-
   const form = useForm<z.infer<typeof widgetEditSchema>>({
     resolver: zodResolver(widgetEditSchema),
     defaultValues: currentFormField,
     mode: 'onChange',
   });
 
-  const {
-    fields: optionsFields,
-    append,
-    remove,
-  } = useFieldArray({
+  const { 
+    isUploading, videoUrl, isVideoValid, isDragging, fileInputRef, isYouTubeVideo, selectedFileName,
+    handleFileChange, handleUrlInput, handleDragEnter, handleDragLeave, handleDrop, setVideoUrl, setIsVideoValid, setSelectedFileName , setIsYouTubeVideo, checkVideoValidity
+  } = useVideoHandler(t, form, currentFormField, updateFormField);
+
+  const { fields: optionsFields, append, remove } = useFieldArray({
     control: form.control,
     name: 'options',
   });
@@ -72,14 +72,12 @@ export function WidgetEditForm() {
     
   };
 
-  // Submit handler
   const onSubmit = (values: z.infer<typeof widgetEditSchema>) => {
     if (currentFormField) {
       updateFormField(currentFormField.id, { ...currentFormField, ...values });
     }
   };
 
-  // Option rendering helper
   const renderOptionFields = () => (
     <React.Fragment>
       {optionsFields.map((option, index) => (
@@ -101,7 +99,6 @@ export function WidgetEditForm() {
     </React.Fragment>
   );
 
-  // Field rendering helper
   const renderFieldInput = (fieldName: string, label: string) => (
     <FormField
       key={fieldName}
@@ -136,7 +133,6 @@ export function WidgetEditForm() {
     />
   );
 
-  // Render logic based on type
   const renderFormFields = () => {
     if (!currentFormField) return null;
     const type = form.getValues('type');
@@ -147,6 +143,31 @@ export function WidgetEditForm() {
         if (fieldName === 'options') return renderOptionFields();
         if (type === 'image' && fieldName == 'placeholder') return renderImageInput();
         if (type === 'image' && fieldName == 'label') return null;
+        if (type === 'video' && fieldName === 'label') {
+          return (
+            <div key={fieldName}>
+              <RenderVideoContent
+                isUploading={isUploading}
+                videoUrl={videoUrl}
+                isVideoValid={isVideoValid}
+                isDragging={isDragging}
+                fileInputRef={fileInputRef}
+                isYouTubeVideo={isYouTubeVideo}
+                selectedFileName={selectedFileName}
+                t={t}
+                handleFileChange={handleFileChange}
+                handleUrlInput={handleUrlInput}
+                handleDragEnter={handleDragEnter}
+                handleDragLeave={handleDragLeave}
+                handleDrop={handleDrop}
+                setVideoUrl={setVideoUrl}
+                setIsVideoValid={setIsVideoValid}
+                setIsYouTubeVideo={setIsYouTubeVideo}
+                setSelectedFileName={setSelectedFileName}
+              />
+            </div>
+          );
+        }
         return renderFieldInput(
           fieldName,
           fieldName.charAt(0).toUpperCase() + fieldName.slice(1),
@@ -154,16 +175,27 @@ export function WidgetEditForm() {
       });
   };
 
-  // Reset form when currentFormField changes
   useEffect(() => {
     form.reset(currentFormField);
+    if (currentFormField?.type === 'video' && currentFormField?.label) {
+      const validateInitialVideo = async () => {
+        const isValid: boolean = (await checkVideoValidity(
+          currentFormField.label,
+        )) as boolean;
+        setIsVideoValid(isValid);
+        setVideoUrl(isValid ? currentFormField.label : null);
+      };
+      validateInitialVideo().catch((error) => {
+        console.error('Error validating initial video:', error);
+      });
+    }
   }, [currentFormField, form]);
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="h-full w-full space-y-8"
+        className="h-full w-full space-y-8 overflow-y-auto no-scrollbar max-h-full"
       >
         <h2>
           {t('creation.form.questionLabel') + ' '}

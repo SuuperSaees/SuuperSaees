@@ -45,76 +45,79 @@ export function FormFieldShortText({
       name={`questions.${index}`}
       render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
-          <FormLabel>
-            {t('creation.form.questionLabel')} {index + 1}
-          </FormLabel>
+          <div className="flex flex-col gap-2">
+            <FormLabel>
+              {t('creation.form.questionLabel')} {index + 1}
+            </FormLabel>
 
-          {/* Label Input */}
-          <FormField
-            control={form.control}
-            name={`questions.${index}.label`}
-            render={({ field, fieldState }) => (
-              <FormItem>
-                <FormControl>
-                  <ThemedInput
-                    {...field}
-                    value={question.label}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleQuestionChange(index, 'label', e.target.value)
-                    }
-                    placeholder={t('creation.form.labelPlaceholder')}
-                    className="focus-visible:ring-none"
-                  />
-                </FormControl>
-                <FormMessage>{fieldState.error?.message}</FormMessage>
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name={`questions.${index}.label`}
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormControl>
+                    <input
+                      {...field}
+                      value={question.label}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleQuestionChange(index, 'label', e.target.value)
+                      }
+                      placeholder={t('creation.form.labelPlaceholder')}
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                    />
+                  </FormControl>
+                  <FormMessage>{fieldState.error?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
 
-          {/* Description Input */}
-          <FormField
-            control={form.control}
-            name={`questions.${index}.description`}
-            render={({ field, fieldState }) => (
-              <FormItem>
-                <FormControl>
-                  <ThemedInput
-                    {...field}
-                    value={question.description}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleQuestionChange(index, 'description', e.target.value)
-                    }
-                    placeholder={t('creation.form.descriptionPlaceholder')}
-                    className="focus-visible:ring-none"
-                  />
-                </FormControl>
-                <FormMessage>{fieldState.error?.message}</FormMessage>
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name={`questions.${index}.description`}
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormControl>
+                    <input
+                      {...field}
+                      value={question.description ?? ''}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleQuestionChange(
+                          index,
+                          'description',
+                          e.target.value,
+                        )
+                      }
+                      placeholder={t('creation.form.descriptionPlaceholder')}
+                      className="border-none text-sm font-medium text-gray-600 focus:outline-none w-full"
+                    />
+                  </FormControl>
+                  <FormMessage>{fieldState.error?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
 
-          {/* Placeholder Input */}
-          <FormField
-            control={form.control}
-            name={`questions.${index}.placeholder`}
-            render={({ field, fieldState }) => (
-              <FormItem>
-                <FormControl>
-                  <ThemedInput
-                    {...field}
-                    value={question.placeholder}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleQuestionChange(index, 'placeholder', e.target.value)
-                    }
-                    placeholder={t('creation.form.placeholderPlaceholder')}
-                    className="focus-visible:ring-none"
-                  />
-                </FormControl>
-                <FormMessage>{fieldState.error?.message}</FormMessage>
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name={`questions.${index}.placeholder`}
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormControl>
+                    <ThemedInput
+                      {...field}
+                      value={question.placeholder}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleQuestionChange(index, 'placeholder', e.target.value)
+                      }
+                      placeholder={t('creation.form.placeholderPlaceholder')}
+                      className="focus-visible:ring-none"
+                    />
+                  </FormControl>
+                  <FormMessage>{fieldState.error?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
 
+          </div>
           <BriefsProvider.Options
             formFieldId={question.id}
             className="ml-auto"
