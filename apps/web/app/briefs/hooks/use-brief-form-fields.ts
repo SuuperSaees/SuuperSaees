@@ -36,11 +36,16 @@ export const useBriefFormFields = () => {
   // title, enriched text, image, video
   const content = Array.from(contentMap.values());
 
-  // Add a new form field using index as id (number)
-  const addFormField = (
-    formFieldType: FormField['type'],
-    insertAtIndex?: number, // Optional parameter to insert at a specific index
-  ): FormField => {
+  // Helper to update field positions consistently
+  function updateFieldPositions(fields: FormField[]): FormField[] {
+    return fields.map((field, index) => ({
+      ...field,
+      position: index + 1, // Set position to index + 1 (1-based indexing)
+    }));
+  }
+
+  // Create a new form field
+  function createFormField(formFieldType: FormField['type']): FormField {
     let newFormField: FormField | undefined;
 
     if (formFieldType && isInputType(formFieldType)) {
@@ -69,24 +74,26 @@ export const useBriefFormFields = () => {
       };
     }
 
+    return newFormField;
+  }
+
+  // Add a new form field
+  const addFormField = (
+    formFieldType: FormField['type'],
+    insertAtIndex?: number,
+  ): FormField => {
+    const newFormField = createFormField(formFieldType);
+
     setFormFields((prevFields) => {
       const updatedFields = [...prevFields];
 
       if (typeof insertAtIndex === 'number') {
-        // Insert the new field at the specific index
         updatedFields.splice(insertAtIndex, 0, newFormField);
       } else {
-        // Append at the end if no specific index
         updatedFields.push(newFormField);
       }
 
-      // Update positions based on the new array order
-      const fieldsWithUpdatedPositions = updatedFields.map((field, index) => ({
-        ...field,
-        position: index + 1, // Set position to index + 1 (1-based indexing)
-      }));
-
-      return fieldsWithUpdatedPositions;
+      return updateFieldPositions(updatedFields);
     });
 
     setCurrentFormField(newFormField);
@@ -95,37 +102,42 @@ export const useBriefFormFields = () => {
     return newFormField;
   };
 
-  // Remove a form field by number id
+  // Remove a form field by id
   const removeFormField = (id: number) => {
-    const updatedFormFields = formFields.filter((_, i) => i !== id);
-    setFormFields(updatedFormFields);
+    setFormFields((prevFields) => {
+      const updatedFormFields = prevFields.filter((_, i) => i !== id);
+      return updateFieldPositions(updatedFormFields);
+    });
     setCurrentFormField(undefined);
     stopEditing();
   };
 
-  // Update a form field by number id
+  // Update a form field
   const updateFormField = (id: number, updatedFormField: FormField) => {
-    // Find the index of the form field with the given id
-    const index = formFields.findIndex((field) => field.id === id);
+    setFormFields((prevFields) => {
+      const index = prevFields.findIndex((field) => field.id === id);
+      if (index !== -1) {
+        const updatedFormFields = [...prevFields];
+        updatedFormFields[index] = updatedFormField;
+        return updateFieldPositions(updatedFormFields);
+      }
+      return prevFields;
+    });
+  };
 
-    if (index !== -1) {
-      const updatedFormFields = [...formFields];
-      updatedFormFields[index] = updatedFormField;
-
-      setFormFields(updatedFormFields);
-      return updatedFormField;
-    }
+  // Swap two form fields and update their positions
+  const swapFormFields = (fromIndex: number, toIndex: number) => {
+    setFormFields((prevFields) => {
+      const reorderedFields = arrayMove(prevFields, fromIndex, toIndex);
+      return updateFieldPositions(reorderedFields);
+    });
   };
 
   // Stop editing
-  const stopEditing = () => {
-    setIsEditing(false);
-  };
+  const stopEditing = () => setIsEditing(false);
 
   // Start editing
-  const startEditing = () => {
-    setIsEditing(true);
-  };
+  const startEditing = () => setIsEditing(true);
 
   // Edit form field
   const editFormField = (id: number) => {
@@ -138,32 +150,14 @@ export const useBriefFormFields = () => {
     const formField = formFields[id];
     if (!formField) return;
 
-    // Clone the selected form field
     const duplicatedFormField = {
       ...formField,
-      id: formFields.length, // Assign a new unique id based on the current length
+      id: formFields.length + 1,
     };
 
-    // Add the duplicated form field to the formFields array
-    setFormFields([...formFields, duplicatedFormField]);
-  };
-
-  // Swap two form fields and update their positions
-  const swapFormFields = (fromIndex: number, toIndex: number) => {
-    setFormFields((prevFields) => {
-      // Use arrayMove to reorder the formFields array
-      const reorderedFields = arrayMove(prevFields, fromIndex, toIndex);
-
-      // Update positions based on the new array order
-      const fieldsWithUpdatedPositions = reorderedFields.map(
-        (field, index) => ({
-          ...field,
-          position: index + 1, // Set position to index + 1 (1-based indexing)
-        }),
-      );
-
-      return fieldsWithUpdatedPositions;
-    });
+    setFormFields((prevFields) =>
+      updateFieldPositions([...prevFields, duplicatedFormField]),
+    );
   };
 
   return {
