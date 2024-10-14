@@ -26,7 +26,7 @@ async function CreateBriefsPage() {
   const userRole = await getUserRole();
 
   return (
-    <PageBody className="mx-auto flex w-full max-w-7xl p-8">
+    <PageBody className="mx-auto flex w-full max-w-7xl lg:px-16 p-8">
       <div className="mb-[32px] flex w-full items-center justify-between">
         <h2
           className={
