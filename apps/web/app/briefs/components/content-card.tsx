@@ -1,4 +1,5 @@
 'use client';
+
 interface ContentCardProps {
   name: string;
   icon: JSX.Element;
