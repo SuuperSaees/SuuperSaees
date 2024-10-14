@@ -10,6 +10,7 @@ import {
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { Trash } from 'lucide-react';
 
 import {
   FormControl,
@@ -23,7 +24,6 @@ import { Spinner } from '@kit/ui/spinner';
 import { generateUUID } from '~/utils/generate-uuid';
 
 import { BriefCreationForm } from './brief-creation-form';
-import { WidgetCreationForm } from './widget-edit-form';
 import { Button } from '@kit/ui/button';
 
 export interface UploadImageDropzoneProps {
@@ -40,9 +40,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   handleQuestionChange,
 }) => {
   const { t } = useTranslation('briefs');
-  // const [newFile, setNewFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [selectedFileName, setSelectedFileName] = useState<string>('');
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +51,6 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
 
   async function uploadImage(file: File) {
     if (!file) return;
-    setSelectedFileName(file.name);
 
     try {
       setIsUploading(true);
@@ -104,7 +101,6 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
       console.error(t('uploadImage.uploadError'), error);
       toast.error(t('uploadImage.uploadError'));
       setImageUrl(null);
-      setSelectedFileName('');
     } finally {
       setIsUploading(false);
     }
@@ -158,7 +154,6 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
 
   const handleRemoveImage = () => {
     setImageUrl(null);
-    setSelectedFileName('');
     form.setValue(`questions.${index}.label`, '');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -189,7 +184,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
                   size="sm"
                   onClick={handleRemoveImage}
                 >
-                  {t('uploadImage.remove')}
+                  <Trash strokeWidth={1.5} />
                 </Button>
               </div>
             </>

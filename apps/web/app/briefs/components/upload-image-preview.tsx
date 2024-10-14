@@ -1,13 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
-
 import { UseFormReturn } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-
-import { Button } from '@kit/ui/button';
-import { FormField, FormItem, FormLabel } from '@kit/ui/form';
-
+import { FormField, FormItem} from '@kit/ui/form';
 import { BriefsProvider } from '../contexts/briefs-context';
 import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
@@ -16,12 +10,6 @@ export interface UploadImageProps {
   index: number;
   question: FormFieldType;
   form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (
-    index: number,
-    field: 'label' | 'placeholder',
-    value: string,
-  ) => void;
-  handleRemoveQuestion: (index: number) => void;
 }
 
 const UploadImagePreview: React.FC<UploadImageProps> = ({
@@ -29,16 +17,12 @@ const UploadImagePreview: React.FC<UploadImageProps> = ({
   question,
   form,
 }) => {
-  const { t } = useTranslation('briefs');
-  // const [newFile, setNewFile] = useState<File | null>(null);
-  const [selectedFileName, setSelectedFileName] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
     const initialValue = form.getValues(`questions.${index}.label`);
     return initialValue && initialValue.toLowerCase() !== 'image'
       ? initialValue
       : null;
   });
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const initialValue = form.getValues(`questions.${index}.label`);
@@ -49,14 +33,6 @@ const UploadImagePreview: React.FC<UploadImageProps> = ({
     );
   }, [form.getValues(`questions.${index}.label`)]);
 
-  const handleRemoveImage = () => {
-    setImageUrl(null);
-    setSelectedFileName('');
-    form.setValue(`questions.${index}.label`, '');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
 
   const isValidImageUrl = (url: string | null): boolean => {
     if (!url) return false;
@@ -69,11 +45,7 @@ const UploadImagePreview: React.FC<UploadImageProps> = ({
       name={`questions.${index}`}
       render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <FormLabel>
-              {t('creation.form.questionLabel')} {index + 1}
-            </FormLabel>
-          </div>
+        
           {isValidImageUrl(imageUrl) ? (
             <Image
               alt="Image"

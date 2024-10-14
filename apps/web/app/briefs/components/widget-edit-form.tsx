@@ -140,12 +140,10 @@ export function WidgetEditForm() {
   const renderFormFields = () => {
     if (!currentFormField) return null;
     const type = form.getValues('type');
-    console.log(type);
 
     return Object.keys(currentFormField)
       .filter((key) => key !== 'id')
       .map((fieldName) => {
-        console.log(fieldName);
         if (fieldName === 'options') return renderOptionFields();
         if (type === 'image' && fieldName == 'placeholder') return renderImageInput();
         if (type === 'image' && fieldName == 'label') return null;
