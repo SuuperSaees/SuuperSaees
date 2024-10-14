@@ -23,14 +23,10 @@ import { containsVideo } from '~/utils/contains-video';
 import { generateUUID } from '~/utils/generate-uuid';
 
 import VideoDescriptionRenderer from './video-description-renderer';
+import { DatePicker } from '~/components/date-seletc';
+import { isYouTubeUrl } from '~/utils/upload-video';
+import { getYouTubeEmbedUrl } from '../utils/video-format';
 
-type ValidElements = keyof JSX.IntrinsicElements;
-
-interface TagProps {
-  Type: ValidElements;
-  children: React.ReactNode;
-  className?: string;
-}
 
 type Option = {
   value: string;
@@ -63,11 +59,7 @@ export const OrderBriefs = ({
   >;
   orderId: string;
 }) => {
-  const notValidFormTypes = new Set(['h1', 'h2', 'h3', 'h4']);
-
-  const Tag = ({ Type, children, className }: TagProps) => {
-    return React.createElement(Type, { className }, children);
-  };
+  const notValidFormTypes = new Set(['h1', 'h2', 'h3', 'h4', 'rich-text', 'image', 'video']);
 
   const [_uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const uniqueId = generateUUID();
@@ -92,6 +84,49 @@ export const OrderBriefs = ({
     });
   };
 
+  const renderSpecialFormField = (formField: any) => {
+    switch (formField.field?.type) {
+      case 'h1':
+        return <h1 className="text-3xl font-bold">{formField.field?.label}</h1>;
+      case 'h2':
+        return <h2 className="text-2xl font-bold">{formField.field?.label}</h2>;
+      case 'h3':
+        return <h3 className="text-xl font-bold">{formField.field?.label}</h3>;
+      case 'h4':
+        return <h4 className="text-lg font-bold">{formField.field?.label}</h4>;
+      case 'rich-text':
+        return <div dangerouslySetInnerHTML={{ __html: formField.field?.label }} />;
+      case 'image':
+        return <img src={formField.field?.label} alt={formField.field?.label} className="max-w-full h-auto" />;
+      case 'video': {
+        const videoUrl = formField.field?.label;
+        if (isYouTubeUrl(videoUrl)) {
+          const embedUrl = getYouTubeEmbedUrl(videoUrl);
+          return (
+            <iframe
+              width="full"
+              height={400}
+              src={embedUrl}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title={formField.field?.label}
+            ></iframe>
+          );
+        } else {
+          return (
+            <video controls className="max-w-full">
+              <source src={formField.field?.label} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          );
+        }
+      }
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {(() => {
@@ -108,17 +143,8 @@ export const OrderBriefs = ({
                   ? uniqueIndexCounter
                   : uniqueIndexCounter++; // Increment the counter for each form field
 
-                // Function to check if the description contains any video links (YouTube or similar)
                 if (notValidFormTypes.has(formField.field?.type ?? '')) {
-                  return (
-                    <Tag
-                      Type={(formField.field?.type as ValidElements) ?? 'p'}
-                      key={formField.field?.id}
-                      className="text-lg font-bold"
-                    >
-                      {formField.field?.label}
-                    </Tag>
-                  );
+                  return renderSpecialFormField(formField);
                 }
                 return (
                   <FormField
@@ -242,32 +268,25 @@ export const OrderBriefs = ({
                               onFileIdsChange={(fileIds) => {
                                 const responseValues =
                                   handleFileIdsChange(fileIds);
-                                setFormResponse(
-                                  currentFieldIndex,
-                                  formField,
-                                  brief.id,
-                                  responseValues,
-                                );
+                                  setFormResponse(
+                                    currentFieldIndex,
+                                    formField,
+                                    brief.id,
+                                    responseValues,
+                                  );
                               }}
                             />
                           ) : formField.field?.type === 'date' ? (
-                            <ThemedInput
-                              type="date"
-                              placeholder={
-                                formField.field?.placeholder ?? undefined
-                              }
-                              {...field}
-                              onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>,
-                              ) => {
-                                const responseValue = e.target.value;
+                            <DatePicker
+                              onDateChange={(selectedDate: Date) => {
+                                const responseValue = selectedDate;
                                 form.setValue(
                                   `brief_responses.${currentFieldIndex}`,
                                   {
                                     form_field_id: formField.field?.id ?? '',
                                     brief_id: brief.id,
                                     order_id: orderId,
-                                    response: responseValue,
+                                    response: responseValue.toString(),
                                   },
                                 );
                               }}

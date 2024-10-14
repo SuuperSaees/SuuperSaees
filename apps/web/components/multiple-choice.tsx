@@ -1,5 +1,4 @@
-"use client"
-
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import React, { useState, useEffect } from 'react';
 
 interface Item {
@@ -20,6 +19,7 @@ export function MultipleChoice({
     selectedOptions,
     onChange
 }: CheckboxProps) {
+    const { theme_color } = useOrganizationSettings();
     const [selected, setSelected] = useState<string[]>(selectedOptions);
 
     useEffect(() => {
@@ -36,14 +36,38 @@ export function MultipleChoice({
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-2.5">
+            <style jsx>{`
+                .custom-checkbox {
+                    appearance: none;
+                    -webkit-appearance: none;
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid #ccc;
+                    border-radius: 4px;
+                    outline: none;
+                    transition: all 0.3s;
+                }
+                .custom-checkbox:checked {
+                    border-color: ${theme_color ?? '#000000'};
+                    background-color: ${theme_color ?? '#000000'};
+                }
+                .custom-checkbox:checked::before {
+                    content: '✓';
+                    display: block;
+                    text-align: center;
+                    color: white;
+                    font-size: 16px;
+                    line-height: 18px;
+                }
+            `}</style>
             <div className="mb-4">
                 <p className="text-base">{question}</p>
             </div>
             {items.map((item) => (
                 <div
                     key={item.value}
-                    className="flex flex-row items-start space-x-3 space-y-0"
+                    className="flex flex-row items-center space-x-3 space-y-0"
                 >
                     <input
                         type="checkbox"
@@ -51,8 +75,9 @@ export function MultipleChoice({
                         onChange={(e) =>
                             handleCheckboxChange(item.value, e.target.checked)
                         }
+                        className="custom-checkbox h-5 w-5"
                     />
-                    <p className="text-sm font-normal">{item.label}</p>
+                    <p className="text-gray-500 text-md font-medium font-inter text-4 leading-6">{item.label}</p>
                 </div>
             ))}
         </div>

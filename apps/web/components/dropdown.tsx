@@ -1,6 +1,8 @@
 "use client"
 
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Item {
     value: string;
@@ -22,6 +24,7 @@ export function SingleChoiceDropdown({
 }: DropdownProps) {
     const [selected, setSelected] = useState<string>(selectedOption);
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         setSelected(selectedOption);  
@@ -39,8 +42,9 @@ export function SingleChoiceDropdown({
                 <p className="text-base">{question}</p>
             </div>
             <div className="border border-gray-300 rounded-md" onClick={() => setIsOpen(!isOpen)}>
-                <div className="p-2">
-                    {selected ? items.find(item => item.value === selected)?.label : "Select an option"}
+                <div className="p-2 flex items-center justify-between text-gray-500 text-[16px] font-medium leading-6 ">
+                    {selected ? items.find(item => item.value === selected)?.label : t('orders:dropdown')}
+                    {isOpen ? <ChevronUp className='w-5 h-5' /> : <ChevronDown className='w-5 h-5' />}
                 </div>
             </div>
             {isOpen && (
@@ -48,10 +52,12 @@ export function SingleChoiceDropdown({
                     {items.map((item) => (
                         <div
                             key={item.value}
-                            className={`p-2 hover:bg-gray-100 cursor-pointer ${selected === item.value ? 'bg-gray-200' : ''}`}
+                            className='flex p-[10px_14px] items-center gap-2 self-stretch rounded-md border border-gray-200 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.05)]"'
                             onClick={() => handleOptionSelect(item.value)}
                         >
-                            {item.label}
+                            <span className='text-gray-500 text-[16px] font-medium leading-6 font-inter'>
+                                {item.label}
+                            </span>
                         </div>
                     ))}
                 </div>

@@ -76,6 +76,7 @@
   "internalMessagingEnabled": "Internal messaging enabled",
   "internalMessagingDisabled": "Internal messaging disabled",
   "internalMessage": "Internal message",
-  "placeholder": "Write a message..."
+  "placeholder": "Write a message...",
+  "dropdown": "Select an option"
 }
   

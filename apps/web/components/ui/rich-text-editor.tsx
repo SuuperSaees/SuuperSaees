@@ -137,7 +137,7 @@ const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
 };
 
 interface RichTextEditorProps {
-  onComplete: (richText: string) => void | Promise<void>;
+  onComplete?: (richText: string) => void | Promise<void>;
   content?: string;
   onChange?: (richText: string) => void;
   uploadFileIsExternal?: boolean;
@@ -287,15 +287,15 @@ const RichTextEditor = ({
         class:
           'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none',
       },
-
       handleKeyDown: (_, event) => {
-        if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey) {
+        if (!onChange && event.key === 'Enter' && !event.shiftKey && !event.ctrlKey) {
           event.preventDefault();
           sendContent();
           return true;
         }
         return false;
       },
+      
     },
     onUpdate({ editor }) {
       const text = editor.getText();
@@ -316,7 +316,7 @@ const RichTextEditor = ({
           return;
         }
         editor?.commands.clearContent();
-        await onComplete(content);
+        onComplete && (await onComplete(content));
         if (onChange){
           onChange(content); 
         }
@@ -476,6 +476,7 @@ export const Toolbar = ({
       </button>
       
       {!onChange && (
+        <>
         <button
           type='button'
           onClick={
@@ -487,28 +488,31 @@ export const Toolbar = ({
         >
           <Image className="h-4 w-4" />
         </button>
+        {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
+          userRole,
+        ) && (
+          <button
+            onClick={handleSwitchChange}
+            className={
+              isInternalMessagingEnabled ? 'text-gray-700' : 'text-gray-400'
+            }
+          >
+            <Switch checked={isInternalMessagingEnabled} />
+          </button>
+        )}
+        {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
+          userRole,
+        ) &&
+          isInternalMessagingEnabled && (
+            <span className="text-gray-400">
+              <Trans i18nKey="internalMessagingEnabled" />
+            </span>
+        )}
+        </>
+        
       )}
 
-      {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
-        userRole,
-      ) && (
-        <button
-          onClick={handleSwitchChange}
-          className={
-            isInternalMessagingEnabled ? 'text-gray-700' : 'text-gray-400'
-          }
-        >
-          <Switch checked={isInternalMessagingEnabled} />
-        </button>
-      )}
-      {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
-        userRole,
-      ) &&
-        isInternalMessagingEnabled && (
-          <span className="text-gray-400">
-            <Trans i18nKey="internalMessagingEnabled" />
-          </span>
-        )}
+      
     </div>
   );
 };

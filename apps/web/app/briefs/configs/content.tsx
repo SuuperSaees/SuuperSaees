@@ -43,7 +43,7 @@ export const generateContent = (
         icon: <AlignCenter className="h-8 w-8" />,
         action: () => action('rich-text'), // Action passed dynamically,
         content: {
-          label: 'Rich text',
+          label: '',
           placeholder: '',
           description: '',
           type: 'rich-text',
