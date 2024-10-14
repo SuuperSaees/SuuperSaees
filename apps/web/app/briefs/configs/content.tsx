@@ -4,6 +4,7 @@ import FormTitleComponent from '../components/title-content';
 import FormRichTextComponent from '../components/rich-text-content';
 import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
 import FormVideoUpload from '../components/video-content';
+import UploadImagePreview from '../components/upload-image-preview';
 
 type ContentKey = ContentTypes;
 type ContentValue = Content;
@@ -66,12 +67,18 @@ export const generateContent = (
         name: 'Image',
         icon: <Image className="h-8 w-8" />,
         action: () => action('image'), // Action passed dynamically
-        component: <></>, // Custom component
         content: {
           label: 'Image',
           placeholder: '',
-          description: '',
+          type:'image'
         },
+        component: (props: ComponentProps) => (
+          <UploadImagePreview
+            index={props.index}
+            question={props.question}
+            form={props.form}
+          />
+        ), // Custom component
       },
     ],
     [

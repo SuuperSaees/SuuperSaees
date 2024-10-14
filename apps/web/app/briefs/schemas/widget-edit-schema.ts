@@ -4,6 +4,7 @@ export const widgetEditSchema = z.object({
   label: z.string().min(1, { message: 'Label cannot be empty.' }),
   description: z.string().optional().nullable(),
   placeholder: z.string().optional().nullable(),
+  position: z.number(),
   type: z
     .enum([
       'text',

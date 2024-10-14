@@ -9,6 +9,7 @@ import { useBriefsContext } from '../contexts/briefs-context';
 import Content from './content';
 import Inputs from './inputs';
 import { WidgetEditForm } from './widget-edit-form';
+import { ContentTypes, InputTypes } from '../types/brief.types';
 
 
 export default function Widgets() {
@@ -16,8 +17,27 @@ export default function Widgets() {
   const { content, inputs, isEditing, stopEditing } = useBriefsContext();
   const { t } = useTranslation('briefs');
 
+  const mappedInputs = inputs.map((input) => {
+    return {
+      name: input.name,
+      icon: input.icon,
+      action: input.action,
+      type: input.content.type as InputTypes,
+    };
+    // return input;
+  });
+
+  const mappedContent = content.map((content) => {
+    return {
+      name: content.name,
+      icon: content.icon,
+      action: content.action,
+      type: content.content.type as ContentTypes,
+    };
+  });
+
   return (
-    <div className="flex w-full max-w-80 flex-col gap-4 p-4 border border-l-1 border-slate-gray-300 max-h-full h-full overflow-y-auto">
+    <div className="flex w-full max-w-80 flex-col gap-4 p-4 border border-l-1 border-slate-gray-300 max-h-full h-full ">
       {isEditing ? (
         <>
         <div className='flex gap-2 items-center'>
@@ -34,8 +54,11 @@ export default function Widgets() {
       ) : (
         <>
           <h1 className="text-2xl font-bold">Widgets</h1>
-          <Inputs inputs={inputs} />
-          <Content content={content} />
+          <div className='flex flex-col gap-4 max-h-full overflow-y-auto no-scrollbar'>
+
+            <Inputs inputs={mappedInputs} />
+            <Content content={mappedContent} />
+          </div>
         </>
       )}
     </div>
