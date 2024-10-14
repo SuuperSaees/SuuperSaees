@@ -35,9 +35,13 @@ function setCachedDomain(
   response: NextResponse,
   userId: string,
   domain: string,
+  isProd: boolean,
 ) {
   // Cache the domain for 1 hour (you can adjust this time as needed)
-  response.cookies.set(`domain_${userId}`, domain, { maxAge: 60 * 60 });
+  response.cookies.set(`domain_${userId}`, domain, {
+    maxAge: 60 * 60,
+    secure: isProd,
+  });
 }
 
 const getUser = (request: NextRequest, response: NextResponse) => {
@@ -82,7 +86,7 @@ export async function middleware(request: NextRequest) {
         // If not in cache, fetch the domain
         domain = await getDomainByUserId(userId, false);
         // Cache the domain in a cookie
-        setCachedDomain(response, userId, domain);
+        setCachedDomain(response, userId, domain, IS_PROD);
       }
 
       const corsResult = handleCors(request, response, domain);
