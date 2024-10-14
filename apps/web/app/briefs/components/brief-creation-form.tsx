@@ -8,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import {
   addFormFieldsToBriefs,
   createBrief,
@@ -18,18 +17,12 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Form } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { isContentType, isInputType } from '../utils/type-guards';
+import FieldsetInformation from './fieldset-information';
 import { Sortable } from './sortable';
 
 type CreateBriefDialogProps = {
@@ -186,27 +179,16 @@ const BriefCreationForm = ({
   useEffect(() => {
     form.setValue('questions', formFields); // Ensure form state stays in sync with context
   }, [formFields, form]); // Re-run effect when formFields or form change
+
+  console.log(form.getValues());
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8 h-full">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="h-full w-full space-y-8"
+      >
         {/* Brief Name Input */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
-              <FormControl>
-                <ThemedInput
-                  {...field}
-                  placeholder={t('creation.form.titlePlaceholder')}
-                  className="focus-visible:ring-none"
-                />
-              </FormControl>
-              <FormMessage>{fieldState.error?.message}</FormMessage>
-            </FormItem>
-          )}
-        />
+        <FieldsetInformation form={form} />
 
         {formFields.map((question, index) => {
           if (question.type) {
@@ -222,7 +204,6 @@ const BriefCreationForm = ({
             // Check if FormFieldComponent is a function
             if (typeof FormFieldComponent === 'function') {
               return (
-  
                 <Sortable key={'q' + index} id={question.id}>
                   <FormFieldComponent
                     index={index}
