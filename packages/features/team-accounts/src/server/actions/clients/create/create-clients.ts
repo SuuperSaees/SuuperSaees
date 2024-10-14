@@ -12,25 +12,16 @@ import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import type { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get-domain-by-user-id';
-import {
-  generateRandomPassword, // getTextColorBasedOnBackground
+import { generateRandomPassword // getTextColorBasedOnBackground
 } from '../../../utils/generate-colors';
 import { addUserAccountRole } from '../../members/create/create-account';
-import {
-  getPrimaryOwnerId,
-  getUserAccountByEmail,
-} from '../../members/get/get-member-account';
+import { getPrimaryOwnerId, getUserAccountByEmail } from '../../members/get/get-member-account';
 import { updateUserAccount } from '../../members/update/update-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
-import {
-  getAgencyForClient,
-  getOrganization, // getOrganizationSettings,
-  getOrganizationById,
-} from '../../organizations/get/get-organizations';
-import {
-  hasPermissionToAddClientMembers,
-  hasPermissionToCreateClientOrg,
-} from '../../permissions/clients';
+import { getAgencyForClient, getOrganization, // getOrganizationSettings,
+getOrganizationById } from '../../organizations/get/get-organizations';
+import { hasPermissionToAddClientMembers, hasPermissionToCreateClientOrg } from '../../permissions/clients';
+
 
 // Define la función createClient
 type CreateClient = {
@@ -152,7 +143,6 @@ export const createClient = async (clientData: CreateClient) => {
     const clientOrganizationUser = await createClientUserAccount(
       clientData.client.email,
       organization.name,
-      userId,
     );
     const userId = clientOrganizationUser.user?.id;
     if (!userId) throw new Error('No user id provided');
@@ -199,7 +189,7 @@ export const createClient = async (clientData: CreateClient) => {
 
     return client;
   } catch (error) {
-    console.error('Error creating the client:', error);
+    console.error('Error creating the client v1:', error);
     throw error;
   }
 };
@@ -281,7 +271,7 @@ export const addClientMember = async ({
 
     return client;
   } catch (error) {
-    console.error('Error creating the client:', error);
+    console.error('Error creating the client v2:', error);
     throw error;
   }
 };
