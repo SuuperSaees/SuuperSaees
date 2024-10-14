@@ -3,19 +3,21 @@ import { NextResponse, URLPattern } from 'next/server';
 
 
 
-import { CsrfError, createCsrfProtect } from '@edge-csrf/nextjs';
-
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
-import appConfig from '~/config/app.config';
+
+
 import pathsConfig from '~/config/paths.config';
+import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 
-const CSRF_SECRET_COOKIE = 'csrfSecret';
-const NEXT_ACTION_HEADER = 'next-action';
 
-const CLIENT_ID = 'suuper-client-id';
-const CLIENT_SECRET = 'suuper-client-secret';
+
+import { handleApiAuth } from './handlers/api-auth-handler';
+import { handleCors } from './handlers/cors-handler';
+import { handleCsrf } from './handlers/csrf-handler';
+import { handleDomainCheck } from './handlers/domain-check-handler';
+
 
 export const config = {
   matcher: [
@@ -24,21 +26,22 @@ export const config = {
   ],
 };
 
-// function to verify the basic auth credentials to api use.
-function isValidBasicAuth(request: NextRequest): boolean {
-  const authorizationHeader = request.headers.get('authorization');
+function getCachedDomain(request: NextRequest, userId: string): string | null {
+  const domainCookie = request.cookies.get(`domain_${userId}`);
+  return domainCookie ? domainCookie.value : null;
+}
 
-  if (!authorizationHeader?.startsWith('Basic ')) {
-    return false;
-  }
-
-  const base64Credentials = authorizationHeader.split(' ')[1];
-  const credentials = atob(base64Credentials!).split(':');
-
-  const clientId = credentials[0];
-  const clientSecret = credentials[1];
-
-  return clientId === CLIENT_ID && clientSecret === CLIENT_SECRET;
+function setCachedDomain(
+  response: NextResponse,
+  userId: string,
+  domain: string,
+  isProd: boolean,
+) {
+  // Cache the domain for 1 hour (you can adjust this time as needed)
+  response.cookies.set(`domain_${userId}`, domain, {
+    maxAge: 60 * 60,
+    secure: isProd,
+  });
 }
 
 const getUser = (request: NextRequest, response: NextResponse) => {
@@ -49,142 +52,76 @@ const getUser = (request: NextRequest, response: NextResponse) => {
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  // Verify route /api/v1
-  if (request.nextUrl.pathname.startsWith('/api/v1')) {
-    // Verify route authentication
-    if (!isValidBasicAuth(request)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // API Authentication
+  const apiAuthResult = handleApiAuth(request);
+  if (apiAuthResult) return apiAuthResult;
+
+  // Domain Check
+  const domainCheckResult = await handleDomainCheck(request);
+  if (domainCheckResult) return domainCheckResult;
+
+  const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+  const ignorePath = new Set([
+    'auth',
+    'add-organization',
+    'api',
+    'home',
+    '/__nextjs_original-stack-frame',
+  ]);
+  const shouldIgnorePath = (pathname: string) =>
+    Array.from(ignorePath).some((path) => pathname.includes(path));
+
+  if (IS_PROD && !shouldIgnorePath(request.nextUrl.pathname)) {
+    try {
+      const supabase = createMiddlewareClient(request, response);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const userId = user?.id ?? '';
+      // Try to get the domain from cache (cookie)
+      let domain = getCachedDomain(request, userId);
+
+      if (!domain) {
+        // If not in cache, fetch the domain
+        domain = await getDomainByUserId(userId, false);
+        // Cache the domain in a cookie
+        setCachedDomain(response, userId, domain, IS_PROD);
+      }
+
+      const corsResult = handleCors(request, response, domain);
+      if (corsResult) return corsResult;
+
+      if (new URL(request.nextUrl.origin).host !== domain) {
+        throw new Error('Unauthorized: Invalid Origin');
+      }
+    } catch (error) {
+      console.error('Error in middleware', error);
+      const landingPage = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
+      const supabase = createMiddlewareClient(request, response);
+      await supabase.auth.signOut();
+      return NextResponse.redirect(
+        new URL(landingPage, request.nextUrl.origin).href,
+      );
     }
-    return NextResponse.next();
   }
 
-  const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-
-  if (IS_PRODUCTION) {
-    const supabase = createMiddlewareClient(request, response);
-    const userData = await getUser(request, response);
-    const userId = userData.data?.user?.id ?? '';
-    const { data: accountData, error: accountError } = await supabase
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', userId)
-      .single();
-
-    if (accountError) {
-      throw new Error(`Unauthorized: ${accountError.message}`);
-    }
-
-    const { data: domainsData, error: domainsError } = await supabase
-      .from('organization_subdomains')
-      .select('subdomains(domain)')
-      .eq('organization_id', accountData.organization_id ?? '')
-      .single();
-
-    if (domainsError) {
-      throw new Error(`Error fetching domains: ${domainsError.message}`);
-    }
-
-    const origin = request.headers.get('Origin');
-
-    if (origin === `https://${domainsData.subdomains?.domain}`) {
-      response.headers.set('Access-Control-Allow-Origin', origin);
-    } else {
-      throw new Error('Unauthorized: Invalid Origin');
-    }
-    // Allow cors for all requests
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: {
-          'Access-Control-Allow-Origin':
-            origin === `https://${domainsData.subdomains?.domain}`
-              ? origin
-              : '',
-          'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
-      });
-    }
-
-    response.headers.set(
-      'Access-Control-Allow-Methods',
-      'GET, POST, DELETE, OPTIONS',
-    );
-    response.headers.set(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization',
-    );
-  }
-  // set current path
   response.headers.set('x-current-path', request.nextUrl.pathname);
-
-  // set a unique request ID for each request
-  // this helps us log and trace requests
   setRequestId(request);
 
-  // apply CSRF protection for mutating requests
-  const csrfResponse = await withCsrfMiddleware(request, response);
+  const csrfResponse = await handleCsrf(request, response);
 
-  // handle patterns for specific routes
   const handlePattern = matchUrlPattern(request.url);
-
-  // if a pattern handler exists, call it
   if (handlePattern) {
     const patternHandlerResponse = await handlePattern(request, csrfResponse);
-
-    // if a pattern handler returns a response, return it
-    if (patternHandlerResponse) {
-      return patternHandlerResponse;
-    }
+    if (patternHandlerResponse) return patternHandlerResponse;
   }
 
-  // append the action path to the request headers
-  // which is useful for knowing the action path in server actions
-  if (isServerAction(request)) {
+  if (request.headers.has('next-action')) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
 
-  // if no pattern handler returned a response,
-  // return the session response
   return csrfResponse;
-}
-
-async function withCsrfMiddleware(
-  request: NextRequest,
-  response = new NextResponse(),
-) {
-  // set up CSRF protection
-  const csrfProtect = createCsrfProtect({
-    cookie: {
-      secure: appConfig.production,
-      name: CSRF_SECRET_COOKIE,
-    },
-    // ignore CSRF errors for server actions since protection is built-in
-    ignoreMethods: isServerAction(request)
-      ? ['POST']
-      : // always ignore GET, HEAD, and OPTIONS requests
-        ['GET', 'HEAD', 'OPTIONS'],
-  });
-
-  try {
-    await csrfProtect(request, response);
-
-    return response;
-  } catch (error) {
-    // if there is a CSRF error, return a 403 response
-    if (error instanceof CsrfError) {
-      return NextResponse.json('Invalid CSRF token', {
-        status: 401,
-      });
-    }
-
-    throw error;
-  }
-}
-
-function isServerAction(request: NextRequest) {
-  const headers = new Headers(request.headers);
-
-  return headers.has(NEXT_ACTION_HEADER);
 }
 
 async function adminMiddleware(request: NextRequest, response: NextResponse) {

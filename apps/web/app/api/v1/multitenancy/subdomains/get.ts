@@ -1,16 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { getIngress } from '~/multitenancy/aws-cluster-ingress/src';
 
-export const getSubdomain = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-) => {
+export async function getIngressAndSubdomain(req: NextRequest) {
   // Step 1: Obtain subdomain id from request params
-  const subdomainId = req.query.subdomainId;
+  const subdomainId = req.nextUrl.searchParams.get('subdomainId') as string;
   if (!subdomainId) {
     const errorResponse = {
       code: 400,
@@ -19,7 +16,7 @@ export const getSubdomain = async (
       details: ['Subdomain id is required'],
     };
 
-    return res.status(400).json(errorResponse);
+    return NextResponse.json(errorResponse, { status: 400 });
   }
   const client = getSupabaseServerComponentClient();
   try {
@@ -52,7 +49,7 @@ export const getSubdomain = async (
       }
     }
     // Step 6: Return the subdomain found in the database
-    return res.status(200).json(updatedSubdomainData);
+    return NextResponse.json(updatedSubdomainData, { status: 200 });
   } catch (error) {
     const errorResponse = {
       code: 500,
@@ -61,6 +58,6 @@ export const getSubdomain = async (
       details: [(error as Error).message],
     };
 
-    return res.status(500).json(errorResponse);
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 };

@@ -35,14 +35,12 @@ import { Input } from '@kit/ui/input';
 import { createOrganizationServer } from '~/team-accounts/src/server/actions/organizations/create/create-organization-server';
 import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
 import { createIngress } from '~/multitenancy/aws-cluster-ingress/src/actions/create';
-import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   organization_name: z.string().min(2).max(50),
 });
 
 const CreateOrganization = () => {
-  const router = useRouter();
   const { t } = useTranslation('organizations');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,6 +50,7 @@ const CreateOrganization = () => {
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [continueUrl, setContinueUrl] = useState('');
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -68,7 +67,11 @@ const CreateOrganization = () => {
       .replace(/[^a-zA-Z0-9-]/g, '');
       const data = await createIngress({ domain: cleanedDomain, isCustom: false},);
       // redirect to the new organization with the new domain
-      router.push(`https://${data.domain}/orders`);
+      const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+      const BASE_URL = IS_PROD
+        ? `https://${data.domain}`
+        : process.env.NEXT_PUBLIC_SITE_URL;
+      setContinueUrl(`${BASE_URL}/orders`);
     } catch (error) {
       toast.error('Error', {
         description: 'Error creating organization',
@@ -116,8 +119,10 @@ const CreateOrganization = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <Link href="/orders">
-                <AlertDialogAction>{t('continue')}</AlertDialogAction>
+              <Link href={continueUrl}>
+                <AlertDialogAction disabled={!continueUrl}>
+                  {t('continue')}
+                </AlertDialogAction>
               </Link>
             </AlertDialogFooter>
           </AlertDialogContent>

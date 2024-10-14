@@ -26,7 +26,8 @@
     "./config/**/*.ts",
     "components/**/*",
     "lib/**/*.ts",
-    "app"
+    "app",
+    "handlers/**/*"
   ],
   "exclude": ["node_modules", ".next"]
 }

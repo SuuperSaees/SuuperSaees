@@ -11,6 +11,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import type { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { generateRandomPassword // getTextColorBasedOnBackground
 } from '../../../utils/generate-colors';
 import { addUserAccountRole } from '../../members/create/create-account';
@@ -20,9 +21,7 @@ import { insertOrganization } from '../../organizations/create/create-organizati
 import { getAgencyForClient, getOrganization, // getOrganizationSettings,
 getOrganizationById } from '../../organizations/get/get-organizations';
 import { hasPermissionToAddClientMembers, hasPermissionToCreateClientOrg } from '../../permissions/clients';
-
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+import { fetchCurrentUser } from '../../members/get/get-member-account';
 
 // Define la función createClient
 type CreateClient = {
@@ -40,6 +39,11 @@ const createClientUserAccount = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
+    const userData = await fetchCurrentUser(client);
+    const userId = userData?.id;
+    if (!userId) throw new Error('No user id provided');
+    const baseUrl = await getDomainByUserId(userId, true);
+
     // const organizationSettings = await getOrganizationSettings();
 
     // pre-authentication of the user
@@ -186,7 +190,7 @@ export const createClient = async (clientData: CreateClient) => {
 
     return client;
   } catch (error) {
-    console.error('Error creating the client:', error);
+    console.error('Error creating the client v1:', error);
     throw error;
   }
 };
@@ -267,7 +271,7 @@ export const addClientMember = async ({
 
     return client;
   } catch (error) {
-    console.error('Error creating the client:', error);
+    console.error('Error creating the client v2:', error);
     throw error;
   }
 };
