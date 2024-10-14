@@ -42,7 +42,7 @@ function PageWithSidebar(props: PageProps) {
       >
         {MobileNavigation}
 
-        <div className={'flex flex-1 flex-col space-y-4'}>{Children}</div>
+        <div className={'flex flex-1 flex-col space-y-4 max-h-full'}>{Children}</div>
       </div>
     </div>
   );

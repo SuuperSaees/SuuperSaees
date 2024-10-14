@@ -183,10 +183,7 @@ const BriefCreationForm = ({
   console.log(form.getValues());
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="h-full w-full space-y-8"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8 h-full overflow-y-auto no-scrollbar">
         {/* Brief Name Input */}
         <FieldsetInformation form={form} />
 

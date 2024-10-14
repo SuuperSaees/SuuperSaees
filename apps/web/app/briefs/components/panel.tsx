@@ -15,7 +15,7 @@ export default function Panel() {
   const {t} = useTranslation('briefs');
   return (
     <Tabs
-      className="border-l-1 border-slate-gray-300 flex h-full max-h-full w-full max-w-80 flex-col gap-4 overflow-y-auto border p-4"
+      className="border-l-1 border-slate-gray-300 flex h-full max-h-full w-full max-w-80 flex-col gap-4 border p-4 overflow-hidden"
       defaultValue={activeTab}
       onValueChange={(value: string) => {
         setActiveTab(value as 'widgets' | 'settings');
@@ -41,10 +41,10 @@ export default function Panel() {
         </ThemedTabTrigger>
       </TabsList>
 
-      <TabsContent value="widgets">
+      <TabsContent value="widgets" className='max-h-full'>
         <Widgets />
       </TabsContent>
-      <TabsContent value="settings">
+      <TabsContent value="settings" className='max-h-full'>
         <BriefCreationForm propietaryOrganizationId='' userRole='' />
       </TabsContent>
     </Tabs>

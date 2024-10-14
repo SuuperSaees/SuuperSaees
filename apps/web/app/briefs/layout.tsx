@@ -49,7 +49,7 @@ function BriefsLayout({ children }: React.PropsWithChildren) {
 
       <UserWorkspaceContextProvider value={workspace}>
         <BriefsProvider>
-          <div className="flex gap-8">
+          <div className="flex gap-8 max-h-full">
             {children}
 
             {showWidgets && <Panel />}
