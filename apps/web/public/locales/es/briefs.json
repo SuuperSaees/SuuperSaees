@@ -87,6 +87,19 @@
     "dropHere": "Deja el video aquí",
     "invalidFileType": "Por favor seleccione un archivo de vídeo válido",
     "youtubePlaceholder": "O ingresa una URL de video de YouTube"
+  },
+  "uploadImage":{
+    "placeholder": "Haz clic o arrastra para subir una imagen",
+    "fileTypes": "PNG, JPG(max. 800x400px)",
+    "uploadSuccess": "Imagen subido con éxito",
+    "uploadError": "Error al cargar la imagen",
+    "uploadUrlError": "No se pudo generar la URL de carga",
+    "databaseEntryError": "No se pudo crear la entrada de la base de datos",
+    "description": "Descripción",
+    "remove": "Eliminar imagen",
+    "dragOrClick": "Arrastre una imagen aquí o haga clic para seleccionarlo",
+    "dropHere": "Deja la imagen aquí",
+    "invalidFileType": "Por favor seleccione un archivo de imagen válido"
   }
 }
 
