@@ -1,13 +1,14 @@
-import Link from 'next/link';
+// import Link from 'next/link';
 
 import { SignInMethodsContainer } from '@kit/auth/sign-in';
-import { Button } from '@kit/ui/button';
+// import { Button } from '@kit/ui/button';
 import { Trans } from '@kit/ui/trans';
 
 import authConfig from '~/config/auth.config';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+import { SignInLogo } from '@kit/auth/sign-in';
 
 interface SignInPageProps {
   searchParams: {
@@ -31,10 +32,9 @@ const paths = {
 
 function SignInPage({ searchParams }: SignInPageProps) {
   const inviteToken = searchParams.invite_token;
-
-  const signUpPath =
-    pathsConfig.auth.signUp +
-    (inviteToken ? `?invite_token=${inviteToken}` : '');
+  // const signUpPath =
+  //   pathsConfig.auth.signUp +
+  //   (inviteToken ? `?invite_token=${inviteToken}` : '');
 
   return (
     <>
@@ -42,6 +42,7 @@ function SignInPage({ searchParams }: SignInPageProps) {
         <div className="hidden md:block absolute md:w-[142px] md:h-auto md:left-8 md:top-8 md:object-contain">
         </div>
         <div className="w-full md:w-1/3 md:px-[32px]">
+          <SignInLogo />
           <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
             <Trans i18nKey={'auth:signInHeading'} />
           </div>

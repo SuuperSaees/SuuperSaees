@@ -4,6 +4,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 
+import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
 
 export const getOrganizationSettings = async () => {
@@ -82,6 +83,24 @@ export const getOrganizationSettings = async () => {
     console.error('Error fetching organization settings:', error);
     throw error;
   }
+};
+
+export const getOrganizationSettingsByOrganizationId = async (
+  organizationId: string,
+  adminActived = false,
+): Promise<OrganizationSettings.Type[]> => {
+  const client = getSupabaseServerComponentClient({ admin: adminActived });
+  const { data: organizationSettings, error: settingsError } = await client
+    .from('organization_settings')
+    .select()
+    .eq('account_id', organizationId)
+    .in('key', ['theme_color', 'logo_url']);
+
+  if (settingsError) {
+    throw settingsError.message;
+  }
+
+  return organizationSettings;
 };
 
 export async function getOrganization(): Promise<{
