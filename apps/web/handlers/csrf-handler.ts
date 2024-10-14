@@ -1,5 +1,9 @@
+import 'server-only';
+
 import { NextRequest, NextResponse } from 'next/server';
+
 import { CsrfError, createCsrfProtect } from '@edge-csrf/nextjs';
+
 import appConfig from '~/config/app.config';
 
 const CSRF_SECRET_COOKIE = 'csrfSecret';
@@ -11,7 +15,9 @@ export async function handleCsrf(request: NextRequest, response: NextResponse) {
       secure: appConfig.production,
       name: CSRF_SECRET_COOKIE,
     },
-    ignoreMethods: isServerAction(request) ? ['POST'] : ['GET', 'HEAD', 'OPTIONS'],
+    ignoreMethods: isServerAction(request)
+      ? ['POST']
+      : ['GET', 'HEAD', 'OPTIONS'],
   });
 
   try {

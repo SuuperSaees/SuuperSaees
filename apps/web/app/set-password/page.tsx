@@ -9,7 +9,7 @@ import {
 } from '@kit/ui/card';
 import { Trans } from '@kit/ui/trans';
 import { UpdatePasswordFormContainer } from '../../../../packages/features/accounts/src/components/personal-account-settings/password/update-password-container';
-import { getDomainByUserId } from '../../../../packages/multitenancy/utils/get-domain-by-user-id';
+import { getDomainByUserId } from '../../../../packages/multitenancy/utils/get/get-domain';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 export const generateMetadata = async () => {

@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { NextRequest, NextResponse } from 'next/server';
 
 const CLIENT_ID = 'dev_b9806c46-8348-4347-a639-7ac223f17546suuper.co';
