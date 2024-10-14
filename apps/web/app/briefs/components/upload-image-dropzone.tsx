@@ -1,8 +1,9 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import Image from 'next/image';
 
 import { CloudUpload } from 'lucide-react';
+import { Trash } from 'lucide-react';
 import {
   createFile,
   createUploadBucketURL,
@@ -10,25 +11,18 @@ import {
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Trash } from 'lucide-react';
 
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Button } from '@kit/ui/button';
+import { FormField, FormItem } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
 
 import { generateUUID } from '~/utils/generate-uuid';
 
 import { BriefCreationForm } from './brief-creation-form';
-import { Button } from '@kit/ui/button';
 
 export interface UploadImageDropzoneProps {
-  index: number;
-  nameField: string;
+  index: number | undefined;
+  nameField: `questions.${number}.label` | `questions.${number}.options` | `questions.${number}.type` | `questions.${number}.position` | `questions.${number}.description` | `questions.${number}.placeholder` | `questions.${number}.alert_message` | `questions.${number}.options.${number}.label` | `questions.${number}.options.${number}.value`;
   form: UseFormReturn<BriefCreationForm>;
   handleQuestionChange: (urlImage: string) => void;
 }
@@ -49,7 +43,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
     handleQuestionChange(imageUrl);
   }, [imageUrl]);
 
-  async function uploadImage(file: File) {
+  async function uploadImageToBucket(file: File) {
     if (!file) return;
 
     try {
@@ -94,13 +88,12 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
 
       const finalUrl = fileData[0]?.url ?? fileUrl;
       setImageUrl(finalUrl);
-
       toast.success(t('uploadImage.uploadSuccess'));
     } catch (error) {
       console.error(error);
       console.error(t('uploadImage.uploadError'), error);
       toast.error(t('uploadImage.uploadError'));
-      setImageUrl(null);
+      setImageUrl('');
     } finally {
       setIsUploading(false);
     }
@@ -109,7 +102,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] ?? null;
     if (selectedFile) {
-      await uploadImage(selectedFile);
+      await uploadImageToBucket(selectedFile);
     }
   };
 
@@ -137,7 +130,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
 
     const file = e.dataTransfer.files?.[0];
     if (file?.type.startsWith('image/')) {
-      await uploadImage(file);
+      await uploadImageToBucket(file);
     } else {
       toast.error(t('uploadImage.invalidFileType'));
     }
@@ -153,8 +146,10 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   };
 
   const handleRemoveImage = () => {
-    setImageUrl(null);
-    form.setValue(`questions.${index}.label`, '');
+    setImageUrl('');
+    if (index !== undefined) {
+      form.setValue(`questions.${index}.label`, '');
+    }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -167,7 +162,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
       render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
           {isValidImageUrl(imageUrl) ? (
-            <>
+            <div className="relative">
               <Image
                 alt="Image"
                 src={imageUrl ?? ''}
@@ -177,17 +172,18 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
                 sizes="100vw"
                 style={{ width: '100%', height: 'auto' }}
               />
-              <div className="flex justify-end">
+              <div className="absolute right-2 top-2">
                 <Button
                   type="button"
                   variant="secondary"
                   size="sm"
                   onClick={handleRemoveImage}
+                  className='rounded-full w-8 h-8 p-2'
                 >
-                  <Trash strokeWidth={1.5} />
+                  <Trash strokeWidth={1.7} className='w-full' />
                 </Button>
               </div>
-            </>
+            </div>
           ) : (
             <div className="flex flex-col gap-2">
               <div

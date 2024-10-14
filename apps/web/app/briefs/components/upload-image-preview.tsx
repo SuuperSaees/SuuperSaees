@@ -24,6 +24,7 @@ const UploadImagePreview: React.FC<UploadImageProps> = ({
       : null;
   });
 
+
   useEffect(() => {
     const initialValue = form.getValues(`questions.${index}.label`);
     setImageUrl(
@@ -31,7 +32,7 @@ const UploadImagePreview: React.FC<UploadImageProps> = ({
         ? initialValue
         : null,
     );
-  }, [form.getValues(`questions.${index}.label`)]);
+  }, [form, index]);
 
 
   const isValidImageUrl = (url: string | null): boolean => {

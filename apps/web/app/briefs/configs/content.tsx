@@ -77,8 +77,6 @@ export const generateContent = (
             index={props.index}
             question={props.question}
             form={props.form}
-            handleQuestionChange={props.handleQuestionChange}
-            handleRemoveQuestion={props.handleRemoveQuestion}
           />
         ), // Custom component
       },
