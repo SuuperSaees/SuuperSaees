@@ -3,6 +3,7 @@
 import { getUserRoleById } from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
 import { getAgencyForClientByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getOrganizationByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { getOrganizationSettingsByOrganizationId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getSupabaseServerComponentClient } from '../../../supabase/src/clients/server-component.client';
 
 export async function getDomainByUserId(
@@ -61,4 +62,65 @@ export async function getDomainByOrganizationId(
   const domain = domainData?.subdomains?.domain;
 
   return domain ?? '';
+}
+
+export async function getDomainBySubdomain(
+  subdomain: string,
+  adminActived = false,
+): Promise<{
+  domain: string;
+  id: string;
+}> {
+  const supabase = getSupabaseServerComponentClient({ admin: adminActived });
+  const { data: domainData, error: domainError } = await supabase
+    .from('subdomains')
+    .select('domain, id')
+    .eq('domain', subdomain)
+    .single();
+
+  if (domainError) {
+    throw new Error(`Error getting domain: ${domainError.message}`);
+  }
+
+  return domainData;
+}
+
+export async function getFullDomainBySubdomain(
+  subdomain: string,
+  adminActived: boolean = false,
+) {
+  const supabase = getSupabaseServerComponentClient({
+    admin: adminActived,
+  });
+
+  const domainData = await getDomainBySubdomain(subdomain, adminActived);
+
+  const { data: organizationSubdomainData, error: organizationSubdomainError } =
+    await supabase
+      .from('organization_subdomains')
+      .select('organization_id')
+      .eq('subdomain_id', domainData.id)
+      .single();
+
+  if (organizationSubdomainError) {
+    throw new Error(
+      `Error getting organization subdomain: ${organizationSubdomainError.message}`,
+    );
+  }
+
+  if (!organizationSubdomainData) {
+    throw new Error(`No organization subdomain found: ${subdomain}`);
+  }
+
+  // Obtain organization settings
+  const organizationSettings = await getOrganizationSettingsByOrganizationId(
+    organizationSubdomainData.organization_id,
+    true,
+  );
+
+  // Return relevant data
+  return {
+    domainData,
+    settings: organizationSettings,
+  };
 }

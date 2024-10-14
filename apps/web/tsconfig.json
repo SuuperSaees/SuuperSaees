@@ -27,7 +27,8 @@
     "components/**/*",
     "lib/**/*.ts",
     "app",
-    "handlers/**/*"
+    "handlers/**/*",
+    "../../packages/features/auth/src/hooks"
   ],
   "exclude": ["node_modules", ".next"]
 }
