@@ -385,20 +385,26 @@ export type Database = {
       briefs: {
         Row: {
           created_at: string
+          description: string | null
           id: string
-          name: string | null
+          image_url: string | null
+          name: string
           propietary_organization_id: string | null
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
-          name?: string | null
+          image_url?: string | null
+          name: string
           propietary_organization_id?: string | null
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
-          name?: string | null
+          image_url?: string | null
+          name?: string
           propietary_organization_id?: string | null
         }
         Relationships: []

@@ -28,7 +28,9 @@
         "questionLabel": "Question",
         "labelPlaceholder": "Put your question here *",
         "descriptionPlaceholder": "Add a description",
-        "placeholderPlaceholder": "Add a placeholder"
+        "placeholderPlaceholder": "Add a placeholder",
+        "descriptionLabel": "Brief description",
+        "imageLabel": "Brief image"
     },
     "widgets": {
       "edit": {

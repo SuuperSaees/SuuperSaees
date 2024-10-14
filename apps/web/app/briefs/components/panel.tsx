@@ -45,7 +45,7 @@ export default function Panel() {
         <Widgets />
       </TabsContent>
       <TabsContent value="settings" className='max-h-full'>
-        <BriefCreationForm propietaryOrganizationId='' userRole='' />
+        <BriefCreationForm propietaryOrganizationId='' userRole='' showFormFields={false} />
       </TabsContent>
     </Tabs>
   );
