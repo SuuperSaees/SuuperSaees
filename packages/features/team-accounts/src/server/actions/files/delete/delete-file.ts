@@ -18,7 +18,8 @@ export async function deleteFile(
 
     // Obtener el bucket y la ruta del archivo a partir del URL
     const bucket = 'agency_files';
-    const folderPath = file_url.replace('http://127.0.0.1:54321/storage/v1/object/public/agency_files/', '').split('/').slice(0, -1).join('/') + '/';
+    const baseUrlFolderPath = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
+    const folderPath = file_url.replace(baseUrlFolderPath, '').split('/').slice(0, -1).join('/') + '/';
 
     // Listar y eliminar todos los archivos en la carpeta
     const { data: filesInFolder, error: listError } = await client
@@ -64,8 +65,10 @@ export async function deleteOrderBriefFile(file_id: string) {
     // Suponiendo que el bucket está en la URL como en el ejemplo proporcionado
     const bucket = urlParts[5]; // Cambia el índice según la posición real del bucket en la URL
 
+    const baseUrlFolderPath = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
+
     // Obtener la ruta del archivo eliminando el bucket de la URL
-    const folderPath = url.replace(`http://127.0.0.1:54321/storage/v1/object/public/${bucket}/`, '').split('/').slice(0, -1).join('/') + '/';
+    const folderPath = url.replace(`${baseUrlFolderPath}${bucket}/`, '').split('/').slice(0, -1).join('/') + '/';
 
     // Listar y eliminar todos los archivos en la carpeta
     const { data: filesInFolder, error: listError } = await client
