@@ -77,6 +77,7 @@ const BriefCreationForm = ({
 
       // If brief creation was successful, add associated form fields
       if (briefId?.id) {
+        console.log('que', values.questions);
         await addFormFieldsToBriefs(values.questions, briefId.id);
       } else {
         throw new Error('Failed to retrieve briefId'); // Error handling for brief creation failure
@@ -96,17 +97,16 @@ const BriefCreationForm = ({
   // Form submission handler
   const onSubmit = (values: z.infer<typeof briefCreationFormSchema>) => {
     // join default question with values (questions)
-    const newQuestionValues = {
+    const newQuestionValues = [
       ...values.questions,
-      ...values.default_question,
-    }
+      values.default_question,
+    ]
    
     const newValues = {
       ...values,
-      questions: [newQuestionValues],
+      questions: newQuestionValues,
     }
 
-    console.log('all', newValues);
     createBriefsMutations.mutate(newValues); // Trigger the mutation with form values
   };
 
@@ -139,7 +139,7 @@ const BriefCreationForm = ({
         <FormField
           control={form.control}
           name='default_question.description'
-          render={({ field, fieldState }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel className="font-semibold text-gray-700">
                 Title
@@ -151,7 +151,7 @@ const BriefCreationForm = ({
                   className="focus-visible:ring-none"
                 />
               </FormControl>
-              <FormMessage>{fieldState.error?.message}</FormMessage>
+              <FormMessage />
             </FormItem>
           )}
         />

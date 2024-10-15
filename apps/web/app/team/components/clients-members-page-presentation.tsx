@@ -75,7 +75,6 @@ const seatByPlans = {
           if (members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans]) {
               setAddMemberIsAvailable(true);
           } else {
-            console.log('members.length', members.length)
               setAddMemberIsAvailable(false);
           }
         }

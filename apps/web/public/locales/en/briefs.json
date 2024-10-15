@@ -97,7 +97,9 @@
     "dragOrClick": "Drag a video here or click to select",
     "dropHere": "Drop the video here",
     "invalidFileType": "Please select a valid video file",
-    "youtubePlaceholder": "Or enter a YouTube video URL"
+    "youtubePlaceholder": "Or enter a YouTube video URL",
+    "urlAddedSuccess": "Video URL added successfully",
+    "invalidUrl": "Please enter a valid YouTube video URL"
   },
   "uploadImage":{
     "placeholder": "Click here or drag an image to upload",

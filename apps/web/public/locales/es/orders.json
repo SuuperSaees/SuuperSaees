@@ -76,5 +76,8 @@
   "internalMessagingEnabled": "Habilitado el envío de mensajes internos",
   "internalMessagingDisabled": "Deshabilitado el envío de mensajes internos",
   "internalMessage": "Mensaje interno",
-  "placeholder": "Escribe un mensaje..."
+  "placeholder": "Escribe un mensaje...",
+  "dropdown": "Selecciona una opción",
+  "deletedFile": "Archivo eliminado",
+  "deletedFileDescription": "El archivo ha sido eliminado"
 }

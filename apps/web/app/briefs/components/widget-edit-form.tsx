@@ -7,7 +7,7 @@ import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-
+import { Trash,Plus } from 'lucide-react';
 import { Button } from '@kit/ui/button';
 import {
   Form,
@@ -80,21 +80,21 @@ export function WidgetEditForm() {
   const renderOptionFields = () => (
     <React.Fragment>
       {optionsFields.map((option, index) => (
-        <div key={option.id} className="space-y-4">
+        <div key={option.id} className="flex flex-col gap-2 relative">
           {renderFieldInput(`options.${index}.label`, 'Option Label')}
           {renderFieldInput(`options.${index}.value`, 'Option Value')}
-          <Button
-            variant="destructive"
-            type="button"
-            onClick={() => remove(index)}
-          >
-            Remove Option
+
+          <Button type="button" onClick={() => remove(index)} className='rounded-full w-[1.3rem] h-[1.3rem] p-0 bg-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent shadow-none absolute top-0 right-0 '>
+            <Trash className='w-full' />
           </Button>
+
         </div>
       ))}
-      <Button type="button" onClick={() => append({ label: '', value: '' })}>
-        Add Option
-      </Button>
+      <div className='flex justify-center'>
+        <Button type="button" onClick={() => append({ label: '', value: '' })} className='rounded-full w-9 h-9 p-2 bg-transparent text-gray-600 bg-gray-50 hover:bg-gray-100 shadow-none'>
+          <Plus className='w-full' />
+        </Button>
+      </div>
     </React.Fragment>
   );
 

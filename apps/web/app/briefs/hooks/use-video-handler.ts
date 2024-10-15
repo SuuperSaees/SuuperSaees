@@ -1,4 +1,4 @@
-import { useState, useRef, ChangeEvent, DragEvent } from 'react';
+import { useState, useRef, ChangeEvent, DragEvent, useCallback } from 'react';
 import { toast } from 'sonner';
 import { generateUUID } from '~/utils/generate-uuid';
 import { createUploadBucketURL, createFile } from '~/team-accounts/src/server/actions/files/create/create-file';
@@ -23,7 +23,7 @@ export function useVideoHandler(t: TranslationFunction, form: UseFormReturn<z.in
   const [isVideoValid, setIsVideoValid] = useState<boolean>(false);
   const [isYouTubeVideo, setIsYouTubeVideo] = useState<boolean>(false);
 
-  const checkVideoValidity = async (url: string) => {
+  const checkVideoValidity = useCallback(async (url: string) => {
     const youtubeId = extractYouTubeId(url);
     if (youtubeId) {
       try {
@@ -52,7 +52,7 @@ export function useVideoHandler(t: TranslationFunction, form: UseFormReturn<z.in
     } catch {
       return false;
     }
-  };
+  }, []);
 
   const handleFileUpload = async (file: File) => {
     if (!file?.type?.startsWith('video/')) {

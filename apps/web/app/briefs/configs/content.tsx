@@ -1,9 +1,9 @@
-import { ALargeSmall, AlignCenter, Image, Play } from 'lucide-react';
+import { ALargeSmall, Image, Play } from 'lucide-react';
 
 import FormTitleComponent from '../components/title-content';
-import FormRichTextComponent from '../components/rich-text-content';
+// import FormRichTextComponent from '../components/rich-text-content';
 import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
-import FormVideoUpload from '../components/video-content';
+// import FormVideoUpload from '../components/video-content';
 import UploadImagePreview from '../components/upload-image-preview';
 
 type ContentKey = ContentTypes;
@@ -37,30 +37,30 @@ export const generateContent = (
         ),
       },
     ],
-    [
-      'rich-text',
-      {
-        name: 'Rich text',
-        icon: <AlignCenter className="h-8 w-8" />,
-        action: () => action('rich-text'), // Action passed dynamically,
-        content: {
-          label: 'Rich text',
-          placeholder: '',
-          description: '',
-          type: 'rich-text',
-        },
-        component: (props: ComponentProps) => (
-          <FormRichTextComponent
-            index={props.index}
-            question={props.question}
-            form={props.form}
-            handleQuestionChange={props.handleQuestionChange}
-            handleRemoveQuestion={props.handleRemoveQuestion}
-            userRole={props.userRole}
-          />
-        ),
-      },
-    ],
+    // [
+    //   'rich-text',
+    //   {
+    //     name: 'Rich text',
+    //     icon: <AlignCenter className="h-8 w-8" />,
+    //     action: () => action('rich-text'), // Action passed dynamically,
+    //     content: {
+    //       label: 'Rich text',
+    //       placeholder: '',
+    //       description: '',
+    //       type: 'rich-text',
+    //     },
+    //     component: (props: ComponentProps) => (
+    //       <FormRichTextComponent
+    //         index={props.index}
+    //         question={props.question}
+    //         form={props.form}
+    //         handleQuestionChange={props.handleQuestionChange}
+    //         handleRemoveQuestion={props.handleRemoveQuestion}
+    //         userRole={props.userRole}
+    //       />
+    //     ),
+    //   },
+    // ],
     [
       'image',
       {
@@ -81,29 +81,29 @@ export const generateContent = (
         ), // Custom component
       },
     ],
-    [
-      'video',
-      {
-        name: 'Video',
-        icon: <Play className="h-8 w-8" />,
-        action: () => action('video'), 
-        content: {
-          label: 'Video',
-          placeholder: '',
-          description: '',
-          type: 'video',
-        },
-        component: (props: ComponentProps) => (
-          <FormVideoUpload
-            index={props.index}
-            question={props.question}
-            form={props.form}
-            handleQuestionChange={props.handleQuestionChange}
-            handleRemoveQuestion={props.handleRemoveQuestion}
-          />
-        )
-      },
-    ],
+    // [
+    //   'video',
+    //   {
+    //     name: 'Video',
+    //     icon: <Play className="h-8 w-8" />,
+    //     action: () => action('video'), 
+    //     content: {
+    //       label: 'Video',
+    //       placeholder: '',
+    //       description: '',
+    //       type: 'video',
+    //     },
+    //     component: (props: ComponentProps) => (
+    //       <FormVideoUpload
+    //         index={props.index}
+    //         question={props.question}
+    //         form={props.form}
+    //         handleQuestionChange={props.handleQuestionChange}
+    //         handleRemoveQuestion={props.handleRemoveQuestion}
+    //       />
+    //     )
+    //   },
+    // ],
     // Add other content...
   ]);
 };

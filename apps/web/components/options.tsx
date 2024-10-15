@@ -1,5 +1,6 @@
 'use client';
 
+import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
 import { useOrganizationSettings } from '../../../packages/features/accounts/src/context/organization-settings-context';
 
 interface RadioOptionProps {
@@ -7,15 +8,6 @@ interface RadioOptionProps {
   selectedOption: string | null;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   label: string;
-}
-
-function getTextColorBasedOnBackground(backgroundColor: string) {
-  const color = backgroundColor.replace('#', '');
-  const r = parseInt(color.substring(0, 2), 16);
-  const g = parseInt(color.substring(2, 4), 16);
-  const b = parseInt(color.substring(4, 6), 16);
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return luminance > 186 ? 'black' : 'white';
 }
 
 export function RadioOption({ value, selectedOption, onChange, label }: RadioOptionProps) {
@@ -32,7 +24,7 @@ export function RadioOption({ value, selectedOption, onChange, label }: RadioOpt
         className="hidden"
       />
       <div
-        className={`w-[16px] h-[16px] rounded-full border-2 flex items-center justify-center ${
+        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
           selectedOption === value ? `bg-brand border-none` : 'border-gray-400'
         }`}
         style={
@@ -42,10 +34,10 @@ export function RadioOption({ value, selectedOption, onChange, label }: RadioOpt
           }
       >
         {selectedOption === value && (
-          <div className="w-[6px] h-[6px] bg-white rounded-full"></div>
+          <div className="w-2 h-2 bg-white rounded-full"></div>
         )}
       </div>
-      <span className="text-gray-700 font-medium text-sm font-inter">{label}</span>
+      <span className="text-gray-500 text-md font-medium font-inter text-4 leading-6">{label}</span>
     </label>
   );
 }

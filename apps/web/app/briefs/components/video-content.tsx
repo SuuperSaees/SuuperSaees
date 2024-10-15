@@ -39,14 +39,7 @@ const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
 
   return (
     <FormItem className="space-y-4">
-      <div className="flex items-center justify-between">
-        <FormLabel>{t('video.title')} {index + 1}</FormLabel>
-        {index > 0 && (
-          <Button type="button" variant="destructive" onClick={() => handleRemoveQuestion(index)}>
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      <FormLabel>{t('video.title')} {index + 1}</FormLabel>
       <div>
         {isValidVideoUrl(videoUrl) ? (
           <div className="space-y-2">

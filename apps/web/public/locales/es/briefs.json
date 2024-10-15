@@ -97,7 +97,9 @@
     "dragOrClick": "Arrastre un video aquí o haga clic para seleccionarlo",
     "dropHere": "Deja el video aquí",
     "invalidFileType": "Por favor seleccione un archivo de vídeo válido",
-    "youtubePlaceholder": "O ingresa una URL de video de YouTube"
+    "youtubePlaceholder": "O ingresa una URL de video de YouTube",
+    "urlAddedSuccess": "URL del video agregada con éxito",
+    "invalidUrl": "Por favor, introduzca una URL de video de YouTube válida"
   },
   "uploadImage":{
     "placeholder": "Haz clic o arrastra para subir una imagen",
