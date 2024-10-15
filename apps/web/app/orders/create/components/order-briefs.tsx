@@ -14,6 +14,7 @@ import {
 } from '@kit/ui/form';
 import { Textarea } from '@kit/ui/textarea';
 
+import { DatePicker } from '~/components/date-seletc';
 import { SingleChoiceDropdown } from '~/components/dropdown';
 import { MultipleChoice } from '~/components/multiple-choice';
 import RadioOptions from '~/components/single-choice';
@@ -21,12 +22,10 @@ import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
 import { containsVideo } from '~/utils/contains-video';
 import { generateUUID } from '~/utils/generate-uuid';
-
-import VideoDescriptionRenderer from './video-description-renderer';
-import { DatePicker } from '~/components/date-seletc';
 import { isYouTubeUrl } from '~/utils/upload-video';
-import { getYouTubeEmbedUrl } from '../utils/video-format';
 
+import { getYouTubeEmbedUrl } from '../utils/video-format';
+import VideoDescriptionRenderer from './video-description-renderer';
 
 type Option = {
   value: string;
@@ -59,7 +58,15 @@ export const OrderBriefs = ({
   >;
   orderId: string;
 }) => {
-  const notValidFormTypes = new Set(['h1', 'h2', 'h3', 'h4', 'rich-text', 'image', 'video']);
+  const notValidFormTypes = new Set([
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'rich-text',
+    'image',
+    'video',
+  ]);
 
   const [_uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const uniqueId = generateUUID();
@@ -95,9 +102,17 @@ export const OrderBriefs = ({
       case 'h4':
         return <h4 className="text-lg font-bold">{formField.field?.label}</h4>;
       case 'rich-text':
-        return <div dangerouslySetInnerHTML={{ __html: formField.field?.label }} />;
+        return (
+          <div dangerouslySetInnerHTML={{ __html: formField.field?.label }} />
+        );
       case 'image':
-        return <img src={formField.field?.label} alt={formField.field?.label} className="max-w-full h-auto" />;
+        return (
+          <img
+            src={formField.field?.label}
+            alt={formField.field?.label}
+            className="h-auto max-w-full"
+          />
+        );
       case 'video': {
         const videoUrl = formField.field?.label;
         if (isYouTubeUrl(videoUrl)) {
@@ -136,199 +151,203 @@ export const OrderBriefs = ({
           <div key={brief.id} className="flex flex-col gap-4">
             <h3 className="text-lg font-bold">{brief.name}</h3>
             <div className="flex flex-col gap-8">
-              {brief?.form_fields?.map((formField) => {
-                const currentFieldIndex = notValidFormTypes.has(
-                  formField.field?.type ?? '',
+              {brief?.form_fields
+                ?.sort(
+                  (a, b) => (a.field.position ?? 0) - (b.field.position ?? 0),
                 )
-                  ? uniqueIndexCounter
-                  : uniqueIndexCounter++; // Increment the counter for each form field
+                .map((formField) => {
+                  const currentFieldIndex = notValidFormTypes.has(
+                    formField.field?.type ?? '',
+                  )
+                    ? uniqueIndexCounter
+                    : uniqueIndexCounter++; // Increment the counter for each form field
 
-                if (notValidFormTypes.has(formField.field?.type ?? '')) {
-                  return renderSpecialFormField(formField);
-                }
-                return (
-                  <FormField
-                    key={formField.field?.id}
-                    control={form.control}
-                    name={`brief_responses.${currentFieldIndex}.response`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{formField.field?.label}</FormLabel>
+                  if (notValidFormTypes.has(formField.field?.type ?? '')) {
+                    return renderSpecialFormField(formField);
+                  }
+                  return (
+                    <FormField
+                      key={formField.field?.id}
+                      control={form.control}
+                      name={`brief_responses.${currentFieldIndex}.response`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{formField.field?.label}</FormLabel>
 
-                        {formField.field?.description &&
-                          (containsVideo(formField.field?.description) ? (
-                            <VideoDescriptionRenderer
-                              description={formField.field?.description}
-                            />
-                          ) : (
-                            <FormDescription>
-                              {formField.field?.description}
-                            </FormDescription>
-                          ))}
+                          {formField.field?.description &&
+                            (containsVideo(formField.field?.description) ? (
+                              <VideoDescriptionRenderer
+                                description={formField.field?.description}
+                              />
+                            ) : (
+                              <FormDescription>
+                                {formField.field?.description}
+                              </FormDescription>
+                            ))}
 
-                        <FormControl>
-                          {formField.field?.type === 'select' ? (
-                            <RadioOptions
-                              options={
-                                (formField.field?.options as Option[]) ?? []
-                              }
-                              onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>,
-                              ) => {
-                                const value = event.target.value;
-                                form.setValue(
-                                  `brief_responses.${currentFieldIndex}`,
-                                  {
-                                    form_field_id: formField.field?.id ?? '',
-                                    brief_id: brief.id,
-                                    order_id: orderId,
-                                    response: value,
-                                  },
-                                );
-                              }}
-                              selectedOption={
-                                form.getValues(
-                                  `brief_responses.${currentFieldIndex}.response`,
-                                ) || ''
-                              }
-                            />
-                          ) : formField.field?.type === 'multiple_choice' ? (
-                            <MultipleChoice
-                              items={
-                                (formField.field?.options as Option[]) ?? []
-                              }
-                              question={formField.field?.label ?? ''}
-                              selectedOptions={(
-                                form.getValues(
-                                  `brief_responses.${currentFieldIndex}.response`,
-                                ) ?? ''
-                              )
-                                .split(', ')
-                                .filter(Boolean)}
-                              onChange={(value) => {
-                                form.setValue(
-                                  `brief_responses.${currentFieldIndex}`,
-                                  {
-                                    form_field_id: formField.field?.id ?? '',
-                                    brief_id: brief.id,
-                                    order_id: orderId,
-                                    response: value,
-                                  },
-                                );
-                              }}
-                            />
-                          ) : formField.field?.type === 'text-short' ? (
-                            <ThemedInput
-                              placeholder={
-                                formField.field?.placeholder ?? undefined
-                              }
-                              {...field}
-                              onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>,
-                              ) => {
-                                const responseValue = e.target.value;
-                                form.setValue(
-                                  `brief_responses.${currentFieldIndex}`,
-                                  {
-                                    form_field_id: formField.field?.id ?? '',
-                                    brief_id: brief.id,
-                                    order_id: orderId,
-                                    response: responseValue,
-                                  },
-                                );
-                              }}
-                            />
-                          ) : formField.field?.type === 'text-large' ? (
-                            <Textarea
-                              placeholder={
-                                formField.field?.placeholder ?? undefined
-                              }
-                              {...field}
-                              onChange={(
-                                e: React.ChangeEvent<HTMLTextAreaElement>,
-                              ) => {
-                                const responseValue = e.target.value;
-                                form.setValue(
-                                  `brief_responses.${currentFieldIndex}`,
-                                  {
-                                    form_field_id: formField.field?.id ?? '',
-                                    brief_id: brief.id,
-                                    order_id: orderId,
-                                    response: responseValue,
-                                  },
-                                );
-                              }}
-                            >
-                              {field.value}
-                            </Textarea>
-                          ) : formField.field?.type === 'file' ? (
-                            <UploadFileComponent
-                              bucketName="orders"
-                              uuid={uniqueId}
-                              onFileIdsChange={(fileIds) => {
-                                const responseValues =
-                                  handleFileIdsChange(fileIds);
+                          <FormControl>
+                            {formField.field?.type === 'select' ? (
+                              <RadioOptions
+                                options={
+                                  (formField.field?.options as Option[]) ?? []
+                                }
+                                onChange={(
+                                  event: React.ChangeEvent<HTMLInputElement>,
+                                ) => {
+                                  const value = event.target.value;
+                                  form.setValue(
+                                    `brief_responses.${currentFieldIndex}`,
+                                    {
+                                      form_field_id: formField.field?.id ?? '',
+                                      brief_id: brief.id,
+                                      order_id: orderId,
+                                      response: value,
+                                    },
+                                  );
+                                }}
+                                selectedOption={
+                                  form.getValues(
+                                    `brief_responses.${currentFieldIndex}.response`,
+                                  ) || ''
+                                }
+                              />
+                            ) : formField.field?.type === 'multiple_choice' ? (
+                              <MultipleChoice
+                                items={
+                                  (formField.field?.options as Option[]) ?? []
+                                }
+                                question={formField.field?.label ?? ''}
+                                selectedOptions={(
+                                  form.getValues(
+                                    `brief_responses.${currentFieldIndex}.response`,
+                                  ) ?? ''
+                                )
+                                  .split(', ')
+                                  .filter(Boolean)}
+                                onChange={(value) => {
+                                  form.setValue(
+                                    `brief_responses.${currentFieldIndex}`,
+                                    {
+                                      form_field_id: formField.field?.id ?? '',
+                                      brief_id: brief.id,
+                                      order_id: orderId,
+                                      response: value,
+                                    },
+                                  );
+                                }}
+                              />
+                            ) : formField.field?.type === 'text-short' ? (
+                              <ThemedInput
+                                placeholder={
+                                  formField.field?.placeholder ?? undefined
+                                }
+                                {...field}
+                                onChange={(
+                                  e: React.ChangeEvent<HTMLInputElement>,
+                                ) => {
+                                  const responseValue = e.target.value;
+                                  form.setValue(
+                                    `brief_responses.${currentFieldIndex}`,
+                                    {
+                                      form_field_id: formField.field?.id ?? '',
+                                      brief_id: brief.id,
+                                      order_id: orderId,
+                                      response: responseValue,
+                                    },
+                                  );
+                                }}
+                              />
+                            ) : formField.field?.type === 'text-large' ? (
+                              <Textarea
+                                placeholder={
+                                  formField.field?.placeholder ?? undefined
+                                }
+                                {...field}
+                                onChange={(
+                                  e: React.ChangeEvent<HTMLTextAreaElement>,
+                                ) => {
+                                  const responseValue = e.target.value;
+                                  form.setValue(
+                                    `brief_responses.${currentFieldIndex}`,
+                                    {
+                                      form_field_id: formField.field?.id ?? '',
+                                      brief_id: brief.id,
+                                      order_id: orderId,
+                                      response: responseValue,
+                                    },
+                                  );
+                                }}
+                              >
+                                {field.value}
+                              </Textarea>
+                            ) : formField.field?.type === 'file' ? (
+                              <UploadFileComponent
+                                bucketName="orders"
+                                uuid={uniqueId}
+                                onFileIdsChange={(fileIds) => {
+                                  const responseValues =
+                                    handleFileIdsChange(fileIds);
                                   setFormResponse(
                                     currentFieldIndex,
                                     formField,
                                     brief.id,
                                     responseValues,
                                   );
-                              }}
-                            />
-                          ) : formField.field?.type === 'date' ? (
-                            <DatePicker
-                              onDateChange={(selectedDate: Date) => {
-                                const responseValue = selectedDate;
-                                form.setValue(
-                                  `brief_responses.${currentFieldIndex}`,
-                                  {
-                                    form_field_id: formField.field?.id ?? '',
-                                    brief_id: brief.id,
-                                    order_id: orderId,
-                                    response: responseValue.toString(),
-                                  },
-                                );
-                              }}
-                            />
-                          ) : formField.field?.type === 'dropdown' ? (
-                            <SingleChoiceDropdown
-                              items={
-                                (formField.field?.options as Option[]) ?? []
-                              }
-                              question={formField.field?.label ?? ''}
-                              selectedOption={
-                                form.getValues(
-                                  `brief_responses.${currentFieldIndex}.response`,
-                                ) ?? ''
-                              }
-                              onChange={(value) => {
-                                form.setValue(
-                                  `brief_responses.${currentFieldIndex}`,
-                                  {
-                                    form_field_id: formField.field?.id ?? '',
-                                    brief_id: brief.id,
-                                    order_id: orderId,
-                                    response: value,
-                                  },
-                                );
-                              }}
-                            />
-                          ) : null}
-                        </FormControl>
+                                }}
+                              />
+                            ) : formField.field?.type === 'date' ? (
+                              <DatePicker
+                                onDateChange={(selectedDate: Date) => {
+                                  const responseValue = selectedDate;
+                                  form.setValue(
+                                    `brief_responses.${currentFieldIndex}`,
+                                    {
+                                      form_field_id: formField.field?.id ?? '',
+                                      brief_id: brief.id,
+                                      order_id: orderId,
+                                      response: responseValue.toString(),
+                                    },
+                                  );
+                                }}
+                              />
+                            ) : formField.field?.type === 'dropdown' ? (
+                              <SingleChoiceDropdown
+                                items={
+                                  (formField.field?.options as Option[]) ?? []
+                                }
+                                question={formField.field?.label ?? ''}
+                                selectedOption={
+                                  form.getValues(
+                                    `brief_responses.${currentFieldIndex}.response`,
+                                  ) ?? ''
+                                }
+                                onChange={(value) => {
+                                  form.setValue(
+                                    `brief_responses.${currentFieldIndex}`,
+                                    {
+                                      form_field_id: formField.field?.id ?? '',
+                                      brief_id: brief.id,
+                                      order_id: orderId,
+                                      response: value,
+                                    },
+                                  );
+                                }}
+                              />
+                            ) : null}
+                          </FormControl>
 
-                        <FormMessage />
-                        {formField.field?.alert_message && (
-                          <div className="flex items-center gap-3 rounded-md bg-accent p-3 px-5 text-sm text-foreground">
-                            <InfoIcon size="16" strokeWidth={2} />
-                            {formField.field?.alert_message}
-                          </div>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-                );
-              })}
+                          <FormMessage />
+                          {formField.field?.alert_message && (
+                            <div className="flex items-center gap-3 rounded-md bg-accent p-3 px-5 text-sm text-foreground">
+                              <InfoIcon size="16" strokeWidth={2} />
+                              {formField.field?.alert_message}
+                            </div>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+                  );
+                })}
             </div>
           </div>
         ));
