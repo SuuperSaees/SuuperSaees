@@ -1789,7 +1789,7 @@ export type Database = {
           id?: string
           namespace: string
           provider?: string
-          provider_id: string
+          provider_id?: string
           service_name?: string | null
           status: string
           updated_at?: string
