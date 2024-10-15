@@ -1,5 +1,9 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+
+
 import nodemailer from 'nodemailer';
-import { NextResponse, NextRequest} from 'next/server';
+
 
 export async function POST(req: NextRequest) {
   const { from, to, subject, text, html } = await req.json();
@@ -7,6 +11,7 @@ export async function POST(req: NextRequest) {
   if (!from) missingFields.push('from');
   if (!to) missingFields.push('to');
   if (!subject) missingFields.push('subject');
+  console.log(text, html, 'TESTIIIIINg');
   if (missingFields.length > 0) {
     // Respuesta de error por campos faltantes
     const errorResponse = {

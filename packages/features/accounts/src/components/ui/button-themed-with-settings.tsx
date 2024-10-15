@@ -26,16 +26,20 @@ function getTextColorBasedOnBackground(backgroundColor: string) {
 export const ThemedButton: React.FC<{
   children: React.ReactNode;
   className?: string;
+  themeColor?: string;
   [key: string]: unknown;
-}> = ({ children, className, ...rest }) => {
+}> = ({ children, className, themeColor, ...rest }) => {
   const { theme_color } = useOrganizationSettings();
-  const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
+  if (!themeColor) {
+    themeColor = theme_color;
+  }
+  const textColor = getTextColorBasedOnBackground(themeColor ?? '#000000');
   return (
     <Button
       className={`bg-brand flex gap-2 ${className}`}
       style={
-        theme_color
-          ? { backgroundColor: theme_color, color: textColor }
+        themeColor
+          ? { backgroundColor: themeColor, color: textColor }
           : undefined
       }
       {...rest}
