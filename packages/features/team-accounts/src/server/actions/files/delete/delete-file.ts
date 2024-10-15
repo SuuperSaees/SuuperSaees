@@ -14,7 +14,11 @@ export async function deleteFile(file_id: string, file_url: string) {
   if (fileError) throw fileError;
 
   // Get bucket and file path from URL
-  const bucket = 'agency_files';
+  const url = file_url;
+  const urlParts = url.split('/');
+
+  const bucket = urlParts[7];
+
   const baseUrlFolderPath =
     process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
   const folderPath =
@@ -58,7 +62,8 @@ export async function deleteOrderBriefFile(file_id: string) {
   const url = fileData.url;
   const urlParts = url.split('/');
 
-  const bucket = urlParts[5];
+  const bucket = urlParts[7];
+
   const baseUrlFolderPath =
     process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
 

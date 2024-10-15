@@ -24,6 +24,11 @@
       "filesLabel": "Archivos",
       "filesPlaceholder": "Haz click o arrastra para subir un archivo SVG, PNG, JPG or GIF (max. 800x400px)",
       "submitMessage": "Crear pedido"
+    },
+    "validation": {
+      "minTitleCharacters": "El título debe tener al menos 2 caracteres.",
+      "minDescriptionCharacters": "La descripción debe tener al menos 2 caracteres.",
+      "files": "Por favor, sube al menos un archivo"
     }
   },
   "details": {
