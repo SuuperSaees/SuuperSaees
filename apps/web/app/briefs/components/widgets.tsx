@@ -37,7 +37,7 @@ export default function Widgets() {
   });
 
   return (
-    <div className="w-full h-full flex flex-col gap-4">
+    <div className="w-full h-full flex flex-col gap-4 max-h-full overflow-y-auto no-scrollbar">
       {isEditing ? (
         <>
         <div className='flex gap-2 items-center'>

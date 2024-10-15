@@ -30,7 +30,8 @@
         "descriptionPlaceholder": "Agregar una descripción",
         "placeholderPlaceholder": "Agregar un marcador de posición",
         "descriptionLabel": "Descripción del brief",
-        "imageLabel": "Imagen del brief"
+        "imageLabel": "Imagen del brief",
+        "defaultPlaceholder": "Añade una descripción..."
     },
     "widgets": {
       "edit": {

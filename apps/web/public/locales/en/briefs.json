@@ -30,7 +30,8 @@
         "descriptionPlaceholder": "Add a description",
         "placeholderPlaceholder": "Add a placeholder",
         "descriptionLabel": "Brief description",
-        "imageLabel": "Brief image"
+        "imageLabel": "Brief image",
+        "defaultPlaceholder": "Add a description..."
     },
     "widgets": {
       "edit": {

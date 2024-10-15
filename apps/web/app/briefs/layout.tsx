@@ -28,7 +28,7 @@ function BriefsLayout({ children }: React.PropsWithChildren) {
 
   const pathname = headers().get('x-current-path');
 
-  const showWidgets = pathname !== '/briefs'; // Logic to hide Widgets for /orders only
+  const showWidgets = pathname === '/briefs/create'; // Logic to hide Widgets for /orders only
 
   return (
     <Page style={style}>
@@ -49,7 +49,7 @@ function BriefsLayout({ children }: React.PropsWithChildren) {
 
       <UserWorkspaceContextProvider value={workspace}>
         <BriefsProvider>
-          <div className="flex gap-8 max-h-full">
+          <div className="flex gap-8 max-h-full h-full">
             {children}
 
             {showWidgets && <Panel />}

@@ -1,6 +1,7 @@
 'use client';
 
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -12,10 +13,11 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 
-import RichTextEditor from '~/components/ui/rich-text-editor';
+// import RichTextEditor from '~/components/ui/rich-text-editor';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { BriefCreationForm } from './brief-creation-form';
+import UploadImage from './upload-image-dropzone';
 
 interface FieldsetInformationProps {
   form: UseFormReturn<BriefCreationForm>;
@@ -32,14 +34,16 @@ export default function FieldsetInformation({
   };
 
   return (
-    <fieldset className='flex flex-col gap-4'>
+    <fieldset className="flex flex-col gap-4">
       {/* Name */}
       <FormField
         control={form.control}
         name="name"
         render={({ field, fieldState }) => (
           <FormItem>
-            <FormLabel className='font-semibold text-gray-700'>{t('creation.form.titleLabel')}</FormLabel>
+            <FormLabel className="font-semibold text-gray-700">
+              {t('creation.form.titleLabel')}
+            </FormLabel>
             <FormControl>
               <ThemedInput
                 {...field}
@@ -59,9 +63,11 @@ export default function FieldsetInformation({
         name="description"
         render={({ field, fieldState }) => (
           <FormItem>
-            <FormLabel className='font-semibold text-gray-700'>{t('creation.form.descriptionLabel')}</FormLabel>
+            <FormLabel className="font-semibold text-gray-700">
+              {t('creation.form.descriptionLabel')}
+            </FormLabel>
             <FormControl>
-              <RichTextEditor
+              {/* <RichTextEditor
                 {...field}
                 content={brief.description ?? ''}
                 onChange={(text: string) => {
@@ -71,6 +77,13 @@ export default function FieldsetInformation({
                 userRole=""
                 onComplete={() => void null}
                 hideSubmitButton
+              /> */}
+              <ThemedTextarea
+                {...field}
+                placeholder={t('creation.form.titlePlaceholder')}
+                className="focus-visible:ring-none"
+                onChange={handleBriefChange}
+                value={brief.description}
               />
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -79,7 +92,15 @@ export default function FieldsetInformation({
       />
 
       {/* Image */}
-      
+      <UploadImage
+        index={0}
+        nameField={'image_url'}
+        form={form}
+        handleQuestionChange={(imgUrl: string) => {
+          // handleBriefChange
+          updateBrief({ ...brief, image_url: imgUrl });
+        }}
+      />
     </fieldset>
   );
 }
