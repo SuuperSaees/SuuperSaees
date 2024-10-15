@@ -5,14 +5,20 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { FormField } from '../../../../../../../../apps/web/lib/form-field.types';
+import { getOrganization } from '../../organizations/get/get-organizations';
 
 // Define la función createClient
 export const createBrief = async (clientData: Brief.Insert) => {
   try {
+
     const client = getSupabaseServerComponentClient();
+    const organization = await getOrganization();
     const { data: briefData, error: briefDataError } = await client
       .from('briefs')
-      .insert(clientData)
+      .insert({
+        ...clientData,
+        propietary_organization_id: organization.primary_owner_user_id,
+      })
       .select('id')
       .single();
     if (briefDataError) {
