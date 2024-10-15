@@ -212,10 +212,6 @@ export function WidgetEditForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="h-full w-full space-y-8 overflow-y-auto no-scrollbar max-h-full"
       >
-        <h2>
-          {t('creation.form.questionLabel') + ' '}
-          {currentFormField ? +currentFormField?.id + 1 : 0}
-        </h2>
         {renderFormFields()}
       </form>
     </Form>

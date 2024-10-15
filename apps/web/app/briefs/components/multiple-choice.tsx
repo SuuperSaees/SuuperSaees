@@ -5,13 +5,7 @@ import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
 import { ThemedCheckbox } from '../../../../../packages/features/accounts/src/components/ui/checkbox-themed-with-settings';
 import { BriefsProvider } from '../contexts/briefs-context';
@@ -49,10 +43,6 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
       render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
           <div className="flex flex-col gap-2">
-            <FormLabel>
-              {t('creation.form.questionLabel')} {index + 1}
-            </FormLabel>
-
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
@@ -66,7 +56,7 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                         handleQuestionChange(index, 'label', e.target.value)
                       }
                       placeholder={t('multipleChoice.title')}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none w-full"
+                      className="w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -91,7 +81,7 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                         )
                       }
                       placeholder={t('multipleChoice.description')}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none w-full"
+                      className="w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
