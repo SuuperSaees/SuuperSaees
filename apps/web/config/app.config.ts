@@ -16,10 +16,13 @@ const AppConfigSchema = z
         required_error: `Please provide the variable NEXT_PUBLIC_SITE_TITLE`,
       })
       .min(1),
-    description: z.string({
-      description: `This is the default description of your SaaS.`,
-      required_error: `Please provide the variable NEXT_PUBLIC_SITE_DESCRIPTION`,
-    }),
+    description: z
+      .string({
+        // description: `This is the default description of your SaaS.`,
+        description: ``,
+        // required_error: `Please provide the variable NEXT_PUBLIC_SITE_DESCRIPTION`,
+      })
+      .optional(),
     url: z
       .string({
         required_error: `Please provide the variable NEXT_PUBLIC_SITE_URL`,

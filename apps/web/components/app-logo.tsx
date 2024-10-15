@@ -46,21 +46,23 @@ export function AppLogo({
   href = '/',
   label = 'Home Page',
   className = '',
+  logoUrl,
 }: {
   href?: string;
   className?: string;
   label?: string;
+  logoUrl?: string;
 }) {
   const { logo_url } = useOrganizationSettings();
-
+  logoUrl = logoUrl ?? logo_url;
   return (
     <Link
       aria-label={label}
       href={href}
       className={`flex h-full max-h-[100px] w-full max-w-[200px] items-center justify-center overflow-hidden ${className}`}
     >
-      {logo_url ? (
-        <CustomLogoImage url={logo_url} className="h-full w-full" />
+      {logoUrl ? (
+        <CustomLogoImage url={logoUrl} className="h-full w-full" />
       ) : (
         <LogoImage className="h-[32px] w-full object-contain" />
       )}

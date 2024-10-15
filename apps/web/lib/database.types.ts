@@ -385,20 +385,26 @@ export type Database = {
       briefs: {
         Row: {
           created_at: string
+          description: string | null
           id: string
-          name: string | null
+          image_url: string | null
+          name: string
           propietary_organization_id: string | null
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
-          name?: string | null
+          image_url?: string | null
+          name: string
           propietary_organization_id?: string | null
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
-          name?: string | null
+          image_url?: string | null
+          name?: string
           propietary_organization_id?: string | null
         }
         Relationships: []
@@ -849,6 +855,7 @@ export type Database = {
           label: string
           options: Json[] | null
           placeholder: string | null
+          position: number
           type: Database["public"]["Enums"]["field_types"]
         }
         Insert: {
@@ -859,6 +866,7 @@ export type Database = {
           label: string
           options?: Json[] | null
           placeholder?: string | null
+          position: number
           type?: Database["public"]["Enums"]["field_types"]
         }
         Update: {
@@ -869,6 +877,7 @@ export type Database = {
           label?: string
           options?: Json[] | null
           placeholder?: string | null
+          position?: number
           type?: Database["public"]["Enums"]["field_types"]
         }
         Relationships: []
@@ -1435,6 +1444,53 @@ export type Database = {
           },
         ]
       }
+      organization_subdomains: {
+        Row: {
+          id: string
+          organization_id: string
+          subdomain_id: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          subdomain_id: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          subdomain_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_subdomain_id_fkey"
+            columns: ["subdomain_id"]
+            isOneToOne: false
+            referencedRelation: "subdomains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           name: string
@@ -1716,6 +1772,45 @@ export type Database = {
           test_period_duration_unit_of_measurement?: string | null
           test_period_price?: number | null
           time_based?: boolean | null
+        }
+        Relationships: []
+      }
+      subdomains: {
+        Row: {
+          created_at: string
+          deleted_on: string | null
+          domain: string
+          id: string
+          namespace: string
+          provider: string
+          provider_id: string
+          service_name: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_on?: string | null
+          domain: string
+          id?: string
+          namespace: string
+          provider?: string
+          provider_id?: string
+          service_name?: string | null
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_on?: string | null
+          domain?: string
+          id?: string
+          namespace?: string
+          provider?: string
+          provider_id?: string
+          service_name?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2091,13 +2186,21 @@ export type Database = {
         }
         Returns: boolean
       }
-      insert_service_brief_relation: {
-        Args: {
-          service_id: number
-          brief_id: string
-        }
-        Returns: undefined
-      }
+      insert_service_brief_relation:
+        | {
+            Args: {
+              service_id: number
+              brief_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              service_id: string
+              brief_id: string
+            }
+            Returns: undefined
+          }
       is_account_owner: {
         Args: {
           account_id: string
@@ -2240,6 +2343,11 @@ export type Database = {
         | "text-short"
         | "text-large"
         | "number"
+        | "file"
+        | "dropdown"
+        | "rich-text"
+        | "image"
+        | "video"
       file_types: "image" | "video" | "pdf" | "fig"
       messages_types: "public" | "internal_agency"
       notification_channel: "in_app" | "email"

@@ -29,7 +29,7 @@ async function BriefsPage() {
     .eq('primary_owner_user_id', userData.user!.id);
 
   const filteredAccounts = accountsData?.filter(
-    (account) => account.id !== userData.user!.id,
+    (account) => account.id === userData.user!.id,
   );
 
   const accountIds = filteredAccounts?.map((account) => account.id) ?? [];
@@ -51,28 +51,15 @@ async function BriefsPage() {
       briefs = data as Brief.Type[];
     }
   }
-  // console.log('all', JSON.stringify(briefs));
   return (
     <PageBody>
       <div className="p-[35px]">
-        <div className="mb-[32px] flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <div className="flex-grow">
             <span>
               <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
                 Briefs
               </div>
-            </span>
-          </div>
-          <div className="flex space-x-4">
-            <span>
-              <Button variant="outline">
-                Tu prueba gratuita termina en xx dias
-              </Button>
-            </span>
-            <span>
-              <Button variant="outline" size="icon">
-                <BellIcon className="h-4 w-4" />
-              </Button>
             </span>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
+import { getUrlFile } from '../../files/get/get-files';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
@@ -24,10 +25,10 @@ export const getBriefQuestionsAndAnswers = async (
   // Extract form_field_id from relationships
   const formFieldIds = briefFormFilesData.map((file) => file.form_field_id);
 
-  // Get the questions from the form_fields table
+  // Get the questions from the form_fields table, including options
   const { data: formFieldsData, error: formFieldsError } = await client
     .from('form_fields')
-    .select('id, description, label, type')
+    .select('id, description, label, type, options') // Include "options"
     .in('id', formFieldIds);
 
   if (formFieldsError) throw formFieldsError;
@@ -42,39 +43,69 @@ export const getBriefQuestionsAndAnswers = async (
   if (briefResponsesError) throw briefResponsesError;
 
   let descriptionContent = '';
-  formFieldsData.forEach((question) => {
+  for (const question of formFieldsData) {
     const response = briefResponsesData.find(
       (res) => res.form_field_id === question.id,
     );
-    // Check if the response is a valid JSON (object type)
     const unvalidResponseTypes = new Set(['h1', 'h2', 'h3', 'h4']);
 
-    if (unvalidResponseTypes.has(question.type)) return;
+    if (unvalidResponseTypes.has(question.type)) continue;
+
     let result;
 
     if (response) {
       try {
-        const parsedResponse = JSON.parse(response.response);
+        // If the field type is multiple_choice, select, or dropdown, map the values to labels
+        if (['multiple_choice', 'select', 'dropdown'].includes(question.type)) {
+          const selectedValues = response.response
+            .split(',')
+            .map((val) => val.trim()); // Split multiple values
+          const options = question.options ?? [];
 
-        // If the object has a 'label' field, extract it
-        if (parsedResponse.label) {
-          result = parsedResponse.label;
+          // Map each selected value to its corresponding label
+          const mappedLabels = selectedValues
+            .map((value) => {
+              const option = options.find((opt) => opt.value === value);
+              return option ? option.label : value; // Fallback to value if no matching label
+            })
+            .join(', ');
+
+          result = mappedLabels;
+        } else if (question.type === 'date') {
+          // Convert date responses to DD/MM/YYYY format
+          const date = new Date(response.response);
+          result = date.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          });
+        } else if (question.type === 'file') {
+          const uploadedFiles = response.response
+            .split(',')
+            .map((val) => val.trim());
+
+          const mappedFiles = await Promise.all(
+            uploadedFiles.map(async (fileId) => {
+              const file = await getUrlFile(fileId);
+              return file;
+            }),
+          );
+
+          result = mappedFiles.map((file) => file).join(', ');
         } else {
-          result = response.response; // If it is not an object or has no label, use the original string
+          result = response.response.replace(/_/g, ' ');
         }
       } catch (error) {
-        // If it is not a JSON, treat it as plain text
-        // quit the "_" if contains, and replace with " "
-
         result = response.response.replace(/_/g, ' ');
       }
     } else {
       result = 'No se proporcionó información';
     }
 
-    //Concatenate question and answer
+    // Concatenate question and answer
     descriptionContent += `<strong>${question.label}:</strong><br/>${result}<br/><br/>`;
-  });
+  }
+
   return descriptionContent;
 };
 

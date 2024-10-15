@@ -17,10 +17,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
-
+import { useAuthDetails } from '../hooks/use-auth-details';
 
 
 import { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
+import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
 
 
 export function PasswordSignInForm({
@@ -31,7 +32,11 @@ export function PasswordSignInForm({
   loading: boolean;
 }) {
   const { t } = useTranslation('auth');
-
+  let host = '';
+  if (typeof window !== 'undefined') {
+    host = window.location.host;
+  }
+  const authDetails = useAuthDetails(host);
   const form = useForm<z.infer<typeof PasswordSignInSchema>>({
     resolver: zodResolver(PasswordSignInSchema),
     defaultValues: {
@@ -127,11 +132,12 @@ export function PasswordSignInForm({
           )}
         />
 
-        <Button
+        <ThemedButton
           data-test="auth-submit-button"
-          className={'bg-brand group w-full'}
+          className="w-full"
           type="submit"
           disabled={loading}
+          themeColor={authDetails?.theme_color}
         >
           <If
             condition={loading}
@@ -149,7 +155,7 @@ export function PasswordSignInForm({
           >
             <Trans i18nKey={'auth:signingIn'} />
           </If>
-        </Button>
+        </ThemedButton>
       </form>
     </Form>
   );

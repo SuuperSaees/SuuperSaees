@@ -24,6 +24,11 @@
       "filesLabel": "Files",
       "filesPlaceholder": "Click or drag to upload an SVG, PNG, JPG, or GIF file (max. 800x400px)",
       "submitMessage": "Create order"
+    },
+    "validation": {
+      "minTitleCharacters": "Title must be at least 2 characters.",
+      "minDescriptionCharacters": "Description must be at least 2 characters.",
+      "files": "Please upload at least one file"
     }
   },
   "details": {
@@ -76,6 +81,9 @@
   "internalMessagingEnabled": "Internal messaging enabled",
   "internalMessagingDisabled": "Internal messaging disabled",
   "internalMessage": "Internal message",
-  "placeholder": "Write a message..."
+  "placeholder": "Write a message...",
+  "dropdown": "Select an option",
+  "deletedFile": "File deleted",
+  "deletedFileDescription": "The file was deleted successfully"
 }
   

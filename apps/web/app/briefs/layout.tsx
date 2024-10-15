@@ -19,6 +19,9 @@ import { HomeSidebar } from '~/home/(user)/_components/home-sidebar';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
+import { BriefsProvider } from './contexts/briefs-context';
+import Panel from './components/panel';
+
 function BriefsLayout({ children }: React.PropsWithChildren) {
   const workspace = use(loadUserWorkspace());
   const style = getLayoutStyle();
@@ -41,7 +44,13 @@ function BriefsLayout({ children }: React.PropsWithChildren) {
       </PageMobileNavigation>
 
       <UserWorkspaceContextProvider value={workspace}>
-        {children}
+        <BriefsProvider>
+          <div className="flex gap-8 max-h-full h-full">
+            {children}
+
+            <Panel />
+          </div>
+        </BriefsProvider>
       </UserWorkspaceContextProvider>
     </Page>
   );

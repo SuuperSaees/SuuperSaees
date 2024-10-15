@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
@@ -15,12 +13,15 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-
-
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
-
-
 
 import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
@@ -53,18 +54,18 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
 
   const orderCreationFormSchema = z.object({
     uuid: z.string(),
-    title: z
-      .string()
-      .min(2, { message: 'Title must be at least 2 characters.' })
-      .max(200, {
-        message: 'Title must be at most 200 characters.',
-      }),
+    title: 
+      briefs.length > 0
+        ? z.string().optional()
+        : z
+            .string()
+            .min(2, { message: t('creation.validation.minTitleCharacters') }),
     description:
       briefs.length > 0
         ? z.string().optional()
         : z
             .string()
-            .min(2, { message: 'Description must be at least 2 characters.' }),
+            .min(2, { message: t('creation.validation.minDescriptionCharacters') }),
     fileIds: z.array(z.string()),
     brief_responses: z
       .array(
@@ -125,50 +126,56 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
   const handleFileIdsChange = (fileIds: string[]) => {
     setUploadedFileIds(fileIds);
     form.setValue('fileIds', fileIds);
-    // console.log('Uploaded File IDs:', fileIds);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
-              <FormControl>
-                <ThemedInput
-                  {...field}
-                  placeholder={t('creation.form.titlePlaceholder')}
-                  className="focus-visible:ring-none"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        
         {!briefs.length && (
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
-                <FormControl>
-                  <ThemedTextarea
-                    {...field}
-                    placeholder={t('creation.form.descriptionPlaceholder')}
-                    rows={5}
-                    className="focus-visible:ring-none"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
+                  <FormControl>
+                    <ThemedInput
+                      {...field}
+                      placeholder={t('creation.form.titlePlaceholder')}
+                      className="focus-visible:ring-none"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
+                  <FormControl>
+                    <ThemedTextarea
+                      {...field}
+                      placeholder={t('creation.form.descriptionPlaceholder')}
+                      rows={5}
+                      className="focus-visible:ring-none"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <UploadFileComponent
+              bucketName="orders"
+              uuid={uniqueId}
+              onFileIdsChange={handleFileIdsChange}
+            />
+          </>
         )}
-        {/* Brief form fields */}
 
         <OrderBriefs
           briefs={briefs}
@@ -176,11 +183,6 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
           orderId={form.getValues('uuid')}
         />
 
-        <UploadFileComponent
-          bucketName="orders"
-          uuid={uniqueId}
-          onFileIdsChange={handleFileIdsChange}
-        />
         <ThemedButton type="submit" className="flex gap-2">
           <span>{t('creation.form.submitMessage')}</span>
           {createOrdersMutations.isPending && (

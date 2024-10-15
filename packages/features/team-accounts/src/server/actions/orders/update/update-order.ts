@@ -136,11 +136,9 @@ const handleFieldUpdate = async (
   } else if (field === 'priority') {
     translatedValue =
       priorityTranslations[value as keyof typeof priorityTranslations] || value;
-  } else if (field === 'due_date'){
+  } else if (field === 'due_date') {
     translatedValue = new Date(value).toLocaleDateString();
   }
-
-  
 
   const emailsData = await getEmails(orderId.toString());
   const actualName = await getUserById(userData.user.id);
@@ -159,6 +157,7 @@ const handleFieldUpdate = async (
         orderInfo?.title ?? '',
         field === 'status' ? `${translatedValue}` : `${translatedValue}`,
         agencyName,
+        userData?.user.id ?? '',
       );
     } else {
       console.warn('Email is null or undefined, skipping...');
@@ -257,7 +256,7 @@ export const addOrderMessage = async (
       .select()
       .single();
 
-      if (messageError) throw messageError.message;
+    if (messageError) throw messageError.message;
 
     for (const email of emailsData) {
       if (email) {
@@ -270,6 +269,7 @@ export const addOrderMessage = async (
           messageContent,
           agencyName,
           new Date().toLocaleDateString(),
+          userData?.user.id,
         );
       } else {
         console.warn('Email is null or undefined, skipping...');

@@ -4,18 +4,28 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
-
 import { FormField } from '../../../../../../../../apps/web/lib/form-field.types';
+import { getOrganization } from '../../organizations/get/get-organizations';
 
 // Define la función createClient
 export const createBrief = async (clientData: Brief.Insert) => {
   try {
+
     const client = getSupabaseServerComponentClient();
-    const { error } = await client.from('briefs').insert(clientData);
-    if (error) {
-      throw new Error(error.message);
+    const organization = await getOrganization();
+    const { data: briefData, error: briefDataError } = await client
+      .from('briefs')
+      .insert({
+        ...clientData,
+        propietary_organization_id: organization.primary_owner_user_id,
+      })
+      .select('id')
+      .single();
+    if (briefDataError) {
+      throw new Error(briefDataError.message);
     }
-    // revalidatePath('/briefs');
+
+    return briefData;
   } catch (error) {
     console.error('Error al crear el servicio:', error);
   }
@@ -42,9 +52,7 @@ export const addServiceBriefs = async (
 };
 
 // insert form fields
-export const createFormFields = async (
-  formFields: FormField.Type[],
-) => {
+export const createFormFields = async (formFields: FormField.Type[]) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { error: formFieldError, data: formFieldData } = await client
@@ -64,7 +72,6 @@ export const createFormFields = async (
     throw error;
   }
 };
-
 
 // link form fields to briefs
 export const addFormFieldsToBriefs = async (
@@ -94,7 +101,7 @@ export const addFormFieldsToBriefs = async (
   }
 };
 
-// create and link the responses to the brief form fields "brief_responses" 
+// create and link the responses to the brief form fields "brief_responses"
 export const addResponsesToBriefFormField = async (
   responses: Brief.Relationships.FormFieldResponses,
 ) => {

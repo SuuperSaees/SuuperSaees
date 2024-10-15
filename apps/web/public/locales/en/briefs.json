@@ -17,5 +17,101 @@
     "validation": {
        "minCharacters" : "Minimum 2 characters required",
        "maxCharacters" : "Maximum 3000 characters allowed"
+    },
+    "creation": {
+    "title": "Create brief",
+    "form": {
+        "addQuestion": "Add question",
+        "submit": "Create brief",
+        "titleLabel": "Brief name",
+        "titlePlaceholder": "Enter the name of your brief",
+        "questionLabel": "Question",
+        "labelPlaceholder": "Put your question here *",
+        "descriptionPlaceholder": "Add a description",
+        "placeholderPlaceholder": "Add a placeholder",
+        "descriptionLabel": "Brief description",
+        "imageLabel": "Brief image",
+        "defaultPlaceholder": "Add a description..."
+    },
+    "widgets": {
+      "edit": {
+        "title": "Edit widget"
+      }
+    }, 
+    "panel": {
+      "widgets": {
+        "title": "Widgets"
+      }, 
+      "settings": {
+        "title": "Settings"
+      }
     }
+  },
+  "singleChoice": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option"
+  },
+  "multipleChoice": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option"
+  },
+  "textLarge" : {
+    "title":"Title",
+    "description":"Description",
+    "descriptionHint":"Enter a description..."
+  },
+  "datePicker": {
+    "selectTitle": "Select date"
+  },
+  "dropdown": {
+    "title": "Title",
+    "description": "Description",
+    "placeholder": "Add new option",
+    "selectAnOption": "Select an option"
+  },
+  "title": {
+    "title": "Title",
+    "placeholder": "Enter the title"
+  },
+  "richText": {
+    "title": "Rich text",
+    "placeholder": "Enter the rich text"
+  },
+  "uploadFiles" : {
+    "title" : "Title",
+    "description" : "Description",
+    "placeholder": "Click here or drag a file to upload",
+    "fileTypes": "SVG, PNG, JPG or GIF (max. 800x400px)"
+  },
+  "video": {
+    "title": "Video",
+    "uploadSuccess": "Video uploaded successfully",
+    "uploadError": "Error uploading video",
+    "uploadUrlError": "Failed to generate upload URL",
+    "databaseEntryError": "Failed to create database entry",
+    "description": "Description",
+    "placeholder": "Upload a video",
+    "remove": "Delete video",
+    "dragOrClick": "Drag a video here or click to select",
+    "dropHere": "Drop the video here",
+    "invalidFileType": "Please select a valid video file",
+    "youtubePlaceholder": "Or enter a YouTube video URL",
+    "urlAddedSuccess": "Video URL added successfully",
+    "invalidUrl": "Please enter a valid YouTube video URL"
+  },
+  "uploadImage":{
+    "placeholder": "Click here or drag an image to upload",
+    "fileTypes": "PNG, JPG(max. 800x400px)",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadError": "Error uploading image",
+    "uploadUrlError": "Failed to generate upload URL",
+    "databaseEntryError": "Failed to create database entry",
+    "description": "Description",
+    "remove": "Delete image",
+    "dragOrClick": "Drag an image here or click to select",
+    "dropHere": "Drop the image here",
+    "invalidFileType": "Please select a valid image file"
+  }
 }
