@@ -56,7 +56,7 @@ class AccountInvitationsWebhookService {
 
     const inviter = await this.adminClient
       .from('accounts')
-      .select('email, name')
+      .select('email, name, organization_id')
       .eq('id', invitation.invited_by)
       .single();
 
@@ -72,34 +72,34 @@ class AccountInvitationsWebhookService {
       throw inviter.error;
     }
 
-    // let inviterOrganizationLogo = '';
-    // let inviterOrganizationThemeColor = '';
+    let inviterOrganizationLogo = '';
+    let inviterOrganizationThemeColor = '';
 
-    // const inviterOrganizationSettings = await this.adminClient
-    //   .from('organization_settings')
-    //   .select('key, value')
-    //   .eq('account_id', inviter?.data.organization_id ?? '')
-    //   .in('key', ['logo_url', 'theme_color']);
+    const inviterOrganizationSettings = await this.adminClient
+      .from('organization_settings')
+      .select('key, value')
+      .eq('account_id', inviter.data.organization_id ?? '')
+      .in('key', ['logo_url', 'theme_color']);
 
-    // if (inviterOrganizationSettings.error) {
-    //   logger.error(
-    //     {
-    //       error: inviterOrganizationSettings.error,
-    //       name: this.namespace,
-    //     },
-    //     'Failed to fetch inviter organization logo',
-    //   );
-    // }
+    if (inviterOrganizationSettings.error) {
+      logger.error(
+        {
+          error: inviterOrganizationSettings.error,
+          name: this.namespace,
+        },
+        'Failed to fetch inviter organization logo',
+      );
+    }
 
-    // if (inviterOrganizationSettings && !inviterOrganizationSettings.error) {
-    //   inviterOrganizationSettings.data.forEach((setting) => {
-    //     // if (setting.key === 'logo_url') {
-    //     //   // inviterOrganizationLogo = setting.value;
-    //     // } else if (setting.key === 'theme_color') {
-    //     //   // inviterOrganizationThemeColor = setting.value;
-    //     // }
-    //   });
-    // }
+    if (inviterOrganizationSettings && !inviterOrganizationSettings.error) {
+      inviterOrganizationSettings.data.forEach((setting) => {
+        if (setting.key === 'logo_url') {
+          inviterOrganizationLogo = setting.value;
+        } else if (setting.key === 'theme_color') {
+          inviterOrganizationThemeColor = setting.value;
+        }
+      });
+    }
 
     const team = await this.adminClient
       .from('accounts')
@@ -141,8 +141,8 @@ class AccountInvitationsWebhookService {
         inviter: inviter.data.name ?? inviter.data.email ?? '',
         productName: env.productName,
         teamName: team.data.name,
-        // logoUrl: inviterOrganizationLogo,
-        // primaryColor: inviterOrganizationThemeColor,
+        logoUrl: inviterOrganizationLogo,
+        primaryColor: inviterOrganizationThemeColor,
       });
 
       await mailer
@@ -161,69 +161,78 @@ class AccountInvitationsWebhookService {
           logger.error({ error, ...ctx }, 'Failed to send invitation email');
         });
 
-
       // obtain subscription id
-      const {data: subscriptionData, error: subscriptionError } = await this.adminClient
-        .from('subscriptions')
-        .select('id')
-        .eq('propietary_organization_id', invitation.invited_by)
-        .single();
+      const { data: subscriptionData, error: subscriptionError } =
+        await this.adminClient
+          .from('subscriptions')
+          .select('id')
+          .eq('propietary_organization_id', invitation.invited_by)
+          .single();
 
-        if (subscriptionError) {
-          logger.error(
-            {
-              error: subscriptionError,
-              name: this.namespace,
-            },
-            'Failed to update team subscription',
+      if (subscriptionError) {
+        logger.error(
+          {
+            error: subscriptionError,
+            name: this.namespace,
+          },
+          'Failed to update team subscription',
+        );
+
+        throw subscriptionError;
+      }
+
+      // obtain members count with that organization
+      let { count: membersCount, error: membersCountError } =
+        await this.adminClient
+          .from('accounts_memberships')
+          .select('*', { count: 'exact' })
+          .eq('account_id', invitation.invited_by)
+          .or(
+            'account_role.eq.agency_member,account_role.eq.agency_project_manager',
           );
-    
-          throw subscriptionError;
-        }
 
-        // obtain members count with that organization 
-        let { count: membersCount, error: membersCountError } = await this.adminClient
-        .from('accounts_memberships')
-        .select('*', { count: 'exact' })
-        .eq('account_id', invitation.invited_by)
-        .or('account_role.eq.agency_member,account_role.eq.agency_project_manager');
+      if (membersCountError) {
+        logger.error(
+          {
+            error: membersCountError,
+            name: this.namespace,
+          },
+          'Failed to update team subscription, obtaining members count',
+        );
+        throw membersCountError;
+      }
+      if (membersCount) {
+        membersCount += 1;
+      }
 
-        if (membersCountError) {
-          logger.error(
-            {
-              error: membersCountError,
-              name: this.namespace,
-            },
-            'Failed to update team subscription, obtaining members count',
-          );
-          throw membersCountError;
-        }
-        if(membersCount) {
-          membersCount += 1;
-        }
-
-        // get stripe subscription 
-        const responseGetSubscription = await fetch(`${siteURL}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(subscriptionData?.id ?? "")}`, {
+      // get stripe subscription
+      const responseGetSubscription = await fetch(
+        `${siteURL}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(subscriptionData?.id ?? '')}`,
+        {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
-        });
-        if (!responseGetSubscription.ok) {
-          throw new Error('Failed to fetch subscription');
-        }
-        const dataSubscription = await responseGetSubscription.json();
-        // update subscription in stripe
-      const responseUpdateSubscription = await fetch(`${siteURL}/api/stripe/update-subscription?subscriptionId=${encodeURIComponent(subscriptionData?.id ?? "")}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          itemQuantity: membersCount ?? 0,
-          itemId: dataSubscription?.items[0]?.id
-        }),
-      });
+      );
+      if (!responseGetSubscription.ok) {
+        throw new Error('Failed to fetch subscription');
+      }
+      const dataSubscription = await responseGetSubscription.json();
+      // update subscription in stripe
+      const responseUpdateSubscription = await fetch(
+        `${siteURL}/api/stripe/update-subscription?subscriptionId=${encodeURIComponent(subscriptionData?.id ?? '')}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            itemQuantity: membersCount ?? 0,
+            itemId: dataSubscription?.items[0]?.id,
+          }),
+        },
+      );
       if (!responseUpdateSubscription.ok) {
         throw new Error('Failed to update subscription');
       }
