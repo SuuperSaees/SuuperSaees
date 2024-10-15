@@ -38,6 +38,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
+              disabled
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -59,6 +60,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
+              disabled
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -84,6 +86,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.placeholder`}
+              disabled
               render={({ fieldState }) => (
                 <FormItem>
                   <FormControl>

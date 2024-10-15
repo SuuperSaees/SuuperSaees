@@ -34,7 +34,7 @@ const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
     <FormField
       control={form.control}
       name={`questions.${index}.label`}
-      render={({ field, fieldState }) => (
+      render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
           <div className="flex flex-col gap-2">
             <FormLabel>
@@ -47,6 +47,7 @@ const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
                 <FormItem>
                   <FormControl>
                     <input
+                      disabled
                       {...field}
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

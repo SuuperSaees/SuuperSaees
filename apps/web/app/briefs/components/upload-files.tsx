@@ -31,6 +31,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
     <FormField
       control={form.control}
       name={`questions.${index}`}
+      disabled
       render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
           <div className="flex flex-col gap-2">
@@ -39,6 +40,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
+              disabled
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -63,6 +65,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
+              disabled
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -90,6 +93,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.placeholder`}
+              disabled
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
