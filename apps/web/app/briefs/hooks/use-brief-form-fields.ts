@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { arrayMove } from '@dnd-kit/sortable';
+
 import { generateContent } from '../configs/content';
 import { generateInputs } from '../configs/inputs';
 import {
@@ -34,8 +36,16 @@ export const useBriefFormFields = () => {
   // title, enriched text, image, video
   const content = Array.from(contentMap.values());
 
-  // Add a new form field using index as id (number)
-  const addFormField = (formFieldType: FormField['type']) => {
+  // Helper to update field positions consistently
+  function updateFieldPositions(fields: FormField[]): FormField[] {
+    return fields.map((field, index) => ({
+      ...field,
+      position: index + 1, // Set position to index + 1 (1-based indexing)
+    }));
+  }
+
+  // Create a new form field
+  function createFormField(formFieldType: FormField['type']): FormField {
     let newFormField: FormField | undefined;
 
     if (formFieldType && isInputType(formFieldType)) {
@@ -44,55 +54,90 @@ export const useBriefFormFields = () => {
       newFormField = contentMap.get(formFieldType)?.content;
     }
 
-    const nextIndexId = formFields.length; // Use the current length as the number-based id
+    const nextIndexId = formFields.length + 1;
 
-    if (newFormField) {
+    // Ensure newFormField is defined or create a default object
+    if (!newFormField) {
       newFormField = {
-        ...newFormField,
-        id: nextIndexId, // Assign index as a number ID
-      };
-      setFormFields([...formFields, newFormField]);
-    }
-
-    setCurrentFormField(newFormField);
-    setIsEditing(true);
-
-    return (
-      newFormField ?? {
-        id: nextIndexId, // Ensure even empty form fields have a number id
+        id: nextIndexId,
         type: formFieldType,
         label: '',
         placeholder: '',
         description: '',
-      }
-    );
-  };
-
-  // Remove a form field by number id
-  const removeFormField = (id: number) => {
-    const updatedFormFields = formFields.filter((_, i) => i !== id);
-    setFormFields(updatedFormFields);
-  };
-
-  // Update a form field by number id
-  const updateFormField = (id: number, updatedFormField: FormField) => {
-    if (id >= 0 && id < formFields.length) {
-      const updatedFormFields = [...formFields];
-      updatedFormFields[id] = updatedFormField;
-      setFormFields(updatedFormFields);
-      return updatedFormField;
+        position: nextIndexId,
+      };
+    } else {
+      newFormField = {
+        ...newFormField,
+        id: nextIndexId,
+        position: nextIndexId,
+      };
     }
+
+    return newFormField;
+  }
+
+  // Add a new form field
+  const addFormField = (
+    formFieldType: FormField['type'],
+    insertAtIndex?: number,
+  ): FormField => {
+    const newFormField = createFormField(formFieldType);
+
+    setFormFields((prevFields) => {
+      const updatedFields = [...prevFields];
+
+      if (typeof insertAtIndex === 'number') {
+        updatedFields.splice(insertAtIndex, 0, newFormField);
+      } else {
+        updatedFields.push(newFormField);
+      }
+
+      return updateFieldPositions(updatedFields);
+    });
+
+    setCurrentFormField(newFormField);
+    setIsEditing(true);
+
+    return newFormField;
+  };
+
+  // Remove a form field by id
+  const removeFormField = (id: number) => {
+    setFormFields((prevFields) => {
+      const updatedFormFields = prevFields.filter((_, i) => i !== id);
+      return updateFieldPositions(updatedFormFields);
+    });
+    setCurrentFormField(undefined);
+    stopEditing();
+  };
+
+  // Update a form field
+  const updateFormField = (id: number, updatedFormField: FormField) => {
+    setFormFields((prevFields) => {
+      const index = prevFields.findIndex((field) => field.id === id);
+      if (index !== -1) {
+        const updatedFormFields = [...prevFields];
+        updatedFormFields[index] = updatedFormField;
+        return updateFieldPositions(updatedFormFields);
+      }
+      return prevFields;
+    });
+  };
+
+  // Swap two form fields and update their positions
+  const swapFormFields = (fromIndex: number, toIndex: number) => {
+    setFormFields((prevFields) => {
+      const reorderedFields = arrayMove(prevFields, fromIndex, toIndex);
+      return updateFieldPositions(reorderedFields);
+    });
   };
 
   // Stop editing
-  const stopEditing = () => {
-    setIsEditing(false);
-  };
+  const stopEditing = () => setIsEditing(false);
 
   // Start editing
-  const startEditing = () => {
-    setIsEditing(true);
-  };
+  const startEditing = () => setIsEditing(true);
 
   // Edit form field
   const editFormField = (id: number) => {
@@ -105,20 +150,25 @@ export const useBriefFormFields = () => {
     const formField = formFields[id];
     if (!formField) return;
 
-    // Clone the selected form field
     const duplicatedFormField = {
       ...formField,
-      id: formFields.length, // Assign a new unique id based on the current length
+      id: formFields.length + 1,
     };
 
-    // Add the duplicated form field to the formFields array
-    setFormFields([...formFields, duplicatedFormField]);
+    setFormFields((prevFields) =>
+      updateFieldPositions([...prevFields, duplicatedFormField]),
+    );
   };
 
   return {
+    inputs,
+    content,
+    inputsMap,
+    contentMap,
     formFields,
     currentFormField,
     isEditing,
+    setFormFields,
     addFormField,
     removeFormField,
     updateFormField,
@@ -126,9 +176,6 @@ export const useBriefFormFields = () => {
     editFormField,
     stopEditing,
     startEditing,
-    inputs,
-    content,
-    inputsMap,
-    contentMap,
+    swapFormFields,
   };
 };
