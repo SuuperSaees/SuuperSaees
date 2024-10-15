@@ -55,7 +55,7 @@ const BriefCreationForm = ({
       image_url: '',
       questions: formFields, // Initialize questions with values from context,
       default_question: {
-        label: 'title', // not editable
+        label: 'Order title', // not editable
         description: '', // editable
         placeholder: 'Add a title...', // editable
         type: 'text-short', // not editable,
@@ -141,7 +141,7 @@ const BriefCreationForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-semibold text-gray-700">
-                Title
+                {form.getValues().default_question.label}
               </FormLabel>
               <FormControl>
                 <ThemedInput
