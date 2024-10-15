@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import Image from 'next/image';
 
@@ -25,6 +25,8 @@ export interface UploadImageDropzoneProps {
   nameField: `questions.${number}.label` | `questions.${number}.options` | `questions.${number}.type` | `questions.${number}.position` | `questions.${number}.description` | `questions.${number}.placeholder` | `questions.${number}.alert_message` | `questions.${number}.options.${number}.label` | `questions.${number}.options.${number}.value`;
   form: UseFormReturn<BriefCreationForm>;
   handleQuestionChange: (urlImage: string) => void;
+  defaultValue? : string
+  handleRemove : () => void
 }
 
 const UploadImage: React.FC<UploadImageDropzoneProps> = ({
@@ -32,16 +34,14 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   nameField,
   form,
   handleQuestionChange,
+  defaultValue,
+  handleRemove
 }) => {
   const { t } = useTranslation('briefs');
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState<string>(defaultValue ?? '');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    handleQuestionChange(imageUrl);
-  }, [imageUrl]);
 
   async function uploadImageToBucket(file: File) {
     if (!file) return;
@@ -88,6 +88,8 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
 
       const finalUrl = fileData[0]?.url ?? fileUrl;
       setImageUrl(finalUrl);
+      handleQuestionChange(finalUrl);
+      
       toast.success(t('uploadImage.uploadSuccess'));
     } catch (error) {
       console.error(error);
@@ -146,6 +148,9 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   };
 
   const handleRemoveImage = () => {
+    
+    handleRemove();
+    
     setImageUrl('');
     if (index !== undefined) {
       form.setValue(`questions.${index}.label`, '');

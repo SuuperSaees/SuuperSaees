@@ -273,3 +273,19 @@ export async function getClientFiles(clientOrganizationId: string) {
 
     return clientFiles;
 }
+
+
+export async function getUrlFile(fileId: string) {
+    const client = getSupabaseServerComponentClient();
+
+    // Fetch the file details
+    const { data: fileData, error: fileDataError } = await client
+        .from('files')
+        .select('url')
+        .eq('id', fileId)
+        .single();
+
+    if (fileDataError) throw fileDataError;
+
+    return fileData.url;
+} 

@@ -2,13 +2,7 @@ import { CloudUpload } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
 import { BriefsProvider } from '../contexts/briefs-context';
 import { FormField as FormFieldType } from '../types/brief.types';
@@ -37,22 +31,21 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
     <FormField
       control={form.control}
       name={`questions.${index}`}
+  
       render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <FormLabel>
-                {t('creation.form.questionLabel')} {index + 1}
-              </FormLabel>
-            </div>
+            <div className="flex items-center justify-between"></div>
 
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
+          
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
                     <input
+                      readOnly
                       {...field}
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -73,10 +66,12 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
+          
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
                     <input
+                    readOnly
                       {...field}
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -100,6 +95,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.placeholder`}
+          
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -108,6 +104,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                         <CloudUpload color="#667085" size={25} />
                       </div>
                       <input
+                        readOnly
                         {...field}
                         value={question.placeholder ?? ''}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

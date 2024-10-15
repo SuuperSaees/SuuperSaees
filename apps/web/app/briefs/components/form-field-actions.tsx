@@ -60,6 +60,7 @@ const Options = ({
         <button
           key={index}
           onClick={option.action}
+          type='button'
           className="text-gray-600 hover:text-gray-800"
         >
           {option.icon}

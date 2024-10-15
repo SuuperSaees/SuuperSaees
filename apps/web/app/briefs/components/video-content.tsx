@@ -1,5 +1,5 @@
 import React from 'react';
-import { CirclePlay, X } from 'lucide-react';
+import { CirclePlay } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@kit/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
@@ -23,7 +23,6 @@ const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
   index,
   form,
   handleQuestionChange,
-  handleRemoveQuestion,
 }) => {
   const { t } = useTranslation('briefs');
   const {

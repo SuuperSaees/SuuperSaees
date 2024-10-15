@@ -1,13 +1,14 @@
 'use client';
 
-import React, { ChangeEvent, useEffect  } from 'react';
+import React, { ChangeEvent, useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus, Trash } from 'lucide-react';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { Trash,Plus } from 'lucide-react';
+
 import { Button } from '@kit/ui/button';
 import {
   Form,
@@ -17,11 +18,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
+
 import { useBriefsContext } from '../contexts/briefs-context';
-import { widgetEditSchema } from '../schemas/widget-edit-schema';
-import UploadImageDropzone from './upload-image-dropzone';
 import { useVideoHandler } from '../hooks/use-video-handler';
+import { widgetEditSchema } from '../schemas/widget-edit-schema';
 import { RenderVideoContent } from './render-video-content';
+import UploadImageDropzone from './upload-image-dropzone';
 
 export type WidgetCreationForm = z.infer<typeof widgetEditSchema>;
 export function WidgetEditForm() {
@@ -33,18 +35,39 @@ export function WidgetEditForm() {
     mode: 'onChange',
   });
 
-  const { 
-    isUploading, videoUrl, isVideoValid, isDragging, fileInputRef, isYouTubeVideo, selectedFileName,
-    handleFileChange, handleUrlInput, handleDragEnter, handleDragLeave, handleDrop, setVideoUrl, setIsVideoValid, setSelectedFileName , setIsYouTubeVideo, checkVideoValidity
+  const {
+    isUploading,
+    videoUrl,
+    isVideoValid,
+    isDragging,
+    fileInputRef,
+    isYouTubeVideo,
+    selectedFileName,
+    handleFileChange,
+    handleUrlInput,
+    handleDragEnter,
+    handleDragLeave,
+    handleDrop,
+    setVideoUrl,
+    setIsVideoValid,
+    setSelectedFileName,
+    setIsYouTubeVideo,
+    checkVideoValidity,
   } = useVideoHandler(t, form, currentFormField, updateFormField);
 
-  const { fields: optionsFields, append, remove } = useFieldArray({
+  const {
+    fields: optionsFields,
+    append,
+    remove,
+  } = useFieldArray({
     control: form.control,
     name: 'options',
   });
 
   // Helper for updating form and context state
-  const handleChange = (e: ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement>,
+  ) => {
     const { name, value } = e.target;
     form.setValue(name as keyof z.infer<typeof widgetEditSchema>, value);
 
@@ -57,18 +80,16 @@ export function WidgetEditForm() {
     }
   };
 
-  const handleChangeImage = (urlImage:string) => {
-    
+  const handleChangeImage = (urlImage: string) => {
     form.setValue('label' as keyof z.infer<typeof widgetEditSchema>, urlImage);
 
     if (currentFormField) {
       updateFormField(currentFormField.id, {
         ...form.getValues(),
         id: currentFormField.id,
-        'label': urlImage,
+        label: urlImage,
       });
     }
-    
   };
 
   const onSubmit = (values: z.infer<typeof widgetEditSchema>) => {
@@ -77,60 +98,133 @@ export function WidgetEditForm() {
     }
   };
 
-  const renderOptionFields = () => (
+  const renderOptionFields = (type: string) => (
     <React.Fragment>
       {optionsFields.map((option, index) => (
-        <div key={option.id} className="flex flex-col gap-2 relative">
-          {renderFieldInput(`options.${index}.label`, 'Option Label')}
-          {renderFieldInput(`options.${index}.value`, 'Option Value')}
+        <div key={option.id} className="relative flex flex-col gap-2">
+          {renderFieldInput(
+            `options.${index}.label`,
+            'Option Label',
+            type,
+            index,
+            false,
+          )}
 
-          <Button type="button" onClick={() => remove(index)} className='rounded-full w-[1.3rem] h-[1.3rem] p-0 bg-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent shadow-none absolute top-0 right-0 '>
-            <Trash className='w-full' />
+          {renderFieldInput(
+            `options.${index}.value`,
+            'Option Value',
+            type,
+            index,
+            true,
+          )}
+
+          <Button
+            type="button"
+            onClick={() => remove(index)}
+            className="absolute right-0 top-0 h-[1.3rem] w-[1.3rem] rounded-full bg-transparent p-0 text-gray-600 shadow-none hover:bg-transparent hover:text-gray-900"
+          >
+            <Trash className="w-full" />
           </Button>
-
         </div>
       ))}
-      <div className='flex justify-center'>
-        <Button type="button" onClick={() => append({ label: '', value: '' })} className='rounded-full w-9 h-9 p-2 bg-transparent text-gray-600 bg-gray-50 hover:bg-gray-100 shadow-none'>
-          <Plus className='w-full' />
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          onClick={() => append({ label: '', value: '' })}
+          className="h-9 w-9 rounded-full bg-gray-50 bg-transparent p-2 text-gray-600 shadow-none hover:bg-gray-100"
+        >
+          <Plus className="w-full" />
         </Button>
       </div>
     </React.Fragment>
   );
 
-  const renderFieldInput = (fieldName: string, label: string) => (
-    <FormField
-      key={fieldName}
-      name={fieldName as keyof z.infer<typeof widgetEditSchema>}
-      control={form.control}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-sm text-gray-700">{label}</FormLabel>
-          <FormControl>
-            <ThemedInput
-              {...field}
-              placeholder={label}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                field.onChange(e);
-                handleChange(e);
-              }}
-              value={field.value}
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
+  const renderFieldInput = (
+    fieldName: string,
+    label: string,
+    type: string,
+    index?: number,
+    isValueField = false,
+  ) => {
+    const fieldIsType = fieldName == 'type';
+    const fieldIsPosition = fieldName == 'position';
+    const hideSelectPlaceholder =
+      fieldName == 'placeholder' && type == 'select';
+    const hideMultiplePlaceholder =
+      fieldName == 'placeholder' && type == 'multiple_choice';
+    const hideDropdownPlaceholder =
+      fieldName == 'placeholder' && type == 'dropdown';
+    const hideDatePlaceholder = fieldName == 'placeholder' && type == 'date';
+    const hideTitlePlaceholderAndDescription =
+      (fieldName == 'placeholder' || fieldName == 'description') &&
+      type == 'h1';
+    
 
-  const renderImageInput = () => (
-    <UploadImageDropzone
-      form = {form}
-      index = {currentFormField?.id}
-      nameField={'label'}
-      handleQuestionChange={handleChangeImage}
-    />
-  );
+    if (
+      fieldIsType ||
+      fieldIsPosition ||
+      hideSelectPlaceholder ||
+      hideDropdownPlaceholder ||
+      hideDatePlaceholder ||
+      hideTitlePlaceholderAndDescription ||
+      hideMultiplePlaceholder
+    ) {
+      return null;
+    } else {
+      return (
+        <FormField
+          key={fieldName}
+          name={fieldName as keyof z.infer<typeof widgetEditSchema>}
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel
+                className={isValueField ? 'hidden' : 'text-sm text-gray-700'}
+              >
+                {label}
+              </FormLabel>
+              <FormControl>
+                <ThemedInput
+                  {...field}
+                  className={isValueField ? 'hidden' : ''}
+                  placeholder={label}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    // For label, we update both the label and the value fields
+                    if (!isValueField && index !== undefined) {
+                      const sanitizedValue = e.target.value
+                        .toLowerCase()
+                        .replace(/\s+/g, '_') // Replace spaces with underscores
+                        .replace(/[^\w_]+/g, ''); // Remove special characters
+
+                      form.setValue(`options.${index}.value`, sanitizedValue);
+                    }
+
+                    field.onChange(e);
+                    handleChange(e);
+                  }}
+                  value={field.value}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      );
+    }
+  };
+
+  const renderImageInput = () => {
+    return (
+      <UploadImageDropzone
+        form={form}
+        index={currentFormField?.id}
+        nameField={'label'}
+        handleQuestionChange={handleChangeImage}
+        defaultValue={currentFormField?.label}
+        handleRemove={currentFormField ? () => updateFormField(currentFormField?.id, { ...currentFormField, label: '' }) : () => null}
+      />
+    );
+  };
 
   const renderFormFields = () => {
     if (!currentFormField) return null;
@@ -139,8 +233,9 @@ export function WidgetEditForm() {
     return Object.keys(currentFormField)
       .filter((key) => key !== 'id')
       .map((fieldName) => {
-        if (fieldName === 'options') return renderOptionFields();
-        if (type === 'image' && fieldName == 'placeholder') return renderImageInput();
+        if (fieldName === 'options') return renderOptionFields(type!);
+        if (type === 'image' && fieldName == 'placeholder')
+          return renderImageInput();
         if (type === 'image' && fieldName == 'label') return null;
         if (type === 'video' && fieldName === 'label') {
           return (
@@ -170,6 +265,7 @@ export function WidgetEditForm() {
         return renderFieldInput(
           fieldName,
           fieldName.charAt(0).toUpperCase() + fieldName.slice(1),
+          type!,
         );
       });
   };
@@ -194,12 +290,8 @@ export function WidgetEditForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="h-full w-full space-y-8 overflow-y-auto no-scrollbar max-h-full"
+        className="no-scrollbar h-full max-h-full w-full space-y-8 overflow-y-auto"
       >
-        <h2>
-          {t('creation.form.questionLabel') + ' '}
-          {currentFormField ? +currentFormField?.id + 1 : 0}
-        </h2>
         {renderFormFields()}
       </form>
     </Form>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
 import { arrayMove } from '@dnd-kit/sortable';
 
@@ -13,7 +13,7 @@ import {
 import { isContentType, isInputType } from '../utils/type-guards';
 
 // Centralized FormField State Management Hook
-export const useBriefFormFields = () => {
+export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widgets' | 'settings'>>) => {
   const [formFields, setFormFields] = useState<FormField[]>([]);
 
   const [currentFormField, setCurrentFormField] = useState<
@@ -98,6 +98,7 @@ export const useBriefFormFields = () => {
 
     setCurrentFormField(newFormField);
     setIsEditing(true);
+    setActiveTab('widgets')
 
     return newFormField;
   };
@@ -123,6 +124,7 @@ export const useBriefFormFields = () => {
       }
       return prevFields;
     });
+    setCurrentFormField(updatedFormField);
   };
 
   // Swap two form fields and update their positions
@@ -144,6 +146,7 @@ export const useBriefFormFields = () => {
     const index = formFields.findIndex(formField => formField.id === id);
     setCurrentFormField(formFields[index]);
     startEditing();
+    setActiveTab('widgets')
   };
 
   // Duplicate form field
@@ -160,6 +163,7 @@ export const useBriefFormFields = () => {
     setFormFields((prevFields) =>
       updateFieldPositions([...prevFields, duplicatedFormField]),
     );
+    setActiveTab('widgets')
   };
 
   return {
