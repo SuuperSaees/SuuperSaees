@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
+
+
 import { getFullDomainBySubdomain } from '../../../../multitenancy/utils/get/get-domain';
+
 
 interface AuthDetails {
   logo_url: string;
@@ -14,7 +17,12 @@ export const useAuthDetails = (hostname: string) => {
 
   useEffect(() => {
     const fetchAuthDetails = async () => {
-      const domainFullData = await getFullDomainBySubdomain(hostname, true);
+      let domainFullData = null;
+      try {
+        domainFullData = await getFullDomainBySubdomain(hostname, true);
+      } catch (error) {
+        console.error('Error fetching auth details', error);
+      }
 
       if (domainFullData) {
         setAuthDetails({

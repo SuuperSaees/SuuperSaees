@@ -80,11 +80,15 @@ export async function middleware(request: NextRequest) {
       } = await supabase.auth.getUser();
       const userId = user?.id ?? '';
       // Try to get the domain from cache (cookie)
-      let domain = getCachedDomain(request, userId);
+      let domain = getCachedDomain(request, userId) ?? '';
 
       if (!domain) {
         // If not in cache, fetch the domain
-        domain = await getDomainByUserId(userId, false);
+        try {
+          domain = await getDomainByUserId(userId, false);
+        } catch (error) {
+          console.error('Error in middleware', error);
+        }
         // Cache the domain in a cookie
         setCachedDomain(response, userId, domain, IS_PROD);
       }
