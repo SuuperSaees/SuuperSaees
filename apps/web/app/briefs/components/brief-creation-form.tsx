@@ -66,25 +66,28 @@ const BriefCreationForm = ({
         {showInfo && <FieldsetInformation form={form} />}
 
         {/* Default and not editable input field */}
-        <FormField
-          control={form.control}
-          name="default_question.description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="font-semibold text-gray-700">
-                {form.getValues().default_question.label}
-              </FormLabel>
-              <FormControl>
-                <ThemedInput
-                  {...field}
-                  placeholder={t('creation.form.defaultPlaceholder')}
-                  className="focus-visible:ring-none"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {showFormFields && (
+            <FormField
+              control={form.control}
+              name='default_question.description'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold text-gray-700">
+                    {form.getValues().default_question.label}
+                  </FormLabel>
+                  <FormControl>
+                    <ThemedInput
+                      {...field}
+                      placeholder={t('creation.form.defaultPlaceholder')}
+                      className="focus-visible:ring-none"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )
+        }
 
         {showFormFields && (
           <>

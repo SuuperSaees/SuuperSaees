@@ -77,12 +77,12 @@ export function WidgetEditForm() {
     }
   };
 
-  const renderOptionFields = () => (
+  const renderOptionFields = (type: string) => (
     <React.Fragment>
       {optionsFields.map((option, index) => (
         <div key={option.id} className="flex flex-col gap-2 relative">
-          {renderFieldInput(`options.${index}.label`, 'Option Label')}
-          {renderFieldInput(`options.${index}.value`, 'Option Value')}
+          {renderFieldInput(`options.${index}.label`, 'Option Label',type)}
+          {renderFieldInput(`options.${index}.value`, 'Option Value',type)}
 
           <Button type="button" onClick={() => remove(index)} className='rounded-full w-[1.3rem] h-[1.3rem] p-0 bg-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent shadow-none absolute top-0 right-0 '>
             <Trash className='w-full' />
@@ -98,30 +98,45 @@ export function WidgetEditForm() {
     </React.Fragment>
   );
 
-  const renderFieldInput = (fieldName: string, label: string) => (
-    <FormField
-      key={fieldName}
-      name={fieldName as keyof z.infer<typeof widgetEditSchema>}
-      control={form.control}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-sm text-gray-700">{label}</FormLabel>
-          <FormControl>
-            <ThemedInput
-              {...field}
-              placeholder={label}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                field.onChange(e);
-                handleChange(e);
-              }}
-              value={field.value}
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
+  const renderFieldInput = (fieldName: string, label: string, type: string) => {
+    const fieldIsType = fieldName == 'type'
+    const fieldIsPosition = fieldName == 'position'
+    const hideSelectPlaceholder = fieldName == 'placeholder' && type == 'select'
+    const hideMultiplePlaceholder = fieldName == 'placeholder' && type == 'multiple_choice'
+    const hideDropdownPlaceholder = fieldName == 'placeholder' && type == 'dropdown'
+    const hideDatePlaceholder = fieldName == 'placeholder' && type == 'date'
+    const hideTitlePlaceholderAndDescription = (fieldName == 'placeholder' || fieldName == 'description') && type == 'title'
+    
+    if(fieldIsType || fieldIsPosition || hideSelectPlaceholder || hideDropdownPlaceholder || hideDatePlaceholder || hideTitlePlaceholderAndDescription || hideMultiplePlaceholder){
+      return null
+    }else{
+      return(
+        <FormField
+          key={fieldName}
+          name={fieldName as keyof z.infer<typeof widgetEditSchema>}
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm text-gray-700">{label}</FormLabel>
+              <FormControl>
+                <ThemedInput
+                  {...field}
+                  placeholder={label}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    field.onChange(e);
+                    handleChange(e);
+                  }}
+                  value={field.value}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )
+    }
+    
+  };
 
   const renderImageInput = () => (
     <UploadImageDropzone
@@ -139,7 +154,7 @@ export function WidgetEditForm() {
     return Object.keys(currentFormField)
       .filter((key) => key !== 'id')
       .map((fieldName) => {
-        if (fieldName === 'options') return renderOptionFields();
+        if (fieldName === 'options') return renderOptionFields(type!);
         if (type === 'image' && fieldName == 'placeholder') return renderImageInput();
         if (type === 'image' && fieldName == 'label') return null;
         if (type === 'video' && fieldName === 'label') {
@@ -170,6 +185,7 @@ export function WidgetEditForm() {
         return renderFieldInput(
           fieldName,
           fieldName.charAt(0).toUpperCase() + fieldName.slice(1),
+          type!
         );
       });
   };
