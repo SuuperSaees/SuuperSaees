@@ -51,7 +51,6 @@ async function BriefsPage() {
       briefs = data as Brief.Type[];
     }
   }
-  // console.log('all', JSON.stringify(briefs));
   return (
     <PageBody>
       <div className="p-[35px]">
