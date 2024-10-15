@@ -1,6 +1,6 @@
 import { use } from 'react';
 
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
@@ -26,10 +26,6 @@ function BriefsLayout({ children }: React.PropsWithChildren) {
   const workspace = use(loadUserWorkspace());
   const style = getLayoutStyle();
 
-  const pathname = headers().get('x-current-path');
-
-  const showWidgets = pathname !== '/briefs'; // Logic to hide Widgets for /orders only
-
   return (
     <Page style={style}>
       <PageNavigation>
@@ -52,7 +48,7 @@ function BriefsLayout({ children }: React.PropsWithChildren) {
           <div className="flex gap-8 max-h-full">
             {children}
 
-            {showWidgets && <Widgets />}
+            <Widgets />
           </div>
         </BriefsProvider>
       </UserWorkspaceContextProvider>

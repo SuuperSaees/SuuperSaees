@@ -10,13 +10,18 @@ import Content from './content';
 import Inputs from './inputs';
 import { WidgetEditForm } from './widget-edit-form';
 import { ContentTypes, InputTypes } from '../types/brief.types';
-
+import { usePathname } from 'next/navigation';
 
 export default function Widgets() {
   // inputs of type Input: short text, paragraph, checkbox, select, dropdown, date, etc.
   const { content, inputs, isEditing, stopEditing } = useBriefsContext();
   const { t } = useTranslation('briefs');
+  const pathname = usePathname();
 
+  const showWidgets = pathname === '/briefs/create';
+  if (!showWidgets) {
+    return null;
+  }
   const mappedInputs = inputs.map((input) => {
     return {
       name: input.name,
