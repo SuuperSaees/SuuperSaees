@@ -141,13 +141,15 @@ export const useBriefFormFields = () => {
 
   // Edit form field
   const editFormField = (id: number) => {
-    setCurrentFormField(formFields[id]);
+    const index = formFields.findIndex(formField => formField.id === id);
+    setCurrentFormField(formFields[index]);
     startEditing();
   };
 
   // Duplicate form field
   const duplicateFormField = (id: number) => {
-    const formField = formFields[id];
+    const index = formFields.findIndex(formField => formField.id === id);
+    const formField = formFields[index];
     if (!formField) return;
 
     const duplicatedFormField = {
