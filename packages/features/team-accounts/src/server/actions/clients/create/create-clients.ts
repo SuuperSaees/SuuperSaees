@@ -19,12 +19,18 @@ import {
   getPrimaryOwnerId,
   getUserAccountByEmail,
 } from '../../members/get/get-member-account';
+import { fetchCurrentUser } from '../../members/get/get-member-account';
 import { updateUserAccount } from '../../members/update/update-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
-import { getAgencyForClient, getOrganization, // getOrganizationSettings,
-getOrganizationById } from '../../organizations/get/get-organizations';
-import { hasPermissionToAddClientMembers, hasPermissionToCreateClientOrg } from '../../permissions/clients';
-import { fetchCurrentUser } from '../../members/get/get-member-account';
+import {
+  getAgencyForClient,
+  getOrganization, // getOrganizationSettings,
+  getOrganizationById,
+} from '../../organizations/get/get-organizations';
+import {
+  hasPermissionToAddClientMembers,
+  hasPermissionToCreateClientOrg,
+} from '../../permissions/clients';
 
 // Define la función createClient
 type CreateClient = {
@@ -52,13 +58,13 @@ const createClientUserAccount = async (
     // pre-authentication of the user
     const password = generateRandomPassword(12);
 
-    const organizationLogo = organizationSettings.find(
-      (setting) => setting.key === 'logo_url',
-    );
+    // const organizationLogo = organizationSettings.find(
+    //   (setting) => setting.key === 'logo_url',
+    // );
 
-    const organizationColor = organizationSettings.find(
-      (setting) => setting.key === 'theme_color',
-    );
+    // const organizationColor = organizationSettings.find(
+    //   (setting) => setting.key === 'theme_color',
+    // );
 
     const { data: clientOrganizationUser, error: clientOrganizationUserError } =
       await client.auth.signUp({
@@ -74,11 +80,11 @@ const createClientUserAccount = async (
             ClientContent4: 'Your username:',
             ClientContent5: 'Thanks,',
             ClientContent6: 'The Team',
-            OrganizationSenderLogo: organizationLogo?.value ?? '',
-            OrganizationSenderColor: organizationColor?.value ?? '',
-            ButtonTextColor: organizationColor
-              ? getTextColorBasedOnBackground(organizationColor.value)
-              : '',
+            // OrganizationSenderLogo: organizationLogo?.value ?? '',
+            // OrganizationSenderColor: organizationColor?.value ?? '',
+            // ButtonTextColor: organizationColor
+            //   ? getTextColorBasedOnBackground(organizationColor.value)
+            //   : '',
           },
         },
       });
