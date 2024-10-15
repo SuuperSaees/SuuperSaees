@@ -1,5 +1,7 @@
 import 'server-only';
 
+
+
 import { NextRequest, NextResponse } from 'next/server';
 
 import { CsrfError, createCsrfProtect } from '@edge-csrf/nextjs';
@@ -17,7 +19,7 @@ export async function handleCsrf(request: NextRequest, response: NextResponse) {
     },
     ignoreMethods: isServerAction(request)
       ? ['POST']
-      : ['GET', 'HEAD', 'OPTIONS'],
+      : ['GET', 'HEAD', 'OPTIONS', 'POST'],
   });
 
   try {
@@ -32,5 +34,7 @@ export async function handleCsrf(request: NextRequest, response: NextResponse) {
 }
 
 function isServerAction(request: NextRequest) {
-  return request.headers.has(NEXT_ACTION_HEADER);
+  const headers = new Headers(request.headers);
+
+  return headers.has(NEXT_ACTION_HEADER);
 }
