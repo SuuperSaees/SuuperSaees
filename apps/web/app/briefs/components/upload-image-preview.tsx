@@ -18,22 +18,11 @@ const UploadImagePreview: React.FC<UploadImageProps> = ({
   form,
 }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
-    const initialValue = form.getValues(`questions.${index}.label`);
+    const initialValue = question.label;
     return initialValue && initialValue.toLowerCase() !== 'image'
       ? initialValue
-      : null;
+      : '';
   });
-
-
-  useEffect(() => {
-    const initialValue = form.getValues(`questions.${index}.label`);
-    setImageUrl(
-      initialValue && initialValue.toLowerCase() !== 'image'
-        ? initialValue
-        : null,
-    );
-  }, [form, index]);
-
 
   const isValidImageUrl = (url: string | null): boolean => {
     if (!url) return false;

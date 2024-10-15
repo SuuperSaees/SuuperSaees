@@ -124,6 +124,7 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
       }
       return prevFields;
     });
+    setCurrentFormField(updatedFormField);
   };
 
   // Swap two form fields and update their positions
