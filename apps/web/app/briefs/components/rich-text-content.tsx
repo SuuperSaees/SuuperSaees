@@ -50,25 +50,16 @@ const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
             <FormLabel>
               {t('richText.title')} {index + 1}
             </FormLabel>
-            <FormField
-              control={form.control}
-              name={`questions.${index}.label`}
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormControl>
-                    <RichTextEditor
-                      {...field}
-                      content={currentValue}
-                      onComplete={() => {}}
-                      onChange={handleChange}
-                      userRole={userRole}
-                      hideSubmitButton={true}
-                    />
-                  </FormControl>
-                  <FormMessage>{fieldState.error?.message}</FormMessage>
-                </FormItem>
-              )}
-            />
+            <FormControl>
+              <RichTextEditor
+                {...field}
+                content={currentValue}
+                onChange={handleChange}
+                userRole={userRole}
+                hideSubmitButton={true}
+              />
+            </FormControl>
+            <FormMessage>{fieldState.error?.message}</FormMessage>
           </div>
           <BriefsProvider.Options
             formFieldId={question.id}
