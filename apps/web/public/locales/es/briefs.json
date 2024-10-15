@@ -28,11 +28,22 @@
         "questionLabel": "Pregunta",
         "labelPlaceholder": "Escribe tu pregunta aquí *",
         "descriptionPlaceholder": "Agregar una descripción",
-        "placeholderPlaceholder": "Agregar un marcador de posición"
+        "placeholderPlaceholder": "Agregar un marcador de posición",
+        "descriptionLabel": "Descripción del brief",
+        "imageLabel": "Imagen del brief",
+        "defaultPlaceholder": "Añade una descripción..."
     },
     "widgets": {
       "edit": {
         "title": "Editar widget"
+      }
+    }, 
+    "panel": {
+      "wigets": {
+        "title": "Widgets"
+      }, 
+      "settings": {
+        "title": "Ajustes"
       }
     }
   },

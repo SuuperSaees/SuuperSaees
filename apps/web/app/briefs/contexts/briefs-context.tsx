@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 
 import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
@@ -18,8 +18,10 @@ import {
   InputTypes,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
+import { Brief } from '~/lib/brief.types';
 
 interface BriefsContext {
+  brief: Brief.Insert;
   inputs: Input[];
   content: Content[];
   formFields: FormField[];
@@ -27,6 +29,7 @@ interface BriefsContext {
   contentMap: Map<ContentTypes, Content>;
   isEditing: boolean;
   currentFormField: FormField | undefined;
+  updateBrief: (updatedBrief: Brief.Insert) => void;
   addFormField: (formFieldType: FormField['type']) => FormField;
   removeFormField: (index: number) => void;
   updateFormField: (
@@ -44,6 +47,14 @@ export const BriefsContext = createContext<BriefsContext | undefined>(
 );
 
 export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
+  const [brief, setBrief] = useState<Brief.Insert>({
+    name: '',
+    description:''
+  });
+
+  function updateBrief(updatedBrief: Brief.Insert) {
+    setBrief(updatedBrief);
+  }
   const formFieldsContext = useBriefFormFields();
 
   const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
@@ -83,7 +94,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   }, [widget.type, formFieldsContext.inputsMap, formFieldsContext.contentMap]);
 
   return (
-    <BriefsContext.Provider value={{ ...formFieldsContext }}>
+    <BriefsContext.Provider value={{ ...formFieldsContext, brief, updateBrief }}>
       <DndContext
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}

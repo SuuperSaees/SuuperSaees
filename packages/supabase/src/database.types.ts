@@ -384,25 +384,31 @@ export type Database = {
       };
       briefs: {
         Row: {
-          created_at: string;
-          id: string;
-          name: string | null;
-          propietary_organization_id: string | null;
-        };
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          propietary_organization_id: string | null
+        }
         Insert: {
-          created_at?: string;
-          id?: string;
-          name?: string | null;
-          propietary_organization_id?: string | null;
-        };
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          propietary_organization_id?: string | null
+        }
         Update: {
-          created_at?: string;
-          id?: string;
-          name?: string | null;
-          propietary_organization_id?: string | null;
-        };
-        Relationships: [];
-      };
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          propietary_organization_id?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           account_id: string;

@@ -19,7 +19,6 @@ import {
 } from '@kit/ui/form';
 import { useBriefsContext } from '../contexts/briefs-context';
 import { widgetEditSchema } from '../schemas/widget-edit-schema';
-import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
 import UploadImageDropzone from './upload-image-dropzone';
 import { useVideoHandler } from '../hooks/use-video-handler';
 import { RenderVideoContent } from './render-video-content';

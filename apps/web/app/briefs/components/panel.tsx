@@ -1,0 +1,60 @@
+'use client';
+
+import { useState } from 'react';
+
+import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
+
+import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
+
+import Widgets from './widgets';
+import BriefCreationForm from './brief-creation-form';
+import { useTranslation } from 'react-i18next';
+import { usePathname } from 'next/navigation';
+
+export default function Panel() {
+  const [activeTab, setActiveTab] = useState<'widgets' | 'settings'>('widgets');
+  const {t} = useTranslation('briefs');
+  const pathname = usePathname();
+  const showWidgets = pathname === '/briefs/create';
+
+  if (!showWidgets) {
+    return null;
+  } 
+  
+  return (
+    <Tabs
+      className="border-l-1 border-slate-gray-300 flex h-full max-h-full w-full max-w-80 flex-col gap-4 border p-4 overflow-hidden"
+      defaultValue={activeTab}
+      onValueChange={(value: string) => {
+        setActiveTab(value as 'widgets' | 'settings');
+      }}
+    >
+      <TabsList className="flex w-full bg-transparent">
+        <ThemedTabTrigger
+          value="widgets"
+          activeTab={activeTab}
+          option={'widgets'}
+          className="w-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-brand data-[state=active]:bg-transparent"
+        >
+
+          {t('creation.panel.widgets.title')}
+        </ThemedTabTrigger>
+        <ThemedTabTrigger
+          value="settings"
+          activeTab={activeTab}
+          option={'settings'}
+          className="w-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-brand data-[state=active]:bg-transparent"
+        >
+          {t('creation.panel.settings.title')}
+        </ThemedTabTrigger>
+      </TabsList>
+
+      <TabsContent value="widgets" className='max-h-full'>
+        <Widgets />
+      </TabsContent>
+      <TabsContent value="settings" className='max-h-full h-full'>
+        <BriefCreationForm propietaryOrganizationId='' userRole='' showFormFields={false} showInfo/>
+      </TabsContent>
+    </Tabs>
+  );
+}

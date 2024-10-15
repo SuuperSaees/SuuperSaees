@@ -214,12 +214,9 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
                   )}
                 </div>
                 <input
-                  style={{
-                    width: `100ch`,
-                    backgroundColor: '#00000000',
-                  }}
+              
                   placeholder={t('uploadImage.placeholder')}
-                  className="pointer-events-none mb-[0.30rem] border-none text-center text-sm font-normal text-gray-400 focus:outline-none"
+                  className="pointer-events-none mb-[0.30rem] border-none text-center text-sm font-normal text-gray-400 focus:outline-none w-full"
                 />
                 <p className="pointer-events-none border-none text-center text-sm font-normal text-gray-400 focus:outline-none">
                   {t('uploadImage.fileTypes')}

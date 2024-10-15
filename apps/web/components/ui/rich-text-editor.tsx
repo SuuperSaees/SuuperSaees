@@ -144,6 +144,7 @@ interface RichTextEditorProps {
   toggleExternalUpload?: () => void;
   userRole: string;
   hideSubmitButton?: boolean;
+  useInForm?: boolean;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
 function extractImageUrls(text: string) {
@@ -160,6 +161,7 @@ const RichTextEditor = ({
   toggleExternalUpload,
   userRole,
   hideSubmitButton = false,
+  // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
   const cleanupImages = () => {
@@ -216,7 +218,7 @@ const RichTextEditor = ({
   });
 
   const editor = useEditor({
-    immediatelyRender: false,
+    immediatelyRender: true,
     extensions: [
       StarterKit.configure({
         bulletList: {
@@ -305,7 +307,7 @@ const RichTextEditor = ({
         onChange(editor.getHTML()); 
       }
     },
-  });
+  }, );
   const sendContent = useCallback(() => {
     void (async () => {
       try {
@@ -334,6 +336,8 @@ const RichTextEditor = ({
       editor.commands.focus();
     }
   }, [editor]);
+
+
   return (
     <div className="relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 shadow-md">
       <div

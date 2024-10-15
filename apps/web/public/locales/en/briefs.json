@@ -28,11 +28,22 @@
         "questionLabel": "Question",
         "labelPlaceholder": "Put your question here *",
         "descriptionPlaceholder": "Add a description",
-        "placeholderPlaceholder": "Add a placeholder"
+        "placeholderPlaceholder": "Add a placeholder",
+        "descriptionLabel": "Brief description",
+        "imageLabel": "Brief image",
+        "defaultPlaceholder": "Add a description..."
     },
     "widgets": {
       "edit": {
         "title": "Edit widget"
+      }
+    }, 
+    "panel": {
+      "widgets": {
+        "title": "Widgets"
+      }, 
+      "settings": {
+        "title": "Settings"
       }
     }
   },

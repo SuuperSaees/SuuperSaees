@@ -10,18 +10,12 @@ import Content from './content';
 import Inputs from './inputs';
 import { WidgetEditForm } from './widget-edit-form';
 import { ContentTypes, InputTypes } from '../types/brief.types';
-import { usePathname } from 'next/navigation';
 
 export default function Widgets() {
   // inputs of type Input: short text, paragraph, checkbox, select, dropdown, date, etc.
   const { content, inputs, isEditing, stopEditing } = useBriefsContext();
   const { t } = useTranslation('briefs');
-  const pathname = usePathname();
 
-  const showWidgets = pathname === '/briefs/create';
-  if (!showWidgets) {
-    return null;
-  }
   const mappedInputs = inputs.map((input) => {
     return {
       name: input.name,
@@ -42,7 +36,7 @@ export default function Widgets() {
   });
 
   return (
-    <div className="flex w-full max-w-80 flex-col gap-4 p-4 border border-l-1 border-slate-gray-300 max-h-full h-full ">
+    <div className="w-full h-full flex flex-col gap-4 max-h-full overflow-y-auto no-scrollbar">
       {isEditing ? (
         <>
         <div className='flex gap-2 items-center'>

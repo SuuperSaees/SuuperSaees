@@ -105,7 +105,7 @@ export const useBriefFormFields = () => {
   // Remove a form field by id
   const removeFormField = (id: number) => {
     setFormFields((prevFields) => {
-      const updatedFormFields = prevFields.filter((_, i) => i !== id);
+      const updatedFormFields = prevFields.filter((field) => field.id !== id);
       return updateFieldPositions(updatedFormFields);
     });
     setCurrentFormField(undefined);

@@ -8,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import {
   addFormFieldsToBriefs,
   createBrief,
@@ -18,93 +17,50 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
 
 import { useBriefsContext } from '../contexts/briefs-context';
-import { isContentType, isInputType } from '../utils/type-guards';
-import { Sortable } from './sortable';
+import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
+import FieldsetFields from './fieldset-fields';
+import FieldsetInformation from './fieldset-information';
+import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 
 type CreateBriefDialogProps = {
   propietaryOrganizationId: string;
   userRole: string;
+  showFormFields?: boolean;
+  showInfo?: boolean;
 };
-const briefCreationFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: 'Name must be at least 2 characters.' })
-    .max(200, { message: 'Name must be at most 200 characters.' }),
-  questions: z.array(
-    z.object({
-      position: z.number(),
-      label: z.string().min(1, { message: 'Question label cannot be empty.' }),
-      description: z.string().optional().nullable(),
-      placeholder: z.string().optional().nullable(),
-      type: z
-        .enum([
-          'text',
-          'text-short',
-          'text-large',
-          'select',
-          'multiple_choice',
-          'date',
-          'number',
-          'file',
-          'dropdown',
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'rich-text',
-          'image',
-          'video',
-        ])
-        .optional(), // Allowing multiple types
-      alert_message: z.string().optional().nullable(),
-      options: z
-        .array(
-          z.object({
-            label: z.string(),
-            value: z.string(),
-            selected: z.boolean().optional(),
-          }),
-        )
-        .optional(),
-    }),
-  ),
-});
 
 export type BriefCreationForm = z.infer<typeof briefCreationFormSchema>;
 
 const BriefCreationForm = ({
   propietaryOrganizationId,
   userRole,
+  showFormFields = true,
+  showInfo = false,
 }: CreateBriefDialogProps) => {
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
   const router = useRouter();
 
-  const {
-    addFormField,
-    removeFormField,
-    updateFormField,
-    formFields,
-    inputsMap,
-    contentMap,
-  } = useBriefsContext(); // Context to manage form fields
+  const { addFormField, formFields, brief } = useBriefsContext(); // Context to manage form fields
 
   // Initialize the form with Zod schema for validation and set default values
   const form = useForm<BriefCreationForm>({
     resolver: zodResolver(briefCreationFormSchema), // Resolver for Zod validation
     defaultValues: {
-      name: '', // Default name field
-      questions: formFields, // Initialize questions with values from context
+      name: '', // Default name field,
+      description: '',
+      image_url: '',
+      questions: formFields, // Initialize questions with values from context,
+      default_question: {
+        label: 'title', // not editable
+        description: '', // editable
+        placeholder: 'Add a title...', // editable
+        type: 'text-short', // not editable,
+        position: 0
+      },
     },
   });
 
@@ -114,6 +70,8 @@ const BriefCreationForm = ({
       // Create a new brief with the provided values
       const briefId = await createBrief({
         name: values.name,
+        description: values.description,
+        image_url: values.image_url,
         propietary_organization_id: propietaryOrganizationId, // Use organization ID from props
       });
 
@@ -137,7 +95,18 @@ const BriefCreationForm = ({
 
   // Form submission handler
   const onSubmit = (values: z.infer<typeof briefCreationFormSchema>) => {
-    createBriefsMutations.mutate(values); // Trigger the mutation with form values
+    // join default question with values (questions)
+    const newQuestionValues = [
+      ...values.questions,
+      values.default_question,
+    ]
+   
+    const newValues = {
+      ...values,
+      questions: newQuestionValues,
+    }
+
+    createBriefsMutations.mutate(newValues); // Trigger the mutation with form values
   };
 
   // Handle adding a new question to the form
@@ -147,113 +116,65 @@ const BriefCreationForm = ({
     form.setValue('questions', [...form.getValues('questions'), newQuestion]);
   };
 
-  // Handle changes to a specific question field
-  const handleQuestionChange = (
-    index: number,
-    field:
-      | 'label'
-      | 'description'
-      | 'placeholder'
-      | `options.${number}.selected`,
-    value: string | boolean | Date,
-  ) => {
-    // Update question in context if it exists
-    if (formFields[index]) {
-      updateFormField(index, { ...formFields[index], [field]: value }); // Update context field
-      const updatedQuestions = form.getValues('questions'); // Get current form questions
-
-      // If the question exists in the form, update its value
-      if (updatedQuestions[index]) {
-        updatedQuestions[index] = {
-          ...updatedQuestions[index],
-          [field]: value,
-        };
-        form.setValue('questions', updatedQuestions); // Update form state
-      }
-    }
-  };
-
-  // Handle removing a question from the form
-  const handleRemoveQuestion = (index: number) => {
-    removeFormField(index); // Remove field from context
-    const currentQuestions = form.getValues('questions'); // Get current questions
-    // Filter out the question to be removed
-    const newQuestions = currentQuestions.filter((_, i) => i !== index);
-    form.setValue('questions', newQuestions); // Update form state with the new questions array
-  };
-
   // Sync form state with context whenever formFields change
   useEffect(() => {
     form.setValue('questions', formFields); // Ensure form state stays in sync with context
-  }, [formFields, form]); // Re-run effect when formFields or form change
+    form.setValue('name', brief.name);
+    form.setValue('description', brief.description);
+    form.setValue('image_url', brief.image_url);
+  }, [formFields, form, brief, brief.description, brief.name, brief.image_url]); // Re-run effect when formFields or form change
+
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8 h-full overflow-y-auto no-scrollbar">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="no-scrollbar flex h-full w-full flex-col space-y-8 overflow-y-auto"
+      >
         {/* Brief Name Input */}
+        {showInfo && <FieldsetInformation form={form} />}
+  
+        {/* Default and not editable input field */}
         <FormField
           control={form.control}
-          name="name"
-          render={({ field, fieldState }) => (
+          name='default_question.description'
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
+              <FormLabel className="font-semibold text-gray-700">
+                Title
+              </FormLabel>
               <FormControl>
                 <ThemedInput
                   {...field}
-                  placeholder={t('creation.form.titlePlaceholder')}
+                  placeholder={t('creation.form.defaultPlaceholder')}
                   className="focus-visible:ring-none"
                 />
               </FormControl>
-              <FormMessage>{fieldState.error?.message}</FormMessage>
+              <FormMessage />
             </FormItem>
           )}
         />
 
-        {formFields.map((question, index) => {
-          if (question.type) {
-            const inputEntry = isInputType(question.type)
-              ? inputsMap.get(question.type)
-              : isContentType(question.type)
-                ? contentMap.get(question.type)
-                : undefined;
-            const FormFieldComponent = inputEntry?.component;
-            if (!FormFieldComponent) {
-              return null; // If no component found, skip rendering
-            }
-            // Check if FormFieldComponent is a function
-            if (typeof FormFieldComponent === 'function') {
-              return (
-  
-                <Sortable key={'q' + index} id={question.id}>
-                  <FormFieldComponent
-                    index={index}
-                    question={question}
-                    form={form}
-                    handleQuestionChange={handleQuestionChange}
-                    handleRemoveQuestion={handleRemoveQuestion}
-                    userRole={userRole}
-                  />
-                </Sortable>
-              );
-            }
-            // If it's a JSX element, render it directly
-            return <div key={'q' + index}>{FormFieldComponent}</div>;
-          }
-          return null;
-        })}
+        {showFormFields && (
+          <>
+            <FieldsetFields form={form} userRole={userRole} />
+          </>
+        )}
+        {showFormFields && (
+          <div className="fixed bottom-0 mt-auto flex h-fit w-full items-center gap-8 border-t border-gray-200 bg-white py-6">
+            <ThemedButton type="submit" className="flex gap-2">
+              <span>{t('creation.form.submit')}</span>
+              {createBriefsMutations.isPending && <Spinner />}
+            </ThemedButton>
 
-        {/* Add Question Button */}
-        <div className="flex items-center justify-center">
-          <ThemedButton type="button" onClick={handleAddQuestion}>
-            <Plus className="h-4 w-4" />
-            {t('creation.form.addQuestion')}
-          </ThemedButton>
-        </div>
+            <ThemedButton type="button" onClick={handleAddQuestion}>
+              <Plus className="h-4 w-4" />
+              {t('creation.form.addQuestion')}
+            </ThemedButton>
 
-        {/* Submit Button */}
-        <ThemedButton type="submit" className="flex gap-2">
-          <span>{t('creation.form.submit')}</span>
-          {createBriefsMutations.isPending && <Spinner />}
-        </ThemedButton>
+            {/* here goes previsualization button */}
+          </div>
+        )}
       </form>
     </Form>
   );
