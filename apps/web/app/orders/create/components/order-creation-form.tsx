@@ -54,18 +54,18 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
 
   const orderCreationFormSchema = z.object({
     uuid: z.string(),
-    title: z
-      .string()
-      .min(2, { message: 'Title must be at least 2 characters.' })
-      .max(200, {
-        message: 'Title must be at most 200 characters.',
-      }),
+    title: 
+      briefs.length > 0
+        ? z.string().optional()
+        : z
+            .string()
+            .min(2, { message: t('creation.validation.minTitleCharacters') }),
     description:
       briefs.length > 0
         ? z.string().optional()
         : z
             .string()
-            .min(2, { message: 'Description must be at least 2 characters.' }),
+            .min(2, { message: t('creation.validation.minDescriptionCharacters') }),
     fileIds: z.array(z.string()),
     brief_responses: z
       .array(
@@ -131,25 +131,26 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
-              <FormControl>
-                <ThemedInput
-                  {...field}
-                  placeholder={t('creation.form.titlePlaceholder')}
-                  className="focus-visible:ring-none"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        
         {!briefs.length && (
           <>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
+                  <FormControl>
+                    <ThemedInput
+                      {...field}
+                      placeholder={t('creation.form.titlePlaceholder')}
+                      className="focus-visible:ring-none"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="description"
@@ -175,7 +176,6 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
             />
           </>
         )}
-        {/* Brief form fields */}
 
         <OrderBriefs
           briefs={briefs}

@@ -24,6 +24,11 @@
       "filesLabel": "Files",
       "filesPlaceholder": "Click or drag to upload an SVG, PNG, JPG, or GIF file (max. 800x400px)",
       "submitMessage": "Create order"
+    },
+    "validation": {
+      "minTitleCharacters": "Title must be at least 2 characters.",
+      "minDescriptionCharacters": "Description must be at least 2 characters.",
+      "files": "Please upload at least one file"
     }
   },
   "details": {
