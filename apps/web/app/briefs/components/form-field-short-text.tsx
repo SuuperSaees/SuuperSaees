@@ -4,20 +4,11 @@ import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-
-
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
 import { BriefsProvider } from '../contexts/briefs-context';
 import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
-
 
 export interface FormFieldShortTextProps {
   index: number;
@@ -46,10 +37,6 @@ export function FormFieldShortText({
       render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
           <div className="flex flex-col gap-2">
-            <FormLabel>
-              {t('creation.form.questionLabel')} {index + 1}
-            </FormLabel>
-
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
@@ -88,7 +75,7 @@ export function FormFieldShortText({
                         )
                       }
                       placeholder={t('creation.form.descriptionPlaceholder')}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none w-full"
+                      className="w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -106,7 +93,11 @@ export function FormFieldShortText({
                       {...field}
                       value={question.placeholder}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        handleQuestionChange(index, 'placeholder', e.target.value)
+                        handleQuestionChange(
+                          index,
+                          'placeholder',
+                          e.target.value,
+                        )
                       }
                       placeholder={t('creation.form.placeholderPlaceholder')}
                       className="focus-visible:ring-none"
@@ -116,7 +107,6 @@ export function FormFieldShortText({
                 </FormItem>
               )}
             />
-
           </div>
           <BriefsProvider.Options
             formFieldId={question.id}

@@ -7,13 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
 import { Calendar } from '@kit/ui/calendar';
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
+import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 
 import { BriefsProvider } from '../contexts/briefs-context';
@@ -59,10 +53,6 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
       render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
           <div className="flex flex-col gap-2">
-            <FormLabel>
-              {t('creation.form.questionLabel')} {index + 1}
-            </FormLabel>
-
             <div className="flex">
               <FormField
                 control={form.control}
