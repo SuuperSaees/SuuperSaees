@@ -47,8 +47,8 @@ const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
                 <FormItem>
                   <FormControl>
                     <input
-                      disabled
                       {...field}
+                      readOnly
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(index, 'label', e.target.value)

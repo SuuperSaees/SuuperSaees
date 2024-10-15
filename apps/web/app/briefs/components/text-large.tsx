@@ -38,12 +38,13 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
-              disabled
+              
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
                     <input
                       {...field}
+                      readOnly
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(index, 'label', e.target.value)
@@ -60,12 +61,13 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
-              disabled
+              
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
                     <input
                       {...field}
+                      readOnly
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(
@@ -86,7 +88,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.placeholder`}
-              disabled
+              
               render={({ fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -96,6 +98,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                       )}
                       placeholder={question.placeholder ?? ''}
                       rows={5}
+                      readOnly
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         handleQuestionChange(
                           index,

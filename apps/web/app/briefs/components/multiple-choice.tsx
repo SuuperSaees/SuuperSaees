@@ -46,11 +46,11 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
-              disabled
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
                     <input
+                      readOnly
                       {...field}
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -68,12 +68,13 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
-              disabled
+              
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
                     <input
                       {...field}
+                      readOnly
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(
