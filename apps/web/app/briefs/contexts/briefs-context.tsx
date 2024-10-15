@@ -1,15 +1,31 @@
 'use client';
 
-import { createContext, useCallback, useContext, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
 
 import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { UseMutationResult } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
+import { UseFormReturn, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
+import { Brief } from '~/lib/brief.types';
+
+import { BriefCreationForm } from '../components/brief-creation-form';
 import Options from '../components/form-field-actions';
 import InputCard from '../components/input-card';
+import { useBrief } from '../hooks/use-brief';
 import { useBriefDragAndDrop } from '../hooks/use-brief-drag-and-drop';
 import { useBriefFormFields } from '../hooks/use-brief-form-fields';
+import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
 import {
   Content,
   ContentTypes,
@@ -18,7 +34,6 @@ import {
   InputTypes,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
-import { Brief } from '~/lib/brief.types';
 
 interface BriefsContext {
   brief: Brief.Insert;
@@ -32,14 +47,21 @@ interface BriefsContext {
   updateBrief: (updatedBrief: Brief.Insert) => void;
   addFormField: (formFieldType: FormField['type']) => FormField;
   removeFormField: (index: number) => void;
-  updateFormField: (
-    index: number,
-    updatedFormField: FormField,
-  ) => void;
+  updateFormField: (index: number, updatedFormField: FormField) => void;
   duplicateFormField: (id: number) => void;
   editFormField: (id: number) => void;
   stopEditing: () => void;
   startEditing: () => void;
+  form: UseFormReturn<BriefCreationForm>;
+  onSubmit: (values: z.infer<typeof briefCreationFormSchema>) => void;
+  briefMutation: UseMutationResult<
+    void,
+    Error,
+    z.infer<typeof briefCreationFormSchema>,
+    unknown
+  >;
+  activeTab: 'widgets' | 'settings';
+  setActiveTab: Dispatch<SetStateAction<'widgets' | 'settings'>>;
 }
 
 export const BriefsContext = createContext<BriefsContext | undefined>(
@@ -47,15 +69,11 @@ export const BriefsContext = createContext<BriefsContext | undefined>(
 );
 
 export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [brief, setBrief] = useState<Brief.Insert>({
-    name: '',
-    description:''
-  });
+  const [activeTab, setActiveTab] = useState<'widgets' | 'settings'>('widgets');
 
-  function updateBrief(updatedBrief: Brief.Insert) {
-    setBrief(updatedBrief);
-  }
-  const formFieldsContext = useBriefFormFields();
+  const formFieldsContext = useBriefFormFields(setActiveTab);
+
+  const briefContext = useBrief(formFieldsContext.setFormFields);
 
   const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
     useBriefDragAndDrop({
@@ -64,19 +82,51 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
       addFormField: formFieldsContext.addFormField,
     });
 
-  const WidgetComponent = useCallback(() => {
-    const widgetType = widget.type ?? '';
-    
-    const getWidgetEntry = (widgetType: string) => {
-      if (isInputType(widgetType)) {
-          return formFieldsContext.inputsMap.get(widgetType);
-      } else if (isContentType(widgetType)) {
-          return formFieldsContext.contentMap.get(widgetType);
-      }
-      return undefined;
+  // Initialize the form with Zod schema for validation and set default values
+  const form = useForm<BriefCreationForm>({
+    resolver: zodResolver(briefCreationFormSchema), // Resolver for Zod validation
+    defaultValues: {
+      name: '', // Default name field,
+      description: '',
+      image_url: '',
+      questions: formFieldsContext.formFields, // Initialize questions with values from context,
+      default_question: {
+        label: 'Order title', // not editable
+        description: '', // editable
+        placeholder: 'Add a title...', // editable
+        type: 'text-short', // not editable,
+        position: 0,
+      },
+    },
+  });
+
+  // Form submission handler
+  const onSubmit = (values: z.infer<typeof briefCreationFormSchema>) => {
+    // join default question with values (questions)
+    const newQuestionValues = [...values.questions, values.default_question];
+
+    const newValues = {
+      ...values,
+      questions: newQuestionValues,
+    };
+
+    briefContext.briefMutation.mutate(newValues); // Trigger the mutation with form values
+    setActiveTab('settings');
   };
 
-    const widgetEntry = getWidgetEntry(widgetType)
+  const WidgetComponent = useCallback(() => {
+    const widgetType = widget.type ?? '';
+
+    const getWidgetEntry = (widgetType: string) => {
+      if (isInputType(widgetType)) {
+        return formFieldsContext.inputsMap.get(widgetType);
+      } else if (isContentType(widgetType)) {
+        return formFieldsContext.contentMap.get(widgetType);
+      }
+      return undefined;
+    };
+
+    const widgetEntry = getWidgetEntry(widgetType);
 
     if (!widgetEntry) return null;
 
@@ -94,7 +144,16 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   }, [widget.type, formFieldsContext.inputsMap, formFieldsContext.contentMap]);
 
   return (
-    <BriefsContext.Provider value={{ ...formFieldsContext, brief, updateBrief }}>
+    <BriefsContext.Provider
+      value={{
+        ...formFieldsContext,
+        ...briefContext,
+        form,
+        onSubmit,
+        activeTab,
+        setActiveTab,
+      }}
+    >
       <DndContext
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}
