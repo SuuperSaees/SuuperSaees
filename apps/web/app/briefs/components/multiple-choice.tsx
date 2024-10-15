@@ -46,6 +46,7 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
+              disabled
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -67,6 +68,7 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
+              disabled
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
