@@ -90,7 +90,7 @@ export const FormSchema = createStepSchema({
     z.object({
       id: z.string(),
       name: z.string(),
-    })),
+    })).optional(),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
