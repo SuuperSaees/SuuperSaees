@@ -11,7 +11,6 @@ import Inputs from './inputs';
 import { WidgetEditForm } from './widget-edit-form';
 import { ContentTypes, InputTypes } from '../types/brief.types';
 
-
 export default function Widgets() {
   // inputs of type Input: short text, paragraph, checkbox, select, dropdown, date, etc.
   const { content, inputs, isEditing, stopEditing } = useBriefsContext();

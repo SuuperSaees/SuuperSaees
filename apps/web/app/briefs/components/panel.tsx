@@ -9,10 +9,18 @@ import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 import Widgets from './widgets';
 import BriefCreationForm from './brief-creation-form';
 import { useTranslation } from 'react-i18next';
+import { usePathname } from 'next/navigation';
 
 export default function Panel() {
   const [activeTab, setActiveTab] = useState<'widgets' | 'settings'>('widgets');
   const {t} = useTranslation('briefs');
+  const pathname = usePathname();
+  const showWidgets = pathname === '/briefs/create';
+
+  if (!showWidgets) {
+    return null;
+  } 
+  
   return (
     <Tabs
       className="border-l-1 border-slate-gray-300 flex h-full max-h-full w-full max-w-80 flex-col gap-4 border p-4 overflow-hidden"
