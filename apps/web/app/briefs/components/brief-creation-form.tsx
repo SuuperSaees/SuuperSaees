@@ -77,7 +77,6 @@ const BriefCreationForm = ({
 
       // If brief creation was successful, add associated form fields
       if (briefId?.id) {
-        console.log('que', values.questions);
         await addFormFieldsToBriefs(values.questions, briefId.id);
       } else {
         throw new Error('Failed to retrieve briefId'); // Error handling for brief creation failure
