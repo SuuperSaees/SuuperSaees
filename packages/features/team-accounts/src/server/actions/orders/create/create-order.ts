@@ -2,17 +2,12 @@
 
 import { redirect } from 'next/navigation';
 
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { hasPermissionToCreateOrder } from '../../permissions/orders';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
-
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -92,9 +87,14 @@ export const createOrders = async (
     const briefIds = new Set<string>(
       briefResponses?.map((response) => response.brief_id) ?? [],
     );
+
+    const titleFromBrief =
+      briefResponses?.[0]?.response ?? orders[0]?.title ?? `Order from ${emailData.email}`;
+
     const ordersToInsert = orders.map(
       ({ fileIds: _fileIds, ...orderWithoutFileIds }) => ({
         ...orderWithoutFileIds,
+        title: titleFromBrief,
         customer_id: userId,
         client_organization_id: clientOrganizationId ?? '',
         propietary_organization_id:
