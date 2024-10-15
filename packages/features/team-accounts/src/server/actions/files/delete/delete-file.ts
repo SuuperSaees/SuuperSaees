@@ -2,97 +2,90 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-export async function deleteFile(
-    file_id: string,
-    file_url: string
-){
-    const client = getSupabaseServerComponentClient();
+export async function deleteFile(file_id: string, file_url: string) {
+  const client = getSupabaseServerComponentClient();
 
-    const { data: fileData, error: fileError } = await client
-        .from('files')
-        .delete()
-        .eq('id', file_id)
-        .select();
-    
-    if (fileError) throw fileError;
+  const { data: fileData, error: fileError } = await client
+    .from('files')
+    .delete()
+    .eq('id', file_id)
+    .select();
 
-    // Obtener el bucket y la ruta del archivo a partir del URL
-    const bucket = 'agency_files';
-    const baseUrlFolderPath = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
-    const folderPath = file_url.replace(baseUrlFolderPath, '').split('/').slice(0, -1).join('/') + '/';
+  if (fileError) throw fileError;
 
-    // Listar y eliminar todos los archivos en la carpeta
-    const { data: filesInFolder, error: listError } = await client
-        .storage
-        .from(bucket)
-        .list(folderPath)
+  // Get bucket and file path from URL
+  const bucket = 'agency_files';
+  const baseUrlFolderPath =
+    process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
+  const folderPath =
+    file_url.replace(baseUrlFolderPath, '').split('/').slice(0, -1).join('/') +
+    '/';
 
+  // List and delete all files in the folder
+  const { data: filesInFolder, error: listError } = await client.storage
+    .from(bucket)
+    .list(folderPath);
 
-    if (listError) throw listError;
+  if (listError) throw listError;
 
-    if (filesInFolder.length > 0) {
-        const filePaths = filesInFolder.map(file => `${folderPath}${file.name}`);
+  if (filesInFolder.length > 0) {
+    const filePaths = filesInFolder.map((file) => `${folderPath}${file.name}`);
 
-        const { error: storageError } = await client
-            .storage
-            .from(bucket)
-            .remove(filePaths);
+    const { error: storageError } = await client.storage
+      .from(bucket)
+      .remove(filePaths);
 
-        if (storageError) throw storageError;
-    }
+    if (storageError) throw storageError;
+  }
 
-    return fileData;
+  return fileData;
 }
-
 
 export async function deleteOrderBriefFile(file_id: string) {
-    const client = getSupabaseServerComponentClient();
+  const client = getSupabaseServerComponentClient();
 
-    // Obtener los datos del archivo
-    const { data: fileData, error: fileError } = await client
-        .from('files')
-        .delete()
-        .eq('id', file_id)
-        .select('id, url')
-        .single();
-    
-    if (fileError) throw fileError;
+  // Get data from file
+  const { data: fileData, error: fileError } = await client
+    .from('files')
+    .delete()
+    .eq('id', file_id)
+    .select('id, url')
+    .single();
 
-    // Obtener el bucket y la ruta del archivo a partir del URL
-    const url = fileData.url;
-    const urlParts = url.split('/');
+  if (fileError) throw fileError;
 
-    // Suponiendo que el bucket está en la URL como en el ejemplo proporcionado
-    const bucket = urlParts[5]; // Cambia el índice según la posición real del bucket en la URL
+  // Get bucket and file path from URL
+  const url = fileData.url;
+  const urlParts = url.split('/');
 
-    const baseUrlFolderPath = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
+  const bucket = urlParts[5];
+  const baseUrlFolderPath =
+    process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
 
-    // Obtener la ruta del archivo eliminando el bucket de la URL
-    const folderPath = url.replace(`${baseUrlFolderPath}${bucket}/`, '').split('/').slice(0, -1).join('/') + '/';
+  // Get file path by removing bucket from URL
+  const folderPath =
+    url
+      .replace(`${baseUrlFolderPath}${bucket}/`, '')
+      .split('/')
+      .slice(0, -1)
+      .join('/') + '/';
 
-    // Listar y eliminar todos los archivos en la carpeta
-    const { data: filesInFolder, error: listError } = await client
-        .storage
-        .from(bucket)
-        .list(folderPath);
+  // List and delete all files in the folder
+  const { data: filesInFolder, error: listError } = await client.storage
+    .from(bucket)
+    .list(folderPath);
 
-    if (listError) throw listError;
+  if (listError) throw listError;
 
-    if (filesInFolder.length > 0) {
-        const filePaths = filesInFolder.map(file => `${folderPath}${file.name}`);
+  if (filesInFolder.length > 0) {
+    const filePaths = filesInFolder.map((file) => `${folderPath}${file.name}`);
 
-        const { error: storageError } = await client
-            .storage
-            .from(bucket)
-            .remove(filePaths);
+    const { error: storageError } = await client.storage
+      .from(bucket)
+      .remove(filePaths);
 
-        if (storageError) throw storageError;
-    }
+    if (storageError) throw storageError;
+  }
 
-    return fileData;
+  return fileData;
 }
-
-
-
-
-
