@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 
 
 import Image from 'next/image';
-// import BriefConnectionStep from './step-brief-connection';
+import BriefConnectionStep from './step-brief-connection';
 import { useRouter } from 'next/navigation';
 
 
@@ -86,11 +86,11 @@ export const FormSchema = createStepSchema({
     max_number_of_simultaneous_orders: z.number(),
     max_number_of_monthly_orders: z.number(),
   }),
-  // step_connect_briefs: z.array(
-  //   z.object({
-  //     id: z.string(),
-  //     name: z.string(),
-  //   })),
+  step_connect_briefs: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+    })),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -172,7 +172,7 @@ export function MultiStepFormDemo() {
                   t('step_type_of_service'),
                   t('step_service_details'),
                   t('step_service_price'),
-                  // t('step_connect_briefs'),
+                  t('step_connect_briefs'),
                 ]}
                 currentStep={currentStepIndex}
               />
@@ -193,9 +193,9 @@ export function MultiStepFormDemo() {
         <PricingStep />
       </MultiStepFormStep>
 
-      {/* <MultiStepFormStep name="connect_briefs">
+      <MultiStepFormStep name="connect_briefs">
         <BriefConnectionStep  />
-      </MultiStepFormStep> */}
+      </MultiStepFormStep>
     </MultiStepForm>
   );
 }
@@ -629,8 +629,9 @@ function DetailsStep() {
 function PricingStep() {
   const { t } = useTranslation('services');
   // const { form, nextStep, prevStep } = useMultiStepFormContext();
-  const { form, prevStep } = useMultiStepFormContext();
+  const { form, nextStep, prevStep, isStepValid } = useMultiStepFormContext();
   const router = useRouter();
+  
 
   // type CheckboxName =
   //   | 'step_service_price.standard'
@@ -836,7 +837,10 @@ function PricingStep() {
         <ThemedButton type="button" disabled={createServiceMutation.isPending} onClick={prevStep}>
           {t('previous')}
         </ThemedButton>
-        <ThemedButton
+        <ThemedButton onClick={nextStep} disabled={!isStepValid()}>
+          {t('next')}
+        </ThemedButton>
+        {/* <ThemedButton
           onClick={() => createServiceMutation.mutate()}
           className="flex gap-2"
         >
@@ -844,7 +848,7 @@ function PricingStep() {
           {createServiceMutation.isPending && (
             <Spinner className="h-4 w-4 text-white" />
           )}
-        </ThemedButton>
+        </ThemedButton> */}
       </div>
     </Form>
   );
