@@ -81,13 +81,14 @@ export function WidgetEditForm() {
     <React.Fragment>
       {optionsFields.map((option, index) => (
         <div key={option.id} className="flex flex-col gap-2 relative">
-          {renderFieldInput(`options.${index}.label`, 'Option Label',type)}
-          {renderFieldInput(`options.${index}.value`, 'Option Value',type)}
 
+          {renderFieldInput(`options.${index}.label`, 'Option Label', type, index, false)}
+  
+          {renderFieldInput(`options.${index}.value`, 'Option Value', type, index, true)}
+  
           <Button type="button" onClick={() => remove(index)} className='rounded-full w-[1.3rem] h-[1.3rem] p-0 bg-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent shadow-none absolute top-0 right-0 '>
             <Trash className='w-full' />
           </Button>
-
         </div>
       ))}
       <div className='flex justify-center'>
@@ -98,7 +99,7 @@ export function WidgetEditForm() {
     </React.Fragment>
   );
 
-  const renderFieldInput = (fieldName: string, label: string, type: string) => {
+  const renderFieldInput = (fieldName: string, label: string, type: string, index?: number, isValueField = false) => {
     const fieldIsType = fieldName == 'type'
     const fieldIsPosition = fieldName == 'position'
     const hideSelectPlaceholder = fieldName == 'placeholder' && type == 'select'
@@ -117,17 +118,28 @@ export function WidgetEditForm() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm text-gray-700">{label}</FormLabel>
+              <FormLabel className={isValueField ? "hidden" : "text-sm text-gray-700"}>{label}</FormLabel>
               <FormControl>
-                <ThemedInput
-                  {...field}
-                  placeholder={label}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    field.onChange(e);
-                    handleChange(e);
-                  }}
-                  value={field.value}
-                />
+              <ThemedInput
+                {...field}
+                className={isValueField ? 'hidden' : ''}
+                placeholder={label}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  // For label, we update both the label and the value fields
+                  if (!isValueField && index !== undefined) {
+                    const sanitizedValue = e.target.value
+                      .toLowerCase()
+                      .replace(/\s+/g, '_')  // Replace spaces with underscores
+                      .replace(/[^\w_]+/g, ''); // Remove special characters
+    
+                    form.setValue(`options.${index}.value`, sanitizedValue);
+                  }
+    
+                  field.onChange(e);
+                  handleChange(e);
+                }}
+                value={field.value}
+              />
               </FormControl>
               <FormMessage />
             </FormItem>
