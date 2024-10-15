@@ -100,6 +100,8 @@ export default function FieldsetInformation({
           // handleBriefChange
           updateBrief({ ...brief, image_url: imgUrl });
         }}
+        defaultValue={brief.image_url}
+        handleRemove={() => updateBrief({ ...brief, image_url: '' })}
       />
     </fieldset>
   );
