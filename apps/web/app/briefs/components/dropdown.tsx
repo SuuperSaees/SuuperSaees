@@ -60,7 +60,7 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                 <FormItem>
                   <FormControl>
                     <input
-                      disabled
+                      readOnly
                       {...field}
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -83,7 +83,7 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                   <FormControl>
                     <input
                       {...field}
-                      disabled
+                      readOnly
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(

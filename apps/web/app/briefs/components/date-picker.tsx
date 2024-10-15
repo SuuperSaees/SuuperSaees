@@ -61,7 +61,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                   <FormItem>
                     <FormControl>
                       <input
-                        disabled
+                        readOnly
                         {...field}
                         value={question.label}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -88,7 +88,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                 <FormItem>
                   <FormControl>
                     <input
-                      disabled
+                      readOnly
                       {...field}
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

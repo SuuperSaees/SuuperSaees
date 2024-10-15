@@ -40,12 +40,13 @@ export function FormFieldShortText({
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
-              disabled
+  
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
                     <input
                       {...field}
+                      readOnly
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(index, 'label', e.target.value)
@@ -62,11 +63,12 @@ export function FormFieldShortText({
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
-              disabled
+      
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
                     <input
+                      readOnly
                       {...field}
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -88,11 +90,12 @@ export function FormFieldShortText({
             <FormField
               control={form.control}
               name={`questions.${index}.placeholder`}
-              disabled
+         
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
                     <ThemedInput
+                      readOnly
                       {...field}
                       value={question.placeholder}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
