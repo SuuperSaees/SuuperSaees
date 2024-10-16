@@ -42,6 +42,7 @@ import { ThemedButton } from '../../../../accounts/src/components/ui/button-them
 // import CreateBriefDialog from '../../server/actions/briefs/create/create-brief-ui';
 import DeleteBriefDialog from '../../server/actions/briefs/delete/delete-brief-ui';
 import UpdateBriefDialog from '../../server/actions/briefs/update/update-brief-ui';
+import { useRouter } from 'next/navigation'
 
 type BriefTableProps = {
   briefs: Brief.Type[];
@@ -174,16 +175,29 @@ const briefColumns = (
 ];
 
 export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
-  const { t } = useTranslation('briefs');
+  const { t } = useTranslation(['services','briefs']);
+  const router = useRouter()
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
+  );
+  const [activeButton, setActiveButton] = React.useState<'services' | 'briefs'>(
+    'briefs',
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
   const columns = useMemo<ColumnDef<Brief.Type>[]>(() => briefColumns(t), [t]);
+
+  const handleButtonClick = (button: 'services' | 'briefs') => {
+    setActiveButton(button);
+    if (button === 'services') {
+      router.push('/services')
+    } else if (button === 'briefs') {
+      router.push('/briefs')
+    }
+  };
 
   const table = useReactTable({
     data: briefs,
@@ -209,6 +223,23 @@ export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
+      <div className='flex gap-2'>
+          <Button
+          variant="ghost"
+          className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'services' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
+          onClick={() => handleButtonClick('services')}
+          >
+            {t('services:serviceTitle')}
+          </Button>
+          <Button
+          variant="ghost"
+          className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'briefs' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
+          onClick={() => handleButtonClick('briefs')}
+          
+          >
+            {t('briefs:briefs', {ns:'briefs'})}
+          </Button>
+        </div>
         <div className="flex w-full justify-end gap-4 px-2">
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
