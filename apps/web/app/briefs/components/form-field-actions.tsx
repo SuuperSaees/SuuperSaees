@@ -1,4 +1,4 @@
-import { Copy, Edit, Trash } from 'lucide-react';
+import { Copy, Pencil, Trash2 } from 'lucide-react';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 
@@ -33,7 +33,7 @@ const Options = ({
       {
         label: 'Duplicate',
         action: duplicateItem,
-        icon: <Copy className="h-5 w-5" />,
+        icon: <Copy className="h-5 w-5 text-[#667085]" />,
       },
     ],
     [
@@ -41,7 +41,7 @@ const Options = ({
       {
         label: 'Edit',
         action: editItem,
-        icon: <Edit className="h-5 w-5" />,
+        icon: <Pencil className="h-5 w-5 text-[#667085]" />,
       },
     ],
     [
@@ -49,7 +49,7 @@ const Options = ({
       {
         label: 'Remove',
         action: removeItem,
-        icon: <Trash className="h-5 w-5" />,
+        icon: <Trash2 className="h-5 w-5 text-[#667085]" />,
       },
     ],
   ]);

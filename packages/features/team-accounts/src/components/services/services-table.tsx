@@ -2,7 +2,8 @@
 
 import { useMemo } from 'react';
 import * as React from 'react';
-
+import { Tabs, TabsList } from '@kit/ui/tabs';
+import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings'
 
 
 import Image from 'next/image';
@@ -54,6 +55,7 @@ import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed
 import { getStripeAccountID } from '../../server/actions/members/get/get-member-account';
 import UpdateServiceDialog from '../../../../../../apps/web/app/services/update/update-component';
 import { useServicesContext } from '../../../../../../apps/web/app/services/contexts/services-context';
+import { useRouter } from 'next/navigation'
 
 type ServicesTableProps = {
   services: Service.Type[];
@@ -204,9 +206,13 @@ const servicesColumns = (
   ];
 
 export function ServicesTable({ services }: ServicesTableProps) {
-  const { t } = useTranslation('services');
+  const { t } = useTranslation(['services','briefs']);
   const { accountRole } = useServicesContext()
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const router = useRouter()
+  const [activeTab, setActiveTab] = React.useState<'services' | 'briefs'>(
+    'services',
+  );
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
@@ -217,6 +223,15 @@ export function ServicesTable({ services }: ServicesTableProps) {
     () => servicesColumns(t),
     [t],
   );
+
+  const handleTabClick = (value: 'services' | 'briefs') => {
+    setActiveTab(value)
+    if (value === 'services') {
+      router.push('/services')
+    } else if (value === 'briefs') {
+      router.push('/briefs')
+    }
+  };
 
   const table = useReactTable({
     data: services,
@@ -243,7 +258,22 @@ export function ServicesTable({ services }: ServicesTableProps) {
 
   return (
     <div className="w-full">
-      <div className="flex flex-wrap items-center justify-end gap-4 mb-[24px] flex items-baseline">
+      <div className="flex items-center justify-between gap-4 py-4">
+        <Tabs
+            defaultValue={activeTab}
+            onValueChange={(value: string) => {
+              handleTabClick(value as 'services' | 'briefs');
+            }}
+          >
+            <TabsList className='gap-2 bg-transparent'>
+              <ThemedTabTrigger value="services" activeTab={activeTab} option={'services'}>
+                {t('services:serviceTitle')}
+              </ThemedTabTrigger>
+              <ThemedTabTrigger value="briefs" activeTab={activeTab} option={'briefs'}>
+                {t('briefs:briefs', {ns:'briefs'})}
+              </ThemedTabTrigger>
+            </TabsList>
+        </Tabs>
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
           <ThemedInput
