@@ -62,11 +62,11 @@ const routes = [
   //   path: pathsConfig.app.personalAccountBilling,
   //   // Icon: </>
   // }
-  {
-    label: 'common:briefsName',
-    path: pathsConfig.app.briefs,
-    Icon: <Briefcase className={iconClasses} />,
-  },
+  // {
+  //   label: 'common:briefsName',
+  //   path: pathsConfig.app.briefs,
+  //   Icon: <Briefcase className={iconClasses} />,
+  // },
 ];
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {
