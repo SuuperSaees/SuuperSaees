@@ -397,9 +397,6 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                       target: { value: React.SetStateAction<string> };
                     }) => setSearchTerm(e.target.value)}
                   />
-                  <Link href="/orders/create" className='ml-[16px]'>
-                    <ThemedButton>{t('creation.title')}</ThemedButton>
-                  </Link>
                 </div>
                 {orders.length > 0 ? (
                   <Link href="/orders/create">
