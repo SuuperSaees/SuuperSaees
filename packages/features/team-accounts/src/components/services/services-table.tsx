@@ -2,7 +2,8 @@
 
 import { useMemo } from 'react';
 import * as React from 'react';
-
+import { Tabs, TabsList } from '@kit/ui/tabs';
+import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings'
 
 
 import Image from 'next/image';
@@ -209,7 +210,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
   const { accountRole } = useServicesContext()
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const router = useRouter()
-  const [activeButton, setActiveButton] = React.useState<'services' | 'briefs'>(
+  const [activeTab, setActiveTab] = React.useState<'services' | 'briefs'>(
     'services',
   );
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -223,11 +224,11 @@ export function ServicesTable({ services }: ServicesTableProps) {
     [t],
   );
 
-  const handleButtonClick = (button: 'services' | 'briefs') => {
-    setActiveButton(button);
-    if (button === 'services') {
+  const handleTabClick = (value: 'services' | 'briefs') => {
+    setActiveTab(value)
+    if (value === 'services') {
       router.push('/services')
-    } else if (button === 'briefs') {
+    } else if (value === 'briefs') {
       router.push('/briefs')
     }
   };
@@ -258,23 +259,21 @@ export function ServicesTable({ services }: ServicesTableProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between gap-4 py-4">
-        <div className='flex gap-2'>
-          <Button
-          variant="ghost"
-          className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'services' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
-          onClick={() => handleButtonClick('services')}
+        <Tabs
+            defaultValue={activeTab}
+            onValueChange={(value: string) => {
+              handleTabClick(value as 'services' | 'briefs');
+            }}
           >
-            {t('services:serviceTitle')}
-          </Button>
-          <Button
-          variant="ghost"
-          className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'briefs' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
-          onClick={() => handleButtonClick('briefs')}
-          
-          >
-            {t('briefs:briefs', {ns:'briefs'})}
-          </Button>
-        </div>
+            <TabsList className='gap-2 bg-transparent'>
+              <ThemedTabTrigger value="services" activeTab={activeTab} option={'services'}>
+                {t('services:serviceTitle')}
+              </ThemedTabTrigger>
+              <ThemedTabTrigger value="briefs" activeTab={activeTab} option={'briefs'}>
+                {t('briefs:briefs', {ns:'briefs'})}
+              </ThemedTabTrigger>
+            </TabsList>
+        </Tabs>
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
           <ThemedInput
