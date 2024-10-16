@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
   const shouldIgnorePath = (pathname: string) =>
     Array.from(ignorePath).some((path) => pathname.includes(path));
 
-  if (IS_PROD && !shouldIgnorePath(request.nextUrl.pathname)) {
+  if (IS_PROD && !shouldIgnorePath(request.nextUrl.pathname) && new URL(request.nextUrl.origin).host !== process.env.HOST_C4C7US) {
     try {
       const supabase = createMiddlewareClient(request, response);
       const {
