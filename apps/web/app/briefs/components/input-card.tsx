@@ -18,7 +18,7 @@ export default function InputCard({
       onClick={action}
     >
       {icon}
-      <span className="text-xs whitespace-nowrap font-bold text-center">{name}</span>
+      <span className="text-xs whitespace-nowrap font-medium text-center">{name}</span>
     </div>
   );
 }

@@ -12,7 +12,7 @@ export function ContentCard({ name, icon, action }: ContentCardProps) {
       onClick={action}
     >
       {icon}
-      <span className="text-xs font-bold text-center">{name}</span>
+      <span className="text-xs font-medium text-center">{name}</span>
     </div>
   );
 }
