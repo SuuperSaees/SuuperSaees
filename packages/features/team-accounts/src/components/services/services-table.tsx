@@ -22,7 +22,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUp, Link2, Search } from 'lucide-react';
+import { ArrowUp, Link2, Pencil, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -52,7 +52,7 @@ import {
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { getStripeAccountID } from '../../server/actions/members/get/get-member-account';
-import UpdateServiceDialog from '../../../../../../apps/web/app/services/update/update-component';
+// import UpdateServiceDialog from '../../../../../../apps/web/app/services/updatev1/update-component';
 import { useServicesContext } from '../../../../../../apps/web/app/services/contexts/services-context';
 
 type ServicesTableProps = {
@@ -195,7 +195,10 @@ const servicesColumns = (
                 className="h-6 w-6 cursor-pointer text-gray-500"
               />}
             </div>}
-            {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />}
+            {/* {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />} */}
+            <Link href={`/services/update?id=${service.id}`}>
+              <Pencil className='h-4 w-4' />
+            </Link>
             {accountRole === "agency_owner" && <DeleteServiceDialog priceId={priceId} />}
           </div>
         );
