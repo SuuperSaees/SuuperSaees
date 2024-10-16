@@ -1,9 +1,6 @@
 'use client';
 
 import React, { useEffect } from 'react';
-
-import { Plus } from 'lucide-react';
-import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -21,6 +18,7 @@ import { useBriefsContext } from '../contexts/briefs-context';
 import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
 import FieldsetFields from './fieldset-fields';
 import FieldsetInformation from './fieldset-information';
+import AddElementButton from '~/components/add-element-button';
 
 type CreateBriefDialogProps = {
   propietaryOrganizationId: string;
@@ -92,14 +90,7 @@ const BriefCreationForm = ({
         {showFormFields && (
           <>
             <FieldsetFields form={form} userRole={userRole} />
-            <div className='relative flex flex-col gap-2 justify-center items-center text-gray-500 text-sm p-4 rounded-lg hover:bg-gray-50 cursor-pointer custom-dashed-border'
-              onClick={handleAddQuestion}
-            >
-              <Plus className="h-5 w-5" />
-              <p>
-                {t('creation.form.addQuestion')}  
-              </p>
-            </div>
+            <AddElementButton message={t('creation.form.addQuestion')} buttonAction={() => handleAddQuestion()}/>
           </>
         )}
       </form>
