@@ -385,29 +385,54 @@ export type Database = {
       briefs: {
         Row: {
           created_at: string
+          deleted_on: string | null
           description: string | null
           id: string
           image_url: string | null
           name: string
-          propietary_organization_id: string | null
+          propietary_organization_id: string
         }
         Insert: {
           created_at?: string
+          deleted_on?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           name: string
-          propietary_organization_id?: string | null
+          propietary_organization_id: string
         }
         Update: {
           created_at?: string
+          deleted_on?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           name?: string
-          propietary_organization_id?: string | null
+          propietary_organization_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_messages: {
         Row: {
