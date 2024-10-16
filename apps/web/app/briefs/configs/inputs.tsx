@@ -30,7 +30,7 @@ export const generateInputs = (
       'text-short',
       {
         name: 'Short Text',
-        icon: <Text className="h-8 w-8" />,
+        icon: <Text className="h-8 w-8  text-[#667085]" />,
         action: () => action('text-short'), // Action passed dynamically
         content: {
           label: 'Label',
@@ -53,7 +53,7 @@ export const generateInputs = (
       'text-large',
       {
         name: 'Paragraph',
-        icon: <TextIcon className="h-8 w-8" />,
+        icon: <TextIcon className="h-8 w-8 text-[#667085]" />,
         action: () => action('text-large'), // Action passed dynamically
         content: {
           label: 'Label',
@@ -76,7 +76,7 @@ export const generateInputs = (
       'file',
       {
         name: 'Upload files',
-        icon: <Upload className="h-8 w-8" />,
+        icon: <Upload className="h-8 w-8 text-[#667085]" />,
         action: () => action('file'), // Action passed dynamically
         content: {
           label: 'Label',
@@ -99,7 +99,7 @@ export const generateInputs = (
       'multiple_choice',
       {
         name: 'Multiple choice',
-        icon: <CheckSquare className="h-8 w-8" />,
+        icon: <CheckSquare className="h-8 w-8 text-[#667085]" />,
         action: () => action('multiple_choice'), // Action passed dynamically
         content: {
           label: 'Label',
@@ -136,7 +136,7 @@ export const generateInputs = (
       'select',
       {
         name: 'Select',
-        icon: <Circle className="h-8 w-8" />,
+        icon: <Circle className="h-8 w-8 text-[#667085]" />,
         action: () => action('select'), // Action passed dynamically
         content: {
           label: 'Label',
@@ -173,7 +173,7 @@ export const generateInputs = (
       'dropdown',
       {
         name: 'Dropdown',
-        icon: <ChevronDown className="h-8 w-8" />,
+        icon: <ChevronDown className="h-8 w-8 text-[#667085]" />,
         action: () => action('dropdown'), // Action passed dynamically
         content: {
           label: 'Label',
@@ -210,7 +210,7 @@ export const generateInputs = (
       'date',
       {
         name: 'Date',
-        icon: <CalendarCheck2 className="h-8 w-8" />,
+        icon: <CalendarCheck2 className="h-8 w-8 text-[#667085]" />,
         action: () => action('date'), // Action passed dynamically
         content: {
           label: 'Label',

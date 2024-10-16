@@ -18,7 +18,7 @@ export const generateContent = (
       'h1',
       {
         name: 'Title',
-        icon: <ALargeSmall className="h-8 w-8" />,
+        icon: <ALargeSmall className="h-8 w-8 text-[#667085]" />,
         action: () => action('h1'), // Action passed dynamically,
         content: {
           label: 'Title',
@@ -65,7 +65,7 @@ export const generateContent = (
       'image',
       {
         name: 'Image',
-        icon: <Image className="h-8 w-8" />,
+        icon: <Image className="h-8 w-8 text-[#667085]" />,
         action: () => action('image'), // Action passed dynamically
         content: {
           label: 'Image',
