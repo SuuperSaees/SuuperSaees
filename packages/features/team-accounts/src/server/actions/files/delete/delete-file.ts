@@ -67,30 +67,15 @@ export async function deleteOrderBriefFile(file_id: string) {
   const baseUrlFolderPath =
     process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
 
-  // Get file path by removing bucket from URL
-  const folderPath =
-    url
-      .replace(`${baseUrlFolderPath}${bucket}/`, '')
-      .split('/')
-      .slice(0, -1)
-      .join('/') + '/';
+  // Get file path by removing the base URL
+  const filePath = url.replace(`${baseUrlFolderPath}${bucket}/`, '');
 
-  // List and delete all files in the folder
-  const { data: filesInFolder, error: listError } = await client.storage
+  // Delete the specific file
+  const { error: storageError } = await client.storage
     .from(bucket)
-    .list(folderPath);
+    .remove([filePath]);
 
-  if (listError) throw listError;
-
-  if (filesInFolder.length > 0) {
-    const filePaths = filesInFolder.map((file) => `${folderPath}${file.name}`);
-
-    const { error: storageError } = await client.storage
-      .from(bucket)
-      .remove(filePaths);
-
-    if (storageError) throw storageError;
-  }
+  if (storageError) throw storageError;
 
   return fileData;
 }
