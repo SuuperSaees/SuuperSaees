@@ -68,7 +68,7 @@ export const getBriefs =
 
       return briefs;
     } catch (error) {
-      console.error('Error al obtener los briefs', error);
+      console.error('Error obtaining briefs', error);
       throw error;
     }
   };
@@ -88,7 +88,7 @@ export const getBriefFormFields = async () => {
 
     return briefFormFields;
   } catch (error) {
-    console.error('Error al obtener los fields del brief', error);
+    console.error('Error obtaining brief fields', error);
     throw error;
   }
 };
@@ -144,7 +144,7 @@ export const getClientBriefs = async (): Promise<Brief.Relationships.FormField[]
 
     return briefs;
   } catch (error) {
-    console.error('Error al obtener los briefs', error);
+    console.error('Error obtaining briefs', error);
     throw error;
   }
 };
