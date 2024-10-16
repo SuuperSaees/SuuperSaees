@@ -92,10 +92,14 @@ const BriefCreationForm = ({
         {showFormFields && (
           <>
             <FieldsetFields form={form} userRole={userRole} />
-            <ThemedButton type="button" onClick={handleAddQuestion}>
-              <Plus className="h-4 w-4" />
-              {t('creation.form.addQuestion')}
-            </ThemedButton>
+            <div className='relative flex flex-col gap-2 justify-center items-center text-gray-500 text-sm p-4 rounded-lg hover:bg-gray-50 cursor-pointer custom-dashed-border'
+              onClick={handleAddQuestion}
+            >
+              <Plus className="h-5 w-5" />
+              <p>
+                {t('creation.form.addQuestion')}  
+              </p>
+            </div>
           </>
         )}
       </form>
