@@ -47,15 +47,14 @@ import UpdateBriefDialog from '../../server/actions/briefs/update/update-brief-u
 import { useRouter } from 'next/navigation'
 
 type BriefTableProps = {
-  briefs: Brief.Type[];
-  accountIds: string[];
+  briefs: Brief.Relationships.Services.Response[];
 };
 
 // SERVICES TABLE
 // TFunction<'briefs', undefined>
 const briefColumns = (
   t: TFunction<'briefs', undefined>,
-): ColumnDef<Brief.Type>[] => [
+): ColumnDef<Brief.Relationships.Services.Response>[] => [
   {
     accessorKey: 'name',
     header: t('name'),
@@ -176,9 +175,11 @@ const briefColumns = (
   },
 ];
 
-export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
-  const { t } = useTranslation(['services','briefs']);
+
+export function BriefsTable({ briefs }: BriefTableProps) {
+  const { t } = useTranslation('briefs');
   const router = useRouter()
+  
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -190,7 +191,7 @@ export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const columns = useMemo<ColumnDef<Brief.Type>[]>(() => briefColumns(t), [t]);
+  const columns = useMemo<ColumnDef<Brief.Relationships.Services.Response>[]>(() => briefColumns(t), [t]);
 
   const handleTabClick = (value: 'services' | 'briefs') => {
     setActiveTab(value)
