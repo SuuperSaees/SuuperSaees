@@ -243,7 +243,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-end gap-4 py-4">
+      <div className="flex flex-wrap items-center justify-end gap-4 mb-[24px] flex items-baseline">
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
           <ThemedInput
@@ -262,7 +262,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
         ) : null}
       </div>
       <Separator />
-      <div className="mt-4 rounded-md border px-4">
+      <div className="mt-[24px] rounded-md border px-4">
         <Table>
           {table.getRowModel().rows?.length ? (
             <>

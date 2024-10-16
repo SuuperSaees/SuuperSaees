@@ -362,7 +362,7 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
 
   return (
     <div className="w-full">
-      <div className="flex flex-wrap items-center justify-between gap-4 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-[24px]">
         <div className="flex">
           {
             !view && 
@@ -423,7 +423,7 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
 
       <Separator />
       }
-      <div className="mt-4 rounded-md border">
+      <div className="mt-[24px] rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

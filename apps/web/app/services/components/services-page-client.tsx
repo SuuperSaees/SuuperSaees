@@ -40,7 +40,7 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePr
           <div className="flex justify-between items-center mb-[32px]">
             <div className="flex-grow">
               <span>
-                <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
+                <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
                 {t('services:title')} 
                 </div>
               </span>

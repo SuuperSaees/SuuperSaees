@@ -208,7 +208,7 @@ export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between py-4">
+      <div className="flex items-center justify-between pb-[24px]">
         <div className="flex w-full justify-end gap-4 px-2">
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
@@ -230,7 +230,7 @@ export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
         </div>
       </div>
       <Separator />
-      <div className="mt-4 rounded-md border">
+      <div className="mt-[24px] rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
