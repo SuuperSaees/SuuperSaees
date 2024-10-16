@@ -2,7 +2,6 @@
 
 import { SignInMethodsContainer } from '@kit/auth/sign-in';
 // import { Button } from '@kit/ui/button';
-import { Trans } from '@kit/ui/trans';
 
 import authConfig from '~/config/auth.config';
 import pathsConfig from '~/config/paths.config';
@@ -43,9 +42,7 @@ function SignInPage({ searchParams }: SignInPageProps) {
         </div>
         <div className="w-[360px] md:px-[32px] ">
           <div className="pb-10"><SignInLogo /></div>
-          <div className="text-gray-900 text-center text-3xl font-semibold leading-9 pb-3">
-            <Trans i18nKey={'auth:signInHeading'} />
-          </div>
+        
           <SignInMethodsContainer
             providers={authConfig.providers}
             inviteToken={inviteToken}
