@@ -41,9 +41,9 @@ function SignInPage({ searchParams }: SignInPageProps) {
       <div className="w-full  h-screen flex items-center justify-center">
         <div className="hidden md:block absolute md:w-[142px] md:h-auto md:left-8 md:top-8 md:object-contain">
         </div>
-        <div className="w-full md:w-1/3 md:px-[32px]">
-          <SignInLogo />
-          <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
+        <div className="w-[360px] md:px-[32px] ">
+          <div className="pb-10"><SignInLogo /></div>
+          <div className="text-gray-900 text-center text-3xl font-semibold leading-9 pb-3">
             <Trans i18nKey={'auth:signInHeading'} />
           </div>
           <SignInMethodsContainer

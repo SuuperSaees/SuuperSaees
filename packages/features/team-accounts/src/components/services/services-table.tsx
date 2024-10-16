@@ -292,7 +292,7 @@ export function ServicesTable({ services }: ServicesTableProps) {
         ) : null}
       </div>
       <Separator />
-      <div className="mt-4 rounded-md border px-4">
+      <div className="mt-[24px] rounded-md border px-4">
         <Table>
           {table.getRowModel().rows?.length ? (
             <>

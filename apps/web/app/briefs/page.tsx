@@ -24,7 +24,7 @@ async function BriefsPage() {
         <div className="flex items-center justify-between">
           <div className="flex-grow">
             <span>
-              <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
+              <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
                 Briefs
               </div>
             </span>

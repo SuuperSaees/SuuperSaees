@@ -1,23 +1,22 @@
-import { Inter as SansFont } from 'next/font/google';
+import { Inter } from 'next/font/google';
 
 /**
  * @sans
- * @description Define here the sans font.
- * By default, it uses the Inter font from Google Fonts.
+ * @description Define the Inter font as the primary sans-serif font
  */
-const sans = SansFont({
+const sans = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
-  fallback: ['system-ui', 'Helvetica Neue', 'Helvetica', 'Arial'],
+  fallback: ['system-ui', 'Helvetica Neue', 'Arial', 'sans-serif'],
   preload: true,
   weight: ['300', '400', '500', '600', '700'],
+  display: 'swap', // Añadido para mejor rendimiento
 });
 
 /**
  * @heading
- * @description Define here the heading font.
+ * @description Using Inter for headings as well
  */
 const heading = sans;
 
-// we export these fonts into the root layout
 export { sans, heading };

@@ -262,7 +262,7 @@ export function BriefsTable({ briefs }: BriefTableProps) {
         </div>
       </div>
       <Separator />
-      <div className="mt-4 rounded-md border">
+      <div className="mt-[24px] rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
