@@ -47,7 +47,7 @@ type OrderInsert = Omit<
   fileIds?: string[];
 };
 
-const OrderCreationForm = ({ briefs }: { briefs: Brief.BriefResponse[] }) => {
+const OrderCreationForm = ({ briefs }: { briefs: Brief.Response[] }) => {
   const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const uniqueId = generateUUID();
   const { t } = useTranslation('orders');
