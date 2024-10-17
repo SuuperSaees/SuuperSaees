@@ -122,9 +122,7 @@ export async function getClientServices(
   }
 }
 
-export async function getServiceBriefs(
-  serviceId: Service.Type['id'],
-) {
+export async function getServiceBriefs(serviceId: Service.Type['id']) {
   const client = getSupabaseServerComponentClient();
   try {
     // Step 1: Verify the user
@@ -132,26 +130,38 @@ export async function getServiceBriefs(
     if (!user) throw new Error('No user found');
 
     // Step 2: Get the service's briefs
-    const { data: serviceBriefData, error: serviceBriefDataError } = await client
-      .from('service_briefs')
-      .select('brief_id')
-      .eq('service_id', serviceId);
+    const { data: serviceBriefData, error: serviceBriefDataError } =
+      await client
+        .from('service_briefs')
+        .select('brief_id')
+        .eq('service_id', serviceId);
 
-    if (serviceBriefDataError) { 
-      throw new Error(`Error while getting service briefs: ${serviceBriefDataError.message}`);
+    if (serviceBriefDataError) {
+      throw new Error(
+        `Error while getting service briefs: ${serviceBriefDataError.message}`,
+      );
+    }
+
+    // Filtrar ids inválidos antes de la siguiente consulta
+    const validBriefIds = (serviceBriefData || [])
+      .map((brief) => brief.brief_id)
+      .filter((briefId) => typeof briefId === 'string' && briefId.length > 0); // Filtrar valores vacíos o no válidos
+
+    if (validBriefIds.length === 0) {
+      return []; // Si no hay ids válidos, retornar un array vacío
     }
 
     // Step 3: Get the briefs
     const { data: briefsData, error: briefsError } = await client
       .from('briefs')
       .select('id, name')
-      .eq('id', serviceBriefData ? serviceBriefData.map((brief) => brief.brief_id) : []);
+      .in('id', validBriefIds);
 
     if (briefsError) {
       throw new Error(`Error while getting briefs: ${briefsError.message}`);
     }
 
-    return briefsData;
+    return briefsData || [];
   } catch (error) {
     console.error('Error while getting briefs:', error);
     throw error;

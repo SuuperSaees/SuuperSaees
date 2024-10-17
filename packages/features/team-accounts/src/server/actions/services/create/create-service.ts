@@ -217,7 +217,7 @@ export async function addServiceToClient(
     const clientId = clientData[0]?.id;
     const clientAgencyId = clientData[0]?.agency_id;
 
-    if (!clientId ?? !clientAgencyId) throw new Error('No client found');
+    if (!clientId || !clientAgencyId) throw new Error('No client found');
 
     // Step 3: Verify the permissions to add service to client
     const hasPermission =

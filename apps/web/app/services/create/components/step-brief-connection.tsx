@@ -30,16 +30,12 @@ export default function BriefConnectionStep(
   previousService? : any,
   previousBriefs?,
 ) {
-  console.log('previousService', previousService);
   const { prevStep, form } = useMultiStepFormContext<typeof FormSchema>();
   const { t } = useTranslation('services');
   const [loading, setLoading] = useState(false);
 
   const client = getSupabaseBrowserClient<Database>();
   const [briefs, setBriefs] = useState<Brief.Type[]>([]);
-  // const [selectedBriefs, setSelectedBriefs] = useState<
-  //   { id: string; name: string }[]
-  // >([]);
   const [selectedBriefs, setSelectedBriefs] = useState<{ id: string; name: string }[]>(Array.isArray(previousBriefs) ? previousBriefs : []);
   
   const handleSelect = (value: Brief.Type) => {
@@ -215,7 +211,7 @@ export default function BriefConnectionStep(
         
         
 
-        {previousService ? (
+        {previousService?.previousService ? (
           <Link
             type="button"
             onClick={updatePreviousService}

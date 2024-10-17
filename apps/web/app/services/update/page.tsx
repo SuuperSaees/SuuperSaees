@@ -27,12 +27,13 @@ async function UpdateServicePage({
   }
   let service = null;
   service = await getServiceById(Number(id));
-  const serviceBriefs = await getServiceBriefs(Number(id));
+  const serviceBriefs = await getServiceBriefs(Number(id)) || [];
 
   service = {
     ...service,
     briefs: serviceBriefs
   }
+
   return (
     <>
       <PageBody>

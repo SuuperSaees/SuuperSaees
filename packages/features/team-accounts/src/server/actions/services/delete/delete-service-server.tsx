@@ -14,15 +14,33 @@ import {
 } from '../../members/get/get-member-account';
 import { hasPermissionToDeleteClientService } from '../../permissions/services';
 
-// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export const deleteService = async (priceId: string) => {
   try {
     const stripe_account_id = await getStripeAccountID();
     if (!stripe_account_id) throw new Error('No stripe account found');
 
+    // API call to disable product and price in Stripe
+    const response = await fetch(`${baseUrl}/api/stripe/delete-service?priceId=${encodeURIComponent(priceId)}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        priceId: priceId,
+        accountId: stripe_account_id,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || 'Error deleting price and product in Stripe');
+    }
+
     const client = getSupabaseServerComponentClient();
-    // Delete From DB
+
+    // Delete the service from the database
     const { error } = await client
       .from('services')
       .delete()
@@ -32,10 +50,11 @@ export const deleteService = async (priceId: string) => {
       throw new Error(error.message);
     }
   } catch (error) {
-    console.error('Error al eliminar el usuario:', error);
+    console.error('Error deleting the service:', error);
     throw error;
   }
 };
+
 
 export async function deleteClientService(
   clientOrganizationId: string,
@@ -53,7 +72,7 @@ export async function deleteClientService(
 
     const clientId = clientData[0]?.id;
     const clientAgencyId = clientData[0]?.agency_id;
-    if (!clientId ?? !clientAgencyId) throw new Error('No client found');
+    if (!clientId || !clientAgencyId) throw new Error('No client found');
 
     // Step 3: Verify the permision to delete
     const hasPermission =
