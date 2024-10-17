@@ -19,7 +19,7 @@ const SignIn = ({ inviteToken, paths }: {
       host = window.location.host;
     }
     const authDetails = useAuthDetails(host);
-    const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? 'white')
+    const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? '#ffffff')
     return (<>
 <div
     className={`relative w-full h-screen flex items-center justify-center overflow-hidden bg-gradient-to-r from-gray-150 to-gray-250`}
@@ -32,7 +32,7 @@ const SignIn = ({ inviteToken, paths }: {
     <div className="hidden md:block absolute md:w-[142px] md:h-auto md:left-8 md:top-8 md:object-contain"></div>
     
     <div
-        className={`align-center relative w-[90%] max-w-[360px] md:px-[32px] md:py-[48px] backdrop-blur-md rounded-lg shadow-lg z-10 ${authDetails?.background_color}`}
+        className={`align-center relative w-[90%] max-w-[360px] md:px-[32px] md:py-[48px] backdrop-blur-[95%] rounded-lg shadow-lg z-10 ${authDetails?.background_color}`}
         style={{
             backgroundColor: authDetails?.background_color || 'white',
             color: textcolor,
@@ -42,11 +42,11 @@ const SignIn = ({ inviteToken, paths }: {
         <div className="flex justify-center items-start pb-[32px] w-full">
             <SignInLogo className="h-auto max-h-[100px] flex justify-center" />
         </div>
-        <div className='h-auto'>
+        <div className='h-auto text-black' style={{color: textcolor}}>
             <SignInMethodsContainer
                 providers={authConfig.providers}
                 inviteToken={inviteToken}
-                paths={paths}
+                paths={paths}    
             />
         </div>
     </div>

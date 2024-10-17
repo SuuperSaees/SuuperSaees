@@ -45,7 +45,7 @@ export function PasswordSignInForm({
   });
  // manage the skeleton with max time of 3000ms
  const [isLoading, setIsLoading] = useState(true);
- const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? 'black')
+ const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? '#ffffff')
  useEffect(() => {
    const timer = setTimeout(() => {
      setIsLoading(false);
@@ -68,15 +68,15 @@ export function PasswordSignInForm({
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="pt-2 flex justify-center items-start text-2xl font-semibold " style={{color: textcolor}}>
+              <FormLabel className="text-black pt-2 flex justify-center items-start text-2xl font-semibold " style={{color: textcolor}}>
                 <Trans i18nKey={'common:plsDetailInputs'} />  
               </FormLabel>
 
-              <FormLabel className="flex justify-center items-start font-normal " style={{color: textcolor}}>
+              <FormLabel className="text-black flex justify-center items-start font-normal " style={{color: textcolor}}>
               <Trans i18nKey={'common:continueToYourAccount'} />
               </FormLabel>
 
-              <div className="text-left text-sm" style={{ marginTop: '30px', color: textcolor }}>
+              <div className="text-black text-left text-sm" style={{ marginTop: '30px', color: textcolor }}>
                 <Trans i18nKey={'common:emailLabel'} />
               </div>
 
@@ -123,7 +123,7 @@ export function PasswordSignInForm({
                   <input
                     type="checkbox"
                     id="rememberMe"
-                    className="form-checkbox"
+                    className="text-black form-checkbox"
                     style={{color: textcolor}}
                   />
                   <label htmlFor="rememberMe" className="text-black text-xs" style={{color: textcolor}}>
