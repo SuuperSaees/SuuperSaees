@@ -10,7 +10,7 @@ This repository is the demo version hosted on Cloudflare Pages. Please use the v
 
 [Please follow the documentation to get started](https://makerkit.dev/docs/next-supabase-turbo/introduction).
 
-# Stripe Integration
+# Stripe Integration 🚀
 
 ```mermaid
 graph TD;
