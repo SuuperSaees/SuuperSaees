@@ -256,23 +256,25 @@ export function ServicesTable({ activeTab, services }: ServicesTableProps) {
             {t('briefs:briefs', {ns:'briefs'})}
           </ThemedTabTrigger>
         </TabsList>
-
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
-          <ThemedInput
-            placeholder={t('searchServices')}
-            value={table.getColumn('name')?.getFilterValue() as string}
-            onChange={(event) => {
-              table.getColumn('name')?.setFilterValue(event.target.value);
-            }}
-            className="pl-10"
-          />
+        
+        <div className='flex gap-3'>
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
+            <ThemedInput
+              placeholder={t('searchServices')}
+              value={table.getColumn('name')?.getFilterValue() as string}
+              onChange={(event) => {
+                table.getColumn('name')?.setFilterValue(event.target.value);
+              }}
+              className="pl-10"
+            />
+          </div>
+          {(services.length > 0 && accountRole == "agency_owner") ? (
+            <Link href="/services/create">
+              <ThemedButton>{t('createService')}</ThemedButton>
+            </Link>
+          ) : null}
         </div>
-        {(services.length > 0 && accountRole == "agency_owner") ? (
-          <Link href="/services/create">
-            <ThemedButton>{t('createService')}</ThemedButton>
-          </Link>
-        ) : null}
       </div>
       <Separator />
       <div className="mt-[24px] rounded-md border px-4">
