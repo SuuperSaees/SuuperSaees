@@ -47,11 +47,11 @@ const routes = [
     path: pathsConfig.app.services,
     Icon: <SquareCheck className={iconClasses} />,
   },
-  {
-    label: 'common:briefsName',
-    path: pathsConfig.app.briefs,
-    Icon: <Briefcase className={iconClasses} />,
-  },
+  // {
+  //   label: 'common:briefsName',
+  //   path: pathsConfig.app.briefs,
+  //   Icon: <Briefcase className={iconClasses} />,
+  // },
   // {
   //   label: 'Facturas',
   //   path: pathsConfig.app.invoices,
