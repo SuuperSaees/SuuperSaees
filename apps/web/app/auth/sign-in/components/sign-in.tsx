@@ -19,7 +19,6 @@ const SignIn = ({ inviteToken, paths }: {
       host = window.location.host;
     }
     const authDetails = useAuthDetails(host);
-    console.log(authDetails)
     const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? 'white')
     return (<>
 <div
