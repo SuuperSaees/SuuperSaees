@@ -20,7 +20,7 @@ export default function Panel() {
   const { t } = useTranslation('briefs');
 
   const pathname = usePathname();
-  const showWidgets = pathname === '/briefs/create';
+  const showWidgets = pathname === '/briefs/create' || pathname === '/briefs/update'; 
 
   if (!showWidgets) {
     return null;

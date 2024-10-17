@@ -148,3 +148,26 @@ export const getClientBriefs = async (): Promise<Brief.Relationships.FormField[]
     throw error;
   }
 };
+
+
+export const getBriefFormFieldsById = async ( id: string) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: briefFormFields, error: errorBriefFormFields } = await client
+      .from('brief_form_fields')
+      .select(
+        'form_fields(id, description, label, type, placeholder, options)',
+      )
+      .eq('brief_id', id);
+
+    if (errorBriefFormFields) {
+      throw new Error(errorBriefFormFields.message);
+    }
+
+    return briefFormFields;
+  } catch (error) {
+    console.error('Error obtaining brief fields', error);
+    throw error;
+  }
+};
+

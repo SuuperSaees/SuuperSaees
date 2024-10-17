@@ -48,6 +48,9 @@
       }
     }
   },
+  "update": {
+    "title": "Actualizar brief"
+  },
   "singleChoice": {
     "title": "Título",
     "description": "Descripción",

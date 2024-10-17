@@ -19,12 +19,14 @@ import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
 import FieldsetFields from './fieldset-fields';
 import FieldsetInformation from './fieldset-information';
 import AddElementButton from '~/components/add-element-button';
+import { Brief } from '~/lib/brief.types';
 
 type CreateBriefDialogProps = {
   propietaryOrganizationId: string;
   userRole: string;
   showFormFields?: boolean;
   showInfo?: boolean;
+  defaultValues?: Brief.Relationships.FormField[];
 };
 
 export type BriefCreationForm = z.infer<typeof briefCreationFormSchema>;
@@ -33,10 +35,11 @@ const BriefCreationForm = ({
   userRole,
   showFormFields = true,
   showInfo = false,
+  defaultValues = [],
 }: CreateBriefDialogProps) => {
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
-
-  const { addFormField, formFields, brief, onSubmit, form } =
+  const isUpdate = defaultValues.length > 0; // Check if the form is for updating an existing brief
+  const { addFormField, formFields, brief, onSubmit, form, setFormFields } =
     useBriefsContext(); // Context to manage form fields
 
   // Handle adding a new question to the form
@@ -48,16 +51,21 @@ const BriefCreationForm = ({
 
   // Sync form state with context whenever formFields change
   useEffect(() => {
+    if (defaultValues.length) {
+      form.setValue('questions', defaultValues);
+      setFormFields(defaultValues);
+    }
     form.setValue('questions', formFields); // Ensure form state stays in sync with context
     form.setValue('name', brief.name);
     form.setValue('description', brief.description);
     form.setValue('image_url', brief.image_url);
-  }, [formFields, form, brief, brief.description, brief.name, brief.image_url]); // Re-run effect when formFields or form change
+  }, [formFields, form, brief, brief.description, brief.name, brief.image_url, defaultValues, setFormFields]); // Re-run effect when formFields or form change
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        // onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit((values) => onSubmit(values, isUpdate ?? false))}
         className="no-scrollbar flex h-full w-full flex-col space-y-8 overflow-y-auto"
       >
         {/* Brief Name Input */}

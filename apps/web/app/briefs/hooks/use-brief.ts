@@ -24,7 +24,17 @@ export const useBrief = (setFormFields: Dispatch<SetStateAction<FormField[]>>) =
 
   // Mutation to handle brief creation
   const briefMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof briefCreationFormSchema>) => {
+    mutationFn: async (
+      // values: z.infer<typeof briefCreationFormSchema>,
+      { values, isUpdate }: { values: z.infer<typeof briefCreationFormSchema>, isUpdate?: boolean }
+    ) => {
+      if (isUpdate) {
+        // Lógica de actualización (si es necesario implementar)
+        console.log('Updating the brief');
+      } else {
+        // Lógica de creación
+        console.log('Creating a new brief');
+      }
       // Create a new brief with the provided values
       const briefId = await createBrief({
         name: values.name,

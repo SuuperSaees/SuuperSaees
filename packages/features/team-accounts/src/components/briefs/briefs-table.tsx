@@ -19,7 +19,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUp, Search } from 'lucide-react';
+import { ArrowUp, Pen, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
@@ -167,7 +167,10 @@ const briefColumns = (
 
       return (
         <div className="h-18 flex items-center gap-4 self-stretch p-4">
-          <UpdateBriefDialog {...brief} />
+          {/* <UpdateBriefDialog {...brief} /> */}
+          <Link href={`/briefs/update?id=${brief.id}`}>
+              <Pen className="h-4 w-4 text-gray-600 cursor-pointer" />
+          </Link>
           <DeleteBriefDialog briefId={brief.id} />
         </div>
       );
