@@ -69,15 +69,15 @@ export function PasswordSignInForm({
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="pt-2 flex justify-center items-start text-2xl font-semibold ">
+              <FormLabel className="text-black pt-2 flex justify-center items-start text-2xl font-semibold ">
                 <Trans i18nKey={'common:plsDetailInputs'} />  
               </FormLabel>
 
-              <FormLabel className="flex justify-center items-start font-normal ">
+              <FormLabel className="text-black flex justify-center items-start font-normal ">
               <Trans i18nKey={'common:continueToYourAccount'} />
               </FormLabel>
 
-              <div className="text-left text-sm" style={{ marginTop: '30px' }}>
+              <div className="text-black text-left text-sm" style={{ marginTop: '30px' }}>
                 <Trans i18nKey={'common:emailLabel'} />
               </div>
 
@@ -86,7 +86,7 @@ export function PasswordSignInForm({
                   data-test={'email-input'}
                   required
                   type="email"
-                  className="focus-visible:ring-brand"
+                  className="text-black focus-visible:ring-brand"
                   {...field}
                 />
               </FormControl>
@@ -101,7 +101,7 @@ export function PasswordSignInForm({
           name={'password'}
           render={({ field }) => (
             <FormItem>
-              <div className="text-left text-sm">
+              <div className="text-black text-left text-sm">
                 <Trans i18nKey={'common:password'} />
               </div>
 
@@ -112,20 +112,20 @@ export function PasswordSignInForm({
                   type="password"
                   placeholder={''}
                   {...field}
-                  className="focus-visible:ring-brand"
+                  className="text-black focus-visible:ring-brand"
                 />
               </FormControl>
 
               <FormMessage />
 
               <div className="flex w-full items-center justify-between">
-                <div className="flex items-center space-x-2">
+                <div className="text-black flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="rememberMe"
                     className="form-checkbox"
                   />
-                  <label htmlFor="rememberMe" className="text-xs">
+                  <label htmlFor="rememberMe" className="text-black text-xs">
                     <Trans i18nKey={'auth:rememberMe'} />
                   </label>
                 </div>
