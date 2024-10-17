@@ -20,7 +20,7 @@ const SignIn = ({ inviteToken, paths }: {
     }
     const authDetails = useAuthDetails(host);
     console.log(authDetails)
-    const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? 'white')
+    const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? 'black')
     return (<>
         <div
   className={`relative w-full h-screen flex items-center justify-center overflow-hidden bg-gradient-to-r from-gray-800`}
