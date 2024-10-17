@@ -1,4 +1,5 @@
 {
+    "briefs":"Briefs",
     "briefTitle": "Brief",
     "name": "Name",
     "services": "Connected Services",
@@ -21,7 +22,7 @@
     "creation": {
     "title": "Create brief",
     "form": {
-        "addQuestion": "Add question",
+        "addQuestion": "Add or drag a new element",
         "submit": "Create brief",
         "titleLabel": "Brief name",
         "titlePlaceholder": "Enter the name of your brief",

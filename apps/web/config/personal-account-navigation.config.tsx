@@ -67,7 +67,6 @@ const routes = [
   //   path: pathsConfig.app.personalAccountBilling,
   //   // Icon: </>
   // }
-
 ];
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {
