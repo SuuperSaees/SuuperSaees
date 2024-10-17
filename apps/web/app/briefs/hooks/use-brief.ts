@@ -46,7 +46,7 @@ export const useBrief = (setFormFields: Dispatch<SetStateAction<FormField[]>>) =
     onSuccess: () => {
       // Show success toast notification and redirect on successful brief creation
       toast('Success', { description: 'The brief has been created.' });
-      router.push('/briefs'); // Redirect to briefs page
+      router.push('/services'); // Redirect to briefs page
       // reset
       setBrief(defaultBrief)
       setFormFields([]);
