@@ -58,7 +58,7 @@ export async function middleware(request: NextRequest) {
   if (apiAuthResult) return apiAuthResult;
 
   // Domain Check
-  const domainCheckResult = await handleDomainCheck(request);
+  const domainCheckResult = await handleDomainCheck(request, response);
   if (domainCheckResult) return domainCheckResult;
 
   const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
