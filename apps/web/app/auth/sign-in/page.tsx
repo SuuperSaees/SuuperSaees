@@ -37,23 +37,28 @@ function SignInPage({ searchParams }: SignInPageProps) {
   //   (inviteToken ? `?invite_token=${inviteToken}` : '');
 
   return (
-    <>
-      <div className="w-full  h-screen flex items-center justify-center">
-        <div className="hidden md:block absolute md:w-[142px] md:h-auto md:left-8 md:top-8 md:object-contain">
-        </div>
-        <div className="w-[360px] md:px-[32px] ">
-          <div className="pb-10"><SignInLogo /></div>
-          <div className="text-gray-900 text-center text-3xl font-semibold leading-9 pb-3">
-            <Trans i18nKey={'auth:signInHeading'} />
-          </div>
-          <SignInMethodsContainer
-            providers={authConfig.providers}
-            inviteToken={inviteToken}
-            paths={paths}
-          />
-        </div>
+<>
+  <div className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-gradient-to-r from-gray-250 to-gray-150">
+    {/* Círculo animado en el fondo */}
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute w-full h-full bg-gradient-to-r from-gray-100 to-gray-400  opacity-30 animate-pulse" />
+    </div>
+
+    <div className="hidden md:block absolute md:w-[142px] md:h-auto md:left-8 md:top-8 md:object-contain"></div>
+    
+    <div className="relative w-[360px] md:px-[32px] md:py-[48px] backdrop-blur-md bg-white/85 rounded-lg shadow-lg z-10">
+      <div className="flex justify-start items-start pb-[32px] max-w-[140px]">
+        <SignInLogo />
       </div>
-    </>
+      
+      <SignInMethodsContainer
+        providers={authConfig.providers}
+        inviteToken={inviteToken}
+        paths={paths}
+      />
+    </div>
+  </div>
+</>
   );
 }
 
