@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 import { useState, useEffect } from 'react';
 
-
+import { SkeletonPasswordSignInForm } from './skeleton-password-sign-in-form';
 import { Button } from '@kit/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
@@ -22,7 +22,6 @@ import { useAuthDetails } from '../hooks/use-auth-details';
 
 import { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
 import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
-import { SkeletonPasswordSignInForm } from './skeleton-password-sign-in-form';
 
 
 export function PasswordSignInForm({
@@ -45,26 +44,21 @@ export function PasswordSignInForm({
       password: '',
     },
   });
+ // manage the skeleton with max time of 3000ms
+ const [isLoading, setIsLoading] = useState(true);
 
-  // manage the skeleton with max time of 3000ms
-  const [isLoading, setIsLoading] = useState(true);
+ useEffect(() => {
+   const timer = setTimeout(() => {
+     setIsLoading(false);
+   }, 2000);
+   return () => clearTimeout(timer);
+ }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!authDetails?.theme_color && !authDetails?.logo_url && isLoading) {
-    return <SkeletonPasswordSignInForm/>;
-  }
+ if (!authDetails?.theme_color && !authDetails?.logo_url && isLoading) {
+   return <SkeletonPasswordSignInForm/>;
+ }
 
   return (
-    <>
-    <div className="text-gray-900 text-center text-3xl font-semibold leading-9 pb-3">
-        <Trans i18nKey={'auth:signInHeading'} />
-    </div>
     <Form {...form}>
       <form
         className={'w-full space-y-2.5'}
@@ -75,8 +69,12 @@ export function PasswordSignInForm({
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-normal">
-                <Trans i18nKey={'common:plsDetailInputs'} />
+              <FormLabel className="pt-2 flex justify-center items-start text-2xl font-semibold ">
+                <Trans i18nKey={'common:plsDetailInputs'} />  
+              </FormLabel>
+
+              <FormLabel className="flex justify-center items-start font-normal ">
+              <Trans i18nKey={'common:continueToYourAccount'} />
               </FormLabel>
 
               <div className="text-left text-sm" style={{ marginTop: '30px' }}>
@@ -88,7 +86,6 @@ export function PasswordSignInForm({
                   data-test={'email-input'}
                   required
                   type="email"
-                  placeholder={t('emailPlaceholder')}
                   className="focus-visible:ring-brand"
                   {...field}
                 />
@@ -175,6 +172,5 @@ export function PasswordSignInForm({
         </ThemedButton>
       </form>
     </Form>
-    </>
   );
 }
