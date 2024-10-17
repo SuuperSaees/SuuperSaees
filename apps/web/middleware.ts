@@ -125,6 +125,16 @@ export async function middleware(request: NextRequest) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
 
+  csrfResponse.headers.set('Access-Control-Allow-Origin', '*');
+  csrfResponse.headers.set(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, OPTIONS',
+  );
+  csrfResponse.headers.set(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization',
+  );
+
   return csrfResponse;
 }
 
