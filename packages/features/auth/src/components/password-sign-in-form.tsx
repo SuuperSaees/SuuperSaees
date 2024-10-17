@@ -9,9 +9,9 @@ import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
+import { useState, useEffect } from 'react';
 
-
-
+import { SkeletonPasswordSignInForm } from './skeleton-password-sign-in-form';
 import { Button } from '@kit/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
@@ -44,6 +44,19 @@ export function PasswordSignInForm({
       password: '',
     },
   });
+ // manage the skeleton with max time of 3000ms
+ const [isLoading, setIsLoading] = useState(true);
+
+ useEffect(() => {
+   const timer = setTimeout(() => {
+     setIsLoading(false);
+   }, 2000);
+   return () => clearTimeout(timer);
+ }, []);
+
+ if (!authDetails?.theme_color && !authDetails?.logo_url && isLoading) {
+   return <SkeletonPasswordSignInForm/>;
+ }
 
   return (
     <Form {...form}>
