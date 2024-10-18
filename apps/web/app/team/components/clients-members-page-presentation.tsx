@@ -120,7 +120,6 @@ const seatByPlans = {
                     onMouseLeave={() => setShowDropdown(false)}
                   >
                     <ThemedButton
-                      size={'sm'}
                       data-test={'invite-members-form-trigger'}
                       disabled={addMemberIsAvailable}
                       className="p-0"
