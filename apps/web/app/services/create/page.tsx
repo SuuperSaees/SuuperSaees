@@ -1,9 +1,10 @@
 import { PageBody } from '@kit/ui/page';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import MultiStepFormDemo from './components/multiform-component';
+// import MultiStepFormDemo from './components/multiform-component';
 import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import {redirect} from "next/navigation"
+import MultiStepFormDemo  from './components/multiform-component';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -21,9 +22,8 @@ async function CreateServicePage() {
   }
   return (
     <>
-    <PageBody>
-            <MultiStepFormDemo/>
-
+      <PageBody>
+        <MultiStepFormDemo/>
       </PageBody>
     </>
   );

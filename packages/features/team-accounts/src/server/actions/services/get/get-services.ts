@@ -10,11 +10,35 @@ import {
 import { getAgencyForClient } from '../../organizations/get/get-organizations';
 import { hasPermissionToReadClientServices } from '../../permissions/services';
 
-export const getServiceById = async (serviceId: Service.Type['id']) => {
+export const getServiceById = async (
+  serviceId: Service.Type['id'],
+  briefsNeeded?: boolean,
+) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
+
+    if (briefsNeeded) {
+      const { data: serviceData, error: serviceError } = await client
+        .from('services')
+        .select(
+          `*, 
+        service_briefs(*, 
+          brief:briefs(id, name, description, created_at)
+        )`,
+        )
+        .eq('id', serviceId)
+        .single();
+
+      if (serviceError) throw serviceError.message;
+
+      const proccesedData = {
+        ...serviceData,
+      };
+
+      return proccesedData;
+    }
 
     const { data: serviceData, error: orderError } = await client
       .from('services')

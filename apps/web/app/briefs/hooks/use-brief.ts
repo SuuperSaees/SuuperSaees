@@ -85,7 +85,7 @@ export const useBrief = (
         ? t('creation.form.updateSuccess')
         : t('creation.form.createSuccess');
       toast('Success', { description: successMessage });
-      router.push('/briefs'); // Redirect to briefs page
+      router.push('/services'); // Redirect to briefs page
       // reset
       setBrief(defaultBrief);
       setFormFields([]);

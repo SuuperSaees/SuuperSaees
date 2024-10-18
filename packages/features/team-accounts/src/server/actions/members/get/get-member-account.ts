@@ -2,10 +2,15 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
+
 
 // Helper function to fetch current user data
 export async function fetchCurrentUser(client: SupabaseClient<Database>) {
@@ -180,7 +185,10 @@ export async function getUserRoleById(userId: string) {
   }
 }
 
-export async function getStripeAccountID() {
+export async function getStripeAccountID(): Promise<{
+  userId: string;
+  stripeId: string;
+}> {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
@@ -194,11 +202,18 @@ export async function getStripeAccountID() {
 
     if (accountsError) throw accountsError;
 
-    const stripetId = userAccountData?.stripe_id;
+    const stripeId = userAccountData?.stripe_id;
 
-    return stripetId;
+    return {
+      stripeId: stripeId ?? '',
+      userId: userData.user.id,
+    };
   } catch (error) {
     console.error('Error fetching primary owner:', error);
+    return {
+      stripeId: '',
+      userId: '',
+    };
   }
 }
 

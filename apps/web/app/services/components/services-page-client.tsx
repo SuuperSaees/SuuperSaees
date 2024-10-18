@@ -1,28 +1,52 @@
-"use client";
+'use client';
 
-import { PageBody } from '@kit/ui/page';
-import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
+import { useEffect } from 'react';
+import * as React from 'react';
+
 import { Elements } from '@stripe/react-stripe-js';
 import { Stripe } from '@stripe/stripe-js';
-import { useEffect } from 'react';
-import { ServicesContextProvider, useServicesContext } from '../contexts/services-context';
 import { useTranslation } from 'react-i18next';
+
+import { PageBody } from '@kit/ui/page';
+import { Tabs, TabsContent} from '@kit/ui/tabs';
+
+import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
+import {
+  ServicesContextProvider,
+  useServicesContext,
+} from '../contexts/services-context';
+import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table';
+import { Brief } from '~/lib/brief.types';
+
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
+  briefs : Brief.Relationships.Services.Response[]
 }
 
-const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePromise }) => {
+const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
+  stripePromise,
+  briefs
+}) => {
   const { services, loading, updateServices } = useServicesContext();
   const { t } = useTranslation('orders');
+  const [activeTab, setActiveTab] = React.useState<'services' | 'briefs'>(
+    'services',
+  );
+
+  const handleTabClick = (value: 'services' | 'briefs') => {
+    setActiveTab(value);
+  };
   useEffect(() => {
-    updateServices(true).catch((error)=> {console.log(error.message)});
+    updateServices(true).catch((error) => {
+      console.log(error.message);
+    });
   }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <div
-          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+          className="text-surface inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
           role="status"
         >
           <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
@@ -34,29 +58,49 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePr
   }
 
   return (
-    <Elements stripe={stripePromise}>
-      <PageBody>
-        <div className='p-[35px]'>
-          <div className="flex justify-between items-center mb-[32px]">
-            <div className="flex-grow">
-              <span>
-                <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
-                {t('services:title')} 
-                </div>
-              </span>
+    <Tabs
+      defaultValue={activeTab}
+      onValueChange={(value: string) => {
+        handleTabClick(value as 'services' | 'briefs');
+      }}
+    >
+      <Elements stripe={stripePromise}>
+        <PageBody>
+          <div className="p-[35px]">
+            <div className="mb-[32px] flex items-center justify-between">
+              <div className="flex-grow">
+                <span>
+                  <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
+                    {t('services:title')}
+                  </div>
+                </span>
+              </div>
             </div>
+            <TabsContent
+            className='bg-transparent'
+              value="services"
+            >
+              <ServicesTable activeTab = {activeTab} services={services} />
+            </TabsContent>
+            <TabsContent 
+            className='bg-transparent'
+              value="briefs"
+            >
+              <BriefsTable activeTab = {activeTab} briefs={briefs}  />
+            </TabsContent>
           </div>
-          <ServicesTable services={services} />
-        </div>
-      </PageBody>
-    </Elements>
+        </PageBody>
+      </Elements>
+    </Tabs>
   );
 };
 
-const ServicesPageClient: React.FC<ServicesPageClientProps> = (props) => (
-  <ServicesContextProvider>
-    <ServicesPageClientContent {...props} />
-  </ServicesContextProvider>
-);
+const ServicesPageClient: React.FC<ServicesPageClientProps> = (props) => {
+  return (
+    <ServicesContextProvider>
+      <ServicesPageClientContent {...props} />
+    </ServicesContextProvider>
+  );
+};
 
 export { ServicesPageClient };
