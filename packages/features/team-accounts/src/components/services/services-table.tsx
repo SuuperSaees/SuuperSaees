@@ -162,7 +162,7 @@ const servicesColumns = (
         const handleCheckout = async (priceId: string) => {
           try {
 
-            const stripeId = await getStripeAccountID();
+            const {stripeId} = await getStripeAccountID();
             const response = await fetch('/api/stripe/checkout-session', {
               method: 'POST',
               headers: {

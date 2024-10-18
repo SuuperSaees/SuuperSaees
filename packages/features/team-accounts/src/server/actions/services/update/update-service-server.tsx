@@ -5,8 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { getStripeAccountID } from '../../members/get/get-member-account';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 interface ServiceData {
   step_type_of_service: {
@@ -47,8 +48,9 @@ export const updateService = async (
     console.log('clientData', clientData);
     console.log('priceId', priceId);
     const client = getSupabaseServerComponentClient();
-    const stripe_account_id = await getStripeAccountID();
-    if (!stripe_account_id) throw new Error('No stripe account found');
+    const { userId, stripeId } = await getStripeAccountID();
+    if (!stripeId) throw new Error('No stripe account found');
+    if (!userId) throw new Error('No user found');
     const serviceUpdated = {
       status,
       name: clientData.step_service_details?.service_name,
@@ -86,8 +88,9 @@ export const updateService = async (
     }
 
     // Get Price in Stripe to get productId.
+    const baseUrl = await getDomainByUserId(userId, true);
     const getPriceResponse = await fetch(
-      `${baseUrl}/api/stripe/get-price?accountId=${encodeURIComponent(stripe_account_id)}&priceId=${encodeURIComponent(priceId)}`,
+      `${baseUrl}/api/stripe/get-price?accountId=${encodeURIComponent(stripeId)}&priceId=${encodeURIComponent(priceId)}`,
       {
         method: 'GET',
         headers: {
@@ -111,7 +114,7 @@ export const updateService = async (
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          accountId: stripe_account_id,
+          accountId: stripeId,
           name: clientData.step_service_details?.service_name,
           imageUrl: clientData.step_service_details?.service_image,
         }),
@@ -141,7 +144,7 @@ export const updateService = async (
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          accountId: stripe_account_id,
+          accountId: stripeId,
           productId: getPriceData?.price?.product,
           unitAmount: unitAmount,
           currency: currency,

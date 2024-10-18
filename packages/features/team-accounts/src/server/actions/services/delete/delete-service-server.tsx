@@ -13,15 +13,18 @@ import {
   getStripeAccountID,
 } from '../../members/get/get-member-account';
 import { hasPermissionToDeleteClientService } from '../../permissions/services';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export const deleteService = async (priceId: string) => {
   try {
-    const stripe_account_id = await getStripeAccountID();
-    if (!stripe_account_id) throw new Error('No stripe account found');
+    const { userId, stripeId } = await getStripeAccountID();
+    if (!stripeId) throw new Error('No stripe account found');
+    if (!userId) throw new Error('No user found');
 
     // API call to disable product and price in Stripe
+    const baseUrl = await getDomainByUserId(userId, true);
     const response = await fetch(`${baseUrl}/api/stripe/delete-service?priceId=${encodeURIComponent(priceId)}`, {
       method: 'DELETE',
       headers: {
@@ -29,7 +32,7 @@ export const deleteService = async (priceId: string) => {
       },
       body: JSON.stringify({
         priceId: priceId,
-        accountId: stripe_account_id,
+        accountId: stripeId,
       }),
     });
 

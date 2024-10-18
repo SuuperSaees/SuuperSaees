@@ -24,8 +24,9 @@ import { UpdateAccountOrganizationName } from './update-account-organization-nam
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 type AccountStripe = {
   id: string;
@@ -79,6 +80,7 @@ export function PersonalAccountSettingsContainer(
           const stripeId = user?.stripe_id as string;
           if (stripeId) {
             try {
+              const baseUrl = await getDomainByUserId(user?.id ?? '', true);
               const response = await fetch(
                 `${baseUrl}/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`,
                 {
