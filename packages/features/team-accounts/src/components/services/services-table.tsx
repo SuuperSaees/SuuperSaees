@@ -267,14 +267,14 @@ export function ServicesTable({ activeTab, services }: ServicesTableProps) {
         
         <div className='flex gap-3'>
           <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
+            <Search className="bg-white absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
             <ThemedInput
               placeholder={t('searchServices')}
               value={table.getColumn('name')?.getFilterValue() as string}
               onChange={(event) => {
                 table.getColumn('name')?.setFilterValue(event.target.value);
               }}
-              className="pl-10"
+              className="pl-10 bg-white"
             />
           </div>
           {(services.length > 0 && accountRole == "agency_owner") ? (
@@ -286,7 +286,7 @@ export function ServicesTable({ activeTab, services }: ServicesTableProps) {
       </div>
       <Separator />
       <div className="mt-[24px] rounded-md border px-4">
-        <Table>
+        <Table className="bg-white rounded-md">
           {table.getRowModel().rows?.length ? (
             <>
               <TableHeader>
