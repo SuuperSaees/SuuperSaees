@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import * as React from 'react';
-import { Tabs, TabsList } from '@kit/ui/tabs';
+import {TabsList } from '@kit/ui/tabs';
 import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings'
 
 
@@ -23,7 +23,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUp, Link2, Search } from 'lucide-react';
+import { ArrowUp, Link2, Pen, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -53,12 +53,11 @@ import {
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { getStripeAccountID } from '../../server/actions/members/get/get-member-account';
-import UpdateServiceDialog from '../../../../../../apps/web/app/services/update/update-component';
 import { useServicesContext } from '../../../../../../apps/web/app/services/contexts/services-context';
-import { useRouter } from 'next/navigation'
 
 type ServicesTableProps = {
   services: Service.Type[];
+  activeTab : string
 };
 
 // SERVICES TABLE
@@ -75,11 +74,15 @@ const servicesColumns = (
     {
       accessorKey: 'price',
       header: t('price'),
-      cell: ({ row }) => (
-        <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
-          ${row.getValue('price')} USD/mes
-        </div>
-      ),
+      cell: ({ row }) => {
+        const price = row.getValue('price');
+        const recurrence = row.original.recurrence;
+        return (
+          <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
+            ${price as number} USD {recurrence ? ` / ${recurrence}` : ''}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'price_id',
@@ -197,7 +200,12 @@ const servicesColumns = (
                 className="h-6 w-6 cursor-pointer text-gray-500"
               />}
             </div>}
-            {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />}
+            {/* {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />} */}
+            {accountRole === "agency_owner" && 
+              <Link href={`/services/update?id=${service.id}`}>
+                <Pen className="h-4 w-4 text-gray-600 cursor-pointer" />
+              </Link>
+            }
             {accountRole === "agency_owner" && <DeleteServiceDialog priceId={priceId} />}
           </div>
         );
@@ -205,14 +213,10 @@ const servicesColumns = (
     },
   ];
 
-export function ServicesTable({ services }: ServicesTableProps) {
+export function ServicesTable({ activeTab, services }: ServicesTableProps) {
   const { t } = useTranslation(['services','briefs']);
   const { accountRole } = useServicesContext()
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const router = useRouter()
-  const [activeTab, setActiveTab] = React.useState<'services' | 'briefs'>(
-    'services',
-  );
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
@@ -224,14 +228,6 @@ export function ServicesTable({ services }: ServicesTableProps) {
     [t],
   );
 
-  const handleTabClick = (value: 'services' | 'briefs') => {
-    setActiveTab(value)
-    if (value === 'services') {
-      router.push('/services')
-    } else if (value === 'briefs') {
-      router.push('/briefs')
-    }
-  };
 
   const table = useReactTable({
     data: services,
@@ -259,37 +255,34 @@ export function ServicesTable({ services }: ServicesTableProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between gap-4 py-4">
-        <Tabs
-            defaultValue={activeTab}
-            onValueChange={(value: string) => {
-              handleTabClick(value as 'services' | 'briefs');
-            }}
-          >
-            <TabsList className='gap-2 bg-transparent'>
-              <ThemedTabTrigger value="services" activeTab={activeTab} option={'services'}>
-                {t('services:serviceTitle')}
-              </ThemedTabTrigger>
-              <ThemedTabTrigger value="briefs" activeTab={activeTab} option={'briefs'}>
-                {t('briefs:briefs', {ns:'briefs'})}
-              </ThemedTabTrigger>
-            </TabsList>
-        </Tabs>
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
-          <ThemedInput
-            placeholder={t('searchServices')}
-            value={table.getColumn('name')?.getFilterValue() as string}
-            onChange={(event) => {
-              table.getColumn('name')?.setFilterValue(event.target.value);
-            }}
-            className="pl-10"
-          />
+
+        <TabsList className='gap-2 bg-transparent'>
+          <ThemedTabTrigger value="services" activeTab={activeTab} option={'services'}>
+            {t('services:serviceTitle')}
+          </ThemedTabTrigger>
+          <ThemedTabTrigger value="briefs" activeTab={activeTab} option={'briefs'}>
+            {t('briefs:briefs', {ns:'briefs'})}
+          </ThemedTabTrigger>
+        </TabsList>
+        
+        <div className='flex gap-3'>
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
+            <ThemedInput
+              placeholder={t('searchServices')}
+              value={table.getColumn('name')?.getFilterValue() as string}
+              onChange={(event) => {
+                table.getColumn('name')?.setFilterValue(event.target.value);
+              }}
+              className="pl-10"
+            />
+          </div>
+          {(services.length > 0 && accountRole == "agency_owner") ? (
+            <Link href="/services/create">
+              <ThemedButton>{t('createService')}</ThemedButton>
+            </Link>
+          ) : null}
         </div>
-        {(services.length > 0 && accountRole == "agency_owner") ? (
-          <Link href="/services/create">
-            <ThemedButton>{t('createService')}</ThemedButton>
-          </Link>
-        ) : null}
       </div>
       <Separator />
       <div className="mt-[24px] rounded-md border px-4">

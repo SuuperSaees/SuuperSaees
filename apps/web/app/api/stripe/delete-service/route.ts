@@ -11,28 +11,44 @@ interface ProductRequest {
 export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const { accountId }: ProductRequest = await req.json();
-    const productId = searchParams.get('productId')
+    const priceId = searchParams.get('priceId');
 
-    if (!productId) {
+    if (!priceId) {
         return NextResponse.json(
-            { error: { message: "Product ID is required" } },
+            { error: { message: "Price ID is required" } },
             { status: 400 }
         );
     }
 
     try {
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        const product = await stripe.products.del(productId, {
+        // Obtener el precio para identificar el producto asociado
+        const price = await stripe.prices.retrieve(priceId, {
             stripeAccount: accountId, // ID de la cuenta conectada
         });
 
-        return NextResponse.json({ product });
+        const productId = price.product;
+
+        // Desactivar el precio
+        await stripe.prices.update(priceId, {
+            active: false,
+        }, {
+            stripeAccount: accountId,
+        });
+
+        // Desactivar el producto (en lugar de eliminarlo)
+        const product = await stripe.products.update(productId, {
+            active: false, // Cambia a archived: true si deseas archivar
+        }, {
+            stripeAccount: accountId,
+        });
+
+        return NextResponse.json({ message: "Price and product deactivated successfully", product });
     } catch (error) {
-        console.error("Error creating product:", error);
+        console.error("Error deactivating price and product:", error);
         return NextResponse.json(
             { error: { message: "Internal Server Error" } },
             { status: 500 }
         );
     }
 }
+
