@@ -280,14 +280,14 @@ function handleCORSPreflight() {
 }
 
 function setCORSHeaders(response: NextResponse) {
-  response.headers.set('Access-Control-Allow-Origin', '*');
-  response.headers.set(
+  response.headers.append('Access-Control-Allow-Credentials', 'true');
+  response.headers.append('Access-Control-Allow-Origin', '*'); // replace this your actual origin
+  response.headers.append(
     'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, OPTIONS',
+    'GET,DELETE,PATCH,POST,PUT',
   );
-  response.headers.set(
+  response.headers.append(
     'Access-Control-Allow-Headers',
-    'Content-Type, Authorization',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
   );
-  response.headers.set('Access-Control-Max-Age', '86400'); // 24 hours
 }
