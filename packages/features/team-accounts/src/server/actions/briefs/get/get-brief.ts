@@ -149,27 +149,25 @@ export const getClientBriefs = async (): Promise<Brief.Relationships.FormField[]
   }
 };
 
-
-export const getBriefFormFieldsById = async ( 
+export const getBriefsById = async (
   id: string
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { data: briefFormFields, error: errorBriefFormFields } = await client
-      .from('brief_form_fields')
+    const { data: briefsData, error: briefsError } = await client
+      .from('briefs')
       .select(
-        'form_fields(id, description, label, type, placeholder, options)',
+        ' id, created_at, name, propietary_organization_id, description, image_url, brief_form_fields ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message))'
       )
-      .eq('brief_id', id);
+      .eq('id', id);
 
-    if (errorBriefFormFields) {
-      throw new Error(errorBriefFormFields.message);
+    if (briefsError) {
+      throw new Error(`Error fetching the briefs, ${briefsError.message}`);
     }
 
-    return briefFormFields;
+    return briefsData;
   } catch (error) {
-    console.error('Error obtaining brief fields', error);
+    console.error(error);
     throw error;
   }
-};
-
+}

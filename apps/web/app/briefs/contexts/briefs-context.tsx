@@ -53,6 +53,7 @@ interface BriefsContext {
   stopEditing: () => void;
   startEditing: () => void;
   setFormFields: Dispatch<SetStateAction<FormField[]>>;
+  setBrief: Dispatch<SetStateAction<Brief.Insert>>;
   form: UseFormReturn<BriefCreationForm>;
   onSubmit: (
     values: z.infer<typeof briefCreationFormSchema>,
