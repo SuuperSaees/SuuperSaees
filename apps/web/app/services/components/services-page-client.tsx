@@ -8,7 +8,7 @@ import { Stripe } from '@stripe/stripe-js';
 import { useTranslation } from 'react-i18next';
 
 import { PageBody } from '@kit/ui/page';
-import { Tabs, TabsContent} from '@kit/ui/tabs';
+import { Tabs, TabsContent, TabsList} from '@kit/ui/tabs';
 
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
 import {
@@ -17,6 +17,7 @@ import {
 } from '../contexts/services-context';
 import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table';
 import { Brief } from '~/lib/brief.types';
+import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
@@ -76,18 +77,15 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
                 </span>
               </div>
             </div>
-            <TabsContent
-            className='bg-transparent'
-              value="services"
-            >
-              <ServicesTable activeTab = {activeTab} services={services} />
-            </TabsContent>
-            <TabsContent 
-            className='bg-transparent'
-              value="briefs"
-            >
-              <BriefsTable activeTab = {activeTab} briefs={briefs}  />
-            </TabsContent>
+
+            <TabsList className='gap-2 bg-transparent'>
+          <ThemedTabTrigger value="services" activeTab={activeTab} option={'services'}>
+            {t('services:serviceTitle')}
+          </ThemedTabTrigger>
+          <ThemedTabTrigger value="briefs" activeTab={activeTab} option={'briefs'}>
+            {t('briefs:briefs', {ns:'briefs'})}
+          </ThemedTabTrigger>
+          </TabsList>
           </div>
         </PageBody>
       </Elements>
