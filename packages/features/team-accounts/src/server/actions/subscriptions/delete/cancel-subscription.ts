@@ -5,13 +5,15 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions.types';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
+import { fetchCurrentUser } from '../../members/get/get-member-account';
 
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export const cancelSubscription = async (subscriptionId: string) => {
   const client = getSupabaseServerComponentClient();
+  const user = await fetchCurrentUser(client);
   const primary_owner_user_id = await getPrimaryOwnerId();
   const newSubscription: {
     status:
@@ -53,6 +55,7 @@ export const cancelSubscription = async (subscriptionId: string) => {
 
     // Generate new susbcription free. See how use platform with new stripe flow ==> Redirect to landing page.
     // Cancel Subscrption on stripe
+    const baseUrl = await getDomainByUserId(user.id, true);
     const responseCancelSubscription = await fetch(
       `${baseUrl}/api/stripe/cancel-subscription?subscriptionId=${encodeURIComponent(subscriptionId ?? '')}`,
       {
