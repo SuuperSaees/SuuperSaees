@@ -29,8 +29,8 @@ export const useBilling = () => {
     setLoading(true);
     setError(false);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/stripe/get-invoices?customerId=${encodeURIComponent(customerId)}`, {
+      // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+      const response = await fetch(`/api/stripe/get-invoices?customerId=${encodeURIComponent(customerId)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -53,8 +53,8 @@ export const useBilling = () => {
     setLoading(true);
     setError(false);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/stripe/get-invoices/upcoming?customerId=${encodeURIComponent(customerId)}`, {
+      // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+      const response = await fetch(`/api/stripe/get-invoices/upcoming?customerId=${encodeURIComponent(customerId)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -77,8 +77,8 @@ export const useBilling = () => {
     setLoading(true);
     setErrorMessage("");
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/stripe/suuper-products`, {
+      // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+      const response = await fetch(`/api/stripe/suuper-products`, {
         method: "GET",
       });
       if (!response.ok) {
@@ -169,8 +169,8 @@ export const useBilling = () => {
     try {
       const result  = await getSubscriptionByOrganizationId();
       setSubscription(result);
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-      const responseSubscription = await fetch(`${baseUrl}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(result?.id ?? "")}`, {
+      // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+      const responseSubscription = await fetch(`/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(result?.id ?? "")}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -182,7 +182,7 @@ export const useBilling = () => {
       const dataSubscription = await responseSubscription.json();
       setSubscriptionFetchedStripe(dataSubscription);
 
-      const responseProduct = await fetch(`${baseUrl}/api/stripe/get-product?productId=${encodeURIComponent(dataSubscription?.plan?.product ?? "")}`, {
+      const responseProduct = await fetch(`/api/stripe/get-product?productId=${encodeURIComponent(dataSubscription?.plan?.product ?? "")}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -208,10 +208,10 @@ export const useBilling = () => {
     setLoading(true);
     setError(false);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+      // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
       const result = await getSubscriptionByOrganizationId();
 
-      const responseSubscriptionsByCustomer = await fetch(`${baseUrl}/api/stripe/get-subscription-by-customer?customerId=${encodeURIComponent(result?.billing_customer_id ?? "")}`, {
+      const responseSubscriptionsByCustomer = await fetch(`/api/stripe/get-subscription-by-customer?customerId=${encodeURIComponent(result?.billing_customer_id ?? "")}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -232,7 +232,7 @@ export const useBilling = () => {
           }
         });
         // Cancel the other subscription
-        const responseCancelSubscription = await fetch(`${baseUrl}/api/stripe/cancel-subscription?subscriptionId=${encodeURIComponent(result?.id ?? "")}`, {
+        const responseCancelSubscription = await fetch(`/api/stripe/cancel-subscription?subscriptionId=${encodeURIComponent(result?.id ?? "")}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
