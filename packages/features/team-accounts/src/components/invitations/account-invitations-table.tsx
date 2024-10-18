@@ -64,7 +64,7 @@ export function AccountInvitationsTable({
           <Trans i18nKey={'team:pendingInvitesHeading'} />
         </h3>
         <div className="relative flex-1 md:grow-0">
-          <Search className="text-muted-foreground absolute right-2.5 top-2.5 h-4 w-4" />
+          <Search className="bg-white text-muted-foreground absolute right-2.5 top-2.5 h-4 w-4" />
           <Input
             value={search}
             onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
@@ -75,12 +75,13 @@ export function AccountInvitationsTable({
       </div>
 
       <Separator className="mb-4 mt-4" />
-
+      <div className='bg-white rounded-md'>
       <DataTable
         data-cy={'invitations-table'}
         columns={columns}
         data={filteredInvitations}
       />
+      </div>
     </div>
   );
 }
