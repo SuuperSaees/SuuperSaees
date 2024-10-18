@@ -124,7 +124,9 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
       }
       return prevFields;
     });
-    setCurrentFormField(updatedFormField);
+    if(updatedFormField.type == 'image'){
+      setCurrentFormField(updatedFormField);
+    }
   };
 
   // Swap two form fields and update their positions
