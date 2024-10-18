@@ -76,12 +76,14 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
                 </span>
               </div>
             </div>
-            <TabsContent 
+            <TabsContent
+            className='bg-["#ffffff00"]'
               value="services"
             >
               <ServicesTable activeTab = {activeTab} services={services} />
             </TabsContent>
             <TabsContent 
+            className='bg-["#ffffff00"]'
               value="briefs"
             >
               <BriefsTable activeTab = {activeTab} briefs={briefs}  />

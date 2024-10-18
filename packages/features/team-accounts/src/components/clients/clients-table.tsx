@@ -386,7 +386,7 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
             </>
           }
         </div>
-        <div className="flex gap-4 px-2">
+        <div className="flex gap-4">
           <div className="relative max-w-sm bg-white rounded-md">
             <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
             <ThemedInput
