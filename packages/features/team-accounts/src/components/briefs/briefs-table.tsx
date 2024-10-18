@@ -226,7 +226,7 @@ export function BriefsTable({ activeTab, briefs }: BriefTableProps) {
         </TabsList>
 
         <div className="flex w-full justify-end gap-4 px-2">
-          <div className="relative max-w-sm">
+          <div className="bg-white relative max-w-sm">
             <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
             <Input
               placeholder="Buscar briefs..."
@@ -234,7 +234,7 @@ export function BriefsTable({ activeTab, briefs }: BriefTableProps) {
               onChange={(event) => {
                 table.getColumn('name')?.setFilterValue(event.target.value);
               }}
-              className="pl-10"
+              className="pl-10 bg-white"
             />
           </div>
           {/* <CreateBriefDialog
@@ -246,7 +246,7 @@ export function BriefsTable({ activeTab, briefs }: BriefTableProps) {
         </div>
       </div>
       <Separator />
-      <div className="mt-[24px] rounded-md border">
+      <div className="mt-[24px] bg-white rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

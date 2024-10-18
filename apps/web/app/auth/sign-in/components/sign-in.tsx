@@ -22,11 +22,11 @@ const SignIn = ({ inviteToken, paths }: {
     const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? '#ffffff')
     return (<>
 <div
-    className={`relative w-full h-screen flex items-center justify-center overflow-hidden bg-gradient-to-r from-gray-150 to-gray-250`}
+    className={`relative w-full h-screen flex items-center justify-center overflow-hidden bg-gradient-to-r from-gray-['#f2f2f2'] to-gray-['#f2f2f2']`}
     style={{ background: `linear-gradient(to right, ${authDetails?.background_color}, ${authDetails?.background_color})` }}
 >
     <div className="absolute inset-0 flex items-center justify-center">
-        <div className="absolute w-full bg-gradient-to-r from-gray-100 to-gray-250 opacity-30 animate-pulse" />
+        <div className="absolute w-full bg-gradient-to-r from-gray-['#f2f2f2'] to-gray-['#f2f2f2'] opacity-100 animate-pulse" />
     </div>
 
     <div className="hidden md:block absolute md:w-[142px] md:h-auto md:left-8 md:top-8 md:object-contain"></div>
