@@ -225,7 +225,7 @@ export function BriefsTable({ activeTab, briefs }: BriefTableProps) {
           </ThemedTabTrigger>
         </TabsList>
 
-        <div className="flex w-full justify-end gap-4 px-2">
+        <div className="flex w-full justify-end gap-4">
           <div className="bg-white relative max-w-sm">
             <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
             <Input
