@@ -26,9 +26,46 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { updateService } from '~/team-accounts/src/server/actions/services/update/update-service-server';
 import { toast } from 'sonner';
 
+interface ServiceBrief {
+  id: string;
+  name: string;
+  created_at: string;
+  description: string;
+}
+
+interface Service {
+  id: number;
+  created_at: string;
+  name: string;
+  price: number;
+  number_of_clients: number;
+  status: string;
+  propietary_organization_id: string;
+  allowed_orders: number;
+  credit_based: boolean;
+  credits: number;
+  hours: number;
+  max_number_of_monthly_orders: number;
+  max_number_of_simultaneous_orders: number;
+  purchase_limit: number;
+  recurrence: string | null;
+  recurring_subscription: boolean;
+  service_description: string;
+  service_image: string | null;
+  single_sale: boolean;
+  standard: boolean;
+  test_period: boolean;
+  test_period_duration: number;
+  test_period_duration_unit_of_measurement: string;
+  test_period_price: number;
+  time_based: boolean;
+  price_id: string;
+  briefs?: ServiceBrief[]; 
+}
+
 export default function BriefConnectionStep(
-  previousService? : any,
-  previousBriefs?,
+  previousService? : Service,
+  previousBriefs?: ServiceBrief[],
 ) {
   const { prevStep, form } = useMultiStepFormContext<typeof FormSchema>();
   const { t } = useTranslation('services');
@@ -69,7 +106,7 @@ export default function BriefConnectionStep(
     // Insert briefs to service
     try {
       const briefsToConnect = form.getValues('step_connect_briefs');
-      const formattedBriefsToConnect = briefsToConnect.map((brief) => ({
+      const formattedBriefsToConnect = briefsToConnect?.map((brief) => ({
         brief_id: brief.id,
         service_id: serviceId,
       }));

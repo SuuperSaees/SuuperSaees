@@ -10,11 +10,35 @@ import {
 import { getAgencyForClient } from '../../organizations/get/get-organizations';
 import { hasPermissionToReadClientServices } from '../../permissions/services';
 
-export const getServiceById = async (serviceId: Service.Type['id']) => {
+export const getServiceById = async (
+  serviceId: Service.Type['id'],
+  briefsNeeded?: boolean,
+) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
+
+    if (briefsNeeded) {
+      const { data: serviceData, error: serviceError } = await client
+        .from('services')
+        .select(
+          `*, 
+        service_briefs(*, 
+          brief:briefs(id, name, description, created_at)
+        )`,
+        )
+        .eq('id', serviceId)
+        .single();
+
+      if (serviceError) throw serviceError.message;
+
+      const proccesedData = {
+        ...serviceData,
+      };
+
+      return proccesedData;
+    }
 
     const { data: serviceData, error: orderError } = await client
       .from('services')
@@ -118,52 +142,6 @@ export async function getClientServices(
     return combinedData;
   } catch (error) {
     console.error('Error while getting client services:', error);
-    throw error;
-  }
-}
-
-export async function getServiceBriefs(serviceId: Service.Type['id']) {
-  const client = getSupabaseServerComponentClient();
-  try {
-    // Step 1: Verify the user
-    const user = await fetchCurrentUser(client);
-    if (!user) throw new Error('No user found');
-
-    // Step 2: Get the service's briefs
-    const { data: serviceBriefData, error: serviceBriefDataError } =
-      await client
-        .from('service_briefs')
-        .select('brief_id')
-        .eq('service_id', serviceId);
-
-    if (serviceBriefDataError) {
-      throw new Error(
-        `Error while getting service briefs: ${serviceBriefDataError.message}`,
-      );
-    }
-
-    // Filtrar ids inválidos antes de la siguiente consulta
-    const validBriefIds = (serviceBriefData || [])
-      .map((brief) => brief.brief_id)
-      .filter((briefId) => typeof briefId === 'string' && briefId.length > 0); // Filtrar valores vacíos o no válidos
-
-    if (validBriefIds.length === 0) {
-      return []; // Si no hay ids válidos, retornar un array vacío
-    }
-
-    // Step 3: Get the briefs
-    const { data: briefsData, error: briefsError } = await client
-      .from('briefs')
-      .select('id, name')
-      .in('id', validBriefIds);
-
-    if (briefsError) {
-      throw new Error(`Error while getting briefs: ${briefsError.message}`);
-    }
-
-    return briefsData || [];
-  } catch (error) {
-    console.error('Error while getting briefs:', error);
     throw error;
   }
 }

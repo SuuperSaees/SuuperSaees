@@ -32,7 +32,12 @@
         "placeholderPlaceholder": "Add a placeholder",
         "descriptionLabel": "Brief description",
         "imageLabel": "Brief image",
-        "defaultPlaceholder": "Add a description..."
+        "defaultPlaceholder": "Add a description...",
+        "update": "Update brief",
+        "createSuccess": "Brief created successfully",
+        "updateSuccess": "Brief updated successfully",
+        "errorCreating": "Error creating brief",
+        "errorUpdating": "Error updating brief"
     },
     "widgets": {
       "edit": {
@@ -47,6 +52,9 @@
         "title": "Settings"
       }
     }
+  },
+  "update": {
+    "title": "Update brief"
   },
   "singleChoice": {
     "title": "Title",

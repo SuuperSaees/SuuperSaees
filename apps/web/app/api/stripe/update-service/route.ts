@@ -3,12 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Definición de tipos para los datos entrantes
 interface ProductRequest {
     accountId: string;
     name: string;
     description: string;
-    imageUrl?: string; // URL de la imagen opcional
+    imageUrl?: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -24,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        // Crear producto en la cuenta conectada de Stripe
+        // Update product in the connected Stripe account
         const productData: {
             name: string;
             description: string;
@@ -37,7 +36,7 @@ export async function POST(req: NextRequest) {
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         const product = await stripe.products.update(productId, productData, {
-            stripeAccount: accountId, // ID de la cuenta conectada
+            stripeAccount: accountId, // Connected account ID
         });
 
         return NextResponse.json({ product });
