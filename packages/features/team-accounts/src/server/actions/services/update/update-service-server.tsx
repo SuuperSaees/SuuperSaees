@@ -35,6 +35,7 @@ interface ServiceData {
     max_number_of_simultaneous_orders: number;
     max_number_of_monthly_orders: number;
   };
+  step_connect_briefs: any;
 }
 
 
@@ -44,8 +45,6 @@ export const updateService = async (
   status?: string,
 ) => {
   try {
-    console.log('clientData', clientData);
-    console.log('priceId', priceId);
     const client = getSupabaseServerComponentClient();
     const stripe_account_id = await getStripeAccountID();
     if (!stripe_account_id) throw new Error('No stripe account found');
@@ -76,13 +75,69 @@ export const updateService = async (
     };
 
     // Update service in Supabase, services row.
-    const { error } = await client
+    const { data: updatedService, error: updateError } = await client
       .from('services')
       .update(serviceUpdated)
-      .eq('price_id', priceId);
+      .eq('price_id', priceId)
+      .select('id');
 
-    if (error) {
-      throw new Error(error.message);
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    const serviceId = updatedService?.[0]?.id ?? priceId;
+
+    const { data: existingBriefs, error: getBriefsError } = await client
+      .from('service_briefs')
+      .select('brief_id')
+      .eq('service_id', serviceId);
+
+    if (getBriefsError) {
+      throw new Error(getBriefsError.message);
+    }
+
+    // Get the briefs sent to the client
+    const newBriefs = clientData.step_connect_briefs;
+
+    // Filter briefs that are not yet connected to the service
+    const briefsToAdd = newBriefs.filter((brief) => {
+      return !existingBriefs.some((existing) => existing.brief_id === brief.id);
+    });
+
+    if (briefsToAdd.length > 0) {
+      // Insert the new briefs into the service_briefs table
+      const { error: insertError } = await client
+        .from('service_briefs')
+        .insert(
+          briefsToAdd.map((brief) => ({
+            service_id: updatedService?.[0]?.id ?? '',
+            brief_id: brief.id,
+          }))
+        );
+
+      if (insertError) {
+        throw new Error(insertError.message);
+      }
+    }
+
+    // Filter out briefs that are no longer connected to the service and delete them
+    const briefsToRemove = existingBriefs.filter((existing) => {
+      return !newBriefs.some((brief) => brief.id === existing.brief_id);
+    });
+
+    if (briefsToRemove.length > 0) {
+      const { error: deleteError } = await client
+        .from('service_briefs')
+        .delete()
+        .in(
+          'brief_id',
+          briefsToRemove.map((brief) => brief.brief_id)
+        )
+        .eq('service_id', serviceId);
+
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
     }
 
     // Get Price in Stripe to get productId.

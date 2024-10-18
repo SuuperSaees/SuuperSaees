@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Definición de tipos para los datos entrantes
 interface ProductRequest {
     accountId: string;
 }
@@ -21,23 +20,23 @@ export async function DELETE(req: NextRequest) {
     }
 
     try {
-        // Obtener el precio para identificar el producto asociado
+        // Get the price to identify the associated product
         const price = await stripe.prices.retrieve(priceId, {
-            stripeAccount: accountId, // ID de la cuenta conectada
+            stripeAccount: accountId, // Connected account ID
         });
 
         const productId = price.product;
 
-        // Desactivar el precio
+        // Deactivate the price
         await stripe.prices.update(priceId, {
             active: false,
         }, {
             stripeAccount: accountId,
         });
 
-        // Desactivar el producto (en lugar de eliminarlo)
+        // Deactivate the product (instead of deleting it)
         const product = await stripe.products.update(productId, {
-            active: false, // Cambia a archived: true si deseas archivar
+            active: false, // Change to archived: true if you want to archive
         }, {
             stripeAccount: accountId,
         });
