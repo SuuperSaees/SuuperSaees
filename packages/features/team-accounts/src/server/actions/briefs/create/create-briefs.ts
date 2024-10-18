@@ -7,7 +7,6 @@ import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { FormField } from '../../../../../../../../apps/web/lib/form-field.types';
 import { getOrganization } from '../../organizations/get/get-organizations';
 
-// Define la función createClient
 export const createBrief = async (clientData: Brief.Insert) => {
   try {
 
@@ -51,13 +50,16 @@ export const addServiceBriefs = async (
   }
 };
 
-// insert form fields
 export const createFormFields = async (formFields: FormField.Type[]) => {
   try {
     const client = getSupabaseServerComponentClient();
+
+    // Create a new list of formFields without the 'id' field
+    const formFieldsWithoutId = formFields.map(({ id, ...rest }) => rest);
+
     const { error: formFieldError, data: formFieldData } = await client
       .from('form_fields')
-      .insert(formFields)
+      .insert(formFieldsWithoutId)
       .select();
 
     if (formFieldError) {
@@ -72,6 +74,7 @@ export const createFormFields = async (formFields: FormField.Type[]) => {
     throw error;
   }
 };
+
 
 // link form fields to briefs
 export const addFormFieldsToBriefs = async (

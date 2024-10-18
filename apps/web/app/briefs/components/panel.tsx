@@ -20,7 +20,7 @@ export default function Panel() {
   const { t } = useTranslation('briefs');
 
   const pathname = usePathname();
-  const showWidgets = pathname === '/briefs/create';
+  const showWidgets = pathname === '/briefs/create' || pathname === '/briefs/update'; 
 
   if (!showWidgets) {
     return null;
@@ -76,11 +76,13 @@ export default function Panel() {
         type="button"
         className="flex gap-2"
         onClick={async () => {
-          setActiveTab('settings')
-          await form.handleSubmit(onSubmit)();
+          setActiveTab('settings');
+          await form.handleSubmit((values) => onSubmit(values, pathname === '/briefs/update'))();
         }}
       >
-        <span>{t('creation.form.submit')}</span>
+        <span>
+          {pathname === '/briefs/create' ? t('creation.form.submit') : t('creation.form.update')}
+        </span>
         {briefMutation.isPending && <Spinner className="h-5 w-5" />}
       </ThemedButton>
     </Tabs>
