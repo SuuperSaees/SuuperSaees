@@ -8,7 +8,7 @@ import { Stripe } from '@stripe/stripe-js';
 import { useTranslation } from 'react-i18next';
 
 import { PageBody } from '@kit/ui/page';
-import { Tabs, TabsContent} from '@kit/ui/tabs';
+import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
 import {
@@ -17,25 +17,25 @@ import {
 } from '../contexts/services-context';
 import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table';
 import { Brief } from '~/lib/brief.types';
+import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
-  briefs : Brief.Relationships.Services.Response[]
+  briefs: Brief.Relationships.Services.Response[];
 }
 
 const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
   stripePromise,
-  briefs
+  briefs,
 }) => {
   const { services, loading, updateServices } = useServicesContext();
   const { t } = useTranslation('orders');
-  const [activeTab, setActiveTab] = React.useState<'services' | 'briefs'>(
-    'services',
-  );
+  const [activeTab, setActiveTab] = React.useState<'services' | 'briefs'>('services');
 
   const handleTabClick = (value: 'services' | 'briefs') => {
     setActiveTab(value);
   };
+
   useEffect(() => {
     updateServices(true).catch((error) => {
       console.log(error.message);
@@ -76,17 +76,37 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
                 </span>
               </div>
             </div>
-            <TabsContent
-            className='bg-["#ffffff00"]'
-              value="services"
-            >
-              <ServicesTable activeTab = {activeTab} services={services} />
+            <TabsList className='gap-2 bg-transparent'>
+              <ThemedTabTrigger
+                value="services"
+                activeTab={activeTab}
+                option={'services'}
+                onClick={() => handleTabClick('services')}
+                className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${
+                  activeTab === 'services' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'
+                }`}
+              >
+                {t('services')}
+              </ThemedTabTrigger>
+
+              <ThemedTabTrigger
+                value="briefs"
+                activeTab={activeTab}
+                option={'briefs'}
+                onClick={() => handleTabClick('briefs')}
+                className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${
+                  activeTab === 'briefs' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'
+                }`}
+              >
+                {t('briefs')}
+              </ThemedTabTrigger>
+            </TabsList>
+
+            <TabsContent className='bg-transparent' value="services">
+              <ServicesTable activeTab={activeTab} services={services} />
             </TabsContent>
-            <TabsContent 
-            className='bg-["#ffffff00"]'
-              value="briefs"
-            >
-              <BriefsTable activeTab = {activeTab} briefs={briefs}  />
+            <TabsContent className='bg-transparent' value="briefs">
+              <BriefsTable activeTab={activeTab} briefs={briefs} />
             </TabsContent>
           </div>
         </PageBody>
