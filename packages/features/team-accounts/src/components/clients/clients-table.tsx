@@ -28,8 +28,6 @@ import CreateClientDialog from '../../../../../../packages/features/team-account
 import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/delete/delete-client';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../../packages/ui/src/shadcn/pagination';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
-import { TabsList } from '@kit/ui/tabs';
-import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings';
 
 
 // import UpdateClientDialog from '../../server/actions/clients/update/update-client';
@@ -85,136 +83,136 @@ type Client = {
 const clientColumns = (
   t: TFunction<'clients', undefined>,
 ): ColumnDef<Client>[] => [
-    {
-      accessorKey: 'name',
-      header: t('clientName'),
-      cell: ({ row }) => (
-        <Link
-          href={`clients/organizations/${row.original.organization_id}`}
-          className={'flex items-center space-x-4 text-left'}
-        >
-          <span>
-            <ProfileAvatar
-              displayName={row.original.name}
-              pictureUrl={row.original.picture_url}
-            />
+  {
+    accessorKey: 'name',
+    header: t('clientName'),
+    cell: ({ row }) => (
+      <Link
+        href={`clients/organizations/${row.original.organization_id}`}
+        className={'flex items-center space-x-4 text-left'}
+      >
+        <span>
+          <ProfileAvatar
+            displayName={row.original.name}
+            pictureUrl={row.original.picture_url}
+          />
+        </span>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium leading-[1.42857] text-gray-900">
+            {row.original.name}
           </span>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium leading-[1.42857] text-gray-900">
-              {row.original.name}
-            </span>
-            <span className="text-sm font-normal leading-[1.42857] text-gray-600">
-              {row.original.email}
-            </span>
-          </div>
-        </Link>
-      ),
-    },
-    // {
-    //   accessorKey: "role",
-    //   header: t("role"),
-    //   cell: ({ row }) => {
-    //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    //     const role = row.getValue("role") as string;
-    //     return (
-    //       <div className="capitalize">
-    //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
-    //       </div>
-    //     );
-    //   },
-    // },
-    {
-      accessorKey: 'client_organization',
-      header: t('organization'),
-      cell: ({ row }) => (
-        <Link
-          href={`clients/organizations/${row.original.organization_id}`}
-          className="capitalize"
-        >
-          {row.getValue('client_organization')}
-        </Link>
-      ),
-    },
-    {
-      accessorKey: 'last_login',
-      header: ({ column }) => {
-        return (
-          <div>
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              <div className="flex items-center justify-between">
-                <span>{t('lastLogin')}</span>
-                <ArrowDown className="ml-2 h-4 w-4" />
-              </div>
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        const date = new Date(row.original.created_at);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-
-        const formattedDate = `${day}-${month}-${year}`;
-
-        return (
-          <span className="text-sm font-medium text-gray-900">
-            {formattedDate}
+          <span className="text-sm font-normal leading-[1.42857] text-gray-600">
+            {row.original.email}
           </span>
-        );
-      },
+        </div>
+      </Link>
+    ),
+  },
+  // {
+  //   accessorKey: "role",
+  //   header: t("role"),
+  //   cell: ({ row }) => {
+  //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  //     const role = row.getValue("role") as string;
+  //     return (
+  //       <div className="capitalize">
+  //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
+  //       </div>
+  //     );
+  //   },
+  // },
+  {
+    accessorKey: 'client_organization',
+    header: t('organization'),
+    cell: ({ row }) => (
+      <Link
+        href={`clients/organizations/${row.original.organization_id}`}
+        className="capitalize"
+      >
+        {row.getValue('client_organization')}
+      </Link>
+    ),
+  },
+  {
+    accessorKey: 'last_login',
+    header: ({ column }) => {
+      return (
+        <div>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            <div className="flex items-center justify-between">
+              <span>{t('lastLogin')}</span>
+              <ArrowDown className="ml-2 h-4 w-4" />
+            </div>
+          </Button>
+        </div>
+      );
     },
-    {
-      accessorKey: 'created_at_column',
-      header: ({ column }) => {
-        return (
-          <div>
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              <div className="flex items-center justify-between">
-                <span>{t('createdAt')}</span>
-                <ArrowUp className="ml-2 h-4 w-4" />
-              </div>
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        const date = new Date(row.original.created_at);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
 
-        const formattedDate = `${day}-${month}-${year}`;
+      const formattedDate = `${day}-${month}-${year}`;
 
-        return (
-          <span className="text-sm font-medium text-gray-900">
-            {formattedDate}
-          </span>
-        );
-      },
+      return (
+        <span className="text-sm font-medium text-gray-900">
+          {formattedDate}
+        </span>
+      );
     },
-    {
-      id: 'actions',
-      header: t('actions'),
-      enableHiding: false,
-      cell: ({ row }) => {
-        const client = row.original;
-
-        return (
-          <div className="h-18 flex items-center gap-4 self-stretch p-4">
-            {/* <UpdateClientDialog {...client} /> */}
-            <DeleteUserDialog userId={client.id} />
-          </div>
-        );
-      },
+  },
+  {
+    accessorKey: 'created_at_column',
+    header: ({ column }) => {
+      return (
+        <div>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            <div className="flex items-center justify-between">
+              <span>{t('createdAt')}</span>
+              <ArrowUp className="ml-2 h-4 w-4" />
+            </div>
+          </Button>
+        </div>
+      );
     },
-  ];
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+
+      const formattedDate = `${day}-${month}-${year}`;
+
+      return (
+        <span className="text-sm font-medium text-gray-900">
+          {formattedDate}
+        </span>
+      );
+    },
+  },
+  {
+    id: 'actions',
+    header: t('actions'),
+    enableHiding: false,
+    cell: ({ row }) => {
+      const client = row.original;
+
+      return (
+        <div className="h-18 flex items-center gap-4 self-stretch p-4">
+          {/* <UpdateClientDialog {...client} /> */}
+          <DeleteUserDialog userId={client.id} />
+        </div>
+      );
+    },
+  },
+];
 
 // ORGANIZATIONS TABLE
 const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
@@ -222,7 +220,7 @@ const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Clie
     accessorKey: 'client_organization',
     header: t('organizationName'),
     cell: ({ row }) => (
-      <Link href={`clients/organizations/${row.original.organization_id}`} className={'flex items-center space-x-4 text-left'}>
+      <Link href={`clients/organizations/${row.original.organization_id}`}  className={'flex items-center space-x-4 text-left'}>
         <span>
           <ProfileAvatar
             displayName={row.original.name}
@@ -296,7 +294,7 @@ const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Clie
   },
 ];
 // accountIds, accountNames
-export function ClientsTable({ clients, view }: ClientsTableProps) {
+export function ClientsTable({ clients, view}: ClientsTableProps) {
   const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clients' | 'organizations'>(
     'clients',
@@ -367,32 +365,23 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
       <div className="flex flex-wrap items-center justify-between gap-4 pb-[24px]">
         <div className="flex">
           {
-            !view &&
-            <TabsList className='gap-2 bg-transparent'>
-              <ThemedTabTrigger
-                value="clients"
-                activeTab={activeButton}
-                option={'clients'}
-                onClick={() => handleButtonClick('clients')}
-                className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'clients' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'
-                  }`}
-              >
-                <span className="text-sm font-semibold leading-5">{t('clients:clients')}</span>
-              </ThemedTabTrigger>
-
-              <ThemedTabTrigger
-                value="organizations"
-                activeTab={activeButton}
-                option={'organizations'}
-                onClick={() => handleButtonClick('organizations')}
-                className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'organizations' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'
-                  } ml-[20px]`}
-              >
-                <span className="text-sm font-semibold leading-5">
-                  {t('clients:organizations.title')}
-                </span>
-              </ThemedTabTrigger>
-            </TabsList>
+            !view && 
+            <>
+            <Button
+              className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'clients' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
+              onClick={() => handleButtonClick('clients')}
+            >
+              <span className="text-sm font-semibold leading-5">{t('clients:clients')}</span>
+            </Button>
+            <Button
+              className={`ml-[20px] flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'organizations' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
+              onClick={() => handleButtonClick('organizations')}
+            >
+              <span className="text-sm font-semibold leading-5">
+                {t('clients:organizations.title')}
+              </span>
+            </Button>
+            </>
           }
         </div>
         <div className="flex gap-4">
@@ -409,8 +398,8 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
                   ? ((table.getColumn('name')?.getFilterValue() as string) ??
                     '')
                   : ((table
-                    .getColumn('client_organization')
-                    ?.getFilterValue() as string) ?? '')
+                      .getColumn('client_organization')
+                      ?.getFilterValue() as string) ?? '')
               }
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 if (activeButton === 'clients') {
@@ -430,7 +419,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
       {
         !view &&
 
-        <Separator />
+      <Separator />
       }
       <div className="mt-[24px] bg-white rounded-md border">
         <Table>
