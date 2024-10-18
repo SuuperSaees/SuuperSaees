@@ -1,16 +1,10 @@
-import { Epilogue } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { cookies } from 'next/headers';
-
-
 
 import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 
-
-
 import { Toaster } from '@kit/ui/sonner';
 import { cn } from '@kit/ui/utils';
-
-
 
 import { RootProviders } from '~/components/root-providers';
 import { heading, sans } from '~/lib/fonts';
@@ -19,7 +13,7 @@ import { generateRootMetadata } from '~/lib/root-metdata';
 
 import '../styles/globals.css';
 
-const epilogue = Epilogue({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'] }); // Cambiado a 'Inter'
 export default async function RootLayout({
   children,
 }: {
@@ -32,7 +26,7 @@ export default async function RootLayout({
   const organizationSettings = await getOrganizationSettings().catch(() => ([]));
 
   return (
-    <html lang={language} className={`${className} ${epilogue.className}`}>
+    <html lang={language} className={`${className} ${inter.className}`}>
       <body>
         <RootProviders
           theme={theme}

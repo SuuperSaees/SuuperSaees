@@ -28,7 +28,7 @@
     "validation": {
       "minTitleCharacters": "Title must be at least 2 characters.",
       "minDescriptionCharacters": "Description must be at least 2 characters.",
-      "files": "Please upload at least one file"
+      "files": "Please upload at least one file."
     }
   },
   "details": {

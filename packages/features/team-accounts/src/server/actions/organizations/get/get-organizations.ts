@@ -94,7 +94,7 @@ export const getOrganizationSettingsByOrganizationId = async (
     .from('organization_settings')
     .select()
     .eq('account_id', organizationId)
-    .in('key', ['theme_color', 'logo_url']);
+    .in('key', ['theme_color', 'logo_url', 'sidebar_background_color']);
 
   if (settingsError) {
     throw settingsError.message;

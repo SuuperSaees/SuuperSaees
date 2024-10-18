@@ -364,8 +364,8 @@ export function OrderList({ orders, role }: OrdersTableProps) {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <div className="flex flex-col py-4">
+    <div className="flex w-full flex-col">
+      <div className="flex flex-col">
         <main className="grid flex-1 items-start gap-4 md:gap-8">
           <Tabs
             defaultValue={activeTab}
@@ -373,7 +373,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
               setActiveTab(value as 'open' | 'completed' | 'all');
             }}
           >
-            <div className="mb-4 flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4 mb-[24px] flex items-baseline">
               <TabsList className='gap-2 bg-transparent'>
                 <ThemedTabTrigger value="open" activeTab={activeTab} option={'open'}>
                   {t('openOrders')}
@@ -386,17 +386,18 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                 </ThemedTabTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
-                <div className="relative ml-auto flex-1 md:grow-0">
+                <div className="flex relative ml-auto flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <ThemedInput
                     type="search"
                     placeholder={t('searchPlaceholderTasks')}
-                    className="focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
+                    className="bg-white focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
                     onChange={(e: {
                       target: { value: React.SetStateAction<string> };
                     }) => setSearchTerm(e.target.value)}
                   />
+
                 </div>
                 {orders.length > 0 ? (
                   <Link href="/orders/create">

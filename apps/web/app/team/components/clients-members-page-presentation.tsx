@@ -86,7 +86,7 @@ const seatByPlans = {
         <div className="mb-[32px] flex items-center justify-between">
           <div className="flex-grow">
             <span>
-              <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
+              <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
                 <Trans i18nKey={'team:team'} />
               </div>
             </span>
@@ -94,7 +94,7 @@ const seatByPlans = {
         </div>
 
         <div className="w-full">
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between pb-[24px]">
             <If condition={canManageInvitations && canAddMember}>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold">
@@ -120,7 +120,6 @@ const seatByPlans = {
                     onMouseLeave={() => setShowDropdown(false)}
                   >
                     <ThemedButton
-                      size={'sm'}
                       data-test={'invite-members-form-trigger'}
                       disabled={addMemberIsAvailable}
                       className="p-0"
@@ -160,7 +159,7 @@ const seatByPlans = {
         </div>
 
         <Separator />
-        <div className="mt-4">
+        <div className="mt-[24px]">
           <AccountMembersTable
             userRoleHierarchy={currentUserRoleHierarchy ?? 0}
             currentUserId={user.id}

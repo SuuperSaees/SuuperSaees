@@ -48,6 +48,11 @@ const routes = [
     Icon: <SquareCheck className={iconClasses} />,
   },
   // {
+  //   label: 'common:briefsName',
+  //   path: pathsConfig.app.briefs,
+  //   Icon: <Briefcase className={iconClasses} />,
+  // },
+  // {
   //   label: 'Facturas',
   //   path: pathsConfig.app.invoices,
   //   Icon: <Wallet className={iconClasses} />,
@@ -62,11 +67,6 @@ const routes = [
   //   path: pathsConfig.app.personalAccountBilling,
   //   // Icon: </>
   // }
-  {
-    label: 'common:briefsName',
-    path: pathsConfig.app.briefs,
-    Icon: <Briefcase className={iconClasses} />,
-  },
 ];
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {

@@ -1,4 +1,5 @@
 {
+    "briefs":"Briefs",
     "briefTitle": "Resumen",
     "name": "Nombre",
     "services": "Servicios Conectados",
@@ -21,7 +22,7 @@
     "creation": {
     "title": "Crear brief",
     "form": {
-        "addQuestion": "Agregar pregunta",
+        "addQuestion": "Añade o arrastra un nuevo elemento",
         "submit": "Crear resumen",
         "titleLabel": "Nombre del brief",
         "titlePlaceholder": "Ingrese el nombre de su brief",

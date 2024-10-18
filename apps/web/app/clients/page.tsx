@@ -23,7 +23,7 @@ async function ClientsMembersPage() {
         <div className="mb-[32px] flex items-center justify-between">
           <div className="flex-grow">
             <span>
-              <div className="font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
+              <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
                 <Trans i18nKey={'clients:client'} />
               </div>
             </span>

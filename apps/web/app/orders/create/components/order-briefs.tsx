@@ -37,7 +37,7 @@ export const OrderBriefs = ({
   form,
   orderId,
 }: {
-  briefs: Brief.BriefResponse[];
+  briefs: Brief.Response[];
   form: UseFormReturn<
     {
       uuid: string;

@@ -89,7 +89,9 @@ export const createOrders = async (
     );
 
     const titleFromBrief =
-      briefResponses?.[0]?.response ?? orders[0]?.title ?? `Order from ${emailData.email}`;
+      briefResponses?.[0]?.response ??
+      orders[0]?.title ??
+      `Order from ${emailData.email}`;
 
     const ordersToInsert = orders.map(
       ({ fileIds: _fileIds, ...orderWithoutFileIds }) => ({
@@ -125,24 +127,54 @@ export const createOrders = async (
         );
     }
 
-    // Step 4: Send email notification
-    if (emailData.email) {
-      await sendOrderCreationEmail(
-        emailData.email,
-        orderData.id.toString(),
-        orderData,
-        agencyOrganizationData.name ?? '',
-        userId,
+    // Step 4: Insert brief order files if present
+    const { data: formFieldIds, error: formFieldIdsError } = await client
+      .from('brief_form_fields')
+      .select('form_field_id')
+      .in('brief_id', Array.from(briefIds));
+
+    if (formFieldIdsError) throw new Error(formFieldIdsError.message);
+
+    const { data: fileFields, error: fileFieldsError } = await client
+      .from('form_fields')
+      .select('id')
+      .in(
+        'id',
+        formFieldIds.map((f) => f.form_field_id),
+      )
+      .eq('type', 'file');
+
+    if (fileFieldsError) throw new Error(fileFieldsError.message);
+
+    const { data: filesFromBrief, error: filesFromBriefError } = await client
+      .from('brief_responses')
+      .select('response')
+      .in(
+        'order_id',
+        ordersToInsert.map((o) => o.uuid),
+      )
+      .in(
+        'form_field_id',
+        fileFields.map((f) => f.id),
       );
-    }
+
+    if (filesFromBriefError) throw new Error(filesFromBriefError.message);
+
+    const fileIdsFromBrief = filesFromBrief
+      .map((f) => f.response.split(',').map((id) => id.trim()))
+      .flat();
 
     // Step 5: Insert order files if present
     for (const order of orders) {
-      if (order.fileIds && order.fileIds.length > 0) {
-        for (const fileId of order.fileIds) {
+      // Join the fileIds of the order with those of the brief form fields
+      const combinedFileIds = [...(order.fileIds ?? []), ...fileIdsFromBrief];
+
+      // If there are files to insert
+      if (combinedFileIds.length > 0) {
+        for (const fileId of combinedFileIds) {
           const orderFileToInsert = {
             order_id: orderData.uuid,
-            file_id: fileId,
+            file_id: fileId.trim(),
           };
 
           const { error: orderFilesError } = await client
@@ -185,7 +217,18 @@ export const createOrders = async (
       if (followUpError) throw new Error(followUpError.message);
     }
 
-    // Step 8: Redirect to orders page after successful order creation
+    // Step 8: Send email notification
+    if (emailData.email) {
+      await sendOrderCreationEmail(
+        emailData.email,
+        orderData.id.toString(),
+        orderData,
+        agencyOrganizationData.name ?? '',
+        userId,
+      );
+    }
+
+    // Step 9: Redirect to orders page after successful order creation
     redirect('/orders');
   } catch (error) {
     console.error(error);

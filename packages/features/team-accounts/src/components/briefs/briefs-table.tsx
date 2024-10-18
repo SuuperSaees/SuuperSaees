@@ -2,6 +2,8 @@
 
 import { useMemo } from 'react';
 import * as React from 'react';
+import { TabsList } from '@kit/ui/tabs';
+import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings'
 
 import Link from 'next/link';
 
@@ -44,15 +46,15 @@ import DeleteBriefDialog from '../../server/actions/briefs/delete/delete-brief-u
 import UpdateBriefDialog from '../../server/actions/briefs/update/update-brief-ui';
 
 type BriefTableProps = {
-  briefs: Brief.Type[];
-  accountIds: string[];
+  briefs: Brief.Relationships.Services.Response[];
+  activeTab : string
 };
 
 // SERVICES TABLE
 // TFunction<'briefs', undefined>
 const briefColumns = (
   t: TFunction<'briefs', undefined>,
-): ColumnDef<Brief.Type>[] => [
+): ColumnDef<Brief.Relationships.Services.Response>[] => [
   {
     accessorKey: 'name',
     header: t('name'),
@@ -173,17 +175,21 @@ const briefColumns = (
   },
 ];
 
-export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
+
+export function BriefsTable({ activeTab, briefs }: BriefTableProps) {
   const { t } = useTranslation('briefs');
+  
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
+
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const columns = useMemo<ColumnDef<Brief.Type>[]>(() => briefColumns(t), [t]);
+  const columns = useMemo<ColumnDef<Brief.Relationships.Services.Response>[]>(() => briefColumns(t), [t]);
+
 
   const table = useReactTable({
     data: briefs,
@@ -209,8 +215,18 @@ export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
-        <div className="flex w-full justify-end gap-4 px-2">
-          <div className="relative max-w-sm">
+        
+        <TabsList className='gap-2 bg-transparent'>
+          <ThemedTabTrigger value="services" activeTab={activeTab} option={'services'}>
+            {t('services:serviceTitle')}
+          </ThemedTabTrigger>
+          <ThemedTabTrigger value="briefs" activeTab={activeTab} option={'briefs'}>
+            {t('briefs:briefs', {ns:'briefs'})}
+          </ThemedTabTrigger>
+        </TabsList>
+
+        <div className="flex w-full justify-end gap-4">
+          <div className="bg-white relative max-w-sm">
             <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
             <Input
               placeholder="Buscar briefs..."
@@ -218,7 +234,7 @@ export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
               onChange={(event) => {
                 table.getColumn('name')?.setFilterValue(event.target.value);
               }}
-              className="pl-10"
+              className="pl-10 bg-white"
             />
           </div>
           {/* <CreateBriefDialog
@@ -230,7 +246,7 @@ export function BriefsTable({ briefs, accountIds }: BriefTableProps) {
         </div>
       </div>
       <Separator />
-      <div className="mt-4 rounded-md border">
+      <div className="mt-[24px] bg-white rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

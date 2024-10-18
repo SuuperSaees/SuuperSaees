@@ -49,9 +49,9 @@ export const ServicesContextProvider: React.FC<ServicesContextProviderProps> = (
 
   const fetchAccountStripeConnect = async () => {
     if(accountRole === "agency_owner"){
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-      const fetchedStripeId = await getStripeAccountID() as string;
-      const response = await fetch(`${baseUrl}/api/stripe/get-account?accountId=${encodeURIComponent(fetchedStripeId)}`, {
+      // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+      const { stripeId } = await getStripeAccountID();
+      const response = await fetch(`/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
