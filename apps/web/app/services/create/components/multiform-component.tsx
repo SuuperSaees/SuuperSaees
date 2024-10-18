@@ -41,7 +41,6 @@ import {
   createStepSchema,
   useMultiStepFormContext,
 } from '@kit/ui/multi-step-form';
-import { Spinner } from '@kit/ui/spinner';
 import { Stepper } from '@kit/ui/stepper';
 import { Textarea } from '@kit/ui/textarea';
 
@@ -95,10 +94,48 @@ export const FormSchema = createStepSchema({
 
 type FormValues = z.infer<typeof FormSchema>;
 
+
+interface ServiceBrief {
+  id: string;
+  name: string;
+  created_at: string;
+  description: string;
+}
+
+interface Service {
+  id: number;
+  created_at: string;
+  name: string;
+  price: number;
+  number_of_clients: number;
+  status: string;
+  propietary_organization_id: string;
+  allowed_orders: number;
+  credit_based: boolean;
+  credits: number;
+  hours: number;
+  max_number_of_monthly_orders: number;
+  max_number_of_simultaneous_orders: number;
+  purchase_limit: number;
+  recurrence: string | null;
+  recurring_subscription: boolean;
+  service_description: string;
+  service_image: string | null;
+  single_sale: boolean;
+  standard: boolean;
+  test_period: boolean;
+  test_period_duration: number;
+  test_period_duration_unit_of_measurement: string;
+  test_period_price: number;
+  time_based: boolean;
+  price_id: string;
+  briefs?: ServiceBrief[]; 
+}
+
 export function MultiStepFormDemo({
   previousService,
 }: {
-  previousService?: any;
+  previousService?: Service;
 }) {
   const { t } = useTranslation('services');
   const form = useForm<FormValues>({
@@ -205,7 +242,7 @@ export function MultiStepFormDemo({
         <BriefConnectionStep  />
       </MultiStepFormStep> */}
       <MultiStepFormStep name="connect_briefs">
-        <BriefConnectionStep previousBriefs={previousService?.briefs || []}  previousService={previousService}/>
+        <BriefConnectionStep previousBriefs={previousService?.briefs ?? []}  previousService={previousService}/>
       </MultiStepFormStep>
     </MultiStepForm>
   );
@@ -868,7 +905,7 @@ function PricingStep() {
 export default function MultiFormComponent({
   previousService
 }: {
-  previousService?: any;
+  previousService?: Service;
 }) {
   return (
     <Elements stripe={stripePromise}>
