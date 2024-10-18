@@ -150,7 +150,9 @@ export const getClientBriefs = async (): Promise<Brief.Relationships.FormField[]
 };
 
 
-export const getBriefFormFieldsById = async ( id: string) => {
+export const getBriefFormFieldsById = async ( 
+  id: string
+) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: briefFormFields, error: errorBriefFormFields } = await client
