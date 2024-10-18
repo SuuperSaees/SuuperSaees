@@ -51,6 +51,9 @@ const getUser = (request: NextRequest, response: NextResponse) => {
 };
 
 export async function middleware(request: NextRequest) {
+  if (request.method === 'OPTIONS') {
+    return handleCORSPreflight();
+  }
   const response = NextResponse.next();
 
   // API Authentication
@@ -72,7 +75,11 @@ export async function middleware(request: NextRequest) {
   const shouldIgnorePath = (pathname: string) =>
     Array.from(ignorePath).some((path) => pathname.includes(path));
 
-  if (IS_PROD && !shouldIgnorePath(request.nextUrl.pathname) && new URL(request.nextUrl.origin).host !== process.env.HOST_C4C7US) {
+  if (
+    IS_PROD &&
+    !shouldIgnorePath(request.nextUrl.pathname) &&
+    new URL(request.nextUrl.origin).host !== process.env.HOST_C4C7US
+  ) {
     try {
       const supabase = createMiddlewareClient(request, response);
       const {
@@ -125,15 +132,7 @@ export async function middleware(request: NextRequest) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
 
-  csrfResponse.headers.set('Access-Control-Allow-Origin', '*');
-  csrfResponse.headers.set(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, OPTIONS',
-  );
-  csrfResponse.headers.set(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization',
-  );
+  setCORSHeaders(csrfResponse);
 
   return csrfResponse;
 }
@@ -272,4 +271,23 @@ function matchUrlPattern(url: string) {
  */
 function setRequestId(request: Request) {
   request.headers.set('x-correlation-id', crypto.randomUUID());
+}
+
+function handleCORSPreflight() {
+  const response = new NextResponse(null, { status: 204 });
+  setCORSHeaders(response);
+  return response;
+}
+
+function setCORSHeaders(response: NextResponse) {
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, OPTIONS',
+  );
+  response.headers.set(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization',
+  );
+  response.headers.set('Access-Control-Max-Age', '86400'); // 24 hours
 }
