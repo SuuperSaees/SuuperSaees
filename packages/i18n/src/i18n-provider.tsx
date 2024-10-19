@@ -3,6 +3,7 @@
 import type { InitOptions, i18n } from 'i18next';
 
 import { initializeI18nClient } from './i18n.client';
+import { getFullDomainBySubdomain } from '../../multitenancy/utils/get/get-domain';
 
 let i18nInstance: i18n;
 
@@ -37,6 +38,25 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
     i18nInstance.options.ns?.length !== settings.ns?.length
   ) {
     throw loadI18nInstance(settings, resolver);
+  }
+
+  if (typeof window !== 'undefined') {
+    getFullDomainBySubdomain(window.location.host, true)
+      .then((domainFullData) => {
+        if (domainFullData) {
+          const databaseLanguage = domainFullData.settings.find(
+            (setting) => setting.key === 'language'
+          )?.value ?? 'en';
+          
+          console.log('databaseLanguage', databaseLanguage);
+          i18nInstance.changeLanguage(databaseLanguage).catch((error) => {
+            console.error('Error changing language:', error);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching domain data:', error);
+      });
   }
 
   return i18nInstance;
