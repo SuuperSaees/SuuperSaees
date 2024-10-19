@@ -40,18 +40,23 @@ export const OrderBriefs = ({
   briefs: Brief.Response[];
   form: UseFormReturn<
     {
-      uuid: string;
-      title: string;
-      fileIds: string[];
-      description?: string | undefined;
-      brief_responses?:
-        | {
-            form_field_id: string;
-            brief_id: string;
-            order_id: string;
-            response: string;
-          }[]
-        | undefined;
+      briefSelection: {
+        selectedBriefId: string;
+      };
+      briefCompletion: {
+        uuid: string;
+        fileIds: string[];
+        description?: string | undefined;
+        title?: string | undefined;
+        brief_responses?:
+          | {
+              form_field_id: string;
+              brief_id: string;
+              order_id: string;
+              response: string;
+            }[]
+          | undefined;
+      };
     },
     unknown,
     undefined
@@ -83,7 +88,7 @@ export const OrderBriefs = ({
     briefId: string,
     responseValue: string,
   ) => {
-    form.setValue(`brief_responses.${currentFieldIndex}`, {
+    form.setValue(`briefCompletion.brief_responses.${currentFieldIndex}`, {
       form_field_id: formField.field?.id ?? '',
       brief_id: briefId,
       order_id: orderId,
@@ -196,7 +201,7 @@ export const OrderBriefs = ({
                                 ) => {
                                   const value = event.target.value;
                                   form.setValue(
-                                    `brief_responses.${currentFieldIndex}`,
+                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
@@ -207,7 +212,7 @@ export const OrderBriefs = ({
                                 }}
                                 selectedOption={
                                   form.getValues(
-                                    `brief_responses.${currentFieldIndex}.response`,
+                                    `briefCompletion.brief_responses.${currentFieldIndex}.response`,
                                   ) || ''
                                 }
                               />
@@ -247,7 +252,7 @@ export const OrderBriefs = ({
                                 ) => {
                                   const responseValue = e.target.value;
                                   form.setValue(
-                                    `brief_responses.${currentFieldIndex}`,
+                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
@@ -268,7 +273,7 @@ export const OrderBriefs = ({
                                 ) => {
                                   const responseValue = e.target.value;
                                   form.setValue(
-                                    `brief_responses.${currentFieldIndex}`,
+                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
@@ -300,7 +305,7 @@ export const OrderBriefs = ({
                                 onDateChange={(selectedDate: Date) => {
                                   const responseValue = selectedDate;
                                   form.setValue(
-                                    `brief_responses.${currentFieldIndex}`,
+                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
@@ -318,12 +323,12 @@ export const OrderBriefs = ({
                                 question={formField.field?.label ?? ''}
                                 selectedOption={
                                   form.getValues(
-                                    `brief_responses.${currentFieldIndex}.response`,
+                                    `briefCompletion.brief_responses.${currentFieldIndex}.response`,
                                   ) ?? ''
                                 }
                                 onChange={(value) => {
                                   form.setValue(
-                                    `brief_responses.${currentFieldIndex}`,
+                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
