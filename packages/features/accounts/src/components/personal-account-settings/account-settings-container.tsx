@@ -25,6 +25,8 @@ import UpdateAccountOrganizationSidebar from './update-account-organization-side
 import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
+import { useOrganizationSettings } from '../../context/organization-settings-context'
+
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -123,6 +125,16 @@ export function PersonalAccountSettingsContainer(
     }
     void fetchUserRole();
   }, [tab, checkoutResult]);
+  
+  const { updateOrganizationSetting } =
+  useOrganizationSettings();
+
+  const handleChangeLanguage = (locale: string) => {
+    updateOrganizationSetting.mutate({
+      key: 'language',
+      value: locale,
+    });
+  }
   //////////////////////////////////////
   if (!user || !role) {
     return <LoadingOverlay fullPage />;
@@ -197,7 +209,7 @@ export function PersonalAccountSettingsContainer(
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <LanguageSelector />
+                  <LanguageSelector onChange={handleChangeLanguage} />
                 </CardContent>
               </Card>
 

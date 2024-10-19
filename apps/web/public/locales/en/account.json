@@ -141,6 +141,8 @@
   "needsReauthenticationDescription": "You need to reauthenticate to change your password. Please log out and log back in to change your password.",
   "language": "Language",
   "languageDescription": "Choose your preferred language",
+  "languageAgency": "Language Agency",
+  "languageAgencyDescription": "Choose your preferred language for your agency",
   "connectToStripe": "Connect to Stripe",
   "connectToStripeDescription": "Connect your account to Stripe to enable billing and payments",
   "stripeConnected": "Stripe Connected",
