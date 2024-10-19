@@ -191,3 +191,27 @@ export const fetchBriefsByOrgOwnerId = async (
     throw error;
   }
 };
+
+export const getBriefsById = async (
+  id: string
+) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: briefsData, error: briefsError } = await client
+      .from('briefs')
+      .select(
+        ' id, created_at, name, propietary_organization_id, description, image_url, brief_form_fields ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message))'
+      )
+      .eq('id', id);
+
+    if (briefsError) {
+      throw new Error(`Error fetching the briefs, ${briefsError.message}`);
+    }
+
+    return briefsData;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+

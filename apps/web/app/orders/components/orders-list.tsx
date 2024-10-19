@@ -364,7 +364,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className="flex w-full flex-col">
       <div className="flex flex-col">
         <main className="grid flex-1 items-start gap-4 md:gap-8">
           <Tabs
@@ -391,12 +391,13 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                   <ThemedInput
                     type="search"
                     placeholder={t('searchPlaceholderTasks')}
-                    className="focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
+                    className="bg-white focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
                     onChange={(e: {
                       target: { value: React.SetStateAction<string> };
                     }) => setSearchTerm(e.target.value)}
                   />
+
                 </div>
                 {orders.length > 0 ? (
                   <Link href="/orders/create">

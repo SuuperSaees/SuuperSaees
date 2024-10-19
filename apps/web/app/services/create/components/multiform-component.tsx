@@ -41,7 +41,6 @@ import {
   createStepSchema,
   useMultiStepFormContext,
 } from '@kit/ui/multi-step-form';
-import { Spinner } from '@kit/ui/spinner';
 import { Stepper } from '@kit/ui/stepper';
 import { Textarea } from '@kit/ui/textarea';
 
@@ -95,37 +94,83 @@ export const FormSchema = createStepSchema({
 
 type FormValues = z.infer<typeof FormSchema>;
 
-export function MultiStepFormDemo() {
+
+interface ServiceBrief {
+  id: string;
+  name: string;
+  created_at: string;
+  description: string;
+}
+
+interface Service {
+  id: number;
+  created_at: string;
+  name: string;
+  price: number;
+  number_of_clients: number;
+  status: string;
+  propietary_organization_id: string;
+  allowed_orders: number;
+  credit_based: boolean;
+  credits: number;
+  hours: number;
+  max_number_of_monthly_orders: number;
+  max_number_of_simultaneous_orders: number;
+  purchase_limit: number;
+  recurrence: string | null;
+  recurring_subscription: boolean;
+  service_description: string;
+  service_image: string | null;
+  single_sale: boolean;
+  standard: boolean;
+  test_period: boolean;
+  test_period_duration: number;
+  test_period_duration_unit_of_measurement: string;
+  test_period_price: number;
+  time_based: boolean;
+  price_id: string;
+  briefs?: ServiceBrief[]; 
+}
+
+export function MultiStepFormDemo({
+  previousService,
+}: {
+  previousService?: Service;
+}) {
   const { t } = useTranslation('services');
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       step_type_of_service: {
-        single_sale: true,
-        recurring_subscription: false,
+        single_sale: previousService?.single_sale ?? true,
+        recurring_subscription: previousService?.recurring_subscription ?? false,
       },
       step_service_details: {
-        service_image: undefined,
-        service_name: '',
-        service_description: '',
+        service_image: previousService?.service_image ?? undefined,
+        service_name: previousService?.name ?? '', 
+        service_description: previousService?.service_description ?? '',
       },
       step_service_price: {
-        standard: true,
-        purchase_limit: 0,
-        allowed_orders: 0,
-        time_based: false,
-        hours: 0,
-        credit_based: false,
-        credits: 0,
-        price: 0,
-        recurrence: '',
-        test_period: false,
-        test_period_duration: 0,
-        test_period_duration_unit_of_measurement: 'days',
-        test_period_price: 0,
-        max_number_of_simultaneous_orders: 0,
-        max_number_of_monthly_orders: 0,
+        standard: previousService?.standard ?? true,
+        purchase_limit: previousService?.purchase_limit ?? 0,
+        allowed_orders: previousService?.allowed_orders ?? 0,
+        time_based: previousService?.time_based ?? false,
+        hours: previousService?.hours ?? 0,
+        credit_based: previousService?.credit_based ?? false,
+        credits: previousService?.credits ?? 0,
+        price: previousService?.price ?? 0,
+        recurrence: previousService?.recurrence ?? '',
+        test_period: previousService?.test_period ?? false,
+        test_period_duration: previousService?.test_period_duration ?? 0,
+        test_period_duration_unit_of_measurement: previousService?.test_period_duration_unit_of_measurement ?? 'days',
+        test_period_price: previousService?.test_period_price ?? 0,
+        max_number_of_simultaneous_orders: previousService?.max_number_of_simultaneous_orders ?? 0,
+        max_number_of_monthly_orders: previousService?.max_number_of_monthly_orders ?? 0,
       },
+      step_connect_briefs: previousService?.briefs?.map((brief) => ({
+        id: brief.id,
+        name: brief.name,
+      })) ?? [],
     },
     reValidateMode: 'onChange',
     mode: 'onChange',
@@ -193,8 +238,11 @@ export function MultiStepFormDemo() {
         <PricingStep />
       </MultiStepFormStep>
 
-      <MultiStepFormStep name="connect_briefs">
+      {/* <MultiStepFormStep name="connect_briefs">
         <BriefConnectionStep  />
+      </MultiStepFormStep> */}
+      <MultiStepFormStep name="connect_briefs">
+        <BriefConnectionStep previousBriefs={previousService?.briefs ?? []}  previousService={previousService}/>
       </MultiStepFormStep>
     </MultiStepForm>
   );
@@ -854,10 +902,14 @@ function PricingStep() {
   );
 }
 
-export default function MultiFormComponent() {
+export default function MultiFormComponent({
+  previousService
+}: {
+  previousService?: Service;
+}) {
   return (
     <Elements stripe={stripePromise}>
-      <MultiStepFormDemo />
+      <MultiStepFormDemo previousService={previousService} />
     </Elements>
   );
 }

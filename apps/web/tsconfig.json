@@ -28,7 +28,9 @@
     "lib/**/*.ts",
     "app",
     "handlers/**/*",
-    "../../packages/features/auth/src/hooks"
+    "../../packages/**/*",
+    "../../packages/features/auth/src/hooks",
+    "../../packages/features/accounts/src/components/personal-account-settings"
   ],
   "exclude": ["node_modules", ".next"]
 }

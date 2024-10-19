@@ -22,7 +22,7 @@
     "creation": {
     "title": "Create brief",
     "form": {
-        "addQuestion": "Add question",
+        "addQuestion": "Add or drag a new element",
         "submit": "Create brief",
         "titleLabel": "Brief name",
         "titlePlaceholder": "Enter the name of your brief",
@@ -32,7 +32,12 @@
         "placeholderPlaceholder": "Add a placeholder",
         "descriptionLabel": "Brief description",
         "imageLabel": "Brief image",
-        "defaultPlaceholder": "Add a description..."
+        "defaultPlaceholder": "Add a description...",
+        "update": "Update brief",
+        "createSuccess": "Brief created successfully",
+        "updateSuccess": "Brief updated successfully",
+        "errorCreating": "Error creating brief",
+        "errorUpdating": "Error updating brief"
     },
     "widgets": {
       "edit": {
@@ -47,6 +52,9 @@
         "title": "Settings"
       }
     }
+  },
+  "update": {
+    "title": "Update brief"
   },
   "singleChoice": {
     "title": "Title",

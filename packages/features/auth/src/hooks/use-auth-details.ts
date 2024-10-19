@@ -10,6 +10,7 @@ import { getFullDomainBySubdomain } from '../../../../multitenancy/utils/get/get
 interface AuthDetails {
   logo_url: string;
   theme_color: string;
+  background_color: string;
 }
 
 export const useAuthDetails = (hostname: string) => {
@@ -20,6 +21,7 @@ export const useAuthDetails = (hostname: string) => {
       let domainFullData = null;
       try {
         domainFullData = await getFullDomainBySubdomain(hostname, true);
+        console.log(domainFullData)
       } catch (error) {
         console.error('Error fetching auth details', error);
       }
@@ -33,6 +35,10 @@ export const useAuthDetails = (hostname: string) => {
           theme_color:
             domainFullData.settings.find(
               (setting) => setting.key === 'theme_color',
+            )?.value ?? '', // Default to empty string if not found, and manage in the component
+            background_color:
+            domainFullData.settings.find(
+              (setting) => setting.key === 'sidebar_background_color',
             )?.value ?? '', // Default to empty string if not found, and manage in the component
         });
       }

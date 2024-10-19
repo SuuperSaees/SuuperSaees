@@ -23,18 +23,58 @@ import { Combobox } from './combobox';
 import { FormSchema } from './multiform-component';
 import { createService } from '~/team-accounts/src/server/actions/services/create/create-service';
 import { Cross2Icon } from '@radix-ui/react-icons';
+import { updateService } from '~/team-accounts/src/server/actions/services/update/update-service-server';
+import { toast } from 'sonner';
 
-export default function BriefConnectionStep() {
+interface ServiceBrief {
+  id: string;
+  name: string;
+  created_at: string;
+  description: string;
+}
+
+interface Service {
+  id: number;
+  created_at: string;
+  name: string;
+  price: number;
+  number_of_clients: number;
+  status: string;
+  propietary_organization_id: string;
+  allowed_orders: number;
+  credit_based: boolean;
+  credits: number;
+  hours: number;
+  max_number_of_monthly_orders: number;
+  max_number_of_simultaneous_orders: number;
+  purchase_limit: number;
+  recurrence: string | null;
+  recurring_subscription: boolean;
+  service_description: string;
+  service_image: string | null;
+  single_sale: boolean;
+  standard: boolean;
+  test_period: boolean;
+  test_period_duration: number;
+  test_period_duration_unit_of_measurement: string;
+  test_period_price: number;
+  time_based: boolean;
+  price_id: string;
+  briefs?: ServiceBrief[]; 
+}
+
+export default function BriefConnectionStep(
+  previousService? : Service,
+  previousBriefs?: ServiceBrief[],
+) {
   const { prevStep, form } = useMultiStepFormContext<typeof FormSchema>();
   const { t } = useTranslation('services');
   const [loading, setLoading] = useState(false);
 
   const client = getSupabaseBrowserClient<Database>();
   const [briefs, setBriefs] = useState<Brief.Type[]>([]);
-  const [selectedBriefs, setSelectedBriefs] = useState<
-    { id: string; name: string }[]
-  >([]);
-
+  const [selectedBriefs, setSelectedBriefs] = useState<{ id: string; name: string }[]>(Array.isArray(previousBriefs) ? previousBriefs : []);
+  
   const handleSelect = (value: Brief.Type) => {
     const prevValues = form.getValues('step_connect_briefs') ?? [];
 
@@ -66,7 +106,7 @@ export default function BriefConnectionStep() {
     // Insert briefs to service
     try {
       const briefsToConnect = form.getValues('step_connect_briefs');
-      const formattedBriefsToConnect = briefsToConnect.map((brief) => ({
+      const formattedBriefsToConnect = briefsToConnect?.map((brief) => ({
         brief_id: brief.id,
         service_id: serviceId,
       }));
@@ -84,7 +124,6 @@ export default function BriefConnectionStep() {
     // Create the service
     // "services" needs to be modified when all the model is well defined and handled via prev steps
     try {
-      // const { service_name } = form.getValues('step_service_details');
       const propietary_organization_id = await getPrimaryOwnerId();
       if (!propietary_organization_id) {
         throw new Error('No propietary_organization_id provided');
@@ -101,12 +140,21 @@ export default function BriefConnectionStep() {
       const serviceId = service.supabase.id;
 
       await addBriefToService(serviceId);
-      //window.location.reload();
-      // onSubmit()
     } catch (error) {
       console.error(error);
     }
   };
+
+  const updatePreviousService = async () => {
+    try {
+      const values = form.getValues();
+      await updateService(values, previousService.previousService.price_id);
+      toast.success('Service updated successfully');
+
+    } catch {
+      console.error('Error while updating service');
+    }
+  }
 
   useEffect(() => {
     const getBriefs = async () => {
@@ -197,14 +245,28 @@ export default function BriefConnectionStep() {
           {t('previous')}
         </Button>
 
-        <Link
-          type="button"
-          onClick={createNewService}
-          href={'/services'}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-        >
-          {t('createService')}
-        </Link>
+        
+        
+
+        {previousService?.previousService ? (
+          <Link
+            type="button"
+            onClick={updatePreviousService}
+            href={'/services'}
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            {t('updateService')}
+          </Link>
+        ) : (
+          <Link
+            type="button"
+            onClick={createNewService}
+            href={'/services'}
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            {t('createService')}
+          </Link>
+        )}
       </div>
     </section>
   );

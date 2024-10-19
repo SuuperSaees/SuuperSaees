@@ -61,11 +61,11 @@ const CreateOrganization = () => {
       toast.success('Success', {
         description: 'Organization created successfully',
       });
-      await createSubscription();
+      const { userId } = await createSubscription();
       const cleanedDomain = values.organization_name
       .trim()
       .replace(/[^a-zA-Z0-9-]/g, '');
-      const data = await createIngress({ domain: cleanedDomain, isCustom: false},);
+      const data = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
       // redirect to the new organization with the new domain
       const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
       const BASE_URL = IS_PROD

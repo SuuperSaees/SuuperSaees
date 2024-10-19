@@ -51,6 +51,9 @@ const getUser = (request: NextRequest, response: NextResponse) => {
 };
 
 export async function middleware(request: NextRequest) {
+  if (request.method === 'OPTIONS') {
+    return handleCORSPreflight();
+  }
   const response = NextResponse.next();
 
   // API Authentication
@@ -58,7 +61,7 @@ export async function middleware(request: NextRequest) {
   if (apiAuthResult) return apiAuthResult;
 
   // Domain Check
-  const domainCheckResult = await handleDomainCheck(request);
+  const domainCheckResult = await handleDomainCheck(request, response);
   if (domainCheckResult) return domainCheckResult;
 
   const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
@@ -72,7 +75,11 @@ export async function middleware(request: NextRequest) {
   const shouldIgnorePath = (pathname: string) =>
     Array.from(ignorePath).some((path) => pathname.includes(path));
 
-  if (IS_PROD && !shouldIgnorePath(request.nextUrl.pathname) && new URL(request.nextUrl.origin).host !== process.env.HOST_C4C7US) {
+  if (
+    IS_PROD &&
+    !shouldIgnorePath(request.nextUrl.pathname) &&
+    new URL(request.nextUrl.origin).host !== process.env.HOST_C4C7US
+  ) {
     try {
       const supabase = createMiddlewareClient(request, response);
       const {
@@ -124,6 +131,8 @@ export async function middleware(request: NextRequest) {
   if (request.headers.has('next-action')) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
+
+  setCORSHeaders(csrfResponse);
 
   return csrfResponse;
 }
@@ -262,4 +271,23 @@ function matchUrlPattern(url: string) {
  */
 function setRequestId(request: Request) {
   request.headers.set('x-correlation-id', crypto.randomUUID());
+}
+
+function handleCORSPreflight() {
+  const response = new NextResponse(null, { status: 204 });
+  setCORSHeaders(response);
+  return response;
+}
+
+function setCORSHeaders(response: NextResponse) {
+  response.headers.append('Access-Control-Allow-Credentials', 'true');
+  response.headers.append('Access-Control-Allow-Origin', '*'); // replace this your actual origin
+  response.headers.append(
+    'Access-Control-Allow-Methods',
+    'GET,DELETE,PATCH,POST,PUT',
+  );
+  response.headers.append(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+  );
 }

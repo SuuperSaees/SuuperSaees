@@ -1,22 +1,38 @@
-import { useMutation } from "@tanstack/react-query";
-import { addFormFieldsToBriefs, createBrief } from "~/team-accounts/src/server/actions/briefs/create/create-briefs";
-import { briefCreationFormSchema } from "../schemas/brief-creation-schema";
-import { Dispatch, SetStateAction, useState } from "react";
-import { Brief } from "~/lib/brief.types";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { FormField } from "../types/brief.types";
-import { z } from "zod";
+'use client';
 
-export const useBrief = (setFormFields: Dispatch<SetStateAction<FormField[]>>) => {
+import { Dispatch, SetStateAction, useState } from 'react';
 
+import { useRouter } from 'next/navigation';
+
+import { useMutation } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { Brief } from '~/lib/brief.types';
+import {
+  addFormFieldsToBriefs,
+  createBrief,
+} from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
+import {
+  updateBriefById,
+  updateFormFieldsById,
+} from '~/team-accounts/src/server/actions/briefs/update/update-brief';
+
+import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
+import { FormField } from '../types/brief.types';
+
+export const useBrief = (
+  setFormFields: Dispatch<SetStateAction<FormField[]>>,
+) => {
   const router = useRouter();
-  
+
   const defaultBrief = {
     name: '',
     description: '',
-  }
+  };
   const [brief, setBrief] = useState<Brief.Insert>(defaultBrief);
+  const { t } = useTranslation('briefs');
 
   function updateBrief(updatedBrief: Brief.Insert) {
     setBrief(updatedBrief);
@@ -24,31 +40,54 @@ export const useBrief = (setFormFields: Dispatch<SetStateAction<FormField[]>>) =
 
   // Mutation to handle brief creation
   const briefMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof briefCreationFormSchema>) => {
-      // Create a new brief with the provided values
-      const briefId = await createBrief({
-        name: values.name,
-        description: values.description,
-        image_url: values.image_url,
-      });
-
-      // If brief creation was successful, add associated form fields
-      if (briefId?.id) {
-        await addFormFieldsToBriefs(values.questions, briefId.id);
+    mutationFn: async ({
+      values,
+      isUpdate,
+    }: {
+      values: z.infer<typeof briefCreationFormSchema>;
+      isUpdate?: boolean;
+    }) => {
+      if (isUpdate) {
+        await updateBriefById({
+          id: brief.id,
+          name: values.name,
+          description: values.description ?? null,
+          image_url: values.image_url ?? null,
+          propietary_organization_id: brief.propietary_organization_id,
+        });
+        await updateFormFieldsById(values.questions, brief.id);
       } else {
-        throw new Error('Failed to retrieve briefId'); // Error handling for brief creation failure
+        // Create a new brief with the provided values
+        const briefId = await createBrief({
+          name: values.name,
+          description: values.description,
+          image_url: values.image_url,
+        });
+
+        // If brief creation was successful, add associated form fields
+        if (briefId?.id) {
+          await addFormFieldsToBriefs(values.questions, briefId.id);
+        } else {
+          throw new Error('Failed to retrieve briefId'); // Error handling for brief creation failure
+        }
       }
     },
-    onError: () => {
+    onError: (_, { isUpdate }) => {
       // Show error toast notification on mutation failure
-      toast('Error', { description: 'There was an error creating the brief.' });
+      const errorMessage = isUpdate
+        ? t('creation.form.errorUpdating')
+        : t('creation.form.errorCreating');
+      toast('Error', { description: errorMessage });
     },
-    onSuccess: () => {
+    onSuccess: (_, { isUpdate }) => {
       // Show success toast notification and redirect on successful brief creation
-      toast('Success', { description: 'The brief has been created.' });
-      router.push('/briefs'); // Redirect to briefs page
+      const successMessage = isUpdate
+        ? t('creation.form.updateSuccess')
+        : t('creation.form.createSuccess');
+      toast('Success', { description: successMessage });
+      router.push('/services'); // Redirect to briefs page
       // reset
-      setBrief(defaultBrief)
+      setBrief(defaultBrief);
       setFormFields([]);
     },
   });
@@ -58,5 +97,5 @@ export const useBrief = (setFormFields: Dispatch<SetStateAction<FormField[]>>) =
     briefMutation,
     setBrief,
     updateBrief,
-  }
-}
+  };
+};

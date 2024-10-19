@@ -52,7 +52,6 @@ export default function Widgets() {
         </>
       ) : (
         <>
-          <h1 className="text-2xl font-bold">Widgets</h1>
           <div className='flex flex-col gap-4 max-h-full overflow-y-auto no-scrollbar'>
 
             <Inputs inputs={mappedInputs} />

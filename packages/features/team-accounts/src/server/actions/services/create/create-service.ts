@@ -6,10 +6,13 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { fetchClientByOrgId } from '../../clients/get/get-clients';
 import {
   fetchCurrentUser,
@@ -19,7 +22,7 @@ import {
 import { hasPermissionToAddClientServices } from '../../permissions/services';
 import { updateTeamAccountStripeId } from '../../team-details-server-actions';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 interface ServiceData {
   step_type_of_service: {
@@ -56,9 +59,8 @@ export const createService = async (clientData: ServiceData) => {
   try {
     const primary_owner_user_id = await getPrimaryOwnerId();
     if (!primary_owner_user_id) throw new Error('No primary owner found');
-
-    let stripe_account_id = (await getStripeAccountID()) as string;
-
+    const { userId, stripeId: stripeAccountId } = await getStripeAccountID();
+    let stripeId = stripeAccountId;
     const newService = {
       created_at: new Date().toISOString(),
       status: 'active',
@@ -98,23 +100,25 @@ export const createService = async (clientData: ServiceData) => {
 
     if (error) throw new Error(error.message);
 
-    if (!stripe_account_id) {
+    if (!stripeId) {
       const user = await fetchUserAccount(client);
-      const stripeAccount = await createStripeAccount('');
+      const stripeAccount = await createStripeAccount('', user.id);
       await updateTeamAccountStripeId({
         stripe_id: stripeAccount.accountId,
         id: user?.id as string,
       });
-      stripe_account_id = stripeAccount.accountId;
+      stripeId = stripeAccount.accountId;
     }
     const stripeProduct = await createStripeProduct(
-      stripe_account_id,
+      stripeId,
       clientData,
+      userId,
     );
     const stripePrice = await createStripePrice(
-      stripe_account_id,
+      stripeId,
       stripeProduct.productId,
       clientData,
+      userId,
     );
 
     await updateServiceWithPriceId(
@@ -143,7 +147,9 @@ async function fetchUserAccount(client) {
   return user;
 }
 
-async function createStripeAccount(email: string) {
+async function createStripeAccount(email: string, userId: string) {
+  const baseUrl = await getDomainByUserId(userId, true);
+  
   const response = await fetch(`${baseUrl}/api/stripe/create-account`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -153,7 +159,12 @@ async function createStripeAccount(email: string) {
   return response.json();
 }
 
-async function createStripeProduct(accountId: string, clientData: ServiceData) {
+async function createStripeProduct(
+  accountId: string,
+  clientData: ServiceData,
+  userId: string,
+) {
+  const baseUrl = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -172,7 +183,9 @@ async function createStripePrice(
   accountId: string,
   productId: string,
   clientData: ServiceData,
+  userId: string,
 ) {
+  const baseUrl = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -217,7 +230,7 @@ export async function addServiceToClient(
     const clientId = clientData[0]?.id;
     const clientAgencyId = clientData[0]?.agency_id;
 
-    if (!clientId ?? !clientAgencyId) throw new Error('No client found');
+    if (!clientId || !clientAgencyId) throw new Error('No client found');
 
     // Step 3: Verify the permissions to add service to client
     const hasPermission =

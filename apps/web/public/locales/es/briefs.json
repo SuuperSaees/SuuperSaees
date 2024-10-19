@@ -1,6 +1,6 @@
 {
     "briefs":"Briefs",
-    "briefTitle": "Resumen",
+    "briefTitle": "Brief",
     "name": "Nombre",
     "services": "Servicios Conectados",
     "createdAt": "Creado El",
@@ -12,7 +12,7 @@
     "deleteDescription": "¿Estás seguro de que deseas eliminar este brief?",
     "delete": "Eliminar",
     "cancel": "Cancelar",
-    "updateBrief": "Actualizar Resumen",
+    "updateBrief": "Actualizar brief",
     "previous": "Anterior",
     "next": "Siguiente",
     "validation": {
@@ -22,8 +22,8 @@
     "creation": {
     "title": "Crear brief",
     "form": {
-        "addQuestion": "Agregar pregunta",
-        "submit": "Crear resumen",
+        "addQuestion": "Añade o arrastra un nuevo elemento",
+        "submit": "Crear brief",
         "titleLabel": "Nombre del brief",
         "titlePlaceholder": "Ingrese el nombre de su brief",
         "questionLabel": "Pregunta",
@@ -32,7 +32,12 @@
         "placeholderPlaceholder": "Agregar un marcador de posición",
         "descriptionLabel": "Descripción del brief",
         "imageLabel": "Imagen del brief",
-        "defaultPlaceholder": "Añade una descripción..."
+        "defaultPlaceholder": "Añade una descripción...",
+        "update": "Actualizar brief",
+        "createSuccess": "Brief creado con éxito",
+        "updateSuccess": "Brief actualizado con éxito",
+        "errorCreating": "Error creando brief",
+        "errorUpdating": "Error actualizando brief"
     },
     "widgets": {
       "edit": {
@@ -47,6 +52,9 @@
         "title": "Ajustes"
       }
     }
+  },
+  "update": {
+    "title": "Actualizar brief"
   },
   "singleChoice": {
     "title": "Título",
