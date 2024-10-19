@@ -45,6 +45,7 @@ export const briefCreationFormSchema = z.object({
     }),
     questions: z.array(
       z.object({
+        id: z.union([z.string(), z.number()]).optional().nullable(),
         position: z.number(),
         label: z.string().min(1, { message: 'Question label cannot be empty.' }),
         description: z.string().optional().nullable(),
@@ -78,7 +79,8 @@ export const briefCreationFormSchema = z.object({
               selected: z.boolean().optional(),
             }),
           )
-          .optional(),
+          .optional() 
+          .nullable(),
       }),
     ),
   });

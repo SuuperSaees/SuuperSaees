@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+// import { useEffect } from 'react';
 import * as React from 'react';
 
 import { Elements } from '@stripe/react-stripe-js';
@@ -13,21 +13,24 @@ import { Tabs, TabsContent} from '@kit/ui/tabs';
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
 import {
   ServicesContextProvider,
-  useServicesContext,
+  // useServicesContext,
 } from '../contexts/services-context';
 import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table';
 import { Brief } from '~/lib/brief.types';
+import { Service } from '~/lib/services.types';
 
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
-  briefs : Brief.Relationships.Services.Response[]
+  briefs : Brief.Relationships.Services.Response[],
+  services: Service.Relationships.Client.Response[];
 }
 
 const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
   stripePromise,
-  briefs
+  briefs,
+  services
 }) => {
-  const { services, loading, updateServices } = useServicesContext();
+  // const { services, loading, updateServices } = useServicesContext();
   const { t } = useTranslation('orders');
   const [activeTab, setActiveTab] = React.useState<'services' | 'briefs'>(
     'services',
@@ -36,26 +39,27 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
   const handleTabClick = (value: 'services' | 'briefs') => {
     setActiveTab(value);
   };
-  useEffect(() => {
-    updateServices(true).catch((error) => {
-      console.log(error.message);
-    });
-  }, []);
+  // useEffect(() => {
+  //   updateServices(true).catch((error) => {
+  //     console.log(error.message);
+  //   });
+  // }, []);
 
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div
-          className="text-surface inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-          role="status"
-        >
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Loading...
-          </span>
-        </div>
-      </div>
-    );
-  }
+
+  // if (loading) {
+  //   return (
+  //     <div className="flex h-screen items-center justify-center">
+  //       <div
+  //         className="text-surface inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+  //         role="status"
+  //       >
+  //         <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+  //           Loading...
+  //         </span>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <Tabs
