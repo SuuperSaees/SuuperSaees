@@ -22,6 +22,7 @@ type OrderInsert = Omit<
 export const createOrders = async (
   orders: OrderInsert[],
   briefResponses?: Brief.Relationships.FormFieldResponses[],
+  orderFollowers?: string[],
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -204,7 +205,20 @@ export const createOrders = async (
       if (assignedOrdersError) throw new Error(assignedOrdersError.message);
     }
 
-    // Step 7: Add order follow-up for client owners/members
+    // Step 7: add order followers if present
+    if (orderFollowers && orderFollowers.length > 0) {
+      const { error: followUpError } = await client
+        .from('order_followers')
+        .insert(
+          orderFollowers.map((followerId) => ({
+            order_id: orderData.id,
+            client_member_id: followerId,
+          })),
+        );
+      if (followUpError) throw new Error(followUpError.message);
+    }
+
+    // Step 8: Add order follow-up for client owners/members
     if (['client_owner', 'client_member'].includes(roleData.account_role)) {
       const followUpData = {
         order_id: orderData.id,
@@ -217,7 +231,7 @@ export const createOrders = async (
       if (followUpError) throw new Error(followUpError.message);
     }
 
-    // Step 8: Send email notification
+    // Step 9: Send email notification
     if (emailData.email) {
       await sendOrderCreationEmail(
         emailData.email,

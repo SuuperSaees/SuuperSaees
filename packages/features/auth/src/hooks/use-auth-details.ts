@@ -21,7 +21,6 @@ export const useAuthDetails = (hostname: string) => {
       let domainFullData = null;
       try {
         domainFullData = await getFullDomainBySubdomain(hostname, true);
-        console.log(domainFullData)
       } catch (error) {
         console.error('Error fetching auth details', error);
       }

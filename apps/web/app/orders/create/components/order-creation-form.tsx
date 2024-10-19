@@ -1,41 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
-import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
-import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
-import { createOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/create/create-order';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
-import { Spinner } from '@kit/ui/spinner';
+  MultiStepForm,
+  MultiStepFormStep,
+  createStepSchema,
+} from '@kit/ui/multi-step-form';
 
-import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
+import { generateUUID } from '~/utils/generate-uuid';
+
+import { generateOrderCreationSchema } from '../schemas/order-creation-schema';
+import BriefSelectionForm from './brief-selection-form';
+import { useMutation } from '@tanstack/react-query';
+import { createOrders } from '~/team-accounts/src/server/actions/orders/create/create-order';
+import { toast } from 'sonner';
 import { Order } from '~/lib/order.types';
-
-import { OrderBriefs } from './order-briefs';
-
-function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0,
-      v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
+import BriefCompletionForm from './brief-completion-form';
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -45,67 +32,62 @@ type OrderInsert = Omit<
   | 'propietary_organization_id'
 > & {
   fileIds?: string[];
+  uniqueId: string;
 };
 
-const OrderCreationForm = ({ briefs }: { briefs: Brief.Response[] }) => {
-  const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
+interface OrderCreationFormProps {
+  briefs: Brief.Response[];
+  userRole: string;
+}
+
+const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
+
   const uniqueId = generateUUID();
   const { t } = useTranslation('orders');
 
-  const orderCreationFormSchema = z.object({
-    uuid: z.string(),
-    title: 
-      briefs.length > 0
-        ? z.string().optional()
-        : z
-            .string()
-            .min(2, { message: t('creation.validation.minTitleCharacters') }),
-    description:
-      briefs.length > 0
-        ? z.string().optional()
-        : z
-            .string()
-            .min(2, { message: t('creation.validation.minDescriptionCharacters') }),
-    fileIds: z.array(z.string()),
-    brief_responses: z
-      .array(
-        z.object({
-          form_field_id: z.string(),
-          brief_id: z.string(),
-          order_id: z.string(),
-          response: z
-            .string()
-            .min(2, {
-              message: t('validation.minCharacters'),
-            })
-            .max(3000, {
-              message: t('validation.maxCharacters'),
-            }),
-        }),
-      )
-      .optional(),
+  const orderCreationFormSchema = generateOrderCreationSchema(
+    briefs.length > 0,
+    t,
+  );
+
+  const formSchema = createStepSchema({
+    briefSelection: z.object({
+      selectedBriefId: z.string().min(1),
+    }),
+    briefCompletion: orderCreationFormSchema,
   });
 
-  const form = useForm<z.infer<typeof orderCreationFormSchema>>({
-    resolver: zodResolver(orderCreationFormSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      uuid: uniqueId,
-      title: '',
-      description: '',
-      fileIds: [],
-      brief_responses: undefined,
+      briefSelection: {
+        selectedBriefId: '',
+      },
+      briefCompletion: {
+        uuid: uniqueId,
+        title: '',
+        description: '',
+        fileIds: [],
+        brief_responses: undefined,
+        order_followers: undefined,
+      },
     },
     mode: 'onChange',
   });
 
-  const createOrdersMutations = useMutation({
-    mutationFn: async (values: z.infer<typeof orderCreationFormSchema>) => {
+  
+  const orderMutation = useMutation({
+    mutationFn: async ({values, fileIds}: {
+      values: z.infer<typeof orderCreationFormSchema>;
+      fileIds: string[];
+    }) => {
       const newOrder = {
         ...values,
-        fileIds: uploadedFileIds,
+        fileIds,
       };
       delete newOrder.brief_responses;
-      await createOrders([newOrder as OrderInsert], values.brief_responses);
+      delete newOrder.order_followers;
+      await createOrders([newOrder as OrderInsert], values.brief_responses, values.order_followers);
     },
     onError: () => {
       toast('Error', {
@@ -119,78 +101,24 @@ const OrderCreationForm = ({ briefs }: { briefs: Brief.Response[] }) => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof orderCreationFormSchema>) => {
-    createOrdersMutations.mutate(values);
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    orderMutation.mutate({values: values.briefCompletion, fileIds: values.briefCompletion.fileIds});
   };
-
-  const handleFileIdsChange = (fileIds: string[]) => {
-    setUploadedFileIds(fileIds);
-    form.setValue('fileIds', fileIds);
-  };
-
+  const selectedBriefs = briefs.filter((brief) => brief.id === form.getValues('briefSelection.selectedBriefId'));
+  
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
-        
-        {!briefs.length && (
-          <>
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
-                  <FormControl>
-                    <ThemedInput
-                      {...field}
-                      placeholder={t('creation.form.titlePlaceholder')}
-                      className="focus-visible:ring-none"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('creation.form.descriptionLabel')}</FormLabel>
-                  <FormControl>
-                    <ThemedTextarea
-                      {...field}
-                      placeholder={t('creation.form.descriptionPlaceholder')}
-                      rows={5}
-                      className="focus-visible:ring-none"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <UploadFileComponent
-              bucketName="orders"
-              uuid={uniqueId}
-              onFileIdsChange={handleFileIdsChange}
-            />
-          </>
-        )}
+    <MultiStepForm schema={formSchema} form={form} onSubmit={onSubmit} className='h-full [&>*]:h-full '>
+      
+      <MultiStepFormStep name='briefSelection' className='h-full [&>*]:h-full '>
+        <BriefSelectionForm briefs={briefs} />
+      </MultiStepFormStep>
 
-        <OrderBriefs
-          briefs={briefs}
-          form={form}
-          orderId={form.getValues('uuid')}
-        />
+      <MultiStepFormStep name='briefCompletion' className='h-full [&>*]:h-full'>
+        <BriefCompletionForm briefs={selectedBriefs } uniqueId={uniqueId} orderMutation={orderMutation} userRole={userRole} />
+      </MultiStepFormStep>
 
-        <ThemedButton type="submit" className="flex gap-2">
-          <span>{t('creation.form.submitMessage')}</span>
-          {createOrdersMutations.isPending && (
-            <Spinner className="h-4 w-4 text-white" />
-          )}
-        </ThemedButton>
-      </form>
-    </Form>
+      
+    </MultiStepForm>
   );
 };
 
