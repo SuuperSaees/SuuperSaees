@@ -84,5 +84,21 @@
   "placeholder": "Escribe un mensaje...",
   "dropdown": "Selecciona una opción",
   "deletedFile": "Archivo eliminado",
-  "deletedFileDescription": "El archivo ha sido eliminado"
+  "deletedFileDescription": "El archivo ha sido eliminado",
+  "form": {
+    "completion": {
+      "client": {
+        "title": "Agregar un cliente",
+        "label": "Nombre de la organización",
+        "select": {
+          "placeholder": "Selecciona una organización"
+        },
+        "members": {
+          "label": "Miembros",
+          "placeholder": "Busca y selecciona un miembro",
+          "notFound": "No se encontraron miembros"
+        }
+      }
+    }
+  }
 }

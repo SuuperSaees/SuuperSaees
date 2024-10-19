@@ -161,7 +161,7 @@ export default function BriefConnectionStep(
       setLoading(true);
 
       const firstAccountId = await getPrimaryOwnerId();
-
+      const propietary_organization_id = await getPrimaryOwnerId();
       if (firstAccountId) {
         const { data } = await client.from('briefs').select(`
               id,
@@ -169,7 +169,7 @@ export default function BriefConnectionStep(
               name,
               propietary_organization_id,
               services ( name )
-              `);
+              `).eq('propietary_organization_id', propietary_organization_id ?? '')
 
         return data;
       }
