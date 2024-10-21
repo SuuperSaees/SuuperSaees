@@ -68,7 +68,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                           handleQuestionChange(index, 'label', e.target.value)
                         }
 
-                        placeholder={t('singleChoice.title')}
+                        placeholder={t('datePicker.title')}
                         className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                       />
                     </FormControl>
@@ -76,7 +76,6 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                   </FormItem>
                 )}
               />
-              <span className="font-bold">*</span>
             </div>
 
             <FormField
@@ -96,7 +95,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                           e.target.value,
                         )
                       }
-                      placeholder={t('singleChoice.description')}
+                      placeholder={t('datePicker.description')}
                       className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>

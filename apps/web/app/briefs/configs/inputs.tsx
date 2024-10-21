@@ -33,9 +33,9 @@ export const generateInputs = (
         icon: <Text className="h-6 w-6" />,
         action: () => action('text-short'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Placeholder',
-          description: 'Description of the short text',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'text-short',
         },
         component: (props: ComponentProps) => (
@@ -56,9 +56,9 @@ export const generateInputs = (
         icon: <TextIcon className="h-6 w-6" />,
         action: () => action('text-large'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Enter a description... ',
-          description: 'This is a hint text for help user',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'text-large',
         },
         component: (props: ComponentProps) => (
@@ -79,9 +79,9 @@ export const generateInputs = (
         icon: <Upload className="h-6 w-6" />,
         action: () => action('file'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Click or drag and drop files here...',
-          description: 'Description of the file upload',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'file',
         },
         component: (props: ComponentProps) => (
@@ -102,9 +102,9 @@ export const generateInputs = (
         icon: <CheckSquare className="h-6 w-6" />,
         action: () => action('multiple_choice'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Select multiple options',
-          description: 'Description of the multiple choice',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'multiple_choice',
           options: [
             {
@@ -139,9 +139,9 @@ export const generateInputs = (
         icon: <Circle className="h-6 w-6" />,
         action: () => action('select'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Select an option',
-          description: 'Description of the select',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'select',
           options: [
             {
@@ -176,9 +176,9 @@ export const generateInputs = (
         icon: <ChevronDown className="h-6 w-6" />,
         action: () => action('dropdown'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Select an option',
-          description: 'Description of the dropdown',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'dropdown',
           options: [
             {
@@ -213,9 +213,9 @@ export const generateInputs = (
         icon: <CalendarCheck2 className="h-6 w-6" />,
         action: () => action('date'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Select a date',
-          description: 'Description of the date',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'date',
         },
         component: (props: ComponentProps) => (

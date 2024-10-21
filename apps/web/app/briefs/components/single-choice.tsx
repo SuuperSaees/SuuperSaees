@@ -71,7 +71,6 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
                   </FormItem>
                 )}
               />
-              <span className="font-bold">*</span>
             </div>
 
             <FormField
