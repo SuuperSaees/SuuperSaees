@@ -38,7 +38,7 @@ export const useAuthDetails = (hostname: string) => {
             background_color:
             domainFullData.settings.find(
               (setting) => setting.key === 'sidebar_background_color',
-            )?.value ?? '', // Default to empty string if not found, and manage in the component
+            )?.value ?? '#f2f2f2', // Default to empty string if not found, and manage in the component
         });
       }
     };
