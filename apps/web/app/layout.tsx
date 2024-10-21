@@ -69,4 +69,4 @@ function getTheme() {
   return cookies().get('theme')?.value;
 }
 
-export const generateMetadata = generateRootMetadata().then((metadata) => metadata);
+export const generateMetadata = generateRootMetadata;

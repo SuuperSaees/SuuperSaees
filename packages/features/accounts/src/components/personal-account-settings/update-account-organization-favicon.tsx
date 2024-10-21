@@ -53,7 +53,7 @@ export default function UpdateAccountOrganizationFavicon(props: {
         const promise = () =>
           removeExistingStorageFile().then(
             () =>
-              uploadOrganizationLogo(client, file, props.organizationId).then(
+              uploadOrganizationFavicon(client, file).then(
                 (value) => {
                   updateOrganizationSetting.mutate({
                     key: 'favicon_url',
@@ -111,15 +111,14 @@ function deleteFaviconImage(client: SupabaseClient<Database>, url: string) {
   return bucket.remove([fileName]);
 }
 
-async function uploadOrganizationLogo(
+async function uploadOrganizationFavicon(
   client: SupabaseClient<Database>,
   photoFile: File,
-  organizationId: string,
 ) {
   const bytes = await photoFile.arrayBuffer();
   const bucket = client.storage.from(ORGANIZATION_BUCKET);
-  const extension = photoFile.name.split('.').pop();
-  const fileName = await getAvatarFileName(organizationId, extension);
+  const host = window.location.host ?? '';
+  const fileName = getFileNameFavicon(host);
 
   const result = await bucket.upload(fileName, bytes);
 
@@ -130,15 +129,8 @@ async function uploadOrganizationLogo(
   throw result.error;
 }
 
-async function getAvatarFileName(
-  organizationId: string,
-  extension: string | undefined,
+function getFileNameFavicon(
+  host: string,
 ) {
-  const { nanoid } = await import('nanoid');
-
-  // we add a version to the URL to ensure
-  // the browser always fetches the latest image
-  const uniqueId = nanoid(16);
-
-  return `${organizationId}.${extension}?v=${uniqueId}`;
+  return `${host}_favicon_url`;
 }
