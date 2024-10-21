@@ -881,6 +881,7 @@ export type Database = {
           options: Json[] | null
           placeholder: string | null
           position: number
+          required : boolean
           type: Database["public"]["Enums"]["field_types"]
         }
         Insert: {
@@ -892,6 +893,7 @@ export type Database = {
           options?: Json[] | null
           placeholder?: string | null
           position: number
+          required : boolean
           type?: Database["public"]["Enums"]["field_types"]
         }
         Update: {
@@ -903,6 +905,7 @@ export type Database = {
           options?: Json[] | null
           placeholder?: string | null
           position?: number
+          required : boolean
           type?: Database["public"]["Enums"]["field_types"]
         }
         Relationships: []

@@ -26,6 +26,7 @@ import { widgetEditSchema } from '../schemas/widget-edit-schema';
 import { RenderVideoContent } from './render-video-content';
 import UploadImageDropzone from './upload-image-dropzone';
 import FormRichTextComponent from './rich-text-content';
+import { Switch } from '@kit/ui/switch';
 
 export type WidgetCreationForm = z.infer<typeof widgetEditSchema>;
 export function WidgetEditForm() {
@@ -80,6 +81,19 @@ export function WidgetEditForm() {
       });
     }
   };
+
+  const handleSwitchChange = (name: keyof WidgetEditFormValues, checked: boolean) => {
+    form.setValue(name, checked)
+
+    if (currentFormField) {
+      updateFormField(currentFormField.id, {
+        ...form.getValues(),
+        id: currentFormField.id,
+        [name]: checked,
+      })
+    }
+    
+  }
 
   const handleChangeContent = (value: string) => {
     form.setValue('label' as keyof z.infer<typeof widgetEditSchema>, value);
@@ -176,6 +190,30 @@ export function WidgetEditForm() {
       hideRichTextFields
     ) {
       return null;
+    } else if(fieldName == 'required'){
+      return (
+        <FormField
+        key={fieldName}
+        name={fieldName as keyof z.infer<typeof widgetEditSchema>}
+        control={form.control}
+        render={({ field }) => (
+          <FormItem className="space-y-0 flex items-center justify-between">
+            <p className='text-gray-700 font-semibold'>
+              Required
+            </p>
+            <FormControl>
+              <Switch
+                checked={field.value}
+                onCheckedChange={(checked) => {
+                  field.onChange(checked)
+                  handleSwitchChange('required', checked)
+                }}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+        />
+      )
     } else {
       return (
         <FormField

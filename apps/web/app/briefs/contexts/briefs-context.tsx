@@ -100,6 +100,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
         description: '', // editable
         placeholder: 'Add a title...', // editable
         type: 'text-short', // not editable,
+        required: false,
         position: 0,
       },
     },

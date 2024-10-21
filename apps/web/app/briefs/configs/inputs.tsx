@@ -37,6 +37,7 @@ export const generateInputs = (
           placeholder: 'Placeholder',
           description: 'Description of the short text',
           type: 'text-short',
+          required: false
         },
         component: (props: ComponentProps) => (
           <FormFieldShortText
@@ -60,6 +61,7 @@ export const generateInputs = (
           placeholder: 'Enter a description... ',
           description: 'This is a hint text for help user',
           type: 'text-large',
+          required: false
         },
         component: (props: ComponentProps) => (
           <TextLarge
@@ -83,6 +85,7 @@ export const generateInputs = (
           placeholder: 'Click or drag and drop files here...',
           description: 'Description of the file upload',
           type: 'file',
+          required: false
         },
         component: (props: ComponentProps) => (
           <UploadFiles
@@ -102,6 +105,7 @@ export const generateInputs = (
         icon: <CheckSquare className="h-6 w-6" />,
         action: () => action('multiple_choice'), // Action passed dynamically
         content: {
+          required: false,
           label: 'Label',
           placeholder: 'Select multiple options',
           description: 'Description of the multiple choice',
@@ -139,6 +143,7 @@ export const generateInputs = (
         icon: <Circle className="h-6 w-6" />,
         action: () => action('select'), // Action passed dynamically
         content: {
+          required: false,
           label: 'Label',
           placeholder: 'Select an option',
           description: 'Description of the select',
@@ -176,6 +181,7 @@ export const generateInputs = (
         icon: <ChevronDown className="h-6 w-6" />,
         action: () => action('dropdown'), // Action passed dynamically
         content: {
+          required: false,
           label: 'Label',
           placeholder: 'Select an option',
           description: 'Description of the dropdown',
@@ -217,6 +223,7 @@ export const generateInputs = (
           placeholder: 'Select a date',
           description: 'Description of the date',
           type: 'date',
+          required: false
         },
         component: (props: ComponentProps) => (
           <FormFieldDatePicker
