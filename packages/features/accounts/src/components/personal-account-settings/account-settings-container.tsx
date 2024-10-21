@@ -281,9 +281,7 @@ export function PersonalAccountSettingsContainer(
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <UpdateAccountOrganizationFavicon
-                        organizationId={user?.organization_id ?? ''}
-                      />
+                      <UpdateAccountOrganizationFavicon />
                     </CardContent>
                   </Card>
                 </>

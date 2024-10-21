@@ -22,9 +22,7 @@ import { useOrganizationSettings } from '../../context/organization-settings-con
 
 const ORGANIZATION_BUCKET = 'organization';
 
-export default function UpdateAccountOrganizationFavicon(props: {
-  organizationId: string;
-}) {
+export default function UpdateAccountOrganizationFavicon() {
   const { favicon_url, updateOrganizationSetting } = useOrganizationSettings();
   const client = useSupabase();
   const { t } = useTranslation('account');
@@ -61,9 +59,6 @@ export default function UpdateAccountOrganizationFavicon(props: {
                   });
                 },
               ),
-            // .then(() => {
-            //   props.onLogoUpdated();
-            // }),
           );
 
         createToaster(promise);
@@ -75,26 +70,18 @@ export default function UpdateAccountOrganizationFavicon(props: {
               value: '',
             });
           });
-        // .then(() => {
-        //   props.onLogoUpdated();
-        // });
 
         createToaster(promise);
       }
     },
-    [client, createToaster, favicon_url, props, updateOrganizationSetting],
+    [client, createToaster, favicon_url, updateOrganizationSetting],
   );
-  // console.log('favicon_url', favicon_url);
   return (
     <ImageUploader value={favicon_url} onValueChange={onValueChange}>
       <div className={'flex flex-col space-y-1'}>
         <span className={'text-sm'}>
-          <Trans i18nKey={'account:brandLogoSelectLabel'} />
+          <Trans i18nKey={'account:brandFaviconSelectLabel'} />
         </span>
-
-        {/* <span className={'text-xs'}>
-          <Trans i18nKey={'account:profilePictureSubheading'} />
-        </span> */}
       </div>
     </ImageUploader>
   );
@@ -113,12 +100,12 @@ function deleteFaviconImage(client: SupabaseClient<Database>, url: string) {
 
 async function uploadOrganizationFavicon(
   client: SupabaseClient<Database>,
-  photoFile: File,
+  faviconFile: File,
 ) {
-  const bytes = await photoFile.arrayBuffer();
+  const bytes = await faviconFile.arrayBuffer();
   const bucket = client.storage.from(ORGANIZATION_BUCKET);
   const host = window.location.host ?? '';
-  const fileName = getFileNameFavicon(host);
+  const fileName = getFaviconFileName(host);
 
   const result = await bucket.upload(fileName, bytes);
 
@@ -129,8 +116,4 @@ async function uploadOrganizationFavicon(
   throw result.error;
 }
 
-function getFileNameFavicon(
-  host: string,
-) {
-  return `${host}_favicon_url`;
-}
+const getFaviconFileName = (host: string,) => `${host}_favicon_url`;
