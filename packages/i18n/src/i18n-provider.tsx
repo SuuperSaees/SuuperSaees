@@ -39,6 +39,7 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
   ) {
     throw loadI18nInstance(settings, resolver);
   }
+
   const LANGUAGE_KEY = 'language';
   const values = [LANGUAGE_KEY];
   if (typeof window !== 'undefined') {
