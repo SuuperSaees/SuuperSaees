@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
   if (!from) missingFields.push('from');
   if (!to) missingFields.push('to');
   if (!subject) missingFields.push('subject');
-  console.log(text, html, 'TESTIIIIINg');
   if (missingFields.length > 0) {
     // Respuesta de error por campos faltantes
     const errorResponse = {
@@ -66,7 +65,6 @@ export async function POST(req: NextRequest) {
       error: 'Internal Server Error',
       details: [(error as Error).message],
     };
-
     return NextResponse.json(errorResponse, { status: 500 });
   }
 }

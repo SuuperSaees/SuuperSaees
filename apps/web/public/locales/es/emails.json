@@ -17,7 +17,7 @@
   "orderCreation": {
     "subject": "Nuevo pedido creado",
     "body": "Tienes un nuevo pedido",
-    "greeting": "Hola ${actualName}",
+    "greeting": "Hola ${toEmail}",
     "newOrderMessage": "Tienes un nuevo pedido de ${emailSender}",
     "viewOrder": "Ver pedido",
     "farewell": "Saludos,",

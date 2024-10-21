@@ -17,7 +17,7 @@
   "orderCreation": {
     "subject": "New order created",
     "body": "You have a new order",
-    "greeting": "Hi ${actualName}",
+    "greeting": "Hi ${toEmail}",
     "newOrderMessage": "You have a new order of ${emailSender}",
     "viewOrder": "View order",
     "farewell": "Regards,",
