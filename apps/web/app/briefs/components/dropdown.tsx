@@ -67,7 +67,7 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                         handleQuestionChange(index, 'label', e.target.value)
                       }
                       placeholder={t('multipleChoice.title')}
-                      className="w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -93,7 +93,7 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                         )
                       }
                       placeholder={t('multipleChoice.description')}
-                      className="w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>

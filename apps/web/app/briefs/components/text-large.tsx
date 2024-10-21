@@ -50,7 +50,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                         handleQuestionChange(index, 'label', e.target.value)
                       }
                       placeholder={t('textLarge.title')}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -77,7 +77,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                         )
                       }
                       placeholder={t('textLarge.description')}
-                      className="w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>

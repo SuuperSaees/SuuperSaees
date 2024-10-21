@@ -67,11 +67,9 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           handleQuestionChange(index, 'label', e.target.value)
                         }
-                        style={{
-                          width: `${Math.max(question.label.length, t('singleChoice.title').length) + 1}ch`,
-                        }}
+
                         placeholder={t('singleChoice.title')}
-                        className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                        className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                       />
                     </FormControl>
                     <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -99,10 +97,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                         )
                       }
                       placeholder={t('singleChoice.description')}
-                      style={{
-                        width: `${Math.max(question?.description?.length ?? 5, t('singleChoice.description').length) + 1}ch`,
-                      }}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
