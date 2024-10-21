@@ -1,44 +1,38 @@
 import React from 'react';
 
 import { UseFormReturn } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
 
 import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 
 import RichTextEditor from '~/components/ui/rich-text-editor';
 
-import { BriefsProvider } from '../contexts/briefs-context';
+import { BriefsProvider} from '../contexts/briefs-context';
 import { FormField as FormFieldType } from '../types/brief.types';
 import { BriefCreationForm } from './brief-creation-form';
 
 export interface FormRichTextComponentProps {
   index: number;
-  question: FormFieldType;
+  question?: FormFieldType;
   form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange?: (index: number, field: 'label', value: string) => void;
+  handleQuestionChange?: (content: string) => void;
   handleRemoveQuestion: (index: number) => void;
   userRole: string;
+  inSidebar?: boolean;
 }
 
 const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
   index,
-  question,
   form,
   userRole,
+  inSidebar = false,
+  question,
+  handleQuestionChange
 }) => {
-  const { t } = useTranslation('briefs');
-
-  const currentValue = form.getValues(`questions.${index}.label`);
-
-  const handleChange = (richText: string) => {
-    form.setValue(`questions.${index}.label`, richText);
-  };
 
   return (
     <FormField
@@ -47,24 +41,24 @@ const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
       render={({ field, fieldState }) => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
           <div className="flex flex-col gap-2">
-            <FormLabel>
-              {t('richText.title')} {index + 1}
-            </FormLabel>
             <FormControl>
               <RichTextEditor
                 {...field}
-                content={currentValue}
-                onChange={handleChange}
+                content={question?.label}
+                onChange={handleQuestionChange}
                 userRole={userRole}
                 hideSubmitButton={true}
+                showToolbar={inSidebar}
+                isEditable={inSidebar ? true : false}
               />
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>
           </div>
-          <BriefsProvider.Options
-            formFieldId={question.id}
-            className="ml-auto"
-          />
+          {!inSidebar ? (
+            <BriefsProvider.Options formFieldId={index} className="ml-auto" />
+          ) : (
+            <></>
+          )}
         </FormItem>
       )}
     />

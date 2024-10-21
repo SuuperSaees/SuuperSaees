@@ -145,6 +145,8 @@ interface RichTextEditorProps {
   userRole: string;
   hideSubmitButton?: boolean;
   useInForm?: boolean;
+  showToolbar? : boolean;
+  isEditable? : boolean;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
 function extractImageUrls(text: string) {
@@ -161,6 +163,8 @@ const RichTextEditor = ({
   toggleExternalUpload,
   userRole,
   hideSubmitButton = false,
+  showToolbar = true,
+  isEditable = true,
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
@@ -333,6 +337,7 @@ const RichTextEditor = ({
 
   useEffect(() => {
     if (editor) {
+      editor.setEditable(isEditable)
       editor.commands.focus();
     }
   }, [editor]);
@@ -355,13 +360,16 @@ const RichTextEditor = ({
         />
       </div>
       <div>
-          <Toolbar
-            editor={editor}
-            toggleExternalUpload={toggleExternalUpload}
-            uploadFileIsExternal={uploadFileIsExternal}
-            userRole={userRole}
-            onChange={onChange}
-          />
+        { showToolbar && (
+            <Toolbar
+              editor={editor}
+              toggleExternalUpload={toggleExternalUpload}
+              uploadFileIsExternal={uploadFileIsExternal}
+              userRole={userRole}
+              onChange={onChange}
+            />
+          )
+        }
           {!hideSubmitButton && ( 
             <ThemedButton
               className="absolute bottom-2 right-2 h-fit w-fit rounded-xl p-2 shadow-sm"
