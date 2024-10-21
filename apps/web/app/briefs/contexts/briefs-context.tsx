@@ -52,12 +52,17 @@ interface BriefsContext {
   editFormField: (id: number) => void;
   stopEditing: () => void;
   startEditing: () => void;
+  setFormFields: Dispatch<SetStateAction<FormField[]>>;
+  setBrief: Dispatch<SetStateAction<Brief.Insert>>;
   form: UseFormReturn<BriefCreationForm>;
-  onSubmit: (values: z.infer<typeof briefCreationFormSchema>) => void;
+  onSubmit: (
+    values: z.infer<typeof briefCreationFormSchema>,
+    isUpdate?: boolean,
+  ) => void;
   briefMutation: UseMutationResult<
     void,
     Error,
-    z.infer<typeof briefCreationFormSchema>,
+    { values: z.infer<typeof briefCreationFormSchema>; isUpdate?: boolean },
     unknown
   >;
   activeTab: 'widgets' | 'settings';
@@ -101,7 +106,10 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   // Form submission handler
-  const onSubmit = (values: z.infer<typeof briefCreationFormSchema>) => {
+  const onSubmit = (
+    values: z.infer<typeof briefCreationFormSchema>,
+    isUpdate?: boolean,
+  ) => {
     // join default question with values (questions)
     const newQuestionValues = [...values.questions, values.default_question];
 
@@ -110,7 +118,9 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
       questions: newQuestionValues,
     };
 
-    briefContext.briefMutation.mutate(newValues); // Trigger the mutation with form values
+    briefContext.briefMutation.mutate({ values: newValues, isUpdate });
+
+     // Trigger the mutation with form values
     setActiveTab('settings');
   };
 

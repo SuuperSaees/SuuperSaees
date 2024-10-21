@@ -21,7 +21,6 @@ export const useAuthDetails = (hostname: string) => {
       let domainFullData = null;
       try {
         domainFullData = await getFullDomainBySubdomain(hostname, true);
-        console.log(domainFullData)
       } catch (error) {
         console.error('Error fetching auth details', error);
       }
@@ -39,7 +38,7 @@ export const useAuthDetails = (hostname: string) => {
             background_color:
             domainFullData.settings.find(
               (setting) => setting.key === 'sidebar_background_color',
-            )?.value ?? '', // Default to empty string if not found, and manage in the component
+            )?.value ?? '#f2f2f2', // Default to empty string if not found, and manage in the component
         });
       }
     };

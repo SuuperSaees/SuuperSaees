@@ -84,6 +84,22 @@
   "placeholder": "Write a message...",
   "dropdown": "Select an option",
   "deletedFile": "File deleted",
-  "deletedFileDescription": "The file was deleted successfully"
+  "deletedFileDescription": "The file was deleted successfully",
+  "form": {
+    "completion": {
+      "client": {
+        "title": "Add a client",
+        "label": "Name of the organization",
+        "select": {
+          "placeholder": "Select an organization"   
+        },
+        "members": {
+          "label": "Members",
+          "placeholder": "Search and select a member",
+          "notFound": "No members found"
+        }
+      }
+    }
+  }
 }
   
