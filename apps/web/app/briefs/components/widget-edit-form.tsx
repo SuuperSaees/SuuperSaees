@@ -19,11 +19,13 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 
+
 import { useBriefsContext } from '../contexts/briefs-context';
 import { useVideoHandler } from '../hooks/use-video-handler';
 import { widgetEditSchema } from '../schemas/widget-edit-schema';
 import { RenderVideoContent } from './render-video-content';
 import UploadImageDropzone from './upload-image-dropzone';
+import FormRichTextComponent from './rich-text-content';
 
 export type WidgetCreationForm = z.infer<typeof widgetEditSchema>;
 export function WidgetEditForm() {
@@ -34,7 +36,6 @@ export function WidgetEditForm() {
     defaultValues: currentFormField,
     mode: 'onChange',
   });
-
   const {
     isUploading,
     videoUrl,
@@ -80,17 +81,18 @@ export function WidgetEditForm() {
     }
   };
 
-  const handleChangeImage = (urlImage: string) => {
-    form.setValue('label' as keyof z.infer<typeof widgetEditSchema>, urlImage);
+  const handleChangeContent = (value: string) => {
+    form.setValue('label' as keyof z.infer<typeof widgetEditSchema>, value);
 
     if (currentFormField) {
       updateFormField(currentFormField.id, {
         ...form.getValues(),
         id: currentFormField.id,
-        label: urlImage,
+        label: value,
       });
     }
   };
+
 
   const onSubmit = (values: z.infer<typeof widgetEditSchema>) => {
     if (currentFormField) {
@@ -148,26 +150,30 @@ export function WidgetEditForm() {
   ) => {
     const fieldIsType = fieldName == 'type';
     const fieldIsPosition = fieldName == 'position';
-    const hideSelectPlaceholder =
+    const hideSelectFields =
       fieldName == 'placeholder' && type == 'select';
-    const hideMultiplePlaceholder =
+    const hideMultipleChoiceFields =
       fieldName == 'placeholder' && type == 'multiple_choice';
-    const hideDropdownPlaceholder =
+    const hideDropdownFields =
       fieldName == 'placeholder' && type == 'dropdown';
-    const hideDatePlaceholder = fieldName == 'placeholder' && type == 'date';
-    const hideTitlePlaceholderAndDescription =
+    const hideDateFields = fieldName == 'placeholder' && type == 'date';
+    const hideTitleFields =
       (fieldName == 'placeholder' || fieldName == 'description') &&
       type == 'h1';
+    const hideRichTextFields =
+      (fieldName == 'placeholder' || fieldName == 'description' || fieldName == 'questions') &&
+      type == 'rich-text';
     
 
     if (
       fieldIsType ||
       fieldIsPosition ||
-      hideSelectPlaceholder ||
-      hideDropdownPlaceholder ||
-      hideDatePlaceholder ||
-      hideTitlePlaceholderAndDescription ||
-      hideMultiplePlaceholder
+      hideSelectFields ||
+      hideDropdownFields ||
+      hideDateFields ||
+      hideTitleFields ||
+      hideMultipleChoiceFields ||
+      hideRichTextFields
     ) {
       return null;
     } else {
@@ -219,12 +225,24 @@ export function WidgetEditForm() {
         form={form}
         index={currentFormField?.id}
         nameField={'label'}
-        handleQuestionChange={handleChangeImage}
+        handleQuestionChange={handleChangeContent}
         defaultValue={currentFormField?.label}
         handleRemove={currentFormField ? () => updateFormField(currentFormField?.id, { ...currentFormField, label: '' }) : () => null}
       />
     );
   };
+
+  const renderRichTextInput = () => {
+    return(
+      <FormRichTextComponent
+        index={currentFormField?.id}
+        form = {form}
+        userRole = {''}
+        inSidebar = {true}
+        handleQuestionChange={handleChangeContent}
+      />
+    )
+  }
 
   const renderFormFields = () => {
     if (!currentFormField) return null;
@@ -237,6 +255,7 @@ export function WidgetEditForm() {
         if (type === 'image' && fieldName == 'placeholder')
           return renderImageInput();
         if (type === 'image' && fieldName == 'label') return null;
+        if (type === 'rich-text' && fieldName == 'label') return renderRichTextInput()
         if (type === 'video' && fieldName === 'label') {
           return (
             <div key={fieldName}>
