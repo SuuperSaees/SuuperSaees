@@ -89,18 +89,20 @@ export const getOrganizationSettings = async () => {
 export const getOrganizationSettingsByOrganizationId = async (
   organizationId: string,
   adminActived = false,
+  values: string[] = [
+    'theme_color',
+    'logo_url',
+    'sidebar_background_color',
+    'language',
+    'favicon_url',
+  ],
 ): Promise<{ key: string; value: string }[]> => {
   const client = getSupabaseServerComponentClient({ admin: adminActived });
   const { data: organizationSettings, error: settingsError } = await client
     .from('organization_settings')
     .select('key, value')
     .eq('account_id', organizationId)
-    .in('key', [
-      'theme_color',
-      'logo_url',
-      'sidebar_background_color',
-      'language',
-    ]);
+    .in('key', values);
 
   if (settingsError) {
     throw settingsError.message;

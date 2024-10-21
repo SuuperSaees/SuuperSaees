@@ -39,16 +39,16 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
   ) {
     throw loadI18nInstance(settings, resolver);
   }
-
+  const LANGUAGE_KEY = 'language';
+  const values = [LANGUAGE_KEY];
   if (typeof window !== 'undefined') {
-    getFullDomainBySubdomain(window.location.host, true)
+    getFullDomainBySubdomain(window.location.host, true, values)
       .then((domainFullData) => {
         if (domainFullData) {
           const databaseLanguage = domainFullData.settings.find(
             (setting) => setting.key === 'language'
           )?.value ?? 'en';
           
-          console.log('databaseLanguage', databaseLanguage);
           i18nInstance.changeLanguage(databaseLanguage).catch((error) => {
             console.error('Error changing language:', error);
           });
