@@ -10,7 +10,6 @@ import { RootProviders } from '~/components/root-providers';
 import { heading, sans } from '~/lib/fonts';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { generateRootMetadata } from '~/lib/root-metdata';
-// import Head from 'next/head';
 
 import '../styles/globals.css';
 
@@ -28,9 +27,6 @@ export default async function RootLayout({
 
   return (
     <html lang={language} className={`${className} ${inter.className}`}>
-      {/* <Head>
-        <link rel="icon" href="http://127.0.0.1:54321/storage/v1/object/public/organization/favicon.ico" type="image/x-icon" />
-      </Head> */}
       <body>
         <RootProviders
           theme={theme}
@@ -69,4 +65,4 @@ function getTheme() {
   return cookies().get('theme')?.value;
 }
 
-export const generateMetadata = generateRootMetadata().then((metadata) => metadata);
+export const generateMetadata = generateRootMetadata;
