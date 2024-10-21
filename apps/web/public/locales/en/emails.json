@@ -1,0 +1,60 @@
+{
+  "contactFormSubmission": {
+    "subject": "Contact Form Submission",
+    "body": "You have received a new contact form submission.",
+    "name": "Name: ${name}",
+    "email": "Email: ${email}",
+    "message": "Message: ${message}"
+  },
+  "orderCompleted": {
+    "subject": "${actualName} has marked '${orderTitle}' request as completed.",
+    "body": "${actualName} has marked '${orderTitle}' request as completed.",
+    "greeting": "Hi ${actualName}",
+    "viewOrder": "View order",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  },
+  "orderCreation": {
+    "subject": "New order created",
+    "body": "You have a new order",
+    "greeting": "Hi ${toEmail}",
+    "newOrderMessage": "You have a new order of ${emailSender}",
+    "viewOrder": "View order",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  },
+  "orderMessage": {
+    "subject": "${userName} commented in ${orderTitle} on ${date}.",
+    "greeting": "Hi ${toEmail}",
+    "reply": "Reply",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  },
+  "orderStatusPriority": {
+    "status": {
+      "subject": "${actualName} has changed '${orderTitle}' request status to ${message}.",
+      "body": "${actualName} has changed '${orderTitle}' request status to ${message}."
+    },
+    "priority": {
+      "subject": "${actualName} has changed '${orderTitle}' request priority to ${message}.",
+      "body": "${actualName} has changed '${orderTitle}' request priority to ${message}."
+    },
+    "due_date": {
+      "subject": "${actualName} has changed '${orderTitle}' due date to ${message}.",
+      "body": "${actualName} has changed '${orderTitle}' due date to ${message}."
+    },
+    "default": {
+      "subject": "New message added to order ${orderId}.",
+      "body": "You have a message in order ${orderId}."
+    },
+    "greeting": "Hi ${actualName}",
+    "viewOrder": "View order",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  },
+  "inviteEmail": {
+    "acceptInvitation": "Accept invitation",
+    "confirmEmail": "Confirm email",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  }
+}
