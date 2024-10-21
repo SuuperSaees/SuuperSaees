@@ -1,12 +1,11 @@
 'use server';
 
 import { getMailer } from '@kit/mailers';
+import { getEmailTranslations } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
 
-
-
+import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
-
 
 const emailSender = process.env.EMAIL_SENDER ?? '';
 
@@ -20,9 +19,11 @@ export async function sendOrderCompleted(
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
+  const lang = getLanguageFromCookie() as 'en' | 'es';
+  const { t } = getEmailTranslations('orderCompleted', lang);
 
-  const subject = `${actualName} has marked '${orderTitle}' request as completed.`;
-  const bodyMessage = `${actualName} has marked '${orderTitle}' request as completed.`;
+  const subject = t('subject', { actualName, orderTitle });
+  const bodyMessage = t('body', { actualName, orderTitle });
   const siteURL = await getDomainByUserId(userId, true);
   await mailer
     .sendEmail({
@@ -31,7 +32,7 @@ export async function sendOrderCompleted(
       subject: subject,
       html: `
        <!DOCTYPE html>
-        <html dir="ltr" lang="es">
+        <html dir="ltr" lang="${lang}">
           <head>
             <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
             <meta name="x-apple-disable-message-reformatting"/>
@@ -91,18 +92,18 @@ export async function sendOrderCompleted(
                                         alt="Suuper Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">Hi ${actualName}</p>
+                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${t('greeting', { actualName })}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${bodyMessage}</p>
 
                                       <!-- Contenedor centrado para el botón -->
                                       <div class="button-container">
                                         <a href="${siteURL}orders/${orderId}" class="button">
-                                          View order
+                                          ${t('viewOrder')}
                                         </a>
                                       </div>
 
                                       <div class="">
-                                        <p style="color: var(--Gray-700, #344054); font-size: 16px; font-style: normal; font-weight: 400; margin:0;">Regards,</p>
+                                        <p style="color: var(--Gray-700, #344054); font-size: 16px; font-style: normal; font-weight: 400; margin:0;">${t('farewell')}</p>
                                         <p style="color: var(--Gray-700, #344054); font-size: 16px; font-style: normal; font-weight: 700; margin:0;">${agencyName}</p>
                                       </div>
 
@@ -127,7 +128,7 @@ export async function sendOrderCompleted(
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        This email was sent to ${toEmail}. If you'd rather not receive this kind of email, you can unsubscribe or manage your email preferences.
+                                        ${t('footer', { toEmail })}
                                       </p>
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         © 2024 Suuper, soporte@suuper.co
