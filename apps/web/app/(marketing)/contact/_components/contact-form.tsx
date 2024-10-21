@@ -24,7 +24,6 @@ import { sendContactEmail } from '~/(marketing)/contact/_lib/server/server-actio
 
 export function ContactForm() {
   const [pending, startTransition] = useTransition();
-
   const [state, setState] = useState({
     success: false,
     error: false,
