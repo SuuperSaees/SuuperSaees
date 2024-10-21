@@ -6,6 +6,7 @@ import { getOrganizationByUserId } from '../../../features/team-accounts/src/ser
 import { getOrganizationSettingsByOrganizationId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getSupabaseServerComponentClient } from '../../../supabase/src/clients/server-component.client';
 
+
 export async function getDomainByUserId(
   userId: string,
   parsedUrl: boolean = false,
@@ -94,6 +95,7 @@ export async function getDomainBySubdomain(
 export async function getFullDomainBySubdomain(
   subdomain: string,
   adminActived: boolean = false,
+  values: string[] = [],
 ) {
   const supabase = getSupabaseServerComponentClient({
     admin: adminActived,
@@ -122,6 +124,7 @@ export async function getFullDomainBySubdomain(
   const organizationSettings = await getOrganizationSettingsByOrganizationId(
     organizationSubdomainData.organization_id,
     true,
+    values,
   );
 
   // Return relevant data

@@ -20,6 +20,7 @@ import UpdateAccountColorBrand from './update-account-color-brand';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
+import UpdateAccountOrganizationFavicon from './update-account-organization-favicon';
 import { UpdateAccountOrganizationName } from './update-account-organization-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
@@ -268,6 +269,19 @@ export function PersonalAccountSettingsContainer(
                       <UpdateAccountOrganizationLogo
                         organizationId={user?.organization_id ?? ''}
                       />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandFavicon'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandFaviconDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationFavicon />
                     </CardContent>
                   </Card>
                 </>

@@ -10,7 +10,8 @@ import appConfig from '~/config/app.config';
  */
 export const generateRootMetadata = (): Metadata => {
   const csrfToken = headers().get('x-csrf-token') ?? '';
-
+  const host = headers().get('host') ?? '';
+  const faviconUrl = `${process.env.NEXT_PUBLIC_FAVICON_URL_BASE}/${host}_favicon_url`;
   return {
     title: appConfig.title,
     description: appConfig.description,
@@ -31,8 +32,8 @@ export const generateRootMetadata = (): Metadata => {
       description: appConfig.description,
     },
     icons: {
-      icon: '/images/favicon/favicon.ico',
-      apple: '/images/favicon/apple-touch-icon.png',
+      icon: faviconUrl,
+      // apple: '/images/favicon/apple-touch-icon.png',
     },
   };
 };
