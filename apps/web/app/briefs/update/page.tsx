@@ -43,6 +43,7 @@ async function UpdateBriefsPage({
     description: info.description,
     image_url: info.image_url,
     brief_form_fields: info.brief_form_fields,
+    services: info.services,
   }));
 
   const briefRelevantInfoFiltered = ( briefRelevantInfo.map(info => ({
@@ -52,6 +53,7 @@ async function UpdateBriefsPage({
     propietary_organization_id: info.propietary_organization_id,
     description: info.description,
     image_url: info.image_url,
+    services: info.services,
   })));
 
 

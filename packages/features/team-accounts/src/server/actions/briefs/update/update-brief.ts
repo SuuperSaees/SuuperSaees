@@ -5,6 +5,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { FormField } from '../../../../../../../../apps/web/lib/form-field.types';
 import { addFormFieldsToBriefs } from '../create/create-briefs';
+import { Database } from '../../../../../../../../apps/web/lib/database.types';
 
 export const updateBriefById = async (briefData: Brief.Type) => {
   try {
@@ -75,5 +76,61 @@ export const updateFormFieldsById = async (
   } catch (error) {
     console.error('Error al actualizar los fields', error);
     throw error;
+  }
+};
+
+// Supabase function to update service briefs
+export const updateServiceBriefs = async (
+  briefId: string,
+  updatedServices: Database['public']['Tables']['service_briefs']['Update'][],
+) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    // Step 1: Fetch current service briefs associated with the brief
+    const { data: existingServiceBriefs, error: fetchError } = await client
+      .from('service_briefs')
+      .select('service_id')
+      .eq('brief_id', briefId);
+
+    if (fetchError) {
+      throw new Error(fetchError.message);
+    }
+
+    const existingServiceIds = existingServiceBriefs?.map(
+      (brief) => brief.service_id,
+    ) || [];
+
+    const updatedServiceIds = updatedServices.map((service) => service.service_id);
+
+    // Step 2: Identify services to remove (those not in updated list)
+    const servicesToRemove = existingServiceIds.filter(
+      (id) => !updatedServiceIds.includes(id),
+    );
+
+    // Step 3: Upsert updated services
+    if (updatedServices.length > 0) {
+      const { error: upsertError } = await client
+        .from('service_briefs')
+        .upsert(updatedServices);
+
+      if (upsertError) {
+        throw new Error(upsertError.message);
+      }
+    }
+
+    // Step 4: Remove services no longer connected
+    if (servicesToRemove.length > 0) {
+      const { error: deleteError } = await client
+        .from('service_briefs')
+        .delete()
+        .eq('brief_id', briefId)
+        .in('service_id', servicesToRemove);
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
+    }
+  } catch (error) {
+    console.error('Error updating service briefs:', error);
   }
 };
