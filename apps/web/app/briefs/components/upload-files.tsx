@@ -55,7 +55,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                         width: `${Math.max(question.label.length, t('uploadFiles.title').length) + 1}ch`,
                       }}
                       placeholder={t('uploadFiles.title')}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -81,11 +81,9 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                           e.target.value,
                         )
                       }
-                      style={{
-                        width: `${Math.max(question.description!.length, t('uploadFiles.description').length) + 1}ch`,
-                      }}
+
                       placeholder={t('uploadFiles.description')}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -114,11 +112,8 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                             e.target.value,
                           )
                         }
-                        style={{
-                          width: `${Math.max(question.placeholder!.length, t('uploadFiles.placeholder').length) + 1}ch`,
-                        }}
                         placeholder={t('uploadFiles.placeholder')}
-                        className="mb-[0.30rem] border-none text-center text-sm font-normal text-gray-400 focus:outline-none"
+                        className="bg-transparent mb-[0.30rem] w-full border-none text-center text-sm font-normal text-gray-400 focus:outline-none"
                       />
                       <p className="border-none text-center text-sm font-normal text-gray-400 focus:outline-none">
                         {t('uploadFiles.fileTypes')}
