@@ -100,6 +100,7 @@ export const getOrganizationSettingsByOrganizationId = async (
       'logo_url',
       'sidebar_background_color',
       'language',
+      'favicon_url',
     ]);
 
   if (settingsError) {
