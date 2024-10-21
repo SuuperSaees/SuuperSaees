@@ -2392,6 +2392,7 @@ export type Database = {
         | "date_format"
         | "sidebar_background_color"
         | "portal_name"
+        | "favicon_url"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"
