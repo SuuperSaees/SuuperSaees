@@ -60,7 +60,7 @@ export async function getDomainByOrganizationId(
     .from('organization_subdomains')
     .select('subdomains(domain)')
     .eq('organization_id', organizationId ?? '')
-    .single();
+    .single()
 
   if (domainError) {
     throw new Error(`Error getting domain: ${domainError.message}`);
@@ -86,7 +86,7 @@ export async function getDomainBySubdomain(
     .single();
 
   if (domainError) {
-    throw new Error(`Error getting domain: ${domainError.message}`);
+    throw new Error(`Error getting domain by subdomain: ${domainError.message}`);
   }
 
   return domainData;
@@ -97,39 +97,48 @@ export async function getFullDomainBySubdomain(
   adminActived: boolean = false,
   values: string[] = [],
 ) {
-  const supabase = getSupabaseServerComponentClient({
-    admin: adminActived,
-  });
+  try {
+    const supabase = getSupabaseServerComponentClient({
+      admin: adminActived,
+    });
 
-  const domainData = await getDomainBySubdomain(subdomain, adminActived);
+    // Fetch domain data and handle possible errors
+    const domainData = await getDomainBySubdomain(subdomain, adminActived);
 
-  const { data: organizationSubdomainData, error: organizationSubdomainError } =
-    await supabase
-      .from('organization_subdomains')
-      .select('organization_id')
-      .eq('subdomain_id', domainData.id)
-      .single();
 
-  if (organizationSubdomainError) {
-    throw new Error(
-      `Error getting organization subdomain: ${organizationSubdomainError.message}`,
+    // Fetch organization subdomain data and handle errors
+    const { data: organizationSubdomainData, error: organizationSubdomainError } =
+      await supabase
+        .from('organization_subdomains')
+        .select('organization_id')
+        .eq('subdomain_id', domainData.id)
+        .single();
+
+    if (organizationSubdomainError) {
+      throw new Error(
+        `Error getting organization subdomain: ${organizationSubdomainError.message}`,
+      );
+    }
+
+    if (!organizationSubdomainData) {
+      throw new Error(`No organization subdomain found for subdomain: ${subdomain}`);
+    }
+
+    // Fetch organization settings and handle possible errors
+    const organizationSettings = await getOrganizationSettingsByOrganizationId(
+      organizationSubdomainData.organization_id,
+      true,
+      values,
     );
+
+    // Return relevant data
+    return {
+      domainData,
+      settings: organizationSettings,
+    };
+
+  } catch (error) {
+    console.error(`Error in getFullDomainBySubdomain: ${error}`);
+    throw new Error(`Failed to get full domain by subdomain: ${error}`);
   }
-
-  if (!organizationSubdomainData) {
-    throw new Error(`No organization subdomain found: ${subdomain}`);
-  }
-
-  // Obtain organization settings
-  const organizationSettings = await getOrganizationSettingsByOrganizationId(
-    organizationSubdomainData.organization_id,
-    true,
-    values,
-  );
-
-  // Return relevant data
-  return {
-    domainData,
-    settings: organizationSettings,
-  };
 }
