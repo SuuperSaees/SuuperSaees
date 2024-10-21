@@ -70,21 +70,21 @@ const config = {
 
 
 
-const sentryOptions = {
-  org: 'grayola',
-  project: process.env.SENTRY_PROJECT_NAME,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  silent: !IS_PRODUCTION,
-  autoInstrumentServerFunctions: false,
-  widenClientFileUpload: true,
-};
+// const sentryOptions = {
+//   org: 'grayola',
+//   project: process.env.SENTRY_PROJECT_NAME,
+//   authToken: process.env.SENTRY_AUTH_TOKEN,
+//   silent: !IS_PRODUCTION,
+//   autoInstrumentServerFunctions: false,
+//   widenClientFileUpload: true,
+// };
 
 // Exporta la configuración de Sentry envuelta en la configuración de Analyzer
 export default withSentryConfig(
   withBundleAnalyzer({
     enabled: process.env.ANALYZE === 'true',
   })(config),
-  sentryOptions
+  // sentryOptions
 );
 
 
