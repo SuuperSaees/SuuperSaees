@@ -34,13 +34,13 @@ const SignIn = ({ inviteToken, paths }: {
     <div
         className={`align-center relative w-[90%] max-w-[360px] md:px-[32px] md:py-[48px] backdrop-blur-[95%] rounded-lg shadow-lg z-10 ${authDetails?.background_color}`}
         style={{
-            backgroundColor: authDetails?.background_color || 'white',
+            backgroundColor: authDetails?.background_color ?? 'white',
             color: textcolor,
             padding: '32px', // Additional padding for the form
         }}
     >
         <div className="flex justify-center items-start pb-[32px] w-full">
-            <SignInLogo className="h-auto max-h-[100px] flex justify-center" />
+            <SignInLogo />
         </div>
         <div className='h-auto text-black' style={{color: textcolor}}>
             <SignInMethodsContainer
