@@ -49,7 +49,10 @@
         "title": "Widgets"
       }, 
       "settings": {
-        "title": "Ajustes"
+        "title": "Ajustes",
+        "services": {
+          "title": "Servicios conenctados"
+        }
       }
     }
   },

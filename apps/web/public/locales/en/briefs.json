@@ -49,7 +49,10 @@
         "title": "Widgets"
       }, 
       "settings": {
-        "title": "Settings"
+        "title": "Settings",
+        "services": {
+          "title": "Connected services"
+        }
       }
     }
   },
