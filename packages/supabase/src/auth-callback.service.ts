@@ -33,6 +33,9 @@ class AuthCallbackService {
       errorPath?: string;
     },
   ): Promise<URL> {
+    // log out the user if any, before starting the new session
+    await logOutUser(this.client);
+
     const url = new URL(request.url);
     const searchParams = url.searchParams;
 
@@ -230,4 +233,13 @@ function getAuthErrorMessage(error: string) {
   return isVerifierError(error)
     ? `auth:errors.codeVerifierMismatch`
     : `auth:authenticationErrorAlertBody`;
+}
+
+// function to log out the user before starting the new session:
+async function logOutUser(supabase: SupabaseClient) {
+  const { error } = await supabase.auth.signOut({scope: 'local'});
+
+  if (error) {
+    console.error('Error logging out user', error);
+  }
 }
