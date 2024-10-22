@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react';
 import React from 'react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileIcon } from 'lucide-react';
 import { Ban, EllipsisVertical } from 'lucide-react';
 import { deleteFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/delete/delete-file';
-import { verifyItIsOrderFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/get/get-files';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -21,24 +19,21 @@ import {
 import ImageWithOptions from '~/orders/[id]/hoc/with-image-options';
 
 interface File {
-  id: string;
-  name: string;
-  type: string;
-  url: string;
+  id: string | undefined;
+  name: string | undefined;
+  type: string | undefined;
+  url: string | undefined;
 }
-const FileItem = ({ file }: { file: File }) => {
-  const [isOrderFile, setIsOrderFile] = useState<boolean>(false);
-  const { t } = useTranslation('organizations');
+interface FileItemProps {
+  file: File;
+  currentPath: Array<{ title: string; uuid?: string }>;
+}
 
-  useEffect(() => {
-    const checkOrderFile = async () => {
-      const result = await verifyItIsOrderFile(file.id);
-      setIsOrderFile(result);
-    };
-    checkOrderFile().catch((error) => {
-      console.error('Error verifying order file:', error);
-    });
-  }, [file.id]);
+const FileItem = ({ file, currentPath }: FileItemProps) => {
+  const { t } = useTranslation('organizations');
+  const showOptions =
+    currentPath.length > 0 &&
+    (!currentPath[0]?.uuid || currentPath[0]?.uuid === '');
 
   const queryClient = useQueryClient();
 
@@ -61,13 +56,13 @@ const FileItem = ({ file }: { file: File }) => {
   return (
     <div>
       <div className="flex h-[132.9px] w-[184.317px] items-center justify-center rounded-[8.86px] bg-[#E1E2E4]">
-        {file.type.startsWith('image/') ? (
+        {file.type?.startsWith('image/') ? (
           <ImageWithOptions
-            src={file.url}
+            src={file.url ?? ''}
             alt="image"
             bucketName="agency_files"
           />
-        ) : file.type.startsWith('video/') ? (
+        ) : file.type?.startsWith('video/') ? (
           <video
             className="h-full w-full rounded-[8.86px] object-contain px-2"
             controls
@@ -90,7 +85,7 @@ const FileItem = ({ file }: { file: File }) => {
         <div className="w-[184.317px] overflow-hidden text-ellipsis whitespace-nowrap text-[15.661px] font-semibold leading-[38.55px] text-gray-900">
           {file.name}
         </div>
-        {!isOrderFile && (
+        {!showOptions && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <EllipsisVertical className="h-[20px] w-[20px] cursor-pointer text-gray-400" />
@@ -100,8 +95,8 @@ const FileItem = ({ file }: { file: File }) => {
                 <DropdownMenuItem
                   onClick={() =>
                     deleteFileHandler.mutate({
-                      fileId: file.id,
-                      fileUrl: file.url,
+                      fileId: file.id ?? '',
+                      fileUrl: file.url ?? '',
                     })
                   }
                 >
