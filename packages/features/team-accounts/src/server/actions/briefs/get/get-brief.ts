@@ -200,7 +200,9 @@ export const getBriefsById = async (
     const { data: briefsData, error: briefsError } = await client
       .from('briefs')
       .select(
-        ' id, created_at, name, propietary_organization_id, description, image_url, brief_form_fields ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message))'
+        `id, created_at, name, propietary_organization_id, description, image_url, brief_form_fields 
+        ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message)),
+         services (name, id)`
       )
       .eq('id', id);
 

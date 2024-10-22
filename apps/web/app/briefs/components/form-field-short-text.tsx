@@ -52,7 +52,7 @@ export function FormFieldShortText({
                         handleQuestionChange(index, 'label', e.target.value)
                       }
                       placeholder={t('creation.form.labelPlaceholder')}
-                      className="border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -79,7 +79,7 @@ export function FormFieldShortText({
                         )
                       }
                       placeholder={t('creation.form.descriptionPlaceholder')}
-                      className="w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>

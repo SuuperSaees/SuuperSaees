@@ -49,7 +49,10 @@
         "title": "Widgets"
       }, 
       "settings": {
-        "title": "Ajustes"
+        "title": "Ajustes",
+        "services": {
+          "title": "Servicios conenctados"
+        }
       }
     }
   },
@@ -57,26 +60,28 @@
     "title": "Actualizar brief"
   },
   "singleChoice": {
-    "title": "Título",
-    "description": "Descripción",
+    "title": "Título *",
+    "description": "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Agregar nueva opción"
   },
   "multipleChoice": {
-    "title": "Título",
-    "description": "Descripción",
+    "title": "Título *",
+    "description": "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Agregar nueva opción"
   },
   "textLarge" : {
-    "title":"Título",
-    "description":"Descripción",
+    "title":"Título *",
+    "description":"Este es un texto de sugerencia para ayudar al usuario.",
     "descriptionHint":"Escribe una descripción..."
   },
   "datePicker": {
-    "selectTitle": "Seleccionar fecha"
+    "title": "Título *",
+    "selectTitle": "Seleccionar fecha",
+    "description": "Este es un texto de sugerencia para ayudar al usuario."
   },
   "dropdown": {
-    "title": "Título",
-    "description": "Descripción",
+    "title": "Título *",
+    "description": "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Agregar nueva opción",
     "selectAnOption": "Seleccione una opción"
   },
@@ -89,8 +94,8 @@
     "placeholder": "Introduzca el texto enriquecido"
   },
   "uploadFiles" : {
-    "title" : "Título",
-    "description" : "Descripción",
+    "title" : "Título *",
+    "description" : "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Haz clic o arrastra para subir un archivo",
     "fileTypes": "SVG, PNG, JPG o GIF (max. 800x400px)"
   },

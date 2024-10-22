@@ -10,13 +10,16 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Brief } from '~/lib/brief.types';
+import { Service } from '~/lib/services.types';
 import {
   addFormFieldsToBriefs,
+  addServiceBriefs,
   createBrief,
 } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
 import {
   updateBriefById,
   updateFormFieldsById,
+  updateServiceBriefs,
 } from '~/team-accounts/src/server/actions/briefs/update/update-brief';
 
 import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
@@ -30,8 +33,13 @@ export const useBrief = (
   const defaultBrief = {
     name: '',
     description: '',
+    services: [],
   };
-  const [brief, setBrief] = useState<Brief.Insert>(defaultBrief);
+  const [brief, setBrief] = useState<
+    Brief.Insert & {
+      services: Service.Response[];
+    }
+  >(defaultBrief);
   const { t } = useTranslation('briefs');
 
   function updateBrief(updatedBrief: Brief.Insert) {
@@ -56,6 +64,15 @@ export const useBrief = (
           propietary_organization_id: brief.propietary_organization_id,
         });
         await updateFormFieldsById(values.questions, brief.id);
+
+        // Call updateServiceBriefs to handle connected services
+        await updateServiceBriefs(
+          brief.id ?? '',
+          values.connected_services?.map((service) => ({
+            service_id: service,
+            brief_id: brief.id,
+          })),
+        );
       } else {
         // Create a new brief with the provided values
         const briefId = await createBrief({
@@ -69,6 +86,15 @@ export const useBrief = (
           await addFormFieldsToBriefs(values.questions, briefId.id);
         } else {
           throw new Error('Failed to retrieve briefId'); // Error handling for brief creation failure
+        }
+
+        if (values.connected_services) {
+          await addServiceBriefs(
+            values.connected_services?.map((service) => ({
+              service_id: service,
+              brief_id: briefId.id,
+            })),
+          );
         }
       }
     },

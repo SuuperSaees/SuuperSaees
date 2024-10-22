@@ -6,6 +6,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { FormField } from '../../../../../../../../apps/web/lib/form-field.types';
 import { getOrganization } from '../../organizations/get/get-organizations';
+import { Database } from '../../../../../../../../apps/web/lib/database.types';
 
 export const createBrief = async (clientData: Brief.Insert) => {
   try {
@@ -31,7 +32,7 @@ export const createBrief = async (clientData: Brief.Insert) => {
 };
 
 export const addServiceBriefs = async (
-  serviceBriefs: Brief.Relationships.Service,
+  serviceBriefs: Database['public']['Tables']['service_briefs']['Insert'][],
 ) => {
   try {
     const client = getSupabaseServerComponentClient();

@@ -64,14 +64,13 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
                           handleQuestionChange(index, 'label', e.target.value)
                         }
                         placeholder={t('singleChoice.title')}
-                        className="w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                        className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                       />
                     </FormControl>
                     <FormMessage>{fieldState.error?.message}</FormMessage>
                   </FormItem>
                 )}
               />
-              <span className="font-bold">*</span>
             </div>
 
             <FormField
@@ -92,7 +91,7 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
                         )
                       }
                       placeholder={t('singleChoice.description')}
-                      className="w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>

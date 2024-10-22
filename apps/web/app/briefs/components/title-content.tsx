@@ -50,7 +50,7 @@ const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
                         handleQuestionChange(index, 'label', e.target.value)
                       }
                       placeholder={t('title.placeholder')}
-                      className="w-full break-words text-2xl font-semibold leading-9 text-gray-500"
+                      className="bg-transparent w-full break-words text-2xl font-semibold leading-9 text-gray-500"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
