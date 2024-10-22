@@ -4,9 +4,12 @@ import { getMailer } from '@kit/mailers';
 import { getEmailTranslations } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
 
+
+
 import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+
 
 const emailSender = process.env.EMAIL_SENDER ?? '';
 
@@ -22,10 +25,18 @@ export async function sendOrderCreationEmail(
   const siteURL = await getDomainByUserId(userId, true);
   const lang = getLanguageFromCookie() as 'en' | 'es';
   const { t } = getEmailTranslations('orderCreation', lang);
+
+  const BRANDTOP_AGENCY_NAME =
+    process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
+  const BRANDTOP_EMAIL_SENDER = `Luz de ${agencyName} <${emailSender}>`;
+
   await mailer
     .sendEmail({
       to: toEmail,
-      from: emailSender,
+      from:
+        agencyName === BRANDTOP_AGENCY_NAME
+          ? BRANDTOP_EMAIL_SENDER
+          : emailSender,
       subject: t('subject'),
       html: `
        <!DOCTYPE html>

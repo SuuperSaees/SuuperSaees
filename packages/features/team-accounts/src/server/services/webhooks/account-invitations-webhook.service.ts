@@ -11,6 +11,7 @@ const invitePath = '/join';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL;
 const productName = process.env.NEXT_PUBLIC_PRODUCT_NAME ?? '';
 const emailSender = process.env.EMAIL_SENDER;
+const brandtopAgencyName = process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
 
 const env = z
   .object({
@@ -18,12 +19,14 @@ const env = z
     siteURL: z.string().min(1),
     productName: z.string(),
     emailSender: z.string().email(),
+    brandtopAgencyName: z.string(),
   })
   .parse({
     invitePath,
     siteURL,
     productName,
     emailSender,
+    brandtopAgencyName,
   });
 
 export function createAccountInvitationsWebhookService(
@@ -74,6 +77,23 @@ class AccountInvitationsWebhookService {
 
     let inviterOrganizationLogo = '';
     let inviterOrganizationThemeColor = '';
+
+    // search organixation name 
+    const inviterOrganization = await this.adminClient
+      .from('accounts')
+      .select('name')
+      .eq('id', inviter.data.organization_id ?? '')
+      .single();
+
+    if (inviterOrganization.error) {
+      logger.error(
+        {
+          error: inviterOrganization.error,
+          name: this.namespace,
+        },
+        'Failed to fetch inviter organization name',
+      );
+    }
 
     const inviterOrganizationSettings = await this.adminClient
       .from('organization_settings')
@@ -145,9 +165,15 @@ class AccountInvitationsWebhookService {
         primaryColor: inviterOrganizationThemeColor,
       });
 
+      const BRANDTOP_AGENCY_NAME = env.brandtopAgencyName ?? '';
+    const BRANDTOP_EMAIL_SENDER = `Luz de ${inviterOrganization.data?.name} <${emailSender}>`;
+
       await mailer
         .sendEmail({
-          from: env.emailSender,
+          from:
+            inviterOrganization.data?.name === BRANDTOP_AGENCY_NAME
+              ? BRANDTOP_EMAIL_SENDER
+              : env.emailSender,
           to: invitation.email,
           subject,
           html,

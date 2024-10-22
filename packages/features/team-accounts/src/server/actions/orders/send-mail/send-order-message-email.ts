@@ -4,8 +4,11 @@ import { getMailer } from '@kit/mailers';
 import { getEmailTranslations } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
 
+
+
 import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+
 
 const emailSender = process.env.EMAIL_SENDER ?? '';
 
@@ -25,10 +28,16 @@ export async function sendOrderMessageEmail(
   const { t } = getEmailTranslations('orderMessage', lang);
   const siteURL = await getDomainByUserId(userId, true);
   const subject = t('subject', { userName, orderTitle, date });
+  const BRANDTOP_AGENCY_NAME =
+    process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
+  const BRANDTOP_EMAIL_SENDER = `Luz de ${agencyName} <${emailSender}>`;
   await mailer
     .sendEmail({
       to: toEmail,
-      from: emailSender,
+      from:
+        agencyName === BRANDTOP_AGENCY_NAME
+          ? BRANDTOP_EMAIL_SENDER
+          : emailSender,
       subject: subject,
       html: `
        <!DOCTYPE html>
