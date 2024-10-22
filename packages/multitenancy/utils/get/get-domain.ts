@@ -37,7 +37,7 @@ export async function getDomainByUserId(
       return "";
     }
   
-    const domain = await getDomainByOrganizationId(organizationId);
+    const domain = await getDomainByOrganizationId(organizationId) ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
     const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
   
     if (parsedUrl) {
@@ -47,8 +47,7 @@ export async function getDomainByUserId(
     return domain;
   } catch (error) {
     console.error(error);
-    return "";
-
+    return process.env.NEXT_PUBLIC_SITE_URL ?? '';
   }
 }
 
@@ -66,9 +65,9 @@ export async function getDomainByOrganizationId(
     throw new Error(`Error getting domain: ${domainError.message}`);
   }
 
-  const domain = domainData?.subdomains?.domain;
+  const domain = domainData?.subdomains?.domain ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
-  return domain ?? '';
+  return domain;
 }
 
 export async function getDomainBySubdomain(
