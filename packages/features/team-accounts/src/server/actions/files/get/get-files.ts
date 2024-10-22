@@ -160,10 +160,19 @@ export async function getMemberFiles(clientOrganizationId: string) {
   // Fetch the files associated with the client organization
   const { data: fileData, error: fileDataError } = await client
     .from('folder_files')
-    .select('file_id')
+    .select('file:files(id, url, name, type, user_id)')
     .eq('client_organization_id', clientOrganizationId);
 
   if (fileDataError) throw fileDataError;
+
+  // Flatten the file objects to remove the 'file' nesting
+  const flattenedFileData = fileData.map(({ file }) => ({
+    id: file?.id,
+    url: file?.url,
+    name: file?.name,
+    type: file?.type,
+    user_id: file?.user_id,
+  }));
 
   // Fetch the orders of the client organization
   const { data: ordersData, error: ordersDataError } = await client
@@ -176,7 +185,7 @@ export async function getMemberFiles(clientOrganizationId: string) {
   // Fetch the files associated with the orders
   const { data: orderFilesData, error: orderFilesDataError } = await client
     .from('order_files')
-    .select('file_id')
+    .select('file:files(id, url, name, type, user_id)')
     .in(
       'order_id',
       ordersData.map((orderData) => orderData.uuid),
@@ -184,19 +193,17 @@ export async function getMemberFiles(clientOrganizationId: string) {
 
   if (orderFilesDataError) throw orderFilesDataError;
 
+  // Flatten the file objects to remove the 'file' nesting
+  const flattenedOrderFileData = orderFilesData.map(({ file }) => ({
+    id: file?.id,
+    url: file?.url,
+    name: file?.name,
+    type: file?.type,
+    user_id: file?.user_id,
+  }));
+
   // Combine the file data
-  const allFileIds = [
-    ...fileData.map((f) => f.file_id),
-    ...orderFilesData.map((f) => f.file_id),
-  ];
-
-  // Fetch file details
-  const { data: files, error: filesError } = await client
-    .from('files')
-    .select('url, id, name, type, user_id')
-    .in('id', allFileIds);
-
-  if (filesError) throw filesError;
+  const allFiles = [...flattenedFileData, ...flattenedOrderFileData];
 
   // Fetch the list of client user_ids
   const { data: clientUsers, error: clientUsersError } = await client
@@ -208,11 +215,11 @@ export async function getMemberFiles(clientOrganizationId: string) {
   const clientUserIds = clientUsers.map((client) => client.user_client_id);
 
   // Filter files that are not associated with clients
-  const nonClientFiles = files.filter(
-    (file) => !clientUserIds.includes(file.user_id),
+  const nonClientFiles = allFiles.filter(
+    (file) => !clientUserIds.includes(file.user_id ?? ''),
   );
 
-  return nonClientFiles;
+  return nonClientFiles.map(({ user_id: _user_id, ...rest }) => rest);
 }
 
 export async function getClientFiles(clientOrganizationId: string) {
@@ -221,10 +228,19 @@ export async function getClientFiles(clientOrganizationId: string) {
   // Fetch the files associated with the client organization
   const { data: fileData, error: fileDataError } = await client
     .from('folder_files')
-    .select('file_id')
+    .select('file:files(id, url, name, type, user_id)')
     .eq('client_organization_id', clientOrganizationId);
 
   if (fileDataError) throw fileDataError;
+
+  // Flatten the file objects to remove the 'file' nesting
+  const flattenedFileData = fileData.map(({ file }) => ({
+    id: file?.id,
+    url: file?.url,
+    name: file?.name,
+    type: file?.type,
+    user_id: file?.user_id,
+  }));
 
   // Fetch the orders of the client organization
   const { data: ordersData, error: ordersDataError } = await client
@@ -237,7 +253,7 @@ export async function getClientFiles(clientOrganizationId: string) {
   // Fetch the files associated with the orders
   const { data: orderFilesData, error: orderFilesDataError } = await client
     .from('order_files')
-    .select('file_id')
+    .select('file:files(id, url, name, type, user_id)')
     .in(
       'order_id',
       ordersData.map((orderData) => orderData.uuid),
@@ -245,19 +261,17 @@ export async function getClientFiles(clientOrganizationId: string) {
 
   if (orderFilesDataError) throw orderFilesDataError;
 
+  // Flatten the file objects to remove the 'file' nesting
+  const flattenedOrderFileData = orderFilesData.map(({ file }) => ({
+    id: file?.id,
+    url: file?.url,
+    name: file?.name,
+    type: file?.type,
+    user_id: file?.user_id,
+  }));
+
   // Combine the file data
-  const allFileIds = [
-    ...fileData.map((f) => f.file_id),
-    ...orderFilesData.map((f) => f.file_id),
-  ];
-
-  // Fetch file details
-  const { data: files, error: filesError } = await client
-    .from('files')
-    .select('url, id, name, type, user_id')
-    .in('id', allFileIds);
-
-  if (filesError) throw filesError;
+  const allFiles = [...flattenedFileData, ...flattenedOrderFileData];
 
   // Fetch the list of client user_ids
   const { data: clientUsers, error: clientUsersError } = await client
@@ -269,11 +283,11 @@ export async function getClientFiles(clientOrganizationId: string) {
   const clientUserIds = clientUsers.map((client) => client.user_client_id);
 
   // Filter files that are associated with clients
-  const clientFiles = files.filter((file) =>
-    clientUserIds.includes(file.user_id),
+  const clientFiles = allFiles.filter((file) =>
+    clientUserIds.includes(file.user_id ?? ''),
   );
 
-  return clientFiles;
+  return clientFiles.map(({ user_id: _user_id, ...rest }) => rest);
 }
 
 export async function getUrlFile(fileId: string) {
