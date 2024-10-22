@@ -198,9 +198,17 @@ function getPatterns() {
           return;
         }
 
-        // check if we need to verify MFA (user is authenticated but needs to verify MFA)
+        // Check if this request is for the activation link (e.g., /auth/confirm)
+        const isActivationLink =
+          req.nextUrl.pathname.startsWith('/auth/confirm');
+
+        // Check if we need to verify MFA (user is authenticated but needs to verify MFA)
         const isVerifyMfa = req.nextUrl.pathname === pathsConfig.auth.verifyMfa;
 
+        // If it's an activation link, do not redirect to home, continue with the request
+        if (isActivationLink) {
+          return; // Allow the process to continue for the activation flow => auth-callback.service.ts
+        }
         // If user is logged in and does not need to verify MFA,
         // redirect to home page.
         if (!isVerifyMfa) {
