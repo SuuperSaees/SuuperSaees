@@ -17,7 +17,12 @@ interface FileManagementHook {
   selectedOption: string;
   setSelectedOption: (option: string) => void;
   mainFolders: Array<{ title: string | null; uuid: string }>;
-  mainFiles: Array<{ id: string; url: string; name: string; type: string }>;
+  mainFiles: Array<{
+    id: string | undefined;
+    url: string | undefined;
+    name: string | undefined;
+    type: string | undefined;
+  }>;
   folders: Array<{ title: string | null; uuid: string }>;
   subFolders: Array<{ title: string | null; uuid: string }>;
   files: Array<{ id: string; url: string; name: string; type: string }>;
@@ -59,6 +64,7 @@ export const useFileManagement = (
     const lastFolder = pathToInitialize[pathToInitialize.length - 1];
     handleFolderClick(lastFolder!.uuid ?? '', lastFolder!.title, true, true);
   };
+
   const {
     data: mainFiles = [],
     refetch: refetchFiles,
@@ -108,7 +114,7 @@ export const useFileManagement = (
         }
         return getFoldersByFolder(folderUuid);
       },
-      enabled: Boolean(path.length > 0),
+      enabled: Boolean(path.length > 0) && currentFolderType !== 'orders',
     });
 
   const subFolders = subFoldersData.map((folder) => ({
@@ -117,12 +123,17 @@ export const useFileManagement = (
   }));
 
   // useQuery for files
-  const { data: files = [], isLoading: loadingFolderFiles } = useQuery({
+  const { data: filesData = [], isLoading: loadingFolderFiles } = useQuery({
     queryKey: ['files', path.length > 0 ? path[path.length - 1]!.uuid : ''],
     queryFn: () =>
       getFilesByFolder(path.length > 0 ? path[path.length - 1]!.uuid! : ''),
-    enabled: Boolean(path.length > 0),
+    enabled: Boolean(path.length > 0) && currentFolderType !== 'orders',
   });
+
+  const files = filesData.filter(
+    (file): file is { id: string; url: string; name: string; type: string } =>
+      file !== null,
+  );
 
   const handleFolderClick = (
     folderUuid: string,

@@ -70,10 +70,12 @@ export async function getOrdersFolders(clientOrganizationId: string) {
   const { data: userData, error: userError } = await client.auth.getUser();
   if (userError) throw userError;
 
+  const userRole = await getUserRoleById(userData.user.id);
+
   if (
-    userData.user.role === 'agency_owner' ||
-    userData.user.role === 'agency_member' ||
-    userData.user.role === 'agency_project_manager'
+    userRole === 'agency_owner' ||
+    userRole === 'agency_member' ||
+    userRole === 'agency_project_manager'
   ) {
     // Fecth the agencies of the user
     const { data: agencies, error: agenciesError } = await client
