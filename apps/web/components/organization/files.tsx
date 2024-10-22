@@ -75,6 +75,7 @@ const FileSection: React.FC<FileSectionProps> = ({
     },
   ];
 
+
   const renderContent = () => {
     if (loading) {
       return (
