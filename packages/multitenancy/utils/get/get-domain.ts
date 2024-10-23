@@ -79,7 +79,7 @@ export async function getDomainByOrganizationId(
   const domain =
     domainData?.subdomains?.domain ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
-  return domain ?? '';
+  return domain;
 }
 
 export async function getDomainBySubdomain(
