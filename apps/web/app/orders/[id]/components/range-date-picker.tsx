@@ -6,37 +6,37 @@ import {
 } from '@kit/ui/popover';
 
 import { Calendar } from '@kit/ui/calendar';
-import { Button } from '@kit/ui/button';
 import { cn } from '@kit/ui/utils';
 import { DateRange } from '@kit/ui/calendar';
-import { addDays, format } from 'date-fns';
-import { useState } from 'react';
-import { Calendar as CalendarIcon } from "lucide-react"
+
+
+interface DatePickerWithRangeProps {
+  selectedPeriod: DateRange | undefined;
+  setSelectedPeriod: Dispatch<SetStateAction<DateRange | undefined>>;
+}
 
 
 export function DatePickerWithRange({
+  selectedPeriod,
+  setSelectedPeriod,
   className,
-}: React.HTMLAttributes<HTMLDivElement>) {
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(),
-  to: addDays(new Date(), 3), 
-  })
+}: DatePickerWithRangeProps & React.HTMLAttributes<HTMLDivElement>) {
  
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
         <PopoverTrigger asChild>
           
-          <p className='cursor-pointer select-none px-3'>Seleccionar fechas</p>
+          <p className='cursor-pointer select-none px-3 text-gray-900 font-medium'>Seleccionar fechas</p>
           
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             initialFocus
             mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={setDate}
+            defaultMonth={selectedPeriod?.from}
+            selected={selectedPeriod}
+            onSelect={setSelectedPeriod}
             numberOfMonths={2}
           />
         </PopoverContent>

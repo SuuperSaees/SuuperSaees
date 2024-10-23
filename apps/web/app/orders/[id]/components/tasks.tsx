@@ -3,7 +3,7 @@ import TaskDropdown from "./task-dropdown";
 const TasksSection = () => {
 
   return (
-    <div>
+    <div className="h-screen max-h-screen overflow-y-auto">
       <TaskDropdown />
     </div>
   );

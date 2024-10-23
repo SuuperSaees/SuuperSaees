@@ -1,9 +1,13 @@
-import { Checkbox } from "@kit/ui/checkbox";
 import { useTranslation } from "react-i18next";
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import { useState } from "react";
 import SelectAction from "./ui/select-action";
 import { DatePickerWithRange } from "./range-date-picker";
+import { generateDropdownOptions } from "../utils/generate-options-and-classnames";
+import { getPriorityClassName } from "../utils/generate-options-and-classnames";
+import { getStatusClassName } from "../utils/generate-options-and-classnames";
+import { DateRange } from '@kit/ui/calendar';
+import { addDays} from 'date-fns';
 
 interface SubTaskProps {
 	name: string,
@@ -13,50 +17,22 @@ interface SubTaskProps {
 
 function SubTask({name, status, priority}:SubTaskProps) {
 
-	const [selectedStatus, setSelectedStatus] = useState(status);
-	const [selectedPriority, setSelectedPriority] = useState(priority);
+	const [selectedStatus, setSelectedStatus] = useState<string>(status);
+	const [selectedPriority, setSelectedPriority] = useState<string>(priority);
+	const [selectedPeriod, setSelectedPeriod] = useState<DateRange>({ from: new Date(), to: addDays(new Date(), 3) });
 
 	const { t } = useTranslation('orders');
   const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
 	const priorities = ['low', 'medium', 'high'];
-
-
-  const statusOptions = statuses.map((status) => {
-    const camelCaseStatus = status.replace(/_./g, (match) =>
-      match.charAt(1).toUpperCase(),
-    );
-    return {
-      value: status,
-      label: t(`details.statuses.${camelCaseStatus}`)
-        .replace(/_/g, ' ')
-        .replace(/^\w/, (c) => c.toUpperCase()),
-    };
-  });
-
-	const priorityOptions = priorities.map((priority) => ({
-    value: priority,
-    label: t(`details.priorities.${priority}`)
-      .replace(/_/g, ' ')
-      .replace(/^\w/, (c) => c.toUpperCase()),
-  }));
-
-	const getPriorityClassName = (priority: string) =>
-    priorityColors[priority as 'low' | 'medium' | 'high'] ?? '';
-
-  const getStatusClassName = (status: string) =>
-    statusColors[
-      status as 'pending' | 'in_progress' | 'completed' | 'in_review'
-    ] ?? '';
-
-		
+	const statusOptions = generateDropdownOptions(statuses, t, 'statuses')
+	const priorityOptions = generateDropdownOptions(priorities, t, 'priorities')
 
 
 	return (
 		<div className="flex justify-between items-center py-3">
-			<div className="flex gap-2">
-				<Checkbox id="terms" />
-				<p className="font-semibold text-gray-900">{name}</p>
-			</div>
+
+			<p className="font-semibold text-gray-900">{name}</p>
+
 			<div className="flex">
 
 				<SelectAction
@@ -69,7 +45,6 @@ function SubTask({name, status, priority}:SubTaskProps) {
 					}
 					onSelectHandler={(value) => {
 						setSelectedStatus(value);
-						console.log(value)
 					}}
 					showLabel={false}
 				/>
@@ -84,12 +59,14 @@ function SubTask({name, status, priority}:SubTaskProps) {
 					}
 					onSelectHandler={(value) => {
 						setSelectedPriority(value);
-						console.log(value)
 					}}
 					showLabel={false}
 				/>
 
-				<DatePickerWithRange />
+				<DatePickerWithRange 
+					selectedPeriod={selectedPeriod}
+          setSelectedPeriod={setSelectedPeriod}
+				/>
 			</div>
 		</div>
 	);

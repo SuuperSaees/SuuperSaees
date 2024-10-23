@@ -40,7 +40,7 @@ const SelectAction = ({
 }: SelectActionProps) => {
   const [selectedOption, setSelectedOption] = useState(defaultValue);
   return (
-    <div className="flex w-full items-center justify-between">
+    <div className={`flex w-full items-center ${showLabel ? 'justify-between' : 'justify-center'}`}>
       <span className="font-semibold">
         {groupName && showLabel ? groupName : showLabel ? 'Select an option' : ''}
       </span>
