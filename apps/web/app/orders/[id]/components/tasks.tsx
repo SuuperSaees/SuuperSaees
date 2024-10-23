@@ -1,10 +1,10 @@
-'use client';
+import TaskDropdown from "./task-dropdown";
 
 const TasksSection = () => {
 
   return (
     <div>
-      Task section
+      <TaskDropdown />
     </div>
   );
 };
