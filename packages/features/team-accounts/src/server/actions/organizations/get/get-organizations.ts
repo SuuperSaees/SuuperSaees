@@ -3,7 +3,8 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
-
+import { Database } from '@kit/supabase/database';
+import { SupabaseClient } from '@supabase/supabase-js';
 // import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
 
@@ -95,9 +96,11 @@ export const getOrganizationSettingsByOrganizationId = async (
     'sidebar_background_color',
     'language',
     'favicon_url',
+    'sender_name',
   ],
+  client?: SupabaseClient<Database>,
 ): Promise<{ key: string; value: string }[]> => {
-  const client = getSupabaseServerComponentClient({ admin: adminActived });
+  client = client ?? getSupabaseServerComponentClient({ admin: adminActived });
   const { data: organizationSettings, error: settingsError } = await client
     .from('organization_settings')
     .select('key, value')
@@ -227,9 +230,9 @@ export async function getOrganizations() {
 }
 // here a function to search organizations and limit the query => once the amount of organizations in production be higher
 
-export async function getOrganizationById(organizationId: string) {
+export async function getOrganizationById(organizationId: string, client?: SupabaseClient<Database>) {
+  client = client ?? getSupabaseServerComponentClient();
   try {
-    const client = getSupabaseServerComponentClient();
 
     // Step 1: Check if the user has permission to view the organization
     const hasPermission = await hasPermissionToViewOrganization(organizationId);

@@ -14,13 +14,10 @@ import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { fetchClientByOrgId } from '../../clients/get/get-clients';
-import {
-  fetchCurrentUser,
-  getPrimaryOwnerId,
-  getStripeAccountID,
-} from '../../members/get/get-member-account';
+import { fetchCurrentUser, getPrimaryOwnerId, getStripeAccountID } from '../../members/get/get-member-account';
 import { hasPermissionToAddClientServices } from '../../permissions/services';
 import { updateTeamAccountStripeId } from '../../team-details-server-actions';
+
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -148,8 +145,8 @@ async function fetchUserAccount(client) {
 }
 
 async function createStripeAccount(email: string, userId: string) {
-  const baseUrl = await getDomainByUserId(userId, true);
-  
+  const { domain: baseUrl } = await getDomainByUserId(userId, true);
+
   const response = await fetch(`${baseUrl}/api/stripe/create-account`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -164,7 +161,7 @@ async function createStripeProduct(
   clientData: ServiceData,
   userId: string,
 ) {
-  const baseUrl = await getDomainByUserId(userId, true);
+  const { domain: baseUrl } = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -185,7 +182,7 @@ async function createStripePrice(
   clientData: ServiceData,
   userId: string,
 ) {
-  const baseUrl = await getDomainByUserId(userId, true);
+  const { domain: baseUrl } = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

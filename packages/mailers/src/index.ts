@@ -2,8 +2,13 @@ import { z } from 'zod';
 
 
 
+import { EmailsTemplates } from '../../../apps/web/lib/emails-templates.types';
 import enEmails from '../../../apps/web/public/locales/en/emails.json';
 import esEmails from '../../../apps/web/public/locales/es/emails.json';
+
+
+// import type { TFunction } from '../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
+
 
 const MAILER_PROVIDER = z
   .enum(['nodemailer', 'cloudflare', 'resend', 'suupermailer'])
@@ -62,20 +67,25 @@ async function getSuuperMailer() {
   return new SuuperMailer();
 }
 
-type EmailTypes = keyof typeof enEmails;
-type TranslationKeys<T extends EmailTypes> = keyof (typeof enEmails)[T];
+type EmailTypes = EmailsTemplates.EmailTypes;
+type TranslationKeys<T extends EmailTypes> = EmailsTemplates.TranslationKeys<T>;
 
 const translations = {
   en: enEmails,
   es: esEmails,
 };
 
+// type TEmailFunction<T extends EmailTypes> = TFunction<'emails', undefined> & {
+//   key: TranslationKeys<T>;
+//   replacements?: Record<string, string>;
+// };
+
 export function getEmailTranslations<T extends EmailTypes>(emailType: T, lang: 'en' | 'es' = 'en') {
   const emailTranslations = translations[lang][emailType];
 
   return {
-    t: (key: TranslationKeys<T>, replacements?: Record<string, string>) => {
-      const rawText = emailTranslations[key];
+    t: ((key: TranslationKeys<T>, replacements?: Record<string, string>) => {
+      const rawText = emailTranslations[key as keyof typeof emailTranslations];
       const text = typeof rawText === 'string' ? rawText : String(rawText);
       
       if (replacements) {
@@ -84,7 +94,7 @@ export function getEmailTranslations<T extends EmailTypes>(emailType: T, lang: '
         }, text);
       }
       return text;
-    },
+    }),
     lang,
   };
 }

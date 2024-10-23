@@ -54,7 +54,7 @@ export const updateService = async (
     const client = getSupabaseServerComponentClient();
     const {userId, stripeId} = await getStripeAccountID();
     if (!stripeId) throw new Error('No stripe account found');
-    const baseUrl = await getDomainByUserId(userId, true);
+    const {domain: baseUrl} = await getDomainByUserId(userId, true);
 
     // Update service details in Supabase
     const serviceId = await updateSupabaseService(

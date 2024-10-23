@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   if (userError) throw userError.message;
   const userId = userData?.user.id;
 
-  const baseUrl = await getDomainByUserId(userId, true);
+  const { domain: baseUrl } = await getDomainByUserId(userId, true);
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call

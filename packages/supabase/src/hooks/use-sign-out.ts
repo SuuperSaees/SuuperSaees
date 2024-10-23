@@ -30,7 +30,7 @@ export function useSignOut() {
         const userId = userData?.user?.id;
 
         // Get the domain for the user (for multi-tenancy support)
-        const domain = await getDomainByUserId(userId, false);
+        const {domain} = await getDomainByUserId(userId, false);
 
         // Determine the appropriate landing page URL
         const landingPageParsed = IS_PROD

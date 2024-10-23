@@ -92,7 +92,11 @@ export async function middleware(request: NextRequest) {
       if (!domain) {
         // If not in cache, fetch the domain
         try {
-          domain = await getDomainByUserId(userId, false);
+          const { domain: domainByUserId } = await getDomainByUserId(
+            userId,
+            false,
+          );
+          domain = domainByUserId;
         } catch (error) {
           console.error('Error in middleware', error);
         }
