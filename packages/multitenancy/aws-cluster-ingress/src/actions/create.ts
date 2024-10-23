@@ -1,5 +1,6 @@
 import { getDomainByUserId } from '../../../utils/get/get-domain';
 
+
 export async function createIngress({
   domain,
   isCustom,
@@ -9,7 +10,7 @@ export async function createIngress({
   isCustom: boolean;
   userId: string;
 }): Promise<any> {
-  const BASE_URL = await getDomainByUserId(userId, true);
+  const { domain: BASE_URL } = await getDomainByUserId(userId, true);
   const SUUPER_CLIENT_ID = process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID;
   const SUUPER_CLIENT_SECRET = process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET;
   const newDomainCreate = {

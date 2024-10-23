@@ -228,6 +228,7 @@ export async function renderInviteEmail(props: Props) {
     return {
       html,
       subject,
+      t: inviteEmailT,
     };
   } catch (error) {
     console.error('Error al renderizar el correo:', error);

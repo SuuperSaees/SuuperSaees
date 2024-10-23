@@ -8,7 +8,10 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 
+
+
 import { fetchCurrentUser } from '../../../../../../packages/features/team-accounts/src/server/actions/members/get/get-member-account';
+
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -18,7 +21,7 @@ export async function POST(req: NextRequest) {
   const userData = await fetchCurrentUser(supabase);
   const userId = userData.id;
 
-  const baseUrl = await getDomainByUserId(userId, true);
+  const { domain: baseUrl } = await getDomainByUserId(userId, true);
 
   try {
     const accountLink = await stripe.accountLinks.create({

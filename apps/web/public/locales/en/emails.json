@@ -12,7 +12,8 @@
     "greeting": "Hi ${actualName}",
     "viewOrder": "View order",
     "farewell": "Regards,",
-    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
   },
   "orderCreation": {
     "subject": "New order created",
@@ -21,14 +22,16 @@
     "newOrderMessage": "You have a new order of ${emailSender}",
     "viewOrder": "View order",
     "farewell": "Regards,",
-    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
   },
   "orderMessage": {
     "subject": "${userName} commented in ${orderTitle} on ${date}.",
     "greeting": "Hi ${toEmail}",
     "reply": "Reply",
     "farewell": "Regards,",
-    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
   },
   "orderStatusPriority": {
     "status": {
@@ -50,11 +53,13 @@
     "greeting": "Hi ${actualName}",
     "viewOrder": "View order",
     "farewell": "Regards,",
-    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
   },
   "inviteEmail": {
     "acceptInvitation": "Accept invitation",
     "confirmEmail": "Confirm email",
-    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
   }
 }

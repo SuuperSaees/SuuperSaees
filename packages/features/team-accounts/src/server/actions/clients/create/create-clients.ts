@@ -51,7 +51,7 @@ const createClientUserAccount = async (
     const userData = await fetchCurrentUser(client);
     const userId = userData?.id;
     if (!userId) throw new Error('No user id provided');
-    const baseUrl = await getDomainByUserId(userId, true);
+    const { domain: baseUrl } = await getDomainByUserId(userId, true);
 
     // const organizationSettings = await getOrganizationSettings();
 

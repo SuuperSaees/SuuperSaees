@@ -8,7 +8,10 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 
+
+
 import { fetchCurrentUser } from '../../../../../../packages/features/team-accounts/src/server/actions/members/get/get-member-account';
+
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -19,7 +22,7 @@ export async function POST(req: NextRequest) {
   const userData = await fetchCurrentUser(supabase);
   const userId = userData.id;
 
-  const baseUrl = await getDomainByUserId(userId, true);
+  const { domain: baseUrl } = await getDomainByUserId(userId, true);
   if (!priceId) {
     return NextResponse.json(
       { error: { message: 'Price ID is required' } },

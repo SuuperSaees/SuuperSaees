@@ -8,9 +8,7 @@ import { getLogger } from '@kit/shared/logger';
 
 import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
-
-
-const emailSender = process.env.EMAIL_SENDER ?? '';
+import { getFormSendIdentity } from '../utils/get-form-send-identity';
 
 export async function sendOrderMessageEmail(
   toEmail: string,
@@ -26,18 +24,22 @@ export async function sendOrderMessageEmail(
   const mailer = await getMailer();
   const lang = getLanguageFromCookie() as 'en' | 'es';
   const { t } = getEmailTranslations('orderMessage', lang);
-  const siteURL = await getDomainByUserId(userId, true);
+  const { domain: siteURL, organizationId } = await getDomainByUserId(
+    userId,
+    true,
+  );
   const subject = t('subject', { userName, orderTitle, date });
-  const BRANDTOP_AGENCY_NAME =
-    process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
-  const BRANDTOP_EMAIL_SENDER = `Luz de ${agencyName} <${emailSender}>`;
+
+  const fromSenderIdentity = await getFormSendIdentity(
+    agencyName,
+    organizationId,
+    t('at'),
+  );
+
   await mailer
     .sendEmail({
       to: toEmail,
-      from:
-        agencyName === BRANDTOP_AGENCY_NAME
-          ? BRANDTOP_EMAIL_SENDER
-          : emailSender,
+      from: fromSenderIdentity,
       subject: subject,
       html: `
        <!DOCTYPE html>
@@ -160,10 +162,10 @@ export async function sendOrderMessageEmail(
     `,
     })
     .then(() => {
-      logger.info('Correo de mensaje de pedido enviado con éxito.');
+      logger.info('Order message email sent successfully.');
     })
     .catch((error) => {
       console.error(error);
-      logger.error({ error }, 'Error al enviar el correo de pedido');
+      logger.error({ error }, 'Error sending the order email');
     });
 }

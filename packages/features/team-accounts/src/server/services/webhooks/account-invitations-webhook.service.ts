@@ -1,9 +1,15 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { z } from 'zod';
 
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
+
+import { OrganizationSettings } from '../../../../../../../apps/web/lib/organization-settings.types';
+import { getOrganizationSettingsByOrganizationId } from '../../actions/organizations/get/get-organizations';
+import { getOrganizationById } from '../../actions/organizations/get/get-organizations';
 
 type Invitation = Database['public']['Tables']['invitations']['Row'];
 
@@ -12,6 +18,12 @@ const siteURL = process.env.NEXT_PUBLIC_SITE_URL;
 const productName = process.env.NEXT_PUBLIC_PRODUCT_NAME ?? '';
 const emailSender = process.env.EMAIL_SENDER;
 const brandtopAgencyName = process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
+const themeColorKey = OrganizationSettings.KEYS.theme_color;
+const senderNameKey = OrganizationSettings.KEYS.sender_name;
+const logoUrlKey = OrganizationSettings.KEYS.logo_url;
+const defaultAgencySenderName =
+  OrganizationSettings.EXTRA_KEYS.default_sender_name;
+const defaultAgencyName = OrganizationSettings.EXTRA_KEYS.default_agency_name;
 
 const env = z
   .object({
@@ -75,51 +87,32 @@ class AccountInvitationsWebhookService {
       throw inviter.error;
     }
 
-    let inviterOrganizationLogo = '';
-    let inviterOrganizationThemeColor = '';
+    // search organization name
+    const inviterOrganization = await getOrganizationById(
+      inviter.data.organization_id ?? '',
+      this.adminClient,
+    );
 
-    // search organixation name 
-    const inviterOrganization = await this.adminClient
-      .from('accounts')
-      .select('name')
-      .eq('id', inviter.data.organization_id ?? '')
-      .single();
-
-    if (inviterOrganization.error) {
-      logger.error(
-        {
-          error: inviterOrganization.error,
-          name: this.namespace,
-        },
-        'Failed to fetch inviter organization name',
+    const inviterOrganizationSettings =
+      await getOrganizationSettingsByOrganizationId(
+        inviter.data.organization_id ?? '',
+        true,
+        [logoUrlKey, themeColorKey, senderNameKey],
+        this.adminClient,
       );
-    }
+    let inviterOrganizationLogo = '',
+      inviterOrganizationThemeColor = '',
+      inviterOrganizationSenderName = '';
 
-    const inviterOrganizationSettings = await this.adminClient
-      .from('organization_settings')
-      .select('key, value')
-      .eq('account_id', inviter.data.organization_id ?? '')
-      .in('key', ['logo_url', 'theme_color']);
-
-    if (inviterOrganizationSettings.error) {
-      logger.error(
-        {
-          error: inviterOrganizationSettings.error,
-          name: this.namespace,
-        },
-        'Failed to fetch inviter organization logo',
-      );
-    }
-
-    if (inviterOrganizationSettings && !inviterOrganizationSettings.error) {
-      inviterOrganizationSettings.data.forEach((setting) => {
-        if (setting.key === 'logo_url') {
-          inviterOrganizationLogo = setting.value;
-        } else if (setting.key === 'theme_color') {
-          inviterOrganizationThemeColor = setting.value;
-        }
-      });
-    }
+    inviterOrganizationSettings.forEach((setting) => {
+      if (setting.key === logoUrlKey) {
+        inviterOrganizationLogo = setting.value;
+      } else if (setting.key === themeColorKey) {
+        inviterOrganizationThemeColor = setting.value;
+      } else if (setting.key === senderNameKey) {
+        inviterOrganizationSenderName = setting.value;
+      }
+    });
 
     const team = await this.adminClient
       .from('accounts')
@@ -155,7 +148,7 @@ class AccountInvitationsWebhookService {
         invitation.email,
       );
 
-      const { html, subject } = await renderInviteEmail({
+      const { html, subject, t } = await renderInviteEmail({
         link,
         invitedUserEmail: invitation.email,
         inviter: inviter.data.name ?? inviter.data.email ?? '',
@@ -165,15 +158,13 @@ class AccountInvitationsWebhookService {
         primaryColor: inviterOrganizationThemeColor,
       });
 
-      const BRANDTOP_AGENCY_NAME = env.brandtopAgencyName ?? '';
-    const BRANDTOP_EMAIL_SENDER = `Luz de ${inviterOrganization.data?.name} <${emailSender}>`;
+      const fromSenderIdentity = inviterOrganizationSenderName
+        ? `${inviterOrganizationSenderName} ${t('at')} ${inviterOrganization.name} <${emailSender}>`
+        : `${defaultAgencySenderName} ${t('at')} ${defaultAgencyName} <${emailSender}>`;
 
       await mailer
         .sendEmail({
-          from:
-            inviterOrganization.data?.name === BRANDTOP_AGENCY_NAME
-              ? BRANDTOP_EMAIL_SENDER
-              : env.emailSender,
+          from: fromSenderIdentity,
           to: invitation.email,
           subject,
           html,
@@ -208,7 +199,8 @@ class AccountInvitationsWebhookService {
       }
 
       // obtain members count with that organization
-      let { count: membersCount, error: membersCountError } =
+      let membersCount = 0;
+      const { count, error: membersCountError } =
         await this.adminClient
           .from('accounts_memberships')
           .select('*', { count: 'exact' })
@@ -227,6 +219,8 @@ class AccountInvitationsWebhookService {
         );
         throw membersCountError;
       }
+      membersCount = count ?? 0;
+      
       if (membersCount) {
         membersCount += 1;
       }

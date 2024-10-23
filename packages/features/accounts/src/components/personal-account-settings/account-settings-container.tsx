@@ -22,6 +22,7 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 import UpdateAccountOrganizationFavicon from './update-account-organization-favicon';
 import { UpdateAccountOrganizationName } from './update-account-organization-name';
+import { UpdateAccountOrganizationSenderName } from './update-account-organization-sender-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -83,7 +84,7 @@ export function PersonalAccountSettingsContainer(
           const stripeId = user?.stripe_id as string;
           if (stripeId) {
             try {
-              const baseUrl = await getDomainByUserId(user?.id ?? '', true);
+              const { domain: baseUrl } = await getDomainByUserId(user?.id ?? '', true);
               const response = await fetch(
                 `${baseUrl}/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`,
                 {
@@ -228,6 +229,19 @@ export function PersonalAccountSettingsContainer(
                     </CardHeader>
                     <CardContent>
                       <UpdateAccountOrganizationName />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandSenderName'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandSenderNameDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationSenderName />
                     </CardContent>
                   </Card>
                   <Card>
