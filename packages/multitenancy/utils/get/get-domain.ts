@@ -10,7 +10,10 @@ import { getSupabaseServerComponentClient } from '../../../supabase/src/clients/
 export async function getDomainByUserId(
   userId: string,
   parsedUrl: boolean = false,
-): Promise<string> {
+): Promise<{
+  domain: string;
+  organizationId: string;
+}> {
   // GET ROLE
   try {
     const userRole = await getUserRoleById(userId);
@@ -21,34 +24,41 @@ export async function getDomainByUserId(
     ]);
     const availableRolesClient = new Set(['client_owner', 'client_member']);
     let organizationId: string | null = null;
-  
+
     if (availableRolesAgency.has(userRole)) {
       // Case 1: Agency roles
       const organizationData = await getOrganizationByUserId(userId);
-  
+
       organizationId = organizationData?.id;
     } else if (availableRolesClient.has(userRole)) {
       // Case 2: Client roles
       const agencyData = await getAgencyForClientByUserId(userId);
-  
+
       organizationId = agencyData?.id;
     } else {
       // Unknown role, use default domain
-      return "";
+      return {
+        domain: process.env.NEXT_PUBLIC_SITE_URL ?? '',
+        organizationId: '',
+      };
     }
-  
-    const domain = await getDomainByOrganizationId(organizationId);
+
+    const domain =
+      (await getDomainByOrganizationId(organizationId)) ??
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      '';
     const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-  
-    if (parsedUrl) {
-      return `${IS_PROD ? 'https' : 'http'}://${domain}/`;
-    }
-  
-    return domain;
+
+    return {
+      domain: parsedUrl ? `${IS_PROD ? 'https' : 'http'}://${domain}/` : domain,
+      organizationId: organizationId,
+    };
   } catch (error) {
     console.error(error);
-    return "";
-
+    return {
+      domain: process.env.NEXT_PUBLIC_SITE_URL ?? '',
+      organizationId: '',
+    };
   }
 }
 
@@ -60,13 +70,14 @@ export async function getDomainByOrganizationId(
     .from('organization_subdomains')
     .select('subdomains(domain)')
     .eq('organization_id', organizationId ?? '')
-    .single()
+    .single();
 
   if (domainError) {
     throw new Error(`Error getting domain: ${domainError.message}`);
   }
 
-  const domain = domainData?.subdomains?.domain;
+  const domain =
+    domainData?.subdomains?.domain ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
   return domain ?? '';
 }

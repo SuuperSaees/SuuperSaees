@@ -178,5 +178,8 @@
   "brandSidebarLoading": "Actualizando barra lateral...",
   "brandSidebarSubmit": "Actualizar barra lateral",
   "brandSidebarLabel": "Selecciona el color de la barra lateral",
-  "brandSidebarReset": "Restablecer color"
+  "brandSidebarReset": "Restablecer color",
+  "brandSenderNameSubmit": "Actualizar remitente",
+  "brandSenderName": "Nombre del remitente",
+  "brandSenderNameDescription": "Actualiza el nombre que se mostrará como el remitente de los correos electrónicos"
 }

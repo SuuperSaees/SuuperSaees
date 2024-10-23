@@ -178,5 +178,8 @@
   "brandSidebarLoading": "Updating sidebar...",
   "brandSidebarSubmit": "Update Sidebar",
   "brandSidebarLabel": "Select Sidebar Color",
-  "brandSidebarReset": "Reset Color"
+  "brandSidebarReset": "Reset Color",
+  "brandSenderNameSubmit": "Update Sender",
+  "brandSenderName": "Sender Name",
+  "brandSenderNameDescription": "Update the name that will be displayed as the sender of the emails"
 }

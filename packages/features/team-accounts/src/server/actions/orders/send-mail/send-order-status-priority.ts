@@ -8,9 +8,7 @@ import { getLogger } from '@kit/shared/logger';
 
 import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
-
-
-const emailSender = process.env.EMAIL_SENDER ?? '';
+import { getFormSendIdentity } from '../utils/get-form-send-identity';
 
 export async function sendOrderStatusPriorityEmail(
   toEmail: string,
@@ -24,7 +22,10 @@ export async function sendOrderStatusPriorityEmail(
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
-  const siteURL = await getDomainByUserId(userId, true);
+  const { domain: siteURL, organizationId } = await getDomainByUserId(
+    userId,
+    true,
+  );
   const lang = getLanguageFromCookie() as 'en' | 'es';
   const { t } = getEmailTranslations('orderStatusPriority', lang);
 
@@ -40,16 +41,17 @@ export async function sendOrderStatusPriorityEmail(
     orderTitle,
     message,
   });
-  const BRANDTOP_AGENCY_NAME =
-    process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
-  const BRANDTOP_EMAIL_SENDER = `Luz de ${agencyName} <${emailSender}>`;
+
+  const fromSenderIdentity = await getFormSendIdentity(
+    agencyName,
+    organizationId,
+    t('at'),
+  );
+
   await mailer
     .sendEmail({
       to: toEmail,
-      from:
-        agencyName === BRANDTOP_AGENCY_NAME
-          ? BRANDTOP_EMAIL_SENDER
-          : emailSender,
+      from: fromSenderIdentity,
       subject: subject,
       html: `
        <!DOCTYPE html>
@@ -127,10 +129,6 @@ export async function sendOrderStatusPriorityEmail(
                                         <p style="color: var(--Gray-700, #344054); font-size: 16px; font-style: normal; font-weight: 400; margin:0;">${t('farewell')}</p>
                                         <p style="color: var(--Gray-700, #344054); font-size: 16px; font-style: normal; font-weight: 700; margin:0;">${agencyName}</p>
                                       </div>
-
-
-                                      
-
                                     </td>
                                   </tr>
                                 </tbody>
@@ -172,12 +170,10 @@ export async function sendOrderStatusPriorityEmail(
     `,
     })
     .then(() => {
-      logger.info(
-        `Correo de cambio de ${field} en el pedido enviado con éxito.`,
-      );
+      logger.info(`Order ${field} change email sent successfully.`);
     })
     .catch((error) => {
       console.error(error);
-      logger.error({ error }, 'Error al enviar el correo de pedido');
+      logger.error({ error }, 'Error sending the order email');
     });
 }
