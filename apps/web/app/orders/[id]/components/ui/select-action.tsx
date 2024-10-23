@@ -26,6 +26,7 @@ interface SelectActionProps {
   getitemClassName: (value: string) => string;
   onSelectHandler?: (value: string) => void;
   [key: string]: unknown;
+  showLabel?: boolean
 }
 const SelectAction = ({
   options,
@@ -34,13 +35,14 @@ const SelectAction = ({
   className,
   getitemClassName,
   onSelectHandler,
+  showLabel = true,
   ...rest
 }: SelectActionProps) => {
   const [selectedOption, setSelectedOption] = useState(defaultValue);
   return (
-    <div className="flex w-full items-center justify-between">
+    <div className={`flex w-full items-center ${showLabel ? 'justify-between' : 'justify-center'}`}>
       <span className="font-semibold">
-        {groupName ? groupName : 'Select an option'}
+        {groupName && showLabel ? groupName : showLabel ? 'Select an option' : ''}
       </span>
       <Select
         {...rest}
