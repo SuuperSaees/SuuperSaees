@@ -127,6 +127,16 @@
     "dragOrClick": "Arrastre una imagen aquí o haga clic para seleccionarlo",
     "dropHere": "Deja la imagen aquí",
     "invalidFileType": "Por favor seleccione un archivo de imagen válido"
+  }, 
+  "empty": {
+    "agency": {
+      "title": "¡Aún no tienes ningún servicio!",
+      "description": "Comienza comprando un servicio para crear tu primer pedido."
+    },
+    "client": {
+      "title": "!Aún no te han asignado ningún servicio!",
+      "description": "Contacta a tu agencia para asignar un servicio y comenzar a crear un pedido."
+    }
   }
 }
 
