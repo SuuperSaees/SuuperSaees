@@ -300,7 +300,6 @@ function TypeOfServiceStep() {
     borderColor: isSelected ? (theme_color ?? '#1f1f1f') : '#d9d9d9',
   });
 
-  console.log('form', form.getValues());
 
   return (
     <div className="">
