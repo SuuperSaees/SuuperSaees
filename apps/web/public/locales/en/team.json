@@ -164,5 +164,9 @@
   "labelNumberOfUsers": {
     "plural": "users",
     "singular": "user"
+  },
+  "plan": {
+    "upgradeButton": "Upgrade plan",
+    "message": "You have reached the membership limit"
   }
 }
