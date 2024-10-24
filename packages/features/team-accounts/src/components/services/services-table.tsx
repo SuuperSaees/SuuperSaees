@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import * as React from 'react';
 
-import Image from 'next/image';
 import Link from 'next/link';
 
 import {
@@ -34,6 +33,8 @@ import {
 import { TabsList } from '@kit/ui/tabs';
 
 import DeleteServiceDialog from '../../../../../../apps/web/app/services/delete/delete-component';
+import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
+import { SkeletonTable } from '../../../../../../apps/web/components/ui/skeleton';
 import { Service } from '../../../../../../apps/web/lib/services.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import {
@@ -55,6 +56,7 @@ type ServicesTableProps = {
   accountRole: string;
   hasTheEmailAssociatedWithStripe: boolean;
   handleCheckout: (priceId: string) => Promise<void>;
+  isLoading: boolean;
 };
 
 // SERVICES TABLE
@@ -158,8 +160,6 @@ const servicesColumns = (
       const priceId = service.price_id as string;
       // eslint-disable-next-line react-hooks/rules-of-hooks
 
-      
-
       return (
         <div className="h-18 flex items-center gap-4 self-stretch p-4">
           {accountRole === 'agency_owner' && (
@@ -194,9 +194,9 @@ export function ServicesTable({
   services,
   accountRole,
   hasTheEmailAssociatedWithStripe,
-  handleCheckout
+  handleCheckout,
+  isLoading,
 }: ServicesTableProps) {
-
   const { t } = useTranslation(['services', 'briefs']);
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -207,7 +207,13 @@ export function ServicesTable({
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const columns = useMemo<ColumnDef<Service.Type>[]>(
-    () => servicesColumns(t, accountRole, hasTheEmailAssociatedWithStripe, handleCheckout),
+    () =>
+      servicesColumns(
+        t,
+        accountRole,
+        hasTheEmailAssociatedWithStripe,
+        handleCheckout,
+      ),
     [t, accountRole, hasTheEmailAssociatedWithStripe],
   );
 
@@ -237,7 +243,7 @@ export function ServicesTable({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between gap-4 py-4">
-        <TabsList className="gap-2 bg-white">
+        <TabsList className="gap-2 bg-transparent">
           <ThemedTabTrigger
             value="services"
             activeTab={activeTab}
@@ -274,140 +280,125 @@ export function ServicesTable({
         </div>
       </div>
       <Separator />
-      <div className="mt-[24px] rounded-md border bg-white px-4">
-        <Table className="rounded-md bg-white">
-          {' '}
-          {/* Asegúrate de que la tabla tenga un fondo blanco */}
-          {table.getRowModel().rows?.length ? (
-            <>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <TableHead key={header.id}>
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </>
-          ) : (
+      {isLoading ? (
+        <SkeletonTable columns={7} rows={7} className="mt-6" />
+      ) : !table.getRowModel().rows?.length ? (
+        <div className="mt-6 flex h-full flex-col rounded-md border bg-white p-2">
+        <EmptyState
+          imageSrc="/images/illustrations/Illustration-cloud.svg"
+          title={t('startFirstService')}
+          description={t('noServicesMessage')}
+          button={
+            accountRole === 'agency_owner' ? (
+              <Link href="/services/create">
+                <ThemedButton>{t('createService')}</ThemedButton>
+              </Link>
+            ) : undefined
+          }
+        />
+        </div>
+      ) : (
+        <div className="mt-[24px] rounded-md border bg-white px-4">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell colSpan={table.getAllColumns().length}>
-                  <div className="flex h-[493px] flex-col place-content-center items-center">
-                    <Image
-                      src="/images/illustrations/Illustration-box.svg"
-                      alt="Illustration Card"
-                      width={220}
-                      height={160}
-                    />
-                    <h3 className="mb-[20px] w-[352px] text-center text-[20px] font-semibold leading-[30px] text-[#101828]">
-                      {t('startFirstService')}{' '}
-                      {/* Usar la clave de traducción */}
-                    </h3>
-                    <p className="mb-[16px] w-[352px] text-center text-[16px] leading-[24px] text-[#475467]">
-                      {t('noServicesMessage')}{' '}
-                      {/* Usar la clave de traducción */}
-                    </p>
-                    {accountRole === 'agency_owner' && (
-                      <Link href="/services/create">
-                        <ThemedButton>{t('createService')}</ThemedButton>
-                      </Link>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
             </TableBody>
-          )}
-        </Table>
+          </Table>
+        </div>
+      )}
 
-        {table.getRowModel().rows?.length ? (
-          <>
-            <div className="flex items-center justify-between py-4">
-              <Pagination>
-                <PaginationContent className="flex w-full items-center justify-between">
-                  {pageIndex > 0 && (
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (table.getCanPreviousPage()) {
-                            table.previousPage();
-                          }
-                        }}
-                      />
-                    </PaginationItem>
-                  )}
-                  <div className="flex flex-1 justify-center">
-                    {pages.length > 1 &&
-                      pages.map((page) => (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            href="#"
-                            isActive={pageIndex === page - 1}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              table.setPageIndex(page - 1);
-                            }}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                    {pageCount > 3 && pageIndex < pageCount - 2 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
+      {table.getRowModel().rows?.length ? (
+        <>
+          <div className="flex items-center justify-between py-4">
+            <Pagination>
+              <PaginationContent className="flex w-full items-center justify-between">
+                {pageIndex > 0 && (
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (table.getCanPreviousPage()) {
+                          table.previousPage();
+                        }
+                      }}
+                    />
+                  </PaginationItem>
+                )}
+                <div className="flex flex-1 justify-center">
+                  {pages.length > 1 &&
+                    pages.map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={pageIndex === page - 1}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            table.setPageIndex(page - 1);
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
                       </PaginationItem>
-                    )}
-                  </div>
-                  {pageIndex < pageCount - 1 && (
+                    ))}
+                  {pageCount > 3 && pageIndex < pageCount - 2 && (
                     <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (table.getCanNextPage()) {
-                            table.nextPage();
-                          }
-                        }}
-                      />
+                      <PaginationEllipsis />
                     </PaginationItem>
                   )}
-                </PaginationContent>
-              </Pagination>
-            </div>
-          </>
-        ) : (
-          <></>
-        )}
-      </div>
+                </div>
+                {pageIndex < pageCount - 1 && (
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (table.getCanNextPage()) {
+                          table.nextPage();
+                        }
+                      }}
+                    />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          </div>
+        </>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

@@ -32,10 +32,10 @@ export function useStripeActions({ userRole }: UseStripeActions) {
 
   const services = servicesQueryData.data?.products ?? [];
   const briefs = briefsQueryData.data ?? [];
-  const loading = servicesQueryData.isLoading;
-  const error = !!servicesQueryData.error;
+  const servicesAreLoading = servicesQueryData.isPending || servicesQueryData.isLoading;
+  const servicesError = !!servicesQueryData.error;
   // briefLoading
-  const briefsAreLoading = briefsQueryData.isLoading;
+  const briefsAreLoading = briefsQueryData.isPending || briefsQueryData.isLoading;
   const briefsError = !!briefsQueryData.error;
 
   const fetchAccountStripeConnect = useCallback(async () => {
@@ -100,8 +100,8 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     briefsError,
     services,
     hasTheEmailAssociatedWithStripe,
-    loading,
-    error,
+    servicesAreLoading,
+    servicesError,
     fetchAccountStripeConnect,
     handleCheckout
   };
