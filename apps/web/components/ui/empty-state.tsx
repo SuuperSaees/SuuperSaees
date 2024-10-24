@@ -4,10 +4,12 @@ export default function EmptyState({
   title,
   description,
   imageSrc,
+  button
 }: {
   title: string;
   description: string;
   imageSrc: string;
+  button?: React.ReactNode;
 }) {
   return (
     <div className="flex h-[493px] flex-col place-content-center items-center max-w-lg w-full mx-auto">
@@ -18,6 +20,10 @@ export default function EmptyState({
       <p className="mb-[16px] w-full text-center text-[16px] leading-[24px] text-[#475467]">
         {description}
       </p>
+      {
+        button && 
+        button
+      }
 
       {/* <Link href="#">
         <ThemedButton>{t('addService')}</ThemedButton>

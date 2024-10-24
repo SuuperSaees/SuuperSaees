@@ -1,70 +1,57 @@
 'use client';
 
-// import { useEffect } from 'react';
-import * as React from 'react';
+import { useState } from 'react';
+
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Elements } from '@stripe/react-stripe-js';
 import { Stripe } from '@stripe/stripe-js';
 import { useTranslation } from 'react-i18next';
 
 import { PageBody } from '@kit/ui/page';
-import { Tabs, TabsContent} from '@kit/ui/tabs';
+import { Tabs, TabsContent } from '@kit/ui/tabs';
+
+import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table';
 
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
-import {
-  ServicesContextProvider,
-  // useServicesContext,
-} from '../contexts/services-context';
-import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table';
-import { Brief } from '~/lib/brief.types';
-import { Service } from '~/lib/services.types';
+import { useStripeActions } from '../hooks/use-stripe-actions';
 
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
-  briefs : Brief.Relationships.Services.Response[],
-  services: Service.Relationships.Client.Response[];
+  accountRole: string;
 }
 
 const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
   stripePromise,
-  briefs,
-  services
+  accountRole,
 }) => {
-  // const { services, loading, updateServices } = useServicesContext();
+  const searchParams = useSearchParams();
+  const briefsView = searchParams.get('briefs');
+  const router = useRouter();
+
   const { t } = useTranslation('orders');
-  const [activeTab, setActiveTab] = React.useState<'services' | 'briefs'>(
-    'services',
+
+  const [activeTab, setActiveTab] = useState<'services' | 'briefs'>(
+    briefsView === 'true' ? 'briefs' : 'services',
   );
+
+  const { services, briefs, hasTheEmailAssociatedWithStripe, handleCheckout, briefsAreLoading, servicesAreLoading } =
+    useStripeActions({
+      userRole: accountRole,
+    });
 
   const handleTabClick = (value: 'services' | 'briefs') => {
     setActiveTab(value);
   };
-  // useEffect(() => {
-  //   updateServices(true).catch((error) => {
-  //     console.log(error.message);
-  //   });
-  // }, []);
-
-
-  // if (loading) {
-  //   return (
-  //     <div className="flex h-screen items-center justify-center">
-  //       <div
-  //         className="text-surface inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-  //         role="status"
-  //       >
-  //         <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-  //           Loading...
-  //         </span>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <Tabs
       defaultValue={activeTab}
       onValueChange={(value: string) => {
+        if (value === 'services' && briefsView === 'true') {
+          handleTabClick(value);
+          router.push('/services');
+        }
         handleTabClick(value as 'services' | 'briefs');
       }}
     >
@@ -80,17 +67,20 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
                 </span>
               </div>
             </div>
-            <TabsContent
-            className='bg-transparent'
-              value="services"
-            >
-              <ServicesTable activeTab = {activeTab} services={services} />
+            <TabsContent className="bg-transparent" value="services">
+              <ServicesTable
+                activeTab={activeTab}
+                services={services}
+                accountRole={accountRole}
+                hasTheEmailAssociatedWithStripe={
+                  hasTheEmailAssociatedWithStripe
+                }
+                handleCheckout={handleCheckout}
+                isLoading={servicesAreLoading}
+              />
             </TabsContent>
-            <TabsContent 
-            className='bg-transparent'
-              value="briefs"
-            >
-              <BriefsTable activeTab = {activeTab} briefs={briefs}  />
+            <TabsContent className="bg-transparent" value="briefs">
+              <BriefsTable activeTab={activeTab} briefs={briefs} accountRole={accountRole} isLoading={briefsAreLoading} />
             </TabsContent>
           </div>
         </PageBody>
@@ -100,11 +90,7 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
 };
 
 const ServicesPageClient: React.FC<ServicesPageClientProps> = (props) => {
-  return (
-    <ServicesContextProvider>
-      <ServicesPageClientContent {...props} />
-    </ServicesContextProvider>
-  );
+  return <ServicesPageClientContent {...props} />;
 };
 
 export { ServicesPageClient };

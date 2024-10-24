@@ -11,18 +11,21 @@ import FileSection from '~/components/organization/files';
 
 import ActivityPage from './activity';
 import DetailsPage from './details';
+import TasksSection from './tasks';
 
 type OrderTabsProps = {
-  organizationId: {
-    account_id: string;
-  } | undefined;
+  organizationId:
+    | {
+        account_id: string;
+      }
+    | undefined;
   currentPath: {
     title: string;
     uuid?: string;
   }[];
 };
 
-export const OrderTabs = ({ organizationId, currentPath}: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
@@ -49,15 +52,35 @@ export const OrderTabs = ({ organizationId, currentPath}: OrderTabsProps) => {
         >
           <Trans i18nKey={'orders:details.navigation.details'} />
         </ThemedTabTrigger>
-        <ThemedTabTrigger value="files" activeTab={activeTab} option={'files'}>
+        <ThemedTabTrigger 
+          value="tasks" 
+          activeTab={activeTab} 
+          option={'tasks'}
+        >
+          <Trans i18nKey={'orders:details.navigation.tasks'} />
+        </ThemedTabTrigger>
+        <ThemedTabTrigger 
+          value="files" 
+          activeTab={activeTab} 
+          option={'files'}
+        >
           <Trans i18nKey={'orders:details.navigation.files'} />
         </ThemedTabTrigger>
       </TabsList>
-      <TabsContent value="details" className="h-full max-h-full min-h-0 overflow-y-auto no-scrollbar">
+
+      <TabsContent
+        value="details"
+        className="no-scrollbar h-full max-h-full min-h-0 overflow-y-auto"
+      >
         <DetailsPage />
-      </TabsContent>  
+      </TabsContent>
       <TabsContent value="activity" className="h-full max-h-full min-h-0">
         <ActivityPage />
+      </TabsContent>
+      <TabsContent value="tasks">
+        <div className="w-full">
+          <TasksSection />
+        </div>
       </TabsContent>
       <TabsContent value="files">
         <div className="w-full">
