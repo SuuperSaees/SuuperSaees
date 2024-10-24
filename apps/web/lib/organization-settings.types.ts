@@ -24,6 +24,7 @@ export namespace OrganizationSettings {
     portal_name: 'portal_name',
     favicon_url: 'favicon_url',
     sender_name: 'sender_name',
+    sender_email: 'sender_email',
     // If you want to add more keys, make sure they are defined in the 'organization_setting_key' enum in 'database.types.ts'
   };
 

@@ -11,6 +11,7 @@ import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { getFormSendIdentity } from '../utils/get-form-send-identity';
 
+
 const emailSender = process.env.EMAIL_SENDER ?? '';
 
 export async function sendOrderCreationEmail(
@@ -29,8 +30,7 @@ export async function sendOrderCreationEmail(
   const lang = getLanguageFromCookie() as 'en' | 'es';
   const { t } = getEmailTranslations('orderCreation', lang);
 
-  const fromSenderIdentity = await getFormSendIdentity(
-    agencyName,
+  const { fromSenderIdentity, logoUrl, themeColor, buttonTextColor } = await getFormSendIdentity(
     organizationId,
     t('at'),
   );
@@ -80,15 +80,15 @@ export async function sendOrderCreationEmail(
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png"
-                                        alt="Suuper Logo"
+                                        src="${logoUrl}"
+                                        alt="Company Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${t('greeting', { toEmail })}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${t('newOrderMessage', { emailSender })}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${orderData.title}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;margin-bottom:60px;">${orderData.description}</p>
-                                      <a href="${siteURL}orders/${orderId}" style="padding: 10px 20px; background-color: #1A38D7; color: white; text-decoration: none; border-radius: 5px;">
+                                      <a href="${siteURL}orders/${orderId}" style="padding: 10px 20px; background-color: ${themeColor}; color: ${buttonTextColor}; text-decoration: none; border-radius: 5px;">
                                         ${t('viewOrder')}
                                       </a>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;margin-top:40px;">${t('farewell')}</p>
@@ -112,9 +112,6 @@ export async function sendOrderCreationEmail(
                                     <td style="text-align: left;">
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         ${t('footer', { toEmail })}
-                                      </p>
-                                      <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        © 2024 Suuper, soporte@suuper.co
                                       </p>
                                     </td>
                                   </tr>
@@ -141,3 +138,6 @@ export async function sendOrderCreationEmail(
       logger.error({ error }, 'Failed to send order email');
     });
 }
+// <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
+// © 2024 Suuper, soporte@suuper.co
+// </p>
