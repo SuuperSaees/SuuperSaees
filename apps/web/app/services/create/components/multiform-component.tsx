@@ -61,7 +61,10 @@ export const FormSchema = createStepSchema({
     })
     .refine((data) => data.single_sale || data.recurring_subscription, {
       message: 'Either single sale or recurring subscription must be true',
-      path: ['step_type_of_service'], // This specifies where the error should appear
+      path: [
+        'step_type_of_service_single_sale',
+        'step_type_of_service_recurring_subscription',
+      ],
     }),
   step_service_details: z.object({
     service_image: z.string().optional(),
@@ -267,13 +270,26 @@ function TypeOfServiceStep() {
     | 'step_type_of_service.single_sale'
     | 'step_type_of_service.recurring_subscription';
 
-  const handleCheckboxChange = (name: CheckboxName, field: ControllerRenderProps<any, "step_type_of_service.single_sale" | "step_type_of_service.recurring_subscription">) => (checked: boolean) => {
-    form.setValue('step_type_of_service.single_sale', false);
-    form.setValue('step_type_of_service.recurring_subscription', false);
-    form.setValue(name, checked);
-
-    field.onChange(checked)
-  };
+  const handleCheckboxChange =
+    (
+      name: CheckboxName,
+      field: ControllerRenderProps<
+        any,
+        | 'step_type_of_service.single_sale'
+        | 'step_type_of_service.recurring_subscription'
+      >,
+    ) =>
+    (_checked: boolean) => {
+      // Always set the selected option to true and the other to false
+      if (name === 'step_type_of_service.single_sale') {
+        form.setValue('step_type_of_service.single_sale', true);
+        form.setValue('step_type_of_service.recurring_subscription', false);
+      } else if (name === 'step_type_of_service.recurring_subscription') {
+        form.setValue('step_type_of_service.single_sale', false);
+        form.setValue('step_type_of_service.recurring_subscription', true);
+      }
+      field.onChange(true);
+    };
 
   const getCheckboxClass = (isSelected: boolean) =>
     isSelected
@@ -303,7 +319,15 @@ function TypeOfServiceStep() {
                   style={getStyles(field.value)}
                 >
                   <FormControl>
-                    <div className="flex gap-[11.792px]">
+                    <div
+                      className="flex cursor-pointer gap-[11.792px]"
+                      onClick={() =>
+                        handleCheckboxChange(
+                          'step_type_of_service.single_sale',
+                          field,
+                        )(!field.value)
+                      }
+                    >
                       <div
                         className={`flex h-8 w-8 cursor-pointer items-center justify-center border-2 ${
                           field.value
@@ -317,11 +341,6 @@ function TypeOfServiceStep() {
                                 backgroundColor: theme_color ?? '#1f1f1f',
                               }
                             : undefined
-                        }
-                        onClick={() =>
-                          handleCheckboxChange(
-                            'step_type_of_service.single_sale', field
-                          )(!field.value)
                         }
                       >
                         {field.value && (
@@ -352,7 +371,15 @@ function TypeOfServiceStep() {
                   style={getStyles(field.value)}
                 >
                   <FormControl>
-                    <div className="flex gap-[11.792px]">
+                    <div
+                      className="flex cursor-pointer gap-[11.792px]"
+                      onClick={() =>
+                        handleCheckboxChange(
+                          'step_type_of_service.recurring_subscription',
+                          field,
+                        )(!field.value)
+                      }
+                    >
                       <div
                         className={`flex h-6 w-8 cursor-pointer items-center justify-center border-2 ${
                           field.value
@@ -366,12 +393,6 @@ function TypeOfServiceStep() {
                                 backgroundColor: theme_color ?? '#1f1f1f',
                               }
                             : undefined
-                        }
-                        onClick={() =>
-                          handleCheckboxChange(
-                            'step_type_of_service.recurring_subscription',
-                            field
-                          )(!field.value)
                         }
                       >
                         {field.value && (
