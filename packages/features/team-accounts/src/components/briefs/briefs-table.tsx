@@ -2,8 +2,6 @@
 
 import { useMemo } from 'react';
 import * as React from 'react';
-import { TabsList } from '@kit/ui/tabs';
-import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings'
 
 import Link from 'next/link';
 
@@ -33,7 +31,9 @@ import {
   TableHeader,
   TableRow,
 } from '@kit/ui/table';
+import { TabsList } from '@kit/ui/tabs';
 
+import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
 import { Brief } from '../../../../../../apps/web/lib/brief.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import {
@@ -41,13 +41,16 @@ import {
   PaginationPrevious,
 } from '../../../../../../packages/ui/src/shadcn/pagination';
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
+import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings';
 // import CreateBriefDialog from '../../server/actions/briefs/create/create-brief-ui';
 import DeleteBriefDialog from '../../server/actions/briefs/delete/delete-brief-ui';
+
 // import UpdateBriefDialog from '../../server/actions/briefs/update/update-brief-ui';
 
 type BriefTableProps = {
   briefs: Brief.Relationships.Services.Response[];
-  activeTab : string
+  activeTab: string;
+  accountRole: string;
 };
 
 // SERVICES TABLE
@@ -169,7 +172,7 @@ const briefColumns = (
         <div className="h-18 flex items-center gap-4 self-stretch p-4">
           {/* <UpdateBriefDialog {...brief} /> */}
           <Link href={`/briefs/update?id=${brief.id}`}>
-              <Pen className="h-4 w-4 text-gray-600 cursor-pointer" />
+            <Pen className="h-4 w-4 cursor-pointer text-gray-600" />
           </Link>
           <DeleteBriefDialog briefId={brief.id} />
         </div>
@@ -178,10 +181,13 @@ const briefColumns = (
   },
 ];
 
-
-export function BriefsTable({ activeTab, briefs }: BriefTableProps) {
+export function BriefsTable({
+  activeTab,
+  briefs,
+  accountRole,
+}: BriefTableProps) {
   const { t } = useTranslation('briefs');
-  
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -191,8 +197,10 @@ export function BriefsTable({ activeTab, briefs }: BriefTableProps) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const columns = useMemo<ColumnDef<Brief.Relationships.Services.Response>[]>(() => briefColumns(t), [t]);
-
+  const columns = useMemo<ColumnDef<Brief.Relationships.Services.Response>[]>(
+    () => briefColumns(t),
+    [t],
+  );
 
   const table = useReactTable({
     data: briefs,
@@ -218,115 +226,134 @@ export function BriefsTable({ activeTab, briefs }: BriefTableProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
-        
-        <TabsList className='gap-2 bg-transparent'>
-          <ThemedTabTrigger value="services" activeTab={activeTab} option={'services'}>
+        <TabsList className="gap-2 bg-transparent">
+          <ThemedTabTrigger
+            value="services"
+            activeTab={activeTab}
+            option={'services'}
+          >
             {t('services:serviceTitle')}
           </ThemedTabTrigger>
-          <ThemedTabTrigger value="briefs" activeTab={activeTab} option={'briefs'}>
-            {t('briefs:briefs', {ns:'briefs'})}
+          <ThemedTabTrigger
+            value="briefs"
+            activeTab={activeTab}
+            option={'briefs'}
+          >
+            {t('briefs:briefs', { ns: 'briefs' })}
           </ThemedTabTrigger>
         </TabsList>
 
         <div className="flex w-full justify-end gap-4">
-          <div className="bg-white relative max-w-sm">
+          <div className="relative max-w-sm bg-white">
             <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
             <Input
-              placeholder="Buscar briefs..."
+              placeholder={t('briefs:search')}
               value={table.getColumn('name')?.getFilterValue() as string}
               onChange={(event) => {
                 table.getColumn('name')?.setFilterValue(event.target.value);
               }}
-              className="pl-10 bg-white"
+              className="bg-white pl-10"
             />
           </div>
           {/* <CreateBriefDialog
             propietary_organization_id={importantPropietaryOrganizationId ?? ''}
           /> */}
-          <Link href="/briefs/create">
-            <ThemedButton>{t('createBrief')}</ThemedButton>
-          </Link>
+          {briefs.length > 0 && (
+            <Link href="/briefs/create">
+              <ThemedButton>{t('createBrief')}</ThemedButton>
+            </Link>
+          )}
         </div>
       </div>
       <Separator />
-      <div className="mt-[24px] bg-white rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-between px-2 py-4">
-        <div className="flex items-center gap-2">
-          <PaginationPrevious
-            onClick={() => table.previousPage()}
-            isActive={table.getCanPreviousPage()}
-          >
-            {t('previous')}
-          </PaginationPrevious>
-
-          <span className="text-sm font-medium">
-            {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-          </span>
-
-          <PaginationNext
-            onClick={() => {
-              if (table.getCanNextPage()) {
-                table.nextPage();
-              }
-            }}
-            isActive={table.getCanNextPage()}
-            className={`${
-              !table.getCanNextPage() ? 'cursor-not-allowed opacity-50' : ''
-            }`}
-          >
-            {t('next')}
-          </PaginationNext>
+      {!briefs.length ? (
+        <div className="mt-6 flex h-full flex-col rounded-md border bg-white p-2">
+          <EmptyState
+            imageSrc="/images/illustrations/Illustration-cloud.svg"
+            title={t('briefs:empty.agency.title')}
+            description={t('briefs:empty.agency.description')}
+            button={
+              accountRole === 'agency_owner' ? (
+                <Link href="/briefs/create">
+                  <ThemedButton>{t('createBrief')}</ThemedButton>
+                </Link>
+              ) : undefined
+            }
+          />
         </div>
-      </div>
+      ) : (
+        <div className="mt-[24px] rounded-md border bg-white">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length &&
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+      {briefs.length > 0 && (
+        <div className="flex items-center justify-between px-2 py-4">
+          <div className="flex items-center gap-2">
+            <PaginationPrevious
+              onClick={() => table.previousPage()}
+              isActive={table.getCanPreviousPage()}
+            >
+              {t('previous')}
+            </PaginationPrevious>
+
+            <span className="text-sm font-medium">
+              {table.getState().pagination.pageIndex + 1} /{' '}
+              {table.getPageCount()}
+            </span>
+
+            <PaginationNext
+              onClick={() => {
+                if (table.getCanNextPage()) {
+                  table.nextPage();
+                }
+              }}
+              isActive={table.getCanNextPage()}
+              className={`${
+                !table.getCanNextPage() ? 'cursor-not-allowed opacity-50' : ''
+              }`}
+            >
+              {t('next')}
+            </PaginationNext>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

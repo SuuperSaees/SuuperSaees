@@ -79,7 +79,7 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
               />
             </TabsContent>
             <TabsContent className="bg-transparent" value="briefs">
-              <BriefsTable activeTab={activeTab} briefs={briefs} />
+              <BriefsTable activeTab={activeTab} briefs={briefs} accountRole={accountRole} />
             </TabsContent>
           </div>
         </PageBody>

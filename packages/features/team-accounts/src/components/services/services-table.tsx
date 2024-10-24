@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import * as React from 'react';
 
-import Image from 'next/image';
 import Link from 'next/link';
 
 import {
@@ -34,6 +33,7 @@ import {
 import { TabsList } from '@kit/ui/tabs';
 
 import DeleteServiceDialog from '../../../../../../apps/web/app/services/delete/delete-component';
+import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
 import { Service } from '../../../../../../apps/web/lib/services.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import {
@@ -158,8 +158,6 @@ const servicesColumns = (
       const priceId = service.price_id as string;
       // eslint-disable-next-line react-hooks/rules-of-hooks
 
-      
-
       return (
         <div className="h-18 flex items-center gap-4 self-stretch p-4">
           {accountRole === 'agency_owner' && (
@@ -194,9 +192,8 @@ export function ServicesTable({
   services,
   accountRole,
   hasTheEmailAssociatedWithStripe,
-  handleCheckout
+  handleCheckout,
 }: ServicesTableProps) {
-
   const { t } = useTranslation(['services', 'briefs']);
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -207,7 +204,13 @@ export function ServicesTable({
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const columns = useMemo<ColumnDef<Service.Type>[]>(
-    () => servicesColumns(t, accountRole, hasTheEmailAssociatedWithStripe, handleCheckout),
+    () =>
+      servicesColumns(
+        t,
+        accountRole,
+        hasTheEmailAssociatedWithStripe,
+        handleCheckout,
+      ),
     [t, accountRole, hasTheEmailAssociatedWithStripe],
   );
 
@@ -237,7 +240,7 @@ export function ServicesTable({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between gap-4 py-4">
-        <TabsList className="gap-2 bg-white">
+        <TabsList className="gap-2 bg-transparent">
           <ThemedTabTrigger
             value="services"
             activeTab={activeTab}
@@ -320,26 +323,19 @@ export function ServicesTable({
             <TableBody>
               <TableRow>
                 <TableCell colSpan={table.getAllColumns().length}>
-                  <div className="flex h-[493px] flex-col place-content-center items-center">
-                    <Image
-                      src="/images/illustrations/Illustration-box.svg"
-                      alt="Illustration Card"
-                      width={220}
-                      height={160}
+                  <div className="flex flex-col gap-2">
+                    <EmptyState
+                      title={t('startFirstService')}
+                      description={t('noServicesMessage')}
+                      imageSrc="/images/illustrations/Illustration-box.svg"
+                      button={
+                        accountRole === 'agency_owner' ? (
+                          <Link href="/services/create">
+                            <ThemedButton>{t('createService')}</ThemedButton>
+                          </Link>
+                        ) : undefined
+                      }
                     />
-                    <h3 className="mb-[20px] w-[352px] text-center text-[20px] font-semibold leading-[30px] text-[#101828]">
-                      {t('startFirstService')}{' '}
-                      {/* Usar la clave de traducción */}
-                    </h3>
-                    <p className="mb-[16px] w-[352px] text-center text-[16px] leading-[24px] text-[#475467]">
-                      {t('noServicesMessage')}{' '}
-                      {/* Usar la clave de traducción */}
-                    </p>
-                    {accountRole === 'agency_owner' && (
-                      <Link href="/services/create">
-                        <ThemedButton>{t('createService')}</ThemedButton>
-                      </Link>
-                    )}
                   </div>
                 </TableCell>
               </TableRow>
