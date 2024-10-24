@@ -31,6 +31,7 @@ import {
 } from '@kit/ui/dropdown-menu';
 
 import { generateUUID } from '~/utils/generate-uuid';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 export function OptionFiles({
   clientOrganizationId,
@@ -300,12 +301,12 @@ export function OptionFiles({
         <>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="bg-brand">
+              <ThemedButton >
                 <div className="flex items-center">
                   <Plus className="mr-[4px] h-[20px] w-[20px]" />
                   {t('files.new.title')}
                 </div>
-              </Button>
+              </ThemedButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>
