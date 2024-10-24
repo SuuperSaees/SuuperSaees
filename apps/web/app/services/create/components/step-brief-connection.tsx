@@ -2,29 +2,30 @@
 
 import { useEffect, useState } from 'react';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
+import { Cross2Icon } from '@radix-ui/react-icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addServiceBriefs } from 'node_modules/@kit/team-accounts/src/server/actions/briefs/create/create-briefs';
 import { getPrimaryOwnerId } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 // import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 // import { z } from 'zod';
-import { getSupabaseBrowserClient } from '@kit/supabase/browser-client';
 import { Button } from '@kit/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@kit/ui/form';
 import { useMultiStepFormContext } from '@kit/ui/multi-step-form';
 import { Spinner } from '@kit/ui/spinner';
 
+import { Option } from '~/components/ui/checkbox-combobox';
 import { Brief } from '~/lib/brief.types';
-import { Database } from '~/lib/database.types';
+import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
+import { createService } from '~/team-accounts/src/server/actions/services/create/create-service';
+import { updateService } from '~/team-accounts/src/server/actions/services/update/update-service-server';
 
 import { Combobox } from './combobox';
 import { FormSchema } from './multiform-component';
-import { createService } from '~/team-accounts/src/server/actions/services/create/create-service';
-import { Cross2Icon } from '@radix-ui/react-icons';
-import { updateService } from '~/team-accounts/src/server/actions/services/update/update-service-server';
-import { toast } from 'sonner';
 
 interface ServiceBrief {
   id: string;
@@ -60,21 +61,21 @@ interface Service {
   test_period_price: number;
   time_based: boolean;
   price_id: string;
-  briefs?: ServiceBrief[]; 
+  briefs?: ServiceBrief[];
 }
 
 export default function BriefConnectionStep(
-  previousService? : Service,
+  previousService?: Service,
   previousBriefs?: ServiceBrief[],
 ) {
   const { prevStep, form } = useMultiStepFormContext<typeof FormSchema>();
   const { t } = useTranslation('services');
-  const [loading, setLoading] = useState(false);
 
-  const client = getSupabaseBrowserClient<Database>();
-  const [briefs, setBriefs] = useState<Brief.Type[]>([]);
-  const [selectedBriefs, setSelectedBriefs] = useState<{ id: string; name: string }[]>(Array.isArray(previousBriefs) ? previousBriefs : []);
-  
+  const [selectedBriefs, setSelectedBriefs] = useState<
+    { id: string; name: string }[]
+  >(Array.isArray(previousBriefs) ? previousBriefs : []);
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const handleSelect = (value: Brief.Type) => {
     const prevValues = form.getValues('step_connect_briefs') ?? [];
 
@@ -95,6 +96,13 @@ export default function BriefConnectionStep(
     form.setValue('step_connect_briefs', newValues);
     setSelectedBriefs(newValues);
   };
+
+  const briefsQuery = useQuery({
+    queryKey: ['briefs'],
+    queryFn: async () => await getBriefs(),
+  });
+
+  const briefs = briefsQuery.data ?? [];
 
   const briefOptions = briefs.map((brief) => ({
     value: brief.name,
@@ -120,10 +128,8 @@ export default function BriefConnectionStep(
     }
   };
 
-  const createNewService = async () => {
-    // Create the service
-    // "services" needs to be modified when all the model is well defined and handled via prev steps
-    try {
+  const createServiceMutation = useMutation({
+    mutationFn: async () => {
       const propietary_organization_id = await getPrimaryOwnerId();
       if (!propietary_organization_id) {
         throw new Error('No propietary_organization_id provided');
@@ -140,48 +146,37 @@ export default function BriefConnectionStep(
       const serviceId = service.supabase.id;
 
       await addBriefToService(serviceId);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    },
+    onSuccess: () => {
+      toast.success('Service created successfully');
+      router.push('/services');
+      void queryClient.invalidateQueries({
+        queryKey: ['services'],
+      });
+    
+    },
+    onError: () => {
+      toast.error('Error creating service');
+    },
+  });
 
-  const updatePreviousService = async () => {
-    try {
+  const updateServiceMutation = useMutation({
+    mutationFn: async () => {
       const values = form.getValues();
       await updateService(values, previousService.previousService.price_id);
+    },
+    onSuccess: async () => {
       toast.success('Service updated successfully');
-
-    } catch {
-      console.error('Error while updating service');
-    }
-  }
-
-  useEffect(() => {
-    const getBriefs = async () => {
-      setLoading(true);
-
-      const firstAccountId = await getPrimaryOwnerId();
-      const propietary_organization_id = await getPrimaryOwnerId();
-      if (firstAccountId) {
-        const { data } = await client.from('briefs').select(`
-              id,
-              created_at,
-              name,
-              propietary_organization_id,
-              services ( name )
-              `).eq('propietary_organization_id', propietary_organization_id ?? '')
-
-        return data;
-      }
-    };
-
-    getBriefs()
-      .then((data) => {
-        setBriefs(data as Brief.Type[]);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, [client]);
+      router.push('/services');
+      await queryClient.invalidateQueries({
+        queryKey: ['services'],
+      });
+      // invalidate the query
+    },
+    onError: () => {
+      toast.error('Error updating service');
+    },
+  });
 
   useEffect(() => {
     setSelectedBriefs(form.getValues('step_connect_briefs') ?? []);
@@ -191,52 +186,53 @@ export default function BriefConnectionStep(
     <section className={'full w-full'}>
       <div className="mx-auto flex h-full max-w-3xl flex-col space-y-4 text-gray-600">
         <p className="font-semibold">{t('step_connect_briefs_description')}</p>
-        {loading ? (
+        {briefsQuery.isLoading ? (
           <Spinner className="mx-auto w-5" />
         ) : (
-            <>
-                {selectedBriefs?.map((selectedBrief) => (
-                    <div
-                    key={selectedBrief.id}
-                    className="rounded-md border border-gray-300 p-2 flex items-center justify-between"
-                    >
-                    <p>{selectedBrief.name}</p>
-                    <Cross2Icon
-                        className="h-4 w-4 cursor-pointer opacity-80 hover:opacity-100 text-red-500"
-                        onClick={() => handleRemove(selectedBrief.id)} 
-                    />
-                    </div>
-                ))}
-                <Form {...form}>
-                    <FormField
-                        control={form.control}
-                        name="step_connect_briefs"
-                        render={() => {
-                        return (
-                            <FormItem>
-                            <FormControl>
-                                <div className='flex items-cente justify-center'>
-                                <Combobox
-                                    options={briefOptions}
-                                    title={t('addBrief')}
-                                    className="justify-start gap-1  shadow-none border-gray-300"
-                                    resetOnSelect
-                                    onSelect={(option) => {
-                                    const selectedBrief = briefs.find(brief => brief.name === option.value);
-                                    if (selectedBrief) {
-                                        handleSelect(selectedBrief);
-                                    }
-                                    }}
-                                />
-                                </div>
-                            </FormControl>
-                            </FormItem>
-                        );
-                        }}
-                    />
-                </Form>
-            </>
-          
+          <>
+            {selectedBriefs?.map((selectedBrief) => (
+              <div
+                key={selectedBrief.id}
+                className="flex items-center justify-between rounded-md border border-gray-300 p-2"
+              >
+                <p>{selectedBrief.name}</p>
+                <Cross2Icon
+                  className="h-4 w-4 cursor-pointer text-red-500 opacity-80 hover:opacity-100"
+                  onClick={() => handleRemove(selectedBrief.id)}
+                />
+              </div>
+            ))}
+            <Form {...form}>
+              <FormField
+                control={form.control}
+                name="step_connect_briefs"
+                render={() => {
+                  return (
+                    <FormItem>
+                      <FormControl>
+                        <div className="items-cente flex justify-center">
+                          <Combobox
+                            options={briefOptions}
+                            title={t('addBrief')}
+                            className="justify-start gap-1 border-gray-300 shadow-none"
+                            resetOnSelect
+                            onSelect={(option: Option) => {
+                              const selectedBrief = briefs.find(
+                                (brief) => brief.name === option.value,
+                              );
+                              if (selectedBrief) {
+                                handleSelect(selectedBrief);
+                              }
+                            }}
+                          />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  );
+                }}
+              />
+            </Form>
+          </>
         )}
       </div>
 
@@ -245,27 +241,30 @@ export default function BriefConnectionStep(
           {t('previous')}
         </Button>
 
-        
-        
-
         {previousService?.previousService ? (
-          <Link
+          <Button
             type="button"
-            onClick={updatePreviousService}
-            href={'/services'}
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            disabled={briefsQuery.isLoading}
+            onClick={async () => await updateServiceMutation.mutateAsync()}
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
-            {t('updateService')}
-          </Link>
+            <span>{t('updateService')}</span>
+            {updateServiceMutation.isPending && (
+              <Spinner className="h-5 w-5 text-white" />
+            )}
+          </Button>
         ) : (
-          <Link
+          <Button
             type="button"
-            onClick={createNewService}
-            href={'/services'}
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            disabled={briefsQuery.isLoading}
+            onClick={async () => await createServiceMutation.mutateAsync()}
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
-            {t('createService')}
-          </Link>
+            <span>{t('createService')}</span>
+            {createServiceMutation.isPending && (
+              <Spinner className="h-5 w-5 text-white" />
+            )}
+          </Button>
         )}
       </div>
     </section>

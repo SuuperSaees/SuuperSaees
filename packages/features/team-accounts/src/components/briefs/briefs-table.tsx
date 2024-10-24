@@ -43,7 +43,7 @@ import {
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 // import CreateBriefDialog from '../../server/actions/briefs/create/create-brief-ui';
 import DeleteBriefDialog from '../../server/actions/briefs/delete/delete-brief-ui';
-import UpdateBriefDialog from '../../server/actions/briefs/update/update-brief-ui';
+// import UpdateBriefDialog from '../../server/actions/briefs/update/update-brief-ui';
 
 type BriefTableProps = {
   briefs: Brief.Relationships.Services.Response[];
