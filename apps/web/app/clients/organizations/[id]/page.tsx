@@ -24,7 +24,6 @@ async function OrganizationsPage({ params }: { params: { id: string } }) {
   const userRole = await getUserRole();
   const newOrganization = { ...organization, owner: organizationOwner };
 
-  // console.log('organization', newOrganization);
   return (
     <OrganizationSection
       name={newOrganization.name}

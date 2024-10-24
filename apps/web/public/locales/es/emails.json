@@ -1,0 +1,66 @@
+{
+  "contactFormSubmission": {
+    "subject": "Solicitud de contacto",
+    "body": "Has recibido una nueva solicitud de contacto.",
+    "name": "Nombre: ${name}",
+    "email": "Email: ${email}",
+    "message": "Mensaje: ${message}",
+    "at": "de"
+  },
+  "orderCompleted": {
+    "subject": "${actualName} ha marcado '${orderTitle}' solicitud como completada.",
+    "body": "${actualName} ha marcado '${orderTitle}' solicitud como completada.",
+    "greeting": "Hola ${actualName}",
+    "viewOrder": "Ver pedido",
+    "farewell": "Saludos,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "orderCreation": {
+    "subject": "Nuevo pedido creado",
+    "body": "Tienes un nuevo pedido",
+    "greeting": "Hola ${toEmail}",
+    "newOrderMessage": "Tienes un nuevo pedido de ${emailSender}",
+    "viewOrder": "Ver pedido",
+    "farewell": "Saludos,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "orderMessage": {
+    "subject": "${userName} ha comentado en ${orderTitle} el ${date}.",
+    "greeting": "Hola ${toEmail}",
+    "reply": "Responder",
+    "farewell": "Saludos,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "orderStatusPriority": {
+    "status": {
+      "subject": "${actualName} ha cambiado el estado de la solicitud '${orderTitle}' a ${message}.",
+      "body": "${actualName} ha cambiado el estado de la solicitud '${orderTitle}' a ${message}."
+    },
+    "priority": {
+      "subject": "${actualName} ha cambiado la prioridad de la solicitud '${orderTitle}' a ${message}.",
+      "body": "${actualName} ha cambiado la prioridad de la solicitud '${orderTitle}' a ${message}."
+    },
+    "due_date": {
+      "subject": "${actualName} ha cambiado la fecha de vencimiento de '${orderTitle}' a ${message}.",
+      "body": "${actualName} ha cambiado la fecha de vencimiento de '${orderTitle}' a ${message}."
+    },
+    "default": {
+      "subject": "Nuevo mensaje en el pedido ${orderId} añadido.",
+      "body": "Tienes un mensaje en el pedido ${orderId}."
+    },
+    "greeting": "Hola ${actualName}",
+    "viewOrder": "Ver pedido",
+    "farewell": "Saludos,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "inviteEmail": {
+    "confirmEmail": "Confirma tu correo",
+    "acceptInvitation": "Aceptar invitación",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  }
+}

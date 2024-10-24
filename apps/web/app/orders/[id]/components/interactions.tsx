@@ -1,11 +1,5 @@
-'use client';
-
 import { useEffect, useRef } from 'react';
-
-
-
 import { format } from 'date-fns';
-
 import {
   Activity,
   File,
@@ -19,12 +13,19 @@ import UserMessage from './user-message';
 import UserReviewMessage from './user-review-message';
 
 const Interactions = () => {
-  const { messages, files, activities, reviews } = useActivityContext();
+  const { messages, files, activities, reviews, userRole} = useActivityContext();
   const interactionsContainerRef = useRef<HTMLDivElement>(null);
 
-  // Combine all items into a single array
+  // Combine all items into a single array with filtering based on user role
+
   const combinedInteractions = [
-    ...messages.map((message) => ({ ...message, class: 'message' })),
+    ...messages
+      .filter(message => 
+        !["agency_owner", "agency_member", "agency_project_manager"].includes(userRole) 
+        ? message.visibility !== "internal_agency" 
+        : true
+      )
+      .map((message) => ({ ...message, class: 'message' })),
     ...files.map((file) => ({ ...file, class: 'file' })),
     ...activities.map((activity) => ({ ...activity, class: 'activity' })),
     ...reviews.map((review) => ({ ...review, class: 'review' })),
@@ -61,11 +62,11 @@ const Interactions = () => {
 
   return (
     <div
-      className="no-scrollbar flex h-full max-h-full w-full min-w-0 shrink flex-col gap-4 overflow-y-auto border-t border-r-0 border-l-0 border-gray-200 border-b-0 p-4"
+      className="no-scrollbar mr-10 ml-2 flex w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto border-t border-r-0 border-l-0 border-gray-200 border-b-0 p-0"
       ref={interactionsContainerRef}
     >
       {Object.entries(groupedInteractions).map(([date, interactions]) => (
-        <div key={date} className="flex w-full flex-col gap-8">
+        <div key={date} className="flex flex-col gap-8">
           <div className="relative flex w-full items-center justify-center rounded-md before:absolute before:left-0 before:top-1/2 before:h-[0.3px] before:w-full before:bg-gray-100">
             <h3 className="z-[10] rounded-full border border-gray-300 bg-white p-1 px-2 text-sm font-semibold text-gray-700">
               {date}
@@ -73,19 +74,20 @@ const Interactions = () => {
           </div>
           {interactions.map((interaction) => {
             return interaction.class === 'message' ? (
-              <UserMessage
-                key={interaction.id}
-                message={interaction as Message}
-              />
+              <div className="flex w-full" key={interaction.id}>
+                <UserMessage
+                  message={interaction as Message}
+                />
+              </div>
             ) : interaction.class === 'activity' ? (
-              <ActivityAction activity={interaction as Activity} />
+              <ActivityAction activity={interaction as Activity} key={interaction.id} />
             ) : interaction.class === 'review' ? (
               <UserReviewMessage
                 review={interaction as Review}
                 key={interaction.id}
               />
             ) : interaction.class === 'file' ? (
-              <UserFile file={interaction as File} />
+              <UserFile file={interaction as File} key={interaction.id} />
             ) : null;
           })}
         </div>
@@ -93,4 +95,5 @@ const Interactions = () => {
     </div>
   );
 };
+
 export default Interactions;

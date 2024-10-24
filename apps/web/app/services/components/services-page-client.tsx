@@ -1,62 +1,96 @@
-"use client";
+'use client';
 
-import { PageBody } from '@kit/ui/page';
-import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
+import { useState } from 'react';
+
+import { useRouter, useSearchParams } from 'next/navigation';
+
 import { Elements } from '@stripe/react-stripe-js';
 import { Stripe } from '@stripe/stripe-js';
-import { useEffect } from 'react';
-import { ServicesContextProvider, useServicesContext } from '../contexts/services-context';
 import { useTranslation } from 'react-i18next';
+
+import { PageBody } from '@kit/ui/page';
+import { Tabs, TabsContent } from '@kit/ui/tabs';
+
+import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table';
+
+import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
+import { useStripeActions } from '../hooks/use-stripe-actions';
+
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
+  accountRole: string;
 }
 
-const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({ stripePromise }) => {
-  const { services, loading, updateServices } = useServicesContext();
-  const { t } = useTranslation('orders');
-  useEffect(() => {
-    updateServices(true).catch((error)=> {console.log(error.message)});
-  }, []);
+const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
+  stripePromise,
+  accountRole,
+}) => {
+  const searchParams = useSearchParams();
+  const briefsView = searchParams.get('briefs');
+  const router = useRouter();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div
-          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-          role="status"
-        >
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Loading...
-          </span>
-        </div>
-      </div>
-    );
-  }
+  const { t } = useTranslation('orders');
+
+  const [activeTab, setActiveTab] = useState<'services' | 'briefs'>(
+    briefsView === 'true' ? 'briefs' : 'services',
+  );
+
+  const { services, briefs, hasTheEmailAssociatedWithStripe, handleCheckout, briefsAreLoading, servicesAreLoading } =
+    useStripeActions({
+      userRole: accountRole,
+    });
+
+  const handleTabClick = (value: 'services' | 'briefs') => {
+    setActiveTab(value);
+  };
 
   return (
-    <Elements stripe={stripePromise}>
-      <PageBody>
-        <div className='p-[35px]'>
-          <div className="flex justify-between items-center mb-[32px]">
-            <div className="flex-grow">
-              <span>
-                <div className="text-primary-900 text-[36px] font-inter font-semibold leading-[44px] tracking-[-0.72px]">
-                {t('services:title')} 
-                </div>
-              </span>
+    <Tabs
+      defaultValue={activeTab}
+      onValueChange={(value: string) => {
+        if (value === 'services' && briefsView === 'true') {
+          handleTabClick(value);
+          router.push('/services');
+        }
+        handleTabClick(value as 'services' | 'briefs');
+      }}
+    >
+      <Elements stripe={stripePromise}>
+        <PageBody>
+          <div className="p-[35px]">
+            <div className="mb-[32px] flex items-center justify-between">
+              <div className="flex-grow">
+                <span>
+                  <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
+                    {t('services:title')}
+                  </div>
+                </span>
+              </div>
             </div>
+            <TabsContent className="bg-transparent" value="services">
+              <ServicesTable
+                activeTab={activeTab}
+                services={services}
+                accountRole={accountRole}
+                hasTheEmailAssociatedWithStripe={
+                  hasTheEmailAssociatedWithStripe
+                }
+                handleCheckout={handleCheckout}
+                isLoading={servicesAreLoading}
+              />
+            </TabsContent>
+            <TabsContent className="bg-transparent" value="briefs">
+              <BriefsTable activeTab={activeTab} briefs={briefs} accountRole={accountRole} isLoading={briefsAreLoading} />
+            </TabsContent>
           </div>
-          <ServicesTable services={services} />
-        </div>
-      </PageBody>
-    </Elements>
+        </PageBody>
+      </Elements>
+    </Tabs>
   );
 };
 
-const ServicesPageClient: React.FC<ServicesPageClientProps> = (props) => (
-  <ServicesContextProvider>
-    <ServicesPageClientContent {...props} />
-  </ServicesContextProvider>
-);
+const ServicesPageClient: React.FC<ServicesPageClientProps> = (props) => {
+  return <ServicesPageClientContent {...props} />;
+};
 
 export { ServicesPageClient };

@@ -24,11 +24,17 @@
       "filesLabel": "Archivos",
       "filesPlaceholder": "Haz click o arrastra para subir un archivo SVG, PNG, JPG or GIF (max. 800x400px)",
       "submitMessage": "Crear pedido"
+    },
+    "validation": {
+      "minTitleCharacters": "El título debe tener al menos 2 caracteres.",
+      "minDescriptionCharacters": "La descripción debe tener al menos 2 caracteres.",
+      "files": "Por favor, sube al menos un archivo"
     }
   },
   "details": {
     "title": "Detalles del pedido",
     "summary": "Resumen",
+    "deadlineNotSet": "Sin asignar",
     "createdBy": "Creado por",
     "orderId": "Pedido ID",
     "createdAt": "Creado",
@@ -53,6 +59,7 @@
     "navigation": {
       "details": "Detalles",
       "activity": "Actividad",
+      "tasks": "Tareas",
       "files": "Archivos"
     },
     "dialog": {
@@ -71,6 +78,28 @@
   "dragAndDrop": "Arrastra los archivos aquí o haz clic para subir",
   "dropHere": "Suelta aquí para subir archivos",
   "tryAgain": "Inténtalo de nuevo",
-  "OrderDescriptionTitle": "Detalles del pedido"
-  
+  "OrderDescriptionTitle": "Detalles del pedido",
+  "internalMessagingEnabled": "Habilitado el envío de mensajes internos",
+  "internalMessagingDisabled": "Deshabilitado el envío de mensajes internos",
+  "internalMessage": "Mensaje interno",
+  "placeholder": "Escribe un mensaje...",
+  "dropdown": "Selecciona una opción",
+  "deletedFile": "Archivo eliminado",
+  "deletedFileDescription": "El archivo ha sido eliminado",
+  "form": {
+    "completion": {
+      "client": {
+        "title": "Asignar un cliente",
+        "label": "Nombre de la organización",
+        "select": {
+          "placeholder": "Selecciona una organización"
+        },
+        "members": {
+          "label": "Miembros",
+          "placeholder": "Busca y selecciona un miembro",
+          "notFound": "No se encontraron miembros"
+        }
+      }
+    }
+  }
 }

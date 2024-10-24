@@ -1,12 +1,19 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { getPrimaryOwnerId } from '../../members/get/get-member-account';
+
+
+
 import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions.types';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
-export const createSubscription = async () => {
+// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
+export const createSubscription = async (): Promise<{
+  userId: string;
+}> => {
   try {
     const client = getSupabaseServerComponentClient();
 
@@ -18,71 +25,89 @@ export const createSubscription = async () => {
       throw new Error('Error to get user account');
     }
     const email = user?.email as string;
+    let { domain: baseUrl } = await getDomainByUserId(user.id, true);
+    if (!baseUrl) {
+      // get host from window
+      if (typeof window !== 'undefined') {
+        baseUrl = window.location.origin;
+      }
+    }
     // create customer in stripe
-    const customerResponse = await fetch(`${baseUrl}/api/stripe/create-customer`, {
+    const customerResponse = await fetch(
+      `${baseUrl}/api/stripe/create-customer`,
+      {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            email
-        })
-    })
+          email,
+        }),
+      },
+    );
 
     if (!customerResponse.ok) {
-        throw new Error('Failed to create customer');
+      throw new Error('Failed to create customer');
     }
-    
-    const customerData = (await customerResponse.json())
+
+    const customerData = await customerResponse.json();
 
     // Search Free Subscription
     const priceId = process.env.PLAN_FREE_ID as string;
     // create subscription in stripe
-    const subscriptionResponse = await fetch(`${baseUrl}/api/stripe/create-subscription?customerId=${encodeURIComponent(customerData?.id)}&priceId=${encodeURIComponent(priceId)}`, {
+    const subscriptionResponse = await fetch(
+      `${baseUrl}/api/stripe/create-subscription?customerId=${encodeURIComponent(customerData?.id)}&priceId=${encodeURIComponent(priceId)}`,
+      {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
-    })
+      },
+    );
 
     if (!subscriptionResponse.ok) {
-        throw new Error('Failed to create subscription');
+      throw new Error('Failed to create subscription');
     }
-    
-    const subscriptionData = (await subscriptionResponse.json())
 
-   // Create subscription in db
-   const primary_owner_user_id = await getPrimaryOwnerId();
-   const newDate = new Date().toISOString();
-   const newSubscription: Subscription.Type = {
-     id: subscriptionData?.id as string,
-     propietary_organization_id: primary_owner_user_id as string,
-     billing_customer_id: customerData?.id as string,
-     active: true,
-     billing_provider: "stripe",
-     currency: "usd",
-     cancel_at_period_end: false,
-     status: "active",
-     period_ends_at: null,
-     period_starts_at: null,
-     trial_ends_at: null,
-     trial_starts_at: null,
-     updated_at: newDate,
-     created_at: newDate,
-     account_id: null
-   };
+    const subscriptionData = await subscriptionResponse.json();
 
-    const { error: subscriptionCreateError} = await client
-    .from('subscriptions')
-    .insert(newSubscription)
-    .select('*')
-    .single();
+    // Create subscription in db
+    const primary_owner_user_id = await getPrimaryOwnerId();
+    const newDate = new Date().toISOString();
+    const newSubscription: Subscription.Type = {
+      id: subscriptionData?.id as string,
+      propietary_organization_id: primary_owner_user_id as string,
+      billing_customer_id: customerData?.id as string,
+      active: true,
+      billing_provider: 'stripe',
+      currency: 'usd',
+      cancel_at_period_end: false,
+      status: 'active',
+      period_ends_at: null,
+      period_starts_at: null,
+      trial_ends_at: null,
+      trial_starts_at: null,
+      updated_at: newDate,
+      created_at: newDate,
+      account_id: null,
+    };
+
+    const { error: subscriptionCreateError } = await client
+      .from('subscriptions')
+      .insert(newSubscription)
+      .select('*')
+      .single();
 
     if (subscriptionCreateError) {
-      console.error('Error creating subscription:', subscriptionCreateError.message);
+      console.error(
+        'Error creating subscription:',
+        subscriptionCreateError.message,
+      );
     }
+
+    return { userId: user.id };
   } catch (error) {
     console.error('Error while creating the organization account:', error);
-    throw error;  // Throw the error to ensure the caller knows the function failed
+    throw error; // Throw the error to ensure the caller knows the function failed
   }
 };

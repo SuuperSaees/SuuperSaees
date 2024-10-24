@@ -1,29 +1,48 @@
 'use server';
 
 import { getMailer } from '@kit/mailers';
+import { getEmailTranslations } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
 
+
+
+import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import { getFormSendIdentity } from '../utils/get-form-send-identity';
+
 
 const emailSender = process.env.EMAIL_SENDER ?? '';
-const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
 export async function sendOrderCreationEmail(
   toEmail: string,
   orderId: string,
   orderData: Order.Type,
   agencyName: string,
+  userId: string,
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
+  const { domain: siteURL, organizationId } = await getDomainByUserId(
+    userId,
+    true,
+  );
+  const lang = getLanguageFromCookie() as 'en' | 'es';
+  const { t } = getEmailTranslations('orderCreation', lang);
+
+  const { fromSenderIdentity, logoUrl, themeColor, buttonTextColor } = await getFormSendIdentity(
+    organizationId,
+    t('at'),
+  );
+
   await mailer
     .sendEmail({
       to: toEmail,
-      from: emailSender,
-      subject: 'Nuevo pedido creado',
+      from: fromSenderIdentity,
+      subject: t('subject'),
       html: `
        <!DOCTYPE html>
-        <html dir="ltr" lang="en">
+        <html dir="ltr" lang="${lang}">
           <head>
             <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
             <meta name="x-apple-disable-message-reformatting"/>
@@ -37,7 +56,7 @@ export async function sendOrderCreationEmail(
             </style>
           </head>
             <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0">
-              Tienes un nuevo pedido
+              ${t('body')}
             </div>
             <body>
               <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;background-color:#fff;margin:auto;font-family:sans-serif;color:#484848">
@@ -61,18 +80,18 @@ export async function sendOrderCreationEmail(
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png"
-                                        alt="Suuper Logo"
+                                        src="${logoUrl}"
+                                        alt="Company Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">Hi ${toEmail}</p>
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">You have a new order from ${emailSender}</p>
+                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${t('greeting', { toEmail })}</p>
+                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${t('newOrderMessage', { emailSender })}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${orderData.title}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;margin-bottom:60px;">${orderData.description}</p>
-                                      <a href="${siteURL}orders/${orderId}" style="padding: 10px 20px; background-color: #1A38D7; color: white; text-decoration: none; border-radius: 5px;">
-                                        View order
+                                      <a href="${siteURL}orders/${orderId}" style="padding: 10px 20px; background-color: ${themeColor}; color: ${buttonTextColor}; text-decoration: none; border-radius: 5px;">
+                                        ${t('viewOrder')}
                                       </a>
-                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;margin-top:40px;">Regards,</p>
+                                      <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;margin-top:40px;">${t('farewell')}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${agencyName}.</p>
                                     </td>
                                   </tr>
@@ -92,10 +111,7 @@ export async function sendOrderCreationEmail(
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias.
-                                      </p>
-                                      <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        © 2024 Suuper, soporte@suuper.co
+                                        ${t('footer', { toEmail })}
                                       </p>
                                     </td>
                                   </tr>
@@ -122,3 +138,6 @@ export async function sendOrderCreationEmail(
       logger.error({ error }, 'Failed to send order email');
     });
 }
+// <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
+// © 2024 Suuper, soporte@suuper.co
+// </p>

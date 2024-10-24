@@ -1,16 +1,14 @@
 import { format } from 'date-fns';
 import { DownloadIcon, StickyNote } from 'lucide-react';
 
-
-
 import { File } from '../context/activity-context';
 import ImageWithOptions from '../hoc/with-image-options';
 import AvatarDisplayer from './ui/avatar-displayer';
 
-
 interface UserFileProps {
   file: File;
 }
+
 const fileTypeColors: Record<string, string> = {
   pdf: 'fill-pdf',
   png: 'fill-png',
@@ -19,14 +17,24 @@ const fileTypeColors: Record<string, string> = {
   doc: 'fill-doc',
   docx: 'fill-docx',
 };
+
 const getFileTypeClass = (fileName: string) => {
   const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
   return fileTypeColors[extension] ?? 'fill-unknown';
 };
+
 const UserFile = ({ file }: UserFileProps) => {
   const renderFilePreview = (file: File) => {
     if (file.type.startsWith('image/')) {
-      return <ImageWithOptions src={file?.url} alt="image" bucketName='orders' />;
+      return (
+        <ImageWithOptions
+          src={file?.url}
+          alt="image"
+          bucketName="orders"
+          className="object-cover" // For the thumbnail
+          dialogClassName="object-contain" // For the dialog
+        />
+      );
     } else if (file.type.startsWith('video/')) {
       return (
         <video className="w-full max-w-[400px] rounded-lg" controls>
@@ -66,14 +74,15 @@ const UserFile = ({ file }: UserFileProps) => {
       );
     }
   };
+
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-4 w-full">
       <AvatarDisplayer
-        displayName={null}
+        displayName={file?.user?.picture_url ? null : file?.user?.name}
         pictureUrl={file?.user?.picture_url}
         text={file?.user.name ? file.user.name : undefined}
       />
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-full">
         <div className="flex w-full justify-between gap-4">
           <span className="font-semibold">{file?.user?.name}</span>
           <small className="text-gray-400">
@@ -82,12 +91,6 @@ const UserFile = ({ file }: UserFileProps) => {
         </div>
 
         <div className="flex max-h-72 w-fit max-w-full flex-wrap gap-4 overflow-hidden rounded-md">
-          {/*conditional rendering must be added */}
-          {/* <img
-            src={file?.url}
-            alt="image"
-            className="aspect-square h-full w-auto object-cover"
-          /> */}
           {renderFilePreview(file)}
         </div>
       </div>

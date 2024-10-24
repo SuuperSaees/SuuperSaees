@@ -22,12 +22,17 @@ import UpdateAccountColorBrand from './update-account-color-brand';
 import { UpdateAccountDetailsFormContainer } from './update-account-details-form-container';
 import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
+import UpdateAccountOrganizationFavicon from './update-account-organization-favicon';
 import { UpdateAccountOrganizationName } from './update-account-organization-name';
+import { UpdateAccountOrganizationSenderName } from './update-account-organization-sender-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
+import { useOrganizationSettings } from '../../context/organization-settings-context'
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
+// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 type AccountStripe = {
   id: string;
@@ -81,6 +86,7 @@ export function PersonalAccountSettingsContainer(
           const stripeId = user?.stripe_id as string;
           if (stripeId) {
             try {
+              const { domain: baseUrl } = await getDomainByUserId(user?.id ?? '', true);
               const response = await fetch(
                 `${baseUrl}/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`,
                 {
@@ -123,6 +129,16 @@ export function PersonalAccountSettingsContainer(
     }
     void fetchUserRole();
   }, [tab, checkoutResult]);
+  
+  const { updateOrganizationSetting } =
+  useOrganizationSettings();
+
+  const handleChangeLanguage = (locale: string) => {
+    updateOrganizationSetting.mutate({
+      key: 'language',
+      value: locale,
+    });
+  }
   //////////////////////////////////////
   if (!user || !role) {
     return <LoadingOverlay fullPage />;
@@ -131,7 +147,7 @@ export function PersonalAccountSettingsContainer(
     <div>
       <Tabs defaultValue={"account"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
-          <TabsList>
+          <TabsList className='gap-2 bg-transparent'>
             <ThemedTabTrigger
               value="account"
               option="account"
@@ -166,6 +182,7 @@ export function PersonalAccountSettingsContainer(
                       pictureUrl: user.picture_url,
                       id: user.id,
                     }}
+                    className='h-20 w-20'
                   />
                 </CardContent>
               </Card>
@@ -196,7 +213,7 @@ export function PersonalAccountSettingsContainer(
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <LanguageSelector />
+                  <LanguageSelector onChange={handleChangeLanguage} />
                 </CardContent>
               </Card>
 
@@ -214,6 +231,19 @@ export function PersonalAccountSettingsContainer(
                     </CardHeader>
                     <CardContent>
                       <UpdateAccountOrganizationName />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandSenderName'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandSenderNameDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationSenderName />
                     </CardContent>
                   </Card>
                   <Card>
@@ -255,6 +285,19 @@ export function PersonalAccountSettingsContainer(
                       <UpdateAccountOrganizationLogo
                         organizationId={user?.organization_id ?? ''}
                       />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandFavicon'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandFaviconDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationFavicon />
                     </CardContent>
                   </Card>
                 </>

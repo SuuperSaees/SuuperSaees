@@ -13,7 +13,7 @@
   "nameLabel": "Ingresa su nombre",
   "emailLabel": "Ingresa su correo electrónico",
   "organizationLabelInput": "Ingresa el nombre de su organización",
-  "searchClientsPlaceholder": "Buscar clientes...",
+  "searchClientsPlaceholder": "Buscar",
   "organizationLabel": "Organización",
   "ActionsLabel": "Acciones",
   "lastSignInLabel": "Último inicio de sesión",
@@ -24,7 +24,7 @@
   "actions": "Acciones",
   "organizationName": "Nombre de la organización",
   "organizationMembers": "Miembros",
-  "searchPlaceholder": "Buscar clientes...",
+  "searchPlaceholder": "Buscar",
   "noResults": "No hay resultados.",
   "roleSelection": "Selecciona su rol",
   "page": "Página",
@@ -51,7 +51,7 @@
         "inviting": "Invitando miembros...",
         "addAnother": "Agregar otro",
         "add": "Añadir miembro",
-        "search": "Buscar miembros..."
+        "search": "Buscar"
       }
     },
     "services": {
@@ -61,7 +61,7 @@
       "title": "Reseñas"
     },
     "files": {
-      "title": "Archivos"
+      "title": "Almacenamiento"
     },
     "invoices": {
       "title": "Facturas"
@@ -71,7 +71,7 @@
   "startWithFirstClientTitle": "Comencemos con tu primer cliente",
   "noClientsDescription": "Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.",
   "clients": "Clientes",
-  "searchClients": "Buscar clientes...",
-  "searchOrganizations": "Buscar organizaciones..."
+  "searchClients": "Buscar",
+  "searchOrganizations": "Buscar"
 }
 

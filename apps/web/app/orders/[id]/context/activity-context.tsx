@@ -1,25 +1,27 @@
 'use client';
 
-import { ReactNode, createContext, useCallback, useContext, useState } from 'react';
-
-
+import {
+  ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
 
 import { getUserById } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { addOrderMessage } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { toast } from 'sonner';
 
-
-
 import { Activity as ServerActivity } from '~/lib/activity.types';
 import { Database } from '~/lib/database.types';
 import { File as ServerFile } from '~/lib/file.types';
+import { Message } from '~/lib/message.types';
 import { Message as ServerMessage } from '~/lib/message.types';
 import { Order } from '~/lib/order.types';
 import { Review as ServerReview } from '~/lib/review.types';
 import { User as ServerUser } from '~/lib/user.types';
 
-
-
+import useInternalMessaging from '../hooks/use-messages';
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
 
 export enum ActivityType {
@@ -86,6 +88,7 @@ interface ActivityContextType {
   reviews: Review[];
   files: File[];
   order: Order.Type;
+  userRole: string;
   writeMessage: (message: string) => Promise<ServerMessage.Type>;
 }
 export const ActivityContext = createContext<ActivityContextType | undefined>(
@@ -106,6 +109,7 @@ export const ActivityProvider = ({
   reviews: serverReviews,
   files: serverFiles,
   order: serverOrder,
+  userRole,
 }: {
   children: ReactNode;
   activities: Activity[];
@@ -113,20 +117,26 @@ export const ActivityProvider = ({
   reviews: Review[];
   files: File[];
   order: Order.Type;
+  userRole: string;
 }) => {
   const [order, setOrder] = useState<Order.Type>(serverOrder);
   const [messages, setMessages] = useState<Message[]>(serverMessages);
   const [activities, setActivities] = useState<Activity[]>(serverActivities);
   const [reviews, setReviews] = useState<Review[]>(serverReviews);
   const [files, setFiles] = useState<File[]>(serverFiles);
-
+  const { getInternalMessagingEnabled } = useInternalMessaging();
   const writeMessage = async (message: string) => {
     try {
       const messageToSend = {
         content: message,
         order_id: Number(order.id),
+        visibility: getInternalMessagingEnabled() ? 'internal_agency' : 'public',
       };
-      const newMessage = await addOrderMessage(Number(order.id), messageToSend);
+      const newMessage = await addOrderMessage(
+        Number(order.id),
+        messageToSend,
+        messageToSend.visibility as Message.Type['visibility'],
+      );
       toast.success('Success', {
         description: 'The message has been sent.',
       });
@@ -151,11 +161,9 @@ export const ActivityProvider = ({
 
       if (!newDataUser) {
         try {
-          // console.log('Fetching user...');
           newDataUser = await getUserById(pureDataSource.user_id);
-          // console.log('User fetched:', newDataUser);
         } catch (err) {
-          console.log('Error fetching user:', err);
+          console.error('Error fetching user:', err);
           throw err; // Rethrow the error if you want the caller to handle it
         }
       }
@@ -179,7 +187,6 @@ export const ActivityProvider = ({
         user: newDataUser,
         files: nestedFiles,
       };
-      // console.log('Reconciled Data:', reconciledData);
       return reconciledData;
     },
     [files], // Dependency array to ensure that `files` is up-to-date
@@ -223,8 +230,6 @@ export const ActivityProvider = ({
     setFiles,
   );
 
-  // console.log('messages', messages);
-  // console.log('files', files);
   return (
     <ActivityContext.Provider
       value={{
@@ -233,6 +238,7 @@ export const ActivityProvider = ({
         reviews: reviews,
         files: files.filter((svFile) => !svFile.message_id),
         order,
+        userRole,
         writeMessage,
       }}
     >

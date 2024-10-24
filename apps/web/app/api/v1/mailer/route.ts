@@ -1,5 +1,9 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+
+
 import nodemailer from 'nodemailer';
-import { NextResponse, NextRequest} from 'next/server';
+
 
 export async function POST(req: NextRequest) {
   const { from, to, subject, text, html } = await req.json();
@@ -61,7 +65,6 @@ export async function POST(req: NextRequest) {
       error: 'Internal Server Error',
       details: [(error as Error).message],
     };
-
     return NextResponse.json(errorResponse, { status: 500 });
   }
 }

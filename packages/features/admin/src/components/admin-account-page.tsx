@@ -50,7 +50,7 @@ async function PersonalAccountPage(props: { account: Account }) {
   const { data, error } = await client.auth.admin.getUserById(props.account.id);
 
   if (!data || error) {
-    throw new Error(`User not found`);
+    throw new Error(`User not found, adm`);
   }
 
   const isBanned =

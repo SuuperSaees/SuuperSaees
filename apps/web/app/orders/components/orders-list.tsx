@@ -39,6 +39,7 @@ import { ThemedButton } from '../../../../../packages/features/accounts/src/comp
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../packages/ui/src/shadcn/pagination';
 import { statusColors } from '../[id]/utils/get-color-class-styles';
+import { Trans } from '@kit/ui/trans';
 
 
 type ExtendedOrderType = Order.Type & {
@@ -50,10 +51,15 @@ type ExtendedOrderType = Order.Type & {
 type OrdersTableProps = {
   orders: ExtendedOrderType[];
   role: string;
+};
+
+type OrdersCardTableProps = {
+  orders: ExtendedOrderType[];
+  role: string;
   updateOrderDate: (dueDate: string, orderId: number) => Promise<void>;
 };
 
-const OrdersCardTable: React.FC<OrdersTableProps> = ({
+const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   orders,
   role,
   updateOrderDate,
@@ -232,7 +238,7 @@ const OrdersCardTable: React.FC<OrdersTableProps> = ({
                     ) : (
                       // Display the date or an empty space if there is no date
                       <span className="pl-2 pr-2">
-                        {order.due_date ?? 'Sin fecha'}
+                        {order.due_date ?? <Trans i18nKey="orders:details.deadlineNotSet" />}
                       </span>
                     )}
                   </TableCell>
@@ -358,8 +364,8 @@ export function OrderList({ orders, role }: OrdersTableProps) {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <div className="flex flex-col py-4">
+    <div className="flex w-full flex-col">
+      <div className="flex flex-col">
         <main className="grid flex-1 items-start gap-4 md:gap-8">
           <Tabs
             defaultValue={activeTab}
@@ -367,8 +373,8 @@ export function OrderList({ orders, role }: OrdersTableProps) {
               setActiveTab(value as 'open' | 'completed' | 'all');
             }}
           >
-            <div className="mb-4 flex flex-wrap items-center gap-4">
-              <TabsList>
+            <div className="flex flex-wrap items-center gap-4 mb-[24px] flex items-baseline">
+              <TabsList className='gap-2 bg-transparent'>
                 <ThemedTabTrigger value="open" activeTab={activeTab} option={'open'}>
                   {t('openOrders')}
                 </ThemedTabTrigger>
@@ -380,17 +386,18 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                 </ThemedTabTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
-                <div className="relative ml-auto flex-1 md:grow-0">
+                <div className="flex relative ml-auto flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <ThemedInput
                     type="search"
                     placeholder={t('searchPlaceholderTasks')}
-                    className="focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
+                    className="bg-white focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
                     onChange={(e: {
                       target: { value: React.SetStateAction<string> };
                     }) => setSearchTerm(e.target.value)}
                   />
+
                 </div>
                 {orders.length > 0 ? (
                   <Link href="/orders/create">

@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+
+
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { Order } from '~/lib/order.types';
@@ -126,15 +128,17 @@ export const useOrderSubscriptions = (
           setOrder(payload.new as Order.Type);
         },
       )
-      .subscribe((state) => {
-        console.log('channel', state);
-        // if the connection is lost due to innactivity or any other state
-        // a retry connection should be trigger
-        // if (state === 'TIMED_OUT' || state === 'CLOSED') {
-        //   console.log('trying to resubscribe...');
-        //   messagesChannel.subscribe();
-        // }
-      });
+      .subscribe();
+
+    // (state) => {
+    //   console.log('channel', state);
+    //   // if the connection is lost due to innactivity or any other state
+    //   // a retry connection should be trigger
+    //   // if (state === 'TIMED_OUT' || state === 'CLOSED') {
+    //   //   console.log('trying to resubscribe...');
+    //   //   messagesChannel.subscribe();
+    //   // }
+    // }
     // reviewsChannel.subscribe();
     // filesChannel.subscribe();
     // activitiesChannel.subscribe();
@@ -144,7 +148,6 @@ export const useOrderSubscriptions = (
     return () => {
       //eslint-disable-next-line @typescript-eslint/no-floating-promises
       supabase.removeChannel(channel);
-
     };
   }, [
     supabase,

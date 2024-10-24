@@ -16,10 +16,6 @@ export const generateMetadata = async () => {
   };
 };
 
-// const capitalizeFirstLetter = (string: string) => {
-//   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-// };
-
 async function OrdersPage() {
   const ordersData = await getOrders().catch((err) => console.error(err));
   const processedOrders =
@@ -38,7 +34,7 @@ async function OrdersPage() {
           <div className="mb-[32px] flex items-center justify-between">
             <div className="flex-grow">
               <span>
-                <div className="font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
+                <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
                   <h1>
                     <Trans i18nKey={'orders:title'} />
                   </h1>

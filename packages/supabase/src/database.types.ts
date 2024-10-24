@@ -346,6 +346,7 @@ export type Database = {
           created_at: string
           form_field_id: string
           id: string
+          order_id: string
           response: string
         }
         Insert: {
@@ -353,6 +354,7 @@ export type Database = {
           created_at?: string
           form_field_id: string
           id?: string
+          order_id: string
           response: string
         }
         Update: {
@@ -360,6 +362,7 @@ export type Database = {
           created_at?: string
           form_field_id?: string
           id?: string
+          order_id?: string
           response?: string
         }
         Relationships: [
@@ -382,23 +385,54 @@ export type Database = {
       briefs: {
         Row: {
           created_at: string
+          deleted_on: string | null
+          description: string | null
           id: string
+          image_url: string | null
           name: string
-          propietary_organization_id: string | null
+          propietary_organization_id: string
         }
         Insert: {
           created_at?: string
+          deleted_on?: string | null
+          description?: string | null
           id?: string
+          image_url?: string | null
           name: string
-          propietary_organization_id?: string | null
+          propietary_organization_id: string
         }
         Update: {
           created_at?: string
+          deleted_on?: string | null
+          description?: string | null
           id?: string
+          image_url?: string | null
           name?: string
-          propietary_organization_id?: string | null
+          propietary_organization_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_messages: {
         Row: {
@@ -501,6 +535,114 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_services: {
+        Row: {
+          agency_id: string
+          client_id: string
+          client_organization_id: string
+          created_at: string
+          created_by: string
+          id: number
+          service_id: number
+        }
+        Insert: {
+          agency_id: string
+          client_id: string
+          client_organization_id: string
+          created_at?: string
+          created_by: string
+          id?: number
+          service_id: number
+        }
+        Update: {
+          agency_id?: string
+          client_id?: string
+          client_organization_id?: string
+          created_at?: string
+          created_by?: string
+          id?: number
+          service_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -649,32 +791,118 @@ export type Database = {
           },
         ]
       }
+      folder_files: {
+        Row: {
+          agency_id: string | null
+          client_organization_id: string | null
+          created_at: string
+          file_id: string | null
+          folder_id: string | null
+          id: string
+        }
+        Insert: {
+          agency_id?: string | null
+          client_organization_id?: string | null
+          created_at?: string
+          file_id?: string | null
+          folder_id?: string | null
+          id?: string
+        }
+        Update: {
+          agency_id?: string | null
+          client_organization_id?: string | null
+          created_at?: string
+          file_id?: string | null
+          folder_id?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folder_files_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folder_files_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folders: {
+        Row: {
+          agency_id: string
+          client_organization_id: string
+          created_at: string
+          id: string
+          is_subfolder: boolean | null
+          name: string | null
+          parent_folder_id: string | null
+        }
+        Insert: {
+          agency_id: string
+          client_organization_id: string
+          created_at?: string
+          id?: string
+          is_subfolder?: boolean | null
+          name?: string | null
+          parent_folder_id?: string | null
+        }
+        Update: {
+          agency_id?: string
+          client_organization_id?: string
+          created_at?: string
+          id?: string
+          is_subfolder?: boolean | null
+          name?: string | null
+          parent_folder_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       form_fields: {
         Row: {
+          alert_message: string | null
           created_at: string
           description: string | null
           id: string
           label: string
           options: Json[] | null
           placeholder: string | null
+          position: number
           type: Database["public"]["Enums"]["field_types"]
         }
         Insert: {
+          alert_message?: string | null
           created_at?: string
           description?: string | null
           id?: string
           label: string
           options?: Json[] | null
           placeholder?: string | null
+          position: number
           type?: Database["public"]["Enums"]["field_types"]
         }
         Update: {
+          alert_message?: string | null
           created_at?: string
           description?: string | null
           id?: string
           label?: string
           options?: Json[] | null
           placeholder?: string | null
+          position?: number
           type?: Database["public"]["Enums"]["field_types"]
         }
         Relationships: []
@@ -759,6 +987,7 @@ export type Database = {
           order_id: number
           updated_at: string
           user_id: string
+          visibility: Database["public"]["Enums"]["messages_types"] | null
         }
         Insert: {
           content?: string | null
@@ -767,6 +996,7 @@ export type Database = {
           order_id: number
           updated_at?: string
           user_id: string
+          visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Update: {
           content?: string | null
@@ -775,6 +1005,7 @@ export type Database = {
           order_id?: number
           updated_at?: string
           user_id?: string
+          visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Relationships: [
           {
@@ -1098,6 +1329,7 @@ export type Database = {
       orders_v2: {
         Row: {
           agency_id: string
+          brief_ids: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -1113,6 +1345,7 @@ export type Database = {
         }
         Insert: {
           agency_id: string
+          brief_ids?: string[] | null
           client_organization_id: string
           created_at?: string
           customer_id: string
@@ -1128,6 +1361,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string
+          brief_ids?: string[] | null
           client_organization_id?: string
           created_at?: string
           customer_id?: string
@@ -1231,6 +1465,53 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_subdomains: {
+        Row: {
+          id: string
+          organization_id: string
+          subdomain_id: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          subdomain_id: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          subdomain_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_subdomain_id_fkey"
+            columns: ["subdomain_id"]
+            isOneToOne: false
+            referencedRelation: "subdomains"
             referencedColumns: ["id"]
           },
         ]
@@ -1442,7 +1723,7 @@ export type Database = {
           id: number
           max_number_of_monthly_orders: number | null
           max_number_of_simultaneous_orders: number | null
-          name: string | null
+          name: string
           number_of_clients: number | null
           price: number | null
           price_id: string | null
@@ -1470,7 +1751,7 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string | null
+          name: string
           number_of_clients?: number | null
           price?: number | null
           price_id?: string | null
@@ -1498,7 +1779,7 @@ export type Database = {
           id?: number
           max_number_of_monthly_orders?: number | null
           max_number_of_simultaneous_orders?: number | null
-          name?: string | null
+          name?: string
           number_of_clients?: number | null
           price?: number | null
           price_id?: string | null
@@ -1516,6 +1797,45 @@ export type Database = {
           test_period_duration_unit_of_measurement?: string | null
           test_period_price?: number | null
           time_based?: boolean | null
+        }
+        Relationships: []
+      }
+      subdomains: {
+        Row: {
+          created_at: string
+          deleted_on: string | null
+          domain: string
+          id: string
+          namespace: string
+          provider: string
+          provider_id: string
+          service_name: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_on?: string | null
+          domain: string
+          id?: string
+          namespace: string
+          provider?: string
+          provider_id?: string
+          service_name?: string | null
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_on?: string | null
+          domain?: string
+          id?: string
+          namespace?: string
+          provider?: string
+          provider_id?: string
+          service_name?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1891,6 +2211,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_service_brief_relation:
+        | {
+            Args: {
+              service_id: number
+              brief_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              service_id: string
+              brief_id: string
+            }
+            Returns: undefined
+          }
       is_account_owner: {
         Args: {
           account_id: string
@@ -2021,8 +2356,25 @@ export type Database = {
         | "messages.read"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
-      field_types: "date" | "multiple_choice" | "select" | "text"
+      field_types:
+        | "date"
+        | "multiple_choice"
+        | "select"
+        | "text"
+        | "h1"
+        | "h2"
+        | "h3"
+        | "h4"
+        | "text-short"
+        | "text-large"
+        | "number"
+        | "file"
+        | "dropdown"
+        | "rich-text"
+        | "image"
+        | "video"
       file_types: "image" | "video" | "pdf" | "fig"
+      messages_types: "public" | "internal_agency"
       notification_channel: "in_app" | "email"
       notification_type: "info" | "warning" | "error"
       order_status_types:
@@ -2040,6 +2392,9 @@ export type Database = {
         | "date_format"
         | "sidebar_background_color"
         | "portal_name"
+        | "favicon_url"
+        | "sender_name"
+        | "sender_email"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"

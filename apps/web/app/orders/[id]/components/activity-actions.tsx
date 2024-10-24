@@ -18,10 +18,20 @@ const translateActivity = (
   const availableTranslates = ['status', 'priority'];
   const newActivity = { ...activity, class: 'activity' };
   newActivity.type = t(`types.${activity.type}`);
+
   if (availableTranslates.includes(activity.type)) {
     newActivity.value = t(`values.${activity.value}`);
   }
-  newActivity.message = `${t(`messages.${activity.action}`)} ${activity.type === 'due_date' ? t('articles.due_date.singular.feminine') : ''}`;
+  let article = '';
+  if (activity.type === 'title') {
+    article = t('articles.title.singular.masculine'); 
+  } else if (activity.type === 'priority') {
+    article = t('articles.priority.singular.feminine'); 
+  } else if (activity.type === 'status') {
+    article = t('articles.status.singular.masculine'); 
+  }
+
+  newActivity.message = `${t(`messages.${activity.action}`)} ${article} ${activity.type === 'due_date' ? t('articles.due_date.singular.feminine') : ''}`;
 
   newActivity.preposition = t(`prepositions.${activity.preposition}`);
   return newActivity;
@@ -168,9 +178,9 @@ export const DefaultAction = ({
 }: ActivityActionProps) => {
   return (
     <div className="flex h-fit w-full justify-between gap-4 text-gray-400">
-      <div className="flex gap-1">
+      <div className="flex gap-4">
         <AvatarDisplayer
-          displayName={null}
+          displayName={formattedActivity.user.picture_url ? null : formattedActivity.user.name}
           pictureUrl={formattedActivity.user.picture_url}
         />
         <span className="flex flex-wrap gap-1">

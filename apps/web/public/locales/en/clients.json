@@ -13,7 +13,7 @@
   "nameLabel": "Enter their name",
   "emailLabel": "Enter their email",
   "organizationLabelInput": "Enter the name of their organization",
-  "searchClientsPlaceholder": "Search clients...",
+  "searchClientsPlaceholder": "Search",
   "organizationLabel": "Organization",
   "ActionsLabel": "Actions",
   "lastSignInLabel": "Last sign in",
@@ -24,7 +24,7 @@
   "actions": "Actions",
   "organizationName": "Organization Name",
   "organizationMembers": "Members",
-  "searchPlaceholder": "Search clients...",
+  "searchPlaceholder": "Search",
   "noResults": "No results.",
   "roleSelection": "Select their role",
   "page": "Page",
@@ -35,10 +35,41 @@
   "leader": "Leader",
   "member": "Member",
   "updateClient": "Update Client",
+"organizations": {
+  "title": "Organizations",
+  "members": {
+    "title": "Members",
+    "owner": "Leader",
+    "invite": {
+      "title": "Invite members",
+      "description": "Invite members to join the organization.",
+      "email": "Email",  
+      "sendInvite": "Send invitations",
+      "cancel": "Cancel",
+      "success": "Invitation sent successfully.",
+      "error": "Error sending the invitation.",
+      "inviting": "Inviting members...",
+      "addAnother": "Add another",
+      "add": "Add member",
+      "search": "Search"
+    }
+  },
+  "services": {
+    "title": "Services"
+  },
+  "reviews": {
+    "title": "Reviews"
+  },
+  "files": {
+    "title": "Files"
+  },
+  "invoices": {
+    "title": "Invoices"
+  }
+},
   "startWithFirstClientTitle": "Let's start with your first client",
   "noClientsDescription": "You haven't created any clients yet, add one by clicking below.",
   "clients": "Clients",
-  "organizations": "Organizations",
-  "searchClients": "Search clients...",
-  "searchOrganizations": "Search organizations..."
+  "searchClients": "Search",
+  "searchOrganizations": "Search"
 }

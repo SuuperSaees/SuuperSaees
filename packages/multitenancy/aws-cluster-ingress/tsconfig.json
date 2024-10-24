@@ -1,0 +1,13 @@
+{
+  "extends": "@kit/tsconfig/base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "paths": {
+      "~/features/*": ["../../features/*"],
+      "~": ["./*"],
+      "~/utils/*": ["../../utils/*"]
+    }
+  },
+  "include": ["src", "*.ts", "*.tsx"],
+  "exclude": ["node_modules"]
+}

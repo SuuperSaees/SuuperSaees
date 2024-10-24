@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus } from 'lucide-react';
 import { DefaultValues, Path, SubmitHandler, useForm } from 'react-hook-form';
 import { ZodType, ZodTypeDef, z } from 'zod';
 
@@ -18,11 +17,12 @@ import {
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
+import { Spinner } from '@kit/ui/spinner';
 
 export type Option = {
   value: string;
   label: string;
-  actionFn?: () => void;
+  actionFn?: (value: string) => void;
 };
 
 export interface CustomItemProps<T extends Option> {
@@ -32,9 +32,9 @@ export interface CustomItemProps<T extends Option> {
 export type CustomItemComponent<T extends Option> = React.ComponentType<
   CustomItemProps<T>
 >;
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export interface ComboboxProps<
-  TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, any>,
+  TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, unknown>,
 > {
   options: Option[];
   defaultValues: DefaultValues<z.infer<TSchema>>;
@@ -42,10 +42,16 @@ export interface ComboboxProps<
   onSubmit: SubmitHandler<z.infer<TSchema>>;
   className?: string;
   customItem?: CustomItemComponent<Option>;
+  customItemTrigger?: JSX.Element;
+  classNameTrigger?: string;
+  values?: string[]; // New prop for controlled values
+  isLoading?: boolean;
+  onSelect?: (value: string) => void; // New prop for selection handler
+  onChange?: (values: string[]) => void; // New prop for change handler
 }
 
 export default function CheckboxCombobox<
-  TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, any>,
+  TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, unknown>,
 >({
   options,
   defaultValues,
@@ -53,6 +59,12 @@ export default function CheckboxCombobox<
   onSubmit,
   className,
   customItem: CustomItemComponent,
+  customItemTrigger,
+  classNameTrigger,
+  values, 
+  isLoading, 
+  onSelect, 
+  onChange, 
 }: ComboboxProps<TSchema>) {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -64,8 +76,8 @@ export default function CheckboxCombobox<
   const filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
   const handlePopoverClose = async (open: boolean) => {
-    // console.log('v', defaultValues);
     if (!open) {
       const currentValues = form.getValues();
       const hasChanges = Object.keys(currentValues).some(
@@ -79,6 +91,7 @@ export default function CheckboxCombobox<
       }
     }
   };
+
   return (
     <Form {...form}>
       <form
@@ -93,16 +106,18 @@ export default function CheckboxCombobox<
             render={({ field }) => (
               <FormItem>
                 <Popover onOpenChange={handlePopoverClose}>
-                  <PopoverTrigger asChild>
-                    {options.length && (
-                      <button className="mr-auto flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-gray-300 text-gray-300 hover:border-gray-500 hover:text-gray-500">
-                        <Plus />
+                  <PopoverTrigger
+                    asChild={customItemTrigger ? false : true}
+                    className={classNameTrigger}
+                  >
+                    {customItemTrigger ? (
+                      customItemTrigger
+                    ) : (
+                      <button className="mr-auto flex h-7 w-7 items-center justify-center rounded-full border-none bg-slate-50 text-2xl font-semibold text-slate-500 transition-transform duration-100 hover:scale-105 hover:shadow-sm">
+                        +
                       </button>
                     )}
                   </PopoverTrigger>
-                  {/* <FormControl>
-                    <Input placeholder="Search options..." />
-                  </FormControl> */}
                   <PopoverContent className="flex w-[300px] flex-col p-2">
                     <Input
                       placeholder="Search..."
@@ -110,39 +125,54 @@ export default function CheckboxCombobox<
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="mb-2"
                     />
-                    {filteredOptions.length ? (
-                      filteredOptions.map((option) => (
-                        <FormItem
-                          key={option.value}
-                          className="flex flex-row items-center space-x-3 space-y-0 rounded-md p-2 hover:bg-gray-100"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value.includes(option.value)}
-                              onCheckedChange={(checked) => {
-                                const newValue = checked
-                                  ? [...field.value, option.value]
-                                  : field.value.filter(
-                                      (value) => value !== option.value,
-                                    );
-                                field.onChange(newValue);
-                              }}
-                            />
-                          </FormControl>
-                          {CustomItemComponent ? (
-                            <FormLabel className="h-full w-full font-normal text-gray">
-                              <CustomItemComponent option={option} />
-                            </FormLabel>
-                          ) : (
-                            <FormLabel>{option.label}</FormLabel>
-                          )}
-                        </FormItem>
-                      ))
-                    ) : (
-                      <p className="p-2 text-sm text-gray-500">
-                        No results found.
-                      </p>
-                    )}
+                    <div className="no-scrollbar max-h-[250px] overflow-y-auto">
+                      { isLoading ? <Spinner className='w-5 h-5 mx-auto' /> :filteredOptions.length ? (
+                        filteredOptions.map((option) => (
+                          <FormItem
+                            key={option.value}
+                            className="flex flex-row items-center space-x-3 space-y-0 rounded-md p-2 hover:bg-gray-100"
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={
+                                  values
+                                    ? values.includes(option.value)
+                                    : field.value.includes(option.value)
+                                }
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...(values ?? field.value), option.value]
+                                    : (values ?? field.value).filter(
+                                        (value) => value !== option.value,
+                                      );
+                                  if (onChange) {
+                                    onChange(newValue);
+                                  } else {
+                                    field.onChange(newValue);
+                                  }
+                                  if (onSelect) {
+                                    onSelect(option.value);
+                                  }
+                                  option.actionFn &&
+                                    option.actionFn(option.value);
+                                }}
+                              />
+                            </FormControl>
+                            {CustomItemComponent ? (
+                              <FormLabel className="h-full w-full font-normal text-gray">
+                                <CustomItemComponent option={option} />
+                              </FormLabel>
+                            ) : (
+                              <FormLabel>{option.label}</FormLabel>
+                            )}
+                          </FormItem>
+                        ))
+                      ) : (
+                        <p className="p-2 text-sm text-gray-500">
+                          No results found.
+                        </p>
+                      )}
+                    </div>
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
@@ -150,7 +180,6 @@ export default function CheckboxCombobox<
             )}
           />
         ))}
-        {/* <Button type="submit">Submit</Button> */}
       </form>
     </Form>
   );

@@ -14,6 +14,7 @@ import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 import { useBilling } from '../../home/[account]/hooks/use-billing';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -63,7 +64,8 @@ const ClientsMembersPagePresentation = ({
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [addMemberIsAvailable, setAddMemberIsAvailable] = useState(false);
-  const { setShowUpgradeComponent, subscriptionFetchedStripe, setAccountBillingTab } = useBilling();
+  const { subscriptionFetchedStripe } = useBilling();
+  const { t } = useTranslation('team');
   const router = useRouter();
 const seatByPlans = {
   0: 1,
@@ -75,7 +77,6 @@ const seatByPlans = {
           if (members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans]) {
               setAddMemberIsAvailable(true);
           } else {
-            console.log('members.length', members.length)
               setAddMemberIsAvailable(false);
           }
         }
@@ -87,7 +88,7 @@ const seatByPlans = {
         <div className="mb-[32px] flex items-center justify-between">
           <div className="flex-grow">
             <span>
-              <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
+              <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
                 <Trans i18nKey={'team:team'} />
               </div>
             </span>
@@ -95,7 +96,7 @@ const seatByPlans = {
         </div>
 
         <div className="w-full">
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between pb-[24px]">
             <If condition={canManageInvitations && canAddMember}>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold">
@@ -121,7 +122,6 @@ const seatByPlans = {
                     onMouseLeave={() => setShowDropdown(false)}
                   >
                     <ThemedButton
-                      size={'sm'}
                       data-test={'invite-members-form-trigger'}
                       disabled={addMemberIsAvailable}
                       className="p-0"
@@ -141,14 +141,17 @@ const seatByPlans = {
                         <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground gap-3 items-center">
                         <div className='flex mb-2'>
                         <InfoIcon size="14" strokeWidth={2} />
-                        <div className='pl-2'>Haz alcanzado el límite de miembros</div>
+                        <div className='pl-2'>
+                          {t('plan.message')}
+                        </div>
                         </div>
                         <ThemedButton
                           size={'sm'}
                           onClick={() => {
                             router.push('/home/settings?tab=billing')
                         }}
-                        > Upgrade Plan 
+                        > 
+                          {t('plan.upgradeButton')}
                         </ThemedButton>
                         </div>
 
@@ -161,7 +164,7 @@ const seatByPlans = {
         </div>
 
         <Separator />
-        <div className="mt-4">
+        <div className="mt-[24px]">
           <AccountMembersTable
             userRoleHierarchy={currentUserRoleHierarchy ?? 0}
             currentUserId={user.id}

@@ -36,43 +36,29 @@ sequenceDiagram
 
 ## Secularization
 
-## Webhook
+## Multitenancy- Subdomains
 
-```mermaid
+```mermaid 
 graph TD;
-    A[Inicio] --> B[Usuario selecciona un plan]
-    B --> C{Usuario paga el plan Standard, Premium, Enterprise ¿Usuario tiene token válido?}
-    C -- Sí --> D[Stripe envía webhook a Suuper] 
-    C -- No --> E[Redirigir a landing page]
-
-    D --> F[Generar token encriptado]
-    F --> H[Almacenar token en la tabla]
-
-    H --> I[Enviar token al usuario mediante Nodemailer]
-
-    I --> J{¿Usuario se registra?}
-    J -- Sí --> L[Verificar validez del token]
-    J -- No --> M[Token sigue almacenado]
-
-    L --> N{¿Token válido?}
-    N -- Sí --> O[Acceso permitido]
-    N -- No --> P[Redirigir a landing page]
-
-    style A fill:#f9f,stroke:#333,stroke-width:2px;
-    style B fill:#bbf,stroke:#333,stroke-width:2px;
-    style C fill:#bbf,stroke:#333,stroke-width:2px;
-    style D fill:#bbf,stroke:#333,stroke-width:2px;
-    style E fill:#fbb,stroke:#333,stroke-width:2px;
-    style F fill:#bbf,stroke:#333,stroke-width:2px;
-    style H fill:#bbf,stroke:#333,stroke-width:2px;
-    style I fill:#bbf,stroke:#333,stroke-width:2px;
-    style J fill:#bbf,stroke:#333,stroke-width:2px;
-    style L fill:#bbf,stroke:#333,stroke-width:2px;
-    style M fill:#bbf,stroke:#333,stroke-width:2px;
-    style N fill:#bbf,stroke:#333,stroke-width:2px;
-    style O fill:#bbf,stroke:#333,stroke-width:2px;
-    style P fill:#bbf,stroke:#333,stroke-width:2px;
-
-    classDef blackText fill:#fff, color:#000;
-    class A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q blackText;
+    A[Modelado de Datos] --> B[Tabla subdomains]
+    B --> C[Tabla organization_subdomains]
+    B --> D[Función handle_deleted_on]
+    D --> E[Trigger check_deleted_on]
+    
+    subgraph Multitenancy
+        F[Gestión de Tenants]
+        G[Gestión de Subdominios]
+        H[Configuración de DNS]
+        I[Gestión de Usuarios]
+        J[Monitoreo y Reportes]
+    end
+    
+    F --> K[Crear Tenant]
+    F --> L[Listar Tenants]
+    G --> M[Crear Subdominio]
+    G --> N[Eliminar Subdominio]
+    H --> O[Actualizar Configuración DNS]
+    I --> P[Agregar Usuario a Tenant]
+    J --> Q[Estadísticas de Uso]
+    J --> R[Logs de Actividad]
 ```

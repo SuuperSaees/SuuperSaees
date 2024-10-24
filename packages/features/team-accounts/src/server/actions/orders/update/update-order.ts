@@ -18,6 +18,7 @@ import { getEmails, getOrderInfo } from '../get/get-mail-info';
 import { sendOrderMessageEmail } from '../send-mail/send-order-message-email';
 import { sendOrderStatusPriorityEmail } from '../send-mail/send-order-status-priority';
 
+
 const statusTranslations = {
   pending: 'Pending',
   in_progress: 'In progres',
@@ -135,11 +136,9 @@ const handleFieldUpdate = async (
   } else if (field === 'priority') {
     translatedValue =
       priorityTranslations[value as keyof typeof priorityTranslations] || value;
-  } else if (field === 'due_date'){
+  } else if (field === 'due_date') {
     translatedValue = new Date(value).toLocaleDateString();
   }
-
-  
 
   const emailsData = await getEmails(orderId.toString());
   const actualName = await getUserById(userData.user.id);
@@ -158,6 +157,7 @@ const handleFieldUpdate = async (
         orderInfo?.title ?? '',
         field === 'status' ? `${translatedValue}` : `${translatedValue}`,
         agencyName,
+        userData?.user.id ?? '',
       );
     } else {
       console.warn('Email is null or undefined, skipping...');
@@ -231,6 +231,7 @@ const logOrderActivities = async (
 export const addOrderMessage = async (
   orderId: Order.Type['id'],
   message: Omit<Message.Insert, Message.Insert['user_id']>,
+  visibility: Message.Type['visibility'],
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -250,10 +251,11 @@ export const addOrderMessage = async (
         ...message,
         user_id: userData.user.id,
         order_id: orderId,
+        visibility,
       })
       .select()
       .single();
-    // console.log('messageData:', orderId, message);
+
     if (messageError) throw messageError.message;
 
     for (const email of emailsData) {
@@ -267,6 +269,7 @@ export const addOrderMessage = async (
           messageContent,
           agencyName,
           new Date().toLocaleDateString(),
+          userData?.user.id,
         );
       } else {
         console.warn('Email is null or undefined, skipping...');

@@ -55,7 +55,7 @@ export async function HomeSidebar(props: { workspace: UserWorkspace }) {
         <AppLogo />
       </div>
 
-      <SidebarContent className={`mt-5 h-[calc(100%-160px)] overflow-y-auto`}>
+      <SidebarContent className={`mt-5 h-[calc(100%-160px)] b-["#f2f2f2"] overflow-y-auto`}>
         <SidebarNavigation config={selectedNavigationConfig} />
         <SidebarContent></SidebarContent>
       </SidebarContent>

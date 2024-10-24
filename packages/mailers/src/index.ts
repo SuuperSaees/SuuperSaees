@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+
+
+import { EmailsTemplates } from '../../../apps/web/lib/emails-templates.types';
+import enEmails from '../../../apps/web/public/locales/en/emails.json';
+import esEmails from '../../../apps/web/public/locales/es/emails.json';
+
+
+// import type { TFunction } from '../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
+
+
 const MAILER_PROVIDER = z
   .enum(['nodemailer', 'cloudflare', 'resend', 'suupermailer'])
   .default('suupermailer')
@@ -52,7 +62,39 @@ async function getResendMailer() {
 }
 
 async function getSuuperMailer() {
-  const {SuuperMailer} = await import('./impl/suuper-mailer');
+  const { SuuperMailer } = await import('./impl/suuper-mailer');
 
-  return new SuuperMailer()
+  return new SuuperMailer();
+}
+
+type EmailTypes = EmailsTemplates.EmailTypes;
+type TranslationKeys<T extends EmailTypes> = EmailsTemplates.TranslationKeys<T>;
+
+const translations = {
+  en: enEmails,
+  es: esEmails,
+};
+
+// type TEmailFunction<T extends EmailTypes> = TFunction<'emails', undefined> & {
+//   key: TranslationKeys<T>;
+//   replacements?: Record<string, string>;
+// };
+
+export function getEmailTranslations<T extends EmailTypes>(emailType: T, lang: 'en' | 'es' = 'en') {
+  const emailTranslations = translations[lang][emailType];
+
+  return {
+    t: ((key: TranslationKeys<T>, replacements?: Record<string, string>) => {
+      const rawText = emailTranslations[key as keyof typeof emailTranslations];
+      const text = typeof rawText === 'string' ? rawText : String(rawText);
+      
+      if (replacements) {
+        return Object.entries(replacements).reduce((acc, [key, value]) => {
+          return acc.replace(`\${${key}}`, value);
+        }, text);
+      }
+      return text;
+    }),
+    lang,
+  };
 }

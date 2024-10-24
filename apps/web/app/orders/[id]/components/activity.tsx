@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 
 
-// import { updateFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/update/update-file';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 
@@ -25,15 +24,13 @@ function generateUUID() {
     return v.toString(16);
   });
 }
+
 const ActivityPage = () => {
   const { order } = useActivityContext();
   const client = useSupabase();
   const [showFileUploader, setShowFileUploader] = useState(false);
-  // const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
 
   const handleFileIdsChange = async (fileIds: string[]) => {
-    // setUploadedFileIds(fileIds);
-
     const orderFilesToInsert = fileIds.map((fileId) => {
       return {
         order_id: order.uuid,
@@ -55,18 +52,11 @@ const ActivityPage = () => {
     }
   };
 
-  const { writeMessage } = useActivityContext();
+  const { writeMessage, userRole } = useActivityContext();
 
   const handleOnCompleteMessageSend = async (messageContent: string) => {
     try {
-      // Step 1: Create the message and get the messageId
       await writeMessage(messageContent);
-
-      // Step 2: If files are uploaded, update them with the message_id
-      // Update files in the database with the message_id
-      // Optionally: Update the UI to replace placeholders with actual files
-      // updateFilesInUI(newMessage.id, updatedFiles);
-      // }
     } catch (error) {
       console.error('Failed to send message or upload files:', error);
     }
@@ -75,22 +65,25 @@ const ActivityPage = () => {
   return (
     <div className="flex h-full w-full pr-8 min-w-0 max-w-full flex-col gap-4 flex-grow shrink">
       <Interactions />
-      <div className="mt-auto flex max-h-full flex-grow max-w-full min-w-0 flex-col gap-4">
+      <div className="mt-auto flex max-h-full flex-grow max-w-full min-w-0 flex-col gap-4 mb-2 justify-end">
         {showFileUploader && (
           <UploadFileComponent
             bucketName="orders"
             onFileIdsChange={handleFileIdsChange}
             uuid={generateUUID()}
             removeResults
+            toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
           />
         )}
         <RichTextEditor
-          onComplete={handleOnCompleteMessageSend} // Update this to call your new function
+          onComplete={handleOnCompleteMessageSend}
           uploadFileIsExternal
           toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
+          userRole={userRole}
         />
       </div>
     </div>
   );
 };
+
 export default ActivityPage;

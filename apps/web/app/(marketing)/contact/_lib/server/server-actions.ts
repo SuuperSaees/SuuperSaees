@@ -2,9 +2,9 @@
 
 import { z } from 'zod';
 
-import { getMailer } from '@kit/mailers';
+import { getEmailTranslations, getMailer } from '@kit/mailers';
 import { enhanceAction } from '@kit/next/actions';
-
+import { getLanguageFromCookie } from '~/lib/i18n/i18n.server';
 import { ContactEmailSchema } from '../contact-email.schema';
 
 const contactEmail = z
@@ -25,21 +25,28 @@ const emailFrom = z
 
 export const sendContactEmail = enhanceAction(
   async (data) => {
+    const lang = getLanguageFromCookie() as 'en' | 'es';
     const mailer = await getMailer();
-
+    const { t } = getEmailTranslations('contactFormSubmission', lang);
     await mailer.sendEmail({
       to: contactEmail,
       from: emailFrom,
-      subject: 'Contact Form Submission',
+      subject: t('subject'),
       html: `
-        <p>
-          You have received a new contact form submission.
-        </p>
-
-        <p>Name: ${data.name}</p>
-        <p>Email: ${data.email}</p>
-        <p>Message: ${data.message}</p>
-      `,
+      <!DOCTYPE html>
+      <html lang="${lang}">
+        <head>
+          <meta charset="utf-8">
+          <title>${t('subject')}</title>
+        </head>
+        <body>
+          <p>${t('body')}</p>
+          <p>${t('name', { name: data.name })}</p>
+          <p>${t('email', { email: data.email })}</p>
+          <p>${t('message', { message: data.message })}</p>
+        </body>
+      </html>
+    `,
     });
 
     return {};

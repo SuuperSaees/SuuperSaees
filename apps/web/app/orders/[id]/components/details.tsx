@@ -4,17 +4,19 @@ import React from 'react';
 
 
 
-import { CircleHelp } from 'lucide-react';
+import { Trans } from '@kit/ui/trans';
 
 
 
 import { File as ServerFile } from '~/lib/file.types';
 
+
+
 import { useActivityContext } from '../context/activity-context';
 import PreviewImage from './file-types/preview-image';
 import PreviewPDF from './file-types/preview-pdf';
 import PreviewVideo from './file-types/preview-video';
-import { Trans } from '@kit/ui/trans';
+
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -48,9 +50,14 @@ const getFilePreviewComponent = (file: ServerFile.Type) => {
 const DetailsPage = () => {
   const { order } = useActivityContext();
 
-  const convertLinks = (text) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" class="text-blue-600 underline">${url}</a>`);
+  const convertLinks = (text: string) => {
+    const urlRegex =
+      /\b(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*))/gi;
+    return text.replace(
+      urlRegex,
+      (url) =>
+        `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">${url}</a>`,
+    );
   };
 
   return (
@@ -65,7 +72,7 @@ const DetailsPage = () => {
       <div className="flex flex-col gap-2">
         <div className="mb-[6px] flex">
           <span className="font-inter text-sm font-medium leading-5 text-gray-700">
-             <Trans i18nKey="orders:OrderDescriptionTitle" />{' '}
+            <Trans i18nKey="orders:OrderDescriptionTitle" />{' '}
           </span>
         </div>
         <div
@@ -74,17 +81,19 @@ const DetailsPage = () => {
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="flex flex-wrap gap-8 pb-8">
         {order?.files?.map((file) => (
           <div
             key={file.id}
-            className="flex w-[220px] flex-col items-start gap-[8px] rounded-none rounded-bl-md rounded-br-md rounded-tr-md border border-gray-200 bg-white p-[10px] px-[14px]"
+            className="flex h-[209px] w-[220px] flex-col items-start gap-2 rounded-md border border-gray-200 bg-white p-[10px] px-[14px]"
           >
-            {getFilePreviewComponent(file)}
-            <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 text-gray-700 h-[30px]">
+            <div className="h-[137px] w-[192px] overflow-y-auto">
+              {getFilePreviewComponent(file)}
+            </div>
+            <span className="line-clamp-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium text-gray-700">
               {file.name}
             </span>
-            <span className="text-sm font-normal leading-5 text-gray-600">
+            <span className="text-sm font-normal text-gray-600">
               {formatFileSize(file.size)}
             </span>
           </div>

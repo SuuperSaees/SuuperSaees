@@ -8,9 +8,9 @@ interface UserMessageProps {
 
 const UserMessage = ({ message }: UserMessageProps) => {
   return (
-    <div className="flex gap-1">
+    <div className="flex items-start gap-4 w-full"> 
       <AvatarDisplayer
-        displayName={null}
+        displayName={message?.user.picture_url ? null : message?.user.name}
         pictureUrl={message?.user.picture_url}
         text={message?.user.name ? message.user.name : undefined}
       />

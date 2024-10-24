@@ -11,18 +11,29 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import type { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-import { generateRandomPassword // getTextColorBasedOnBackground
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import {
+  generateRandomPassword,
+  getTextColorBasedOnBackground,
 } from '../../../utils/generate-colors';
 import { addUserAccountRole } from '../../members/create/create-account';
-import { getPrimaryOwnerId, getUserAccountByEmail } from '../../members/get/get-member-account';
+import {
+  getPrimaryOwnerId,
+  getUserAccountByEmail,
+} from '../../members/get/get-member-account';
+import { fetchCurrentUser } from '../../members/get/get-member-account';
 import { updateUserAccount } from '../../members/update/update-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
-import { getAgencyForClient, getOrganization, // getOrganizationSettings,
-getOrganizationById } from '../../organizations/get/get-organizations';
-import { hasPermissionToAddClientMembers, hasPermissionToCreateClientOrg } from '../../permissions/clients';
-
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+import {
+  getAgencyForClient,
+  getOrganization,
+  getOrganizationById,
+  getOrganizationSettings,
+} from '../../organizations/get/get-organizations';
+import {
+  hasPermissionToAddClientMembers,
+  hasPermissionToCreateClientOrg,
+} from '../../permissions/clients';
 
 // Define la función createClient
 type CreateClient = {
@@ -40,18 +51,27 @@ const createClientUserAccount = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    // const organizationSettings = await getOrganizationSettings();
+    const userData = await fetchCurrentUser(client);
+    const userId = userData?.id;
+    if (!userId) throw new Error('No user id provided');
+    const { domain: baseUrl } = await getDomainByUserId(userId, true);
+
+    const organizationSettings = await getOrganizationSettings();
 
     // pre-authentication of the user
     const password = generateRandomPassword(12);
 
-    // const organizationLogo = organizationSettings.find(
-    //   (setting) => setting.key === 'logo_url',
-    // );
+    const organizationLogo = organizationSettings.find(
+      (setting) => setting.key === 'logo_url',
+    ) ?? {
+      key: 'logo_url',
+      value:
+        'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/a81567d28893e15cd0baf517c39f52ee.jpg',
+    };
 
-    // const organizationColor = organizationSettings.find(
-    //   (setting) => setting.key === 'theme_color',
-    // );
+    const organizationColor = organizationSettings.find(
+      (setting) => setting.key === 'theme_color',
+    ) ?? { key: 'theme_color', value: '#000000' };
 
     const { data: clientOrganizationUser, error: clientOrganizationUserError } =
       await client.auth.signUp({
@@ -67,11 +87,11 @@ const createClientUserAccount = async (
             ClientContent4: 'Your username:',
             ClientContent5: 'Thanks,',
             ClientContent6: 'The Team',
-            // OrganizationSenderLogo: organizationLogo?.value ?? '',
-            // OrganizationSenderColor: organizationColor?.value ?? '',
-            // ButtonTextColor: organizationColor
-            //   ? getTextColorBasedOnBackground(organizationColor.value)
-            //   : '',
+            OrganizationSenderLogo: organizationLogo.value,
+            OrganizationSenderColor: organizationColor.value,
+            ButtonTextColor:
+              getTextColorBasedOnBackground(organizationColor?.value) ??
+              '#ffffff',
           },
         },
       });
@@ -186,7 +206,7 @@ export const createClient = async (clientData: CreateClient) => {
 
     return client;
   } catch (error) {
-    console.error('Error creating the client:', error);
+    console.error('Error creating the client v1:', error);
     throw error;
   }
 };
@@ -267,7 +287,7 @@ export const addClientMember = async ({
 
     return client;
   } catch (error) {
-    console.error('Error creating the client:', error);
+    console.error('Error creating the client v2:', error);
     throw error;
   }
 };
