@@ -1,3 +1,4 @@
+'use client';
 import {
   CalendarCheck2,
   CheckSquare,
@@ -16,20 +17,22 @@ import FormFieldSingleChoice from '../components/single-choice';
 import { ComponentProps, Input, InputTypes } from '../types/brief.types';
 import TextLarge from '../components/text-large';
 import UploadFiles from '../components/upload-files';
+import { useTranslation } from 'react-i18next';
 
 // Import your custom components
 type InputKey = InputTypes;
 type InputValue = Input;
 type InputMap = Map<InputKey, InputValue>;
 // Generator function to create the inputs Map
-export const generateInputs = (
+export const useGenerateInputs = (
   action: (inputName: InputTypes) => void,
 ): InputMap => {
+  const {t} = useTranslation('briefs')
   return new Map([
     [
       'text-short',
       {
-        name: 'Short Text',
+        name: t('textShort.value'),
         icon: <Text className="h-6 w-6" />,
         action: () => action('text-short'), // Action passed dynamically
         content: {
@@ -52,7 +55,7 @@ export const generateInputs = (
     [
       'text-large',
       {
-        name: 'Paragraph',
+        name: t('textLarge.value'),
         icon: <TextIcon className="h-6 w-6" />,
         action: () => action('text-large'), // Action passed dynamically
         content: {
@@ -75,7 +78,7 @@ export const generateInputs = (
     [
       'file',
       {
-        name: 'Upload files',
+        name: t('uploadFiles.value'),
         icon: <Upload className="h-6 w-6" />,
         action: () => action('file'), // Action passed dynamically
         content: {
@@ -98,7 +101,7 @@ export const generateInputs = (
     [
       'multiple_choice',
       {
-        name: 'Multiple choice',
+        name: t('multipleChoice.value'),
         icon: <CheckSquare className="h-6 w-6" />,
         action: () => action('multiple_choice'), // Action passed dynamically
         content: {
@@ -135,7 +138,7 @@ export const generateInputs = (
     [
       'select',
       {
-        name: 'Select',
+        name: t('singleChoice.value'),
         icon: <Circle className="h-6 w-6" />,
         action: () => action('select'), // Action passed dynamically
         content: {
@@ -172,7 +175,7 @@ export const generateInputs = (
     [
       'dropdown',
       {
-        name: 'Dropdown',
+        name: t('dropdown.value'),
         icon: <ChevronDown className="h-6 w-6" />,
         action: () => action('dropdown'), // Action passed dynamically
         content: {
@@ -209,7 +212,7 @@ export const generateInputs = (
     [
       'date',
       {
-        name: 'Date',
+        name: t('datePicker.value'),
         icon: <CalendarCheck2 className="h-6 w-6" />,
         action: () => action('date'), // Action passed dynamically
         content: {

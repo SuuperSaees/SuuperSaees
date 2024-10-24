@@ -127,7 +127,7 @@ const BriefCreationForm = ({
             name="default_question.description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-semibold text-gray-700">
+                <FormLabel className="font-semibold text-gray-600">
                   {form.getValues().default_question.label}
                 </FormLabel>
                 <FormControl>
