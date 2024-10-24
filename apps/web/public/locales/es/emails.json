@@ -4,7 +4,8 @@
     "body": "Has recibido una nueva solicitud de contacto.",
     "name": "Nombre: ${name}",
     "email": "Email: ${email}",
-    "message": "Mensaje: ${message}"
+    "message": "Mensaje: ${message}",
+    "at": "de"
   },
   "orderCompleted": {
     "subject": "${actualName} ha marcado '${orderTitle}' solicitud como completada.",
@@ -12,7 +13,8 @@
     "greeting": "Hola ${actualName}",
     "viewOrder": "Ver pedido",
     "farewell": "Saludos,",
-    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
   },
   "orderCreation": {
     "subject": "Nuevo pedido creado",
@@ -21,14 +23,16 @@
     "newOrderMessage": "Tienes un nuevo pedido de ${emailSender}",
     "viewOrder": "Ver pedido",
     "farewell": "Saludos,",
-    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
   },
   "orderMessage": {
     "subject": "${userName} ha comentado en ${orderTitle} el ${date}.",
     "greeting": "Hola ${toEmail}",
     "reply": "Responder",
     "farewell": "Saludos,",
-    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
   },
   "orderStatusPriority": {
     "status": {
@@ -50,11 +54,13 @@
     "greeting": "Hola ${actualName}",
     "viewOrder": "Ver pedido",
     "farewell": "Saludos,",
-    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
   },
   "inviteEmail": {
     "confirmEmail": "Confirma tu correo",
     "acceptInvitation": "Aceptar invitación",
-    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
   }
 }

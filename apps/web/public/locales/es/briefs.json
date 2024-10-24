@@ -19,6 +19,7 @@
        "minCharacters": "Se requieren al menos 2 caracteres",
        "maxCharacters": "Se permiten un máximo de 3000 caracteres"
     },
+    "search": "Buscar brief...",
     "creation": {
     "title": "Crear brief",
     "form": {
@@ -127,6 +128,22 @@
     "dragOrClick": "Arrastre una imagen aquí o haga clic para seleccionarlo",
     "dropHere": "Deja la imagen aquí",
     "invalidFileType": "Por favor seleccione un archivo de imagen válido"
+  }, 
+  "empty": {
+    "orderCreation": {
+      "agency": {
+        "title": "¡Aún no tienes ningún servicio!",
+        "description": "Comienza comprando un servicio para crear tu primer pedido."
+      },
+      "client": {
+        "title": "!Aún no te han asignado ningún servicio!",
+        "description": "Contacta a tu agencia para asignar un servicio y comenzar a crear un pedido."
+      }
+    }, 
+      "agency": {
+        "title": "¡Aún no tienes ningún brief creado!",
+        "description": "Comienza creando un brief haciendo clic en el botón de abajo."
+      }
   }
 }
 

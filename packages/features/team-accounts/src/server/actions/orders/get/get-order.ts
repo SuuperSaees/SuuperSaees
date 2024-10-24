@@ -124,7 +124,8 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
           reviews(*, user:accounts(id, name, email, picture_url)), 
           files(*, user:accounts(id, name, email, picture_url)),
          assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url)),
-         followers:order_followers(client_follower:accounts(id, name, email, picture_url))
+         followers:order_followers(client_follower:accounts(id, name, email, picture_url)),
+         tasks:tasks(id, name, completed, deleted_on, subtasks:subtasks(id, name, completed, state, content, priority, deleted_on))
         `,
       )
       .eq('id', orderId)
@@ -139,6 +140,13 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     if (!userHasReadMessagePermission) throw 'Unauthorized access to order';
 
     if (orderError) throw orderError.message;
+
+
+    // Filter tasks and subtasks where delete_on is null
+    orderData.tasks = orderData.tasks.filter((task) => task.deleted_on === null);
+    orderData.tasks.forEach((task) => {
+      task.subtasks = task.subtasks.filter((subtask) => subtask.deleted_on === null);
+    });
 
     // fetch client organization with the order
     const { data: clientOrganizationData, error: clientOrganizationError } =

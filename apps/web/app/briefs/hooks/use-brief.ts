@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -29,6 +29,7 @@ export const useBrief = (
   setFormFields: Dispatch<SetStateAction<FormField[]>>,
 ) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const defaultBrief = {
     name: '',
@@ -105,13 +106,17 @@ export const useBrief = (
         : t('creation.form.errorCreating');
       toast('Error', { description: errorMessage });
     },
-    onSuccess: (_, { isUpdate }) => {
+    onSuccess: async (_, { isUpdate }) => {
       // Show success toast notification and redirect on successful brief creation
       const successMessage = isUpdate
         ? t('creation.form.updateSuccess')
         : t('creation.form.createSuccess');
       toast('Success', { description: successMessage });
-      router.push('/services'); // Redirect to briefs page
+      router.push('/services?briefs=true'); // Redirect to briefs page
+      
+      await queryClient.invalidateQueries({
+        queryKey: ['briefs'],
+      });
       // reset
       setBrief(defaultBrief);
       setFormFields([]);

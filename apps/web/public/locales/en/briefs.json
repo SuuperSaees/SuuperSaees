@@ -19,6 +19,7 @@
        "minCharacters" : "Minimum 2 characters required",
        "maxCharacters" : "Maximum 3000 characters allowed"
     },
+    "search": "Search brief...",
     "creation": {
     "title": "Create brief",
     "form": {
@@ -127,5 +128,21 @@
     "dragOrClick": "Drag an image here or click to select",
     "dropHere": "Drop the image here",
     "invalidFileType": "Please select a valid image file"
+  },
+  "empty": {
+    "orderCreation": {
+      "agency": {
+        "title": "You don’t have any service yet!",
+        "description": "Start by buying a service to create your first order."
+      },
+      "client": {
+        "title": "You haven't assigned any services yet!",
+        "description": "Contact your agency to assign a service and start creating orders."
+      }
+    },
+    "agency": {
+      "title": "You don’t have any brief yet!",
+      "description": "Start by creating a brief clicking on the button below."
+    }
   }
 }

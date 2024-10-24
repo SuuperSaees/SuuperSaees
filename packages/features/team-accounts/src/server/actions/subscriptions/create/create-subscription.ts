@@ -8,6 +8,7 @@ import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
+
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export const createSubscription = async (): Promise<{
@@ -24,7 +25,7 @@ export const createSubscription = async (): Promise<{
       throw new Error('Error to get user account');
     }
     const email = user?.email as string;
-    let baseUrl = await getDomainByUserId(user.id, true);
+    let { domain: baseUrl } = await getDomainByUserId(user.id, true);
     if (!baseUrl) {
       // get host from window
       if (typeof window !== 'undefined') {

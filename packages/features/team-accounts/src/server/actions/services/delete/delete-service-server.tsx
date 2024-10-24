@@ -24,7 +24,7 @@ export const deleteService = async (priceId: string) => {
     if (!userId) throw new Error('No user found');
 
     // API call to disable product and price in Stripe
-    const baseUrl = await getDomainByUserId(userId, true);
+    const {domain: baseUrl} = await getDomainByUserId(userId, true);
     const response = await fetch(`${baseUrl}/api/stripe/delete-service?priceId=${encodeURIComponent(priceId)}`, {
       method: 'DELETE',
       headers: {
