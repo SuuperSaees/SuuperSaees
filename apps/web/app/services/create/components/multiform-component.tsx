@@ -2,13 +2,8 @@
 
 import React, { useState } from 'react';
 
-
-
 import Image from 'next/image';
-import BriefConnectionStep from './step-brief-connection';
 import { useRouter } from 'next/navigation';
-
-
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Elements } from '@stripe/react-stripe-js';
@@ -17,11 +12,10 @@ import { useMutation } from '@tanstack/react-query';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service';
-import { useForm } from 'react-hook-form';
+import { ControllerRenderProps, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
-
 
 import {
   Form,
@@ -51,6 +45,7 @@ import TimeBasedRecurringSubscription from './recurring_subscription/time_based'
 import CreditBased from './single_sale/credit_based';
 import Standard from './single_sale/standard';
 import TimeBased from './single_sale/time_based';
+import BriefConnectionStep from './step-brief-connection';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error('Stripe public key is not defined in environment variables');
@@ -59,10 +54,18 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export const FormSchema = createStepSchema({
-  step_type_of_service: z.object({
-    single_sale: z.boolean().default(false),
-    recurring_subscription: z.boolean().default(false),
-  }),
+  step_type_of_service: z
+    .object({
+      single_sale: z.boolean().default(true),
+      recurring_subscription: z.boolean().default(false),
+    })
+    .refine((data) => data.single_sale || data.recurring_subscription, {
+      message: 'Either single sale or recurring subscription must be true',
+      path: [
+        'step_type_of_service_single_sale',
+        'step_type_of_service_recurring_subscription',
+      ],
+    }),
   step_service_details: z.object({
     service_image: z.string().optional(),
     service_name: z.string().min(2).max(50),
@@ -85,15 +88,17 @@ export const FormSchema = createStepSchema({
     max_number_of_simultaneous_orders: z.number(),
     max_number_of_monthly_orders: z.number(),
   }),
-  step_connect_briefs: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-    })).optional(),
+  step_connect_briefs: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
-
 
 interface ServiceBrief {
   id: string;
@@ -129,7 +134,7 @@ interface Service {
   test_period_price: number;
   time_based: boolean;
   price_id: string;
-  briefs?: ServiceBrief[]; 
+  briefs?: ServiceBrief[];
 }
 
 export function MultiStepFormDemo({
@@ -143,11 +148,12 @@ export function MultiStepFormDemo({
     defaultValues: {
       step_type_of_service: {
         single_sale: previousService?.single_sale ?? true,
-        recurring_subscription: previousService?.recurring_subscription ?? false,
+        recurring_subscription:
+          previousService?.recurring_subscription ?? false,
       },
       step_service_details: {
         service_image: previousService?.service_image ?? undefined,
-        service_name: previousService?.name ?? '', 
+        service_name: previousService?.name ?? '',
         service_description: previousService?.service_description ?? '',
       },
       step_service_price: {
@@ -162,15 +168,19 @@ export function MultiStepFormDemo({
         recurrence: previousService?.recurrence ?? '',
         test_period: previousService?.test_period ?? false,
         test_period_duration: previousService?.test_period_duration ?? 0,
-        test_period_duration_unit_of_measurement: previousService?.test_period_duration_unit_of_measurement ?? 'days',
+        test_period_duration_unit_of_measurement:
+          previousService?.test_period_duration_unit_of_measurement ?? 'days',
         test_period_price: previousService?.test_period_price ?? 0,
-        max_number_of_simultaneous_orders: previousService?.max_number_of_simultaneous_orders ?? 0,
-        max_number_of_monthly_orders: previousService?.max_number_of_monthly_orders ?? 0,
+        max_number_of_simultaneous_orders:
+          previousService?.max_number_of_simultaneous_orders ?? 0,
+        max_number_of_monthly_orders:
+          previousService?.max_number_of_monthly_orders ?? 0,
       },
-      step_connect_briefs: previousService?.briefs?.map((brief) => ({
-        id: brief.id,
-        name: brief.name,
-      })) ?? [],
+      step_connect_briefs:
+        previousService?.briefs?.map((brief) => ({
+          id: brief.id,
+          name: brief.name,
+        })) ?? [],
     },
     reValidateMode: 'onChange',
     mode: 'onChange',
@@ -242,7 +252,10 @@ export function MultiStepFormDemo({
         <BriefConnectionStep  />
       </MultiStepFormStep> */}
       <MultiStepFormStep name="connect_briefs">
-        <BriefConnectionStep previousBriefs={previousService?.briefs ?? []}  previousService={previousService}/>
+        <BriefConnectionStep
+          previousBriefs={previousService?.briefs ?? []}
+          previousService={previousService}
+        />
       </MultiStepFormStep>
     </MultiStepForm>
   );
@@ -257,11 +270,26 @@ function TypeOfServiceStep() {
     | 'step_type_of_service.single_sale'
     | 'step_type_of_service.recurring_subscription';
 
-  const handleCheckboxChange = (name: CheckboxName) => (checked: boolean) => {
-    form.setValue('step_type_of_service.single_sale', false);
-    form.setValue('step_type_of_service.recurring_subscription', false);
-    form.setValue(name, checked);
-  };
+  const handleCheckboxChange =
+    (
+      name: CheckboxName,
+      field: ControllerRenderProps<
+        any,
+        | 'step_type_of_service.single_sale'
+        | 'step_type_of_service.recurring_subscription'
+      >,
+    ) =>
+    (_checked: boolean) => {
+      // Always set the selected option to true and the other to false
+      if (name === 'step_type_of_service.single_sale') {
+        form.setValue('step_type_of_service.single_sale', true);
+        form.setValue('step_type_of_service.recurring_subscription', false);
+      } else if (name === 'step_type_of_service.recurring_subscription') {
+        form.setValue('step_type_of_service.single_sale', false);
+        form.setValue('step_type_of_service.recurring_subscription', true);
+      }
+      field.onChange(true);
+    };
 
   const getCheckboxClass = (isSelected: boolean) =>
     isSelected
@@ -271,6 +299,7 @@ function TypeOfServiceStep() {
   const getStyles = (isSelected: boolean) => ({
     borderColor: isSelected ? (theme_color ?? '#1f1f1f') : '#d9d9d9',
   });
+
 
   return (
     <div className="">
@@ -289,7 +318,15 @@ function TypeOfServiceStep() {
                   style={getStyles(field.value)}
                 >
                   <FormControl>
-                    <div className="flex gap-[11.792px]">
+                    <div
+                      className="flex cursor-pointer gap-[11.792px]"
+                      onClick={() =>
+                        handleCheckboxChange(
+                          'step_type_of_service.single_sale',
+                          field,
+                        )(!field.value)
+                      }
+                    >
                       <div
                         className={`flex h-8 w-8 cursor-pointer items-center justify-center border-2 ${
                           field.value
@@ -303,11 +340,6 @@ function TypeOfServiceStep() {
                                 backgroundColor: theme_color ?? '#1f1f1f',
                               }
                             : undefined
-                        }
-                        onClick={() =>
-                          handleCheckboxChange(
-                            'step_type_of_service.single_sale',
-                          )(!field.value)
                         }
                       >
                         {field.value && (
@@ -338,7 +370,15 @@ function TypeOfServiceStep() {
                   style={getStyles(field.value)}
                 >
                   <FormControl>
-                    <div className="flex gap-[11.792px]">
+                    <div
+                      className="flex cursor-pointer gap-[11.792px]"
+                      onClick={() =>
+                        handleCheckboxChange(
+                          'step_type_of_service.recurring_subscription',
+                          field,
+                        )(!field.value)
+                      }
+                    >
                       <div
                         className={`flex h-6 w-8 cursor-pointer items-center justify-center border-2 ${
                           field.value
@@ -352,11 +392,6 @@ function TypeOfServiceStep() {
                                 backgroundColor: theme_color ?? '#1f1f1f',
                               }
                             : undefined
-                        }
-                        onClick={() =>
-                          handleCheckboxChange(
-                            'step_type_of_service.recurring_subscription',
-                          )(!field.value)
                         }
                       >
                         {field.value && (
@@ -380,10 +415,17 @@ function TypeOfServiceStep() {
             />
           </div>
           <div className="mt-4 flex justify-between space-x-2">
-            <ThemedButton type="button" onClick={()=> router.push('/services')}>
+            <ThemedButton
+              type="button"
+              onClick={() => router.push('/services')}
+            >
               {t('previous')}
             </ThemedButton>
-            <ThemedButton onClick={nextStep} disabled={!isStepValid()}>
+            <ThemedButton
+              type="button"
+              onClick={nextStep}
+              disabled={!isStepValid()}
+            >
               {t('next')}
             </ThemedButton>
           </div>
@@ -679,7 +721,6 @@ function PricingStep() {
   // const { form, nextStep, prevStep } = useMultiStepFormContext();
   const { form, nextStep, prevStep, isStepValid } = useMultiStepFormContext();
   const router = useRouter();
-  
 
   // type CheckboxName =
   //   | 'step_service_price.standard'
@@ -882,7 +923,11 @@ function PricingStep() {
       </div>
 
       <div className="mt-4 flex justify-between space-x-2">
-        <ThemedButton type="button" disabled={createServiceMutation.isPending} onClick={prevStep}>
+        <ThemedButton
+          type="button"
+          disabled={createServiceMutation.isPending}
+          onClick={prevStep}
+        >
           {t('previous')}
         </ThemedButton>
         <ThemedButton onClick={nextStep} disabled={!isStepValid()}>
@@ -903,7 +948,7 @@ function PricingStep() {
 }
 
 export default function MultiFormComponent({
-  previousService
+  previousService,
 }: {
   previousService?: Service;
 }) {
