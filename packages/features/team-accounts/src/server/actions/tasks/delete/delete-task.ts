@@ -11,7 +11,9 @@ export const deleteTask = async (
       // Delete the task from the database
       const { error } = await client
         .from('tasks')
-        .delete()
+        .update({
+            deleted_on: new Date().toDateString()
+        })
         .eq('id', taskId);
   
       if (error) {
@@ -34,7 +36,9 @@ export const deleteSubtask = async (
       // Delete the subtask from the database
       const { error } = await client
         .from('subtasks')
-        .delete()
+        .update({
+            deleted_on: new Date().toDateString()
+        })
         .eq('id', subtaskId);
   
       if (error) {
