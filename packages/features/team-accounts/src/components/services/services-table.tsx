@@ -283,9 +283,10 @@ export function ServicesTable({
       {isLoading ? (
         <SkeletonTable columns={7} rows={7} className="mt-6" />
       ) : !table.getRowModel().rows?.length ? (
+        <div className="mt-6 flex h-full flex-col rounded-md border bg-white p-2">
         <EmptyState
           imageSrc="/images/illustrations/Illustration-cloud.svg"
-          title={t('noServicesMessage')}
+          title={t('startFirstService')}
           description={t('noServicesMessage')}
           button={
             accountRole === 'agency_owner' ? (
@@ -295,6 +296,7 @@ export function ServicesTable({
             ) : undefined
           }
         />
+        </div>
       ) : (
         <div className="mt-[24px] rounded-md border bg-white px-4">
           <Table>
