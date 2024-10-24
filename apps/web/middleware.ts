@@ -11,8 +11,6 @@ import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 import pathsConfig from '~/config/paths.config';
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 
-
-
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
@@ -21,7 +19,7 @@ import { handleDomainCheck } from './handlers/domain-check-handler';
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|images|locales|assets|api).*)',
+    '/((?!_next/static|_next/image|images|locales|assets|api/v1/webhook|api).*)', 
     '/api/v1/:path*',
   ],
 };

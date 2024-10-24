@@ -7,6 +7,11 @@ const CLIENT_SECRET =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkwMjk0ZmM2LWJlODItNGE5Zi04ZDIyLTNjZDc0ZDAwODJjZSIsIm5hbWUiOiJzYW11ZWwiLCJlbWFpbCI6InNhbXVlbEBzdXVwZXIuY28iLCJkb21haW4iOiJzdXVwZXIuY28ifQ.Q3rEzb3evSkVZgJeIYtJtRn_5f2xUG1HHxRnVoACDV0';
 
 export function handleApiAuth(request: NextRequest) {
+
+  if (request.nextUrl.pathname === '/api/v1/webhook' || request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+  
   if (request.nextUrl.pathname.startsWith('/api/v1')) {
     if (!isValidBasicAuth(request)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
