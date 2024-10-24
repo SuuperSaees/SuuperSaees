@@ -34,6 +34,7 @@ import { TabsList } from '@kit/ui/tabs';
 
 import DeleteServiceDialog from '../../../../../../apps/web/app/services/delete/delete-component';
 import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
+import { SkeletonTable } from '../../../../../../apps/web/components/ui/skeleton';
 import { Service } from '../../../../../../apps/web/lib/services.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import {
@@ -55,6 +56,7 @@ type ServicesTableProps = {
   accountRole: string;
   hasTheEmailAssociatedWithStripe: boolean;
   handleCheckout: (priceId: string) => Promise<void>;
+  isLoading: boolean;
 };
 
 // SERVICES TABLE
@@ -193,6 +195,7 @@ export function ServicesTable({
   accountRole,
   hasTheEmailAssociatedWithStripe,
   handleCheckout,
+  isLoading,
 }: ServicesTableProps) {
   const { t } = useTranslation(['services', 'briefs']);
 
@@ -277,133 +280,123 @@ export function ServicesTable({
         </div>
       </div>
       <Separator />
-      <div className="mt-[24px] rounded-md border bg-white px-4">
-        <Table className="rounded-md bg-white">
-          {' '}
-          {/* Asegúrate de que la tabla tenga un fondo blanco */}
-          {table.getRowModel().rows?.length ? (
-            <>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <TableHead key={header.id}>
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </>
-          ) : (
+      {isLoading ? (
+        <SkeletonTable columns={7} rows={7} className="mt-6" />
+      ) : !table.getRowModel().rows?.length ? (
+        <EmptyState
+          imageSrc="/images/illustrations/Illustration-cloud.svg"
+          title={t('noServicesMessage')}
+          description={t('noServicesMessage')}
+          button={
+            accountRole === 'agency_owner' ? (
+              <Link href="/services/create">
+                <ThemedButton>{t('createService')}</ThemedButton>
+              </Link>
+            ) : undefined
+          }
+        />
+      ) : (
+        <div className="mt-[24px] rounded-md border bg-white px-4">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell colSpan={table.getAllColumns().length}>
-                  <div className="flex flex-col gap-2">
-                    <EmptyState
-                      title={t('startFirstService')}
-                      description={t('noServicesMessage')}
-                      imageSrc="/images/illustrations/Illustration-box.svg"
-                      button={
-                        accountRole === 'agency_owner' ? (
-                          <Link href="/services/create">
-                            <ThemedButton>{t('createService')}</ThemedButton>
-                          </Link>
-                        ) : undefined
-                      }
-                    />
-                  </div>
-                </TableCell>
-              </TableRow>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
             </TableBody>
-          )}
-        </Table>
+          </Table>
+        </div>
+      )}
 
-        {table.getRowModel().rows?.length ? (
-          <>
-            <div className="flex items-center justify-between py-4">
-              <Pagination>
-                <PaginationContent className="flex w-full items-center justify-between">
-                  {pageIndex > 0 && (
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (table.getCanPreviousPage()) {
-                            table.previousPage();
-                          }
-                        }}
-                      />
-                    </PaginationItem>
-                  )}
-                  <div className="flex flex-1 justify-center">
-                    {pages.length > 1 &&
-                      pages.map((page) => (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            href="#"
-                            isActive={pageIndex === page - 1}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              table.setPageIndex(page - 1);
-                            }}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                    {pageCount > 3 && pageIndex < pageCount - 2 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
+      {table.getRowModel().rows?.length ? (
+        <>
+          <div className="flex items-center justify-between py-4">
+            <Pagination>
+              <PaginationContent className="flex w-full items-center justify-between">
+                {pageIndex > 0 && (
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (table.getCanPreviousPage()) {
+                          table.previousPage();
+                        }
+                      }}
+                    />
+                  </PaginationItem>
+                )}
+                <div className="flex flex-1 justify-center">
+                  {pages.length > 1 &&
+                    pages.map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={pageIndex === page - 1}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            table.setPageIndex(page - 1);
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
                       </PaginationItem>
-                    )}
-                  </div>
-                  {pageIndex < pageCount - 1 && (
+                    ))}
+                  {pageCount > 3 && pageIndex < pageCount - 2 && (
                     <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (table.getCanNextPage()) {
-                            table.nextPage();
-                          }
-                        }}
-                      />
+                      <PaginationEllipsis />
                     </PaginationItem>
                   )}
-                </PaginationContent>
-              </Pagination>
-            </div>
-          </>
-        ) : (
-          <></>
-        )}
-      </div>
+                </div>
+                {pageIndex < pageCount - 1 && (
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (table.getCanNextPage()) {
+                          table.nextPage();
+                        }
+                      }}
+                    />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          </div>
+        </>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

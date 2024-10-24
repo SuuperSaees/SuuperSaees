@@ -35,7 +35,7 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
     briefsView === 'true' ? 'briefs' : 'services',
   );
 
-  const { services, briefs, hasTheEmailAssociatedWithStripe, handleCheckout } =
+  const { services, briefs, hasTheEmailAssociatedWithStripe, handleCheckout, briefsAreLoading, servicesAreLoading } =
     useStripeActions({
       userRole: accountRole,
     });
@@ -76,10 +76,11 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
                   hasTheEmailAssociatedWithStripe
                 }
                 handleCheckout={handleCheckout}
+                isLoading={servicesAreLoading}
               />
             </TabsContent>
             <TabsContent className="bg-transparent" value="briefs">
-              <BriefsTable activeTab={activeTab} briefs={briefs} accountRole={accountRole} />
+              <BriefsTable activeTab={activeTab} briefs={briefs} accountRole={accountRole} isLoading={briefsAreLoading} />
             </TabsContent>
           </div>
         </PageBody>

@@ -34,6 +34,7 @@ import {
 import { TabsList } from '@kit/ui/tabs';
 
 import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
+import { SkeletonTable } from '../../../../../../apps/web/components/ui/skeleton';
 import { Brief } from '../../../../../../apps/web/lib/brief.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import {
@@ -51,6 +52,7 @@ type BriefTableProps = {
   briefs: Brief.Relationships.Services.Response[];
   activeTab: string;
   accountRole: string;
+  isLoading: boolean;
 };
 
 // SERVICES TABLE
@@ -185,6 +187,7 @@ export function BriefsTable({
   activeTab,
   briefs,
   accountRole,
+  isLoading,
 }: BriefTableProps) {
   const { t } = useTranslation('briefs');
 
@@ -266,7 +269,9 @@ export function BriefsTable({
         </div>
       </div>
       <Separator />
-      {!briefs.length ? (
+      {isLoading ? (
+        <SkeletonTable columns={4} rows={7} className="mt-6" />
+      ) : !briefs.length ? (
         <div className="mt-6 flex h-full flex-col rounded-md border bg-white p-2">
           <EmptyState
             imageSrc="/images/illustrations/Illustration-cloud.svg"
@@ -282,7 +287,7 @@ export function BriefsTable({
           />
         </div>
       ) : (
-        <div className="mt-[24px] rounded-md border bg-white">
+        <div className="mt-[24px] rounded-md border bg-white px-4">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -303,7 +308,7 @@ export function BriefsTable({
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length &&
+              {table.getRowModel().rows?.length > 0 &&
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
