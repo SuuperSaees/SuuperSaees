@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Plus } from 'lucide-react';
+import { ThemedProgress } from 'node_modules/@kit/accounts/src/components/ui/progress-themed-with-settings';
 
 import {
   Accordion,
@@ -10,96 +11,15 @@ import {
 } from '@kit/ui/accordion';
 import { Button } from '@kit/ui/button';
 
-import { Progress } from '../../../../../../packages/ui/src/shadcn/progress';
+import { Task } from '~/lib/tasks.types';
+
+// import { Progress } from '../../../../../../packages/ui/src/shadcn/progress';
 import SubTask from './sub-task';
-import { ThemedProgress } from 'node_modules/@kit/accounts/src/components/ui/progress-themed-with-settings';
+import { calculateSubtaskProgress } from '~/utils/task-counter';
 
-function TaskDropdown() {
-  const tasks = [
-    {
-      name: 'Kick-off del pedido',
-      subtasks: [
-        {
-          name: 'Kick-off 1',
-          state: 'in_progress',
-          priority: 'high',
-        },
-        {
-          name: 'Kick-off 2',
-          state: 'pending',
-          priority: 'medium',
-        },
-      ],
-    },
-    {
-      name: 'Diseño del producto',
-      subtasks: [
-        {
-          name: 'Diseño inicial',
-          state: 'completed',
-          priority: 'high',
-        },
-        {
-          name: 'Revisión de diseño',
-          state: 'in_review',
-          priority: 'high',
-        },
-        {
-          name: 'Ajustes finales',
-          state: 'pending',
-          priority: 'low',
-        },
-      ],
-    },
-    {
-      name: 'Desarrollo del producto',
-      subtasks: [
-        {
-          name: 'Configuración del entorno',
-          state: 'completed',
-          priority: 'high',
-        },
-        {
-          name: 'Desarrollo del backend',
-          state: 'in_progress',
-          priority: 'high',
-        },
-        {
-          name: 'Desarrollo del frontend',
-          state: 'pending',
-          priority: 'medium',
-        },
-        {
-          name: 'Integración',
-          state: 'pending',
-          priority: 'low',
-        },
-      ],
-    },
-    {
-      name: 'Pruebas del producto',
-      subtasks: [
-        {
-          name: 'Pruebas unitarias',
-          state: 'pending',
-          priority: 'high',
-        },
-        {
-          name: 'Pruebas de integración',
-          state: 'pending',
-          priority: 'medium',
-        },
-        {
-          name: 'Pruebas de aceptación',
-          state: 'pending',
-          priority: 'high',
-        },
-      ],
-    },
-  ];
-
+function TaskDropdown({ tasks }: { tasks: Task.Type[] }) {
   return (
-    <div className="max-h-[70vh] overflow-y-auto no-scrollbar">
+    <div className="no-scrollbar max-h-[70vh] overflow-y-auto">
       <Accordion type="single" collapsible type="multiple" className="w-full">
         {tasks.map((task, index) => (
           <AccordionItem key={index} value={`item-${index}`}>
@@ -108,16 +28,16 @@ function TaskDropdown() {
                 <p className="mb-5 flex justify-start font-semibold text-gray-900">
                   {task.name}
                 </p>
-                <ThemedProgress value={60} className="w-full" />
+                <ThemedProgress value={calculateSubtaskProgress(task.subtasks ?? [])} className="w-full" />
               </div>
             </AccordionTrigger>
-            <AccordionContent className='ml-3'>
-              {task.subtasks.map((subtask, subIndex) => (
+            <AccordionContent className="ml-3">
+              {task?.subtasks?.map((subtask, subIndex) => (
                 <SubTask
                   key={subIndex}
-                  name={subtask.name}
-                  status={subtask.state}
-                  priority={subtask.priority}
+                  name={subtask.name ?? ''}
+                  status={subtask.state ?? 'pending'}
+                  priority={subtask.priority ?? 'low'}
                 />
               ))}
               <Button variant="secondary" className="mt-1 py-0 text-gray-600">

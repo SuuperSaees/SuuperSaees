@@ -12,6 +12,9 @@ import FileSection from '~/components/organization/files';
 import ActivityPage from './activity';
 import DetailsPage from './details';
 import TasksSection from './tasks';
+import { Task } from '~/lib/tasks.types';
+import { TaskCounter } from 'node_modules/@kit/accounts/src/components/ui/tasks-cantity-themed-with-settings';
+import { countIncompleteTasks } from '~/utils/task-counter';
 
 type OrderTabsProps = {
   organizationId:
@@ -23,12 +26,14 @@ type OrderTabsProps = {
     title: string;
     uuid?: string;
   }[];
+  tasks: Task.Type[];
 };
 
-export const OrderTabs = ({ organizationId, currentPath }: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, tasks }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
+
   return (
     <Tabs
       className="flex h-full flex-grow flex-col gap-6"
@@ -56,8 +61,12 @@ export const OrderTabs = ({ organizationId, currentPath }: OrderTabsProps) => {
           value="tasks" 
           activeTab={activeTab} 
           option={'tasks'}
+          className='flex items-center gap-1'
         >
           <Trans i18nKey={'orders:details.navigation.tasks'} />
+          <TaskCounter
+            taskCount={countIncompleteTasks(tasks)}
+          />
         </ThemedTabTrigger>
         <ThemedTabTrigger 
           value="files" 
@@ -79,7 +88,9 @@ export const OrderTabs = ({ organizationId, currentPath }: OrderTabsProps) => {
       </TabsContent>
       <TabsContent value="tasks">
         <div className="w-full">
-          <TasksSection />
+          <TasksSection 
+            tasks={tasks}
+          />
         </div>
       </TabsContent>
       <TabsContent value="files">

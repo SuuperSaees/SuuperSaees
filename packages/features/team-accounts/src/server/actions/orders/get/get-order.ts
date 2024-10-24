@@ -124,7 +124,8 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
           reviews(*, user:accounts(id, name, email, picture_url)), 
           files(*, user:accounts(id, name, email, picture_url)),
          assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url)),
-         followers:order_followers(client_follower:accounts(id, name, email, picture_url))
+         followers:order_followers(client_follower:accounts(id, name, email, picture_url)),
+         tasks:tasks(id, name, completed, subtasks:subtasks(id, name, completed, state, content, priority))
         `,
       )
       .eq('id', orderId)
@@ -168,6 +169,8 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       );
       proccesedData.description = description ?? '';
     }
+
+    // console.log('Order data:', proccesedData);
 
     return proccesedData as Order.Relational;
   } catch (error) {

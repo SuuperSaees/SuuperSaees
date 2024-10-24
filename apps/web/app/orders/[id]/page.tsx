@@ -46,6 +46,7 @@ async function OrderDetailsPage({
         reviews={order?.reviews ?? []}
         order={order!}
         userRole={role}
+        tasks={order?.tasks ?? []}
       >
         <OrderHeader order={order!} />
 
@@ -59,6 +60,7 @@ async function OrderDetailsPage({
                     : undefined
                 }
                 currentPath={currentPath}
+                tasks={order?.tasks ?? []}
               />
             </div>
             <AsideOrderInformation order={order!} className="hidden lg:flex" />
