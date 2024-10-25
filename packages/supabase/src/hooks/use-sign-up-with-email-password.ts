@@ -26,8 +26,6 @@ export function useSignUpWithEmailAndPassword() {
       },
     });
 
-    // console.log(response)
-
     if (response.error) {
       throw response.error.message;
     }

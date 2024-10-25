@@ -12,6 +12,6 @@ export async function GET(request: NextRequest) {
     joinTeamPath: pathsConfig.app.joinTeam,
     redirectPath: pathsConfig.app.home,
   });
-
+  console.log('url11', url);
   return NextResponse.redirect(url);
 }

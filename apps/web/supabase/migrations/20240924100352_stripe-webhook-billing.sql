@@ -1,5 +1,3 @@
-alter table "public"."subscriptions" drop constraint "subscriptions_propietary_organization_id_fkey";
-
 create table "public"."tokens" (
     "id" uuid not null default gen_random_uuid(),
     "created_at" timestamp with time zone not null default now(),
