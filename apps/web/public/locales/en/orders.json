@@ -59,6 +59,7 @@
     "navigation": {
       "details": "Details",
       "activity": "Activity",
+      "tasks": "Tasks",
       "files": "Files"
     },
     "dialog": {
@@ -88,7 +89,7 @@
   "form": {
     "completion": {
       "client": {
-        "title": "Add a client",
+        "title": "Assign a client",
         "label": "Name of the organization",
         "select": {
           "placeholder": "Select an organization"   

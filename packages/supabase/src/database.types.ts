@@ -2394,6 +2394,7 @@ export type Database = {
         | "portal_name"
         | "favicon_url"
         | "sender_name"
+        | "sender_email"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"

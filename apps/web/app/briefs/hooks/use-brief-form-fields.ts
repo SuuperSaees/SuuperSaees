@@ -2,8 +2,8 @@ import { Dispatch, SetStateAction, useState } from 'react';
 
 import { arrayMove } from '@dnd-kit/sortable';
 
-import { generateContent } from '../configs/content';
-import { generateInputs } from '../configs/inputs';
+import { useGenerateContent } from '../configs/content';
+import { useGenerateInputs } from '../configs/inputs';
 import {
   ContentTypes,
   FormField,
@@ -22,14 +22,14 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  const inputsMap = generateInputs((inputName: InputTypes) => {
+  const inputsMap = useGenerateInputs((inputName: InputTypes) => {
     addFormField(inputName);
   });
 
   // inputs of type Input: short text, paragraph, checkbox, select, dropdown, date, etc.
   const inputs: Input[] = Array.from(inputsMap.values());
 
-  const contentMap = generateContent((contentName: ContentTypes) => {
+  const contentMap = useGenerateContent((contentName: ContentTypes) => {
     addFormField(contentName);
   });
 

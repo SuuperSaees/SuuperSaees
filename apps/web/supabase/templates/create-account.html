@@ -1,0 +1,245 @@
+<!doctype html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <style>
+      body {
+        background-color: #fff;
+        margin: auto;
+        font-family: sans-serif;
+        color: #484848;
+      }
+    </style>
+  </head>
+  <div
+    style="
+      display: none;
+      overflow: hidden;
+      line-height: 1px;
+      opacity: 0;
+      max-height: 0;
+      max-width: 0;
+    "
+  >
+    Create your account - Suuper
+  </div>
+  <body>
+    <table
+      align="center"
+      width="100%"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      role="presentation"
+      style="
+        max-width: 37.5em;
+        background-color: #fff;
+        margin: auto;
+        font-family: sans-serif;
+        color: #484848;
+      "
+    >
+      <tbody>
+        <tr style="width: 100%">
+          <td>
+            <table
+              align="center"
+              width="100%"
+              class="undefined"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="
+                max-width: 535px;
+                background-color: #fff;
+                margin: auto;
+                margin-top: 36px;
+                margin-bottom: 36px;
+                margin-left: auto;
+                margin-right: auto;
+                padding-left: 1rem;
+                padding-right: 1rem;
+              "
+            >
+              <tbody>
+                <tr style="width: 100%">
+                  <td>
+                    <table
+                      align="left"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="max-width: 37.5em"
+                    >
+                      <tbody>
+                        <tr style="width: 100%">
+                          <td style="text-align: left">
+                            <img
+                            src="{{ if .Data.OrganizationSenderLogo}}{{ .Data.OrganizationSenderLogo }}{{ else }}https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png?{{ end }}"
+                            alt="Company Logo"
+                              style="
+                                max-width: 142px;
+                                height: auto;
+                                width: 100%;
+                                margin-bottom: 20px;
+                              "
+                            />
+                            <h1
+                              style="
+                                color: var(--Gray-900, #101828);
+                                font-size: 36px;
+                                font-style: normal;
+                                font-weight: 600;
+                                line-height: 44px;
+                                letter-spacing: -0.72px;
+                                margin-left: 0px;
+                                margin-right: 0px;
+                              "
+                            >
+                              Hi {{ .Email }}
+                            </h1>
+                            <p
+                              style="
+                                font-size: 14px;
+                                line-height: 24px;
+                                margin: 16px 0;
+                                color: rgb(0, 0, 0);
+                              "
+                            >
+                              We're excited to have you with us at Suuper!
+                            </p>
+                            <p
+                              style="
+                                font-size: 14px;
+                                line-height: 24px;
+                                margin: 16px 0;
+                                color: rgb(0, 0, 0);
+                              "
+                            >
+                              To get started, please confirm your email address by clicking the button below.
+                            </p>
+                            <table
+                              align="left"
+                              width="163px"
+                              border="0"
+                              cellpadding="0"
+                              cellspacing="0"
+                              role="presentation"
+                              style="
+                                text-align: center;
+                                margin-top: 32px;
+                                margin-bottom: 32px;
+                              "
+                            >
+                              <tbody>
+                                <tr>
+                                  <td>
+                                    <a
+                                      href="{{ .SiteURL }}/auth/sign-up?access-token={{ .AccessToken }}"
+                                      style="
+                                        line-height: 100%;
+                                        text-decoration: none;
+                                        display: inline-block;
+                                        max-width: 100%;
+                                        width: auto;
+                                        background-color: #1a38d7;
+                                        border-radius: 8px;
+                                        color: rgb(255, 255, 255);
+                                        font-size: 14px;
+                                        font-weight: 600;
+                                        text-align: center;
+                                        padding: 10px 16px;
+                                        border: 2px solid
+                                          rgba(255, 255, 255, 0.12);
+                                        box-shadow:
+                                          0px 0px 0px 1px rgba(16, 24, 40, 0.18)
+                                            inset,
+                                          0px -2px 0px 0px rgba(16, 24, 40, 0.05)
+                                            inset,
+                                          0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+                                        display: flex;
+                                        justify-content: center;
+                                        align-items: center;
+                                        gap: 6px;
+                                      "
+                                      target="_blank"
+                                    >
+                                      <span
+                                        style="
+                                          max-width: 100%;
+                                          display: inline-block;
+                                          line-height: 120%;
+                                          mso-padding-alt: 0px;
+                                          mso-text-raise: 9px;
+                                        "
+                                        >Create your account</span
+                                      >
+                                    </a>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <p
+                              style="
+                                color: var(--Gray-700, #344054);
+                                font-size: 14px;
+                                font-style: normal;
+                                font-weight: 400;
+                                line-height: 20px;
+                              "
+                            >
+                              If you did not sign up for this account, please disregard this email.
+                            </p>
+                            <p
+                              style="
+                                color: var(--Gray-600, #475467);
+                                font-size: 14px;
+                                font-style: normal;
+                                font-weight: 400;
+                                line-height: 20px;
+                                margin: 16px 0;
+                              "
+                            >
+                              This email was sent to {{.Email}}. If you'd rather
+                              not receive these emails, you can
+                              unsubscribe or manage your email preferences.
+                            </p>
+                            <p
+                              style="
+                                color: var(--Gray-600, #475467);
+                                font-size: 14px;
+                                font-style: normal;
+                                font-weight: 400;
+                                line-height: 20px;
+                                margin: 16px 0;
+                              "
+                            >
+                              © 2024 Suuper, soporte@suuper.co
+                            </p>
+                            <img
+                              src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png?t=2024-09-11T17%3A36%3A08.579Z"
+                              alt="Suuper Logo"
+                              style="
+                                width: 142px;
+                                height: 32px;
+                                margin-bottom: 20px;
+                              "
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

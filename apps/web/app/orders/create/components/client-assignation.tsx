@@ -114,7 +114,6 @@ export default function ClientAssignation() {
   const selectedMemberIds = selectedMembers.map((member) => member.id) ?? [];
 
   function handleFormSubmit() {
-
     form.setValue(
       'briefCompletion.order_followers',
       selectedMembers.map((member) => member.id),
@@ -139,18 +138,22 @@ export default function ClientAssignation() {
       <div>
         <SelectAction
           options={organizationOptions}
-          className="w-full bg-white"
+          className="w-full bg-transparent"
           groupName={t('dialogs.add.select.label')}
           onSelectHandler={(value: string) => {
             setSelectedOrganization(
-              clientsOrganizationsQuery?.data?.find((cOrg) => cOrg.id === value),
+              clientsOrganizationsQuery?.data?.find(
+                (cOrg) => cOrg.id === value,
+              ),
             );
             form.setValue('briefCompletion.order_followers', undefined);
             setSelectedMembers([]);
-
           }}
           customItem={(option: string) => customItem(option)}
-          isLoading={clientsOrganizationsQuery.isLoading || clientsOrganizationsQuery.isPending}
+          isLoading={
+            clientsOrganizationsQuery.isLoading ||
+            clientsOrganizationsQuery.isPending
+          }
         >
           <span className="text-sm text-gray-700">
             {t('form.completion.client.label')}
@@ -159,33 +162,36 @@ export default function ClientAssignation() {
           </span>
         </SelectAction>
       </div>
+      {selectedOrganization && (
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-semibold text-gray-700">
+            {t('form.completion.client.members.label')}
+            <span className="text-[#7F56D9]"> *</span>{' '}
+            {/* Change text-red-500 to any desired color */}
+          </span>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-semibold text-gray-700">
-          {t('form.completion.client.members.label')}
-          <span className="text-[#7F56D9]"> *</span>{' '}
-          {/* Change text-red-500 to any desired color */}
-        </span>
-
-        <CheckboxCombobox
-          className="w-full"
-          options={memberOptions}
-          defaultValues={{ order_assignations: selectedMemberIds }}
-          values={selectedMemberIds}
-          onSelect={onSelectHandler}
-          schema={membersAssignedSchema}
-          onSubmit={handleFormSubmit}
-          customItem={CustomUserItem}
-          customItemTrigger={
-            <CustomTrigger
-              members={selectedMembers}
-              onRemoveHandler={onRemoveHandler}
-            />
-          }
-          classNameTrigger="w-full h-fit"
-          isLoading={clientMembersQuery.isLoading || clientMembersQuery.isPending}
-        />
-      </div>
+          <CheckboxCombobox
+            className="w-full"
+            options={memberOptions}
+            defaultValues={{ order_assignations: selectedMemberIds }}
+            values={selectedMemberIds}
+            onSelect={onSelectHandler}
+            schema={membersAssignedSchema}
+            onSubmit={handleFormSubmit}
+            customItem={CustomUserItem}
+            customItemTrigger={
+              <CustomTrigger
+                members={selectedMembers}
+                onRemoveHandler={onRemoveHandler}
+              />
+            }
+            classNameTrigger="w-full h-fit"
+            isLoading={
+              clientMembersQuery.isLoading || clientMembersQuery.isPending
+            }
+          />
+        </div>
+      )}
     </div>
   );
 }

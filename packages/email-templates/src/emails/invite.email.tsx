@@ -206,9 +206,6 @@ export async function renderInviteEmail(props: Props) {
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         ${inviteEmailT('footer', { toEmail: props.invitedUserEmail })}
                                       </p>
-                                      <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        © 2024 Suuper, soporte@suuper.co
-                                      </p>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -235,3 +232,7 @@ export async function renderInviteEmail(props: Props) {
     throw error; // Re-lanza el error para que pueda ser manejado por el llamador si es necesario
   }
 }
+
+{/* <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
+        © 2024 Suuper, soporte@suuper.co
+</p> */}

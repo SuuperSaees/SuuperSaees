@@ -6,19 +6,21 @@ import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
 // import FormVideoUpload from '../components/video-content';
 import UploadImagePreview from '../components/upload-image-preview';
 import { AlignCenter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type ContentKey = ContentTypes;
 type ContentValue = Content;
 type ContentMap = Map<ContentKey, ContentValue>;
 // Generator function to create the content Map
-export const generateContent = (
+export const useGenerateContent = (
   action: (contentName: ContentKey) => void,
 ): ContentMap => {
+  const {t} = useTranslation('briefs')
   return new Map([
     [
       'h1',
       {
-        name: 'Title',
+        name: t('title.value'),
         icon: <ALargeSmall className="h-6 w-6" />,
         action: () => action('h1'), // Action passed dynamically,
         content: {
@@ -41,7 +43,7 @@ export const generateContent = (
     [
       'rich-text',
       {
-        name: 'Rich text',
+        name: t('richText.value'),
         icon: <AlignCenter className="h-8 w-8" />,
         action: () => action('rich-text'), // Action passed dynamically,
         content: {
@@ -66,7 +68,7 @@ export const generateContent = (
     [
       'image',
       {
-        name: 'Image',
+        name: t('uploadImage.value'),
         icon: <Image className="h-6 w-6" />,
         action: () => action('image'), // Action passed dynamically
         content: {

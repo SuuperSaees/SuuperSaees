@@ -19,6 +19,7 @@
        "minCharacters": "Se requieren al menos 2 caracteres",
        "maxCharacters": "Se permiten un máximo de 3000 caracteres"
     },
+    "search": "Buscar brief...",
     "creation": {
     "title": "Crear brief",
     "form": {
@@ -37,7 +38,11 @@
         "createSuccess": "Brief creado con éxito",
         "updateSuccess": "Brief actualizado con éxito",
         "errorCreating": "Error creando brief",
-        "errorUpdating": "Error actualizando brief"
+        "errorUpdating": "Error actualizando brief",
+        "defaultField": {
+          "label": "Título del pedido",
+          "placeholder": "Añade una descripción..."
+        }
     },
     "widgets": {
       "edit": {
@@ -51,7 +56,7 @@
       "settings": {
         "title": "Ajustes",
         "services": {
-          "title": "Servicios conenctados"
+          "title": "Servicios conectados"
         }
       }
     }
@@ -60,46 +65,61 @@
     "title": "Actualizar brief"
   },
   "singleChoice": {
+    "value": "Seleccionar",
     "title": "Título *",
     "description": "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Agregar nueva opción"
   },
   "multipleChoice": {
+    "value": "Selección múltiple",
     "title": "Título *",
     "description": "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Agregar nueva opción"
   },
   "textLarge" : {
+    "value": "Párrafo",
     "title":"Título *",
     "description":"Este es un texto de sugerencia para ayudar al usuario.",
     "descriptionHint":"Escribe una descripción..."
   },
+  "textShort": {
+    "value": "Texto corto",
+    "title": "Título *",
+    "description": "Este es un texto de sugerencia para ayudar al usuario.",
+    "placeholder": "Escribe una descripción..."
+  },
   "datePicker": {
+    "value": "Fecha",
     "title": "Título *",
     "selectTitle": "Seleccionar fecha",
     "description": "Este es un texto de sugerencia para ayudar al usuario."
   },
   "dropdown": {
+    "value": "Desplegable",
     "title": "Título *",
     "description": "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Agregar nueva opción",
     "selectAnOption": "Seleccione una opción"
   },
   "title": {
+    "value": "Título",
     "title": "Título",
     "placeholder": "Introduzca el título"
   },
   "richText": {
+    "value": "Texto enriquecido",
     "title": "Texto enriquecido",
     "placeholder": "Introduzca el texto enriquecido"
   },
   "uploadFiles" : {
+    "value": "Subir archivos",
     "title" : "Título *",
     "description" : "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Haz clic o arrastra para subir un archivo",
     "fileTypes": "SVG, PNG, JPG o GIF (max. 800x400px)"
   },
   "video": {
+    "value": "Video",
     "title": "Video",
     "uploadSuccess": "Vídeo subido con éxito",
     "uploadError": "Error al cargar el video",
@@ -116,6 +136,7 @@
     "invalidUrl": "Por favor, introduzca una URL de video de YouTube válida"
   },
   "uploadImage":{
+    "value": "Imagen",
     "placeholder": "Haz clic o arrastra para subir una imagen",
     "fileTypes": "PNG, JPG(max. 800x400px)",
     "uploadSuccess": "Imagen subido con éxito",
@@ -129,14 +150,20 @@
     "invalidFileType": "Por favor seleccione un archivo de imagen válido"
   }, 
   "empty": {
-    "agency": {
-      "title": "¡Aún no tienes ningún servicio!",
-      "description": "Comienza comprando un servicio para crear tu primer pedido."
-    },
-    "client": {
-      "title": "!Aún no te han asignado ningún servicio!",
-      "description": "Contacta a tu agencia para asignar un servicio y comenzar a crear un pedido."
-    }
+    "orderCreation": {
+      "agency": {
+        "title": "¡Aún no tienes ningún servicio!",
+        "description": "Comienza comprando un servicio para crear tu primer pedido."
+      },
+      "client": {
+        "title": "!Aún no te han asignado ningún servicio!",
+        "description": "Contacta a tu agencia para asignar un servicio y comenzar a crear un pedido."
+      }
+    }, 
+      "agency": {
+        "title": "¡Aún no tienes ningún brief creado!",
+        "description": "Comienza creando un brief haciendo clic en el botón de abajo."
+      }
   }
 }
 

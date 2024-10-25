@@ -1,0 +1,7 @@
+import { Database } from './database.types';
+
+export namespace Tokens {
+  export type Type = Database['public']['Tables']['tokens']['Row'];
+  export type Insert = Database['public']['Tables']['tokens']['Insert'];
+  export type Update = Database['public']['Tables']['tokens']['Update'];
+}

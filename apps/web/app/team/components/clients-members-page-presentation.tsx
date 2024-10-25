@@ -14,6 +14,7 @@ import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 import { useBilling } from '../../home/[account]/hooks/use-billing';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -63,7 +64,8 @@ const ClientsMembersPagePresentation = ({
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [addMemberIsAvailable, setAddMemberIsAvailable] = useState(false);
-  const { setShowUpgradeComponent, subscriptionFetchedStripe, setAccountBillingTab } = useBilling();
+  const { subscriptionFetchedStripe } = useBilling();
+  const { t } = useTranslation('team');
   const router = useRouter();
 const seatByPlans = {
   0: 1,
@@ -139,14 +141,17 @@ const seatByPlans = {
                         <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground gap-3 items-center">
                         <div className='flex mb-2'>
                         <InfoIcon size="14" strokeWidth={2} />
-                        <div className='pl-2'>Haz alcanzado el límite de miembros</div>
+                        <div className='pl-2'>
+                          {t('plan.message')}
+                        </div>
                         </div>
                         <ThemedButton
                           size={'sm'}
                           onClick={() => {
                             router.push('/home/settings?tab=billing')
                         }}
-                        > Upgrade Plan 
+                        > 
+                          {t('plan.upgradeButton')}
                         </ThemedButton>
                         </div>
 

@@ -21,7 +21,7 @@
     "active": "Active",
     "draft": "Draft",
     "title": "Services",
-    "searchServices": "Search",
+    "searchServices": "Search service...",
     "startFirstService": "Let's get started with your first service",
     "noServicesMessage": "You haven't created any service yet, add one by clicking below.",
     "step_type_of_service": "Type of Service",
