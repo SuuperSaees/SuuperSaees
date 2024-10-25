@@ -24,16 +24,18 @@ import { deleteClient } from './delete-client-server';
 const DeleteUserDialog = ({
   userId,
   queryKey,
+  organizationId,
 }: {
   userId: string;
   queryKey?: string;
+  organizationId?: string;
 }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   // Client version
   const deleteClientFn = useMutation({
-    mutationFn: async (userId: string) => await deleteClient(userId),
+    mutationFn: async (userId: string) => await deleteClient(userId, organizationId),
     onSuccess: async () => {
       toast('Success', {
         description: 'User deleted successfully',

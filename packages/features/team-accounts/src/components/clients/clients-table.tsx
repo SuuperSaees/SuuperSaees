@@ -284,10 +284,12 @@ const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Clie
     id: 'actions',
     header: t('actions'),
     enableHiding: false,
-    cell: () => {
+    cell: ({row}) => {
+      const client = row.original;
       return (
         <div className="h-18 flex items-center gap-4 self-stretch p-4">
           {/* <Pen className="h-4 w-4 text-gray-600" /> */}
+          <DeleteUserDialog organizationId={client.organization_id ?? undefined} userId={client.id} />
         </div>
       );
     },

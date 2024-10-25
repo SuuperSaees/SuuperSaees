@@ -12,6 +12,7 @@ import {
   getUserRole,
 } from '../../members/get/get-member-account';
 import { hasPermissionToReadAgencyClients } from '../../permissions/clients';
+import { Client } from '../../../../../../../../apps/web/lib/client.types';
 
 // Helper function to fetch client members based on user role (agency or client)
 type Organization = Pick<
@@ -52,12 +53,14 @@ async function fetchClientMembers(
       .from('clients')
       .select('user_client_id')
       .eq('agency_id', currentUserOrganizationId)
-      .eq('organization_client_id', clientOrganizacionId);
+      .eq('organization_client_id', clientOrganizacionId)
+      .is('deleted_on', null);
   } else if (clientRoles.includes(currentUserRole)) {
     clientsQuery = client
       .from('clients')
       .select('user_client_id')
-      .eq('organization_client_id', currentUserOrganizationId);
+      .eq('organization_client_id', currentUserOrganizationId)
+      .is('deleted_on', null);
   } else {
     throw new Error('User role is neither agency nor client.');
   }
@@ -135,7 +138,8 @@ export async function fetchAgencyClients(
   const { data: agencyClients, error: agencyClientsError } = await client
     .from('clients')
     .select()
-    .eq('agency_id', agencyId);
+    .eq('agency_id', agencyId)
+    .is('deleted_on', null);
 
   if (agencyClientsError) {
     throw new Error(
@@ -260,7 +264,8 @@ export async function fetchClientByOrgId(
     const { data: clientData, error: clientError } = await client
       .from('clients')
       .select('id, agency_id')
-      .eq('organization_client_id', clientOrganizationId);
+      .eq('organization_client_id', clientOrganizationId)
+      .is('deleted_on', null);
 
     if (clientError) {
       throw new Error(
@@ -303,6 +308,32 @@ export async function getClientsOrganizations() {
     return clientOrganizations;
   } catch (error) {
     console.error('Error fetching client organizations:', error);
+    throw error;
+  }
+}
+
+export async function fetchDeletedClients(client: SupabaseClient<Database>, agencyId: Client.Type['agency_id'], userId?: Client.Type['user_client_id']) {
+  try {
+    if (!userId) {
+      const user = await fetchCurrentUser(client);
+      userId = user.id;
+    }
+
+    const { data: notAllowedClient, error: clientError } = await client
+    .from('clients')
+    .select('user_client_id')
+    .eq('user_client_id', userId)
+    .eq('agency_id', agencyId)
+    .not('deleted_on', 'is', null)
+    .maybeSingle();
+
+    if (clientError) {
+      throw new Error(`Error fetching client: ${clientError.message}`);
+    }
+
+    return notAllowedClient;
+  } catch (error) {
+    console.error('Error fetching deleted clients:', error);
     throw error;
   }
 }

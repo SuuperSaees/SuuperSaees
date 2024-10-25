@@ -1,23 +1,17 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse, URLPattern } from 'next/server';
 
-
-
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
-
-
 import pathsConfig from '~/config/paths.config';
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
-
-
+import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
 import { handleDomainCheck } from './handlers/domain-check-handler';
-
 
 export const config = {
   matcher: [
@@ -186,6 +180,7 @@ function getPatterns() {
         );
       },
     },
+ 
     {
       pattern: new URLPattern({ pathname: '/admin/*?' }),
       handler: adminMiddleware,
@@ -257,6 +252,41 @@ function getPatterns() {
     },
     {
       pattern: new URLPattern({ pathname: '/api/v1' }),
+    },
+    {
+      // Verify if the client is eliminated from the agency
+      pattern: new URLPattern({ pathname: '/*' }),
+      handler: async (req: NextRequest, res: NextResponse) => {
+        const supabase = createMiddlewareClient(req, res);
+        const {
+          data: { user },
+        } = await getUser(req, res);
+
+        // the user is logged out, so we don't need to do anything
+        if (!user) {
+          return;
+        }
+        const userId = user.id;
+
+        // Step 2: Get the organization id fetching the domain/subdomain data
+        const { organizationId } = await getDomainByUserId(userId, true);
+
+        // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
+        const clientDeleted = await fetchDeletedClients(
+          supabase,
+          organizationId,
+          userId,
+        );
+
+        // Step 4: If the client is deleted, sign out the user
+        if (clientDeleted) {
+          await supabase.auth.signOut();
+          return NextResponse.redirect(
+            new URL(pathsConfig.auth.signIn, req.url).href,
+          );
+        }
+        return
+      },
     },
   ];
 }
