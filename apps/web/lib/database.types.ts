@@ -1965,55 +1965,82 @@ export type Database = {
           },
         ]
       }
-      tasks: {
+      subtasks: {
         Row: {
-          account_id: string
+          completed: boolean | null
+          content: string | null
           created_at: string
-          description: string | null
-          done: boolean
+          deleted_on: string | null
           id: string
-          title: string
-          updated_at: string
+          name: string | null
+          parent_task_id: string | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          state: Database["public"]["Enums"]["order_status_types"] | null
         }
         Insert: {
-          account_id: string
+          completed?: boolean | null
+          content?: string | null
           created_at?: string
-          description?: string | null
-          done?: boolean
+          deleted_on?: string | null
           id?: string
-          title: string
-          updated_at?: string
+          name?: string | null
+          parent_task_id?: string | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          state?: Database["public"]["Enums"]["order_status_types"] | null
         }
         Update: {
-          account_id?: string
+          completed?: boolean | null
+          content?: string | null
           created_at?: string
-          description?: string | null
-          done?: boolean
+          deleted_on?: string | null
           id?: string
-          title?: string
-          updated_at?: string
+          name?: string | null
+          parent_task_id?: string | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          state?: Database["public"]["Enums"]["order_status_types"] | null
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subtasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
             isOneToOne: false
-            referencedRelation: "accounts"
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      tasks: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          name: string | null
+          order_id: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "tasks_order_id_fkey"
+            columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
+            referencedRelation: "orders_v2"
+            referencedColumns: ["uuid"]
           },
         ]
       }

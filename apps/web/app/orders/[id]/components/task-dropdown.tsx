@@ -20,7 +20,7 @@ import { calculateSubtaskProgress } from '~/utils/task-counter';
 function TaskDropdown({ tasks }: { tasks: Task.Type[] }) {
   return (
     <div className="no-scrollbar max-h-[70vh] overflow-y-auto">
-      <Accordion type="single" collapsible type="multiple" className="w-full">
+      <Accordion type="single" collapsible className="w-full">
         {tasks.map((task, index) => (
           <AccordionItem key={index} value={`item-${index}`}>
             <AccordionTrigger>
@@ -35,9 +35,7 @@ function TaskDropdown({ tasks }: { tasks: Task.Type[] }) {
               {task?.subtasks?.map((subtask, subIndex) => (
                 <SubTask
                   key={subIndex}
-                  name={subtask.name ?? ''}
-                  status={subtask.state ?? 'pending'}
-                  priority={subtask.priority ?? 'low'}
+                  subtask={subtask}
                 />
               ))}
               <Button variant="secondary" className="mt-1 py-0 text-gray-600">
