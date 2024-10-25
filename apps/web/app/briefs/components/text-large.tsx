@@ -39,7 +39,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
               control={form.control}
               name={`questions.${index}.label`}
               render={({ field, fieldState }) => (
-                <FormItem>
+                <FormItem className='w-full'>
                   <FormControl>
                     <input
                       {...field}
@@ -49,7 +49,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                         handleQuestionChange(index, 'label', e.target.value)
                       }
                       placeholder={t('textLarge.title')}
-                      className="border-none bg-transparent text-sm font-medium text-gray-600 focus:outline-none"
+                      className="border-none bg-transparent text-sm font-medium text-gray-600 focus:outline-none w-full"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>

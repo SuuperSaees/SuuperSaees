@@ -58,7 +58,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                 control={form.control}
                 name={`questions.${index}.label`}
                 render={({ field, fieldState }) => (
-                  <FormItem>
+                  <FormItem className='w-full'>
                     <FormControl>
                       <input
                         readOnly
@@ -69,7 +69,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                         }
 
                         placeholder={t('datePicker.title')}
-                        className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                        className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none w-full"
                       />
                     </FormControl>
                     <FormMessage>{fieldState.error?.message}</FormMessage>
