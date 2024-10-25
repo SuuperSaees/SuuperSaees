@@ -1,21 +1,29 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import Stripe from 'stripe';
 import { Readable } from 'stream';
+import Stripe from 'stripe';
+
+
+
+import { Subscription } from '~/lib/subscriptions.types';
+
+
+
+import { getSupabaseServerComponentClient } from '../../../../../../packages/supabase/src/clients/server-component.client';
 import { createToken } from '../../../../../../packages/tokens/src/create-token';
 import { Token } from '../../../../../../packages/tokens/src/domain/token-type';
-import { getSupabaseServerComponentClient } from '../../../../../../packages/supabase/src/clients/server-component.client';
-import { Subscription } from '~/lib/subscriptions.types';
+
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const emailSender = process.env.EMAIL_SENDER ?? '';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? '';
-export const config = {
-  api: {
-    bodyParser: false, 
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false, 
+//   },
+// };
+export const runtime = 'edge';
 // Function to get the raw body of the request
 async function getRawBody(readable: Readable): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -68,19 +76,20 @@ try {
     const newSubscription: Subscription.Insert = {
       id: dataObjectCheckoutPaymentSucceeded.subscription as string,
       active: true,
-      billing_customer_id: dataObjectCheckoutPaymentSucceeded.customer as string,
+      billing_customer_id:
+        dataObjectCheckoutPaymentSucceeded.customer as string,
       billing_provider: 'stripe',
       created_at: newDate,
       currency: 'usd',
-      days_used: 7,
+      // days_used: 7,
       status: 'active',
-      token_id: tokenId,
+      // token_id: tokenId,
       updated_at: newDate,
       account_id: null,
       cancel_at_period_end: false,
       period_ends_at: null,
       period_starts_at: null,
-      propietary_organization_id: null,
+      propietary_organization_id: '',
       trial_ends_at: null,
       trial_starts_at: null,
     };
