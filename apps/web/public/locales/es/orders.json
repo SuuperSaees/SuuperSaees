@@ -14,6 +14,7 @@
   "statusLabel": "Estado",
   "assignedToLabel": "Asignado a",
   "dueDateLabel": "Fecha de vencimiento",
+  "select_date_range": "Seleccionar rango de fechas",
   "creation": {
     "title": "Crear pedido",
     "form": {
@@ -30,6 +31,11 @@
       "minDescriptionCharacters": "La descripción debe tener al menos 2 caracteres.",
       "files": "Por favor, sube al menos un archivo"
     }
+  },
+  "tasks": {
+    "emptyTasks": "No se encontraron tareas",
+    "addTask": "Agregar tarea",
+    "addSubtask": "Agregar subtarea"
   },
   "details": {
     "title": "Detalles del pedido",

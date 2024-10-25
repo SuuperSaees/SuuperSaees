@@ -1971,10 +1971,12 @@ export type Database = {
           content: string | null
           created_at: string
           deleted_on: string | null
+          end_date: string | null
           id: string
           name: string | null
           parent_task_id: string | null
           priority: Database["public"]["Enums"]["priority_types"] | null
+          start_date: string | null
           state: Database["public"]["Enums"]["order_status_types"] | null
         }
         Insert: {
@@ -1982,10 +1984,12 @@ export type Database = {
           content?: string | null
           created_at?: string
           deleted_on?: string | null
+          end_date?: string | null
           id?: string
           name?: string | null
           parent_task_id?: string | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
           state?: Database["public"]["Enums"]["order_status_types"] | null
         }
         Update: {
@@ -1993,10 +1997,12 @@ export type Database = {
           content?: string | null
           created_at?: string
           deleted_on?: string | null
+          end_date?: string | null
           id?: string
           name?: string | null
           parent_task_id?: string | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
           state?: Database["public"]["Enums"]["order_status_types"] | null
         }
         Relationships: [

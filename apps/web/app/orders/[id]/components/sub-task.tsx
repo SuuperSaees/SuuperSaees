@@ -6,20 +6,33 @@ import { DatePickerWithRange } from "./range-date-picker";
 import { generateDropdownOptions } from "../utils/generate-options-and-classnames";
 import { getPriorityClassName } from "../utils/generate-options-and-classnames";
 import { getStatusClassName } from "../utils/generate-options-and-classnames";
-import { DateRange } from '@kit/ui/calendar';
-import { addDays} from 'date-fns';
 import { Button } from "@kit/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@kit/ui/sheet";
 import { Subtask } from "~/lib/tasks.types";
-import { CalendarIcon, FlagIcon, Loader } from "lucide-react";
+import { CalendarIcon, FlagIcon, Loader, Trash } from "lucide-react";
+import { useRealTimeSubtasks } from "../hooks/use-subtasks";
+import RichTextEditor from "~/components/ui/rich-text-editor";
 
 
+function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, userRole: string}) {
 
-function SubTask({subtask} : {subtask: Subtask.Type}) {
+	const { 
+		selectedStatus, 
+		handleStatusChange, 
+		selectedPriority, 
+		handlePriorityChange, 
+		selectedPeriod, 
+		handleDateRangeChange, 
+		name, 
+		setName,
+		handleNameChange, 
+		content,
+		setContent,
+		handleContentChange,
+		handleDeleteSubtask,
+		isDeleted
+	} = useRealTimeSubtasks(initialSubtask);
 
-	const [selectedStatus, setSelectedStatus] = useState<string>(subtask.state ?? 'pending');
-	const [selectedPriority, setSelectedPriority] = useState<string>(subtask.priority ?? 'low');
-	const [selectedPeriod, setSelectedPeriod] = useState<DateRange>({ from: new Date(), to: addDays(new Date(), 3) });
 	const [isHovered, setIsHovered] = useState<boolean>(false);
 	const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
 
@@ -29,6 +42,9 @@ function SubTask({subtask} : {subtask: Subtask.Type}) {
 	const statusOptions = generateDropdownOptions(statuses, t, 'statuses');
 	const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
 
+	if (isDeleted) {
+		return null;
+	}
 
 	return (
 		<div 
@@ -36,24 +52,41 @@ function SubTask({subtask} : {subtask: Subtask.Type}) {
 			onMouseEnter={() => setIsHovered(true)} 
 			onMouseLeave={() => setIsHovered(false)}
 		>
-
-			<p className="font-semibold text-gray-900">{subtask.name}</p>
+			<div className="justify-start gap-2 flex">
+				<input
+					type="text"
+					value={name}
+					onChange={(e) => setName(e.target.value)}
+					onBlur={handleNameChange}
+					className="border-none p-2 rounded-md focus:outline-none w-full font-semibold text-gray-900"
+				/>
+				<Trash className="h-4 w-4 text-gray-500 cursor-pointer" onClick={handleDeleteSubtask} />
+			</div>
+			
 
 			{isHovered && (
 				<>
 				<Button
 					className="bg-gray-200 text-gray-500"
-					onClick={() => setIsSheetOpen(true)} // Abrir el Sheet manualmente
+					onClick={() => setIsSheetOpen(true)} 
 				>
-					Open
+					{t('openOrders')}
 				</Button>
 				</>
 			)}
 
-			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}> {/* Controla si el Sheet está abierto o cerrado */}
+			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}> 
 				<SheetContent>
 				<SheetHeader>
-					<SheetTitle>{subtask.name}</SheetTitle>
+					<SheetTitle>
+						<input
+							type="text"
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+							onBlur={handleNameChange}
+							className="border-none p-2 rounded-md focus:outline-none w-full"
+						/>
+					</SheetTitle>
 				</SheetHeader>
 				<div className="grid gap-4 py-4">
 					<div className="flex items-center justify-between">
@@ -62,7 +95,7 @@ function SubTask({subtask} : {subtask: Subtask.Type}) {
 						</span>
 						<DatePickerWithRange 
 							selectedPeriod={selectedPeriod}
-							setSelectedPeriod={setSelectedPeriod}
+							setSelectedPeriod={handleDateRangeChange}
 						/>
 					</div>
 					<div className="flex items-center text-sm justify-between">
@@ -78,9 +111,8 @@ function SubTask({subtask} : {subtask: Subtask.Type}) {
 								selectedStatus ? statusColors[selectedStatus as 'pending' | 'in_progress' | 'completed' | 'in_review'] : undefined
 							}
 							onSelectHandler={(value) => {
-								setSelectedStatus(value);
+								handleStatusChange(value);
 							}}
-							// showLabel={false}
 						/>
 					</div>
 					<div className="flex items-center text-sm justify-between">
@@ -97,12 +129,24 @@ function SubTask({subtask} : {subtask: Subtask.Type}) {
 								selectedPriority ? priorityColors[selectedPriority as 'low' | 'medium' | 'high'] : undefined
 							}
 							onSelectHandler={(value) => {
-								setSelectedPriority(value);
+								handlePriorityChange(value);
 							}}
-							// showLabel={false}
 						/>
 					</div>
-					<div dangerouslySetInnerHTML={{ __html: subtask.content ?? '' }} />
+
+					<RichTextEditor
+						content={content}
+						onChange= {
+							(value) => {
+								setContent(value);
+								handleContentChange();
+							}
+						}
+						userRole={userRole}
+						hideSubmitButton={true}
+						showToolbar={true}
+						isEditable={true}
+					/>
 				</div>
 				</SheetContent>
 			</Sheet>
@@ -112,35 +156,35 @@ function SubTask({subtask} : {subtask: Subtask.Type}) {
 
 				<SelectAction
 					options={statusOptions}
-					groupName="Status"
+					groupName={t('details.status')}
 					defaultValue={selectedStatus}
 					getitemClassName={getStatusClassName}
 					className={
 						selectedStatus ? statusColors[selectedStatus as 'pending' | 'in_progress' | 'completed' | 'in_review'] : undefined
 					}
 					onSelectHandler={(value) => {
-						setSelectedStatus(value);
+						handleStatusChange(value);
 					}}
 					showLabel={false}
 				/>
 
 				<SelectAction
 					options={priorityOptions}
-					groupName="Priority"
+					groupName={t('details.priority')}
 					defaultValue={selectedPriority}
 					getitemClassName={getPriorityClassName}
 					className={
 						selectedPriority ? priorityColors[selectedPriority as 'low' | 'medium' | 'high'] : undefined
 					}
 					onSelectHandler={(value) => {
-						setSelectedPriority(value);
+						handlePriorityChange(value);
 					}}
 					showLabel={false}
 				/>
 
 				<DatePickerWithRange 
 					selectedPeriod={selectedPeriod}
-          			setSelectedPeriod={setSelectedPeriod}
+          			setSelectedPeriod={handleDateRangeChange}
 				/>
 			</div>
 		</div>
