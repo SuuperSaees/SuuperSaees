@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
-import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -16,6 +15,7 @@ import { getServices } from '~/team-accounts/src/server/actions/services/get/get
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { BriefCreationForm } from './brief-creation-form';
+import { Button } from '@kit/ui/button';
 
 interface BriefServicesAssignationProps {
   form: UseFormReturn<BriefCreationForm>;
@@ -93,12 +93,12 @@ export default function BriefServicesAssignation({
       </div>
       <CheckboxCombobox
         customItemTrigger={
-          <ThemedButton
+          <Button
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 p-0 text-black hover:bg-gray-200 text-gray-700"
           >
             <Plus className="h-4 w-4" />
-          </ThemedButton>
+          </Button>
         }
         options={serviceOptions}
         defaultValues={{
