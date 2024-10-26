@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useState } from 'react';
 
+import { DndContext, closestCorners } from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
 import { Plus, TrashIcon, X } from 'lucide-react';
 import { ThemedProgress } from 'node_modules/@kit/accounts/src/components/ui/progress-themed-with-settings';
 import { useTranslation } from 'react-i18next';
@@ -14,10 +16,12 @@ import {
 import { Button } from '@kit/ui/button';
 import { Spinner } from '@kit/ui/spinner';
 
+import { useTaskDragAndDrop } from '~/briefs/hooks/use-task-drag-and-drop';
 import { Task } from '~/lib/tasks.types';
 import { calculateSubtaskProgress } from '~/utils/task-counter';
 
 import { useRealTimeTasks } from '../hooks/use-tasks';
+import { SortableTask } from './sortable-task';
 import SubTask from './sub-task';
 
 function TaskDropdown({
@@ -36,6 +40,12 @@ function TaskDropdown({
   const [newTaskName, setNewTaskName] = useState<string>('');
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const { t } = useTranslation('orders');
+  const {
+    handleDragStart,
+    handleDragEnd,
+    sensors,
+    taskList,
+  } = useTaskDragAndDrop(tasks);
 
   const handleAddTask = async () => {
     const newTask = {
@@ -117,79 +127,109 @@ function TaskDropdown({
         </div>
       ) : (
         <>
-          {tasks.map((task, index) => (
-            <div key={index} className="mb-4">
-              <div className="flex items-center justify-between">
-                {editingTaskId === task.id ? (
-                  <div className="flex flex-grow items-center">
-                    <input
-                      type="text"
-                      value={newTaskName}
-                      onChange={(e) => setNewTaskName(e.target.value)}
-                      onBlur={() => handleSaveTaskName(task.id)}
-                      onKeyDown={(e) => handleKeyDown(e, task.id)}
-                      className="w-full rounded-md border-none p-2 font-semibold text-gray-900 focus:outline-none"
-                      autoFocus
-                    />
-                    <X
-                      className="ml-2 h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                      onClick={() => setEditingTaskId(null)}
-                    />
+          <DndContext
+            onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
+            sensors={sensors}
+            collisionDetection={closestCorners}
+          >
+            <SortableContext items={taskList}>
+              {taskList.map((task, index) => (
+                <SortableTask key={task.id} task={task}>
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between">
+                      {editingTaskId === task.id ? (
+                        <div className="flex flex-grow items-center">
+                          <input
+                            type="text"
+                            value={newTaskName}
+                            onChange={(e) => setNewTaskName(e.target.value)}
+                            onBlur={() => handleSaveTaskName(task.id)}
+                            onKeyDown={(e) => handleKeyDown(e, task.id)}
+                            className="w-full rounded-md border-none p-2 font-semibold text-gray-900 focus:outline-none"
+                            autoFocus
+                          />
+                          <X
+                            className="ml-2 h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                            onClick={() => setEditingTaskId(null)}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="flex w-full items-center justify-between"
+                          onMouseEnter={() => setHoveredTaskId(task.id)}
+                          onMouseLeave={() => setHoveredTaskId(null)}
+                        >
+                          <p
+                            className="flex-grow font-semibold text-gray-900"
+                            onClick={() =>
+                              handleStartEditing(task.id, task.name)
+                            }
+                          >
+                            {task.name}
+                          </p>
+                          {hoveredTaskId === task.id && (
+                            <TrashIcon
+                              className="ml-2 h-4 w-4 cursor-pointer text-gray-500 hover:text-red-500"
+                              onClick={async () =>
+                                await deleteTask.mutateAsync({
+                                  taskId: task.id,
+                                })
+                              }
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value={`item-${index}`}>
+                        <AccordionTrigger>
+                          <ThemedProgress
+                            value={calculateSubtaskProgress(
+                              (task as Task.Type).subtasks ?? [],
+                            )}
+                            className="w-full"
+                          />
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <DndContext
+                            onDragEnd={handleDragEnd}
+                            onDragStart={handleDragStart}
+                            sensors={sensors}
+                            collisionDetection={closestCorners}
+                          >
+                            <SortableContext
+                              items={(task as Task.Type)?.subtasks}
+                            >
+                              {(task as Task.Type)?.subtasks?.map(
+                                (subtask, subIndex) => (
+                                  <SortableTask key={subIndex} task={subtask}>
+                                    <SubTask
+                                      key={subIndex}
+                                      initialSubtask={subtask}
+                                      userRole={userRole}
+                                    />
+                                  </SortableTask>
+                                ),
+                              )}
+                            </SortableContext>
+                          </DndContext>
+                          <Button
+                            variant="secondary"
+                            className="mt-1 py-0 text-gray-600"
+                            onClick={() => handleAddSubtask(task.id)}
+                          >
+                            <Plus className="mr-1 h-5 w-5" />
+                            <p className="text-sm">{t('tasks.addSubtask')}</p>
+                          </Button>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </div>
-                ) : (
-                  <div
-                    className="flex w-full items-center justify-between"
-                    onMouseEnter={() => setHoveredTaskId(task.id)}
-                    onMouseLeave={() => setHoveredTaskId(null)}
-                  >
-                    <p
-                      className="flex-grow font-semibold text-gray-900"
-                      onClick={() => handleStartEditing(task.id, task.name)}
-                    >
-                      {task.name}
-                    </p>
-                    {hoveredTaskId === task.id && (
-                      <>
-                        <TrashIcon
-                          className="ml-2 h-4 w-4 cursor-pointer text-gray-500 hover:text-red-500"
-                          onClick={async () =>
-                            await deleteTask.mutateAsync({ taskId: task.id })
-                          }
-                        />
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value={`item-${index}`}>
-                  <AccordionTrigger>
-                    <ThemedProgress
-                      value={calculateSubtaskProgress(task.subtasks ?? [])}
-                      className="w-full"
-                    />
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    {task?.subtasks?.map((subtask, subIndex) => (
-                      <SubTask
-                        key={subIndex}
-                        initialSubtask={subtask}
-                        userRole={userRole}
-                      />
-                    ))}
-                    <Button
-                      variant="secondary"
-                      className="mt-1 py-0 text-gray-600"
-                      onClick={() => handleAddSubtask(task.id)}
-                    >
-                      <Plus className="mr-1 h-5 w-5" />
-                      <p className="text-sm">{t('tasks.addSubtask')}</p>
-                    </Button>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          ))}
+                </SortableTask>
+              ))}
+            </SortableContext>
+          </DndContext>
           <Button
             variant="secondary"
             className="mt-4 py-0 text-gray-600"
