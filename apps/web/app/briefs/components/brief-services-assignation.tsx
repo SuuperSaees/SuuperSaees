@@ -95,9 +95,9 @@ export default function BriefServicesAssignation({
         customItemTrigger={
           <ThemedButton
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 p-0 text-black hover:bg-gray-200"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 p-0 text-black hover:bg-gray-200 text-gray-700"
           >
-            <Plus className="h-4 w-4 text-gray-700" />
+            <Plus className="h-4 w-4" />
           </ThemedButton>
         }
         options={serviceOptions}
