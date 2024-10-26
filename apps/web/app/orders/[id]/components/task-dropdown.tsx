@@ -16,7 +16,7 @@ import {
 import { Button } from '@kit/ui/button';
 import { Spinner } from '@kit/ui/spinner';
 
-import { useTaskDragAndDrop } from '~/briefs/hooks/use-task-drag-and-drop';
+import { useTaskDragAndDrop } from '~/orders/[id]/hooks/use-task-drag-and-drop';
 import { Task } from '~/lib/tasks.types';
 import { calculateSubtaskProgress } from '~/utils/task-counter';
 
