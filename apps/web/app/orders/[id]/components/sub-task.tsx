@@ -60,7 +60,6 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 					onBlur={handleNameChange}
 					className="border-none p-2 rounded-md focus:outline-none w-full font-semibold text-gray-900"
 				/>
-				<Trash className="h-4 w-4 text-gray-500 cursor-pointer" onClick={handleDeleteSubtask} />
 			</div>
 			
 
@@ -111,7 +110,7 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 								selectedStatus ? statusColors[selectedStatus as 'pending' | 'in_progress' | 'completed' | 'in_review'] : undefined
 							}
 							onSelectHandler={(value) => {
-								handleStatusChange(value);
+								handleStatusChange(value).catch((error) => console.error(error));
 							}}
 						/>
 					</div>
@@ -129,7 +128,7 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 								selectedPriority ? priorityColors[selectedPriority as 'low' | 'medium' | 'high'] : undefined
 							}
 							onSelectHandler={(value) => {
-								handlePriorityChange(value);
+								handlePriorityChange(value).catch((error) => console.error(error));
 							}}
 						/>
 					</div>
@@ -139,9 +138,11 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 						onChange= {
 							(value) => {
 								setContent(value);
-								handleContentChange();
 							}
 						}
+						onBlur={() => {
+							handleContentChange().catch((error) => console.error(error));
+						}}
 						userRole={userRole}
 						hideSubmitButton={true}
 						showToolbar={true}
@@ -151,42 +152,48 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 				</SheetContent>
 			</Sheet>
 
+			<div className="flex gap-0 items-center">
+				<div className="flex">
+					<SelectAction
+						options={statusOptions}
+						groupName={t('details.status')}
+						defaultValue={selectedStatus}
+						getitemClassName={getStatusClassName}
+						className={
+							selectedStatus ? statusColors[selectedStatus as 'pending' | 'in_progress' | 'completed' | 'in_review'] : undefined
+						}
+						onSelectHandler={(value) => {
+							handleStatusChange(value).catch((error) => console.error(error));
+						}}
+						showLabel={false}
+					/>
 
-			<div className="flex">
+					<SelectAction
+						options={priorityOptions}
+						groupName={t('details.priority')}
+						defaultValue={selectedPriority}
+						getitemClassName={getPriorityClassName}
+						className={
+							selectedPriority ? priorityColors[selectedPriority as 'low' | 'medium' | 'high'] : undefined
+						}
+						onSelectHandler={(value) => {
+							handlePriorityChange(value).catch((error) => console.error(error));
+						}}
+						showLabel={false}
+					/>
 
-				<SelectAction
-					options={statusOptions}
-					groupName={t('details.status')}
-					defaultValue={selectedStatus}
-					getitemClassName={getStatusClassName}
-					className={
-						selectedStatus ? statusColors[selectedStatus as 'pending' | 'in_progress' | 'completed' | 'in_review'] : undefined
-					}
-					onSelectHandler={(value) => {
-						handleStatusChange(value);
-					}}
-					showLabel={false}
-				/>
-
-				<SelectAction
-					options={priorityOptions}
-					groupName={t('details.priority')}
-					defaultValue={selectedPriority}
-					getitemClassName={getPriorityClassName}
-					className={
-						selectedPriority ? priorityColors[selectedPriority as 'low' | 'medium' | 'high'] : undefined
-					}
-					onSelectHandler={(value) => {
-						handlePriorityChange(value);
-					}}
-					showLabel={false}
-				/>
-
-				<DatePickerWithRange 
-					selectedPeriod={selectedPeriod}
-          			setSelectedPeriod={handleDateRangeChange}
-				/>
+					<DatePickerWithRange 
+						selectedPeriod={selectedPeriod}
+						setSelectedPeriod={handleDateRangeChange}
+					/>
+				</div>
+				{isHovered && (
+				<Trash className="h-4 w-4 text-gray-500 cursor-pointer hover:text-red-500" onClick={handleDeleteSubtask} />
+				)}
 			</div>
+
+
+			
 		</div>
 	);
 }

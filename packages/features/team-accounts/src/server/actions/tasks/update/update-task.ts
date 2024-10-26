@@ -1,14 +1,15 @@
+
 'use server';
 
-import { Task, Subtask } from '../../../../../../../../apps/web/lib/tasks.types';
+import { Subtask } from '../../../../../../../../apps/web/lib/tasks.types';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
 export const updateTask = async (
-    task: Task.Insert,
+    taskId: string,
+    taskName: string,
 ) => {
     try {
-        const { subtasks, ...taskWithoutSubtasks } = task;
         const client = getSupabaseServerComponentClient();
         const { error: userError } = await client.auth.getUser();
         if (userError) throw new Error(userError.message);
@@ -16,17 +17,10 @@ export const updateTask = async (
         const { data: taskData, error: taskDataError } = await client
             .from('tasks')
             .update(
-                taskWithoutSubtasks
+                { name: taskName }
             )
-            .single();
+            .eq('id', taskId)
         if (taskDataError) throw new Error(taskDataError.message);
-
-        if (subtasks && subtasks.length > 0) {
-            for (const subtask of subtasks) {
-                const updatedSubtask = await updateSubtask(subtask);
-                if (!updatedSubtask) throw new Error('Error updating subtask');
-            }
-        }
 
         return taskData;
         
@@ -35,7 +29,8 @@ export const updateTask = async (
     }
 }
 
-export const updateSubtask = async (
+export const updateSubtaskById = async (
+    subtaskId: string,
     subtask: Subtask.Insert,
 ) => {
     try {
@@ -48,7 +43,7 @@ export const updateSubtask = async (
             .update(
                 subtask
             )
-            .single();
+            .eq('id', subtaskId);
         if (taskDataError) throw new Error(taskDataError.message);
 
         return subtaskData;

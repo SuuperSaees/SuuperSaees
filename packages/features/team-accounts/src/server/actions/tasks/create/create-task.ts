@@ -4,7 +4,7 @@ import { Task, Subtask } from '../../../../../../../../apps/web/lib/tasks.types'
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
-export const createTask = async (
+export const createNewTask = async (
     task: Task.Insert,
 ) => {
     try {
@@ -28,7 +28,7 @@ export const createTask = async (
     }
 }
 
-export const createSubtask = async (
+export const createNewSubtask = async (
     subtask: Subtask.Insert,
 ) => {
     try {

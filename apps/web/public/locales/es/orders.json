@@ -35,7 +35,9 @@
   "tasks": {
     "emptyTasks": "No se encontraron tareas",
     "addTask": "Agregar tarea",
-    "addSubtask": "Agregar subtarea"
+    "addSubtask": "Agregar subtarea",
+    "newTask": "Nueva tarea",
+    "newSubtask": "Nueva subtarea"
   },
   "details": {
     "title": "Detalles del pedido",

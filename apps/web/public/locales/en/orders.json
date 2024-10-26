@@ -35,7 +35,9 @@
   "tasks": {
     "emptyTasks": "No tasks found",
     "addTask": "Add task",
-    "addSubtask": "Add subtask"
+    "addSubtask": "Add subtask",
+    "newTask": "New task",
+    "newSubtask": "New subtask"
   },
   "details": {
     "title": "Order details",

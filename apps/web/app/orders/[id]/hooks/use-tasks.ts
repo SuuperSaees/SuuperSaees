@@ -3,15 +3,23 @@ import { useEffect, useState } from 'react';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { Subtask, Task } from '~/lib/tasks.types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createNewSubtask, createNewTask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
+import { toast } from 'sonner';
+import { updateTask } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { deleteTaskById } from '~/team-accounts/src/server/actions/tasks/delete/delete-task';
+import { getTasks } from '~/team-accounts/src/server/actions/tasks/get/get-tasks';
 
-export const useRealTimeTasks = () => {
+export const useRealTimeTasks = (orderId: string) => {
   const supabase = useSupabase();
   const [tasks, setTasks] = useState<Task.Type[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     // Handler for task changes
-    const handleTaskChange = (payload: any) => {
+    const handleTaskChange = (payload: { eventType: string; new: Task.Type; old: Task.Type }) => {
       const { eventType, new: newTask, old: oldTask } = payload;
 
       if (eventType === 'INSERT') {
@@ -39,7 +47,7 @@ export const useRealTimeTasks = () => {
     };
 
     // Handler for subtask changes
-    const handleSubtaskChange = (payload: any) => {
+    const handleSubtaskChange = (payload: { eventType: string; new: Subtask.Type; old: Subtask.Type }) => {
       const { eventType, new: newSubtask, old: oldSubtask } = payload;
 
       setTasks((prevTasks) => {
@@ -47,9 +55,9 @@ export const useRealTimeTasks = () => {
           // Only update the task that owns this subtask
           if (
             task.id ===
-            (newSubtask?.parent_task_id || oldSubtask?.parent_task_id)
+            (newSubtask?.parent_task_id ?? oldSubtask?.parent_task_id)
           ) {
-            const updatedSubtasks = [...(task.subtasks || [])];
+            const updatedSubtasks = [...(task.subtasks ?? [])];
 
             if (eventType === 'INSERT') {
               updatedSubtasks.push(newSubtask);
@@ -96,93 +104,103 @@ export const useRealTimeTasks = () => {
 
     // Initial fetch of tasks with their subtasks
     const fetchInitialData = async () => {
-      setLoading(true);
-      try {
-        const { data: tasksData, error: tasksError } = await supabase
-          .from('tasks')
-          .select(
-            `
-                        *,
-                        subtasks (*)
-                    `,
-          )
-          .is('deleted_on', null);
-
-        if (tasksError) throw tasksError;
-        setTasks(tasksData || []);
-      } catch (error) {
-        console.error('Error fetching initial data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInitialData().catch((error) => console.error(error));
+        setLoading(true);
+        try {
+          const tasksData = await getTasks(orderId); 
+          setTasks(tasksData ?? []);
+        } catch (error) {
+          console.error('Error fetching initial data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchInitialData().catch((error) => console.error(error));
 
     return () => {
-      channel.unsubscribe();
+      channel.unsubscribe().catch((error) => console.error(error));
     };
   }, []);
 
-  const createTask = async (newTask: Omit<Task.Type, 'id'>) => {
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([newTask])
-      .select('*');
+  const createTask = useMutation({
+    mutationFn: ({
+      newTask,
+    }: {
+      newTask: Omit<Task.Type, 'id'>;
+    }) => createNewTask(newTask),
 
-    if (error) {
-      console.error('Error creating task:', error);
-      return;
-    }
-  };
+    onSuccess: async () => {
+      toast.success('Successfully created new task');
 
-  const createSubtask = async (newSubtask: Omit<Subtask.Type, 'id'>) => {
-    const { data, error } = await supabase
-      .from('subtasks')
-      .insert([newSubtask])
-      .select('*');
+      await queryClient.invalidateQueries({
+        queryKey: ['tasks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error creating new task');
+    },
+  });
 
-    if (error) {
-      console.error('Error creating subtask:', error);
-      return;
-    }
-  };
+  const createSubtask = useMutation({
+    mutationFn: ({
+        newSubtask,
+    }: {
+        newSubtask: Omit<Subtask.Type, 'id'>;
+    }) => createNewSubtask(newSubtask),
 
-  const updateTaskName = async (taskId: string, newName: string) => {
-    const { error } = await supabase
-      .from('tasks')
-      .update({ name: newName })
-      .eq('id', taskId);
+    onSuccess: async () => {
+      toast.success('Successfully created new subtask');
 
-    if (error) {
-      console.error('Error updating task name:', error);
-    }
-  };
+      await queryClient.invalidateQueries({
+        queryKey: ['subtasks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error creating new subtask');
+    },
+  });
 
-  const deleteTask = async (taskId: string) => {
-    const { error } = await supabase
-      .from('tasks')
-      .update({
-        deleted_on: new Date().toISOString(),
-      })
-      .eq('id', taskId);
+  const updateTaskName = useMutation({
+    mutationFn:(
+        { 
+            taskId, 
+            newName 
+        }: {
+            taskId: string;
+            newName: string;
+        }
+    ) => updateTask(taskId, newName),
+    onSuccess: async () => {
+      toast.success('Successfully updated task name');
 
-    if (error) {
-      console.error('Error deleting task:', error);
-      return;
-    }
+      await queryClient.invalidateQueries({
+        queryKey: ['tasks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error updating task name');
+    },
+  });
 
-    const { error: subtasksError } = await supabase
-      .from('subtasks')
-      .update({
-        deleted_on: new Date().toISOString(),
-      })
-      .eq('parent_task_id', taskId);
+  const deleteTask = useMutation({
+    mutationFn:(
+        { 
+            taskId, 
+        }: {
+            taskId: string;
+        }
+    ) => deleteTaskById(taskId),
+    onSuccess: async () => {
+      toast.success('Successfully deleted task');
 
-    if (subtasksError) {
-      console.error('Error deleting subtasks:', subtasksError);
-    }
-  };
+      await queryClient.invalidateQueries({
+        queryKey: ['tasks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error deleting');
+    },
+  });
 
   return {
     tasks,

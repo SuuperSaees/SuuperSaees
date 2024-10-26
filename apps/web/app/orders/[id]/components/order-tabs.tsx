@@ -34,7 +34,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole }: OrderTabsPr
     'activity',
   );
 
-  const { tasks } = useRealTimeTasks();
+  const { tasks } = useRealTimeTasks(currentPath[currentPath.length - 1]?.uuid ?? '');
 
   return (
     <Tabs

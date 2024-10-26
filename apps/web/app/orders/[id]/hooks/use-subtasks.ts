@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { DateRange } from '@kit/ui/calendar';
 
 import { Subtask } from '~/lib/tasks.types';
+import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 
 type SubtaskType = Subtask.Type;
 
@@ -24,8 +28,14 @@ export const useRealTimeSubtasks = (initialSubtask: SubtaskType) => {
     to: new Date(subtask.end_date ?? Date.now()),
   });
 
+  const queryClient = useQueryClient();
+
   useEffect(() => {
-    const handleSubtaskChange = (payload: any) => {
+    const handleSubtaskChange = (payload: {
+      eventType: string;
+      new: SubtaskType;
+      old: SubtaskType;
+    }) => {
       const { eventType, new: newSubtask, old: oldSubtask } = payload;
 
       if (eventType === 'UPDATE' && newSubtask.id === subtask.id) {
@@ -49,7 +59,7 @@ export const useRealTimeSubtasks = (initialSubtask: SubtaskType) => {
       .subscribe();
 
     return () => {
-      channel.unsubscribe();
+      channel.unsubscribe().catch((error) => console.error(error));
     };
   }, [subtask.id]);
 
@@ -59,110 +69,71 @@ export const useRealTimeSubtasks = (initialSubtask: SubtaskType) => {
     }
   }, [subtask.deleted_on]);
 
-  const updateSubtask = async (updates: Partial<SubtaskType>) => {
-    if (updates.state === 'completed') {
-      updates.completed = true;
-    } else {
-      updates.completed = false;
-    }
+  const updateSubtask = useMutation({
+    mutationFn: async (updates: Partial<SubtaskType>) =>
+      updateSubtaskById(subtask.id, updates),
+    onSuccess: async () => {
+      toast.success('Successfully updated task');
+      await queryClient.invalidateQueries({
+        queryKey: ['subtasks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Failed to update task name');
+    },
+  });
 
-    const { data, error } = await supabase
-      .from('subtasks')
-      .update(updates)
-      .eq('id', subtask.id)
-      .select('*');
-
-    if (error) {
-      console.error('Error updating subtask:', error);
-      return;
-    }
-    if (data && data.length > 0) {
-      setSubtask((prev) => ({ ...prev, ...data[0] }));
-    } else {
-      console.warn('No data returned on update for subtask');
-    }
-  };
-
-  const createSubtask = async (newSubtask: Omit<SubtaskType, 'id'>) => {
-    const { data, error } = await supabase
-      .from('subtasks')
-      .insert([newSubtask])
-      .select('*');
-
-    if (error) {
-      console.error('Error creating subtask:', error);
-      return;
-    }
-    if (data && data.length > 0) {
-      setSubtask((prev) => ({ ...prev, ...data[0] }));
-    } else {
-      console.warn('No data returned on create for subtask');
-    }
-  };
-
-  const handleStatusChange = (value: string) => {
+  const handleStatusChange = async (value: string) => {
     if (
       ['completed', 'in_progress', 'in_review', 'pending', 'annulled'].includes(
         value,
       )
     ) {
       setSelectedStatus(value);
-      updateSubtask({
+      await updateSubtask.mutateAsync({
         state: value as
           | 'completed'
           | 'in_progress'
           | 'in_review'
           | 'pending'
           | 'annulled',
-      }).catch((error) => {
-        console.error('Error updating subtask status:', error);
+        completed: value === 'completed' ? true : false,
       });
     }
   };
 
-  const handlePriorityChange = (value: string) => {
+  const handlePriorityChange = async (value: string) => {
     if (['high', 'medium', 'low'].includes(value)) {
       setSelectedPriority(value);
-      updateSubtask({ priority: value as 'high' | 'medium' | 'low' }).catch(
-        (error) => {
-          console.error('Error updating subtask priority:', error);
-        },
-      );
+      await updateSubtask.mutateAsync({
+        priority: value as 'high' | 'medium' | 'low',
+      });
     }
   };
 
-  const handleNameChange = () => {
-    updateSubtask({ name }).catch((error) => {
-      console.error('Error updating subtask name:', error);
-    });
+  const handleNameChange = async () => {
+    await updateSubtask.mutateAsync({ name });
   };
 
-  const handleContentChange = () => {
-    updateSubtask({ content }).catch((error) => {
-      console.error('Error updating subtask content:', error);
-    });
+  const handleContentChange = async () => {
+    await updateSubtask.mutateAsync({ content });
   };
 
-  const handleDateRangeChange = (newPeriod: DateRange) => {
+  const handleDateRangeChange = async (newPeriod: DateRange) => {
     setSelectedPeriod(newPeriod);
-    updateSubtask({
-      start_date: newPeriod?.from ? newPeriod?.from.toDateString() : null,
-      end_date: newPeriod?.to ? newPeriod?.to.toDateString() : null,
-    }).catch((error) => {
-      console.error('Error updating subtask date range:', error);
+    await updateSubtask.mutateAsync({
+      start_date: newPeriod?.from ? newPeriod?.from.toISOString() : null,
+      end_date: newPeriod?.to ? newPeriod?.to.toISOString() : null,
     });
   };
 
-  const handleDeleteSubtask = () => {
-    updateSubtask({ deleted_on: new Date().toISOString() }).catch((error) => {
-      console.error('Error deleting subtask:', error);
-    });
+  const handleDeleteSubtask = async () => {
+    await updateSubtask.mutateAsync({ deleted_on: new Date().toISOString() });
   };
 
   return {
     subtask,
     updateSubtask,
-    createSubtask,
     selectedStatus,
     setSelectedStatus,
     selectedPriority,
