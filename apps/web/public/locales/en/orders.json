@@ -14,6 +14,7 @@
   "statusLabel": "Status",
   "assignedToLabel": "Assigned to",
   "dueDateLabel": "Due date",
+  "select_date_range": "Select date range",
   "creation": {
     "title": "Create order",
     "form": {
@@ -30,6 +31,13 @@
       "minDescriptionCharacters": "Description must be at least 2 characters.",
       "files": "Please upload at least one file."
     }
+  },
+  "tasks": {
+    "emptyTasks": "No tasks found",
+    "addTask": "Add task",
+    "addSubtask": "Add subtask",
+    "newTask": "New task",
+    "newSubtask": "New subtask"
   },
   "details": {
     "title": "Order details",

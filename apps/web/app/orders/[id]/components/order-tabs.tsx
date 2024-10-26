@@ -12,9 +12,9 @@ import FileSection from '~/components/organization/files';
 import ActivityPage from './activity';
 import DetailsPage from './details';
 import TasksSection from './tasks';
-import { Task } from '~/lib/tasks.types';
 import { TaskCounter } from 'node_modules/@kit/accounts/src/components/ui/tasks-cantity-themed-with-settings';
 import { countIncompleteTasks } from '~/utils/task-counter';
+import { useRealTimeTasks } from '../hooks/use-tasks';
 
 type OrderTabsProps = {
   organizationId:
@@ -26,13 +26,15 @@ type OrderTabsProps = {
     title: string;
     uuid?: string;
   }[];
-  tasks: Task.Type[];
+  userRole: string;
 };
 
-export const OrderTabs = ({ organizationId, currentPath, tasks }: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, userRole }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
+
+  const { tasks } = useRealTimeTasks(currentPath[currentPath.length - 1]?.uuid ?? '');
 
   return (
     <Tabs
@@ -89,7 +91,8 @@ export const OrderTabs = ({ organizationId, currentPath, tasks }: OrderTabsProps
       <TabsContent value="tasks">
         <div className="w-full">
           <TasksSection 
-            tasks={tasks}
+            userRole={userRole}
+            orderId={currentPath ? currentPath[currentPath.length - 1]?.uuid ?? '' : ''}
           />
         </div>
       </TabsContent>

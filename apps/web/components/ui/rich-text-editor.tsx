@@ -140,6 +140,7 @@ interface RichTextEditorProps {
   onComplete?: (richText: string) => void | Promise<void>;
   content?: string;
   onChange?: (richText: string) => void;
+  onBlur?: () => void;
   uploadFileIsExternal?: boolean;
   toggleExternalUpload?: () => void;
   userRole: string;
@@ -159,6 +160,7 @@ const RichTextEditor = ({
   content,
   onComplete,
   onChange,
+  onBlur,
   uploadFileIsExternal,
   toggleExternalUpload,
   userRole,
@@ -311,6 +313,9 @@ const RichTextEditor = ({
         onChange(editor.getHTML()); 
       }
     },
+    onBlur: () => {
+      onBlur?.();
+    }
   }, );
   const sendContent = useCallback(() => {
     void (async () => {

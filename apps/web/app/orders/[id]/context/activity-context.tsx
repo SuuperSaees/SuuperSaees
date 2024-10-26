@@ -20,7 +20,6 @@ import { Message as ServerMessage } from '~/lib/message.types';
 import { Order } from '~/lib/order.types';
 import { Review as ServerReview } from '~/lib/review.types';
 import { User as ServerUser } from '~/lib/user.types';
-import { Task as ServerTask } from '~/lib/tasks.types';
 
 import useInternalMessaging from '../hooks/use-messages';
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
@@ -91,8 +90,6 @@ interface ActivityContextType {
   order: Order.Type;
   userRole: string;
   writeMessage: (message: string) => Promise<ServerMessage.Type>;
-  tasks: ServerTask.Type[];
-  setTasks: React.Dispatch<React.SetStateAction<ServerTask.Type[]>>;
 }
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -113,7 +110,6 @@ export const ActivityProvider = ({
   files: serverFiles,
   order: serverOrder,
   userRole,
-  tasks: serverTasks,
 }: {
   children: ReactNode;
   activities: Activity[];
@@ -122,14 +118,12 @@ export const ActivityProvider = ({
   files: File[];
   order: Order.Type;
   userRole: string;
-  tasks: ServerTask.Type[];
 }) => {
   const [order, setOrder] = useState<Order.Type>(serverOrder);
   const [messages, setMessages] = useState<Message[]>(serverMessages);
   const [activities, setActivities] = useState<Activity[]>(serverActivities);
   const [reviews, setReviews] = useState<Review[]>(serverReviews);
   const [files, setFiles] = useState<File[]>(serverFiles);
-  const [tasks, setTasks] = useState<ServerTask.Type[]>(serverTasks);
   const { getInternalMessagingEnabled } = useInternalMessaging();
   const writeMessage = async (message: string) => {
     try {
@@ -246,8 +240,6 @@ export const ActivityProvider = ({
         order,
         userRole,
         writeMessage,
-        tasks,
-        setTasks,
       }}
     >
       {children}

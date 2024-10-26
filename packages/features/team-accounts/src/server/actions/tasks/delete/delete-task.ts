@@ -1,8 +1,11 @@
+'use server';
+
+
 import { getSupabaseServerComponentClient } from "@kit/supabase/server-component-client";
 
 
 
-export const deleteTask = async (
+export const deleteTaskById = async (
     taskId: string
 ) => {
     try {  
@@ -19,6 +22,17 @@ export const deleteTask = async (
       if (error) {
         throw new Error(error.message);
       }
+
+      const { error: subtasksError } = await client
+      .from('subtasks')
+      .update({
+        deleted_on: new Date().toISOString(),
+      })
+      .eq('parent_task_id', taskId);
+
+    if (subtasksError) {
+      console.error('Error deleting subtasks:', subtasksError);
+    }
     } catch (error) {
       console.error('Error deleting the task:', error);
       throw error;

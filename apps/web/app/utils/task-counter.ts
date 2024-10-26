@@ -4,7 +4,7 @@ export const countIncompleteTasks = (tasks: Task.Type[]) => {
   let count = 0;
 
   tasks.forEach((task) => {
-    if (!task.completed) {
+    if (!task.completed && task.deleted_on === null) {
       count++;
     }
   });

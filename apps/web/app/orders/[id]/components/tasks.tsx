@@ -1,13 +1,18 @@
-import { Task } from "~/lib/tasks.types";
-import TaskDropdown from "./task-dropdown";
+import { useRealTimeTasks } from '../hooks/use-tasks';
+import TaskDropdown from './task-dropdown';
 
-const TasksSection = (
-  { tasks }: { tasks: Task.Type[] }
-) => {
+const TasksSection = ({
+  userRole,
+  orderId,
+}: {
+  userRole: string;
+  orderId: string;
+}) => {
+  const { tasks } = useRealTimeTasks(orderId);
 
   return (
     <div className="h-screen max-h-screen overflow-y-auto">
-      <TaskDropdown  tasks={tasks}/>
+      <TaskDropdown tasks={tasks} userRole={userRole} orderId={orderId} />
     </div>
   );
 };
