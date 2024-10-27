@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
     };
     return NextResponse.json(errorResponse, { status: 400 });
   }
-  console.log('process.env.EMAIL_HOST', process.env.EMAIL_HOST);
   // Configure the transporter
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const transporter = nodemailer.createTransport({

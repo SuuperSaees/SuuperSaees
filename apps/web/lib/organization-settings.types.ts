@@ -34,5 +34,6 @@ export namespace OrganizationSettings {
     default_sender_logo:
       'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png',
     default_sender_color: '#1A38D7',
+    default_from_sender_identity: 'Ana de Suuper <samuel@suuper.co>',
   };
 }

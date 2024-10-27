@@ -4,6 +4,9 @@ import 'server-only';
 
 import { type EmailOtpType, SupabaseClient } from '@supabase/supabase-js';
 
+
+
+import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
 
 /**
@@ -38,10 +41,17 @@ class AuthCallbackService {
     },
   ): Promise<URL> {
     // log out the user if any, before starting the new session
-    await logOutUser(this.client);
-
     const url = new URL(request.url);
     const searchParams = url.searchParams;
+    const token_hash_session = searchParams.get('token_hash_session');
+    const { data: currentSession } = await this.client.auth.getSession();
+    const currentSessionId = decodeToken(
+      currentSession?.session?.access_token ?? '',
+    )?.session_id;
+
+    if (token_hash_session !== currentSessionId) {
+      await logOutUser(this.client);
+    }
 
     const host = request.headers.get('host');
 
@@ -54,7 +64,6 @@ class AuthCallbackService {
     url.pathname = params.redirectPath;
 
     const token_hash = searchParams.get('token_hash');
-    const token_hash_session = searchParams.get('token_hash_session');
     const type = searchParams.get('type') as EmailOtpType | null;
     const callbackParam = searchParams.get('callback');
 
@@ -128,14 +137,12 @@ class AuthCallbackService {
       if (error) {
         console.error('Error verifying token hash session', error);
       }
-      console.log('data', data);
       if (data) {
         // set session with the user data
         const { error } = await this.client.auth.setSession({
           access_token: data.access_token,
           refresh_token: data.refresh_token,
         });
-
         if (!error) {
           return url;
         }

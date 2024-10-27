@@ -58,8 +58,10 @@ const createClientUserAccount = async (
     const userData = await fetchCurrentUser(client);
     const userId = userData?.id;
     if (!userId) throw new Error('No user id provided');
-    const { domain: baseUrl, organizationId } = await getDomainByUserId(userId, true);
-
+    const { domain: baseUrl, organizationId } = await getDomainByUserId(
+      userId,
+      true,
+    );
     const organizationSettings = await getOrganizationSettings();
 
     // Step 1: Pre-authentication of the user
@@ -134,7 +136,7 @@ const createClientUserAccount = async (
     const providerToken = 'supabase';
     const sessionId = decodeToken(accessToken, 'base64')?.session_id as string;
     const callbackUrl = `${baseUrl}set-password`;
-    // Step 4: Save the session in the database
+    // Step 4: Save the token in the database
     const token: Tokens.Insert = {
       id: sessionId,
       id_token_provider: sessionId,
@@ -162,7 +164,7 @@ const createClientUserAccount = async (
       sessionId,
       callbackUrl,
       organizationName,
-      organizationId
+      organizationId,
     );
     // Step 6: Return the client organization user
     return clientOrganizationUser;
@@ -270,7 +272,7 @@ export const createClient = async (clientData: CreateClient) => {
 
     return client;
   } catch (error) {
-    console.error('Error creating the client v1:', error);
+    console.error('Error creating the client:', error);
     throw error;
   }
 };

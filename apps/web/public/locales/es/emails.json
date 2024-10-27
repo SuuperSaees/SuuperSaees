@@ -71,6 +71,7 @@
     "thanks": "Gracias,",
     "team": "El equipo",
     "activateAccount": "Activar cuenta",
-    "at": "de"
+    "at": "de",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
   }
 }

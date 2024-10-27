@@ -1,5 +1,6 @@
 import { getEmailTranslations } from '@kit/mailers';
 
+
 export const getClientConfirmEmailTemplate = (
   toEmail: string,
   baseUrl: string,
@@ -208,6 +209,25 @@ export const getClientConfirmEmailTemplate = (
                 </tr>
               </tbody>
             </table>
+            <table
+                                align="left"
+                                width="100%"
+                                border="0"
+                                cellPadding="0"
+                                cellSpacing="0"
+                                role="presentation"
+                                style="max-width:37.5em"
+                              >
+                                <tbody>
+                                  <tr style="width:100%">
+                                    <td style="text-align: left;">
+                                      <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
+                                        ${t('footer', { toEmail })}
+                                      </p>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
           </td>
         </tr>
       </tbody>

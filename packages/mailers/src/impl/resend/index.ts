@@ -1,5 +1,4 @@
-import 'server-only';
-
+// import 'server-only';
 import { z } from 'zod';
 
 import { Mailer } from '../../mailer';

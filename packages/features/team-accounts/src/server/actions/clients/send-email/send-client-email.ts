@@ -2,9 +2,12 @@
 
 import { getMailer } from '@kit/mailers';
 
+
+
 import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { getFormSendIdentity } from '../../orders/utils/get-form-send-identity';
 import { getClientConfirmEmailTemplate } from './utils/client-confirm-email-template';
+
 
 export const sendClientConfirmEmail = async (
   baseUrl: string,
