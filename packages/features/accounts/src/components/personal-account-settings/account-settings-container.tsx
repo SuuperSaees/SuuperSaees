@@ -30,6 +30,7 @@ import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { useOrganizationSettings } from '../../context/organization-settings-context'
+import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './update-account-organization-sender-email-and-sender-domain';
 
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -244,6 +245,19 @@ export function PersonalAccountSettingsContainer(
                     </CardHeader>
                     <CardContent>
                       <UpdateAccountOrganizationSenderName />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandSenderEmailAndDomain'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandSenderEmailAndDomainDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationSenderEmailAndSenderDomain />
                     </CardContent>
                   </Card>
                   <Card>
