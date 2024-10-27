@@ -60,6 +60,7 @@ async function OrderDetailsPage({
                 }
                 currentPath={currentPath}
                 userRole={role}
+                orderId={id}
               />
             </div>
             <AsideOrderInformation order={order!} className="hidden lg:flex" />

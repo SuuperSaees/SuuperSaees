@@ -1,11 +1,11 @@
 
 'use server';
 
-import { Subtask } from '../../../../../../../../apps/web/lib/tasks.types';
+import { Subtask, Task } from '../../../../../../../../apps/web/lib/tasks.types';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
-export const updateTask = async (
+export const updateTaskNameById = async (
     taskId: string,
     taskName: string,
 ) => {
@@ -26,6 +26,80 @@ export const updateTask = async (
         
     } catch (error) {
         console.error('Error creating tasks:', error);
+    }
+}
+
+export const updateTaskById = async (
+    taskId: string,
+    task: Task.Insert,
+) => {
+    try {
+        const client = getSupabaseServerComponentClient();
+        const { error: userError } = await client.auth.getUser();
+        if (userError) throw new Error(userError.message);
+        
+        const { data: taskData, error: taskDataError } = await client
+            .from('tasks')
+            .update(
+                task
+            )
+            .eq('id', taskId);
+        if (taskDataError) throw new Error(taskDataError.message);
+
+        return taskData;
+        
+    } catch (error) {
+        console.error('Error updating tasks:', error);
+    }
+}
+
+export const updateTasksPositions = async (
+    tasks: Task.Type[],
+) => {
+    try {
+        const updates = tasks.map((task, index) => ({
+            id: task.id,
+            position: index, 
+          }));
+        const client = getSupabaseServerComponentClient();
+        const { error: userError } = await client.auth.getUser();
+        if (userError) throw new Error(userError.message);
+        
+        const { data: tasksData, error: taskDataError } = await client
+            .from("tasks")
+            .upsert(updates, { onConflict: ["id"] });
+
+        if (taskDataError) throw new Error(taskDataError.message);
+
+        return tasksData;
+        
+    } catch (error) {
+        console.error('Error updating tasks:', error);
+    }
+}
+
+export const updateSubtasksPositions = async (
+    subtasks: Subtask.Type[],
+) => {
+    try {
+        const updates = subtasks.map((subtask, index) => ({
+            id: subtask.id,
+            position: index, 
+          }));
+        const client = getSupabaseServerComponentClient();
+        const { error: userError } = await client.auth.getUser();
+        if (userError) throw new Error(userError.message);
+        
+        const { data: subtasksData, error: taskDataError } = await client
+            .from("subtasks")
+            .upsert(updates, { onConflict: ["id"] });
+
+        if (taskDataError) throw new Error(taskDataError.message);
+
+        return subtasksData;
+        
+    } catch (error) {
+        console.error('Error updating tasks:', error);
     }
 }
 
@@ -52,3 +126,4 @@ export const updateSubtaskById = async (
         console.error('Error creating tasks:', error);
     }
 }
+

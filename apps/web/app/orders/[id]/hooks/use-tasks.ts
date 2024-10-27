@@ -6,7 +6,7 @@ import { Subtask, Task } from '~/lib/tasks.types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createNewSubtask, createNewTask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
 import { toast } from 'sonner';
-import { updateTask } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { updateSubtasksPositions, updateTaskById, updateTaskNameById, updateTasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 import { deleteTaskById } from '~/team-accounts/src/server/actions/tasks/delete/delete-task';
 import { getTasks } from '~/team-accounts/src/server/actions/tasks/get/get-tasks';
 
@@ -130,7 +130,7 @@ export const useRealTimeTasks = (orderId: string) => {
     }) => createNewTask(newTask),
 
     onSuccess: async () => {
-      toast.success('Successfully created new task');
+      // toast.success('Successfully created new task');
 
       await queryClient.invalidateQueries({
         queryKey: ['tasks', 'all'],
@@ -149,7 +149,7 @@ export const useRealTimeTasks = (orderId: string) => {
     }) => createNewSubtask(newSubtask),
 
     onSuccess: async () => {
-      toast.success('Successfully created new subtask');
+      // toast.success('Successfully created new subtask');
 
       await queryClient.invalidateQueries({
         queryKey: ['subtasks', 'all'],
@@ -169,9 +169,9 @@ export const useRealTimeTasks = (orderId: string) => {
             taskId: string;
             newName: string;
         }
-    ) => updateTask(taskId, newName),
+    ) => updateTaskNameById(taskId, newName),
     onSuccess: async () => {
-      toast.success('Successfully updated task name');
+      // toast.success('Successfully updated task name');
 
       await queryClient.invalidateQueries({
         queryKey: ['tasks', 'all'],
@@ -179,6 +179,67 @@ export const useRealTimeTasks = (orderId: string) => {
     },
     onError: () => {
       toast.error('Error updating task name');
+    },
+  });
+
+  const updateTask = useMutation({
+    mutationFn:(
+        { 
+            taskId, 
+            task 
+        }: {
+            taskId: string;
+            task: Task.Type;
+        }
+    ) => updateTaskById(taskId, task),
+    onSuccess: async () => {
+      // toast.success('Successfully updated task name');
+
+      await queryClient.invalidateQueries({
+        queryKey: ['tasks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error updating task name');
+    },
+  });
+
+  const updateTaskPositions = useMutation({
+    mutationFn:(
+        { 
+            tasks 
+        }: {
+            tasks: Task.Type[];
+        }
+    ) => updateTasksPositions(tasks),
+    onSuccess: async () => {
+      // toast.success('Successfully updated task positions');
+
+      await queryClient.invalidateQueries({
+        queryKey: ['tasks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error updating task positions');
+    },
+  });
+
+  const updateSubtaskPositions = useMutation({
+    mutationFn:(
+        { 
+          subtasks 
+        }: {
+          subtasks: Subtask.Type[];
+        }
+    ) => updateSubtasksPositions(subtasks),
+    onSuccess: async () => {
+      // toast.success('Successfully updated task positions');
+
+      await queryClient.invalidateQueries({ queryKey: ['subtasks', 'all'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks', 'all'] });
+    },
+    onError: () => {
+      toast.error('Error updating subtask positions');
     },
   });
 
@@ -191,7 +252,7 @@ export const useRealTimeTasks = (orderId: string) => {
         }
     ) => deleteTaskById(taskId),
     onSuccess: async () => {
-      toast.success('Successfully deleted task');
+      // toast.success('Successfully deleted task');
 
       await queryClient.invalidateQueries({
         queryKey: ['tasks', 'all'],
@@ -208,6 +269,9 @@ export const useRealTimeTasks = (orderId: string) => {
     createTask,
     createSubtask,
     updateTaskName,
+    updateTask,
+    updateTaskPositions,
+    updateSubtaskPositions,
     deleteTask,
     loading,
     setLoading,

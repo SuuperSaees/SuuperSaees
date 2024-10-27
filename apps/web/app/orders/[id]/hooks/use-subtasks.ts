@@ -73,7 +73,7 @@ export const useRealTimeSubtasks = (initialSubtask: SubtaskType) => {
     mutationFn: async (updates: Partial<SubtaskType>) =>
       updateSubtaskById(subtask.id, updates),
     onSuccess: async () => {
-      toast.success('Successfully updated task');
+      // toast.success('Successfully updated task');
       await queryClient.invalidateQueries({
         queryKey: ['subtasks', 'all'],
       });

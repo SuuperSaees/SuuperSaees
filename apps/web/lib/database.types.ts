@@ -1975,6 +1975,7 @@ export type Database = {
           id: string
           name: string | null
           parent_task_id: string | null
+          position: number | null
           priority: Database["public"]["Enums"]["priority_types"] | null
           start_date: string | null
           state: Database["public"]["Enums"]["order_status_types"] | null
@@ -1988,6 +1989,7 @@ export type Database = {
           id?: string
           name?: string | null
           parent_task_id?: string | null
+          position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
           state?: Database["public"]["Enums"]["order_status_types"] | null
@@ -2001,6 +2003,7 @@ export type Database = {
           id?: string
           name?: string | null
           parent_task_id?: string | null
+          position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
           state?: Database["public"]["Enums"]["order_status_types"] | null
@@ -2023,6 +2026,7 @@ export type Database = {
           id: string
           name: string | null
           order_id: string | null
+          position: number | null
         }
         Insert: {
           completed?: boolean | null
@@ -2031,6 +2035,7 @@ export type Database = {
           id?: string
           name?: string | null
           order_id?: string | null
+          position?: number | null
         }
         Update: {
           completed?: boolean | null
@@ -2039,6 +2044,7 @@ export type Database = {
           id?: string
           name?: string | null
           order_id?: string | null
+          position?: number | null
         }
         Relationships: [
           {
@@ -2377,6 +2383,7 @@ export type Database = {
         | "description"
         | "title"
         | "assigned_to"
+        | "task"
       app_permissions:
         | "roles.manage"
         | "billing.manage"

@@ -16,8 +16,8 @@ import {
 import { Button } from '@kit/ui/button';
 import { Spinner } from '@kit/ui/spinner';
 
-import { useTaskDragAndDrop } from '~/orders/[id]/hooks/use-task-drag-and-drop';
 import { Task } from '~/lib/tasks.types';
+import { useTaskDragAndDrop } from '~/orders/[id]/hooks/use-task-drag-and-drop';
 import { calculateSubtaskProgress } from '~/utils/task-counter';
 
 import { useRealTimeTasks } from '../hooks/use-tasks';
@@ -40,12 +40,11 @@ function TaskDropdown({
   const [newTaskName, setNewTaskName] = useState<string>('');
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const { t } = useTranslation('orders');
-  const {
-    handleDragStart,
-    handleDragEnd,
-    sensors,
-    taskList,
-  } = useTaskDragAndDrop(tasks);
+  const { handleDragStart, handleDragEnd, sensors, taskList } =
+    useTaskDragAndDrop(
+      tasks.sort((a, b) => a.position - b.position),
+      orderId,
+    );
 
   const handleAddTask = async () => {
     const newTask = {
@@ -103,7 +102,7 @@ function TaskDropdown({
     }
   };
 
-  if (!loading && tasks.length === 0) {
+  if (!loading && taskList.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center">
         <p className="text-gray-500">{t('tasks.emptyTasks')}</p>
@@ -135,7 +134,7 @@ function TaskDropdown({
           >
             <SortableContext items={taskList}>
               {taskList.map((task, index) => (
-                <SortableTask key={task.id} task={task}>
+                <SortableTask key={task.id} task={task} type="task">
                   <div className="mb-4">
                     <div className="flex items-center justify-between">
                       {editingTaskId === task.id ? (
@@ -186,34 +185,29 @@ function TaskDropdown({
                         <AccordionTrigger>
                           <ThemedProgress
                             value={calculateSubtaskProgress(
-                              (task as Task.Type).subtasks ?? [],
+                              task.subtasks ?? [],
                             )}
                             className="w-full"
                           />
                         </AccordionTrigger>
                         <AccordionContent>
-                          <DndContext
-                            onDragEnd={handleDragEnd}
-                            onDragStart={handleDragStart}
-                            sensors={sensors}
-                            collisionDetection={closestCorners}
+                          <SortableContext
+                            items={(task as Task.Type)?.subtasks}
                           >
-                            <SortableContext
-                              items={(task as Task.Type)?.subtasks}
-                            >
-                              {(task as Task.Type)?.subtasks?.map(
-                                (subtask, subIndex) => (
-                                  <SortableTask key={subIndex} task={subtask}>
-                                    <SubTask
-                                      key={subIndex}
-                                      initialSubtask={subtask}
-                                      userRole={userRole}
-                                    />
-                                  </SortableTask>
-                                ),
-                              )}
-                            </SortableContext>
-                          </DndContext>
+                            {task?.subtasks?.map((subtask, subIndex) => (
+                              <SortableTask
+                                key={subIndex}
+                                task={subtask}
+                                type="subtask"
+                              >
+                                <SubTask
+                                  key={subIndex}
+                                  initialSubtask={subtask}
+                                  userRole={userRole}
+                                />
+                              </SortableTask>
+                            ))}
+                          </SortableContext>
                           <Button
                             variant="secondary"
                             className="mt-1 py-0 text-gray-600"
