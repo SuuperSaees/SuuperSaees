@@ -37,10 +37,10 @@ export async function getFormSendIdentity(organizationId: string, at: string) {
     if (setting.key === senderNameKey && !senderName) {
       senderName = setting.value;
     }
-    if (setting.key === senderDomainKey && !senderDomain) {
+    if (setting.key === senderDomainKey) {
       senderDomain = setting.value;
     }
-    if (setting.key === senderEmailKey && !senderEmail) {
+    if (setting.key === senderEmailKey) {
       senderEmail = setting.value;
     }
   });
