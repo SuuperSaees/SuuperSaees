@@ -53,7 +53,7 @@ export const deleteClient = async (clientId: string, organizationId?: string) =>
     }
 
     // Step 3: Proceed with deletion based on the provided parameters
-    if (clientId) {
+    if (clientId && !organizationId) {
       // Delete a specific client
       const { error: deleteError } = await client
         .from('clients')
@@ -85,7 +85,8 @@ export const deleteClient = async (clientId: string, organizationId?: string) =>
         .update({
           deleted_on: new Date().toISOString(),
         })
-        .eq('organization_client_id', organizationId);
+        .eq('organization_client_id', organizationId)
+        .eq('agency_id', agencyOrganizationId);
 
       if (deleteClientsError) {
         throw new Error(`Error deleting clients in the organization: ${deleteClientsError.message}`);

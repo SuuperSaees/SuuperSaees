@@ -261,9 +261,11 @@ function getPatterns() {
         const {
           data: { user },
         } = await getUser(req, res);
-
+        if (req.nextUrl.pathname === '/add-organization') {
+          return;
+        }
         // the user is logged out, so we don't need to do anything
-        if (!user) {
+        if (!user ) {
           return;
         }
         const userId = user.id;
@@ -276,7 +278,7 @@ function getPatterns() {
           supabase,
           organizationId,
           userId,
-        );
+        ).catch((error) => console.error('Error fetching deleted from middleware:', error));
 
         // Step 4: If the client is deleted, sign out the user
         if (clientDeleted) {

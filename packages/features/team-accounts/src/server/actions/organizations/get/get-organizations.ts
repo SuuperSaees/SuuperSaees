@@ -275,7 +275,7 @@ export async function getAgencyForClient(clientOrganizationId: string) {
       .from('clients')
       .select('agency_id')
       .eq('organization_client_id', clientOrganizationId)
-      .single();
+     
 
     if (clientError ?? !clientData) {
       console.error('Error fetching agency:', clientError);
@@ -286,11 +286,12 @@ export async function getAgencyForClient(clientOrganizationId: string) {
     const { data: agencyData, error: agencyError } = await client
       .from('accounts')
       .select('id, name, email, picture_url')
-      .eq('id', clientData.agency_id)
+      .eq('id', clientData?.[0]?.agency_id ?? '')
       .eq('is_personal_account', false)
       .single();
 
     if (agencyError ?? !agencyData) {
+
       console.error('Error fetching agency:', agencyError);
       throw agencyError;
     }

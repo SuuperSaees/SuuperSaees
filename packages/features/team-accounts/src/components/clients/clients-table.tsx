@@ -3,80 +3,111 @@
 import { useMemo, useState } from 'react';
 import * as React from 'react';
 
-
-
 import Image from 'next/image';
 import Link from 'next/link';
 
-
-
-import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-
 
 import { Button } from '@kit/ui/button';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 import { Separator } from '@kit/ui/separator';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@kit/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@kit/ui/table';
 
-
-
+import { Account } from '../../../../../../apps/web/lib/account.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
 import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/delete/delete-client';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../../packages/ui/src/shadcn/pagination';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../../../../../../packages/ui/src/shadcn/pagination';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
-
+import { ClientsWithOrganization } from '../../server/actions/clients/get/get-clients';
 
 // import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 
-const getUniqueOrganizations = (clients: Client[]) => {
-  const organizationMap = new Map<string, Client>();
+const getUniqueOrganizations = (clients: ClientsWithOrganization[]): Organization[] => {
+  return clients.map((client) => ({
+    ...client.organization,
+    primary_owner: client.primaryOwner?.name ?? '',
+  }));
+};
 
-  clients.forEach((client) => {
-    if (!organizationMap.has(client.client_organization)) {
-      organizationMap.set(client.client_organization, client);
-    } else {
-      if (client.role === 'leader') {
-        organizationMap.set(client.client_organization, client);
-      }
-    }
-  });
+const getUniqueClients = (clients: ClientsWithOrganization[]): Client[] => {
+  return clients.flatMap((client) =>
+    client.users.map((user) => ({
+      ...user,
+      primary_owner: client.primaryOwner?.name ?? '',
+      organization: {
+        id: client.organization.id,
+        name: client.organization.name,
+      },
+    }))
+  );
+};
+// organization type based on getUniqueOrganizations
 
-  return Array.from(organizationMap.values());
+type Organization = Pick<
+  Account.Type,
+  | 'id'
+  | 'name'
+  | 'slug'
+  | 'picture_url'
+  | 'created_at'
+  | 'is_personal_account'
+  | 'primary_owner_user_id'
+> & {
+  primary_owner: string;
+};
+
+type Client = Pick<
+  Account.Type,
+  | 'id'
+  | 'name'
+  | 'email'
+  | 'created_at'
+  | 'is_personal_account'
+  | 'organization_id'
+  | 'picture_url'
+  | 'primary_owner_user_id'
+> & {
+  primary_owner: string;
+  organization: {
+    id: string;
+    name: string;
+  };
 };
 
 type ClientsTableProps = {
-  clients: {
-    id: string;
-    created_at: string;
-    name: string;
-    client_organization: string;
-    email: string;
-    role: string;
-    propietary_organization: string;
-    propietary_organization_id: string;
-    picture_url: string | null;
-    organization_id: string | null;
-  }[];
+  clients: ClientsWithOrganization[];
   accountIds: string[];
   accountNames: string[];
   view?: 'clients' | 'organizations';
-};
-
-type Client = {
-  id: string;
-  created_at: string;
-  name: string;
-  client_organization: string;
-  email: string;
-  role: string;
-  propietary_organization: string;
-  propietary_organization_id: string;
-  picture_url: string | null;
-  organization_id: string | null;
 };
 
 // CLIENTS TABLE
@@ -88,7 +119,7 @@ const clientColumns = (
     header: t('clientName'),
     cell: ({ row }) => (
       <Link
-        href={`clients/organizations/${row.original.organization_id}`}
+        href={`clients/organizations/${row.original.organization.id}`}
         className={'flex items-center space-x-4 text-left'}
       >
         <span>
@@ -122,14 +153,14 @@ const clientColumns = (
   //   },
   // },
   {
-    accessorKey: 'client_organization',
+    accessorKey: 'organization',
     header: t('organization'),
     cell: ({ row }) => (
       <Link
         href={`clients/organizations/${row.original.organization_id}`}
         className="capitalize"
       >
-        {row.getValue('client_organization')}
+        {row.original.organization.name}
       </Link>
     ),
   },
@@ -151,7 +182,7 @@ const clientColumns = (
       );
     },
     cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
+      const date = new Date(row.original.created_at ?? '');
       const day = date.getDate().toString().padStart(2, '0');
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear();
@@ -166,7 +197,7 @@ const clientColumns = (
     },
   },
   {
-    accessorKey: 'created_at_column',
+    accessorKey: 'created_at',
     header: ({ column }) => {
       return (
         <div>
@@ -183,7 +214,7 @@ const clientColumns = (
       );
     },
     cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
+      const date = new Date(row.original.created_at ?? '');
       const day = date.getDate().toString().padStart(2, '0');
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear();
@@ -215,12 +246,17 @@ const clientColumns = (
 ];
 
 // ORGANIZATIONS TABLE
-const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Client>[] => [
+const organizationColumns = (
+  t: TFunction<'clients', undefined>,
+): ColumnDef<Organization>[] => [
   {
-    accessorKey: 'client_organization',
+    accessorKey: 'name',
     header: t('organizationName'),
     cell: ({ row }) => (
-      <Link href={`clients/organizations/${row.original.organization_id}`}  className={'flex items-center space-x-4 text-left'}>
+      <Link
+        href={`clients/organizations/${row.original.id}`}
+        className={'flex items-center space-x-4 text-left'}
+      >
         <span>
           <ProfileAvatar
             displayName={row.original.name}
@@ -229,10 +265,10 @@ const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Clie
         </span>
         <div className="flex flex-col">
           <span className="text-sm font-medium leading-[1.42857] text-gray-900">
-            {row.original.client_organization}
+            {row.original.name}
           </span>
           <span className="text-sm font-normal leading-[1.42857] text-gray-600">
-            {t('leader')}: {row.original.name}
+            {t('leader')}: {row.original.primary_owner}
           </span>
         </div>
       </Link>
@@ -251,7 +287,7 @@ const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Clie
     ),
   },
   {
-    accessorKey: 'created_at_organization',
+    accessorKey: 'created_at',
     header: ({ column }) => (
       <div>
         <Button
@@ -266,7 +302,7 @@ const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Clie
       </div>
     ),
     cell: ({ row }) => {
-      const date = new Date(row.original.created_at);
+      const date = new Date(row.original.created_at ?? '');
       const day = date.getDate().toString().padStart(2, '0');
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear();
@@ -284,19 +320,23 @@ const organizationColumns = (t: TFunction<'clients', undefined>): ColumnDef<Clie
     id: 'actions',
     header: t('actions'),
     enableHiding: false,
-    cell: ({row}) => {
+    cell: ({ row }) => {
       const client = row.original;
+      console.log('client', client);
       return (
         <div className="h-18 flex items-center gap-4 self-stretch p-4">
           {/* <Pen className="h-4 w-4 text-gray-600" /> */}
-          <DeleteUserDialog organizationId={client.organization_id ?? undefined} userId={client.id} />
+          <DeleteUserDialog
+            organizationId={client.id ?? undefined}
+            userId={''}
+          />
         </div>
       );
     },
   },
 ];
 // accountIds, accountNames
-export function ClientsTable({ clients, view}: ClientsTableProps) {
+export function ClientsTable({ clients, view }: ClientsTableProps) {
   const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clients' | 'organizations'>(
     'clients',
@@ -309,13 +349,27 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const uniqueClients = useMemo(() => getUniqueOrganizations(clients), [clients]);
-  const columns = useMemo<ColumnDef<Client>[]>(() => activeButton === 'clients' ? clientColumns(t) : organizationColumns(t), [t, activeButton]);
+  const transformedOrganizations = useMemo(
+    () => getUniqueOrganizations(clients),
+    [clients],
+  );
+  const transformedClients = useMemo(
+    () => getUniqueClients(clients),
+    [clients],
+  );
+  const columns = useMemo<ColumnDef<Organization>[] | ColumnDef<Client>[]>(
+    () =>
+      activeButton === 'clients' ? clientColumns(t) : organizationColumns(t),
+    [t, activeButton],
+  );
 
+  console.log('transformedClients', transformedClients);
 
-
-  const table = useReactTable({
-    data: activeButton === 'organizations' ? uniqueClients : clients,
+  const table = useReactTable<Organization | Client>({
+    data:
+      activeButton === 'organizations'
+        ? transformedOrganizations
+        : transformedClients,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -366,30 +420,31 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
     <div className="w-full">
       <div className="flex flex-wrap items-center justify-between gap-4 pb-[24px]">
         <div className="flex">
-          {
-            !view && 
+          {!view && (
             <>
-            <Button
-              variant="ghost"
-              className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'clients' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
-              onClick={() => handleButtonClick('clients')}
-            >
-              <span className="text-sm font-semibold leading-5">{t('clients:clients')}</span>
-            </Button>
-            <Button
-              variant="ghost"
-              className={`ml-[20px] flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'organizations' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
-              onClick={() => handleButtonClick('organizations')}
-            >
-              <span className="text-sm font-semibold leading-5">
-                {t('clients:organizations.title')}
-              </span>
-            </Button>
+              <Button
+                variant="ghost"
+                className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'clients' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
+                onClick={() => handleButtonClick('clients')}
+              >
+                <span className="text-sm font-semibold leading-5">
+                  {t('clients:clients')}
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className={`ml-[20px] flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'organizations' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
+                onClick={() => handleButtonClick('organizations')}
+              >
+                <span className="text-sm font-semibold leading-5">
+                  {t('clients:organizations.title')}
+                </span>
+              </Button>
             </>
-          }
+          )}
         </div>
         <div className="flex gap-4 px-2">
-          <div className="relative max-w-sm bg-white rounded-md">
+          <div className="relative max-w-sm rounded-md bg-white">
             <Search className="absolute left-3 top-1/2 h-[20px] w-[20px] -translate-y-1/2 transform text-gray-500" />
             <ThemedInput
               placeholder={
@@ -420,12 +475,8 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
           <CreateClientDialog />
         </div>
       </div>
-      {
-        !view &&
-
-      <Separator />
-      }
-      <div className="mt-[24px] bg-white rounded-md border">
+      {!view && <Separator />}
+      <div className="mt-[24px] rounded-md border bg-white">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -436,9 +487,9 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
@@ -450,13 +501,13 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -465,17 +516,17 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={table.getAllColumns().length}>
-                  <div className='flex flex-col place-content-center items-center h-[493px]'>
+                  <div className="flex h-[493px] flex-col place-content-center items-center">
                     <Image
                       src="/images/illustrations/Illustration-cloud.svg"
                       alt="Illustration Card"
                       width={220}
                       height={160}
                     />
-                    <h3 className='w-[352px] text-center text-[20px] text-[#101828] leading-[30px] mb-[20px] font-semibold'>
+                    <h3 className="mb-[20px] w-[352px] text-center text-[20px] font-semibold leading-[30px] text-[#101828]">
                       {t('startWithFirstClientTitle')}
                     </h3>
-                    <p className='w-[352px] text-center text-[16px] text-[#475467] leading-[24px] mb-[16px]'>
+                    <p className="mb-[16px] w-[352px] text-center text-[16px] leading-[24px] text-[#475467]">
                       {t('noClientsDescription')}
                     </p>
                     <CreateClientDialog />
@@ -488,9 +539,9 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
       </div>
       {table.getRowModel().rows?.length ? (
         <>
-          <div className="flex justify-between items-center py-4">
+          <div className="flex items-center justify-between py-4">
             <Pagination>
-              <PaginationContent className="flex justify-between items-center w-full">
+              <PaginationContent className="flex w-full items-center justify-between">
                 <PaginationItem>
                   <PaginationPrevious
                     href="#"
@@ -502,7 +553,7 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
                     }}
                   />
                 </PaginationItem>
-                <div className="flex-1 flex justify-center">
+                <div className="flex flex-1 justify-center">
                   {pages.map((page) => (
                     <PaginationItem key={page}>
                       <PaginationLink
@@ -538,9 +589,9 @@ export function ClientsTable({ clients, view}: ClientsTableProps) {
             </Pagination>
           </div>
         </>
-      ) :
-        (<>
-        </>)}
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
