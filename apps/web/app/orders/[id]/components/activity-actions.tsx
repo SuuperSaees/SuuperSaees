@@ -132,7 +132,8 @@ export const StatusActivity = ({
   if (
     activity.type === ActivityType.STATUS ||
     activity.type === ActivityType.PRIORITY ||
-    activity.type === ActivityType.DUE_DATE
+    activity.type === ActivityType.DUE_DATE ||
+    activity.type === ActivityType.TASK
   ) {
     return (
       <div className="flex h-fit w-full justify-between gap-4 text-gray-400">
