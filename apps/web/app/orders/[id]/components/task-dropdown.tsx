@@ -191,7 +191,7 @@ function TaskDropdown({
                           />
                         </AccordionTrigger>
                         <AccordionContent>
-                          <SortableContext
+                          {/* <SortableContext
                             items={(task as Task.Type)?.subtasks}
                           >
                             {task?.subtasks?.map((subtask, subIndex) => (
@@ -207,7 +207,14 @@ function TaskDropdown({
                                 />
                               </SortableTask>
                             ))}
-                          </SortableContext>
+                          </SortableContext> */}
+                          {task?.subtasks?.map((subtask, subIndex) => (
+                                <SubTask
+                                  key={subIndex}
+                                  initialSubtask={subtask}
+                                  userRole={userRole}
+                                />
+                            ))}
                           <Button
                             variant="secondary"
                             className="mt-1 py-0 text-gray-600"
