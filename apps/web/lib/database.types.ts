@@ -1898,11 +1898,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string | null
           currency: string
+          days_used: number
           id: string
           period_ends_at: string | null
           period_starts_at: string | null
-          propietary_organization_id: string
+          propietary_organization_id: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          token_id: string
           trial_ends_at: string | null
           trial_starts_at: string | null
           updated_at: string | null
@@ -1915,11 +1917,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at?: string | null
           currency: string
+          days_used?: number
           id: string
           period_ends_at?: string | null
           period_starts_at?: string | null
-          propietary_organization_id: string
+          propietary_organization_id?: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          token_id?: string
           trial_ends_at?: string | null
           trial_starts_at?: string | null
           updated_at?: string | null
@@ -1932,38 +1936,38 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string | null
           currency?: string
+          days_used?: number
           id?: string
           period_ends_at?: string | null
           period_starts_at?: string | null
-          propietary_organization_id?: string
+          propietary_organization_id?: string | null
           status?: Database["public"]["Enums"]["subscription_status"]
+          token_id?: string
           trial_ends_at?: string | null
           trial_starts_at?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
-            columns: ["propietary_organization_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
-            columns: ["propietary_organization_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
-            columns: ["propietary_organization_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: [{
+          foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+          columns: ["propietary_organization_id"]
+          isOneToOne: false
+          referencedRelation: "accounts"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+          columns: ["propietary_organization_id"]
+          isOneToOne: false
+          referencedRelation: "user_account_workspace"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+          columns: ["propietary_organization_id"]
+          isOneToOne: false
+          referencedRelation: "user_accounts"
+          referencedColumns: ["id"]
+        },]
       }
       subtasks: {
         Row: {
@@ -2055,6 +2059,39 @@ export type Database = {
             referencedColumns: ["uuid"]
           },
         ]
+      }
+      tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          id_token_provider: string
+          provider: string
+          refresh_token: string
+          updated_at: string | null
+        }
+        Insert: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          id_token_provider?: string
+          provider?: string
+          refresh_token?: string
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          id_token_provider?: string
+          provider?: string
+          refresh_token?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -2360,11 +2397,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string | null
           currency: string
+          days_used: number
           id: string
           period_ends_at: string | null
           period_starts_at: string | null
-          propietary_organization_id: string
+          propietary_organization_id: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          token_id: string
           trial_ends_at: string | null
           trial_starts_at: string | null
           updated_at: string | null
@@ -2530,6 +2569,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2543,6 +2583,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2556,6 +2597,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2577,6 +2619,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2587,6 +2630,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2597,6 +2641,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2732,6 +2777,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {

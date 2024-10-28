@@ -1,6 +1,13 @@
 import 'server-only';
 
+
+
 import { type EmailOtpType, SupabaseClient } from '@supabase/supabase-js';
+
+
+
+import { decodeToken } from '../../tokens/src/decode-token';
+import { getSupabaseServerComponentClient } from './clients/server-component.client';
 
 /**
  * @name createAuthCallbackService
@@ -34,10 +41,17 @@ class AuthCallbackService {
     },
   ): Promise<URL> {
     // log out the user if any, before starting the new session
-    await logOutUser(this.client);
-
     const url = new URL(request.url);
     const searchParams = url.searchParams;
+    const token_hash_session = searchParams.get('token_hash_session');
+    const { data: currentSession } = await this.client.auth.getSession();
+    const currentSessionId = decodeToken(
+      currentSession?.session?.access_token ?? '',
+    )?.session_id;
+
+    if (token_hash_session !== currentSessionId) {
+      await logOutUser(this.client);
+    }
 
     const host = request.headers.get('host');
 
@@ -73,6 +87,7 @@ class AuthCallbackService {
 
     // remove the query params from the url
     searchParams.delete('token_hash');
+    searchParams.delete('token_hash_session');
     searchParams.delete('type');
     searchParams.delete('next');
     searchParams.delete('callback');
@@ -106,6 +121,31 @@ class AuthCallbackService {
 
       if (!error) {
         return url;
+      }
+    }
+    const supabaseServerComponentClient = getSupabaseServerComponentClient({
+      admin: true,
+    });
+    if (token_hash_session) {
+      // search in the database for the token_hash_session
+      const { data, error } = await supabaseServerComponentClient
+        .from('tokens')
+        .select('*')
+        .eq('id', token_hash_session)
+        .single();
+
+      if (error) {
+        console.error('Error verifying token hash session', error);
+      }
+      if (data) {
+        // set session with the user data
+        const { error } = await this.client.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+        if (!error) {
+          return url;
+        }
       }
     }
 
@@ -237,7 +277,7 @@ function getAuthErrorMessage(error: string) {
 
 // function to log out the user before starting the new session:
 async function logOutUser(supabase: SupabaseClient) {
-  const { error } = await supabase.auth.signOut({scope: 'local'});
+  const { error } = await supabase.auth.signOut({ scope: 'local' });
 
   if (error) {
     console.error('Error logging out user', error);

@@ -2,6 +2,7 @@ import { getTextColorBasedOnBackground } from '../../../../../../../../apps/web/
 import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { getOrganizationSettingsByOrganizationId } from '../../organizations/get/get-organizations';
 
+
 const emailSender = process.env.EMAIL_SENDER ?? '';
 const senderNameKey = OrganizationSettings.KEYS.sender_name;
 const logoUrlKey = OrganizationSettings.KEYS.logo_url;
