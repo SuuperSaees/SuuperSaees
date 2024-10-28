@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { arrayMove } from "@dnd-kit/sortable";
+import { useState } from 'react';
+import { useEffect } from 'react';
 
 import {
   DragEndEvent,
@@ -9,22 +9,30 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { Task, Subtask } from "~/lib/tasks.types";
-import { useEffect } from "react";
+import { arrayMove } from '@dnd-kit/sortable';
 
-export function useTaskDragAndDrop(tasks:Task.Type[] | Subtask.Type[]){
-  const [taskList, setTaskList] = useState(tasks)
+import { Subtask, Task } from '~/lib/tasks.types';
+
+import { useRealTimeTasks } from './use-tasks';
+
+export function useTaskDragAndDrop(
+  tasks: Task.Type[] | Subtask.Type[],
+  orderId: string,
+) {
+  const [taskList, setTaskList] = useState(tasks);
   const [isDragging, setIsDragging] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [dragTask, setDragTask] = useState({
     isDragging: false,
     type: null,
   });
+  const { updateTaskPositions, updateSubtaskPositions } =
+    useRealTimeTasks(orderId);
 
   useEffect(() => {
     setTaskList(tasks);
   }, [tasks]);
-  
+
   const mouseSensor = useSensor(MouseSensor, {
     // Require the mouse to move by 10 pixels before activating
     activationConstraint: {
@@ -58,20 +66,92 @@ export function useTaskDragAndDrop(tasks:Task.Type[] | Subtask.Type[]){
     }
   }
 
-  function handleDragEnd(event: DragEndEvent){
-    const {active, over} = event;
-    const oldIndex = taskList.findIndex(task => task.id === active.id);
-    const newIndex = taskList.findIndex(task => task.id === over?.id);
-    setTaskList(arrayMove(taskList,oldIndex,newIndex))
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (!over) {
+      resetDragState();
+      return;
+    }
+
+    if (dragTask.type === 'task') {
+      await handleTaskDragEnd(active.id as string, over.id as string);
+    } else if (dragTask.type === 'subtask') {
+      await handleSubtaskDragEnd(active.id as string, over.id as string);
+    }
+
+    resetDragState();
+  }
+
+  const handleTaskDragEnd = async (activeId: string, overId: string) => {
+    const oldIndex = taskList.findIndex((task) => task.id === activeId);
+    const newIndex = taskList.findIndex((task) => task.id === overId);
+
+    if (oldIndex !== newIndex) {
+      const updatedTasks = arrayMove(taskList, oldIndex, newIndex).map(
+        (task, index) => ({
+          ...task,
+          position: index,
+        }),
+      );
+
+      setTaskList(updatedTasks);
+      await updateTaskPositions.mutateAsync({
+        tasks: updatedTasks,
+      });
+    }
+  };
+
+  const handleSubtaskDragEnd = async (activeId: string, overId: string) => {
+    const parentTask = taskList.find((task) =>
+      task.subtasks?.some((subtask) => subtask.id === activeId),
+    );
+
+    if (!parentTask?.subtasks) return;
+
+    const oldIndex = parentTask.subtasks.findIndex(
+      (subtask) => subtask.id === activeId,
+    );
+    const newIndex = parentTask.subtasks.findIndex(
+      (subtask) => subtask.id === overId,
+    );
+
+    if (oldIndex !== newIndex) {
+      const updatedSubtasks = arrayMove(
+        parentTask.subtasks,
+        oldIndex,
+        newIndex,
+      ).map((subtask, index) => ({
+        ...subtask,
+        position: index,
+      }));
+
+      const updatedTask = {
+        ...parentTask,
+        subtasks: updatedSubtasks,
+      };
+
+      const updatedTasks = taskList.map((t) =>
+        t.id === parentTask.id ? updatedTask : t,
+      );
+
+      setTaskList(updatedTasks);
+      await updateSubtaskPositions.mutateAsync({
+        subtasks: updatedSubtasks,
+      });
+    }
+  };
+
+  const resetDragState = () => {
     setIsDragging(false);
     setActiveId(null);
     setDragTask({
       isDragging: false,
       type: null,
     });
-  }
+  };
 
-  return{
+  return {
     dragTask,
     isDragging,
     taskList,
@@ -79,7 +159,5 @@ export function useTaskDragAndDrop(tasks:Task.Type[] | Subtask.Type[]){
     handleDragStart,
     handleDragEnd,
     activeId,
-  }
-
-  
+  };
 }

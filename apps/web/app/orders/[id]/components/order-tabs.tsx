@@ -12,9 +12,9 @@ import FileSection from '~/components/organization/files';
 import ActivityPage from './activity';
 import DetailsPage from './details';
 import TasksSection from './tasks';
-import { TaskCounter } from 'node_modules/@kit/accounts/src/components/ui/tasks-cantity-themed-with-settings';
-import { countIncompleteTasks } from '~/utils/task-counter';
-import { useRealTimeTasks } from '../hooks/use-tasks';
+// import { TaskCounter } from 'node_modules/@kit/accounts/src/components/ui/tasks-cantity-themed-with-settings';
+// import { countIncompleteTasks } from '~/utils/task-counter';
+// import { useRealTimeTasks } from '../hooks/use-tasks';
 
 type OrderTabsProps = {
   organizationId:
@@ -27,14 +27,13 @@ type OrderTabsProps = {
     uuid?: string;
   }[];
   userRole: string;
+  orderId: string;
 };
 
-export const OrderTabs = ({ organizationId, currentPath, userRole }: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
-
-  const { tasks } = useRealTimeTasks(currentPath[currentPath.length - 1]?.uuid ?? '');
 
   return (
     <Tabs
@@ -66,9 +65,9 @@ export const OrderTabs = ({ organizationId, currentPath, userRole }: OrderTabsPr
           className='flex items-center gap-1'
         >
           <Trans i18nKey={'orders:details.navigation.tasks'} />
-          <TaskCounter
+          {/* <TaskCounter
             taskCount={countIncompleteTasks(tasks)}
-          />
+          /> */}
         </ThemedTabTrigger>
         <ThemedTabTrigger 
           value="files" 
@@ -92,7 +91,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole }: OrderTabsPr
         <div className="w-full">
           <TasksSection 
             userRole={userRole}
-            orderId={currentPath ? currentPath[currentPath.length - 1]?.uuid ?? '' : ''}
+            orderId={orderId}
           />
         </div>
       </TabsContent>

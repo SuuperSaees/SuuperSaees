@@ -22,6 +22,7 @@ export namespace Activity {
       DESCRIPTION = 'description',
       TITLE = 'title',
       ASSIGNED_TO = 'assigned_to',
+      TASK = 'task',
     }
     // "create" | "update" | "delete"
 
