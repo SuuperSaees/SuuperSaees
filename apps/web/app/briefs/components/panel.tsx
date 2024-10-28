@@ -40,7 +40,8 @@ export default function Panel() {
           value="widgets"
           activeTab={activeTab}
           option={'widgets'}
-          className="w-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-brand data-[state=active]:bg-transparent"
+          className="w-full"
+          withBorder
         >
           {t('creation.panel.widgets.title')}
         </ThemedTabTrigger>
@@ -48,7 +49,8 @@ export default function Panel() {
           value="settings"
           activeTab={activeTab}
           option={'settings'}
-          className="w-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-brand data-[state=active]:bg-transparent"
+          className="w-full"
+          withBorder
         >
           {t('creation.panel.settings.title')}
         </ThemedTabTrigger>
