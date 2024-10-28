@@ -150,11 +150,11 @@ const AsideOrderInformation = ({
     enabled: userRole === 'agency_owner' || userRole === 'agency_member' || userRole === 'agency_project_manager',
   });
 
-  const { data: orderAgencyClientsFollowers } = useQuery({
-    queryKey: ['order-agency-clients-followers', order.id],
-    queryFn: () => getAgencyClients(order.agency_id, order.id),
-    retry: 5,
-  });
+  // const { data: orderAgencyClientsFollowers } = useQuery({
+  //   queryKey: ['order-agency-clients-followers', order.id],
+  //   queryFn: () => getAgencyClients(order.agency_id, order.id),
+  //   retry: 5,
+  // });
 
   const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
   const priorities = ['low', 'medium', 'high'];
