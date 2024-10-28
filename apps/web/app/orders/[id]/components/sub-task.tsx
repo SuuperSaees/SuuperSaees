@@ -9,7 +9,7 @@ import { getStatusClassName } from "../utils/generate-options-and-classnames";
 import { Button } from "@kit/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@kit/ui/sheet";
 import { Subtask } from "~/lib/tasks.types";
-import { CalendarIcon, FlagIcon, Loader, Trash } from "lucide-react";
+import { CalendarIcon, FlagIcon, Loader, Trash, X } from "lucide-react";
 import { useRealTimeSubtasks } from "../hooks/use-subtasks";
 import RichTextEditor from "~/components/ui/rich-text-editor";
 
@@ -41,10 +41,32 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 	const priorities = ['low', 'medium', 'high'];
 	const statusOptions = generateDropdownOptions(statuses, t, 'statuses');
 	const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
+	const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
 	if (isDeleted) {
 		return null;
 	}
+
+	const handleStartEditing = (taskId: string, currentName: string) => {
+		setEditingTaskId(taskId);
+		setName(currentName);
+	  };
+	
+	  const handleSaveTaskName = () => {
+		console.log(name);
+		if (name.trim() !== '') {
+			handleNameChange().catch((error) => console.error(error));
+		}
+		setEditingTaskId(null);
+	  };
+	
+	  const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter') {
+		  handleSaveTaskName();
+		} else if (e.key === 'Escape') {
+		  setEditingTaskId(null);
+		}
+	  };
 
 	return (
 		<div 
@@ -52,15 +74,36 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 			onMouseEnter={() => setIsHovered(true)} 
 			onMouseLeave={() => setIsHovered(false)}
 		>
-			<div className="justify-start gap-2 flex">
-				<input
+			{editingTaskId === initialSubtask.id ? (
+				<div className="flex flex-grow items-center mr-4">
+					<input
 					type="text"
 					value={name}
 					onChange={(e) => setName(e.target.value)}
-					onBlur={handleNameChange}
-					className="border-none p-2 rounded-md focus:outline-none w-full font-semibold text-gray-900"
-				/>
-			</div>
+					onBlur={() => handleSaveTaskName()}
+					onKeyDown={(e) => handleKeyDown(e)}
+					className="w-full rounded-md border-none p-2 font-semibold text-gray-900 focus:outline-none bg-transparent"
+					autoFocus
+					/>
+					<X
+					className="ml-2 h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-700"
+					onClick={() => setEditingTaskId(null)}
+					/>
+				</div>
+			) : (
+				<div
+					className="flex w-full items-center justify-between"
+				>
+					<p
+					className="flex-grow font-semibold text-gray-900"
+					onClick={() =>
+						handleStartEditing(initialSubtask.id, initialSubtask.name)
+					}
+					>
+					{initialSubtask.name}
+					</p>
+				</div>
+			)}
 			
 
 			
@@ -143,7 +186,7 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 				</SheetContent>
 			</Sheet>
 
-			<div className="flex gap-0 items-center">
+			<div className="flex gap-1 items-center">
 				<div className="flex items-center">
 					{isHovered && (
 						<>
@@ -188,10 +231,13 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 						setSelectedPeriod={handleDateRangeChange}
 					/>
 				</div>
-				{isHovered && (
-				<Trash className="h-4 w-4 text-gray-500 cursor-pointer hover:text-red-500" onClick={handleDeleteSubtask} />
-				)}
 			</div>
+
+			{isHovered && (
+				<div className="h-4 w-4 ml-2">
+					<Trash className="h-4 w-4 text-gray-500 cursor-pointer hover:text-red-500" onClick={handleDeleteSubtask} />
+				</div>
+			)}
 
 
 			
