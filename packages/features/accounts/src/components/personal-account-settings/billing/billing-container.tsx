@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { Card, CardContent } from "@kit/ui/card";
 import { ArrowUpRight, CheckIcon, Link2Icon } from "lucide-react";
-// import Link from "next/link";
-// import { Progress } from '../../../../../../../packages/ui/src/shadcn/progress';
 import { Table,
     TableBody,
     TableCell,
@@ -56,9 +54,13 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
         setShowUpgradeComponent(true);
     };
     
-    const calculateTotalAmountPaid = (invoices: any[]): number => {
+    interface Invoice {
+        total: number;
+    }
+
+    const calculateTotalAmountPaid = (invoices: Invoice[]): number => {
         return invoices?.reduce((total, invoice) => total + invoice.total, 0)/100;
-      };
+    };
 
       const getPlanValue = (plan: string): number => {
         const planValues: Record<string, number> = {
@@ -68,7 +70,7 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
           enterprise: 20
         };
       
-        return planValues[plan?.toLowerCase()] || 0;
+        return planValues[plan?.toLowerCase()] ?? 0;
       };
 
       const getProgressPercentage = (occupied: any, available: any) => {

@@ -6,68 +6,241 @@ import { DatePickerWithRange } from "./range-date-picker";
 import { generateDropdownOptions } from "../utils/generate-options-and-classnames";
 import { getPriorityClassName } from "../utils/generate-options-and-classnames";
 import { getStatusClassName } from "../utils/generate-options-and-classnames";
-import { DateRange } from '@kit/ui/calendar';
-import { addDays} from 'date-fns';
+import { Button } from "@kit/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@kit/ui/sheet";
+import { Subtask } from "~/lib/tasks.types";
+import { CalendarIcon, FlagIcon, Loader, Trash, X } from "lucide-react";
+import { useRealTimeSubtasks } from "../hooks/use-subtasks";
+import RichTextEditor from "~/components/ui/rich-text-editor";
 
-interface SubTaskProps {
-	name: string,
-	status: string,
-	priority : string
-}
 
-function SubTask({name, status, priority}:SubTaskProps) {
+function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, userRole: string}) {
 
-	const [selectedStatus, setSelectedStatus] = useState<string>(status);
-	const [selectedPriority, setSelectedPriority] = useState<string>(priority);
-	const [selectedPeriod, setSelectedPeriod] = useState<DateRange>({ from: new Date(), to: addDays(new Date(), 3) });
+	const { 
+		selectedStatus, 
+		handleStatusChange, 
+		selectedPriority, 
+		handlePriorityChange, 
+		selectedPeriod, 
+		handleDateRangeChange, 
+		name, 
+		setName,
+		handleNameChange, 
+		content,
+		setContent,
+		handleContentChange,
+		handleDeleteSubtask,
+		isDeleted
+	} = useRealTimeSubtasks(initialSubtask);
+
+	const [isHovered, setIsHovered] = useState<boolean>(false);
+	const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
 
 	const { t } = useTranslation('orders');
-  const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
+  	const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
 	const priorities = ['low', 'medium', 'high'];
-	const statusOptions = generateDropdownOptions(statuses, t, 'statuses')
-	const priorityOptions = generateDropdownOptions(priorities, t, 'priorities')
+	const statusOptions = generateDropdownOptions(statuses, t, 'statuses');
+	const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
+	const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
+	if (isDeleted) {
+		return null;
+	}
+
+	const handleStartEditing = (taskId: string, currentName: string) => {
+		setEditingTaskId(taskId);
+		setName(currentName);
+	  };
+	
+	  const handleSaveTaskName = () => {
+		console.log(name);
+		if (name.trim() !== '') {
+			handleNameChange().catch((error) => console.error(error));
+		}
+		setEditingTaskId(null);
+	  };
+	
+	  const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter') {
+		  handleSaveTaskName();
+		} else if (e.key === 'Escape') {
+		  setEditingTaskId(null);
+		}
+	  };
 
 	return (
-		<div className="flex justify-between items-center py-3">
-
-			<p className="font-semibold text-gray-900">{name}</p>
-
-			<div className="flex">
-
-				<SelectAction
-					options={statusOptions}
-					groupName="Status"
-					defaultValue={selectedStatus}
-					getitemClassName={getStatusClassName}
-					className={
-						selectedStatus ? statusColors[selectedStatus as 'pending' | 'in_progress' | 'completed' | 'in_review'] : undefined
+		<div 
+			className="flex justify-between items-center py-3"
+			onMouseEnter={() => setIsHovered(true)} 
+			onMouseLeave={() => setIsHovered(false)}
+		>
+			{editingTaskId === initialSubtask.id ? (
+				<div className="flex flex-grow items-center mr-4">
+					<input
+					type="text"
+					value={name}
+					onChange={(e) => setName(e.target.value)}
+					onBlur={() => handleSaveTaskName()}
+					onKeyDown={(e) => handleKeyDown(e)}
+					className="w-full rounded-md border-none p-2 font-semibold text-gray-900 focus:outline-none bg-transparent"
+					autoFocus
+					/>
+					<X
+					className="ml-2 h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-700"
+					onClick={() => setEditingTaskId(null)}
+					/>
+				</div>
+			) : (
+				<div
+					className="flex w-full items-center justify-between"
+				>
+					<p
+					className="flex-grow font-semibold text-gray-900"
+					onClick={() =>
+						handleStartEditing(initialSubtask.id, initialSubtask.name)
 					}
-					onSelectHandler={(value) => {
-						setSelectedStatus(value);
-					}}
-					showLabel={false}
-				/>
+					>
+					{initialSubtask.name}
+					</p>
+				</div>
+			)}
+			
 
-				<SelectAction
-					options={priorityOptions}
-					groupName="Priority"
-					defaultValue={selectedPriority}
-					getitemClassName={getPriorityClassName}
-					className={
-						selectedPriority ? priorityColors[selectedPriority as 'low' | 'medium' | 'high'] : undefined
-					}
-					onSelectHandler={(value) => {
-						setSelectedPriority(value);
-					}}
-					showLabel={false}
-				/>
+			
 
-				<DatePickerWithRange 
-					selectedPeriod={selectedPeriod}
-          setSelectedPeriod={setSelectedPeriod}
-				/>
+			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}> 
+				<SheetContent>
+				<SheetHeader>
+					<SheetTitle>
+						<input
+							type="text"
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+							onBlur={handleNameChange}
+							className="border-none p-2 rounded-md focus:outline-none w-full"
+						/>
+					</SheetTitle>
+				</SheetHeader>
+				<div className="grid gap-4 py-4">
+					<div className="flex items-center justify-between">
+						<span className="flex text-sm font-semibold">
+						<CalendarIcon className="mr-2 h-4 w-4" /> {t('details.deadline')}{' '}
+						</span>
+						<DatePickerWithRange 
+							selectedPeriod={selectedPeriod}
+							setSelectedPeriod={handleDateRangeChange}
+						/>
+					</div>
+					<div className="flex items-center text-sm justify-between">
+						<span className="flex text-sm font-semibold">
+						<Loader className="mr-2 h-4 w-4" />
+						</span>
+						<SelectAction
+							options={statusOptions}
+							groupName={t('details.status')}
+							defaultValue={selectedStatus}
+							getitemClassName={getStatusClassName}
+							className={
+								selectedStatus ? statusColors[selectedStatus as 'pending' | 'in_progress' | 'completed' | 'in_review'] : undefined
+							}
+							onSelectHandler={(value) => {
+								handleStatusChange(value).catch((error) => console.error(error));
+							}}
+						/>
+					</div>
+					<div className="flex items-center text-sm justify-between">
+						
+						<span className="flex text-sm font-semibold">
+						<FlagIcon className="mr-2 h-4 w-4" />
+						</span>
+						<SelectAction
+							options={priorityOptions}
+							groupName={t('details.priority')}
+							defaultValue={selectedPriority}
+							getitemClassName={getPriorityClassName}
+							className={
+								selectedPriority ? priorityColors[selectedPriority as 'low' | 'medium' | 'high'] : undefined
+							}
+							onSelectHandler={(value) => {
+								handlePriorityChange(value).catch((error) => console.error(error));
+							}}
+						/>
+					</div>
+
+					<RichTextEditor
+						content={content}
+						onChange= {
+							(value) => {
+								setContent(value);
+							}
+						}
+						onBlur={() => {
+							handleContentChange().catch((error) => console.error(error));
+						}}
+						userRole={userRole}
+						hideSubmitButton={true}
+						showToolbar={true}
+						isEditable={true}
+					/>
+				</div>
+				</SheetContent>
+			</Sheet>
+
+			<div className="flex gap-1 items-center">
+				<div className="flex items-center">
+					{isHovered && (
+						<>
+						<Button
+							className="bg-gray-200 text-gray-500 mr-4"
+							onClick={() => setIsSheetOpen(true)} 
+						>
+							{t('openOrders')}
+						</Button>
+						</>
+					)}
+					<SelectAction
+						options={statusOptions}
+						groupName={t('details.status')}
+						defaultValue={selectedStatus}
+						getitemClassName={getStatusClassName}
+						className={
+							selectedStatus ? statusColors[selectedStatus as 'pending' | 'in_progress' | 'completed' | 'in_review'] : undefined
+						}
+						onSelectHandler={(value) => {
+							handleStatusChange(value).catch((error) => console.error(error));
+						}}
+						showLabel={false}
+					/>
+
+					<SelectAction
+						options={priorityOptions}
+						groupName={t('details.priority')}
+						defaultValue={selectedPriority}
+						getitemClassName={getPriorityClassName}
+						className={
+							selectedPriority ? priorityColors[selectedPriority as 'low' | 'medium' | 'high'] : undefined
+						}
+						onSelectHandler={(value) => {
+							handlePriorityChange(value).catch((error) => console.error(error));
+						}}
+						showLabel={false}
+					/>
+
+					<DatePickerWithRange 
+						selectedPeriod={selectedPeriod}
+						setSelectedPeriod={handleDateRangeChange}
+					/>
+				</div>
 			</div>
+
+			{isHovered && (
+				<div className="h-4 w-4 ml-2">
+					<Trash className="h-4 w-4 text-gray-500 cursor-pointer hover:text-red-500" onClick={handleDeleteSubtask} />
+				</div>
+			)}
+
+
+			
 		</div>
 	);
 }

@@ -15,7 +15,7 @@ import { handleDomainCheck } from './handlers/domain-check-handler';
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|images|locales|assets|api).*)',
+    '/((?!_next/static|_next/image|images|locales|assets|api/v1/webhook|api).*)', 
     '/api/v1/:path*',
   ],
 };
