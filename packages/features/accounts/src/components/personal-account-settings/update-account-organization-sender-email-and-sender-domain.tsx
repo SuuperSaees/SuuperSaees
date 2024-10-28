@@ -17,8 +17,21 @@ import { ThemedButton } from '../ui/button-themed-with-settings';
 import { ThemedInput } from '../ui/input-themed-with-settings';
 
 const AccountOrganizationSenderEmailAndSenderDomainSchema = z.object({
-sender_email: z.string().optional(),
-  sender_domain: z.string().optional(),
+  sender_email: z
+    .string()
+    .transform((email) => email.toLowerCase())
+    .refine((email) => {
+      const testEmail = `${email}@gmail.com`; // Add suffix to validate
+      return z.string().email().safeParse(testEmail).success;
+    })
+    .optional(),
+  sender_domain: z
+    .string()
+    .refine((domain) => {
+      const testDomain = `test@${domain}`; // Add prefix to validate
+      return z.string().email().safeParse(testDomain).success;
+    })
+    .optional(),
 });
 export function UpdateAccountOrganizationSenderEmailAndSenderDomain() {
   const { updateOrganizationSetting, sender_email, sender_domain } = useOrganizationSettings();
@@ -38,7 +51,7 @@ export function UpdateAccountOrganizationSenderEmailAndSenderDomain() {
     if (sender_email) {
       updateOrganizationSetting.mutate({
         key: 'sender_email',
-        value: sender_email,
+        value: sender_email.toLowerCase(),
       });
     }
     if (sender_domain) {
