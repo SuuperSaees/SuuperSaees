@@ -1965,55 +1965,94 @@ export type Database = {
           },
         ]
       }
-      tasks: {
+      subtasks: {
         Row: {
-          account_id: string
+          completed: boolean | null
+          content: string | null
           created_at: string
-          description: string | null
-          done: boolean
+          deleted_on: string | null
+          end_date: string | null
           id: string
-          title: string
-          updated_at: string
+          name: string | null
+          parent_task_id: string | null
+          position: number | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          start_date: string | null
+          state: Database["public"]["Enums"]["order_status_types"] | null
         }
         Insert: {
-          account_id: string
+          completed?: boolean | null
+          content?: string | null
           created_at?: string
-          description?: string | null
-          done?: boolean
+          deleted_on?: string | null
+          end_date?: string | null
           id?: string
-          title: string
-          updated_at?: string
+          name?: string | null
+          parent_task_id?: string | null
+          position?: number | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
+          state?: Database["public"]["Enums"]["order_status_types"] | null
         }
         Update: {
-          account_id?: string
+          completed?: boolean | null
+          content?: string | null
           created_at?: string
-          description?: string | null
-          done?: boolean
+          deleted_on?: string | null
+          end_date?: string | null
           id?: string
-          title?: string
-          updated_at?: string
+          name?: string | null
+          parent_task_id?: string | null
+          position?: number | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
+          state?: Database["public"]["Enums"]["order_status_types"] | null
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subtasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
             isOneToOne: false
-            referencedRelation: "accounts"
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      tasks: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          name: string | null
+          order_id: string | null
+          position: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: string | null
+          position?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: string | null
+          position?: number | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "tasks_order_id_fkey"
+            columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
+            referencedRelation: "orders_v2"
+            referencedColumns: ["uuid"]
           },
         ]
       }
@@ -2344,6 +2383,7 @@ export type Database = {
         | "description"
         | "title"
         | "assigned_to"
+        | "task"
       app_permissions:
         | "roles.manage"
         | "billing.manage"

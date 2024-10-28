@@ -55,7 +55,8 @@
       "message": "Comment",
       "description": "Description",
       "title": "Title",
-      "assign": "Assign"
+      "assign": "Assign",
+      "task": "Task"
     },
     "prepositions": {
       "in": "in",
@@ -69,7 +70,8 @@
       "from": "from",
       "into": "into",
       "during": "during",
-      "until": "until"
+      "until": "until",
+      "named": "named"
     },
     "values": {
       "low": "Low",

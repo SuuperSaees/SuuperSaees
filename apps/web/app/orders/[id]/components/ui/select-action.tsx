@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-
-
+import { useState, useEffect } from 'react';
 
 import {
   Select,
@@ -39,6 +37,17 @@ const SelectAction = ({
   ...rest
 }: SelectActionProps) => {
   const [selectedOption, setSelectedOption] = useState(defaultValue);
+
+  useEffect(() => {
+    setSelectedOption(defaultValue);
+  }, [defaultValue]);
+
+  //Retrieves the label for a given value from the options array
+  const getSelectedLabel = (value: string) => {
+    const option = options.find(opt => opt.value === value);
+    return option ? option.label : '';
+  };
+
   return (
     <div className={`flex w-full items-center ${showLabel ? 'justify-between' : 'justify-center'}`}>
       <span className="font-semibold">
@@ -58,7 +67,9 @@ const SelectAction = ({
           {(groupName === 'Priority' || groupName === 'Prioridad') && (
             <div className="mr-2 h-2 w-2 rounded-full bg-current"></div>
           )}
-          <SelectValue placeholder="Select an option" className="m-0 p-0" />
+          <SelectValue className="m-0 p-0" >
+            {selectedOption ? getSelectedLabel(selectedOption) : 'Select an option'}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup className="flex flex-col gap-2">

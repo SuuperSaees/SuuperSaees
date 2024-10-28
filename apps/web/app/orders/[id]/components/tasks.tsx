@@ -1,10 +1,18 @@
-import TaskDropdown from "./task-dropdown";
+import { useRealTimeTasks } from '../hooks/use-tasks';
+import TaskDropdown from './task-dropdown';
 
-const TasksSection = () => {
+const TasksSection = ({
+  userRole,
+  orderId,
+}: {
+  userRole: string;
+  orderId: string;
+}) => {
+  const { tasks } = useRealTimeTasks(orderId);
 
   return (
     <div className="h-screen max-h-screen overflow-y-auto">
-      <TaskDropdown />
+      <TaskDropdown tasks={tasks} userRole={userRole} orderId={orderId} />
     </div>
   );
 };
