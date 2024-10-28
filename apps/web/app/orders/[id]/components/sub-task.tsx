@@ -63,16 +63,7 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 			</div>
 			
 
-			{isHovered && (
-				<>
-				<Button
-					className="bg-gray-200 text-gray-500"
-					onClick={() => setIsSheetOpen(true)} 
-				>
-					{t('openOrders')}
-				</Button>
-				</>
-			)}
+			
 
 			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}> 
 				<SheetContent>
@@ -153,7 +144,17 @@ function SubTask({initialSubtask, userRole } : {initialSubtask : Subtask.Type, u
 			</Sheet>
 
 			<div className="flex gap-0 items-center">
-				<div className="flex">
+				<div className="flex items-center">
+					{isHovered && (
+						<>
+						<Button
+							className="bg-gray-200 text-gray-500 mr-4"
+							onClick={() => setIsSheetOpen(true)} 
+						>
+							{t('openOrders')}
+						</Button>
+						</>
+					)}
 					<SelectAction
 						options={statusOptions}
 						groupName={t('details.status')}
