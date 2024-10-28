@@ -145,7 +145,7 @@ function TaskDropdown({
                             onChange={(e) => setNewTaskName(e.target.value)}
                             onBlur={() => handleSaveTaskName(task.id)}
                             onKeyDown={(e) => handleKeyDown(e, task.id)}
-                            className="w-full rounded-md border-none p-2 font-semibold text-gray-900 focus:outline-none"
+                            className="w-full rounded-md border-none p-2 font-semibold text-gray-900 focus:outline-none bg-transparent"
                             autoFocus
                           />
                           <X
