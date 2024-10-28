@@ -61,5 +61,16 @@
     "confirmEmail": "Confirm email",
     "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
     "at": "at"
+  },
+  "clientConfirmEmail": {
+    "subject": "Confirm your email",
+    "body": "Welcome to <strong>${agencyName}</strong>, please activate your account to get started.",
+    "greeting": "Hi ${toEmail}",
+    "yourUsername": "Your username:",
+    "thanks": "Thanks,",
+    "team": "The Team",
+    "activateAccount": "Activate account",
+    "at": "at",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
   }
 }

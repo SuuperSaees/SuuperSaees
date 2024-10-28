@@ -31,5 +31,9 @@ export namespace OrganizationSettings {
   export const EXTRA_KEYS = {
     default_sender_name: 'Ana',
     default_agency_name: 'Suuper',
+    default_sender_logo:
+      'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png',
+    default_sender_color: '#1A38D7',
+    default_from_sender_identity: 'Ana de Suuper <samuel@suuper.co>',
   };
 }

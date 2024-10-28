@@ -62,5 +62,16 @@
     "acceptInvitation": "Aceptar invitación",
     "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
     "at": "de"
+  },
+  "clientConfirmEmail": {
+    "subject": "Confirma tu correo",
+    "body": "Bienvenido a ${agencyName}, por favor activa tu cuenta para empezar.",
+    "greeting": "Hola ${toEmail}",
+    "yourUsername": "Tu nombre de usuario:",
+    "thanks": "Gracias,",
+    "team": "El equipo",
+    "activateAccount": "Activar cuenta",
+    "at": "de",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
   }
 }

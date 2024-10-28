@@ -1,8 +1,14 @@
 import { createHmac } from 'crypto';
-import { getSupabaseServerComponentClient } from '../../../packages/supabase/src/clients/server-component.client';
+
+
+
 import { Tokens } from '../../../apps/web/lib/tokens.types';
+import { getSupabaseServerComponentClient } from '../../../packages/supabase/src/clients/server-component.client';
+
 
 const client = getSupabaseServerComponentClient();
+
+const { sha256 } = Tokens.EXTRA_TOKENS_KEYS;
 
 export async function verifyToken(accessToken: string): Promise<boolean> {
   try {
@@ -13,7 +19,7 @@ export async function verifyToken(accessToken: string): Promise<boolean> {
     // const payload = JSON.parse(Buffer.from(base64Payload ?? "", 'base64').toString('utf-8'));
 
     // Verify the signature
-    const expectedSignature = createHmac('sha256', process.env.JWT_SECRET!)
+    const expectedSignature = createHmac(sha256, process.env.JWT_SECRET!)
       .update(`${base64Header}.${base64Payload}`)
       .digest('base64');
 
