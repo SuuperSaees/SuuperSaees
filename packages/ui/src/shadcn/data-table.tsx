@@ -1,25 +1,47 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
-import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
-
-
+import type { ColumnDef, TableOptions } from '@tanstack/react-table';
+import {
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
 
 import { Trans } from '../makerkit/trans';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './pagination';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table';
-
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from './pagination';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './table';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  options?: TableOptions<TData>;
+  className?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  options,
+  className
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
+    ...options,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -31,7 +53,7 @@ export function DataTable<TData, TValue>({
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
   return (
-    <div className="rounded-md border">
+    <div className={"rounded-md border " + className} >
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -79,19 +101,22 @@ export function DataTable<TData, TValue>({
       {table.getRowModel().rows?.length > 0 && (
         <Pagination className="border-t p-4">
           <PaginationContent className="flex w-full items-center justify-between">
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (table.getCanPreviousPage()) {
-                    table.previousPage();
-                  }
-                }}
-              >
-                <Trans i18nKey={'common:pagination.previous'} />
-              </PaginationPrevious>
-            </PaginationItem>
+            {pageIndex > 0 && (
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (table.getCanPreviousPage()) {
+                      table.previousPage();
+                    }
+                  }}
+                >
+                  <Trans i18nKey={'common:pagination.previous'} />
+                </PaginationPrevious>
+              </PaginationItem>
+            )}
+
             <div className="flex flex-1 justify-center">
               {pages.map((page) => (
                 <PaginationItem key={page}>
@@ -114,19 +139,21 @@ export function DataTable<TData, TValue>({
                 </PaginationItem>
               )}
             </div>
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (table.getCanNextPage()) {
-                    table.nextPage();
-                  }
-                }}
-              >
-                <Trans i18nKey={'common:pagination.next'} />
-              </PaginationNext>
-            </PaginationItem>
+            {pageIndex < pageCount - 1 && (
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (table.getCanNextPage()) {
+                      table.nextPage();
+                    }
+                  }}
+                >
+                  <Trans i18nKey={'common:pagination.next'} />
+                </PaginationNext>
+              </PaginationItem>
+            )}
           </PaginationContent>
         </Pagination>
       )}

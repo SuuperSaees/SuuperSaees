@@ -1929,84 +1929,128 @@ export type Database = {
           updated_at?: string | null;
         };
         Update: {
-          account_id?: number | null;
-          active?: boolean;
-          billing_customer_id?: string;
-          billing_provider?: Database['public']['Enums']['billing_provider'];
-          cancel_at_period_end?: boolean;
-          created_at?: string | null;
-          currency?: string;
-          days_used?: number;
-          id?: string;
-          period_ends_at?: string | null;
-          period_starts_at?: string | null;
-          propietary_organization_id?: string | null;
-          status?: Database['public']['Enums']['subscription_status'];
-          token_id?: string;
-          trial_ends_at?: string | null;
-          trial_starts_at?: string | null;
-          updated_at?: string | null;
-        };
+          account_id?: number | null
+          active?: boolean
+          billing_customer_id?: string
+          billing_provider?: Database["public"]["Enums"]["billing_provider"]
+          cancel_at_period_end?: boolean
+          created_at?: string | null
+          currency?: string
+          days_used?: number
+          id?: string
+          period_ends_at?: string | null
+          period_starts_at?: string | null
+          propietary_organization_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          token_id?: string
+          trial_ends_at?: string | null
+          trial_starts_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [{
+          foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+          columns: ["propietary_organization_id"]
+          isOneToOne: false
+          referencedRelation: "accounts"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+          columns: ["propietary_organization_id"]
+          isOneToOne: false
+          referencedRelation: "user_account_workspace"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+          columns: ["propietary_organization_id"]
+          isOneToOne: false
+          referencedRelation: "user_accounts"
+          referencedColumns: ["id"]
+        },]
+      }
+      subtasks: {
+        Row: {
+          completed: boolean | null
+          content: string | null
+          created_at: string
+          deleted_on: string | null
+          end_date: string | null
+          id: string
+          name: string | null
+          parent_task_id: string | null
+          position: number | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          start_date: string | null
+          state: Database["public"]["Enums"]["order_status_types"] | null
+        }
+        Insert: {
+          completed?: boolean | null
+          content?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string | null
+          parent_task_id?: string | null
+          position?: number | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
+          state?: Database["public"]["Enums"]["order_status_types"] | null
+        }
+        Update: {
+          completed?: boolean | null
+          content?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string | null
+          parent_task_id?: string | null
+          position?: number | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
+          state?: Database["public"]["Enums"]["order_status_types"] | null
+        }
         Relationships: [
           {
-            foreignKeyName: 'subscriptions_propietary_organization_id_fkey';
-            columns: ['propietary_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "subtasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: 'subscriptions_propietary_organization_id_fkey';
-            columns: ['propietary_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'subscriptions_propietary_organization_id_fkey';
-            columns: ['propietary_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
+        ]
+      }
       tasks: {
         Row: {
-          account_id: string;
-          created_at: string;
-          description: string | null;
-          done: boolean;
-          id: string;
-          title: string;
-          updated_at: string;
-        };
+          completed: boolean | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          name: string | null
+          order_id: string | null
+          position: number | null
+        }
         Insert: {
-          account_id: string;
-          created_at?: string;
-          description?: string | null;
-          done?: boolean;
-          id?: string;
-          title: string;
-          updated_at?: string;
-        };
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: string | null
+          position?: number | null
+        }
         Update: {
-          account_id?: string;
-          created_at?: string;
-          description?: string | null;
-          done?: boolean;
-          id?: string;
-          title?: string;
-          updated_at?: string;
-        };
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: string | null
+          position?: number | null
+        }
         Relationships: [
-          {
-            foreignKeyName: 'tasks_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'accounts';
-            referencedColumns: ['id'];
-          },
           {
             foreignKeyName: 'tasks_account_id_fkey';
             columns: ['account_id'];
@@ -2020,6 +2064,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'user_accounts';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: "tasks_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["uuid"]
           },
         ];
       };
@@ -2376,15 +2427,16 @@ export type Database = {
     Enums: {
       action_type: 'create' | 'update' | 'delete';
       activity_type:
-        | 'message'
-        | 'review'
-        | 'status'
-        | 'priority'
-        | 'assign'
-        | 'due_date'
-        | 'description'
-        | 'title'
-        | 'assigned_to';
+        | "message"
+        | "review"
+        | "status"
+        | "priority"
+        | "assign"
+        | "due_date"
+        | "description"
+        | "title"
+        | "assigned_to"
+        | "task"
       app_permissions:
         | 'roles.manage'
         | 'billing.manage'
