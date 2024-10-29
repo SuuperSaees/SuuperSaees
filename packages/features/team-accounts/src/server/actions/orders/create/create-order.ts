@@ -243,7 +243,7 @@ export const createOrders = async (
     }
 
     // Step 9: Redirect to orders page after successful order creation
-    redirect('/orders');
+    redirect(`/orders/${orderData.id}`);
   } catch (error) {
     console.error(error);
     throw error;
