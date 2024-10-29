@@ -24,19 +24,21 @@ import { deleteClient } from './delete-client-server';
 const DeleteUserDialog = ({
   userId,
   queryKey,
+  organizationId,
 }: {
   userId: string;
   queryKey?: string;
+  organizationId?: string;
 }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   // Client version
   const deleteClientFn = useMutation({
-    mutationFn: async (userId: string) => await deleteClient(userId),
+    mutationFn: async (userId: string) => await deleteClient(userId, organizationId),
     onSuccess: async () => {
       toast('Success', {
-        description: 'User deleted successfully',
+        description: 'Client deleted successfully',
       });
 
       await queryClient.invalidateQueries({
@@ -46,7 +48,7 @@ const DeleteUserDialog = ({
 
     onError: () => {
       toast('Error', {
-        description: 'Error deleting user',
+        description: 'Error deleting client',
       });
     },
   });
@@ -55,15 +57,15 @@ const DeleteUserDialog = ({
   // to the data was fetched directly from the server
   const handleDelete = async () => {
     try {
-      await deleteClient(userId);
+      await deleteClient(userId, organizationId);
 
       toast('Success', {
-        description: 'User deleted successfully',
+        description: 'Client deleted successfully',
       });
       router.refresh();
     } catch (error) {
       toast('Error', {
-        description: 'Error deleting user',
+        description: 'Error deleting client',
       });
     }
   };

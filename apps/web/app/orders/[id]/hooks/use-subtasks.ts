@@ -4,29 +4,17 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import { DateRange } from '@kit/ui/calendar';
 
 import { Subtask } from '~/lib/tasks.types';
-import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { createNewSubtask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
+import { updateSubtaskById, updateSubtasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 
 type SubtaskType = Subtask.Type;
 
-export const useRealTimeSubtasks = (initialSubtask: SubtaskType) => {
+export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
   const supabase = useSupabase();
-  const [subtask, setSubtask] = useState<SubtaskType>(initialSubtask);
-  const [isDeleted, setIsDeleted] = useState<boolean>(false);
-  const [selectedStatus, setSelectedStatus] = useState<string>(
-    subtask.state ?? 'pending',
-  );
-  const [selectedPriority, setSelectedPriority] = useState<string>(
-    subtask.priority ?? 'low',
-  );
-  const [name, setName] = useState<string>(subtask.name ?? '');
-  const [content, setContent] = useState<string>(subtask.content ?? '');
-  const [selectedPeriod, setSelectedPeriod] = useState<DateRange>({
-    from: new Date(subtask.start_date ?? Date.now()),
-    to: new Date(subtask.end_date ?? Date.now()),
-  });
+  const [subtaskList, setSubtaskList] =
+    useState<SubtaskType[]>(initialSubtasks);
 
   const queryClient = useQueryClient();
 
@@ -37,15 +25,26 @@ export const useRealTimeSubtasks = (initialSubtask: SubtaskType) => {
       old: SubtaskType;
     }) => {
       const { eventType, new: newSubtask, old: oldSubtask } = payload;
-
-      if (eventType === 'UPDATE' && newSubtask.id === subtask.id) {
-        if (newSubtask.deleted_on) {
-          setIsDeleted(true);
-        } else {
-          setSubtask((prev) => ({ ...prev, ...newSubtask }));
-        }
-      } else if (eventType === 'DELETE' && oldSubtask.id === subtask.id) {
-        setIsDeleted(true);
+      if (eventType === 'INSERT') {
+        setSubtaskList((prevSubtasks) => [...prevSubtasks, { ...newSubtask }]);
+      } else if (eventType === 'UPDATE') {
+        setSubtaskList(
+          (prevSubtasks) =>
+            prevSubtasks
+              .map((subtask) =>
+                subtask.id === newSubtask.id
+                  ? {
+                      ...subtask,
+                      ...newSubtask,
+                    }
+                  : subtask,
+              )
+              .filter((subtask) => subtask.deleted_on === null), // Filter out deleted subtasks
+        );
+      } else if (eventType === 'DELETE') {
+        setSubtaskList((prevSubtasks) =>
+          prevSubtasks.filter((subtask) => subtask.id !== oldSubtask.id),
+        );
       }
     };
 
@@ -61,17 +60,32 @@ export const useRealTimeSubtasks = (initialSubtask: SubtaskType) => {
     return () => {
       channel.unsubscribe().catch((error) => console.error(error));
     };
-  }, [subtask.id]);
+  }, []);
 
-  useEffect(() => {
-    if (subtask.deleted_on) {
-      setIsDeleted(true);
-    }
-  }, [subtask.deleted_on]);
+  const createSubtask = useMutation({
+    mutationFn: ({ newSubtask }: { newSubtask: Omit<Subtask.Type, 'id'> }) =>
+      createNewSubtask(newSubtask),
+
+    onSuccess: async () => {
+      // toast.success('Successfully created new subtask');
+
+      await queryClient.invalidateQueries({
+        queryKey: ['subtasks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error creating new subtask');
+    },
+  });
 
   const updateSubtask = useMutation({
-    mutationFn: async (updates: Partial<SubtaskType>) =>
-      updateSubtaskById(subtask.id, updates),
+    mutationFn: async ({
+      subtaskId,
+      subtask,
+    }: {
+      subtaskId: string;
+      subtask: Subtask.Type;
+    }) => updateSubtaskById(subtaskId, subtask),
     onSuccess: async () => {
       // toast.success('Successfully updated task');
       await queryClient.invalidateQueries({
@@ -83,73 +97,33 @@ export const useRealTimeSubtasks = (initialSubtask: SubtaskType) => {
     },
   });
 
-  const handleStatusChange = async (value: string) => {
-    if (
-      ['completed', 'in_progress', 'in_review', 'pending', 'annulled'].includes(
-        value,
-      )
-    ) {
-      setSelectedStatus(value);
-      await updateSubtask.mutateAsync({
-        state: value as
-          | 'completed'
-          | 'in_progress'
-          | 'in_review'
-          | 'pending'
-          | 'annulled',
-        completed: value === 'completed' ? true : false,
+  const updateSubtaskIndex = useMutation({
+    mutationFn:(
+        { 
+          subtasks 
+        }: {
+          subtasks: Subtask.Type[];
+        }
+    ) => updateSubtasksPositions(subtasks),
+    onSuccess: async () => {
+      // toast.success('Successfully updated task positions');
+
+      await queryClient.invalidateQueries({
+        queryKey: ['subtasks', 'all'],
       });
-    }
-  };
-
-  const handlePriorityChange = async (value: string) => {
-    if (['high', 'medium', 'low'].includes(value)) {
-      setSelectedPriority(value);
-      await updateSubtask.mutateAsync({
-        priority: value as 'high' | 'medium' | 'low',
+      await queryClient.invalidateQueries({
+        queryKey: ['taks', 'all'],
       });
-    }
-  };
-
-  const handleNameChange = async () => {
-    await updateSubtask.mutateAsync({ name });
-  };
-
-  const handleContentChange = async () => {
-    await updateSubtask.mutateAsync({ content });
-  };
-
-  const handleDateRangeChange = async (newPeriod: DateRange) => {
-    setSelectedPeriod(newPeriod);
-    await updateSubtask.mutateAsync({
-      start_date: newPeriod?.from ? newPeriod?.from.toISOString() : null,
-      end_date: newPeriod?.to ? newPeriod?.to.toISOString() : null,
-    });
-  };
-
-  const handleDeleteSubtask = async () => {
-    await updateSubtask.mutateAsync({ deleted_on: new Date().toISOString() });
-  };
+    },
+    onError: () => {
+      toast.error('Error updating task positions');
+    },
+  });
 
   return {
-    subtask,
+    subtaskList,
+    createSubtask,
     updateSubtask,
-    selectedStatus,
-    setSelectedStatus,
-    selectedPriority,
-    setSelectedPriority,
-    name,
-    setName,
-    content,
-    setContent,
-    selectedPeriod,
-    setSelectedPeriod,
-    handleStatusChange,
-    handlePriorityChange,
-    handleNameChange,
-    handleDateRangeChange,
-    handleContentChange,
-    handleDeleteSubtask,
-    isDeleted,
+    updateSubtaskIndex,
   };
 };

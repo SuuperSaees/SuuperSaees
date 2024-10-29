@@ -11,27 +11,27 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 
-import { Task } from '~/lib/tasks.types';
+import { Subtask} from '~/lib/tasks.types';
 
-import { useRealTimeTasks } from './use-tasks';
+import { useRealTimeSubtasks } from './use-subtasks';
 
-export function useTaskDragAndDrop(
-  tasks: Task.Type[],
-  orderId: string,
+export function useSubtaskDragAndDrop(
+  subtasks: Subtask.Type[],
 ) {
-  const [taskList, setTaskList] = useState(tasks);
+  const [subtaskListDragAnDrop, setSubaskList] = useState(subtasks);
   const [isDragging, setIsDragging] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [dragTask, setDragTask] = useState({
     isDragging: false,
     type: null,
   });
-  const { updateTaskPositions } =
-    useRealTimeTasks(orderId);
+
+  const { updateSubtaskIndex } =
+    useRealTimeSubtasks(subtaskListDragAnDrop);
 
   useEffect(() => {
-    setTaskList(tasks);
-  }, [tasks]);
+    setSubaskList(subtasks);
+  }, [subtasks]);
 
   const mouseSensor = useSensor(MouseSensor, {
     // Require the mouse to move by 10 pixels before activating
@@ -73,27 +73,27 @@ export function useTaskDragAndDrop(
       resetDragState();
       return;
     }
-      await handleTaskDragEnd(active.id as string, over.id as string);
 
+    await handleTaskDragEnd(active.id as string, over.id as string);
 
     resetDragState();
   }
 
   const handleTaskDragEnd = async (activeId: string, overId: string) => {
-    const oldIndex = taskList.findIndex((task) => task.id === activeId);
-    const newIndex = taskList.findIndex((task) => task.id === overId);
+    const oldIndex = subtaskListDragAnDrop.findIndex((task) => task.id === activeId);
+    const newIndex = subtaskListDragAnDrop.findIndex((task) => task.id === overId);
 
     if (oldIndex !== newIndex) {
-      const updatedTasks = arrayMove(taskList, oldIndex, newIndex).map(
-        (task, index) => ({
-          ...task,
+      const updatedSubtasks = arrayMove(subtaskListDragAnDrop, oldIndex, newIndex).map(
+        (subtask, index) => ({
+          ...subtask,
           position: index,
         }),
       );
 
-      setTaskList(updatedTasks);
-      await updateTaskPositions.mutateAsync({
-        tasks: updatedTasks,
+      setSubaskList(updatedSubtasks);
+      await updateSubtaskIndex.mutateAsync({
+        subtasks: updatedSubtasks,
       });
     }
   };
@@ -110,7 +110,7 @@ export function useTaskDragAndDrop(
   return {
     dragTask,
     isDragging,
-    taskList,
+    subtaskListDragAnDrop,
     sensors,
     handleDragStart,
     handleDragEnd,

@@ -4,9 +4,9 @@ import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { Subtask, Task } from '~/lib/tasks.types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createNewSubtask, createNewTask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
+import { createNewTask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
 import { toast } from 'sonner';
-import { updateSubtasksPositions, updateTaskById, updateTaskNameById, updateTasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { updateTaskById, updateTaskNameById, updateTasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 import { deleteTaskById } from '~/team-accounts/src/server/actions/tasks/delete/delete-task';
 import { getTasks } from '~/team-accounts/src/server/actions/tasks/get/get-tasks';
 
@@ -141,25 +141,6 @@ export const useRealTimeTasks = (orderId: string) => {
     },
   });
 
-  const createSubtask = useMutation({
-    mutationFn: ({
-        newSubtask,
-    }: {
-        newSubtask: Omit<Subtask.Type, 'id'>;
-    }) => createNewSubtask(newSubtask),
-
-    onSuccess: async () => {
-      // toast.success('Successfully created new subtask');
-
-      await queryClient.invalidateQueries({
-        queryKey: ['subtasks', 'all'],
-      });
-    },
-    onError: () => {
-      toast.error('Error creating new subtask');
-    },
-  });
-
   const updateTaskName = useMutation({
     mutationFn:(
         { 
@@ -224,25 +205,6 @@ export const useRealTimeTasks = (orderId: string) => {
     },
   });
 
-  const updateSubtaskPositions = useMutation({
-    mutationFn:(
-        { 
-          subtasks 
-        }: {
-          subtasks: Subtask.Type[];
-        }
-    ) => updateSubtasksPositions(subtasks),
-    onSuccess: async () => {
-      // toast.success('Successfully updated task positions');
-
-      await queryClient.invalidateQueries({ queryKey: ['subtasks', 'all'] });
-      await queryClient.invalidateQueries({ queryKey: ['tasks', 'all'] });
-    },
-    onError: () => {
-      toast.error('Error updating subtask positions');
-    },
-  });
-
   const deleteTask = useMutation({
     mutationFn:(
         { 
@@ -267,11 +229,9 @@ export const useRealTimeTasks = (orderId: string) => {
     tasks,
     setTasks,
     createTask,
-    createSubtask,
     updateTaskName,
     updateTask,
     updateTaskPositions,
-    updateSubtaskPositions,
     deleteTask,
     loading,
     setLoading,

@@ -9,6 +9,7 @@ import {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
+  TableOptions,
   VisibilityState,
   getCoreRowModel,
   getFilteredRowModel,
@@ -28,54 +29,68 @@ import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
 import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/delete/delete-client';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
+import { ClientsWithOrganization } from '../../server/actions/clients/get/get-clients';
+import { Account } from '../../../../../../apps/web/lib/account.types';
 
 // import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 
-const getUniqueOrganizations = (clients: Client[]) => {
-  const organizationMap = new Map<string, Client>();
+const getUniqueOrganizations = (clients: ClientsWithOrganization[]): Organization[] => {
+  return clients.map((client) => ({
+    ...client.organization,
+    primary_owner: client.primaryOwner?.name ?? '',
+  }));
+};
 
-  clients.forEach((client) => {
-    if (!organizationMap.has(client.client_organization)) {
-      organizationMap.set(client.client_organization, client);
-    } else {
-      if (client.role === 'leader') {
-        organizationMap.set(client.client_organization, client);
-      }
-    }
-  });
+const getUniqueClients = (clients: ClientsWithOrganization[]): Client[] => {
+  return clients.flatMap((client) =>
+    client.users.map((user) => ({
+      ...user,
+      primary_owner: client.primaryOwner?.name ?? '',
+      organization: {
+        id: client.organization.id,
+        name: client.organization.name,
+      },
+    }))
+  );
+};
+// organization type based on getUniqueOrganizations
 
-  return Array.from(organizationMap.values());
+type Organization = Pick<
+  Account.Type,
+  | 'id'
+  | 'name'
+  | 'slug'
+  | 'picture_url'
+  | 'created_at'
+  | 'is_personal_account'
+  | 'primary_owner_user_id'
+> & {
+  primary_owner: string;
+};
+
+type Client = Pick<
+  Account.Type,
+  | 'id'
+  | 'name'
+  | 'email'
+  | 'created_at'
+  | 'is_personal_account'
+  | 'organization_id'
+  | 'picture_url'
+  | 'primary_owner_user_id'
+> & {
+  primary_owner: string;
+  organization: {
+    id: string;
+    name: string;
+  };
 };
 
 type ClientsTableProps = {
-  clients: {
-    id: string;
-    created_at: string;
-    name: string;
-    client_organization: string;
-    email: string;
-    role: string;
-    propietary_organization: string;
-    propietary_organization_id: string;
-    picture_url: string | null;
-    organization_id: string | null;
-  }[];
+  clients: ClientsWithOrganization[];
   accountIds: string[];
   accountNames: string[];
   view?: 'clients' | 'organizations';
-};
-
-type Client = {
-  id: string;
-  created_at: string;
-  name: string;
-  client_organization: string;
-  email: string;
-  role: string;
-  propietary_organization: string;
-  propietary_organization_id: string;
-  picture_url: string | null;
-  organization_id: string | null;
 };
 
 // CLIENTS TABLE
@@ -97,6 +112,10 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
 
   const [search, setSearch] = React.useState('');
   const uniqueClients = useMemo(
+    () => getUniqueClients(clients),
+    [clients],
+  );
+  const uniqueOrganizations = useMemo(
     () => getUniqueOrganizations(clients),
     [clients],
   );
@@ -105,13 +124,13 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
   const columns =
     activeButton === 'clients' ? clientColumns : organizationColumns;
 
-  const filteredClients = clients.filter((client) => {
+  const filteredClients = uniqueClients.filter((client) => {
     const searchString = search?.toLowerCase();
     const displayName = client?.name.toLowerCase();
     return displayName.includes(searchString);
   });
 
-  const filteredOrganizations = uniqueClients.filter((client) => {
+  const filteredOrganizations = uniqueOrganizations.filter((client) => {
     const searchString = search?.toLowerCase();
     const displayName = client?.name.toLowerCase();
     return displayName.includes(searchString);
@@ -216,12 +235,12 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
       ) : (
         <DataTable
           data={
-            activeButton === 'organizations'
+            (activeButton === 'organizations'
               ? filteredOrganizations
-              : filteredClients
+              : filteredClients) as Client[]
           }
-          columns={columns}
-          options={options}
+          columns={columns as ColumnDef<Client>[]}
+          options={options as TableOptions<Client>}
         />
       )}
     </div>
@@ -238,7 +257,7 @@ const useClientColumns = (
         header: t('clientName'),
         cell: ({ row }) => (
           <Link
-            href={`clients/organizations/${row.original.organization_id}`}
+            href={`clients/organizations/${row.original.organization.id}`}
             className={'flex items-center space-x-4 text-left'}
           >
             <span>
@@ -276,10 +295,10 @@ const useClientColumns = (
         header: t('organization'),
         cell: ({ row }) => (
           <Link
-            href={`clients/organizations/${row.original.organization_id}`}
+            href={`clients/organizations/${row.original.organization.id}`}
             className="capitalize"
           >
-            {row.getValue('client_organization')}
+            {row.original.organization.name}
           </Link>
         ),
       },
@@ -303,7 +322,7 @@ const useClientColumns = (
           );
         },
         cell: ({ row }) => {
-          const date = new Date(row.original.created_at);
+          const date = new Date(row.original.created_at ?? '');
           const day = date.getDate().toString().padStart(2, '0');
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
           const year = date.getFullYear();
@@ -337,7 +356,7 @@ const useClientColumns = (
           );
         },
         cell: ({ row }) => {
-          const date = new Date(row.original.created_at);
+          const date = new Date(row.original.created_at ?? '');
           const day = date.getDate().toString().padStart(2, '0');
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
           const year = date.getFullYear();
@@ -371,10 +390,10 @@ const useClientColumns = (
   );
 };
 
-// ORGANIZATIONS TABLE
+{/* // ORGANIZATIONS TABLE */}
 const useOrganizationColumns = (
   t: TFunction<'clients', undefined>,
-): ColumnDef<Client>[] => {
+): ColumnDef<Organization>[] => {
   return useMemo(
     () => [
       {
@@ -382,7 +401,7 @@ const useOrganizationColumns = (
         header: t('organizationName'),
         cell: ({ row }) => (
           <Link
-            href={`clients/organizations/${row.original.organization_id}`}
+            href={`clients/organizations/${row.original.id}`}
             className={'flex items-center space-x-4 text-left'}
           >
             <span>
@@ -393,10 +412,10 @@ const useOrganizationColumns = (
             </span>
             <div className="flex flex-col">
               <span className="text-sm font-medium leading-[1.42857] text-gray-900">
-                {row.original.client_organization}
+                {row.original.name}
               </span>
               <span className="text-sm font-normal leading-[1.42857] text-gray-600">
-                {t('leader')}: {row.original.name}
+                {t('leader')}: {row.original.primary_owner}
               </span>
             </div>
           </Link>
@@ -432,7 +451,7 @@ const useOrganizationColumns = (
           </div>
         ),
         cell: ({ row }) => {
-          const date = new Date(row.original.created_at);
+          const date = new Date(row.original.created_at ?? '');
           const day = date.getDate().toString().padStart(2, '0');
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
           const year = date.getFullYear();
@@ -450,10 +469,11 @@ const useOrganizationColumns = (
         id: 'actions',
         header: t('actions'),
         enableHiding: false,
-        cell: () => {
+        cell: ({row}) => {
           return (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <Pen className="h-4 w-4 text-gray-600" /> */}
+              <DeleteUserDialog userId={''}  organizationId={row.original.id} />
             </div>
           );
         },

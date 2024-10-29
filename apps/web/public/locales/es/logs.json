@@ -2,7 +2,8 @@
   "messages": {
     "create": "ha añadido",
     "update": "ha cambiado",
-    "delete": "ha eliminado"
+    "delete": "ha eliminado",
+    "complete": "ha completado la"
   },
   "articles": {
     "due_date": {

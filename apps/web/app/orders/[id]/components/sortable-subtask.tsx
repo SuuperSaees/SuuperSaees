@@ -1,15 +1,15 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from '@dnd-kit/utilities';
-import { Task } from '~/lib/tasks.types';
+import { Subtask } from '~/lib/tasks.types';
 
-export function SortableTask({ task, children }: { task: Task.Type; children: React.ReactNode }) {
+export function SortableSubtask({ subtask, children }: { subtask: Subtask.Type; children: React.ReactNode}) {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: task.id});
+  } = useSortable({ id: subtask.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
