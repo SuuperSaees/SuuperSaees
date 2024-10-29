@@ -65,7 +65,6 @@ const DetailsPage = () => {
 
   const briefsWithResponses = briefsWithResponsesQuery.data ?? [];
 
-  console.log(briefsWithResponsesQuery.data, order.brief_ids);
 
   const Field = ({
     formField,
