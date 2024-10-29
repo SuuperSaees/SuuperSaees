@@ -22,7 +22,7 @@ import { calculateSubtaskProgress } from '~/utils/task-counter';
 
 import { useRealTimeTasks } from '../hooks/use-tasks';
 import { SortableTask } from './sortable-task';
-import SubTask from './sub-task';
+import SubTasks from './sub-task';
 
 function TaskDropdown({
   tasks,
@@ -33,8 +33,12 @@ function TaskDropdown({
   userRole: string;
   orderId: string;
 }) {
-  const { createTask, createSubtask, updateTaskName, deleteTask, loading } =
-    useRealTimeTasks(orderId);
+  const {
+    createTask,
+    updateTaskName,
+    deleteTask,
+    loading,
+  } = useRealTimeTasks(orderId);
 
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [newTaskName, setNewTaskName] = useState<string>('');
@@ -56,24 +60,6 @@ function TaskDropdown({
     };
     await createTask.mutateAsync({
       newTask,
-    });
-  };
-
-  const handleAddSubtask = async (taskId: string) => {
-    const newSubtask = {
-      completed: false,
-      name: t('tasks.newSubtask'),
-      parent_task_id: taskId,
-      deleted_on: null,
-      created_at: new Date().toISOString(),
-      priority: null,
-      content: null,
-      end_date: null,
-      start_date: null,
-      state: null,
-    };
-    await createSubtask.mutateAsync({
-      newSubtask,
     });
   };
 
@@ -145,7 +131,7 @@ function TaskDropdown({
                             onChange={(e) => setNewTaskName(e.target.value)}
                             onBlur={() => handleSaveTaskName(task.id)}
                             onKeyDown={(e) => handleKeyDown(e, task.id)}
-                            className="w-full rounded-md border-none p-2 font-semibold text-gray-900 focus:outline-none bg-transparent"
+                            className="w-full rounded-md border-none bg-transparent p-2 font-semibold text-gray-900 focus:outline-none"
                             autoFocus
                           />
                           <X
@@ -185,44 +171,19 @@ function TaskDropdown({
                         <AccordionTrigger>
                           <ThemedProgress
                             value={calculateSubtaskProgress(
-                              task.subtasks ?? [],
+                              task.subtasks.filter(
+                                (subtask) => !subtask.deleted_on,
+                              ) ?? [],
                             )}
                             className="w-full"
                           />
                         </AccordionTrigger>
-                        <AccordionContent>
-                          {/* <SortableContext
-                            items={(task as Task.Type)?.subtasks}
-                          >
-                            {task?.subtasks?.map((subtask, subIndex) => (
-                              <SortableTask
-                                key={subIndex}
-                                task={subtask}
-                                type="subtask"
-                              >
-                                <SubTask
-                                  key={subIndex}
-                                  initialSubtask={subtask}
-                                  userRole={userRole}
-                                />
-                              </SortableTask>
-                            ))}
-                          </SortableContext> */}
-                          {task?.subtasks?.map((subtask, subIndex) => (
-                                <SubTask
-                                  key={subIndex}
-                                  initialSubtask={subtask}
-                                  userRole={userRole}
-                                />
-                            ))}
-                          <Button
-                            variant="secondary"
-                            className="mt-1 py-0 text-gray-600"
-                            onClick={() => handleAddSubtask(task.id)}
-                          >
-                            <Plus className="mr-1 h-5 w-5" />
-                            <p className="text-sm">{t('tasks.addSubtask')}</p>
-                          </Button>
+                        <AccordionContent className='ml-10'>
+                          <SubTasks
+                            initialSubtasks={task.subtasks}
+                            userRole={userRole}
+                            taskId={task.id}
+                          />
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>

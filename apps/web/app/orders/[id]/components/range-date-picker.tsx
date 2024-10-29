@@ -10,33 +10,54 @@ import { cn } from '@kit/ui/utils';
 import { DateRange } from '@kit/ui/calendar';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { Subtask } from '~/lib/tasks.types';
+import { useState } from 'react';
 
 
 interface DatePickerWithRangeProps {
-  selectedPeriod: DateRange | undefined;
-  setSelectedPeriod: Dispatch<SetStateAction<DateRange | undefined>>;
+  initialPeriod: DateRange | undefined;
+  handlePeriod: (
+    subtaskId: string,
+    subtask: Subtask.Type,
+    newPeriod: DateRange | undefined
+  ) => void
+  subtaskId: string;  
+  subtask: Subtask.Type;
+  shortFormat?: boolean;
 }
 
 
 export function DatePickerWithRange({
-  selectedPeriod,
-  setSelectedPeriod,
+  initialPeriod,
+  handlePeriod,
+  subtaskId,
+  subtask,
   className,
+  shortFormat = false
 }: DatePickerWithRangeProps & React.HTMLAttributes<HTMLDivElement>) {
 
-  const { t } = useTranslation('orders');
+  const { t } = useTranslation(['tasks','orders']);
+  const [selectedPeriod, setSelectedPeriod] = useState<DateRange | undefined>(initialPeriod)
 
   const formattedDateRange = selectedPeriod?.from && selectedPeriod?.to
-    ? `${format(selectedPeriod.from, 'dd/MM/yyyy')} - ${format(selectedPeriod.to, 'dd/MM/yyyy')}`
-    : t('select_date_range');
- 
+    ? shortFormat 
+        ? `${format(selectedPeriod.to, 'MMMM d')}` 
+        : `${format(selectedPeriod.from, `MMMM d '${t('dateConector')}' yyyy`)} - ${format(selectedPeriod.to, `MMMM d '${t('dateConector')}' yyyy`)}`
+    : t('select_date_range',{ns: 'orders'});
+  
+
+  const handleDateSelect = (newPeriod: DateRange | undefined) => {
+    setSelectedPeriod(newPeriod)
+    handlePeriod(subtaskId, subtask, newPeriod)
+  }
+  
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
         <PopoverTrigger asChild>
           
           <p 
-            className='cursor-pointer select-none px-3 text-gray-900 font-medium'
+            className='whitespace-nowrap cursor-pointer select-none px-3 text-gray-900 font-medium'
           >
             {formattedDateRange}
           </p>
@@ -48,7 +69,7 @@ export function DatePickerWithRange({
             mode="range"
             defaultMonth={selectedPeriod?.from}
             selected={selectedPeriod}
-            onSelect={setSelectedPeriod}
+            onSelect={handleDateSelect}
             numberOfMonths={2}
           />
         </PopoverContent>
