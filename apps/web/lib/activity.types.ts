@@ -30,6 +30,7 @@ export namespace Activity {
       CREATE = 'create',
       UPDATE = 'update',
       DELETE = 'delete',
+      COMPLETE = 'complete',
     }
   }
 }
