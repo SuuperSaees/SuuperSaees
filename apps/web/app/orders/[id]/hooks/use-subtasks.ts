@@ -7,7 +7,7 @@ import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { Subtask } from '~/lib/tasks.types';
 import { createNewSubtask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
-import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { updateSubtaskById, updateSubtasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 
 type SubtaskType = Subtask.Type;
 
@@ -97,9 +97,33 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
     },
   });
 
+  const updateSubtaskIndex = useMutation({
+    mutationFn:(
+        { 
+          subtasks 
+        }: {
+          subtasks: Subtask.Type[];
+        }
+    ) => updateSubtasksPositions(subtasks),
+    onSuccess: async () => {
+      // toast.success('Successfully updated task positions');
+
+      await queryClient.invalidateQueries({
+        queryKey: ['subtasks', 'all'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['taks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error updating task positions');
+    },
+  });
+
   return {
     subtaskList,
     createSubtask,
     updateSubtask,
+    updateSubtaskIndex,
   };
 };
