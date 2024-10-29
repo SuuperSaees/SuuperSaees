@@ -20,7 +20,7 @@ import {
   SheetTrigger,
 } from '@kit/ui/sheet';
 
-import RichTextEditor from '~/components/ui/rich-text-editor';
+import RichTextEditorV2 from '~/components/ui/rich-text-editor-v2';
 import { Subtask } from '~/lib/tasks.types';
 
 import { useRealTimeSubtasks } from '../hooks/use-subtasks';
@@ -32,6 +32,10 @@ import {
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import { DatePickerWithRange } from './range-date-picker';
 import SelectAction from './ui/select-action';
+import { useSubtaskDragAndDrop } from '../hooks/use-subtask-drag-and-drop';
+import { closestCorners, DndContext } from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
+import { SortableSubtask } from './sortable-subtask';
 
 function SubTasks({
   initialSubtasks,
@@ -48,13 +52,19 @@ function SubTasks({
   const statusOptions = generateDropdownOptions(statuses, t, 'statuses');
   const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
 
-  const { subtaskList, createSubtask, updateSubtask } =
+  const { createSubtask, updateSubtask } =
     useRealTimeSubtasks(initialSubtasks);
 
   const [newSubtaskName, setNewSubtaskName] = useState<string>('');
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const [content, setContent] = useState<string>('');
+
+  const { handleDragStart, handleDragEnd, sensors, subtaskListDragAnDrop } =
+    useSubtaskDragAndDrop(
+      initialSubtasks
+      .sort((a, b) => a.position - b.position),
+    );
 
   const handleAddSubtask = async (taskId: string) => {
     const newSubtask = {
@@ -171,13 +181,19 @@ function SubTasks({
   // Map through the subtasks to render each one
   return (
     <div>
-      {subtaskList
+      <DndContext
+        onDragEnd={handleDragEnd}
+        onDragStart={handleDragStart}
+        sensors={sensors}
+        collisionDetection={closestCorners}
+      >
+        <SortableContext items={subtaskListDragAnDrop} >
+        {subtaskListDragAnDrop
         .filter((subtask) => !subtask.deleted_on)
         .sort((a, b) => a.position - b.position)
-        .map((subtask) => {
-          return (
-            <div
-              key={subtask.id}
+        .map((subtask) => (
+            <SortableSubtask key={subtask.id} subtask={subtask}>
+              <div
               className="flex items-center justify-between py-3"
               onMouseEnter={() => setHoveredTaskId(subtask.id)}
               onMouseLeave={() => setHoveredTaskId(null)}
@@ -214,7 +230,7 @@ function SubTasks({
                   <Sheet>
                     <SheetTrigger asChild>
                       <Button
-                        className="mr-4 bg-gray-200 text-gray-500"
+                        className="mr-4 bg-gray-200 text-gray-500 hover:bg-slate-200"
                         type="button"
                       >
                         {t('openOrders')}
@@ -328,7 +344,7 @@ function SubTasks({
                           />
                         </div>
 
-                        <RichTextEditor
+                        <RichTextEditorV2
                           content={subtask.content}
                           onChange={(value) => {
                             if (value) {
@@ -408,26 +424,27 @@ function SubTasks({
                   subtaskId={subtask.id}
 
                 />
-                {hoveredTaskId === subtask.id && (
-                  <div className="h-4 w-4 ml-3">
-                    <TrashIcon
-                      className="h-4 w-4 cursor-pointer text-gray-500 hover:text-red-500"
-                      onClick={async () =>
-                        await updateSubtask.mutateAsync({
-                          subtaskId: subtask.id,
-                          subtask: {
-                            ...subtask,
-                            deleted_on: new Date().toISOString(),
-                          },
-                        })
-                      }
-                    />
-                  </div>
-                )}
+                <div className="h-4 w-4 ml-3">
+                  <TrashIcon
+                    className={`h-4 w-4 cursor-pointer ${hoveredTaskId === subtask.id ? 'text-gray-500 hover:text-red-500' : 'text-transparent'}`}
+                    onClick={async () =>
+                      await updateSubtask.mutateAsync({
+                        subtaskId: subtask.id,
+                        subtask: {
+                          ...subtask,
+                          deleted_on: new Date().toISOString(),
+                        },
+                      })
+                    }
+                  />
+                </div>
               </div>
             </div>
-          );
-        })}
+            </SortableSubtask>
+          ))}
+        </SortableContext>
+      
+      </DndContext>
       <Button
         variant="secondary"
         className="mt-1 py-0 text-gray-600"
