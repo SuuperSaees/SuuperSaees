@@ -3,14 +3,14 @@
 import { useMutation } from '@tanstack/react-query';
 
 
-
+import { z } from 'zod';
 import { OrganizationSettings } from '../../../../apps/web/lib/organization-settings.types';
 import { Tokens } from '../../../../apps/web/lib/tokens.types';
 import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/src/server/actions/clients/send-email/utils/client-confirm-email-template';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
-import { getMailer } from '../../../mailers/src/index';
 import { decodeToken } from '../../../tokens/src/decode-token';
 import { useSupabase } from './use-supabase';
+
 
 interface Credentials {
   email: string;
@@ -20,6 +20,20 @@ interface Credentials {
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+const SUUPER_CLIENT_ID = z
+  .string({
+    description: 'The Client id for the Suuper API',
+    required_error: 'Please provide the client id for the Suuper API',
+  })
+  .parse(process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID);
+
+const SUUPER_CLIENT_SECRET = z
+  .string({
+    description: 'The Client secret for the Suuper API',
+    required_error: 'Please provide the client secret for the Suuper API',
+  })
+  .parse(process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET);
+
 const defaultLogoUrl = OrganizationSettings.EXTRA_KEYS.default_sender_logo;
 const defaultColor = OrganizationSettings.EXTRA_KEYS.default_sender_color;
 const defaultTextColor = getTextColorBasedOnBackground(defaultColor);
@@ -95,13 +109,22 @@ export function useSignUpWithEmailAndPassword() {
       defaultTextColor,
     );
 
-    const mailer = await getMailer();
-    await mailer.sendEmail({
-      to: email,
-      from: defaultFromSenderIdentity,
-      subject: 'Confirm your email',
-      html: template,
+    const res = await fetch(`${baseUrl}/api/v1/mailer`, {
+      method: 'POST',
+      headers: new Headers({
+        Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
+      }),
+      body: JSON.stringify({
+        from: defaultFromSenderIdentity,
+        to: [email],
+        subject: 'Confirm your email',
+        html: template,
+      }),
     });
+
+    if (!res.ok) {
+      throw new Error(`Failed to send email: ${res.statusText}`);
+    }
     const user = response.data?.user;
     const identities = user?.identities ?? [];
 
