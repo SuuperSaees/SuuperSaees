@@ -64,8 +64,9 @@ export async function getDomainByUserId(
 
 export async function getDomainByOrganizationId(
   organizationId: string,
+  adminActived = false,
 ): Promise<string> {
-  const supabase = getSupabaseServerComponentClient();
+  const supabase = getSupabaseServerComponentClient({ admin: adminActived });
   const { data: domainData, error: domainError } = await supabase
     .from('organization_subdomains')
     .select('subdomains(domain)')

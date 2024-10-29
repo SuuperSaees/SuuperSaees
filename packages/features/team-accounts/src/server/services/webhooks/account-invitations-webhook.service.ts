@@ -4,26 +4,38 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { z } from 'zod';
 
+
+
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
 import { OrganizationSettings } from '../../../../../../../apps/web/lib/organization-settings.types';
+import { getDomainByOrganizationId } from '../../../../../../../packages/multitenancy/utils/get/get-domain';
 import { getOrganizationSettingsByOrganizationId } from '../../actions/organizations/get/get-organizations';
-import { getOrganizationById } from '../../actions/organizations/get/get-organizations';
+
+// import { getOrganizationById } from '../../actions/organizations/get/get-organizations';
 
 type Invitation = Database['public']['Tables']['invitations']['Row'];
 
 const invitePath = '/join';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL;
+const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
 const productName = process.env.NEXT_PUBLIC_PRODUCT_NAME ?? '';
+const SUUPER_CLIENT_ID = process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID;
+const SUUPER_CLIENT_SECRET = process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET;
 const emailSender = process.env.EMAIL_SENDER;
 const brandtopAgencyName = process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
 const themeColorKey = OrganizationSettings.KEYS.theme_color;
 const senderNameKey = OrganizationSettings.KEYS.sender_name;
 const logoUrlKey = OrganizationSettings.KEYS.logo_url;
+const senderEmailKey = OrganizationSettings.KEYS.sender_email;
+const senderDomainKey = OrganizationSettings.KEYS.sender_domain;
 const defaultAgencySenderName =
   OrganizationSettings.EXTRA_KEYS.default_sender_name;
 const defaultAgencyName = OrganizationSettings.EXTRA_KEYS.default_agency_name;
+const defaultSenderEmail = OrganizationSettings.EXTRA_KEYS.default_sender_email;
+const defaultSenderDomain =
+  OrganizationSettings.EXTRA_KEYS.default_sender_domain;
 
 const env = z
   .object({
@@ -88,21 +100,29 @@ class AccountInvitationsWebhookService {
     }
 
     // search organization name
-    const inviterOrganization = await getOrganizationById(
-      inviter.data.organization_id ?? '',
-      this.adminClient,
-    );
+    // const inviterOrganization = await getOrganizationById(
+    //   inviter.data.organization_id ?? '',
+    //   this.adminClient,
+    // );
 
     const inviterOrganizationSettings =
       await getOrganizationSettingsByOrganizationId(
         inviter.data.organization_id ?? '',
         true,
-        [logoUrlKey, themeColorKey, senderNameKey],
+        [
+          logoUrlKey,
+          themeColorKey,
+          senderNameKey,
+          senderEmailKey,
+          senderDomainKey,
+        ],
         this.adminClient,
       );
     let inviterOrganizationLogo = '',
       inviterOrganizationThemeColor = '',
-      inviterOrganizationSenderName = '';
+      inviterOrganizationSenderName = '',
+      inviterOrganizationSenderEmail = defaultSenderEmail,
+      inviterOrganizationSenderDomain = defaultSenderDomain;
 
     inviterOrganizationSettings.forEach((setting) => {
       if (setting.key === logoUrlKey) {
@@ -111,6 +131,10 @@ class AccountInvitationsWebhookService {
         inviterOrganizationThemeColor = setting.value;
       } else if (setting.key === senderNameKey) {
         inviterOrganizationSenderName = setting.value;
+      } else if (setting.key === senderEmailKey) {
+        inviterOrganizationSenderEmail = setting.value;
+      } else if (setting.key === senderDomainKey) {
+        inviterOrganizationSenderDomain = setting.value;
       }
     });
 
@@ -141,8 +165,8 @@ class AccountInvitationsWebhookService {
 
     try {
       const { renderInviteEmail } = await import('@kit/email-templates');
-      const { getMailer } = await import('@kit/mailers');
-      const mailer = await getMailer();
+      // const { getMailer } = await import('@kit/mailers');
+      // const mailer = await getMailer();
       const link = this.getInvitationLink(
         invitation.invite_token,
         invitation.email,
@@ -159,24 +183,32 @@ class AccountInvitationsWebhookService {
       });
 
       const fromSenderIdentity = inviterOrganizationSenderName
-        ? `${inviterOrganizationSenderName} ${t('at')} ${inviterOrganization.name} <${emailSender}>`
-        : `${defaultAgencySenderName} ${t('at')} ${defaultAgencyName} <${emailSender}>`;
+        ? `${inviterOrganizationSenderName} <${inviterOrganizationSenderEmail}@${inviterOrganizationSenderDomain}>`
+        : `${defaultAgencySenderName} ${t('at')} ${defaultAgencyName} <${inviterOrganizationSenderEmail}@${inviterOrganizationSenderDomain}>`;
 
-      await mailer
-        .sendEmail({
+      let domain = await getDomainByOrganizationId(inviter.data.organization_id ?? '', true);
+
+      if (domain !== siteURL) {
+        domain = isProd ? `https://${domain}` : `http://${domain}`;
+      }
+
+      const res = await fetch(`${domain}/api/v1/mailer`, {
+        method: 'POST',
+        headers: new Headers({
+          Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
+        }),
+        body: JSON.stringify({
           from: fromSenderIdentity,
-          to: invitation.email,
+          to: [invitation.email],
           subject,
           html,
-        })
-        .then(() => {
-          logger.info(ctx, 'Invitation email successfully sent!');
-        })
-        .catch((error) => {
-          console.error(error);
-
-          logger.error({ error, ...ctx }, 'Failed to send invitation email');
-        });
+        }),
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        console.error('Failed to send invitation email', data);
+      }
 
       // obtain subscription id
       const { data: subscriptionData, error: subscriptionError } =
@@ -200,14 +232,13 @@ class AccountInvitationsWebhookService {
 
       // obtain members count with that organization
       let membersCount = 0;
-      const { count, error: membersCountError } =
-        await this.adminClient
-          .from('accounts_memberships')
-          .select('*', { count: 'exact' })
-          .eq('account_id', invitation.invited_by)
-          .or(
-            'account_role.eq.agency_member,account_role.eq.agency_project_manager',
-          );
+      const { count, error: membersCountError } = await this.adminClient
+        .from('accounts_memberships')
+        .select('*', { count: 'exact' })
+        .eq('account_id', invitation.invited_by)
+        .or(
+          'account_role.eq.agency_member,account_role.eq.agency_project_manager',
+        );
 
       if (membersCountError) {
         logger.error(
@@ -220,7 +251,7 @@ class AccountInvitationsWebhookService {
         throw membersCountError;
       }
       membersCount = count ?? 0;
-      
+
       if (membersCount) {
         membersCount += 1;
       }

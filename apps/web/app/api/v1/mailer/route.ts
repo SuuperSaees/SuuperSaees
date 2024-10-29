@@ -25,14 +25,14 @@ export async function POST(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
-    port: Number(process.env.EMAIL_PORT), 
+    port: Number(process.env.EMAIL_PORT),
     secure: process.env.EMAIL_TLS !== 'false', // true for 465, false for other ports
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD
+      user: process.env.SMTP_USER_AWS_SES,
+      pass: process.env.SMPT_PASSWORD_AWS_SES,
     },
     dkim: {
-      domainName: process.env.EMAIL_DOMAIN, 
+      domainName: process.env.EMAIL_DOMAIN,
       keySelector: 'mail', // DKIM selector
       privateKey: process.env.EMAIL_DKIM, // DKIM private key from environment variables
     },
