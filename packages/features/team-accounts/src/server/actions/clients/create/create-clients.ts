@@ -44,6 +44,7 @@ type CreateClient = {
   client: {
     email: string;
     slug: string;
+    name: string;
   };
   role: string;
   selectedOrganizationId?: string;
@@ -206,7 +207,6 @@ export const insertClient = async (
 export const createClient = async (clientData: CreateClient) => {
   try {
     const supabase = getSupabaseServerComponentClient();
-
     // Step 1: Fetch primary owner ID and organization
     const primaryOwnerId = await getPrimaryOwnerId();
     const organization = await getOrganization();
@@ -266,7 +266,7 @@ export const createClient = async (clientData: CreateClient) => {
     // Step 8: Update client user with organization ID
     await updateUserAccount(
       supabase,
-      { organization_id: clientOrganizationAccount.id },
+      { organization_id: clientOrganizationAccount.id, name: clientData.client.name },
       userId,
     );
 
