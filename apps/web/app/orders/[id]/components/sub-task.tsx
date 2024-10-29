@@ -216,7 +216,7 @@ function SubTasks({
                 </div>
               ) : (
                 <p
-                  className="font-semibold text-gray-900"
+                  className="font-semibold text-gray-900 truncate w-20"
                   onMouseEnter={() => setHoveredTaskId(subtask.id)}
                   onMouseLeave={() => setHoveredTaskId(null)}
                   onClick={() => handleStartEditing(subtask.id, subtask.name)}
