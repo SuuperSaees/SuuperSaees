@@ -178,7 +178,7 @@ export const OrderBriefs = ({
                     <FormField
                       key={formField.field?.id}
                       control={form.control}
-                      name={`${briefResponseSufix}.${currentFieldIndex}.response`}
+                      name={`${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}.response`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{formField.field?.label}</FormLabel>
