@@ -26,7 +26,7 @@ function MemberSection({
 }) {
   const clientsWithOrganizations =
     useQuery({
-      queryKey: ['clientsWithOrganizations'],
+      queryKey: ['clientsWithOrganizations', clientOrganizationId],
       queryFn: async () =>
         await getClientMembersForOrganization(clientOrganizationId ?? ''),
     }) ?? [];
