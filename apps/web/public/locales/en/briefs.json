@@ -42,6 +42,26 @@
         "defaultField": {
           "label": "Order title",
           "placeholder": "Add a description..."
+        },
+        "marks": {
+          "label": "Title",
+          "description": "Description",
+          "alert_message": "Alert message",
+          "placeholder": "Placeholder",
+          "options": {
+            "1": {
+              "label": "Option 1",
+              "value": "Option 1 value"
+            },
+            "2": {
+              "label": "Option 2",
+              "value": "Option 2 value"
+            },
+            "3": {
+              "label": "Option 3",
+              "value": "Option 3 value"
+            }
+          }
         }
     },
     "widgets": {
@@ -68,13 +88,35 @@
     "value": "Select",
     "title": "Title *",
     "description": "This is a hint text to help user",
-    "placeholder": "Add new option"
+    "placeholder": "Add new option",
+    "options": {
+      "option1": {
+        "label": "Option 1"
+      },
+      "option2": {
+        "label": "Option 2"
+      },
+      "option3": {
+        "label": "Option 3"
+      }
+    }
   },
   "multipleChoice": {
     "value": "Multiple choice",
     "title": "Title *",
     "description": "This is a hint text to help user",
-    "placeholder": "Add new option"
+    "placeholder": "Add new option",
+    "options": {
+      "option1": {
+        "label": "Option 1"
+      },
+      "option2": {
+        "label": "Option 2"
+      },
+      "option3": {
+        "label": "Option 3"
+      }
+    }
   },
   "textLarge" : {
     "value": "Paragraph",
