@@ -1,8 +1,11 @@
 // import 'server-only';
 import { z } from 'zod';
 
+
+
 import { Mailer } from '../../mailer';
 import { MailerSchema } from '../../schema/mailer.schema';
+
 
 type Config = z.infer<typeof MailerSchema>;
 
@@ -36,7 +39,7 @@ export class SuuperMailer implements Mailer {
         : {
             html: config.html,
           };
-
+    console.log('configHOLA', config);
     const res = await fetch(`${baseUrl}/api/v1/mailer`, {
       method: 'POST',
       headers: new Headers({

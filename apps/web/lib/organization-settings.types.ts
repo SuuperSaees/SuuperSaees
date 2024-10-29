@@ -25,6 +25,7 @@ export namespace OrganizationSettings {
     favicon_url: 'favicon_url',
     sender_name: 'sender_name',
     sender_email: 'sender_email',
+    sender_domain: 'sender_domain',
     // If you want to add more keys, make sure they are defined in the 'organization_setting_key' enum in 'database.types.ts'
   };
 
@@ -35,5 +36,7 @@ export namespace OrganizationSettings {
       'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png',
     default_sender_color: '#1A38D7',
     default_from_sender_identity: 'Ana de Suuper <samuel@suuper.co>',
+    default_sender_email: 'ana',
+    default_sender_domain: 'suuper.co',
   };
 }

@@ -76,7 +76,6 @@ export async function renderInviteEmail(props: Props) {
     const mainText = t(`${namespace}:mainText`, {
       inviter: props.inviter,
       teamName: props.teamName,
-      productName: props.productName,
     });
 
     // const joinTeam = t(`${namespace}:joinTeam`, {

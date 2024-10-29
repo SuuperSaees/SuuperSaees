@@ -1,13 +1,12 @@
 'use server';
 
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
+import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
-import { SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
 // import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
-
 
 export const getOrganizationSettings = async () => {
   try {
@@ -97,6 +96,8 @@ export const getOrganizationSettingsByOrganizationId = async (
     'language',
     'favicon_url',
     'sender_name',
+    'sender_domain',
+    'sender_email',
   ],
   client?: SupabaseClient<Database>,
 ): Promise<{ key: string; value: string }[]> => {
