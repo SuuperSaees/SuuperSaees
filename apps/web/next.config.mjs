@@ -1,6 +1,7 @@
 import withBundleAnalyzer from '@next/bundle-analyzer';
 import { withSentryConfig } from '@sentry/nextjs';
 
+
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -76,7 +77,7 @@ const config = {
 //   widenClientFileUpload: true,
 // };
 
-// Exporta la configuración de Sentry envuelta en la configuración de Analyzer
+// Export the Sentry configuration wrapped in the Analyzer configuration
 export default withSentryConfig(
   withBundleAnalyzer({
     enabled: process.env.ANALYZE === 'true',
