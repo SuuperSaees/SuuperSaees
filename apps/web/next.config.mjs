@@ -68,8 +68,6 @@ const config = {
   typescript: { ignoreBuildErrors: true },
 };
 
-
-
 // const sentryOptions = {
 //   org: 'grayola',
 //   project: process.env.SENTRY_PROJECT_NAME,
@@ -79,17 +77,13 @@ const config = {
 //   widenClientFileUpload: true,
 // };
 
-// Exporta la configuración de Sentry envuelta en la configuración de Analyzer
+// Export the Sentry configuration wrapped in the Analyzer configuration
 export default withSentryConfig(
   withBundleAnalyzer({
     enabled: process.env.ANALYZE === 'true',
   })(config),
   // sentryOptions
 );
-
-
-
-
 
 function getRemotePatterns() {
   /** @type {import('next').NextConfig['remotePatterns']} */
