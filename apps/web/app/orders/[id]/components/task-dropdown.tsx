@@ -120,7 +120,7 @@ function TaskDropdown({
           >
             <SortableContext items={taskList}>
               {taskList.map((task, index) => (
-                <SortableTask key={task.id} task={task} type="task">
+                <SortableTask key={task.id} task={task}>
                   <div className="mb-4">
                     <div className="flex items-center justify-between">
                       {editingTaskId === task.id ? (
