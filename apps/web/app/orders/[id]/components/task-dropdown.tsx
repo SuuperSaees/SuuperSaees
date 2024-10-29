@@ -171,7 +171,9 @@ function TaskDropdown({
                         <AccordionTrigger>
                           <ThemedProgress
                             value={calculateSubtaskProgress(
-                              task.subtasks ?? [],
+                              task.subtasks.filter(
+                                (subtask) => !subtask.deleted_on,
+                              ) ?? [],
                             )}
                             className="w-full"
                           />
