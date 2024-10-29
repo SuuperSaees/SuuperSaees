@@ -114,8 +114,8 @@ export const hasPermissionToDeleteClient = async (
     // Step 1: Fetch current user data
     const currentUser = await fetchCurrentUser(client);
     const currentUserAccount = await fetchCurrentUserAccount(client, currentUser.id);
-
-    const allowedRolesToDeleteMembers = ['agency_owner', 'client_owner'];
+    
+    const allowedRolesToDeleteMembers = new Set(['agency_owner', 'client_owner']);
     const userAccountRole = await getUserRole();
 
     // Step 2: Check for agency role if deleting an entire organization
@@ -125,7 +125,7 @@ export const hasPermissionToDeleteClient = async (
     }
 
     // Step 3: Ensure the user has the correct role for deleting individual clients
-    if (!removeClientOrganization && !allowedRolesToDeleteMembers.includes(userAccountRole)) {
+    if (!removeClientOrganization && !allowedRolesToDeleteMembers.has(userAccountRole)) {
       console.error('User does not have permission to delete individual clients');
       return false;
     }
