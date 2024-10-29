@@ -649,25 +649,28 @@ export type Database = {
       };
       clients: {
         Row: {
-          agency_id: string;
-          id: string;
-          organization_client_id: string;
-          user_client_id: string;
-        };
+          agency_id: string
+          deleted_on: string | null
+          id: string
+          organization_client_id: string
+          user_client_id: string
+        }
         Insert: {
-          agency_id: string;
-          id?: string;
-          organization_client_id: string;
-          user_client_id: string;
-        };
+          agency_id: string
+          deleted_on?: string | null
+          id?: string
+          organization_client_id: string
+          user_client_id: string
+        }
         Update: {
-          agency_id?: string;
-          id?: string;
-          organization_client_id?: string;
-          user_client_id?: string;
-        };
-        Relationships: [];
-      };
+          agency_id?: string
+          deleted_on?: string | null
+          id?: string
+          organization_client_id?: string
+          user_client_id?: string
+        }
+        Relationships: []
+      }
       config: {
         Row: {
           billing_provider: Database['public']['Enums']['billing_provider'];
