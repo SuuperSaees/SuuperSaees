@@ -46,7 +46,6 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
   const queryGetFullDomainBySubdomain = useQuery({
     queryKey: ['getFullDomainBySubdomain'],
     queryFn: async () => {
-      console.log('query executed')
       const domainFullData = await getFullDomainBySubdomain(window.location.host, true, values);
       if(domainFullData){
         const databaseLanguage = domainFullData.settings.find(

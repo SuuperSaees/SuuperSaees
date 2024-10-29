@@ -181,5 +181,11 @@
   "brandSidebarReset": "Reset Color",
   "brandSenderNameSubmit": "Update Sender",
   "brandSenderName": "Sender Name",
-  "brandSenderNameDescription": "Update the name that will be displayed as the sender of the emails"
+  "brandSenderNameDescription": "Update the name that will be displayed as the sender of the emails",
+  "brandSenderEmailAndDomain": "Sender Email and Domain",
+  "brandSenderEmailAndDomainDescription": "Update the email and domain that will be displayed as the sender of the emails",
+  "brandSenderEmailAndDomainSubmit": "Update Email and Domain",
+  "brandSenderEmailSubmit": "Update Email",
+  "brandSenderDomainSubmit": "Sender Domain",
+  "brandSenderEmail": "Sender Email"
 }

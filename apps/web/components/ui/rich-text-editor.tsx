@@ -318,7 +318,9 @@ const RichTextEditor = ({
     }
   }, );
   const sendContent = useCallback(() => {
+
     void (async () => {
+      
       try {
         cleanupImages();
         const content = editor ? editor.getHTML() : '';

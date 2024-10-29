@@ -27,7 +27,7 @@ function BriefsLayout({ children }: React.PropsWithChildren) {
   const style = getLayoutStyle();
 
   return (
-    <Page style={style}>
+    <Page style={style} contentContainerClassName='mx-auto flex h-screen w-full flex-col overflow-y-hidden px-4 lg:px-0'>
       <PageNavigation>
         <If condition={style === 'header'}>
           <HomeMenuNavigation workspace={workspace} />

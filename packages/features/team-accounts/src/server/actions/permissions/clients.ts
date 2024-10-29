@@ -106,60 +106,49 @@ export const hasPermissionToDeleteClient = async (
   agencyOrganizationId: string,
   clientOrganizationId: string,
   clientId: string,
-  clientOrganizationPrimaryOwnerUserId: string,
+  removeClientOrganization?: boolean
 ): Promise<boolean> => {
   const client = getSupabaseServerComponentClient();
+
   try {
     // Step 1: Fetch current user data
     const currentUser = await fetchCurrentUser(client);
-    const currentUserAccount = await fetchCurrentUserAccount(
-      client,
-      currentUser.id,
-    );
-
-    const allowedRolesToDeleteMembers = ['agency_owner', 'client_owner'];
+    const currentUserAccount = await fetchCurrentUserAccount(client, currentUser.id);
+    
+    const allowedRolesToDeleteMembers = new Set(['agency_owner', 'client_owner']);
     const userAccountRole = await getUserRole();
 
-    // Step 2: Ensure the user has the correct role
-    if (!allowedRolesToDeleteMembers.includes(userAccountRole)) {
-      console.error('User does not have permission to delete clients');
+    // Step 2: Check for agency role if deleting an entire organization
+    if (removeClientOrganization && userAccountRole !== 'agency_owner') {
+      console.error('Only agency owners can delete an entire client organization');
       return false;
     }
 
-    // Step 3: Ensure the user belongs to the correct agency if they are an agency owner
-    if (
-      userAccountRole === 'agency_owner' &&
-      currentUserAccount.organization_id !== agencyOrganizationId
-    ) {
-      console.error(
-        `Unauthorized: Agency owner does not belong to the specified agency (ID: ${agencyOrganizationId})`,
-      );
+    // Step 3: Ensure the user has the correct role for deleting individual clients
+    if (!removeClientOrganization && !allowedRolesToDeleteMembers.has(userAccountRole)) {
+      console.error('User does not have permission to delete individual clients');
       return false;
     }
 
-    // Step 4: Ensure the user belongs to the correct client organization if they are a client owner
+    // Step 4: Ensure the user belongs to the correct agency if they are an agency owner
+    if (userAccountRole === 'agency_owner' && currentUserAccount.organization_id !== agencyOrganizationId) {
+      console.error(`Unauthorized: Agency owner does not belong to the specified agency (ID: ${agencyOrganizationId})`);
+      return false;
+    }
+
+    // Step 5: Ensure the user belongs to the correct client organization if they are a client owner
     if (
+      !removeClientOrganization &&
       userAccountRole === 'client_owner' &&
       currentUserAccount.organization_id !== clientOrganizationId
     ) {
-      console.error(
-        `Unauthorized: Client owner does not belong to the specified client organization (ID: ${clientOrganizationId})`,
-      );
+      console.error(`Unauthorized: Client owner does not belong to the specified client organization (ID: ${clientOrganizationId})`);
       return false;
     }
 
-    // Step 5: Prevent client_owner from deleting their own account
-    if (userAccountRole === 'client_owner' && currentUser.id === clientId) {
+    // Step 6: Prevent client_owner from deleting their own account
+    if (!removeClientOrganization && userAccountRole === 'client_owner' && currentUser.id === clientId) {
       console.error('Client owners cannot delete their own accounts');
-      return false;
-    }
-
-    // Step 6: Agency owners cannot delete client leaders (client_owner)
-    if (
-      userAccountRole === 'agency_owner' &&
-      clientOrganizationPrimaryOwnerUserId === clientId
-    ) {
-      console.error('Agency owners cannot delete client owners');
       return false;
     }
 

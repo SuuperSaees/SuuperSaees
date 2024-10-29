@@ -97,7 +97,7 @@
   "form": {
     "completion": {
       "client": {
-        "title": "Add a client",
+        "title": "Assign a client",
         "label": "Name of the organization",
         "select": {
           "placeholder": "Select an organization"   

@@ -11,8 +11,13 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import type { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
+import { OrganizationSettings as OrganizationSettingsType } from '../../../../../../../../apps/web/lib/organization-settings.types';
+import { Tokens } from '../../../../../../../../apps/web/lib/tokens.types';
+import { decodeToken } from '../../../../../../../../packages/tokens/src/decode-token';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
-import { generateRandomPassword // getTextColorBasedOnBackground
+import {
+  generateRandomPassword,
+  getTextColorBasedOnBackground,
 } from '../../../utils/generate-colors';
 import { addUserAccountRole } from '../../members/create/create-account';
 import {
@@ -24,19 +29,22 @@ import { updateUserAccount } from '../../members/update/update-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
 import {
   getAgencyForClient,
-  getOrganization, // getOrganizationSettings,
+  getOrganization,
   getOrganizationById,
+  getOrganizationSettings,
 } from '../../organizations/get/get-organizations';
 import {
   hasPermissionToAddClientMembers,
   hasPermissionToCreateClientOrg,
 } from '../../permissions/clients';
+import { sendClientConfirmEmail } from '../send-email/send-client-email';
 
 // Define la función createClient
 type CreateClient = {
   client: {
     email: string;
     slug: string;
+    name: string;
   };
   role: string;
   selectedOrganizationId?: string;
@@ -51,49 +59,115 @@ const createClientUserAccount = async (
     const userData = await fetchCurrentUser(client);
     const userId = userData?.id;
     if (!userId) throw new Error('No user id provided');
-    const { domain: baseUrl } = await getDomainByUserId(userId, true);
+    const { domain: baseUrl, organizationId } = await getDomainByUserId(
+      userId,
+      true,
+    );
+    const organizationSettings = await getOrganizationSettings();
 
-    // const organizationSettings = await getOrganizationSettings();
-
-    // pre-authentication of the user
+    // Step 1: Pre-authentication of the user
     const password = generateRandomPassword(12);
 
-    // const organizationLogo = organizationSettings.find(
-    //   (setting) => setting.key === 'logo_url',
-    // );
+    const { logo_url, theme_color } = OrganizationSettingsType.KEYS;
 
-    // const organizationColor = organizationSettings.find(
-    //   (setting) => setting.key === 'theme_color',
-    // );
+    const { default_sender_logo, default_sender_color } =
+      OrganizationSettingsType.EXTRA_KEYS;
+    let organizationLogo: {
+        key: string;
+        value: string;
+      } | null = null,
+      organizationColor: {
+        key: string;
+        value: string;
+      } | null = null;
 
+    organizationSettings.forEach((setting) => {
+      if (setting.key === logo_url)
+        organizationLogo = { key: logo_url, value: setting.value };
+      if (setting.key === theme_color)
+        organizationColor = { key: theme_color, value: setting.value };
+    });
+
+    organizationLogo = organizationLogo ?? {
+      key: logo_url,
+      value: default_sender_logo,
+    };
+
+    organizationColor = organizationColor ?? {
+      key: theme_color,
+      value: default_sender_color,
+    };
+
+    // Step 2: Sign up the user
     const { data: clientOrganizationUser, error: clientOrganizationUserError } =
       await client.auth.signUp({
         email: clientEmail ?? '',
         password,
-        options: {
-          emailRedirectTo: `${baseUrl}set-password`,
-          data: {
-            ClientContent: 'Hi',
-            ClientContent1: 'Welcome to ',
-            ClientContent2: organizationName,
-            ClientContent3: ', please activate your account to get started.',
-            ClientContent4: 'Your username:',
-            ClientContent5: 'Thanks,',
-            ClientContent6: 'The Team',
-            // OrganizationSenderLogo: organizationLogo?.value ?? '',
-            // OrganizationSenderColor: organizationColor?.value ?? '',
-            // ButtonTextColor: organizationColor
-            //   ? getTextColorBasedOnBackground(organizationColor.value)
-            //   : '',
-          },
-        },
+        // options: { IMPORTANT: We need to disable this to avoid the email confirmation flow
+        //   emailRedirectTo: `${baseUrl}set-password`,
+        //   data: {
+        //     ClientContent: 'Hi',
+        //     ClientContent1: 'Welcome to ',
+        //     ClientContent2: organizationName,
+        //     ClientContent3: ', please activate your account to get started.',
+        //     ClientContent4: 'Your username:',
+        //     ClientContent5: 'Thanks,',
+        //     ClientContent6: 'The Team',
+        //     OrganizationSenderLogo: organizationLogo.value,
+        //     OrganizationSenderColor: organizationColor.value,
+        //     ButtonTextColor:
+        //       getTextColorBasedOnBackground(organizationColor?.value) ??
+        //       '#ffffff',
+        //   },
+        // },
       });
 
     if (clientOrganizationUserError) {
       console.error('Error occurred while creating the client user');
       throw new Error(clientOrganizationUserError.message);
     }
+    // Step 3: Take the object session and decode the access_token as jwt to get the session id
+    const sessionUserClient = clientOrganizationUser.session;
+    const createdAtAndUpdatedAt = new Date().toISOString();
+    const accessToken = sessionUserClient?.access_token ?? '';
+    const refreshToken = sessionUserClient?.refresh_token ?? '';
+    const expiresAt = new Date(
+      new Date().getTime() + 3600 * 1000,
+    ).toISOString();
+    const providerToken = 'supabase';
+    const sessionId = decodeToken(accessToken, 'base64')?.session_id as string;
+    const callbackUrl = `${baseUrl}set-password`;
+    // Step 4: Save the token in the database
+    const token: Tokens.Insert = {
+      id: sessionId,
+      id_token_provider: sessionId,
+      created_at: createdAtAndUpdatedAt,
+      updated_at: createdAtAndUpdatedAt,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_at: expiresAt,
+      provider: providerToken,
+    };
 
+    const { error: tokenError } = await client.from('tokens').insert(token);
+
+    if (tokenError) {
+      console.error('Error occurred while saving the token', tokenError);
+      throw new Error('Error occurred while saving the token');
+    }
+    // Step 5: Send the email with the magic link
+    await sendClientConfirmEmail(
+      baseUrl,
+      clientEmail,
+      organizationLogo.value,
+      organizationColor.value,
+      getTextColorBasedOnBackground(organizationColor.value),
+      sessionId,
+      callbackUrl,
+      organizationName,
+      organizationId,
+    );
+    // Step 6: Return the client organization user
     return clientOrganizationUser;
   } catch (error) {
     console.error('Error occurred while creating the client user');
@@ -133,7 +207,6 @@ export const insertClient = async (
 export const createClient = async (clientData: CreateClient) => {
   try {
     const supabase = getSupabaseServerComponentClient();
-
     // Step 1: Fetch primary owner ID and organization
     const primaryOwnerId = await getPrimaryOwnerId();
     const organization = await getOrganization();
@@ -193,13 +266,13 @@ export const createClient = async (clientData: CreateClient) => {
     // Step 8: Update client user with organization ID
     await updateUserAccount(
       supabase,
-      { organization_id: clientOrganizationAccount.id },
+      { organization_id: clientOrganizationAccount.id, name: clientData.client.name },
       userId,
     );
 
     return client;
   } catch (error) {
-    console.error('Error creating the client v1:', error);
+    console.error('Error creating the client:', error);
     throw error;
   }
 };

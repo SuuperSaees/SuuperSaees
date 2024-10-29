@@ -82,16 +82,22 @@ export const getBriefs = async (): Promise<
   }
 };
 
-export const getBriefFormFields = async (): Promise<
-  Brief.Relationships.FormField[]
+export const fetchFormfieldsWithResponses = async (
+  briefIds: Brief.Type['id'][] 
+): Promise<
+  Brief.Relationships.FormFieldResponse.Response[]
+
 > => {
   try {
-    const client = getSupabaseServerComponentClient();
+    const client =  getSupabaseServerComponentClient();
     const { data: briefFormFields, error: errorBriefFormFields } = await client
-      .from('brief_form_fields')
-      .select(
-        'form_fields(id, description, label, type, placeholder, options, position, alert_message)',
-      );
+      .from('brief_responses')
+      .select(`field:form_fields(id, description, label, type, options, placeholder, position, alert_message),
+        response
+        
+        ` 
+      )
+      .in('brief_id', briefIds);
 
     if (errorBriefFormFields) {
       throw new Error(errorBriefFormFields.message);

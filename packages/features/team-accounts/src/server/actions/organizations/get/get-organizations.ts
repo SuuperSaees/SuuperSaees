@@ -1,13 +1,12 @@
 'use server';
 
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
+import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
-import { SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
 // import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
-
 
 export const getOrganizationSettings = async () => {
   try {
@@ -97,6 +96,8 @@ export const getOrganizationSettingsByOrganizationId = async (
     'language',
     'favicon_url',
     'sender_name',
+    'sender_domain',
+    'sender_email',
   ],
   client?: SupabaseClient<Database>,
 ): Promise<{ key: string; value: string }[]> => {
@@ -275,7 +276,7 @@ export async function getAgencyForClient(clientOrganizationId: string) {
       .from('clients')
       .select('agency_id')
       .eq('organization_client_id', clientOrganizationId)
-      .single();
+     
 
     if (clientError ?? !clientData) {
       console.error('Error fetching agency:', clientError);
@@ -286,11 +287,12 @@ export async function getAgencyForClient(clientOrganizationId: string) {
     const { data: agencyData, error: agencyError } = await client
       .from('accounts')
       .select('id, name, email, picture_url')
-      .eq('id', clientData.agency_id)
+      .eq('id', clientData?.[0]?.agency_id ?? '')
       .eq('is_personal_account', false)
       .single();
 
     if (agencyError ?? !agencyData) {
+
       console.error('Error fetching agency:', agencyError);
       throw agencyError;
     }

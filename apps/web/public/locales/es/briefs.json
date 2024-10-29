@@ -38,7 +38,32 @@
         "createSuccess": "Brief creado con éxito",
         "updateSuccess": "Brief actualizado con éxito",
         "errorCreating": "Error creando brief",
-        "errorUpdating": "Error actualizando brief"
+        "errorUpdating": "Error actualizando brief",
+        "defaultField": {
+          "label": "Título del pedido",
+          "placeholder": "Añade una descripción..."
+        },
+        "marks": {
+          "label": "Titulo",
+          "description": "Descripción",
+          "alert_message": "Mensaje informativo",
+          "placeholder": "Placeholder",
+          "options": {
+            "1": {
+              "label": "Opción 1",
+              "value": "Valor de la opción 1"
+            },
+            "2": {
+              "label": "Opción 2",
+              "value": "Valor de la opción 2"
+
+            },
+            "3": {
+              "label": "Opción 3",
+              "value": "Valor de la opción 3"
+            }
+          }
+        }
     },
     "widgets": {
       "edit": {
@@ -52,7 +77,7 @@
       "settings": {
         "title": "Ajustes",
         "services": {
-          "title": "Servicios conenctados"
+          "title": "Servicios conectados"
         }
       }
     }
@@ -61,46 +86,83 @@
     "title": "Actualizar brief"
   },
   "singleChoice": {
+    "value": "Seleccionar",
     "title": "Título *",
     "description": "Este es un texto de sugerencia para ayudar al usuario.",
-    "placeholder": "Agregar nueva opción"
+    "placeholder": "Agregar nueva opción",
+    "options": {
+      "option1": {
+        "label": "Opción 1"
+      },
+      "option2": {
+        "label": "Opción 2"
+      },
+      "option3": {
+        "label": "Opción 3"
+      }
+    }
   },
   "multipleChoice": {
+    "value": "Selección múltiple",
     "title": "Título *",
     "description": "Este es un texto de sugerencia para ayudar al usuario.",
-    "placeholder": "Agregar nueva opción"
+    "placeholder": "Agregar nueva opción",
+    "options": {
+      "option1": {
+        "label": "Opción 1"
+      },
+      "option2": {
+        "label": "Opción 2"
+      },
+      "option3": {
+        "label": "Opción 3"
+      }
+    }
   },
   "textLarge" : {
+    "value": "Párrafo",
     "title":"Título *",
     "description":"Este es un texto de sugerencia para ayudar al usuario.",
     "descriptionHint":"Escribe una descripción..."
   },
+  "textShort": {
+    "value": "Texto corto",
+    "title": "Título *",
+    "description": "Este es un texto de sugerencia para ayudar al usuario.",
+    "placeholder": "Escribe una descripción..."
+  },
   "datePicker": {
+    "value": "Fecha",
     "title": "Título *",
     "selectTitle": "Seleccionar fecha",
     "description": "Este es un texto de sugerencia para ayudar al usuario."
   },
   "dropdown": {
+    "value": "Desplegable",
     "title": "Título *",
     "description": "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Agregar nueva opción",
     "selectAnOption": "Seleccione una opción"
   },
   "title": {
+    "value": "Título",
     "title": "Título",
     "placeholder": "Introduzca el título"
   },
   "richText": {
+    "value": "Texto enriquecido",
     "title": "Texto enriquecido",
     "placeholder": "Introduzca el texto enriquecido"
   },
   "uploadFiles" : {
+    "value": "Subir archivos",
     "title" : "Título *",
     "description" : "Este es un texto de sugerencia para ayudar al usuario.",
     "placeholder": "Haz clic o arrastra para subir un archivo",
     "fileTypes": "SVG, PNG, JPG o GIF (max. 800x400px)"
   },
   "video": {
+    "value": "Video",
     "title": "Video",
     "uploadSuccess": "Vídeo subido con éxito",
     "uploadError": "Error al cargar el video",
@@ -117,6 +179,7 @@
     "invalidUrl": "Por favor, introduzca una URL de video de YouTube válida"
   },
   "uploadImage":{
+    "value": "Imagen",
     "placeholder": "Haz clic o arrastra para subir una imagen",
     "fileTypes": "PNG, JPG(max. 800x400px)",
     "uploadSuccess": "Imagen subido con éxito",

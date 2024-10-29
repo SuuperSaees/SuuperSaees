@@ -38,7 +38,31 @@
         "createSuccess": "Brief created successfully",
         "updateSuccess": "Brief updated successfully",
         "errorCreating": "Error creating brief",
-        "errorUpdating": "Error updating brief"
+        "errorUpdating": "Error updating brief",
+        "defaultField": {
+          "label": "Order title",
+          "placeholder": "Add a description..."
+        },
+        "marks": {
+          "label": "Title",
+          "description": "Description",
+          "alert_message": "Alert message",
+          "placeholder": "Placeholder",
+          "options": {
+            "1": {
+              "label": "Option 1",
+              "value": "Option 1 value"
+            },
+            "2": {
+              "label": "Option 2",
+              "value": "Option 2 value"
+            },
+            "3": {
+              "label": "Option 3",
+              "value": "Option 3 value"
+            }
+          }
+        }
     },
     "widgets": {
       "edit": {
@@ -61,46 +85,83 @@
     "title": "Update brief"
   },
   "singleChoice": {
+    "value": "Select",
     "title": "Title *",
     "description": "This is a hint text to help user",
-    "placeholder": "Add new option"
+    "placeholder": "Add new option",
+    "options": {
+      "option1": {
+        "label": "Option 1"
+      },
+      "option2": {
+        "label": "Option 2"
+      },
+      "option3": {
+        "label": "Option 3"
+      }
+    }
   },
   "multipleChoice": {
+    "value": "Multiple choice",
     "title": "Title *",
     "description": "This is a hint text to help user",
-    "placeholder": "Add new option"
+    "placeholder": "Add new option",
+    "options": {
+      "option1": {
+        "label": "Option 1"
+      },
+      "option2": {
+        "label": "Option 2"
+      },
+      "option3": {
+        "label": "Option 3"
+      }
+    }
   },
   "textLarge" : {
+    "value": "Paragraph",
     "title":"Title *",
     "description":"This is a hint text to help user",
     "placeholder":"Enter a description..."
   },
+  "textShort": {
+    "value": "Short text",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
+    "placeholder": "Enter a description..."
+  },
   "datePicker": {
+    "value": "Date",
     "title": "Title *",
     "description": "This is a hint text to help user",
     "selectTitle": "Select date"
   },
   "dropdown": {
+    "value": "Dropdown",
     "title": "Title *",
     "description": "This is a hint text to help user",
     "placeholder": "Add new option",
     "selectAnOption": "Select an option"
   },
   "title": {
+    "value": "Title",
     "title": "Title",
     "placeholder": "Enter the title"
   },
   "richText": {
+    "value": "Rich text",
     "title": "Rich text",
     "placeholder": "Enter the rich text"
   },
   "uploadFiles" : {
+    "value": "Upload files",
     "title" : "Title *",
     "description" : "This is a hint text to help user",
     "placeholder": "Click here or drag a file to upload",
     "fileTypes": "SVG, PNG, JPG or GIF (max. 800x400px)"
   },
   "video": {
+    "value": "Video",
     "title": "Video",
     "uploadSuccess": "Video uploaded successfully",
     "uploadError": "Error uploading video",
@@ -117,6 +178,7 @@
     "invalidUrl": "Please enter a valid YouTube video URL"
   },
   "uploadImage":{
+    "value": "Image",
     "placeholder": "Click here or drag an image to upload",
     "fileTypes": "PNG, JPG(max. 800x400px)",
     "uploadSuccess": "Image uploaded successfully",

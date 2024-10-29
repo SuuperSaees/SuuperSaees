@@ -40,6 +40,10 @@
         "delete": "Eliminar carpeta",
         "deleteSuccess": "Carpeta eliminada"
     },
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "members": {
+        "search": "Buscar miembros...",
+        "addButton": "Añadir miembro"
+    }
 }
   

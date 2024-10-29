@@ -40,5 +40,9 @@
         "delete": "Delete folder",
         "deleteSuccess": "Folder deleted"
     },
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "members": {
+        "search": "Search members...",
+        "addButton": "Add member"
+    }
 }
