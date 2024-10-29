@@ -20,7 +20,7 @@ import {
   SheetTrigger,
 } from '@kit/ui/sheet';
 
-import RichTextEditor from '~/components/ui/rich-text-editor';
+import RichTextEditorV2 from '~/components/ui/rich-text-editor-v2';
 import { Subtask } from '~/lib/tasks.types';
 
 import { useRealTimeSubtasks } from '../hooks/use-subtasks';
@@ -214,7 +214,7 @@ function SubTasks({
                   <Sheet>
                     <SheetTrigger asChild>
                       <Button
-                        className="mr-4 bg-gray-200 text-gray-500"
+                        className="mr-4 bg-gray-200 text-gray-500 hover:bg-slate-200"
                         type="button"
                       >
                         {t('openOrders')}
@@ -328,7 +328,7 @@ function SubTasks({
                           />
                         </div>
 
-                        <RichTextEditor
+                        <RichTextEditorV2
                           content={subtask.content}
                           onChange={(value) => {
                             if (value) {
@@ -408,22 +408,20 @@ function SubTasks({
                   subtaskId={subtask.id}
 
                 />
-                {hoveredTaskId === subtask.id && (
-                  <div className="h-4 w-4 ml-3">
-                    <TrashIcon
-                      className="h-4 w-4 cursor-pointer text-gray-500 hover:text-red-500"
-                      onClick={async () =>
-                        await updateSubtask.mutateAsync({
-                          subtaskId: subtask.id,
-                          subtask: {
-                            ...subtask,
-                            deleted_on: new Date().toISOString(),
-                          },
-                        })
-                      }
-                    />
-                  </div>
-                )}
+                <div className="h-4 w-4 ml-3">
+                  <TrashIcon
+                    className={`h-4 w-4 cursor-pointer ${hoveredTaskId === subtask.id ? 'text-gray-500 hover:text-red-500' : 'text-transparent'}`}
+                    onClick={async () =>
+                      await updateSubtask.mutateAsync({
+                        subtaskId: subtask.id,
+                        subtask: {
+                          ...subtask,
+                          deleted_on: new Date().toISOString(),
+                        },
+                      })
+                    }
+                  />
+                </div>
               </div>
             </div>
           );
