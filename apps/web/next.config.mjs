@@ -1,6 +1,6 @@
 // import withBundleAnalyzer from '@next/bundle-analyzer';
 // import { withSentryConfig } from '@sentry/nextjs';
-import defineConfig from 'next';
+
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -66,18 +66,9 @@ const config = {
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        fs: false,
-        net: false,
-        dns: false,
-        tls: false,
-      };
-    }
-    return config;
-  },
 };
+
+
 
 // const sentryOptions = {
 //   org: 'grayola',
@@ -95,6 +86,10 @@ const config = {
 //   })(config),
 //   // sentryOptions
 // );
+
+
+
+
 
 function getRemotePatterns() {
   /** @type {import('next').NextConfig['remotePatterns']} */
@@ -123,5 +118,3 @@ function getRemotePatterns() {
         },
       ];
 }
-
-export default defineConfig(config);
