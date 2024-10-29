@@ -2,7 +2,8 @@
     "messages": {
       "create": "has added",
       "update": "has changed",
-      "delete": "has deleted"
+      "delete": "has deleted",
+      "complete": "has completed the"
     },
     "articles": {
       "due_date": {

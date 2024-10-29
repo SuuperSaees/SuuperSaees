@@ -41,6 +41,7 @@ export enum ActionType {
   CREATE = 'create',
   UPDATE = 'update',
   DELETE = 'delete',
+  COMPLETE = 'complete',
 }
 
 export type Activity = ServerActivity.Type & {

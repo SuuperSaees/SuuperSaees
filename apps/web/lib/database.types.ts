@@ -2032,7 +2032,7 @@ export type Database = {
           deleted_on: string | null
           id: string
           name: string | null
-          order_id: string | null
+          order_id: number | null
           position: number | null
         }
         Insert: {
@@ -2041,7 +2041,7 @@ export type Database = {
           deleted_on?: string | null
           id?: string
           name?: string | null
-          order_id?: string | null
+          order_id?: number | null
           position?: number | null
         }
         Update: {
@@ -2050,7 +2050,7 @@ export type Database = {
           deleted_on?: string | null
           id?: string
           name?: string | null
-          order_id?: string | null
+          order_id?: number | null
           position?: number | null
         }
         Relationships: [
@@ -2073,7 +2073,7 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders_v2"
-            referencedColumns: ["uuid"]
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -2428,7 +2428,7 @@ export type Database = {
       };
     };
     Enums: {
-      action_type: 'create' | 'update' | 'delete';
+      action_type: "create" | "update" | "delete" | "complete"
       activity_type:
         | "message"
         | "review"
