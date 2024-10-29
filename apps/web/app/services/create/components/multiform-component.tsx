@@ -274,7 +274,7 @@ function TypeOfServiceStep() {
     (
       name: CheckboxName,
       field: ControllerRenderProps<
-        any,
+        FormValues,
         | 'step_type_of_service.single_sale'
         | 'step_type_of_service.recurring_subscription'
       >,

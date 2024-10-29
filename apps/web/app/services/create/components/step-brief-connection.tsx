@@ -65,8 +65,13 @@ interface Service {
 }
 
 export default function BriefConnectionStep(
-  previousService?: Service,
-  previousBriefs?: ServiceBrief[],
+  {
+  previousService,
+  previousBriefs,
+}: {
+  previousService?: Service;
+  previousBriefs?: ServiceBrief[];
+}
 ) {
   const { prevStep, form } = useMultiStepFormContext<typeof FormSchema>();
   const { t } = useTranslation('services');
@@ -118,7 +123,7 @@ export default function BriefConnectionStep(
         brief_id: brief.id,
         service_id: serviceId,
       }));
-      await addServiceBriefs(formattedBriefsToConnect);
+      await addServiceBriefs(formattedBriefsToConnect ?? []);
     } catch (error) {
       // reset the briefs
       setSelectedBriefs([]);
@@ -210,7 +215,7 @@ export default function BriefConnectionStep(
                   return (
                     <FormItem>
                       <FormControl>
-                        <div className="items-cente flex justify-center">
+                        <div className="items-center flex justify-center">
                           <Combobox
                             options={briefOptions}
                             title={t('addBrief')}

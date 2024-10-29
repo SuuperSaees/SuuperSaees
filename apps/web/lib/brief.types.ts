@@ -40,14 +40,21 @@ export namespace Brief {
       };
     }
 
+    export namespace FormFieldResponse {
+      export type Response = {
+        field: FormFieldType;
+        response: Database['public']['Tables']['brief_responses']['Row']['response'];
+      };
+    }
+
     export type Service = Brief.Type & {
       services?: Database['public']['Tables']['services']['Row'][];
     };
     export type FormFieldResponses =
       Database['public']['Tables']['brief_responses']['Insert'];
 
-      export type FormField = {
-        form_fields: FormFieldType;
-      };
+    export type FormField = {
+      form_fields: FormFieldType;
+    };
   }
 }
