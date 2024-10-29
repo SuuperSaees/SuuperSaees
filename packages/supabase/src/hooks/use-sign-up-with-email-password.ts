@@ -2,11 +2,13 @@
 
 import { useMutation } from '@tanstack/react-query';
 
+
+
 import { OrganizationSettings } from '../../../../apps/web/lib/organization-settings.types';
 import { Tokens } from '../../../../apps/web/lib/tokens.types';
 import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/src/server/actions/clients/send-email/utils/client-confirm-email-template';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
-import { getMailer } from '../../../mailers/src/index';
+// import { getMailer } from '../../../mailers/src/index';
 import { decodeToken } from '../../../tokens/src/decode-token';
 import { useSupabase } from './use-supabase';
 
@@ -93,13 +95,13 @@ export function useSignUpWithEmailAndPassword() {
       defaultTextColor,
     );
 
-    const mailer = await getMailer();
-    await mailer.sendEmail({
-      to: email,
-      from: defaultFromSenderIdentity,
-      subject: 'Confirm your email',
-      html: template,
-    });
+    // const mailer = await getMailer();
+    // await mailer.sendEmail({
+    //   to: email,
+    //   from: defaultFromSenderIdentity,
+    //   subject: 'Confirm your email',
+    //   html: template,
+    // });
     const user = response.data?.user;
     const identities = user?.identities ?? [];
 
