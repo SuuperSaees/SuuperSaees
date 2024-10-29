@@ -1,6 +1,5 @@
-// import withBundleAnalyzer from '@next/bundle-analyzer';
-// import { withSentryConfig } from '@sentry/nextjs';
-
+import withBundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -68,8 +67,6 @@ const config = {
   typescript: { ignoreBuildErrors: true },
 };
 
-
-
 // const sentryOptions = {
 //   org: 'grayola',
 //   project: process.env.SENTRY_PROJECT_NAME,
@@ -80,16 +77,12 @@ const config = {
 // };
 
 // Exporta la configuración de Sentry envuelta en la configuración de Analyzer
-// export default withSentryConfig(
-//   withBundleAnalyzer({
-//     enabled: process.env.ANALYZE === 'true',
-//   })(config),
-//   // sentryOptions
-// );
-
-
-
-
+export default withSentryConfig(
+  withBundleAnalyzer({
+    enabled: process.env.ANALYZE === 'true',
+  })(config),
+  // sentryOptions
+);
 
 function getRemotePatterns() {
   /** @type {import('next').NextConfig['remotePatterns']} */
