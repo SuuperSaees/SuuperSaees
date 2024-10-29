@@ -127,7 +127,7 @@ function SubTasks({
   const handleDateRangeChange = async (
     subtaskId: string,
     subtask: Subtask.Type,
-    selectedPeriod: DateRange | null,
+    selectedPeriod: DateRange | undefined,
   ) => {
     await updateSubtask.mutateAsync({
       subtaskId,
@@ -220,7 +220,7 @@ function SubTasks({
                         {t('openOrders')}
                       </Button>
                     </SheetTrigger>
-                    <SheetContent>
+                    <SheetContent className='max-w-[300px] sm:max-w-[700px]'>
                       <SheetHeader>
                         <SheetTitle>
                           {editingSubtaskId === subtask.id ? (
@@ -260,23 +260,19 @@ function SubTasks({
                             {t('details.deadline')}{' '}
                           </span>
                           <DatePickerWithRange
-                            selectedPeriod={
+                            initialPeriod={
                               subtask.start_date && subtask.end_date
                                 ? {
                                     from: new Date(subtask.start_date),
                                     to: new Date(subtask.end_date),
                                   }
-                                : null
+                                : undefined
                             }
-                            setSelectedPeriod={
-                              (newPeriod: DateRange) => {
-                                handleDateRangeChange(
-                                  subtask.id,
-                                  subtask,
-                                  newPeriod,
-                                ).catch((error) => console.error(error));
-                              }
+                            handlePeriod={
+                              handleDateRangeChange
                             }
+                            subtask={subtask}
+                            subtaskId={subtask.id}
                           />
                         </div>
                         <div className="flex items-center justify-between text-sm">
@@ -398,26 +394,22 @@ function SubTasks({
                 />
 
                 <DatePickerWithRange
-                  selectedPeriod={
+                  shortFormat={true}
+                  initialPeriod={
                     subtask.start_date && subtask.end_date
                       ? {
                           from: new Date(subtask.start_date),
                           to: new Date(subtask.end_date),
                         }
-                      : null
+                      : undefined
                   }
-                  setSelectedPeriod={
-                    (newPeriod: DateRange) => {
-                      handleDateRangeChange(
-                        subtask.id,
-                        subtask,
-                        newPeriod,
-                      ).catch((error) => console.error(error));
-                    }
-                  }
+                  handlePeriod={handleDateRangeChange}
+                  subtask={subtask}
+                  subtaskId={subtask.id}
+
                 />
                 {hoveredTaskId === subtask.id && (
-                  <div className="h-4 w-4">
+                  <div className="h-4 w-4 ml-3">
                     <TrashIcon
                       className="h-4 w-4 cursor-pointer text-gray-500 hover:text-red-500"
                       onClick={async () =>
