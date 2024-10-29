@@ -176,7 +176,7 @@ function TaskDropdown({
                             className="w-full"
                           />
                         </AccordionTrigger>
-                        <AccordionContent>
+                        <AccordionContent className='ml-10'>
                           <SubTasks
                             initialSubtasks={task.subtasks}
                             userRole={userRole}
