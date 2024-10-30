@@ -1336,10 +1336,7 @@ export type Database = {
           client_organization_id: string
           created_at: string
           customer_id: string
-<<<<<<< Updated upstream
           deleted_on: string | null
-=======
->>>>>>> Stashed changes
           description: string
           due_date: string | null
           id: number
@@ -1356,10 +1353,7 @@ export type Database = {
           client_organization_id: string
           created_at?: string
           customer_id: string
-<<<<<<< Updated upstream
           deleted_on?: string | null
-=======
->>>>>>> Stashed changes
           description: string
           due_date?: string | null
           id?: number
@@ -1376,10 +1370,7 @@ export type Database = {
           client_organization_id?: string
           created_at?: string
           customer_id?: string
-<<<<<<< Updated upstream
           deleted_on?: string | null
-=======
->>>>>>> Stashed changes
           description?: string
           due_date?: string | null
           id?: number
@@ -1962,7 +1953,6 @@ export type Database = {
           trial_starts_at?: string | null
           updated_at?: string | null
         }
-<<<<<<< Updated upstream
         Relationships: [
           {
             foreignKeyName: "subscriptions_propietary_organization_id_fkey"
@@ -1986,9 +1976,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-=======
-        Relationships: []
->>>>>>> Stashed changes
       }
       subtasks: {
         Row: {
