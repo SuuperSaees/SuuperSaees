@@ -24,9 +24,11 @@ import SubTasks from './sub-task';
 function TaskDropdown({
   userRole,
   orderId,
+  orderAgencyId,
 }: {
   userRole: string;
   orderId: string;
+  orderAgencyId: string;
 }) {
   const {
     tasks,
@@ -177,6 +179,8 @@ function TaskDropdown({
                             initialSubtasks={task.subtasks}
                             userRole={userRole}
                             taskId={task.id}
+                            orderId={orderId}
+                            orderAgencyId={orderAgencyId}
                           />
                         </AccordionContent>
                       </AccordionItem>

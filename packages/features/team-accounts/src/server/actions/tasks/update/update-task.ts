@@ -24,7 +24,7 @@ export const updateTaskNameById = async (taskId: string, taskName: string) => {
 
     return taskData;
   } catch (error) {
-    console.error('Error creating tasks:', error);
+    console.error('Error updating tasks:', error);
   }
 };
 
@@ -99,9 +99,11 @@ export const updateSubtaskById = async (
     const { error: userError } = await client.auth.getUser();
     if (userError) throw new Error(userError.message);
 
+    const { assigned_to, followers, ...subtaskWithoutAssignedTo } = subtask;
+
     const { data: subtaskData, error: taskDataError } = await client
       .from('subtasks')
-      .update(subtask)
+      .update(subtaskWithoutAssignedTo)
       .eq('id', subtaskId);
     if (taskDataError) throw new Error(taskDataError.message);
 
@@ -111,7 +113,7 @@ export const updateSubtaskById = async (
 
     return subtaskData;
   } catch (error) {
-    console.error('Error creating tasks:', error);
+    console.error('Error updating subtask updateSubtaskById:', error);
   }
 };
 
@@ -158,5 +160,63 @@ export const checkAndUpdateTaskCompletion = async (parentId: string) => {
     }
   } catch (error) {
     console.error('Error checking and updating task completion:', error);
+  }
+};
+
+
+export const updateSubtaskAssigns = async (
+  subtaskId: Subtask.Type['id'],
+  agencyMemberIds: string[],
+) => {
+  try {
+    console.log('subtaskId', subtaskId);
+    console.log('agencyMemberIds', agencyMemberIds);
+    const client = getSupabaseServerComponentClient();
+
+    // 1. Fetch existing assignments to determine if you need to delete any
+    const { data: existingAssignments, error: fetchError } = await client
+      .from('subtask_assignations')
+      .select('agency_member_id')
+      .eq('subtask_id', subtaskId);
+
+    if (fetchError) throw fetchError;
+
+    // Extract existing IDs
+    const existingIds =
+      existingAssignments?.map((assign) => assign.agency_member_id) || [];
+
+    // Determine IDs to add and remove
+    const idsToAdd = agencyMemberIds.filter((id) => !existingIds.includes(id));
+    const idsToRemove = existingIds.filter(
+      (id) => !agencyMemberIds.includes(id),
+    );
+
+    // 2. Remove old assignments
+    if (idsToRemove.length > 0) {
+      const { error: deleteError } = await client
+        .from('subtask_assignations')
+        .delete()
+        .in('agency_member_id', idsToRemove)
+        .eq('subtask_id', subtaskId);
+
+      if (deleteError) throw deleteError;
+    }
+
+    // 3. Upsert new assignments
+    const newAssignments = idsToAdd.map((id) => ({
+      subtask_id: subtaskId,
+      agency_member_id: id,
+    }));
+
+    const { error: upsertError } = await client
+      .from('subtask_assignations')
+      .upsert(newAssignments)
+      .select();
+
+    if (upsertError) throw upsertError;
+
+  } catch (error) {
+    console.error('Error updating subtask assignments:', error);
+    throw new Error('Failed to update subtask assignments');
   }
 };

@@ -28,9 +28,10 @@ type OrderTabsProps = {
   }[];
   userRole: string;
   orderId: string;
+  orderAgencyId: string;
 };
 
-export const OrderTabs = ({ organizationId, currentPath, userRole, orderId }: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
@@ -92,6 +93,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId }: Or
           <TasksSection 
             userRole={userRole}
             orderId={orderId}
+            orderAgencyId={orderAgencyId}
           />
         </div>
       </TabsContent>

@@ -6,6 +6,7 @@ import {
   Subtask,
   Task,
 } from '../../../../../../../../apps/web/lib/tasks.types';
+import { User } from '../../../../../../../../apps/web/lib/user.types';
 
 export const getTasks = async (orderId: string) => {
   try {
@@ -15,10 +16,12 @@ export const getTasks = async (orderId: string) => {
 
     const { data: tasksData, error: tasksDataError } = await client
       .from('tasks')
-      .select(`*, subtasks(*)`)
+      // .select(`*, subtasks(*)`)
+      .select(`*, subtasks(*, followers:subtask_followers(*, accounts(id, name, email)), assigned_to:subtask_assignations(*, accounts(id, name, email)))`)
       .eq('order_id', orderId)
       .is('deleted_on', null);
     if (tasksDataError) throw new Error(tasksDataError.message);
+
 
     const tasks = tasksData
       .map((task: Task.Type) => {

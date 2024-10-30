@@ -35,15 +35,20 @@ import SelectAction from './ui/select-action';
 import { closestCorners, DndContext } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import { SortableSubtask } from './sortable-subtask';
+import SubtaskAssignations from './subtasks/subtask-assignations';
 
 function SubTasks({
   initialSubtasks,
   userRole,
   taskId,
+  orderId,
+  orderAgencyId,
 }: {
   initialSubtasks: Subtask.Type[];
   userRole: string;
   taskId: string;
+  orderId: string;
+  orderAgencyId: string;
 }) {
   const { t } = useTranslation('orders');
   const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
@@ -51,8 +56,8 @@ function SubTasks({
   const statusOptions = generateDropdownOptions(statuses, t, 'statuses');
   const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
 
-  const { subtaskList, createSubtask, updateSubtask, handleDragEnd, handleDragStart,  sensors} =
-    useRealTimeSubtasks(initialSubtasks);
+  const { subtaskList, createSubtask, updateSubtask, handleDragEnd, handleDragStart,  sensors, searchUserOptions, changeAgencyMembersAssigned} =
+    useRealTimeSubtasks(initialSubtasks, orderId, orderAgencyId, userRole);
 
   const [newSubtaskName, setNewSubtaskName] = useState<string>('');
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
@@ -170,6 +175,17 @@ function SubTasks({
       setNewSubtaskName('');
     }
   };
+
+  const handleUpdateAssignedTo = async (
+    subtaskId: string,
+    assignedTo: string[],
+  ) => {
+    await changeAgencyMembersAssigned.mutateAsync({
+      agencyMemberIds: assignedTo,
+      subtaskId,
+    });
+  }
+
 
   // Map through the subtasks to render each one
   return (
@@ -336,6 +352,19 @@ function SubTasks({
                             showLabel={true}
                           />
                         </div>
+
+                        <SubtaskAssignations
+                          assignedTo={subtask.assigned_to}
+                          onUserSelectionChange={(selectedUsers) =>
+                            handleUpdateAssignedTo(subtask.id, selectedUsers)
+                          }
+                          searchUserOptions={searchUserOptions}
+                          subtaskId={subtask.id}
+                        />
+
+                        
+
+
 
                         <RichTextEditorV2
                           content={subtask.content}

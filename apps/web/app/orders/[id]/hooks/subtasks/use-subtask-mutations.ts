@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 
 import { Subtask } from '~/lib/tasks.types';
 import { createNewSubtask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
-import { updateSubtaskById, updateSubtasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { updateSubtaskAssigns, updateSubtaskById, updateSubtasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 
 
 export const useSubtaskMutations = () => {
@@ -68,9 +68,45 @@ export const useSubtaskMutations = () => {
     },
   });
 
+  const changeAgencyMembersAssigned = useMutation({
+    mutationFn: (
+      {
+        agencyMemberIds,
+        subtaskId,
+      }: {
+        agencyMemberIds: string[];
+        subtaskId: string;
+      }
+    ) => {
+      return updateSubtaskAssigns(subtaskId, agencyMemberIds);
+    },
+    onSuccess: async () => {
+      toast.success('Success', {
+        description: 'Agency members in tasks were updated successfully!',
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['subtask_assignations', 'all'],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['subtasks', 'all'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['taks', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: 'The agency members could not be updated in subtask.',
+      });
+    },
+  });
+
   return {
     createSubtask,
     updateSubtask,
     updateSubtaskIndex,
+    changeAgencyMembersAssigned
   };
 };
