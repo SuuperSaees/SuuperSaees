@@ -48,7 +48,7 @@
     "summary": "Resumen",
     "deadlineNotSet": "Sin asignar",
     "createdBy": "Creado por",
-    "orderId": "Pedido ID",
+    "orderId": "#",
     "createdAt": "Creado",
     "assignedTo": "Asignado a",
     "followedBy": "Seguido por",

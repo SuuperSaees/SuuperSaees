@@ -62,15 +62,16 @@ const Interactions = () => {
 
   return (
     <div
-      className="no-scrollbar mr-10 ml-2 flex w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto border-t border-r-0 border-l-0 border-gray-200 border-b-0 p-0"
+      className="h-[63vh] no-scrollbar mr-10 ml-2 flex w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto border-t border-r-0 border-l-0 border-gray-200 border-b-0 p-0"
       ref={interactionsContainerRef}
     >
       {Object.entries(groupedInteractions).map(([date, interactions]) => (
         <div key={date} className="flex flex-col gap-8">
-          <div className="relative flex w-full items-center justify-center rounded-md before:absolute before:left-0 before:top-1/2 before:h-[0.3px] before:w-full before:bg-gray-100">
-            <h3 className="z-[10] rounded-full border border-gray-300 bg-white p-1 px-2 text-sm font-semibold text-gray-700">
-              {date}
-            </h3>
+          <div className="relative flex mt-2 w-full items-center justify-center rounded-md before:absolute before:left-0 before:top-1/2 before:h-[0.3px] before:w-full before:bg-gray-100">
+          <h3 className="z-[10] rounded-full border border-gray-300 bg-white p-1 px-2 text-sm font-semibold text-gray-700 pr-[1rem] whitespace-nowrap">
+    {date}
+</h3>
+
           </div>
           {interactions.map((interaction) => {
             return interaction.class === 'message' ? (

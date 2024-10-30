@@ -25,7 +25,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         </span>
         }
       </div>
-        <small>{`${date}`}</small>
+        <small className="">{`${date}`}</small>
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg rounded-ss-none w-full bg-slate-0 overflow-hidden">

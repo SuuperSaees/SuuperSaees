@@ -48,7 +48,7 @@
     "deadlineNotSet": "Unassigned",
     "summary": "Summary",
     "createdBy": "Created by",
-    "orderId": "Order ID",
+    "orderId": "#",
     "createdAt": "Created",
     "assignedTo": "Assigned to",
     "followedBy": "Followed by",

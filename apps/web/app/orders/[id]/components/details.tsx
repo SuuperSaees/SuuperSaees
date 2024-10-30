@@ -98,7 +98,7 @@ const DetailsPage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="h-[76vh] overflow-hidden overflow-y-auto no-scrollbar flex flex-col gap-6">
       <div className="flex w-full min-w-full gap-2">
         <div className="w-full rounded-lg border border-gray-300 px-[12px] py-[8px]">
           <span className="font-inter text-md overflow-hidden text-ellipsis leading-6 text-gray-500">

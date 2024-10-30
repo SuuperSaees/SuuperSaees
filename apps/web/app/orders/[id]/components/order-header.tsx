@@ -28,13 +28,12 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
         label="Order title"
         fieldName="title"
       />
-      <div className='flex items-center'>
-        <h3 className="relative mb-2">
+      <div className="flex items-center">
+        <h3 className="relative mb-2 text-[0.75rem] text-lg font-normal text-gray-600">
           <Trans i18nKey="details.orderId" /> {order?.id}
         </h3>
-        <DeleteOrderDropdown orderId = {order?.id} />
+        <DeleteOrderDropdown orderId={order?.id} />
       </div>
-      
     </div>
   );
 };

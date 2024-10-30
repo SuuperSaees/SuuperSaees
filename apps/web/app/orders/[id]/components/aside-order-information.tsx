@@ -204,7 +204,7 @@ const AsideOrderInformation = ({
 
   return (
     <div
-      className={`relative overflow-y-auto no-scrollbar bottom-10 flex h-[90vh] w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 text-gray-700 ${className}`}
+      className={`relative min-h-full overflow-y-auto no-scrollbar bottom-10 flex h-[90vh] w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 text-gray-700 ${className}`}
       {...rest}
     >
       <div className="border-b border-gray-200 pb-7">
@@ -221,7 +221,7 @@ const AsideOrderInformation = ({
             }
           />
           <div className="flex flex-col">
-            <span className="text-sm text-gray-600 font-semibold">
+            <span className="text-sm text-gray-600 font-medium">
               {order.client?.email ? deduceNameFromEmail(order.client?.email ?? '') : ''}
             </span>
             <span className="text-sm text-gray-600">
@@ -232,7 +232,7 @@ const AsideOrderInformation = ({
           </div>
         </div>
       </div>
-      <h3 className="font-bold">{t('details.summary')}</h3>
+      <h3 className="font-medium">{t('details.summary')}</h3>
 
       {userRoles.has(userRole) ? (
         <>
@@ -306,7 +306,7 @@ const AsideOrderInformation = ({
           <div className="mb-4 flex items-center justify-between">
             <div className="flex">
               <Loader className="mr-2 h-4 w-4" />
-              <span className="text-sm font-semibold">{t('details.status')}</span>
+              <span className="text-sm font-medium">{t('details.status')}</span>
             </div>
             <span
               className={`rounded-full px-2 py-1 ${order.status ? statusColors[order.status] : undefined}`}
@@ -320,7 +320,7 @@ const AsideOrderInformation = ({
           <div className="mb-4 flex items-center justify-between">
             <div className="flex">
               <FlagIcon className="mr-2 h-4 w-4" />
-              <span className="text-sm font-semibold">{t('details.priority')}</span>
+              <span className="text-sm font-medium">{t('details.priority')}</span>
             </div>
             <span
               className={`flex items-center rounded-full px-2 py-1 ${order.priority ? priorityColors[order.priority] : undefined}`}
