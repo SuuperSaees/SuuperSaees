@@ -15,9 +15,6 @@ import {
 } from '@kit/ui/accordion';
 import { Button } from '@kit/ui/button';
 import { Spinner } from '@kit/ui/spinner';
-
-import { Task } from '~/lib/tasks.types';
-import { useTaskDragAndDrop } from '~/orders/[id]/hooks/use-task-drag-and-drop';
 import { calculateSubtaskProgress } from '~/utils/task-counter';
 
 import { useRealTimeTasks } from '../hooks/use-tasks';
@@ -25,30 +22,27 @@ import { SortableTask } from './sortable-task';
 import SubTasks from './sub-task';
 
 function TaskDropdown({
-  tasks,
   userRole,
   orderId,
 }: {
-  tasks: Task.Type[];
   userRole: string;
   orderId: string;
 }) {
   const {
+    tasks,
     createTask,
     updateTaskName,
     deleteTask,
     loading,
+    handleDragStart,
+    handleDragEnd,
+    sensors
   } = useRealTimeTasks(orderId);
 
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [newTaskName, setNewTaskName] = useState<string>('');
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const { t } = useTranslation('orders');
-  const { handleDragStart, handleDragEnd, sensors, taskList } =
-    useTaskDragAndDrop(
-      tasks.sort((a, b) => a.position - b.position),
-      orderId,
-    );
 
   const handleAddTask = async () => {
     const newTask = {
@@ -88,7 +82,7 @@ function TaskDropdown({
     }
   };
 
-  if (!loading && taskList.length === 0) {
+  if (!loading && tasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center">
         <p className="text-gray-500">{t('tasks.emptyTasks')}</p>
@@ -118,8 +112,8 @@ function TaskDropdown({
             sensors={sensors}
             collisionDetection={closestCorners}
           >
-            <SortableContext items={taskList}>
-              {taskList.map((task, index) => (
+            <SortableContext items={tasks}>
+              {tasks.map((task, index) => (
                 <SortableTask key={task.id} task={task}>
                   <div className="mb-4">
                     <div className="flex items-center justify-between">

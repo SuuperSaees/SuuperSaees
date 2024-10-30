@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useEffect } from 'react';
 
 import {
   DragEndEvent,
@@ -10,37 +9,34 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
+import { UseMutationResult, useQueryClient } from '@tanstack/react-query';
 
 import { Task } from '~/lib/tasks.types';
 
-import { useRealTimeTasks } from './use-tasks';
-
-export function useTaskDragAndDrop(
-  tasks: Task.Type[],
+export const useDragAndDrop = (
+  updateTaskPositions: UseMutationResult<
+    null | undefined,
+    Error,
+    { tasks: Task.Type[] },
+    unknown
+  >,
   orderId: string,
-) {
-  const [taskList, setTaskList] = useState(tasks);
+) => {
   const [isDragging, setIsDragging] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [dragTask, setDragTask] = useState({
     isDragging: false,
     type: null,
   });
-  const { updateTaskPositions } =
-    useRealTimeTasks(orderId);
 
-  useEffect(() => {
-    setTaskList(tasks);
-  }, [tasks]);
-
+  // Configure DnD sensors
   const mouseSensor = useSensor(MouseSensor, {
-    // Require the mouse to move by 10 pixels before activating
     activationConstraint: {
       distance: 10,
     },
   });
   const touchSensor = useSensor(TouchSensor, {
-    // Press delay of 250ms, with tolerance of 5px of movement
     activationConstraint: {
       delay: 250,
       tolerance: 5,
@@ -48,7 +44,7 @@ export function useTaskDragAndDrop(
   });
   const sensors = useSensors(mouseSensor, touchSensor);
 
-  function handleDragStart(event: DragStartEvent) {
+  const handleDragStart = (event: DragStartEvent) => {
     setIsDragging(true);
     setActiveId(event.active.id as string);
     const draggableData = event.active?.data?.current;
@@ -64,38 +60,41 @@ export function useTaskDragAndDrop(
         type: null,
       });
     }
-  }
+  };
 
-  async function handleDragEnd(event: DragEndEvent) {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over) {
       resetDragState();
       return;
     }
-      await handleTaskDragEnd(active.id as string, over.id as string);
 
+    let updatedTasks: Task.Type[] = [];
+
+    queryClient.setQueryData(
+      ['tasks', orderId],
+      (prevTasks: Task.Type[] | undefined) => {
+        if (!prevTasks) return [];
+        const oldIndex = prevTasks.findIndex((task) => task.id === active.id);
+        const newIndex = prevTasks.findIndex((task) => task.id === over.id);
+
+        if (oldIndex === newIndex) return prevTasks;
+
+        updatedTasks = arrayMove(prevTasks, oldIndex, newIndex).map(
+          (task, index) => ({
+            ...task,
+            position: index,
+          }),
+        );
+
+        return updatedTasks;
+      },
+    );
+
+    await updateTaskPositions.mutateAsync({ tasks: updatedTasks });
 
     resetDragState();
-  }
-
-  const handleTaskDragEnd = async (activeId: string, overId: string) => {
-    const oldIndex = taskList.findIndex((task) => task.id === activeId);
-    const newIndex = taskList.findIndex((task) => task.id === overId);
-
-    if (oldIndex !== newIndex) {
-      const updatedTasks = arrayMove(taskList, oldIndex, newIndex).map(
-        (task, index) => ({
-          ...task,
-          position: index,
-        }),
-      );
-
-      setTaskList(updatedTasks);
-      await updateTaskPositions.mutateAsync({
-        tasks: updatedTasks,
-      });
-    }
   };
 
   const resetDragState = () => {
@@ -108,12 +107,11 @@ export function useTaskDragAndDrop(
   };
 
   return {
-    dragTask,
     isDragging,
-    taskList,
-    sensors,
+    activeId,
+    dragTask,
     handleDragStart,
     handleDragEnd,
-    activeId,
+    sensors,
   };
-}
+};
