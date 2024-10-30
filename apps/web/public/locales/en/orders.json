@@ -15,6 +15,10 @@
   "assignedToLabel": "Assigned to",
   "dueDateLabel": "Due date",
   "select_date_range": "Select date range",
+  "delete": "Delete order",
+  "deleteConfirmation": "Do you really want to delete this order?",
+  "deleteSuccess": "Order deleted successfully",
+  "deleteError": "Error deleting order",
   "creation": {
     "title": "Create order",
     "form": {
