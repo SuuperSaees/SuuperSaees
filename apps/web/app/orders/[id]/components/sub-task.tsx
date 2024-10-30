@@ -32,7 +32,6 @@ import {
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import { DatePickerWithRange } from './range-date-picker';
 import SelectAction from './ui/select-action';
-import { useSubtaskDragAndDrop } from '../hooks/use-subtask-drag-and-drop';
 import { closestCorners, DndContext } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import { SortableSubtask } from './sortable-subtask';
@@ -52,19 +51,13 @@ function SubTasks({
   const statusOptions = generateDropdownOptions(statuses, t, 'statuses');
   const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
 
-  const { createSubtask, updateSubtask } =
+  const { subtaskList, createSubtask, updateSubtask, handleDragEnd, handleDragStart,  sensors} =
     useRealTimeSubtasks(initialSubtasks);
 
   const [newSubtaskName, setNewSubtaskName] = useState<string>('');
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const [content, setContent] = useState<string>('');
-
-  const { handleDragStart, handleDragEnd, sensors, subtaskListDragAnDrop } =
-    useSubtaskDragAndDrop(
-      initialSubtasks
-      .sort((a, b) => a.position - b.position),
-    );
 
   const handleAddSubtask = async (taskId: string) => {
     const newSubtask = {
@@ -187,8 +180,8 @@ function SubTasks({
         sensors={sensors}
         collisionDetection={closestCorners}
       >
-        <SortableContext items={subtaskListDragAnDrop} >
-        {subtaskListDragAnDrop
+        <SortableContext items={subtaskList} >
+        {subtaskList
         .filter((subtask) => !subtask.deleted_on)
         .sort((a, b) => a.position - b.position)
         .map((subtask) => (
@@ -216,7 +209,7 @@ function SubTasks({
                 </div>
               ) : (
                 <p
-                  className="font-semibold text-gray-900 truncate w-20"
+                  className="font-semibold text-gray-900 truncate w-full"
                   onMouseEnter={() => setHoveredTaskId(subtask.id)}
                   onMouseLeave={() => setHoveredTaskId(null)}
                   onClick={() => handleStartEditing(subtask.id, subtask.name)}
