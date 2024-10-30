@@ -1336,6 +1336,7 @@ export type Database = {
           client_organization_id: string
           created_at: string
           customer_id: string
+          deleted_on: string | null
           description: string
           due_date: string | null
           id: number
@@ -1352,6 +1353,7 @@ export type Database = {
           client_organization_id: string
           created_at?: string
           customer_id: string
+          deleted_on?: string | null
           description: string
           due_date?: string | null
           id?: number
@@ -1368,6 +1370,7 @@ export type Database = {
           client_organization_id?: string
           created_at?: string
           customer_id?: string
+          deleted_on?: string | null
           description?: string
           due_date?: string | null
           id?: number
@@ -1950,7 +1953,29 @@ export type Database = {
           trial_starts_at?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subtasks: {
         Row: {

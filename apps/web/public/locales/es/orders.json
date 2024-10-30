@@ -15,6 +15,10 @@
   "assignedToLabel": "Asignado a",
   "dueDateLabel": "Fecha de vencimiento",
   "select_date_range": "Seleccionar rango de fechas",
+  "delete": "Eliminar orden",
+  "deleteConfirmation": "¿Estás seguro de que deseas eliminar este pedido?",
+  "deleteSuccess": "Pedido eliminado con éxito",
+  "deleteError": "Error al eliminar el pedido",
   "creation": {
     "title": "Crear pedido",
     "form": {
