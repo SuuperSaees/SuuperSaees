@@ -28,6 +28,7 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
         label="Order title"
         fieldName="title"
       />
+<<<<<<< Updated upstream
       <div className='flex items-center'>
         <h3 className="relative mb-2">
           <Trans i18nKey="details.orderId" /> {order?.id}
@@ -35,6 +36,11 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
         <DeleteOrderDropdown orderId = {order?.id} />
       </div>
       
+=======
+      <h3 className="relative mb-2 text-gray-600 text-[0.75rem] font-normal text-lg">
+        #{order?.id}
+      </h3>
+>>>>>>> Stashed changes
     </div>
   );
 };
