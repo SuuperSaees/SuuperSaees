@@ -32,7 +32,7 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
         <h3 className="relative mb-2">
           <Trans i18nKey="details.orderId" /> {order?.id}
         </h3>
-        <DeleteOrderDropdown orderUuid = {order.uuid} />
+        <DeleteOrderDropdown orderId = {order?.id} />
       </div>
       
     </div>

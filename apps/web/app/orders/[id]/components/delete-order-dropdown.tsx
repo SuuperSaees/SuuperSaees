@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { deleteOrderByUuid } from '~/team-accounts/src/server/actions/orders/delete/delete-order';
+import { deleteOrderById } from '~/team-accounts/src/server/actions/orders/delete/delete-order';
 import {toast} from 'sonner';
 
 import { Button } from '@kit/ui/button';
@@ -21,14 +21,14 @@ import {
 } from '@kit/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 
-function DeleteOrderDropdown({orderUuid}: {orderUuid: string}) {
+function DeleteOrderDropdown({orderId}: {orderId: number}) {
   const { t } = useTranslation('orders');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter()
 
   async function handleDelete() {
     try {
-      await deleteOrderByUuid(orderUuid);
+      await deleteOrderById(orderId);
       setIsDialogOpen(false);
       router.push('/orders');
       router.refresh();

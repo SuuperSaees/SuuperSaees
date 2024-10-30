@@ -2,8 +2,8 @@
 import { getSupabaseServerComponentClient } from "@kit/supabase/server-component-client";
 
 
-export const deleteOrderByUuid = async (
-  orderUuid: string
+export const deleteOrderById = async (
+  orderId: number
 ) => {
   try {  
     const client = getSupabaseServerComponentClient();
@@ -13,7 +13,7 @@ export const deleteOrderByUuid = async (
       .update({
           deleted_on: new Date().toDateString()
       })
-      .eq('uuid', orderUuid);
+      .eq('id', orderId);
 
     if (error) {
       throw new Error(error.message);
