@@ -1,15 +1,11 @@
-import { useEffect, useState } from 'react';
-
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { Subtask } from '~/lib/tasks.types';
-import { createNewSubtask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
-import { updateSubtaskById, updateSubtasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
-import { DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DragEndEvent, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
+import { useSubtaskMutations } from './subtasks/use-subtask-mutations';
 
 type SubtaskType = Subtask.Type;
 
@@ -25,7 +21,7 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
     type: null,
   });
 
-  const queryClient = useQueryClient();
+  const { createSubtask, updateSubtask, updateSubtaskIndex } = useSubtaskMutations();
 
   // Configure DnD sensors
   const mouseSensor = useSensor(MouseSensor, {
@@ -41,16 +37,19 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
   });
   const sensors = useSensors(mouseSensor, touchSensor);
 
-  useEffect(() => {
-    const handleSubtaskChange = (payload: { eventType: string; new: SubtaskType; old: SubtaskType }) => {
+  const handleSubtaskChange = useCallback(
+    (payload: { eventType: string; new: SubtaskType; old: SubtaskType }) => {
       const { eventType, new: newSubtask, old: oldSubtask } = payload;
-
+      const insert = 'INSERT';
+      const update = 'UPDATE';
+      const del = 'DELETE';
+  
       setSubtaskList((prevSubtasks) => {
-        if (eventType === 'INSERT') {
+        if (eventType === insert) {
           return [...prevSubtasks, { ...newSubtask }];
         }
-
-        if (eventType === 'UPDATE') {
+  
+        if (eventType === update) {
           return prevSubtasks
             .map((subtask) =>
               subtask.id === newSubtask.id
@@ -62,15 +61,18 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
             )
             .filter((subtask) => subtask.deleted_on === null); // Filter out deleted subtasks
         }
-
-        if (eventType === 'DELETE') {
+  
+        if (eventType === del) {
           return prevSubtasks.filter((subtask) => subtask.id !== oldSubtask.id);
         }
-
+  
         return prevSubtasks;
       });
-    };
+    },
+    [],
+  )
 
+  useEffect(() => {
     const channel = supabase
       .channel('subtasks')
       .on(
@@ -83,7 +85,7 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
     return () => {
       channel.unsubscribe().catch((error) => console.error(error));
     };
-  }, []);
+  }, [supabase, handleSubtaskChange]);
 
   // Drag and drop handlers
   function handleDragStart(event: DragStartEvent) {
@@ -138,64 +140,6 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
       type: null,
     });
   };
-
-  const createSubtask = useMutation({
-    mutationFn: ({ newSubtask }: { newSubtask: Omit<Subtask.Type, 'id'> }) =>
-      createNewSubtask(newSubtask),
-
-    onSuccess: async () => {
-      // toast.success('Successfully created new subtask');
-
-      await queryClient.invalidateQueries({
-        queryKey: ['subtasks', 'all'],
-      });
-    },
-    onError: () => {
-      toast.error('Error creating new subtask');
-    },
-  });
-
-  const updateSubtask = useMutation({
-    mutationFn: async ({
-      subtaskId,
-      subtask,
-    }: {
-      subtaskId: string;
-      subtask: Subtask.Type;
-    }) => updateSubtaskById(subtaskId, subtask),
-    onSuccess: async () => {
-      // toast.success('Successfully updated task');
-      await queryClient.invalidateQueries({
-        queryKey: ['subtasks', 'all'],
-      });
-    },
-    onError: () => {
-      toast.error('Failed to update task name');
-    },
-  });
-
-  const updateSubtaskIndex = useMutation({
-    mutationFn:(
-        { 
-          subtasks 
-        }: {
-          subtasks: Subtask.Type[];
-        }
-    ) => updateSubtasksPositions(subtasks),
-    onSuccess: async () => {
-      // toast.success('Successfully updated task positions');
-
-      await queryClient.invalidateQueries({
-        queryKey: ['subtasks', 'all'],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['taks', 'all'],
-      });
-    },
-    onError: () => {
-      toast.error('Error updating task positions');
-    },
-  });
 
   return {
     // Subtask states
