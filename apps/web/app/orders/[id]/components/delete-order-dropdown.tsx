@@ -41,10 +41,12 @@ function DeleteOrderDropdown({orderId}: {orderId: number}) {
   }
 
   return (
-    <div className="mb-[0.20rem] ml-2">
+    <div className="mb-[0.20rem] ml-2 w-auto items-center flex">
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <EllipsisVertical className="h-5 w-5" />
+          <Button variant="ghost" className='mr-2 h-10 m-0 text-slate-500 px-1'>
+          <EllipsisVertical className="w-[20px] h-[20px]" />
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem

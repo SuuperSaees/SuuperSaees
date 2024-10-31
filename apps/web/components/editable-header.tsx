@@ -74,7 +74,7 @@ const EditableHeader = ({
           <input
             type="text"
             ref={inputRef}
-            className="h-15 flex min-w-[98%] items-center justify-between overflow-hidden rounded-md border-none bg-slate-50 text-[20px] max-w-[98%] pr-1 font-semibold text-primary-900 outline-none"
+            className="h-15 flex min-w-[80%] items-center justify-between overflow-hidden rounded-md border-none bg-slate-50 text-[20px] max-w-[80%] pr-1 font-semibold text-primary-900 outline-none"
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
@@ -85,12 +85,12 @@ const EditableHeader = ({
             {name}
           </span>
           <Button variant="ghost" className="mr-2 h-10 m-0 text-slate-500 px-1"  onClick={handleSave}>
-            <Check />
+            <Check className='w-[20px] h-[20px]'/>
           </Button>
         </>
       ) : (
         <>
-          <span className=" min-w-[98%] whitespace-nowrap text-[20px] overflow-hidden font-semibold text-primary-900 pr-1 max-w-[98%]">
+          <span className=" min-w-[80%] whitespace-nowrap text-[20px] overflow-hidden font-semibold text-primary-900 pr-1 max-w-[80%]">
             {name.slice(0, 70).trim()}
             {name.length > 70 && '...'}
           </span>
@@ -103,7 +103,7 @@ const EditableHeader = ({
                 updateInputWidth();
               }}
             >
-              <PenLine />
+              <PenLine className='w-[20px] h-[20px]'/>
             </Button>
           )}
         </>
