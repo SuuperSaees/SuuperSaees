@@ -101,7 +101,7 @@ function TaskDropdown({
   }
 
   return (
-    <div className="no-scrollbar max-h-[70vh] overflow-y-auto">
+    <div className="no-scrollbar max-h-[76vh] overflow-y-auto">
       {loading ? (
         <div className="flex items-center justify-center">
           <Spinner />
