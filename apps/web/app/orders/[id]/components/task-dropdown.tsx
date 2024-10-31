@@ -18,8 +18,8 @@ import { Spinner } from '@kit/ui/spinner';
 import { calculateSubtaskProgress } from '~/utils/task-counter';
 
 import { useRealTimeTasks } from '../hooks/use-tasks';
-import { SortableTask } from './sortable-task';
 import SubTasks from './sub-task';
+import { SortableItem } from '~/components/sortable-item';
 
 function TaskDropdown({
   userRole,
@@ -116,7 +116,7 @@ function TaskDropdown({
           >
             <SortableContext items={tasks}>
               {tasks.map((task, index) => (
-                <SortableTask key={task.id} task={task}>
+                <SortableItem id={task.id} key={task.id}>
                   <div className="mb-4">
                     <div className="flex items-center justify-between">
                       {editingTaskId === task.id ? (
@@ -186,7 +186,7 @@ function TaskDropdown({
                       </AccordionItem>
                     </Accordion>
                   </div>
-                </SortableTask>
+                </SortableItem>
               ))}
             </SortableContext>
           </DndContext>

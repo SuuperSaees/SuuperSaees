@@ -32,11 +32,11 @@ import {
 } from '../utils/generate-options-and-classnames';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import { DatePickerWithRange } from './range-date-picker';
-import { SortableSubtask } from './sortable-subtask';
 import SubtaskAssignations from './subtasks/subtask-assignations';
 import SelectAction from './ui/select-action';
 import SubtaskFollowers from './subtasks/subtask-followers';
 import { createHandlers } from '../hooks/subtasks/subtask-handlers';
+import { SortableItem } from '~/components/sortable-item';
 
 function SubTasks({
   initialSubtasks,
@@ -99,7 +99,7 @@ function SubTasks({
             .filter((subtask) => !subtask.deleted_on)
             .sort((a, b) => a.position - b.position)
             .map((subtask) => (
-              <SortableSubtask key={subtask.id} subtask={subtask}>
+              <SortableItem key={subtask.id} id={subtask.id}>
                 <div
                   className="flex items-center justify-between py-3"
                   onMouseEnter={() => setHoveredTaskId(subtask.id)}
@@ -380,7 +380,7 @@ function SubTasks({
                     </div>
                   </div>
                 </div>
-              </SortableSubtask>
+              </SortableItem>
             ))}
         </SortableContext>
       </DndContext>
