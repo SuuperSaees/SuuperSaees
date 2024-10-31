@@ -24,9 +24,11 @@ import SubTasks from './sub-task';
 function TaskDropdown({
   userRole,
   orderId,
+  orderAgencyId,
 }: {
   userRole: string;
   orderId: string;
+  orderAgencyId: string;
 }) {
   const {
     tasks,
@@ -177,6 +179,8 @@ function TaskDropdown({
                             initialSubtasks={task.subtasks}
                             userRole={userRole}
                             taskId={task.id}
+                            orderId={orderId}
+                            orderAgencyId={orderAgencyId}
                           />
                         </AccordionContent>
                       </AccordionItem>
@@ -191,7 +195,7 @@ function TaskDropdown({
             className="mt-4 py-0 text-gray-600"
             onClick={handleAddTask}
           >
-            <Plus className="mr-1 h-5 w-5" />
+            <Plus className="mr-1 h-4 w-4" />
             <p className="text-sm">{t('tasks.addTask')}</p>
           </Button>
         </>

@@ -9,9 +9,25 @@ import { useSubtaskMutations } from './subtasks/use-subtask-mutations';
 
 type SubtaskType = Subtask.Type;
 
-export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
+export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[], orderId: string, orderAgencyId: string, userRole: string) => {
   const supabase = useSupabase();
   const [subtaskList, setSubtaskList] = useState<SubtaskType[]>(initialSubtasks);
+
+  const { createSubtask, updateSubtask, updateSubtaskIndex, changeAgencyMembersAssigned, changeAgencyMembersFollowers,  orderAgencyMembers, orderAgencyClientsFollowers} = useSubtaskMutations(orderId, orderAgencyId, userRole);
+
+  const searchUserOptions =
+    orderAgencyMembers?.map((user) => ({
+      picture_url: user.picture_url,
+      value: user.id,
+      label: user.name,
+  })) ?? [];
+
+  const searchUserOptionsFollowers =
+    orderAgencyClientsFollowers?.map((user) => ({
+      picture_url: user.picture_url,
+      value: user.id,
+      label: user.name,
+  })) ?? [];
 
   // Drag and drop states
   const [isDragging, setIsDragging] = useState(false);
@@ -20,8 +36,6 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
     isDragging: false,
     type: null,
   });
-
-  const { createSubtask, updateSubtask, updateSubtaskIndex } = useSubtaskMutations();
 
   // Configure DnD sensors
   const mouseSensor = useSensor(MouseSensor, {
@@ -157,5 +171,13 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[]) => {
     handleDragStart,
     handleDragEnd,
     activeId,
+
+    //Assigned members
+    searchUserOptions,
+    changeAgencyMembersAssigned,
+
+    //Followers
+    searchUserOptionsFollowers,
+    changeAgencyMembersFollowers
   };
 };

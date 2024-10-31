@@ -241,7 +241,7 @@ const RichTextEditorV2 = ({
         // custom style for block quote
         blockquote: {
           HTMLAttributes: {
-            class: `relative border-l-2 pl-4 italic mx-4 my-2 
+            class: `relative border-l-2 pl-4 italic  my-2 
               before:content-['“'] before:text-2xl before:font-bold before:absolute 
               before:left-0 before:transform before:-translate-x-0
               inline-block
@@ -353,7 +353,7 @@ const RichTextEditorV2 = ({
   }, [editor]);
 
   return (
-    <div className="relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4">
+    <div className="relative grid h-full w-full grid-rows-[1fr_auto] gap-1 rounded-2xl mt-6">
       <div>
         {showToolbar && (
           <Toolbar
@@ -375,16 +375,16 @@ const RichTextEditorV2 = ({
       </div>
       <div
         onClick={() => editor?.commands.focus()}
-        className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
+        className={`${styles['scrollbar-thin']} relative h-full w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
       >
         {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
-          <span className="absolute left-2 top-4 -translate-y-1/2 transform text-gray-400">
+          <span className="absolute left-2 top-4 -translate-y-1/2 transform text-gray-400 h-full">
             <Trans i18nKey="placeholder" />
           </span>
         ) : null}
         <EditorContent
           editor={editor}
-          className={`${styles['scrollbar-thin']} flex h-fit max-h-96 w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
+          className={`${styles['scrollbar-thin']} flex h-full w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
         />
       </div>
       
