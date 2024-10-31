@@ -93,7 +93,7 @@ function TaskDropdown({
           className="mt-4 py-0 text-gray-600"
           onClick={handleAddTask}
         >
-          <Plus className="mr-1 h-5 w-5" />
+          <Plus className="mr-1 h-4 w-4" />
           <p className="text-sm">{t('tasks.addTask')}</p>
         </Button>
       </div>

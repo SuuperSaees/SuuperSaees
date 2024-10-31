@@ -36,7 +36,7 @@ import { SortableSubtask } from './sortable-subtask';
 import SubtaskAssignations from './subtasks/subtask-assignations';
 import SelectAction from './ui/select-action';
 import SubtaskFollowers from './subtasks/subtask-followers';
-import { createHandlers } from './subtasks/subtask-handlers';
+import { createHandlers } from '../hooks/subtasks/subtask-handlers';
 
 function SubTasks({
   initialSubtasks,
