@@ -41,8 +41,8 @@ export default function SignUp({ searchParams }: Props) {
   // const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? '#ffffff')
   const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
   const currentAppOrigin = window.location.origin + '/';
-  //   const isCustomDomain = originalAppOrigin !== currentAppOrigin;
-  const isCustomDomain = true;
+    const isCustomDomain = originalAppOrigin !== currentAppOrigin;
+
   const textcolor = getTextColorBasedOnBackground(
     authDetails?.background_color ?? '#ffffff',
   );
