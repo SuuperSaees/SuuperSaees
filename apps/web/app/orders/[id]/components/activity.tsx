@@ -63,26 +63,28 @@ const ActivityPage = () => {
   };
 
   return (
-    <div className="flex h-full w-full pr-8 min-w-0 max-w-full flex-col gap-4 flex-grow shrink">
-      <Interactions />
-      <div className="mt-auto flex max-h-full flex-grow max-w-full min-w-0 flex-col gap-4 mb-2 justify-end">
+<div className="flex w-full flex-col gap-4">
+    <Interactions />
+    <div className="flex flex-col gap-4 justify-end mb-2">
         {showFileUploader && (
-          <UploadFileComponent
-            bucketName="orders"
-            onFileIdsChange={handleFileIdsChange}
-            uuid={generateUUID()}
-            removeResults
-            toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
-          />
+            <UploadFileComponent
+                bucketName="orders"
+                onFileIdsChange={handleFileIdsChange}
+                uuid={generateUUID()}
+                removeResults
+                toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
+            />
         )}
+        <div className="flex-grow" /> 
         <RichTextEditor
-          onComplete={handleOnCompleteMessageSend}
-          uploadFileIsExternal
-          toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
-          userRole={userRole}
+            onComplete={handleOnCompleteMessageSend}
+            uploadFileIsExternal
+            toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
+            userRole={userRole}
         />
-      </div>
     </div>
+</div>
+
   );
 };
 

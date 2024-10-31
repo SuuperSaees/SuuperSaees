@@ -351,13 +351,13 @@ const RichTextEditor = ({
 
 
   return (
-    <div className="relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 shadow-md">
+    <div className="relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4">
       <div
         onClick={() => editor?.commands.focus()}
         className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
       >
         {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
-          <span className="absolute left-2 top-4 -translate-y-1/2 transform text-gray-400">
+          <span className="absolute min-h-[40px] h-[40px] transform text-gray-400">
             <Trans i18nKey="placeholder" />
           </span>
         ) : null}

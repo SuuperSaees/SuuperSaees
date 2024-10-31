@@ -7,6 +7,7 @@ import { Order } from '~/lib/order.types';
 import { updateOrder } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import EditableHeader from '../../../../components/editable-header';
 import { useActivityContext } from '../context/activity-context';
+import DeleteOrderDropdown from './delete-order-dropdown';
 
 export const OrderHeader = ({ order }: { order: Order.Relational }) => {
   const { userRole } = useActivityContext();
@@ -27,9 +28,12 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
         label="Order title"
         fieldName="title"
       />
-      <h3 className="relative mb-2">
-        <Trans i18nKey="details.orderId" /> {order?.id}
-      </h3>
+      <div className="flex items-center">
+        <h3 className="relative mb-2 text-[0.75rem] text-lg font-normal text-gray-600">
+          <Trans i18nKey="details.orderId" /> {order?.id}
+        </h3>
+        <DeleteOrderDropdown orderId={order?.id} />
+      </div>
     </div>
   );
 };
