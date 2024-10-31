@@ -6,8 +6,6 @@ import { Subtask } from '~/lib/tasks.types';
 import { DragEndEvent, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSubtaskMutations } from './subtasks/use-subtask-mutations';
-import { useQuery } from '@tanstack/react-query';
-import { getOrderAgencyMembers } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 type SubtaskType = Subtask.Type;
 
@@ -15,19 +13,21 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[], orderId: str
   const supabase = useSupabase();
   const [subtaskList, setSubtaskList] = useState<SubtaskType[]>(initialSubtasks);
 
-  const { data: orderAgencyMembers } = useQuery({
-    queryKey: ['order-agency-members', orderId],
-    queryFn: () => getOrderAgencyMembers(orderAgencyId, Number(orderId)),
-    retry: 5,
-    enabled: userRole === 'agency_owner' || userRole === 'agency_member' || userRole === 'agency_project_manager',
-  });
+  const { createSubtask, updateSubtask, updateSubtaskIndex, changeAgencyMembersAssigned, changeAgencyMembersFollowers,  orderAgencyMembers, orderAgencyClientsFollowers} = useSubtaskMutations(orderId, orderAgencyId, userRole);
 
   const searchUserOptions =
     orderAgencyMembers?.map((user) => ({
       picture_url: user.picture_url,
       value: user.id,
       label: user.name,
-    })) ?? [];
+  })) ?? [];
+
+  const searchUserOptionsFollowers =
+    orderAgencyClientsFollowers?.map((user) => ({
+      picture_url: user.picture_url,
+      value: user.id,
+      label: user.name,
+  })) ?? [];
 
   // Drag and drop states
   const [isDragging, setIsDragging] = useState(false);
@@ -36,8 +36,6 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[], orderId: str
     isDragging: false,
     type: null,
   });
-
-  const { createSubtask, updateSubtask, updateSubtaskIndex, changeAgencyMembersAssigned } = useSubtaskMutations();
 
   // Configure DnD sensors
   const mouseSensor = useSensor(MouseSensor, {
@@ -66,7 +64,6 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[], orderId: str
         }
   
         if (eventType === update) {
-          console.log('newSubtask', newSubtask);
           return prevSubtasks
             .map((subtask) =>
               subtask.id === newSubtask.id
@@ -177,6 +174,10 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[], orderId: str
 
     //Assigned members
     searchUserOptions,
-    changeAgencyMembersAssigned
+    changeAgencyMembersAssigned,
+
+    //Followers
+    searchUserOptionsFollowers,
+    changeAgencyMembersFollowers
   };
 };

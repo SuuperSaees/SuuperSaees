@@ -1,5 +1,6 @@
 'use client';
 
+// import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
@@ -12,12 +13,12 @@ import CheckboxCombobox, {
   CustomItemProps,
   Option,
 } from '~/components/ui/checkbox-combobox';
-import { getSubtaskAssigns } from '~/team-accounts/src/server/actions/tasks/get/get-tasks';
+import { getSubtaskFollowers } from '~/team-accounts/src/server/actions/tasks/get/get-tasks';
 
 import deduceNameFromEmail from '../../utils/deduce-name-from-email';
-import { isValidName } from '../../utils/is-valid-name';
 import AvatarDisplayer from '../ui/avatar-displayer';
-import { UserCheck } from 'lucide-react';
+import { isValidName } from '../../utils/is-valid-name';
+import { UserPlus } from 'lucide-react';
 
 const CustomUserItem: React.FC<
   CustomItemProps<
@@ -30,7 +31,7 @@ const CustomUserItem: React.FC<
     <AvatarDisplayer
       className="font-normal"
       pictureUrl={option?.picture_url ?? null}
-      displayName={deduceNameFromEmail(option.label) ?? option.label}
+      displayName={option.label}
     />
     <span>
       {isValidName(option.label)
@@ -39,7 +40,7 @@ const CustomUserItem: React.FC<
     </span>
   </div>
 );
-interface SubtaskAssignationProps {
+interface ActivityAssignationProps {
   subtaskId: string;
   onUserSelectionChange: (selectedUsers: string[]) => void;
   searchUserOptions: {
@@ -50,17 +51,17 @@ interface SubtaskAssignationProps {
   userRole: string;
 }
 
-const SubtaskAssignations = ({
+const SubtaskFollowers = ({
   subtaskId,
   onUserSelectionChange,
   searchUserOptions,
   userRole,
-}: SubtaskAssignationProps) => {
+}: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
 
-  const { data: assignedTo, isLoading } = useQuery({
-    queryKey: ['subtask_assignations', subtaskId],
-    queryFn: () => getSubtaskAssigns(subtaskId),
+  const { data: followers, isLoading } = useQuery({
+    queryKey: ['subtask_followers', subtaskId],
+    queryFn: () => getSubtaskFollowers(subtaskId),
     enabled:
       userRole === 'agency_owner' ||
       userRole === 'agency_member' ||
@@ -68,12 +69,12 @@ const SubtaskAssignations = ({
   });
 
   const [selectedUsers, setSelectedUsers] = useState<string[]>(
-    assignedTo?.map((user) => user.agency_member_id) ?? [],
+    followers?.map((user) => user.client_member_id) ?? [],
   );
   const loading = isLoading;
 
   const avatarsWithStatus =
-    assignedTo?.map((account) => ({
+    followers?.map((account) => ({
       ...account.accounts,
       status: undefined,
     })) ?? [];
@@ -95,16 +96,16 @@ const SubtaskAssignations = ({
   return (
     <div className="flex gap-2 items-center justify-between h-10">
       <div className='flex items-center'>
-        <UserCheck className="h-4 w-4 mr-2" />
-        <span className="font-semibold text-sm">{t('details.assignedTo')}</span>
+        <UserPlus className="h-4 w-4 mr-2" />
+        <span className="font-semibold text-sm">{t('details.followedBy')}</span>
       </div>
       
-      <div className="no-scrollbar flex max-h-[300px] flex-wrap items-center justify-end gap-0 overflow-y-auto">
-      {loading && (
-        <div className='items-center flex'>
-          <Spinner className="h-4 w-4" />
-        </div>
-      )}
+        <div className="no-scrollbar flex max-h-[300px] flex-wrap items-center justify-end gap-0 overflow-y-auto">
+          {loading && (
+            <div className='items-center flex'>
+              <Spinner className="h-4 w-4" />
+          </div>
+          )}
           {!loading && (
             <>
             {avatarsWithStatus.map((avatar, index) => {
@@ -134,8 +135,8 @@ const SubtaskAssignations = ({
             />
             </>
           )}
-      </div>
+        </div>
     </div>
   );
 };
-export default SubtaskAssignations;
+export default SubtaskFollowers;

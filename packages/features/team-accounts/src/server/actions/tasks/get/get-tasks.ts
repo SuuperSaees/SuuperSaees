@@ -6,7 +6,6 @@ import {
   Subtask,
   Task,
 } from '../../../../../../../../apps/web/lib/tasks.types';
-import { User } from '../../../../../../../../apps/web/lib/user.types';
 
 export const getTasks = async (orderId: string) => {
   try {
@@ -17,11 +16,12 @@ export const getTasks = async (orderId: string) => {
     const { data: tasksData, error: tasksDataError } = await client
       .from('tasks')
       // .select(`*, subtasks(*)`)
-      .select(`*, subtasks(*, followers:subtask_followers(*, accounts(id, name, email)), assigned_to:subtask_assignations(*, accounts(id, name, email)))`)
+      .select(
+        `*, subtasks(*, followers:subtask_followers(*, accounts(id, name, email)), assigned_to:subtask_assignations(*, accounts(id, name, email)))`,
+      )
       .eq('order_id', orderId)
       .is('deleted_on', null);
     if (tasksDataError) throw new Error(tasksDataError.message);
-
 
     const tasks = tasksData
       .map((task: Task.Type) => {
@@ -41,5 +41,37 @@ export const getTasks = async (orderId: string) => {
     return tasks;
   } catch (error) {
     console.error('Error fetching tasks:', error);
+  }
+};
+
+export const getSubtaskAssigns = async (subtaskId: string) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: assignsData, error: assignsDataError } = await client
+      .from('subtask_assignations')
+      .select(`*, accounts(*)`)
+      .eq('subtask_id', subtaskId);
+    // .is('deleted_on', null);
+    if (assignsDataError) throw new Error(assignsDataError.message);
+
+    return assignsData;
+  } catch (error) {
+    console.error('Error fetching subtask assigns:', error);
+  }
+};
+
+export const getSubtaskFollowers = async (subtaskId: string) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: assignsData, error: assignsDataError } = await client
+      .from('subtask_followers')
+      .select(`*, accounts(*)`)
+      .eq('subtask_id', subtaskId);
+    // .is('deleted_on', null);
+    if (assignsDataError) throw new Error(assignsDataError.message);
+
+    return assignsData;
+  } catch (error) {
+    console.error('Error fetching subtask assigns:', error);
   }
 };

@@ -127,7 +127,8 @@ export const checkAndUpdateTaskCompletion = async (parentId: string) => {
     const { data: subtasks, error: subtasksError } = await client
       .from('subtasks')
       .select('completed')
-      .eq('parent_task_id', parentId);
+      .eq('parent_task_id', parentId)
+      .is('deleted_on', null);
     if (subtasksError) throw new Error(subtasksError.message);
 
     // Check if all subtasks are completed
@@ -157,6 +158,14 @@ export const checkAndUpdateTaskCompletion = async (parentId: string) => {
         user_id: userData.user.id,
       };
       await addActivityAction(activity);
+    } else {
+      const { error: taskError } = await client
+        .from('tasks')
+        .update({ completed: false })
+        .eq('id', parentId)
+        .select('name, order_id')
+        .single();
+      if (taskError) throw new Error(taskError.message);
     }
   } catch (error) {
     console.error('Error checking and updating task completion:', error);
@@ -169,8 +178,6 @@ export const updateSubtaskAssigns = async (
   agencyMemberIds: string[],
 ) => {
   try {
-    console.log('subtaskId', subtaskId);
-    console.log('agencyMemberIds', agencyMemberIds);
     const client = getSupabaseServerComponentClient();
 
     // 1. Fetch existing assignments to determine if you need to delete any
@@ -218,5 +225,60 @@ export const updateSubtaskAssigns = async (
   } catch (error) {
     console.error('Error updating subtask assignments:', error);
     throw new Error('Failed to update subtask assignments');
+  }
+};
+
+export const updateSubtaskFollower = async (
+  subtaskId: Subtask.Type['id'],
+  followerIds: string[],
+) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    // 1. Fetch existing followers to determine if you need to delete any
+    const { data: existingAssignments, error: fetchError } = await client
+      .from('subtask_followers')
+      .select('client_member_id')
+      .eq('subtask_id', subtaskId);
+
+    if (fetchError) throw fetchError;
+
+    // Extract existing IDs
+    const existingIds =
+      existingAssignments?.map((assign) => assign.client_member_id) || [];
+
+    // Determine IDs to add and remove
+    const idsToAdd = followerIds.filter((id) => !existingIds.includes(id));
+    const idsToRemove = existingIds.filter(
+      (id) => !followerIds.includes(id),
+    );
+
+    // 2. Remove old assignments
+    if (idsToRemove.length > 0) {
+      const { error: deleteError } = await client
+        .from('subtask_followers')
+        .delete()
+        .in('client_member_id', idsToRemove)
+        .eq('subtask_id', subtaskId);
+
+      if (deleteError) throw deleteError;
+    }
+
+    // 3. Upsert new followers
+    const newFollowers = idsToAdd.map((id) => ({
+      subtask_id: subtaskId,
+      client_member_id: id,
+    }));
+
+    const { error: upsertError } = await client
+      .from('subtask_followers')
+      .upsert(newFollowers)
+      .select();
+
+    if (upsertError) throw upsertError;
+
+  } catch (error) {
+    console.error('Error updating subtask followers:', error);
+    throw new Error('Failed to update subtask followers');
   }
 };
