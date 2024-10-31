@@ -68,6 +68,24 @@ async function OrderDetailsPage({
   </div>
 </div>
 
+        <div className="flex h-full min-h-0 max-h-full w-full flex-col text-gray-700">
+          <div className="flex h-full max-h-full w-full justify-between gap-6">
+            <div className="flex w-full min-w-0 flex-grow flex-col gap-6">
+              <OrderTabs
+                organizationId={
+                  organizationId
+                    ? { account_id: organizationId.client_organization_id }
+                    : undefined
+                }
+                currentPath={currentPath}
+                userRole={role}
+                orderId={id}
+                orderAgencyId={order?.agency_id ?? ''}
+              />
+            </div>
+            <AsideOrderInformation order={order!} className="hidden lg:flex" />
+          </div>
+        </div>
 
       </ActivityProvider>
     </PageBody>

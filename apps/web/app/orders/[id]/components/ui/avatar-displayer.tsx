@@ -3,6 +3,7 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@kit/ui/avatar';
 
 interface AvatarDisplayerProps {
+  isTask?: boolean;
   displayName?: string | null;
   isAssignedOrFollower?: boolean;
   pictureUrl?: string | null;
@@ -14,6 +15,7 @@ interface AvatarDisplayerProps {
   fallbackInitials?: string;
 }
 const AvatarDisplayer = ({
+  isTask = false,
   pictureUrl,
   displayName,
   organizationName,
@@ -24,7 +26,7 @@ const AvatarDisplayer = ({
   ...rest
 }: AvatarDisplayerProps) => {
   return (
-    <div className={`relative flex h-fit w-fit items-center ${isAssignedOrFollower ? "bg-slate-50 px-4 rounded-full" : ""} ${className}`} {...rest}>
+    <div className={`relative flex ${!isTask ? "h-fit w-fit": ""} items-center ${isAssignedOrFollower && !isTask ? "bg-slate-50 px-4 rounded-full" : ""} ${className}`} {...rest}>
       {/* <ProfileAvatar
         displayName={!displayName ? null : displayName}
         pictureUrl={pictureUrl}
@@ -35,7 +37,7 @@ const AvatarDisplayer = ({
         } ${status === 'online' ? 'after:bg-green-400' : 'after:bg-gray-400'} ${className} `}
         {...rest}
       /> */}
-      <Avatar className={`${isAssignedOrFollower ? "scale-75" : ""}`}>
+      <Avatar className={`${isAssignedOrFollower ? "scale-75" : ""} `}>
         <AvatarImage src={pictureUrl ?? ''} />
         {/* <AvatarFallback>{displayName}</AvatarFallback> */}
         {displayName && (
@@ -49,12 +51,15 @@ const AvatarDisplayer = ({
           </AvatarFallback>
         )}
       </Avatar>
-      <div className={`${organizationName ? "grid grid-rows-2 grid-cols-1" : "flex py-2 justify-center items-center"}`}>
-        {displayName && isAssignedOrFollower && <span className="whitespace-nowrap text-sm font-semibold">{displayName}</span>}
-        {/* {nickname && <span className="text-sm text-gray-600">{nickname}</span>} */}
-        {/* <AvatarFallback>SD</AvatarFallback> */}
-      {organizationName && <span className="text-sm text-gray-600">{organizationName}</span>}
-      </div>
+      {!isTask && 
+        <div className={`${organizationName ? "grid grid-rows-2 grid-cols-1" : "flex py-2 justify-center items-center"}`}>
+          {displayName && isAssignedOrFollower && <span className="whitespace-nowrap text-sm font-semibold">{displayName}</span>}
+          {/* {nickname && <span className="text-sm text-gray-600">{nickname}</span>} */}
+          {/* <AvatarFallback>SD</AvatarFallback> */}
+          {organizationName && <span className="text-sm text-gray-600">{organizationName}</span>}
+        </div>
+      }
+      
     </div>
   );
 };

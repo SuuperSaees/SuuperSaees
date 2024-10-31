@@ -5,6 +5,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { getUserById } from '../../members/get/get-member-account';
 import { Activity } from '../../../../../../../../apps/web/lib/activity.types';
 import { addActivityAction } from '../../activity/create/create-activity';
+import { checkAndUpdateTaskCompletion } from '../update/update-task';
 
 export const createNewTask = async (
     task: Task.Insert,
@@ -108,6 +109,10 @@ export const createNewSubtask = async (
             )
             .single();
         if (taskDataError) throw new Error(taskDataError.message);
+
+        if (subtask.parent_task_id) {
+            await checkAndUpdateTaskCompletion(subtask.parent_task_id);
+        }
 
         return subtaskData;
         
