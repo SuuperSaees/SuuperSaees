@@ -15,29 +15,16 @@ import { OrganizationSettings as OrganizationSettingsType } from '../../../../..
 import { Tokens } from '../../../../../../../../apps/web/lib/tokens.types';
 import { decodeToken } from '../../../../../../../../packages/tokens/src/decode-token';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
-import {
-  generateRandomPassword,
-  getTextColorBasedOnBackground,
-} from '../../../utils/generate-colors';
+import { generateRandomPassword, getTextColorBasedOnBackground } from '../../../utils/generate-colors';
 import { addUserAccountRole } from '../../members/create/create-account';
-import {
-  getPrimaryOwnerId,
-  getUserAccountByEmail,
-} from '../../members/get/get-member-account';
+import { getPrimaryOwnerId, getUserAccountByEmail } from '../../members/get/get-member-account';
 import { fetchCurrentUser } from '../../members/get/get-member-account';
 import { updateUserAccount } from '../../members/update/update-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
-import {
-  getAgencyForClient,
-  getOrganization,
-  getOrganizationById,
-  getOrganizationSettings,
-} from '../../organizations/get/get-organizations';
-import {
-  hasPermissionToAddClientMembers,
-  hasPermissionToCreateClientOrg,
-} from '../../permissions/clients';
+import { getAgencyForClient, getOrganization, getOrganizationById, getOrganizationSettings } from '../../organizations/get/get-organizations';
+import { hasPermissionToAddClientMembers, hasPermissionToCreateClientOrg } from '../../permissions/clients';
 import { sendClientConfirmEmail } from '../send-email/send-client-email';
+
 
 // Define la función createClient
 type CreateClient = {
@@ -205,6 +192,7 @@ export const insertClient = async (
 };
 
 export const createClient = async (clientData: CreateClient) => {
+  // Refactor this function to use the new client data structure
   try {
     const supabase = getSupabaseServerComponentClient();
     // Step 1: Fetch primary owner ID and organization
@@ -266,7 +254,10 @@ export const createClient = async (clientData: CreateClient) => {
     // Step 8: Update client user with organization ID
     await updateUserAccount(
       supabase,
-      { organization_id: clientOrganizationAccount.id, name: clientData.client.name },
+      {
+        organization_id: clientOrganizationAccount.id,
+        name: clientData.client.name,
+      },
       userId,
     );
 
