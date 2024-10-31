@@ -9,9 +9,12 @@ import { z } from 'zod';
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
+
+
 import { OrganizationSettings } from '../../../../../../../apps/web/lib/organization-settings.types';
 import { getDomainByOrganizationId } from '../../../../../../../packages/multitenancy/utils/get/get-domain';
 import { getOrganizationSettingsByOrganizationId } from '../../actions/organizations/get/get-organizations';
+
 
 // import { getOrganizationById } from '../../actions/organizations/get/get-organizations';
 
@@ -164,12 +167,21 @@ class AccountInvitationsWebhookService {
     logger.info(ctx, 'Invite retrieved. Sending invitation email...');
 
     try {
+      let domain = await getDomainByOrganizationId(
+        inviter.data.organization_id ?? '',
+        true,
+      );
+      if (domain !== siteURL) {
+        domain = isProd ? `https://${domain}` : `http://${domain}`;
+      }
+
       const { renderInviteEmail } = await import('@kit/email-templates');
       // const { getMailer } = await import('@kit/mailers');
       // const mailer = await getMailer();
       const link = this.getInvitationLink(
         invitation.invite_token,
         invitation.email,
+        domain,
       );
 
       const { html, subject, t } = await renderInviteEmail({
@@ -185,12 +197,6 @@ class AccountInvitationsWebhookService {
       const fromSenderIdentity = inviterOrganizationSenderName
         ? `${inviterOrganizationSenderName} <${inviterOrganizationSenderEmail}@${inviterOrganizationSenderDomain}>`
         : `${defaultAgencySenderName} ${t('at')} ${defaultAgencyName} <${inviterOrganizationSenderEmail}@${inviterOrganizationSenderDomain}>`;
-
-      let domain = await getDomainByOrganizationId(inviter.data.organization_id ?? '', true);
-
-      if (domain !== siteURL) {
-        domain = isProd ? `https://${domain}` : `http://${domain}`;
-      }
 
       const res = await fetch(`${domain}/api/v1/mailer`, {
         method: 'POST',
@@ -301,13 +307,13 @@ class AccountInvitationsWebhookService {
     }
   }
 
-  private getInvitationLink(token: string, email: string) {
+  private getInvitationLink(token: string, email: string, domain?: string,) {
     const searchParams = new URLSearchParams({
       invite_token: token,
       email,
     }).toString();
 
-    const href = new URL(env.invitePath, env.siteURL).href;
+    const href = new URL(env.invitePath, domain ?? env.siteURL).href;
 
     return `${href}?${searchParams}`;
   }
