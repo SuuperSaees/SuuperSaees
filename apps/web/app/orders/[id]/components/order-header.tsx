@@ -19,6 +19,7 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
 
   return (
     <div>
+      <div className='flex'>
       <EditableHeader
         initialName={order.title}
         id={order.id}
@@ -28,11 +29,13 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
         label="Order title"
         fieldName="title"
       />
+      <DeleteOrderDropdown orderId={order?.id} />
+      </div>
       <div className="flex items-center">
-        <h3 className="relative mb-2 text-[0.75rem] text-lg font-normal text-gray-600">
+        <h3 className="relative mb-2 text-[0.9em] text-lg font-normal text-gray-600">
           <Trans i18nKey="details.orderId" /> {order?.id}
         </h3>
-        <DeleteOrderDropdown orderId={order?.id} />
+        
       </div>
     </div>
   );
