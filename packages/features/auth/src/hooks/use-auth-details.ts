@@ -13,6 +13,7 @@ interface AuthDetails {
 
 export const useAuthDetails = (hostname: string) => {
   const [authDetails, setAuthDetails] = useState<AuthDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchAuthDetails = async () => {
@@ -24,6 +25,7 @@ export const useAuthDetails = (hostname: string) => {
       // Fetch from the database
       let domainFullData = null;
       try {
+        setIsLoading(true);
         domainFullData = await getFullDomainBySubdomain(hostname, true, [
           'theme_color',
           'logo_url',
@@ -34,6 +36,8 @@ export const useAuthDetails = (hostname: string) => {
       } catch (error) {
         console.error('Error fetching auth details', error);
         return;
+      } finally {
+        setIsLoading(false);
       }
 
       if (domainFullData) {
@@ -75,5 +79,5 @@ export const useAuthDetails = (hostname: string) => {
     void fetchAuthDetails();
   }, [hostname]);
 
-  return authDetails;
+  return { authDetails, isLoading };
 };

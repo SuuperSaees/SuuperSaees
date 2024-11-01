@@ -1,16 +1,16 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
+
 import { useMutation } from '@tanstack/react-query';
-
-
 import { z } from 'zod';
+
 import { OrganizationSettings } from '../../../../apps/web/lib/organization-settings.types';
 import { Tokens } from '../../../../apps/web/lib/tokens.types';
 import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/src/server/actions/clients/send-email/utils/client-confirm-email-template';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
 import { decodeToken } from '../../../tokens/src/decode-token';
 import { useSupabase } from './use-supabase';
-
 
 interface Credentials {
   email: string;
@@ -44,9 +44,12 @@ const defaultFromSenderIdentity =
 export function useSignUpWithEmailAndPassword() {
   const client = useSupabase();
   const mutationKey = ['auth', 'sign-up-with-email-password'];
-
+  // catch invite token
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get('invite_token');
   const mutationFn = async (params: Credentials) => {
     const { emailRedirectTo, captchaToken, ...credentials } = params;
+    let inviteRedirectUrl: string | undefined = undefined;
     // Step 1: Sign up the user
 
     const response = await client.auth.signUp({
@@ -108,23 +111,28 @@ export function useSignUpWithEmailAndPassword() {
       defaultColor,
       defaultTextColor,
     );
+    // don't send confirmation email if is a member invitation (/auth/sign-up?invite_token=xxxx)
+    if (inviteToken) {
+      inviteRedirectUrl = `${baseUrl}/auth/confirm?token_hash_session=${sessionId}&type=invite&callback=${callbackUrl}`;
+    } else {
+      const res = await fetch(`${baseUrl}/api/v1/mailer`, {
+        method: 'POST',
+        headers: new Headers({
+          Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
+        }),
+        body: JSON.stringify({
+          from: defaultFromSenderIdentity,
+          to: [email],
+          subject: 'Confirm your email',
+          html: template,
+        }),
+      });
 
-    const res = await fetch(`${baseUrl}/api/v1/mailer`, {
-      method: 'POST',
-      headers: new Headers({
-        Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
-      }),
-      body: JSON.stringify({
-        from: defaultFromSenderIdentity,
-        to: [email],
-        subject: 'Confirm your email',
-        html: template,
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to send email: ${res.statusText}`);
+      if (!res.ok) {
+        throw new Error(`Failed to send email: ${res.statusText}`);
+      }
     }
+
     const user = response.data?.user;
     const identities = user?.identities ?? [];
 
@@ -133,12 +141,13 @@ export function useSignUpWithEmailAndPassword() {
       throw new Error('User already registered');
     }
 
-    // Step 6: Return the user data
-    return response.data;
+    // Step 6: Return the user data and the invite redirect url if it exists
+    return { data: response.data, inviteRedirectUrl };
   };
 
-  return useMutation({
+  const signUpMutation = useMutation({
     mutationKey,
     mutationFn,
   });
+  return signUpMutation;
 }
