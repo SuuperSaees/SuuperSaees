@@ -40,7 +40,7 @@ export const useAuthDetails = (hostname: string) => {
       let domainFullData = null;
       try {
         setIsLoading(true);
-        domainFullData = await getFullDomainBySubdomain(hostname, true, [
+        domainFullData = isCustomDomain() && await getFullDomainBySubdomain(hostname, true, [
           'theme_color',
           'logo_url',
           'sidebar_background_color',
