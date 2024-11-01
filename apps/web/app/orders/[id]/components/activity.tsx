@@ -2,20 +2,13 @@
 
 import { useState } from 'react';
 
-
-
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-
-
 
 import UploadFileComponent from '~/components/ui/files-input';
 import RichTextEditor from '~/components/ui/rich-text-editor';
 
-
-
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
-
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -63,28 +56,27 @@ const ActivityPage = () => {
   };
 
   return (
-<div className="flex w-full flex-col gap-4">
-    <Interactions />
-    <div className="flex flex-col gap-4 justify-end mb-2">
+    <div className="flex w-full flex-col gap-4 max-h-full h-full">
+      <Interactions />
+      <div className="mb-2 flex flex-col justify-end gap-4 ">
         {showFileUploader && (
-            <UploadFileComponent
-                bucketName="orders"
-                onFileIdsChange={handleFileIdsChange}
-                uuid={generateUUID()}
-                removeResults
-                toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
-            />
-        )}
-        <div className="" /> 
-        <RichTextEditor
-            onComplete={handleOnCompleteMessageSend}
-            uploadFileIsExternal
+          <UploadFileComponent
+            bucketName="orders"
+            onFileIdsChange={handleFileIdsChange}
+            uuid={generateUUID()}
+            removeResults
             toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
-            userRole={userRole}
+          />
+        )}
+ 
+        <RichTextEditor
+          onComplete={handleOnCompleteMessageSend}
+          uploadFileIsExternal
+          toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
+          userRole={userRole}
         />
+      </div>
     </div>
-</div>
-
   );
 };
 

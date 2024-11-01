@@ -38,7 +38,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
 
   return (
     <Tabs
-      className="flex h-full flex-grow flex-col gap-6"
+      className="flex max-h-full h-full flex-col gap-6 min-h-0"
       defaultValue={activeTab}
       onValueChange={(value: string) => {
         setActiveTab(value as 'activity' | 'details');

@@ -38,7 +38,7 @@ async function OrderDetailsPage({
   const role = await getUserRole();
 
   return (
-    <PageBody className="h-[100vh] max-h-full min-h-0 flex-grow lg:px-0">
+    <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
       <ActivityProvider
         messages={order?.messages ?? []}
         files={order?.files ?? []}
@@ -49,9 +49,9 @@ async function OrderDetailsPage({
       >
         
 
-    <div className="flex h-screen w-full flex-col text-gray-700 overflow-hidden pt-[2em]">
-      <div className="flex h-full w-full justify-between overflow-hidden">
-        <div className="flex w-full min-w-0 flex-grow flex-col overflow-hidden  pr-[2rem]">
+    <div className="flex h-full max-h-full w-full flex-col text-gray-700 pt-[2em]">
+      <div className="flex max-h-full h-full w-full justify-between">
+        <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem]">
           <OrderHeader order={order!} />
           <OrderTabs
             organizationId={
