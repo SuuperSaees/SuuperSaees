@@ -9,6 +9,7 @@ import { type EmailOtpType, SupabaseClient } from '@supabase/supabase-js';
 import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
 
+
 /**
  * @name createAuthCallbackService
  * @description Creates an instance of the AuthCallbackService
@@ -49,7 +50,7 @@ class AuthCallbackService {
       currentSession?.session?.access_token ?? '',
     )?.session_id;
 
-    if (token_hash_session !== currentSessionId) {
+    if (token_hash_session === currentSessionId) {
       await logOutUser(this.client);
     }
 
