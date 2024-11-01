@@ -85,7 +85,7 @@ const UserFile = ({ file }: UserFileProps) => {
       <div className="flex flex-col gap-1 w-full">
         <div className="flex w-full justify-between gap-4">
           <span className="font-semibold">{file?.user?.name}</span>
-          <small className="text-gray-400">
+          <small className="">
             {format(new Date(file?.created_at), 'MMM dd, p')}
           </small>
         </div>

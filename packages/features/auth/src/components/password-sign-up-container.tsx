@@ -2,6 +2,8 @@
 
 import { useCallback, useRef, useState } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import { CheckCircledIcon } from '@radix-ui/react-icons';
 
 import { useAppEvents } from '@kit/shared/events';
@@ -17,11 +19,13 @@ import { PasswordSignUpForm } from './password-sign-up-form';
 interface EmailPasswordSignUpContainerProps {
   displayTermsCheckbox?: boolean;
   defaultValues?: {
-    email: string; 
+    email: string;
   };
 
   onSignUp?: (userId?: string) => unknown;
   emailRedirectTo: string;
+  className?: string;
+  showConfirmEmail?: boolean;
 }
 
 export function EmailPasswordSignUpContainer({
@@ -29,6 +33,8 @@ export function EmailPasswordSignUpContainer({
   onSignUp,
   emailRedirectTo,
   displayTermsCheckbox,
+  showConfirmEmail,
+  className
 }: EmailPasswordSignUpContainerProps) {
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
 
@@ -36,7 +42,7 @@ export function EmailPasswordSignUpContainer({
   const redirecting = useRef(false);
   const [showVerifyEmailAlert, setShowVerifyEmailAlert] = useState(false);
   const appEvents = useAppEvents();
-
+  const router = useRouter();
   const loading = signUpMutation.isPending || redirecting.current;
 
   const onSignupRequested = useCallback(
@@ -52,6 +58,8 @@ export function EmailPasswordSignUpContainer({
           captchaToken,
         });
 
+        showConfirmEmail && setShowVerifyEmailAlert(true);
+
         appEvents.emit({
           type: 'user.signedUp',
           payload: {
@@ -59,10 +67,12 @@ export function EmailPasswordSignUpContainer({
           },
         });
 
-        setShowVerifyEmailAlert(true);
-
         if (onSignUp) {
-          onSignUp(data.user?.id);
+          onSignUp(data?.data?.user?.id);
+        }
+
+        if (data?.inviteRedirectUrl) {
+          router.push(data.inviteRedirectUrl);
         }
       } catch (error) {
         console.error(error);
@@ -78,6 +88,8 @@ export function EmailPasswordSignUpContainer({
       onSignUp,
       resetCaptchaToken,
       signUpMutation,
+      showConfirmEmail,
+      router,
     ],
   );
 
@@ -95,6 +107,7 @@ export function EmailPasswordSignUpContainer({
           loading={loading}
           defaultValues={defaultValues}
           displayTermsCheckbox={displayTermsCheckbox}
+          className={className}
         />
       </If>
     </>

@@ -68,42 +68,42 @@ const EditableHeader = ({
   const canEdit = rolesThatCanEdit.has(userRole);
 
   return (
-    <div className="inline-flex w-full">
+    <div className="inline-flex w-full max-h-[60px] flex justify-between items-center">
       {canEdit && isEditing ? (
         <>
           <input
             type="text"
             ref={inputRef}
-            className="h-15 flex min-w-0 max-w-full items-center justify-between rounded-md border-none bg-slate-50 text-[36px] font-semibold text-primary-900 outline-none overflow-x-auto"
+            className="h-15 flex min-w-[80%] items-center justify-between overflow-hidden rounded-md border-none bg-slate-50 text-[20px] max-w-[80%] pr-1 font-semibold text-primary-900 outline-none"
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
           <span
             ref={spanRef}
-            className="absolute invisible min-w-0 max-w-[60vw] whitespace-nowrap text-[36px] font-semibold text-primary-900 overflow-x-auto"
+            className="absolute invisible min-w-[80%] whitespace-nowrap overflow-hidden text-[20px] font-semibold text-primary-900 pr-1 max-w-[80%]"
           >
             {name}
           </span>
-          <Button variant="ghost" className="h-15 m-0 text-slate-500" onClick={handleSave}>
-            <Check />
+          <Button variant="ghost" className="mr-2 h-10 m-0 text-slate-500 px-1"  onClick={handleSave}>
+            <Check className='w-[20px] h-[20px]'/>
           </Button>
         </>
       ) : (
         <>
-          <span className="min-w-0 max-w-[60vw] overflow-x-auto whitespace-nowrap text-[36px] font-semibold text-primary-900">
-            {name.slice(0, 45).trim()}
-            {name.length > 45 && '...'}
+          <span className=" min-w-[80%] whitespace-nowrap text-[20px] overflow-hidden font-semibold text-primary-900 pr-1 max-w-[80%]">
+            {name.slice(0, 70).trim()}
+            {name.length > 70 && '...'}
           </span>
           {canEdit && (
             <Button
               variant="ghost"
-              className="h-15 m-0 text-slate-500"
+              className="mr-2 h-10 m-0 text-slate-500 px-1"
               onClick={() => {
                 setIsEditing(true);
                 updateInputWidth();
               }}
             >
-              <PenLine />
+              <PenLine className='w-[20px] h-[20px]'/>
             </Button>
           )}
         </>

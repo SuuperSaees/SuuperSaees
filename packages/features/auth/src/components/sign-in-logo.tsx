@@ -10,7 +10,7 @@ export function SignInLogo() {
   if (typeof window !== 'undefined') {
     host = window.location.host;
   }
-  const authDetails = useAuthDetails(host);
+  const {authDetails} = useAuthDetails(host);
   const [isLoading, setIsLoading] = useState(true);
 
   // manage the skeleton with max time of 2000ms
