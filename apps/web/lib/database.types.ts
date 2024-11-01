@@ -539,6 +539,63 @@ export type Database = {
           },
         ]
       }
+      checkout_services: {
+        Row: {
+          checkout_id: string | null
+          id: string
+          service_id: number | null
+        }
+        Insert: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Update: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_services_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "checkouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkout_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkouts: {
+        Row: {
+          created_at: string | null
+          deleted_on: string | null
+          id: string
+          provider: string
+          provider_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider: string
+          provider_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider?: string
+          provider_id?: string
+        }
+        Relationships: []
+      }
       client_services: {
         Row: {
           agency_id: string
@@ -2578,6 +2635,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2591,6 +2649,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2604,6 +2663,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2625,6 +2685,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2635,6 +2696,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2645,6 +2707,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2780,6 +2843,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {
