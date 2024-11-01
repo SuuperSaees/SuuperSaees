@@ -169,6 +169,7 @@ class AccountInvitationsWebhookService {
     try {
       let domain = await getDomainByOrganizationId(
         inviter.data.organization_id ?? '',
+        false,
         true,
       );
       if (domain !== siteURL) {
