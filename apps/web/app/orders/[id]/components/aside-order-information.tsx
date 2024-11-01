@@ -31,6 +31,7 @@ import ActivityFollowers from './activity-followers';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
+import StatusCombobox from './status-combobox';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -245,21 +246,13 @@ const AsideOrderInformation = ({
               defaultDate={order.due_date}
             />
           </div>
-          <div className="flex items-center text-sm">
-            <Loader className="mr-2 h-4 w-4" />
-            <SelectAction
-              options={statusOptions}
-              groupName={t('details.status')}
-              defaultValue={selectedStatus}
-              className={
-                selectedStatus ? statusColors[selectedStatus] : undefined
-              }
-              onSelectHandler={(status) => {
-                changeStatus.mutate(status as Order.Type['status']);
-              }}
-              getitemClassName={getStatusClassName}
-              disabled={changeStatus.isPending}
-            />
+          <div className="flex items-center text-sm justify-between">
+            <div className='flex gap-1 font-semibold items-center'>
+              <Loader className="mr-2 h-4 w-4" />
+              <p>{t('details.status')}</p>
+            </div>
+            
+            <StatusCombobox order={order} />
           </div>
           <div className="flex items-center text-sm">
             <FlagIcon className="mr-2 h-4 w-4" />

@@ -190,12 +190,14 @@ function StatusCombobox({ order }: StatusComboboxProps) {
                     key={status + statusIndex}
                     value={status}
                     onSelect={(currentValue) => {
-                      changeStatus.mutate({
-                        orderId: order.id,
-                        status,
-                      });
-                      setPopoverValue(currentValue === popoverValue ? '' : currentValue);
-                      setOpen(false);
+                      if(status !== popoverValue){
+                        changeStatus.mutate({
+                          orderId: order.id,
+                          status,
+                        });
+                        setPopoverValue(currentValue === popoverValue ? '' : currentValue);
+                        setOpen(false);
+                      }
                     }}
                     className="flex items-center justify-between p-0"
                   >
@@ -216,12 +218,14 @@ function StatusCombobox({ order }: StatusComboboxProps) {
                     key={statusIndex}
                     value={status?.status_name ?? undefined}
                     onSelect={(currentValue: string) => {
-                      changeStatus.mutate({
-                        orderId: order.id,
-                        status: currentValue,
-                      });
-                      setPopoverValue(currentValue === popoverValue ? '' : currentValue);
-                      setOpen(false);
+                      if(status?.status_name !== popoverValue){
+                        changeStatus.mutate({
+                          orderId: order.id,
+                          status: currentValue,
+                        });
+                        setPopoverValue(currentValue === popoverValue ? '' : currentValue);
+                        setOpen(false);
+                      }
                     }}
                     className="flex items-center justify-between p-0"
                   >
