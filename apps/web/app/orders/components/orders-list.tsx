@@ -27,12 +27,8 @@ import { Separator } from '@kit/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@kit/ui/table';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
-
-
 import { Order } from '~/lib/order.types';
 import { statuses } from '~/lib/orders-data';
-
-
 
 import { ThemedButton } from '../../../../../packages/features/accounts/src/components/ui/button-themed-with-settings';
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
@@ -40,6 +36,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { statusColors } from '../[id]/utils/get-color-class-styles';
 import { Trans } from '@kit/ui/trans';
 import EmptyState from '~/components/ui/empty-state';
+import StatusCombobox from '../[id]/components/status-combobox';
 
 
 type ExtendedOrderType = Order.Type & {
@@ -76,28 +73,6 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
 
   const totalPages = Math.ceil(orders.length / rowsPerPage);
   const router = useRouter();
-  const changeStatus = useMutation({
-    mutationFn: async ({
-      orderId,
-      status,
-    }: {
-      orderId: Order.Type['id'];
-      status: Order.Type['status'];
-    }) => {
-      await updateOrder(orderId, { status });
-      return router.push(`/orders`);
-    },
-    onSuccess: () => {
-      toast.success('Success', {
-        description: 'Status updated successfully!',
-      });
-    },
-    onError: () => {
-      toast.error('Error', {
-        description: 'The status could not be updated.',
-      });
-    },
-  });
 
   return (
     <Card x-chunk="dashboard-06-chunk-0" className='bg-transparent'>
@@ -152,51 +127,7 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
                     'agency_owner',
                     'agency_project_manager',
                   ].includes(role) ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        className={`m-2 inline-flex items-center rounded-lg p-2 ${
-                          order.status === 'in_progress'
-                            ? 'bg-[#F4EBFF] text-[#6941C6]'
-                            : order.status
-                              ? statusColors[order.status]
-                              : ''
-                        }`}
-                      >
-                        <span className="pl-2 pr-2">
-                          {t(
-                            `details.statuses.${order.status?.replace(/_./g, (match) => match.charAt(1).toUpperCase())}`,
-                          )
-                            .replace(/_/g, ' ')
-                            .replace(/^\w/, (c) => c.toUpperCase())}
-                        </span>
-                        <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {statuses.map((status, statusIndex) => {
-                          const camelCaseStatus = status?.replace(
-                            /_./g,
-                            (match) => match.charAt(1).toUpperCase(),
-                          );
-                          if (!status) return null;
-                          return (
-                            <DropdownMenuItem
-                              className={`m-2 rounded-lg p-2 ${statusColors[status]} cursor-pointer`}
-                              key={status + statusIndex}
-                              onClick={() => {
-                                changeStatus.mutate({
-                                  orderId: order.id,
-                                  status,
-                                });
-                              }}
-                            >
-                              {t(`details.statuses.${camelCaseStatus}`)
-                                .replace(/_/g, ' ')
-                                .replace(/^\w/, (c) => c.toUpperCase())}
-                            </DropdownMenuItem>
-                          );
-                        })}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <StatusCombobox order={order} />
                   ) : (
                     // Display the status or an empty space if there is no status
                     <span className="pl-2 pr-2">

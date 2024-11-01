@@ -258,6 +258,52 @@ export type Database = {
           },
         ]
       }
+      agency_statuses: {
+        Row: {
+          agency_id: string | null
+          created_at: string
+          id: number
+          status_color: string | null
+          status_name: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string
+          id?: number
+          status_color?: string | null
+          status_name?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string
+          id?: number
+          status_color?: string | null
+          status_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_customers: {
         Row: {
           account_id: string
@@ -1342,7 +1388,7 @@ export type Database = {
           id: number
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
-          status: Database["public"]["Enums"]["order_status_types"] | null
+          status: string
           stripe_account_id: string | null
           title: string
           uuid: string
@@ -1359,7 +1405,7 @@ export type Database = {
           id?: number
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
-          status?: Database["public"]["Enums"]["order_status_types"] | null
+          status?: string
           stripe_account_id?: string | null
           title: string
           uuid: string
@@ -1376,7 +1422,7 @@ export type Database = {
           id?: number
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
-          status?: Database["public"]["Enums"]["order_status_types"] | null
+          status?: string
           stripe_account_id?: string | null
           title?: string
           uuid?: string

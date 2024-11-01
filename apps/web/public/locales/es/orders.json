@@ -20,6 +20,7 @@
   "deleteConfirmation": "¿Estás seguro de que deseas eliminar este pedido?",
   "deleteSuccess": "Pedido eliminado con éxito",
   "deleteError": "Error al eliminar el pedido",
+  "create":"Crear",
   "creation": {
     "title": "Crear pedido",
     "form": {
