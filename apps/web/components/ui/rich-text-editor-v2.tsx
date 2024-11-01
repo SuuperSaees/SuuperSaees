@@ -19,6 +19,7 @@ import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import {
   Bold,
+  File,
   Heading1,
   Heading2,
   Image,
@@ -33,6 +34,12 @@ import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/butto
 
 import { Switch } from '@kit/ui/switch';
 import { Trans } from '@kit/ui/trans';
+
+import {
+  createFile,
+  createUploadBucketURL,
+} from '~/team-accounts/src/server/actions/files/create/create-file';
+import { generateUUID } from '~/utils/generate-uuid';
 
 import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
@@ -131,8 +138,8 @@ const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
 
   /* eslint-disable @next/next/no-img-element */
   return (
-    <NodeViewWrapper ref={wrapperRef} as="div" className="relative">
-      <img {...node?.attrs} className="cloned-image" />
+    <NodeViewWrapper as="span" className="image-inline-wrapper">
+      <img {...node.attrs} className="inline-image" />
     </NodeViewWrapper>
   );
 };
@@ -150,11 +157,6 @@ interface RichTextEditorProps {
   showToolbar?: boolean;
   isEditable?: boolean;
 }
-const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
-function extractImageUrls(text: string) {
-  const matches = text.match(IMAGE_URL_REGEX);
-  return matches ?? []; // Return an empty array if no matches are found
-}
 
 // TODO: remove not related logic for this presentation component !IMPORTANT- TECHDEBT
 const RichTextEditorV2 = ({
@@ -162,8 +164,6 @@ const RichTextEditorV2 = ({
   onComplete,
   onChange,
   onBlur,
-  uploadFileIsExternal,
-  toggleExternalUpload,
   userRole,
   hideSubmitButton = false,
   showToolbar = true,
@@ -171,6 +171,67 @@ const RichTextEditorV2 = ({
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
+
+  const uploadImage = async (file: File) => {
+    if (!file) return;
+
+    const uuid = generateUUID();
+    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const newFilepath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
+    const bucketName = 'orders';
+
+    const urlData = await createUploadBucketURL(bucketName, newFilepath);
+
+    if (!urlData || 'error' in urlData || !urlData.signedUrl) {
+      throw new Error('Error uploading task image');
+    }
+
+    const uploadResponse = await fetch(urlData.signedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type,
+      },
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error('Error uploading task image in response');
+    }
+
+    const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/orders/${newFilepath}`;
+
+    const fileData = await createFile([
+      {
+        name: sanitizedFileName,
+        size: file.size,
+        type: file.type,
+        url: fileUrl,
+      },
+    ]);
+
+    if (!fileData) {
+      throw new Error('Error creating file');
+    }
+
+    if (file.type.startsWith('image/')) {
+      const finalUrl = fileData[0]?.url ?? fileUrl;
+
+      return finalUrl;
+    } else {
+      editor
+        .chain()
+        .focus()
+        .insertContent(
+          `
+          <span class='file-class'>${sanitizedFileName}</span>
+          <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" style="padding: 6px 12px; background-color: black; color: white; text-decoration: none; border-radius: 4px; display: inline-block; transition: background-color 0.3s; cursor: pointer; font-family: 'Inter', sans-serif;">Abrir</a>
+      `,
+        )
+        .run();
+      return null;
+    }
+  };
+
   const cleanupImages = () => {
     // Select all image wrappers
     const imageWrappers = document.querySelectorAll('.cloned-image-wrapper');
@@ -184,28 +245,6 @@ const RichTextEditorV2 = ({
       parentDiv.remove();
     }
   };
-
-  const debounce = (func: (...args: string[]) => void, wait: number) => {
-    let timeout: NodeJS.Timeout;
-    return (...args: string[]) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-  };
-
-  const debounceHandleImageUrl = useCallback((editor: Editor) => {
-    return debounce((text: string) => {
-      const imagesInText = extractImageUrls(text);
-
-      // insert image node for each ulr of image found
-      imagesInText.forEach((image) => {
-        if (!insertedImages.current.has(image)) {
-          editor.chain().focus().setImage({ src: image }).run();
-          insertedImages.current.add(image);
-        }
-      });
-    }, 500);
-  }, []);
 
   const CustomShortcuts = Extension.create({
     addKeyboardShortcuts() {
@@ -269,7 +308,7 @@ const RichTextEditorV2 = ({
       ImageInsert.configure({
         inline: true,
         HTMLAttributes: {
-          class: 'rounded-md max-h-[400px] h-full w-auto object-cover ',
+          class: 'rounded-md max-h-[400px] w-auto object-cover ',
         },
       }).extend({
         addNodeView() {
@@ -296,6 +335,28 @@ const RichTextEditorV2 = ({
         class:
           'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none',
       },
+      handlePaste: (view, event: ClipboardEvent) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+
+        for (const item of items) {
+          if (item.type.startsWith('image/')) {
+            const file = item.getAsFile();
+            if (file) {
+              uploadImage(file)
+                .then((url) => {
+                  if (url) {
+                    editor.chain().focus().setImage({ src: url }).run();
+                  }
+                })
+                .catch((error) =>
+                  console.error('Error uploading image:', error),
+                );
+            }
+          }
+        }
+        return false;
+      },
       handleKeyDown: (_, event) => {
         if (
           !onChange &&
@@ -311,9 +372,9 @@ const RichTextEditorV2 = ({
       },
     },
     onUpdate({ editor }) {
-      const text = editor.getText();
-      const imagesInText = extractImageUrls(text);
-      imagesInText && debounceHandleImageUrl(editor)(text);
+      // const text = editor.getText();
+      // const imagesInText = extractImageUrls(text);
+      // imagesInText && debounceHandleImageUrl(editor)(text);
       if (onChange) {
         onChange(editor.getHTML());
       }
@@ -353,13 +414,12 @@ const RichTextEditorV2 = ({
   }, [editor]);
 
   return (
-    <div className="relative grid h-full w-full grid-rows-[1fr_auto] gap-1 rounded-2xl mt-6">
+    <div className="relative grid w-full grid-rows-[1fr_auto] gap-1 rounded-2xl">
       <div>
         {showToolbar && (
           <Toolbar
             editor={editor}
-            toggleExternalUpload={toggleExternalUpload}
-            uploadFileIsExternal={uploadFileIsExternal}
+            uploadImage={uploadImage}
             userRole={userRole}
             onChange={onChange}
           />
@@ -375,39 +435,58 @@ const RichTextEditorV2 = ({
       </div>
       <div
         onClick={() => editor?.commands.focus()}
-        className={`${styles['scrollbar-thin']} relative h-full w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
+        className={`relative h-[48vh] max-h-[48vh] w-full overflow-y-auto border-none bg-transparent pb-40 outline-none [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:w-2`}
       >
         {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
-          <span className="absolute left-2 top-4 -translate-y-1/2 transform text-gray-400 h-full">
+          <span className="absolute left-2 top-4 -translate-y-1/2 transform text-gray-400">
             <Trans i18nKey="placeholder" />
           </span>
         ) : null}
         <EditorContent
           editor={editor}
-          className={`${styles['scrollbar-thin']} flex h-full w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
+          className={`flex w-full flex-col-reverse whitespace-normal placeholder:text-gray-400`}
         />
       </div>
-      
     </div>
   );
 };
 interface ToolbarProps {
   userRole: string;
   editor: Editor | null;
-  uploadFileIsExternal?: boolean;
-  toggleExternalUpload?: () => void;
+  uploadImage: (file: File) => Promise<string | undefined>;
   onChange?: (richText: string) => void;
 }
 
 export const Toolbar = ({
   userRole,
   editor,
-  uploadFileIsExternal,
-  toggleExternalUpload,
+  uploadImage,
   onChange,
 }: ToolbarProps) => {
   const { isInternalMessagingEnabled, handleSwitchChange } =
     useInternalMessaging();
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      try {
+        const url = await uploadImage(file); // Call your upload function
+        if (url) {
+          editor?.chain().focus().setImage({ src: url }).run();
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    }
+  };
 
   if (!editor) {
     return null;
@@ -495,21 +574,20 @@ export const Toolbar = ({
         <Quote className="h-4 w-4" />
       </button>
 
+      <button type="button" onClick={handleImageUpload}>
+        <Image className="h-4 w-4 text-gray-400" />
+      </button>
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+        accept="image/*"
+      />
+
       {!onChange && (
         <>
-          <button
-            type="button"
-            onClick={
-              uploadFileIsExternal && toggleExternalUpload
-                ? () => toggleExternalUpload()
-                : undefined
-            }
-            className={
-              editor.isActive('image') ? 'text-gray-700' : 'text-gray-400'
-            }
-          >
-            <Image className="h-4 w-4" />
-          </button>
           {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
             userRole,
           ) && (
