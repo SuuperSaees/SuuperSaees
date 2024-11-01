@@ -75,7 +75,7 @@ const ActivityPage = () => {
                 toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
             />
         )}
-        <div className="flex-grow" /> 
+        <div className="" /> 
         <RichTextEditor
             onComplete={handleOnCompleteMessageSend}
             uploadFileIsExternal

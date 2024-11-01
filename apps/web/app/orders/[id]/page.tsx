@@ -49,25 +49,25 @@ async function OrderDetailsPage({
       >
         
 
-  <div className="flex h-screen w-full flex-col text-gray-700 overflow-hidden pt-[2em]">
-  <div className="flex h-full w-full justify-between overflow-hidden">
-    <div className="flex w-full min-w-0 flex-grow flex-col overflow-hidden  pr-[2rem]">
-      <OrderHeader order={order!} />
-      <OrderTabs
-        organizationId={
-          organizationId
-            ? { account_id: organizationId.client_organization_id }
-            : undefined
-        }
-        currentPath={currentPath}
-        userRole={role}
-        orderId={id}
-      />
+    <div className="flex h-screen w-full flex-col text-gray-700 overflow-hidden pt-[2em]">
+      <div className="flex h-full w-full justify-between overflow-hidden">
+        <div className="flex w-full min-w-0 flex-grow flex-col overflow-hidden  pr-[2rem]">
+          <OrderHeader order={order!} />
+          <OrderTabs
+            organizationId={
+              organizationId
+                ? { account_id: organizationId.client_organization_id }
+                : undefined
+            }
+            currentPath={currentPath}
+            userRole={role}
+            orderId={id}
+            orderAgencyId={order?.agency_id ?? ''}
+          />
+        </div>
+        <AsideOrderInformation order={order!} className="hidden lg:flex pt-[3rem]" />
+      </div>
     </div>
-    <AsideOrderInformation order={order!} className="hidden lg:flex pt-[3rem]" />
-  </div>
-</div>
-
 
       </ActivityProvider>
     </PageBody>

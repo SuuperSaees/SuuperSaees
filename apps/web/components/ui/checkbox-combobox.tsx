@@ -18,6 +18,7 @@ import {
 import { Input } from '@kit/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Spinner } from '@kit/ui/spinner';
+import { Plus } from 'lucide-react';
 
 export type Option = {
   value: string;
@@ -114,7 +115,7 @@ export default function CheckboxCombobox<
                       customItemTrigger
                     ) : (
                       <button className="mr-auto flex h-7 w-7 items-center justify-center rounded-full border-none bg-slate-50 text-2xl font-semibold text-slate-500 transition-transform duration-100 hover:scale-105 hover:shadow-sm">
-                        +
+                        <Plus className="w-4 h-4" />
                       </button>
                     )}
                   </PopoverTrigger>
