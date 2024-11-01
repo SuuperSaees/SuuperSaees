@@ -42,7 +42,6 @@ export default function SignUp({ searchParams }: Props) {
   const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
   const currentAppOrigin = window.location.origin + '/';
     const isCustomDomain = originalAppOrigin !== currentAppOrigin;
-
   const textcolor = getTextColorBasedOnBackground(
     authDetails?.background_color ?? '#ffffff',
   );
@@ -112,6 +111,7 @@ export default function SignUp({ searchParams }: Props) {
                 displayTermsCheckbox={authConfig.displayTermsCheckbox}
                 inviteToken={inviteToken}
                 paths={paths}
+                showConfirmAlert={!isCustomDomain}
            
               />
 

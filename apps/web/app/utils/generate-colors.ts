@@ -26,3 +26,20 @@ export function hexToRgba(hex: string, opacity: number) {
   // Return the hex color with the opacity as the alpha channel
   return `#${hex}${alpha}`;
 }
+
+// Return color luminance based on hex color or hsla => {luminance: value, alpha: value, theme: light or dark}
+export const getColorLuminance = (hexColor: string): { luminance: number, theme: 'light' | 'dark' } => {
+  const color = hexColor.replace('#', '');
+  const r = parseInt(color.substring(0, 2), 16);
+  const g = parseInt(color.substring(2, 4), 16);
+  const b = parseInt(color.substring(4, 6), 16);
+
+  // Calculate the luminance value
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+  // Determine the theme based on the luminance value
+  const theme = luminance > 186 ? 'light' : 'dark';
+
+  // Return an object with luminance and theme properties
+  return { luminance, theme };
+}

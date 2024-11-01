@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+import { getColorLuminance } from '~/utils/generate-colors';
 
 function LogoImage({ className }: { className?: string }) {
   return (
@@ -53,8 +54,10 @@ export function AppLogo({
   label?: string;
   logoUrl?: string;
 }) {
-  const { logo_url } = useOrganizationSettings();
-  logoUrl = logoUrl ?? logo_url;
+  const { logo_url, logo_dark_url, sidebar_background_color } = useOrganizationSettings();
+  const {theme} = getColorLuminance(sidebar_background_color ?? '#f2f2f2');
+  const themedLogoUrl = theme === 'dark' ? (logo_dark_url || logo_url): logo_url  
+  logoUrl = logoUrl ?? themedLogoUrl;
   return (
     <Link
       aria-label={label}

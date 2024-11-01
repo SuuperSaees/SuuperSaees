@@ -25,6 +25,7 @@ interface EmailPasswordSignUpContainerProps {
   onSignUp?: (userId?: string) => unknown;
   emailRedirectTo: string;
   className?: string;
+  showConfirmEmail?: boolean;
 }
 
 export function EmailPasswordSignUpContainer({
@@ -32,6 +33,7 @@ export function EmailPasswordSignUpContainer({
   onSignUp,
   emailRedirectTo,
   displayTermsCheckbox,
+  showConfirmEmail,
   className
 }: EmailPasswordSignUpContainerProps) {
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
@@ -56,7 +58,7 @@ export function EmailPasswordSignUpContainer({
           captchaToken,
         });
 
-        setShowVerifyEmailAlert(true);
+        showConfirmEmail && setShowVerifyEmailAlert(true);
 
         appEvents.emit({
           type: 'user.signedUp',
@@ -86,7 +88,7 @@ export function EmailPasswordSignUpContainer({
       onSignUp,
       resetCaptchaToken,
       signUpMutation,
-
+      showConfirmEmail,
       router,
     ],
   );

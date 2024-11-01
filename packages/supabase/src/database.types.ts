@@ -1953,62 +1953,40 @@ export type Database = {
           trial_starts_at?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
-            columns: ["propietary_organization_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
-            columns: ["propietary_organization_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
-            columns: ["propietary_organization_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       subtask_assignations: {
         Row: {
-          agency_member_id: string | null
+          agency_member_id: string
           subtask_id: string | null
         }
         Insert: {
-          agency_member_id?: string | null
+          agency_member_id: string
           subtask_id?: string | null
         }
         Update: {
-          agency_member_id?: string | null
+          agency_member_id?: string
           subtask_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "subtask_assignations_agency_member_id_fkey"
             columns: ["agency_member_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "subtask_assignations_agency_member_id_fkey"
             columns: ["agency_member_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "subtask_assignations_agency_member_id_fkey"
             columns: ["agency_member_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -2024,14 +2002,17 @@ export type Database = {
       subtask_followers: {
         Row: {
           client_member_id: string | null
+          created_at: string
           subtask_id: string | null
         }
         Insert: {
           client_member_id?: string | null
+          created_at?: string
           subtask_id?: string | null
         }
         Update: {
           client_member_id?: string | null
+          created_at?: string
           subtask_id?: string | null
         }
         Relationships: [
@@ -2571,6 +2552,7 @@ export type Database = {
         | "sender_name"
         | "sender_email"
         | "sender_domain"
+        | "logo_dark_url"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"
@@ -2666,6 +2648,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2679,6 +2662,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2692,6 +2676,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2713,6 +2698,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2723,6 +2709,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2733,6 +2720,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2869,6 +2857,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       search: {
         Args: {
           prefix: string
@@ -2980,3 +2972,4 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
+
