@@ -26,6 +26,7 @@ export function SignUpMethodsContainer(props: {
 
   displayTermsCheckbox?: boolean;
   inviteToken?: string;
+  showConfirmAlert?: boolean;
 }) {
   const redirectUrl = getCallbackUrl(props);
   const defaultValues = getDefaultValues();
@@ -38,6 +39,7 @@ export function SignUpMethodsContainer(props: {
 
       <If condition={props.providers.password}>
         <EmailPasswordSignUpContainer
+          showConfirmEmail={props.showConfirmAlert}
           emailRedirectTo={redirectUrl}
           defaultValues={defaultValues}
           displayTermsCheckbox={props.displayTermsCheckbox}

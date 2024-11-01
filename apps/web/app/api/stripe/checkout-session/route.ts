@@ -13,7 +13,7 @@ import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
-  const { priceId, stripeId } = await req.json();
+  const { priceId, stripeId, serviceId } = await req.json();
   const supabase = getSupabaseServerComponentClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError) throw userError.message;
@@ -47,6 +47,36 @@ export async function POST(req: NextRequest) {
         stripeAccount: stripeId,
       },
     );
+
+    (async () => {
+      const { data: checkoutSessionData, error: checkoutSessionError } =
+        await supabase
+          .from('checkouts')
+          .insert({
+            provider: 'stripe',
+            provider_id: session.id,
+          })
+          .select('id')
+          .single();
+
+      if (checkoutSessionError) {
+        console.error('Error creating checkout session:', checkoutSessionError);
+      }
+
+      const { error: checkoutServiceError } = await supabase
+        .from('checkout_services')
+        .insert({
+          checkout_id: checkoutSessionData?.id,
+          service_id: serviceId,
+        })
+        .single();
+
+      if (checkoutServiceError) {
+        console.error('Error creating checkout service:', checkoutServiceError);
+      }
+    })().catch((error) => {
+      console.error('Error creating checkout session:', error);
+    });
 
     return NextResponse.json({ sessionUrl: session.url });
   } catch (error) {

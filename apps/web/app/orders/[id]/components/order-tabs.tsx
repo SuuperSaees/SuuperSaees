@@ -28,16 +28,17 @@ type OrderTabsProps = {
   }[];
   userRole: string;
   orderId: string;
+  orderAgencyId: string;
 };
 
-export const OrderTabs = ({ organizationId, currentPath, userRole, orderId }: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
 
   return (
     <Tabs
-      className="flex h-full flex-grow flex-col gap-6"
+      className="flex max-h-full h-full flex-col gap-6 min-h-0"
       defaultValue={activeTab}
       onValueChange={(value: string) => {
         setActiveTab(value as 'activity' | 'details');
@@ -92,6 +93,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId }: Or
           <TasksSection 
             userRole={userRole}
             orderId={orderId}
+            orderAgencyId={orderAgencyId}
           />
         </div>
       </TabsContent>

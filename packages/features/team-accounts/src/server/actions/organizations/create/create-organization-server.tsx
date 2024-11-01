@@ -37,18 +37,18 @@ export const createOrganizationServer = async (clientData: {
     };
 
     const organizationAccountData = await insertOrganization(
-      client,
       newAccount,
       user.id,
+      client,
     );
 
     // Associate the new organization with the user
     await updateUserAccount(
-      client,
       {
         organization_id: organizationAccountData.id,
       },
       user.id,
+      client
     );
 
     return organizationAccountData;
@@ -59,10 +59,14 @@ export const createOrganizationServer = async (clientData: {
 };
 
 export const insertOrganization = async (
-  databaseClient: SupabaseClient<Database>,
   organizationData: Account.Insert,
   ownerId: Account.Type['id'],
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
 ) => {
+  databaseClient = databaseClient ?? getSupabaseServerComponentClient({
+    admin: adminActivated,
+  });
   try {
     const newAccount = {
       ...organizationData,

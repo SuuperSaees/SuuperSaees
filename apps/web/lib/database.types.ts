@@ -539,6 +539,63 @@ export type Database = {
           },
         ]
       }
+      checkout_services: {
+        Row: {
+          checkout_id: string | null
+          id: string
+          service_id: number | null
+        }
+        Insert: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Update: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_services_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "checkouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkout_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkouts: {
+        Row: {
+          created_at: string | null
+          deleted_on: string | null
+          id: string
+          provider: string
+          provider_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider: string
+          provider_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider?: string
+          provider_id?: string
+        }
+        Relationships: []
+      }
       client_services: {
         Row: {
           agency_id: string
@@ -1336,6 +1393,7 @@ export type Database = {
           client_organization_id: string
           created_at: string
           customer_id: string
+          deleted_on: string | null
           description: string
           due_date: string | null
           id: number
@@ -1352,6 +1410,7 @@ export type Database = {
           client_organization_id: string
           created_at?: string
           customer_id: string
+          deleted_on?: string | null
           description: string
           due_date?: string | null
           id?: number
@@ -1368,6 +1427,7 @@ export type Database = {
           client_organization_id?: string
           created_at?: string
           customer_id?: string
+          deleted_on?: string | null
           description?: string
           due_date?: string | null
           id?: number
@@ -1952,6 +2012,97 @@ export type Database = {
         }
         Relationships: []
       }
+      subtask_assignations: {
+        Row: {
+          agency_member_id: string
+          subtask_id: string | null
+        }
+        Insert: {
+          agency_member_id: string
+          subtask_id?: string | null
+        }
+        Update: {
+          agency_member_id?: string
+          subtask_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_assignations_subtask_id_fkey"
+            columns: ["subtask_id"]
+            isOneToOne: false
+            referencedRelation: "subtasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subtask_followers: {
+        Row: {
+          client_member_id: string | null
+          created_at: string
+          subtask_id: string | null
+        }
+        Insert: {
+          client_member_id?: string | null
+          created_at?: string
+          subtask_id?: string | null
+        }
+        Update: {
+          client_member_id?: string | null
+          created_at?: string
+          subtask_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_followers_subtask_id_fkey"
+            columns: ["subtask_id"]
+            isOneToOne: false
+            referencedRelation: "subtasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subtasks: {
         Row: {
           completed: boolean | null
@@ -2458,6 +2609,7 @@ export type Database = {
         | "sender_name"
         | "sender_email"
         | "sender_domain"
+        | "logo_dark_url"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"
@@ -2553,6 +2705,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2566,6 +2719,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2579,6 +2733,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2600,6 +2755,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2610,6 +2766,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2620,6 +2777,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2755,6 +2913,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {

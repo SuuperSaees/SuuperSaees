@@ -6,6 +6,7 @@
   "accept": "Accept",
   "cancel": "Cancel",
   "openOrders": "Open",
+  "summary": "Summary",
   "completedOrders": "Completed",
   "allOrders": "All",
   "titleLabel": "Title",
@@ -15,6 +16,10 @@
   "assignedToLabel": "Assigned to",
   "dueDateLabel": "Due date",
   "select_date_range": "Select date range",
+  "delete": "Delete order",
+  "deleteConfirmation": "Do you really want to delete this order?",
+  "deleteSuccess": "Order deleted successfully",
+  "deleteError": "Error deleting order",
   "creation": {
     "title": "Create order",
     "form": {
@@ -44,7 +49,7 @@
     "deadlineNotSet": "Unassigned",
     "summary": "Summary",
     "createdBy": "Created by",
-    "orderId": "Order ID",
+    "orderId": "#",
     "createdAt": "Created",
     "assignedTo": "Assigned to",
     "followedBy": "Followed by",

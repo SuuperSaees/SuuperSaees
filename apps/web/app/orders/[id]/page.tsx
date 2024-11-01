@@ -38,7 +38,7 @@ async function OrderDetailsPage({
   const role = await getUserRole();
 
   return (
-    <PageBody className="h-[100vh] max-h-full min-h-0 flex-grow lg:px-0">
+    <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
       <ActivityProvider
         messages={order?.messages ?? []}
         files={order?.files ?? []}
@@ -47,25 +47,28 @@ async function OrderDetailsPage({
         order={order!}
         userRole={role}
       >
-        <OrderHeader order={order!} />
+        
 
-        <div className="flex h-full min-h-0 max-h-full w-full flex-col text-gray-700">
-          <div className="flex h-full max-h-full w-full justify-between gap-6">
-            <div className="flex w-full min-w-0 flex-grow flex-col gap-6">
-              <OrderTabs
-                organizationId={
-                  organizationId
-                    ? { account_id: organizationId.client_organization_id }
-                    : undefined
-                }
-                currentPath={currentPath}
-                userRole={role}
-                orderId={id}
-              />
-            </div>
-            <AsideOrderInformation order={order!} className="hidden lg:flex" />
-          </div>
+    <div className="flex h-full max-h-full w-full flex-col text-gray-700 pt-[2em]">
+      <div className="flex max-h-full h-full w-full justify-between">
+        <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem]">
+          <OrderHeader order={order!} />
+          <OrderTabs
+            organizationId={
+              organizationId
+                ? { account_id: organizationId.client_organization_id }
+                : undefined
+            }
+            currentPath={currentPath}
+            userRole={role}
+            orderId={id}
+            orderAgencyId={order?.agency_id ?? ''}
+          />
         </div>
+        <AsideOrderInformation order={order!} className="hidden lg:flex pt-[3rem]" />
+      </div>
+    </div>
+
       </ActivityProvider>
     </PageBody>
   );

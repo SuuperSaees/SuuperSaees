@@ -5,6 +5,7 @@
   "confirmDateMessage": "¿Estás seguro de que deseas actualizar la fecha de vencimiento?",
   "accept": "Aceptar",
   "cancel": "Cancelar",
+  "summary": "Resumen",
   "openOrders": "Abiertos",
   "completedOrders": "Completados",
   "allOrders": "Todos",
@@ -15,6 +16,10 @@
   "assignedToLabel": "Asignado a",
   "dueDateLabel": "Fecha de vencimiento",
   "select_date_range": "Seleccionar rango de fechas",
+  "delete": "Eliminar orden",
+  "deleteConfirmation": "¿Estás seguro de que deseas eliminar este pedido?",
+  "deleteSuccess": "Pedido eliminado con éxito",
+  "deleteError": "Error al eliminar el pedido",
   "creation": {
     "title": "Crear pedido",
     "form": {
@@ -44,7 +49,7 @@
     "summary": "Resumen",
     "deadlineNotSet": "Sin asignar",
     "createdBy": "Creado por",
-    "orderId": "Pedido ID",
+    "orderId": "#",
     "createdAt": "Creado",
     "assignedTo": "Asignado a",
     "followedBy": "Seguido por",

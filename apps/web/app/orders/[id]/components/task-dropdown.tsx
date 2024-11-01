@@ -18,15 +18,17 @@ import { Spinner } from '@kit/ui/spinner';
 import { calculateSubtaskProgress } from '~/utils/task-counter';
 
 import { useRealTimeTasks } from '../hooks/use-tasks';
-import { SortableTask } from './sortable-task';
 import SubTasks from './sub-task';
+import { SortableItem } from '~/components/sortable-item';
 
 function TaskDropdown({
   userRole,
   orderId,
+  orderAgencyId,
 }: {
   userRole: string;
   orderId: string;
+  orderAgencyId: string;
 }) {
   const {
     tasks,
@@ -91,7 +93,7 @@ function TaskDropdown({
           className="mt-4 py-0 text-gray-600"
           onClick={handleAddTask}
         >
-          <Plus className="mr-1 h-5 w-5" />
+          <Plus className="mr-1 h-4 w-4" />
           <p className="text-sm">{t('tasks.addTask')}</p>
         </Button>
       </div>
@@ -99,7 +101,7 @@ function TaskDropdown({
   }
 
   return (
-    <div className="no-scrollbar max-h-[70vh] overflow-y-auto">
+    <div className="no-scrollbar max-h-[76vh] overflow-y-auto">
       {loading ? (
         <div className="flex items-center justify-center">
           <Spinner />
@@ -114,7 +116,7 @@ function TaskDropdown({
           >
             <SortableContext items={tasks}>
               {tasks.map((task, index) => (
-                <SortableTask key={task.id} task={task}>
+                <SortableItem id={task.id} key={task.id}>
                   <div className="mb-4">
                     <div className="flex items-center justify-between">
                       {editingTaskId === task.id ? (
@@ -177,12 +179,14 @@ function TaskDropdown({
                             initialSubtasks={task.subtasks}
                             userRole={userRole}
                             taskId={task.id}
+                            orderId={orderId}
+                            orderAgencyId={orderAgencyId}
                           />
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>
                   </div>
-                </SortableTask>
+                </SortableItem>
               ))}
             </SortableContext>
           </DndContext>
@@ -191,7 +195,7 @@ function TaskDropdown({
             className="mt-4 py-0 text-gray-600"
             onClick={handleAddTask}
           >
-            <Plus className="mr-1 h-5 w-5" />
+            <Plus className="mr-1 h-4 w-4" />
             <p className="text-sm">{t('tasks.addTask')}</p>
           </Button>
         </>

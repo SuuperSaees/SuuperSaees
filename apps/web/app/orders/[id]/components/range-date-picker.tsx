@@ -57,7 +57,7 @@ export function DatePickerWithRange({
         <PopoverTrigger asChild>
           
           <p 
-            className='whitespace-nowrap cursor-pointer select-none px-3 text-gray-900 font-medium'
+            className='whitespace-nowrap cursor-pointer select-none px-3 text-gray-900 font-medium text-sm'
           >
             {formattedDateRange}
           </p>

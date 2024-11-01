@@ -1,13 +1,32 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { Subtask } from '~/lib/tasks.types';
+import { getAgencyClients, getOrderAgencyMembers } from '~/team-accounts/src/server/actions/orders/get/get-order';
 import { createNewSubtask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
-import { updateSubtaskById, updateSubtasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { updateSubtaskAssigns, updateSubtaskById, updateSubtaskFollower, updateSubtasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 
 
-export const useSubtaskMutations = () => {
+export const useSubtaskMutations = (
+  orderId: string,
+  orderAgencyId: string,
+  userRole: string
+) => {
   const queryClient = useQueryClient();
+
+  const { data: orderAgencyMembers } = useQuery({
+    queryKey: ['order-agency-members', orderId],
+    queryFn: () => getOrderAgencyMembers(orderAgencyId, Number(orderId)),
+    retry: 5,
+    enabled: userRole === 'agency_owner' || userRole === 'agency_member' || userRole === 'agency_project_manager',
+  });
+
+  const { data: orderAgencyClientsFollowers } = useQuery({
+    queryKey: ['order-agency-clients-followers', orderId],
+    queryFn: () => getAgencyClients(orderAgencyId, Number(orderId)),
+    retry: 5,
+    enabled: userRole === 'agency_owner' || userRole === 'agency_member' || userRole === 'agency_project_manager',
+  });
 
   // Mutations
   const createSubtask = useMutation({
@@ -68,9 +87,85 @@ export const useSubtaskMutations = () => {
     },
   });
 
+  const changeAgencyMembersAssigned = useMutation({
+    mutationFn: (
+      {
+        agencyMemberIds,
+        subtaskId,
+      }: {
+        agencyMemberIds: string[];
+        subtaskId: string;
+      }
+    ) => {
+      return updateSubtaskAssigns(subtaskId, agencyMemberIds).then(() => ({ subtaskId }));
+    },
+    onSuccess: async (
+      { subtaskId }: { subtaskId: string }
+    ) => {
+      // toast.success('Success', {
+      //   description: 'Agency members in tasks were updated successfully!',
+      // });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['subtask_assignations', subtaskId],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['order-agency-members', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: 'The agency members could not be updated in subtask.',
+      });
+    },
+  });
+
+  const changeAgencyMembersFollowers = useMutation({
+    mutationFn: (
+      {
+        followers,
+        subtaskId,
+      }: {
+        followers: string[];
+        subtaskId: string;
+      }
+    ) => {
+      return updateSubtaskFollower(subtaskId, followers).then(() => ({ subtaskId }));
+    },
+    onSuccess: async (
+      { subtaskId }: { subtaskId: string }
+    ) => {
+      // toast.success('Success', {
+      //   description: 'Clients followers updated successfully!',
+      // });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['subtask_followers', subtaskId],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['order-agency-clients-followers', 'all'],
+      });
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: 'The clients followers could not be updated.',
+      });
+    },
+  });
+
+  
+
   return {
     createSubtask,
     updateSubtask,
     updateSubtaskIndex,
+    changeAgencyMembersAssigned,
+    changeAgencyMembersFollowers,
+
+    // Query data
+    orderAgencyMembers,
+    orderAgencyClientsFollowers
   };
 };

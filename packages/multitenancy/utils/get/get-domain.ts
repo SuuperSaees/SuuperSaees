@@ -64,6 +64,7 @@ export async function getDomainByUserId(
 
 export async function getDomainByOrganizationId(
   organizationId: string,
+  parsedUrl = false,
   adminActived = false,
 ): Promise<string> {
   const supabase = getSupabaseServerComponentClient({ admin: adminActived });
@@ -77,10 +78,13 @@ export async function getDomainByOrganizationId(
     throw new Error(`Error getting domain: ${domainError.message}`);
   }
 
-  const domain =
-    domainData?.subdomains?.domain ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
+  const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
 
-  return domain;
+  const domain = domainData?.subdomains?.domain;
+
+  return parsedUrl
+    ? `${IS_PROD ? 'https' : 'http'}://${domain}/`
+    : (domain ?? process.env.NEXT_PUBLIC_SITE_URL ?? '');
 }
 
 export async function getDomainBySubdomain(
