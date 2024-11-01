@@ -57,7 +57,7 @@ export function useStripeActions({ userRole }: UseStripeActions) {
         },
       );
       if (!response.ok) {
-        throw new Error('Failed to fetch account data from Stripe');
+        console.error('Failed to fetch account data from Stripe');
       }
       const data: { email: string | null } = await response.json();
       setHasTheEmailAssociatedWithStripe(!!data.email);

@@ -48,7 +48,36 @@ export async function POST(req: NextRequest) {
       },
     );
 
-    console.log('session', session, serviceId);
+    (async () => {
+      const { data: checkoutSessionData, error: checkoutSessionError } =
+        await supabase
+          .from('checkouts')
+          .insert({
+            provider: 'stripe',
+            provider_id: session.id,
+          })
+          .select('id')
+          .single();
+
+      if (checkoutSessionError) {
+        console.error('Error creating checkout session:', checkoutSessionError);
+      }
+
+      const { error: checkoutServiceError } = await supabase
+        .from('checkout_services')
+        .insert({
+          checkout_id: checkoutSessionData?.id,
+          service_id: serviceId,
+        })
+        .single();
+
+      if (checkoutServiceError) {
+        console.error('Error creating checkout service:', checkoutServiceError);
+      }
+    })().catch((error) => {
+      console.error('Error creating checkout session:', error);
+    });
+
     return NextResponse.json({ sessionUrl: session.url });
   } catch (error) {
     console.error('Error creating checkout session:', error);
