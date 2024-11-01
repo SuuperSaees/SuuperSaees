@@ -1,4 +1,4 @@
-alter table "public"."subscriptions" drop constraint "subscriptions_propietary_organization_id_fkey";
+-- alter table "public"."subscriptions" drop constraint "subscriptions_propietary_organization_id_fkey";
 
 alter table "public"."subtasks" drop constraint "subtasks_parent_task_id_fkey";
 
