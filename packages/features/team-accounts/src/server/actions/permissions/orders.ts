@@ -36,7 +36,7 @@ export const hasPermissionToReadOrderDetails = async (
 
     // Step 3: Check for agency permission
     if (
-      userRole === 'agency_owner' &&
+      (userRole === 'agency_owner' || userRole === 'agency_project_manager') &&
       account.organization_id === orderPropietaryOrganizationId
     ) {
       return true;
