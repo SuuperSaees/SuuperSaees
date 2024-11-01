@@ -299,6 +299,7 @@ export function PersonalAccountSettingsContainer(
                     <CardContent>
                       <UpdateAccountOrganizationLogo
                         organizationId={user?.organization_id ?? ''}
+                        className='w-10 h-10'
                       />
                     </CardContent>
                   </Card>
@@ -314,6 +315,7 @@ export function PersonalAccountSettingsContainer(
                     <CardContent>
                       <UpdateAccountOrganizationDarkLogo
                         organizationId={user?.organization_id ?? ''}
+                        className='w-10 h-10'
                       />
                     </CardContent>
                   </Card>
@@ -327,7 +329,9 @@ export function PersonalAccountSettingsContainer(
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <UpdateAccountOrganizationFavicon />
+                      <UpdateAccountOrganizationFavicon 
+                      className='w-10 h-10'
+                      />
                     </CardContent>
                   </Card>
                 </>
