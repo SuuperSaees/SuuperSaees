@@ -49,9 +49,9 @@ async function OrderDetailsPage({
       >
         
 
-    <div className="flex h-full max-h-full w-full flex-col text-gray-700 pt-[2em]">
+    <div className="flex h-full max-h-full w-full flex-col text-gray-700">
       <div className="flex max-h-full h-full w-full justify-between">
-        <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem]">
+        <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem] pt-2">
           <OrderHeader order={order!} />
           <OrderTabs
             organizationId={
@@ -65,7 +65,7 @@ async function OrderDetailsPage({
             orderAgencyId={order?.agency_id ?? ''}
           />
         </div>
-        <AsideOrderInformation order={order!} className="hidden lg:flex pt-[3rem]" />
+        <AsideOrderInformation order={order!} className="hidden lg:flex " />
       </div>
     </div>
 

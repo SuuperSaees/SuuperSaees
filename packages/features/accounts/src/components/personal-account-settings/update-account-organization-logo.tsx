@@ -27,6 +27,7 @@ const ORGANIZATION_BUCKET = 'organization';
 
 export default function UpdateAccountOrganizationLogo(props: {
   organizationId: string;
+  className?: string;
 }) {
   const { logo_url, updateOrganizationSetting } = useOrganizationSettings();
   const client = useSupabase();
@@ -89,7 +90,7 @@ export default function UpdateAccountOrganizationLogo(props: {
   );
   // console.log('logo_url', logo_url);
   return (
-    <ImageUploader value={logo_url} onValueChange={onValueChange}>
+    <ImageUploader value={logo_url} onValueChange={onValueChange} className={props.className}>
       <div className={'flex flex-col space-y-1'}>
         <span className={'text-sm'}>
           <Trans i18nKey={'account:brandLogoSelectLabel'} />

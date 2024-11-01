@@ -27,8 +27,9 @@ const ORGANIZATION_BUCKET = 'organization';
 
 export default function UpdateAccountOrganizationDarkLogo(props: {
   organizationId: string;
+  className?: string;
 }) {
-  const { logo_dark_url, updateOrganizationSetting } = useOrganizationSettings();
+  const { logo_dark_url, updateOrganizationSetting, sidebar_background_color } = useOrganizationSettings();
   const client = useSupabase();
   const { t } = useTranslation('account');
   const createToaster = useCallback(
@@ -89,7 +90,11 @@ export default function UpdateAccountOrganizationDarkLogo(props: {
   );
   // console.log('logo_dark_url', logo_dark_url);
   return (
-    <ImageUploader value={logo_dark_url} onValueChange={onValueChange}>
+    <ImageUploader value={logo_dark_url} onValueChange={onValueChange} className={props.className}
+    style={{
+      backgroundColor: sidebar_background_color ?? 'black',
+    }}
+    >
       <div className={'flex flex-col space-y-1'}>
         <span className={'text-sm'}>
           <Trans i18nKey={'account:brandLogoSelectLabel'} />

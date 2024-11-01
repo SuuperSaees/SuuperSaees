@@ -74,6 +74,7 @@ const ActivityPage = () => {
           uploadFileIsExternal
           toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
           userRole={userRole}
+          className='pb-8'
         />
       </div>
     </div>

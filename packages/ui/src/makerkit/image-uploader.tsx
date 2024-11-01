@@ -17,6 +17,7 @@ export function ImageUploader(
     onValueChange: (value: File | null) => unknown;
     floatingDeleteButton?: boolean;
     className?: string;
+    style?: React.CSSProperties;
   }>,
 ) {
   const [image, setImage] = useState(props.value);
@@ -75,9 +76,10 @@ export function ImageUploader(
   }
 
   return (
-    <div className='relative flex items-center space-x-4'>
+    <div className='relative flex items-center space-x-4 w-fit'>
       <label
-        className={`relative animate-in fade-in zoom-in-50 ${props.className}`}
+        className={`relative animate-in fade-in zoom-in-50 ${props.className}` }
+        style={props.style}
       >
         <Image
           fill
@@ -104,7 +106,7 @@ export function ImageUploader(
             onClick={onClear}
             size={'sm'}
             variant={'ghost'}
-            className={'absolute right-0 top-0'}
+          
           >
             <Trans i18nKey={'common:clear'} />
           </Button>
