@@ -22,7 +22,7 @@ import { useOrganizationSettings } from '../../context/organization-settings-con
 
 const ORGANIZATION_BUCKET = 'organization';
 
-export default function UpdateAccountOrganizationFavicon() {
+export default function UpdateAccountOrganizationFavicon({className}: {className?: string}) {
   const { favicon_url, updateOrganizationSetting } = useOrganizationSettings();
   const client = useSupabase();
   const { t } = useTranslation('account');
@@ -77,7 +77,7 @@ export default function UpdateAccountOrganizationFavicon() {
     [client, createToaster, favicon_url, updateOrganizationSetting],
   );
   return (
-    <ImageUploader value={favicon_url} onValueChange={onValueChange}>
+    <ImageUploader value={favicon_url} onValueChange={onValueChange} className={className}>
       <div className={'flex flex-col space-y-1'}>
         <span className={'text-sm'}>
           <Trans i18nKey={'account:brandFaviconSelectLabel'} />
