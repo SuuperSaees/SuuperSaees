@@ -15,7 +15,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
   // Ensure content is a string
   const content = message.content ?? '';
   return (
-    <div className={`flex flex-col gap-2 w-full p-0 `}>
+    <div className={`flex flex-col gap-2 w-full p-0 max-w-full min-w-0`}>
       <div className="flex justify-between w-full">
       <div className="flex gap-2">
       <span className="font-semibold">{message.user.name}</span>
@@ -30,7 +30,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
 
       <div className="flex flex-col gap-2 rounded-lg rounded-ss-none w-full bg-slate-0 overflow-hidden">
         {/* Only rounded bottom left and right top right */}
-        <div className={`w-fit overflow-hidden break-words rounded-r-md rounded-b-md p-4 whitespace-normal ${message.visibility === "internal_agency" ? "bg-[#FEF9D2]" : "bg-slate-100"}`} dangerouslySetInnerHTML={{ __html: content }} />
+        <div className={`w-full break-words rounded-r-md rounded-b-md p-4 whitespace-normal ${message.visibility === "internal_agency" ? "bg-[#FEF9D2]" : "bg-slate-100"}`} dangerouslySetInnerHTML={{ __html: content }} />
         {message.files && message.files.length > 0 && (
           <div className="flex flex-wrap gap-4">
             {message.files.map((file) => (
