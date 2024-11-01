@@ -1,18 +1,26 @@
 import { useCallback, useEffect } from 'react';
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { Subtask, Task } from '~/lib/tasks.types';
 import { getTasks } from '~/team-accounts/src/server/actions/tasks/get/get-tasks';
-import { useTaskMutations } from './tasks/use-task-mutations';
+
 import { useDragAndDrop } from './tasks/use-task-drag-and-drop';
+import { useTaskMutations } from './tasks/use-task-mutations';
 
 export const useRealTimeTasks = (orderId: string) => {
   const supabase = useSupabase();
   const queryClient = useQueryClient();
 
-  const { createTask, updateTaskName, updateTask, updateTaskPositions, deleteTask } = useTaskMutations();
+  const {
+    createTask,
+    updateTaskName,
+    updateTask,
+    updateTaskPositions,
+    deleteTask,
+  } = useTaskMutations();
 
   // Task data with useQuery
   const { data: tasks = [], isLoading } = useQuery({
@@ -21,9 +29,14 @@ export const useRealTimeTasks = (orderId: string) => {
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
-  const { isDragging, activeId, handleDragStart, handleDragEnd, dragTask, sensors } = useDragAndDrop(updateTaskPositions, orderId);
-
-  
+  const {
+    isDragging,
+    activeId,
+    handleDragStart,
+    handleDragEnd,
+    dragTask,
+    sensors,
+  } = useDragAndDrop(updateTaskPositions, orderId);
 
   const handleTaskChange = useCallback(
     (payload: { eventType: string; new: Task.Type; old: Task.Type }) => {
