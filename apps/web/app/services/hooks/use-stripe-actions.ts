@@ -2,13 +2,18 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+
+
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+
 
 import { Database } from '~/lib/database.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
-import { toast } from 'sonner';
+
 
 interface UseStripeActions {
   userRole: Database['public']['Tables']['accounts_memberships']['Row']['account_role'];
@@ -52,7 +57,7 @@ export function useStripeActions({ userRole }: UseStripeActions) {
         },
       );
       if (!response.ok) {
-        throw new Error('Failed to fetch account data from Stripe');
+        console.error('Failed to fetch account data from Stripe');
       }
       const data: { email: string | null } = await response.json();
       setHasTheEmailAssociatedWithStripe(!!data.email);
@@ -60,7 +65,7 @@ export function useStripeActions({ userRole }: UseStripeActions) {
   }, [userRole]);
 
   
-  const handleCheckout = async (priceId: string) => {
+  const handleCheckout = async (priceId: string, serviceId: number) => {
     try {
       const { stripeId } = await getStripeAccountID();
       const response = await fetch('/api/stripe/checkout-session', {
@@ -68,7 +73,7 @@ export function useStripeActions({ userRole }: UseStripeActions) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ priceId, stripeId }),
+        body: JSON.stringify({ priceId, stripeId, serviceId }),
       });
 
       if (!response.ok) {

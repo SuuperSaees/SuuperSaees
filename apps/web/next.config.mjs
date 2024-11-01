@@ -18,6 +18,7 @@ const INTERNAL_PACKAGES = [
   '@kit/billing-gateway',
   '@kit/email-templates',
   '@kit/database-webhooks',
+  '@kit/webhooks',
   '@kit/cms',
   '@kit/monitoring',
   '@kit/next',

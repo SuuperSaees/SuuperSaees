@@ -539,6 +539,63 @@ export type Database = {
           },
         ]
       }
+      checkout_services: {
+        Row: {
+          checkout_id: string | null
+          id: string
+          service_id: number | null
+        }
+        Insert: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Update: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_services_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "checkouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkout_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkouts: {
+        Row: {
+          created_at: string | null
+          deleted_on: string | null
+          id: string
+          provider: string
+          provider_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider: string
+          provider_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider?: string
+          provider_id?: string
+        }
+        Relationships: []
+      }
       client_services: {
         Row: {
           agency_id: string

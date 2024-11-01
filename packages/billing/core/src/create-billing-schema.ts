@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+
 export enum LineItemType {
   Flat = 'flat',
   PerSeat = 'per_seat',
@@ -193,7 +194,7 @@ const ProductSchema = z
 const BillingSchema = z
   .object({
     provider: BillingProviderSchema,
-    products: z.array(ProductSchema).nonempty(),
+    products: z.array(ProductSchema),
   })
   .refine(
     (schema) => {
@@ -213,7 +214,7 @@ const BillingSchema = z
       message: 'Lemon Squeezy only supports one line item per plan',
       path: ['provider', 'products'],
     },
-  )
+  );
 export function createBillingSchema(config: z.infer<typeof BillingSchema>) {
   return BillingSchema.parse(config);
 }

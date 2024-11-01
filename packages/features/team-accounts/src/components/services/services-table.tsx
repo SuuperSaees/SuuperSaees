@@ -37,7 +37,7 @@ type ServicesTableProps = {
   activeTab: string;
   accountRole: string;
   hasTheEmailAssociatedWithStripe: boolean;
-  handleCheckout: (priceId: string) => Promise<void>;
+  handleCheckout: (priceId: string, serviceId: number) => Promise<void>;
   isLoading: boolean;
 };
 
@@ -174,7 +174,7 @@ const useGetColumns = (
   t: TFunction<'services', undefined>,
   accountRole: string,
   hasTheEmailAssociatedWithStripe: boolean,
-  handleCheckout: (priceId: string) => Promise<void>,
+  handleCheckout: (priceId: string, serviceId: number) => Promise<void>,
 ): ColumnDef<Service.Type>[] => {
   return useMemo(
     () => [
@@ -280,7 +280,7 @@ const useGetColumns = (
                   {hasTheEmailAssociatedWithStripe && (
                     <Link2
                       onClick={() =>
-                        service.price_id && handleCheckout(service.price_id)
+                        service.price_id && handleCheckout(service.price_id, service.id)
                       }
                       className="h-6 w-6 cursor-pointer text-gray-500"
                     />
