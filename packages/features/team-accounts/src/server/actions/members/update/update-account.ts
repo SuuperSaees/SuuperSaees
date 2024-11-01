@@ -4,12 +4,17 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 export const updateUserAccount = async (
-  databaseClient: SupabaseClient<Database>,
   userData: Account.Update,
   userId: Account.Type['id'],
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
 ) => {
+  databaseClient = databaseClient ?? getSupabaseServerComponentClient({
+    admin: adminActivated,
+  });
   try {
     const { data: userAccountData, error: errorUpdateUserAccount } =
       await databaseClient

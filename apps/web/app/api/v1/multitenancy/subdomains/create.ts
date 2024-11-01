@@ -82,7 +82,7 @@ export async function createIngressAndSubdomain(req: NextRequest) {
       provider: 'c4c7us',
       domain: subdomainDataBody.isCustom
         ? ingress.domain
-        : `${ingress.domain}.suuper.co`,
+        : `${ingress.domain}.suuper.co`.toLowerCase(),
       service_name: ingress.service_name,
       status: ingress.status,
     };

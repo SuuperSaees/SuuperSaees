@@ -31,6 +31,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { useOrganizationSettings } from '../../context/organization-settings-context'
 import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './update-account-organization-sender-email-and-sender-domain';
+import UpdateAccountOrganizationDarkLogo from './update-account-organization-dark-logo';
 
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -298,6 +299,23 @@ export function PersonalAccountSettingsContainer(
                     <CardContent>
                       <UpdateAccountOrganizationLogo
                         organizationId={user?.organization_id ?? ''}
+                        className='w-10 h-10'
+                      />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandDarkLogo'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandDarkLogoDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationDarkLogo
+                        organizationId={user?.organization_id ?? ''}
+                        className='w-10 h-10'
                       />
                     </CardContent>
                   </Card>
@@ -311,7 +329,9 @@ export function PersonalAccountSettingsContainer(
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <UpdateAccountOrganizationFavicon />
+                      <UpdateAccountOrganizationFavicon 
+                      className='w-10 h-10'
+                      />
                     </CardContent>
                   </Card>
                 </>

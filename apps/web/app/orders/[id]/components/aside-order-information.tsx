@@ -28,6 +28,7 @@ import deduceNameFromEmail from '../utils/deduce-name-from-email';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import ActivityAssignations from './activity-assignations';
 import ActivityFollowers from './activity-followers';
+import StatusCombobox from './status-combobox';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
@@ -37,7 +38,7 @@ interface AsideOrderInformationProps {
   className?: string;
   [key: string]: unknown;
 }
-const AsideOrderInformation = ({
+const   AsideOrderInformation = ({
   order,
   className,
   ...rest
@@ -140,14 +141,20 @@ const AsideOrderInformation = ({
     queryKey: ['order-agency-members', order.id],
     queryFn: () => getOrderAgencyMembers(order.agency_id, order.id),
     retry: 5,
-    enabled: userRole === 'agency_owner' || userRole === 'agency_member' || userRole === 'agency_project_manager',
+    enabled:
+      userRole === 'agency_owner' ||
+      userRole === 'agency_member' ||
+      userRole === 'agency_project_manager',
   });
 
   const { data: orderAgencyClientsFollowers } = useQuery({
     queryKey: ['order-agency-clients-followers', order.id],
     queryFn: () => getAgencyClients(order.agency_id, order.id),
     retry: 5,
-    enabled: userRole === 'agency_owner' || userRole === 'agency_member' || userRole === 'agency_project_manager',
+    enabled:
+      userRole === 'agency_owner' ||
+      userRole === 'agency_member' ||
+      userRole === 'agency_project_manager',
   });
 
   // const { data: orderAgencyClientsFollowers } = useQuery({
@@ -200,11 +207,15 @@ const AsideOrderInformation = ({
       label: user.name,
     })) ?? [];
 
-  const userRoles = new Set(['agency_member', 'agency_owner', 'agency_project_manager']);
+  const userRoles = new Set([
+    'agency_member',
+    'agency_owner',
+    'agency_project_manager',
+  ]);
 
   return (
     <div
-      className={`relative min-h-full overflow-y-auto no-scrollbar bottom-10 flex h-[90vh] w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 text-gray-700 ${className}`}
+      className={`pt-4 no-scrollbar relative  flex h-full min-h-full w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 overflow-y-auto border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 text-gray-700 ${className}`}
       {...rest}
     >
       <div className="border-b border-gray-200 pb-7">
@@ -213,7 +224,11 @@ const AsideOrderInformation = ({
         </h3>
         <div className="flex gap-3">
           <AvatarDisplayer
-            displayName={order.client?.name ? order.client?.name : deduceNameFromEmail(order.client?.email ?? '')}
+            displayName={
+              order.client?.name
+                ? order.client?.name
+                : deduceNameFromEmail(order.client?.email ?? '')
+            }
             pictureUrl={
               order.client
                 ? order.client?.picture_url && order.client?.picture_url
@@ -221,8 +236,10 @@ const AsideOrderInformation = ({
             }
           />
           <div className="flex flex-col">
-            <span className="text-sm text-gray-600 font-medium">
-              {order.client?.email ? deduceNameFromEmail(order.client?.email ?? '') : ''}
+            <span className="text-sm font-medium text-gray-600">
+              {order.client?.email
+                ? deduceNameFromEmail(order.client?.email ?? '')
+                : ''}
             </span>
             <span className="text-sm text-gray-600">
               {order.client_organization?.name
@@ -245,21 +262,13 @@ const AsideOrderInformation = ({
               defaultDate={order.due_date}
             />
           </div>
-          <div className="flex items-center text-sm">
-            <Loader className="mr-2 h-4 w-4" />
-            <SelectAction
-              options={statusOptions}
-              groupName={t('details.status')}
-              defaultValue={selectedStatus}
-              className={
-                selectedStatus ? statusColors[selectedStatus] : undefined
-              }
-              onSelectHandler={(status) => {
-                changeStatus.mutate(status as Order.Type['status']);
-              }}
-              getitemClassName={getStatusClassName}
-              disabled={changeStatus.isPending}
-            />
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-1 font-semibold">
+              <Loader className="mr-2 h-4 w-4" />
+              <p>{t('details.status')}</p>
+            </div>
+
+            <StatusCombobox order={order} />
           </div>
           <div className="flex items-center text-sm">
             <FlagIcon className="mr-2 h-4 w-4" />
@@ -320,7 +329,9 @@ const AsideOrderInformation = ({
           <div className="mb-4 flex items-center justify-between">
             <div className="flex">
               <FlagIcon className="mr-2 h-4 w-4" />
-              <span className="text-sm font-medium">{t('details.priority')}</span>
+              <span className="text-sm font-medium">
+                {t('details.priority')}
+              </span>
             </div>
             <span
               className={`flex items-center rounded-full px-2 py-1 ${order.priority ? priorityColors[order.priority] : undefined}`}

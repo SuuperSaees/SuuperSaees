@@ -13,9 +13,24 @@ interface AuthDetails {
 
 export const useAuthDetails = (hostname: string) => {
   const [authDetails, setAuthDetails] = useState<AuthDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchAuthDetails = async () => {
+      const isCustomDomain = () => {
+        const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
+        const currentAppOrigin = window.location.origin + '/';
+        return  originalAppOrigin !== currentAppOrigin;
+      }
+      if (!isCustomDomain()) {
+        // Clear cached data if the domain is not custom
+        localStorage.removeItem(`authDetails_${hostname}`);
+        document.cookie = `authDetails_${hostname}=; path=/;`;
+        setAuthDetails(null);
+        setIsLoading(false);
+        return;
+      }
+
       // Check if auth details for this hostname are already in localStorage
       const cachedData = localStorage.getItem(`authDetails_${hostname}`);
       const parsedCachedData = cachedData ? JSON.parse(cachedData) : null;
@@ -24,7 +39,8 @@ export const useAuthDetails = (hostname: string) => {
       // Fetch from the database
       let domainFullData = null;
       try {
-        domainFullData = await getFullDomainBySubdomain(hostname, true, [
+        setIsLoading(true);
+        domainFullData = isCustomDomain() && await getFullDomainBySubdomain(hostname, true, [
           'theme_color',
           'logo_url',
           'sidebar_background_color',
@@ -34,6 +50,8 @@ export const useAuthDetails = (hostname: string) => {
       } catch (error) {
         console.error('Error fetching auth details', error);
         return;
+      } finally {
+        setIsLoading(false);
       }
 
       if (domainFullData) {
@@ -67,7 +85,9 @@ export const useAuthDetails = (hostname: string) => {
             `authDetails_${hostname}`,
             JSON.stringify(fetchedAuthDetails),
           );
-          document.cookie = `authDetails_${hostname}=${JSON.stringify(fetchedAuthDetails)}; path=/;`;
+          document.cookie = `authDetails_${hostname}=${JSON.stringify(
+            fetchedAuthDetails,
+          )}; path=/;`;
         }
       }
     };
@@ -75,5 +95,5 @@ export const useAuthDetails = (hostname: string) => {
     void fetchAuthDetails();
   }, [hostname]);
 
-  return authDetails;
+  return { authDetails, isLoading };
 };

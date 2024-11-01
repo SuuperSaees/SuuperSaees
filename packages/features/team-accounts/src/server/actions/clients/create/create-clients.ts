@@ -14,7 +14,10 @@ import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { OrganizationSettings as OrganizationSettingsType } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { Tokens } from '../../../../../../../../apps/web/lib/tokens.types';
 import { decodeToken } from '../../../../../../../../packages/tokens/src/decode-token';
-import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import {
+  getDomainByOrganizationId,
+  getDomainByUserId,
+} from '../../../../../../../multitenancy/utils/get/get-domain';
 import {
   generateRandomPassword,
   getTextColorBasedOnBackground,
@@ -32,11 +35,13 @@ import {
   getOrganization,
   getOrganizationById,
   getOrganizationSettings,
+  getOrganizationSettingsByOrganizationId,
 } from '../../organizations/get/get-organizations';
 import {
   hasPermissionToAddClientMembers,
   hasPermissionToCreateClientOrg,
 } from '../../permissions/clients';
+// import { getSubscriptionByOrganizationId } from '../../subscriptions/get/get-subscription';
 import { sendClientConfirmEmail } from '../send-email/send-client-email';
 
 // Define la función createClient
@@ -47,23 +52,33 @@ type CreateClient = {
     name: string;
   };
   role: string;
-  selectedOrganizationId?: string;
+  agencyId?: string;
+  adminActivated?: boolean;
 };
 
 const createClientUserAccount = async (
   clientEmail: string,
   organizationName: Account.Type['name'],
+  adminActivated = false,
+  agencyId?: string,
 ) => {
   try {
-    const client = getSupabaseServerComponentClient();
-    const userData = await fetchCurrentUser(client);
-    const userId = userData?.id;
-    if (!userId) throw new Error('No user id provided');
-    const { domain: baseUrl, organizationId } = await getDomainByUserId(
-      userId,
-      true,
-    );
-    const organizationSettings = await getOrganizationSettings();
+    const client = getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+    let baseUrl, organizationId;
+    if (!adminActivated) {
+      const userData = await fetchCurrentUser(client);
+      const userId = userData?.id;
+      if (!userId) throw new Error('No user id provided');
+      const { domain: baseUrlValue, organizationId: organizationIdValue } =
+        await getDomainByUserId(userId, true);
+      baseUrl = baseUrlValue;
+      organizationId = organizationIdValue;
+    } else {
+      baseUrl = await getDomainByOrganizationId(agencyId ?? '', true, true);
+      organizationId = agencyId ?? '';
+    }
 
     // Step 1: Pre-authentication of the user
     const password = generateRandomPassword(12);
@@ -81,12 +96,30 @@ const createClientUserAccount = async (
         value: string;
       } | null = null;
 
-    organizationSettings.forEach((setting) => {
-      if (setting.key === logo_url)
-        organizationLogo = { key: logo_url, value: setting.value };
-      if (setting.key === theme_color)
-        organizationColor = { key: theme_color, value: setting.value };
-    });
+    if (!adminActivated) {
+      const organizationSettings = await getOrganizationSettings();
+
+      organizationSettings.forEach((setting) => {
+        if (setting.key === logo_url && setting.value !== '')
+          organizationLogo = { key: logo_url, value: setting.value };
+        if (setting.key === theme_color && setting.value !== '')
+          organizationColor = { key: theme_color, value: setting.value };
+      });
+    } else {
+      const organizationSettings =
+        await getOrganizationSettingsByOrganizationId(
+          organizationId,
+          adminActivated,
+          [logo_url, theme_color],
+        );
+
+      organizationSettings.forEach((setting) => {
+        if (setting.key === logo_url && setting.value !== '')
+          organizationLogo = { key: logo_url, value: setting.value };
+        if (setting.key === theme_color && setting.value !== '')
+          organizationColor = { key: theme_color, value: setting.value };
+      });
+    }
 
     organizationLogo = organizationLogo ?? {
       key: logo_url,
@@ -176,11 +209,15 @@ const createClientUserAccount = async (
 };
 
 export const insertClient = async (
-  supabaseClient: SupabaseClient<Database>,
   agencyId: Client.Insert['agency_id'],
   userId: Client.Insert['user_client_id'],
   organizationId: Client.Insert['organization_client_id'],
+  supabaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
 ): Promise<Client.Insert> => {
+  supabaseClient = supabaseClient ?? getSupabaseServerComponentClient({
+    admin: adminActivated,
+  });
   try {
     const { data: clientData, error: clientError } = await supabaseClient
       .from('clients')
@@ -204,70 +241,100 @@ export const insertClient = async (
   }
 };
 
-export const createClient = async (clientData: CreateClient) => {
-  try {
-    const supabase = getSupabaseServerComponentClient();
-    // Step 1: Fetch primary owner ID and organization
-    const primaryOwnerId = await getPrimaryOwnerId();
-    const organization = await getOrganization();
+/**
+ * @prop {adminActivated}: This is a boolean that indicates if the client is being created by an admin user.
+ * @prop {agencyId}: This is the id of the agency that the client is being created for.
+ *
+ */
 
-    if (!primaryOwnerId) throw new Error('No primary owner user id found');
+export const createClient = async (clientData: CreateClient) => {
+  // Refactor this function to use the new client data structure
+  try {
+    // Step 1: Fetch primary owner ID and organization
+    let primaryOwnerId;
+    if (!clientData.adminActivated) {
+      primaryOwnerId = await getPrimaryOwnerId();
+    }
+    const organization = !clientData.agencyId
+      ? await getOrganization()
+      : await getOrganizationById(
+          clientData.agencyId,
+          undefined,
+          clientData.adminActivated,
+        );
+
+    if (!primaryOwnerId && !clientData.adminActivated)
+      throw new Error('No primary owner user id found');
     if (!organization) throw new Error('No organization found');
 
     // Step 2: Check if the user has permission to create a client
-    const hasPermission = await hasPermissionToCreateClientOrg(organization.id);
-    if (!hasPermission) {
-      throw new Error(
-        'You do not have the required permissions to create a client',
+    if (!clientData.adminActivated) {
+      const hasPermission = await hasPermissionToCreateClientOrg(
+        organization.id,
       );
+      if (!hasPermission) {
+        throw new Error(
+          'You do not have the required permissions to create a client',
+        );
+      }
     }
 
     // Step 3: Create or fetch the client organization user account
     const clientOrganizationUser = await createClientUserAccount(
       clientData.client.email,
       organization.name,
+      clientData.adminActivated,
+      clientData.agencyId,
     );
     const userId = clientOrganizationUser.user?.id;
     if (!userId) throw new Error('No user id provided');
 
     // Step 4: Verify if the client organization account already exists
     const clientAccountData = await getUserAccountByEmail(
-      supabase,
       clientData.client.email,
+      undefined,
+      clientData.adminActivated,
     );
 
     // Step 5: Retrieve or create the client organization
     const clientOrganizationAccount = clientAccountData?.organization_id
       ? await getOrganizationById(clientAccountData.organization_id)
       : await insertOrganization(
-          supabase,
           { name: clientData.client.slug },
           userId,
+          undefined,
+          clientData.adminActivated,
         );
 
     if (!clientOrganizationAccount) throw new Error('No organization found');
 
     // Step 6: Add role to the accounts_memberships
     await addUserAccountRole(
-      supabase,
       clientOrganizationAccount.id,
       userId,
       clientData.role,
+      undefined,
+      clientData.adminActivated,
     );
 
     // Step 7: Insert client into the clients table
     const client = await insertClient(
-      supabase,
       organization.id,
       userId,
       clientOrganizationAccount.id,
+      undefined,
+      clientData.adminActivated,
     );
 
     // Step 8: Update client user with organization ID
     await updateUserAccount(
-      supabase,
-      { organization_id: clientOrganizationAccount.id, name: clientData.client.name },
+      {
+        organization_id: clientOrganizationAccount.id,
+        name: clientData.client.name,
+      },
       userId,
+      undefined,
+      clientData.adminActivated,
     );
 
     return client;
@@ -313,7 +380,7 @@ export const addClientMember = async ({
     }
 
     // Step 4: Check if the client already exists
-    const clientAccountData = await getUserAccountByEmail(supabase, email);
+    const clientAccountData = await getUserAccountByEmail(email);
     if (clientAccountData) {
       throw new Error('Client already exists');
     }
@@ -330,25 +397,25 @@ export const addClientMember = async ({
 
     // Step 6: Assign the new user as part of the agency's clients
     const client = await insertClient(
-      supabase,
       agencyOrganization.id,
       clientUserId,
       clientOrganizationId,
+      supabase
     );
 
     // Step 7: Add the user role as client into the accounts_memberships table
     await addUserAccountRole(
-      supabase,
       clientOrganizationId,
       clientUserId,
       userRole,
+      supabase,
     );
 
     // Step 8: Update the new user client account with its respective organization ID
     await updateUserAccount(
-      supabase,
       { organization_id: clientOrganization.id },
       clientUserId,
+      supabase,
     );
 
     return client;

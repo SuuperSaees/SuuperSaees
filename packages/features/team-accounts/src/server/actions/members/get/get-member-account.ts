@@ -245,9 +245,13 @@ export async function getUserAccountById(
 }
 
 export const getUserAccountByEmail = async (
-  databaseClient: SupabaseClient<Database>,
   email: Account.Type['email'],
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
 ) => {
+  databaseClient = databaseClient ?? getSupabaseServerComponentClient({
+    admin: adminActivated,
+  });
   try {
     if (!email) return null;
     const { data: userAccountData, error: clientAccountError } =

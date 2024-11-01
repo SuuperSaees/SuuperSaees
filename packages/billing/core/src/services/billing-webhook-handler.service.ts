@@ -1,5 +1,6 @@
 import { UpsertOrderParams, UpsertSubscriptionParams } from '../types';
 
+
 /**
  * @name BillingWebhookHandlerService
  * @description Represents an abstract class for handling billing webhook events.
@@ -11,6 +12,10 @@ export abstract class BillingWebhookHandlerService {
    * @param request
    */
   abstract verifyWebhookSignature(request: Request): Promise<unknown>;
+  abstract verifyWebhookSignatureCustom(
+    body: string,
+    signature: string,
+  ): Promise<unknown>;
 
   /**
    * @name handleWebhookEvent
