@@ -115,7 +115,8 @@ function TaskDropdown({
             collisionDetection={closestCorners}
           >
             <SortableContext items={tasks}>
-              {tasks.map((task, index) => (
+              {tasks.sort((a, b) => a.position - b.position)
+              .map((task, index) => (
                 <SortableItem id={task.id} key={task.id}>
                   <div className="mb-4">
                     <div className="flex items-center justify-between">

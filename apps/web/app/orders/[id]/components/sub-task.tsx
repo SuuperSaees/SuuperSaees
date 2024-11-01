@@ -21,9 +21,11 @@ import {
   SheetTrigger,
 } from '@kit/ui/sheet';
 
+import { SortableItem } from '~/components/sortable-item';
 import RichTextEditorV2 from '~/components/ui/rich-text-editor-v2';
 import { Subtask } from '~/lib/tasks.types';
 
+import { createHandlers } from '../hooks/subtasks/subtask-handlers';
 import { useRealTimeSubtasks } from '../hooks/use-subtasks';
 import { generateDropdownOptions } from '../utils/generate-options-and-classnames';
 import {
@@ -33,10 +35,8 @@ import {
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import { DatePickerWithRange } from './range-date-picker';
 import SubtaskAssignations from './subtasks/subtask-assignations';
-import SelectAction from './ui/select-action';
 import SubtaskFollowers from './subtasks/subtask-followers';
-import { createHandlers } from '../hooks/subtasks/subtask-handlers';
-import { SortableItem } from '~/components/sortable-item';
+import SelectAction from './ui/select-action';
 
 function SubTasks({
   initialSubtasks,
@@ -67,7 +67,7 @@ function SubTasks({
     searchUserOptions,
     changeAgencyMembersAssigned,
     searchUserOptionsFollowers,
-    changeAgencyMembersFollowers
+    changeAgencyMembersFollowers,
   } = useRealTimeSubtasks(initialSubtasks, orderId, orderAgencyId, userRole);
 
   const [newSubtaskName, setNewSubtaskName] = useState<string>('');
@@ -76,13 +76,13 @@ function SubTasks({
   const [content, setContent] = useState<string>('');
 
   const handlers = createHandlers(
-    updateSubtask, 
-    createSubtask, 
-    setEditingSubtaskId, 
+    updateSubtask,
+    createSubtask,
+    setEditingSubtaskId,
     setNewSubtaskName,
     changeAgencyMembersAssigned,
     changeAgencyMembersFollowers,
-    t
+    t,
   );
 
   // Map through the subtasks to render each one
@@ -99,7 +99,7 @@ function SubTasks({
             .filter((subtask) => !subtask.deleted_on)
             .sort((a, b) => a.position - b.position)
             .map((subtask) => (
-              <SortableItem key={subtask.id} id={subtask.id}>
+              <SortableItem key={subtask.id} id={subtask.id} className='items-center'>
                 <div
                   className="flex items-center justify-between py-3"
                   onMouseEnter={() => setHoveredTaskId(subtask.id)}
@@ -111,8 +111,21 @@ function SubTasks({
                         type="text"
                         value={newSubtaskName}
                         onChange={(e) => setNewSubtaskName(e.target.value)}
-                        onBlur={() => handlers.handleSaveTaskName(subtask.id, subtask, newSubtaskName)}
-                        onKeyDown={(e) => handlers.handleKeyDown(e, subtask.id, subtask, newSubtaskName)}
+                        onBlur={() =>
+                          handlers.handleSaveTaskName(
+                            subtask.id,
+                            subtask,
+                            newSubtaskName,
+                          )
+                        }
+                        onKeyDown={(e) =>
+                          handlers.handleKeyDown(
+                            e,
+                            subtask.id,
+                            subtask,
+                            newSubtaskName,
+                          )
+                        }
                         className="w-full rounded-md border-none bg-transparent p-2 font-semibold text-gray-900 focus:outline-none"
                         autoFocus
                       />
@@ -123,7 +136,7 @@ function SubTasks({
                     </div>
                   ) : (
                     <p
-                      className="truncate font-semibold text-gray-900 mr-4 max-w-[calc(100%-40px)] overflow-hidden text-ellipsis"
+                      className="mr-4 max-w-[calc(100%-40px)] overflow-hidden truncate text-ellipsis font-semibold text-gray-900"
                       onMouseEnter={() => setHoveredTaskId(subtask.id)}
                       onMouseLeave={() => setHoveredTaskId(null)}
                       onClick={() =>
@@ -156,18 +169,26 @@ function SubTasks({
                                     setNewSubtaskName(e.target.value)
                                   }
                                   onBlur={() =>
-                                    handlers.handleSaveTaskName(subtask.id, subtask, newSubtaskName)
+                                    handlers.handleSaveTaskName(
+                                      subtask.id,
+                                      subtask,
+                                      newSubtaskName,
+                                    )
                                   }
                                   onKeyDown={(e) =>
-                                    handlers.handleKeyDown(e, subtask.id, subtask, newSubtaskName)
+                                    handlers.handleKeyDown(
+                                      e,
+                                      subtask.id,
+                                      subtask,
+                                      newSubtaskName,
+                                    )
                                   }
-                                  className="w-full rounded-md border-none bg-transparent font-semibold text-gray-900 focus:outline-none text-xl"
-                                  // autoFocus
+                                  className="w-full rounded-md border-none bg-transparent text-xl font-semibold text-gray-900 focus:outline-none"
                                 />
                               ) : (
-                                <div className="flex w-full items-center justify-between mr-2">
+                                <div className="mr-2 flex w-full items-center justify-between">
                                   <p
-                                    className="flex-grow font-semibold text-gray-900 text-xl"
+                                    className="flex-grow text-xl font-semibold text-gray-900"
                                     onClick={() =>
                                       handlers.handleStartEditing(
                                         subtask.id,
@@ -181,8 +202,7 @@ function SubTasks({
                               )}
                             </SheetTitle>
                           </SheetHeader>
-                          <div className="grid gap-4 py-4 mt-6">
-                            <span className='text-base text-gray-900 font-medium mb-2.5'>{t('summary')}</span>
+                          <div className="grid gap-3 py-4">
                             <div className="flex items-center justify-between">
                               <span className="flex text-sm font-semibold">
                                 <CalendarIcon className="mr-2 h-4 w-4" />{' '}
@@ -221,11 +241,13 @@ function SubTasks({
                                   ]
                                 }
                                 onSelectHandler={(value) => {
-                                  handlers.handleStatusChange(
-                                    subtask.id,
-                                    subtask,
-                                    value,
-                                  ).catch((error) => console.error(error));
+                                  handlers
+                                    .handleStatusChange(
+                                      subtask.id,
+                                      subtask,
+                                      value,
+                                    )
+                                    .catch((error) => console.error(error));
                                 }}
                                 showLabel={true}
                               />
@@ -248,11 +270,13 @@ function SubTasks({
                                   ]
                                 }
                                 onSelectHandler={(value) => {
-                                  handlers.handlePriorityChange(
-                                    subtask.id,
-                                    subtask,
-                                    value,
-                                  ).catch((error) => console.error(error));
+                                  handlers
+                                    .handlePriorityChange(
+                                      subtask.id,
+                                      subtask,
+                                      value,
+                                    )
+                                    .catch((error) => console.error(error));
                                 }}
                                 showLabel={true}
                               />
@@ -280,31 +304,32 @@ function SubTasks({
                               searchUserOptions={searchUserOptionsFollowers}
                               subtaskId={subtask.id}
                               userRole={userRole}
-                              // followers={subtask.followers}
                             />
 
-                            <div className='mt-6 h-full'>
-                            <RichTextEditorV2
-                              content={subtask.content}
-                              onChange={(value) => {
-                                if (value) {
-                                  setContent(value);
-                                } else {
-                                  setContent('');
-                                }
-                              }}
-                              onBlur={() => {
-                                handlers.handleContentChange(
-                                  subtask.id,
-                                  subtask,
-                                  content,
-                                ).catch((error) => console.error(error));
-                              }}
-                              userRole={userRole}
-                              hideSubmitButton={true}
-                              showToolbar={true}
-                              isEditable={true}
-                            />
+                            <div className="h-full">
+                              <RichTextEditorV2
+                                content={subtask.content}
+                                onChange={(value) => {
+                                  if (value) {
+                                    setContent(value);
+                                  } else {
+                                    setContent('');
+                                  }
+                                }}
+                                onBlur={() => {
+                                  handlers
+                                    .handleContentChange(
+                                      subtask.id,
+                                      subtask,
+                                      content,
+                                    )
+                                    .catch((error) => console.error(error));
+                                }}
+                                userRole={userRole}
+                                hideSubmitButton={true}
+                                showToolbar={true}
+                                isEditable={true}
+                              />
                             </div>
                           </div>
                         </SheetContent>
@@ -325,9 +350,9 @@ function SubTasks({
                         ]
                       }
                       onSelectHandler={(value) => {
-                        handlers.handleStatusChange(subtask.id, subtask, value).catch(
-                          (error) => console.error(error),
-                        );
+                        handlers
+                          .handleStatusChange(subtask.id, subtask, value)
+                          .catch((error) => console.error(error));
                       }}
                       showLabel={false}
                     />
@@ -343,9 +368,9 @@ function SubTasks({
                         ]
                       }
                       onSelectHandler={(value) => {
-                        handlers.handlePriorityChange(subtask.id, subtask, value).catch(
-                          (error) => console.error(error),
-                        );
+                        handlers
+                          .handlePriorityChange(subtask.id, subtask, value)
+                          .catch((error) => console.error(error));
                       }}
                       showLabel={false}
                     />

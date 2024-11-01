@@ -136,6 +136,18 @@ export const checkAndUpdateTaskCompletion = async (parentId: string) => {
 
     // If all subtasks are completed, update the parent task
     if (allCompleted) {
+      // Check if the main task is already completed
+      const { data: taskStatus, error: taskStatusError } = await client
+        .from('tasks')
+        .select('completed')
+        .eq('id', parentId)
+        .single();
+      if (taskStatusError) throw new Error(taskStatusError.message);
+
+      // If already completed, exit the function to avoid redundancy
+      if (taskStatus?.completed) return;
+
+
       const { data: taskData, error: taskError } = await client
         .from('tasks')
         .update({ completed: true })
