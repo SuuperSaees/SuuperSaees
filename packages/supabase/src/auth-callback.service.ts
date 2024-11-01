@@ -40,18 +40,18 @@ class AuthCallbackService {
       errorPath?: string;
     },
   ): Promise<URL> {
-    // log out the user if any, before starting the new session
     const url = new URL(request.url);
     const searchParams = url.searchParams;
     const token_hash_session = searchParams.get('token_hash_session');
-    const { data: currentSession } = await this.client.auth.getSession();
-    const currentSessionId = decodeToken(
+    const { data: currentSession} = await this.client.auth.getSession()
+
+    const currentSessionId =  currentSession?.session?.access_token ? decodeToken(
       currentSession?.session?.access_token ?? '',
-    )?.session_id;
+    )?.session_id : '';
 
     if (token_hash_session !== currentSessionId) {
-      await logOutUser(this.client);
-    }
+       await logOutUser(this.client);
+    } 
 
     const host = request.headers.get('host');
 
