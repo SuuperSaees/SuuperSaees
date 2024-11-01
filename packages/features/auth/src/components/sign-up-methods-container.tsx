@@ -29,7 +29,6 @@ export function SignUpMethodsContainer(props: {
   showConfirmAlert?: boolean;
 }) {
   const redirectUrl = getCallbackUrl(props);
-  const showConfirmAlert = props.showConfirmAlert ?? true;
   const defaultValues = getDefaultValues();
 
   return (
@@ -40,7 +39,7 @@ export function SignUpMethodsContainer(props: {
 
       <If condition={props.providers.password}>
         <EmailPasswordSignUpContainer
-          showConfirmEmail={showConfirmAlert}
+          showConfirmEmail={props.showConfirmAlert}
           emailRedirectTo={redirectUrl}
           defaultValues={defaultValues}
           displayTermsCheckbox={props.displayTermsCheckbox}

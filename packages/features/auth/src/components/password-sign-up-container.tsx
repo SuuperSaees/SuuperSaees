@@ -33,7 +33,7 @@ export function EmailPasswordSignUpContainer({
   onSignUp,
   emailRedirectTo,
   displayTermsCheckbox,
-  showConfirmEmail = true,
+  showConfirmEmail,
   className
 }: EmailPasswordSignUpContainerProps) {
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
@@ -58,7 +58,7 @@ export function EmailPasswordSignUpContainer({
           captchaToken,
         });
 
-        !showConfirmEmail && setShowVerifyEmailAlert(true);
+        showConfirmEmail && setShowVerifyEmailAlert(true);
 
         appEvents.emit({
           type: 'user.signedUp',
