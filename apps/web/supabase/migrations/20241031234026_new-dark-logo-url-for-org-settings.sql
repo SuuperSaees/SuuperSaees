@@ -7,7 +7,7 @@ alter table "public"."organization_settings" alter column key type "public"."org
 
 drop type "public"."organization_setting_key__old_version_to_be_dropped";
 
-alter table "public"."subscriptions" alter column "account_id" set data type uuid using "account_id"::uuid;
+-- alter table "public"."subscriptions" alter column "account_id" set data type uuid using "account_id"::uuid;
 
 
 
