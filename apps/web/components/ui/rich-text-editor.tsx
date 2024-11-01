@@ -148,6 +148,7 @@ interface RichTextEditorProps {
   useInForm?: boolean;
   showToolbar? : boolean;
   isEditable? : boolean;
+  className?: string;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
 function extractImageUrls(text: string) {
@@ -167,6 +168,7 @@ const RichTextEditor = ({
   hideSubmitButton = false,
   showToolbar = true,
   isEditable = true,
+  className
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
@@ -351,7 +353,7 @@ const RichTextEditor = ({
 
 
   return (
-    <div className="relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4">
+    <div className={"relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 " + (className ?? '')}>
       <div
         onClick={() => editor?.commands.focus()}
         className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
@@ -379,7 +381,7 @@ const RichTextEditor = ({
         }
           {!hideSubmitButton && ( 
             <ThemedButton
-              className="absolute bottom-2 right-2 h-fit w-fit rounded-xl p-2 shadow-sm"
+              className="absolute bottom-6 right-0 h-fit w-fit rounded-xl p-2 shadow-sm"
               onClick={sendContent}
             >
               <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
@@ -412,7 +414,7 @@ export const Toolbar = ({
     return null;
   }
   return (
-    <div className="flex items-center gap-2 bg-transparent">
+    <div className={"flex items-center gap-2 bg-transparent"}>
       <button
       type='button'
         className={
