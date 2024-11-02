@@ -21,7 +21,7 @@
   "deletingTask": "Eliminando tarea...",
   "deleteTaskConfirmation": "¿Estás seguro de que deseas eliminar esta tarea?",
   "searchPlaceholderTasks": "Buscar",
-   "startFirstOrderTitle": "Comencemos con tu primer pedido",
-  "startFirstOrderDescription": "Aún no has creado ningún pedido, agrega uno haciendo clic a continuación.",
+   "startFirstOrderTitle": "Comencemos con tu primer proyecto",
+  "startFirstOrderDescription": "Aún no has creado ningún proyecto, agrega uno haciendo clic a continuación.",
   "dateConector": "de"
 }

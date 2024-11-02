@@ -11,17 +11,17 @@
     "subject": "${actualName} ha marcado '${orderTitle}' solicitud como completada.",
     "body": "${actualName} ha marcado '${orderTitle}' solicitud como completada.",
     "greeting": "Hola ${actualName}",
-    "viewOrder": "Ver pedido",
+    "viewOrder": "Ver proyecto",
     "farewell": "Saludos,",
     "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
     "at": "de"
   },
   "orderCreation": {
-    "subject": "Nuevo pedido creado",
-    "body": "Tienes un nuevo pedido",
+    "subject": "Nuevo proyecto creado",
+    "body": "Tienes un nuevo proyecto",
     "greeting": "Hola ${toEmail}",
-    "newOrderMessage": "Tienes un nuevo pedido de ${emailSender}",
-    "viewOrder": "Ver pedido",
+    "newOrderMessage": "Tienes un nuevo proyecto de ${emailSender}",
+    "viewOrder": "Ver proyecto",
     "farewell": "Saludos,",
     "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
     "at": "de"
@@ -48,11 +48,11 @@
       "body": "${actualName} ha cambiado la fecha de vencimiento de '${orderTitle}' a ${message}."
     },
     "default": {
-      "subject": "Nuevo mensaje en el pedido ${orderId} añadido.",
-      "body": "Tienes un mensaje en el pedido ${orderId}."
+      "subject": "Nuevo mensaje en el proyecto ${orderId} añadido.",
+      "body": "Tienes un mensaje en el proyecto ${orderId}."
     },
     "greeting": "Hola ${actualName}",
-    "viewOrder": "Ver pedido",
+    "viewOrder": "Ver proyecto",
     "farewell": "Saludos,",
     "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
     "at": "de"

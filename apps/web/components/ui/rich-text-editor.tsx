@@ -415,8 +415,8 @@ export const Toolbar = ({
   }
   return (
     <div className={"flex items-center gap-2 bg-transparent"}>
-      <button
-      type='button'
+ {/* <button
+        type='button'
         className={
           editor.isActive('heading', { level: 1 })
             ? 'text-gray-700'
@@ -437,7 +437,7 @@ export const Toolbar = ({
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
       >
         <Heading2 className="h-5 w-5" />
-      </button>
+      </button> */}
 
       <button
         type='button'

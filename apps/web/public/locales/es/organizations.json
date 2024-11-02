@@ -18,7 +18,7 @@
             "uploadSuccess": "Archivo subido",
             "error": "Error al subir archivo"
         },
-        "orders": "Pedidos",
+        "orders": "Proyectos",
         "delete": "Eliminar archivo",
         "deleteSuccess": "Archivo eliminado"
     },
@@ -35,7 +35,7 @@
             "error": "Error al crear carpeta",
             "successSubfolder": "Carpeta \"{{folderName}}\" creada exitosamente en \"{{lastPath}}\"",
             "success": "Carpeta \"{{folderName}}\" creada exitosamente.",
-            "cannotCreateInOrderFolder": "No puedes crear carpetas en la carpeta de pedidos"
+            "cannotCreateInOrderFolder": "No puedes crear carpetas en la carpeta de proyectos"
         },
         "delete": "Eliminar carpeta",
         "deleteSuccess": "Carpeta eliminada"

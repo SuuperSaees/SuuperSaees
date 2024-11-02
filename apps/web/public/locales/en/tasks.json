@@ -21,7 +21,7 @@
   "deletingTask": "Deleting task...",
   "deleteTaskConfirmation": "Are you sure you want to delete this task?",
   "searchPlaceholderTasks": "Search",
-  "startFirstOrderTitle": "Let’s start with your first order",
-  "startFirstOrderDescription": "You haven’t created any orders yet, add one by clicking below.",
+  "startFirstOrderTitle": "Let’s start with your first project",
+  "startFirstOrderDescription": "You haven’t created any project yet, add one by clicking below.",
   "dateConector": "of"
 }
