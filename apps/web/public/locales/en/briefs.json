@@ -40,7 +40,7 @@
         "errorCreating": "Error creating brief",
         "errorUpdating": "Error updating brief",
         "defaultField": {
-          "label": "Order title",
+          "label": "Project title",
           "placeholder": "Add a description..."
         },
         "marks": {
@@ -195,11 +195,11 @@
     "orderCreation": {
       "agency": {
         "title": "You don’t have any service yet!",
-        "description": "Start by buying a service to create your first order."
+        "description": "Start by buying a service to create your first project."
       },
       "client": {
         "title": "You haven't assigned any services yet!",
-        "description": "Contact your agency to assign a service and start creating orders."
+        "description": "Contact your agency to assign a service and start creating projects."
       }
     },
     "agency": {
