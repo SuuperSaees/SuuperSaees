@@ -1,5 +1,14 @@
 import { HttpStatus, statusCodeMap } from './http-status';
 
+/**
+ * Represents an error in the application.
+ * 
+ * @property {number} code - HTTP status code.
+ * @property {string} status - Description of the status (e.g., "Not Found").
+ * @property {string} [message] - Optional message providing more details about the error.
+ * @property {Record<string, unknown> | Array<unknown>} [data] - Additional information about the error, 
+ * which can be either an object or an array.
+ */
 export class CustomError extends Error {
   status: HttpStatus;
   message: string;
