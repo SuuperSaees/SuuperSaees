@@ -127,7 +127,7 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
                     'agency_owner',
                     'agency_project_manager',
                   ].includes(role) ? (
-                    <StatusCombobox order={order} />
+                    <StatusCombobox order={order} agency_id={order.agency_id} mode='order' />
                   ) : (
                     // Display the status or an empty space if there is no status
                     <span className="pl-2 pr-2">
