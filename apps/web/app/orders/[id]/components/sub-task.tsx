@@ -34,10 +34,10 @@ import {
 } from '../utils/generate-options-and-classnames';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import { DatePickerWithRange } from './range-date-picker';
+import StatusCombobox from './status-combobox';
 import SubtaskAssignations from './subtasks/subtask-assignations';
 import SubtaskFollowers from './subtasks/subtask-followers';
 import SelectAction from './ui/select-action';
-import StatusCombobox from './status-combobox';
 
 function SubTasks({
   initialSubtasks,
@@ -254,11 +254,11 @@ function SubTasks({
                               <Loader className="mr-2 h-4 w-4" />
                               <p>{t('details.status')}</p>
                             </span>
-                            <StatusCombobox 
-                                subtask={subtask}
-                                agency_id={orderAgencyId}
-                                mode='subtask'
-                              />
+                            <StatusCombobox
+                              subtask={subtask}
+                              agency_id={orderAgencyId}
+                              mode="subtask"
+                            />
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="flex text-sm font-semibold">
@@ -339,10 +339,10 @@ function SubTasks({
                         </div>
                       </SheetContent>
                     </Sheet>
-                    <StatusCombobox 
+                    <StatusCombobox
                       subtask={subtask}
                       agency_id={orderAgencyId}
-                      mode='subtask'
+                      mode="subtask"
                     />
 
                     <SelectAction
