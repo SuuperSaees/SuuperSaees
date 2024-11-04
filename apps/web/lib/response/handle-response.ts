@@ -23,12 +23,10 @@ export function handleResponse<T>(response: T, entity: Entity, t: TFunction) {
   if (isCustomResponse(response)) {
     // Handle error if present in response
     if (response.error && isCustomError(response.error)) {
-      console.log('custom error');
       handleNotification(response.error, 'error', entity, t);
     }
     // Handle success if present in response
     else if (response.success && isCustomSuccess(response.success)) {
-      console.log('custom success');
       handleNotification(response.success, 'success', entity, t);
     }
   }
