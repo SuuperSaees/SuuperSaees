@@ -7,7 +7,6 @@ function hasProperty<T>(obj: unknown, prop: string, type: string): obj is T {
 
 // Type guard for CustomError
 export function isCustomError(obj: unknown): obj is CustomError {
-  console.log('custom error', obj);
   return (
     hasProperty<CustomError>(obj, 'status', 'number') &&
     hasProperty<CustomError>(obj, 'message', 'string') &&  
