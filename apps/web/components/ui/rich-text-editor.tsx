@@ -297,14 +297,7 @@ const RichTextEditor = ({
         class:
           'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none',
       },
-      handleKeyDown: (_, event) => {
-        if (!onChange && event.key === 'Enter' && !event.shiftKey && !event.ctrlKey) {
-          event.preventDefault();
-          sendContent();
-          return true;
-        }
-        return false;
-      },
+
       
     },
     onUpdate({ editor }) {
