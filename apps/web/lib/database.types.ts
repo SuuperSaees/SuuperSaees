@@ -2184,7 +2184,7 @@ export type Database = {
           position: number | null
           priority: Database["public"]["Enums"]["priority_types"] | null
           start_date: string | null
-          state: Database["public"]["Enums"]["order_status_types"] | null
+          state: string | null
         }
         Insert: {
           completed?: boolean | null
@@ -2198,7 +2198,7 @@ export type Database = {
           position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
-          state?: Database["public"]["Enums"]["order_status_types"] | null
+          state?: string | null
         }
         Update: {
           completed?: boolean | null
@@ -2212,7 +2212,7 @@ export type Database = {
           position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
-          state?: Database["public"]["Enums"]["order_status_types"] | null
+          state?: string | null
         }
         Relationships: [
           {

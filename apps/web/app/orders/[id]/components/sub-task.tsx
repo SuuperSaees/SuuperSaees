@@ -34,6 +34,7 @@ import {
 } from '../utils/generate-options-and-classnames';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import { DatePickerWithRange } from './range-date-picker';
+import StatusCombobox from './status-combobox';
 import SubtaskAssignations from './subtasks/subtask-assignations';
 import SubtaskFollowers from './subtasks/subtask-followers';
 import SelectAction from './ui/select-action';
@@ -251,31 +252,12 @@ function SubTasks({
                           <div className="flex items-center justify-between text-sm">
                             <span className="flex text-sm font-semibold">
                               <Loader className="mr-2 h-4 w-4" />
+                              <p>{t('details.status')}</p>
                             </span>
-                            <SelectAction
-                              options={statusOptions}
-                              groupName={t('details.status')}
-                              defaultValue={subtask.state}
-                              getitemClassName={getStatusClassName}
-                              className={
-                                statusColors[
-                                  subtask.state as
-                                    | 'pending'
-                                    | 'in_progress'
-                                    | 'completed'
-                                    | 'in_review'
-                                ]
-                              }
-                              onSelectHandler={(value) => {
-                                handlers
-                                  .handleStatusChange(
-                                    subtask.id,
-                                    subtask,
-                                    value,
-                                  )
-                                  .catch((error) => console.error(error));
-                              }}
-                              showLabel={true}
+                            <StatusCombobox
+                              subtask={subtask}
+                              agency_id={orderAgencyId}
+                              mode="subtask"
                             />
                           </div>
                           <div className="flex items-center justify-between text-sm">
@@ -357,26 +339,10 @@ function SubTasks({
                         </div>
                       </SheetContent>
                     </Sheet>
-                    <SelectAction
-                      options={statusOptions}
-                      groupName={t('details.status')}
-                      defaultValue={subtask.state}
-                      getitemClassName={getStatusClassName}
-                      className={
-                        statusColors[
-                          subtask.state as
-                            | 'pending'
-                            | 'in_progress'
-                            | 'completed'
-                            | 'in_review'
-                        ]
-                      }
-                      onSelectHandler={(value) => {
-                        handlers
-                          .handleStatusChange(subtask.id, subtask, value)
-                          .catch((error) => console.error(error));
-                      }}
-                      showLabel={false}
+                    <StatusCombobox
+                      subtask={subtask}
+                      agency_id={orderAgencyId}
+                      mode="subtask"
                     />
 
                     <SelectAction

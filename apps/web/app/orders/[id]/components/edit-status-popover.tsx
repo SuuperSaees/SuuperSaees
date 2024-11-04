@@ -16,12 +16,15 @@ import { Spinner } from '@kit/ui/spinner';
 import { updateOrder } from '~/team-accounts/src/server/actions/orders/update/update-order';
 import { updateStatusById } from '~/team-accounts/src/server/actions/statuses/update/update-agency-status';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 
 interface EditStatusPopoverProps {
   status_id: number;
   status_name: string;
   status_color: string;
-  order_id: number;
+  order_id?: number;
+  task_id?: string;
+  mode?: 'order' | 'subtask';
   setValue: (value: string) => void;
 }
 
@@ -30,6 +33,8 @@ function EditStatusPopover({
   status_name,
   status_color,
   order_id,
+  task_id,
+  mode,
   setValue,
 }: EditStatusPopoverProps) {
   const [open, setOpen] = useState<boolean>(false);
@@ -73,12 +78,34 @@ function EditStatusPopover({
     },
   })
 
+  const changeSubtaskStatus = useMutation({
+    mutationFn: async () => {
+      await updateSubtaskById(task_id, { state: name });
+      router.refresh();
+    },
+    onSuccess: () => {
+      toast.success('Success', {
+        description: 'Subtask status updated successfully!',
+      });
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: 'Subtask status could not be updated.',
+      });
+    },
+  });
+
+
   const handleSave = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     updateStatusMutation.mutate()
     if (name !== status_name) {
-      updateOrderMutation.mutate()
+      if(mode === 'order'){
+        updateOrderMutation.mutate()
+      }else{
+        changeSubtaskStatus.mutate()
+      }
     }
   }
 
