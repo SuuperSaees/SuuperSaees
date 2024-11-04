@@ -14,7 +14,7 @@
     "./utils": "./src/utils.ts",
     "./hooks": "./src/hooks/index.ts",
     "./events": "./src/events/index.tsx",
-    "./errors": "./src/errors/index.ts"
+    "./response": "./src/response/index.ts"
 
   },
   "devDependencies": {
