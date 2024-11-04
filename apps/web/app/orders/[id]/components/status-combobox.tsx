@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ChevronsUpDown, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@kit/ui/button';
@@ -25,6 +24,7 @@ import { statusColors } from '../utils/get-color-class-styles';
 import EditStatusPopover from './edit-status-popover';
 import { Subtask } from '~/lib/tasks.types';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { ChevronDown } from 'lucide-react';
 
 interface StatusComboboxProps {
   order?: Order.Type,
@@ -167,7 +167,7 @@ function StatusCombobox({ order, subtask, mode, agency_id }: StatusComboboxProps
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`m-2 inline-flex items-center rounded-lg p-2 ${popoverValue == 'in_progress' ? 'bg-[#F4EBFF] text-[#6941C6]' : statuses.includes(popoverValue) ? statusColors[popoverValue as keyof typeof statusColors] : ''}`}
+          className={`inline-flex items-center rounded-lg p-2 border-none ${popoverValue == 'in_progress' ? 'bg-[#F4EBFF] text-[#6941C6]' : statuses.includes(popoverValue) ? statusColors[popoverValue as keyof typeof statusColors] : ''}`}
 
           style={{
             backgroundColor: statuses.includes(popoverValue)
@@ -187,7 +187,7 @@ function StatusCombobox({ order, subtask, mode, agency_id }: StatusComboboxProps
                   .replace(/^\w/, (c) => c.toUpperCase())
               : popoverValue}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="h-64 w-[250px] p-0">
