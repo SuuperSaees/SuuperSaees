@@ -15,10 +15,10 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@kit/ui/button';
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from '@kit/ui/sheet';
 
 import { SortableItem } from '~/components/sortable-item';
@@ -57,6 +57,7 @@ function SubTasks({
   const priorities = ['low', 'medium', 'high'];
   const statusOptions = generateDropdownOptions(statuses, t, 'statuses');
   const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const {
     subtaskList,
@@ -86,6 +87,16 @@ function SubTasks({
     t,
   );
 
+  const handleSheetOpen = (subtaskId: string) => {
+    setHoveredTaskId(subtaskId);
+    setIsSheetOpen(true);
+  };
+
+  const handleSheetClose = () => {
+    setHoveredTaskId(null);
+    setIsSheetOpen(false);
+  };
+
   // Map through the subtasks to render each one
   return (
     <div>
@@ -100,7 +111,11 @@ function SubTasks({
             .filter((subtask) => !subtask.deleted_on)
             .sort((a, b) => a.position - b.position)
             .map((subtask) => (
-              <SortableItem key={subtask.id} id={subtask.id} className='items-center'>
+              <SortableItem
+                key={subtask.id}
+                id={subtask.id}
+                className="items-center"
+              >
                 <div
                   className="flex items-center justify-between py-3"
                   onMouseEnter={() => setHoveredTaskId(subtask.id)}
@@ -127,7 +142,7 @@ function SubTasks({
                             newSubtaskName,
                           )
                         }
-                        className="w-full rounded-md border-none bg-transparent p-2 font-semibold text-gray-900 focus:outline-none"
+                        className="w-full rounded-md border-none bg-transparent font-semibold text-gray-900 focus:outline-none"
                         autoFocus
                       />
                       <X
@@ -150,17 +165,21 @@ function SubTasks({
 
                   <div className="flex items-center gap-2">
                     {hoveredTaskId === subtask.id && (
-                      <Sheet>
-                        <SheetTrigger asChild>
-                          <Button
-                            className="mr-4 bg-gray-200 text-gray-500 hover:bg-slate-200"
-                            type="button"
-                          >
-                            {t('openOrders')}
-                          </Button>
-                        </SheetTrigger>
-                        <SheetContent className="max-w-[300px] sm:max-w-[700px]">
-                          <SheetHeader>
+                      <Button
+                        className="mr-4 bg-gray-200 text-gray-500 hover:bg-slate-200"
+                        type="button"
+                        onClick={() => handleSheetOpen(subtask.id)}
+                      >
+                        {t('openOrders')}
+                      </Button>
+                    )}
+                    <Sheet open={isSheetOpen}>
+                      <SheetContent
+                        className="max-w-[300px] sm:max-w-[700px]"
+                        onInteractOutside={handleSheetClose}
+                      >
+                        <SheetHeader>
+                          <div className="flex justify-between">
                             <SheetTitle>
                               {editingSubtaskId === subtask.id ? (
                                 <input
@@ -202,121 +221,124 @@ function SubTasks({
                                 </div>
                               )}
                             </SheetTitle>
-                          </SheetHeader>
-                          <div className="grid gap-3 py-4">
-                            <div className="flex items-center justify-between">
-                              <span className="flex text-sm font-semibold">
-                                <CalendarIcon className="mr-2 h-4 w-4" />{' '}
-                                {t('details.deadline')}{' '}
-                              </span>
-                              <DatePickerWithRange
-                                initialPeriod={
-                                  subtask.start_date && subtask.end_date
-                                    ? {
-                                        from: new Date(subtask.start_date),
-                                        to: new Date(subtask.end_date),
-                                      }
-                                    : undefined
-                                }
-                                handlePeriod={handlers.handleDateRangeChange}
-                                subtask={subtask}
-                                subtaskId={subtask.id}
-                              />
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="flex text-sm font-semibold">
-                                <Loader className="mr-2 h-4 w-4" />
-                                <p>{t('details.status')}</p>
-                              </span>
-                              <StatusCombobox 
+                            <SheetClose
+                              onClick={handleSheetClose}
+                              className="absolute right-0 top-0 mr-4 mt-4"
+                            >
+                              <X className="h-4 w-4" />
+                            </SheetClose>
+                          </div>
+                        </SheetHeader>
+                        <div className="grid gap-3 py-4">
+                          <div className="flex items-center justify-between">
+                            <span className="flex text-sm font-semibold">
+                              <CalendarIcon className="mr-2 h-4 w-4" />{' '}
+                              {t('details.deadline')}{' '}
+                            </span>
+                            <DatePickerWithRange
+                              initialPeriod={
+                                subtask.start_date && subtask.end_date
+                                  ? {
+                                      from: new Date(subtask.start_date),
+                                      to: new Date(subtask.end_date),
+                                    }
+                                  : undefined
+                              }
+                              handlePeriod={handlers.handleDateRangeChange}
+                              subtask={subtask}
+                              subtaskId={subtask.id}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="flex text-sm font-semibold">
+                              <Loader className="mr-2 h-4 w-4" />
+                              <p>{t('details.status')}</p>
+                            </span>
+                            <StatusCombobox 
                                 subtask={subtask}
                                 agency_id={orderAgencyId}
                                 mode='subtask'
                               />
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="flex text-sm font-semibold">
-                                <FlagIcon className="mr-2 h-4 w-4" />
-                              </span>
-                              <SelectAction
-                                options={priorityOptions}
-                                groupName={t('details.priority')}
-                                defaultValue={subtask.priority}
-                                getitemClassName={getPriorityClassName}
-                                className={
-                                  priorityColors[
-                                    subtask.priority as
-                                      | 'low'
-                                      | 'medium'
-                                      | 'high'
-                                  ]
-                                }
-                                onSelectHandler={(value) => {
-                                  handlers
-                                    .handlePriorityChange(
-                                      subtask.id,
-                                      subtask,
-                                      value,
-                                    )
-                                    .catch((error) => console.error(error));
-                                }}
-                                showLabel={true}
-                              />
-                            </div>
-
-                            <SubtaskAssignations
-                              onUserSelectionChange={(selectedUsers) =>
-                                handlers.handleUpdateAssignedTo(
-                                  subtask.id,
-                                  selectedUsers,
-                                )
-                              }
-                              searchUserOptions={searchUserOptions}
-                              subtaskId={subtask.id}
-                              userRole={userRole}
-                            />
-
-                            <SubtaskFollowers
-                              onUserSelectionChange={(selectedUsers) =>
-                                handlers.handleUpdateFollowers(
-                                  subtask.id,
-                                  selectedUsers,
-                                )
-                              }
-                              searchUserOptions={searchUserOptionsFollowers}
-                              subtaskId={subtask.id}
-                              userRole={userRole}
-                            />
-
-                            <div className="h-full">
-                              <RichTextEditorV2
-                                content={subtask.content}
-                                onChange={(value) => {
-                                  if (value) {
-                                    setContent(value);
-                                  } else {
-                                    setContent('');
-                                  }
-                                }}
-                                onBlur={() => {
-                                  handlers
-                                    .handleContentChange(
-                                      subtask.id,
-                                      subtask,
-                                      content,
-                                    )
-                                    .catch((error) => console.error(error));
-                                }}
-                                userRole={userRole}
-                                hideSubmitButton={true}
-                                showToolbar={true}
-                                isEditable={true}
-                              />
-                            </div>
                           </div>
-                        </SheetContent>
-                      </Sheet>
-                    )}
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="flex text-sm font-semibold">
+                              <FlagIcon className="mr-2 h-4 w-4" />
+                            </span>
+                            <SelectAction
+                              options={priorityOptions}
+                              groupName={t('details.priority')}
+                              defaultValue={subtask.priority}
+                              getitemClassName={getPriorityClassName}
+                              className={
+                                priorityColors[
+                                  subtask.priority as 'low' | 'medium' | 'high'
+                                ]
+                              }
+                              onSelectHandler={(value) => {
+                                handlers
+                                  .handlePriorityChange(
+                                    subtask.id,
+                                    subtask,
+                                    value,
+                                  )
+                                  .catch((error) => console.error(error));
+                              }}
+                              showLabel={true}
+                            />
+                          </div>
+
+                          <SubtaskAssignations
+                            onUserSelectionChange={(selectedUsers) =>
+                              handlers.handleUpdateAssignedTo(
+                                subtask.id,
+                                selectedUsers,
+                              )
+                            }
+                            searchUserOptions={searchUserOptions}
+                            subtaskId={subtask.id}
+                            userRole={userRole}
+                          />
+
+                          <SubtaskFollowers
+                            onUserSelectionChange={(selectedUsers) =>
+                              handlers.handleUpdateFollowers(
+                                subtask.id,
+                                selectedUsers,
+                              )
+                            }
+                            searchUserOptions={searchUserOptionsFollowers}
+                            subtaskId={subtask.id}
+                            userRole={userRole}
+                          />
+
+                          <div className="h-full">
+                            <RichTextEditorV2
+                              content={subtask.content}
+                              onChange={(value) => {
+                                if (value) {
+                                  setContent(value);
+                                } else {
+                                  setContent('');
+                                }
+                              }}
+                              onBlur={() => {
+                                handlers
+                                  .handleContentChange(
+                                    subtask.id,
+                                    subtask,
+                                    content,
+                                  )
+                                  .catch((error) => console.error(error));
+                              }}
+                              userRole={userRole}
+                              hideSubmitButton={true}
+                              showToolbar={true}
+                              isEditable={true}
+                            />
+                          </div>
+                        </div>
+                      </SheetContent>
+                    </Sheet>
                     <StatusCombobox 
                       subtask={subtask}
                       agency_id={orderAgencyId}
