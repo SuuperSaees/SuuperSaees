@@ -23,22 +23,26 @@ import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/g
 import { darkenColor } from '~/utils/generate-colors';
 import { statusColors } from '../utils/get-color-class-styles';
 import EditStatusPopover from './edit-status-popover';
+import { Subtask } from '~/lib/tasks.types';
+import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 
 interface StatusComboboxProps {
-  order: Order.Type;
+  order?: Order.Type,
+  subtask?: Subtask.Type,
+  agency_id: string,
+  mode: 'order' | 'subtask',
 }
 
-function StatusCombobox({ order }: StatusComboboxProps) {
+function StatusCombobox({ order, subtask, mode, agency_id }: StatusComboboxProps) {
   const [open, setOpen] = useState<boolean>(false);
-  const [popoverValue, setPopoverValue] = useState<string>(order?.status);
+  const [popoverValue, setPopoverValue] = useState<string>(mode == 'order' ? order?.status ?? '' : subtask?.state ?? '');
   const [customStatus, setCustomStatus] = useState<string>('');
-  // const [agencyStatuses, setAgencyStatuses] = useState<AgencyStatus.Type[]>([]);
   const { t } = useTranslation('orders');
   const router = useRouter();
 
   const { data: agencyStatuses, refetch } = useQuery({
-    queryKey: ['agencyStatuses', order.agency_id],
-    queryFn: () => getAgencyStatuses(order.agency_id),
+    queryKey: ['agencyStatuses', agency_id],
+    queryFn: () => getAgencyStatuses(agency_id),
     initialData: [],
     refetchOnMount: true,
     refetchOnWindowFocus: true,
@@ -70,7 +74,7 @@ function StatusCombobox({ order }: StatusComboboxProps) {
     },
   })
 
-  const changeStatus = useMutation({
+  const changeOrderStatus = useMutation({
     mutationFn: async ({
       orderId,
       status,
@@ -79,16 +83,41 @@ function StatusCombobox({ order }: StatusComboboxProps) {
       status: string;
     }) => {
       await updateOrder(orderId, { status });
-      return router.push(`/orders`);
+      router.refresh();
     },
     onSuccess: () => {
       toast.success('Success', {
         description: 'Order status updated successfully!',
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.log(error);
       toast.error('Error', {
         description: 'Order status could not be updated.',
+      });
+    },
+  });
+
+  const changeSubtaskStatus = useMutation({
+    mutationFn: async ({
+      subtaskId,
+      status,
+    }: {
+      subtaskId: Subtask.Type['id'];
+      status: string;
+    }) => {
+      await updateSubtaskById(subtaskId, { state: status, completed: status === 'completed' });
+      router.refresh();
+    },
+    onSuccess: () => {
+      toast.success('Success', {
+        description: 'Subtask status updated successfully!',
+      });
+    },
+    onError: (error) => {
+      console.log(error)
+      toast.error('Error', {
+        description: 'Subtask status could not be updated.',
       });
     },
   });
@@ -112,21 +141,28 @@ function StatusCombobox({ order }: StatusComboboxProps) {
     createStatus.mutate({
       status_name: customStatus,
       status_color: '#8fd6fc',
-      agency_id: order.agency_id,
+      agency_id: agency_id,
     })
   }
 
   const handleDeleteStatus = (statusId: number) => {
-    if (popoverValue === agencyStatuses?.find(s => s.id === statusId)?.status_name) {
-      toast.warning('Warning', { description: 'Select another status before deleting it.' })
-    } else {
-      deleteStatus.mutate(statusId)
+    if(mode === 'order'){
+      changeOrderStatus.mutate({
+        orderId: order?.id,
+        status: 'pending',
+      });
+    }else if(mode === 'subtask'){
+      changeSubtaskStatus.mutate({
+        subtaskId: subtask?.id,
+        status: 'pending',
+      });
     }
+    deleteStatus.mutate(statusId)
   }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild disabled={createStatus.status == 'pending' || deleteStatus.status == 'pending' || changeSubtaskStatus.status == 'pending'}>
         <Button
           variant="outline"
           role="combobox"
@@ -191,10 +227,17 @@ function StatusCombobox({ order }: StatusComboboxProps) {
                     value={status}
                     onSelect={(currentValue) => {
                       if(status !== popoverValue){
-                        changeStatus.mutate({
-                          orderId: order.id,
-                          status,
-                        });
+                        if(mode === 'order'){
+                          changeOrderStatus.mutate({
+                            orderId: order?.id,
+                            status: status ?? '',
+                          });
+                        }else if(mode === 'subtask'){
+                          changeSubtaskStatus.mutate({
+                            subtaskId: subtask?.id,
+                            status: status ?? '',
+                          });
+                        }
                         setPopoverValue(currentValue === popoverValue ? '' : currentValue);
                         setOpen(false);
                       }
@@ -219,10 +262,17 @@ function StatusCombobox({ order }: StatusComboboxProps) {
                     value={status?.status_name ?? undefined}
                     onSelect={(currentValue: string) => {
                       if(status?.status_name !== popoverValue){
-                        changeStatus.mutate({
-                          orderId: order.id,
-                          status: currentValue,
-                        });
+                        if(mode === 'order'){
+                          changeOrderStatus.mutate({
+                            orderId: order?.id,
+                            status: status?.status_name ?? '',
+                          });
+                        }else if(mode === 'subtask'){
+                          changeSubtaskStatus.mutate({
+                            subtaskId: subtask?.id,
+                            status: status?.status_name ?? '',
+                          });
+                        }
                         setPopoverValue(currentValue === popoverValue ? '' : currentValue);
                         setOpen(false);
                       }
@@ -243,21 +293,18 @@ function StatusCombobox({ order }: StatusComboboxProps) {
                         status_id={status.id}
                         status_color={status.status_color ?? ''}
                         status_name={status.status_name ?? ''}
-                        order_id = {order.id}
+                        order_id = {order?.id}
+                        task_id = {subtask?.id}
                         setValue = {setPopoverValue}
+                        mode={mode}
                       />
                       <Trash2 className="h-5 w-5 cursor-pointer" 
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          if(popoverValue == status?.status_name) {
-                            toast.warning('Warning', {
-                              description: 'Select another status before deleting it.',
-                            });
-                          }else{
-                            handleDeleteStatus(status.id)
-                            setOpen(false);
-                          }
+                          handleDeleteStatus(status.id)
+                          setOpen(false);
+                          
                         }}
                       />
                     </div>
