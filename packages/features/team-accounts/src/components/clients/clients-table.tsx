@@ -214,9 +214,9 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
 </>
           )}
         </div>
-
+        <div className='justify-end flex'>
         <div className="flex gap-4">
-          <div className="relative ml-auto flex w-fit flex-1 md:grow-0 max-h-[36px]">
+          <div className="relative ml-auto flex w-fit flex-1 md:grow-0 max-h-[36px] px-3">
             
           <Search className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
             <ThemedInput
@@ -238,6 +238,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
           {(activeButton === 'organizations' &&
             filteredOrganizations.length > 0) ||
             (filteredClients.length > 0 && <CreateClientDialog />)}
+        </div>
         </div>
         {!view && <Separator />}
       </div>
