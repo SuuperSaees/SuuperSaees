@@ -32,6 +32,7 @@ import { SortableStatus } from './sortable-status';
 import { closestCenter, DndContext } from '@dnd-kit/core';
 import { ChevronDown } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
+import { convertToTitleCase, convertToSnakeCase } from '../utils/format-agency-names';
 
 interface StatusComboboxProps {
   order?: Order.Type;
@@ -161,7 +162,7 @@ function StatusCombobox({
 
   const handleCreateStatus = () => {
     createStatus.mutate({
-      status_name: customStatus,
+      status_name: convertToSnakeCase(customStatus),
       status_color: '#8fd6fc',
       agency_id: agency_id,
     });
@@ -207,7 +208,7 @@ function StatusCombobox({
             ),
           }}
         >
-          <span className="pl-2 pr-2">{popoverValue}</span>
+          <span className="pl-2 pr-2">{convertToTitleCase(popoverValue)}</span>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -283,7 +284,7 @@ function StatusCombobox({
                               backgroundColor: status?.status_color,
                             }}
                           >
-                            {status?.status_name}
+                            {convertToTitleCase(status?.status_name)}
                           </p>
                           <div className="flex gap-2 px-1 text-gray-500">
                             <EditStatusPopover
