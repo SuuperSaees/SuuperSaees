@@ -25,11 +25,16 @@ export const useBilling = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [hasFetched, setHasFetched] = useState(false);
 
+  const featuresByProduct = {
+    "starter": ["unlimitedServices", "unlimitedClients", "unlimitedProjects"],
+    "premium": ["calendarView", "whiteBrandingPortal", "customDomain"],
+    "advanced": ["customEmails", "apiIntegration", "zapierAutomation"],
+  }
+
   const fetchInvoices = async (customerId: string): Promise<void> => { 
     setLoading(true);
     setError(false);
     try {
-      // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
       const response = await fetch(`/api/stripe/get-invoices?customerId=${encodeURIComponent(customerId)}`, {
         method: 'GET',
         headers: {
@@ -87,12 +92,20 @@ export const useBilling = () => {
       const provider = BillingProviderSchema.parse(
         process.env.NEXT_PUBLIC_BILLING_PROVIDER,
       );
+      const productsMap = data.reduce((acc: Record<string, any>, product: { name: string; id: string; default_price: string }) => {
+        acc[product.name.toLowerCase()] = {
+          id: product.id,
+          default_price: product.default_price
+        };
+        return acc;
+      }, {});
+
       const productsDataConfigBase = [
         {
-          id: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === "starter")?.id,
+          id: productsMap['starter']?.id,
           name: "Starter",
           plan: {
-            id: data?.find((productCurrent: { name: string; default_price: string; }) => productCurrent?.name.toLowerCase() === "starter")?.default_price,
+            id: productsMap['starter']?.default_price,
             currency: "USD",
             amount: 1900,
             interval: "month",
@@ -101,10 +114,10 @@ export const useBilling = () => {
           },
         },
         {
-          id: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === "premium")?.id,
+          id: productsMap['premium']?.id,
           name: "Premium",
           plan: {
-            id: data?.find((productCurrent: { name: string; default_price: string; }) => productCurrent?.name.toLowerCase() === "premium")?.default_price,
+            id: productsMap['premium']?.default_price,
             currency: "USD",
             amount: 2500,
             interval: "month",
@@ -113,10 +126,10 @@ export const useBilling = () => {
           },
         },
         {
-          id: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === "advanced")?.id,
+          id: productsMap['advanced']?.id,
           name: "Advanced",
           plan: {
-            id: data?.find((productCurrent: { name: string; default_price: string; }) => productCurrent?.name.toLowerCase() === "advanced")?.default_price,
+            id: productsMap['advanced']?.default_price,
             currency: "USD",
             amount: 3900,
             interval: "month",
@@ -131,7 +144,8 @@ export const useBilling = () => {
         products: productsDataConfigBase.map((product: { id: any; name: any; plan: { currency: any; id: any; trial_period_days: any; interval: any; amount: number; billing_scheme: any; }; }) => ({
           id: product.id,
           name: product.name,
-          description: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === product.name.toLowerCase())?.description,
+          // description: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === product.name.toLowerCase())?.description,
+          description: "",
           currency: product.plan.currency,
           badge: product.name,
           plans: [{
@@ -149,7 +163,7 @@ export const useBilling = () => {
               }
             ]
           }],
-          features: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === product.name.toLowerCase())?.description.split('.'),
+          features: featuresByProduct[product.name.toLowerCase() as keyof typeof featuresByProduct],
         })),
       };
 

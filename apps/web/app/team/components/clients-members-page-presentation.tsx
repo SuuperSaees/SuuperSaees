@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import {
   AccountInvitationsTable,
@@ -8,13 +7,11 @@ import {
   InviteMembersDialogContainer,
 } from '@kit/team-accounts/components';
 import { If } from '@kit/ui/if';
-import { InfoIcon } from "lucide-react";
+// import { InfoIcon } from "lucide-react";
 import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 import { useBilling } from '../../home/[account]/hooks/use-billing';
-import { useRouter } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -62,25 +59,25 @@ const ClientsMembersPagePresentation = ({
     canManageInvitations: boolean;
     isPrimaryOwner: boolean;
 }) => {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [addMemberIsAvailable, setAddMemberIsAvailable] = useState(false);
+  // const [showDropdown, setShowDropdown] = useState(false);
+  // const [addMemberIsAvailable, setAddMemberIsAvailable] = useState(false);
   const { subscriptionFetchedStripe } = useBilling();
-  const { t } = useTranslation('team');
-  const router = useRouter();
-const seatByPlans = {
-  0: 1,
-  25: 5,
-  45: 10,
-};
-    useEffect(() => {
-        if (subscriptionFetchedStripe) {
-          if (members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans]) {
-              setAddMemberIsAvailable(true);
-          } else {
-              setAddMemberIsAvailable(false);
-          }
-        }
-    }, [members, subscriptionFetchedStripe]);
+  // const { t } = useTranslation('team');
+  // const router = useRouter();
+// const seatByPlans = {
+//   0: 1,
+//   25: 5,
+//   45: 10,
+// };
+    // useEffect(() => {
+        // if (subscriptionFetchedStripe) {
+        //   if (members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans]) {
+        //       setAddMemberIsAvailable(true);
+        //   } else {
+        //       setAddMemberIsAvailable(false);
+        //   }
+        // }
+    // }, [members, subscriptionFetchedStripe]);
 
   return (
     <PageBody>
@@ -115,15 +112,15 @@ const seatByPlans = {
                   </div>
                 )}
               </div>
-              {account.role_hierarchy_level === 2 && subscriptionFetchedStripe && (
+              {account?.role_hierarchy_level === 2 && subscriptionFetchedStripe && (
                   <div
-                    className="invite-button-container"
-                    onMouseEnter={() => setShowDropdown(true)}
-                    onMouseLeave={() => setShowDropdown(false)}
+                    // className="invite-button-container"
+                    // onMouseEnter={() => setShowDropdown(true)}
+                    // onMouseLeave={() => setShowDropdown(false)}
                   >
                     <ThemedButton
                       data-test={'invite-members-form-trigger'}
-                      disabled={addMemberIsAvailable}
+                      // disabled={addMemberIsAvailable}
                       className="p-0"
                     >
                         <InviteMembersDialogContainer
@@ -136,7 +133,7 @@ const seatByPlans = {
                 </InviteMembersDialogContainer>
                       
                     </ThemedButton>
-                    {showDropdown && members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans] && (
+                    {/* {showDropdown && members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans] && (
                       <div className="dropdown absolute top-4 right-24 px-9 py-14 rounded-md w-fit transform transition-transform duration-300 ease-in-out animate-fade-in">
                         <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground gap-3 items-center">
                         <div className='flex mb-2'>
@@ -156,7 +153,7 @@ const seatByPlans = {
                         </div>
 
                       </div>
-                    )}
+                    )} */}
                   </div>
               )}
             </If>

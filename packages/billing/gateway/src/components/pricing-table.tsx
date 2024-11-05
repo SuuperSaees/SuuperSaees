@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 
-import { CheckCircle } from 'lucide-react';
+import { StarsIcon } from 'lucide-react';
 import { z } from 'zod';
 
 import {
@@ -44,7 +44,6 @@ export function PricingTable({
 }) {
   const { subscriptionFetchedStripe } = useBilling()
 
-  
   if (!productsDataConfig) {
     return (
       <div className="items-center justify-center flex flex-col mt-10">
@@ -160,13 +159,18 @@ function PricingItem(
   //   return item.type !== 'flat';
   // });
 
-
+  const PremiumPlan = "premium"
+  // const AdvancedPlan = "advanced"
+  // const StarterPlan = "starter"
+  const currentPlanName = props.product.name.toLowerCase()
+  const isPremiumPlan = currentPlanName === PremiumPlan
+  const urlScheduleDemo = "https://suuper.co/demo/"
   return (
     <div
       data-cy={'subscription-plan'}
       className={cn(
         props.className,
-        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-xl border lg:w-4/12 xl:max-w-[18rem] shadow-md`,
+        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-xl border lg:w-4/12 xl:max-w-[17rem] shadow-md`,
         {
           ['border-primary']: highlighted,
           ['border-border']: !highlighted,
@@ -176,23 +180,28 @@ function PricingItem(
       <div className={'flex flex-col space-y-6'}>
         <div className='px-4 pt-4'>
         <div className={'flex flex-col space-y-2.5'}>
-          <div className={'flex items-center space-x-6'}>
+          <div className={'flex items-center space-x-6 justify-between mb-4'}>
             <b
               className={
-                'text-current-foreground font-semibold tracking-tight text-slate-800 text-md mb-4'
+                'text-current-foreground font-semibold tracking-tight text-slate-800 text-sm'
               }
             >
-              Plan <Trans
-                i18nKey={props.product.name}
-                defaults={props.product.name}
+              <Trans
+                i18nKey={`billing:plans.${currentPlanName}.name`}
               />
             </b>
+            <If condition={isPremiumPlan}>
+                <span className='text-xs absolute right-4 text-blue-800 rounded-full bg-grayBlue-100 px-2 py-1 border-grayBlue-200 border'>
+                  <Trans i18nKey={`billing:plans.${currentPlanName}.badge`} />
+                </span>
+            </If>
           </div>
 
         </div>
 
-        <div className={'flex space-y-1 gap-2 mb-4'}>
-          <Price>
+        <div className={'flex space-y-1 gap-2 mb-4 items-center'}>
+          <Price >
+            <span className='text-6xl font-semibold'>
             {lineItem ? (
               formatCurrency(props.product.currency, lineItem.cost)
             ) : props.plan.label ? (
@@ -200,6 +209,7 @@ function PricingItem(
             ) : (
               <Trans i18nKey={'billing:custom'} />
             )}
+            </span>
           </Price>
 
           <If condition={props.plan.name}>
@@ -208,19 +218,21 @@ function PricingItem(
                 `animate-in slide-in-from-left-4 fade-in text-slate-800 flex items-center space-x-0.5 text-sm`,
               )}
             >
-              por miembro de tu equipo al mes
+              <Trans i18nKey={`billing:plans.features.perMemberPerMonth`} />
             </span>
           </If>
         </div>
         <span className='text-slate-800 text-sm'>
-          Ideal para comenzar tu negocio de servicios digitales.
+          <Trans i18nKey={`billing:plans.${currentPlanName}.description`} />
         </span>
         <div className='mt-4 flex flex-col gap-2'>
-          <ThemedButton onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost!, props.plan.id)} disabled={props.plan.id === props.subscriptionFetchedStripe?.plan.id}
+          <ThemedButton onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost, props.plan.id)} disabled={props.plan.id === props.subscriptionFetchedStripe?.plan.id}
           className='w-full'
-            >{props.plan.id === props.subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</ThemedButton>
-          <Link href={"https://suuper.co/demo/"} className="w-full" target="_blank">
-            <Button className="w-full" variant="outline">Agenda una demo</Button>
+            >{props.plan.id === props.subscriptionFetchedStripe?.plan.id ? <Trans i18nKey={`billing:plans.currentPlan`} /> : <Trans i18nKey={`billing:plans.upgrade`} />}</ThemedButton>
+          <Link href={urlScheduleDemo} className="w-full" target="_blank">
+            <Button className="w-full" variant="outline">
+              <Trans i18nKey={`billing:plans.scheduleDemo`} />
+            </Button>
           </Link>
         </div>
         </div>
@@ -228,13 +240,17 @@ function PricingItem(
         <Separator className="w-full" />
 
         <div className={'flex flex-col pt-0 pb-4 px-4'}>
-          <h6 className={'text-sm font-semibold uppercase'}>Qué incluye</h6>
-          <span className='text-slate-800 text-sm mb-2'>
-            Funcionalidades más básicas y...
+          <h6 className={'text-sm font-semibold uppercase'}>
+            <Trans i18nKey={`billing:plans.whatIncludes`} />
+          </h6>
+          <span className='text-slate-800 text-sm mb-4'>
+            <Trans i18nKey={`billing:plans.${currentPlanName}.features.base`} />
           </span>
           <FeaturesList
             highlighted={highlighted}
             features={props.product.features}
+            isPremiumPlan={isPremiumPlan}
+            currentPlanName={currentPlanName}
           />
         </div>
       </div>
@@ -246,13 +262,15 @@ function FeaturesList(
   props: React.PropsWithChildren<{
     features: string[];
     highlighted?: boolean;
+    isPremiumPlan: boolean;
+    currentPlanName: string;
   }>,
 ) {
   return (
     <ul className={'flex flex-col space-y-2'}>
       {props.features?.map((feature) => {
         return (
-          <>{feature ? <ListItem key={feature}>
+          <>{feature ? <ListItem key={feature} currentPlanName={props.currentPlanName} isPremiumPlan={props.isPremiumPlan} feature={feature}>
             <Trans i18nKey={feature} defaults={feature} />
           </ListItem> : <div></div>}</>
         );
@@ -277,17 +295,26 @@ function Price({ children }: React.PropsWithChildren) {
   );
 }
 
-function ListItem({ children }: React.PropsWithChildren) {
+function ListItem({ currentPlanName, isPremiumPlan, feature }: React.PropsWithChildren<{currentPlanName: string, isPremiumPlan: boolean, feature: string}>) {
+  const customDomain = "customdomain"
+  const isCustomDomain = feature.toLowerCase().trim().split(" ").join("") === customDomain && isPremiumPlan
+
   return (
     <li className={'flex items-center space-x-2.5'}>
-      <CheckCircle className={'text-primary h-4 min-h-4 w-4 min-w-4'} />
+      {
+        !isCustomDomain ?  <div className='flex items-center justify-center rounded-full border-2 border-blue-800 p-[1px]'>
+        <div className="relative w-3 h-3 scale-x-[-1] flex justify-center items-center">
+          <div className="absolute transform rotate-45 mt-[2.5px] border-b-[2px] border-r-[2px] border-blue-800 w-2 h-[5px] -top-[1px] left-[2px]"></div>
+        </div>
+      </div> : <StarsIcon className={'text-blue-800 h-4 min-h-4 w-4 min-w-4'} />
+      }
 
       <span
         className={cn('text-sm', {
           ['text-secondary-foreground']: true,
         })}
       >
-        {children}
+        <Trans i18nKey={`billing:plans.${currentPlanName}.features.${feature}`} />
       </span>
     </li>
   );
