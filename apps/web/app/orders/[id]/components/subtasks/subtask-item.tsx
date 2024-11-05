@@ -116,7 +116,7 @@ const SubtaskItem = ({
       {...props}
     >
       {isEditing ? (
-        <div>
+        <div className='flex items-center'>
           <input
             type="text"
             value={newSubtaskName}
