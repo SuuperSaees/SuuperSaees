@@ -14,13 +14,18 @@ import {
 } from '../../members/get/get-member-account';
 import { hasPermissionToDeleteClientService } from '../../permissions/services';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
-
+import { CustomError, CustomResponse, ErrorServiceOperations } from '../../../../../../../shared/src/response';
+import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export const deleteService = async (priceId: string) => {
   try {
     const { userId, stripeId } = await getStripeAccountID();
-    if (!stripeId) throw new Error('No stripe account found');
+    if (!stripeId) throw new CustomError(
+      HttpStatus.Error.InternalServerError,
+      `No stripe account found`,
+      ErrorServiceOperations.FAILED_TO_FIND_STRIPE_ACCOUNT,
+    );
     if (!userId) throw new Error('No user found');
 
     // API call to disable product and price in Stripe
@@ -38,7 +43,11 @@ export const deleteService = async (priceId: string) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error?.message || 'Error deleting price and product in Stripe');
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        `Error deleting price and product in Stripe: ${errorData.error?.message}`,
+        ErrorServiceOperations.FAILED_TO_DELETE_SERVICE_FROM_STRIPE,
+      );
     }
 
     const client = getSupabaseServerComponentClient();
@@ -50,11 +59,16 @@ export const deleteService = async (priceId: string) => {
       .eq('price_id', priceId);
 
     if (error) {
-      throw new Error(error.message);
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        `Error deleting the service: ${error.message}`,
+        ErrorServiceOperations.FAILED_TO_DELETE_SERVICE,
+      );
     }
+    return CustomResponse.success(null, 'serviceDeleted').toJSON();
   } catch (error) {
     console.error('Error deleting the service:', error);
-    throw error;
+    return CustomResponse.error(error).toJSON();
   }
 };
 
@@ -80,7 +94,11 @@ export async function deleteClientService(
     // Step 3: Verify the permision to delete
     const hasPermission =
       await hasPermissionToDeleteClientService(clientAgencyId);
-    if (!hasPermission) throw new Error('No permission to delete services');
+    if (!hasPermission) throw new CustomError(  
+      HttpStatus.Error.Unauthorized,
+      'You do not have the required permissions to cancel this service',
+      ErrorServiceOperations.INSUFFICIENT_PERMISSIONS,
+    );
 
     // Step 4: Delete the specified service from the client organization
     const deleteData = await deleteServiceFromClient(
@@ -91,10 +109,10 @@ export async function deleteClientService(
       serviceSubscriptionId,
     );
 
-    return deleteData;
+    return CustomResponse.success(deleteData, 'serviceCancelled').toJSON();
   } catch (error) {
     console.error('Error while deleting service from client', error);
-    throw error;
+    return CustomResponse.error(error).toJSON();
   }
 }
 

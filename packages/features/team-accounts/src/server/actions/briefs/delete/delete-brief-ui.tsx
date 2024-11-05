@@ -4,7 +4,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import {
   AlertDialog,
@@ -19,23 +18,24 @@ import {
 } from '@kit/ui/alert-dialog';
 
 import { deleteBrief } from './delete-brief';
+import { handleResponse } from '../../../../../../../../apps/web/lib/response/handle-response';
 
 const DeleteBriefDialog = ({ briefId }: { briefId: string }) => {
-  const { t } = useTranslation('briefs');
+  const { t } = useTranslation(['briefs', 'responses']);
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await deleteBrief(briefId);
+      const res = await deleteBrief(briefId);
+      await handleResponse(res, 'briefs', t);
     },
     onSuccess: async () => {
-      toast.success('Brief deleted successfully');
       await queryClient.invalidateQueries({
         queryKey: ['briefs'],
       });
     },
     onError: () => {
-      toast.error('Error deleting brief');
+      console.error('Error deleting brief');
     },
   });
 

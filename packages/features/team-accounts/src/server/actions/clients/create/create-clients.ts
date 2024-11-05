@@ -2,17 +2,21 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import type { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { OrganizationSettings as OrganizationSettingsType } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { Tokens } from '../../../../../../../../apps/web/lib/tokens.types';
+import {
+  CustomError,
+  CustomResponse,
+  ErrorClientOperations,
+  ErrorOrganizationOperations,
+  ErrorUserOperations,
+  JSONCustomResponse,
+} from '../../../../../../../../packages/shared/src/response';
 import { decodeToken } from '../../../../../../../../packages/tokens/src/decode-token';
 import {
   getDomainByOrganizationId,
@@ -156,8 +160,14 @@ const createClientUserAccount = async (
       });
 
     if (clientOrganizationUserError) {
-      console.error('Error occurred while creating the client user');
-      throw new Error(clientOrganizationUserError.message);
+      console.error(
+        'Error occurred while creating the client user. Authentication error',
+      );
+      throw new CustomError(
+        401,
+        'Authentication error',
+        ErrorUserOperations.USER_ALREADY_EXISTS,
+      );
     }
     // Step 3: Take the object session and decode the access_token as jwt to get the session id
     const sessionUserClient = clientOrganizationUser.session;
@@ -215,9 +225,11 @@ export const insertClient = async (
   supabaseClient?: SupabaseClient<Database>,
   adminActivated = false,
 ): Promise<Client.Insert> => {
-  supabaseClient = supabaseClient ?? getSupabaseServerComponentClient({
-    admin: adminActivated,
-  });
+  supabaseClient =
+    supabaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
   try {
     const { data: clientData, error: clientError } = await supabaseClient
       .from('clients')
@@ -255,6 +267,7 @@ export const createClient = async (clientData: CreateClient) => {
     if (!clientData.adminActivated) {
       primaryOwnerId = await getPrimaryOwnerId();
     }
+
     const organization = !clientData.agencyId
       ? await getOrganization()
       : await getOrganizationById(
@@ -265,7 +278,13 @@ export const createClient = async (clientData: CreateClient) => {
 
     if (!primaryOwnerId && !clientData.adminActivated)
       throw new Error('No primary owner user id found');
-    if (!organization) throw new Error('No organization found');
+
+    if (!organization)
+      throw new CustomError(
+        404,
+        'No agency found',
+        ErrorOrganizationOperations.ORGANIZATION_NOT_FOUND,
+      );
 
     // Step 2: Check if the user has permission to create a client
     if (!clientData.adminActivated) {
@@ -273,8 +292,10 @@ export const createClient = async (clientData: CreateClient) => {
         organization.id,
       );
       if (!hasPermission) {
-        throw new Error(
+        throw new CustomError(
+          403,
           'You do not have the required permissions to create a client',
+          ErrorClientOperations.INSUFFICIENT_PERMISSIONS,
         );
       }
     }
@@ -286,6 +307,7 @@ export const createClient = async (clientData: CreateClient) => {
       clientData.adminActivated,
       clientData.agencyId,
     );
+
     const userId = clientOrganizationUser.user?.id;
     if (!userId) throw new Error('No user id provided');
 
@@ -306,7 +328,12 @@ export const createClient = async (clientData: CreateClient) => {
           clientData.adminActivated,
         );
 
-    if (!clientOrganizationAccount) throw new Error('No organization found');
+    if (!clientOrganizationAccount)
+      throw new CustomError(
+        404,
+        'No organization found for this client',
+        ErrorOrganizationOperations.ORGANIZATION_NOT_FOUND,
+      );
 
     // Step 6: Add role to the accounts_memberships
     await addUserAccountRole(
@@ -337,10 +364,10 @@ export const createClient = async (clientData: CreateClient) => {
       clientData.adminActivated,
     );
 
-    return client;
+    return CustomResponse.success(client, 'clientCreated').toJSON();
   } catch (error) {
     console.error('Error creating the client:', error);
-    throw error;
+    return CustomResponse.error(error).toJSON();
   }
 };
 
@@ -350,7 +377,7 @@ export const addClientMember = async ({
 }: {
   email: string;
   clientOrganizationId: string;
-}): Promise<Client.Insert> => {
+}): Promise<JSONCustomResponse<Client.Insert | null>> => {
   try {
     const supabase = getSupabaseServerComponentClient();
     const userRole = 'client_member';
@@ -358,14 +385,21 @@ export const addClientMember = async ({
     // Step 1: Get the client's organization
     const clientOrganization = await getOrganizationById(clientOrganizationId);
     if (!clientOrganization) {
-      throw new Error('Client organization not found');
+      throw new CustomError(
+        404,
+        'Client organization not found',
+        ErrorOrganizationOperations.ORGANIZATION_NOT_FOUND,
+      );
     }
 
     // Step 2: Get the agency organization assigned to the client
     const agencyOrganization = await getAgencyForClient(clientOrganizationId);
     if (!agencyOrganization) {
-      throw new Error(
+      throw new CustomError(
+        404,
         `No agency found for organization ID ${clientOrganizationId}`,
+
+        ErrorClientOperations.AGENCY_NOT_FOUND,
       );
     }
 
@@ -376,13 +410,22 @@ export const addClientMember = async ({
     );
 
     if (!hasPermissionToAdd) {
-      throw new Error('Unauthorized: Insufficient permissions');
+      throw new CustomError(
+        403,
+        'Unauthorized: Insufficient permissions',
+        ErrorClientOperations.INSUFFICIENT_PERMISSIONS,
+      );
     }
 
     // Step 4: Check if the client already exists
     const clientAccountData = await getUserAccountByEmail(email);
     if (clientAccountData) {
-      throw new Error('Client already exists');
+      // throw new Error('Client already exists');
+      throw new CustomError(
+        409,
+        'Client already exists',
+        ErrorUserOperations.USER_ALREADY_EXISTS,
+      );
     }
 
     // Step 5: Create the new client user account
@@ -392,7 +435,11 @@ export const addClientMember = async ({
     );
     const clientUserId = clientOrganizationUser.user?.id;
     if (!clientUserId) {
-      throw new Error('Failed to create client user account');
+      throw new CustomError(
+        409,
+        'Failed to create client user account',
+        ErrorUserOperations.FAILED_TO_CREATE_USER,
+      );
     }
 
     // Step 6: Assign the new user as part of the agency's clients
@@ -400,7 +447,7 @@ export const addClientMember = async ({
       agencyOrganization.id,
       clientUserId,
       clientOrganizationId,
-      supabase
+      supabase,
     );
 
     // Step 7: Add the user role as client into the accounts_memberships table
@@ -418,9 +465,10 @@ export const addClientMember = async ({
       supabase,
     );
 
-    return client;
+    // return client;
+    return CustomResponse.success(client, 'memberAdded').toJSON();
   } catch (error) {
     console.error('Error creating the client v2:', error);
-    throw error;
+    return CustomResponse.error(error).toJSON();
   }
 };

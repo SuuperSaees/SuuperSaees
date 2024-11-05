@@ -1,20 +1,24 @@
 'use server';
 
+import { ErrorClientOperations, ErrorOrderOperations, ErrorUserOperations } from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
+import { CustomError } from '../../../../../../../shared/src/response/errors/custom-errors';
+import { CustomResponse } from '../../../../../../../shared/src/response/response';
+import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import {
-  getAgencyForClient,
-  // getOrganizationById,
+  getAgencyForClient, // getOrganizationById,
 } from '../../organizations/get/get-organizations';
 import { hasPermissionToDeleteClient } from '../../permissions/clients';
 
 // Define la función handleDelete
-export const deleteClient = async (clientId: string, organizationId?: string) => {
+export const deleteClient = async (
+  clientId: string,
+  organizationId?: string,
+) => {
   try {
     const client = getSupabaseServerComponentClient();
-
+    console.log('ids',clientId, organizationId);
     // Step 1: Determine the organization ID and check for required permissions
     let clientOrganizationId = organizationId;
     if (clientId && !organizationId) {
@@ -49,7 +53,11 @@ export const deleteClient = async (clientId: string, organizationId?: string) =>
       clientId,
     );
     if (!hasPermission) {
-      throw new Error('You do not have permission to delete this client or organization');
+      throw new CustomError(
+        HttpStatus.Error.Unauthorized,
+        'You do not have permission to delete this client or organization',
+        ErrorClientOperations.INSUFFICIENT_PERMISSIONS,
+      );
     }
 
     // Step 3: Proceed with deletion based on the provided parameters
@@ -64,7 +72,11 @@ export const deleteClient = async (clientId: string, organizationId?: string) =>
         .eq('agency_id', agencyOrganizationId);
 
       if (deleteError) {
-        throw new Error(`Error deleting the client: ${deleteError.message}`);
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          `Error deleting the client: ${deleteError.message}`,
+          ErrorUserOperations.FAILED_TO_DELETE_USER,
+        );
       }
 
       // Remove the client as follower from assigned orders for that agency
@@ -74,8 +86,10 @@ export const deleteClient = async (clientId: string, organizationId?: string) =>
         .eq('client_member_id', clientId);
 
       if (followersError) {
-        throw new Error(
-          `Error removing the client as follower from their assigned orders: ${followersError.message}`,
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          `Error removing follower from assigned order`,
+          ErrorOrderOperations.FAILED_TO_REMOVE_FOLLOWER,
         );
       }
     } else if (organizationId) {
@@ -89,7 +103,11 @@ export const deleteClient = async (clientId: string, organizationId?: string) =>
         .eq('agency_id', agencyOrganizationId);
 
       if (deleteClientsError) {
-        throw new Error(`Error deleting clients in the organization: ${deleteClientsError.message}`);
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          `Error deleting clients in the organization: ${deleteClientsError.message}`,
+          ErrorUserOperations.FAILED_TO_DELETE_USERS,
+        );
       }
 
       // Remove all client members as followers from their assigned orders
@@ -102,17 +120,22 @@ export const deleteClient = async (clientId: string, organizationId?: string) =>
             .from('clients')
             .select('user_client_id')
             .eq('organization_id', organizationId)
-            .then((res) => res.data?.map((client) => client.user_client_id) ?? [])
+            .then(
+              (res) => res.data?.map((client) => client.user_client_id) ?? [],
+            ),
         );
 
       if (followersError) {
-        throw new Error(
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
           `Error removing clients as followers from assigned orders: ${followersError.message}`,
+          ErrorOrderOperations.FAILED_TO_REMOVE_FOLLOWERS,
         );
       }
     }
+    return CustomResponse.success(null, ErrorClientOperations.CLIENT_DELETED).toJSON();
   } catch (error) {
     console.error('Error deleting client or organization:', error);
-    throw error;
+    return CustomResponse.error(error).toJSON();
   }
 };

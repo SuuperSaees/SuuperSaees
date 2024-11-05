@@ -33,8 +33,7 @@ function StatusCombobox({ order }: StatusComboboxProps) {
   const [popoverValue, setPopoverValue] = useState<string>(order?.status);
   const [customStatus, setCustomStatus] = useState<string>('');
   // const [agencyStatuses, setAgencyStatuses] = useState<AgencyStatus.Type[]>([]);
-  const { t } = useTranslation('orders');
-  const router = useRouter();
+  const { t } = useTranslation(['orders', 'responses']);
 
   const { data: agencyStatuses, refetch } = useQuery({
     queryKey: ['agencyStatuses', order.agency_id],
@@ -79,16 +78,16 @@ function StatusCombobox({ order }: StatusComboboxProps) {
       status: string;
     }) => {
       await updateOrder(orderId, { status });
-      return router.push(`/orders`);
+      // return router.push(`/orders`);
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Order status updated successfully!',
+        description: t('success.orders.orderStatusUpdated'),
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'Order status could not be updated.',
+        description: t('error.orders.failedToUpdateOrderStatus'),
       });
     },
   });

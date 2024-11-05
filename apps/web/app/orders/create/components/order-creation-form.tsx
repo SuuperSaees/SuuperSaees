@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 import {
@@ -24,6 +23,8 @@ import { generateUUID } from '~/utils/generate-uuid';
 import { generateOrderCreationSchema } from '../schemas/order-creation-schema';
 import BriefCompletionForm from './brief-completion-form';
 import BriefSelectionForm from './brief-selection-form';
+import { handleResponse } from '~/lib/response/handle-response';
+import { useRouter } from 'next/navigation';
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -43,8 +44,8 @@ interface OrderCreationFormProps {
 
 const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
   const uniqueId = generateUUID();
-  const { t } = useTranslation('orders');
-
+  const { t } = useTranslation(['orders', 'responses']);
+  const router = useRouter();
   const orderCreationFormSchema = generateOrderCreationSchema(
     briefs.length > 0,
     t,
@@ -89,22 +90,19 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
       };
       delete newOrder.brief_responses;
       delete newOrder.order_followers;
-      await createOrders(
+      const res = await createOrders(
         [newOrder as OrderInsert],
         values.brief_responses,
         values.order_followers,
       );
+      await handleResponse(res, 'orders', t);
+      if(res.ok) router.push(`/orders/${res?.success?.data?.id}`);
+     
     },
     onError: () => {
-      toast('Error', {
-        description: 'There was an error creating the order.',
-      });
+      console.error('Error creating the order');
     },
-    onSuccess: () => {
-      toast('Success', {
-        description: 'The order has been created.',
-      });
-    },
+ 
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
