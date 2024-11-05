@@ -218,7 +218,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
         <div className="flex gap-4">
           <div className="relative ml-auto flex w-fit flex-1 md:grow-0 max-h-[36px] px-3">
             
-          <Search className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
+          <Search className="text-muted-foreground absolute left-5 top-2.5 h-4 w-4" />
             <ThemedInput
               value={search}
               onInput={(
