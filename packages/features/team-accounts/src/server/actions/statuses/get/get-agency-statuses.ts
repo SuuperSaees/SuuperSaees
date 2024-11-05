@@ -2,7 +2,6 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
 export const getAgencyStatuses = async (agency_id: string) => {
     try {
         const client = getSupabaseServerComponentClient();

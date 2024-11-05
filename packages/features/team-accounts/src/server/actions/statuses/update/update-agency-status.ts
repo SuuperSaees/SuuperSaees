@@ -10,7 +10,6 @@ export const updateStatusById = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    console.log(status);
 
     const { data: statusData, error: statusError } = await client
       .from('agency_statuses')

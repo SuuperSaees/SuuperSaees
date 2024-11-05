@@ -2,30 +2,43 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { Subtask } from '~/lib/tasks.types';
-import { getAgencyClients, getOrderAgencyMembers } from '~/team-accounts/src/server/actions/orders/get/get-order';
+import {
+  getAgencyClients,
+  getOrderAgencyMembers,
+} from '~/team-accounts/src/server/actions/orders/get/get-order';
 import { createNewSubtask } from '~/team-accounts/src/server/actions/tasks/create/create-task';
-import { updateSubtaskAssigns, updateSubtaskById, updateSubtaskFollower, updateSubtasksPositions } from '~/team-accounts/src/server/actions/tasks/update/update-task';
-
+import {
+  updateSubtaskAssigns,
+  updateSubtaskById,
+  updateSubtaskFollower,
+  updateSubtasksPositions,
+} from '~/team-accounts/src/server/actions/tasks/update/update-task';
 
 export const useSubtaskMutations = (
   orderId: string,
   orderAgencyId: string,
-  userRole: string
+  userRole: string,
 ) => {
   const queryClient = useQueryClient();
 
   const { data: orderAgencyMembers } = useQuery({
     queryKey: ['order-agency-members', orderId],
     queryFn: () => getOrderAgencyMembers(orderAgencyId, Number(orderId)),
-    retry: 5,
-    enabled: userRole === 'agency_owner' || userRole === 'agency_member' || userRole === 'agency_project_manager',
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    enabled:
+      userRole === 'agency_owner' ||
+      userRole === 'agency_member' ||
+      userRole === 'agency_project_manager',
   });
 
   const { data: orderAgencyClientsFollowers } = useQuery({
     queryKey: ['order-agency-clients-followers', orderId],
     queryFn: () => getAgencyClients(orderAgencyId, Number(orderId)),
-    retry: 5,
-    enabled: userRole === 'agency_owner' || userRole === 'agency_member' || userRole === 'agency_project_manager',
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    enabled:
+      userRole === 'agency_owner' ||
+      userRole === 'agency_member' ||
+      userRole === 'agency_project_manager',
   });
 
   // Mutations
@@ -34,8 +47,6 @@ export const useSubtaskMutations = (
       createNewSubtask(newSubtask),
 
     onSuccess: async () => {
-    //   toast.success('Successfully created new subtask');
-
       await queryClient.invalidateQueries({
         queryKey: ['subtasks', 'all'],
       });
@@ -54,7 +65,6 @@ export const useSubtaskMutations = (
       subtask: Subtask.Type;
     }) => updateSubtaskById(subtaskId, subtask),
     onSuccess: async () => {
-    //   toast.success('Successfully updated task');
       await queryClient.invalidateQueries({
         queryKey: ['subtasks', 'all'],
       });
@@ -65,16 +75,9 @@ export const useSubtaskMutations = (
   });
 
   const updateSubtaskIndex = useMutation({
-    mutationFn:(
-        { 
-          subtasks 
-        }: {
-          subtasks: Subtask.Type[];
-        }
-    ) => updateSubtasksPositions(subtasks),
+    mutationFn: ({ subtasks }: { subtasks: Subtask.Type[] }) =>
+      updateSubtasksPositions(subtasks),
     onSuccess: async () => {
-    //   toast.success('Successfully updated subtask positions');
-
       await queryClient.invalidateQueries({
         queryKey: ['subtasks', 'all'],
       });
@@ -88,24 +91,18 @@ export const useSubtaskMutations = (
   });
 
   const changeAgencyMembersAssigned = useMutation({
-    mutationFn: (
-      {
-        agencyMemberIds,
+    mutationFn: ({
+      agencyMemberIds,
+      subtaskId,
+    }: {
+      agencyMemberIds: string[];
+      subtaskId: string;
+    }) => {
+      return updateSubtaskAssigns(subtaskId, agencyMemberIds).then(() => ({
         subtaskId,
-      }: {
-        agencyMemberIds: string[];
-        subtaskId: string;
-      }
-    ) => {
-      return updateSubtaskAssigns(subtaskId, agencyMemberIds).then(() => ({ subtaskId }));
+      }));
     },
-    onSuccess: async (
-      { subtaskId }: { subtaskId: string }
-    ) => {
-      // toast.success('Success', {
-      //   description: 'Agency members in tasks were updated successfully!',
-      // });
-
+    onSuccess: async ({ subtaskId }: { subtaskId: string }) => {
       await queryClient.invalidateQueries({
         queryKey: ['subtask_assignations', subtaskId],
       });
@@ -122,24 +119,18 @@ export const useSubtaskMutations = (
   });
 
   const changeAgencyMembersFollowers = useMutation({
-    mutationFn: (
-      {
-        followers,
+    mutationFn: ({
+      followers,
+      subtaskId,
+    }: {
+      followers: string[];
+      subtaskId: string;
+    }) => {
+      return updateSubtaskFollower(subtaskId, followers).then(() => ({
         subtaskId,
-      }: {
-        followers: string[];
-        subtaskId: string;
-      }
-    ) => {
-      return updateSubtaskFollower(subtaskId, followers).then(() => ({ subtaskId }));
+      }));
     },
-    onSuccess: async (
-      { subtaskId }: { subtaskId: string }
-    ) => {
-      // toast.success('Success', {
-      //   description: 'Clients followers updated successfully!',
-      // });
-
+    onSuccess: async ({ subtaskId }: { subtaskId: string }) => {
       await queryClient.invalidateQueries({
         queryKey: ['subtask_followers', subtaskId],
       });
@@ -155,8 +146,6 @@ export const useSubtaskMutations = (
     },
   });
 
-  
-
   return {
     createSubtask,
     updateSubtask,
@@ -166,6 +155,6 @@ export const useSubtaskMutations = (
 
     // Query data
     orderAgencyMembers,
-    orderAgencyClientsFollowers
+    orderAgencyClientsFollowers,
   };
 };

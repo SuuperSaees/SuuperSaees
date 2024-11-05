@@ -165,6 +165,7 @@ function StatusCombobox({
       status_color: '#8fd6fc',
       agency_id: agency_id,
     });
+    setCustomStatus('');
   };
 
   const handleDeleteStatus = (statusId: number) => {
