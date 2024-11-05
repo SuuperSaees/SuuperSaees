@@ -25,6 +25,10 @@ import { statusColors } from '../utils/get-color-class-styles';
 import EditStatusPopover from './edit-status-popover';
 import { Subtask } from '~/lib/tasks.types';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { useStatusDragAndDrop } from '../hooks/agency-statuses/use-status-drag-and-drop';
+import { closestCorners, DndContext, DragOverlay } from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
+import { SortableItem } from '~/components/sortable-item';
 
 interface StatusComboboxProps {
   order?: Order.Type,
@@ -40,6 +44,15 @@ function StatusCombobox({ order, subtask, mode, agency_id }: StatusComboboxProps
   const { t } = useTranslation('orders');
   const router = useRouter();
 
+  const {
+    isDragging,
+    activeId,
+    dragTask,
+    handleDragStart,
+    handleDragEnd,
+    sensors,
+  } = useStatusDragAndDrop(agency_id);
+
   const { data: agencyStatuses, refetch } = useQuery({
     queryKey: ['agencyStatuses', agency_id],
     queryFn: () => getAgencyStatuses(agency_id),
@@ -54,7 +67,6 @@ function StatusCombobox({ order, subtask, mode, agency_id }: StatusComboboxProps
       console.error(error);
     });
   }, [refetch]);
-
 
   const findStatusColor = useCallback((statusName: string) => {
     const status = agencyStatuses?.find((s) => s.status_name === statusName)
@@ -254,63 +266,81 @@ function StatusCombobox({ order, subtask, mode, agency_id }: StatusComboboxProps
                   </CommandItem>
                 );
               })}
-              {agencyStatuses?.map((status, statusIndex) => {
-                if (!status) return null;
-                return (
-                  <CommandItem
-                    key={statusIndex}
-                    value={status?.status_name ?? undefined}
-                    onSelect={(currentValue: string) => {
-                      if(status?.status_name !== popoverValue){
-                        if(mode === 'order'){
-                          changeOrderStatus.mutate({
-                            orderId: order?.id,
-                            status: status?.status_name ?? '',
-                          });
-                        }else if(mode === 'subtask'){
-                          changeSubtaskStatus.mutate({
-                            subtaskId: subtask?.id,
-                            status: status?.status_name ?? '',
-                          });
-                        }
-                        setPopoverValue(currentValue === popoverValue ? '' : currentValue);
-                        setOpen(false);
-                      }
-                    }}
-                    className="flex items-center justify-between p-0"
-                  >
-                    <p
-                      className="m-2 cursor-pointer rounded-lg p-1 font-medium"
-                      style={{
-                        color: status?.status_color ? darkenColor(status.status_color, 0.55) : undefined,
-                        backgroundColor: status?.status_color,
-                      }}
-                    >
-                      {status?.status_name}
-                    </p>
-                    <div className="flex gap-2 px-1 text-gray-500">
-                      <EditStatusPopover 
-                        status_id={status.id}
-                        status_color={status.status_color ?? ''}
-                        status_name={status.status_name ?? ''}
-                        order_id = {order?.id}
-                        task_id = {subtask?.id}
-                        setValue = {setPopoverValue}
-                        mode={mode}
-                      />
-                      <Trash2 className="h-5 w-5 cursor-pointer" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDeleteStatus(status.id)
-                          setOpen(false);
-                          
-                        }}
-                      />
-                    </div>
-                  </CommandItem>
-                );
-              })}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                >
+                <SortableContext items={agencyStatuses ?? []}>
+                  {agencyStatuses?.sort((a, b) => a.position - b.position)?.map((status, statusIndex) => {
+                    if (!status) return null;
+                    return (
+                      <div key={statusIndex}>
+                        <SortableItem id={status.id.toString()} key={statusIndex}>
+                          <CommandItem
+                            key={statusIndex}
+                            value={status?.status_name ?? undefined}
+                            onSelect={(currentValue: string) => {
+                              if(status?.status_name !== popoverValue){
+                                if(mode === 'order'){
+                                  changeOrderStatus.mutate({
+                                    orderId: order?.id,
+                                    status: status?.status_name ?? '',
+                                  });
+                                }else if(mode === 'subtask'){
+                                  changeSubtaskStatus.mutate({
+                                    subtaskId: subtask?.id,
+                                    status: status?.status_name ?? '',
+                                  });
+                                }
+                                setPopoverValue(currentValue === popoverValue ? '' : currentValue);
+                                setOpen(false);
+                              }
+                            }}
+                            className="flex items-center justify-between p-0"
+                          >
+                            <p
+                              className="m-2 cursor-pointer rounded-lg p-1 font-medium"
+                              style={{
+                                color: status?.status_color ? darkenColor(status.status_color, 0.55) : undefined,
+                                backgroundColor: status?.status_color,
+                              }}
+                            >
+                              {status?.status_name}
+                            </p>
+                            <div className="flex gap-2 px-1 text-gray-500">
+                              <EditStatusPopover 
+                                status_id={status.id}
+                                status_color={status.status_color ?? ''}
+                                status_name={status.status_name ?? ''}
+                                order_id = {order?.id}
+                                task_id = {subtask?.id}
+                                setValue = {setPopoverValue}
+                                mode={mode}
+                              />
+                              <Trash2 className="h-5 w-5 cursor-pointer" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleDeleteStatus(status.id)
+                                  setOpen(false);
+                                  
+                                }}
+                              />
+                            </div>
+                          </CommandItem>
+                        </SortableItem>
+                      </div>
+                    );
+                  })}
+                </SortableContext>
+                <DragOverlay>
+                  {activeId ? (
+                    <p>aaaaaaaaaaa + {activeId}</p>
+                  ): null}
+                </DragOverlay>
+              </DndContext>
             </CommandGroup>
           </CommandList>
         </Command>

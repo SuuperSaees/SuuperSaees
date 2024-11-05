@@ -38,6 +38,8 @@ import StatusCombobox from './status-combobox';
 import SubtaskAssignations from './subtasks/subtask-assignations';
 import SubtaskFollowers from './subtasks/subtask-followers';
 import SelectAction from './ui/select-action';
+import { useQuery } from '@tanstack/react-query';
+import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 
 function SubTasks({
   initialSubtasks,
@@ -77,6 +79,15 @@ function SubTasks({
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const [content, setContent] = useState<string>('');
 
+  // const { data: agencyStatuses, refetch } = useQuery({
+  //   queryKey: ['agencyStatuses', orderAgencyId],
+  //   queryFn: () => getAgencyStatuses(orderAgencyId),
+  //   initialData: [],
+  //   refetchOnMount: true,
+  //   refetchOnWindowFocus: true,
+  //   staleTime: 1000 * 60 * 5, // 5 minutes
+  // })
+
   const handlers = createHandlers(
     updateSubtask,
     createSubtask,
@@ -93,6 +104,7 @@ function SubTasks({
   };
 
   const handleSheetClose = () => {
+    console.log('close')
     setHoveredTaskId(null);
     setIsSheetOpen(false);
   };
@@ -174,9 +186,9 @@ function SubTasks({
                       </Button>
                     )}
                     <Sheet open={isSheetOpen}>
-                      <SheetContent
+                      <SheetContent onClick={(e) => e.stopPropagation()}
                         className="max-w-[300px] sm:max-w-[700px]"
-                        onInteractOutside={handleSheetClose}
+                        // onInteractOutside={handleSheetClose}
                       >
                         <SheetHeader>
                           <div className="flex justify-between">
@@ -258,6 +270,7 @@ function SubTasks({
                               subtask={subtask}
                               agency_id={orderAgencyId}
                               mode="subtask"
+                              // agencyStatuses={agencyStatuses}
                             />
                           </div>
                           <div className="flex items-center justify-between text-sm">
