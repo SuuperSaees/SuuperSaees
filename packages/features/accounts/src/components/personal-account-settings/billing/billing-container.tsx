@@ -11,7 +11,7 @@ import { Table,
     TableRow,
 } from "@kit/ui/table";
 import { Button } from "@kit/ui/button";
-import { ThemedProgress } from "../../ui/progress-themed-with-settings";
+// import { ThemedProgress } from "../../ui/progress-themed-with-settings";
 import PlansContainer from '../../../../../../../apps/web/app/select-plan/components/plans-container';
 import { useBilling } from '../../../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { cancelSubscription } from '../../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/delete/cancel-subscription'
@@ -62,27 +62,27 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
         return invoices?.reduce((total, invoice) => total + invoice.total, 0)/100;
     };
 
-      const getPlanValue = (plan: string): number => {
-        const planValues: Record<string, number> = {
-          starter: 1,
-          standard: 5,
-          premium: 10,
-          enterprise: 20
-        };
+    //   const getPlanValue = (plan: string): number => {
+    //     const planValues: Record<string, number> = {
+    //       starter: 1,
+    //       standard: 5,
+    //       premium: 10,
+    //       enterprise: 20
+    //     };
       
-        return planValues[plan?.toLowerCase()] ?? 0;
-      };
+    //     return planValues[plan?.toLowerCase()] ?? 0;
+    //   };
 
-      const getProgressPercentage = (occupied: any, available: any) => {
-        if (available <= 0) return 0;
-        if (occupied < 0) occupied = 0;
+    //   const getProgressPercentage = (occupied: any, available: any) => {
+    //     if (available <= 0) return 0;
+    //     if (occupied < 0) occupied = 0;
         
-        const percentage = (occupied / available) * 100;
+    //     const percentage = (occupied / available) * 100;
       
-        return Math.max(1, Math.min(100, Math.round(percentage)));
-      };
+    //     return Math.max(1, Math.min(100, Math.round(percentage)));
+    //   };
       
-      const handleCancelSubscription = async (subscriptionId: any) => {
+      const handleCancelSubscription = async (subscriptionId: string) => {
         // Implement cancel subscription logic here
         try {
             await cancelSubscription(subscriptionId)
@@ -97,6 +97,9 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
             });
           }
       };
+      const planName = productSubscription?.name as string;
+      const currentPlanName = planName.toLowerCase();
+      const availablePlansToCancel = new Set(["starter", "premium", "advanced"]);
     return (
         
         <div className="flex flex-col">
@@ -168,7 +171,7 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
                             </CardContent>
                         </Card>
                     </div>
-                   {(productSubscription?.name.toLowerCase() === "standard" || productSubscription?.name.toLowerCase() === "premium" || productSubscription?.name.toLowerCase() === "enterprise") && <div className="flex justify-between">
+                   {(availablePlansToCancel.has(currentPlanName)) && <div className="flex justify-between">
                         <div className="flex flex-col">
                             <div className="text-gray-900 font-inter text-lg font-semibold leading-7 mb-[2px]">{t('manage.title')}</div>
                             <div className="overflow-hidden text-[var(--Gray-600,#475467)] truncate font-inter text-sm font-normal leading-5">{t('manage.description')}</div>
@@ -181,7 +184,7 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
                         <div className="text-gray-900 font-inter text-lg font-semibold leading-7 mb-4">{t('modal.cancel.title')}</div>
                         <div className="overflow-hidden text-slate-950 truncate font-inter text-sm font-normal leading-5 mb-4">{t('modal.cancel.description.paragraph1')}</div>
                         <div className="overflow-hidden text-slate-950 truncate font-inter text-sm font-normal leading-5 mb-4">
-                         {t('modal.cancel.description.paragraph2.text1')} <strong>"cancel_subscription"</strong> {t('modal.cancel.description.paragraph2.text2')}
+                         {t('modal.cancel.description.paragraph2.text1')} <strong>&quot;cancel_subscription&quot;</strong> {t('modal.cancel.description.paragraph2.text2')}
                         </div>
                         <input
                             type="text"

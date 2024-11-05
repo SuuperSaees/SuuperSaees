@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useState } from "react";
 import CheckoutPage from "./checkout-page"; 
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
@@ -18,9 +18,7 @@ const PlansPage = () => {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null); 
   const [selectedPriceId, setSelectedPriceId] = useState(''); 
   const [billingCustomerId, setBillingCustomerId] = useState<string | null>(null);
-// USAREMOS LOS PRODUCTOS QUE VIENEN CON EL FETCH
  
-
   const handleCheckout = (amount: number | undefined, priceID: string) => {
     setSelectedAmount(amount ?? 0); 
     setSelectedPriceId(priceID);

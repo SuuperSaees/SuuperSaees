@@ -60,7 +60,7 @@ export function PricingTable({
   }
 
   const intervals = getPlanIntervals(productsDataConfig).filter(Boolean) as string[];
-  const [interval, setInterval] = useState(intervals[0] ?? ''); 
+  const [interval] = useState(intervals[0] ?? ''); 
   return (
     <div className={'flex flex-col space-y-8 xl:space-y-12'}>
 { productsDataConfig?.products?.length ?
@@ -96,7 +96,7 @@ export function PricingTable({
                 <PricingItem
                   selectable
                   key={plan?.id}
-                  plan={plan!}
+                  plan={plan}
                   redirectToCheckout={redirectToCheckout}
                   primaryLineItem={primaryLineItem}
                   product={product}
@@ -226,7 +226,7 @@ function PricingItem(
           <Trans i18nKey={`billing:plans.${currentPlanName}.description`} />
         </span>
         <div className='mt-4 flex flex-col gap-2'>
-          <ThemedButton onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost, props.plan.id)} disabled={props.plan.id === props.subscriptionFetchedStripe?.plan.id}
+          <ThemedButton onClick={() => props?.checkoutButtonRenderer?.(lineItem?.cost ?? 0, props.plan.id)} disabled={props.plan.id === props.subscriptionFetchedStripe?.plan.id}
           className='w-full'
             >{props.plan.id === props.subscriptionFetchedStripe?.plan.id ? <Trans i18nKey={`billing:plans.currentPlan`} /> : <Trans i18nKey={`billing:plans.upgrade`} />}</ThemedButton>
           <Link href={urlScheduleDemo} className="w-full" target="_blank">

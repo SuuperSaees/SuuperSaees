@@ -25,7 +25,10 @@ const ClientsMembersPagePresentation = ({
   canManageInvitations,
   isPrimaryOwner,
 }: {
-    account: unknown;
+    account: {
+      id: string;
+      role_hierarchy_level: number;
+    };
     currentUserRoleHierarchy: number | undefined;
     slug: string;
     members: {
@@ -54,7 +57,9 @@ const ClientsMembersPagePresentation = ({
         inviter_email: string;
     }[];
     canAddMember: boolean;
-    user: unknown;
+    user: {
+      id: string;
+    };
     canManageRoles: boolean;
     canManageInvitations: boolean;
     isPrimaryOwner: boolean;
