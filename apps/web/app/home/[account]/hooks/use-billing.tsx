@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getSubscriptionByOrganizationId } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/get/get-subscription';
 import { updateSubscription } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/update/update-subscription';
 // import { BillingProviderSchema } from '@kit/billing';
@@ -77,7 +77,16 @@ export const useBilling = () => {
     }
   };
 
-  const fetchProducts = async () => {
+  const [lastProductsFetch, setLastProductsFetch] = useState<number>(0);
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+  const fetchProducts = useCallback(async () => {
+    // Check if we have recent data
+    const now = Date.now();
+    if (productsDataConfig && (now - lastProductsFetch) < CACHE_DURATION) {
+      return; // Use cached data
+    }
+
     setLoading(true);
     setErrorMessage("");
     try {
@@ -167,13 +176,14 @@ const productsDataConfigBase = [
       };
   
       setProductsDataConfig(productsDataConfigResult);
+      setLastProductsFetch(now);
     } catch (error) {
       console.error("Error fetching products: ", error);
       setErrorMessage("Error loading products");
     } finally {
       setLoading(false);
     }
-  };
+  }, [lastProductsFetch, productsDataConfig]);
 
   const updateSubscriptionContext = async (): Promise<void> => {
     setLoading(true);

@@ -21,6 +21,8 @@ import { cn } from '@kit/ui/utils';
 
 import { useBilling } from '../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { ThemedButton } from '../../../../features/accounts/src/components/ui/button-themed-with-settings';
+import OrganizationSettingsProvider from '../../../../features/accounts/src/context/organization-settings-context';
+import { useOrganizationSettings } from '../../../../features/accounts/src/context/organization-settings-context';
 
 interface Paths {
   signUp: string;
@@ -43,6 +45,8 @@ export function PricingTable({
   checkoutButtonRenderer?: (amount: number, priceId: string)=> void;
 }) {
   const { subscriptionFetchedStripe } = useBilling()
+  const intervals = getPlanIntervals(productsDataConfig ?? { products: [] }).filter(Boolean) as string[];
+  const [interval] = useState(intervals?.[0] ?? ''); 
 
   if (!productsDataConfig) {
     return (
@@ -59,15 +63,12 @@ export function PricingTable({
     );
   }
 
-  const intervals = getPlanIntervals(productsDataConfig).filter(Boolean) as string[];
-  const [interval] = useState(intervals[0] ?? ''); 
   return (
-    <div className={'flex flex-col space-y-8 xl:space-y-12'}>
+    <div className={'flex h-full w-full flex-grow'}>
 { productsDataConfig?.products?.length ?
       (<div
         className={
-          'flex flex-col items-start space-y-6 lg:space-y-0 mt-4 mb-4' +
-          ' justify-center lg:flex-row lg:space-x-4'
+          'flex justify-center flex-col gap-8 w-full md:flex-row'
         }
       >
         {Array.isArray(productsDataConfig.products) && productsDataConfig.products.length > 0 ? (
@@ -170,7 +171,7 @@ function PricingItem(
       data-cy={'subscription-plan'}
       className={cn(
         props.className,
-        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-xl border lg:w-4/12 xl:max-w-[17rem] shadow-md`,
+        `h-full w-96 max-w-full relative flex-col justify-between rounded-xl border shadow-md`,
         {
           ['border-primary']: highlighted,
           ['border-border']: !highlighted,
@@ -178,12 +179,12 @@ function PricingItem(
       )}
     >
       <div className={'flex flex-col space-y-6'}>
-        <div className='px-4 pt-4'>
+        <div className='px-4 pt-6'>
         <div className={'flex flex-col space-y-2.5'}>
           <div className={'flex items-center space-x-6 justify-between mb-4'}>
             <b
               className={
-                'text-current-foreground font-semibold tracking-tight text-slate-800 text-sm'
+                'text-current-foreground font-semibold tracking-tight text-slate-600 text-lg'
               }
             >
               <Trans
@@ -191,17 +192,19 @@ function PricingItem(
               />
             </b>
             <If condition={isPremiumPlan}>
-                <span className='text-xs absolute right-4 text-blue-800 rounded-full bg-grayBlue-100 px-2 py-1 border-grayBlue-200 border'>
-                  <Trans i18nKey={`billing:plans.${currentPlanName}.badge`} />
-                </span>
+                <ThemedButton variant='outline' className='text-sm md:text-md lg:text-md absolute right-4 rounded-full px-2 py-1 pointer-events-none border font-medium' opacity={0.3}>
+                  <span>
+                    <Trans i18nKey={`billing:plans.${currentPlanName}.badge`} />
+                  </span>
+                </ThemedButton>
             </If>
           </div>
 
         </div>
 
-        <div className={'flex space-y-1 gap-2 mb-4 items-center'}>
+        <div className={'flex space-y-1 gap-2 mb-4 items-center justify-center'}>
           <Price >
-            <span className='text-6xl font-semibold'>
+            <span className='text-5xl md:text-6xl lg:text-7xl font-semibold'>
             {lineItem ? (
               formatCurrency(props.product.currency, lineItem.cost)
             ) : props.plan.label ? (
@@ -215,22 +218,22 @@ function PricingItem(
           <If condition={props.plan.name}>
             <span
               className={cn(
-                `animate-in slide-in-from-left-4 fade-in text-slate-800 flex items-center space-x-0.5 text-sm`,
+                `animate-in slide-in-from-left-4 fade-in text-slate-800 flex items-center space-x-0.5 text-md font-medium justify-center min-w-36 max-w-40`,
               )}
             >
               <Trans i18nKey={`billing:plans.features.perMemberPerMonth`} />
             </span>
           </If>
         </div>
-        <span className='text-slate-800 text-sm'>
+        <span className='text-slate-800 text-lg'>
           <Trans i18nKey={`billing:plans.${currentPlanName}.description`} />
         </span>
-        <div className='mt-4 flex flex-col gap-2'>
+        <div className='mt-4 flex flex-col gap-4'>
           <ThemedButton onClick={() => props?.checkoutButtonRenderer?.(lineItem?.cost ?? 0, props.plan.id)} disabled={props.plan.id === props.subscriptionFetchedStripe?.plan.id}
-          className='w-full'
+          className='w-full text-lg py-6'
             >{props.plan.id === props.subscriptionFetchedStripe?.plan.id ? <Trans i18nKey={`billing:plans.currentPlan`} /> : <Trans i18nKey={`billing:plans.upgrade`} />}</ThemedButton>
           <Link href={urlScheduleDemo} className="w-full" target="_blank">
-            <Button className="w-full" variant="outline">
+            <Button className="w-full text-lg py-6" variant="outline">
               <Trans i18nKey={`billing:plans.scheduleDemo`} />
             </Button>
           </Link>
@@ -239,11 +242,11 @@ function PricingItem(
 
         <Separator className="w-full" />
 
-        <div className={'flex flex-col pt-0 pb-4 px-4'}>
-          <h6 className={'text-sm font-semibold uppercase'}>
+        <div className={'flex flex-col text-lg pt-0 pb-4 px-4'}>
+          <h6 className={'font-semibold uppercase'}>
             <Trans i18nKey={`billing:plans.whatIncludes`} />
           </h6>
-          <span className='text-slate-800 text-sm mb-4'>
+          <span className='text-slate-800 mb-4'>
             <Trans i18nKey={`billing:plans.${currentPlanName}.features.base`} />
           </span>
           <FeaturesList
@@ -298,25 +301,32 @@ function Price({ children }: React.PropsWithChildren) {
 function ListItem({ currentPlanName, isPremiumPlan, feature }: React.PropsWithChildren<{currentPlanName: string, isPremiumPlan: boolean, feature: string}>) {
   const customDomain = "customdomain"
   const isCustomDomain = feature.toLowerCase().trim().split(" ").join("") === customDomain && isPremiumPlan
+  const { theme_color } = useOrganizationSettings();
 
   return (
-    <li className={'flex items-center space-x-2.5'}>
+    <OrganizationSettingsProvider initialSettings={[]}>
+
+  <li className={'flex items-center space-x-2.5'}>
       {
-        !isCustomDomain ?  <div className='flex items-center justify-center rounded-full border-2 border-blue-800 p-[1px]'>
+        !isCustomDomain ?  <div className='flex items-center justify-center rounded-full border-2 p-[1px]' style={{borderColor: theme_color}}>
         <div className="relative w-3 h-3 scale-x-[-1] flex justify-center items-center">
-          <div className="absolute transform rotate-45 mt-[2.5px] border-b-[2px] border-r-[2px] border-blue-800 w-2 h-[5px] -top-[1px] left-[2px]"></div>
+          <div className="absolute transform rotate-45 mt-[2.5px] border-b-[2px] border-r-[2px] w-2 h-[5px] -top-[1px] left-[2px]" style={{borderColor: theme_color}}></div>
         </div>
-      </div> : <StarsIcon className={'text-blue-800 h-4 min-h-4 w-4 min-w-4'} />
+      </div> : <StarsIcon className={' h-4 min-h-4 w-4 min-w-4'} style={{color: theme_color}}/>
       }
 
       <span
-        className={cn('text-sm', {
+        className={cn({
           ['text-secondary-foreground']: true,
         })}
       >
         <Trans i18nKey={`billing:plans.${currentPlanName}.features.${feature}`} />
       </span>
     </li>
+
+
+    </OrganizationSettingsProvider>
+  
   );
 }
 

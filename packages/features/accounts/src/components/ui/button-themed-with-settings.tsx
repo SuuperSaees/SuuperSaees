@@ -6,40 +6,40 @@ import { Button } from '@kit/ui/button';
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
 import withOrganizationSettings from '../../hoc/with-organization-settings';
+import { getColorLuminance, hexToRgb } from '../../../../../../apps/web/app/utils/generate-colors';
 
-function getTextColorBasedOnBackground(backgroundColor: string) {
-  // Remove any hash symbol if it exists
-  const color = backgroundColor.replace('#', '');
-
-  // Convert the hex color to RGB
-  const r = parseInt(color.substring(0, 2), 16);
-  const g = parseInt(color.substring(2, 4), 16);
-  const b = parseInt(color.substring(4, 6), 16);
-
-  // Calculate the luminance
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-
-  // Return 'black' for lighter backgrounds and 'white' for darker backgrounds
-  return luminance > 186 ? 'black' : 'white'; // 186 is a common threshold for readability
-}
 // Example component that uses organization settings and accepts children for customization
 export const ThemedButton: React.FC<{
   children: React.ReactNode;
   className?: string;
   themeColor?: string;
+  opacity?: number;
   [key: string]: unknown;
-}> = ({ children, className, themeColor, ...rest }) => {
+}> = ({ children, className, themeColor, opacity, ...rest }) => {
   const { theme_color } = useOrganizationSettings();
   if (!themeColor) {
     themeColor = theme_color;
   }
-  const textColor = getTextColorBasedOnBackground(themeColor ?? '#000000');
+  const { theme: baseTextColor, luminance } = getColorLuminance(themeColor ?? '#000000');
+  
+  let textColor;
+  if (opacity) {
+    if (luminance < 50) {
+      textColor = 'white';
+    } else if (luminance > 200) {
+      textColor = 'black';
+    } else {
+      textColor = themeColor;
+    }
+  } else {
+    textColor = baseTextColor;
+  }
   return (
     <Button
       className={`bg-brand flex gap-2 ${className}`}
       style={
         themeColor
-          ? { backgroundColor: themeColor, color: textColor }
+          ? { backgroundColor: opacity ? `rgba(${hexToRgb(themeColor)}, ${opacity})` : themeColor, color: textColor, borderColor: opacity ? `rgba(${hexToRgb(themeColor)}, ${opacity})` : undefined }
           : undefined
       }
       {...rest}

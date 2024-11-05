@@ -5,6 +5,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { PricingTable } from '@kit/billing-gateway/marketing';
 import pathsConfig from '../../../../../apps/web/config/paths.config';
 import useBilling from "~/home/[account]/hooks/use-billing";
+import { SkeletonCardPlans } from "../components/skeleton-card-plans";
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error("Stripe public key is not defined in environment variables");
@@ -28,15 +29,8 @@ const PlansPage = () => {
 
   if (loading) {
     return (
-      <div className="items-center justify-center flex flex-col mt-10">
-        <div
-          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-          role="status"
-        >
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Loading...
-          </span>
-        </div>
+      <div className="flex flex-col flex-1 items-center justify-center w-full max-h-full min-h-[70vh] mt-4">
+        <SkeletonCardPlans />
       </div>
     );
   }
@@ -46,9 +40,9 @@ const PlansPage = () => {
   }
 
   return (
-    <div className="items-center justify-center flex flex-col mt-4 w-full">
+    <div className="flex flex-col flex-1 items-center justify-center w-full max-h-full min-h-[70vh] mt-4">
       {selectedAmount ? (
-        <div>
+        <div className="flex-1 w-full">
           <Elements
             stripe={stripePromise}
             options={{
@@ -60,7 +54,8 @@ const PlansPage = () => {
             <CheckoutPage amount={selectedAmount} priceId={selectedPriceId} billingCustomerId={billingCustomerId!} />
           </Elements>
         </div>
-      ) : <PricingTable
+      ) :
+      <PricingTable
       paths={{
         signUp: pathsConfig.auth.signUp,
         return: pathsConfig.app.home,

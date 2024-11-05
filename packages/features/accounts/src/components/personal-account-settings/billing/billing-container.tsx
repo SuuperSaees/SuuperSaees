@@ -19,12 +19,6 @@ import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-function UpgradePlanComponent() {
-    return (
-        <PlansContainer />
-    );
-}
-
 export default function BillingContainerConfig({ tab }: { tab: string }) {
     const [modalCancelSubscription, setModalCancelSubscription] = useState(false)
     const [cancelSubscriptionInput, setCancelSubscriptionInput] = useState("")
@@ -98,13 +92,13 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
           }
       };
       const planName = productSubscription?.name as string;
-      const currentPlanName = planName.toLowerCase();
+      const currentPlanName = planName?.toLowerCase();
       const availablePlansToCancel = new Set(["starter", "premium", "advanced"]);
     return (
         
         <div className="flex flex-col">
             {showUpgradeComponent ? (
-                <UpgradePlanComponent />
+                <PlansContainer />
             ) : (
                 <>
                     <div className="flex gap-4 mb-[24px]">

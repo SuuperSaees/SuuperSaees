@@ -34,18 +34,10 @@ import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './update-ac
 import UpdateAccountOrganizationDarkLogo from './update-account-organization-dark-logo';
 import PlansContainer from '../../../../../../apps/web/app/select-plan/components/plans-container';
 
-// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-
 type AccountStripe = {
   id: string;
   charges_enabled: boolean;
 };
-
-function UpgradePlanComponent() {
-  return (
-      <PlansContainer />
-  );
-}
 
 export function PersonalAccountSettingsContainer(
   props: React.PropsWithChildren<{
@@ -152,7 +144,7 @@ export function PersonalAccountSettingsContainer(
     return <LoadingOverlay fullPage />;
   }
   return (
-    <div>
+    <div className="w-full h-full">
       <Tabs defaultValue={"account"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
           <TabsList className='gap-2 bg-transparent'>
@@ -434,7 +426,7 @@ export function PersonalAccountSettingsContainer(
           <BillingContainerConfig tab={tab ?? ''} />
         </TabsContent>
         <TabsContent value="subscription">
-          <UpgradePlanComponent />
+          <PlansContainer />
         </TabsContent>
       </Tabs>
     </div>
