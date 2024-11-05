@@ -343,21 +343,21 @@ export function OrderList({ orders, role }: OrdersTableProps) {
             </div>
             <Separator />
             <div className="mt-4">
-              <TabsContent value="open">
+              <TabsContent className='bg-white' value="open">
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
                 />
               </TabsContent>
-              <TabsContent value="completed">
+              <TabsContent value="completed" className='bg-white'>
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
                 />
               </TabsContent>
-              <TabsContent value="all">
+              <TabsContent value="all" className='bg-white'>
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
