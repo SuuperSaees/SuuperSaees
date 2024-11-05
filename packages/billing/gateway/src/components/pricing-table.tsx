@@ -4,8 +4,7 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 
-import { ArrowRight, CheckCircle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { CheckCircle } from 'lucide-react';
 import { z } from 'zod';
 
 import {
@@ -14,15 +13,15 @@ import {
   getPrimaryLineItem,
 } from '@kit/billing';
 import { formatCurrency } from '@kit/shared/utils';
-import { Badge } from '@kit/ui/badge';
 import { Button } from '@kit/ui/button';
 import { If } from '@kit/ui/if';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
-import { LineItemDetails } from './line-item-details';
 import { useBilling } from '../../../../../apps/web/app/home/[account]/hooks/use-billing';
+import { ThemedButton } from '../../../../features/accounts/src/components/ui/button-themed-with-settings';
+
 interface Paths {
   signUp: string;
   return: string;
@@ -62,7 +61,7 @@ export function PricingTable({
   }
 
   const intervals = getPlanIntervals(productsDataConfig).filter(Boolean) as string[];
-  const [interval, setInterval] = useState(intervals[0] || ''); 
+  const [interval, setInterval] = useState(intervals[0] ?? ''); 
   return (
     <div className={'flex flex-col space-y-8 xl:space-y-12'}>
 { productsDataConfig?.products?.length ?
@@ -73,7 +72,7 @@ export function PricingTable({
         }
       >
         {Array.isArray(productsDataConfig.products) && productsDataConfig.products.length > 0 ? (
-          productsDataConfig.products.map((product: { plans?: any; id?: string; name?: string; currency?: string; description?: string; badge?: string | undefined; highlighted?: boolean | undefined; features?: string[]; }) => {
+          productsDataConfig?.products?.map((product: { plans?: any; id?: string; name?: string; currency?: string; description?: string; badge?: string | undefined; highlighted?: boolean | undefined; features?: string[]; }) => {
             if (!Array.isArray(product.plans)) {
               return null; 
             }
@@ -94,7 +93,6 @@ export function PricingTable({
             if (!plan.custom && !primaryLineItem) {
               throw new Error(`Primary line item not found for plan ${plan.id}`);
             }
-            if (plan.id !== subscriptionFetchedStripe?.plan?.id) {
               return (
                 <PricingItem
                   selectable
@@ -109,7 +107,6 @@ export function PricingTable({
                   checkoutButtonRenderer={checkoutButtonRenderer}
                 />
               );
-            }
           })
         ) : (
           <div>No hay productos disponibles.</div> 
@@ -159,9 +156,9 @@ function PricingItem(
   const lineItem = props.primaryLineItem;
   // we exclude flat line items from the details since
   // it doesn't need further explanation
-  const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
-    return item.type !== 'flat';
-  });
+  // const lineItemsToDisplay = props.plan.lineItems.filter((item) => {
+  //   return item.type !== 'flat';
+  // });
 
 
   return (
@@ -169,38 +166,23 @@ function PricingItem(
       data-cy={'subscription-plan'}
       className={cn(
         props.className,
-        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-xl border p-8 lg:w-4/12 xl:max-w-[18rem]`,
+        `s-full relative flex flex-1 grow flex-col items-stretch justify-between self-stretch rounded-xl border lg:w-4/12 xl:max-w-[18rem] shadow-md`,
         {
           ['border-primary']: highlighted,
           ['border-border']: !highlighted,
         },
       )}
     >
-      <If condition={props.product.badge}>
-        <div className={'absolute -top-2.5 left-0 flex w-full justify-center'}>
-          <Badge
-            className={highlighted ? '' : 'bg-background'}
-            variant={highlighted ? 'default' : 'outline'}
-          >
-            <span>
-              <Trans
-                i18nKey={props.product.badge}
-                defaults={props.product.badge}
-              />
-            </span>
-          </Badge>
-        </div>
-      </If>
-
       <div className={'flex flex-col space-y-6'}>
+        <div className='px-4 pt-4'>
         <div className={'flex flex-col space-y-2.5'}>
           <div className={'flex items-center space-x-6'}>
             <b
               className={
-                'text-current-foreground font-heading font-semibold uppercase tracking-tight'
+                'text-current-foreground font-semibold tracking-tight text-slate-800 text-md mb-4'
               }
             >
-              <Trans
+              Plan <Trans
                 i18nKey={props.product.name}
                 defaults={props.product.name}
               />
@@ -209,9 +191,7 @@ function PricingItem(
 
         </div>
 
-        <Separator />
-
-        <div className={'flex flex-col space-y-1'}>
+        <div className={'flex space-y-1 gap-2 mb-4'}>
           <Price>
             {lineItem ? (
               formatCurrency(props.product.currency, lineItem.cost)
@@ -225,71 +205,38 @@ function PricingItem(
           <If condition={props.plan.name}>
             <span
               className={cn(
-                `animate-in slide-in-from-left-4 fade-in text-muted-foreground flex items-center space-x-0.5 text-sm capitalize`,
+                `animate-in slide-in-from-left-4 fade-in text-slate-800 flex items-center space-x-0.5 text-sm`,
               )}
             >
-              <span>
-                <If
-                  condition={props.plan.interval}
-                  fallback={<Trans i18nKey={'billing:lifetime'} />}
-                >
-                  {(interval) => (
-                    <Trans i18nKey={`billing:billingInterval.${interval}`} />
-                  )}
-                </If>
-              </span>
-
-              <If condition={lineItem && lineItem?.type !== 'flat'}>
-                <span>/</span>
-
-                <span
-                  className={cn(
-                    `animate-in slide-in-from-left-4 fade-in text-sm capitalize`,
-                  )}
-                >
-                  <If condition={lineItem?.type === 'per_seat'}>
-                    <Trans i18nKey={'billing:perTeamMember'} />
-                  </If>
-
-                  <If condition={lineItem?.unit}>
-                    <Trans
-                      i18nKey={'billing:perUnit'}
-                      values={{
-                        unit: lineItem?.unit,
-                      }}
-                    />
-                  </If>
-                </span>
-              </If>
+              por miembro de tu equipo al mes
             </span>
           </If>
         </div>
-        <Button onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost!, props.plan.id)} disabled={props.plan.id === props.subscriptionFetchedStripe?.plan.id}>{props.plan.id === props.subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</Button>
+        <span className='text-slate-800 text-sm'>
+          Ideal para comenzar tu negocio de servicios digitales.
+        </span>
+        <div className='mt-4 flex flex-col gap-2'>
+          <ThemedButton onClick={()=>props?.checkoutButtonRenderer(lineItem?.cost!, props.plan.id)} disabled={props.plan.id === props.subscriptionFetchedStripe?.plan.id}
+          className='w-full'
+            >{props.plan.id === props.subscriptionFetchedStripe?.plan.id ? "Actual" : "Mejorar"}</ThemedButton>
+          <Link href={"https://suuper.co/demo/"} className="w-full" target="_blank">
+            <Button className="w-full" variant="outline">Agenda una demo</Button>
+          </Link>
+        </div>
+        </div>
 
-        <Separator />
+        <Separator className="w-full" />
 
-        <div className={'flex flex-col'}>
+        <div className={'flex flex-col pt-0 pb-4 px-4'}>
+          <h6 className={'text-sm font-semibold uppercase'}>Qué incluye</h6>
+          <span className='text-slate-800 text-sm mb-2'>
+            Funcionalidades más básicas y...
+          </span>
           <FeaturesList
             highlighted={highlighted}
             features={props.product.features}
           />
         </div>
-
-        <If condition={props.displayPlanDetails && lineItemsToDisplay.length}>
-          <Separator />
-
-          <div className={'flex flex-col space-y-2'}>
-            <h6 className={'text-sm font-semibold'}>
-              <Trans i18nKey={'billing:detailsLabel'} />
-            </h6>
-
-            <LineItemDetails
-              selectedInterval={props.plan.interval}
-              currency={props.product.currency}
-              lineItems={lineItemsToDisplay}
-            />
-          </div>
-        </If>
       </div>
     </div>
   );
@@ -303,7 +250,7 @@ function FeaturesList(
 ) {
   return (
     <ul className={'flex flex-col space-y-2'}>
-      {props.features.map((feature) => {
+      {props.features?.map((feature) => {
         return (
           <>{feature ? <ListItem key={feature}>
             <Trans i18nKey={feature} defaults={feature} />
@@ -346,107 +293,107 @@ function ListItem({ children }: React.PropsWithChildren) {
   );
 }
 
-function PlanIntervalSwitcher(
-  props: React.PropsWithChildren<{
-    intervals: string[];
-    interval: string;
-    setInterval: (interval: string) => void;
-  }>,
-) {
-  return (
-    <div className={'flex'}>
-      {props.intervals.map((plan, index) => {
-        const selected = plan === props.interval;
+// function PlanIntervalSwitcher(
+//   props: React.PropsWithChildren<{
+//     intervals: string[];
+//     interval: string;
+//     setInterval: (interval: string) => void;
+//   }>,
+// ) {
+//   return (
+//     <div className={'flex'}>
+//       {props.intervals?.map((plan, index) => {
+//         const selected = plan === props.interval;
 
-        const className = cn(
-          'focus:!ring-0 !outline-none animate-in transition-all fade-in',
-          {
-            'rounded-r-none border-r-transparent': index === 0,
-            'rounded-l-none': index === props.intervals.length - 1,
-            ['hover:text-primary border text-muted-foreground']: !selected,
-            ['font-semibold cursor-default hover:text-initial hover:bg-background']:
-              selected,
-          },
-        );
+//         const className = cn(
+//           'focus:!ring-0 !outline-none animate-in transition-all fade-in',
+//           {
+//             'rounded-r-none border-r-transparent': index === 0,
+//             'rounded-l-none': index === props.intervals.length - 1,
+//             ['hover:text-primary border text-muted-foreground']: !selected,
+//             ['font-semibold cursor-default hover:text-initial hover:bg-background']:
+//               selected,
+//           },
+//         );
 
-        return (
-          <Button
-            key={plan}
-            variant={'outline'}
-            className={className}
-            onClick={() => props.setInterval(plan)}
-          >
-            <span className={'flex items-center space-x-1'}>
-              <If condition={selected}>
-                <CheckCircle className={'animate-in fade-in zoom-in-90 h-4'} />
-              </If>
+//         return (
+//           <Button
+//             key={plan}
+//             variant={'outline'}
+//             className={className}
+//             onClick={() => props.setInterval(plan)}
+//           >
+//             <span className={'flex items-center space-x-1'}>
+//               <If condition={selected}>
+//                 <CheckCircle className={'animate-in fade-in zoom-in-90 h-4'} />
+//               </If>
 
-              <span className={'capitalize'}>
-                <Trans i18nKey={`common:billingInterval.${plan}`} />
-              </span>
-            </span>
-          </Button>
-        );
-      })}
-    </div>
-  );
-}
+//               <span className={'capitalize'}>
+//                 <Trans i18nKey={`common:billingInterval.${plan}`} />
+//               </span>
+//             </span>
+//           </Button>
+//         );
+//       })}
+//     </div>
+//   );
+// }
 
-function DefaultCheckoutButton(
-  props: React.PropsWithChildren<{
-    plan: {
-      id: string;
-      name?: string | undefined;
-      href?: string;
-      buttonLabel?: string;
-    };
+// function DefaultCheckoutButton(
+//   props: React.PropsWithChildren<{
+//     plan: {
+//       id: string;
+//       name?: string | undefined;
+//       href?: string;
+//       buttonLabel?: string;
+//     };
 
-    product: {
-      name: string;
-    };
+//     product: {
+//       name: string;
+//     };
 
-    paths: Paths;
-    redirectToCheckout?: boolean;
+//     paths: Paths;
+//     redirectToCheckout?: boolean;
 
-    highlighted?: boolean;
-  }>,
-) {
-  const { t } = useTranslation('billing');
+//     highlighted?: boolean;
+//   }>,
+// ) {
+//   const { t } = useTranslation('billing');
 
-  const signUpPath = props.paths.signUp;
+//   const signUpPath = props.paths.signUp;
 
-  const searchParams = new URLSearchParams({
-    next: props.paths.return,
-    plan: props.plan.id,
-    redirectToCheckout: props.redirectToCheckout ? 'true' : 'false',
-  });
+//   const searchParams = new URLSearchParams({
+//     next: props.paths.return,
+//     plan: props.plan.id,
+//     redirectToCheckout: props.redirectToCheckout ? 'true' : 'false',
+//   });
 
-  const linkHref =
-    props.plan.href ?? `${signUpPath}?${searchParams.toString()}` ?? '';
+//   const linkHref =
+//     props.plan.href ?? `${signUpPath}?${searchParams.toString()}` ?? '';
 
-  const label = props.plan.buttonLabel ?? 'common:getStartedWithPlan';
+//   const label = props.plan.buttonLabel ?? 'common:getStartedWithPlan';
 
-  return (
-    <Link className={'w-full'} href={linkHref}>
-      <Button
-        size={'lg'}
-        className={'border-primary w-full rounded-lg border'}
-        variant={props.highlighted ? 'default' : 'outline'}
-      >
-        <span>
-          <Trans
-            i18nKey={label}
-            defaults={label}
-            values={{
-              plan: t(props.product.name, {
-                defaultValue: props.product.name,
-              }),
-            }}
-          />
-        </span>
+//   return (
+//     <Link className={'w-full'} href={linkHref}>
+//       <Button
+//         size={'lg'}
+//         className={'border-primary w-full rounded-lg border'}
+//         variant={props.highlighted ? 'default' : 'outline'}
+//       >
+//         <span>
+//           <Trans
+//             i18nKey={label}
+//             defaults={label}
+//             values={{
+//               plan: t(props.product.name, {
+//                 defaultValue: props.product.name,
+//               }),
+//             }}
+//           />
+//         </span>
 
-        <ArrowRight className={'ml-2 h-4'} />
-      </Button>
-    </Link>
-  );
-}
+//         <ArrowRight className={'ml-2 h-4'} />
+//       </Button>
+//     </Link>
+//   );
+// }

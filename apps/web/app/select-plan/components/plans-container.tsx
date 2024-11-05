@@ -19,8 +19,6 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export default function PlansContainer() {
     
-    // const amount = 49.99;
-    
     return (
         <div>
             <Elements 

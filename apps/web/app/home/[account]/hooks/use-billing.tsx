@@ -77,7 +77,6 @@ export const useBilling = () => {
     setLoading(true);
     setErrorMessage("");
     try {
-      // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
       const response = await fetch(`/api/stripe/suuper-products`, {
         method: "GET",
       });
@@ -90,12 +89,12 @@ export const useBilling = () => {
       );
       const productsDataConfigBase = [
         {
-          id: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === "standard")?.id,
-          name: "Standard",
+          id: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === "starter")?.id,
+          name: "Starter",
           plan: {
-            id: data?.find((productCurrent: { name: string; default_price: string; }) => productCurrent?.name.toLowerCase() === "standard")?.default_price,
+            id: data?.find((productCurrent: { name: string; default_price: string; }) => productCurrent?.name.toLowerCase() === "starter")?.default_price,
             currency: "USD",
-            amount: 2500,
+            amount: 1900,
             interval: "month",
             trial_period_days: 0,
             billing_scheme: "per_seat",
@@ -107,19 +106,19 @@ export const useBilling = () => {
           plan: {
             id: data?.find((productCurrent: { name: string; default_price: string; }) => productCurrent?.name.toLowerCase() === "premium")?.default_price,
             currency: "USD",
-            amount: 4500,
+            amount: 2500,
             interval: "month",
             trial_period_days: 0,
             billing_scheme: "per_seat",
           },
         },
         {
-          id: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === "enterprise")?.id,
-          name: "Enterprise",
+          id: data?.find((productCurrent: { name: string; id: string }) => productCurrent?.name.toLowerCase() === "advanced")?.id,
+          name: "Advanced",
           plan: {
-            id: data?.find((productCurrent: { name: string; default_price: string; }) => productCurrent?.name.toLowerCase() === "enterprise")?.default_price,
+            id: data?.find((productCurrent: { name: string; default_price: string; }) => productCurrent?.name.toLowerCase() === "advanced")?.default_price,
             currency: "USD",
-            amount: 7500,
+            amount: 3900,
             interval: "month",
             trial_period_days: 0,
             billing_scheme: "per_seat",

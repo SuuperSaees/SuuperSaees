@@ -32,7 +32,7 @@ import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-dom
 import { useOrganizationSettings } from '../../context/organization-settings-context'
 import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './update-account-organization-sender-email-and-sender-domain';
 import UpdateAccountOrganizationDarkLogo from './update-account-organization-dark-logo';
-
+import PlansContainer from '../../../../../../apps/web/app/select-plan/components/plans-container';
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -40,6 +40,12 @@ type AccountStripe = {
   id: string;
   charges_enabled: boolean;
 };
+
+function UpgradePlanComponent() {
+  return (
+      <PlansContainer />
+  );
+}
 
 export function PersonalAccountSettingsContainer(
   props: React.PropsWithChildren<{
@@ -163,6 +169,13 @@ export function PersonalAccountSettingsContainer(
               activeTab={accountBillingTab}
             >
               <Trans i18nKey={'account:billing'} />
+            </ThemedTabTrigger>
+            <ThemedTabTrigger
+              value="subscription"
+              option="subscription"
+              activeTab={accountBillingTab}
+            >
+              <Trans i18nKey={'account:subscription'} />
             </ThemedTabTrigger>
           </TabsList>
         )}
@@ -418,15 +431,10 @@ export function PersonalAccountSettingsContainer(
         </TabsContent>
 
         <TabsContent value="billing">
-          {/* <div className="flex w-full flex-col space-y-6">
-            <Button>
-              <Link href="/select-plan">
-                Upgrade your plan
-              </Link>
-            </Button>
-              
-            </div> */}
           <BillingContainerConfig tab={tab ?? ''} />
+        </TabsContent>
+        <TabsContent value="subscription">
+          <UpgradePlanComponent />
         </TabsContent>
       </Tabs>
     </div>

@@ -48,7 +48,7 @@ const PlansPage = () => {
   }
 
   return (
-    <div className="items-center justify-center flex flex-col mt-10 w-full">
+    <div className="items-center justify-center flex flex-col mt-4 w-full">
       {selectedAmount ? (
         <div>
           <Elements

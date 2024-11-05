@@ -121,8 +121,8 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
                         <div className="text-gray-900 font-inter text-5xl font-semibold leading-[60px] tracking-[-0.96px] mb-[24px]">{calculateTotalAmountPaid(invoices)} US$</div>
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
-                                <div className="text-gray-900 font-inter text-sm font-medium leading-5">{t('total.users', { currentUsers: subscriptionFetchedStripe?.quantity ?? 0, totalUsers: getPlanValue(productSubscription?.name) })}</div>
-                                <ThemedProgress value={getProgressPercentage(subscriptionFetchedStripe?.quantity, getPlanValue(productSubscription?.name))} className="w-[279.961px] h-[8px]" />
+                                <div className="text-gray-900 font-inter text-sm font-medium leading-5">{t('total.users', { currentUsers: subscriptionFetchedStripe?.quantity ?? 0})}</div>
+                                {/* <ThemedProgress value={getProgressPercentage(subscriptionFetchedStripe?.quantity, getPlanValue(productSubscription?.name))} className="w-[279.961px] h-[8px]" /> */}
                             </div>
                             <div className="text-brand text-sm font-semibold leading-5 flex gap-2 cursor-pointer" onClick={handleUpgradeClick}>
                                 {t('total.upgrade')}
