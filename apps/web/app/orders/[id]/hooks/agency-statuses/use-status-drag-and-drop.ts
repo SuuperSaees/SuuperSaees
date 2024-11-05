@@ -2,36 +2,30 @@ import { useState } from 'react';
 
 import {
   DragEndEvent,
-  DragStartEvent,
-  MouseSensor,
-  TouchSensor,
+  KeyboardSensor,
+  PointerSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { updateStatusesPositions } from '~/team-accounts/src/server/actions/statuses/update/update-agency-status';
 import { toast } from 'sonner';
+import { useEffect } from 'react';
 
 export const useStatusDragAndDrop = (
-  agency_id: string,
+  agencyStatuses: AgencyStatus.Type[]
 ) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [statuses, setStatuses] = useState(agencyStatuses);
   const queryClient = useQueryClient();
-  const [dragStatus, setDragStatus] = useState({
-    isDragging: false,
-    type: null,
-  });
-
 
   const updateStatusesPositionsMutation = useMutation({
     mutationFn: async ({ statuses }: { statuses: AgencyStatus.Type[] }) => {
       return await updateStatusesPositions(statuses);
     },
     onSuccess: async () => {
-      // toast.success('Successfully updated task positions');
+      // toast.success('Successfully updated status positions');
       await queryClient.invalidateQueries({
         queryKey: ['statuses', 'all'],
       });
@@ -41,90 +35,37 @@ export const useStatusDragAndDrop = (
     },
   });
 
-  // Configure DnD sensors
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10,
-    },
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 250,
-      tolerance: 5,
-    },
-  });
-  const sensors = useSensors(mouseSensor, touchSensor);
+  useEffect(() => {
+    setStatuses(agencyStatuses);
+  }, [agencyStatuses]);
 
-  const handleDragStart = (event: DragStartEvent) => {
-    console.log('drag start');
-    setIsDragging(true);
-    setActiveId(event.active.id as string);
-    const draggableData = event.active?.data?.current;
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
-    if (draggableData?.type) {
-      setDragStatus({
-        isDragging: true,
-        type: draggableData.type,
-      });
-    } else {
-      setDragStatus({
-        isDragging: false,
-        type: null,
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    let newStatuses = statuses
+
+    if (active.id !== over?.id) {
+      setStatuses((items) => {
+        const oldIndex = items?.findIndex((item) => item.id === active.id)
+        const newIndex = items?.findIndex((item) => item.id === over?.id)
+        newStatuses = arrayMove(items, oldIndex, newIndex)
+        return newStatuses
+      })
+      await updateStatusesPositionsMutation.mutateAsync({
+        statuses: newStatuses,
       });
     }
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    console.log('drag end');
-    const { active, over } = event;
-
-    if (!over) {
-      resetDragState();
-      return;
-    }
-
-    let updatedStatuses: AgencyStatus.Type[] = [];
-
-    queryClient.setQueryData(
-      ['statuses', agency_id],
-      (prevTasks: AgencyStatus.Type[] | undefined) => {
-        if (!prevTasks) return [];
-        const oldIndex = prevTasks.findIndex((task) => task.id === active.id);
-        const newIndex = prevTasks.findIndex((task) => task.id === over.id);
-
-        if (oldIndex === newIndex) return prevTasks;
-
-        updatedStatuses = arrayMove(prevTasks, oldIndex, newIndex).map(
-          (status, index) => ({
-            ...status,
-            position: index,
-          }),
-        );
-
-        return updatedStatuses;
-      },
-    );
-
-    await updateStatusesPositionsMutation.mutateAsync({ statuses: updatedStatuses });
-
-    resetDragState();
-  };
-
-  const resetDragState = () => {
-    setIsDragging(false);
-    setActiveId(null);
-    setDragStatus({
-      isDragging: false,
-      type: null,
-    });
-  };
+  }
 
   return {
-    isDragging,
-    activeId,
-    dragStatus,
-    handleDragStart,
-    handleDragEnd,
     sensors,
+    handleDragEnd,
+    statuses
   };
 };

@@ -45,6 +45,6 @@ export const updateStatusesPositions = async (statuses: AgencyStatus.Type[]) => 
 
     return tasksData;
   } catch (error) {
-    console.error('Error updating tasks:', error);
+    console.error('Error updating statuses:', error);
   }
 };
