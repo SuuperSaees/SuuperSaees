@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { Subtask, Task } from '~/lib/tasks.types';
-import { getTasks } from '~/team-accounts/src/server/actions/tasks/get/get-tasks';
+import { getSubtasks, getTasks } from '~/team-accounts/src/server/actions/tasks/get/get-tasks';
 
 import { useDragAndDrop } from './tasks/use-task-drag-and-drop';
 import { useTaskMutations } from './tasks/use-task-mutations';
@@ -23,9 +23,15 @@ export const useRealTimeTasks = (orderId: string) => {
   } = useTaskMutations();
 
   // Task data with useQuery
-  const { data: tasks = [], isLoading } = useQuery({
+  const { data: tasks = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', orderId],
     queryFn: () => getTasks(orderId),
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
+
+  const { data: subtasks = [], isLoading: isLoadingSubtasks } = useQuery({
+    queryKey: ['subtasks', orderId],
+    queryFn: () => getSubtasks(),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
@@ -75,37 +81,30 @@ export const useRealTimeTasks = (orderId: string) => {
       const insert = 'INSERT';
       const update = 'UPDATE';
       const del = 'DELETE';
-
+      
       queryClient.setQueryData(
-        ['tasks', orderId],
-        (oldTasks: Task.Type[] | undefined) => {
-          if (!oldTasks) return [];
-          return oldTasks.map((task) => {
-            if (
-              task.id ===
-              (newSubtask?.parent_task_id ?? oldSubtask?.parent_task_id)
-            ) {
-              const updatedSubtasks = [...(task.subtasks ?? [])];
-              if (eventType === insert) updatedSubtasks.push(newSubtask);
-              else if (eventType === update) {
-                const index = updatedSubtasks.findIndex(
-                  (st) => st.id === newSubtask.id,
-                );
-                if (index !== -1)
-                  updatedSubtasks[index] = {
-                    ...updatedSubtasks[index],
-                    ...newSubtask,
-                  };
-              } else if (eventType === del) {
-                const index = updatedSubtasks.findIndex(
-                  (st) => st.id === oldSubtask.id,
-                );
-                if (index !== -1) updatedSubtasks.splice(index, 1);
-              }
-              return { ...task, subtasks: updatedSubtasks };
-            }
-            return task;
-          });
+        ['subtasks', orderId],
+        (oldSubtasks: Subtask.Type[] | undefined) => {
+          if (!oldSubtasks) return [];
+          switch (eventType) {
+            case insert:
+              return [...oldSubtasks, { ...newSubtask }];
+            case update:
+              return oldSubtasks
+                .map((subtask) =>
+                  subtask.id === newSubtask.id
+                    ? {
+                        ...subtask,
+                        ...newSubtask,
+                      }
+                    : subtask,
+                )
+                .filter((subtask) => subtask.deleted_on === null); // Filter out deleted subtasks
+            case del:
+              return oldSubtasks.filter((subtask) => subtask.id !== oldSubtask.id);
+            default:
+              return oldSubtasks;
+          }
         },
       );
     },
@@ -136,7 +135,8 @@ export const useRealTimeTasks = (orderId: string) => {
   return {
     // Task state
     tasks,
-    loading: isLoading,
+    subtasks,
+    loading: isLoadingTasks || isLoadingSubtasks,
 
     // Task mutations
     createTask,
