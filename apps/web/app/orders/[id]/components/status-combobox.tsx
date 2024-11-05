@@ -164,10 +164,10 @@ function StatusCombobox({ order, subtask, mode, agency_id }: StatusComboboxProps
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={createStatus.status == 'pending' || deleteStatus.status == 'pending' || changeSubtaskStatus.status == 'pending'}>
         <Button
-          variant="outline"
+          variant="normal"
           role="combobox"
           aria-expanded={open}
-          className={`inline-flex items-center rounded-lg p-2 border-none ${popoverValue == 'in_progress' ? 'bg-[#F4EBFF] text-[#6941C6]' : statuses.includes(popoverValue) ? statusColors[popoverValue as keyof typeof statusColors] : ''}`}
+          className={` shadow-none inline-flex items-center rounded-lg p-2 border-none ${popoverValue == 'in_progress' ? 'bg-[#F4EBFF] text-[#6941C6]' : statuses.includes(popoverValue) ? statusColors[popoverValue as keyof typeof statusColors] : ''}`}
 
           style={{
             backgroundColor: statuses.includes(popoverValue)

@@ -176,7 +176,7 @@ function SubTasks({
                     <Sheet open={isSheetOpen}>
                       <SheetContent
                         className="max-w-[300px] sm:max-w-[700px]"
-                        onInteractOutside={handleSheetClose}
+                        // onInteractOutside={handleSheetClose}
                       >
                         <SheetHeader>
                           <div className="flex justify-between">
