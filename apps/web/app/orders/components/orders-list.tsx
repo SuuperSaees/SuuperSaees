@@ -326,7 +326,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                   <ThemedInput
                     type="search"
                     placeholder={t('searchPlaceholderTasks')}
-                    className="bg-white focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
+                    className="bg-white rounded-xl focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
                     onChange={(e: {
                       target: { value: React.SetStateAction<string> };
@@ -343,7 +343,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
             </div>
             <Separator />
             <div className="mt-4">
-              <TabsContent className='bg-white' value="open">
+              <TabsContent className='bg-white rounded-xl' value="open">
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
