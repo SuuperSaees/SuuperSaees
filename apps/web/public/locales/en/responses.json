@@ -1,0 +1,22 @@
+{
+  "error": {
+    "default": "An error occurred while processing your request. Please try again.",
+    "clients": {
+        "userAlreadyExists": "Member with this email already exists",
+        "faildedToCreateUser": "Failed to create client user account",
+        "insufficientPermissions": "You do not have the required permissions to execute this operation",
+        "organizationNotFound": "No organization found for this client",
+        "agencyNotFound": "No agency found for this client"
+        
+    },
+    "services": {}
+  },
+  "success": {
+    "default": "Operation completed successfully",
+    "clients": {
+      "clientCreated": "Client created successfully",
+      "memberAdded": "Member added successfully"
+   
+    }
+  }
+}

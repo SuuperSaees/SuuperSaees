@@ -1,0 +1,1 @@
+export type Entity = 'clients' | 'accounts' | 'services' | 'briefs' | 'tasks' | 'orders';
