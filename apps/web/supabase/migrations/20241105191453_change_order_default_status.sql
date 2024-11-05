@@ -1,1 +1,1 @@
-alter table "public"."orders_v2" alter column "status" set default '''Pending response''::text'::text;
+alter table "public"."orders_v2" alter column "status" set default 'Pending response'::text;

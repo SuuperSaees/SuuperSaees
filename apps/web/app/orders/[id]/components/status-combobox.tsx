@@ -6,7 +6,6 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ChevronsUpDown,Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -31,6 +30,8 @@ import { useStatusDragAndDrop } from '../hooks/agency-statuses/use-status-drag-a
 import EditStatusPopover from './edit-status-popover';
 import { SortableStatus } from './sortable-status';
 import { closestCenter, DndContext } from '@dnd-kit/core';
+import { ChevronDown } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface StatusComboboxProps {
   order?: Order.Type;
@@ -192,10 +193,11 @@ function StatusCombobox({
         }
       >
         <Button
-          variant="outline"
+          variant="normal"
           role="combobox"
           aria-expanded={open}
-          className={`m-2 inline-flex items-center rounded-lg p-2`}
+          className={` shadow-none inline-flex items-center rounded-lg p-2 border-none ${popoverValue == 'in_progress' ? 'bg-[#F4EBFF] text-[#6941C6]' : statuses.includes(popoverValue) ? statusColors[popoverValue as keyof typeof statusColors] : ''}`}
+
           style={{
             backgroundColor: findStatusColor(popoverValue),
             color: darkenColor(
@@ -205,7 +207,7 @@ function StatusCombobox({
           }}
         >
           <span className="pl-2 pr-2">{popoverValue}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="h-64 w-[250px] p-0">

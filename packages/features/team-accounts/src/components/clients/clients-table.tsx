@@ -93,7 +93,7 @@ type ClientsTableProps = {
   view?: 'clients' | 'organizations';
 };
 
-// CLIENTS TABLE
+// CLIENTS TABLE 
 // accountIds, accountNames
 export function ClientsTable({ clients, view }: ClientsTableProps) {
   const { t } = useTranslation();
@@ -172,37 +172,53 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
   }, [view]);
 
   return (
-    <div className="w-full">
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-[24px]">
-        <div className="flex">
+    <div className="flex w-full flex-col">
+      <div className="flex flex-col">
+        <div className="flex justify-between mb-[20px]">
+          <div className='gap-2 min-h-[40px]'>
           {!view && (
             <>
-              <Button
-                variant="ghost"
-                className={`flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'clients' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
-                onClick={() => handleButtonClick('clients')}
-              >
-                <span className="text-sm font-semibold leading-5">
-                  {t('clients:clients')}
-                </span>
-              </Button>
-              <Button
-                variant="ghost"
-                className={`ml-[20px] flex h-9 items-center gap-2 rounded-md p-2 px-3 ${activeButton === 'organizations' ? 'bg-primary/10 text-black-700' : 'bg-transparent text-gray-500'}`}
-                onClick={() => handleButtonClick('organizations')}
-              >
-                <span className="text-sm font-semibold leading-5">
-                  {t('clients:organizations.title')}
-                </span>
-              </Button>
-            </>
+<Button
+  variant="ghost"
+  className={`
+    max-h-[32px] inline-flex items-center text-[#667085] gap-2 px-3 py-1.5 hover:text-[#667085] 
+    active:bg-[#EBECEF] text-sm font-semibold transition-all rounded-sm whitespace-nowrap
+    ${activeButton === 'clients' ? 
+      'shadow-sm data-[state=active]:shadow-sm data-[state=active]:text-[#667085] data-[state=active]:bg-[#d0d6f799] text-[#667085] bg-[#EBECEF]' :
+      'bg-transparent text-[#667085]'
+    }
+  `}
+  onClick={() => handleButtonClick('clients')}
+>
+  <span className="leading-5">
+    {t('clients:clients')}
+  </span>
+</Button>
+
+<Button
+  variant="ghost"
+  className={`
+    max-h-[32px] ml-[.5rem] inline-flex items-center gap-2 text-[#667085] px-3 py-1.5 hover:text-[#667085] 
+    active:bg-[#EBECEF] text-sm font-semibold transition-all rounded-sm whitespace-nowrap
+    ${activeButton === 'organizations' ? 
+      'shadow-sm data-[state=active]:shadow-sm data-[state=active]:text-[#667085] data-[state=active]:bg-[#d0d6f799] text-[#667085] bg-[#EBECEF]' :
+      'bg-transparent text-[#667085]'
+    }
+  `}
+  onClick={() => handleButtonClick('organizations')}
+>
+  <span className="leading-5">
+    {t('clients:organizations.title')}
+  </span>
+</Button>
+</>
           )}
         </div>
-
-        <div className="flex gap-4 px-2">
-          <div className="relative ml-auto flex w-fit flex-1 md:grow-0">
-            <Search className="text-muted-foreground absolute right-2.5 top-2.5 h-4 w-4" />
-
+        <div className='justify-end flex'>
+        <div className="flex gap-4">
+          <div className="relative ml-auto flex w-fit flex-1 md:grow-0 max-h-[36px] px-3">
+            
+          <Search className="text-muted-foreground absolute left-5 top-2.5 h-4 w-4" />
             <ThemedInput
               value={search}
               onInput={(
@@ -215,15 +231,18 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
                   ? t('clients:searchClients')
                   : t('clients:searchOrganizations')
               }
-              className="bg-background w-full rounded-lg pr-8 md:w-[200px] lg:w-[320px]"
+              className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[320px]"
             />
+            </div>
           </div>
           {(activeButton === 'organizations' &&
             filteredOrganizations.length > 0) ||
             (filteredClients.length > 0 && <CreateClientDialog />)}
         </div>
+        </div>
         {!view && <Separator />}
       </div>
+      <div className='bg-white border mt-4 rounded-xl'>
       {(activeButton === 'organizations' && !uniqueClients.length) ||
       !clients.length ? (
         <EmptyState
@@ -233,7 +252,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
           button={<CreateClientDialog />}
         />
       ) : (
-        <DataTable
+        <DataTable className=''
           data={
             (activeButton === 'organizations'
               ? filteredOrganizations
@@ -243,6 +262,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
           options={options as TableOptions<Client>}
         />
       )}
+      </div>
     </div>
   );
 }

@@ -91,7 +91,7 @@ export function BriefsTable({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between py-4">
+      <div className="flex items-center justify-between pb-[24px]">
         <TabsList className="gap-2 bg-transparent">
           <ThemedTabTrigger
             value="services"
@@ -137,7 +137,7 @@ export function BriefsTable({
       <Separator />
 
       {isLoading ? (
-        <SkeletonTable columns={4} rows={7} className="mt-6" />
+        <SkeletonTable columns={4} rows={7} className="mt-4" />
       ) : !briefs.length ? (
         // <div className="mt-6 flex h-full flex-col rounded-md border bg-white p-2">
           <EmptyState
@@ -159,7 +159,7 @@ export function BriefsTable({
             data={filteredBriefs}
             columns={columns}
             options={options}
-            className='mt-6'
+            className='mt-4 bg-white'
           />
     
       )}
