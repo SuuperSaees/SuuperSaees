@@ -263,6 +263,7 @@ export type Database = {
           agency_id: string | null
           created_at: string
           id: number
+          position: number | null
           status_color: string | null
           status_name: string | null
         }
@@ -270,6 +271,7 @@ export type Database = {
           agency_id?: string | null
           created_at?: string
           id?: number
+          position?: number | null
           status_color?: string | null
           status_name?: string | null
         }
@@ -277,6 +279,7 @@ export type Database = {
           agency_id?: string | null
           created_at?: string
           id?: number
+          position?: number | null
           status_color?: string | null
           status_name?: string | null
         }
@@ -1445,7 +1448,7 @@ export type Database = {
           id: number
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
-          status: string
+          status: string | null
           stripe_account_id: string | null
           title: string
           uuid: string
@@ -1462,7 +1465,7 @@ export type Database = {
           id?: number
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
-          status?: string
+          status?: string | null
           stripe_account_id?: string | null
           title: string
           uuid: string
@@ -1479,7 +1482,7 @@ export type Database = {
           id?: number
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
-          status?: string
+          status?: string | null
           stripe_account_id?: string | null
           title?: string
           uuid?: string
@@ -2056,7 +2059,29 @@ export type Database = {
           trial_starts_at?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subtask_assignations: {
         Row: {
@@ -2162,7 +2187,7 @@ export type Database = {
           position: number | null
           priority: Database["public"]["Enums"]["priority_types"] | null
           start_date: string | null
-          state: Database["public"]["Enums"]["order_status_types"] | null
+          state: string | null
         }
         Insert: {
           completed?: boolean | null
@@ -2176,7 +2201,7 @@ export type Database = {
           position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
-          state?: Database["public"]["Enums"]["order_status_types"] | null
+          state?: string | null
         }
         Update: {
           completed?: boolean | null
@@ -2190,7 +2215,7 @@ export type Database = {
           position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
-          state?: Database["public"]["Enums"]["order_status_types"] | null
+          state?: string | null
         }
         Relationships: [
           {
@@ -2751,7 +2776,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2765,7 +2789,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2779,7 +2802,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2801,7 +2823,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2812,7 +2833,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2823,7 +2843,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2959,10 +2978,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {

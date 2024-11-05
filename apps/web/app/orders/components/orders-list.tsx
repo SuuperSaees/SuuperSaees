@@ -127,7 +127,7 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
                     'agency_owner',
                     'agency_project_manager',
                   ].includes(role) ? (
-                    <StatusCombobox order={order} />
+                    <StatusCombobox order={order} agency_id={order.agency_id} mode='order' />
                   ) : (
                     // Display the status or an empty space if there is no status
                     <span className="pl-2 pr-2">
@@ -326,7 +326,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                   <ThemedInput
                     type="search"
                     placeholder={t('searchPlaceholderTasks')}
-                    className="bg-white focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
+                    className="bg-white rounded-xl focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
                     onChange={(e: {
                       target: { value: React.SetStateAction<string> };
@@ -343,21 +343,21 @@ export function OrderList({ orders, role }: OrdersTableProps) {
             </div>
             <Separator />
             <div className="mt-4">
-              <TabsContent value="open">
+              <TabsContent className='bg-white rounded-xl' value="open">
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
                 />
               </TabsContent>
-              <TabsContent value="completed">
+              <TabsContent value="completed" className='bg-white'>
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
                 />
               </TabsContent>
-              <TabsContent value="all">
+              <TabsContent value="all" className='bg-white'>
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}

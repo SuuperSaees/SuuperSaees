@@ -62,7 +62,7 @@ const SelectAction = ({
         }}
       >
         <SelectTrigger
-          className={'w-fit rounded-full border-none bg-black ' + className}
+          className={'w-fit border-none bg-black ' + className}
         >
           {(groupName === 'Priority' || groupName === 'Prioridad') && (
             <div className="mr-2 h-2 w-2 rounded-full bg-current"></div>

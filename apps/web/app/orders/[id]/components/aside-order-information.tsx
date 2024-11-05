@@ -268,7 +268,7 @@ const   AsideOrderInformation = ({
               <p>{t('details.status')}</p>
             </div>
 
-            <StatusCombobox order={order} />
+            <StatusCombobox order={order} agency_id={order.agency_id} mode='order' />
           </div>
           <div className="flex items-center text-sm">
             <FlagIcon className="mr-2 h-4 w-4" />

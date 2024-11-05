@@ -190,7 +190,6 @@ export default function BriefConnectionStep(
     setSelectedBriefs(form.getValues('step_connect_briefs') ?? []);
   }, [form]);
 
-  console.log('previousService', previousService);
   return (
     <section className={'full w-full'}>
       <div className="mx-auto flex h-full max-w-3xl flex-col space-y-4 text-gray-600">
