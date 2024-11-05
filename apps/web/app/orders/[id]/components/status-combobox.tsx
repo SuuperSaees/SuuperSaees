@@ -25,6 +25,7 @@ import EditStatusPopover from './edit-status-popover';
 import { Subtask } from '~/lib/tasks.types';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 import { ChevronDown } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface StatusComboboxProps {
   order?: Order.Type,
