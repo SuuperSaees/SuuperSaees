@@ -1,17 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { Subtask } from '~/lib/tasks.types';
 import { DragEndEvent, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSubtaskMutations } from './subtasks/use-subtask-mutations';
+import { useQueryClient } from '@tanstack/react-query';
 
 type SubtaskType = Subtask.Type;
 
-export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[], orderId: string, orderAgencyId: string, userRole: string) => {
-  const supabase = useSupabase();
-  const [subtaskList, setSubtaskList] = useState<SubtaskType[]>(initialSubtasks);
+export const useRealTimeSubtasks = (orderId: string, orderAgencyId: string, userRole: string) => {
+  const queryClient = useQueryClient();
 
   const { createSubtask, updateSubtask, updateSubtaskIndex, changeAgencyMembersAssigned, changeAgencyMembersFollowers,  orderAgencyMembers, orderAgencyClientsFollowers} = useSubtaskMutations(orderId, orderAgencyId, userRole);
 
@@ -51,56 +50,6 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[], orderId: str
   });
   const sensors = useSensors(mouseSensor, touchSensor);
 
-  const handleSubtaskChange = useCallback(
-    (payload: { eventType: string; new: SubtaskType; old: SubtaskType }) => {
-      const { eventType, new: newSubtask, old: oldSubtask } = payload;
-      const insert = 'INSERT';
-      const update = 'UPDATE';
-      const del = 'DELETE';
-  
-      setSubtaskList((prevSubtasks) => {
-        if (eventType === insert) {
-          return [...prevSubtasks, { ...newSubtask }];
-        }
-  
-        if (eventType === update) {
-          return prevSubtasks
-            .map((subtask) =>
-              subtask.id === newSubtask.id
-                ? {
-                    ...subtask,
-                    ...newSubtask,
-                  }
-                : subtask,
-            )
-            .filter((subtask) => subtask.deleted_on === null); // Filter out deleted subtasks
-        }
-  
-        if (eventType === del) {
-          return prevSubtasks.filter((subtask) => subtask.id !== oldSubtask.id);
-        }
-  
-        return prevSubtasks;
-      });
-    },
-    [],
-  )
-
-  useEffect(() => {
-    const channel = supabase
-      .channel('subtasks')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'subtasks' },
-        handleSubtaskChange,
-      )
-      .subscribe();
-
-    return () => {
-      channel.unsubscribe().catch((error) => console.error(error));
-    };
-  }, [supabase, handleSubtaskChange]);
-
   // Drag and drop handlers
   function handleDragStart(event: DragStartEvent) {
     setIsDragging(true);
@@ -127,21 +76,30 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[], orderId: str
       resetDragState();
       return;
     }
-  
-    const oldIndex = subtaskList.findIndex((subtask) => subtask.id === active.id);
-    const newIndex = subtaskList.findIndex((subtask) => subtask.id === over.id);
-  
-    if (oldIndex !== newIndex) {
-      const updatedSubtasks = arrayMove(subtaskList, oldIndex, newIndex).map((subtask, index) => ({
-        ...subtask,
-        position: index,
-      }));
-  
-      setSubtaskList(updatedSubtasks); 
-      await updateSubtaskIndex.mutateAsync({
-        subtasks: updatedSubtasks,
-       }); 
-    }
+
+    let updatedSubtasks: Subtask.Type[] = [];
+
+    queryClient.setQueryData(
+      ['subtasks', orderId],
+      (prevSubtasks: SubtaskType[] | undefined) => {
+        if (!prevSubtasks) return [];
+        const oldIndex = prevSubtasks.findIndex((subtask) => subtask.id === active.id);
+        const newIndex = prevSubtasks.findIndex((subtask) => subtask.id === over.id);
+
+        if (oldIndex === newIndex) return prevSubtasks;
+
+        updatedSubtasks = arrayMove(prevSubtasks, oldIndex, newIndex).map(
+          (subtask, index) => ({
+            ...subtask,
+            position: index,
+          }),
+        );
+
+        return updatedSubtasks;
+      },
+    );
+
+    await updateSubtaskIndex.mutateAsync({ subtasks: updatedSubtasks });
   
     resetDragState();
   }
@@ -157,7 +115,6 @@ export const useRealTimeSubtasks = (initialSubtasks: SubtaskType[], orderId: str
 
   return {
     // Subtask states
-    subtaskList,
     createSubtask,
 
     // Subtask mutations
