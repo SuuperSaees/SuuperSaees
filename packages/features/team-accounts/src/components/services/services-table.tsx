@@ -99,7 +99,7 @@ export function ServicesTable({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between gap-4 py-4">
+      <div className="flex items-center justify-between gap-4 pb-[24px]">
         <TabsList className="gap-2 bg-transparent">
           <ThemedTabTrigger
             value="services"
@@ -142,7 +142,7 @@ export function ServicesTable({
       <Separator />
 
       {isLoading ? (
-        <SkeletonTable columns={7} rows={7} className="mt-6" />
+        <SkeletonTable columns={7} rows={7} className="mt-2" />
       ) : !services.length ? (
         // <div className="mt-6 flex h-full flex-col rounded-md border bg-white p-2">
           <EmptyState
@@ -163,7 +163,7 @@ export function ServicesTable({
           columns={columns}
           data={filteredServices}
           options={options}
-          className="mt-6"
+          className="mt-4 bg-white"
         />
       )}
     </div>
