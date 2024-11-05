@@ -38,7 +38,7 @@ function PersonalAccountSettingsPage() {
         <div className="mb-[32px] flex items-center justify-between">
           <div className="flex-grow">
             <span>
-              <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
+              <div className="text-primary-900 font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px]">
                 <Trans i18nKey={'account:settingsTab'} />
               </div>
             </span>

@@ -1,0 +1,21 @@
+{
+  "error": {
+    "default": "Ha ocurrido un error al procesar su solicitud. Por favor, inténtelo de nuevo.",
+    "clients": {
+      "userAlreadyExists": "Ya existe un miembro con ese correo electrónico",
+      "faildedToCreateUser": "Error al crear el usuario del cliente",
+      "insufficientPermissions": "No tienes permisos para ejecutar esta acción",
+      "organizationNotFound": "No se encontró la organización del cliente",
+      "agencyNotFound": "No se encontró la agencia del cliente"
+    },
+    "services": {}
+  },
+  "success": {
+    "default": "La operación se completó correctamente",
+    "clients": {
+      "clientCreated": "Cliente creado correctamente",
+      "memberAdded": "Miembro agregado correctamente"
+    }
+  }
+
+}

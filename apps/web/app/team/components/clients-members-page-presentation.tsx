@@ -98,7 +98,7 @@ const ClientsMembersPagePresentation = ({
         </div>
 
         <div className="w-full">
-          <div className="flex items-center justify-between pb-[24px]">
+          <div className="flex items-center justify-between pb-[28px]">
             <If condition={canManageInvitations && canAddMember}>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold">
@@ -166,7 +166,7 @@ const ClientsMembersPagePresentation = ({
         </div>
 
         <Separator />
-        <div className="mt-[24px]">
+        <div className="mt-4">
           <AccountMembersTable
             userRoleHierarchy={currentUserRoleHierarchy ?? 0}
             currentUserId={user.id}

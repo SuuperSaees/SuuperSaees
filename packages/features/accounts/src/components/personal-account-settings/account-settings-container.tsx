@@ -33,6 +33,10 @@ import { useOrganizationSettings } from '../../context/organization-settings-con
 import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './update-account-organization-sender-email-and-sender-domain';
 import UpdateAccountOrganizationDarkLogo from './update-account-organization-dark-logo';
 import PlansContainer from '../../../../../../apps/web/app/select-plan/components/plans-container';
+import { Separator } from '@kit/ui/separator';
+
+
+// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 type AccountStripe = {
   id: string;
@@ -147,7 +151,8 @@ export function PersonalAccountSettingsContainer(
     <div className="w-full h-full">
       <Tabs defaultValue={"account"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
-          <TabsList className='gap-2 bg-transparent'>
+          <div className="flex items-center justify-between pb-[24px]">
+          <TabsList className='gap-2 bg-transparent '>
             <ThemedTabTrigger
               value="account"
               option="account"
@@ -170,9 +175,12 @@ export function PersonalAccountSettingsContainer(
               <Trans i18nKey={'account:subscription'} />
             </ThemedTabTrigger>
           </TabsList>
+          </div>
         )}
+        
+        <Separator />
         <TabsContent value="account">
-          <div className='"flex w-full flex-wrap gap-6 pb-32 lg:flex-nowrap'>
+          <div className='"flex w-full mt-4 flex-wrap gap-6 pb-32 lg:flex-nowrap'>
             <div className="flex w-full flex-col space-y-6">
               <Card>
                 <CardHeader>

@@ -20,7 +20,7 @@ async function ClientsMembersPage() {
   return (
     <PageBody>
       <div className="p-[35px]">
-        <div className="mb-[32px] flex items-center justify-between">
+        <div className="mb-[36px] flex items-center justify-between">
           <div className="flex-grow">
             <span>
               <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
