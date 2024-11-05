@@ -23,6 +23,7 @@ interface EditStatusPopoverProps {
   order_id?: number;
   task_id?: string;
   mode?: 'order' | 'subtask';
+  preventEditName?: boolean;
   setValue: (value: string) => void;
 }
 
@@ -33,6 +34,7 @@ function EditStatusPopover({
   order_id,
   task_id,
   mode,
+  preventEditName = false,
   setValue,
 }: EditStatusPopoverProps) {
   const [open, setOpen] = useState<boolean>(false);
@@ -125,14 +127,17 @@ function EditStatusPopover({
       <PopoverContent className="w-80" onClick={handlePopoverClick}>
         <form onSubmit={(e) => e.preventDefault()} className="grid gap-4">
           <div className="flex items-center gap-2">
-            <Input
-              id="name"
-              value={name}
-              defaultValue={name}
-              onChange={(e) => setName(e.target.value)}
-              className="h-8 w-[80%]"
-              onClick={(e) => e.stopPropagation()}
-            />
+            {
+              !preventEditName &&
+              <Input
+                id="name"
+                value={name}
+                defaultValue={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-8 w-[80%]"
+                onClick={(e) => e.stopPropagation()}
+              />
+            }
             <div
               className="h-10 w-10 cursor-pointer rounded-full border-4 border-white shadow-lg transition-transform hover:scale-110"
               style={{ backgroundColor: color }}

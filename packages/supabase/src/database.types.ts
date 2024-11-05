@@ -263,6 +263,7 @@ export type Database = {
           agency_id: string | null
           created_at: string
           id: number
+          position: number | null
           status_color: string | null
           status_name: string | null
         }
@@ -270,6 +271,7 @@ export type Database = {
           agency_id?: string | null
           created_at?: string
           id?: number
+          position?: number | null
           status_color?: string | null
           status_name?: string | null
         }
@@ -277,6 +279,7 @@ export type Database = {
           agency_id?: string | null
           created_at?: string
           id?: number
+          position?: number | null
           status_color?: string | null
           status_name?: string | null
         }
