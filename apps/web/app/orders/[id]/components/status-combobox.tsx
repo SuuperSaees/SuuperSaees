@@ -293,16 +293,25 @@ function StatusCombobox({
                               task_id={subtask?.id}
                               setValue={setPopoverValue}
                               mode={mode}
+                              preventEditName = {status.status_name === 'Pending response' || status.status_name === 'Completed' || status.status_name === 'In review' || status.status_name === 'Cancelled' || status.status_name === 'In progress'}
                             />
-                            <Trash2
-                              className="h-5 w-5 cursor-pointer"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleDeleteStatus(status.id);
-                                setOpen(false);
-                              }}
-                            />
+                            {
+                              status.status_name === 'Pending response' ||
+                              status.status_name === 'Completed' ||
+                              status.status_name === 'In review' ||
+                              status.status_name === 'Cancelled' ||
+                              status.status_name === 'In progress' ? null : (
+                                <Trash2
+                                  className="h-5 w-5 cursor-pointer"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleDeleteStatus(status.id);
+                                    setOpen(false);
+                                  }}
+                                />
+                              )
+                            }
                           </div>
                         </CommandItem>
                       </SortableStatus>
