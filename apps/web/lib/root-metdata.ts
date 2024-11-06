@@ -15,6 +15,10 @@ export const generateRootMetadata = (): Metadata => {
   // Get the favicon URL from cookies
   // const cookies = headers().get('cookie') ?? '';
   const defaultFaviconUrl = `${process.env.NEXT_PUBLIC_FAVICON_URL_BASE}/${host}_favicon_url`;
+  const applicationName = host;
+  const metadataBase = new URL(`https://${host}`);
+  const title = host;
+  const url = `https://${host}`;
   
   // Try to find the favicon_url from authDetails cookie
   const faviconUrl = defaultFaviconUrl;
@@ -32,22 +36,22 @@ export const generateRootMetadata = (): Metadata => {
   // }
 
   return {
-    title: appConfig.title,
+    title,
     description: appConfig.description,
-    metadataBase: new URL(appConfig.url),
-    applicationName: appConfig.name,
+    metadataBase,
+    applicationName,
     other: {
       'csrf-token': csrfToken,
     },
     openGraph: {
-      url: appConfig.url,
-      siteName: appConfig.name,
-      title: appConfig.title,
+      url,
+      siteName: applicationName,
+      title,
       description: appConfig.description,
     },
     twitter: {
       card: 'summary_large_image',
-      title: appConfig.title,
+      title,
       description: appConfig.description,
     },
     icons: {
