@@ -20,7 +20,10 @@ export const generateMetadata = async () => {
 };
 
 async function ServicesPage(){
-  const accountRole = await getUserRole();
+  const accountRole = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
   return(
     <ServicesPageClient stripePromise={stripePromise} accountRole={accountRole}/>
   )

@@ -35,7 +35,10 @@ async function OrderDetailsPage({
     { title: ordersTitle },
     { title: order?.title ?? '', uuid: order?.uuid ?? '' },
   ];
-  const role = await getUserRole();
+  const role = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
 
   return (
     <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
