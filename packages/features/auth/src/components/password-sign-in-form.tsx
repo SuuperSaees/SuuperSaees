@@ -66,15 +66,15 @@ export function PasswordSignInForm({
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-black pt-2 flex justify-center items-start text-2xl font-semibold " >
+              <FormLabel className="pt-2 flex justify-center items-start text-2xl font-semibold " >
                 <Trans i18nKey={'common:plsDetailInputs'} />  
               </FormLabel>
 
-              <FormLabel className="text-black flex justify-center items-start font-normal " >
+              <FormLabel className="flex justify-center items-start font-normal " >
               <Trans i18nKey={'common:continueToYourAccount'} />
               </FormLabel>
 
-              <div className="text-black text-left text-sm" style={{ marginTop: '30px' }}>
+              <div className=" text-left text-sm" style={{ marginTop: '30px' }}>
                 <Trans i18nKey={'common:emailLabel'} />
               </div>
 
