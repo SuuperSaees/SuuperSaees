@@ -22,7 +22,7 @@ type Invitation = Database['public']['Tables']['invitations']['Row'];
 
 const invitePath = '/join';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL;
-const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+// const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
 const productName = process.env.NEXT_PUBLIC_PRODUCT_NAME ?? '';
 const SUUPER_CLIENT_ID = process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID;
 const SUUPER_CLIENT_SECRET = process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET;
@@ -167,14 +167,11 @@ class AccountInvitationsWebhookService {
     logger.info(ctx, 'Invite retrieved. Sending invitation email...');
 
     try {
-      let domain = await getDomainByOrganizationId(
+      const domain = await getDomainByOrganizationId(
         inviter.data.organization_id ?? '',
-        false,
+        true,
         true,
       );
-      if (domain !== siteURL) {
-        domain = isProd ? `https://${domain}` : `http://${domain}`;
-      }
 
       const { renderInviteEmail } = await import('@kit/email-templates');
       // const { getMailer } = await import('@kit/mailers');

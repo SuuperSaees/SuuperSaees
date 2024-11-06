@@ -15,7 +15,7 @@ import { Trans } from '@kit/ui/trans';
 import { AppLogo } from '~/components/app-logo';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
-import { withI18n } from '~/lib/i18n/with-i18n';
+// import { withI18n } from '~/lib/i18n/with-i18n';
 
 interface Context {
   searchParams: {
@@ -32,7 +32,7 @@ export const generateMetadata = async () => {
   };
 };
 
-async function JoinTeamAccountPage({ searchParams }: Context) {
+export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const token = searchParams.invite_token;
 
   // no token, redirect to 404
@@ -117,6 +117,11 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
   const accountHome = pathsConfig.app.orders;
   const email = auth.data.email ?? '';
 
+  const currentSession = await client.auth.getSession();
+  if (currentSession.data.session) {
+    await client.auth.signOut();
+  }
+
   return (
     <AuthLayoutShell Logo={AppLogo}>
       <AcceptInvitationContainer
@@ -132,7 +137,7 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
   );
 }
 
-export default withI18n(JoinTeamAccountPage);
+// export default withI18n(JoinTeamAccountPage);
 
 function InviteNotFoundOrExpired() {
   return (
