@@ -119,7 +119,7 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
 
   const currentSession = await client.auth.getSession();
   if (currentSession.data.session) {
-    await client.auth.signOut({scope: 'local'});
+    await client.auth.signOut();
   }
 
   return (
