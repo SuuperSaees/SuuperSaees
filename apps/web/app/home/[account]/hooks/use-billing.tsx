@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getSubscriptionByOrganizationId } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/get/get-subscription';
 import { updateSubscription } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/update/update-subscription';
 // import { BillingProviderSchema } from '@kit/billing';
@@ -22,7 +23,7 @@ export const useBilling = () => {
   const [totalBilled] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessage] = useState<string>("");
   const [hasFetched, setHasFetched] = useState(false);
 
   const featuresByProduct = {
@@ -31,7 +32,7 @@ export const useBilling = () => {
     "advanced": ["customEmails", "apiIntegration", "zapierAutomation"],
   }
 
-  const fetchInvoices = async (customerId: string): Promise<void> => { 
+  const fetchInvoices = useCallback(async (customerId: string): Promise<void> => {
     setLoading(true);
     setError(false);
     try {
@@ -52,9 +53,9 @@ export const useBilling = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchUpcomingInvoice = async (customerId: string): Promise<void> => {
+  const fetchUpcomingInvoice = useCallback(async (customerId: string): Promise<void> => {
     setLoading(true);
     setError(false);
     try {
@@ -75,79 +76,100 @@ export const useBilling = () => {
     } finally {
       setLoading(false);
     }
+  }, [])
+
+
+  const fetchProducts = async () => {
+    const cacheKey = 'productsDataConfig';
+    const cacheExpiryKey = 'productsDataConfigExpiry';
+    const cacheExpiryTime = 1000 * 60 * 5;
+  
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedExpiry = localStorage.getItem(cacheExpiryKey);
+  
+    if (cachedData && cachedExpiry && Date.now() < parseInt(cachedExpiry, 10)) {
+      return JSON.parse(cachedData) as { name: string; id: string; default_price: string; }[];
+    }
+  
+    const response = await fetch(`/api/stripe/suuper-products`, {
+      method: "GET",
+    });
+  
+    if (!response.ok) {
+      throw new Error("Error fetching products");
+    }
+  
+    const data = await response.json() as { name: string; id: string; default_price: string; }[];
+
+    const newCachedData = data.map((product) => ({
+      id: product.id,
+      name: product.name,
+      default_price: product.default_price,
+    }));
+      
+    localStorage.setItem(cacheKey, JSON.stringify(newCachedData));
+    localStorage.setItem(cacheExpiryKey, (Date.now() + cacheExpiryTime).toString());
+  
+    return data;
   };
 
-  const [lastProductsFetch, setLastProductsFetch] = useState<number>(0);
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+  const { data: productsData } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts,
+    staleTime: 1000 * 60 * 5
+  }) as {
+    data: { name: string; id: string; default_price: string; }[];
+  };
 
-  const fetchProducts = useCallback(async () => {
-    // Check if we have recent data
-    const now = Date.now();
-    if (productsDataConfig && (now - lastProductsFetch) < CACHE_DURATION) {
-      return; // Use cached data
-    }
+  useEffect(() => {
+    if (productsData) {
+      const productsMap = productsData.reduce((acc: Record<string, { id: string; default_price: string }>, product: { name: string; id: string; default_price: string; }) => ({
+        ...acc,
+        [product.name.toLowerCase()]: {
+          id: product.id,
+          default_price: product.default_price
+        }
+      }), {});
 
-    setLoading(true);
-    setErrorMessage("");
-    try {
-      const response = await fetch(`/api/stripe/suuper-products`, {
-        method: "GET",
-      });
-      if (!response.ok) {
-        throw new Error("Error fetching products");
-      }
-      const data = await response.json() as { name: string; id: string; default_price: string }[];
+      const productsDataConfigBase = [
+        {
+          id: productsMap.starter?.id ?? '',
+          name: "Starter",
+          plan: {
+            id: productsMap.starter?.default_price ?? '',
+            currency: "USD",
+            amount: 1900,
+            interval: "month",
+            trial_period_days: 0,
+            billing_scheme: "per_seat",
+          },
+        },
+        {
+          id: productsMap.premium?.id ?? '',
+          name: "Premium",
+          plan: {
+            id: productsMap.premium?.default_price ?? '',
+            currency: "USD",
+            amount: 2500,
+            interval: "month",
+            trial_period_days: 0,
+            billing_scheme: "per_seat",
+          },
+        },
+        {
+          id: productsMap.advanced?.id ?? '',
+          name: "Advanced",
+          plan: {
+            id: productsMap.advanced?.default_price ?? '',
+            currency: "USD",
+            amount: 3900,
+            interval: "month",
+            trial_period_days: 0,
+            billing_scheme: "per_seat",
+          },
+        },
+      ].filter(product => product.id && product.plan.id);
 
-// Create a products map for O(1) access instead of using find() multiple times
-const productsMap = data.reduce((acc, product) => ({
-  ...acc,
-  [product.name.toLowerCase()]: {
-    id: product.id,
-    default_price: product.default_price
-  }
-}), {} as Record<string, { id: string; default_price: string }>);
-
-// Use direct map access for better performance
-const productsDataConfigBase = [
-  {
-    id: productsMap.starter?.id ?? '',
-    name: "Starter",
-    plan: {
-      id: productsMap.starter?.default_price ?? '',
-      currency: "USD",
-      amount: 1900,
-      interval: "month",
-      trial_period_days: 0,
-      billing_scheme: "per_seat",
-    },
-  },
-  {
-    id: productsMap.premium?.id ?? '',
-    name: "Premium",
-    plan: {
-      id: productsMap.premium?.default_price ?? '',
-      currency: "USD",
-      amount: 2500,
-      interval: "month",
-      trial_period_days: 0,
-      billing_scheme: "per_seat",
-    },
-  },
-  {
-    id: productsMap.advanced?.id ?? '',
-    name: "Advanced",
-    plan: {
-      id: productsMap.advanced?.default_price ?? '',
-      currency: "USD",
-      amount: 3900,
-      interval: "month",
-      trial_period_days: 0,
-      billing_scheme: "per_seat",
-    },
-  },
-// Filter out any products that don't have required IDs
-].filter(product => product.id && product.plan.id);
-  
       const productsDataConfigResult = {
         provider: "stripe",
         products: productsDataConfigBase.map((product) => ({
@@ -174,18 +196,12 @@ const productsDataConfigBase = [
           features: featuresByProduct[product.name.toLowerCase() as keyof typeof featuresByProduct],
         })),
       };
-  
-      setProductsDataConfig(productsDataConfigResult);
-      setLastProductsFetch(now);
-    } catch (error) {
-      console.error("Error fetching products: ", error);
-      setErrorMessage("Error loading products");
-    } finally {
-      setLoading(false);
-    }
-  }, [lastProductsFetch, productsDataConfig]);
 
-  const updateSubscriptionContext = async (): Promise<void> => {
+      setProductsDataConfig(productsDataConfigResult);
+    }
+  }, [productsData]);
+
+  const updateSubscriptionContext = useCallback(async (): Promise<void> => {
     setLoading(true);
     setError(false);
     try {
@@ -223,7 +239,7 @@ const productsDataConfigBase = [
     } finally {
       setLoading(false);
     }
-  };
+  }, [])
 
   const upgradeSubscription = async (): Promise<void> => {
     setLoading(true);
@@ -283,7 +299,6 @@ const productsDataConfigBase = [
     const fetchData = () => {
     if (!hasFetched) {
       void updateSubscriptionContext();
-      void fetchProducts();
       setHasFetched(true);
     }
   };
