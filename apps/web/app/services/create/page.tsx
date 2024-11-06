@@ -16,7 +16,10 @@ export const generateMetadata = async () => {
 };
 
 async function CreateServicePage() {
-  const accountRole = await getUserRole()
+  const accountRole = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
   if(accountRole !== "agency_owner"){
     return redirect("/orders")
   }
