@@ -124,7 +124,7 @@ export function PasswordSignInForm({
                     className="text-black form-checkbox"
                     
                   />
-                  <label htmlFor="rememberMe" className="text-black text-xs" >
+                  <label htmlFor="rememberMe" className="text-xs" >
                     <Trans i18nKey={'auth:rememberMe'} />
                   </label>
                 </div>
