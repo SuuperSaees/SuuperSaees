@@ -60,6 +60,7 @@
   "orders": "Projects",
   "profile": "My profile",
   "billing": "Billing",
+  "subscription": "Subscription",
   "storage": "Storage",
   "roles": {
     "agency_owner": {

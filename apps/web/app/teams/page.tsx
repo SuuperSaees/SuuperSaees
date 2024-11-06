@@ -1,5 +1,5 @@
-import { BellIcon } from '@radix-ui/react-icons';
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+// import { BellIcon } from '@radix-ui/react-icons';
+// import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import {
@@ -25,28 +25,28 @@ export const generateMetadata = async () => {
   };
 };
 
-type Account = {
-  id: string;
-  primary_owner_user_id: string;
-  name: string;
-  slug: string;
-  email: string | null;
-  is_personal_account: boolean;
-  updated_at: string | null;
-  created_at: string | null;
-  created_by: string | null;
-  updated_by: string | null;
-  picture_url: string | null;
-  public_data: object;
-  role_hierarchy_level: number;
-  permissions: Array<
-    | 'roles.manage'
-    | 'billing.manage'
-    | 'settings.manage'
-    | 'members.manage'
-    | 'invites.manage'
-  >;
-};
+// type Account = {
+//   id: string;
+//   primary_owner_user_id: string;
+//   name: string;
+//   slug: string;
+//   email: string | null;
+//   is_personal_account: boolean;
+//   updated_at: string | null;
+//   created_at: string | null;
+//   created_by: string | null;
+//   updated_by: string | null;
+//   picture_url: string | null;
+//   public_data: object;
+//   role_hierarchy_level: number;
+//   permissions: Array<
+//     | 'roles.manage'
+//     | 'billing.manage'
+//     | 'settings.manage'
+//     | 'members.manage'
+//     | 'invites.manage'
+//   >;
+// };
 
 async function ClientsMembersPage() {
   const client = getSupabaseServerComponentClient();
@@ -136,7 +136,7 @@ async function ClientsMembersPage() {
 
   const isPrimaryOwner = account.primary_owner_user_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
-  // console.log('orgnazation account ', organizationAccount, slug);
+
   return (
     <>
       <PageBody>
@@ -187,7 +187,7 @@ async function ClientsMembersPage() {
             <AccountMembersTable
               userRoleHierarchy={currentUserRoleHierarchy ?? 0}
               currentUserId={user.id}
-              currentAccountId={account.id}
+              currentAccountId={account.id ?? ''}
               members={members}
               isPrimaryOwner={isPrimaryOwner}
               canManageRoles={canManageRoles}

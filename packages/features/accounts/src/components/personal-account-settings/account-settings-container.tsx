@@ -32,6 +32,7 @@ import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-dom
 import { useOrganizationSettings } from '../../context/organization-settings-context'
 import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './update-account-organization-sender-email-and-sender-domain';
 import UpdateAccountOrganizationDarkLogo from './update-account-organization-dark-logo';
+import PlansContainer from '../../../../../../apps/web/app/select-plan/components/plans-container';
 import { Separator } from '@kit/ui/separator';
 
 
@@ -147,7 +148,7 @@ export function PersonalAccountSettingsContainer(
     return <LoadingOverlay fullPage />;
   }
   return (
-    <div>
+    <div className="w-full h-full">
       <Tabs defaultValue={"account"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
           <div className="flex items-center justify-between pb-[24px]">
@@ -166,11 +167,18 @@ export function PersonalAccountSettingsContainer(
             >
               <Trans i18nKey={'account:billing'} />
             </ThemedTabTrigger>
+            <ThemedTabTrigger
+              value="subscription"
+              option="subscription"
+              activeTab={accountBillingTab}
+            >
+              <Trans i18nKey={'account:subscription'} />
+            </ThemedTabTrigger>
           </TabsList>
           </div>
         )}
         
-        <Separator></Separator>
+        <Separator />
         <TabsContent value="account">
           <div className='"flex w-full mt-4 flex-wrap gap-6 pb-32 lg:flex-nowrap'>
             <div className="flex w-full flex-col space-y-6">
@@ -423,15 +431,10 @@ export function PersonalAccountSettingsContainer(
         </TabsContent>
 
         <TabsContent value="billing">
-          {/* <div className="flex w-full flex-col space-y-6">
-            <Button>
-              <Link href="/select-plan">
-                Upgrade your plan
-              </Link>
-            </Button>
-              
-            </div> */}
           <BillingContainerConfig tab={tab ?? ''} />
+        </TabsContent>
+        <TabsContent value="subscription">
+          <PlansContainer />
         </TabsContent>
       </Tabs>
     </div>

@@ -6,7 +6,9 @@
   },
   "total": {
     "title": "Invoice total",
-    "users": "{{currentUsers}} of {{totalUsers}} users",
+    "usersEquivalent": "equivalent to {{currentUsers}}",
+    "users": "users",
+    "user": "user",
     "upgrade": "Upgrade your plan"
   },
   "history": {

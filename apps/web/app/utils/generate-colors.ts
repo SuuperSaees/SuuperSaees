@@ -102,3 +102,15 @@ export const getColorLuminance = (hexColor: string): { luminance: number, theme:
   // Return an object with luminance and theme properties
   return { luminance, theme };
 }
+
+export const hexToRgb = (hex: string) => {
+  // Remove the hash if present
+  hex = hex.replace('#', '');
+  
+  // Parse the hex values
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  
+  return `${r}, ${g}, ${b}`;
+};

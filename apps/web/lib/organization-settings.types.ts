@@ -26,6 +26,7 @@ export namespace OrganizationSettings {
     sender_name: 'sender_name',
     sender_email: 'sender_email',
     sender_domain: 'sender_domain',
+    logo_dark_url: 'logo_dark_url',
     // If you want to add more keys, make sure they are defined in the 'organization_setting_key' enum in 'database.types.ts'
   };
 

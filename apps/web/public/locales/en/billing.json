@@ -113,36 +113,53 @@
     }
   },
   "plans": {
+    "currentPlan": "Current",
+    "upgrade": "Upgrade plan",
+    "scheduleDemo": "Schedule a Demo",
+    "whatIncludes": "What includes",
     "features": {
       "maxTasks": "Up to 10 tasks",
-      "chatSupport": "Chat Support"
+      "chatSupport": "Chat Support",
+      "perMemberPerMonth": "per team member per month"
     },
     "starter": {
-      "name": "Starter",
-      "description": "For small teams just getting started",
+      "name": "Starter Plan",
+      "description": "Ideal for starting your digital services business.",
       "badge": "Value",
       "base": "Base",
       "features": {
-        "maxTokens": "Up to 500k tokens"
+        "maxTokens": "Up to 500k tokens",
+        "base": "Basic features and...",
+        "unlimitedServices": "Unlimited services",
+        "unlimitedClients": "Unlimited clients",
+        "unlimitedProjects": "Unlimited projects"
       }
     },
-    "pro": {
-      "name": "Pro",
-      "description": "For growing teams",
-      "badge": "Popular",
+    "premium": {
+      "name": "Premium Plan",
+      "description": "For agencies and creative studios with great potential.",
+      "badge": "Most Popular",
       "base": "Base",
       "features": {
-        "maxTokens": "Up to 3M tokens"
+        "maxTokens": "Up to 3M tokens",
+        "base": "<strong>Premium Plan</strong> features plus...",
+        "calendarView": "Calendar view",
+        "whiteBrandingPortal": "White branding on the portal",
+        "customDomain": "Custom domain"
       }
     },
-    "enterprise": {
-      "name": "Enterprise",
-      "description": "For large teams and organizations",
+    "advanced": {
+      "name": "Advanced Plan",
+      "description": "For established teams with advanced needs.",
       "badge": "Custom",
       "base": "Base",
       "features": {
+        "base": "<strong>Premium Plan</strong> features plus...",
         "maxTokens": "Unlimited tokens",
-        "chatSupport": "Priority Support"
+        "chatSupport": "Priority Support",
+        "customEmails": "Custom emails",
+        "apiIntegration": "API integration",
+        "zapierAutomation": "Zapier automations"
       }
     }
   }
