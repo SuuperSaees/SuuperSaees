@@ -13,7 +13,8 @@ import { toast } from 'sonner';
 import { Database } from '../../../../../apps/web/lib/database.types';
 // import { getOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/get/get-organizations';
 import { upsertOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/update/update-organizations';
-
+import { useTranslation } from 'react-i18next';
+import { handleResponse } from '../../../../../apps/web/lib/response/handle-response';
 
 export type OrganizationSettingKeys =
   Database['public']['Enums']['organization_setting_key'];
@@ -80,7 +81,7 @@ const OrganizationSettingsProvider = ({
 }) => {
   // Transform initialSettings from array to key-value format
   const mappedSettings = mapInitialSettingsToKeyValue(initialSettings);
-
+  const { t } = useTranslation('responses');
   // State to store organization settings initialized with transformed settings
   const [organizationSettings, setOrganizationSettings] =
     useState<OrganizationSettingsContextType>(mappedSettings);
@@ -90,7 +91,10 @@ const OrganizationSettingsProvider = ({
     mutationFn: async (organizationSetting: {
       key: OrganizationSettingKeys;
       value: string;
-    }) => await upsertOrganizationSettings(organizationSetting),
+    }) =>  {
+      const rest = await upsertOrganizationSettings(organizationSetting)
+      await handleResponse(rest, 'organizations', t);
+    },
 
     onSuccess: (updatedSetting) => {
       // console.log('Updated Setting', updatedSetting);
@@ -105,14 +109,10 @@ const OrganizationSettingsProvider = ({
         [key]: newValue,
       }));
 
-      toast.success('Success', {
-        description: `Organization setting updated`,
-      });
+
     },
     onError: () => {
-      toast.error('Error', {
-        description: 'The organization setting could not be updated',
-      });
+      console.error('Error updating organization setting');
     },
   });
 

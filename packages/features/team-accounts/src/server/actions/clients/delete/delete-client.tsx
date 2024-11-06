@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
 
 import {
   AlertDialog,
@@ -20,6 +19,8 @@ import {
 } from '@kit/ui/alert-dialog';
 
 import { deleteClient } from './delete-client-server';
+import { handleResponse } from '../../../../../../../../apps/web/lib/response/handle-response';
+import { useTranslation } from 'react-i18next';
 
 const DeleteUserDialog = ({
   userId,
@@ -32,41 +33,33 @@ const DeleteUserDialog = ({
 }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { t } = useTranslation('responses');
 
   // Client version
   const deleteClientFn = useMutation({
     mutationFn: async (userId: string) => await deleteClient(userId, organizationId),
     onSuccess: async () => {
-      toast('Success', {
-        description: 'Client deleted successfully',
-      });
+      const res = await deleteClient(userId, organizationId);
+      await handleResponse(res, 'clients', t);
 
       await queryClient.invalidateQueries({
         queryKey: [queryKey ?? 'clients'],
       });
     },
+    onError: () => null,
 
-    onError: () => {
-      toast('Error', {
-        description: 'Error deleting client',
-      });
-    },
   });
 
   // Server version, when not querykey is present due
   // to the data was fetched directly from the server
   const handleDelete = async () => {
     try {
-      await deleteClient(userId, organizationId);
-
-      toast('Success', {
-        description: 'Client deleted successfully',
-      });
+      const res = await deleteClient(userId, organizationId);
+      await handleResponse(res, 'clients', t);
+      
       router.refresh();
     } catch (error) {
-      toast('Error', {
-        description: 'Error deleting client',
-      });
+      console.error('Error deleting client:', error);
     }
   };
 

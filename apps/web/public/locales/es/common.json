@@ -29,6 +29,7 @@
   "anonymousUser": "Anónimo",
   "profile": "Mi perfil",
   "billing": "Facturación",
+  "subscription": "Suscripción",
   "orders": "Proyectos",
   "tryAgain": "Intentar de Nuevo",
   "theme": "Tema",
@@ -82,5 +83,7 @@
     "previous": "Anterior"
   },
   "organizationName": "Organización",
-  "selectOption": "Seleccionar una opción"
+  "selectOption": "Seleccionar una opción",
+  "success": "!Todo Listo!",
+  "error": "!Algo salió mal!"
 }

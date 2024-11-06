@@ -6,7 +6,8 @@ import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { FormField } from '../../../../../../../../apps/web/lib/form-field.types';
 import { addFormFieldsToBriefs } from '../create/create-briefs';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-
+import { CustomResponse, CustomError, ErrorBriefOperations } from '../../../../../../../shared/src/response';
+import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 export const updateBriefById = async (briefData: Brief.Type) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -17,10 +18,16 @@ export const updateBriefById = async (briefData: Brief.Type) => {
 
     if (error) {
       console.error('Error al crear brief:', error);
-      throw new Error(error.message);
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        `Error updating brief: ${error.message}`,
+        ErrorBriefOperations.FAILED_TO_UPDATE_BRIEF,
+      );
     }
+    return CustomResponse.success(briefData, 'briefUpdated').toJSON();
   } catch (error) {
     console.error('Error al crear el brief:', error);
+    return CustomResponse.error(error).toJSON();
   }
 };
 
@@ -61,9 +68,11 @@ export const updateFormFieldsById = async (
         .select();
 
       if (formFieldError) {
-        throw new Error(
-          `Error updating form field with id ${id}: ${formFieldError.message}`,
-        );
+        throw new CustomError(
+          HttpStatus.Error.BadRequest,
+          `Error updating form field with id ${id}: ${formFieldError.message}`, 
+          ErrorBriefOperations.FAILED_TO_UPDATE_FIELDS,
+        )
       }
 
       return formFieldData;
@@ -72,10 +81,11 @@ export const updateFormFieldsById = async (
     // Execute all update promises (ignoring those that called addFormFieldsToBriefs)
     const updatedFields = await Promise.all(updatePromises);
 
-    return updatedFields.flat().filter(Boolean); // Returns only updated fields
+
+    return CustomResponse.success(updatedFields.flat().filter(Boolean), 'fieldsUpdated').toJSON();
   } catch (error) {
     console.error('Error al actualizar los fields', error);
-    throw error;
+    return CustomResponse.error(error).toJSON();
   }
 };
 

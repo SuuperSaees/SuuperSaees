@@ -5,6 +5,8 @@ import { UpdateAccountImageContainer } from 'node_modules/@kit/accounts/src/comp
 import { Trans } from '@kit/ui/trans';
 import { updateOrganization } from '../../../../packages/features/team-accounts/src/server/actions/organizations/update/update-organizations';
 import EditableHeader from '../editable-header';
+import { handleResponse } from '~/lib/response/handle-response';
+import { useTranslation } from 'react-i18next';
 
 interface OrganizationHeaderProps {
   id: string;
@@ -21,6 +23,7 @@ interface OrganizationHeaderProps {
 function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderProps) {
   const rolesThatCanEdit = new Set(['agency_member', 'agency_project_manager', 'agency_owner']);
   const ownerUserId = owner.id;
+  const { t } = useTranslation('responses');
   return (
     <div className="flex w-full gap-4">
       <UpdateAccountImageContainer
@@ -40,7 +43,8 @@ function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderPr
           id={id}
           userRole={currentUserRole}
           updateFunction={async (id, data) => {
-            await updateOrganization(id as string, ownerUserId, data);
+            const res = await updateOrganization(id as string, ownerUserId, data);
+            await handleResponse(res, 'organizations', t).catch(() => null);
           }}
           rolesThatCanEdit={rolesThatCanEdit}
           label="Organization name"
