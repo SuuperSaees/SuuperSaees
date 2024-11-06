@@ -60,7 +60,7 @@ export const convertToCustomError = (error: unknown, operationName?: string): Cu
   if (error instanceof CustomError) {
     return operationName ? new CustomError(error.status, error.message, operationName, error.statusText, error.data) : error;
   } else if (error instanceof Error) {
-    return new CustomError(404, error.message);
+    return new CustomError(400, error.message);
   } else {
     return new CustomError(
       500,

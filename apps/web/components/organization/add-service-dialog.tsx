@@ -10,7 +10,6 @@ import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/butto
 import { addServiceToClient } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 import {
@@ -30,6 +29,8 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
+
+import { handleResponse } from '~/lib/response/handle-response';
 
 import SelectAction from '../ui/select';
 
@@ -58,24 +59,20 @@ export function AddServiceDialog({
   const queryClient = useQueryClient();
 
   const addService = useMutation({
-    mutationFn: async ({ serviceSelected }: { serviceSelected: number }) =>
-      await addServiceToClient(clientOrganizationId, serviceSelected),
-
+    mutationFn: async ({ serviceSelected }: { serviceSelected: number }) => {
+      const res = await addServiceToClient(
+        clientOrganizationId,
+        serviceSelected,
+      );
+      await handleResponse(res, 'services', t);
+    },
     onSuccess: async () => {
-      toast.success('Success', {
-        description: 'Service added successfully!',
-      });
       setIsOpen(false);
       await queryClient.invalidateQueries({
         queryKey: ['services', clientOrganizationId],
       });
     },
-
-    onError: () => {
-      toast.error('Error', {
-        description: 'Service could not be added!',
-      });
-    },
+    onError: () => null,
   });
 
   const addServiceSchema = z.object({

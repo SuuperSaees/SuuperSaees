@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { deleteOrderById } from '~/team-accounts/src/server/actions/orders/delete/delete-order';
-import {toast} from 'sonner';
 
 import { Button } from '@kit/ui/button';
 import {
@@ -20,23 +19,24 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
+import { handleResponse } from '~/lib/response/handle-response';
 
 function DeleteOrderDropdown({orderId}: {orderId: number}) {
-  const { t } = useTranslation('orders');
+  const { t } = useTranslation(['orders', 'responses']);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter()
 
   async function handleDelete() {
     try {
-      await deleteOrderById(orderId);
+
+      const res = await deleteOrderById(orderId);
+      await handleResponse(res, 'orders', t);
       setIsDialogOpen(false);
       router.push('/orders');
       router.refresh();
-      toast.success(t('deleteSuccess'));
     } catch (error) {
       console.error('Error deleting the order:', error);
       setIsDialogOpen(false);
-      toast.success(t('deleteError'));
     }
   }
 

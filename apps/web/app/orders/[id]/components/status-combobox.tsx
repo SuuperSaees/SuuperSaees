@@ -52,9 +52,9 @@ function StatusCombobox({
     mode == 'order' ? (order?.status ?? '') : (subtask?.state ?? ''),
   );
   const [customStatus, setCustomStatus] = useState<string>('');
-  const { t } = useTranslation('orders');
+  // const [agencyStatuses, setAgencyStatuses] = useState<AgencyStatus.Type[]>([]);
+  const { t } = useTranslation(['orders', 'responses']);
   const router = useRouter();
-
   const { data: agencyStatuses, refetch } = useQuery({
     queryKey: ['agencyStatuses', agency_id],
     queryFn: () => getAgencyStatuses(agency_id),
@@ -110,13 +110,13 @@ function StatusCombobox({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Order status updated successfully!',
+        description: t('success.orders.orderStatusUpdated'),
       });
     },
     onError: (error) => {
       console.log(error);
       toast.error('Error', {
-        description: 'Order status could not be updated.',
+        description: t('error.orders.failedToUpdateOrderStatus'),
       });
     },
   });

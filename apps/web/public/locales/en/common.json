@@ -84,5 +84,7 @@
     "previous": "Previous"
   },
   "organizationName": "Organization",
-  "selectOption": "Select an option"
+  "selectOption": "Select an option",
+  "success": "All set!",
+  "error": "Something went wrong!"
 }

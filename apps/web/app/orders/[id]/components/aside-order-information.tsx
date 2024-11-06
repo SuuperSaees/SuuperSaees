@@ -43,7 +43,7 @@ const   AsideOrderInformation = ({
   className,
   ...rest
 }: AsideOrderInformationProps) => {
-  const { t } = useTranslation('orders');
+  const { t } = useTranslation(['orders', 'responses']);
   const [selectedStatus, setSelectedStatus] = useState(order.status);
   const [selectedPriority, setSelectedPriority] = useState(order.priority);
 
@@ -58,13 +58,13 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Status updated successfully!',
+        description: t('success.orders.orderStatusUpdated'),
       });
     },
     onError: () => {
       setSelectedStatus(order.status);
       toast.error('Error', {
-        description: 'The status could not be updated.',
+        description: t('error.orders.failedToUpdateOrderStatus'),
       });
     },
   });
@@ -77,13 +77,13 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Priority updated successfully!',
+        description: t('success.orders.orderPriorityUpdated'),
       });
     },
     onError: () => {
       setSelectedPriority(order.priority);
       toast.error('Error', {
-        description: 'The priority could not be updated.',
+        description: t('error.orders.failedToUpdateOrderPriority'),
       });
     },
   });
@@ -95,12 +95,12 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Date updated successfully!',
+        description: t('success.orders.orderDateUpdated'),
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'The date could not be updated.',
+        description: t('error.orders.failedToUpdateOrderDate'),
       });
     },
   });
@@ -111,12 +111,12 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Agency members updated successfully!',
+        description: t('success.orders.orderAssigneesUpdated'),
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'The agency members could not be updated.',
+        description: t('error.orders.failedToUpdateOrderAssigneees'),
       });
     },
   });
@@ -127,12 +127,12 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Clients followers updated successfully!',
+        description: t('success.orders.orderFollowersUpdated'),
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'The clients followers could not be updated.',
+        description: t('error.orders.failedToUpdateOrderFollowers'),
       });
     },
   });
