@@ -1,3 +1,4 @@
+'use client';
 import {
   CalendarCheck2,
   CheckSquare,
@@ -16,26 +17,28 @@ import FormFieldSingleChoice from '../components/single-choice';
 import { ComponentProps, Input, InputTypes } from '../types/brief.types';
 import TextLarge from '../components/text-large';
 import UploadFiles from '../components/upload-files';
+import { useTranslation } from 'react-i18next';
 
 // Import your custom components
 type InputKey = InputTypes;
 type InputValue = Input;
 type InputMap = Map<InputKey, InputValue>;
 // Generator function to create the inputs Map
-export const generateInputs = (
+export const useGenerateInputs = (
   action: (inputName: InputTypes) => void,
 ): InputMap => {
+  const {t} = useTranslation('briefs')
   return new Map([
     [
       'text-short',
       {
-        name: 'Short Text',
+        name: t('textShort.value'),
         icon: <Text className="h-6 w-6" />,
         action: () => action('text-short'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Placeholder',
-          description: 'Description of the short text',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'text-short',
           required: false
         },
@@ -53,13 +56,13 @@ export const generateInputs = (
     [
       'text-large',
       {
-        name: 'Paragraph',
+        name: t('textLarge.value'),
         icon: <TextIcon className="h-6 w-6" />,
         action: () => action('text-large'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Enter a description... ',
-          description: 'This is a hint text for help user',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'text-large',
           required: false
         },
@@ -77,13 +80,13 @@ export const generateInputs = (
     [
       'file',
       {
-        name: 'Upload files',
+        name: t('uploadFiles.value'),
         icon: <Upload className="h-6 w-6" />,
         action: () => action('file'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Click or drag and drop files here...',
-          description: 'Description of the file upload',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'file',
           required: false
         },
@@ -101,14 +104,13 @@ export const generateInputs = (
     [
       'multiple_choice',
       {
-        name: 'Multiple choice',
+        name: t('multipleChoice.value'),
         icon: <CheckSquare className="h-6 w-6" />,
         action: () => action('multiple_choice'), // Action passed dynamically
         content: {
-          required: false,
-          label: 'Label',
-          placeholder: 'Select multiple options',
-          description: 'Description of the multiple choice',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'multiple_choice',
           options: [
             {
@@ -139,14 +141,13 @@ export const generateInputs = (
     [
       'select',
       {
-        name: 'Select',
+        name: t('singleChoice.value'),
         icon: <Circle className="h-6 w-6" />,
         action: () => action('select'), // Action passed dynamically
         content: {
-          required: false,
-          label: 'Label',
-          placeholder: 'Select an option',
-          description: 'Description of the select',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'select',
           options: [
             {
@@ -177,14 +178,13 @@ export const generateInputs = (
     [
       'dropdown',
       {
-        name: 'Dropdown',
+        name: t('dropdown.value'),
         icon: <ChevronDown className="h-6 w-6" />,
         action: () => action('dropdown'), // Action passed dynamically
         content: {
-          required: false,
-          label: 'Label',
-          placeholder: 'Select an option',
-          description: 'Description of the dropdown',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'dropdown',
           options: [
             {
@@ -215,13 +215,13 @@ export const generateInputs = (
     [
       'date',
       {
-        name: 'Date',
+        name: t('datePicker.value'),
         icon: <CalendarCheck2 className="h-6 w-6" />,
         action: () => action('date'), // Action passed dynamically
         content: {
-          label: 'Label',
-          placeholder: 'Select a date',
-          description: 'Description of the date',
+          label: '',
+          placeholder: '',
+          description: '',
           type: 'date',
           required: false
         },

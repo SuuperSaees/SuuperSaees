@@ -159,6 +159,9 @@
   "brandLogo": "Logotipo de marca",
   "brandLogoDescription": "Sube un logotipo que represente tu marca. Se recomienda que el fondo sea transparente. Tamaño recomendado: 200x100 píxeles.",
   "brandLogoSelectLabel": "Selecciona un logotipo",
+  "brandDarkLogo": "Logotipo de marca para temas oscuros",
+  "brandDarkLogoSelectLabel": "Selecciona un logotipo para temas oscuros",
+  "bradDarkLogoDescription": "Sube un logotipo para temas oscuros que represente tu marca. Se recomienda que el fondo sea transparente. Tamaño recomendado: 200x100 píxeles.",
   "brandLogoSubmit": "Actualizar logotipo",
   "brandLogoSuccess": "Logotipo actualizado con éxito",
   "brandLogoError": "Error al actualizar el logotipo",
@@ -178,5 +181,14 @@
   "brandSidebarLoading": "Actualizando barra lateral...",
   "brandSidebarSubmit": "Actualizar barra lateral",
   "brandSidebarLabel": "Selecciona el color de la barra lateral",
-  "brandSidebarReset": "Restablecer color"
+  "brandSidebarReset": "Restablecer color",
+  "brandSenderNameSubmit": "Actualizar remitente",
+  "brandSenderName": "Nombre del remitente",
+  "brandSenderNameDescription": "Actualiza el nombre que se mostrará como el remitente de los correos electrónicos",
+  "brandSenderEmailAndDomain": "Correo electrónico y dominio del remitente",
+  "brandSenderEmailAndDomainDescription": "Actualiza el correo electrónico y el dominio que se mostrará como el remitente de los correos electrónicos",
+  "brandSenderEmailAndDomainSubmit": "Actualizar correo y dominio",
+  "brandSenderEmailSubmit": "Actualizar correo",
+  "brandSenderDomainSubmit": "Dominio del remitente",
+  "brandSenderEmail": "Correo electrónico del remitente"
 }

@@ -76,7 +76,6 @@ export async function renderInviteEmail(props: Props) {
     const mainText = t(`${namespace}:mainText`, {
       inviter: props.inviter,
       teamName: props.teamName,
-      productName: props.productName,
     });
 
     // const joinTeam = t(`${namespace}:joinTeam`, {
@@ -206,9 +205,6 @@ export async function renderInviteEmail(props: Props) {
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         ${inviteEmailT('footer', { toEmail: props.invitedUserEmail })}
                                       </p>
-                                      <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        © 2024 Suuper, soporte@suuper.co
-                                      </p>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -228,9 +224,14 @@ export async function renderInviteEmail(props: Props) {
     return {
       html,
       subject,
+      t: inviteEmailT,
     };
   } catch (error) {
     console.error('Error al renderizar el correo:', error);
     throw error; // Re-lanza el error para que pueda ser manejado por el llamador si es necesario
   }
 }
+
+{/* <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
+        © 2024 Suuper, soporte@suuper.co
+</p> */}

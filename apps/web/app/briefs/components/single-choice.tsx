@@ -48,14 +48,14 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
       name={`questions.${index}`}
       render={() => (
         <FormItem className="flex w-full flex-col gap-2 space-y-4">
-          <div className="flex flex-col gap-2">
-            <div className="flex">
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex w-full">
               <FormField
                 control={form.control}
                 name={`questions.${index}.label`}
      
                 render={({ field, fieldState }) => (
-                  <FormItem>
+                  <FormItem className='w-full'>
                     <FormControl>
                       <input
                         {...field}
@@ -71,14 +71,13 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
                   </FormItem>
                 )}
               />
-              <span className="font-bold">*</span>
             </div>
 
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
               render={({ field, fieldState }) => (
-                <FormItem>
+                <FormItem className='w-full'>
                   <FormControl>
                     <input
                       {...field}
@@ -100,7 +99,7 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
               )}
             />
 
-            <div className="mt-4 flex flex-col gap-3">
+            <div className="mt-4 flex flex-col gap-3 w-full">
               {question.options?.map(
                 (
                   option: { value: string; label: string },

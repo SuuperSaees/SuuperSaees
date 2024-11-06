@@ -1,7 +1,8 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
+import { CustomResponse, CustomError, ErrorBriefOperations } from '../../../../../../../../packages/shared/src/response';
+import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 export const deleteBrief = async (briefId: string) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -18,7 +19,11 @@ export const deleteBrief = async (briefId: string) => {
     // Delete the brief from the briefs table
     const { error: deleteError } = await client.from('briefs').delete().eq('id', briefId);
     if (deleteError) {
-      throw new Error(deleteError.message);
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        `Error deleting the brief: ${briefId}`,
+        ErrorBriefOperations.FAILED_TO_DELETE_BRIEF,
+      );
     }
 
     // If there are related form_field_ids, delete them from the form_fields table
@@ -31,16 +36,26 @@ export const deleteBrief = async (briefId: string) => {
         .in('id', formFieldIds);
       
       if (deleteFieldsError) {
-        throw new Error(deleteFieldsError.message);
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          'Error deleting the related form_fields',
+          ErrorBriefOperations.FAILED_TO_DELETE_FORM_FIELDS,
+        );
       }
     }
 
     // Delete the related brief_form_fields from the brief_form_fields table
     const { error: deleteBriefFieldsError } = await client.from('brief_form_fields').delete().eq('brief_id', briefId);
     if (deleteBriefFieldsError) {
-      throw new Error(deleteBriefFieldsError.message);
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        'Error deleting the related brief_form_fields',
+        ErrorBriefOperations.FAILED_TO_DELETE_FORM_FIELDS,
+      );
     }
+    return CustomResponse.success(null, 'briefDeleted').toJSON();
   } catch (error) {
     console.error('Error al eliminar el brief:', error);
+    return CustomResponse.error(error).toJSON();
   }
 };

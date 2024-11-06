@@ -6,6 +6,9 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { FormField } from '../../../../../../../../apps/web/lib/form-field.types';
 import { getOrganization } from '../../organizations/get/get-organizations';
+import { Database } from '../../../../../../../../apps/web/lib/database.types';
+import { CustomResponse, CustomError, ErrorBriefOperations } from '../../../../../../../shared/src/response';
+import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 
 export const createBrief = async (clientData: Brief.Insert) => {
   try {
@@ -21,17 +24,22 @@ export const createBrief = async (clientData: Brief.Insert) => {
       .select('id')
       .single();
     if (briefDataError) {
-      throw new Error(briefDataError.message);
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        `Failed to create brief: ${briefDataError.message}`,
+        ErrorBriefOperations.FAILED_TO_CREATE_BRIEF,
+      );
     }
 
-    return briefData;
+    return CustomResponse.success(briefData, 'briefCreated').toJSON();
   } catch (error) {
     console.error('Error al crear el servicio:', error);
+    return CustomResponse.error(error).toJSON();
   }
 };
 
 export const addServiceBriefs = async (
-  serviceBriefs: Brief.Relationships.Service,
+  serviceBriefs: Database['public']['Tables']['service_briefs']['Insert'][],
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -41,12 +49,18 @@ export const addServiceBriefs = async (
       .select();
 
     if (serviceBriefError) {
-      throw new Error(serviceBriefError.message);
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        `Error adding services to brief: ${serviceBriefError.message}`,
+        ErrorBriefOperations.FAILED_TO_CONNECT_SERVICE,
+      );
     }
 
     // revalidatePath('/briefs');
+    return CustomResponse.success(null, 'serviceConnected').toJSON();
   } catch (error) {
     console.error('Error al crear el servicio:', error);
+    return CustomResponse.error(error).toJSON();  
   }
 };
 

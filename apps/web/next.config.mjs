@@ -18,6 +18,7 @@ const INTERNAL_PACKAGES = [
   '@kit/billing-gateway',
   '@kit/email-templates',
   '@kit/database-webhooks',
+  '@kit/webhooks',
   '@kit/cms',
   '@kit/monitoring',
   '@kit/next',
@@ -68,28 +69,22 @@ const config = {
   typescript: { ignoreBuildErrors: true },
 };
 
+// const sentryOptions = {
+//   org: 'grayola',
+//   project: process.env.SENTRY_PROJECT_NAME,
+//   authToken: process.env.SENTRY_AUTH_TOKEN,
+//   silent: !IS_PRODUCTION,
+//   autoInstrumentServerFunctions: false,
+//   widenClientFileUpload: true,
+// };
 
-
-const sentryOptions = {
-  org: 'grayola',
-  project: process.env.SENTRY_PROJECT_NAME,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  silent: !IS_PRODUCTION,
-  autoInstrumentServerFunctions: false,
-  widenClientFileUpload: true,
-};
-
-// Exporta la configuración de Sentry envuelta en la configuración de Analyzer
+// Export the Sentry configuration wrapped in the Analyzer configuration
 export default withSentryConfig(
   withBundleAnalyzer({
     enabled: process.env.ANALYZE === 'true',
   })(config),
-  sentryOptions
+  // sentryOptions
 );
-
-
-
-
 
 function getRemotePatterns() {
   /** @type {import('next').NextConfig['remotePatterns']} */

@@ -34,6 +34,7 @@ import {
   InputTypes,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
+import { useTranslation } from 'react-i18next';
 
 interface BriefsContext {
   brief: Brief.Insert;
@@ -75,7 +76,7 @@ export const BriefsContext = createContext<BriefsContext | undefined>(
 
 export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeTab, setActiveTab] = useState<'widgets' | 'settings'>('widgets');
-
+  const { t } = useTranslation('briefs')
   const formFieldsContext = useBriefFormFields(setActiveTab);
 
   const briefContext = useBrief(formFieldsContext.setFormFields);
@@ -96,9 +97,9 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
       image_url: '',
       questions: formFieldsContext.formFields, // Initialize questions with values from context,
       default_question: {
-        label: 'Order title', // not editable
+        label: t('creation.form.defaultField.label'), // not editable
         description: '', // editable
-        placeholder: 'Add a title...', // editable
+        placeholder: t('creation.form.defaultField.placeholder'), // editable
         type: 'text-short', // not editable,
         required: false,
         position: 0,

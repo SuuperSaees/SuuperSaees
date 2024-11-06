@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+
 export const StripeServerEnvSchema = z
   .object({
     secretKey: z
@@ -12,6 +13,11 @@ export const StripeServerEnvSchema = z
         required_error: `Please provide the variable STRIPE_WEBHOOK_SECRET`,
       })
       .min(1),
+    connectWebhooksSecret: z
+      .string({
+        required_error: `Please provide the variable STRIPE_CONNECT_WEBHOOK_SECRET`,
+      })
+      .optional(),
   })
   .refine(
     (schema) => {
@@ -30,4 +36,16 @@ export const StripeServerEnvSchema = z
       path: ['STRIPE_WEBHOOK_SECRET'],
       message: `Stripe webhook secret must start with 'whsec_'`,
     },
-  );
+  )
+  .refine(
+    (schema) => {
+      return (
+        !schema.connectWebhooksSecret ||
+        schema.connectWebhooksSecret.startsWith('whsec_')
+      );
+    },
+    {
+      path: ['STRIPE_CONNECT_WEBHOOK_SECRET'],
+      message: `Stripe connect webhook secret must start with 'whsec_'`,
+    },
+  );;

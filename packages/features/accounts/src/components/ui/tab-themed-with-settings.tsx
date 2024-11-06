@@ -53,7 +53,8 @@ export const ThemedTabTrigger: React.FC<{
   value: string;
   activeTab: string;
   option: string;
-}> = ({ className, activeTab, option, ...rest }) => {
+  withBorder?: boolean;
+}> = ({ className, activeTab, option, withBorder,...rest }) => {
   const { theme_color } = useOrganizationSettings();
   // const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
 
@@ -62,17 +63,18 @@ export const ThemedTabTrigger: React.FC<{
 
   return (
     <TabsTrigger
-      className={`hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900 font-semibold ${className}`}
+      className={`hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900 font-semibold ${className} ${withBorder ? 'border-b-2 border-transparent rounded-none data-[state=active]:border-b-brand data-[state=active]:bg-transparent' : ''}`}
       style={
         theme_color
           ? {
               backgroundColor:
-                activeTab === option
+                (activeTab === option && !withBorder)
                   ? hexToRgba('#667085', 0.1) // Apply 0.1 opacity if active
-                  : isHovered
+                  : (isHovered && !withBorder)
                     ? hexToRgba('#667085', 0.1) // Apply 0.1 opacity on hover
                     : undefined,
               color: '#667085',
+              borderColor: (withBorder && activeTab === option ) ? theme_color: undefined,
             }
           : undefined
       }

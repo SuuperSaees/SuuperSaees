@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 import { useState, useEffect } from 'react';
 
@@ -18,7 +18,6 @@ import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 import { useAuthDetails } from '../hooks/use-auth-details';
-import { getTextColorBasedOnBackground } from '../../../../../apps/web/app/utils/generate-colors';
 import { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
 import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
 
@@ -30,12 +29,12 @@ export function PasswordSignInForm({
   onSubmit: (params: z.infer<typeof PasswordSignInSchema>) => unknown;
   loading: boolean;
 }) {
-  const { t } = useTranslation('auth');
+  // const { t } = useTranslation('auth');
   let host = '';
   if (typeof window !== 'undefined') {
     host = window.location.host;
   }
-  const authDetails = useAuthDetails(host);
+  const {authDetails} = useAuthDetails(host);
   const form = useForm<z.infer<typeof PasswordSignInSchema>>({
     resolver: zodResolver(PasswordSignInSchema),
     defaultValues: {
@@ -45,7 +44,6 @@ export function PasswordSignInForm({
   });
  // manage the skeleton with max time of 3000ms
  const [isLoading, setIsLoading] = useState(true);
- const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? '#ffffff')
  useEffect(() => {
    const timer = setTimeout(() => {
      setIsLoading(false);
@@ -68,15 +66,15 @@ export function PasswordSignInForm({
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-black pt-2 flex justify-center items-start text-2xl font-semibold " style={{color: textcolor}}>
+              <FormLabel className="pt-2 flex justify-center items-start text-2xl font-semibold " >
                 <Trans i18nKey={'common:plsDetailInputs'} />  
               </FormLabel>
 
-              <FormLabel className="text-black flex justify-center items-start font-normal " style={{color: textcolor}}>
+              <FormLabel className="flex justify-center items-start font-normal " >
               <Trans i18nKey={'common:continueToYourAccount'} />
               </FormLabel>
 
-              <div className="text-black text-left text-sm" style={{ marginTop: '30px', color: textcolor }}>
+              <div className=" text-left text-sm" style={{ marginTop: '30px' }}>
                 <Trans i18nKey={'common:emailLabel'} />
               </div>
 
@@ -100,7 +98,7 @@ export function PasswordSignInForm({
           name={'password'}
           render={({ field }) => (
             <FormItem>
-              <div className="text-left text-sm" style={{color: textcolor}}>
+              <div className="text-left text-sm" >
                 <Trans i18nKey={'common:password'} />
               </div>
 
@@ -112,7 +110,7 @@ export function PasswordSignInForm({
                   placeholder={''}
                   {...field}
                   className="text-black focus-visible:ring-brand"
-                  style={{color: textcolor}}
+                  
                 />
               </FormControl>
 
@@ -124,9 +122,9 @@ export function PasswordSignInForm({
                     type="checkbox"
                     id="rememberMe"
                     className="text-black form-checkbox"
-                    style={{color: textcolor}}
+                    
                   />
-                  <label htmlFor="rememberMe" className="text-black text-xs" style={{color: textcolor}}>
+                  <label htmlFor="rememberMe" className="text-xs" >
                     <Trans i18nKey={'auth:rememberMe'} />
                   </label>
                 </div>
@@ -137,7 +135,7 @@ export function PasswordSignInForm({
                   size={'sm'}
                   variant={'link'}
                   className={`font-inter block flex items-center space-y-3 text-xs font-semibold leading-[20px] tracking-normal ${authDetails?.theme_color}`}
-                  style={{color: textcolor}}
+                  
                 >
                   <Link href={'/auth/password-reset'}>
                     <Trans i18nKey={'auth:passwordForgottenQuestion'} />

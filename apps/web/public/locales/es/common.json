@@ -29,7 +29,8 @@
   "anonymousUser": "Anónimo",
   "profile": "Mi perfil",
   "billing": "Facturación",
-  "orders": "Pedidos",
+  "subscription": "Suscripción",
+  "orders": "Proyectos",
   "tryAgain": "Intentar de Nuevo",
   "theme": "Tema",
   "contactUs": "Contactanos",
@@ -53,7 +54,7 @@
   "servicesName": "Servicios",
   "settingsName": "Configuraciones",
   "usersName": "Usuarios",
-  "ordersName": "Pedidos",
+  "ordersName": "Proyectos",
   "clientsName": "Clientes",
   "teamName": "Equipo",
   "nameInput": "Nombre",
@@ -82,5 +83,7 @@
     "previous": "Anterior"
   },
   "organizationName": "Organización",
-  "selectOption": "Seleccionar una opción"
+  "selectOption": "Seleccionar una opción",
+  "success": "!Todo Listo!",
+  "error": "!Algo salió mal!"
 }

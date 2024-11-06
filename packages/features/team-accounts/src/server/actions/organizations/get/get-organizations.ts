@@ -1,5 +1,10 @@
 'use server';
 
+import { SupabaseClient } from '@supabase/supabase-js';
+
+
+
+import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
@@ -17,7 +22,7 @@ export const getOrganizationSettings = async () => {
     } = await client.auth.getUser();
 
     if (!user) {
-      console.error('User not found');
+      console.error('User not found when trying to get organization settings');
       return [];
     }
 
@@ -95,9 +100,15 @@ export const getOrganizationSettingsByOrganizationId = async (
     'sidebar_background_color',
     'language',
     'favicon_url',
+    'sender_name',
+    'sender_domain',
+    'sender_email',
+    'auth_card_background_color',
+    'auth_section_background_color',
   ],
+  client?: SupabaseClient<Database>,
 ): Promise<{ key: string; value: string }[]> => {
-  const client = getSupabaseServerComponentClient({ admin: adminActived });
+  client = client ?? getSupabaseServerComponentClient({ admin: adminActived });
   const { data: organizationSettings, error: settingsError } = await client
     .from('organization_settings')
     .select('key, value')
@@ -227,17 +238,21 @@ export async function getOrganizations() {
 }
 // here a function to search organizations and limit the query => once the amount of organizations in production be higher
 
-export async function getOrganizationById(organizationId: string) {
+export async function getOrganizationById(organizationId: string, client?: SupabaseClient<Database>, adminActivated = false) {
+  client = client ?? getSupabaseServerComponentClient({
+    admin: adminActivated,
+  });
   try {
-    const client = getSupabaseServerComponentClient();
 
     // Step 1: Check if the user has permission to view the organization
+    if (!adminActivated) {
     const hasPermission = await hasPermissionToViewOrganization(organizationId);
     if (!hasPermission) {
       throw new Error(
         'You do not have the required permissions to view this organization',
       );
     }
+  }
 
     // Step 2: Fetch the organization data
     const { data: organizationData, error: clientOrganizationError } =
@@ -272,7 +287,7 @@ export async function getAgencyForClient(clientOrganizationId: string) {
       .from('clients')
       .select('agency_id')
       .eq('organization_client_id', clientOrganizationId)
-      .single();
+     
 
     if (clientError ?? !clientData) {
       console.error('Error fetching agency:', clientError);
@@ -283,11 +298,12 @@ export async function getAgencyForClient(clientOrganizationId: string) {
     const { data: agencyData, error: agencyError } = await client
       .from('accounts')
       .select('id, name, email, picture_url')
-      .eq('id', clientData.agency_id)
+      .eq('id', clientData?.[0]?.agency_id ?? '')
       .eq('is_personal_account', false)
       .single();
 
     if (agencyError ?? !agencyData) {
+
       console.error('Error fetching agency:', agencyError);
       throw agencyError;
     }

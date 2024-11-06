@@ -4,10 +4,12 @@ import { getMailer } from '@kit/mailers';
 import { getEmailTranslations } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
 
+
+
 import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import { getFormSendIdentity } from '../utils/get-form-send-identity';
 
-const emailSender = process.env.EMAIL_SENDER ?? '';
 
 export async function sendOrderStatusPriorityEmail(
   toEmail: string,
@@ -21,7 +23,10 @@ export async function sendOrderStatusPriorityEmail(
 ) {
   const logger = await getLogger();
   const mailer = await getMailer();
-  const siteURL = await getDomainByUserId(userId, true);
+  const { domain: siteURL, organizationId } = await getDomainByUserId(
+    userId,
+    true,
+  );
   const lang = getLanguageFromCookie() as 'en' | 'es';
   const { t } = getEmailTranslations('orderStatusPriority', lang);
 
@@ -38,10 +43,15 @@ export async function sendOrderStatusPriorityEmail(
     message,
   });
 
+  const { fromSenderIdentity, logoUrl, themeColor, buttonTextColor } = await getFormSendIdentity(
+    organizationId,
+    t('at'),
+  );
+
   await mailer
     .sendEmail({
       to: toEmail,
-      from: emailSender,
+      from: fromSenderIdentity,
       subject: subject,
       html: `
        <!DOCTYPE html>
@@ -62,8 +72,8 @@ export async function sendOrderStatusPriorityEmail(
                 }
                 .button {
                   padding: 10px 20px;
-                  background-color: #1A38D7;
-                  color: white;
+                  background-color: ${themeColor};
+                  color: ${buttonTextColor};
                   text-decoration: none;
                   border-radius: 5px;
                   display: inline-block;
@@ -101,8 +111,8 @@ export async function sendOrderStatusPriorityEmail(
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png"
-                                        alt="Suuper Logo"
+                                        src="${logoUrl}"
+                                        alt="Company Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${t('greeting', { actualName })}</p>
@@ -119,10 +129,6 @@ export async function sendOrderStatusPriorityEmail(
                                         <p style="color: var(--Gray-700, #344054); font-size: 16px; font-style: normal; font-weight: 400; margin:0;">${t('farewell')}</p>
                                         <p style="color: var(--Gray-700, #344054); font-size: 16px; font-style: normal; font-weight: 700; margin:0;">${agencyName}</p>
                                       </div>
-
-
-                                      
-
                                     </td>
                                   </tr>
                                 </tbody>
@@ -143,9 +149,6 @@ export async function sendOrderStatusPriorityEmail(
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         ${t('footer', { toEmail })}
                                       </p>
-                                      <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        © 2024 Suuper, soporte@suuper.co
-                                      </p>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -164,12 +167,14 @@ export async function sendOrderStatusPriorityEmail(
     `,
     })
     .then(() => {
-      logger.info(
-        `Correo de cambio de ${field} en el pedido enviado con éxito.`,
-      );
+      logger.info(`Order ${field} change email sent successfully.`);
     })
     .catch((error) => {
       console.error(error);
-      logger.error({ error }, 'Error al enviar el correo de pedido');
+      logger.error({ error }, 'Error sending the order email');
     });
 }
+
+// <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
+// © 2024 Suuper, soporte@suuper.co
+// </p>

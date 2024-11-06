@@ -11,24 +11,34 @@ import FileSection from '~/components/organization/files';
 
 import ActivityPage from './activity';
 import DetailsPage from './details';
+import TasksSection from './tasks';
+// import { TaskCounter } from 'node_modules/@kit/accounts/src/components/ui/tasks-cantity-themed-with-settings';
+// import { countIncompleteTasks } from '~/utils/task-counter';
+// import { useRealTimeTasks } from '../hooks/use-tasks';
 
 type OrderTabsProps = {
-  organizationId: {
-    account_id: string;
-  } | undefined;
+  organizationId:
+    | {
+        account_id: string;
+      }
+    | undefined;
   currentPath: {
     title: string;
     uuid?: string;
   }[];
+  userRole: string;
+  orderId: string;
+  orderAgencyId: string;
 };
 
-export const OrderTabs = ({ organizationId, currentPath}: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
+
   return (
     <Tabs
-      className="flex h-full flex-grow flex-col gap-6"
+      className="flex max-h-full h-full flex-col gap-6 min-h-0"
       defaultValue={activeTab}
       onValueChange={(value: string) => {
         setActiveTab(value as 'activity' | 'details');
@@ -49,15 +59,43 @@ export const OrderTabs = ({ organizationId, currentPath}: OrderTabsProps) => {
         >
           <Trans i18nKey={'orders:details.navigation.details'} />
         </ThemedTabTrigger>
-        <ThemedTabTrigger value="files" activeTab={activeTab} option={'files'}>
+        <ThemedTabTrigger 
+          value="tasks" 
+          activeTab={activeTab} 
+          option={'tasks'}
+          className='flex items-center gap-1'
+        >
+          <Trans i18nKey={'orders:details.navigation.tasks'} />
+          {/* <TaskCounter
+            taskCount={countIncompleteTasks(tasks)}
+          /> */}
+        </ThemedTabTrigger>
+        <ThemedTabTrigger 
+          value="files" 
+          activeTab={activeTab} 
+          option={'files'}
+        >
           <Trans i18nKey={'orders:details.navigation.files'} />
         </ThemedTabTrigger>
       </TabsList>
-      <TabsContent value="details" className="h-full max-h-full min-h-0 overflow-y-auto no-scrollbar">
+
+      <TabsContent
+        value="details"
+        className="no-scrollbar h-full max-h-full min-h-0 overflow-y-auto"
+      >
         <DetailsPage />
-      </TabsContent>  
+      </TabsContent>
       <TabsContent value="activity" className="h-full max-h-full min-h-0">
         <ActivityPage />
+      </TabsContent>
+      <TabsContent value="tasks">
+        <div className="w-full">
+          <TasksSection 
+            userRole={userRole}
+            orderId={orderId}
+            orderAgencyId={orderAgencyId}
+          />
+        </div>
       </TabsContent>
       <TabsContent value="files">
         <div className="w-full">

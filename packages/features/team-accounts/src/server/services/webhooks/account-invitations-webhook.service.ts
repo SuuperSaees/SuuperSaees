@@ -1,16 +1,44 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { z } from 'zod';
+
+
 
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
+
+
+
+import { OrganizationSettings } from '../../../../../../../apps/web/lib/organization-settings.types';
+import { getDomainByOrganizationId } from '../../../../../../../packages/multitenancy/utils/get/get-domain';
+import { getOrganizationSettingsByOrganizationId } from '../../actions/organizations/get/get-organizations';
+
+
+// import { getOrganizationById } from '../../actions/organizations/get/get-organizations';
 
 type Invitation = Database['public']['Tables']['invitations']['Row'];
 
 const invitePath = '/join';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL;
+const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
 const productName = process.env.NEXT_PUBLIC_PRODUCT_NAME ?? '';
+const SUUPER_CLIENT_ID = process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID;
+const SUUPER_CLIENT_SECRET = process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET;
 const emailSender = process.env.EMAIL_SENDER;
+const brandtopAgencyName = process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
+const themeColorKey = OrganizationSettings.KEYS.theme_color;
+const senderNameKey = OrganizationSettings.KEYS.sender_name;
+const logoUrlKey = OrganizationSettings.KEYS.logo_url;
+const senderEmailKey = OrganizationSettings.KEYS.sender_email;
+const senderDomainKey = OrganizationSettings.KEYS.sender_domain;
+const defaultAgencySenderName =
+  OrganizationSettings.EXTRA_KEYS.default_sender_name;
+const defaultAgencyName = OrganizationSettings.EXTRA_KEYS.default_agency_name;
+const defaultSenderEmail = OrganizationSettings.EXTRA_KEYS.default_sender_email;
+const defaultSenderDomain =
+  OrganizationSettings.EXTRA_KEYS.default_sender_domain;
 
 const env = z
   .object({
@@ -18,12 +46,14 @@ const env = z
     siteURL: z.string().min(1),
     productName: z.string(),
     emailSender: z.string().email(),
+    brandtopAgencyName: z.string(),
   })
   .parse({
     invitePath,
     siteURL,
     productName,
     emailSender,
+    brandtopAgencyName,
   });
 
 export function createAccountInvitationsWebhookService(
@@ -72,34 +102,44 @@ class AccountInvitationsWebhookService {
       throw inviter.error;
     }
 
-    let inviterOrganizationLogo = '';
-    let inviterOrganizationThemeColor = '';
+    // search organization name
+    // const inviterOrganization = await getOrganizationById(
+    //   inviter.data.organization_id ?? '',
+    //   this.adminClient,
+    // );
 
-    const inviterOrganizationSettings = await this.adminClient
-      .from('organization_settings')
-      .select('key, value')
-      .eq('account_id', inviter.data.organization_id ?? '')
-      .in('key', ['logo_url', 'theme_color']);
-
-    if (inviterOrganizationSettings.error) {
-      logger.error(
-        {
-          error: inviterOrganizationSettings.error,
-          name: this.namespace,
-        },
-        'Failed to fetch inviter organization logo',
+    const inviterOrganizationSettings =
+      await getOrganizationSettingsByOrganizationId(
+        inviter.data.organization_id ?? '',
+        true,
+        [
+          logoUrlKey,
+          themeColorKey,
+          senderNameKey,
+          senderEmailKey,
+          senderDomainKey,
+        ],
+        this.adminClient,
       );
-    }
+    let inviterOrganizationLogo = '',
+      inviterOrganizationThemeColor = '',
+      inviterOrganizationSenderName = '',
+      inviterOrganizationSenderEmail = defaultSenderEmail,
+      inviterOrganizationSenderDomain = defaultSenderDomain;
 
-    if (inviterOrganizationSettings && !inviterOrganizationSettings.error) {
-      inviterOrganizationSettings.data.forEach((setting) => {
-        if (setting.key === 'logo_url') {
-          inviterOrganizationLogo = setting.value;
-        } else if (setting.key === 'theme_color') {
-          inviterOrganizationThemeColor = setting.value;
-        }
-      });
-    }
+    inviterOrganizationSettings.forEach((setting) => {
+      if (setting.key === logoUrlKey) {
+        inviterOrganizationLogo = setting.value;
+      } else if (setting.key === themeColorKey) {
+        inviterOrganizationThemeColor = setting.value;
+      } else if (setting.key === senderNameKey) {
+        inviterOrganizationSenderName = setting.value;
+      } else if (setting.key === senderEmailKey) {
+        inviterOrganizationSenderEmail = setting.value;
+      } else if (setting.key === senderDomainKey) {
+        inviterOrganizationSenderDomain = setting.value;
+      }
+    });
 
     const team = await this.adminClient
       .from('accounts')
@@ -127,15 +167,25 @@ class AccountInvitationsWebhookService {
     logger.info(ctx, 'Invite retrieved. Sending invitation email...');
 
     try {
+      let domain = await getDomainByOrganizationId(
+        inviter.data.organization_id ?? '',
+        false,
+        true,
+      );
+      if (domain !== siteURL) {
+        domain = isProd ? `https://${domain}` : `http://${domain}`;
+      }
+
       const { renderInviteEmail } = await import('@kit/email-templates');
-      const { getMailer } = await import('@kit/mailers');
-      const mailer = await getMailer();
+      // const { getMailer } = await import('@kit/mailers');
+      // const mailer = await getMailer();
       const link = this.getInvitationLink(
         invitation.invite_token,
         invitation.email,
+        domain,
       );
 
-      const { html, subject } = await renderInviteEmail({
+      const { html, subject, t } = await renderInviteEmail({
         link,
         invitedUserEmail: invitation.email,
         inviter: inviter.data.name ?? inviter.data.email ?? '',
@@ -145,21 +195,27 @@ class AccountInvitationsWebhookService {
         primaryColor: inviterOrganizationThemeColor,
       });
 
-      await mailer
-        .sendEmail({
-          from: env.emailSender,
-          to: invitation.email,
+      const fromSenderIdentity = inviterOrganizationSenderName
+        ? `${inviterOrganizationSenderName} <${inviterOrganizationSenderEmail}@${inviterOrganizationSenderDomain}>`
+        : `${defaultAgencySenderName} ${t('at')} ${defaultAgencyName} <${inviterOrganizationSenderEmail}@${inviterOrganizationSenderDomain}>`;
+
+      const res = await fetch(`${domain}/api/v1/mailer`, {
+        method: 'POST',
+        headers: new Headers({
+          Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
+        }),
+        body: JSON.stringify({
+          from: fromSenderIdentity,
+          to: [invitation.email],
           subject,
           html,
-        })
-        .then(() => {
-          logger.info(ctx, 'Invitation email successfully sent!');
-        })
-        .catch((error) => {
-          console.error(error);
-
-          logger.error({ error, ...ctx }, 'Failed to send invitation email');
-        });
+        }),
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        console.error('Failed to send invitation email', data);
+      }
 
       // obtain subscription id
       const { data: subscriptionData, error: subscriptionError } =
@@ -182,14 +238,14 @@ class AccountInvitationsWebhookService {
       }
 
       // obtain members count with that organization
-      let { count: membersCount, error: membersCountError } =
-        await this.adminClient
-          .from('accounts_memberships')
-          .select('*', { count: 'exact' })
-          .eq('account_id', invitation.invited_by)
-          .or(
-            'account_role.eq.agency_member,account_role.eq.agency_project_manager',
-          );
+      let membersCount = 0;
+      const { count, error: membersCountError } = await this.adminClient
+        .from('accounts_memberships')
+        .select('*', { count: 'exact' })
+        .eq('account_id', invitation.invited_by)
+        .or(
+          'account_role.eq.agency_member,account_role.eq.agency_project_manager',
+        );
 
       if (membersCountError) {
         logger.error(
@@ -201,6 +257,8 @@ class AccountInvitationsWebhookService {
         );
         throw membersCountError;
       }
+      membersCount = count ?? 0;
+
       if (membersCount) {
         membersCount += 1;
       }
@@ -250,13 +308,13 @@ class AccountInvitationsWebhookService {
     }
   }
 
-  private getInvitationLink(token: string, email: string) {
+  private getInvitationLink(token: string, email: string, domain?: string,) {
     const searchParams = new URLSearchParams({
       invite_token: token,
       email,
     }).toString();
 
-    const href = new URL(env.invitePath, env.siteURL).href;
+    const href = new URL(env.invitePath, domain ?? env.siteURL).href;
 
     return `${href}?${searchParams}`;
   }

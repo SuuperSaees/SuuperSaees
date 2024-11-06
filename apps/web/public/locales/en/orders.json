@@ -1,11 +1,12 @@
 {
-  "title": "Orders",
+  "title": "Projects",
   "selectDateLabel": "Select a date",
   "confirmDateTitle": "Confirm date",
   "confirmDateMessage": "Are you sure you want to update the due date?",
   "accept": "Accept",
   "cancel": "Cancel",
   "openOrders": "Open",
+  "summary": "Summary",
   "completedOrders": "Completed",
   "allOrders": "All",
   "titleLabel": "Title",
@@ -14,16 +15,22 @@
   "statusLabel": "Status",
   "assignedToLabel": "Assigned to",
   "dueDateLabel": "Due date",
+  "select_date_range": "Select date range",
+  "delete": "Delete project",
+  "deleteConfirmation": "Do you really want to delete this project?",
+  "deleteSuccess": "Project deleted successfully",
+  "deleteError": "Error deleting project",
+  "create":"Create",
   "creation": {
-    "title": "Create order",
+    "title": "Create project",
     "form": {
-      "titleLabel": "Order name",
-      "titlePlaceholder": "Enter the name of your order",
-      "descriptionLabel": "Order description",
-      "descriptionPlaceholder": "Add a description for this order",
+      "titleLabel": "Project name",
+      "titlePlaceholder": "Enter the name of your project",
+      "descriptionLabel": "Project description",
+      "descriptionPlaceholder": "Add a description for this project",
       "filesLabel": "Files",
       "filesPlaceholder": "Click or drag to upload an SVG, PNG, JPG, or GIF file (max. 800x400px)",
-      "submitMessage": "Create order"
+      "submitMessage": "Create project"
     },
     "validation": {
       "minTitleCharacters": "Title must be at least 2 characters.",
@@ -31,12 +38,19 @@
       "files": "Please upload at least one file."
     }
   },
+  "tasks": {
+    "emptyTasks": "No tasks found",
+    "addTask": "Add task",
+    "addSubtask": "Add subtask",
+    "newTask": "New task",
+    "newSubtask": "New subtask"
+  },
   "details": {
-    "title": "Order details",
+    "title": "Project details",
     "deadlineNotSet": "Unassigned",
     "summary": "Summary",
     "createdBy": "Created by",
-    "orderId": "Order ID",
+    "orderId": "#",
     "createdAt": "Created",
     "assignedTo": "Assigned to",
     "followedBy": "Followed by",
@@ -59,14 +73,15 @@
     "navigation": {
       "details": "Details",
       "activity": "Activity",
+      "tasks": "Tasks",
       "files": "Files"
     },
     "dialog": {
       "button": "Mark as completed",
       "title": "Leave a review",
-      "description": "Tell us about your experience with this order!",
+      "description": "Tell us about your experience with this project!",
       "label": "Write a review",
-      "placeholder": "What did you think of this order?"
+      "placeholder": "What did you think of this project?"
     }
   },
   "selectFile": "Please select at least one file",
@@ -77,7 +92,7 @@
   "dragAndDrop": "Drag files here or click to upload",
   "dropHere": "Drop here to upload files",
   "tryAgain": "Try again",
-  "OrderDescriptionTitle": "Order description",
+  "OrderDescriptionTitle": "Project description",
   "internalMessagingEnabled": "Internal messaging enabled",
   "internalMessagingDisabled": "Internal messaging disabled",
   "internalMessage": "Internal message",
@@ -88,7 +103,7 @@
   "form": {
     "completion": {
       "client": {
-        "title": "Add a client",
+        "title": "Assign a client",
         "label": "Name of the organization",
         "select": {
           "placeholder": "Select an organization"   

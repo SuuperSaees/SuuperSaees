@@ -2,7 +2,8 @@
   "messages": {
     "create": "ha añadido",
     "update": "ha cambiado",
-    "delete": "ha eliminado"
+    "delete": "ha eliminado",
+    "complete": "ha completado la"
   },
   "articles": {
     "due_date": {
@@ -55,7 +56,8 @@
       "message": "Comentario",
       "description": "Descripción",
       "title": "Título",
-      "assign": "Asignar"
+      "assign": "Asignar",
+      "task": "Tarea"
     },
     "prepositions": {
       "in": "en",
@@ -69,7 +71,8 @@
       "from": "de",
       "into": "en",
       "during": "durante",
-      "until": "hasta"
+      "until": "hasta",
+      "named": "llamada"
     },
     "values": {
       "low": "Bajo",

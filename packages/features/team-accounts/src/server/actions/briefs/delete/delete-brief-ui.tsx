@@ -1,6 +1,7 @@
 'use client';
 
 // Asegúrate de ajustar la importación según tu configuración
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,19 +18,26 @@ import {
 } from '@kit/ui/alert-dialog';
 
 import { deleteBrief } from './delete-brief';
+import { handleResponse } from '../../../../../../../../apps/web/lib/response/handle-response';
 
 const DeleteBriefDialog = ({ briefId }: { briefId: string }) => {
-  const { t } = useTranslation('briefs');
+  const { t } = useTranslation(['briefs', 'responses']);
+  const queryClient = useQueryClient();
 
-  const handleDelete = async () => {
-    try {
-      await deleteBrief(briefId);
-      window.location.reload();
-    } catch (error) {
-      console.error('Error al eliminar el brief:', error);
-      alert('Error al eliminar el brief');
-    }
-  };
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await deleteBrief(briefId);
+      await handleResponse(res, 'briefs', t);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['briefs'],
+      });
+    },
+    onError: () => {
+      console.error('Error deleting brief');
+    },
+  });
 
   return (
     <>
@@ -49,7 +57,9 @@ const DeleteBriefDialog = ({ briefId }: { briefId: string }) => {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
+            <AlertDialogAction
+              onClick={async () => await deleteMutation.mutateAsync()}
+            >
               {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>

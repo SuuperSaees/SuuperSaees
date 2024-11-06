@@ -78,6 +78,7 @@ export const hasPermissionToReadOrders = async () => {
         '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
       )
       .eq('customer_id', userId)
+      .is('deleted_on', null)
       .order('created_at', { ascending: false });
 
     if (clientError) {
@@ -127,6 +128,7 @@ export const hasPermissionToReadOrders = async () => {
               '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
             )
             .eq('id', orderId as number)
+            .is('deleted_on', null)
             .single();
 
         if (followerOrderError) {
@@ -163,6 +165,7 @@ export const hasPermissionToReadOrders = async () => {
         'id',
         orderAssignedData.map((assign) => assign.order_id),
       )
+      .is('deleted_on', null)
       .order('created_at', { ascending: false });
 
     if (teamOwnerError) {
@@ -190,6 +193,7 @@ export const hasPermissionToReadOrders = async () => {
         customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`,
       )
       .eq('agency_id', agencyUserAccount?.organization_id ?? '')
+      .is('deleted_on', null)
       .order('created_at', { ascending: false });
 
     if (ownerError) {

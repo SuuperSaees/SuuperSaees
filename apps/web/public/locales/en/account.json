@@ -159,6 +159,9 @@
   "brandLogo": "Brand Logo",
   "brandLogoDescription": "Upload a logo that represents your brand. A transparent background is recommended. Recommended size: 200x100 pixels.",
   "brandLogoSelectLabel": "Select a Logo",
+  "brandDarkLogo": "Brand Logo for dark themes",
+  "brandDarkLogoSelectLabel": "Select a Logo for dark themes",
+  "brandDarkLogoDescription": "Upload a logo for dark themes that represents your brand. A transparent background is recommended. Recommended size: 200x100 pixels.",
   "brandLogoSubmit": "Update Logo",
   "brandLogoSuccess": "Logo updated successfully",
   "brandLogoError": "Error updating logo",
@@ -178,5 +181,14 @@
   "brandSidebarLoading": "Updating sidebar...",
   "brandSidebarSubmit": "Update Sidebar",
   "brandSidebarLabel": "Select Sidebar Color",
-  "brandSidebarReset": "Reset Color"
+  "brandSidebarReset": "Reset Color",
+  "brandSenderNameSubmit": "Update Sender",
+  "brandSenderName": "Sender Name",
+  "brandSenderNameDescription": "Update the name that will be displayed as the sender of the emails",
+  "brandSenderEmailAndDomain": "Sender Email and Domain",
+  "brandSenderEmailAndDomainDescription": "Update the email and domain that will be displayed as the sender of the emails",
+  "brandSenderEmailAndDomainSubmit": "Update Email and Domain",
+  "brandSenderEmailSubmit": "Update Email",
+  "brandSenderDomainSubmit": "Sender Domain",
+  "brandSenderEmail": "Sender Email"
 }

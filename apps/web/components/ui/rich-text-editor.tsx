@@ -140,6 +140,7 @@ interface RichTextEditorProps {
   onComplete?: (richText: string) => void | Promise<void>;
   content?: string;
   onChange?: (richText: string) => void;
+  onBlur?: () => void;
   uploadFileIsExternal?: boolean;
   toggleExternalUpload?: () => void;
   userRole: string;
@@ -147,6 +148,7 @@ interface RichTextEditorProps {
   useInForm?: boolean;
   showToolbar? : boolean;
   isEditable? : boolean;
+  className?: string;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
 function extractImageUrls(text: string) {
@@ -159,12 +161,14 @@ const RichTextEditor = ({
   content,
   onComplete,
   onChange,
+  onBlur,
   uploadFileIsExternal,
   toggleExternalUpload,
   userRole,
   hideSubmitButton = false,
   showToolbar = true,
   isEditable = true,
+  className
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
@@ -293,14 +297,7 @@ const RichTextEditor = ({
         class:
           'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none',
       },
-      handleKeyDown: (_, event) => {
-        if (!onChange && event.key === 'Enter' && !event.shiftKey && !event.ctrlKey) {
-          event.preventDefault();
-          sendContent();
-          return true;
-        }
-        return false;
-      },
+
       
     },
     onUpdate({ editor }) {
@@ -311,9 +308,14 @@ const RichTextEditor = ({
         onChange(editor.getHTML()); 
       }
     },
+    onBlur: () => {
+      onBlur?.();
+    }
   }, );
   const sendContent = useCallback(() => {
+
     void (async () => {
+      
       try {
         cleanupImages();
         const content = editor ? editor.getHTML() : '';
@@ -344,13 +346,13 @@ const RichTextEditor = ({
 
 
   return (
-    <div className="relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 shadow-md">
+    <div className={"relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 " + (className ?? '')}>
       <div
         onClick={() => editor?.commands.focus()}
         className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
       >
         {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
-          <span className="absolute left-2 top-4 -translate-y-1/2 transform text-gray-400">
+          <span className="absolute min-h-[40px] h-[40px] transform text-gray-400">
             <Trans i18nKey="placeholder" />
           </span>
         ) : null}
@@ -372,7 +374,7 @@ const RichTextEditor = ({
         }
           {!hideSubmitButton && ( 
             <ThemedButton
-              className="absolute bottom-2 right-2 h-fit w-fit rounded-xl p-2 shadow-sm"
+              className="absolute bottom-6 right-0 h-fit w-fit rounded-xl p-2 shadow-sm"
               onClick={sendContent}
             >
               <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
@@ -405,9 +407,9 @@ export const Toolbar = ({
     return null;
   }
   return (
-    <div className="flex items-center gap-2 bg-transparent">
-      <button
-      type='button'
+    <div className={"flex items-center gap-2 bg-transparent"}>
+ {/* <button
+        type='button'
         className={
           editor.isActive('heading', { level: 1 })
             ? 'text-gray-700'
@@ -428,7 +430,7 @@ export const Toolbar = ({
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
       >
         <Heading2 className="h-5 w-5" />
-      </button>
+      </button> */}
 
       <button
         type='button'

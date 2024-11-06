@@ -28,10 +28,13 @@ async function UpdateBriefsPage({
   };
 }) {
   const client = getSupabaseServerComponentClient<Database>();
-  const { data: userData } = await client.auth.getUser();
+  const { data: userData } = await client.auth.getUser()
 
   const propietary_organization_id = userData.user!.id;
-  const userRole = await getUserRole();
+  const userRole = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
   const briefId = id;
 
   // Get the form fields associated with the brief and the brief information
@@ -43,6 +46,7 @@ async function UpdateBriefsPage({
     description: info.description,
     image_url: info.image_url,
     brief_form_fields: info.brief_form_fields,
+    services: info.services,
   }));
 
   const briefRelevantInfoFiltered = ( briefRelevantInfo.map(info => ({
@@ -52,6 +56,7 @@ async function UpdateBriefsPage({
     propietary_organization_id: info.propietary_organization_id,
     description: info.description,
     image_url: info.image_url,
+    services: info.services,
   })));
 
 

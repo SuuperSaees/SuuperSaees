@@ -62,7 +62,7 @@ export default function BriefCompletionForm({
       <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
         
         <div className="no-scrollbar flex lg:flex-nowrap flex-wrap h-full gap-16 overflow-y-auto">
-          <div className="flex w-full max-w-full shrink-0 flex-col gap-4 lg:max-w-xs">
+          <div className="flex w-full max-w-full shrink-0 flex-col gap-16 lg:max-w-xs">
             <BriefCard brief={briefs[0]}  />
             {(userRole === 'agency_owner' ||
               userRole === 'agency_project_manager') && <ClientAssignation />

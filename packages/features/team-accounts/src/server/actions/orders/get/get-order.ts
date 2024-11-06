@@ -4,110 +4,9 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
-import { getUrlFile } from '../../files/get/get-files';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
-export const getBriefQuestionsAndAnswers = async (
-  briefIds: string[],
-  orderId: string,
-) => {
-  const client = getSupabaseServerComponentClient();
-
-  // Get the relationships of brief_form_files for the brief_id
-  const { data: briefFormFilesData, error: briefFormFilesError } = await client
-    .from('brief_form_fields')
-    .select('form_field_id')
-    .in('brief_id', briefIds);
-
-  if (briefFormFilesError) throw briefFormFilesError;
-
-  // Extract form_field_id from relationships
-  const formFieldIds = briefFormFilesData.map((file) => file.form_field_id);
-
-  // Get the questions from the form_fields table, including options
-  const { data: formFieldsData, error: formFieldsError } = await client
-    .from('form_fields')
-    .select('id, description, label, type, options') // Include "options"
-    .in('id', formFieldIds);
-
-  if (formFieldsError) throw formFieldsError;
-
-  // Get the responses corresponding to the orderID
-  const { data: briefResponsesData, error: briefResponsesError } = await client
-    .from('brief_responses')
-    .select('response, form_field_id')
-    .in('form_field_id', formFieldIds)
-    .eq('order_id', orderId);
-
-  if (briefResponsesError) throw briefResponsesError;
-
-  let descriptionContent = '';
-  for (const question of formFieldsData) {
-    const response = briefResponsesData.find(
-      (res) => res.form_field_id === question.id,
-    );
-    const unvalidResponseTypes = new Set(['h1', 'h2', 'h3', 'h4']);
-
-    if (unvalidResponseTypes.has(question.type)) continue;
-
-    let result;
-
-    if (response) {
-      try {
-        // If the field type is multiple_choice, select, or dropdown, map the values to labels
-        if (['multiple_choice', 'select', 'dropdown'].includes(question.type)) {
-          const selectedValues = response.response
-            .split(',')
-            .map((val) => val.trim()); // Split multiple values
-          const options = question.options ?? [];
-
-          // Map each selected value to its corresponding label
-          const mappedLabels = selectedValues
-            .map((value) => {
-              const option = options.find((opt) => opt.value === value);
-              return option ? option.label : value; // Fallback to value if no matching label
-            })
-            .join(', ');
-
-          result = mappedLabels;
-        } else if (question.type === 'date') {
-          // Convert date responses to DD/MM/YYYY format
-          const date = new Date(response.response);
-          result = date.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          });
-        } else if (question.type === 'file') {
-          const uploadedFiles = response.response
-            .split(',')
-            .map((val) => val.trim());
-
-          const mappedFiles = await Promise.all(
-            uploadedFiles.map(async (fileId) => {
-              const file = await getUrlFile(fileId);
-              return file;
-            }),
-          );
-
-          result = mappedFiles.map((file) => file).join(', ');
-        } else {
-          result = response.response.replace(/_/g, ' ');
-        }
-      } catch (error) {
-        result = response.response.replace(/_/g, ' ');
-      }
-    } else {
-      result = 'No se proporcionó información';
-    }
-
-    // Concatenate question and answer
-    descriptionContent += `<strong>${question.label}:</strong><br/>${result}<br/><br/>`;
-  }
-
-  return descriptionContent;
-};
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
@@ -161,14 +60,6 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       client_organization: clientOrganizationData,
     };
 
-    if (proccesedData.brief_ids) {
-      const description = await getBriefQuestionsAndAnswers(
-        proccesedData.brief_ids ? proccesedData.brief_ids : [],
-        orderData.uuid,
-      );
-      proccesedData.description = description ?? '';
-    }
-
     return proccesedData as Order.Relational;
   } catch (error) {
     console.error('Error fetching order:', error);
@@ -216,8 +107,9 @@ export async function getOrderAgencyMembers(
     if (orderError) throw orderError;
 
     if (
-      accountMembershipsData.account_role !== 'agency_owner' &&
-      accountMembershipsData.account_role !== 'agency_member'
+      accountMembershipsData.account_role 
+      && accountMembershipsData.account_role !== 'agency_project_manager'
+      && accountMembershipsData.account_role !== 'agency_owner'
     ) {
       throw new Error('Unauthorized access to order agency members');
     }
@@ -290,7 +182,7 @@ export async function getAgencyClients(
 
     const userRoles = new Set([
       'agency_owner',
-      'agency_member',
+      'agency_project_manager',
       'client_owner',
     ]);
 

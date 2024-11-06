@@ -1,11 +1,17 @@
 'use server';
 
-import { redirect } from 'next/navigation';
-
+import {
+  CustomError,
+  CustomResponse,
+  ErrorBriefOperations,
+  ErrorOrderOperations,
+  ErrorOrganizationOperations,
+} from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
+import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { hasPermissionToCreateOrder } from '../../permissions/orders';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
 
@@ -58,8 +64,13 @@ export const createOrders = async (
         .select('id, primary_owner_user_id, name')
         .eq('id', agencyClientId)
         .single();
+
     if (agencyOrganizationError)
-      throw new Error(agencyOrganizationError.message);
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        'There was an error trying to get the agency organization for the client',
+        ErrorOrganizationOperations.ORGANIZATION_NOT_FOUND,
+      );
 
     const { data: emailData, error: emailError } = await client
       .from('accounts')
@@ -73,7 +84,12 @@ export const createOrders = async (
       .select('account_role')
       .eq('user_id', userId)
       .single();
-    if (roleError) throw new Error(roleError.message);
+    if (roleError)
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        roleError.message,
+        ErrorOrganizationOperations.FAILED_TO_ASSOCIATE_ROLE,
+      );
 
     // Step 1: Check if the user has permission to create orders
     const hasPermission = await hasPermissionToCreateOrder(
@@ -81,7 +97,11 @@ export const createOrders = async (
       clientOrganizationId ?? '',
     );
     if (!hasPermission) {
-      throw new Error('You do not have permission to create orders.');
+      throw new CustomError(
+        HttpStatus.Error.Unauthorized,
+        'You do not have permission to create orders',
+        ErrorOrderOperations.INSUFFICIENT_PERMISSIONS,
+      );
     }
 
     // Step 2: Prepare the orders for insertion
@@ -114,7 +134,13 @@ export const createOrders = async (
       .insert(ordersToInsert)
       .select()
       .single();
-    if (orderError) throw new Error(orderError.message);
+    if (orderError)
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        `
+      There was an error creating the order: ${orderError.message}`,
+        ErrorOrderOperations.FAILED_TO_CREATE_ORDER,
+      );
 
     // Step 3.5: Insert brief responses if present
     if (briefResponses && briefResponses.length > 0) {
@@ -123,8 +149,10 @@ export const createOrders = async (
         .insert(briefResponses);
 
       if (briefResponsesError)
-        throw new Error(
+        throw new CustomError(
+          HttpStatus.Error.BadRequest,
           `Error creating the order brief, ${briefResponsesError.message}`,
+          ErrorBriefOperations.FAILED_TO_CREATE_BRIEF_RESPONSES,
         );
     }
 
@@ -134,7 +162,12 @@ export const createOrders = async (
       .select('form_field_id')
       .in('brief_id', Array.from(briefIds));
 
-    if (formFieldIdsError) throw new Error(formFieldIdsError.message);
+    if (formFieldIdsError)
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        formFieldIdsError.message,
+        ErrorBriefOperations.FAILED_TO_GET_FORM_FIELDS,
+      );
 
     const { data: fileFields, error: fileFieldsError } = await client
       .from('form_fields')
@@ -145,7 +178,12 @@ export const createOrders = async (
       )
       .eq('type', 'file');
 
-    if (fileFieldsError) throw new Error(fileFieldsError.message);
+    if (fileFieldsError)
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        `Error getting file fields: ${fileFieldsError.message}`,
+        ErrorBriefOperations.FAILED_TO_GET_FORM_FIELDS,
+      );
 
     const { data: filesFromBrief, error: filesFromBriefError } = await client
       .from('brief_responses')
@@ -182,7 +220,12 @@ export const createOrders = async (
             .from('order_files')
             .insert(orderFileToInsert);
 
-          if (orderFilesError) throw new Error(orderFilesError.message);
+          if (orderFilesError)
+            throw new CustomError(
+              HttpStatus.Error.BadRequest,
+              orderFilesError.message,
+              ErrorOrderOperations.FAILED_TO_INSERT_FILES,
+            );
         }
       }
     }
@@ -202,7 +245,12 @@ export const createOrders = async (
       const { error: assignedOrdersError } = await client
         .from('order_assignations')
         .insert(assignationData);
-      if (assignedOrdersError) throw new Error(assignedOrdersError.message);
+      if (assignedOrdersError)
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          'Error adding order assignements',
+          ErrorOrderOperations.FAILED_TO_ADD_ASSIGNEES,
+        );
     }
 
     // Step 7: add order followers if present
@@ -215,7 +263,12 @@ export const createOrders = async (
             client_member_id: followerId,
           })),
         );
-      if (followUpError) throw new Error(followUpError.message);
+      if (followUpError)
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          'Error adding order followers',
+          ErrorOrderOperations.FAILED_TO_ADD_FOLLOWERS,
+        );
     }
 
     // Step 8: Add order follow-up for client owners/members
@@ -228,7 +281,12 @@ export const createOrders = async (
       const { error: followUpError } = await client
         .from('order_followers')
         .insert(followUpData);
-      if (followUpError) throw new Error(followUpError.message);
+      if (followUpError)
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          'Error adding order followers',
+          ErrorOrderOperations.FAILED_TO_ADD_FOLLOWERS,
+        );
     }
 
     // Step 9: Send email notification
@@ -243,9 +301,10 @@ export const createOrders = async (
     }
 
     // Step 9: Redirect to orders page after successful order creation
-    redirect('/orders');
+
+    return CustomResponse.success(orderData, 'orderCreated').toJSON();
   } catch (error) {
     console.error(error);
-    throw error;
+    return CustomResponse.error(error).toJSON()
   }
 };

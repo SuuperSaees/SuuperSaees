@@ -17,7 +17,7 @@ const UserReviewMessage = ({ review }: UserReviewMessageProps) => {
       <div className="flex flex-col">
         <div className="flex justify-between gap-4">
           <p className="font-semibold text-gray-600">{`Left a ${review?.rating} star review:`}</p>
-          <small className="text-gray-400">
+          <small className="">
             {format(new Date(review?.created_at), 'MMM dd, p')}
           </small>
         </div>

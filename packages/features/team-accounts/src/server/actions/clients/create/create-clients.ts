@@ -2,17 +2,29 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import type { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
-import { generateRandomPassword // getTextColorBasedOnBackground
+import { OrganizationSettings as OrganizationSettingsType } from '../../../../../../../../apps/web/lib/organization-settings.types';
+import { Tokens } from '../../../../../../../../apps/web/lib/tokens.types';
+import {
+  CustomError,
+  CustomResponse,
+  ErrorClientOperations,
+  ErrorOrganizationOperations,
+  ErrorUserOperations,
+  JSONCustomResponse,
+} from '../../../../../../../../packages/shared/src/response';
+import { decodeToken } from '../../../../../../../../packages/tokens/src/decode-token';
+import {
+  getDomainByOrganizationId,
+  getDomainByUserId,
+} from '../../../../../../../multitenancy/utils/get/get-domain';
+import {
+  generateRandomPassword,
+  getTextColorBasedOnBackground,
 } from '../../../utils/generate-colors';
 import { addUserAccountRole } from '../../members/create/create-account';
 import {
@@ -24,76 +36,181 @@ import { updateUserAccount } from '../../members/update/update-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
 import {
   getAgencyForClient,
-  getOrganization, // getOrganizationSettings,
+  getOrganization,
   getOrganizationById,
+  getOrganizationSettings,
+  getOrganizationSettingsByOrganizationId,
 } from '../../organizations/get/get-organizations';
 import {
   hasPermissionToAddClientMembers,
   hasPermissionToCreateClientOrg,
 } from '../../permissions/clients';
+// import { getSubscriptionByOrganizationId } from '../../subscriptions/get/get-subscription';
+import { sendClientConfirmEmail } from '../send-email/send-client-email';
 
 // Define la función createClient
 type CreateClient = {
   client: {
     email: string;
     slug: string;
+    name: string;
   };
   role: string;
-  selectedOrganizationId?: string;
+  agencyId?: string;
+  adminActivated?: boolean;
 };
 
 const createClientUserAccount = async (
   clientEmail: string,
   organizationName: Account.Type['name'],
+  adminActivated = false,
+  agencyId?: string,
 ) => {
   try {
-    const client = getSupabaseServerComponentClient();
-    const userData = await fetchCurrentUser(client);
-    const userId = userData?.id;
-    if (!userId) throw new Error('No user id provided');
-    const baseUrl = await getDomainByUserId(userId, true);
+    const client = getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+    let baseUrl, organizationId;
+    if (!adminActivated) {
+      const userData = await fetchCurrentUser(client);
+      const userId = userData?.id;
+      if (!userId) throw new Error('No user id provided');
+      const { domain: baseUrlValue, organizationId: organizationIdValue } =
+        await getDomainByUserId(userId, true);
+      baseUrl = baseUrlValue;
+      organizationId = organizationIdValue;
+    } else {
+      baseUrl = await getDomainByOrganizationId(agencyId ?? '', true, true);
+      organizationId = agencyId ?? '';
+    }
 
-    // const organizationSettings = await getOrganizationSettings();
-
-    // pre-authentication of the user
+    // Step 1: Pre-authentication of the user
     const password = generateRandomPassword(12);
 
-    // const organizationLogo = organizationSettings.find(
-    //   (setting) => setting.key === 'logo_url',
-    // );
+    const { logo_url, theme_color } = OrganizationSettingsType.KEYS;
 
-    // const organizationColor = organizationSettings.find(
-    //   (setting) => setting.key === 'theme_color',
-    // );
+    const { default_sender_logo, default_sender_color } =
+      OrganizationSettingsType.EXTRA_KEYS;
+    let organizationLogo: {
+        key: string;
+        value: string;
+      } | null = null,
+      organizationColor: {
+        key: string;
+        value: string;
+      } | null = null;
 
+    if (!adminActivated) {
+      const organizationSettings = await getOrganizationSettings();
+
+      organizationSettings.forEach((setting) => {
+        if (setting.key === logo_url && setting.value !== '')
+          organizationLogo = { key: logo_url, value: setting.value };
+        if (setting.key === theme_color && setting.value !== '')
+          organizationColor = { key: theme_color, value: setting.value };
+      });
+    } else {
+      const organizationSettings =
+        await getOrganizationSettingsByOrganizationId(
+          organizationId,
+          adminActivated,
+          [logo_url, theme_color],
+        );
+
+      organizationSettings.forEach((setting) => {
+        if (setting.key === logo_url && setting.value !== '')
+          organizationLogo = { key: logo_url, value: setting.value };
+        if (setting.key === theme_color && setting.value !== '')
+          organizationColor = { key: theme_color, value: setting.value };
+      });
+    }
+
+    organizationLogo = organizationLogo ?? {
+      key: logo_url,
+      value: default_sender_logo,
+    };
+
+    organizationColor = organizationColor ?? {
+      key: theme_color,
+      value: default_sender_color,
+    };
+
+    // Step 2: Sign up the user
     const { data: clientOrganizationUser, error: clientOrganizationUserError } =
       await client.auth.signUp({
         email: clientEmail ?? '',
         password,
-        options: {
-          emailRedirectTo: `${baseUrl}set-password`,
-          data: {
-            ClientContent: 'Hi',
-            ClientContent1: 'Welcome to ',
-            ClientContent2: organizationName,
-            ClientContent3: ', please activate your account to get started.',
-            ClientContent4: 'Your username:',
-            ClientContent5: 'Thanks,',
-            ClientContent6: 'The Team',
-            // OrganizationSenderLogo: organizationLogo?.value ?? '',
-            // OrganizationSenderColor: organizationColor?.value ?? '',
-            // ButtonTextColor: organizationColor
-            //   ? getTextColorBasedOnBackground(organizationColor.value)
-            //   : '',
-          },
-        },
+        // options: { IMPORTANT: We need to disable this to avoid the email confirmation flow
+        //   emailRedirectTo: `${baseUrl}set-password`,
+        //   data: {
+        //     ClientContent: 'Hi',
+        //     ClientContent1: 'Welcome to ',
+        //     ClientContent2: organizationName,
+        //     ClientContent3: ', please activate your account to get started.',
+        //     ClientContent4: 'Your username:',
+        //     ClientContent5: 'Thanks,',
+        //     ClientContent6: 'The Team',
+        //     OrganizationSenderLogo: organizationLogo.value,
+        //     OrganizationSenderColor: organizationColor.value,
+        //     ButtonTextColor:
+        //       getTextColorBasedOnBackground(organizationColor?.value) ??
+        //       '#ffffff',
+        //   },
+        // },
       });
 
     if (clientOrganizationUserError) {
-      console.error('Error occurred while creating the client user');
-      throw new Error(clientOrganizationUserError.message);
+      console.error(
+        'Error occurred while creating the client user. Authentication error',
+      );
+      throw new CustomError(
+        401,
+        'Authentication error',
+        ErrorUserOperations.USER_ALREADY_EXISTS,
+      );
     }
+    // Step 3: Take the object session and decode the access_token as jwt to get the session id
+    const sessionUserClient = clientOrganizationUser.session;
+    const createdAtAndUpdatedAt = new Date().toISOString();
+    const accessToken = sessionUserClient?.access_token ?? '';
+    const refreshToken = sessionUserClient?.refresh_token ?? '';
+    const expiresAt = new Date(
+      new Date().getTime() + 3600 * 1000,
+    ).toISOString();
+    const providerToken = 'supabase';
+    const sessionId = decodeToken(accessToken, 'base64')?.session_id as string;
+    const callbackUrl = `${baseUrl}set-password`;
+    // Step 4: Save the token in the database
+    const token: Tokens.Insert = {
+      id: sessionId,
+      id_token_provider: sessionId,
+      created_at: createdAtAndUpdatedAt,
+      updated_at: createdAtAndUpdatedAt,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_at: expiresAt,
+      provider: providerToken,
+    };
 
+    const { error: tokenError } = await client.from('tokens').insert(token);
+
+    if (tokenError) {
+      console.error('Error occurred while saving the token', tokenError);
+      throw new Error('Error occurred while saving the token');
+    }
+    // Step 5: Send the email with the magic link
+    await sendClientConfirmEmail(
+      baseUrl,
+      clientEmail,
+      organizationLogo.value,
+      organizationColor.value,
+      getTextColorBasedOnBackground(organizationColor.value),
+      sessionId,
+      callbackUrl,
+      organizationName,
+      organizationId,
+    );
+    // Step 6: Return the client organization user
     return clientOrganizationUser;
   } catch (error) {
     console.error('Error occurred while creating the client user');
@@ -102,11 +219,17 @@ const createClientUserAccount = async (
 };
 
 export const insertClient = async (
-  supabaseClient: SupabaseClient<Database>,
   agencyId: Client.Insert['agency_id'],
   userId: Client.Insert['user_client_id'],
   organizationId: Client.Insert['organization_client_id'],
+  supabaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
 ): Promise<Client.Insert> => {
+  supabaseClient =
+    supabaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
   try {
     const { data: clientData, error: clientError } = await supabaseClient
       .from('clients')
@@ -130,77 +253,121 @@ export const insertClient = async (
   }
 };
 
+/**
+ * @prop {adminActivated}: This is a boolean that indicates if the client is being created by an admin user.
+ * @prop {agencyId}: This is the id of the agency that the client is being created for.
+ *
+ */
+
 export const createClient = async (clientData: CreateClient) => {
+  // Refactor this function to use the new client data structure
   try {
-    const supabase = getSupabaseServerComponentClient();
-
     // Step 1: Fetch primary owner ID and organization
-    const primaryOwnerId = await getPrimaryOwnerId();
-    const organization = await getOrganization();
+    let primaryOwnerId;
+    if (!clientData.adminActivated) {
+      primaryOwnerId = await getPrimaryOwnerId();
+    }
 
-    if (!primaryOwnerId) throw new Error('No primary owner user id found');
-    if (!organization) throw new Error('No organization found');
+    const organization = !clientData.agencyId
+      ? await getOrganization()
+      : await getOrganizationById(
+          clientData.agencyId,
+          undefined,
+          clientData.adminActivated,
+        );
+
+    if (!primaryOwnerId && !clientData.adminActivated)
+      throw new Error('No primary owner user id found');
+
+    if (!organization)
+      throw new CustomError(
+        404,
+        'No agency found',
+        ErrorOrganizationOperations.ORGANIZATION_NOT_FOUND,
+      );
 
     // Step 2: Check if the user has permission to create a client
-    const hasPermission = await hasPermissionToCreateClientOrg(organization.id);
-    if (!hasPermission) {
-      throw new Error(
-        'You do not have the required permissions to create a client',
+    if (!clientData.adminActivated) {
+      const hasPermission = await hasPermissionToCreateClientOrg(
+        organization.id,
       );
+      if (!hasPermission) {
+        throw new CustomError(
+          403,
+          'You do not have the required permissions to create a client',
+          ErrorClientOperations.INSUFFICIENT_PERMISSIONS,
+        );
+      }
     }
 
     // Step 3: Create or fetch the client organization user account
     const clientOrganizationUser = await createClientUserAccount(
       clientData.client.email,
       organization.name,
+      clientData.adminActivated,
+      clientData.agencyId,
     );
+
     const userId = clientOrganizationUser.user?.id;
     if (!userId) throw new Error('No user id provided');
 
     // Step 4: Verify if the client organization account already exists
     const clientAccountData = await getUserAccountByEmail(
-      supabase,
       clientData.client.email,
+      undefined,
+      clientData.adminActivated,
     );
 
     // Step 5: Retrieve or create the client organization
     const clientOrganizationAccount = clientAccountData?.organization_id
       ? await getOrganizationById(clientAccountData.organization_id)
       : await insertOrganization(
-          supabase,
           { name: clientData.client.slug },
           userId,
+          undefined,
+          clientData.adminActivated,
         );
 
-    if (!clientOrganizationAccount) throw new Error('No organization found');
+    if (!clientOrganizationAccount)
+      throw new CustomError(
+        404,
+        'No organization found for this client',
+        ErrorOrganizationOperations.ORGANIZATION_NOT_FOUND,
+      );
 
     // Step 6: Add role to the accounts_memberships
     await addUserAccountRole(
-      supabase,
       clientOrganizationAccount.id,
       userId,
       clientData.role,
+      undefined,
+      clientData.adminActivated,
     );
 
     // Step 7: Insert client into the clients table
     const client = await insertClient(
-      supabase,
       organization.id,
       userId,
       clientOrganizationAccount.id,
+      undefined,
+      clientData.adminActivated,
     );
 
     // Step 8: Update client user with organization ID
     await updateUserAccount(
-      supabase,
-      { organization_id: clientOrganizationAccount.id },
+      {
+        organization_id: clientOrganizationAccount.id,
+        name: clientData.client.name,
+      },
       userId,
+      undefined,
+      clientData.adminActivated,
     );
 
-    return client;
+    return CustomResponse.success(client, 'clientCreated').toJSON();
   } catch (error) {
-    console.error('Error creating the client v1:', error);
-    throw error;
+    console.error('Error creating the client:', error);
+    return CustomResponse.error(error).toJSON();
   }
 };
 
@@ -210,7 +377,7 @@ export const addClientMember = async ({
 }: {
   email: string;
   clientOrganizationId: string;
-}): Promise<Client.Insert> => {
+}): Promise<JSONCustomResponse<Client.Insert | null>> => {
   try {
     const supabase = getSupabaseServerComponentClient();
     const userRole = 'client_member';
@@ -218,14 +385,21 @@ export const addClientMember = async ({
     // Step 1: Get the client's organization
     const clientOrganization = await getOrganizationById(clientOrganizationId);
     if (!clientOrganization) {
-      throw new Error('Client organization not found');
+      throw new CustomError(
+        404,
+        'Client organization not found',
+        ErrorOrganizationOperations.ORGANIZATION_NOT_FOUND,
+      );
     }
 
     // Step 2: Get the agency organization assigned to the client
     const agencyOrganization = await getAgencyForClient(clientOrganizationId);
     if (!agencyOrganization) {
-      throw new Error(
+      throw new CustomError(
+        404,
         `No agency found for organization ID ${clientOrganizationId}`,
+
+        ErrorClientOperations.AGENCY_NOT_FOUND,
       );
     }
 
@@ -236,13 +410,22 @@ export const addClientMember = async ({
     );
 
     if (!hasPermissionToAdd) {
-      throw new Error('Unauthorized: Insufficient permissions');
+      throw new CustomError(
+        403,
+        'Unauthorized: Insufficient permissions',
+        ErrorClientOperations.INSUFFICIENT_PERMISSIONS,
+      );
     }
 
     // Step 4: Check if the client already exists
-    const clientAccountData = await getUserAccountByEmail(supabase, email);
+    const clientAccountData = await getUserAccountByEmail(email);
     if (clientAccountData) {
-      throw new Error('Client already exists');
+      // throw new Error('Client already exists');
+      throw new CustomError(
+        409,
+        'Client already exists',
+        ErrorUserOperations.USER_ALREADY_EXISTS,
+      );
     }
 
     // Step 5: Create the new client user account
@@ -252,35 +435,40 @@ export const addClientMember = async ({
     );
     const clientUserId = clientOrganizationUser.user?.id;
     if (!clientUserId) {
-      throw new Error('Failed to create client user account');
+      throw new CustomError(
+        409,
+        'Failed to create client user account',
+        ErrorUserOperations.FAILED_TO_CREATE_USER,
+      );
     }
 
     // Step 6: Assign the new user as part of the agency's clients
     const client = await insertClient(
-      supabase,
       agencyOrganization.id,
       clientUserId,
       clientOrganizationId,
+      supabase,
     );
 
     // Step 7: Add the user role as client into the accounts_memberships table
     await addUserAccountRole(
-      supabase,
       clientOrganizationId,
       clientUserId,
       userRole,
+      supabase,
     );
 
     // Step 8: Update the new user client account with its respective organization ID
     await updateUserAccount(
-      supabase,
       { organization_id: clientOrganization.id },
       clientUserId,
+      supabase,
     );
 
-    return client;
+    // return client;
+    return CustomResponse.success(client, 'memberAdded').toJSON();
   } catch (error) {
     console.error('Error creating the client v2:', error);
-    throw error;
+    return CustomResponse.error(error).toJSON();
   }
 };

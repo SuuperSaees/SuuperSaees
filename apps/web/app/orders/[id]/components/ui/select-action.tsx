@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-
-
+import { useState, useEffect } from 'react';
 
 import {
   Select,
@@ -26,6 +24,7 @@ interface SelectActionProps {
   getitemClassName: (value: string) => string;
   onSelectHandler?: (value: string) => void;
   [key: string]: unknown;
+  showLabel?: boolean
 }
 const SelectAction = ({
   options,
@@ -34,13 +33,25 @@ const SelectAction = ({
   className,
   getitemClassName,
   onSelectHandler,
+  showLabel = true,
   ...rest
 }: SelectActionProps) => {
   const [selectedOption, setSelectedOption] = useState(defaultValue);
+
+  useEffect(() => {
+    setSelectedOption(defaultValue);
+  }, [defaultValue]);
+
+  //Retrieves the label for a given value from the options array
+  const getSelectedLabel = (value: string) => {
+    const option = options.find(opt => opt.value === value);
+    return option ? option.label : '';
+  };
+
   return (
-    <div className="flex w-full items-center justify-between">
+    <div className={`flex w-full items-center ${showLabel ? 'justify-between' : 'justify-center'}`}>
       <span className="font-semibold">
-        {groupName ? groupName : 'Select an option'}
+        {groupName && showLabel ? groupName : showLabel ? 'Select an option' : ''}
       </span>
       <Select
         {...rest}
@@ -51,12 +62,14 @@ const SelectAction = ({
         }}
       >
         <SelectTrigger
-          className={'w-fit rounded-full border-none bg-black ' + className}
+          className={'w-fit border-none bg-black ' + className}
         >
           {(groupName === 'Priority' || groupName === 'Prioridad') && (
             <div className="mr-2 h-2 w-2 rounded-full bg-current"></div>
           )}
-          <SelectValue placeholder="Select an option" className="m-0 p-0" />
+          <SelectValue className="m-0 p-0" >
+            {selectedOption ? getSelectedLabel(selectedOption) : 'Select an option'}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup className="flex flex-col gap-2">

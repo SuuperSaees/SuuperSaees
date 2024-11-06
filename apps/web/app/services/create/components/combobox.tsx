@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { cn } from "@kit/ui/utils";
 import { Button } from "@kit/ui/button";
@@ -20,6 +20,36 @@ export function Combobox({ options, title, className, resetOnSelect, onSelect })
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
 
+  const [triggerWidth, setTriggerWidth] = useState(0);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!triggerRef.current) return;
+
+    const updateWidth = () => {
+      if (triggerRef.current) {
+        setTriggerWidth(triggerRef.current.offsetWidth);
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(updateWidth);
+    
+    resizeObserver.observe(triggerRef.current);
+
+    updateWidth();
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  
+  useEffect(() => {
+    if (open && triggerRef.current) {
+      setTriggerWidth(triggerRef.current.offsetWidth);
+    }
+  }, [open]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -28,6 +58,7 @@ export function Combobox({ options, title, className, resetOnSelect, onSelect })
           role="combobox"
           aria-expanded={open}
           className={cn("w-full", className)}
+          ref={triggerRef}
         >
           <div className="flex justify-between w-full">
             {value
@@ -37,7 +68,7 @@ export function Combobox({ options, title, className, resetOnSelect, onSelect })
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-52 p-0">
+      <PopoverContent className="p-0" style={{ width: triggerWidth }}>
         <Command>
           <CommandInput placeholder="Search..." className="h-9" />
           <CommandList>

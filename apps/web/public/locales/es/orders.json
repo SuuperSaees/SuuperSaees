@@ -1,10 +1,11 @@
 {
-  "title": "Pedidos",
+  "title": "Proyectos",
   "selectDateLabel": "Selecciona una fecha",
   "confirmDateTitle": "Confirmar fecha",
   "confirmDateMessage": "¿Estás seguro de que deseas actualizar la fecha de vencimiento?",
   "accept": "Aceptar",
   "cancel": "Cancelar",
+  "summary": "Resumen",
   "openOrders": "Abiertos",
   "completedOrders": "Completados",
   "allOrders": "Todos",
@@ -14,16 +15,22 @@
   "statusLabel": "Estado",
   "assignedToLabel": "Asignado a",
   "dueDateLabel": "Fecha de vencimiento",
+  "select_date_range": "Seleccionar rango de fechas",
+  "delete": "Eliminar orden",
+  "deleteConfirmation": "¿Estás seguro de que deseas eliminar este proyecto?", 
+  "deleteSuccess": "Proyecto eliminado con éxito",
+  "deleteError": "Error al eliminar el proyecto",
+  "create":"Crear",
   "creation": {
-    "title": "Crear pedido",
+    "title": "Crear proyecto",
     "form": {
-      "titleLabel": "Nombre del pedido",
-      "titlePlaceholder": "Escribe el nombre de tu pedido",
-      "descriptionLabel": "Descripción del pedido",
-      "descriptionPlaceholder": "Añade una descripción sobre este pedido",
+      "titleLabel": "Nombre del proyecto",
+      "titlePlaceholder": "Escribe el nombre de tu proyecto",
+      "descriptionLabel": "Descripción del proyecto",
+      "descriptionPlaceholder": "Añade una descripción sobre este proyecto",
       "filesLabel": "Archivos",
       "filesPlaceholder": "Haz click o arrastra para subir un archivo SVG, PNG, JPG or GIF (max. 800x400px)",
-      "submitMessage": "Crear pedido"
+      "submitMessage": "Crear proyecto"
     },
     "validation": {
       "minTitleCharacters": "El título debe tener al menos 2 caracteres.",
@@ -31,12 +38,19 @@
       "files": "Por favor, sube al menos un archivo"
     }
   },
+  "tasks": {
+    "emptyTasks": "No se encontraron tareas",
+    "addTask": "Agregar tarea",
+    "addSubtask": "Agregar subtarea",
+    "newTask": "Nueva tarea",
+    "newSubtask": "Nueva subtarea"
+  },
   "details": {
-    "title": "Detalles del pedido",
+    "title": "Detalles del proyecto",
     "summary": "Resumen",
     "deadlineNotSet": "Sin asignar",
     "createdBy": "Creado por",
-    "orderId": "Pedido ID",
+    "orderId": "#",
     "createdAt": "Creado",
     "assignedTo": "Asignado a",
     "followedBy": "Seguido por",
@@ -59,14 +73,15 @@
     "navigation": {
       "details": "Detalles",
       "activity": "Actividad",
+      "tasks": "Tareas",
       "files": "Archivos"
     },
     "dialog": {
       "button": "Marcar como completado",
       "title": "Deja una reseña",
-      "description": "¡Cuentanos sobre tu experiencia con este pedido!",
+      "description": "¡Cuentanos sobre tu experiencia con este proyecto!",
       "label": "Escribe una reseña",
-      "placeholder": "¿Qué te pareció este pedido?"
+      "placeholder": "¿Qué te pareció este proyecto?"
     }
   },
   "selectFile": "Debes seleccionar al menos un archivo",
@@ -77,7 +92,7 @@
   "dragAndDrop": "Arrastra los archivos aquí o haz clic para subir",
   "dropHere": "Suelta aquí para subir archivos",
   "tryAgain": "Inténtalo de nuevo",
-  "OrderDescriptionTitle": "Detalles del pedido",
+  "OrderDescriptionTitle": "Detalles del proyecto",
   "internalMessagingEnabled": "Habilitado el envío de mensajes internos",
   "internalMessagingDisabled": "Deshabilitado el envío de mensajes internos",
   "internalMessage": "Mensaje interno",
@@ -88,7 +103,7 @@
   "form": {
     "completion": {
       "client": {
-        "title": "Agregar un cliente",
+        "title": "Asignar un cliente",
         "label": "Nombre de la organización",
         "select": {
           "placeholder": "Selecciona una organización"

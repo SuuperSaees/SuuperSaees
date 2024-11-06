@@ -258,6 +258,55 @@ export type Database = {
           },
         ]
       }
+      agency_statuses: {
+        Row: {
+          agency_id: string | null
+          created_at: string
+          id: number
+          position: number | null
+          status_color: string | null
+          status_name: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string
+          id?: number
+          position?: number | null
+          status_color?: string | null
+          status_name?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string
+          id?: number
+          position?: number | null
+          status_color?: string | null
+          status_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_customers: {
         Row: {
           account_id: string
@@ -539,6 +588,63 @@ export type Database = {
           },
         ]
       }
+      checkout_services: {
+        Row: {
+          checkout_id: string | null
+          id: string
+          service_id: number | null
+        }
+        Insert: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Update: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_services_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "checkouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkout_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkouts: {
+        Row: {
+          created_at: string | null
+          deleted_on: string | null
+          id: string
+          provider: string
+          provider_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider: string
+          provider_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider?: string
+          provider_id?: string
+        }
+        Relationships: []
+      }
       client_services: {
         Row: {
           agency_id: string
@@ -650,18 +756,21 @@ export type Database = {
       clients: {
         Row: {
           agency_id: string
+          deleted_on: string | null
           id: string
           organization_client_id: string
           user_client_id: string
         }
         Insert: {
           agency_id: string
+          deleted_on?: string | null
           id?: string
           organization_client_id: string
           user_client_id: string
         }
         Update: {
           agency_id?: string
+          deleted_on?: string | null
           id?: string
           organization_client_id?: string
           user_client_id?: string
@@ -1336,12 +1445,13 @@ export type Database = {
           client_organization_id: string
           created_at: string
           customer_id: string
+          deleted_on: string | null
           description: string
           due_date: string | null
           id: number
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
-          status: Database["public"]["Enums"]["order_status_types"] | null
+          status: string | null
           stripe_account_id: string | null
           title: string
           uuid: string
@@ -1352,12 +1462,13 @@ export type Database = {
           client_organization_id: string
           created_at?: string
           customer_id: string
+          deleted_on?: string | null
           description: string
           due_date?: string | null
           id?: number
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
-          status?: Database["public"]["Enums"]["order_status_types"] | null
+          status?: string | null
           stripe_account_id?: string | null
           title: string
           uuid: string
@@ -1368,12 +1479,13 @@ export type Database = {
           client_organization_id?: string
           created_at?: string
           customer_id?: string
+          deleted_on?: string | null
           description?: string
           due_date?: string | null
           id?: number
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
-          status?: Database["public"]["Enums"]["order_status_types"] | null
+          status?: string | null
           stripe_account_id?: string | null
           title?: string
           uuid?: string
@@ -1901,11 +2013,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string | null
           currency: string
+          days_used: number
           id: string
           period_ends_at: string | null
           period_starts_at: string | null
-          propietary_organization_id: string
+          propietary_organization_id: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          token_id: string
           trial_ends_at: string | null
           trial_starts_at: string | null
           updated_at: string | null
@@ -1918,11 +2032,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at?: string | null
           currency: string
+          days_used?: number
           id: string
           period_ends_at?: string | null
           period_starts_at?: string | null
-          propietary_organization_id: string
+          propietary_organization_id?: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          token_id?: string
           trial_ends_at?: string | null
           trial_starts_at?: string | null
           updated_at?: string | null
@@ -1935,11 +2051,13 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string | null
           currency?: string
+          days_used?: number
           id?: string
           period_ends_at?: string | null
           period_starts_at?: string | null
-          propietary_organization_id?: string
+          propietary_organization_id?: string | null
           status?: Database["public"]["Enums"]["subscription_status"]
+          token_id?: string
           trial_ends_at?: string | null
           trial_starts_at?: string | null
           updated_at?: string | null
@@ -1968,57 +2086,220 @@ export type Database = {
           },
         ]
       }
-      tasks: {
+      subtask_assignations: {
         Row: {
-          account_id: string
-          created_at: string
-          description: string | null
-          done: boolean
-          id: string
-          title: string
-          updated_at: string
+          agency_member_id: string
+          subtask_id: string | null
         }
         Insert: {
-          account_id: string
-          created_at?: string
-          description?: string | null
-          done?: boolean
-          id?: string
-          title: string
-          updated_at?: string
+          agency_member_id: string
+          subtask_id?: string | null
         }
         Update: {
-          account_id?: string
-          created_at?: string
-          description?: string | null
-          done?: boolean
-          id?: string
-          title?: string
-          updated_at?: string
+          agency_member_id?: string
+          subtask_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_assignations_subtask_id_fkey"
+            columns: ["subtask_id"]
+            isOneToOne: false
+            referencedRelation: "subtasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subtask_followers: {
+        Row: {
+          client_member_id: string | null
+          created_at: string
+          subtask_id: string | null
+        }
+        Insert: {
+          client_member_id?: string | null
+          created_at?: string
+          subtask_id?: string | null
+        }
+        Update: {
+          client_member_id?: string | null
+          created_at?: string
+          subtask_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
             isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "subtask_followers_subtask_id_fkey"
+            columns: ["subtask_id"]
+            isOneToOne: false
+            referencedRelation: "subtasks"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      subtasks: {
+        Row: {
+          completed: boolean | null
+          content: string | null
+          created_at: string
+          deleted_on: string | null
+          end_date: string | null
+          id: string
+          name: string | null
+          parent_task_id: string | null
+          position: number | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          start_date: string | null
+          state: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          content?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string | null
+          parent_task_id?: string | null
+          position?: number | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
+          state?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          content?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string | null
+          parent_task_id?: string | null
+          position?: number | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
+          state?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          name: string | null
+          order_id: number | null
+          position: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: number | null
+          position?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: number | null
+          position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          id_token_provider: string
+          provider: string
+          refresh_token: string
+          updated_at: string | null
+        }
+        Insert: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          id_token_provider?: string
+          provider?: string
+          refresh_token?: string
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          id_token_provider?: string
+          provider?: string
+          refresh_token?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -2324,11 +2605,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string | null
           currency: string
+          days_used: number
           id: string
           period_ends_at: string | null
           period_starts_at: string | null
-          propietary_organization_id: string
+          propietary_organization_id: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          token_id: string
           trial_ends_at: string | null
           trial_starts_at: string | null
           updated_at: string | null
@@ -2336,7 +2619,7 @@ export type Database = {
       }
     }
     Enums: {
-      action_type: "create" | "update" | "delete"
+      action_type: "create" | "update" | "delete" | "complete"
       activity_type:
         | "message"
         | "review"
@@ -2347,6 +2630,7 @@ export type Database = {
         | "description"
         | "title"
         | "assigned_to"
+        | "task"
       app_permissions:
         | "roles.manage"
         | "billing.manage"
@@ -2396,6 +2680,12 @@ export type Database = {
         | "sidebar_background_color"
         | "portal_name"
         | "favicon_url"
+        | "sender_name"
+        | "sender_email"
+        | "sender_domain"
+        | "logo_dark_url"
+        | "auth_card_background_color"
+        | "auth_section_background_color"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"
@@ -2491,7 +2781,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2505,7 +2794,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2519,7 +2807,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2541,7 +2828,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2552,7 +2838,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2563,7 +2848,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -2699,10 +2983,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {

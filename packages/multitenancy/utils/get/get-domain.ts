@@ -10,7 +10,10 @@ import { getSupabaseServerComponentClient } from '../../../supabase/src/clients/
 export async function getDomainByUserId(
   userId: string,
   parsedUrl: boolean = false,
-): Promise<string> {
+): Promise<{
+  domain: string;
+  organizationId: string;
+}> {
   // GET ROLE
   try {
     const userRole = await getUserRoleById(userId);
@@ -21,41 +24,50 @@ export async function getDomainByUserId(
     ]);
     const availableRolesClient = new Set(['client_owner', 'client_member']);
     let organizationId: string | null = null;
-  
+
     if (availableRolesAgency.has(userRole)) {
       // Case 1: Agency roles
       const organizationData = await getOrganizationByUserId(userId);
-  
+
       organizationId = organizationData?.id;
     } else if (availableRolesClient.has(userRole)) {
       // Case 2: Client roles
       const agencyData = await getAgencyForClientByUserId(userId);
-  
+
       organizationId = agencyData?.id;
     } else {
       // Unknown role, use default domain
-      return "";
+      return {
+        domain: process.env.NEXT_PUBLIC_SITE_URL ?? '',
+        organizationId: '',
+      };
     }
-  
-    const domain = await getDomainByOrganizationId(organizationId);
+
+    const domain =
+      (await getDomainByOrganizationId(organizationId)) ??
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      '';
     const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-  
-    if (parsedUrl) {
-      return `${IS_PROD ? 'https' : 'http'}://${domain}/`;
-    }
-  
-    return domain;
+
+    return {
+      domain: parsedUrl ? `${IS_PROD ? 'https' : 'http'}://${domain}/` : domain,
+      organizationId: organizationId,
+    };
   } catch (error) {
     console.error(error);
-    return "";
-
+    return {
+      domain: process.env.NEXT_PUBLIC_SITE_URL ?? '',
+      organizationId: '',
+    };
   }
 }
 
 export async function getDomainByOrganizationId(
   organizationId: string,
+  parsedUrl = false,
+  adminActived = false,
 ): Promise<string> {
-  const supabase = getSupabaseServerComponentClient();
+  const supabase = getSupabaseServerComponentClient({ admin: adminActived });
   const { data: domainData, error: domainError } = await supabase
     .from('organization_subdomains')
     .select('subdomains(domain)')
@@ -66,9 +78,13 @@ export async function getDomainByOrganizationId(
     throw new Error(`Error getting domain: ${domainError.message}`);
   }
 
+  const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+
   const domain = domainData?.subdomains?.domain;
 
-  return domain ?? '';
+  return parsedUrl
+    ? `${IS_PROD ? 'https' : 'http'}://${domain}/`
+    : (domain ?? process.env.NEXT_PUBLIC_SITE_URL ?? '');
 }
 
 export async function getDomainBySubdomain(
@@ -86,7 +102,7 @@ export async function getDomainBySubdomain(
     .single();
 
   if (domainError) {
-    throw new Error(`Error getting domain: ${domainError.message}`);
+    throw new Error(`Error getting domain by subdomain: ${domainError.message}`);
   }
 
   return domainData;
@@ -97,39 +113,48 @@ export async function getFullDomainBySubdomain(
   adminActived: boolean = false,
   values: string[] = [],
 ) {
-  const supabase = getSupabaseServerComponentClient({
-    admin: adminActived,
-  });
+  try {
+    const supabase = getSupabaseServerComponentClient({
+      admin: adminActived,
+    });
 
-  const domainData = await getDomainBySubdomain(subdomain, adminActived);
+    // Fetch domain data and handle possible errors
+    const domainData = await getDomainBySubdomain(subdomain, adminActived);
 
-  const { data: organizationSubdomainData, error: organizationSubdomainError } =
-    await supabase
-      .from('organization_subdomains')
-      .select('organization_id')
-      .eq('subdomain_id', domainData.id)
-      .single();
 
-  if (organizationSubdomainError) {
-    throw new Error(
-      `Error getting organization subdomain: ${organizationSubdomainError.message}`,
+    // Fetch organization subdomain data and handle errors
+    const { data: organizationSubdomainData, error: organizationSubdomainError } =
+      await supabase
+        .from('organization_subdomains')
+        .select('organization_id')
+        .eq('subdomain_id', domainData.id)
+        .single();
+
+    if (organizationSubdomainError) {
+      throw new Error(
+        `Error getting organization subdomain: ${organizationSubdomainError.message}`,
+      );
+    }
+
+    if (!organizationSubdomainData) {
+      throw new Error(`No organization subdomain found for subdomain: ${subdomain}`);
+    }
+
+    // Fetch organization settings and handle possible errors
+    const organizationSettings = await getOrganizationSettingsByOrganizationId(
+      organizationSubdomainData.organization_id,
+      true,
+      values,
     );
+
+    // Return relevant data
+    return {
+      domainData,
+      settings: organizationSettings,
+    };
+
+  } catch (error) {
+    console.error(`Error in getFullDomainBySubdomain: ${error}`);
+    throw new Error(`Failed to get full domain by subdomain: ${error}`);
   }
-
-  if (!organizationSubdomainData) {
-    throw new Error(`No organization subdomain found: ${subdomain}`);
-  }
-
-  // Obtain organization settings
-  const organizationSettings = await getOrganizationSettingsByOrganizationId(
-    organizationSubdomainData.organization_id,
-    true,
-    values,
-  );
-
-  // Return relevant data
-  return {
-    domainData,
-    settings: organizationSettings,
-  };
 }

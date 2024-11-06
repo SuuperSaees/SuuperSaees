@@ -103,7 +103,10 @@ async function ClientsMembersPage() {
 
   return (
     <ClientsMembersPagePresentation
-      account={account}
+      account={{
+        id: account.id ?? '',
+        role_hierarchy_level: account.role_hierarchy_level ?? 0,
+      }}
       currentUserRoleHierarchy={currentUserRoleHierarchy}
       slug={slug}
       members={members}

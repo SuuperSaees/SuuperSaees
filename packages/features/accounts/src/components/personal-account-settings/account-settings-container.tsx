@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+// import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
+// import { If } from '@kit/ui/if';
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
@@ -22,11 +24,16 @@ import { UpdateAccountImageContainer } from './update-account-image-container';
 import UpdateAccountOrganizationLogo from './update-account-organization-logo';
 import UpdateAccountOrganizationFavicon from './update-account-organization-favicon';
 import { UpdateAccountOrganizationName } from './update-account-organization-name';
+import { UpdateAccountOrganizationSenderName } from './update-account-organization-sender-name';
 import UpdateAccountOrganizationSidebar from './update-account-organization-sidebar';
 import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { useOrganizationSettings } from '../../context/organization-settings-context'
+import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './update-account-organization-sender-email-and-sender-domain';
+import UpdateAccountOrganizationDarkLogo from './update-account-organization-dark-logo';
+import PlansContainer from '../../../../../../apps/web/app/select-plan/components/plans-container';
+import { Separator } from '@kit/ui/separator';
 
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -83,7 +90,7 @@ export function PersonalAccountSettingsContainer(
           const stripeId = user?.stripe_id as string;
           if (stripeId) {
             try {
-              const baseUrl = await getDomainByUserId(user?.id ?? '', true);
+              const { domain: baseUrl } = await getDomainByUserId(user?.id ?? '', true);
               const response = await fetch(
                 `${baseUrl}/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`,
                 {
@@ -141,10 +148,11 @@ export function PersonalAccountSettingsContainer(
     return <LoadingOverlay fullPage />;
   }
   return (
-    <div>
+    <div className="w-full h-full">
       <Tabs defaultValue={"account"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
-          <TabsList className='gap-2 bg-transparent'>
+          <div className="flex items-center justify-between pb-[24px]">
+          <TabsList className='gap-2 bg-transparent '>
             <ThemedTabTrigger
               value="account"
               option="account"
@@ -159,10 +167,20 @@ export function PersonalAccountSettingsContainer(
             >
               <Trans i18nKey={'account:billing'} />
             </ThemedTabTrigger>
+            <ThemedTabTrigger
+              value="subscription"
+              option="subscription"
+              activeTab={accountBillingTab}
+            >
+              <Trans i18nKey={'account:subscription'} />
+            </ThemedTabTrigger>
           </TabsList>
+          </div>
         )}
+        
+        <Separator />
         <TabsContent value="account">
-          <div className='"flex w-full flex-wrap gap-6 pb-32 lg:flex-nowrap'>
+          <div className='"flex w-full mt-4 flex-wrap gap-6 pb-32 lg:flex-nowrap'>
             <div className="flex w-full flex-col space-y-6">
               <Card>
                 <CardHeader>
@@ -233,6 +251,32 @@ export function PersonalAccountSettingsContainer(
                   <Card>
                     <CardHeader>
                       <CardTitle>
+                        <Trans i18nKey={'account:brandSenderName'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandSenderNameDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationSenderName />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandSenderEmailAndDomain'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandSenderEmailAndDomainDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationSenderEmailAndSenderDomain />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
                         <Trans i18nKey={'account:brandColor'} />
                       </CardTitle>
                       <CardDescription>
@@ -268,6 +312,23 @@ export function PersonalAccountSettingsContainer(
                     <CardContent>
                       <UpdateAccountOrganizationLogo
                         organizationId={user?.organization_id ?? ''}
+                        className='w-10 h-10'
+                      />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <Trans i18nKey={'account:brandDarkLogo'} />
+                      </CardTitle>
+                      <CardDescription>
+                        <Trans i18nKey={'account:brandDarkLogoDescription'} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <UpdateAccountOrganizationDarkLogo
+                        organizationId={user?.organization_id ?? ''}
+                        className='w-10 h-10'
                       />
                     </CardContent>
                   </Card>
@@ -281,7 +342,9 @@ export function PersonalAccountSettingsContainer(
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <UpdateAccountOrganizationFavicon />
+                      <UpdateAccountOrganizationFavicon 
+                      className='w-10 h-10'
+                      />
                     </CardContent>
                   </Card>
                 </>
@@ -368,15 +431,10 @@ export function PersonalAccountSettingsContainer(
         </TabsContent>
 
         <TabsContent value="billing">
-          {/* <div className="flex w-full flex-col space-y-6">
-            <Button>
-              <Link href="/select-plan">
-                Upgrade your plan
-              </Link>
-            </Button>
-              
-            </div> */}
           <BillingContainerConfig tab={tab ?? ''} />
+        </TabsContent>
+        <TabsContent value="subscription">
+          <PlansContainer />
         </TabsContent>
       </Tabs>
     </div>

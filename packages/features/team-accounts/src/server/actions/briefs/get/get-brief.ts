@@ -1,3 +1,5 @@
+'use server';
+
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
@@ -80,16 +82,22 @@ export const getBriefs = async (): Promise<
   }
 };
 
-export const getBriefFormFields = async (): Promise<
-  Brief.Relationships.FormField[]
+export const fetchFormfieldsWithResponses = async (
+  briefIds: Brief.Type['id'][] 
+): Promise<
+  Brief.Relationships.FormFieldResponse.Response[]
+
 > => {
   try {
-    const client = getSupabaseServerComponentClient();
+    const client =  getSupabaseServerComponentClient();
     const { data: briefFormFields, error: errorBriefFormFields } = await client
-      .from('brief_form_fields')
-      .select(
-        'form_fields(id, description, label, type, placeholder, options, position, alert_message)',
-      );
+      .from('brief_responses')
+      .select(`field:form_fields(id, description, label, type, options, placeholder, position, alert_message),
+        response
+        
+        ` 
+      )
+      .in('brief_id', briefIds);
 
     if (errorBriefFormFields) {
       throw new Error(errorBriefFormFields.message);
@@ -200,7 +208,9 @@ export const getBriefsById = async (
     const { data: briefsData, error: briefsError } = await client
       .from('briefs')
       .select(
-        ' id, created_at, name, propietary_organization_id, description, image_url, brief_form_fields ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message))'
+        `id, created_at, name, propietary_organization_id, description, image_url, brief_form_fields 
+        ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message)),
+         services (name, id)`
       )
       .eq('id', id);
 

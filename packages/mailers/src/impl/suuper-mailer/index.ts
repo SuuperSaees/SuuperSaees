@@ -1,18 +1,12 @@
-import 'server-only';
-
-
-
+// import 'server-only';
 import { z } from 'zod';
-
-
 
 import { Mailer } from '../../mailer';
 import { MailerSchema } from '../../schema/mailer.schema';
 
-
 type Config = z.infer<typeof MailerSchema>;
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
 const SUUPER_CLIENT_ID = z
   .string({
@@ -42,11 +36,10 @@ export class SuuperMailer implements Mailer {
         : {
             html: config.html,
           };
-
     const res = await fetch(`${baseUrl}/api/v1/mailer`, {
       method: 'POST',
       headers: new Headers({
-        "Authorization": `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`
+        Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
       }),
       body: JSON.stringify({
         from: config.from,

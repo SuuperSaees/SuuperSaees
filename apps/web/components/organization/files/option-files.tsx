@@ -30,13 +30,8 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 
-function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0,
-      v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
+import { generateUUID } from '~/utils/generate-uuid';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 export function OptionFiles({
   clientOrganizationId,
@@ -49,7 +44,7 @@ export function OptionFiles({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
-  const showDropdown = !(currentPath.length > 0 && currentPath[0]?.uuid === '');
+  const showDropdown = !(currentPath.length > 0 && (!currentPath[0]?.uuid || currentPath[0]?.uuid === ''));
 
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -306,12 +301,12 @@ export function OptionFiles({
         <>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="bg-brand">
+              <ThemedButton >
                 <div className="flex items-center">
                   <Plus className="mr-[4px] h-[20px] w-[20px]" />
                   {t('files.new.title')}
                 </div>
-              </Button>
+              </ThemedButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>

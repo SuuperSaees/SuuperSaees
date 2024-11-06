@@ -66,7 +66,7 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(index, 'label', e.target.value)
                       }
-                      placeholder={t('multipleChoice.title')}
+                      placeholder={t('dropdown.title')}
                       className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
@@ -92,7 +92,7 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                           e.target.value,
                         )
                       }
-                      placeholder={t('multipleChoice.description')}
+                      placeholder={t('dropdown.description')}
                       className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
@@ -107,19 +107,19 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                 className="flex w-full items-center justify-between rounded-lg border border-gray-300 px-4 py-2 text-base text-sm font-medium leading-6 text-gray-500"
                 onClick={() => setDropdownOpen(!isDropdownOpen)}
               >
-                {t('dropdown.selectAnOption')}
+                {question.options?.[0]?.label === '' ? t('dropdown.selectAnOption') : question.options?.[0]?.label }
                 <ChevronDown className="h-4 w-4" />
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute z-10 mt-1 w-full rounded-lg border border-gray-300 bg-white">
+                <div className="z-10 mt-1 w-full rounded-lg border border-gray-300">
                   {question.options?.map((option: Option, optIndex) => (
                     <div
                       key={option.value}
                       className="cursor-pointer px-4 py-2 hover:bg-gray-100"
                       onClick={() => handleOptionSelect(optIndex)}
                     >
-                      {option.label}
+                      <span className='text-base text-sm font-medium leading-6 text-gray-500'>{option.label}</span>
                     </div>
                   ))}
                 </div>

@@ -20,6 +20,7 @@ import { Brief } from '~/lib/brief.types';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
+import BriefServicesAssignation from './brief-services-assignation';
 import FieldsetFields from './fieldset-fields';
 import FieldsetInformation from './fieldset-information';
 
@@ -44,6 +45,7 @@ const BriefCreationForm = ({
     description: '',
     image_url: '',
     propietary_organization_id: '',
+    services: [],
   },
 }: CreateBriefDialogProps) => {
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
@@ -72,6 +74,10 @@ const BriefCreationForm = ({
       form.setValue('name', defaultBriefInfo.name);
       form.setValue('description', defaultBriefInfo.description);
       form.setValue('image_url', defaultBriefInfo.image_url);
+      form.setValue(
+        'connected_services',
+        defaultBriefInfo?.services.map((service) => service.id),
+      );
       setBrief(defaultBriefInfo);
     }
   }, [defaultValues]);
@@ -82,6 +88,10 @@ const BriefCreationForm = ({
     form.setValue('name', brief.name);
     form.setValue('description', brief.description);
     form.setValue('image_url', brief.image_url);
+    form.setValue(
+      'connected_services',
+      brief.services?.map((service) => service.id),
+    );
   }, [
     formFields,
     form,
@@ -89,6 +99,7 @@ const BriefCreationForm = ({
     brief.description,
     brief.name,
     brief.image_url,
+    brief?.services,
     defaultValues,
     setFormFields,
   ]); // Re-run effect when formFields or form change
@@ -102,7 +113,12 @@ const BriefCreationForm = ({
         className="no-scrollbar flex h-full w-full flex-col space-y-8 overflow-y-auto"
       >
         {/* Brief Name Input */}
-        {showInfo && <FieldsetInformation form={form} />}
+        {showInfo && (
+          <>
+            <FieldsetInformation form={form} />
+            <BriefServicesAssignation form={form} />
+          </>
+        )}
 
         {/* Default and not editable input field */}
         {showFormFields && (
@@ -111,7 +127,7 @@ const BriefCreationForm = ({
             name="default_question.description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-semibold text-gray-700">
+                <FormLabel className="font-semibold text-gray-600">
                   {form.getValues().default_question.label}
                 </FormLabel>
                 <FormControl>

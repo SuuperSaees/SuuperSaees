@@ -19,6 +19,7 @@
        "minCharacters" : "Minimum 2 characters required",
        "maxCharacters" : "Maximum 3000 characters allowed"
     },
+    "search": "Search brief...",
     "creation": {
     "title": "Create brief",
     "form": {
@@ -27,8 +28,8 @@
         "titleLabel": "Brief name",
         "titlePlaceholder": "Enter the name of your brief",
         "questionLabel": "Question",
-        "labelPlaceholder": "Put your question here *",
-        "descriptionPlaceholder": "Add a description",
+        "labelPlaceholder": "Title *",
+        "descriptionPlaceholder": "This is a hint text to help user",
         "placeholderPlaceholder": "Add a placeholder",
         "descriptionLabel": "Brief description",
         "imageLabel": "Brief image",
@@ -37,7 +38,31 @@
         "createSuccess": "Brief created successfully",
         "updateSuccess": "Brief updated successfully",
         "errorCreating": "Error creating brief",
-        "errorUpdating": "Error updating brief"
+        "errorUpdating": "Error updating brief",
+        "defaultField": {
+          "label": "Project title",
+          "placeholder": "Add a description..."
+        },
+        "marks": {
+          "label": "Title",
+          "description": "Description",
+          "alert_message": "Alert message",
+          "placeholder": "Placeholder",
+          "options": {
+            "1": {
+              "label": "Option 1",
+              "value": "Option 1 value"
+            },
+            "2": {
+              "label": "Option 2",
+              "value": "Option 2 value"
+            },
+            "3": {
+              "label": "Option 3",
+              "value": "Option 3 value"
+            }
+          }
+        }
     },
     "widgets": {
       "edit": {
@@ -49,7 +74,10 @@
         "title": "Widgets"
       }, 
       "settings": {
-        "title": "Settings"
+        "title": "Settings",
+        "services": {
+          "title": "Connected services"
+        }
       }
     }
   },
@@ -57,44 +85,83 @@
     "title": "Update brief"
   },
   "singleChoice": {
-    "title": "Title",
-    "description": "Description",
-    "placeholder": "Add new option"
+    "value": "Select",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
+    "placeholder": "Add new option",
+    "options": {
+      "option1": {
+        "label": "Option 1"
+      },
+      "option2": {
+        "label": "Option 2"
+      },
+      "option3": {
+        "label": "Option 3"
+      }
+    }
   },
   "multipleChoice": {
-    "title": "Title",
-    "description": "Description",
-    "placeholder": "Add new option"
+    "value": "Multiple choice",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
+    "placeholder": "Add new option",
+    "options": {
+      "option1": {
+        "label": "Option 1"
+      },
+      "option2": {
+        "label": "Option 2"
+      },
+      "option3": {
+        "label": "Option 3"
+      }
+    }
   },
   "textLarge" : {
-    "title":"Title",
-    "description":"Description",
-    "descriptionHint":"Enter a description..."
+    "value": "Paragraph",
+    "title":"Title *",
+    "description":"This is a hint text to help user",
+    "placeholder":"Enter a description..."
+  },
+  "textShort": {
+    "value": "Short text",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
+    "placeholder": "Enter a description..."
   },
   "datePicker": {
+    "value": "Date",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
     "selectTitle": "Select date"
   },
   "dropdown": {
-    "title": "Title",
-    "description": "Description",
+    "value": "Dropdown",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
     "placeholder": "Add new option",
     "selectAnOption": "Select an option"
   },
   "title": {
+    "value": "Title",
     "title": "Title",
     "placeholder": "Enter the title"
   },
   "richText": {
+    "value": "Rich text",
     "title": "Rich text",
     "placeholder": "Enter the rich text"
   },
   "uploadFiles" : {
-    "title" : "Title",
-    "description" : "Description",
+    "value": "Upload files",
+    "title" : "Title *",
+    "description" : "This is a hint text to help user",
     "placeholder": "Click here or drag a file to upload",
     "fileTypes": "SVG, PNG, JPG or GIF (max. 800x400px)"
   },
   "video": {
+    "value": "Video",
     "title": "Video",
     "uploadSuccess": "Video uploaded successfully",
     "uploadError": "Error uploading video",
@@ -111,6 +178,7 @@
     "invalidUrl": "Please enter a valid YouTube video URL"
   },
   "uploadImage":{
+    "value": "Image",
     "placeholder": "Click here or drag an image to upload",
     "fileTypes": "PNG, JPG(max. 800x400px)",
     "uploadSuccess": "Image uploaded successfully",
@@ -122,5 +190,21 @@
     "dragOrClick": "Drag an image here or click to select",
     "dropHere": "Drop the image here",
     "invalidFileType": "Please select a valid image file"
+  },
+  "empty": {
+    "orderCreation": {
+      "agency": {
+        "title": "You don’t have any service yet!",
+        "description": "Start by buying a service to create your first project."
+      },
+      "client": {
+        "title": "You haven't assigned any services yet!",
+        "description": "Contact your agency to assign a service and start creating projects."
+      }
+    },
+    "agency": {
+      "title": "You don’t have any brief yet!",
+      "description": "Start by creating a brief clicking on the button below."
+    }
   }
 }

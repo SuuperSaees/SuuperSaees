@@ -4,10 +4,12 @@ import { getMailer } from '@kit/mailers';
 import { getEmailTranslations } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
 
+
+
 import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import { getFormSendIdentity } from '../utils/get-form-send-identity';
 
-const emailSender = process.env.EMAIL_SENDER ?? '';
 
 export async function sendOrderMessageEmail(
   toEmail: string,
@@ -23,12 +25,21 @@ export async function sendOrderMessageEmail(
   const mailer = await getMailer();
   const lang = getLanguageFromCookie() as 'en' | 'es';
   const { t } = getEmailTranslations('orderMessage', lang);
-  const siteURL = await getDomainByUserId(userId, true);
+  const { domain: siteURL, organizationId } = await getDomainByUserId(
+    userId,
+    true,
+  );
   const subject = t('subject', { userName, orderTitle, date });
+
+  const { fromSenderIdentity, logoUrl, themeColor, buttonTextColor } = await getFormSendIdentity(
+    organizationId,
+    t('at'),
+  );
+
   await mailer
     .sendEmail({
       to: toEmail,
-      from: emailSender,
+      from: fromSenderIdentity,
       subject: subject,
       html: `
        <!DOCTYPE html>
@@ -49,8 +60,8 @@ export async function sendOrderMessageEmail(
                 }
                 .button {
                   padding: 10px 20px;
-                  background-color: #1A38D7;
-                  color: white;
+                  background-color: ${themeColor};
+                  color: ${buttonTextColor};
                   text-decoration: none;
                   border-radius: 5px;
                   display: inline-block;
@@ -88,8 +99,8 @@ export async function sendOrderMessageEmail(
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <img
-                                        src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png"
-                                        alt="Suuper Logo"
+                                        src="${logoUrl}"
+                                        alt="Company Logo"
                                         style="width: 142px; height: 32px; margin-bottom: 20px;"
                                       />
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${t('greeting', { toEmail })}</p>
@@ -130,9 +141,6 @@ export async function sendOrderMessageEmail(
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
                                         ${t('footer', { toEmail })}
                                       </p>
-                                      <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        © 2024 Suuper, soporte@suuper.co
-                                      </p>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -151,10 +159,14 @@ export async function sendOrderMessageEmail(
     `,
     })
     .then(() => {
-      logger.info('Correo de mensaje de pedido enviado con éxito.');
+      logger.info('Order message email sent successfully.');
     })
     .catch((error) => {
       console.error(error);
-      logger.error({ error }, 'Error al enviar el correo de pedido');
+      logger.error({ error }, 'Error sending the order email');
     });
 }
+
+// <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
+// © 2024 Suuper, soporte@suuper.co
+// </p>

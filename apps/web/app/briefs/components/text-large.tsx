@@ -38,9 +38,8 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.label`}
-              
               render={({ field, fieldState }) => (
-                <FormItem>
+                <FormItem className='w-full'>
                   <FormControl>
                     <input
                       {...field}
@@ -50,7 +49,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                         handleQuestionChange(index, 'label', e.target.value)
                       }
                       placeholder={t('textLarge.title')}
-                      className="bg-transparent border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="border-none bg-transparent text-sm font-medium text-gray-600 focus:outline-none w-full"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -61,7 +60,6 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
-              
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -77,7 +75,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                         )
                       }
                       placeholder={t('textLarge.description')}
-                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="w-full border-none bg-transparent text-sm font-medium text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -88,7 +86,6 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.placeholder`}
-              
               render={({ fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -96,7 +93,8 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                       className={cn(
                         'w-full focus-visible:ring-0 focus-visible:ring-offset-0',
                       )}
-                      placeholder={question.placeholder ?? ''}
+                      placeholder={t('textLarge.placeholder')}
+                      value={question.placeholder}
                       rows={5}
                       readOnly
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>

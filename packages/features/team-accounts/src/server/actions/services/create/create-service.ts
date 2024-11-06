@@ -2,17 +2,19 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import {
+  CustomError,
+  CustomResponse,
+  ErrorServiceOperations,
+} from '../../../../../../../shared/src/response';
+import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { fetchClientByOrgId } from '../../clients/get/get-clients';
 import {
   fetchCurrentUser,
@@ -98,7 +100,12 @@ export const createService = async (clientData: ServiceData) => {
       .select()
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error)
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        error.message,
+        ErrorServiceOperations.FAILED_TO_CREATE_SERVICE,
+      );
 
     if (!stripeId) {
       const user = await fetchUserAccount(client);
@@ -127,14 +134,17 @@ export const createService = async (clientData: ServiceData) => {
       stripePrice.priceId,
     );
 
-    return {
-      supabase: dataResponseCreateService,
-      stripeProduct,
-      stripePrice,
-    };
+    return CustomResponse.success(
+      {
+        supabase: dataResponseCreateService,
+        stripeProduct,
+        stripePrice,
+      },
+      'serviceCreated',
+    ).toJSON();
   } catch (error) {
     console.error('Error al crear el servicio:', error);
-    throw error;
+    return CustomResponse.error(error).toJSON();
   }
 };
 
@@ -148,8 +158,8 @@ async function fetchUserAccount(client) {
 }
 
 async function createStripeAccount(email: string, userId: string) {
-  const baseUrl = await getDomainByUserId(userId, true);
-  
+  const { domain: baseUrl } = await getDomainByUserId(userId, true);
+
   const response = await fetch(`${baseUrl}/api/stripe/create-account`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -164,7 +174,7 @@ async function createStripeProduct(
   clientData: ServiceData,
   userId: string,
 ) {
-  const baseUrl = await getDomainByUserId(userId, true);
+  const { domain: baseUrl } = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -185,7 +195,7 @@ async function createStripePrice(
   clientData: ServiceData,
   userId: string,
 ) {
-  const baseUrl = await getDomainByUserId(userId, true);
+  const { domain: baseUrl } = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -237,7 +247,11 @@ export async function addServiceToClient(
       await hasPermissionToAddClientServices(clientAgencyId);
 
     if (!hasPermission)
-      throw new Error('No permission to add services to client');
+      throw new CustomError(
+        HttpStatus.Error.Unauthorized,
+        'No permissions to add service to client',
+        ErrorServiceOperations.INSUFFICIENT_PERMISSIONS,
+      );
 
     // Step 4: Add to specified service to the client organization
     const serviceAddedData = await insertServiceToClient(
@@ -249,10 +263,10 @@ export async function addServiceToClient(
       clientAgencyId,
     );
 
-    return serviceAddedData;
+    return CustomResponse.success(serviceAddedData, 'serviceAdded').toJSON();
   } catch (error) {
     console.error('Error while adding service to client', error);
-    throw error;
+    return CustomResponse.error(error).toJSON();
   }
 }
 
@@ -277,8 +291,10 @@ export async function insertServiceToClient(
       .select();
 
     if (serviceAddedError) {
-      throw new Error(
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
         `Error while trying to add service to client, ${serviceAddedError.message}`,
+        ErrorServiceOperations.FAILED_TO_ADD_SERVICE,
       );
     }
 

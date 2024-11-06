@@ -1,39 +1,47 @@
 'use client';
 
 // Asegúrate de ajustar la importación según tu configuración
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
-import { useServicesContext } from '../contexts/services-context';
-
-
-
-
-import { deleteService } from '../../../../../packages/features/team-accounts/src/server/actions/services/delete/delete-service-server'
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { useTranslation } from 'react-i18next';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@kit/ui/alert-dialog';
 
+import { handleResponse } from '~/lib/response/handle-response';
+
+import { deleteService } from '../../../../../packages/features/team-accounts/src/server/actions/services/delete/delete-service-server';
 
 const DeleteServiceDialog = ({ priceId }: { priceId: string }) => {
-  const { t } = useTranslation('services');
-  const { updateServices } = useServicesContext();
+  const { t } = useTranslation(['services', 'responses']);
 
-  const handleDelete = async () => {
-    try {
-      await deleteService(priceId);
+  const queryClient = useQueryClient();
 
-      toast('Success', {
-        description: 'The service has been deleted!',
+  const handleDelete = useMutation({
+    mutationFn: async () => {
+      const res = await deleteService(priceId);
+      await handleResponse(res, 'services', t);
+    },
+    onSuccess: async () => {
+      // invalidate the query
+      await queryClient.invalidateQueries({
+        queryKey: ['services'],
       });
-      await updateServices(false);
-
-    } catch (error) {
-      toast('Error', {
-        description: 'The service could not be deleted',
-      });
-    }
-  };
+    },
+    onError: () => {
+      console.error('Error deleting service');
+    },
+  });
 
   return (
     <>
@@ -43,7 +51,7 @@ const DeleteServiceDialog = ({ priceId }: { priceId: string }) => {
         </AlertDialogTrigger>
         <AlertDialogContent>
           <div className="flex">
-            <Trash2 className="text-error-600 h-4 w-4" />
+            <Trash2 className="h-4 w-4 text-error-600" />
             <AlertDialogHeader>
               <AlertDialogTitle>{t('deleteService')}</AlertDialogTitle>
               <AlertDialogDescription>
@@ -53,11 +61,13 @@ const DeleteServiceDialog = ({ priceId }: { priceId: string }) => {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <ThemedButton className='w-fit'>
-
-            <AlertDialogAction onClick={handleDelete} className='bg-transparent w-full hover:bg-transparent'>
-              {t('delete')}
-            </AlertDialogAction>
+            <ThemedButton className="w-fit">
+              <AlertDialogAction
+                onClick={() => handleDelete.mutateAsync()}
+                className="w-full bg-transparent hover:bg-transparent"
+              >
+                {t('delete')}
+              </AlertDialogAction>
             </ThemedButton>
           </AlertDialogFooter>
         </AlertDialogContent>

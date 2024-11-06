@@ -85,4 +85,5 @@ export const briefCreationFormSchema = z.object({
           .nullable(),
       }),
     ),
+    connected_services: z.array(z.number()),
   });

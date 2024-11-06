@@ -147,14 +147,18 @@ export const OrderBriefs = ({
     }
   };
 
+  
+  const briefSetValuePrefix = 'briefCompletion'
+  const briefResponseSufix = 'brief_responses';
+
   return (
     <div className="flex flex-col gap-8">
       {(() => {
         let uniqueIndexCounter = 0; // Initialize a counter outside the map functions
 
         return briefs?.map((brief) => (
-          <div key={brief.id} className="flex flex-col gap-4">
-            <h3 className="text-lg font-bold">{brief.name}</h3>
+          <div key={brief?.id} className="flex flex-col gap-4">
+            <h3 className="text-lg font-bold">{brief?.name}</h3>
             <div className="flex flex-col gap-8">
               {brief?.form_fields
                 ?.sort(
@@ -174,7 +178,7 @@ export const OrderBriefs = ({
                     <FormField
                       key={formField.field?.id}
                       control={form.control}
-                      name={`brief_responses.${currentFieldIndex}.response`}
+                      name={`${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}.response`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{formField.field?.label}</FormLabel>
@@ -201,7 +205,7 @@ export const OrderBriefs = ({
                                 ) => {
                                   const value = event.target.value;
                                   form.setValue(
-                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
@@ -212,7 +216,7 @@ export const OrderBriefs = ({
                                 }}
                                 selectedOption={
                                   form.getValues(
-                                    `briefCompletion.brief_responses.${currentFieldIndex}.response`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}.response`,
                                   ) || ''
                                 }
                               />
@@ -224,14 +228,14 @@ export const OrderBriefs = ({
                                 question={formField.field?.label ?? ''}
                                 selectedOptions={(
                                   form.getValues(
-                                    `brief_responses.${currentFieldIndex}.response`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}.response`,
                                   ) ?? ''
                                 )
                                   .split(', ')
                                   .filter(Boolean)}
                                 onChange={(value) => {
                                   form.setValue(
-                                    `brief_responses.${currentFieldIndex}`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
@@ -252,7 +256,7 @@ export const OrderBriefs = ({
                                 ) => {
                                   const responseValue = e.target.value;
                                   form.setValue(
-                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
@@ -273,7 +277,7 @@ export const OrderBriefs = ({
                                 ) => {
                                   const responseValue = e.target.value;
                                   form.setValue(
-                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
@@ -305,7 +309,7 @@ export const OrderBriefs = ({
                                 onDateChange={(selectedDate: Date) => {
                                   const responseValue = selectedDate;
                                   form.setValue(
-                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,
@@ -323,12 +327,12 @@ export const OrderBriefs = ({
                                 question={formField.field?.label ?? ''}
                                 selectedOption={
                                   form.getValues(
-                                    `briefCompletion.brief_responses.${currentFieldIndex}.response`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}.response`,
                                   ) ?? ''
                                 }
                                 onChange={(value) => {
                                   form.setValue(
-                                    `briefCompletion.brief_responses.${currentFieldIndex}`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
                                     {
                                       form_field_id: formField.field?.id ?? '',
                                       brief_id: brief.id,

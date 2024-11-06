@@ -1,6 +1,7 @@
 // shimmer effect class: overflow-hidden relative isolate
 // before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1s_infinite_ease]
 // before:bg-gradient-to-r before:from-transparent before:via-gray/[.05] before:to-transparent
+import React from 'react';
 
 export const SkeletonUser = ({ className }: { className?: string }) => {
   return (
@@ -10,10 +11,17 @@ export const SkeletonUser = ({ className }: { className?: string }) => {
   );
 };
 
-export const SkeletonLineText = ({ className }: { className?: string }) => {
+export const SkeletonLineText = ({
+  className,
+  ...rest
+}: {
+  className?: string;
+  [key: string]: unknown;
+}) => {
   return (
     <div
       className={`${className} relative isolate min-h-[16px] min-w-[50px] overflow-hidden rounded bg-gray/[.06] before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1s_infinite_ease] before:bg-gradient-to-r before:from-transparent before:via-gray/[.05] before:to-transparent`}
+      {...rest}
     ></div>
   );
 };
@@ -28,10 +36,17 @@ export const SkeletonParagraph = ({ className }: { className?: string }) => {
   );
 };
 
-export const SkeletonBox = ({ className }: { className?: string }) => {
+export const SkeletonBox = ({
+  className,
+  ...rest
+}: {
+  className?: string;
+  [key: string]: unknown;
+}) => {
   return (
     <div
       className={`relative isolate overflow-hidden rounded bg-gray/[.06] before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1s_infinite_ease] before:bg-gradient-to-r before:from-transparent before:via-gray/[.05] before:to-transparent ${className} `}
+      {...rest}
     ></div>
   );
 };
@@ -54,4 +69,35 @@ export const SkeletonCards = ({
       ))}
     </div>
   );
+};
+
+export const SkeletonTable = ({
+  className,
+  columns,
+  rows,
+}: {
+  className?: string;
+  columns: number;
+  rows: number;
+}) => {
+  return (
+    <div className={`flex flex-col gap-4 bg-gray/[.04] py-4 px-6 rounded-md overflow-hidden ${className}`}>
+      {/* header */}
+      <div className="flex w-full gap-8 overflow-hidden">
+        {Array.from({ length: columns }).map((_, index) => (
+          <SkeletonLineText key={index} className="h-[20px] w-full" />
+        ))}
+      </div>
+
+      <div className={`flex h-full w-full flex-col gap-4`}>
+        {Array.from({ length: rows }).map((_, index) => (
+          <SkeletonTableRow key={index} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const SkeletonTableRow = ({ className }: { className?: string }) => {
+  return <SkeletonBox className={`h-[64.5px] w-full ${className}`} />;
 };

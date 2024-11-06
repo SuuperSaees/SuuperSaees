@@ -88,3 +88,24 @@ sequenceDiagram
 
     Stripe->>Usuario: Envía factura ajustada por número de miembros
 ```
+## Email Confirmation Flow Implementation for Supabase with Amazon SES Integration
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Supabase
+    participant Database
+    participant AmazonSES
+
+    User->>Supabase: Sign up with email and password
+    Supabase-->>User: Obtain session object
+    Supabase->>Database: Store accessToken, refreshToken, etc.
+    Supabase->>AmazonSES: Configure email server
+    AmazonSES-->>Supabase: Configuration confirmation
+    Supabase->>AmazonSES: Send email to user
+    AmazonSES-->>User: Email with URL and token id
+    User->>Supabase: Confirmation with id from request
+    Supabase->>Database: Search in the database
+    Database-->>Supabase: If exists, retrieve accessToken and refreshToken
+    Supabase-->>User: Set session
+```

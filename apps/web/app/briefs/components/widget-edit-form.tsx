@@ -120,7 +120,7 @@ export function WidgetEditForm() {
         <div key={option.id} className="relative flex flex-col gap-2">
           {renderFieldInput(
             `options.${index}.label`,
-            'Option Label',
+            t('creation.form.marks.options.' + (index + 1)+ '.label'),
             type,
             index,
             false,
@@ -128,7 +128,7 @@ export function WidgetEditForm() {
 
           {renderFieldInput(
             `options.${index}.value`,
-            'Option Value',
+            t('creation.form.marks.options.' + (index + 1)+ '.value'),
             type,
             index,
             true,
@@ -321,7 +321,7 @@ export function WidgetEditForm() {
         }
         return renderFieldInput(
           fieldName,
-          fieldName.charAt(0).toUpperCase() + fieldName.slice(1),
+          t('creation.form.marks.' + fieldName),
           type!,
         );
       });

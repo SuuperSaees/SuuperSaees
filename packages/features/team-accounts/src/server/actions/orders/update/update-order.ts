@@ -42,10 +42,12 @@ export const updateOrder = async (
     const { error: userError, data: userData } = await client.auth.getUser();
     if (userError) throw userError.message;
 
-    const { error: orderError } = await client
+    const {data: updatedData, error: orderError } = await client
       .from('orders_v2')
       .update(order)
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .select()
+      .single()
 
     if (orderError) throw orderError.message;
     // console.log('updatedOrder:', orderData);
@@ -55,10 +57,11 @@ export const updateOrder = async (
 
     // Call the abstracted activity logging function
     await logOrderActivities(orderId, order, userData.user.id, userNameOrEmail);
+    return updatedData;
 
   } catch (error) {
     console.error('Error updating order:', error);
-    throw error;
+    throw error
   }
 };
 

@@ -1,3 +1,42 @@
 {
-    "title": "Facturas"
+  "title": "Facturas",
+  "plan": {
+    "title": "Plan",
+    "nextInvoice": "Fecha de la próxima factura"
+  },
+  "total": {
+    "title": "Total de la factura",
+    "usersEquivalent": "equivalente a {{currentUsers}}",
+    "users": "usuarios",
+    "user": "usuario",
+    "upgrade": "Mejorar su plan"
+  },
+  "history": {
+    "title": "Historial de facturación",
+    "invoice": "Factura",
+    "amount": "Cantidad",
+    "date": "Fecha",
+    "status": "Estado"
+  },
+  "manage": {
+    "title": "Gestionar suscripción",
+    "description": "Actulizar estado de suscripción",
+    "cancel": "Cancelar suscripción",
+    "modal": {
+      "cancel": {
+        "title": "Cancelar suscripción",
+        "description": {
+          "paragraph1": "¿Estás seguro de que quieres cancelar tu suscripción?",
+          "paragraph2": {
+            "text1": "Escribe",
+            "text2": "para confirmar."
+          }
+        },
+        "submit": "Cancelar suscripción",
+        "placeholder": "Escribe 'cancel_subscription'",
+        "cancelButton": "Cancelar",
+        "backButton": "Volver"
+      }
+    }
+  }
 }
