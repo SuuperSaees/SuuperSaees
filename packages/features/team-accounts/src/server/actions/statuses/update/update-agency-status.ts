@@ -26,7 +26,7 @@ export const updateStatusById = async (
 };
 
 
-export const updateStatusesPositions = async (statuses: AgencyStatus.Type[]) => {
+export const updateStatusesPositions = async (statuses: AgencyStatus.Type[],agency_id:string) => {
   try {
     const updates = statuses.map((status, index) => ({
       id: status.id,
@@ -36,13 +36,21 @@ export const updateStatusesPositions = async (statuses: AgencyStatus.Type[]) => 
     const { error: userError } = await client.auth.getUser();
     if (userError) throw new Error(userError.message);
 
-    const { data: tasksData, error: taskDataError } = await client
+    const { data: statusData, error: statusDataError } = await client
       .from('agency_statuses')
       .upsert(updates, { onConflict: 'id' });
 
-    if (taskDataError) throw new Error(taskDataError.message);
+    if (statusDataError) throw new Error(statusDataError.message);
 
-    return tasksData;
+    const { data: updatedStatuses, error: updatedStatusesError } = await client
+      .from('agency_statuses')
+      .select('*')
+      .eq('agency_id', agency_id)
+      .order('position', { ascending: true });
+
+    if (updatedStatusesError) throw new Error(updatedStatusesError.message);
+
+    return updatedStatuses;
   } catch (error) {
     console.error('Error updating statuses:', error);
   }

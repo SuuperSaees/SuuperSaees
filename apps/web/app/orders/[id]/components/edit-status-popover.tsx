@@ -15,6 +15,10 @@ import { Spinner } from '@kit/ui/spinner';
 import { updateOrder } from '~/team-accounts/src/server/actions/orders/update/update-order';
 import { updateStatusById } from '~/team-accounts/src/server/actions/statuses/update/update-agency-status';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { convertToSnakeCase, convertToTitleCase } from '../utils/format-agency-names';
+import { getCache, updateCache } from '~/utils/handle-caching';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { CACHE_KEY, CACHE_EXPIRY } from '../hooks/agency-statuses/use-status-drag-and-drop';
 
 interface EditStatusPopoverProps {
   status_id: number;
@@ -23,6 +27,7 @@ interface EditStatusPopoverProps {
   order_id?: number;
   task_id?: string;
   mode?: 'order' | 'subtask';
+  agency_id: string;
   preventEditName?: boolean;
   setValue: (value: string) => void;
 }
@@ -34,6 +39,7 @@ function EditStatusPopover({
   order_id,
   task_id,
   mode,
+  agency_id,
   preventEditName = false,
   setValue,
 }: EditStatusPopoverProps) {
@@ -54,21 +60,33 @@ function EditStatusPopover({
   }
 
   const updateStatusMutation = useMutation({
-    mutationFn: () =>
-      updateStatusById(status_id, { status_name: name, status_color: color }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['agencyStatuses'] })
-      toast.success('Status updated successfully')
-      setValue(name)
-      setOpen(false)
+    mutationFn: async() =>
+      await updateStatusById(status_id, { status_name: convertToSnakeCase(name), status_color: color }),
+    onSuccess: (updatedStatus) => {
+      const cachedStatuses = getCache<AgencyStatus.Type[]>(`${CACHE_KEY}_${agency_id}`);
+      if (cachedStatuses) {
+        const updatedStatuses = cachedStatuses.map(status =>
+          status.id === status_id ? { ...status, ...updatedStatus } : status
+        );
+        updateCache(
+          `${CACHE_KEY}_${agency_id}`,
+          updatedStatuses,
+          queryClient,
+          ['agencyStatuses', agency_id],
+          CACHE_EXPIRY
+        );
+      }
+      toast.success('Status updated successfully');
+      setValue(convertToSnakeCase(name));
+      setOpen(false);
     },
     onError: () => {
-      toast.error('Failed to update status')
+      toast.error('Failed to update status');
     },
-  })
+  });
 
   const updateOrderMutation = useMutation({
-    mutationFn: () => updateOrder(order_id, { status: name }),
+    mutationFn: () => updateOrder(order_id, { status: convertToSnakeCase(name) }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['orders'] })
       router.refresh()
@@ -80,7 +98,7 @@ function EditStatusPopover({
 
   const changeSubtaskStatus = useMutation({
     mutationFn: async () => {
-      await updateSubtaskById(task_id, { state: name });
+      await updateSubtaskById(task_id, { state: convertToSnakeCase(name) });
       router.refresh();
     },
     onSuccess: () => {
@@ -127,17 +145,17 @@ function EditStatusPopover({
       <PopoverContent className="w-80" onClick={handlePopoverClick}>
         <form onSubmit={(e) => e.preventDefault()} className="grid gap-4">
           <div className="flex items-center gap-2">
-            {
-              !preventEditName &&
-              <Input
-                id="name"
-                value={name}
-                defaultValue={name}
-                onChange={(e) => setName(e.target.value)}
-                className="h-8 w-[80%]"
-                onClick={(e) => e.stopPropagation()}
-              />
-            }
+            
+            <Input
+              id="name"
+              value={convertToTitleCase(name)}
+              defaultValue={convertToTitleCase(name)}
+              onChange={(e) => setName(e.target.value)}
+              readOnly={preventEditName}
+              className="h-8 w-[80%]"
+              onClick={(e) => e.stopPropagation()}
+            />
+            
             <div
               className="h-10 w-10 cursor-pointer rounded-full border-4 border-white shadow-lg transition-transform hover:scale-110"
               style={{ backgroundColor: color }}
@@ -162,8 +180,7 @@ function EditStatusPopover({
               className="flex items-center gap-1"
             >
               <p>Save changes</p>
-              {(updateStatusMutation.status === 'pending' ||
-                updateOrderMutation.status === 'pending') && (
+              {(updateStatusMutation.status === 'pending') && (
                 <Spinner className="h-4 w-4" />
               )}
             </ThemedButton>

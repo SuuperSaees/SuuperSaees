@@ -1,6 +1,6 @@
 export function convertToTitleCase(input: string): string {
   if(input == 'pending' || input == 'pending_response'){
-    return 'Pending response'
+    return 'Pending Response'
   }else if(input == 'annulled'){
     return 'Annulled'
   }
