@@ -2681,6 +2681,8 @@ export type Database = {
         | "sender_email"
         | "sender_domain"
         | "logo_dark_url"
+        | "auth_card_background_color"
+        | "auth_section_background_color"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"

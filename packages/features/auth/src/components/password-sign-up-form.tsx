@@ -22,7 +22,9 @@ import { ThemedInput } from '../../../accounts/src/components/ui/input-themed-wi
 import { PasswordSignUpSchema } from '../schemas/password-sign-up.schema';
 import { useAuthDetails } from '../sign-in';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
+
 import { getTextColorBasedOnBackground } from '../../../../../apps/web/app/utils/generate-colors';
+
 
 export function PasswordSignUpForm({
   defaultValues,
