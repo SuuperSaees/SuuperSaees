@@ -40,8 +40,11 @@ export default function SignUp({ searchParams }: Props) {
   const { authDetails, isLoading } = useAuthDetails(host);
   // const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? '#ffffff')
   const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
-  const currentAppOrigin = window.location.origin + '/';
-    const isCustomDomain = originalAppOrigin !== currentAppOrigin;
+  let currentAppOrigin = 'http://localhost:3000/';
+  if (typeof window !== 'undefined') {
+    currentAppOrigin = window.location.origin + '/';
+  }
+  const isCustomDomain = originalAppOrigin !== currentAppOrigin;
   const textcolor = getTextColorBasedOnBackground(
     authDetails?.background_color ?? '#ffffff',
   );
