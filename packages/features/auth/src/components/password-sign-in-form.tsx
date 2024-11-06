@@ -117,7 +117,7 @@ export function PasswordSignInForm({
               <FormMessage />
 
               <div className="flex w-full items-center justify-between">
-                <div className="text-black flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="rememberMe"
