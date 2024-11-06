@@ -9,6 +9,8 @@ interface AuthDetails {
   theme_color: string;
   background_color: string;
   favicon_url: string;
+  auth_card_background_color: string;
+  auth_section_background_color: string;
 }
 
 export const useAuthDetails = (hostname: string) => {
@@ -20,8 +22,8 @@ export const useAuthDetails = (hostname: string) => {
       const isCustomDomain = () => {
         const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
         const currentAppOrigin = window.location.origin + '/';
-        return  originalAppOrigin !== currentAppOrigin;
-      }
+        return originalAppOrigin !== currentAppOrigin;
+      };
       if (!isCustomDomain()) {
         // Clear cached data if the domain is not custom
         localStorage.removeItem(`authDetails_${hostname}`);
@@ -40,20 +42,24 @@ export const useAuthDetails = (hostname: string) => {
       let domainFullData = null;
       try {
         setIsLoading(true);
-        domainFullData = isCustomDomain() && await getFullDomainBySubdomain(hostname, true, [
-          'theme_color',
-          'logo_url',
-          'sidebar_background_color',
-          'language',
-          'favicon_url',
-        ]);
+        domainFullData =
+          isCustomDomain() &&
+          (await getFullDomainBySubdomain(hostname, true, [
+            'theme_color',
+            'logo_url',
+            'sidebar_background_color',
+            'language',
+            'favicon_url',
+            'auth_card_background_color',
+            'auth_section_background_color',
+          ]));
       } catch (error) {
         console.error('Error fetching auth details', error);
         return;
       } finally {
         setIsLoading(false);
       }
-
+      
       if (domainFullData) {
         const fetchedAuthDetails = {
           logo_url:
@@ -71,6 +77,14 @@ export const useAuthDetails = (hostname: string) => {
           favicon_url:
             domainFullData.settings.find(
               (setting) => setting.key === 'favicon_url',
+            )?.value ?? '',
+          auth_card_background_color:
+            domainFullData.settings.find(
+              (setting) => setting.key === 'auth_card_background_color',
+            )?.value ?? '',
+          auth_section_background_color:
+            domainFullData.settings.find(
+              (setting) => setting.key === 'auth_section_background_color',
             )?.value ?? '',
         };
 

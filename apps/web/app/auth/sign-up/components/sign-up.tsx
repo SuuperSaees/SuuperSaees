@@ -72,6 +72,16 @@ export default function SignUp({ searchParams }: Props) {
             )}
             <div
               className={`${isCustomDomain && 'shadow-lg max-w-[360px] w-full'} rounded-lg bg-white p-8 text-black lg:w-1/2`}
+              style={{
+                color: getTextColorBasedOnBackground(
+                  authDetails?.auth_card_background_color
+                    ? authDetails.auth_card_background_color
+                    : '#ffffff',
+                ),
+                backgroundColor: authDetails?.auth_card_background_color
+                  ? authDetails.auth_card_background_color
+                  : 'white',
+              }}
             >
               {isCustomDomain && (
                 <div className="flex w-full items-start justify-center pb-[32px]">
