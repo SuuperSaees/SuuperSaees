@@ -78,7 +78,7 @@ export function EmailPasswordSignUpContainer({
         }
 
         if (data?.inviteRedirectUrl) {
-          router.push(`join?invite_token=${inviteToken}&email=${credentials.email}`);
+          router.push(`/join?invite_token=${inviteToken}&email=${credentials.email}`);
         }
       } catch (error) {
         console.error(error);

@@ -2,8 +2,12 @@
 
 import { useSearchParams } from 'next/navigation';
 
+
+
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
+
+
 
 import { OrganizationSettings } from '../../../../apps/web/lib/organization-settings.types';
 import { Tokens } from '../../../../apps/web/lib/tokens.types';
@@ -11,6 +15,7 @@ import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/s
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
 import { decodeToken } from '../../../tokens/src/decode-token';
 import { useSupabase } from './use-supabase';
+
 
 interface Credentials {
   email: string;
@@ -48,14 +53,18 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get('invite_token');
   const mutationFn = async (params: Credentials) => {
-    const { emailRedirectTo, captchaToken, ...credentials } = params;
+    const {
+      // emailRedirectTo,
+      captchaToken,
+      ...credentials
+    } = params;
     let inviteRedirectUrl: string | undefined = undefined;
     // Step 1: Sign up the user
 
     const response = await client.auth.signUp({
       ...credentials,
       options: {
-        emailRedirectTo,
+        // emailRedirectTo,
         captchaToken,
       },
     });
