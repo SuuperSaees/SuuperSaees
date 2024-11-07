@@ -147,6 +147,8 @@ class AuthCallbackService {
         });
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
         url.pathname = callbackParam ?? baseUrl;
+        url.href = callbackParam ?? baseUrl;
+        
         console.log('error setting session', error, url);
         if (!error) {
           return url;
