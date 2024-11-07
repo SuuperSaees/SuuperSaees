@@ -117,10 +117,7 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const accountHome = pathsConfig.app.orders;
   const email = auth.data.email ?? '';
 
-  const currentSession = await client.auth.getSession();
-  if (currentSession.data.session) {
-    await client.auth.signOut();
-  }
+  await client.auth.signOut();
 
   return (
     <AuthLayoutShell Logo={AppLogo}>
