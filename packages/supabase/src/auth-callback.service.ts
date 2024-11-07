@@ -145,6 +145,7 @@ class AuthCallbackService {
           access_token: data.access_token,
           refresh_token: data.refresh_token,
         });
+        console.log('error setting session', error);
         if (!error) {
           return url;
         }
