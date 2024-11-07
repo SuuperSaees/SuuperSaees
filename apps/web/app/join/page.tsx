@@ -51,25 +51,14 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     .single();
 
     if (!verifyAccountData) {
-      const SUUPER_CLIENT_ID = process.env.NEXT_PUBLIC_SUPER_CLIENT_ID;
-      const SUUPER_CLIENT_SECRET = process.env.NEXT_PUBLIC_SUPER_CLIENT_SECRET;
-
       await client.auth.signOut();
-      // clear the all cookies
-      let currentOrigin = 'http://localhost:3000'; // Default value for development
-
-      if (typeof window !== 'undefined') {
-        currentOrigin = window.location.origin;
-      }
-
-      console.log('Current Origin:', currentOrigin);
-
-      await fetch(`${currentOrigin}/api/v1/clear-cookies`,  {
-        method: 'POST',
-        headers: new Headers({
-          Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
-        }),
-      });
+      // Clear all cookies manually if necessary
+    document.cookie.split(";").forEach((c) => {
+    document.cookie = c
+      .replace(/^ +/, "")
+      .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    return redirect(`${pathsConfig.auth.signIn}?invite_token=${token}&email=${emailSearch}`);
     }
     // const verifyAccountData = currentSession.data.session.user.email !== searchParams.email;
     // if (verifyAccountData) {
