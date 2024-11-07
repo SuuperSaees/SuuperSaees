@@ -53,7 +53,7 @@ class AuthCallbackService {
     // if (token_hash_session !== currentSessionId) {
     //    await logOutUser(this.client);
     // } 
-    await logOutUser(this.client);
+    // await logOutUser(this.client);
     const host = request.headers.get('host');
 
     // set the host to the request host since outside of Vercel it gets set as "localhost"
