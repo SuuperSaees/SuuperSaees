@@ -54,7 +54,7 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
   const inviteToken = searchParams.get('invite_token');
   const mutationFn = async (params: Credentials) => {
     const {
-      // emailRedirectTo,
+      emailRedirectTo,
       captchaToken,
       ...credentials
     } = params;
@@ -64,7 +64,7 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
     const response = await client.auth.signUp({
       ...credentials,
       options: {
-        // emailRedirectTo,
+        emailRedirectTo,
         captchaToken,
       },
     });
