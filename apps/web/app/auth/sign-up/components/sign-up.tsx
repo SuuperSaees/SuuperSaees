@@ -125,7 +125,7 @@ export default function SignUp({ searchParams }: Props) {
                 inviteToken={inviteToken}
                 paths={paths}
                 showConfirmAlert={!isCustomDomain}
-           
+                currentAppOrigin={currentAppOrigin}
               />
 
               {!isCustomDomain && (
