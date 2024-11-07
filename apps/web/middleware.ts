@@ -17,7 +17,9 @@ import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
-import { handleDomainCheck } from './handlers/domain-check-handler';
+
+
+// import { handleDomainCheck } from './handlers/domain-check-handler';
 
 
 export const config = {
@@ -62,8 +64,8 @@ export async function middleware(request: NextRequest) {
   if (apiAuthResult) return apiAuthResult;
 
   // Domain Check
-  const domainCheckResult = await handleDomainCheck(request, response);
-  if (domainCheckResult) return domainCheckResult;
+  // const domainCheckResult = await handleDomainCheck(request, response);
+  // if (domainCheckResult) return domainCheckResult;
 
   const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
   const ignorePath = new Set([
