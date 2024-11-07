@@ -66,7 +66,7 @@ console.log('Current Session:', currentSession);
   // if the user is not logged in or there is an error
   // redirect to the sign up page with the invite token
   // so that they will get back to this page after signing up
-  console.log('Auth:', auth);
+  console.log('Auth:', auth, verifyAccountData);
   if ((auth.error ?? !auth.data) && !verifyAccountData) {
     console.log('Redirecting to sign up');
     const urlParams = new URLSearchParams({
