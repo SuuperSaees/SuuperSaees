@@ -40,11 +40,14 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const currentSession = await client.auth.getSession();
   console.log('I AM HERE');
   console.log('Token:', token);
-console.log('Current Session:', currentSession);
-    const { data: verifyAccountData } = await client
+  console.log('Current Session:', currentSession);
+  const emailParam = searchParams.email ?? '';
+
+  const emailSearch = decodeURIComponent(emailParam).replace(/ /g, '+');
+  const { data: verifyAccountData } = await client
     .from('accounts')
     .select("email")
-    .eq('email', searchParams.email ?? '')
+    .eq('email', emailSearch)
     .single();
 
     if (!verifyAccountData) {
@@ -66,7 +69,7 @@ console.log('Current Session:', currentSession);
   // if the user is not logged in or there is an error
   // redirect to the sign up page with the invite token
   // so that they will get back to this page after signing up
-  console.log('Auth:', auth, verifyAccountData, searchParams.email);
+  console.log('Auth:', auth, verifyAccountData, emailSearch);
   if ((auth.error ?? !auth.data) && !verifyAccountData) {
     console.log('Redirecting to sign up');
     const urlParams = new URLSearchParams({
