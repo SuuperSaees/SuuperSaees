@@ -26,6 +26,7 @@ interface EmailPasswordSignUpContainerProps {
   emailRedirectTo: string;
   className?: string;
   showConfirmEmail?: boolean;
+  currentAppOrigin?: string;
 }
 
 export function EmailPasswordSignUpContainer({
@@ -34,13 +35,12 @@ export function EmailPasswordSignUpContainer({
   emailRedirectTo,
   displayTermsCheckbox,
   showConfirmEmail,
-  className
+  className,
+  currentAppOrigin
 }: EmailPasswordSignUpContainerProps) {
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
 
-  const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-
-  const currentBaseUrl = typeof window !== 'undefined' && !showConfirmEmail ? `${isProd ? 'https://' : 'http://'}${window.location.host}` : undefined;
+  const currentBaseUrl = !showConfirmEmail ? currentAppOrigin : undefined;
 
   const signUpMutation = useSignUpWithEmailAndPassword(currentBaseUrl);
   const redirecting = useRef(false);
