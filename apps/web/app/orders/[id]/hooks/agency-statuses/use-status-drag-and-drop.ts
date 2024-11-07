@@ -2,12 +2,12 @@ import { useState } from 'react';
 
 import {
   DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { arrayMove} from '@dnd-kit/sortable';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { updateStatusesPositions } from '~/team-accounts/src/server/actions/statuses/update/update-agency-status';
@@ -53,9 +53,16 @@ export const useStatusDragAndDrop = (
   }, [agencyStatuses]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor,{
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
     })
   )
 

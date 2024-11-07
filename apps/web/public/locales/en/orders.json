@@ -5,6 +5,7 @@
   "confirmDateMessage": "Are you sure you want to update the due date?",
   "accept": "Accept",
   "cancel": "Cancel",
+  "saveChanges": "Save changes",
   "openOrders": "Open",
   "summary": "Summary",
   "completedOrders": "Completed",
@@ -59,11 +60,11 @@
     "dueDate": "Due date",
     "deadline": "Deadline",
     "statuses": {
-      "pending": "Pending response",
-      "inProgress": "In progress",
+      "pending": "Pending Response",
+      "inProgress": "In Progress",
       "completed": "Completed",
-      "inReview": "In review",
-      "annulled": "Cancelled"
+      "inReview": "In Review",
+      "annulled": "Annulled"
     },
     "priorities": {
       "low": "Low",
