@@ -118,6 +118,9 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const email = auth.data.email ?? '';
 
   await client.auth.signOut();
+  if (typeof window !== 'undefined') {
+    window.location.reload();
+  }
 
   return (
     <AuthLayoutShell Logo={AppLogo}>
