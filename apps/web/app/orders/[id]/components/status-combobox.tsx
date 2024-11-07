@@ -5,7 +5,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -27,12 +27,14 @@ import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/g
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 import { darkenColor } from '~/utils/generate-colors';
 import { useStatusDragAndDrop } from '../hooks/agency-statuses/use-status-drag-and-drop';
-import EditStatusPopover from './edit-status-popover';
+import StatusComboboxItem from './status-combobox-item';
 import { SortableStatus } from './sortable-status';
 import { closestCenter, DndContext } from '@dnd-kit/core';
 import { ChevronDown } from 'lucide-react';
-import { Trash2 } from 'lucide-react';
-import { convertToTitleCase, convertToSnakeCase } from '../utils/format-agency-names';
+import { convertToTitleCase, convertToSnakeCase, convertToCamelCase } from '../utils/format-agency-names';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { getCache, setCache, updateCache } from '~/utils/handle-caching';
+import { CACHE_KEY, CACHE_EXPIRY } from '../hooks/agency-statuses/use-status-drag-and-drop';
 
 interface StatusComboboxProps {
   order?: Order.Type;
@@ -52,20 +54,30 @@ function StatusCombobox({
     mode == 'order' ? (order?.status ?? '') : (subtask?.state ?? ''),
   );
   const [customStatus, setCustomStatus] = useState<string>('');
-  // const [agencyStatuses, setAgencyStatuses] = useState<AgencyStatus.Type[]>([]);
   const { t } = useTranslation(['orders', 'responses']);
   const router = useRouter();
+  const queryClient = useQueryClient();
+  
   const { data: agencyStatuses, refetch } = useQuery({
     queryKey: ['agencyStatuses', agency_id],
-    queryFn: () => getAgencyStatuses(agency_id),
+    queryFn: async () => {
+      const cachedData = getCache<AgencyStatus.Type[]>(`${CACHE_KEY}_${agency_id}`);
+      if (cachedData) {
+        return cachedData;
+      }
+      const fetchedData = await getAgencyStatuses(agency_id);
+      setCache(`${CACHE_KEY}_${agency_id}`, fetchedData, CACHE_EXPIRY);
+      return fetchedData;
+    },
     initialData: [],
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: CACHE_EXPIRY,
   });
 
   const { sensors, handleDragEnd, statuses } = useStatusDragAndDrop(
     agencyStatuses ?? [],
+    agency_id,
   );
 
   useEffect(() => {
@@ -77,17 +89,22 @@ function StatusCombobox({
   const findStatusColor = useCallback(
     (statusName: string) => {
       const status = agencyStatuses?.find((s) => s.status_name === statusName);
-      return status?.status_color;
+      return status?.status_color ?? '#E8EFFC';
     },
     [agencyStatuses],
   );
 
   const createStatus = useMutation({
     mutationFn: createNewStatus,
-    onSuccess: () => {
-      refetch().catch((error) => {
-        console.error(error);
-      });
+    onSuccess: (newStatus) => {
+      const updatedStatuses = [...(agencyStatuses ?? []), newStatus];
+      updateCache(
+        `${CACHE_KEY}_${agency_id}`,
+        updatedStatuses,
+        queryClient,
+        ['agencyStatuses', agency_id],
+        CACHE_EXPIRY
+      );
       toast.success('Success', {
         description: 'New status created successfully!',
       });
@@ -149,10 +166,15 @@ function StatusCombobox({
 
   const deleteStatus = useMutation({
     mutationFn: deleteStatusById,
-    onSuccess: () => {
-      refetch().catch((error) => {
-        console.error(error);
-      });
+    onSuccess: (_, deletedStatusId) => {
+      const updatedStatuses = agencyStatuses?.filter(status => status.id !== deletedStatusId) ?? [];
+      updateCache(
+        `${CACHE_KEY}_${agency_id}`,
+        updatedStatuses,
+        queryClient,
+        ['agencyStatuses', agency_id],
+        CACHE_EXPIRY
+      );
       toast.success('Success', { description: 'Status deleted successfully!' });
     },
     onError: () => {
@@ -170,19 +192,10 @@ function StatusCombobox({
   };
 
   const handleDeleteStatus = (statusId: number) => {
-    if (mode === 'order') {
-      changeOrderStatus.mutate({
-        orderId: order?.id,
-        status: 'pending',
-      });
-    } else if (mode === 'subtask') {
-      changeSubtaskStatus.mutate({
-        subtaskId: subtask?.id,
-        status: 'pending',
-      });
-    }
     deleteStatus.mutate(statusId);
   };
+
+  const isDefaultState = ['pending', 'completed', 'in_review', 'annulled', 'anulled', 'in_progress'].includes(popoverValue ?? '')
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -195,24 +208,24 @@ function StatusCombobox({
         }
       >
         <Button
-          variant="normal"
+          variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className={` shadow-none inline-flex items-center rounded-lg p-2 border-none ${popoverValue == 'in_progress' ? 'bg-[#F4EBFF] text-[#6941C6]' : statuses.includes(popoverValue) ? statusColors[popoverValue as keyof typeof statusColors] : ''}`}
+          className={` shadow-none inline-flex items-center rounded-lg p-2 border-none`}
 
           style={{
-            backgroundColor: findStatusColor(popoverValue),
+            backgroundColor: findStatusColor(popoverValue) ?? '',
             color: darkenColor(
               findStatusColor(popoverValue) ?? '#000000',
               0.55,
             ),
           }}
         >
-          <span className="pl-2 pr-2">{convertToTitleCase(popoverValue)}</span>
+          <span className="pl-2 pr-2">{isDefaultState ? t(`details.statuses.${convertToCamelCase(popoverValue ?? '')}`, {ns:'orders'}) : convertToTitleCase(popoverValue)}</span>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="h-64 w-[250px] p-0">
+      <PopoverContent className="h-64 w-[290px] p-0">
         <Command>
           <CommandInput
             placeholder=""
@@ -250,72 +263,32 @@ function StatusCombobox({
                   >
                     {statuses?.map((status) => (
                       <SortableStatus key={status.id} status={status}>
-                        <CommandItem
-                          value={status?.status_name ?? undefined}
-                          onSelect={(currentValue: string) => {
-                            if (status?.status_name !== popoverValue) {
+                        <StatusComboboxItem
+                          status={status}
+                          onSelect={(currentValue) => {
+                            if (status.status_name !== popoverValue) {
                               if (mode === 'order') {
                                 changeOrderStatus.mutate({
-                                  orderId: order?.id,
-                                  status: status?.status_name ?? '',
-                                });
+                                  orderId: order?.id ?? -1,
+                                  status: convertToSnakeCase(status?.status_name ?? ''),
+                                })
                               } else if (mode === 'subtask') {
                                 changeSubtaskStatus.mutate({
-                                  subtaskId: subtask?.id,
-                                  status: status?.status_name ?? '',
-                                });
+                                  subtaskId: subtask?.id ?? '',
+                                  status: convertToSnakeCase(status?.status_name ?? ''),
+                                })
                               }
-                              setPopoverValue(
-                                currentValue === popoverValue
-                                  ? ''
-                                  : currentValue,
-                              );
-                              setOpen(false);
+                              setPopoverValue(currentValue === popoverValue ? '' : currentValue)
+                              setOpen(false)
                             }
                           }}
-                          className="flex w-full items-center justify-between p-0"
-                        >
-                          <p
-                            className="m-2 cursor-pointer rounded-lg p-1 font-medium"
-                            style={{
-                              color: status?.status_color
-                                ? darkenColor(status.status_color, 0.55)
-                                : undefined,
-                              backgroundColor: status?.status_color,
-                            }}
-                          >
-                            {convertToTitleCase(status?.status_name)}
-                          </p>
-                          <div className="flex gap-2 px-1 text-gray-500">
-                            <EditStatusPopover
-                              status_id={status.id}
-                              status_color={status.status_color ?? ''}
-                              status_name={status.status_name ?? ''}
-                              order_id={order?.id}
-                              task_id={subtask?.id}
-                              setValue={setPopoverValue}
-                              mode={mode}
-                              preventEditName = {status.status_name === 'Pending response' || status.status_name === 'Completed' || status.status_name === 'In review' || status.status_name === 'Cancelled' || status.status_name === 'In progress'}
-                            />
-                            {
-                              status.status_name === 'Pending response' ||
-                              status.status_name === 'Completed' ||
-                              status.status_name === 'In review' ||
-                              status.status_name === 'Cancelled' ||
-                              status.status_name === 'In progress' ? null : (
-                                <Trash2
-                                  className="h-5 w-5 cursor-pointer"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    handleDeleteStatus(status.id);
-                                    setOpen(false);
-                                  }}
-                                />
-                              )
-                            }
-                          </div>
-                        </CommandItem>
+                          onDelete={handleDeleteStatus}
+                          order={order}
+                          subtask={subtask}
+                          agency_id={agency_id}
+                          mode={mode}
+                          setPopoverValue={setPopoverValue}
+                        />
                       </SortableStatus>
                     ))}
                   </SortableContext>

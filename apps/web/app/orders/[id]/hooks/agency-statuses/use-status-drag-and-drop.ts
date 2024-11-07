@@ -2,36 +2,49 @@ import { useState } from 'react';
 
 import {
   DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { arrayMove} from '@dnd-kit/sortable';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { updateStatusesPositions } from '~/team-accounts/src/server/actions/statuses/update/update-agency-status';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
+import { updateCache } from '~/utils/handle-caching';
+
+export const CACHE_KEY = 'agencyStatuses';
+export const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
 
 export const useStatusDragAndDrop = (
-  agencyStatuses: AgencyStatus.Type[]
+  agencyStatuses: AgencyStatus.Type[],
+  agency_id: string
 ) => {
+
+
   const [statuses, setStatuses] = useState(agencyStatuses);
   const queryClient = useQueryClient();
 
   const updateStatusesPositionsMutation = useMutation({
     mutationFn: async ({ statuses }: { statuses: AgencyStatus.Type[] }) => {
-      return await updateStatusesPositions(statuses);
+      return await updateStatusesPositions(statuses,agency_id);
     },
-    onSuccess: async () => {
-      // toast.success('Successfully updated status positions');
-      await queryClient.invalidateQueries({
-        queryKey: ['statuses', 'all'],
-      });
+    onSuccess: (updatedStatuses) => {
+      if (updatedStatuses) {
+        updateCache(
+          `${CACHE_KEY}_${agency_id}`,
+          updatedStatuses,
+          queryClient,
+          ['agencyStatuses', agency_id],
+          CACHE_EXPIRY
+        );
+        // toast.success('Successfully updated status positions');
+      }
     },
     onError: () => {
-      toast.error('Error updating task positions');
+      toast.error('Error updating status positions');
     },
   });
 
@@ -40,9 +53,16 @@ export const useStatusDragAndDrop = (
   }, [agencyStatuses]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor,{
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
     })
   )
 
@@ -66,6 +86,8 @@ export const useStatusDragAndDrop = (
   return {
     sensors,
     handleDragEnd,
-    statuses
+    statuses,
+    CACHE_KEY,
+    CACHE_EXPIRY,
   };
 };

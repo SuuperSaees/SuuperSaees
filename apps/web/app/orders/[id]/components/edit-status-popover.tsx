@@ -15,6 +15,11 @@ import { Spinner } from '@kit/ui/spinner';
 import { updateOrder } from '~/team-accounts/src/server/actions/orders/update/update-order';
 import { updateStatusById } from '~/team-accounts/src/server/actions/statuses/update/update-agency-status';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
+import { convertToCamelCase, convertToSnakeCase, convertToTitleCase } from '../utils/format-agency-names';
+import { getCache, updateCache } from '~/utils/handle-caching';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { CACHE_KEY, CACHE_EXPIRY } from '../hooks/agency-statuses/use-status-drag-and-drop';
+import { useTranslation } from 'react-i18next';
 
 interface EditStatusPopoverProps {
   status_id: number;
@@ -23,8 +28,13 @@ interface EditStatusPopoverProps {
   order_id?: number;
   task_id?: string;
   mode?: 'order' | 'subtask';
+  agency_id: string;
   preventEditName?: boolean;
   setValue: (value: string) => void;
+  open: boolean;
+  setOpen: (value: boolean) => void;
+  isHovered?: boolean;
+  setIsHovered?: (value: boolean) => void;
 }
 
 function EditStatusPopover({
@@ -34,14 +44,18 @@ function EditStatusPopover({
   order_id,
   task_id,
   mode,
+  agency_id,
+  open,
+  setOpen,
+  setIsHovered,
   preventEditName = false,
   setValue,
 }: EditStatusPopoverProps) {
-  const [open, setOpen] = useState<boolean>(false);
-  const [name, setName] = useState<string>(status_name);
-  const [color, setColor] = useState<string>(status_color);
+  const [name, setName] = useState<string>(status_name ?? '');
+  const [color, setColor] = useState<string>(status_color ?? '');
   const router = useRouter();
   const queryClient = useQueryClient()
+  const {t} = useTranslation('orders')
 
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -53,22 +67,36 @@ function EditStatusPopover({
     inputRef.current?.click()
   }
 
+  const isDefaultState = ['pending', 'completed', 'in_review', 'annulled','anulled', 'in_progress'].includes(name ?? '')
+
   const updateStatusMutation = useMutation({
-    mutationFn: () =>
-      updateStatusById(status_id, { status_name: name, status_color: color }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['agencyStatuses'] })
-      toast.success('Status updated successfully')
-      setValue(name)
-      setOpen(false)
+    mutationFn: async() =>
+      await updateStatusById(status_id, { status_name: convertToSnakeCase(name), status_color: color }),
+    onSuccess: (updatedStatus) => {
+      const cachedStatuses = getCache<AgencyStatus.Type[]>(`${CACHE_KEY}_${agency_id}`);
+      if (cachedStatuses) {
+        const updatedStatuses = cachedStatuses.map(status =>
+          status.id === status_id ? { ...status, ...updatedStatus } : status
+        );
+        updateCache(
+          `${CACHE_KEY}_${agency_id}`,
+          updatedStatuses,
+          queryClient,
+          ['agencyStatuses', agency_id],
+          CACHE_EXPIRY
+        );
+      }
+      toast.success('Status updated successfully');
+      setValue(convertToSnakeCase(name));
+      setOpen(false);
     },
     onError: () => {
-      toast.error('Failed to update status')
+      toast.error('Failed to update status');
     },
-  })
+  });
 
   const updateOrderMutation = useMutation({
-    mutationFn: () => updateOrder(order_id, { status: name }),
+    mutationFn: () => updateOrder(order_id, { status: convertToSnakeCase(name) }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['orders'] })
       router.refresh()
@@ -80,7 +108,7 @@ function EditStatusPopover({
 
   const changeSubtaskStatus = useMutation({
     mutationFn: async () => {
-      await updateSubtaskById(task_id, { state: name });
+      await updateSubtaskById(task_id, { state: convertToSnakeCase(name) });
       router.refresh();
     },
     onSuccess: () => {
@@ -113,7 +141,7 @@ function EditStatusPopover({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} >
       <PopoverTrigger asChild>
         <Pencil
           className="h-5 w-5 cursor-pointer"
@@ -127,17 +155,17 @@ function EditStatusPopover({
       <PopoverContent className="w-80" onClick={handlePopoverClick}>
         <form onSubmit={(e) => e.preventDefault()} className="grid gap-4">
           <div className="flex items-center gap-2">
-            {
-              !preventEditName &&
-              <Input
-                id="name"
-                value={name}
-                defaultValue={name}
-                onChange={(e) => setName(e.target.value)}
-                className="h-8 w-[80%]"
-                onClick={(e) => e.stopPropagation()}
-              />
-            }
+            
+            <Input
+              id="name"
+              value={isDefaultState ? t(`details.statuses.${convertToCamelCase(name ?? '')}`) : convertToTitleCase(name) ?? ''}
+              defaultValue={isDefaultState ? t(`details.statuses.${convertToCamelCase(name ?? '')}`) : convertToTitleCase(name) ?? ''}
+              onChange={(e) => setName(e.target.value)}
+              disabled={preventEditName}
+              className="h-8 w-[80%]"
+              onClick={(e) => e.stopPropagation()}
+            />
+            
             <div
               className="h-10 w-10 cursor-pointer rounded-full border-4 border-white shadow-lg transition-transform hover:scale-110"
               style={{ backgroundColor: color }}
@@ -154,16 +182,21 @@ function EditStatusPopover({
           </div>
 
           <div className="flex justify-between">
-            <Button variant="secondary" onClick={() => setOpen(false)}>
-              Cancel
+            <Button variant="secondary" onClick={() => {
+              setOpen(false)
+              setIsHovered?.(false)
+              }}>
+              {t('cancel')}
             </Button>
             <ThemedButton
-              onClick={handleSave}
+              onClick={(e) => {
+                handleSave(e)
+                setIsHovered?.(false)
+              }}
               className="flex items-center gap-1"
             >
-              <p>Save changes</p>
-              {(updateStatusMutation.status === 'pending' ||
-                updateOrderMutation.status === 'pending') && (
+              <p>{t('saveChanges')}</p>
+              {(updateStatusMutation.status === 'pending') && (
                 <Spinner className="h-4 w-4" />
               )}
             </ThemedButton>
