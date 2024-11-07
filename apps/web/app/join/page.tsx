@@ -11,7 +11,6 @@ import { AcceptInvitationContainer } from '@kit/team-accounts/components';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
 import { Trans } from '@kit/ui/trans';
-import { cookies } from 'next/headers';
 
 import { AppLogo } from '~/components/app-logo';
 import pathsConfig from '~/config/paths.config';
@@ -54,7 +53,7 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     if (!verifyAccountData) {
       await client.auth.signOut();
       // clear the all cookies
-      cookies().delete("sb-ygxrahspvgyntzimoelc-auth-token");
+      await fetch('/api/clear-cookies', { method: 'POST' });
     }
     // const verifyAccountData = currentSession.data.session.user.email !== searchParams.email;
     // if (verifyAccountData) {
