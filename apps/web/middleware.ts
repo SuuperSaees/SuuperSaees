@@ -1,17 +1,24 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse, URLPattern } from 'next/server';
 
+
+
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
+
+
 
 import pathsConfig from '~/config/paths.config';
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
+
+
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
 import { handleDomainCheck } from './handlers/domain-check-handler';
+
 
 export const config = {
   matcher: [
@@ -63,6 +70,7 @@ export async function middleware(request: NextRequest) {
     'auth',
     'add-organization',
     'api',
+    'join',
     'home',
     '/__nextjs_original-stack-frame',
   ]);

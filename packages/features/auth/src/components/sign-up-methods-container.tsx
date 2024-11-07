@@ -45,6 +45,7 @@ export function SignUpMethodsContainer(props: {
           defaultValues={defaultValues}
           displayTermsCheckbox={props.displayTermsCheckbox}
           currentAppOrigin={props.currentAppOrigin}
+          inviteToken={props.inviteToken}
         />
       </If>
 

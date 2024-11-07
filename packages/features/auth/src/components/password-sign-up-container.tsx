@@ -27,6 +27,7 @@ interface EmailPasswordSignUpContainerProps {
   className?: string;
   showConfirmEmail?: boolean;
   currentAppOrigin?: string;
+  inviteToken?: string;
 }
 
 export function EmailPasswordSignUpContainer({
@@ -36,7 +37,8 @@ export function EmailPasswordSignUpContainer({
   displayTermsCheckbox,
   showConfirmEmail,
   className,
-  currentAppOrigin
+  currentAppOrigin,
+  inviteToken
 }: EmailPasswordSignUpContainerProps) {
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
 
@@ -76,7 +78,7 @@ export function EmailPasswordSignUpContainer({
         }
 
         if (data?.inviteRedirectUrl) {
-          router.push('/home');
+          router.push(`join?invite_token=${inviteToken}&email=${credentials.email}`);
         }
       } catch (error) {
         console.error(error);
@@ -94,6 +96,7 @@ export function EmailPasswordSignUpContainer({
       signUpMutation,
       showConfirmEmail,
       router,
+      inviteToken,
     ],
   );
 
