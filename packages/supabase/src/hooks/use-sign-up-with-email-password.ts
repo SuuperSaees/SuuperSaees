@@ -122,7 +122,7 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
     );
     // don't send confirmation email if is a member invitation (/auth/sign-up?invite_token=xxxx)
     if (inviteToken) {
-      inviteRedirectUrl = `${baseUrl}/auth/confirm?token_hash_session=${sessionId}&type=invite&callback=${callbackUrl}`;
+      inviteRedirectUrl = `${callbackUrl}/auth/confirm?token_hash_session=${sessionId}&type=invite&callback=${callbackUrl}`;
     } else {
       const res = await fetch(`${baseUrl}/api/v1/mailer`, {
         method: 'POST',
