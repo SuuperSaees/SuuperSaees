@@ -11,6 +11,7 @@ type FormFieldType = Pick<
   | 'options'
   | 'placeholder'
   | 'position'
+  | 'required'
   | 'alert_message'
 > | null;
 export namespace Brief {
