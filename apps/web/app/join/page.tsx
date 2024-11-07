@@ -35,18 +35,22 @@ export const generateMetadata = async () => {
 export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const token = searchParams.invite_token;
   const client = getSupabaseServerComponentClient();
-  // const currentSession = await client.auth.getSession();
-  // if (currentSession.data.session) {
-    const { data: verifyAccountData } = await client
-    .from('accounts')
-    .select()
-    .eq('email', searchParams.email ?? '')
-    .single();
+  const currentSession = await client.auth.getSession();
+  if (currentSession.data.session) {
+    // const { data: verifyAccountData } = await client
+    // .from('accounts')
+    // .select()
+    // .eq('email', searchParams.email ?? '')
+    // .single();
 
-    if (!verifyAccountData) {
+    // if (!verifyAccountData) {
+      // await client.auth.signOut();
+    // }
+    const verifyAccountData = currentSession.data.session.user.email !== searchParams.email;
+    if (verifyAccountData) {
       await client.auth.signOut();
     }
-  // }
+  }
 
 
   // no token, redirect to 404
