@@ -51,9 +51,17 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     .single();
 
     if (!verifyAccountData) {
+      const SUUPER_CLIENT_ID = process.env.NEXT_PUBLIC_SUPER_CLIENT_ID;
+      const SUUPER_CLIENT_SECRET = process.env.NEXT_PUBLIC_SUPER_CLIENT_SECRET;
+
       await client.auth.signOut();
       // clear the all cookies
-      await fetch('/api/clear-cookies', { method: 'POST' });
+      await fetch('/api/v1/clear-cookies',  {
+        method: 'POST',
+        headers: new Headers({
+          Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
+        }),
+      });
     }
     // const verifyAccountData = currentSession.data.session.user.email !== searchParams.email;
     // if (verifyAccountData) {
