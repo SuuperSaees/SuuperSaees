@@ -41,7 +41,7 @@ const defaultOrganizationName =
   OrganizationSettings.EXTRA_KEYS.default_agency_name;
 const defaultFromSenderIdentity =
   OrganizationSettings.EXTRA_KEYS.default_from_sender_identity;
-export function useSignUpWithEmailAndPassword() {
+export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
   const client = useSupabase();
   const mutationKey = ['auth', 'sign-up-with-email-password'];
   // catch invite token
@@ -76,7 +76,7 @@ export function useSignUpWithEmailAndPassword() {
     ).toISOString();
     const providerToken = 'supabase';
     const sessionId = decodeToken(accessToken, 'base64')?.session_id as string;
-    const callbackUrl = baseUrl;
+    const callbackUrl = currentBaseUrl ?? baseUrl;
     const lang = 'en';
     const email = newUserData?.user?.email ?? '';
 
