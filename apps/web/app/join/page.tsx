@@ -56,7 +56,15 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
 
       await client.auth.signOut();
       // clear the all cookies
-      await fetch('/api/v1/clear-cookies',  {
+      let currentOrigin = 'http://localhost:3000'; // Default value for development
+
+      if (typeof window !== 'undefined') {
+        currentOrigin = window.location.origin;
+      }
+
+      console.log('Current Origin:', currentOrigin);
+
+      await fetch(`${currentOrigin}/api/v1/clear-cookies`,  {
         method: 'POST',
         headers: new Headers({
           Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
