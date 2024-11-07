@@ -68,6 +68,7 @@ export async function middleware(request: NextRequest) {
   const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
   const ignorePath = new Set([
     'auth',
+    '/auth/confirm',
     'add-organization',
     'api',
     'join',
