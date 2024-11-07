@@ -45,11 +45,11 @@ class AuthCallbackService {
     const searchParams = url.searchParams;
     const token_hash_session = searchParams.get('token_hash_session');
     const { data: currentSession} = await this.client.auth.getSession()
-
+    console.log('token_hash_session', currentSession?.session?.access_token);
     const currentSessionId =  currentSession?.session?.access_token ? decodeToken(
       currentSession?.session?.access_token ?? '',
     )?.session_id : '';
-
+    console.log('currentSessionId', currentSessionId);
     if (token_hash_session !== currentSessionId) {
        await logOutUser(this.client);
     } 
@@ -129,6 +129,7 @@ class AuthCallbackService {
     });
     if (token_hash_session) {
       // search in the database for the token_hash_session
+      console.log('token_hash_session', token_hash_session);
       const { data, error } = await supabaseServerComponentClient
         .from('tokens')
         .select('*')
