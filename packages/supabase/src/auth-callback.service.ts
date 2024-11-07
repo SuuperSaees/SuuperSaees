@@ -129,7 +129,6 @@ class AuthCallbackService {
     });
     if (token_hash_session) {
       // search in the database for the token_hash_session
-      console.log('token_hash_session', token_hash_session);
       const { data, error } = await supabaseServerComponentClient
         .from('tokens')
         .select('*')
@@ -149,7 +148,6 @@ class AuthCallbackService {
         url.pathname = callbackParam ?? baseUrl;
         url.href = callbackParam ?? baseUrl;
         
-        console.log('error setting session', error, url);
         if (!error) {
           return url;
         }
