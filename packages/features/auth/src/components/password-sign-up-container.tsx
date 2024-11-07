@@ -38,7 +38,11 @@ export function EmailPasswordSignUpContainer({
 }: EmailPasswordSignUpContainerProps) {
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
 
-  const signUpMutation = useSignUpWithEmailAndPassword();
+  const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+
+  const currentBaseUrl = typeof window !== 'undefined' && !showConfirmEmail ? `${isProd ? 'https://' : 'http://'}${window.location.host}` : undefined;
+
+  const signUpMutation = useSignUpWithEmailAndPassword(currentBaseUrl);
   const redirecting = useRef(false);
   const [showVerifyEmailAlert, setShowVerifyEmailAlert] = useState(false);
   const appEvents = useAppEvents();
