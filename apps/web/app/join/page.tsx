@@ -38,6 +38,7 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     admin: true,
   });
   const currentSession = await client.auth.getSession();
+  console.log('I AM HERE');
   if (currentSession.data.session) {
     const { data: verifyAccountData } = await client
     .from('accounts')
@@ -135,6 +136,7 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
 
   const accountHome = pathsConfig.app.orders;
   const email = auth.data.email ?? '';
+  console.log('I AM HERE 2', email);
   return (
     <AuthLayoutShell Logo={AppLogo}>
       <AcceptInvitationContainer
