@@ -34,13 +34,18 @@ export const generateMetadata = async () => {
 
 export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const token = searchParams.invite_token;
+  const client = getSupabaseServerComponentClient();
+  const currentSession = await client.auth.getSession();
+  if (currentSession.data.session) {
+    await client.auth.signOut();
+  }
+
 
   // no token, redirect to 404
   if (!token) {
     notFound();
   }
 
-  const client = getSupabaseServerComponentClient();
   const auth = await requireUser(client);
 
   // if the user is not logged in or there is an error
@@ -116,12 +121,6 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
 
   const accountHome = pathsConfig.app.orders;
   const email = auth.data.email ?? '';
-
-  const currentSession = await client.auth.getSession();
-  if (currentSession.data.session) {
-    await client.auth.signOut();
-  }
-
   return (
     <AuthLayoutShell Logo={AppLogo}>
       <AcceptInvitationContainer
