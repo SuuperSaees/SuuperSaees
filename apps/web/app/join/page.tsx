@@ -40,7 +40,8 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     const { data: verifyAccountData } = await client
     .from('accounts')
     .select()
-    .eq('email', currentSession.data.session.user.email ?? '')
+    .eq('email', searchParams.email ?? '')
+    .eq('is_personal_account', true)
     .single();
 
     if (!verifyAccountData) {
