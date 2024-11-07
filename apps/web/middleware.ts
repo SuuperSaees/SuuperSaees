@@ -74,6 +74,9 @@ export async function middleware(request: NextRequest) {
     'add-organization',
     'api',
     'join',
+    'join?invite_token=',
+    '/join?invite_token=',
+    '/join',
     'home',
     '/__nextjs_original-stack-frame',
   ]);
