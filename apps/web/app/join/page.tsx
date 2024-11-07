@@ -41,7 +41,6 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
   console.log('I AM HERE');
   console.log('Token:', token);
 console.log('Current Session:', currentSession);
-  if (currentSession.data.session) {
     const { data: verifyAccountData } = await client
     .from('accounts')
     .select("email")
@@ -55,7 +54,6 @@ console.log('Current Session:', currentSession);
     // if (verifyAccountData) {
     //   await client.auth.signOut();
     // }
-  }
 
 
   // no token, redirect to 404
@@ -69,7 +67,7 @@ console.log('Current Session:', currentSession);
   // redirect to the sign up page with the invite token
   // so that they will get back to this page after signing up
   console.log('Auth:', auth);
-  if (auth.error ?? !auth.data) {
+  if ((auth.error ?? !auth.data) && !verifyAccountData) {
     console.log('Redirecting to sign up');
     const urlParams = new URLSearchParams({
       invite_token: token,
@@ -79,8 +77,7 @@ console.log('Current Session:', currentSession);
     const signUpPath = `${pathsConfig.auth.signUp}?${urlParams.toString()}`;
 
     // redirect to the sign up page with the invite token
-    redirect(signUpPath);
-    return;
+    return redirect(signUpPath);
   } 
 
 
@@ -142,7 +139,7 @@ console.log('Current Session:', currentSession);
   // once the user accepts the invitation, we redirect them to home page
 
   const accountHome = pathsConfig.app.orders;
-  const email = auth.data.email ?? '';
+  const email = auth.data?.email ?? '';
   console.log('Email:', email);
   console.log('I AM HERE 2', email);
   return (
