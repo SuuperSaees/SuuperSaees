@@ -16,6 +16,7 @@
     "previous": "Anterior",
     "next": "Siguiente",
     "validation": {
+       "required": "Requerido",
        "minCharacters": "Se requieren al menos 2 caracteres",
        "maxCharacters": "Se permiten un máximo de 3000 caracteres"
     },

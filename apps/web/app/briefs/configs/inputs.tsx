@@ -126,6 +126,7 @@ export const useGenerateInputs = (
               value: 'option3',
             },
           ],
+          required: false,
         },
         component: (props: ComponentProps) => (
           <FormFieldMultipleChoice
@@ -163,6 +164,7 @@ export const useGenerateInputs = (
               value: 'option3',
             },
           ],
+          required: false,
         },
         component: (props: ComponentProps) => (
           <FormFieldSingleChoice
@@ -200,6 +202,7 @@ export const useGenerateInputs = (
               value: 'option3',
             },
           ],
+          required: false,
         },
         component: (props: ComponentProps) => (
           <FormFieldDropdown

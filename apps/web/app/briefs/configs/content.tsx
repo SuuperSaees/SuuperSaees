@@ -28,7 +28,6 @@ export const useGenerateContent = (
           placeholder: '',
           description: '',
           type: 'h1',
-          required: false
         },
         component: (props: ComponentProps) => (
           <FormTitleComponent
@@ -52,7 +51,6 @@ export const useGenerateContent = (
           placeholder: '',
           description: '',
           type: 'rich-text',
-          required: false
         },
         component: (props: ComponentProps) => (
           <FormRichTextComponent
@@ -77,7 +75,6 @@ export const useGenerateContent = (
           label: 'Image',
           placeholder: '',
           type:'image',
-          required: false
         },
         component: (props: ComponentProps) => (
           <UploadImagePreview
