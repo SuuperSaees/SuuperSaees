@@ -76,7 +76,7 @@ export function EmailPasswordSignUpContainer({
         }
 
         if (data?.inviteRedirectUrl) {
-          router.push(data.inviteRedirectUrl);
+          router.push('/home');
         }
       } catch (error) {
         console.error(error);
