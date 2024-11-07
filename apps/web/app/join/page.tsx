@@ -37,7 +37,15 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const client = getSupabaseServerComponentClient();
   const currentSession = await client.auth.getSession();
   if (currentSession.data.session) {
-    await client.auth.signOut();
+    const { data: verifyAccountData } = await client
+    .from('accounts')
+    .select()
+    .eq('email', currentSession.data.session.user.email ?? '')
+    .single();
+
+    if (!verifyAccountData) {
+      await client.auth.signOut();
+    }
   }
 
 
