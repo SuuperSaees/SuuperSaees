@@ -20,6 +20,7 @@ import { MultipleChoice } from '~/components/multiple-choice';
 import RadioOptions from '~/components/single-choice';
 import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
+import { FormField as FormFieldType } from '~/lib/form-field.types';
 import { containsVideo } from '~/utils/contains-video';
 import { generateUUID } from '~/utils/generate-uuid';
 import { isYouTubeUrl } from '~/utils/upload-video';
@@ -33,29 +34,22 @@ type Option = {
 };
 
 export const OrderBriefs = ({
-  briefs,
+  brief,
   form,
-  orderId,
 }: {
-  briefs: Brief.Response[];
+  brief: Brief.Relationships.Services.Response | null;
   form: UseFormReturn<
     {
       briefSelection: {
         selectedBriefId: string;
       };
       briefCompletion: {
+        brief_responses?: Record<string, string | undefined>;
         uuid: string;
         fileIds: string[];
         description?: string | undefined;
         title?: string | undefined;
-        brief_responses?:
-          | {
-              form_field_id: string;
-              brief_id: string;
-              order_id: string;
-              response: string;
-            }[]
-          | undefined;
+        order_followers?: string[] | undefined;
       };
     },
     unknown,
@@ -84,42 +78,38 @@ export const OrderBriefs = ({
 
   const setFormResponse = (
     currentFieldIndex: number,
-    formField: any,
-    briefId: string,
+    formField: FormFieldType.Type,
     responseValue: string,
   ) => {
-    form.setValue(`briefCompletion.brief_responses.${currentFieldIndex}`, {
-      form_field_id: formField.field?.id ?? '',
-      brief_id: briefId,
-      order_id: orderId,
-      response: responseValue,
-    });
+    form.setValue(
+      `briefCompletion.brief_responses.${formField?.id}`,
+      responseValue as never,
+    );
   };
 
-  const renderSpecialFormField = (formField: any) => {
-    switch (formField.field?.type) {
+  const renderSpecialFormField = (formField: FormFieldType.Type) => {
+    switch (formField.type) {
       case 'h1':
-        return <h1 className="text-3xl font-bold">{formField.field?.label}</h1>;
+        return <h1 className="text-3xl font-bold">{formField.label}</h1>;
       case 'h2':
-        return <h2 className="text-2xl font-bold">{formField.field?.label}</h2>;
+        return <h2 className="text-2xl font-bold">{formField.label}</h2>;
       case 'h3':
-        return <h3 className="text-xl font-bold">{formField.field?.label}</h3>;
+        return <h3 className="text-xl font-bold">{formField.label}</h3>;
       case 'h4':
-        return <h4 className="text-lg font-bold">{formField.field?.label}</h4>;
+        return <h4 className="text-lg font-bold">{formField.label}</h4>;
       case 'rich-text':
-        return (
-          <div dangerouslySetInnerHTML={{ __html: formField.field?.label }} />
-        );
+        return <div dangerouslySetInnerHTML={{ __html: formField.label }} />;
       case 'image':
         return (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={formField.field?.label}
-            alt={formField.field?.label}
+            src={formField.label}
+            alt={formField.label}
             className="h-auto max-w-full"
           />
         );
       case 'video': {
-        const videoUrl = formField.field?.label;
+        const videoUrl = formField.label;
         if (isYouTubeUrl(videoUrl)) {
           const embedUrl = getYouTubeEmbedUrl(videoUrl);
           return (
@@ -130,13 +120,13 @@ export const OrderBriefs = ({
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              title={formField.field?.label}
+              title={formField.label}
             ></iframe>
           );
         } else {
           return (
             <video controls className="max-w-full">
-              <source src={formField.field?.label} type="video/mp4" />
+              <source src={formField.label} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           );
@@ -147,8 +137,7 @@ export const OrderBriefs = ({
     }
   };
 
-  
-  const briefSetValuePrefix = 'briefCompletion'
+  const briefSetValuePrefix = 'briefCompletion';
   const briefResponseSufix = 'brief_responses';
 
   return (
@@ -156,13 +145,14 @@ export const OrderBriefs = ({
       {(() => {
         let uniqueIndexCounter = 0; // Initialize a counter outside the map functions
 
-        return briefs?.map((brief) => (
+        return (
           <div key={brief?.id} className="flex flex-col gap-4">
             <h3 className="text-lg font-bold">{brief?.name}</h3>
             <div className="flex flex-col gap-8">
               {brief?.form_fields
                 ?.sort(
-                  (a, b) => (a.field.position ?? 0) - (b.field.position ?? 0),
+                  (a, b) =>
+                    (a?.field?.position ?? 0) - (b?.field?.position ?? 0),
                 )
                 .map((formField) => {
                   const currentFieldIndex = notValidFormTypes.has(
@@ -172,13 +162,15 @@ export const OrderBriefs = ({
                     : uniqueIndexCounter++; // Increment the counter for each form field
 
                   if (notValidFormTypes.has(formField.field?.type ?? '')) {
-                    return renderSpecialFormField(formField);
+                    return renderSpecialFormField(
+                      formField.field as FormFieldType.Type,
+                    );
                   }
                   return (
                     <FormField
                       key={formField.field?.id}
                       control={form.control}
-                      name={`${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}.response`}
+                      name={`${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{formField.field?.label}</FormLabel>
@@ -203,21 +195,16 @@ export const OrderBriefs = ({
                                 onChange={(
                                   event: React.ChangeEvent<HTMLInputElement>,
                                 ) => {
-                                  const value = event.target.value;
+                                  const value = event.target.value as never;
                                   form.setValue(
-                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
-                                    {
-                                      form_field_id: formField.field?.id ?? '',
-                                      brief_id: brief.id,
-                                      order_id: orderId,
-                                      response: value,
-                                    },
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                    value,
                                   );
                                 }}
                                 selectedOption={
                                   form.getValues(
-                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}.response`,
-                                  ) || ''
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                  ) ?? ''
                                 }
                               />
                             ) : formField.field?.type === 'multiple_choice' ? (
@@ -226,22 +213,16 @@ export const OrderBriefs = ({
                                   (formField.field?.options as Option[]) ?? []
                                 }
                                 question={formField.field?.label ?? ''}
-                                selectedOptions={(
-                                  form.getValues(
-                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}.response`,
-                                  ) ?? ''
-                                )
-                                  .split(', ')
-                                  .filter(Boolean)}
+                                selectedOptions={
+                                  (form.getValues(
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                  ) ?? '').split(',').map(o => o.trim()).filter(Boolean)
+                                }
                                 onChange={(value) => {
+                                  const joinedValue = Array.isArray(value) ? value.join(', ') : value;
                                   form.setValue(
-                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
-                                    {
-                                      form_field_id: formField.field?.id ?? '',
-                                      brief_id: brief.id,
-                                      order_id: orderId,
-                                      response: value,
-                                    },
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                    joinedValue as never,
                                   );
                                 }}
                               />
@@ -256,13 +237,8 @@ export const OrderBriefs = ({
                                 ) => {
                                   const responseValue = e.target.value;
                                   form.setValue(
-                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
-                                    {
-                                      form_field_id: formField.field?.id ?? '',
-                                      brief_id: brief.id,
-                                      order_id: orderId,
-                                      response: responseValue,
-                                    },
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                    responseValue as never,
                                   );
                                 }}
                               />
@@ -277,13 +253,8 @@ export const OrderBriefs = ({
                                 ) => {
                                   const responseValue = e.target.value;
                                   form.setValue(
-                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
-                                    {
-                                      form_field_id: formField.field?.id ?? '',
-                                      brief_id: brief.id,
-                                      order_id: orderId,
-                                      response: responseValue,
-                                    },
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                    responseValue as never,
                                   );
                                 }}
                               >
@@ -298,9 +269,8 @@ export const OrderBriefs = ({
                                     handleFileIdsChange(fileIds);
                                   setFormResponse(
                                     currentFieldIndex,
-                                    formField,
-                                    brief.id,
-                                    responseValues,
+                                    formField.field as FormFieldType.Type,
+                                    responseValues as never,
                                   );
                                 }}
                               />
@@ -309,13 +279,8 @@ export const OrderBriefs = ({
                                 onDateChange={(selectedDate: Date) => {
                                   const responseValue = selectedDate;
                                   form.setValue(
-                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
-                                    {
-                                      form_field_id: formField.field?.id ?? '',
-                                      brief_id: brief.id,
-                                      order_id: orderId,
-                                      response: responseValue.toString(),
-                                    },
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                    responseValue as never,
                                   );
                                 }}
                               />
@@ -327,18 +292,13 @@ export const OrderBriefs = ({
                                 question={formField.field?.label ?? ''}
                                 selectedOption={
                                   form.getValues(
-                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}.response`,
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
                                   ) ?? ''
                                 }
                                 onChange={(value) => {
                                   form.setValue(
-                                    `${briefSetValuePrefix}.${briefResponseSufix}.${currentFieldIndex}`,
-                                    {
-                                      form_field_id: formField.field?.id ?? '',
-                                      brief_id: brief.id,
-                                      order_id: orderId,
-                                      response: value,
-                                    },
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                    value as never,
                                   );
                                 }}
                               />
@@ -359,7 +319,7 @@ export const OrderBriefs = ({
                 })}
             </div>
           </div>
-        ));
+        );
       })()}
     </div>
   );

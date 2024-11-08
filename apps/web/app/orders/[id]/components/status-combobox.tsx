@@ -43,6 +43,33 @@ interface StatusComboboxProps {
   mode: 'order' | 'subtask';
 }
 
+export const baseColors = {
+  "pending":{
+    "bg":"#fef7c3",
+    "text":"#a15c07"
+  },
+  "in_progress":{
+    "bg":"#F4EBFF",
+    "text":"#6941C6"
+  },
+  "completed":{
+    "bg":"#DCFAE6",
+    "text":"#067647",
+  },
+  "in_review":{
+    "bg":"#FFEBD9",
+    "text":"#C66A41",
+  },
+  "annulled":{
+    "bg":"#FEE4E2",
+    "text":"#B42318",
+  },
+  "anulled":{
+    "bg":"#FEE4E2",
+    "text":"#B42318",
+  },
+}
+
 function StatusCombobox({
   order,
   subtask,
@@ -214,10 +241,10 @@ function StatusCombobox({
           className={` shadow-none inline-flex items-center rounded-lg p-2 border-none`}
 
           style={{
-            backgroundColor: findStatusColor(popoverValue) ?? '',
-            color: darkenColor(
+            backgroundColor: isDefaultState ? baseColors[popoverValue as keyof typeof baseColors].bg : findStatusColor(popoverValue) ?? '',
+            color: isDefaultState ? baseColors[popoverValue as keyof typeof baseColors].text : darkenColor(
               findStatusColor(popoverValue) ?? '#000000',
-              0.55,
+              0.60
             ),
           }}
         >

@@ -171,7 +171,7 @@ export default function BriefConnectionStep(
   const updateServiceMutation = useMutation({
     mutationFn: async () => {
       const values = form.getValues();
-      const res = await updateService(values, previousService.previousService.price_id);
+      const res = await updateService(values, previousService.price_id);
       await handleResponse(res, 'services', t);
     },
     onSuccess: async () => {
@@ -249,7 +249,7 @@ export default function BriefConnectionStep(
           {t('previous')}
         </Button>
 
-        {previousService?.previousService ? (
+        {previousService ? (
           <Button
             type="button"
             disabled={briefsQuery.isLoading}

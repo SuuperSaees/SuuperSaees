@@ -29,31 +29,31 @@ import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
 import {
   Content,
   ContentTypes,
-  FormField,
   Input,
   InputTypes,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
 import { useTranslation } from 'react-i18next';
+import { FormField } from '~/lib/form-field.types';
 
 interface BriefsContext {
   brief: Brief.Insert;
   inputs: Input[];
   content: Content[];
-  formFields: FormField[];
+  formFields: FormField.Type[];
   inputsMap: Map<InputTypes, Input>;
   contentMap: Map<ContentTypes, Content>;
   isEditing: boolean;
-  currentFormField: FormField | undefined;
+  currentFormField: FormField.Type | undefined;
   updateBrief: (updatedBrief: Brief.Insert) => void;
-  addFormField: (formFieldType: FormField['type']) => FormField;
+  addFormField: (formFieldType: FormField.Type['type']) => FormField.Type;
   removeFormField: (index: number) => void;
-  updateFormField: (index: number, updatedFormField: FormField) => void;
+  updateFormField: (index: number, updatedFormField: FormField.Type) => void;
   duplicateFormField: (id: number) => void;
   editFormField: (id: number) => void;
   stopEditing: () => void;
   startEditing: () => void;
-  setFormFields: Dispatch<SetStateAction<FormField[]>>;
+  setFormFields: Dispatch<SetStateAction<FormField.Type[]>>;
   setBrief: Dispatch<SetStateAction<Brief.Insert>>;
   form: UseFormReturn<BriefCreationForm>;
   onSubmit: (
@@ -101,6 +101,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
         description: '', // editable
         placeholder: t('creation.form.defaultField.placeholder'), // editable
         type: 'text-short', // not editable,
+        required: true,
         position: 0,
       },
     },

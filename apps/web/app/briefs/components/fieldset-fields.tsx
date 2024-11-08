@@ -75,7 +75,7 @@ export default function FieldsetFields({
             return (
               <Sortable key={'q' + index} id={question.id}>
                 <FormFieldComponent
-                  index={question.id}
+                  index={index}
                   question={question}
                   form={form}
                   handleQuestionChange={handleQuestionChange}
