@@ -50,7 +50,7 @@ export default function StatusComboboxItem({
       }}
     >
       <p
-        className="m-2 cursor-pointer rounded-lg p-1 font-medium"
+        className="m-2 cursor-pointer rounded-lg p-1 px-3 font-medium"
         style={{
           color: preventEditName ? baseColors[status.status_name as keyof typeof baseColors].text : status.status_color ? darkenColor(status.status_color, 0.55) : undefined,
           backgroundColor: preventEditName ? baseColors[status.status_name as keyof typeof baseColors].bg : status.status_color,
