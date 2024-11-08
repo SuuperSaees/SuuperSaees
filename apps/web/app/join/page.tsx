@@ -53,7 +53,6 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     if (!verifyAccountData) {
       await client.auth.signOut();
       // Clear all cookies manually if necessary
-      window.location.reload();
     }
     // const verifyAccountData = currentSession.data.session.user.email !== searchParams.email;
     // if (verifyAccountData) {
