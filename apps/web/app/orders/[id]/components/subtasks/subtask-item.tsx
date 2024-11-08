@@ -20,9 +20,10 @@ import { Subtask } from '~/lib/tasks.types';
 
 import { DatePickerWithRange } from '../range-date-picker';
 import StatusCombobox from '../status-combobox';
-import SelectAction from '../ui/select-action';
 import SubtaskAssignations from './subtask-assignations';
 import SubtaskFollowers from './subtask-followers';
+import { PriorityCombobox } from '../priority-combobox';
+import { useTranslation } from 'react-i18next';
 
 const SubtaskItem = ({
   t,
@@ -218,22 +219,11 @@ const SubtaskItem = ({
                 />
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="flex text-sm font-semibold">
+                <span className="flex gap-[0.20rem] text-sm font-semibold">
                   <FlagIcon className="mr-2 h-4 w-4" />
+                  <p>{t('details.priority')}</p>
                 </span>
-                <SelectAction
-                  options={priorityOptions}
-                  groupName={t('details.priority')}
-                  defaultValue={subtask.priority}
-                  getitemClassName={getPriorityClassName}
-                  className={
-                    priorityColors[
-                      subtask.priority as 'low' | 'medium' | 'high'
-                    ]
-                  }
-                  onSelectHandler={(value) => handlePriorityChange(value)}
-                  showLabel={true}
-                />
+                <PriorityCombobox mode={'subtask'} subtask={subtask} />
               </div>
               <SubtaskAssignations
                 onUserSelectionChange={(selectedUsers) =>
@@ -272,17 +262,7 @@ const SubtaskItem = ({
           mode="subtask"
         />
 
-        <SelectAction
-          options={priorityOptions}
-          groupName={t('details.priority')}
-          defaultValue={subtask.priority}
-          getitemClassName={getPriorityClassName}
-          className={
-            priorityColors[subtask.priority as 'low' | 'medium' | 'high']
-          }
-          onSelectHandler={(value) => handlePriorityChange(value)}
-          showLabel={false}
-        />
+        <PriorityCombobox mode={'subtask'} subtask={subtask} />
 
         <DatePickerWithRange
           shortFormat={true}

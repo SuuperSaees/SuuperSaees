@@ -10,6 +10,7 @@ import { AgencyStatus } from '~/lib/agency-statuses.types'
 import { Order } from '~/lib/order.types'
 import { Subtask } from '~/lib/tasks.types'
 import { useTranslation } from 'react-i18next'
+import { baseColors } from './status-combobox'
 
 interface StatusComboboxItemProps {
   status: AgencyStatus.Type
@@ -51,8 +52,8 @@ export default function StatusComboboxItem({
       <p
         className="m-2 cursor-pointer rounded-lg p-1 font-medium"
         style={{
-          color: status.status_color ? darkenColor(status.status_color, 0.55) : undefined,
-          backgroundColor: status.status_color,
+          color: preventEditName ? baseColors[status.status_name as keyof typeof baseColors].text : status.status_color ? darkenColor(status.status_color, 0.55) : undefined,
+          backgroundColor: preventEditName ? baseColors[status.status_name as keyof typeof baseColors].bg : status.status_color,
         }}
       >
         {preventEditName ? t(`details.statuses.${convertToCamelCase(status?.status_name ?? '')}`) : convertToTitleCase(status?.status_name ?? '')}
