@@ -119,7 +119,6 @@ export function PriorityCombobox({
       </PopoverTrigger>
       <PopoverContent className="w-[130px] p-0">
         <Command>
-          <CommandInput placeholder="" />
           <CommandList>
             <CommandGroup>
               {priorityOptions.map((priority) => (
@@ -143,11 +142,14 @@ export function PriorityCombobox({
                     setOpen(false);
                   }}
                 >
-                  <p
-                    className={`cursor-pointer rounded-lg p-1 font-medium ${getPriorityClassName(priority.value)}`}
-                  >
-                    {t(`details.priorities.${priority.value}`)}
-                  </p>
+                  <div className={`flex gap-[0.05rem] items-center cursor-pointer rounded-lg p-1 font-medium px-3 ${getPriorityClassName(priority.value)}`}>
+                    <div className="mr-2 h-2 w-2 rounded-full bg-current"></div>
+                    <p
+                      className={``}
+                    >
+                      {t(`details.priorities.${priority.value}`)}
+                    </p>
+                  </div>
                 </CommandItem>
               ))}
             </CommandGroup>
