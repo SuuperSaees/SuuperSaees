@@ -9,15 +9,15 @@ import {
   Upload,
 } from 'lucide-react';
 
-import FormFieldDatePicker from '../components/date-picker';
-import FormFieldDropdown from '../components/dropdown';
-import { FormFieldShortText } from '../components/form-field-short-text';
-import FormFieldMultipleChoice from '../components/multiple-choice';
-import FormFieldSingleChoice from '../components/single-choice';
+import FormFieldDatePicker from '../components/input-fields/date-picker';
+import FormFieldDropdown from '../components/input-fields/dropdown';
+import { FormFieldShortText } from '../components/input-fields/short-text';
+import FormFieldMultipleChoice from '../components/input-fields/multiple-choice';
 import { ComponentProps, Input, InputTypes } from '../types/brief.types';
-import TextLarge from '../components/text-large';
-import UploadFiles from '../components/upload-files';
+import TextLarge from '../components/input-fields/text-large';
+import UploadFiles from '../components/input-fields/upload-files';
 import { useTranslation } from 'react-i18next';
+import FormFieldSingleChoice from '../components/input-fields/single-choice';
 
 // Import your custom components
 type InputKey = InputTypes;

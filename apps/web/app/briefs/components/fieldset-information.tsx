@@ -41,14 +41,14 @@ export default function FieldsetInformation({
         name="name"
         render={({ field, fieldState }) => (
           <FormItem>
-            <FormLabel className="font-semibold text-gray-700">
+            <FormLabel className="font-semibold text-gray-600">
               {t('creation.form.titleLabel')}
             </FormLabel>
             <FormControl>
               <ThemedInput
                 {...field}
                 placeholder={t('creation.form.titlePlaceholder')}
-                className="focus-visible:ring-none"
+                className="focus-visible:ring-none text-gray-500"
                 onChange={handleBriefChange}
                 value={brief.name}
               />
@@ -63,7 +63,7 @@ export default function FieldsetInformation({
         name="description"
         render={({ field, fieldState }) => (
           <FormItem>
-            <FormLabel className="font-semibold text-gray-700">
+            <FormLabel className="font-semibold text-gray-600">
               {t('creation.form.descriptionLabel')}
             </FormLabel>
             <FormControl>
@@ -81,7 +81,7 @@ export default function FieldsetInformation({
               <ThemedTextarea
                 {...field}
                 placeholder={t('creation.form.titlePlaceholder')}
-                className="focus-visible:ring-none"
+                className="focus-visible:ring-none text-gray-500"
                 onChange={handleBriefChange}
                 value={brief.description}
               />

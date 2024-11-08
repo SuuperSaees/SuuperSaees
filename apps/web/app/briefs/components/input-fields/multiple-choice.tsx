@@ -2,17 +2,17 @@
 
 import React from 'react';
 
-import { ChevronDown, X } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
-import { BriefsProvider } from '../contexts/briefs-context';
-import { FormField as FormFieldType, Option } from '../types/brief.types';
-import { BriefCreationForm } from './brief-creation-form';
+import { ThemedCheckbox } from '../../../../../../packages/features/accounts/src/components/ui/checkbox-themed-with-settings';
+import { BriefsProvider } from '../../contexts/briefs-context';
+import { FormField as FormFieldType, Option } from '../../types/brief.types';
+import { BriefCreationForm } from '../brief-creation-form';
 
-export interface FormFieldDropdownProps {
+export interface FormFieldMultipleChoiceProps {
   index: number;
   question: FormFieldType;
   form: UseFormReturn<BriefCreationForm>;
@@ -28,30 +28,20 @@ export interface FormFieldDropdownProps {
   handleRemoveQuestion: (index: number) => void;
 }
 
-const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
+const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
   index,
   question,
   form,
   handleQuestionChange,
 }) => {
   const { t } = useTranslation('briefs');
-  const [isDropdownOpen, setDropdownOpen] = React.useState(false);
-
-  const handleOptionSelect = (optIndex: number) => {
-    const newOptions = question.options?.map((option, i) => ({
-      ...option,
-      selected: i === optIndex,
-    }));
-    handleQuestionChange(index, `options.${optIndex}.selected`, true);
-    setDropdownOpen(false);
-  };
 
   return (
     <FormField
       control={form.control}
       name={`questions.${index}`}
       render={() => (
-        <FormItem className="flex w-full flex-col gap-2 space-y-4">
+        <FormItem className="flex w-full flex-col gap-2 space-y-4 group relative">
           <div className="flex flex-col gap-2">
             <FormField
               control={form.control}
@@ -66,8 +56,8 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(index, 'label', e.target.value)
                       }
-                      placeholder={t('dropdown.title')}
-                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      placeholder={t('multipleChoice.title')}
+                      className="bg-transparent w-full border-none text-sm font-bold text-gray-600 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -78,6 +68,7 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
             <FormField
               control={form.control}
               name={`questions.${index}.description`}
+              
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
@@ -92,8 +83,8 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
                           e.target.value,
                         )
                       }
-                      placeholder={t('dropdown.description')}
-                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      placeholder={t('multipleChoice.description')}
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-500 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -101,34 +92,32 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
               )}
             />
 
-            <div className="relative">
-              <button
-                type="button"
-                className="flex w-full items-center justify-between rounded-lg border border-gray-300 px-4 py-2 text-base text-sm font-medium leading-6 text-gray-500"
-                onClick={() => setDropdownOpen(!isDropdownOpen)}
+            {question.options?.map((option: Option, optIndex) => (
+              <div
+                key={option.value}
+                className="flex flex-row items-start space-x-3 space-y-0"
               >
-                {question.options?.[0]?.label === '' ? t('dropdown.selectAnOption') : question.options?.[0]?.label }
-                <ChevronDown className="h-4 w-4" />
-              </button>
-
-              {isDropdownOpen && (
-                <div className="z-10 mt-1 w-full rounded-lg border border-gray-300">
-                  {question.options?.map((option: Option, optIndex) => (
-                    <div
-                      key={option.value}
-                      className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-                      onClick={() => handleOptionSelect(optIndex)}
-                    >
-                      <span className='text-base text-sm font-medium leading-6 text-gray-500'>{option.label}</span>
-                    </div>
-                  ))}
+                <div>
+                  <ThemedCheckbox
+                    checked={option.selected}
+                    onCheckedChange={(checked) => {
+                      handleQuestionChange(
+                        index,
+                        `options.${optIndex}.selected`,
+                        checked,
+                      );
+                    }}
+                  />
                 </div>
-              )}
-            </div>
+                <label className="text-sm font-medium leading-6 text-gray-600">
+                  {option.label}
+                </label>
+              </div>
+            ))}
           </div>
           <BriefsProvider.Options
             formFieldId={question.id}
-            className="ml-auto"
+            className="ml-auto group-hover:flex hidden absolute right-0 top-0"
           />
         </FormItem>
       )}
@@ -136,4 +125,4 @@ const FormFieldDropdown: React.FC<FormFieldDropdownProps> = ({
   );
 };
 
-export default FormFieldDropdown;
+export default FormFieldMultipleChoice;

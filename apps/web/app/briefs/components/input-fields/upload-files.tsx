@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
-import { BriefsProvider } from '../contexts/briefs-context';
-import { FormField as FormFieldType } from '../types/brief.types';
-import { BriefCreationForm } from './brief-creation-form';
+import { BriefsProvider } from '../../contexts/briefs-context';
+import { FormField as FormFieldType } from '../../types/brief.types';
+import { BriefCreationForm } from '../brief-creation-form';
 
 export interface UploadFilesProps {
   index: number;
@@ -33,7 +33,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
       name={`questions.${index}`}
   
       render={() => (
-        <FormItem className="flex w-full flex-col gap-2 space-y-4">
+        <FormItem className="flex w-full flex-col gap-2 space-y-4 group relative">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between"></div>
 
@@ -55,7 +55,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                         width: `${Math.max(question.label.length, t('uploadFiles.title').length) + 1}ch`,
                       }}
                       placeholder={t('uploadFiles.title')}
-                      className="bg-transparent border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent border-none text-sm font-bold text-gray-700 font-bold focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -83,7 +83,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                       }
 
                       placeholder={t('uploadFiles.description')}
-                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-500 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -127,7 +127,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
           </div>
           <BriefsProvider.Options
             formFieldId={question.id}
-            className="ml-auto"
+            className="ml-auto group-hover:flex hidden absolute right-0 top-0"
           />
         </FormItem>
       )}
