@@ -8,7 +8,7 @@ export function getTextColorBasedOnBackground(backgroundColor: string) {
 }
 
 
-export function darkenColor(hex: string, amount: number = 0.1): string {
+export function darkenColor(hex: string, amount = 0.1): string {
   // Remove the # if present
   hex = hex.replace(/^#/, '');
 
@@ -23,7 +23,7 @@ export function darkenColor(hex: string, amount: number = 0.1): string {
   b /= 255;
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
+  let h=0, s:number, l:number = (max + min) / 2;
 
   if (max === min) {
     h = s = 0; // achromatic

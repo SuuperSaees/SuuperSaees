@@ -32,6 +32,7 @@ import StatusCombobox from './status-combobox';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
+import { PriorityCombobox } from './priority-combobox';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -263,28 +264,19 @@ const   AsideOrderInformation = ({
             />
           </div>
           <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-1 font-semibold">
+            <div className="flex items-center gap-[0.20rem] font-semibold">
               <Loader className="mr-2 h-4 w-4" />
               <p>{t('details.status')}</p>
             </div>
 
             <StatusCombobox order={order} agency_id={order.agency_id} mode='order' />
           </div>
-          <div className="flex items-center text-sm">
-            <FlagIcon className="mr-2 h-4 w-4" />
-            <SelectAction
-              options={priorityOptions}
-              groupName={t('details.priority')}
-              defaultValue={selectedPriority}
-              className={
-                selectedPriority ? priorityColors[selectedPriority] : undefined
-              }
-              onSelectHandler={(priority) => {
-                changePriority.mutate(priority as Order.Type['priority']);
-              }}
-              disabled={changePriority.isPending}
-              getitemClassName={getPriorityClassName}
-            />
+          <div className='flex justify-between'>
+            <div className='flex items-center text-sm'>
+              <FlagIcon className='mr-2 h-4 w-4' />
+              <span className='font-semibold'>{t('details.priority')}</span>
+            </div>
+            <PriorityCombobox order = {order} mode = {'order'}/>
           </div>
           <ActivityAssignations
             searchUserOptions={searchUserOptions}
