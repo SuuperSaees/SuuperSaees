@@ -211,6 +211,15 @@ function getPatterns() {
           return;
         }
 
+        // Check URL parameters
+      const searchParams = req.nextUrl.searchParams;
+      const hasInviteToken = searchParams.has('invite_token');
+      const hasEmail = searchParams.has('email');
+
+      if (hasInviteToken && hasEmail) {
+        return;
+      }
+
         // Check if this request is for the activation link (e.g., /auth/confirm)
         const isActivationLink =
           req.nextUrl.pathname.startsWith('/auth/confirm');

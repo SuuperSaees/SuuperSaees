@@ -1,23 +1,21 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 
-export default function POST(req: NextApiRequest, res: NextApiResponse) {
-  // Get all cookies from the request
-  const cookies = req.headers.cookie;
+import { getSupabaseRouteHandlerClient } from '@kit/supabase/route-handler-client';
 
-  if (cookies) {
-    // Split cookies into an array
-    const cookieArray = cookies.split(';');
+export async function POST() {
+  try {
+    // Usar el cliente de Supabase que maneja cookies
+    const supabase = getSupabaseRouteHandlerClient();
 
-    // Map each cookie to a Set-Cookie header with Max-Age=0 to delete it
-    const clearCookies = cookieArray.map((cookie) => {
-      const [name] = cookie.split('=');
-      return `${name?.trim()}=; Max-Age=0; Path=/; HttpOnly`;
-    });
+    // Cerrar sesión, esto limpiará automáticamente las cookies de autenticación
+    await supabase.auth.signOut();
 
-    // Set the headers to clear all cookies
-    res.setHeader('Set-Cookie', clearCookies);
+    return NextResponse.json({ message: 'Cookies cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing cookies:', error);
+    return NextResponse.json(
+      { error: 'Failed to clear cookies' },
+      { status: 500 },
+    );
   }
-
-  // Respond with a success message
-  res.status(200).json({ message: 'All cookies cleared' });
 }

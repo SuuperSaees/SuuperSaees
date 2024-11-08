@@ -1,3 +1,4 @@
+'use server'; 
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -11,7 +12,6 @@ import { AcceptInvitationContainer } from '@kit/team-accounts/components';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
 import { Trans } from '@kit/ui/trans';
-
 import { AppLogo } from '~/components/app-logo';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
@@ -23,6 +23,7 @@ interface Context {
     email?: string;
   };
 }
+
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -38,8 +39,6 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     admin: true,
   });
   const currentSession = await client.auth.getSession();
-  console.log('I AM HERE');
-  console.log('Token:', token);
   console.log('Current Session:', currentSession);
   const emailParam = searchParams.email ?? '';
 
@@ -52,23 +51,7 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
 
     if (!verifyAccountData) {
       await client.auth.signOut();
-      // Clear all cookies manually if necessary
-      const urlParams = new URLSearchParams({
-        invite_token: token ?? '',
-        email: searchParams.email ?? '',
-      });
-  
-      const signUpPath = `${pathsConfig.auth.signUp}?${urlParams.toString()}`;
-  
-      // redirect to the sign up page with the invite token
-      return redirect(signUpPath);
     }
-    // const verifyAccountData = currentSession.data.session.user.email !== searchParams.email;
-    // if (verifyAccountData) {
-    //   await client.auth.signOut();
-    // }
-
-
   // no token, redirect to 404
   if (!token) {
     notFound();
