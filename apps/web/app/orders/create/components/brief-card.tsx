@@ -5,11 +5,12 @@ import { Brief } from '~/lib/brief.types';
 import ServiceTags from './service-tags';
 
 type BriefCardProps = {
-  brief: Brief.Relationships.Services.Response;
+  brief: Brief.Relationships.Services.Response | null;
   className?: string;
 };
 
 export default function BriefCard({ brief, className }: BriefCardProps) {
+  if (!brief) return null;
   return (
     <div className={`relative flex h-fit max-h-96 w-full max-w-xs flex-col gap-2 ${className}`}>
       <div className="w-xs relative h-60 w-full overflow-hidden rounded-xl">

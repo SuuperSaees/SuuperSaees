@@ -84,6 +84,6 @@
   },
   "organizationName": "Organización",
   "selectOption": "Seleccionar una opción",
-  "success": "!Todo Listo!",
-  "error": "!Algo salió mal!"
+  "success": "¡Todo Listo!",
+  "error": "¡Algo salió mal!"
 }

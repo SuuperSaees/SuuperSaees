@@ -1,6 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -16,15 +18,15 @@ import {
 
 import EmptyState from '~/components/ui/empty-state';
 import { Brief } from '~/lib/brief.types';
+import { FormField } from '~/lib/form-field.types';
 import { Order } from '~/lib/order.types';
+import { handleResponse } from '~/lib/response/handle-response';
 import { createOrders } from '~/team-accounts/src/server/actions/orders/create/create-order';
 import { generateUUID } from '~/utils/generate-uuid';
 
 import { generateOrderCreationSchema } from '../schemas/order-creation-schema';
 import BriefCompletionForm from './brief-completion-form';
 import BriefSelectionForm from './brief-selection-form';
-import { handleResponse } from '~/lib/response/handle-response';
-import { useRouter } from 'next/navigation';
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -38,7 +40,7 @@ type OrderInsert = Omit<
 };
 
 interface OrderCreationFormProps {
-  briefs: Brief.Response[];
+  briefs: Brief.Relationships.Services.Response[];
   userRole: string;
 }
 
@@ -46,9 +48,10 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
   const uniqueId = generateUUID();
   const { t } = useTranslation(['orders', 'responses']);
   const router = useRouter();
-  const orderCreationFormSchema = generateOrderCreationSchema(
-    briefs.length > 0,
-    t,
+  console.log('briefs', briefs);
+  const [formFields, setFormFields] = useState<FormField.Type[]>([]);
+  const [orderCreationFormSchema, setOrderCreationFormSchema] = useState(
+    generateOrderCreationSchema(briefs.length > 0, t, formFields),
   );
 
   const formSchema = createStepSchema({
@@ -81,40 +84,75 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
       values,
       fileIds,
     }: {
-      values: z.infer<typeof orderCreationFormSchema>;
+      values: z.infer<typeof formSchema>;
       fileIds: string[];
     }) => {
-      const newOrder = {
-        ...values,
+      const {
+        brief_responses: _brief_responses,
+        order_followers,
+        ...newOrder
+      } = {
+        ...values.briefCompletion,
         fileIds,
       };
-      delete newOrder.brief_responses;
-      delete newOrder.order_followers;
+      // Transform the data into the shape required by the server
+      let briefResponses: Brief.Relationships.FormFieldResponses[] = [];
+      if (formFields.length > 0) {
+        briefResponses = formFields
+          .map((field) => {
+            if (!field?.id) return null;
+            return {
+              form_field_id: field.id,
+              brief_id: values.briefSelection.selectedBriefId,
+              order_id: uniqueId,
+              response: values.briefCompletion.brief_responses[field.id] ?? '',
+            };
+          })
+          .filter(
+            (response): response is Brief.Relationships.FormFieldResponses =>
+              response !== null,
+          );
+      }
+
       const res = await createOrders(
         [newOrder as OrderInsert],
-        values.brief_responses,
-        values.order_followers,
+        briefResponses,
+        order_followers,
       );
       await handleResponse(res, 'orders', t);
-      if(res.ok) router.push(`/orders/${res?.success?.data?.id}`);
-     
+      if (res.ok) router.push(`/orders/${res?.success?.data?.id}`);
     },
     onError: () => {
       console.error('Error creating the order');
     },
- 
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     orderMutation.mutate({
-      values: values.briefCompletion,
+      values: values,
       fileIds: values.briefCompletion.fileIds,
     });
   };
-  const selectedBriefs = briefs.filter(
-    (brief) => brief.id === form.getValues('briefSelection.selectedBriefId'),
-  );
 
+  const selectedBrief =
+    briefs.find(
+      (brief) => brief.id === form.getValues('briefSelection.selectedBriefId'),
+    ) ?? null;
+
+  // see errors in form
+  console.log('errors', form.formState.errors, 'values', form.getValues());
+  useEffect(() => {
+    if (selectedBrief) {
+      const fields = (selectedBrief.form_fields?.map((field) => field.field) ??
+        []) as FormField.Type[];
+      setFormFields(fields);
+      setOrderCreationFormSchema(
+        generateOrderCreationSchema(briefs.length > 0, t, fields),
+      );
+    }
+  }, [selectedBrief, t, briefs.length]);
+  console.log('formSchema', formSchema);
+  console.log('selectedBriefs', selectedBrief);
   return (
     <MultiStepForm
       schema={formSchema}
@@ -140,7 +178,7 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
 
       <MultiStepFormStep name="briefCompletion" className="h-full [&>*]:h-full">
         <BriefCompletionForm
-          briefs={selectedBriefs}
+          brief={selectedBrief}
           uniqueId={uniqueId}
           orderMutation={orderMutation}
           userRole={userRole}

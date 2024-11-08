@@ -74,7 +74,7 @@ export const useGenerateContent = (
         content: {
           label: 'Image',
           placeholder: '',
-          type:'image'
+          type:'image',
         },
         component: (props: ComponentProps) => (
           <UploadImagePreview
