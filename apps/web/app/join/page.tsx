@@ -53,6 +53,15 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     if (!verifyAccountData) {
       await client.auth.signOut();
       // Clear all cookies manually if necessary
+      const urlParams = new URLSearchParams({
+        invite_token: token ?? '',
+        email: searchParams.email ?? '',
+      });
+  
+      const signUpPath = `${pathsConfig.auth.signUp}?${urlParams.toString()}`;
+  
+      // redirect to the sign up page with the invite token
+      return redirect(signUpPath);
     }
     // const verifyAccountData = currentSession.data.session.user.email !== searchParams.email;
     // if (verifyAccountData) {
