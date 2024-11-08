@@ -64,7 +64,8 @@ export async function middleware(request: NextRequest) {
     'add-organization',
     'api',
     'home',
-    'services/checkout',
+    'checkout',
+    'buy-success',
     '/__nextjs_original-stack-frame',
   ]);
   const shouldIgnorePath = (pathname: string) =>

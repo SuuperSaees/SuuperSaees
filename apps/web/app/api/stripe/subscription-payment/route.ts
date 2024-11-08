@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request: NextRequest) {
@@ -8,6 +9,7 @@ export async function POST(request: NextRequest) {
       await request.json();
 
     let customer;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const existingCustomers = await stripe.customers.list(
       { email, limit: 1 },
       { stripeAccount: accountId },
@@ -16,17 +18,20 @@ export async function POST(request: NextRequest) {
     if (existingCustomers.data.length > 0) {
       customer = existingCustomers.data[0];
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       customer = await stripe.customers.create(
         { email },
         { stripeAccount: accountId },
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     await stripe.paymentMethods.attach(
       paymentMethodId,
       { customer: customer.id },
       { stripeAccount: accountId },
     );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     await stripe.customers.update(
       customer.id,
       {
@@ -39,10 +44,12 @@ export async function POST(request: NextRequest) {
 
     if (couponId) {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         const coupon = await stripe.coupons.retrieve(couponId, {
           stripeAccount: accountId,
         });
         if (coupon.valid) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
           subscription = await stripe.subscriptions.create(
             {
               customer: customer.id,
@@ -72,6 +79,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     subscription = await stripe.subscriptions.create(
       {
         customer: customer.id,
@@ -87,7 +95,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Internal Server Error: ', error);
     return NextResponse.json(
-      { error: { message: 'Internal Server Error' } },
+      { error: { message: `Error: ${error.message}` } },
       { status: 500 },
     );
   }

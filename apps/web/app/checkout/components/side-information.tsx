@@ -142,6 +142,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
       </div>
       {validSuccess ? (
         <Button
+          type="button"
           className="w-full bg-green-600 text-white transition duration-300 ease-in-out transform hover:scale-105"
         >
           <CheckCircle className="mr-2 h-4 w-4 text-white transition-opacity duration-300" />
@@ -149,6 +150,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
       ) : (
         <Button
           type="submit"
+          disabled={loading}
           className="w-full bg-brand text-white transition duration-300 ease-in-out transform hover:scale-105"
         >
           {t('checkout.subscribe')}

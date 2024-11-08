@@ -66,7 +66,16 @@
         "expirationDate": "Expiration date *",
         "securityCode": "CVC *",
         "securePayment": "Secure payment",
-        "discount": "Discount"
+        "discount": "Discount",
+        "successTitle": "Success payment",
+        "cancelTitle": "Cancel",
+        "success": {
+            "title": "Thank you!",
+            "description": "Your payment was successful",
+            "already_account": "The service was added to your account. You can now login to your account",
+            "not_account": "You will receive an email with the details of your account",
+            "sign_in": "Sign In"
+        }
     },
     "step_connect_briefs": "Connect Briefs",
     "single_sale": "One-time Sale",

@@ -66,7 +66,16 @@
         "expirationDate": "Fecha de expiración *",
         "securityCode": "CVC *",
         "securePayment": "Pago seguro",
-        "discount": "Descuento"
+        "discount": "Descuento",
+        "successTitle": "Pago exitoso",
+        "cancelTitle": "Cancelar",
+        "success": {
+            "title": "¡Gracias!",
+            "description": "Su pago fue exitoso",
+            "already_account": "El servicio se ha añadido a tu cuenta. Ahora puedes iniciar sesión en tu cuenta.",
+            "not_account": "Recibirás un correo electrónico con los detalles de tu cuenta.",
+            "sign_in": "Iniciar sesión"
+        }
     },
     "step_connect_briefs": "Conectar briefs",
     "single_sale": "Venta única",

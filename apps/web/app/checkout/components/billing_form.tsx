@@ -33,6 +33,7 @@ import { handleSubmitPayment } from '../utils/billing-handlers';
 import { ServiceTypeSection } from './service-type-section';
 import { SideInfo } from './side-information';
 import { UserInfo } from './user-info';
+import { toast } from 'sonner';
 
 const formSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -130,7 +131,7 @@ const BillingForm: React.FC<{
         throw new Error('Failed to create payment method');
       }
 
-      const { success, error } = await handleSubmitPayment({
+      const { success, error, accountAlreadyExists } = await handleSubmitPayment({
         service,
         values: values,
         stripeId,
@@ -141,12 +142,18 @@ const BillingForm: React.FC<{
       });
 
       if (!success) {
-        setErrorMessage(error ?? 'Payment processing failed');
+        if(error === 'User already registered'){
+          toast.error(`Payment processing failed: ${error} and is not a client account`);
+          setErrorMessage(error ?? 'Payment processing failed');
+        } else {
+          toast.error(`Payment processing failed: ${error ?? 'Unknown error'}`);
+          setErrorMessage(error ?? 'Payment processing failed');
+        }
         return;
       }
 
       setValidSuccess(true);
-      router.push('/auth/sign-in');
+      router.push('/success?accountAlreadyExists=' + accountAlreadyExists);
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : 'Payment processing failed',
@@ -157,103 +164,105 @@ const BillingForm: React.FC<{
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="flex gap-8">
-          <div className="w-auto">
-            <div className="font-inter mb-5 text-2xl font-semibold leading-[1.27] text-gray-900">
-              {t('checkout.billing_details')}
+    <div className='h-full'>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="flex gap-8">
+            <div className="w-auto">
+              <div className="font-inter mb-5 text-2xl font-semibold leading-[1.27] text-gray-900">
+                {t('checkout.billing_details')}
+              </div>
+              <Separator />
+              <UserInfo form={form} />
+              <ServiceTypeSection service={service} />
+              <>
+                <div className="flex w-full gap-4">
+                  <FormField
+                    name="card_name"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
+                          {t('checkout.cardName')}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="w-full flex-col gap-1.5">
+                    <Label className="mb-1.5 text-sm font-medium leading-[20px] text-gray-700">
+                      {t('checkout.expirationDate')}
+                    </Label>
+                    <CardExpiryElement
+                      id="card_expiry"
+                      className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 flex w-full gap-4">
+                  <div className="w-full flex-col gap-1.5">
+                    <Label className="text-sm font-medium leading-[20px] text-gray-700">
+                      {t('checkout.cardNumber')}
+                    </Label>
+                    <CardNumberElement
+                      id="card_number"
+                      className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                    />
+                  </div>
+                  <div className="w-full flex-col gap-1.5">
+                    <Label className="text-sm font-medium leading-[20px] text-gray-700">
+                      {t('checkout.securityCode')}
+                    </Label>
+                    <CardCvcElement
+                      id="card_cvc"
+                      className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                    />
+                  </div>
+                </div>
+              </>
             </div>
-            <Separator />
-            <UserInfo form={form} />
-            <ServiceTypeSection service={service} />
-            <>
-              <div className="flex w-full gap-4">
-                <FormField
-                  name="card_name"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-                        {t('checkout.cardName')}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="w-full flex-col gap-1.5">
-                  <Label className="mb-1.5 text-sm font-medium leading-[20px] text-gray-700">
-                    {t('checkout.expirationDate')}
-                  </Label>
-                  <CardExpiryElement
-                    id="card_expiry"
-                    className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+            <div className="flex flex-col justify-between">
+              <SideInfo
+                form={form}
+                service={service}
+                loading={loading}
+                errorMessage={errorMessage ?? ''}
+                accountId={stripeId}
+                validSuccess={validSuccess}
+              />
+              <div className="flex flex-col items-center justify-center">
+                <div className="mb-10">
+                  <span className="text-center text-sm font-medium leading-[1.42857] text-gray-700">
+                    {t('checkout.securePayment')}
+                  </span>
+                </div>
+                <Separator className="w-full" />
+                <div className="mt-10">
+                  <img
+                    src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/www.uk-cheapest.co%201.png?t=2024-11-06T14%3A53%3A58.386Z"
+                    alt="Visa"
+                    className="h-7 w-40"
                   />
                 </div>
-              </div>
-              <div className="mt-4 flex w-full gap-4">
-                <div className="w-full flex-col gap-1.5">
-                  <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                    {t('checkout.cardNumber')}
-                  </Label>
-                  <CardNumberElement
-                    id="card_number"
-                    className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                <div>
+                  <img
+                    src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/powered_by_stripe.png?t=2024-11-06T14%3A55%3A53.278Z"
+                    alt="Powered By Stripe"
+                    className="h-12 w-40"
                   />
                 </div>
-                <div className="w-full flex-col gap-1.5">
-                  <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                    {t('checkout.securityCode')}
-                  </Label>
-                  <CardCvcElement
-                    id="card_cvc"
-                    className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                  />
-                </div>
-              </div>
-            </>
-          </div>
-          <div className="flex flex-col justify-between">
-            <SideInfo
-              form={form}
-              service={service}
-              loading={loading}
-              errorMessage={errorMessage ?? ''}
-              accountId={stripeId}
-              validSuccess={validSuccess}
-            />
-            <div className="flex flex-col items-center justify-center">
-              <div className="mb-10">
-                <span className="text-center text-sm font-medium leading-[1.42857] text-gray-700">
-                  {t('checkout.securePayment')}
-                </span>
-              </div>
-              <Separator className="w-full" />
-              <div className="mt-10">
-                <img
-                  src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/www.uk-cheapest.co%201.png?t=2024-11-06T14%3A53%3A58.386Z"
-                  alt="Visa"
-                  className="h-7 w-40"
-                />
-              </div>
-              <div>
-                <img
-                  src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/powered_by_stripe.png?t=2024-11-06T14%3A55%3A53.278Z"
-                  alt="Powered By Stripe"
-                  className="h-12 w-40"
-                />
               </div>
             </div>
           </div>
-        </div>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </div>
   );
 };
 

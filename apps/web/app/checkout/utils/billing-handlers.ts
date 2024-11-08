@@ -4,7 +4,7 @@ import { createClient } from '~/team-accounts/src/server/actions/clients/create/
 import { getUserByEmail } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getOrganizationById } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { insertServiceToClientFromCheckout } from '~/team-accounts/src/server/actions/services/create/create-service';
-import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
+// import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
 
 type ValuesProps = {
   fullName: string;
@@ -58,6 +58,7 @@ export const handleRecurringPayment = async ({
   const data = await res.json();
 
   if (data.error) {
+    console.error(data.error.message);
     throw new Error(data.error.message);
   }
 
@@ -102,7 +103,7 @@ export const createClientAndAddService = async ({
   organizationId,
   tokenId,
 }: {
-  values: ValuesProps; // Replace with your form schema type
+  values: ValuesProps;
   service: Service.Type;
   organizationId: string;
   tokenId: string;
@@ -128,8 +129,14 @@ export const createClientAndAddService = async ({
       emailRevision.clientId.id ?? '',
       organizationId,
     );
-    await deleteToken(tokenId);
-    return client;
+    // await deleteToken(tokenId);
+    return {
+      client,
+      success: true,
+      error: null,
+      accountAlreadyExists: true,
+    };
+    // return client;
   }
 
   const client = await createClient({
@@ -152,9 +159,16 @@ export const createClientAndAddService = async ({
     organizationId,
   );
 
-  await deleteToken(tokenId);
+  // await deleteToken(tokenId);
 
-  return client;
+  // return client;
+  return {
+    client,
+    success: true,
+    error: null,
+    accountAlreadyExists: false,
+  };
+
 };
 
 export const handleSubmitPayment = async ({
@@ -188,12 +202,18 @@ export const handleSubmitPayment = async ({
         });
 
     if (clientSecret) {
-      await createClientAndAddService({
+      const clientResponse = await createClientAndAddService({
         values,
         service,
         organizationId,
         tokenId,
       });
+
+      return {
+        success: true,
+        error: null,
+        accountAlreadyExists: clientResponse.accountAlreadyExists,
+      };
     }
 
     return { success: true, error: null };
