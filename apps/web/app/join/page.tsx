@@ -38,8 +38,6 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const client = getSupabaseServerComponentClient({
     admin: true,
   });
-  const currentSession = await client.auth.getSession();
-  console.log('Current Session:', currentSession);
   const emailParam = searchParams.email ?? '';
 
   const emailSearch = decodeURIComponent(emailParam).replace(/ /g, '+');
@@ -62,9 +60,7 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
   // if the user is not logged in or there is an error
   // redirect to the sign up page with the invite token
   // so that they will get back to this page after signing up
-  console.log('Auth:', auth, verifyAccountData, emailSearch);
   if ((auth.error ?? !auth.data) && !verifyAccountData) {
-    console.log('Redirecting to sign up');
     const urlParams = new URLSearchParams({
       invite_token: token,
       email: searchParams.email ?? '',
@@ -84,11 +80,9 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
   // the user is logged in, we can now check if the token is valid
   const invitation = await api.getInvitation(adminClient, token);
 
-  console.log('Invitation:', invitation);
 
   // the invitation is not found or expired
   if (!invitation) {
-    console.log('Invitation not found or expired');
     return (
       <AuthLayoutShell Logo={AppLogo}>
         <InviteNotFoundOrExpired />
