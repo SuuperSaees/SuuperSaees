@@ -86,10 +86,10 @@ export const updateService = async (
 
     // Revalidate services page
     revalidatePath('/services');
-    return CustomResponse.success(null, 'serviceUpdated');
+    return CustomResponse.success(null, 'serviceUpdated').toJSON();
   } catch (error) {
     console.error('Error updating service:', error);
-    return CustomResponse.error(error);
+    return CustomResponse.error(error).toJSON();
   }
 };
 
