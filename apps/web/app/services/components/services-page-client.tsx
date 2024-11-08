@@ -19,11 +19,15 @@ import { useStripeActions } from '../hooks/use-stripe-actions';
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
   accountRole: string;
+  stripeId: string;
+  organizationId: string;
 }
 
 const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
   stripePromise,
   accountRole,
+  stripeId,
+  organizationId,
 }) => {
   const searchParams = useSearchParams();
   const briefsView = searchParams.get('briefs');
@@ -77,6 +81,8 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
                 }
                 handleCheckout={handleCheckout}
                 isLoading={servicesAreLoading}
+                stripeId={stripeId}
+                organizationId={organizationId}
               />
             </TabsContent>
             <TabsContent className="bg-transparent" value="briefs">
