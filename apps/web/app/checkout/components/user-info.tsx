@@ -16,7 +16,8 @@ export const UserInfo: React.FC<UserDataFieldsProps> = ({ form }) => {
     const { t } = useTranslation('services');
     return(
       <div>
-         <div className="mt-4 flex items-center gap-4">
+        <div className="text-gray-900 font-inter text-base font-semibold leading-[2.375]">{t('checkout.personalDetails')}</div>
+         <div className="mt-1 mb-10 flex items-center gap-4">
                 <FormField
                   name="fullName"
                   control={form.control}
@@ -48,7 +49,8 @@ export const UserInfo: React.FC<UserDataFieldsProps> = ({ form }) => {
                   )}
                 />
               </div>
-              <div className="mt-4 flex items-center gap-4">
+              <div className="text-gray-900 font-inter text-base font-semibold leading-[2.375]">{t('checkout.billingAddress')}</div>
+              <div className="mt-1 flex items-center gap-4">
                 <FormField
                   name="address"
                   control={form.control}

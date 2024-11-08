@@ -12,10 +12,10 @@ export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
   const { t } = useTranslation('services');
 
   return (
-    <div className="mb-4 mt-4 flex flex-col gap-y-1">
-      <span className="text-base font-semibold leading-6 text-gray-800">
+    <div className="mb-4 mt-7 flex flex-col gap-y-1">
+      <div className="text-gray-900 font-inter text-base font-semibold leading-[2.375]">
         {t('checkout.typeOfService')}
-      </span>
+      </div>
       <div className="flex w-full items-start gap-2 rounded-xl border-2 border-brand bg-white p-4 md:w-60">
         <div className="mt-1 flex h-4 w-4 items-center justify-center rounded-full border border-brand bg-brand">
           <div className="h-1.5 w-1.5 rounded-full bg-white"></div>

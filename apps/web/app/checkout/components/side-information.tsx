@@ -36,7 +36,6 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
     setIsApplyingDiscount(true);
 
     try {
-      // Replace this with your actual API call to validate the discount
       const response = await fetch('/api/stripe/discount', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -64,24 +63,19 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
       <div className="font-inter mb-4 text-2xl font-semibold leading-[1.27] text-gray-900">
         {t('checkout.resume')}
       </div>
-      <div className="mb-[18px] flex items-center">
-        {service.service_image ? (
-          <Image
-            alt="Service Image"
-            src={service.service_image}
-            width={50}
-            height={50}
-            className="object-cover"
-          />
+      {service.service_image ? (
+          <img src={service.service_image} alt="Service Image" className="object-cover w-full w-[390px] h-[190px] "/>
         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gray-200"></div>
+          <img src={'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/service_without_image.png?t=2024-11-08T21%3A54%3A38.871Z'} alt="Service Image" className="object-cover w-full w-[390px] h-[190px] "/>
+          
         )}
-        <div className="ml-4 flex flex-1 justify-between">
+      <div className="my-[18px] flex items-center">
+        <div className="flex flex-1 justify-between">
           <div className="text-sm font-medium leading-5 text-gray-700">
             {service.name}
           </div>
           <div className="text-sm font-medium leading-5 text-gray-700">
-            ${service.price}
+            ${service.price?.toFixed(2)}
           </div>
         </div>
       </div>
@@ -116,7 +110,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
           {t('checkout.subtotal')}
         </div>
         <div className="text-sm font-medium leading-5 text-gray-700">
-          ${service.price}
+          ${service.price?.toFixed(2)}
         </div>
       </div>
       {discountAmount !== null && (

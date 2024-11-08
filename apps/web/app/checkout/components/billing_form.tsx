@@ -54,8 +54,7 @@ const BillingForm: React.FC<{
   service: ServiceType;
   stripeId: string;
   organizationId: string;
-  tokenId: string;
-}> = ({ service, stripeId, organizationId, tokenId }) => {
+}> = ({ service, stripeId, organizationId }) => {
   const { t } = useTranslation('services');
   const router = useRouter();
 
@@ -138,7 +137,6 @@ const BillingForm: React.FC<{
         organizationId,
         paymentMethodId: paymentMethod.id,
         coupon: values.discount_coupon,
-        tokenId: tokenId,
       });
 
       if (!success) {
@@ -172,10 +170,12 @@ const BillingForm: React.FC<{
               <div className="font-inter mb-5 text-2xl font-semibold leading-[1.27] text-gray-900">
                 {t('checkout.billing_details')}
               </div>
-              <Separator />
               <UserInfo form={form} />
               <ServiceTypeSection service={service} />
               <>
+                <div className="text-gray-900 font-inter text-base font-semibold leading-[2.375]">
+                  {t('checkout.paymentMethod')}
+                </div>
                 <div className="flex w-full gap-4">
                   <FormField
                     name="card_name"

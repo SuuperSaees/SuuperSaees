@@ -26,15 +26,15 @@ async function ServiceCheckoutPage({
 
   return (
     <PageBody className="min-h-screen flex flex-col">
-      <div className="flex flex-col w-full items-center  flex-grow my-10">
-        <div className="mb-4 w-full px-32">
+      <img src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png"  className='w-36 h-8 mt-4 mb-2'/>
+      <div className="flex flex-col w-full items-center flex-grow mb-10">
+        <div className="mb-4 w-full">
           <Separator className="w-full" />
         </div>
         <DetailsSide
           service={tokendecoded.service}
           stripeId={tokendecoded.account_id}
           organizationId={tokendecoded.organization_id}
-          tokenId={tokenId}
         />
       </div>
     </PageBody>

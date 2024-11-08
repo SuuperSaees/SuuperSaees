@@ -1,10 +1,7 @@
 import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/select-plan/components/convertToSubcurrency';
-import { createClient } from '~/team-accounts/src/server/actions/clients/create/create-clients';
 import { getUserByEmail } from '~/team-accounts/src/server/actions/clients/get/get-clients';
-import { getOrganizationById } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
-import { insertServiceToClientFromCheckout } from '~/team-accounts/src/server/actions/services/create/create-service';
-// import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
+import { createSession } from '~/team-accounts/src/server/actions/sessions/create/create-sessions';
 
 type ValuesProps = {
   fullName: string;
@@ -28,7 +25,16 @@ type HandlePaymentProps = {
   organizationId: string;
   paymentMethodId: string;
   coupon: string;
-  tokenId: string;
+};
+
+type HandlePaymentStripeProps = {
+  service: Service.Type;
+  values: ValuesProps;
+  stripeId: string;
+  organizationId: string;
+  paymentMethodId: string;
+  coupon: string;
+  sessionId: string;
 };
 
 export const handleRecurringPayment = async ({
@@ -37,8 +43,8 @@ export const handleRecurringPayment = async ({
   stripeId,
   paymentMethodId,
   coupon,
-  tokenId,
-}: HandlePaymentProps) => {
+  sessionId,
+}: HandlePaymentStripeProps) => {
   const res = await fetch('/api/stripe/subscription-payment', {
     method: 'POST',
     headers: {
@@ -48,10 +54,12 @@ export const handleRecurringPayment = async ({
       amount: convertToSubcurrency(service.price ?? 0),
       recurrence: true,
       email: values.email,
+      serviceId: service.id,
       priceId: service.price_id,
       accountId: stripeId,
       paymentMethodId,
       couponId: coupon,
+      sessionId: sessionId,
     }),
   });
 
@@ -71,8 +79,8 @@ export const handleOneTimePayment = async ({
   stripeId,
   paymentMethodId,
   coupon,
-  tokenId,
-}: HandlePaymentProps) => {
+  sessionId,
+}: HandlePaymentStripeProps) => {
   const res = await fetch('/api/stripe/unique-payment', {
     method: 'POST',
     headers: {
@@ -85,6 +93,8 @@ export const handleOneTimePayment = async ({
       accountId: stripeId,
       paymentMethodId,
       couponId: coupon,
+      serviceId: service.id,
+      sessionId: sessionId,
     }),
   });
 
@@ -97,80 +107,6 @@ export const handleOneTimePayment = async ({
   return data.clientSecret;
 };
 
-export const createClientAndAddService = async ({
-  values,
-  service,
-  organizationId,
-  tokenId,
-}: {
-  values: ValuesProps;
-  service: Service.Type;
-  organizationId: string;
-  tokenId: string;
-}) => {
-  const newClient = {
-    name: values.fullName,
-    email: values.email,
-    slug: values.enterprise_name ?? `${values.fullName}'s organization`,
-  };
-
-  const emailRevision = await getUserByEmail(values.email, true);
-
-  if (emailRevision) {
-    const client = emailRevision;
-    const organizationData = await getOrganizationById(
-      emailRevision.userData.organization_id ?? '',
-      null,
-      true,
-    );
-    await insertServiceToClientFromCheckout(
-      organizationData.id,
-      service.id,
-      emailRevision.clientId.id ?? '',
-      organizationId,
-    );
-    // await deleteToken(tokenId);
-    return {
-      client,
-      success: true,
-      error: null,
-      accountAlreadyExists: true,
-    };
-    // return client;
-  }
-
-  const client = await createClient({
-    client: newClient,
-    role: 'client_owner',
-    agencyId: organizationId,
-    adminActivated: true,
-  });
-
-  const organizationData = await getOrganizationById(
-    client.organization_client_id,
-    null,
-    true,
-  );
-
-  await insertServiceToClientFromCheckout(
-    organizationData.id,
-    service.id,
-    client.id ?? '',
-    organizationId,
-  );
-
-  // await deleteToken(tokenId);
-
-  // return client;
-  return {
-    client,
-    success: true,
-    error: null,
-    accountAlreadyExists: false,
-  };
-
-};
-
 export const handleSubmitPayment = async ({
   service,
   values,
@@ -178,10 +114,29 @@ export const handleSubmitPayment = async ({
   organizationId,
   paymentMethodId,
   coupon,
-  tokenId,
 }: HandlePaymentProps) => {
   try {
-    const clientSecret = service.recurrence
+
+      const userAlreadyExists = await getUserByEmail(values.email, true); 
+
+      let accountAlreadyExists = false;
+      if (userAlreadyExists) {
+        accountAlreadyExists = true
+      }
+
+      const sessionCreated = await createSession({
+        client_address: values.address,
+        client_city: values.city,
+        client_country: values.country,
+        client_email: values.email,
+        client_name: values.fullName,
+        client_state: values.state_province_region,
+        client_postal_code: values.postal_code,
+        provider: 'suuper',
+        provider_id: null,
+      })
+
+     service.recurrence
       ? await handleRecurringPayment({
           service,
           values,
@@ -189,7 +144,7 @@ export const handleSubmitPayment = async ({
           organizationId,
           paymentMethodId,
           coupon,
-          tokenId,
+          sessionId: sessionCreated?.id ?? '',
         })
       : await handleOneTimePayment({
           service,
@@ -198,25 +153,10 @@ export const handleSubmitPayment = async ({
           organizationId,
           paymentMethodId,
           coupon,
-          tokenId,
+          sessionId: sessionCreated?.id ?? '',
         });
 
-    if (clientSecret) {
-      const clientResponse = await createClientAndAddService({
-        values,
-        service,
-        organizationId,
-        tokenId,
-      });
-
-      return {
-        success: true,
-        error: null,
-        accountAlreadyExists: clientResponse.accountAlreadyExists,
-      };
-    }
-
-    return { success: true, error: null };
+    return { success: true, error: null, accountAlreadyExists };
   } catch (error) {
     return {
       success: false,

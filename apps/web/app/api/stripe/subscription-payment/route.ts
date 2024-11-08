@@ -1,3 +1,4 @@
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { NextRequest, NextResponse } from 'next/server';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
@@ -5,8 +6,12 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, priceId, accountId, paymentMethodId, couponId } =
+    const { email, serviceId, priceId, accountId, paymentMethodId, couponId, sessionId } =
       await request.json();
+    
+    const supabase = getSupabaseServerComponentClient(
+      { admin: true },
+    );
 
     let customer;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -56,9 +61,40 @@ export async function POST(request: NextRequest) {
               items: [{ price: priceId }],
               discounts: couponId ? [{ coupon: couponId }] : undefined,
               expand: ['latest_invoice.payment_intent'],
+              metadata: { sessionId: sessionId },
             },
             { stripeAccount: accountId },
           );
+
+          (async () => {
+            const { data: checkoutSessionData, error: checkoutSessionError } =
+              await supabase
+                .from('checkouts')
+                .insert({
+                  provider: 'stripe',
+                  provider_id: subscription.id,
+                })
+                .select('id')
+                .single();
+      
+            if (checkoutSessionError) {
+              console.error('Error creating checkout session:', checkoutSessionError);
+            }
+      
+            const { error: checkoutServiceError } = await supabase
+              .from('checkout_services')
+              .insert({
+                checkout_id: checkoutSessionData?.id,
+                service_id: serviceId,
+              })
+              .single();
+      
+            if (checkoutServiceError) {
+              console.error('Error creating checkout service:', checkoutServiceError);
+            }
+          })().catch((error) => {
+            console.error('Error creating checkout session:', error);
+          });
 
           return NextResponse.json({
             clientSecret:
@@ -85,9 +121,40 @@ export async function POST(request: NextRequest) {
         customer: customer.id,
         items: [{ price: priceId }],
         expand: ['latest_invoice.payment_intent'],
+        metadata: { sessionId: sessionId },
       },
       { stripeAccount: accountId },
     );
+
+    (async () => {
+      const { data: checkoutSessionData, error: checkoutSessionError } =
+        await supabase
+          .from('checkouts')
+          .insert({
+            provider: 'stripe',
+            provider_id: subscription.id,
+          })
+          .select('id')
+          .single();
+
+      if (checkoutSessionError) {
+        console.error('Error creating checkout session:', checkoutSessionError);
+      }
+
+      const { error: checkoutServiceError } = await supabase
+        .from('checkout_services')
+        .insert({
+          checkout_id: checkoutSessionData?.id,
+          service_id: serviceId,
+        })
+        .single();
+
+      if (checkoutServiceError) {
+        console.error('Error creating checkout service:', checkoutServiceError);
+      }
+    })().catch((error) => {
+      console.error('Error creating checkout session:', error);
+    });
 
     return NextResponse.json({
       clientSecret: subscription.latest_invoice.payment_intent.client_secret,

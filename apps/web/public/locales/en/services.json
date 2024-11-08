@@ -34,8 +34,10 @@
         "tokenExpired": "Token expired or invalid",
         "title": "Acquire Service",
         "signIn": "Sign In",
-        "billing_details": "Billing Details",
-        "resume": "Project Summary",
+        "billing_details": "Checkout",
+        "personalDetails": "Personal details",
+        "billingAddress": "Billing address",
+        "resume": "Order Summary",
         "billing_data_label": "Billing Information",
         "full_name": "Full Name *",
         "email": "Email *",
@@ -72,8 +74,8 @@
         "success": {
             "title": "Thank you!",
             "description": "Your payment was successful",
-            "already_account": "The service was added to your account. You can now login to your account",
-            "not_account": "You will receive an email with the details of your account",
+            "already_account": "The service was added to your account. You can now login to your account.",
+            "not_account": "You will receive an email with the details of your account.",
             "sign_in": "Sign In"
         }
     },
