@@ -284,18 +284,18 @@ function getPatterns() {
         const {
           data: { user },
         } = await getUser(req, res);
-        if (req.nextUrl.pathname === '/add-organization') {
-          return;
-        }
         // the user is logged out, so we don't need to do anything
         if (!user ) {
           return;
         }
         const userId = user.id;
-
+        
         // Step 2: Get the organization id fetching the domain/subdomain data
         const { organizationId } = await getDomainByUserId(userId, true);
-
+        
+        if (req.nextUrl.pathname === '/add-organization' && !organizationId) {
+          return;
+        }
         // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
         const clientDeleted = await fetchDeletedClients(
           supabase,
