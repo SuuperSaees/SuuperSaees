@@ -50,7 +50,7 @@ export function RadioOption({
           <div className="h-[6px] w-[6px] rounded-full bg-gray-300"></div>
         )}
       </div>
-      <span className="text-base font-medium leading-6 text-gray-700">
+      <span className="text-sm font-medium leading-6 text-gray-600">
         {label}
       </span>
     </label>

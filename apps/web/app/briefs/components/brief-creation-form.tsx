@@ -127,14 +127,15 @@ const BriefCreationForm = ({
             name="default_question.description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-semibold text-gray-600">
+                <FormLabel className="font-bold text-gray-600">
                   {form.getValues().default_question.label}
                 </FormLabel>
                 <FormControl>
                   <ThemedInput
                     {...field}
                     placeholder={t('creation.form.defaultPlaceholder')}
-                    className="focus-visible:ring-none"
+                    className="focus-visible:ring-none border-transparent font-medium text-gray-500 shadow-none focus:border-input placeholder:text-gray-400 placeholder:font-normal
+                    focus:px-4 p-0 "
                   />
                 </FormControl>
                 <FormMessage />

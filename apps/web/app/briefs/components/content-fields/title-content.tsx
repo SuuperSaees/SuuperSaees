@@ -10,9 +10,9 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 
-import { BriefsProvider } from '../contexts/briefs-context';
-import { FormField as FormFieldType } from '../types/brief.types';
-import { BriefCreationForm } from './brief-creation-form';
+import { BriefsProvider } from '../../contexts/briefs-context';
+import { FormField as FormFieldType } from '../../types/brief.types';
+import { BriefCreationForm } from '../brief-creation-form';
 
 export interface FormTitleComponentProps {
   index: number;
@@ -34,7 +34,7 @@ const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
       control={form.control}
       name={`questions.${index}.label`}
       render={() => (
-        <FormItem className="flex w-full flex-col gap-2 space-y-4">
+        <FormItem className="flex w-full flex-col gap-2 space-y-4 group relative">
           <div className="flex flex-col gap-2">
             <FormField
               control={form.control}
@@ -42,7 +42,7 @@ const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
-                    <input
+                    <textarea
                       {...field}
                       readOnly
                       value={question.label}
@@ -50,7 +50,8 @@ const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
                         handleQuestionChange(index, 'label', e.target.value)
                       }
                       placeholder={t('title.placeholder')}
-                      className="bg-transparent w-full break-words text-2xl font-semibold leading-9 text-gray-500"
+                      className="bg-transparent w-full break-words text-2xl font-bold leading-9 text-gray-600"
+                      rows={3}
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -60,7 +61,7 @@ const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
           </div>
           <BriefsProvider.Options
             formFieldId={question.id}
-            className="ml-auto"
+            className="ml-auto group-hover:flex hidden absolute right-0 top-0"
           />
         </FormItem>
       )}

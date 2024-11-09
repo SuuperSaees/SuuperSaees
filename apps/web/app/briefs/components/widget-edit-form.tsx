@@ -25,8 +25,9 @@ import { useVideoHandler } from '../hooks/use-video-handler';
 import { widgetEditSchema } from '../schemas/widget-edit-schema';
 import { RenderVideoContent } from './render-video-content';
 import UploadImageDropzone from './upload-image-dropzone';
-import FormRichTextComponent from './rich-text-content';
+import FormRichTextComponent from './content-fields/rich-text-content';
 import { Switch } from '@kit/ui/switch';
+import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
 
 export type WidgetCreationForm = z.infer<typeof widgetEditSchema>;
 export function WidgetEditForm() {
@@ -198,7 +199,7 @@ export function WidgetEditForm() {
         control={form.control}
         render={({ field }) => (
           <FormItem className="space-y-0 flex items-center justify-between">
-            <p className='text-gray-700 font-semibold'>
+            <p className='text-gray-600 font-bold text-sm'>
               Required
             </p>
             <FormControl>
@@ -214,7 +215,7 @@ export function WidgetEditForm() {
         )}
         />
       )
-    } else {
+    } else if(fieldName === 'description') {
       return (
         <FormField
           key={fieldName}
@@ -223,14 +224,55 @@ export function WidgetEditForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel
-                className={isValueField ? 'hidden' : 'text-sm text-gray-700'}
+                className={isValueField ? 'hidden' : 'text-gray-600 font-bold text-sm'}
+              >
+                {label}
+              </FormLabel>
+              <FormControl>
+                <ThemedTextarea
+                  {...field}
+                  className={isValueField ? 'hidden' : 'text-gray-500'}
+                  placeholder={label}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    // For label, we update both the label and the value fields
+                    if (!isValueField && index !== undefined) {
+                      const sanitizedValue = e.target.value
+                        .toLowerCase()
+                        .replace(/\s+/g, '_') // Replace spaces with underscores
+                        .replace(/[^\w_]+/g, ''); // Remove special characters
+
+                      form.setValue(`options.${index}.value`, sanitizedValue);
+                    }
+
+                    field.onChange(e);
+                    handleChange(e);
+                  }}
+                  value={field.value}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      );
+    } 
+    else {
+      return (
+        <FormField
+          key={fieldName}
+          name={fieldName as keyof z.infer<typeof widgetEditSchema>}
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel
+                className={isValueField ? 'hidden' : 'text-gray-600 font-bold text-sm'}
               >
                 {label}
               </FormLabel>
               <FormControl>
                 <ThemedInput
                   {...field}
-                  className={isValueField ? 'hidden' : ''}
+                  className={isValueField ? 'hidden' : 'text-gray-500'}
                   placeholder={label}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     // For label, we update both the label and the value fields

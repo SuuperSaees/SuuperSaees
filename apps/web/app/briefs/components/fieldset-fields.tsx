@@ -1,3 +1,4 @@
+import { GripHorizontal } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 
 import { useBriefsContext } from '../contexts/briefs-context';
@@ -73,15 +74,21 @@ export default function FieldsetFields({
           // Check if FormFieldComponent is a function
           if (typeof FormFieldComponent === 'function') {
             return (
-              <Sortable key={'q' + index} id={question.id}>
-                <FormFieldComponent
-                  index={index}
-                  question={question}
-                  form={form}
-                  handleQuestionChange={handleQuestionChange}
-                  handleRemoveQuestion={handleRemoveQuestion}
-                  userRole={userRole}
-                />
+              <Sortable
+                key={'q' + index}
+                id={question.id}
+                className="group relative cursor-grab rounded-md hover:bg-[#f2f2f2] px-6 py-6"
+              >
+                  <GripHorizontal className="absolute right-1/2 top-2 hidden h-4 w-4 group-hover:block" />
+                  <FormFieldComponent
+                    index={index}
+                    question={question}
+                    form={form}
+                    handleQuestionChange={handleQuestionChange}
+                    handleRemoveQuestion={handleRemoveQuestion}
+                    userRole={userRole}
+                  />
+         
               </Sortable>
             );
           }

@@ -1,7 +1,7 @@
 import { ALargeSmall, Image } from 'lucide-react';
 
-import FormTitleComponent from '../components/title-content';
-import FormRichTextComponent from '../components/rich-text-content';
+import FormTitleComponent from '../components/content-fields/title-content';
+import FormRichTextComponent from '../components/content-fields/rich-text-content';
 import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
 // import FormVideoUpload from '../components/video-content';
 import UploadImagePreview from '../components/upload-image-preview';

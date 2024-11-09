@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
 
-import { CalendarIcon } from '@radix-ui/react-icons';
-import { format } from 'date-fns';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@kit/ui/button';
-import { Calendar } from '@kit/ui/calendar';
 import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
-import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 
-import { BriefsProvider } from '../contexts/briefs-context';
-import { FormField as FormFieldType } from '../types/brief.types';
-import { BriefCreationForm } from './brief-creation-form';
+import { BriefsProvider } from '../../contexts/briefs-context';
+import { FormField as FormFieldType } from '../../types/brief.types';
+import { BriefCreationForm } from '../brief-creation-form';
+import { RadioOption } from '../options';
 
-export interface FormFieldDatePickerProps {
+export interface FormFieldSingleChoiceProps {
   index: number;
   question: FormFieldType;
   form: UseFormReturn<BriefCreationForm>;
@@ -25,25 +21,25 @@ export interface FormFieldDatePickerProps {
       | 'description'
       | 'placeholder'
       | `options.${number}.selected`,
-    value: string | boolean | Date,
+    value: string | boolean,
   ) => void;
   handleRemoveQuestion: (index: number) => void;
 }
 
-const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
+const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
   index,
   question,
   form,
   handleQuestionChange,
 }) => {
   const { t } = useTranslation('briefs');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(
+    question.options?.[0]?.value ?? null,
+  );
 
-  const handleDateChange = (date: Date | undefined) => {
-    setSelectedDate(date ?? null);
-    if (date) {
-      handleQuestionChange(index, `options.0.selected`, date);
-    }
+  const handleOptionChange = (value: string, optIndex: number) => {
+    setSelectedOption(value);
+    handleQuestionChange(index, `options.${optIndex}.selected`, true);
   };
 
   return (
@@ -51,25 +47,24 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
       control={form.control}
       name={`questions.${index}`}
       render={() => (
-        <FormItem className="flex w-full flex-col gap-2 space-y-4">
-          <div className="flex flex-col gap-2">
-            <div className="flex">
+        <FormItem className="flex w-full flex-col gap-2 space-y-4 group relative">
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex w-full">
               <FormField
                 control={form.control}
                 name={`questions.${index}.label`}
+     
                 render={({ field, fieldState }) => (
                   <FormItem className='w-full'>
                     <FormControl>
                       <input
-                        readOnly
                         {...field}
                         value={question.label}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           handleQuestionChange(index, 'label', e.target.value)
                         }
-
-                        placeholder={t('datePicker.title')}
-                        className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none w-full"
+                        placeholder={t('singleChoice.title')}
+                        className="bg-transparent w-full border-none text-sm font-bold text-gray-600 focus:outline-none"
                       />
                     </FormControl>
                     <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -82,11 +77,11 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
               control={form.control}
               name={`questions.${index}.description`}
               render={({ field, fieldState }) => (
-                <FormItem>
+                <FormItem className='w-full'>
                   <FormControl>
                     <input
-                      readOnly
                       {...field}
+                      readOnly
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(
@@ -95,8 +90,8 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                           e.target.value,
                         )
                       }
-                      placeholder={t('datePicker.description')}
-                      className="bg-transparent w-full border-none text-sm font-medium text-gray-600 focus:outline-none"
+                      placeholder={t('singleChoice.description')}
+                      className="bg-transparent w-full border-none text-sm font-medium text-gray-500 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -104,35 +99,26 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
               )}
             />
 
-            <div className="w-full">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={`w-full justify-start text-left font-normal ${!selectedDate ? 'text-muted-foreground' : ''}`}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? (
-                      format(selectedDate, 'PPP')
-                    ) : (
-                      <span>{t('datePicker.selectTitle')}</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate ?? undefined}
-                    onSelect={handleDateChange}
-                    initialFocus
+            <div className="mt-4 flex flex-col gap-3 w-full">
+              {question.options?.map(
+                (
+                  option: { value: string; label: string },
+                  optIndex: number,
+                ) => (
+                  <RadioOption
+                    key={option.value}
+                    value={option.value}
+                    selectedOption={selectedOption}
+                    onChange={() => handleOptionChange(option.value, optIndex)}
+                    label={option.label}
                   />
-                </PopoverContent>
-              </Popover>
+                ),
+              )}
             </div>
           </div>
           <BriefsProvider.Options
             formFieldId={question.id}
-            className="ml-auto"
+            className="ml-auto group-hover:flex hidden absolute right-0 top-0"
           />
         </FormItem>
       )}
@@ -140,4 +126,4 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
   );
 };
 
-export default FormFieldDatePicker;
+export default FormFieldSingleChoice;
