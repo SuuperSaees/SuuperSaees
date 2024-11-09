@@ -77,6 +77,22 @@
             "already_account": "El servicio se ha añadido a tu cuenta. Ahora puedes iniciar sesión en tu cuenta.",
             "not_account": "Recibirás un correo electrónico con los detalles de tu cuenta.",
             "sign_in": "Iniciar sesión"
+        },
+        "error": {
+            "userAlreadyRegistered": "Error en el procesamiento del pago: {{error}} y no es una cuenta de cliente",
+            "paymentFailedWithError": "Error en el procesamiento del pago: {{error}}",
+            "paymentFailed": "Error en el procesamiento del pago",
+            "cardNumberElement": "No se encontraron los elementos del número de tarjeta"
+        },
+        "validation": {
+            "fullNameRequired": "Se requiere el nombre completo",
+            "invalidEmail": "Dirección de correo electrónico no válida",
+            "addressRequired": "Se requiere la dirección",
+            "cityRequired": "Se requiere la ciudad",
+            "countryRequired": "Se requiere el país",
+            "stateProvinceRegionRequired": "Se requiere el estado/provincia/región",
+            "postalCodeRequired": "Se requiere el código postal",
+            "cardNameRequired": "Se requiere el nombre de la tarjeta"
         }
     },
     "step_connect_briefs": "Conectar briefs",

@@ -123,7 +123,7 @@ class WebhookRouterService {
 
             const clientOrganizationId = clientData
               ? clientData.organization_id
-              : client?.organization_client_id;
+              : client?.success?.data?.organization_client_id;
             let clientId;
             if (clientData) {
               const { data: clientDataWithChecker, error: clientError } =
@@ -136,9 +136,9 @@ class WebhookRouterService {
               if (clientError) {
                 console.error('Error fetching client:', clientError);
               }
-              clientId = clientDataWithChecker?.id ?? client?.id;
+              clientId = clientDataWithChecker?.id ?? client?.success?.data?.id;
             } else {
-              clientId = client?.id;
+              clientId = client?.success?.data?.id;
             }
             await insertServiceToClient(
               this.adminClient,
@@ -155,8 +155,6 @@ class WebhookRouterService {
                 deleted_on: new Date().toISOString(),
               })
               .eq('id', checkoutServiceData?.id);
-
-            console.log('Subscription created');
           } else {
             // TODO: Implement logic to handle checkout session completed
             console.log('Account ID not found in the event');
@@ -183,6 +181,7 @@ class WebhookRouterService {
         return Promise.resolve();
       },
       onPaymentIntentSucceeded: async (data) => {
+        console.log('Payment subscription or unique payment succeeded:', data);
         try {
           if (stripeAccountId) {
             // Search organization by accountId
@@ -229,7 +228,6 @@ class WebhookRouterService {
             }
             let client;
             if (!clientData) {
-              console.log('Creating client:', newClient);
               client = await createClient({
                 client: newClient,
                 role: this.ClientRoleStripeInvitation,
@@ -237,6 +235,7 @@ class WebhookRouterService {
                 adminActivated: true,
               });
             }
+
 
             // After assign a service to the client, we need to create the subscription
             // Search in the database, by checkout session id
@@ -258,7 +257,7 @@ class WebhookRouterService {
 
             const clientOrganizationId = clientData
               ? clientData.organization_id
-              : client?.organization_client_id;
+              : client?.success?.data?.organization_client_id;
             let clientId;
             if (clientData) {
               const { data: clientDataWithChecker, error: clientError } =
@@ -271,9 +270,9 @@ class WebhookRouterService {
               if (clientError) {
                 console.error('Error fetching client:', clientError);
               }
-              clientId = clientDataWithChecker?.id ?? client?.id;
+              clientId = clientDataWithChecker?.id ?? client?.success?.data?.id;
             } else {
-              clientId = client?.id;
+              clientId = client?.success?.data?.id;
             }
             await insertServiceToClient(
               this.adminClient,

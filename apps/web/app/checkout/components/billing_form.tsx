@@ -35,26 +35,15 @@ import { SideInfo } from './side-information';
 import { UserInfo } from './user-info';
 import { toast } from 'sonner';
 
-const formSchema = z.object({
-  fullName: z.string().min(1, 'Full name is required'),
-  email: z.string().email('Invalid email address'),
-  address: z.string().min(1, 'Address is required'),
-  city: z.string().min(1, 'City is required'),
-  country: z.string().min(1, 'Country is required'),
-  state_province_region: z.string().min(1, 'State/Province/Region is required'),
-  postal_code: z.string().min(1, 'Postal code is required'),
-  buying_for_organization: z.boolean().default(false),
-  enterprise_name: z.string(),
-  tax_code: z.string(),
-  discount_coupon: z.string(),
-  card_name: z.string().min(1, 'Card name is required'),
-});
+
 
 const BillingForm: React.FC<{
   service: ServiceType;
   stripeId: string;
   organizationId: string;
 }> = ({ service, stripeId, organizationId }) => {
+  const paymentMethodsImage = process.env.NEXT_PUBLIC_PAYMENT_METHODS_IMAGE;
+  const poweredByStripeImage = process.env.NEXT_PUBLIC_POWERED_BY_STRIPE_IMAGE; 
   const { t } = useTranslation('services');
   const router = useRouter();
 
@@ -64,6 +53,21 @@ const BillingForm: React.FC<{
   const [errorMessage, setErrorMessage] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [validSuccess, setValidSuccess] = useState(false);
+
+  const formSchema = z.object({
+    fullName: z.string().min(1, t('checkout.validation.fullNameRequired')),
+    email: z.string().email(t('checkout.validation.invalidEmail')),
+    address: z.string().min(1, t('checkout.validation.addressRequired')),
+    city: z.string().min(1, t('checkout.validation.cityRequired')),
+    country: z.string().min(1, t('checkout.validation.countryRequired')),
+    state_province_region: z.string().min(1, t('checkout.validation.stateProvinceRegionRequired')),
+    postal_code: z.string().min(1, t('checkout.validation.postalCodeRequired')),
+    buying_for_organization: z.boolean().default(false),
+    enterprise_name: z.string(),
+    tax_code: z.string(),
+    discount_coupon: z.string(),
+    card_name: z.string().min(1, t('checkout.validation.cardNameRequired')),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,7 +94,7 @@ const BillingForm: React.FC<{
 
     const cardNumberElement = elements.getElement(CardNumberElement);
     if (!cardNumberElement) {
-      setErrorMessage('Card number element not found');
+      setErrorMessage(t('checkout.error.cardNumberElement'));
       return;
     }
 
@@ -127,7 +131,7 @@ const BillingForm: React.FC<{
       const paymentMethod = await handleCreateCard();
 
       if (!paymentMethod?.id) {
-        throw new Error('Failed to create payment method');
+        throw new Error(t('checkout.error.paymentFailed'));
       }
 
       const { success, error, accountAlreadyExists } = await handleSubmitPayment({
@@ -141,11 +145,15 @@ const BillingForm: React.FC<{
 
       if (!success) {
         if(error === 'User already registered'){
-          toast.error(`Payment processing failed: ${error} and is not a client account`);
+          toast.error(
+            t('checkout.error.userAlreadyRegistered', {error})
+          );
           setErrorMessage(error ?? 'Payment processing failed');
         } else {
-          toast.error(`Payment processing failed: ${error ?? 'Unknown error'}`);
-          setErrorMessage(error ?? 'Payment processing failed');
+          toast.error(
+            t('checkout.error.paymentFailed', {error})
+          );
+          setErrorMessage(error ?? t('checkout.error.paymentFailed'));
         }
         return;
       }
@@ -154,7 +162,7 @@ const BillingForm: React.FC<{
       router.push('/success?accountAlreadyExists=' + accountAlreadyExists);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : 'Payment processing failed',
+        error instanceof Error ? error.message : t('checkout.error.paymentFailed'),
       );
     } finally {
       setLoading(false);
@@ -245,14 +253,14 @@ const BillingForm: React.FC<{
                 <Separator className="w-full" />
                 <div className="mt-10">
                   <img
-                    src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/www.uk-cheapest.co%201.png?t=2024-11-06T14%3A53%3A58.386Z"
+                    src={paymentMethodsImage}
                     alt="Visa"
                     className="h-7 w-40"
                   />
                 </div>
                 <div>
                   <img
-                    src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/powered_by_stripe.png?t=2024-11-06T14%3A55%3A53.278Z"
+                    src={poweredByStripeImage}
                     alt="Powered By Stripe"
                     className="h-12 w-40"
                   />

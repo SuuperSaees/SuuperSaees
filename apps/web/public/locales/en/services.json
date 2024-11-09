@@ -77,6 +77,22 @@
             "already_account": "The service was added to your account. You can now login to your account.",
             "not_account": "You will receive an email with the details of your account.",
             "sign_in": "Sign In"
+        },
+        "error": {
+            "userAlreadyRegistered": "Payment processing failed: {{error}} and is not a client account",
+            "paymentFailedWithError": "Payment processing failed: {{error}}",
+            "paymentFailed": "Payment processing failed",
+            "cardNumberElement": "Card number elements not found"
+        },
+        "validation": {
+            "fullNameRequired": "Full name is required",
+            "invalidEmail": "Invalid email address",
+            "addressRequired": "Address is required",
+            "cityRequired": "City is required",
+            "countryRequired": "Country is required",
+            "stateProvinceRegionRequired": "State/Province/Region is required",
+            "postalCodeRequired": "Postal code is required",
+            "cardNameRequired": "Card name is required"
         }
     },
     "step_connect_briefs": "Connect Briefs",

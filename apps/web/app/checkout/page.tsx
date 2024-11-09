@@ -11,7 +11,7 @@ import DetailsSide from './components/details';
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   return {
-    title: i18n.t('services:details.title'),
+    title: i18n.t('services:serviceCheckout'),
   };
 };
 
@@ -20,13 +20,14 @@ async function ServiceCheckoutPage({
 }: {
   searchParams: { tokenId: string };
 }) {
+  const suuperLogo = process.env.NEXT_PUBLIC_SUUPER_LOGO_IMAGE;
   const token = await getTokenData(tokenId);
 
   const tokendecoded = decodeToken(token?.access_token ?? '');
 
   return (
     <PageBody className="min-h-screen flex flex-col">
-      <img src="https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/suuper-logo.png"  className='w-36 h-8 mt-4 mb-2'/>
+      <img src={suuperLogo}  className='w-36 h-8 mt-4 mb-2'/>
       <div className="flex flex-col w-full items-center flex-grow mb-10">
         <div className="mb-4 w-full">
           <Separator className="w-full" />

@@ -278,6 +278,7 @@ export async function insertServiceToClient(
   userId: Account.Type['id'],
   agencyId: string,
 ) {
+
   try {
     const { data: serviceAddedData, error: serviceAddedError } = await client
       .from('client_services')
@@ -305,36 +306,3 @@ export async function insertServiceToClient(
   }
 }
 
-export async function insertServiceToClientFromCheckout(
-  clientOrganizationId: string,
-  serviceId: Service.Type['id'],
-  clientId: Client.Type['id'],
-  agencyId: string,
-) {
-  try {
-    const client = getSupabaseServerComponentClient({
-      admin: true,
-    });
-    const { data: serviceAddedData, error: serviceAddedError } = await client
-      .from('client_services')
-      .insert({
-        client_organization_id: clientOrganizationId,
-        service_id: serviceId,
-        client_id: clientId,
-        created_by: agencyId,
-        agency_id: agencyId,
-      })
-      .select();
-
-    if (serviceAddedError) {
-      throw new Error(
-        `Error while trying to add service to client, ${serviceAddedError.message}`,
-      );
-    }
-
-    return serviceAddedData;
-  } catch (error) {
-    console.error('Error while adding service to client', error);
-    throw error;
-  }
-}

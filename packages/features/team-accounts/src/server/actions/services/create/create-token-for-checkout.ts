@@ -1,9 +1,8 @@
 'use server';
 
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
+import { getDomainByOrganizationId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { createToken } from '../../../../../../../tokens/src/create-token';
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'localhost:3000';
 
 export const createUrlForCheckout = async ({
   stripeId,
@@ -24,7 +23,9 @@ export const createUrlForCheckout = async ({
     organization_id: organizationId,
   });
 
-  const url = `${baseUrl}checkout?tokenId=${token.tokenId}`;
+  const baseUrl = await getDomainByOrganizationId(organizationId);
+
+  const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
 
   return url;
 };

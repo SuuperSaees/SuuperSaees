@@ -11,7 +11,6 @@ import {
 import { Input } from '@kit/ui/input';
 
 import { FormData, ServiceType } from '../types/billing-form-types';
-import Image from 'next/image';
 import { Button } from '@kit/ui/button';
 import { Spinner } from '@kit/ui/spinner';
 import { useState } from 'react';
@@ -27,6 +26,7 @@ interface SideDataFieldsProps {
 }
 
 export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading, errorMessage, accountId, validSuccess }) => {
+  const defaultServiceImage = process.env.NEXT_PUBLIC_SERVICE_DEFAULT_IMAGE;
   const { t } = useTranslation('services');
   const [discountAmount, setDiscountAmount] = useState<number | null>(null);
   const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
@@ -57,16 +57,16 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
     }
   };
 
-  const discountedTotal = discountAmount ? service.price - discountAmount : service.price;
+  const discountedTotal = discountAmount ? (service.price ?? 0) - discountAmount : service.price;
   return (
     <div>
       <div className="font-inter mb-4 text-2xl font-semibold leading-[1.27] text-gray-900">
         {t('checkout.resume')}
       </div>
       {service.service_image ? (
-          <img src={service.service_image} alt="Service Image" className="object-cover w-full w-[390px] h-[190px] "/>
+          <img src={service.service_image} alt="Service Image" className="object-cover w-full w-[390px] h-[190px] rounded-lg"/>
         ) : (
-          <img src={'https://ygxrahspvgyntzimoelc.supabase.co/storage/v1/object/public/account_image/service_without_image.png?t=2024-11-08T21%3A54%3A38.871Z'} alt="Service Image" className="object-cover w-full w-[390px] h-[190px] "/>
+          <img src={defaultServiceImage} alt="Service Image" className="object-cover w-full w-[390px] h-[190px] rounded-lg"/>
           
         )}
       <div className="my-[18px] flex items-center">
@@ -128,7 +128,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
           {t('checkout.total')}
         </div>
         <div className="text-sm font-medium leading-5 text-gray-700">
-          ${discountedTotal.toFixed(2)}
+          ${discountedTotal?.toFixed(2)}
         </div>
       </div>
       <div className="mb-[18px] text-sm font-medium leading-5 text-gray-700">
