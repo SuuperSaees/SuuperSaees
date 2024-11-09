@@ -23,7 +23,7 @@ export const createUrlForCheckout = async ({
     organization_id: organizationId,
   });
 
-  const baseUrl = await getDomainByOrganizationId(organizationId);
+  const baseUrl = await getDomainByOrganizationId(organizationId, true);
 
   const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
 
