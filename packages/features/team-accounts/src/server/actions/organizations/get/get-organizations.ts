@@ -171,11 +171,16 @@ export async function getOrganization(): Promise<{
   }
 }
 
-export async function getOrganizationByUserId(userId: string): Promise<{
+export async function getOrganizationByUserId(
+  userId: string,
+  adminActivated = false,
+): Promise<{
   id: string;
 }> {
   try {
-    const client = getSupabaseServerComponentClient();
+    const client = getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
     const { data: userAccountData, error: userAccountError } = await client
       .from('accounts')
       .select('organization_id')

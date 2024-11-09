@@ -11,6 +11,7 @@ import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 import pathsConfig from '~/config/paths.config';
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
+import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 
 
@@ -18,13 +19,11 @@ import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
 
-
 // import { handleDomainCheck } from './handlers/domain-check-handler';
-
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|images|locales|assets|api/v1/webhook|api).*)', 
+    '/((?!_next/static|_next/image|images|locales|assets|api/v1/webhook|api).*)',
     '/api/v1/:path*',
   ],
 };
@@ -204,9 +203,19 @@ function getPatterns() {
           return;
         }
 
-        const { organizationId } = await getDomainByUserId(user.id, true);
+        const {id: organizationId} = await getOrganizationByUserId(
+          user.id,
+          true,
+        ).catch((error) => {
+          console.error('Error fetching organization from middleware:', error);
+          return {
+            id: '',
+          };
+        });
         if (organizationId) {
-          return NextResponse.redirect(new URL(pathsConfig.app.orders, req.url).href);
+          return NextResponse.redirect(
+            new URL(pathsConfig.app.orders, req.url).href,
+          );
         }
         return;
       },
@@ -228,13 +237,13 @@ function getPatterns() {
         }
 
         // Check URL parameters
-      const searchParams = req.nextUrl.searchParams;
-      const hasInviteToken = searchParams.has('invite_token');
-      const hasEmail = searchParams.has('email');
+        const searchParams = req.nextUrl.searchParams;
+        const hasInviteToken = searchParams.has('invite_token');
+        const hasEmail = searchParams.has('email');
 
-      if (hasInviteToken && hasEmail) {
-        return;
-      }
+        if (hasInviteToken && hasEmail) {
+          return;
+        }
 
         // Check if this request is for the activation link (e.g., /auth/confirm)
         const isActivationLink =
@@ -304,7 +313,7 @@ function getPatterns() {
           return;
         }
         // the user is logged out, so we don't need to do anything
-        if (!user ) {
+        if (!user) {
           return;
         }
         const userId = user.id;
@@ -317,7 +326,9 @@ function getPatterns() {
           supabase,
           organizationId,
           userId,
-        ).catch((error) => console.error('Error fetching deleted from middleware:', error));
+        ).catch((error) =>
+          console.error('Error fetching deleted from middleware:', error),
+        );
 
         // Step 4: If the client is deleted, sign out the user
         if (clientDeleted) {
@@ -326,7 +337,7 @@ function getPatterns() {
             new URL(pathsConfig.auth.signIn, req.url).href,
           );
         }
-        return
+        return;
       },
     },
   ];
