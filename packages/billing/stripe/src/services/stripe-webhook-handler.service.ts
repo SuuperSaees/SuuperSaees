@@ -29,6 +29,8 @@ type UpsertSubscriptionParams =
     'checkout.session.async_payment_failed'?: (sessionId: string) => Promise<unknown>;
     'checkout.session.async_payment_succeeded'?: (sessionId: string) => Promise<unknown>;
     'invoice.paid'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
+    'customer.subscription.created'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
+    'payment_intent.succeeded'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
   };
 
 interface LineItem {
@@ -117,6 +119,7 @@ export class StripeWebhookHandlerService implements BillingWebhookHandlerService
       ) => Promise<unknown>;
       onSubscriptionDeleted: (subscriptionId: string) => Promise<unknown>;
       onPaymentSucceeded: (sessionId: string) => Promise<unknown>;
+      onPaymentIntentSucceeded: (data: UpsertSubscriptionParams) => Promise<unknown>;
       onPaymentFailed: (sessionId: string) => Promise<unknown>;
       onInvoicePaid: (data: UpsertSubscriptionParams) => Promise<unknown>;
       onEvent?(event: Stripe.Event): Promise<unknown>;
@@ -129,6 +132,8 @@ export class StripeWebhookHandlerService implements BillingWebhookHandlerService
       'checkout.session.async_payment_failed': params.onPaymentFailed,
       'checkout.session.async_payment_succeeded': params.onPaymentSucceeded,
       'invoice.paid': params.onInvoicePaid,
+      'customer.subscription.created': params.onPaymentIntentSucceeded,
+      'payment_intent.succeeded': params.onPaymentIntentSucceeded,
     };
   
     const handler = handlers[event.type as keyof WebhookEventHandlers];
