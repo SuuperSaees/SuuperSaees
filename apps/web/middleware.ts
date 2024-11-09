@@ -328,7 +328,7 @@ function getPatterns() {
         }
         return
       },
-    }
+    },
   ];
 }
 
