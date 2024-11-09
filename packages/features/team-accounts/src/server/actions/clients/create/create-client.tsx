@@ -2,15 +2,10 @@
 
 import React from 'react';
 
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { z } from 'zod';
-
-
 
 import {
   AlertDialog,
@@ -32,11 +27,11 @@ import {
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
 
+import { handleResponse } from '../../../../../../../../apps/web/lib/response/handle-response';
 import { ThemedButton } from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
 // import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
 // import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
 import { createClient } from './create-clients';
-
 
 const formSchema = z.object({
   name: z.string().min(2).max(50),
@@ -46,8 +41,7 @@ const formSchema = z.object({
 });
 
 const CreateClientDialog = () => {
-  // const [selectedRole, setSelectedRole] = useState('');
-  const { t } = useTranslation('clients');
+  const { t } = useTranslation('responses');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,24 +52,11 @@ const CreateClientDialog = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const newClient = { ...values };
-      // delete newClient?.role;
-      await createClient({ client: newClient, role: values.role });
-      // console.log('values client', values);
-      // sendClientInvitations(
-      //   [{ email: values.email, role: selectedRole }],
-      //   client?.slug ?? '',
-      // );
-      toast.success('success', {
-        description: 'Client created successfully',
-      });
-      window.location.reload();
-    } catch (error) {
-      toast.error('error', {
-        description: 'Something went wrong while creating the client',
-      });
-    }
+    const newClient = { ...values };
+    // delete newClient?.role;
+    const res = await createClient({ client: newClient, role: values.role });
+    await handleResponse(res, 'clients', t).catch(() => null);
+    window.location.reload();
   }
 
   // const handleRoleSelect = (role: string) => {
@@ -192,7 +173,7 @@ const CreateClientDialog = () => {
 
                 <Separator />
                 <ThemedButton type="submit" className="w-full">
-                {t('clients:createClient')}
+                  {t('clients:createClient')}
                 </ThemedButton>
               </form>
             </Form>

@@ -18,7 +18,10 @@ export const generateMetadata = async () => {
 
 async function CreateOrderPage() {
   const briefs = await getBriefs();
-  const userRole = await getUserRole();
+  const userRole = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
 
   return (
     <PageBody className="mx-auto flex w-full max-w-7xl p-8 max-h-full">

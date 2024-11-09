@@ -12,6 +12,7 @@ export const briefCreationFormSchema = z.object({
         description: z.string().optional().nullable(),
         placeholder: z.string().optional().nullable(),
         position: z.number(),
+        required: z.boolean().optional(),
         type: z
           .enum([
             'text',
@@ -50,6 +51,7 @@ export const briefCreationFormSchema = z.object({
         label: z.string().min(1, { message: 'Question label cannot be empty.' }),
         description: z.string().optional().nullable(),
         placeholder: z.string().optional().nullable(),
+        required: z.boolean().optional(),
         type: z
           .enum([
             'text',

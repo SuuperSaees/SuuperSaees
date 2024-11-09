@@ -61,7 +61,7 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   role,
   updateOrderDate,
 }) => {
-  const { t } = useTranslation('orders');
+  const { t } = useTranslation(['orders', 'responses']);
 
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
@@ -289,11 +289,11 @@ export function OrderList({ orders, role }: OrdersTableProps) {
     try {
       await updateOrder(orderId, { due_date });
       toast('Success!', {
-        description: 'The date has been updated.',
+        description: t('success.orders.orderDateUpdated'),
       });
     } catch (error) {
       toast('Error', {
-        description: 'The date could not be updated.',
+        description: t('error.orders.failedToUpdateOrderDate'),
       });
     }
   };

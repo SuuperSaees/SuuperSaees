@@ -10,6 +10,7 @@ import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.
 import { Activity, ActivityType } from '../context/activity-context';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
+import { convertToTitleCase } from '../utils/format-agency-names';
 
 const translateActivity = (
   activity: Activity,
@@ -75,7 +76,7 @@ export const ActivityCustomSpan = ({
   const matchedWord = wordsToMark.find((word) => value.includes(word));
 
   if (!matchedWord) {
-    return <span>{value}</span>;
+    return <span className='font-semibold'>{convertToTitleCase(value)}</span>;
   }
 
   // Split the message into two parts based on the matched word

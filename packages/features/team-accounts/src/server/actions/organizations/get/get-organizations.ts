@@ -103,6 +103,8 @@ export const getOrganizationSettingsByOrganizationId = async (
     'sender_name',
     'sender_domain',
     'sender_email',
+    'auth_card_background_color',
+    'auth_section_background_color',
   ],
   client?: SupabaseClient<Database>,
 ): Promise<{ key: string; value: string }[]> => {

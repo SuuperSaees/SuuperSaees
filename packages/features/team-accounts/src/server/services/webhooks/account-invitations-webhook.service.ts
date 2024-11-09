@@ -22,12 +22,12 @@ type Invitation = Database['public']['Tables']['invitations']['Row'];
 
 const invitePath = '/join';
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL;
-const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+// const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
 const productName = process.env.NEXT_PUBLIC_PRODUCT_NAME ?? '';
 const SUUPER_CLIENT_ID = process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID;
 const SUUPER_CLIENT_SECRET = process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET;
 const emailSender = process.env.EMAIL_SENDER;
-const brandtopAgencyName = process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
+// const brandtopAgencyName = process.env.NEXT_PUBLIC_BRANDTOP_AGENCY_NAME ?? '';
 const themeColorKey = OrganizationSettings.KEYS.theme_color;
 const senderNameKey = OrganizationSettings.KEYS.sender_name;
 const logoUrlKey = OrganizationSettings.KEYS.logo_url;
@@ -46,14 +46,14 @@ const env = z
     siteURL: z.string().min(1),
     productName: z.string(),
     emailSender: z.string().email(),
-    brandtopAgencyName: z.string(),
+    // brandtopAgencyName: z.string(),
   })
   .parse({
     invitePath,
     siteURL,
     productName,
     emailSender,
-    brandtopAgencyName,
+    // brandtopAgencyName,
   });
 
 export function createAccountInvitationsWebhookService(
@@ -167,14 +167,11 @@ class AccountInvitationsWebhookService {
     logger.info(ctx, 'Invite retrieved. Sending invitation email...');
 
     try {
-      let domain = await getDomainByOrganizationId(
+      const domain = await getDomainByOrganizationId(
         inviter.data.organization_id ?? '',
-        false,
+        true,
         true,
       );
-      if (domain !== siteURL) {
-        domain = isProd ? `https://${domain}` : `http://${domain}`;
-      }
 
       const { renderInviteEmail } = await import('@kit/email-templates');
       // const { getMailer } = await import('@kit/mailers');

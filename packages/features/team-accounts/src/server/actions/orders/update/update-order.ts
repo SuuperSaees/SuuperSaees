@@ -61,7 +61,7 @@ export const updateOrder = async (
 
   } catch (error) {
     console.error('Error updating order:', error);
-    throw error;
+    throw error
   }
 };
 

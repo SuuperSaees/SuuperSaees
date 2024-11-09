@@ -263,6 +263,7 @@ export type Database = {
           agency_id: string | null
           created_at: string
           id: number
+          position: number | null
           status_color: string | null
           status_name: string | null
         }
@@ -270,6 +271,7 @@ export type Database = {
           agency_id?: string | null
           created_at?: string
           id?: number
+          position?: number | null
           status_color?: string | null
           status_name?: string | null
         }
@@ -277,6 +279,7 @@ export type Database = {
           agency_id?: string | null
           created_at?: string
           id?: number
+          position?: number | null
           status_color?: string | null
           status_name?: string | null
         }
@@ -987,6 +990,7 @@ export type Database = {
           options: Json[] | null
           placeholder: string | null
           position: number
+          required: boolean | null
           type: Database["public"]["Enums"]["field_types"]
         }
         Insert: {
@@ -998,6 +1002,7 @@ export type Database = {
           options?: Json[] | null
           placeholder?: string | null
           position: number
+          required?: boolean | null
           type?: Database["public"]["Enums"]["field_types"]
         }
         Update: {
@@ -1009,6 +1014,7 @@ export type Database = {
           options?: Json[] | null
           placeholder?: string | null
           position?: number
+          required?: boolean | null
           type?: Database["public"]["Enums"]["field_types"]
         }
         Relationships: []
@@ -2723,6 +2729,8 @@ export type Database = {
         | "sender_email"
         | "sender_domain"
         | "logo_dark_url"
+        | "auth_card_background_color"
+        | "auth_section_background_color"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"

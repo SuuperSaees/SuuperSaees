@@ -1,15 +1,21 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Button } from '@kit/ui/button';
+import { useEffect, useRef, useState } from 'react';
+
 import { Check, PenLine } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+
+import { Button } from '@kit/ui/button';
 
 interface EditableHeaderProps {
   initialName: string;
   id: string | number;
   userRole: string;
-  updateFunction: (id: string | number, data: Record<string, string>) => Promise<void>;
+  updateFunction: (
+    id: string | number,
+    data: Record<string, string>,
+  ) => Promise<void>;
   rolesThatCanEdit: Set<string>;
   label: string;
   fieldName: string;
@@ -22,13 +28,13 @@ const EditableHeader = ({
   updateFunction,
   rolesThatCanEdit,
   label,
-  fieldName
+  fieldName,
 }: EditableHeaderProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(initialName);
   const inputRef = useRef<HTMLInputElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
-
+  const { t } = useTranslation('responses');
   const handleSave = async () => {
     if (name.trim() === '') {
       toast.error(`${label} cannot be empty`);
@@ -38,11 +44,15 @@ const EditableHeader = ({
     if (name !== initialName) {
       try {
         await updateFunction(id, { [fieldName]: name });
-        toast.success(`${label} updated successfully`);
         setIsEditing(false);
+        toast.success('Success', {
+          description: t('success.orders.orderNameUpdated'),
+        });
       } catch (error) {
         console.error(`Error updating ${label.toLowerCase()}:`, error);
-        toast.error(`Error updating ${label.toLowerCase()}`);
+        toast.error('Error', {
+          description: t('error.orders.failedToUpdateOrderName'),
+        });
       }
     } else {
       resetEditing();
@@ -68,42 +78,46 @@ const EditableHeader = ({
   const canEdit = rolesThatCanEdit.has(userRole);
 
   return (
-    <div className="inline-flex w-full max-h-[60px] flex justify-between items-center">
+    <div className="flex inline-flex max-h-[60px] w-full items-center justify-between">
       {canEdit && isEditing ? (
         <>
           <input
             type="text"
             ref={inputRef}
-            className="h-15 flex min-w-[80%] items-center justify-between overflow-hidden rounded-md border-none bg-slate-50 text-[20px] max-w-[80%] pr-1 font-semibold text-primary-900 outline-none"
+            className="h-15 flex min-w-[80%] max-w-[80%] items-center justify-between overflow-hidden rounded-md border-none bg-slate-50 pr-1 text-[20px] font-semibold text-primary-900 outline-none"
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
           <span
             ref={spanRef}
-            className="absolute invisible min-w-[80%] whitespace-nowrap overflow-hidden text-[20px] font-semibold text-primary-900 pr-1 max-w-[80%]"
+            className="invisible absolute min-w-[80%] max-w-[80%] overflow-hidden whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900"
           >
             {name}
           </span>
-          <Button variant="ghost" className="mr-2 h-10 m-0 text-slate-500 px-1"  onClick={handleSave}>
-            <Check className='w-[20px] h-[20px]'/>
+          <Button
+            variant="ghost"
+            className="m-0 mr-2 h-10 px-1 text-slate-500"
+            onClick={handleSave}
+          >
+            <Check className="h-[20px] w-[20px]" />
           </Button>
         </>
       ) : (
         <>
-          <span className=" min-w-[80%] whitespace-nowrap text-[20px] overflow-hidden font-semibold text-primary-900 pr-1 max-w-[80%]">
+          <span className="min-w-[80%] max-w-[80%] overflow-hidden whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900">
             {name.slice(0, 70).trim()}
             {name.length > 70 && '...'}
           </span>
           {canEdit && (
             <Button
               variant="ghost"
-              className="mr-2 h-10 m-0 text-slate-500 px-1"
+              className="m-0 mr-2 h-10 px-1 text-slate-500"
               onClick={() => {
                 setIsEditing(true);
                 updateInputWidth();
               }}
             >
-              <PenLine className='w-[20px] h-[20px]'/>
+              <PenLine className="h-[20px] w-[20px]" />
             </Button>
           )}
         </>

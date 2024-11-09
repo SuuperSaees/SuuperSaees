@@ -18,18 +18,26 @@ import {
  * @param entity - The entity type (e.g., 'clients', 'accounts') for message translations.
  * @param t - Translation function for localization.
  */
-export function handleResponse<T>(response: T, entity: Entity, t: TFunction) {
-
-  if (isCustomResponse(response)) {
-    // Handle error if present in response
-    if (response.error && isCustomError(response.error)) {
-      handleNotification(response.error, 'error', entity, t);
+export function handleResponse<T>(
+  response: T,
+  entity: Entity,
+  t: TFunction
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    if (isCustomResponse(response)) {
+      if (response.error && isCustomError(response.error)) {
+        handleNotification(response.error, 'error', entity, t);
+        reject(response.error); // Reject the promise on error
+      } else if (response.success && isCustomSuccess(response.success)) {
+        handleNotification(response.success, 'success', entity, t);
+        resolve(response.success as T); // Resolve the promise on success
+      } else {
+        reject(new Error('Unexpected response format')); // Reject for any other case
+      }
+    } else {
+      reject(new Error('Invalid response')); // Reject if not a custom response
     }
-    // Handle success if present in response
-    else if (response.success && isCustomSuccess(response.success)) {
-      handleNotification(response.success, 'success', entity, t);
-    }
-  }
+  });
 }
 
 /**
@@ -49,12 +57,12 @@ function handleNotification(
   const operationName = extractOperationName(result);
   const description =
     operationName === 'default'
-      ? t(`${type}.${entity}.default`)
+      ? t(`${type}.default`)
       : t(`${type}.${entity}.${operationName}`);
-  const statusText = result.statusText;
+  // const statusText = result.statusText;
 
   // Display notification using the appropriate toast method (error or success)
-  toast[type](statusText, { description });
+  toast[type](type === 'error' ? t('common:error') : t('common:success'), { description });
 }
 
 /**

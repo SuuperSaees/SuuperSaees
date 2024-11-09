@@ -23,6 +23,9 @@ import { PasswordSignUpSchema } from '../schemas/password-sign-up.schema';
 import { useAuthDetails } from '../sign-in';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
 
+import { getTextColorBasedOnBackground } from '../../../../../apps/web/app/utils/generate-colors';
+
+
 export function PasswordSignUpForm({
   defaultValues,
   displayTermsCheckbox,
@@ -157,7 +160,7 @@ export function PasswordSignUpForm({
           disabled={loading}
           style={{
             backgroundColor: authDetails?.theme_color ?? '#1a38d7',
-            color: authDetails?.logo_url ?? '#ffffff',
+            color: getTextColorBasedOnBackground(authDetails?.theme_color ? authDetails.theme_color : '#000000'),
           }}
         >
           <If

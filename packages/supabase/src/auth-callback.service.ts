@@ -6,7 +6,7 @@ import { type EmailOtpType, SupabaseClient } from '@supabase/supabase-js';
 
 
 
-import { decodeToken } from '../../tokens/src/decode-token';
+// import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
 
 
@@ -44,16 +44,16 @@ class AuthCallbackService {
     const url = new URL(request.url);
     const searchParams = url.searchParams;
     const token_hash_session = searchParams.get('token_hash_session');
-    const { data: currentSession} = await this.client.auth.getSession()
-
-    const currentSessionId =  currentSession?.session?.access_token ? decodeToken(
-      currentSession?.session?.access_token ?? '',
-    )?.session_id : '';
-
-    if (token_hash_session !== currentSessionId) {
-       await logOutUser(this.client);
-    } 
-
+    // const { data: currentSession} = await this.client.auth.getSession()
+    // console.log('token_hash_session', currentSession?.session?.access_token);
+    // const currentSessionId =  currentSession?.session?.access_token ? decodeToken(
+    //   currentSession?.session?.access_token ?? '',
+    // )?.session_id : '';
+    // console.log('currentSessionId', currentSessionId);
+    // if (token_hash_session !== currentSessionId) {
+    //    await logOutUser(this.client);
+    // } 
+    // await logOutUser(this.client);
     const host = request.headers.get('host');
 
     // set the host to the request host since outside of Vercel it gets set as "localhost"
@@ -144,6 +144,10 @@ class AuthCallbackService {
           access_token: data.access_token,
           refresh_token: data.refresh_token,
         });
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+        url.pathname = callbackParam ?? baseUrl;
+        url.href = callbackParam ?? baseUrl;
+        
         if (!error) {
           return url;
         }
@@ -278,7 +282,7 @@ function getAuthErrorMessage(error: string) {
 
 // function to log out the user before starting the new session:
 async function logOutUser(supabase: SupabaseClient) {
-  const { error } = await supabase.auth.signOut({ scope: 'local' });
+  const { error } = await supabase.auth.signOut();
 
   if (error) {
     console.error('Error logging out user', error);

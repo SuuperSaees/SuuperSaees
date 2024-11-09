@@ -26,6 +26,7 @@ interface EmailPasswordSignUpContainerProps {
   emailRedirectTo: string;
   className?: string;
   showConfirmEmail?: boolean;
+  currentAppOrigin?: string;
 }
 
 export function EmailPasswordSignUpContainer({
@@ -34,11 +35,14 @@ export function EmailPasswordSignUpContainer({
   emailRedirectTo,
   displayTermsCheckbox,
   showConfirmEmail,
-  className
+  className,
+  currentAppOrigin
 }: EmailPasswordSignUpContainerProps) {
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
 
-  const signUpMutation = useSignUpWithEmailAndPassword();
+  const currentBaseUrl = !showConfirmEmail ? currentAppOrigin : undefined;
+
+  const signUpMutation = useSignUpWithEmailAndPassword(currentBaseUrl);
   const redirecting = useRef(false);
   const [showVerifyEmailAlert, setShowVerifyEmailAlert] = useState(false);
   const appEvents = useAppEvents();

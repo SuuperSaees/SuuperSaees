@@ -2,8 +2,12 @@
 
 import { useSearchParams } from 'next/navigation';
 
+
+
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
+
+
 
 import { OrganizationSettings } from '../../../../apps/web/lib/organization-settings.types';
 import { Tokens } from '../../../../apps/web/lib/tokens.types';
@@ -11,6 +15,7 @@ import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/s
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
 import { decodeToken } from '../../../tokens/src/decode-token';
 import { useSupabase } from './use-supabase';
+
 
 interface Credentials {
   email: string;
@@ -41,14 +46,18 @@ const defaultOrganizationName =
   OrganizationSettings.EXTRA_KEYS.default_agency_name;
 const defaultFromSenderIdentity =
   OrganizationSettings.EXTRA_KEYS.default_from_sender_identity;
-export function useSignUpWithEmailAndPassword() {
+export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
   const client = useSupabase();
   const mutationKey = ['auth', 'sign-up-with-email-password'];
   // catch invite token
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get('invite_token');
   const mutationFn = async (params: Credentials) => {
-    const { emailRedirectTo, captchaToken, ...credentials } = params;
+    const {
+      emailRedirectTo,
+      captchaToken,
+      ...credentials
+    } = params;
     let inviteRedirectUrl: string | undefined = undefined;
     // Step 1: Sign up the user
 
@@ -76,7 +85,7 @@ export function useSignUpWithEmailAndPassword() {
     ).toISOString();
     const providerToken = 'supabase';
     const sessionId = decodeToken(accessToken, 'base64')?.session_id as string;
-    const callbackUrl = baseUrl;
+    const callbackUrl = currentBaseUrl ?? baseUrl;
     const lang = 'en';
     const email = newUserData?.user?.email ?? '';
 
@@ -111,9 +120,9 @@ export function useSignUpWithEmailAndPassword() {
       defaultColor,
       defaultTextColor,
     );
-    // don't send confirmation email if is a member invitation (/auth/sign-up?invite_token=xxxx)
+    // don't send confirmation email if is a member invitation (/auth/sign-up?invite_token=xxxx) 
     if (inviteToken) {
-      inviteRedirectUrl = `${baseUrl}/auth/confirm?token_hash_session=${sessionId}&type=invite&callback=${callbackUrl}`;
+      inviteRedirectUrl = `${callbackUrl}/auth/confirm?token_hash_session=${sessionId}&type=invite&callback=${encodeURIComponent(callbackUrl + '/join?invite_token=' + inviteToken + '&email=' + email)}`;
     } else {
       const res = await fetch(`${baseUrl}/api/v1/mailer`, {
         method: 'POST',

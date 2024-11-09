@@ -4,10 +4,15 @@ import { revalidatePath } from 'next/cache';
 
 import { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 
+import {
+  CustomError,
+  CustomResponse,
+  ErrorServiceOperations,
+} from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { getStripeAccountID } from '../../members/get/get-member-account';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import { getStripeAccountID } from '../../members/get/get-member-account';
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -52,9 +57,14 @@ export const updateService = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const {userId, stripeId} = await getStripeAccountID();
-    if (!stripeId) throw new Error('No stripe account found');
-    const {domain: baseUrl} = await getDomainByUserId(userId, true);
+    const { userId, stripeId } = await getStripeAccountID();
+    if (!stripeId)
+      throw new CustomError(
+        400,
+        'No stripe account found',
+        ErrorServiceOperations.FAILED_TO_FIND_STRIPE_ACCOUNT,
+      );
+    const { domain: baseUrl } = await getDomainByUserId(userId, true);
 
     // Update service details in Supabase
     const serviceId = await updateSupabaseService(
@@ -76,8 +86,10 @@ export const updateService = async (
 
     // Revalidate services page
     revalidatePath('/services');
+    return CustomResponse.success(null, 'serviceUpdated').toJSON();
   } catch (error) {
     console.error('Error updating service:', error);
+    return CustomResponse.error(error).toJSON();
   }
 };
 
@@ -157,14 +169,12 @@ const manageServiceBriefs = async (
   );
 
   if (briefsToAdd.length > 0) {
-    const { error: insertError } = await client
-      .from('service_briefs')
-      .insert(
-        briefsToAdd.map((brief) => ({
-          service_id: serviceId,
-          brief_id: brief.id,
-        })),
-      );
+    const { error: insertError } = await client.from('service_briefs').insert(
+      briefsToAdd.map((brief) => ({
+        service_id: serviceId,
+        brief_id: brief.id,
+      })),
+    );
     if (insertError) {
       throw new Error(insertError.message);
     }
@@ -330,4 +340,4 @@ const updatePriceId = async (client: SupabaseClient, priceId: string) => {
   if (errorResponseUpdateService) {
     throw new Error(errorResponseUpdateService.message);
   }
-}
+};

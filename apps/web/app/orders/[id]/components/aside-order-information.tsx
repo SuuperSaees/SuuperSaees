@@ -32,6 +32,7 @@ import StatusCombobox from './status-combobox';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
 import SelectAction from './ui/select-action';
+import { PriorityCombobox } from './priority-combobox';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -43,7 +44,7 @@ const   AsideOrderInformation = ({
   className,
   ...rest
 }: AsideOrderInformationProps) => {
-  const { t } = useTranslation('orders');
+  const { t } = useTranslation(['orders', 'responses']);
   const [selectedStatus, setSelectedStatus] = useState(order.status);
   const [selectedPriority, setSelectedPriority] = useState(order.priority);
 
@@ -58,13 +59,13 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Status updated successfully!',
+        description: t('success.orders.orderStatusUpdated'),
       });
     },
     onError: () => {
       setSelectedStatus(order.status);
       toast.error('Error', {
-        description: 'The status could not be updated.',
+        description: t('error.orders.failedToUpdateOrderStatus'),
       });
     },
   });
@@ -77,13 +78,13 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Priority updated successfully!',
+        description: t('success.orders.orderPriorityUpdated'),
       });
     },
     onError: () => {
       setSelectedPriority(order.priority);
       toast.error('Error', {
-        description: 'The priority could not be updated.',
+        description: t('error.orders.failedToUpdateOrderPriority'),
       });
     },
   });
@@ -95,12 +96,12 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Date updated successfully!',
+        description: t('success.orders.orderDateUpdated'),
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'The date could not be updated.',
+        description: t('error.orders.failedToUpdateOrderDate'),
       });
     },
   });
@@ -111,12 +112,12 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Agency members updated successfully!',
+        description: t('success.orders.orderAssigneesUpdated'),
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'The agency members could not be updated.',
+        description: t('error.orders.failedToUpdateOrderAssigneees'),
       });
     },
   });
@@ -127,12 +128,12 @@ const   AsideOrderInformation = ({
     },
     onSuccess: () => {
       toast.success('Success', {
-        description: 'Clients followers updated successfully!',
+        description: t('success.orders.orderFollowersUpdated'),
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'The clients followers could not be updated.',
+        description: t('error.orders.failedToUpdateOrderFollowers'),
       });
     },
   });
@@ -263,28 +264,19 @@ const   AsideOrderInformation = ({
             />
           </div>
           <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-1 font-semibold">
+            <div className="flex items-center gap-[0.20rem] font-semibold">
               <Loader className="mr-2 h-4 w-4" />
               <p>{t('details.status')}</p>
             </div>
 
             <StatusCombobox order={order} agency_id={order.agency_id} mode='order' />
           </div>
-          <div className="flex items-center text-sm">
-            <FlagIcon className="mr-2 h-4 w-4" />
-            <SelectAction
-              options={priorityOptions}
-              groupName={t('details.priority')}
-              defaultValue={selectedPriority}
-              className={
-                selectedPriority ? priorityColors[selectedPriority] : undefined
-              }
-              onSelectHandler={(priority) => {
-                changePriority.mutate(priority as Order.Type['priority']);
-              }}
-              disabled={changePriority.isPending}
-              getitemClassName={getPriorityClassName}
-            />
+          <div className='flex justify-between'>
+            <div className='flex items-center text-sm'>
+              <FlagIcon className='mr-2 h-4 w-4' />
+              <span className='font-semibold'>{t('details.priority')}</span>
+            </div>
+            <PriorityCombobox order = {order} mode = {'order'}/>
           </div>
           <ActivityAssignations
             searchUserOptions={searchUserOptions}

@@ -28,12 +28,24 @@ import ClientAssignation from './client-assignation';
 import { OrderBriefs } from './order-briefs';
 
 interface BriefCompletionFormProps {
-  briefs: Brief.Relationships.Services.Response[];
+  brief: Brief.Relationships.Services.Response | null;
   orderMutation: UseMutationResult<
     void,
     Error,
     {
-      values: Brief.Relationships.Services.Response[];
+      values: {
+        briefSelection: {
+          selectedBriefId: string;
+        };
+        briefCompletion: {
+          uuid: string;
+          fileIds: string[];
+          brief_responses: Record<string, string | undefined | Date>;
+          description?: string | undefined;
+          title?: string | undefined;
+          order_followers?: string[] | undefined;
+        };
+      };
       fileIds: string[];
     },
     unknown
@@ -43,7 +55,7 @@ interface BriefCompletionFormProps {
 }
 
 export default function BriefCompletionForm({
-  briefs,
+  brief,
   uniqueId,
   orderMutation,
   userRole,
@@ -60,17 +72,15 @@ export default function BriefCompletionForm({
   return (
     <Form {...form}>
       <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
-        
-        <div className="no-scrollbar flex lg:flex-nowrap flex-wrap h-full gap-16 overflow-y-auto">
+        <div className="no-scrollbar flex h-full flex-wrap gap-16 overflow-y-auto lg:flex-nowrap">
           <div className="flex w-full max-w-full shrink-0 flex-col gap-16 lg:max-w-xs">
-            <BriefCard brief={briefs[0]}  />
+            <BriefCard brief={brief} />
             {(userRole === 'agency_owner' ||
-              userRole === 'agency_project_manager') && <ClientAssignation />
-            }
+              userRole === 'agency_project_manager') && <ClientAssignation />}
           </div>
 
           <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
-            {!briefs.length && (
+            {!brief && (
               <>
                 <FormField
                   name="briefCompletion.title"
@@ -118,7 +128,7 @@ export default function BriefCompletionForm({
             )}
 
             <OrderBriefs
-              briefs={briefs}
+              brief={brief}
               form={form}
               orderId={form.getValues('briefCompletion.uuid')}
             />

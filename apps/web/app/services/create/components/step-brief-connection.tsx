@@ -26,6 +26,7 @@ import { updateService } from '~/team-accounts/src/server/actions/services/updat
 
 import { Combobox } from './combobox';
 import { FormSchema } from './multiform-component';
+import { handleResponse } from '~/lib/response/handle-response';
 
 interface ServiceBrief {
   id: string;
@@ -74,7 +75,7 @@ export default function BriefConnectionStep(
 }
 ) {
   const { prevStep, form } = useMultiStepFormContext<typeof FormSchema>();
-  const { t } = useTranslation('services');
+  const { t } = useTranslation(['services', 'responses']);
 
   const [selectedBriefs, setSelectedBriefs] = useState<
     { id: string; name: string }[]
@@ -140,9 +141,12 @@ export default function BriefConnectionStep(
         throw new Error('No propietary_organization_id provided');
       }
       const values = form.getValues();
-      const service = await createService({
+      const res = await createService({
         ...values,
       });
+      await handleResponse(res, 'services', t);
+      const service = res.success?.data;
+      
 
       if (!service) {
         throw new Error('Service not created');
@@ -151,27 +155,26 @@ export default function BriefConnectionStep(
       const serviceId = service.supabase.id;
 
       await addBriefToService(serviceId);
+      
+ 
     },
     onSuccess: () => {
-      toast.success('Service created successfully');
       router.push('/services');
       void queryClient.invalidateQueries({
         queryKey: ['services'],
       });
-    
     },
-    onError: () => {
-      toast.error('Error creating service');
-    },
+    onError: () => null,
+
   });
 
   const updateServiceMutation = useMutation({
     mutationFn: async () => {
       const values = form.getValues();
-      await updateService(values, previousService.previousService.price_id);
+      const res = await updateService(values, previousService.price_id);
+      await handleResponse(res, 'services', t);
     },
     onSuccess: async () => {
-      toast.success('Service updated successfully');
       router.push('/services');
       await queryClient.invalidateQueries({
         queryKey: ['services'],
@@ -179,7 +182,7 @@ export default function BriefConnectionStep(
       // invalidate the query
     },
     onError: () => {
-      toast.error('Error updating service');
+      console.error('Error updating service');
     },
   });
 
@@ -246,7 +249,7 @@ export default function BriefConnectionStep(
           {t('previous')}
         </Button>
 
-        {previousService?.previousService ? (
+        {previousService ? (
           <Button
             type="button"
             disabled={briefsQuery.isLoading}

@@ -38,6 +38,7 @@ export function DatePickerWithRange({
 
   const { t } = useTranslation(['tasks','orders']);
   const [selectedPeriod, setSelectedPeriod] = useState<DateRange | undefined>(initialPeriod)
+  const [open, setOpen] = useState(false);
 
   const formattedDateRange = selectedPeriod?.from && selectedPeriod?.to
     ? shortFormat 
@@ -53,8 +54,8 @@ export function DatePickerWithRange({
   
   return (
     <div className={cn("grid gap-2", className)}>
-      <Popover>
-        <PopoverTrigger asChild>
+      <Popover open={open}>
+        <PopoverTrigger asChild onClick={() => {setOpen(!open)}}>
           
           <p 
             className='whitespace-nowrap cursor-pointer select-none px-3 text-gray-900 font-medium text-sm'

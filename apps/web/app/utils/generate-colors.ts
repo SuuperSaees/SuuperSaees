@@ -8,7 +8,7 @@ export function getTextColorBasedOnBackground(backgroundColor: string) {
 }
 
 
-export function darkenColor(hex: string, amount: number = 0.1): string {
+export function darkenColor(hex: string, amount = 0.1): string {
   // Remove the # if present
   hex = hex.replace(/^#/, '');
 
@@ -23,7 +23,7 @@ export function darkenColor(hex: string, amount: number = 0.1): string {
   b /= 255;
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
+  let h=0, s:number, l:number = (max + min) / 2;
 
   if (max === min) {
     h = s = 0; // achromatic
@@ -102,3 +102,15 @@ export const getColorLuminance = (hexColor: string): { luminance: number, theme:
   // Return an object with luminance and theme properties
   return { luminance, theme };
 }
+
+export const hexToRgb = (hex: string) => {
+  // Remove the hash if present
+  hex = hex.replace('#', '');
+  
+  // Parse the hex values
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  
+  return `${r}, ${g}, ${b}`;
+};

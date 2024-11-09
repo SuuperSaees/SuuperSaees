@@ -6,7 +6,9 @@
   },
   "total": {
     "title": "Total de la factura",
-    "users": "{{currentUsers}} de {{totalUsers}} usuarios",
+    "usersEquivalent": "equivalente a {{currentUsers}}",
+    "users": "usuarios",
+    "user": "usuario",
     "upgrade": "Mejorar su plan"
   },
   "history": {

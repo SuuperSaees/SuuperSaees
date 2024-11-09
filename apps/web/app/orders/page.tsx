@@ -25,7 +25,10 @@ async function OrdersPage() {
       customer_name: order.customer.name ?? '',
     })) ?? [];
 
-  const role = await getUserRole();
+  const role = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
 
   return (
     <>

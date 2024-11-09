@@ -1,17 +1,26 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse, URLPattern } from 'next/server';
 
+
+
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
+
+
 
 import pathsConfig from '~/config/paths.config';
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
+
+
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
-import { handleDomainCheck } from './handlers/domain-check-handler';
+
+
+// import { handleDomainCheck } from './handlers/domain-check-handler';
+
 
 export const config = {
   matcher: [
@@ -55,14 +64,19 @@ export async function middleware(request: NextRequest) {
   if (apiAuthResult) return apiAuthResult;
 
   // Domain Check
-  const domainCheckResult = await handleDomainCheck(request, response);
-  if (domainCheckResult) return domainCheckResult;
+  // const domainCheckResult = await handleDomainCheck(request, response);
+  // if (domainCheckResult) return domainCheckResult;
 
   const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
   const ignorePath = new Set([
     'auth',
+    '/auth/confirm',
     'add-organization',
     'api',
+    'join',
+    'join?invite_token=',
+    '/join?invite_token=',
+    '/join',
     'home',
     'checkout',
     'buy-success',
@@ -198,6 +212,15 @@ function getPatterns() {
         if (!user) {
           return;
         }
+
+        // Check URL parameters
+      const searchParams = req.nextUrl.searchParams;
+      const hasInviteToken = searchParams.has('invite_token');
+      const hasEmail = searchParams.has('email');
+
+      if (hasInviteToken && hasEmail) {
+        return;
+      }
 
         // Check if this request is for the activation link (e.g., /auth/confirm)
         const isActivationLink =

@@ -37,7 +37,7 @@ export const createHandlers = (
       content: null,
       end_date: null,
       start_date: null,
-      state: 'pending' as 'completed' | 'pending' | 'in_progress' | 'in_review' | 'annulled' | null,
+      state: 'pending',
       position: null,
     };
     await createSubtask.mutateAsync({

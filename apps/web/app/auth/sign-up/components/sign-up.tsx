@@ -40,8 +40,11 @@ export default function SignUp({ searchParams }: Props) {
   const { authDetails, isLoading } = useAuthDetails(host);
   // const textcolor = getTextColorBasedOnBackground(authDetails?.background_color ?? '#ffffff')
   const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
-  const currentAppOrigin = window.location.origin + '/';
-    const isCustomDomain = originalAppOrigin !== currentAppOrigin;
+  let currentAppOrigin = 'http://localhost:3000/';
+  if (typeof window !== 'undefined') {
+    currentAppOrigin = window.location.origin + '/';
+  }
+  const isCustomDomain = originalAppOrigin !== currentAppOrigin;
   const textcolor = getTextColorBasedOnBackground(
     authDetails?.background_color ?? '#ffffff',
   );
@@ -72,6 +75,16 @@ export default function SignUp({ searchParams }: Props) {
             )}
             <div
               className={`${isCustomDomain && 'shadow-lg max-w-[360px] w-full'} rounded-lg bg-white p-8 text-black lg:w-1/2`}
+              style={{
+                color: getTextColorBasedOnBackground(
+                  authDetails?.auth_card_background_color
+                    ? authDetails.auth_card_background_color
+                    : '#ffffff',
+                ),
+                backgroundColor: authDetails?.auth_card_background_color
+                  ? authDetails.auth_card_background_color
+                  : 'white',
+              }}
             >
               {isCustomDomain && (
                 <div className="flex w-full items-start justify-center pb-[32px]">
@@ -112,7 +125,7 @@ export default function SignUp({ searchParams }: Props) {
                 inviteToken={inviteToken}
                 paths={paths}
                 showConfirmAlert={!isCustomDomain}
-           
+                currentAppOrigin={currentAppOrigin}
               />
 
               {!isCustomDomain && (
