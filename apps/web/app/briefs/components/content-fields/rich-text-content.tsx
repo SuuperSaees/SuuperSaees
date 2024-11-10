@@ -11,9 +11,9 @@ import {
 
 import RichTextEditor from '~/components/ui/rich-text-editor';
 
-import { BriefsProvider} from '../contexts/briefs-context';
-import { FormField as FormFieldType } from '../types/brief.types';
-import { BriefCreationForm } from './brief-creation-form';
+import { BriefsProvider} from '../../contexts/briefs-context';
+import { FormField as FormFieldType } from '../../types/brief.types';
+import { BriefCreationForm } from '../brief-creation-form';
 
 export interface FormRichTextComponentProps {
   index: number;
@@ -39,7 +39,7 @@ const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
       control={form.control}
       name={`questions.${index}.label`}
       render={({ field, fieldState }) => (
-        <FormItem className="flex w-full flex-col gap-2 space-y-4">
+        <FormItem className="flex w-full flex-col gap-2 space-y-4 group relative">
           <div className="flex flex-col gap-2">
             <FormControl>
               <RichTextEditor
@@ -50,12 +50,13 @@ const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
                 hideSubmitButton={true}
                 showToolbar={inSidebar}
                 isEditable={inSidebar ? true : false}
+                className='text-gray-600 text-sm'
               />
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>
           </div>
           {!inSidebar ? (
-            <BriefsProvider.Options formFieldId={index} className="ml-auto" />
+            <BriefsProvider.Options formFieldId={index} className="ml-auto group-hover:flex hidden absolute right-0 top-0" />
           ) : (
             <></>
           )}

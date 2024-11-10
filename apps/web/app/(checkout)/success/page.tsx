@@ -1,34 +1,56 @@
 import { PageBody } from '@kit/ui/page';
-// import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
-// import { withI18n } from '~/lib/i18n/with-i18n';
 
-// export const generateMetadata = async () => {
-//   const i18n = await createI18nServerInstance();
-//   const title = i18n.t('billing:billingTitle');
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+import { withI18n } from '~/lib/i18n/with-i18n';
 
-//   return {
-//     title,
-//   };
-// };
+import DetailsSide from './components/success-info';
+import { Trans } from '@kit/ui/trans';
+import { CheckCircle } from 'lucide-react';
 
-function PaymentSuccess() {
-    return (
-        <>
-        <PageBody className="h-screen flex items-center justify-center">
-          <main className="max-w-6xl mx-auto p-10 text-white text-center border m-10 rounded-md bg-gradient-to-tr from-blue-500 to-purple-500">
-                <div className="mb-10">
-                <h1 className="text-4xl font-extrabold mb-2">Thank you!</h1>
-                <h2 className="text-2xl">Your payment was successful</h2>
-        
-                {/* <div className="bg-white p-2 rounded-md text-purple-500 mt-5 text-4xl font-bold">
-                    ${amount}
-                </div> */}
-                </div>
-            </main>
-        </PageBody>   
-        </>
-    );
+export const generateMetadata = async () => {
+  const i18n = await createI18nServerInstance();
+  const title = i18n.t('services:checkout:successTitle');
+
+  return {
+    title,
+  };
+};
+
+function PaymentSuccess({
+  searchParams: { accountAlreadyExists },
+}: {
+  searchParams: { accountAlreadyExists: string };
+}) {
+  const accountAlreadyExistsBool = accountAlreadyExists === 'true';
+  return (
+    <PageBody className="flex h-screen items-center justify-center">
+      <main className="m-10 mx-auto max-w-6xl rounded-md text-center border bg-white">
+        <div className="mb-10 flex flex-col gap-4 p-4">
+          <h1 className=" text-4xl font-extrabold">
+            <Trans i18nKey="services:checkout:success:title"  />
+          </h1>
+          
+          <h2 className="text-2xl">
+            <Trans i18nKey="services:checkout:success:description"  />
+          </h2>
+          <div>
+            <CheckCircle size={64} className="text-green-500 mx-auto" />
+          </div>
+          {accountAlreadyExistsBool && (
+            <p className="mt-4">
+              <Trans i18nKey="services:checkout:success:already_account"  />
+            </p>
+          )}
+          {!accountAlreadyExistsBool && (
+            <p className="mt-4">
+              <Trans i18nKey="services:checkout:success:not_account"  />
+            </p>
+          )}
+          <DetailsSide />
+        </div>
+      </main>
+    </PageBody>
+  );
 }
 
-
-export default PaymentSuccess;
+export default withI18n(PaymentSuccess);
