@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { addHours, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-
+import { formatDisplayDate } from '@kit/shared/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@kit/ui/alert-dialog';
 import { Button } from '@kit/ui/button';
 import { Calendar } from '@kit/ui/calendar';
@@ -17,6 +17,7 @@ interface DatePickerProps {
 
 const DatePicker = ({ updateFn, defaultDate }: DatePickerProps) => {
   const { t, i18n } = useTranslation('orders');
+
   const [date, setDate] = React.useState<Date | undefined>(
     defaultDate?.toString()
       ? addHours(
@@ -28,28 +29,7 @@ const DatePicker = ({ updateFn, defaultDate }: DatePickerProps) => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const formatDisplayDate = (date: Date) => {
-    const isSpanish = i18n.language.startsWith('es');
-  
-    const months = {
-      en: [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ],
-      es: [
-        'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-        'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-      ]
-    };
-    
-    const month = months[isSpanish ? 'es' : 'en'][date.getMonth()];
-    const day = date.getDate();
-    const year = date.getFullYear();
-    
-    return isSpanish 
-      ? `${day} ${month}, ${year}`  // formato español: 29 Sep, 2023
-      : `${month} ${day}, ${year}`; // formato inglés: Sep 29, 2023
-  };
+  const language = i18n.language
 
   async function onSubmit() {
     if (!date) return;
@@ -82,7 +62,7 @@ const DatePicker = ({ updateFn, defaultDate }: DatePickerProps) => {
               !date && 'text-muted-foreground',
             )}
           >
-            {date ? formatDisplayDate(date) : t('selectDateLabel')}
+            {date ? formatDisplayDate(date, language) : t('selectDateLabel')}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">

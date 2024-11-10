@@ -2,7 +2,7 @@
 
 // import { useState } from 'react';
 
-import { format } from 'date-fns';
+import { formatDisplayDate } from '@kit/shared/utils';
 
 import { useRouter } from 'next/navigation';
 
@@ -46,10 +46,10 @@ const   AsideOrderInformation = ({
   className,
   ...rest
 }: AsideOrderInformationProps) => {
-  const { t } = useTranslation(['orders', 'responses']);
+  const { t, i18n } = useTranslation(['orders', 'responses']);
   // const [selectedStatus, setSelectedStatus] = useState(order.status);
   // const [selectedPriority, setSelectedPriority] = useState(order.priority);
-
+  const language = i18n.language;
   const router = useRouter();
   const { userRole } = useActivityContext();
 
@@ -300,7 +300,7 @@ const   AsideOrderInformation = ({
             </span>
             <span className="pl-2 pr-2">
               {order.due_date ? (
-                format(new Date(order.due_date), 'MMM dd, yyyy')
+                formatDisplayDate(new Date(order.due_date), language)
               ) : (
                 <Trans i18nKey="orders:details.deadlineNotSet" />
               )}
