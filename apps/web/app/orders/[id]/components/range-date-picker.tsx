@@ -42,8 +42,8 @@ export function DatePickerWithRange({
 
   const formattedDateRange = selectedPeriod?.from && selectedPeriod?.to
     ? shortFormat 
-        ? `${format(selectedPeriod.to, 'MMMM d')}` 
-        : `${format(selectedPeriod.from, `MMMM d '${t('dateConector')}' yyyy`)} - ${format(selectedPeriod.to, `MMMM d '${t('dateConector')}' yyyy`)}`
+        ? `${format(selectedPeriod.to, 'MMM d, yyyy')}` 
+        : `${format(selectedPeriod.from, 'MMM d, yyyy')} - ${format(selectedPeriod.to, 'MMM d, yyyy')}`
     : t('select_date_range',{ns: 'orders'});
   
 

@@ -5,12 +5,12 @@ import React, { useState } from 'react';
 
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
+import { FormattedDate } from './formatted-date';
 
 
-
-import { ChevronDownIcon } from '@radix-ui/react-icons';
-import { useMutation } from '@tanstack/react-query';
+// import { ChevronDownIcon } from '@radix-ui/react-icons';
+// import { useMutation } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
@@ -22,18 +22,18 @@ import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 import { Card, CardContent, CardFooter } from '@kit/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
+// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
 import { Separator } from '@kit/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@kit/ui/table';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 import { Order } from '~/lib/order.types';
-import { statuses } from '~/lib/orders-data';
+// import { statuses } from '~/lib/orders-data';
 
 import { ThemedButton } from '../../../../../packages/features/accounts/src/components/ui/button-themed-with-settings';
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../packages/ui/src/shadcn/pagination';
-import { statusColors } from '../[id]/utils/get-color-class-styles';
+// import { statusColors } from '../[id]/utils/get-color-class-styles';
 import { Trans } from '@kit/ui/trans';
 import EmptyState from '~/components/ui/empty-state';
 import StatusCombobox from '../[id]/components/status-combobox';
@@ -72,7 +72,7 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   const currentOrders = orders.slice(startIndex, endIndex);
 
   const totalPages = Math.ceil(orders.length / rowsPerPage);
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <Card x-chunk="dashboard-06-chunk-0" className='bg-transparent'>
@@ -157,24 +157,21 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
                   </div>
                 </TableCell>
                 <TableCell className="hidden flex-1 md:table-cell">
-                  {[
-                    'agency_member',
-                    'agency_owner',
-                    'agency_project_manager',
-                  ].includes(role) ? (
-                    <DatePicker
-                      updateFn={(dueDate: string) =>
-                        updateOrderDate(dueDate, order.id)
-                      }
-                      defaultDate={order.due_date}
-                    />
-                  ) : (
-                    // Display the date or an empty space if there is no date
-                    <span className="pl-2 pr-2">
-                      {order.due_date ?? <Trans i18nKey="orders:details.deadlineNotSet" />}
-                    </span>
-                  )}
-                </TableCell>
+                {['agency_member', 'agency_owner', 'agency_project_manager'].includes(role) ? (
+                  <DatePicker
+                    updateFn={(dueDate: string) => updateOrderDate(dueDate, order.id)}
+                    defaultDate={order.due_date}
+                  /> 
+                ) : (
+                  <span className="pl-2 pr-2">
+                    {order.due_date ? (
+                      <FormattedDate date={order.due_date} />
+                    ) : (
+                      <Trans i18nKey="orders:details.deadlineNotSet" />
+                    )}
+                  </span>
+                )}
+              </TableCell>
               </TableRow>
             ))
 

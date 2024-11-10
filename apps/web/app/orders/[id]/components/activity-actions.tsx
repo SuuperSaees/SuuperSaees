@@ -12,6 +12,36 @@ import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
 import { convertToTitleCase } from '../utils/format-agency-names';
 
+const formatDisplayDate = (date: Date) => {
+  const { i18n } = useTranslation();
+  const isSpanish = i18n.language.startsWith('es');
+
+  const months = {
+    en: [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ],
+    es: [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ]
+  };
+  
+  const month = months[isSpanish ? 'es' : 'en'][date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
+  
+  // Para la hora
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12;
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+  return isSpanish
+    ? `${day} ${month}, ${year} ${formattedHours}:${formattedMinutes} ${ampm}`
+    : `${month} ${day}, ${year} ${formattedHours}:${formattedMinutes} ${ampm}`;
+};
+
 const translateActivity = (
   activity: Activity,
   t: TFunction<'logs', undefined>,
@@ -155,7 +185,7 @@ export const StatusActivity = ({
             <span>{formattedActivity.preposition}</span>
             <span>
               {activity.type === 'due_date' &&
-                format(new Date(formattedActivity.value ?? ''), '	Pp')}
+                formatDisplayDate(new Date(formattedActivity.value ?? ''))}
             </span>
             {(activity.type === 'priority' || activity.type === 'status') && (
               <ActivityCustomSpan
@@ -192,7 +222,7 @@ export const DefaultAction = ({
           <span>{formattedActivity.preposition}</span>
           <span>
             {activity.type === 'due_date'
-              ? format(new Date(formattedActivity.value ?? ''), '	Pp')
+              ? formatDisplayDate(new Date(formattedActivity.value ?? ''))
               : formattedActivity.value}
           </span>
         </span>

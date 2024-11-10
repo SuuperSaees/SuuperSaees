@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+// import { useState } from 'react';
+
+import { format } from 'date-fns';
 
 import { useRouter } from 'next/navigation';
 
@@ -31,7 +33,7 @@ import ActivityFollowers from './activity-followers';
 import StatusCombobox from './status-combobox';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
-import SelectAction from './ui/select-action';
+// import SelectAction from './ui/select-action';
 import { PriorityCombobox } from './priority-combobox';
 
 interface AsideOrderInformationProps {
@@ -45,49 +47,49 @@ const   AsideOrderInformation = ({
   ...rest
 }: AsideOrderInformationProps) => {
   const { t } = useTranslation(['orders', 'responses']);
-  const [selectedStatus, setSelectedStatus] = useState(order.status);
-  const [selectedPriority, setSelectedPriority] = useState(order.priority);
+  // const [selectedStatus, setSelectedStatus] = useState(order.status);
+  // const [selectedPriority, setSelectedPriority] = useState(order.priority);
 
   const router = useRouter();
   const { userRole } = useActivityContext();
 
-  const changeStatus = useMutation({
-    mutationFn: async (status: Order.Type['status']) => {
-      setSelectedStatus(status);
-      await updateOrder(order.id, { status });
-      return router.push(`/orders/${order.id}`);
-    },
-    onSuccess: () => {
-      toast.success('Success', {
-        description: t('success.orders.orderStatusUpdated'),
-      });
-    },
-    onError: () => {
-      setSelectedStatus(order.status);
-      toast.error('Error', {
-        description: t('error.orders.failedToUpdateOrderStatus'),
-      });
-    },
-  });
+  // const changeStatus = useMutation({
+  //   mutationFn: async (status: Order.Type['status']) => {
+  //     setSelectedStatus(status);
+  //     await updateOrder(order.id, { status });
+  //     return router.push(`/orders/${order.id}`);
+  //   },
+  //   onSuccess: () => {
+  //     toast.success('Success', {
+  //       description: t('success.orders.orderStatusUpdated'),
+  //     });
+  //   },
+  //   onError: () => {
+  //     setSelectedStatus(order.status);
+  //     toast.error('Error', {
+  //       description: t('error.orders.failedToUpdateOrderStatus'),
+  //     });
+  //   },
+  // });
 
-  const changePriority = useMutation({
-    mutationFn: async (priority: Order.Type['priority']) => {
-      setSelectedPriority(priority);
-      await updateOrder(order.id, { priority });
-      return router.push(`/orders/${order.id}`);
-    },
-    onSuccess: () => {
-      toast.success('Success', {
-        description: t('success.orders.orderPriorityUpdated'),
-      });
-    },
-    onError: () => {
-      setSelectedPriority(order.priority);
-      toast.error('Error', {
-        description: t('error.orders.failedToUpdateOrderPriority'),
-      });
-    },
-  });
+  // const changePriority = useMutation({
+  //   mutationFn: async (priority: Order.Type['priority']) => {
+  //     setSelectedPriority(priority);
+  //     await updateOrder(order.id, { priority });
+  //     return router.push(`/orders/${order.id}`);
+  //   },
+  //   onSuccess: () => {
+  //     toast.success('Success', {
+  //       description: t('success.orders.orderPriorityUpdated'),
+  //     });
+  //   },
+  //   onError: () => {
+  //     setSelectedPriority(order.priority);
+  //     toast.error('Error', {
+  //       description: t('error.orders.failedToUpdateOrderPriority'),
+  //     });
+  //   },
+  // });
 
   const changeDate = useMutation({
     mutationFn: async (due_date: Order.Type['due_date']) => {
@@ -164,35 +166,35 @@ const   AsideOrderInformation = ({
   //   retry: 5,
   // });
 
-  const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
-  const priorities = ['low', 'medium', 'high'];
+  // const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
+  // const priorities = ['low', 'medium', 'high'];
 
-  const statusOptions = statuses.map((status) => {
-    const camelCaseStatus = status.replace(/_./g, (match) =>
-      match.charAt(1).toUpperCase(),
-    );
-    return {
-      value: status,
-      label: t(`details.statuses.${camelCaseStatus}`)
-        .replace(/_/g, ' ')
-        .replace(/^\w/, (c) => c.toUpperCase()),
-    };
-  });
+  // const statusOptions = statuses.map((status) => {
+  //   const camelCaseStatus = status.replace(/_./g, (match) =>
+  //     match.charAt(1).toUpperCase(),
+  //   );
+  //   return {
+  //     value: status,
+  //     label: t(`details.statuses.${camelCaseStatus}`)
+  //       .replace(/_/g, ' ')
+  //       .replace(/^\w/, (c) => c.toUpperCase()),
+  //   };
+  // });
 
-  const getStatusClassName = (status: string) =>
-    statusColors[
-      status as 'pending' | 'in_progress' | 'completed' | 'in_review'
-    ] ?? '';
+  // const getStatusClassName = (status: string) =>
+  //   statusColors[
+  //     status as 'pending' | 'in_progress' | 'completed' | 'in_review'
+  //   ] ?? '';
 
-  const priorityOptions = priorities.map((priority) => ({
-    value: priority,
-    label: t(`details.priorities.${priority}`)
-      .replace(/_/g, ' ')
-      .replace(/^\w/, (c) => c.toUpperCase()),
-  }));
+  // const priorityOptions = priorities.map((priority) => ({
+  //   value: priority,
+  //   label: t(`details.priorities.${priority}`)
+  //     .replace(/_/g, ' ')
+  //     .replace(/^\w/, (c) => c.toUpperCase()),
+  // }));
 
-  const getPriorityClassName = (priority: string) =>
-    priorityColors[priority as 'low' | 'medium' | 'high'] ?? '';
+  // const getPriorityClassName = (priority: string) =>
+  //   priorityColors[priority as 'low' | 'medium' | 'high'] ?? '';
 
   const searchUserOptions =
     orderAgencyMembers?.map((user) => ({
@@ -298,7 +300,7 @@ const   AsideOrderInformation = ({
             </span>
             <span className="pl-2 pr-2">
               {order.due_date ? (
-                new Date(order.due_date).toLocaleDateString()
+                format(new Date(order.due_date), 'MMM dd, yyyy')
               ) : (
                 <Trans i18nKey="orders:details.deadlineNotSet" />
               )}
