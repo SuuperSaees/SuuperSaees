@@ -8,7 +8,8 @@ import {
 import { Calendar } from '@kit/ui/calendar';
 import { cn } from '@kit/ui/utils';
 import { DateRange } from '@kit/ui/calendar';
-import { format } from 'date-fns';
+// import { format } from 'date-fns';
+import { formatDisplayDate } from '@kit/shared/utils';
 import { useTranslation } from 'react-i18next';
 import { Subtask } from '~/lib/tasks.types';
 import { useState } from 'react';
@@ -36,14 +37,15 @@ export function DatePickerWithRange({
   shortFormat = false
 }: DatePickerWithRangeProps & React.HTMLAttributes<HTMLDivElement>) {
 
-  const { t } = useTranslation(['tasks','orders']);
+  const { t, i18n } = useTranslation(['tasks','orders']);
+  const language = i18n.language;
   const [selectedPeriod, setSelectedPeriod] = useState<DateRange | undefined>(initialPeriod)
   const [open, setOpen] = useState(false);
 
   const formattedDateRange = selectedPeriod?.from && selectedPeriod?.to
     ? shortFormat 
-        ? `${format(selectedPeriod.to, 'MMMM d')}` 
-        : `${format(selectedPeriod.from, `MMMM d '${t('dateConector')}' yyyy`)} - ${format(selectedPeriod.to, `MMMM d '${t('dateConector')}' yyyy`)}`
+        ? `${formatDisplayDate(selectedPeriod.to, language)}` 
+        : `${formatDisplayDate(selectedPeriod.from, language)} - ${formatDisplayDate(selectedPeriod.to, language)}`
     : t('select_date_range',{ns: 'orders'});
   
 

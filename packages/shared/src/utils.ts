@@ -22,3 +22,74 @@ export function formatCurrency(currencyCode: string, value: string | number) {
 
   return isInteger ? formattedValue.replace(/\.00$/, '') : formattedValue;
 }
+
+export const formatDisplayDate = (
+  date: Date,
+  language: string,
+  fullMonth = false,
+) => {
+  const isSpanish = language.startsWith('es');
+  const months = {
+    en: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ],
+    es: [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ],
+  };
+
+  const month =
+    months[isSpanish ? 'es' : 'en'][
+      fullMonth ? date.getMonth() + 12 : date.getMonth()
+    ];
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  return isSpanish ? `${month} ${day}, ${year}` : `${month} ${day}, ${year}`;
+};
