@@ -22,11 +22,22 @@ import { BriefCreationForm } from './brief-creation-form';
 
 export interface UploadImageDropzoneProps {
   index: number | undefined;
-  nameField: `questions.${number}.label` | `questions.${number}.options` | `questions.${number}.type` | `questions.${number}.position` | `questions.${number}.description` | `questions.${number}.placeholder` | `questions.${number}.alert_message` | `questions.${number}.options.${number}.label` | `questions.${number}.options.${number}.value`;
+  nameField:
+    | `questions.${number}.label`
+    | `questions.${number}.options`
+    | `questions.${number}.type`
+    | `questions.${number}.position`
+    | `questions.${number}.description`
+    | `questions.${number}.placeholder`
+    | `questions.${number}.alert_message`
+    | `questions.${number}.options.${number}.label`
+    | `questions.${number}.options.${number}.value`
+    | 'image_url'
+    | 'label';
   form: UseFormReturn<BriefCreationForm>;
   handleQuestionChange: (urlImage: string) => void;
-  defaultValue? : string
-  handleRemove : () => void
+  defaultValue?: string | null;
+  handleRemove: () => void;
 }
 
 const UploadImage: React.FC<UploadImageDropzoneProps> = ({
@@ -35,7 +46,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   form,
   handleQuestionChange,
   defaultValue,
-  handleRemove
+  handleRemove,
 }) => {
   const { t } = useTranslation('briefs');
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -89,7 +100,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
       const finalUrl = fileData[0]?.url ?? fileUrl;
       setImageUrl(finalUrl);
       handleQuestionChange(finalUrl);
-      
+
       toast.success(t('uploadImage.uploadSuccess'));
     } catch (error) {
       console.error(error);
@@ -148,9 +159,8 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   };
 
   const handleRemoveImage = () => {
-    
     handleRemove();
-    
+
     setImageUrl('');
     if (index !== undefined) {
       form.setValue(`questions.${index}.label`, '');
@@ -183,9 +193,9 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
                   variant="secondary"
                   size="sm"
                   onClick={handleRemoveImage}
-                  className='rounded-full w-8 h-8 p-2'
+                  className="h-8 w-8 rounded-full p-2"
                 >
-                  <Trash strokeWidth={1.7} className='w-full' />
+                  <Trash strokeWidth={1.7} className="w-full" />
                 </Button>
               </div>
             </div>
@@ -219,9 +229,8 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
                   )}
                 </div>
                 <input
-              
                   placeholder={t('uploadImage.placeholder')}
-                  className="bg-transparent pointer-events-none mb-[0.30rem] border-none text-center text-sm font-normal text-gray-400 focus:outline-none w-full"
+                  className="pointer-events-none mb-[0.30rem] w-full border-none bg-transparent text-center text-sm font-normal text-gray-400 focus:outline-none"
                 />
                 <p className="pointer-events-none border-none text-center text-sm font-normal text-gray-400 focus:outline-none">
                   {t('uploadImage.fileTypes')}

@@ -1,6 +1,8 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
 import { arrayMove } from '@dnd-kit/sortable';
+
+import { FormField as ServerFormField } from '~/lib/form-field.types';
 
 import { useGenerateContent } from '../configs/content';
 import { useGenerateInputs } from '../configs/inputs';
@@ -9,11 +11,14 @@ import {
   FormField,
   Input,
   InputTypes,
+  Option,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
 
 // Centralized FormField State Management Hook
-export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widgets' | 'settings'>>) => {
+export const useBriefFormFields = (
+  setActiveTab: Dispatch<SetStateAction<'widgets' | 'settings'>>,
+) => {
   const [formFields, setFormFields] = useState<FormField[]>([]);
 
   const [currentFormField, setCurrentFormField] = useState<
@@ -35,6 +40,38 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
 
   // title, enriched text, image, video
   const content = Array.from(contentMap.values());
+
+  // Helper to create default form fields
+  const createDefaultFormFields = useCallback(
+    (formFields: ServerFormField.Response[]): { defaultFormFields: FormField[]; defaultInitialFormField: FormField | null } => {
+      let defaultInitialFormField: FormField | null = null;
+        
+      // Process form fields
+      const defaultFormFields = formFields
+        .map((field) => {
+          const newField = {
+            ...field,
+            options: isValidOptions(field.options) ? field.options : null, // Ensure options are valid
+          };
+  
+          // Check if the field is the default initial one (position 0)
+          if (field.position === 0) {
+            defaultInitialFormField = newField; // Assign the default initial field
+            defaultInitialFormField.position = 0
+            return null; // Exclude from the defaultFormFields array
+          }
+  
+          return newField;
+        })
+        .filter((field) => field !== null); // Filter out null values
+  
+      return {
+        defaultFormFields,
+        defaultInitialFormField,
+      };
+    },
+    []
+  );
 
   // Helper to update field positions consistently
   function updateFieldPositions(fields: FormField[]): FormField[] {
@@ -59,7 +96,7 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
     // Ensure newFormField is defined or create a default object
     if (!newFormField) {
       newFormField = {
-        id: nextIndexId,
+        id: 'create-form-field-' + nextIndexId,
         type: formFieldType,
         label: '',
         placeholder: '',
@@ -69,7 +106,7 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
     } else {
       newFormField = {
         ...newFormField,
-        id: nextIndexId,
+        id: 'create-form-field-' + nextIndexId,
         position: nextIndexId,
       };
     }
@@ -98,13 +135,13 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
 
     setCurrentFormField(newFormField);
     setIsEditing(true);
-    setActiveTab('widgets')
+    setActiveTab('widgets');
 
     return newFormField;
   };
 
   // Remove a form field by id
-  const removeFormField = (id: number) => {
+  const removeFormField = (id: string) => {
     setFormFields((prevFields) => {
       const updatedFormFields = prevFields.filter((field) => field.id !== id);
       return updateFieldPositions(updatedFormFields);
@@ -114,7 +151,7 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
   };
 
   // Update a form field
-  const updateFormField = (id: number, updatedFormField: FormField) => {
+  const updateFormField = (id: string, updatedFormField: FormField) => {
     setFormFields((prevFields) => {
       const index = prevFields.findIndex((field) => field.id === id);
       if (index !== -1) {
@@ -124,7 +161,7 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
       }
       return prevFields;
     });
-    if(updatedFormField.type == 'image'){
+    if (updatedFormField.type == 'image') {
       setCurrentFormField(updatedFormField);
     }
   };
@@ -133,6 +170,8 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
   const swapFormFields = (fromIndex: number, toIndex: number) => {
     setFormFields((prevFields) => {
       const reorderedFields = arrayMove(prevFields, fromIndex, toIndex);
+      console.log('reorderedFields', reorderedFields);
+      console.log('new positions', updateFieldPositions(reorderedFields));
       return updateFieldPositions(reorderedFields);
     });
   };
@@ -144,28 +183,28 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
   const startEditing = () => setIsEditing(true);
 
   // Edit form field
-  const editFormField = (id: number) => {
-    const index = formFields.findIndex(formField => formField.id === id);
+  const editFormField = (id: string) => {
+    const index = formFields.findIndex((formField) => formField.id === id);
     setCurrentFormField(formFields[index]);
     startEditing();
-    setActiveTab('widgets')
+    setActiveTab('widgets');
   };
 
   // Duplicate form field
-  const duplicateFormField = (id: number) => {
-    const index = formFields.findIndex(formField => formField.id === id);
+  const duplicateFormField = (id: string) => {
+    const index = formFields.findIndex((formField) => formField.id === id);
     const formField = formFields[index];
     if (!formField) return;
 
     const duplicatedFormField = {
       ...formField,
-      id: formFields.length + 1,
+      id: 'create-form-field-' + formFields.length + 1,
     };
 
     setFormFields((prevFields) =>
       updateFieldPositions([...prevFields, duplicatedFormField]),
     );
-    setActiveTab('widgets')
+    setActiveTab('widgets');
   };
 
   return {
@@ -177,6 +216,7 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
     currentFormField,
     isEditing,
     setFormFields,
+    createDefaultFormFields,
     addFormField,
     removeFormField,
     updateFormField,
@@ -187,3 +227,14 @@ export const useBriefFormFields = (setActiveTab: Dispatch<SetStateAction<'widget
     swapFormFields,
   };
 };
+
+// Guard to ensure the options property inside form fields follow the correct format ({ label: string, value: string, selected?: string }[])
+function isValidOptions(options: unknown): options is Option[] {
+  if (!Array.isArray(options)) return false;
+  return options.every(
+    (option) =>
+      option !== null &&
+      typeof option.label === 'string' &&
+      typeof option.value === 'string',
+  );
+}

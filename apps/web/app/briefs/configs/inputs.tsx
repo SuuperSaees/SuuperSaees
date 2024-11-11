@@ -1,4 +1,5 @@
 'use client';
+
 import {
   CalendarCheck2,
   CheckSquare,
@@ -8,16 +9,16 @@ import {
   TextIcon,
   Upload,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import FormFieldDatePicker from '../components/input-fields/date-picker';
 import FormFieldDropdown from '../components/input-fields/dropdown';
-import { FormFieldShortText } from '../components/input-fields/short-text';
 import FormFieldMultipleChoice from '../components/input-fields/multiple-choice';
-import { ComponentProps, Input, InputTypes } from '../types/brief.types';
+import { FormFieldShortText } from '../components/input-fields/short-text';
+import FormFieldSingleChoice from '../components/input-fields/single-choice';
 import TextLarge from '../components/input-fields/text-large';
 import UploadFiles from '../components/input-fields/upload-files';
-import { useTranslation } from 'react-i18next';
-import FormFieldSingleChoice from '../components/input-fields/single-choice';
+import { ComponentProps, Input, InputTypes } from '../types/brief.types';
 
 // Import your custom components
 type InputKey = InputTypes;
@@ -27,7 +28,7 @@ type InputMap = Map<InputKey, InputValue>;
 export const useGenerateInputs = (
   action: (inputName: InputTypes) => void,
 ): InputMap => {
-  const {t} = useTranslation('briefs')
+  const { t } = useTranslation('briefs');
   return new Map([
     [
       'text-short',
@@ -40,7 +41,9 @@ export const useGenerateInputs = (
           placeholder: '',
           description: '',
           type: 'text-short',
-          required: false
+          required: false,
+          position: -1,
+          id: 'create-form-field-0',
         },
         component: (props: ComponentProps) => (
           <FormFieldShortText
@@ -64,7 +67,9 @@ export const useGenerateInputs = (
           placeholder: '',
           description: '',
           type: 'text-large',
-          required: false
+          required: false,
+          position: -1,
+          id: 'create-form-field-0',
         },
         component: (props: ComponentProps) => (
           <TextLarge
@@ -88,7 +93,9 @@ export const useGenerateInputs = (
           placeholder: '',
           description: '',
           type: 'file',
-          required: false
+          required: false,
+          position: -1,
+          id: 'create-form-field-0',
         },
         component: (props: ComponentProps) => (
           <UploadFiles
@@ -127,6 +134,8 @@ export const useGenerateInputs = (
             },
           ],
           required: false,
+          position: -1,
+          id: 'create-form-field-0',
         },
         component: (props: ComponentProps) => (
           <FormFieldMultipleChoice
@@ -165,6 +174,8 @@ export const useGenerateInputs = (
             },
           ],
           required: false,
+          position: -1,
+          id: 'create-form-field-0',
         },
         component: (props: ComponentProps) => (
           <FormFieldSingleChoice
@@ -203,6 +214,8 @@ export const useGenerateInputs = (
             },
           ],
           required: false,
+          position: -1,
+          id: 'create-form-field-0'
         },
         component: (props: ComponentProps) => (
           <FormFieldDropdown
@@ -226,7 +239,9 @@ export const useGenerateInputs = (
           placeholder: '',
           description: '',
           type: 'date',
-          required: false
+          required: false,
+          position: -1,
+          id: 'create-form-field-0',
         },
         component: (props: ComponentProps) => (
           <FormFieldDatePicker

@@ -1,4 +1,3 @@
-import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
@@ -6,22 +5,9 @@ import { Textarea } from '@kit/ui/textarea';
 import { cn } from '@kit/ui/utils';
 
 import { BriefsProvider } from '../../contexts/briefs-context';
-import { FormField as FormFieldType } from '../../types/brief.types';
-import { BriefCreationForm } from '../brief-creation-form';
+import { ComponentProps } from '../../types/brief.types';
 
-export interface FormFieldTextLargeProps {
-  index: number;
-  question: FormFieldType;
-  form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (
-    index: number,
-    field: 'label' | 'description' | 'placeholder',
-    value: string,
-  ) => void;
-  handleRemoveQuestion: (index: number) => void;
-}
-
-const TextLarge: React.FC<FormFieldTextLargeProps> = ({
+const TextLarge: React.FC<ComponentProps> = ({
   index,
   question,
   form,
@@ -46,7 +32,7 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                       readOnly
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        handleQuestionChange(index, 'label', e.target.value)
+                        handleQuestionChange(question.id, 'label', e.target.value)
                       }
                       placeholder={t('textLarge.title')}
                       className="border-none bg-transparent text-sm font-bold text-gray-600 focus:outline-none w-full"
@@ -67,9 +53,9 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                       {...field}
                       readOnly
                       value={question.description ?? ''}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         handleQuestionChange(
-                          index,
+                          question.id,
                           'description',
                           e.target.value,
                         )
@@ -94,12 +80,12 @@ const TextLarge: React.FC<FormFieldTextLargeProps> = ({
                         'w-full focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-400 bg-white',
                       )}
                       placeholder={t('textLarge.placeholder')}
-                      value={question.placeholder}
+                      value={question.placeholder ?? ''}
                       rows={5}
                       readOnly
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         handleQuestionChange(
-                          index,
+                          question.id,
                           'placeholder',
                           e.target.value,
                         )

@@ -7,7 +7,7 @@ const Options = ({
   className,
   ...rest
 }: {
-  formFieldId: number;
+  formFieldId: string;
   className?: string;
   [key: string]: unknown;
 }) => {

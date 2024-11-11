@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem} from '@kit/ui/form';
@@ -17,12 +16,9 @@ const UploadImagePreview: React.FC<UploadImageProps> = ({
   question,
   form,
 }) => {
-  const [imageUrl, setImageUrl] = useState<string | null>(() => {
-    const initialValue = question.label;
-    return initialValue && initialValue.toLowerCase() !== 'image'
-      ? initialValue
+  const imageUrl = question.label.toLowerCase() !== 'image'
+      ? question.label
       : '';
-  });
 
   const isValidImageUrl = (url: string | null): boolean => {
     if (!url) return false;

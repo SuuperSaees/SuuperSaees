@@ -67,7 +67,6 @@ export default function Panel() {
         className="h-full max-h-full shrink overflow-y-auto"
       >
         <BriefCreationForm
-          propietaryOrganizationId=""
           userRole=""
           showFormFields={false}
           showInfo

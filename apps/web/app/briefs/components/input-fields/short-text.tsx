@@ -1,33 +1,19 @@
 'use client';
 
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
-import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
 import { BriefsProvider } from '../../contexts/briefs-context';
-import { FormField as FormFieldType } from '../../types/brief.types';
-import { BriefCreationForm } from '../brief-creation-form';
-
-export interface FormFieldShortTextProps {
-  index: number;
-  question: FormFieldType;
-  form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (
-    index: number,
-    field: 'label' | 'description' | 'placeholder',
-    value: string,
-  ) => void;
-  handleRemoveQuestion: (index: number) => void;
-}
+import { ComponentProps} from '../../types/brief.types';
 
 export function FormFieldShortText({
   index,
   question,
   form,
   handleQuestionChange,
-}: FormFieldShortTextProps) {
+}: ComponentProps) {
   const { t } = useTranslation();
 
   return (
@@ -49,7 +35,7 @@ export function FormFieldShortText({
                       readOnly
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        handleQuestionChange(index, 'label', e.target.value)
+                        handleQuestionChange(question.id, 'label', e.target.value)
                       }
                       placeholder={t('creation.form.labelPlaceholder')}
                       className="bg-transparent border-none text-sm font-bold text-gray-600 focus:outline-none w-full"
@@ -71,9 +57,9 @@ export function FormFieldShortText({
                       readOnly
                       {...field}
                       value={question.description ?? ''}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         handleQuestionChange(
-                          index,
+                          question.id,
                           'description',
                           e.target.value,
                         )
@@ -100,7 +86,7 @@ export function FormFieldShortText({
                       value={question.placeholder}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(
-                          index,
+                          question.id,
                           'placeholder',
                           e.target.value,
                         )

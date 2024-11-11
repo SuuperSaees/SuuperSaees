@@ -12,7 +12,7 @@ import { FormField } from '../types/brief.types';
 type TranslationFunction = (key: string) => string;
 
 export function useVideoHandler(t: TranslationFunction, form: UseFormReturn<z.infer<typeof widgetEditSchema>>, currentFormField: FormField | undefined, updateFormField: (
-  index: number,
+  id: string,
   updatedFormField: FormField,
 ) => void) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -86,7 +86,7 @@ export function useVideoHandler(t: TranslationFunction, form: UseFormReturn<z.in
       setIsVideoValid(true);
 
       if (currentFormField) {
-        updateFormField(currentFormField.id, { ...form.getValues(), id: currentFormField.id, label: finalUrl });
+        updateFormField(currentFormField.id, { ...form.getValues(), position: currentFormField.position, label: finalUrl });
       }
 
       toast.success(t('video.uploadSuccess'));
@@ -112,7 +112,7 @@ export function useVideoHandler(t: TranslationFunction, form: UseFormReturn<z.in
         setSelectedFileName(url);
 
         if (currentFormField) {
-          updateFormField(currentFormField.id, { ...form.getValues(), id: currentFormField.id, label: url });
+          updateFormField(currentFormField.id, { ...form.getValues(), position: currentFormField.position, label: url });
         }
         toast.success(t('video.urlAddedSuccess'));
       } else {
@@ -153,7 +153,7 @@ export function useVideoHandler(t: TranslationFunction, form: UseFormReturn<z.in
     setIsVideoValid(false);
     setSelectedFileName('');
     if (currentFormField) {
-      updateFormField(currentFormField.id, { ...form.getValues(), id: currentFormField.id, label: '' });
+      updateFormField(currentFormField.id, { ...form.getValues(), position: currentFormField.position, label: '' });
     }
   };
 

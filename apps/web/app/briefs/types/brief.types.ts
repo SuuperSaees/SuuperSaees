@@ -1,8 +1,11 @@
 import { UseFormReturn } from 'react-hook-form';
-
-import { Brief } from '~/lib/brief.types';
-
 import { BriefCreationForm } from '../components/brief-creation-form';
+import { FormField as FormFieldType } from '~/lib/form-field.types';
+import { Brief as BriefType } from '~/lib/brief.types';
+import { Service } from '~/lib/services.types';
+
+type FormFieldType = FormFieldType.Insert;
+type BriefType = BriefType.Type;
 
 export type Option = {
   label: string;
@@ -11,28 +14,36 @@ export type Option = {
 };
 
 export type FormField = Omit<
-  Brief.Relationships.FormField,
+  FormFieldType,
   'created_at' | 'id'
 > & {
-  id: number;
-  options?: Option[];
+  options?: Option[] | null;
+  id: string;
 };
+
+export type Brief = Pick<BriefType , 'name'> & {
+  id?: BriefType['id'];
+  description?: BriefType['description'];
+  image_url?: BriefType['image_url'];
+  services: Pick<Service.Response, 'id' | 'name'>[];
+}
 
 export type ComponentProps = {
   index: number;
   question: FormField;
   form: UseFormReturn<BriefCreationForm>;
   handleQuestionChange: (
-    index: number,
+    id: string,
     field:
       | 'label'
       | 'description'
       | 'placeholder'
-      | `options.${number}.selected`,
+      | `options.${number}.selected` | 'image_url', 
     value: string | boolean | Date,
   ) => void;
-  handleRemoveQuestion: (index: number) => void;
-  userRole: string;
+  handleRemoveQuestion: (id: string) => void;
+  userRole?: string;
+  inSidebar?: boolean;
 };
 
 export type InputTypes =

@@ -1,26 +1,12 @@
 import { CloudUpload } from 'lucide-react';
-import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
 import { BriefsProvider } from '../../contexts/briefs-context';
-import { FormField as FormFieldType } from '../../types/brief.types';
-import { BriefCreationForm } from '../brief-creation-form';
+import { ComponentProps } from '../../types/brief.types';
 
-export interface UploadFilesProps {
-  index: number;
-  question: FormFieldType;
-  form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (
-    index: number,
-    field: 'label' | 'description' | 'placeholder',
-    value: string,
-  ) => void;
-  handleRemoveQuestion: (index: number) => void;
-}
-
-const UploadFiles: React.FC<UploadFilesProps> = ({
+const UploadFiles: React.FC<ComponentProps> = ({
   index,
   question,
   form,
@@ -49,7 +35,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                       {...field}
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        handleQuestionChange(index, 'label', e.target.value)
+                        handleQuestionChange(question.id, 'label', e.target.value)
                       }
                       style={{
                         width: `${Math.max(question.label.length, t('uploadFiles.title').length) + 1}ch`,
@@ -76,7 +62,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(
-                          index,
+                          question.id,
                           'description',
                           e.target.value,
                         )
@@ -107,7 +93,7 @@ const UploadFiles: React.FC<UploadFilesProps> = ({
                         value={question.placeholder ?? ''}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           handleQuestionChange(
-                            index,
+                            question.id,
                             'placeholder',
                             e.target.value,
                           )
