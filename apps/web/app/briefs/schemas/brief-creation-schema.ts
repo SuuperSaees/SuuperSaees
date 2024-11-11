@@ -8,11 +8,12 @@ export const briefCreationFormSchema = z.object({
     description: z.string().optional().nullable(),
     image_url: z.string().optional().nullable(),
     default_question: z.object({
+        id: z.string().optional(),
         label: z.string().min(1, { message: 'Question label cannot be empty.' }),
         description: z.string().optional().nullable(),
         placeholder: z.string().optional().nullable(),
         position: z.number(),
-        required: z.boolean().optional(),
+        required: z.boolean().optional().nullable(),
         type: z
           .enum([
             'text',
@@ -40,18 +41,18 @@ export const briefCreationFormSchema = z.object({
               label: z.string(),
               value: z.string(),
               selected: z.boolean().optional(),
-            }),
+            })
           )
-          .optional(),
+          .optional().nullable(),
     }),
     questions: z.array(
       z.object({
-        id: z.union([z.string(), z.number()]).optional().nullable(),
+        id: z.string().optional(),
         position: z.number(),
         label: z.string().min(1, { message: 'Question label cannot be empty.' }),
         description: z.string().optional().nullable(),
         placeholder: z.string().optional().nullable(),
-        required: z.boolean().optional(),
+        required: z.boolean().optional().nullable(),
         type: z
           .enum([
             'text',

@@ -92,7 +92,7 @@ export const fetchFormfieldsWithResponses = async (
     const client =  getSupabaseServerComponentClient();
     const { data: briefFormFields, error: errorBriefFormFields } = await client
       .from('brief_responses')
-      .select(`field:form_fields(id, description, label, type, options, placeholder, position, alert_message),
+      .select(`field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required),
         response
         
         ` 
@@ -140,7 +140,7 @@ export const fetchClientBriefs = async (
     const { data: briefsData, error: briefsError } = await client
       .from('briefs')
       .select(
-        `id, created_at, name, propietary_organization_id, description, image_url,
+        `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
         form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
         services ( name )`,
       )
@@ -162,7 +162,7 @@ export const fetchBriefs = async (
     const { data: briefsData, error: briefsError } = await client
       .from('briefs')
       .select(
-        ' id, created_at, name, propietary_organization_id, description, image_url, services ( name )',
+        ' id, created_at, name, propietary_organization_id, description, image_url, deleted_on, services ( name )',
       );
     if (briefsError)
       throw new Error(`Error fetching the briefs, ${briefsError.message}`);
@@ -183,7 +183,7 @@ export const fetchBriefsByOrgOwnerId = async (
     const { data: briefsData, error: briefsError } = await client
       .from('briefs')
       .select(
-        `id, created_at, name, propietary_organization_id, description, image_url,
+        `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
         form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
         services ( name )`,
       )
@@ -199,25 +199,26 @@ export const fetchBriefsByOrgOwnerId = async (
   }
 };
 
-export const getBriefsById = async (
+export const getBriefById = async (
   id: string
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { data: briefsData, error: briefsError } = await client
+    const { data: briefData, error: briefsError } = await client
       .from('briefs')
       .select(
         `id, created_at, name, propietary_organization_id, description, image_url, brief_form_fields 
-        ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message)),
+        ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
          services (name, id)`
       )
-      .eq('id', id);
+      .eq('id', id)
+      .single();
 
     if (briefsError) {
       throw new Error(`Error fetching the briefs, ${briefsError.message}`);
     }
 
-    return briefsData;
+    return briefData;
   } catch (error) {
     console.error(error);
     throw error;

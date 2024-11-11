@@ -19,6 +19,7 @@ export namespace Brief {
   export type Insert = Database['public']['Tables']['briefs']['Insert'];
   export type Update = Database['public']['Tables']['briefs']['Update'];
 
+  // This represent the response from the server
   export type Response = Pick<
     Brief.Type,
     | 'id'
@@ -27,7 +28,17 @@ export namespace Brief {
     | 'description'
     | 'image_url'
     | 'propietary_organization_id'
+    | 'deleted_on'
   > | null;
+
+  // This represent the request from the client to the server
+  export namespace Request {
+    export type Create = Omit<Brief.Insert, 'propietary_organization_id'>;
+    export type Update = Omit<Brief.Update, 'propietary_organization_id'> & {
+      id: Brief.Type['id'];
+    }
+  }
+  
 
   export namespace Relationships {
     export namespace Services {

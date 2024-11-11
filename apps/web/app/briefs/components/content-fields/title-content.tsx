@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -11,18 +10,9 @@ import {
 } from '@kit/ui/form';
 
 import { BriefsProvider } from '../../contexts/briefs-context';
-import { FormField as FormFieldType } from '../../types/brief.types';
-import { BriefCreationForm } from '../brief-creation-form';
+import { ComponentProps } from '~/briefs/types/brief.types';
 
-export interface FormTitleComponentProps {
-  index: number;
-  question: FormFieldType;
-  form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (index: number, field: 'label', value: string) => void;
-  handleRemoveQuestion: (index: number) => void;
-}
-
-const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
+const FormTitleComponent: React.FC<ComponentProps> = ({
   index,
   question,
   form,
@@ -46,8 +36,8 @@ const FormTitleComponent: React.FC<FormTitleComponentProps> = ({
                       {...field}
                       readOnly
                       value={question.label}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        handleQuestionChange(index, 'label', e.target.value)
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        handleQuestionChange(question.id, 'label', e.target.value)
                       }
                       placeholder={t('title.placeholder')}
                       className="bg-transparent w-full break-words text-2xl font-bold leading-9 text-gray-600"

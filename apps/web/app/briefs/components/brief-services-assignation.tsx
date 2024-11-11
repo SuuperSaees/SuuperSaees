@@ -9,13 +9,13 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import CheckboxCombobox from '~/components/ui/checkbox-combobox';
-import { Service } from '~/lib/services.types';
 import ServiceTags from '~/orders/create/components/service-tags';
 import { getServices } from '~/team-accounts/src/server/actions/services/get/get-services';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { BriefCreationForm } from './brief-creation-form';
 import { Button } from '@kit/ui/button';
+import { Brief } from '../types/brief.types';
 
 interface BriefServicesAssignationProps {
   form: UseFormReturn<BriefCreationForm>;
@@ -26,7 +26,7 @@ export default function BriefServicesAssignation({
   const { brief, updateBrief } = useBriefsContext();
   const { t } = useTranslation('briefs');
 
-  const [selectedServices, setSelectedService] = useState<Service.Response[]>(
+  const [selectedServices, setSelectedService] = useState<Brief['services']>(
     brief?.services ?? [],
   );
   // Context to manage form fields
