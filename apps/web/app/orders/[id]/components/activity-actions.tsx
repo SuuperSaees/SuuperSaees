@@ -11,7 +11,7 @@ import { Activity, ActivityType } from '../context/activity-context';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
 import { convertToTitleCase } from '../utils/format-agency-names';
-
+import { formatDisplayDate } from '@kit/shared/utils';
 const translateActivity = (
   activity: Activity,
   t: TFunction<'logs', undefined>,
@@ -130,6 +130,8 @@ export const StatusActivity = ({
   activity,
   formattedActivity,
 }: ActivityActionProps) => {
+  const { i18n } = useTranslation();
+  const language = i18n.language;
   if (
     activity.type === ActivityType.STATUS ||
     activity.type === ActivityType.PRIORITY ||
@@ -155,7 +157,7 @@ export const StatusActivity = ({
             <span>{formattedActivity.preposition}</span>
             <span>
               {activity.type === 'due_date' &&
-                format(new Date(formattedActivity.value ?? ''), '	Pp')}
+                formatDisplayDate(new Date(formattedActivity.value ?? ''), language, true)}
             </span>
             {(activity.type === 'priority' || activity.type === 'status') && (
               <ActivityCustomSpan
@@ -178,6 +180,8 @@ export const DefaultAction = ({
   activity,
   formattedActivity,
 }: ActivityActionProps) => {
+  const { i18n } = useTranslation();
+  const language = i18n.language;
   return (
     <div className="flex h-fit w-full justify-between gap-4">
       <div className="flex gap-4">
@@ -192,7 +196,7 @@ export const DefaultAction = ({
           <span>{formattedActivity.preposition}</span>
           <span>
             {activity.type === 'due_date'
-              ? format(new Date(formattedActivity.value ?? ''), '	Pp')
+              ? formatDisplayDate(new Date(formattedActivity.value ?? ''), language)
               : formattedActivity.value}
           </span>
         </span>

@@ -1,21 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-
-
-
-import { addHours, format, parseISO } from 'date-fns';
-
+import { addHours, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-
-
-
+import { formatDisplayDate } from '@kit/shared/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@kit/ui/alert-dialog';
 import { Button } from '@kit/ui/button';
 import { Calendar } from '@kit/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { cn } from '@kit/ui/utils';
-
 
 interface DatePickerProps {
   updateFn: (date: string) => void | Promise<void>;
@@ -23,7 +16,8 @@ interface DatePickerProps {
 }
 
 const DatePicker = ({ updateFn, defaultDate }: DatePickerProps) => {
-  const { t } = useTranslation('orders');
+  const { t, i18n } = useTranslation('orders');
+
   const [date, setDate] = React.useState<Date | undefined>(
     defaultDate?.toString()
       ? addHours(
@@ -35,11 +29,11 @@ const DatePicker = ({ updateFn, defaultDate }: DatePickerProps) => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const language = i18n.language
+
   async function onSubmit() {
     if (!date) return;
-
     await updateFn(date.toISOString());
-    // window.location.reload();
   }
 
   const handleDateChange = (selectedDate: Date | undefined) => {
@@ -68,7 +62,7 @@ const DatePicker = ({ updateFn, defaultDate }: DatePickerProps) => {
               !date && 'text-muted-foreground',
             )}
           >
-            {date ? format(date, 'dd-MM-yyyy') : t('selectDateLabel')}
+            {date ? formatDisplayDate(date, language) : t('selectDateLabel')}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
