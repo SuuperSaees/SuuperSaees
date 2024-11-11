@@ -1,32 +1,15 @@
 import React, { useState } from 'react';
 
-import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
 import { BriefsProvider } from '../../contexts/briefs-context';
-import { FormField as FormFieldType } from '../../types/brief.types';
-import { BriefCreationForm } from '../brief-creation-form';
+import { ComponentProps } from '../../types/brief.types';
 import { RadioOption } from '../options';
 
-export interface FormFieldSingleChoiceProps {
-  index: number;
-  question: FormFieldType;
-  form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (
-    index: number,
-    field:
-      | 'label'
-      | 'description'
-      | 'placeholder'
-      | `options.${number}.selected`,
-    value: string | boolean,
-  ) => void;
-  handleRemoveQuestion: (index: number) => void;
-}
 
-const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
+const FormFieldSingleChoice: React.FC<ComponentProps> = ({
   index,
   question,
   form,
@@ -39,7 +22,7 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
 
   const handleOptionChange = (value: string, optIndex: number) => {
     setSelectedOption(value);
-    handleQuestionChange(index, `options.${optIndex}.selected`, true);
+    handleQuestionChange(question.id, `options.${optIndex}.selected`, true);
   };
 
   return (
@@ -61,7 +44,7 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
                         {...field}
                         value={question.label}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleQuestionChange(index, 'label', e.target.value)
+                          handleQuestionChange(question.id, 'label', e.target.value)
                         }
                         placeholder={t('singleChoice.title')}
                         className="bg-transparent w-full border-none text-sm font-bold text-gray-600 focus:outline-none"
@@ -85,7 +68,7 @@ const FormFieldSingleChoice: React.FC<FormFieldSingleChoiceProps> = ({
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(
-                          index,
+                          question.id,
                           'description',
                           e.target.value,
                         )

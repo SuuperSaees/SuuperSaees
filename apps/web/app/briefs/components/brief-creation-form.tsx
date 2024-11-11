@@ -16,21 +16,23 @@ import {
 } from '@kit/ui/form';
 
 import AddElementButton from '~/components/add-element-button';
-import { Brief } from '~/lib/brief.types';
+import { FormField as FormFieldType } from '~/lib/form-field.types';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
+import { Brief } from '../types/brief.types';
 import BriefServicesAssignation from './brief-services-assignation';
 import FieldsetFields from './fieldset-fields';
 import FieldsetInformation from './fieldset-information';
 
+type FormFieldType = FormFieldType.Response
+
 type CreateBriefDialogProps = {
-  propietaryOrganizationId: string;
   userRole: string;
   showFormFields?: boolean;
   showInfo?: boolean;
-  defaultValues?: Brief.Relationships.FormField[];
-  defaultBriefInfo?: Brief.Insert;
+  defaultFormFields?: FormFieldType[];
+  defaultBriefInfo?: Brief;
 };
 
 export type BriefCreationForm = z.infer<typeof briefCreationFormSchema>;
@@ -39,25 +41,25 @@ const BriefCreationForm = ({
   userRole,
   showFormFields = true,
   showInfo = false,
-  defaultValues = [],
+  defaultFormFields = [],
   defaultBriefInfo = {
     name: '',
     description: '',
     image_url: '',
-    propietary_organization_id: '',
     services: [],
   },
 }: CreateBriefDialogProps) => {
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
-  const isUpdate = defaultValues.length > 0; // Check if the form is for updating an existing brief
+  const isUpdate = defaultFormFields.length > 0; // Check if the form is for updating an existing brief
   const {
     addFormField,
-    formFields,
-    brief,
-    onSubmit,
-    form,
     setFormFields,
     setBrief,
+    onSubmit,
+    createDefaultFormFields,
+    formFields,
+    brief,
+    form,
   } = useBriefsContext(); // Context to manage form fields
 
   // Handle adding a new question to the form
@@ -68,22 +70,43 @@ const BriefCreationForm = ({
   };
 
   useEffect(() => {
-    if (defaultValues.length) {
-      form.setValue('questions', defaultValues);
-      setFormFields(defaultValues);
-      form.setValue('name', defaultBriefInfo.name);
-      form.setValue('description', defaultBriefInfo.description);
-      form.setValue('image_url', defaultBriefInfo.image_url);
-      form.setValue(
-        'connected_services',
-        defaultBriefInfo?.services.map((service) => service.id),
-      );
+    if (defaultFormFields.length && !formFields.length) {
+      const {
+        defaultFormFields: formattedDefaultFormFields,
+        defaultInitialFormField,
+      } = createDefaultFormFields(defaultFormFields);
+      createDefaultFormFields(defaultFormFields);
+
+      if (defaultInitialFormField) {
+        form.setValue('default_question', defaultInitialFormField);
+      }
+      console.log('defaultQuestion', defaultInitialFormField);
+      console.log('formattedDefaultFormFields', formattedDefaultFormFields);
+      // form.setValue('questions', formattedDefaultFormFields);
+      setFormFields(formattedDefaultFormFields);
+      // form.setValue('name', defaultBriefInfo.name);
+      // form.setValue('description', defaultBriefInfo.description);
+      // form.setValue('image_url', defaultBriefInfo.image_url);
+      // form.setValue(
+      //   'connected_services',
+      //   defaultBriefInfo?.services.map((service) => service.id),
+      // );
       setBrief(defaultBriefInfo);
     }
-  }, [defaultValues]);
+  }, [
+    createDefaultFormFields,
+    defaultBriefInfo,
+    defaultFormFields,
+    form,
+    setBrief,
+    setFormFields,
+    formFields.length
+  ]);
 
   // Sync form state with context whenever formFields change
   useEffect(() => {
+    console.log('form', form.getValues(), 'errors', form.formState.errors);
+    console.log('formFields2', formFields);
     form.setValue('questions', formFields); // Ensure form state stays in sync with context
     form.setValue('name', brief.name);
     form.setValue('description', brief.description);
@@ -100,7 +123,6 @@ const BriefCreationForm = ({
     brief.name,
     brief.image_url,
     brief?.services,
-    defaultValues,
     setFormFields,
   ]); // Re-run effect when formFields or form change
 
@@ -134,8 +156,7 @@ const BriefCreationForm = ({
                   <ThemedInput
                     {...field}
                     placeholder={t('creation.form.defaultPlaceholder')}
-                    className="focus-visible:ring-none border-transparent font-medium text-gray-500 shadow-none focus:border-input placeholder:text-gray-400 placeholder:font-normal
-                    focus:px-4 p-0 "
+                    className="focus-visible:ring-none border-transparent p-0 font-medium text-gray-500 shadow-none placeholder:font-normal placeholder:text-gray-400 focus:border-input focus:px-4"
                   />
                 </FormControl>
                 <FormMessage />

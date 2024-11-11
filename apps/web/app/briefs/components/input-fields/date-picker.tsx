@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 import { CalendarIcon } from '@radix-ui/react-icons';
 import { format } from 'date-fns';
-import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
@@ -11,26 +10,9 @@ import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 
 import { BriefsProvider } from '../../contexts/briefs-context';
-import { FormField as FormFieldType } from '../../types/brief.types';
-import { BriefCreationForm } from '../brief-creation-form';
+import { ComponentProps } from '../../types/brief.types';
 
-export interface FormFieldDatePickerProps {
-  index: number;
-  question: FormFieldType;
-  form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (
-    index: number,
-    field:
-      | 'label'
-      | 'description'
-      | 'placeholder'
-      | `options.${number}.selected`,
-    value: string | boolean | Date,
-  ) => void;
-  handleRemoveQuestion: (index: number) => void;
-}
-
-const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
+const FormFieldDatePicker: React.FC<ComponentProps> = ({
   index,
   question,
   form,
@@ -42,7 +24,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date ?? null);
     if (date) {
-      handleQuestionChange(index, `options.0.selected`, date);
+      handleQuestionChange(question.id, `options.0.selected`, date);
     }
   };
 
@@ -65,7 +47,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                         {...field}
                         value={question.label}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleQuestionChange(index, 'label', e.target.value)
+                          handleQuestionChange(question.id, 'label', e.target.value)
                         }
 
                         placeholder={t('datePicker.title')}
@@ -90,7 +72,7 @@ const FormFieldDatePicker: React.FC<FormFieldDatePickerProps> = ({
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(
-                          index,
+                          question.id,
                           'description',
                           e.target.value,
                         )

@@ -117,7 +117,7 @@ const ClientsMembersPagePresentation = ({
                   </div>
                 )}
               </div>
-              {account?.role_hierarchy_level === 2 && subscriptionFetchedStripe && (
+              {/* {account?.role_hierarchy_level === 2 && subscriptionFetchedStripe && ( */}
                   <div
                     // className="invite-button-container"
                     // onMouseEnter={() => setShowDropdown(true)}
@@ -160,7 +160,7 @@ const ClientsMembersPagePresentation = ({
                       </div>
                     )} */}
                   </div>
-              )}
+              {/* )} */}
             </If>
           </div>
         </div>

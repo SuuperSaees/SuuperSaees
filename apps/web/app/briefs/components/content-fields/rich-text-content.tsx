@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { UseFormReturn } from 'react-hook-form';
-
 import {
   FormControl,
   FormField,
@@ -12,20 +10,9 @@ import {
 import RichTextEditor from '~/components/ui/rich-text-editor';
 
 import { BriefsProvider} from '../../contexts/briefs-context';
-import { FormField as FormFieldType } from '../../types/brief.types';
-import { BriefCreationForm } from '../brief-creation-form';
+import { ComponentProps } from '../../types/brief.types';
 
-export interface FormRichTextComponentProps {
-  index: number;
-  question?: FormFieldType;
-  form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange?: (content: string) => void;
-  handleRemoveQuestion: (index: number) => void;
-  userRole: string;
-  inSidebar?: boolean;
-}
-
-const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
+const FormRichTextComponent: React.FC<ComponentProps> = ({
   index,
   form,
   userRole,
@@ -46,7 +33,7 @@ const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
                 {...field}
                 content={question?.label}
                 onChange={handleQuestionChange}
-                userRole={userRole}
+                userRole={userRole ?? ''}
                 hideSubmitButton={true}
                 showToolbar={inSidebar}
                 isEditable={inSidebar ? true : false}
@@ -56,7 +43,7 @@ const FormRichTextComponent: React.FC<FormRichTextComponentProps> = ({
             <FormMessage>{fieldState.error?.message}</FormMessage>
           </div>
           {!inSidebar ? (
-            <BriefsProvider.Options formFieldId={index} className="ml-auto group-hover:flex hidden absolute right-0 top-0" />
+            <BriefsProvider.Options formFieldId={question?.id ?? 'create-form-field-' + index} className="ml-auto group-hover:flex hidden absolute right-0 top-0" />
           ) : (
             <></>
           )}

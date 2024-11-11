@@ -1,25 +1,26 @@
 import React from 'react';
+
 import { CirclePlay } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
 import { Button } from '@kit/ui/button';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
-import { UseFormReturn } from 'react-hook-form';
-import { FormField as FormFieldType } from '../types/brief.types';
-import { BriefCreationForm } from './brief-creation-form';
-import { BriefsProvider } from '../contexts/briefs-context';
+
 import { isValidVideoUrl, isYouTubeUrl } from '~/utils/upload-video';
+
+import { BriefsProvider } from '../contexts/briefs-context';
 import { useVideoUpload } from '../hooks/use-video-upload';
+import { ComponentProps } from '../types/brief.types';
 
-export interface FormVideoUploadProps {
-  index: number;
-  question: FormFieldType;
-  form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (index: number, field: 'label', value: string) => void;
-  handleRemoveQuestion: (index: number) => void;
-}
-
-const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
+const FormVideoUpload: React.FC<ComponentProps> = ({
+  question,
   index,
   form,
   handleQuestionChange,
@@ -38,7 +39,9 @@ const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
 
   return (
     <FormItem className="space-y-4">
-      <FormLabel>{t('video.title')} {index + 1}</FormLabel>
+      <FormLabel>
+        {t('video.title')} {index + 1}
+      </FormLabel>
       <div>
         {isValidVideoUrl(videoUrl) ? (
           <div className="space-y-2">
@@ -55,7 +58,12 @@ const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
             )}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-500">{selectedFileName}</span>
-              <Button type="button" variant="secondary" size="sm" onClick={handleRemoveVideo}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleRemoveVideo}
+              >
                 {t('video.remove')}
               </Button>
             </div>
@@ -77,7 +85,9 @@ const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
             ) : (
               <div className="flex flex-col items-center">
                 <CirclePlay className="mb-2 h-14 w-14 text-gray-200" />
-                <p className="text-sm text-gray-200">{t('video.dragOrClick')}</p>
+                <p className="text-sm text-gray-200">
+                  {t('video.dragOrClick')}
+                </p>
               </div>
             )}
           </div>
@@ -102,7 +112,10 @@ const FormVideoUpload: React.FC<FormVideoUploadProps> = ({
           </FormItem>
         )}
       />
-      <BriefsProvider.Options formFieldId={index} className="justify-end flex" />
+      <BriefsProvider.Options
+        formFieldId={question.id}
+        className="flex justify-end"
+      />
     </FormItem>
   );
 };

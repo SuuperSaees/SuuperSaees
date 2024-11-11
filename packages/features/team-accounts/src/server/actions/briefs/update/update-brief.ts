@@ -3,12 +3,17 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
-import { FormField } from '../../../../../../../../apps/web/lib/form-field.types';
-import { addFormFieldsToBriefs } from '../create/create-briefs';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-import { CustomResponse, CustomError, ErrorBriefOperations } from '../../../../../../../shared/src/response';
+import { FormField } from '../../../../../../../../apps/web/lib/form-field.types';
+import {
+  CustomError,
+  CustomResponse,
+  ErrorBriefOperations,
+} from '../../../../../../../shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
-export const updateBriefById = async (briefData: Brief.Type) => {
+import { addFormFieldsToBriefs, createFormFields } from '../create/create-briefs';
+
+export const updateBriefById = async (briefData: Brief.Request.Update) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { error } = await client
@@ -32,59 +37,63 @@ export const updateBriefById = async (briefData: Brief.Type) => {
 };
 
 export const updateFormFieldsById = async (
-  formFields: FormField.Type[],
+  formFields: FormField.Update[],
   briefId: Brief.Type['id'],
 ) => {
   try {
-    // Check if formFields is an array
-    if (!Array.isArray(formFields)) {
-      throw new Error('formFields is not an array');
-    }
-
     const client = getSupabaseServerComponentClient();
+    console.log('updateOrCreateFormFields', formFields);
 
-    // Filter fields that have 'id'
-    const fieldsWithId = formFields.filter((field) => field.id);
+    // Split fields into those that need updating and those that need creating
+    const fieldsToUpdate = formFields.filter((field) => field.id);
+    const fieldsToCreate = formFields.filter(
+      (field): field is FormField.Insert =>
+        !field.id &&
+        field.label !== undefined &&
+        field.position !== undefined &&
+        typeof field.label === 'string' &&
+        typeof field.position === 'number'
+    );
 
-    if (fieldsWithId.length === 0) {
-      throw new Error('No fields with valid IDs to update');
-    }
-
-    const updatePromises = fieldsWithId.map(async (field) => {
-      const { id, ...rest } = field;
-
-      // Check if 'id' is of type 'number'
-      if (typeof id === 'number') {
-        // Calls the addFormFieldsToBriefs function if the id is a number
-        await addFormFieldsToBriefs([field], briefId);
-        return null; // Do not continue with the update if addFormFieldsToBriefs was called
-      }
-
-      // If the 'id' is of type string, performs the update in the database
-      const { error: formFieldError, data: formFieldData } = await client
+    // Perform bulk updates for fields with an id
+    const updatePromises = fieldsToUpdate.map(({ id, ...field }) =>
+      client
         .from('form_fields')
-        .update(rest)
-        .eq('id', id)
-        .select();
+        .update(field)
+        .eq('id', id ?? '')
+    );
 
-      if (formFieldError) {
-        throw new CustomError(
-          HttpStatus.Error.BadRequest,
-          `Error updating form field with id ${id}: ${formFieldError.message}`, 
-          ErrorBriefOperations.FAILED_TO_UPDATE_FIELDS,
-        )
-      }
-
-      return formFieldData;
+    // Execute update queries in parallel
+    const updateResults = await Promise.all(updatePromises).catch((error) => {
+      console.error('Error updating form fields:', error);
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        `Error updating form fields: ${error.message}`,
+        ErrorBriefOperations.FAILED_TO_UPDATE_FIELDS,
+      );
     });
 
-    // Execute all update promises (ignoring those that called addFormFieldsToBriefs)
-    const updatedFields = await Promise.all(updatePromises);
+    // Collect updated fields
+    const updatedFields = updateResults
+      .map(({ data }) => data)
+      .filter((field) => field !== null)
+      .flat();
 
+    // If there are fields to create, use your separate insert function
+    let createdFields: FormField.Insert[] = [];
+    if (fieldsToCreate.length > 0) {
+      createdFields = await createFormFields(fieldsToCreate); // Call your separate insert function
+    }
 
-    return CustomResponse.success(updatedFields.flat().filter(Boolean), 'fieldsUpdated').toJSON();
+    // Combine updated and newly created fields
+    const allFields = [...updatedFields, ...createdFields];
+
+    // Associate the updated and newly created fields with the brief
+    await addFormFieldsToBriefs(allFields, briefId);
+
+    return CustomResponse.success(allFields, 'fieldsUpdated').toJSON();
   } catch (error) {
-    console.error('Error al actualizar los fields', error);
+    console.error('Error while updating/creating fields', error);
     return CustomResponse.error(error).toJSON();
   }
 };
@@ -107,11 +116,12 @@ export const updateServiceBriefs = async (
       throw new Error(fetchError.message);
     }
 
-    const existingServiceIds = existingServiceBriefs?.map(
-      (brief) => brief.service_id,
-    ) || [];
+    const existingServiceIds =
+      existingServiceBriefs?.map((brief) => brief.service_id) || [];
 
-    const updatedServiceIds = updatedServices.map((service) => service.service_id);
+    const updatedServiceIds = updatedServices.map(
+      (service) => service.service_id,
+    );
 
     // Step 2: Identify services to remove (those not in updated list)
     const servicesToRemove = existingServiceIds.filter(

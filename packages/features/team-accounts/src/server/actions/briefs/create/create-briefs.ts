@@ -10,7 +10,7 @@ import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { CustomResponse, CustomError, ErrorBriefOperations } from '../../../../../../../shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 
-export const createBrief = async (clientData: Brief.Insert) => {
+export const createBrief = async (clientData: Brief.Request.Create) => {
   try {
 
     const client = getSupabaseServerComponentClient();
@@ -64,13 +64,12 @@ export const addServiceBriefs = async (
   }
 };
 
-export const createFormFields = async (formFields: FormField.Type[]) => {
+export const createFormFields = async (formFields: FormField.Insert[]) => {
   try {
     const client = getSupabaseServerComponentClient();
 
     // Create a new list of formFields without the 'id' field
-    const formFieldsWithoutId = formFields.map(({ id, ...rest }) => rest);
-
+    const formFieldsWithoutId = formFields.map(({ id: _id, ...rest }) => rest);
     const { error: formFieldError, data: formFieldData } = await client
       .from('form_fields')
       .insert(formFieldsWithoutId)

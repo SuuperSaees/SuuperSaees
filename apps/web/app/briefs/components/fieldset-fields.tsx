@@ -5,6 +5,7 @@ import { useBriefsContext } from '../contexts/briefs-context';
 import { isContentType, isInputType } from '../utils/type-guards';
 import { BriefCreationForm } from './brief-creation-form';
 import { Sortable } from './sortable';
+import { ComponentProps } from '../types/brief.types';
 
 interface FieldsetFieldsProps {
   form: UseFormReturn<BriefCreationForm>;
@@ -23,19 +24,15 @@ export default function FieldsetFields({
   } = useBriefsContext();
 
   // Handle changes to a specific question field
-  const handleQuestionChange = (
-    id: number,
-    field:
-      | 'label'
-      | 'description'
-      | 'placeholder'
-      | `options.${number}.selected`,
-    value: string | boolean | Date,
+  const handleQuestionChange: ComponentProps['handleQuestionChange'] = (
+    id,
+    field,
+    value,
   ) => {
     const index = formFields.findIndex((field) => field.id === id);
     // Update question in context if it exists
     if (formFields[index]) {
-      updateFormField(index, { ...formFields[index], [field]: value }); // Update context field
+      updateFormField(formFields[index].id, { ...formFields[index], [field]: value }); // Update context field
       const updatedQuestions = form.getValues('questions'); // Get current form questions
 
       // If the question exists in the form, update its value
@@ -50,11 +47,11 @@ export default function FieldsetFields({
   };
 
   // Handle removing a question from the form
-  const handleRemoveQuestion = (index: number) => {
-    removeFormField(index); // Remove field from context
+  const handleRemoveQuestion = (id: string) => {
+    removeFormField(id); // Remove field from context
     const currentQuestions = form.getValues('questions'); // Get current questions
     // Filter out the question to be removed
-    const newQuestions = currentQuestions.filter((_, i) => i !== index);
+    const newQuestions = currentQuestions.filter((prevQuestion) => prevQuestion.id !== id);
     form.setValue('questions', newQuestions); // Update form state with the new questions array
   };
 
