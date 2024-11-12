@@ -69,20 +69,18 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     service: Service.Type,
     organizationId: string,
   ) => {
-    console.log('handleCheckout');
-    console.log('priceId', priceId);
-    console.log('stripeId', stripeId);
-    console.log('service', service);
-    console.log('organizationId', organizationId);
     try {
-      // const sessionUrl = await createUrlForCheckout({
-      //   stripeId,
-      //   priceId,
-      //   service,
-      //   organizationId,
-      // });
-
-      const sessionUrl = 'https://www.google.com';
+      console.log('handleCheckout');
+      console.log('priceId', priceId);
+      console.log('stripeId', stripeId);
+      console.log('service', service);
+      console.log('organizationId', organizationId);
+      const sessionUrl = await createUrlForCheckout({
+        stripeId,
+        priceId,
+        service,
+        organizationId,
+      });
 
       console.log('sessionUrl', sessionUrl);
 
