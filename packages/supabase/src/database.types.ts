@@ -1915,51 +1915,6 @@ export type Database = {
         }
         Relationships: []
       }
-      sessions: {
-        Row: {
-          client_address: string | null
-          client_city: string | null
-          client_country: string | null
-          client_email: string | null
-          client_name: string | null
-          client_postal_code: string | null
-          client_state: string | null
-          created_at: string
-          deleted_on: string | null
-          id: string
-          provider: string | null
-          provider_id: string | null
-        }
-        Insert: {
-          client_address?: string | null
-          client_city?: string | null
-          client_country?: string | null
-          client_email?: string | null
-          client_name?: string | null
-          client_postal_code?: string | null
-          client_state?: string | null
-          created_at?: string
-          deleted_on?: string | null
-          id?: string
-          provider?: string | null
-          provider_id?: string | null
-        }
-        Update: {
-          client_address?: string | null
-          client_city?: string | null
-          client_country?: string | null
-          client_email?: string | null
-          client_name?: string | null
-          client_postal_code?: string | null
-          client_state?: string | null
-          created_at?: string
-          deleted_on?: string | null
-          id?: string
-          provider?: string | null
-          provider_id?: string | null
-        }
-        Relationships: []
-      }
       subdomains: {
         Row: {
           created_at: string

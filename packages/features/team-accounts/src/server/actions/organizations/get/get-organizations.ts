@@ -247,7 +247,6 @@ export async function getOrganizationById(organizationId: string, client?: Supab
   client = client ?? getSupabaseServerComponentClient({
     admin: adminActivated,
   });
-
   try {
 
     // Step 1: Check if the user has permission to view the organization

@@ -2,9 +2,9 @@ import { Tokens } from '../../../apps/web/lib/tokens.types';
 import { v4 as uuidv4 } from 'uuid';
 import { createHmac } from 'crypto';
 import { getSupabaseServerComponentClient } from '../../../packages/supabase/src/clients/server-component.client';
-import { Token, PayToken } from './domain/token-type';
+import { Token } from './domain/token-type';
 
-export async function createToken(payload: Token | PayToken): Promise<{accessToken: string, tokenId: string}> {
+export async function createToken(payload: Token): Promise<{accessToken: string, tokenId: string}> {
   const header = {
     alg: 'HS256',
     typ: 'JWT',
