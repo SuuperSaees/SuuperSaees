@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowRight } from 'lucide-react';
+// import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +9,7 @@ import { Button } from '@kit/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
+  // FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -42,6 +42,7 @@ export function PasswordSignUpForm({
   onSubmit: (params: {
     email: string;
     password: string;
+    organizationName: string;
     repeatPassword: string;
   }) => unknown;
   loading: boolean;
@@ -54,6 +55,8 @@ export function PasswordSignUpForm({
     defaultValues: {
       email: defaultValues?.email ?? '',
       password: '',
+      organizationName: '',
+      termsAccepted: false,
       repeatPassword: '',
     },
   });
@@ -72,6 +75,35 @@ export function PasswordSignUpForm({
         className={'w-full space-y-2.5 ' + className}
         onSubmit={form.handleSubmit(onSubmit)}
       >
+       <div className='flex flex-col gap-2.5 '>
+       <FormField
+          control={form.control}
+          name={'organizationName'}
+          render={({ field }) => (
+            <FormItem className="text-start w-full">
+              <FormLabel>
+                <Trans i18nKey={'common:organizationNamelabel'} />
+              </FormLabel>
+
+              <FormControl>
+                <ThemedInput
+                  className='w-full'
+                  data-test={'email-input'}
+                  required
+                  type='text'
+                  placeholder={t('organizationNamePlaceholder')}
+                  {...field}
+                />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
+
+
         <FormField
           control={form.control}
           name={'email'}
@@ -107,44 +139,28 @@ export function PasswordSignUpForm({
               </FormLabel>
 
               <FormControl>
+                {/* <ThemedInput
+                  required
+                  data-test={'password-input'}
+                  type="password"
+                  placeholder={''}
+                  {...field}
+                /> */}
                 <ThemedInput
                   required
                   data-test={'password-input'}
                   type="password"
                   placeholder={''}
                   {...field}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    field.onChange(e);
+                    // Automatically set repeatPassword to match password
+                    form.setValue('repeatPassword', e.target.value);
+                  }}
                 />
               </FormControl>
 
               <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name={'repeatPassword'}
-          render={({ field }) => (
-            <FormItem className="text-start">
-              <FormLabel>
-                <Trans i18nKey={'auth:repeatPassword'} />
-              </FormLabel>
-
-              <FormControl>
-                <ThemedInput
-                  required
-                  data-test={'repeat-password-input'}
-                  type="password"
-                  placeholder={''}
-                  {...field}
-                />
-              </FormControl>
-
-              <FormMessage />
-
-              <FormDescription className={'pb-2 text-xs'}>
-                <Trans i18nKey={'auth:repeatPasswordHint'} />
-              </FormDescription>
             </FormItem>
           )}
         />
@@ -152,34 +168,25 @@ export function PasswordSignUpForm({
         <If condition={displayTermsCheckbox}>
           <TermsAndConditionsFormField />
         </If>
+        <TermsAndConditionsFormField name='termsAccepted'/>
 
-        <Button
-          data-test={'auth-submit-button'}
-          className={'w-full'}
-          type="submit"
+        <Button 
+          type='submit' 
+          onClick={() => {
+            console.log('clicked');
+            // console.log(form.getValues());
+          }}
           disabled={loading}
+          data-test={'auth-submit-button'}
+          className='rounded-full w-fit p-4'
           style={{
             backgroundColor: authDetails?.theme_color ?? '#1a38d7',
             color: getTextColorBasedOnBackground(authDetails?.theme_color ? authDetails.theme_color : '#000000'),
           }}
         >
-          <If
-            condition={loading}
-            fallback={
-              <>
-                <Trans i18nKey={'auth:signUpWithEmail'} />
-
-                <ArrowRight
-                  className={
-                    'zoom-in animate-in slide-in-from-left-2 fill-mode-both h-4 delay-500 duration-500'
-                  }
-                />
-              </>
-            }
-          >
-            <Trans i18nKey={'auth:signingUp'} />
-          </If>
+          <Trans i18nKey={'auth:createOrganization'} />
         </Button>
+       </div>
       </form>
     </Form>
   );
