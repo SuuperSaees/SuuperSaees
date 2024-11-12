@@ -15,17 +15,24 @@ export const createUrlForCheckout = async ({
   service: Service.Type;
   organizationId: string;
 }) => {
-  const token = await createToken({
-    account_id: stripeId,
-    price_id: priceId,
-    service: service,
-    expires_at: new Date(),
-    organization_id: organizationId,
-  });
-
-  const baseUrl = await getDomainByOrganizationId(organizationId, true);
-
-  const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
-
-  return url;
+  try {
+    const token = await createToken({
+      account_id: stripeId,
+      price_id: priceId,
+      service: service,
+      expires_at: new Date(),
+      organization_id: organizationId,
+    });
+  
+    const baseUrl = await getDomainByOrganizationId(organizationId, true);
+  
+    const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
+  
+    
+  
+    return url;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
