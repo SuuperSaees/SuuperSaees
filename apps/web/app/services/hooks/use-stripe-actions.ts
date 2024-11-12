@@ -9,8 +9,9 @@ import { Database } from '~/lib/database.types';
 import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
-import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
+// import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
+import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 
 interface UseStripeActions {
   userRole: Database['public']['Tables']['accounts_memberships']['Row']['account_role'];
