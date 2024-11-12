@@ -60,12 +60,19 @@ const DetailsPage = () => {
   const briefsWithResponsesQuery = useQuery({
     queryKey: ['briefsWithResponses', order.brief_ids],
     queryFn: async () =>
-      await fetchFormfieldsWithResponses(order.brief_ids ?? []),
+      await fetchFormfieldsWithResponses(order.uuid),
   });
-
+  
   const briefsWithResponses = briefsWithResponsesQuery.data ?? [];
-
-
+  const notValidFormTypes = new Set([
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'rich-text',
+    'image',
+    'video',
+  ]);
   const Field = ({
     formField,
   }: {
@@ -92,20 +99,20 @@ const DetailsPage = () => {
         <span
           className="font-medium leading-[1.42857] text-gray-600"
           dangerouslySetInnerHTML={{ __html: formatResponse(formField) }}
-        ></span>
+        />
       </div>
     );
   };
 
   return (
     <div className="h-[76vh] overflow-hidden overflow-y-auto no-scrollbar flex flex-col gap-6">
-      <div className="flex w-full min-w-full gap-2">
+      {/* <div className="flex w-full min-w-full gap-2">
         <div className="w-full rounded-lg border border-gray-300 px-[12px] py-[8px]">
           <span className="font-inter text-md overflow-hidden text-ellipsis leading-6 text-gray-500">
             {order.title}
           </span>
         </div>
-      </div>
+      </div> */}
       {briefsWithResponsesQuery.isLoading ? (
         Array.from({ length: 5 }, (_, i) => 
           <SkeletonBox className='h-20 w-full' key={i} />
@@ -121,11 +128,17 @@ const DetailsPage = () => {
           className="rounded-lg border border-gray-300 px-[14px] py-[12px]"
           dangerouslySetInnerHTML={{ __html: convertLinks(order.description) }}
         /> */}
-          {briefsWithResponses.map((formField) => {
-            if (formField.field?.type !== 'file') {
-              return <Field key={formField.field?.id} formField={formField} />;
-            }
-            return null;
+          {briefsWithResponses
+            .filter(a => a?.field?.position !== undefined)
+            .sort((a, b) => (a.field?.position ?? 0) - (b.field?.position ?? 0))
+            .map((formField) => {
+              if (notValidFormTypes.has(formField.field?.type ?? '')) {
+                return null;
+              }
+              else if (formField.field?.type !== 'file') {
+                return <Field key={formField.field?.id} formField={formField} />;
+              }
+              return null;
           })}
         </div>
       )}
