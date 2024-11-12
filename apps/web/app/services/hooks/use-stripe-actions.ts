@@ -75,12 +75,14 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     console.log('service', service);
     console.log('organizationId', organizationId);
     try {
-      const sessionUrl = await createUrlForCheckout({
-        stripeId,
-        priceId,
-        service,
-        organizationId,
-      });
+      // const sessionUrl = await createUrlForCheckout({
+      //   stripeId,
+      //   priceId,
+      //   service,
+      //   organizationId,
+      // });
+
+      const sessionUrl = 'https://www.google.com';
 
       console.log('sessionUrl', sessionUrl);
 
@@ -96,6 +98,7 @@ export function useStripeActions({ userRole }: UseStripeActions) {
           console.error('Error al copiar al portapapeles:', err);
         });
     } catch (error) {
+      console.log('error', error);
       toast.error('Error creating checkout URL', {
         description: error?.message,
       });

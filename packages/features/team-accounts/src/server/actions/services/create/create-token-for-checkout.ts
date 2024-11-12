@@ -15,6 +15,7 @@ export const createUrlForCheckout = async ({
   service: Service.Type;
   organizationId: string;
 }) => {
+  console.log('createUrlForCheckout');
   console.log('stripeId', stripeId);
   console.log('priceId', priceId);
   console.log('service', service);
