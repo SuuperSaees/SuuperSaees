@@ -37,7 +37,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Trans } from '@kit/ui/trans';
 import EmptyState from '~/components/ui/empty-state';
 import StatusCombobox from '../[id]/components/status-combobox';
-
+import { AgencyStatus } from '~/lib/agency-statuses.types';
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -48,18 +48,21 @@ type ExtendedOrderType = Order.Type & {
 type OrdersTableProps = {
   orders: ExtendedOrderType[];
   role: string;
+  agencyStatuses?: AgencyStatus.Type[];
 };
 
 type OrdersCardTableProps = {
   orders: ExtendedOrderType[];
   role: string;
   updateOrderDate: (dueDate: string, orderId: number) => Promise<void>;
+  agencyStatuses?: AgencyStatus.Type[];
 };
 
 const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   orders,
   role,
   updateOrderDate,
+  agencyStatuses,
 }) => {
   const { t } = useTranslation(['orders', 'responses']);
 
@@ -73,6 +76,12 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
 
   const totalPages = Math.ceil(orders.length / rowsPerPage);
   // const router = useRouter();
+
+  Object.keys(localStorage).forEach((key) => { // ¡IMPORTANT!: we must remove this code when we have a better solution for the statuses cache
+    if (key.startsWith('agencyStatuses')) {
+      localStorage.removeItem(key);
+    }
+  });
 
   return (
     <Card x-chunk="dashboard-06-chunk-0" className='bg-transparent'>
@@ -127,7 +136,7 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
                     'agency_owner',
                     'agency_project_manager',
                   ].includes(role) ? (
-                    <StatusCombobox order={order} agency_id={order.agency_id} mode='order' />
+                    <StatusCombobox order={order} statusData={order.statusData} agencyStatuses={agencyStatuses} agency_id={order.agency_id} mode='order' />
                   ) : (
                     // Display the status or an empty space if there is no status
                     <span className="pl-2 pr-2">
@@ -253,7 +262,7 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   );
 };
 
-export function OrderList({ orders, role }: OrdersTableProps) {
+export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
   const { t } = useTranslation('orders');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
@@ -345,6 +354,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
+                  agencyStatuses={agencyStatuses}
                 />
               </TabsContent>
               <TabsContent value="completed" className='bg-white'>
@@ -352,6 +362,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
+                  agencyStatuses={agencyStatuses}
                 />
               </TabsContent>
               <TabsContent value="all" className='bg-white'>
@@ -359,6 +370,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
+                  agencyStatuses={agencyStatuses}
                 />
               </TabsContent>
             </div>

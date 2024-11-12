@@ -10,7 +10,6 @@ import { AgencyStatus } from '~/lib/agency-statuses.types'
 import { Order } from '~/lib/order.types'
 import { Subtask } from '~/lib/tasks.types'
 import { useTranslation } from 'react-i18next'
-import { baseColors } from './status-combobox'
 
 interface StatusComboboxItemProps {
   status: AgencyStatus.Type
@@ -36,12 +35,12 @@ export default function StatusComboboxItem({
   const {t} = useTranslation('orders')
   const [isHovered, setIsHovered] = useState(false)
   const [open, setOpen] = useState<boolean>(false);
-
-  const preventEditName = ['pending', 'completed', 'in_review', 'annulled','anulled','in_progress'].includes(status?.status_name ?? '')
+  const defaultStatuses = new Set(['pending', 'completed', 'in_review', 'annulled', 'anulled', 'in_progress']); 
+  const preventEditName = defaultStatuses.has(status?.status_name ?? '');
 
   return (
     <CommandItem
-      value={status.status_name}
+      value={status.status_name ?? ''}
       onSelect={() => onSelect(status?.status_name ?? '')}
       className="flex w-full items-center justify-between p-0"
       onMouseOver={() => setIsHovered(true)}
@@ -52,8 +51,8 @@ export default function StatusComboboxItem({
       <p
         className="m-2 cursor-pointer rounded-lg p-1 px-3 font-medium"
         style={{
-          color: preventEditName ? baseColors[status.status_name as keyof typeof baseColors].text : status.status_color ? darkenColor(status.status_color, 0.55) : undefined,
-          backgroundColor: preventEditName ? baseColors[status.status_name as keyof typeof baseColors].bg : status.status_color,
+          color: status.status_color ? darkenColor(status.status_color, 0.55) : undefined,
+          backgroundColor: status.status_color ?? undefined,
         }}
       >
         {preventEditName ? t(`details.statuses.${convertToCamelCase(status?.status_name ?? '')}`) : convertToTitleCase(status?.status_name ?? '')}

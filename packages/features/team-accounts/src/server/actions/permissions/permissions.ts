@@ -11,6 +11,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 // import { Database } from '../../../../../../../apps/web/lib/database.types';
 import { getUserRole } from '../members/get/get-member-account';
+import { Order } from '../../../../../../../apps/web/lib/order.types';
 
 
 // Generic permission check
@@ -50,7 +51,7 @@ export const hasPermissionToReadOrders = async () => {
   const { data: userData } = await client.auth.getUser();
   const userId = userData.user!.id;
 
-  // Obtener el rol
+  // Step 1: Get the user's role
   const { data: role, error: roleError } = await client
     .from('accounts_memberships')
     .select('account_role')
@@ -69,8 +70,9 @@ export const hasPermissionToReadOrders = async () => {
   const isTeamMember = role && role.account_role === 'agency_member';
   const isAgency = !isClient && !isTeamMember;
 
-  let ordersData = [];
+  let ordersData: any[] = [];
 
+  // Step 2: Fetch orders based on user role
   if (isClient) {
     const { data: orderData, error: clientError } = await client
       .from('orders_v2')
@@ -89,61 +91,44 @@ export const hasPermissionToReadOrders = async () => {
     ordersData = orderData ?? [];
 
     const { data: followerOrders, error: followerError } = await client
-    .from('order_followers')
-    .select('order_id') 
-    .eq('client_member_id', userId);
-  
+      .from('order_followers')
+      .select('order_id')
+      .eq('client_member_id', userId);
+
     if (followerError) {
       console.error(followerError.message);
       throw new Error('Error fetching follower orders');
     }
-  
-  if (followerOrders?.length > 0) {
-    // map the follower orders to get the order ids and filter the orders that are not equal to the orders in the ordersData array by id
-    const followerOrderIds = followerOrders
-      ?.map((order) => order.order_id)
-      .filter((orderId) => !ordersData.some((order) => order.id === orderId));
-    const followerOrdersData: {
-      agency_id: string;
-      client_organization_id: string;
-      created_at: string;
-      customer_id: string;
-      description: string;
-      due_date: string | null;
-      id: number;
-      priority: Database['public']['Enums']['priority_types'] | null;
-      propietary_organization_id: string;
-      status: Database['public']['Enums']['order_status_types'] | null;
-      stripe_account_id: string | null;
-      title: string;
-      uuid: string;
-    }[] = [];
 
-    await Promise.all(
-      followerOrderIds?.map(async (orderId) => {
-        const { data: followerOrderData, error: followerOrderError } =
-          await client
-            .from('orders_v2')
-            .select(
-              '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
-            )
-            .eq('id', orderId as number)
-            .is('deleted_on', null)
-            .single();
+    if (followerOrders?.length > 0) {
+      const followerOrderIds = new Set(followerOrders.map(order => order.order_id));
+      const followerOrdersData: any[] = [];
 
-        if (followerOrderError) {
-          console.error(followerOrderError.message);
-          throw new Error('Error fetching orders for followers');
-        }
+      await Promise.all(
+        Array.from(followerOrderIds).map(async (orderId) => {
+          const { data: followerOrderData, error: followerOrderError } =
+            await client
+              .from('orders_v2')
+              .select(
+                '*, organization:accounts!client_organization_id(slug, name), customer:accounts!customer_id(name)',
+              )
+              .eq('id', orderId as number)
+              .is('deleted_on', null)
+              .single();
 
-        if (followerOrderData) {
-          followerOrdersData.push(followerOrderData);
-        }
-      }) ?? [],
-    );
+          if (followerOrderError) {
+            console.error(followerOrderError.message);
+            throw new Error('Error fetching orders for followers');
+          }
 
-    ordersData = [...ordersData, ...followerOrdersData];
-  }
+          if (followerOrderData) {
+            followerOrdersData.push(followerOrderData);
+          }
+        }),
+      );
+
+      ordersData = [...ordersData, ...followerOrdersData];
+    }
   } else if (isTeamMember) {
     const { data: orderAssignedData, error: orderAssignedError } = await client
       .from('order_assignations')
@@ -155,25 +140,25 @@ export const hasPermissionToReadOrders = async () => {
       throw orderAssignedError.message;
     }
 
-    const { data: orderData, error: teamOwnerError } = await client
-      .from('orders_v2')
-      .select(
-        `*, organization:accounts!client_organization_id(slug, name), 
-        customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`,
-      )
-      .in(
-        'id',
-        orderAssignedData.map((assign) => assign.order_id),
-      )
-      .is('deleted_on', null)
-      .order('created_at', { ascending: false });
+    const orderIds = orderAssignedData.map(assign => assign.order_id);
+    if (orderIds.length > 0) {
+      const { data: orderData, error: teamOwnerError } = await client
+        .from('orders_v2')
+        .select(
+          `*, organization:accounts!client_organization_id(slug, name), 
+          customer:accounts!customer_id(name), assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))`,
+        )
+        .in('id', orderIds)
+        .is('deleted_on', null)
+        .order('created_at', { ascending: false });
 
-    if (teamOwnerError) {
-      console.error(teamOwnerError.message);
-      throw teamOwnerError.message;
+      if (teamOwnerError) {
+        console.error(teamOwnerError.message);
+        throw teamOwnerError.message;
+      }
+
+      ordersData = orderData ?? [];
     }
-
-    ordersData = orderData ?? [];
   } else if (isAgency) {
     const { data: agencyUserAccount, error: accountError } = await client
       .from('accounts')
@@ -204,7 +189,32 @@ export const hasPermissionToReadOrders = async () => {
     ordersData = orderData ?? [];
   }
 
-return ordersData;
+  // Step 3: Collect all status_ids from orders
+  const statusIds = Array.from(new Set(ordersData.map((order: Order.Type) => order.status_id as number).filter(Boolean)));
+
+  // Step 4: Fetch all relevant statuses in one query
+  const { data: statuses, error: statusesError } = await client
+    .from('agency_statuses')
+    .select('*')
+    .in('id', statusIds);
+
+  if (statusesError) {
+    console.error(statusesError.message);
+    throw new Error('Error fetching statuses');
+  }
+
+  // Step 5: Create a map of statuses for quick access
+  const statusMap = new Map();
+  statuses?.forEach(status => {
+    statusMap.set(status.id, status);
+  });
+
+  // Step 6: Assign the status to each order
+  ordersData.forEach(order => {
+    order.statusData = statusMap.get(order.status_id) || null;
+  });
+
+  return ordersData;
 };
 
 export const hasPermissionToAddTeamMembers = async () => {

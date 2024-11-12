@@ -19,6 +19,7 @@ import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
 
+
 // import { handleDomainCheck } from './handlers/domain-check-handler';
 
 export const config = {
@@ -144,7 +145,7 @@ export async function middleware(request: NextRequest) {
   if (request.headers.has('next-action')) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
-
+  
   setCORSHeaders(csrfResponse);
 
   return csrfResponse;

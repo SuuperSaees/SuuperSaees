@@ -1,11 +1,10 @@
-import { useCallback, useState } from 'react';
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { MutationFunction, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -23,7 +22,6 @@ import { Subtask } from '~/lib/tasks.types';
 import { updateOrder } from '~/team-accounts/src/server/actions/orders/update/update-order';
 import { createNewStatus } from '~/team-accounts/src/server/actions/statuses/create/create-status';
 import { deleteStatusById } from '~/team-accounts/src/server/actions/statuses/delete/delete-status';
-import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 import { darkenColor } from '~/utils/generate-colors';
 import { useStatusDragAndDrop } from '../hooks/agency-statuses/use-status-drag-and-drop';
@@ -33,108 +31,81 @@ import { closestCenter, DndContext } from '@dnd-kit/core';
 import { ChevronDown } from 'lucide-react';
 import { convertToTitleCase, convertToSnakeCase, convertToCamelCase } from '../utils/format-agency-names';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
-import { getCache, setCache, updateCache } from '~/utils/handle-caching';
-import { CACHE_KEY, CACHE_EXPIRY } from '../hooks/agency-statuses/use-status-drag-and-drop';
+import { updateCache } from '~/utils/handle-caching';
 
 interface StatusComboboxProps {
   order?: Order.Type;
+  statusData?: AgencyStatus.Type;
+  agencyStatuses?: AgencyStatus.Type[];
   subtask?: Subtask.Type;
   agency_id: string;
   mode: 'order' | 'subtask';
 }
 
-export const baseColors = {
-  "pending":{
-    "bg":"#fef7c3",
-    "text":"#a15c07"
-  },
-  "in_progress":{
-    "bg":"#F4EBFF",
-    "text":"#6941C6"
-  },
-  "completed":{
-    "bg":"#DCFAE6",
-    "text":"#067647",
-  },
-  "in_review":{
-    "bg":"#FFEBD9",
-    "text":"#C66A41",
-  },
-  "annulled":{
-    "bg":"#FEE4E2",
-    "text":"#B42318",
-  },
-  "anulled":{
-    "bg":"#FEE4E2",
-    "text":"#B42318",
-  },
-}
+// export const baseColors = {
+//   "pending":{
+//     "bg":"#fef7c3",
+//     "text":"#a15c07"
+//   },
+//   "in_progress":{
+//     "bg":"#F4EBFF",
+//     "text":"#6941C6"
+//   },
+//   "completed":{
+//     "bg":"#DCFAE6",
+//     "text":"#067647",
+//   },
+//   "in_review":{
+//     "bg":"#FFEBD9",
+//     "text":"#C66A41",
+//   },
+//   "annulled":{
+//     "bg":"#FEE4E2",
+//     "text":"#B42318",
+//   },
+//   "anulled":{
+//     "bg":"#FEE4E2",
+//     "text":"#B42318",
+//   },
+// }
 
 function StatusCombobox({
+  statusData,
   order,
+  agencyStatuses,
   subtask,
   mode,
   agency_id,
 }: StatusComboboxProps) {
   const [open, setOpen] = useState<boolean>(false);
+  const [currentStatusData, setCurrentStatusData] = useState<AgencyStatus.Type | undefined>(statusData);
   const [popoverValue, setPopoverValue] = useState<string>(
-    mode == 'order' ? (order?.status ?? '') : (subtask?.state ?? ''),
+    mode == 'order' ? (statusData?.status_name ?? '') : (subtask?.state ?? ''),
   );
   const [customStatus, setCustomStatus] = useState<string>('');
   const { t } = useTranslation(['orders', 'responses']);
   const router = useRouter();
   const queryClient = useQueryClient();
-  
-  const { data: agencyStatuses, refetch } = useQuery({
-    queryKey: ['agencyStatuses', agency_id],
-    queryFn: async () => {
-      const cachedData = getCache<AgencyStatus.Type[]>(`${CACHE_KEY}_${agency_id}`);
-      if (cachedData) {
-        return cachedData;
-      }
-      const fetchedData = await getAgencyStatuses(agency_id);
-      setCache(`${CACHE_KEY}_${agency_id}`, fetchedData, CACHE_EXPIRY);
-      return fetchedData;
-    },
-    initialData: [],
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    staleTime: CACHE_EXPIRY,
-  });
 
   const { sensors, handleDragEnd, statuses } = useStatusDragAndDrop(
     agencyStatuses ?? [],
     agency_id,
   );
 
-  useEffect(() => {
-    refetch().catch((error) => {
-      console.error(error);
-    });
-  }, [refetch]);
-
-  const findStatusColor = useCallback(
-    (statusName: string) => {
-      const status = agencyStatuses?.find((s) => s.status_name === statusName);
-      return status?.status_color ?? '#E8EFFC';
-    },
-    [agencyStatuses],
-  );
-
   const createStatus = useMutation({
-    mutationFn: createNewStatus,
-    onSuccess: (newStatus) => {
+    mutationFn: createNewStatus as MutationFunction<AgencyStatus.Type>,
+    onSuccess: (newStatus: AgencyStatus.Type) => {
       const updatedStatuses = [...(agencyStatuses ?? []), newStatus];
+      agencyStatuses = [...updatedStatuses];
       updateCache(
-        `${CACHE_KEY}_${agency_id}`,
         updatedStatuses,
         queryClient,
         ['agencyStatuses', agency_id],
-        CACHE_EXPIRY
       );
       toast.success('Success', {
         description: 'New status created successfully!',
       });
+      router.refresh();
     },
     onError: () => {
       toast.error('Error', { description: 'Failed to create new status.' });
@@ -145,11 +116,20 @@ function StatusCombobox({
     mutationFn: async ({
       orderId,
       status,
+      status_id,
+      status_color,
     }: {
       orderId: Order.Type['id'];
       status: string;
+      status_id: number;
+      status_color: string | null;
     }) => {
-      await updateOrder(orderId, { status });
+      setCurrentStatusData(statusData ? {
+        ...statusData,
+        status_name: status ?? null,
+        status_color: status_color ?? null,
+      } : undefined);
+      await updateOrder(orderId, { status, status_id });
       router.refresh();
     },
     onSuccess: () => {
@@ -196,13 +176,12 @@ function StatusCombobox({
     onSuccess: (_, deletedStatusId) => {
       const updatedStatuses = agencyStatuses?.filter(status => status.id !== deletedStatusId) ?? [];
       updateCache(
-        `${CACHE_KEY}_${agency_id}`,
         updatedStatuses,
         queryClient,
-        ['agencyStatuses', agency_id],
-        CACHE_EXPIRY
+        ['agencyStatuses', agency_id]
       );
       toast.success('Success', { description: 'Status deleted successfully!' });
+      router.refresh();
     },
     onError: () => {
       toast.error('Error', { description: 'Failed to delete status.' });
@@ -215,14 +194,15 @@ function StatusCombobox({
       status_color: '#8fd6fc',
       agency_id: agency_id,
     });
+    
     setCustomStatus('');
   };
 
   const handleDeleteStatus = (statusId: number) => {
     deleteStatus.mutate(statusId);
   };
-
-  const isDefaultState = ['pending', 'completed', 'in_review', 'annulled', 'anulled', 'in_progress'].includes(popoverValue ?? '')
+  const defaultStatuses = new Set(['pending', 'completed', 'in_review', 'annulled', 'anulled', 'in_progress']);
+  const isDefaultState = defaultStatuses.has(popoverValue ?? '');
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -241,9 +221,9 @@ function StatusCombobox({
           className={` shadow-none inline-flex items-center rounded-lg p-2 border-none`}
 
           style={{
-            backgroundColor: isDefaultState ? baseColors[popoverValue as keyof typeof baseColors].bg : findStatusColor(popoverValue) ?? '',
-            color: isDefaultState ? baseColors[popoverValue as keyof typeof baseColors].text : darkenColor(
-              findStatusColor(popoverValue) ?? '#000000',
+            backgroundColor: currentStatusData?.status_color ?? '',
+            color: darkenColor(
+              currentStatusData?.status_color ?? '#000000',
               0.60
             ),
           }}
@@ -298,11 +278,14 @@ function StatusCombobox({
                                 changeOrderStatus.mutate({
                                   orderId: order?.id ?? -1,
                                   status: convertToSnakeCase(status?.status_name ?? ''),
+                                  status_id: status.id,
+                                  status_color: status.status_color ?? null,
                                 })
                               } else if (mode === 'subtask') {
                                 changeSubtaskStatus.mutate({
                                   subtaskId: subtask?.id ?? '',
                                   status: convertToSnakeCase(status?.status_name ?? ''),
+                                  // status_id: status.id,
                                 })
                               }
                               setPopoverValue(currentValue === popoverValue ? '' : currentValue)
