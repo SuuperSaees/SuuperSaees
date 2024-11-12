@@ -83,6 +83,9 @@ export function useStripeActions({ userRole }: UseStripeActions) {
           toast.success('URL copiado en el portapapeles');
         })
         .catch((err) => {
+          toast.error('Error al copiar al portapapeles', {
+            description: err.message,
+          });
           console.error('Error al copiar al portapapeles:', err);
         });
     } catch (error) {
