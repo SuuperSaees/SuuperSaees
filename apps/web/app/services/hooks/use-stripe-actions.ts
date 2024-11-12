@@ -69,6 +69,11 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     service: Service.Type,
     organizationId: string,
   ) => {
+    console.log('handleCheckout');
+    console.log('priceId', priceId);
+    console.log('stripeId', stripeId);
+    console.log('service', service);
+    console.log('organizationId', organizationId);
     try {
       const sessionUrl = await createUrlForCheckout({
         stripeId,
@@ -76,6 +81,8 @@ export function useStripeActions({ userRole }: UseStripeActions) {
         service,
         organizationId,
       });
+
+      console.log('sessionUrl', sessionUrl);
 
       navigator.clipboard
         .writeText(sessionUrl)
