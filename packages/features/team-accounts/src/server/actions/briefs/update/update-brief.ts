@@ -42,9 +42,22 @@ export const updateFormFieldsById = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    console.log('updateOrCreateFormFields', formFields);
+    // Fetch existing fields for the brief
+    const { data: existingFields, error: fetchError } = await client
+      .from('brief_form_fields')
+      .select('id:form_field_id')
+      .eq('brief_id', briefId)
+      
+    if (fetchError) {
+      console.error('Error fetching existing form fields:', fetchError);
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        `Error fetching existing form fields: ${fetchError.message}`,
+        ErrorBriefOperations.FAILED_TO_GET_FORM_FIELDS,
+      );
+    }
 
-    // Split fields into those that need updating and those that need creating
+    // Identify fields to update and create
     const fieldsToUpdate = formFields.filter((field) => field.id);
     const fieldsToCreate = formFields.filter(
       (field): field is FormField.Insert =>
@@ -55,12 +68,33 @@ export const updateFormFieldsById = async (
         typeof field.position === 'number'
     );
 
+    // Identify fields to delete
+    const existingFieldIds = existingFields.map((field) => field.id);
+    const updatedFieldIds = fieldsToUpdate.map((field) => field.id);
+    const fieldsToDelete = existingFieldIds.filter(
+      (id) => !updatedFieldIds.includes(id)
+    );
+
+    // Perform deletion if there are fields to remove
+    if (fieldsToDelete.length > 0) {
+      const { error: deleteError } = await client
+        .from('form_fields')
+        .delete()
+        .in('id', fieldsToDelete);
+
+      if (deleteError) {
+        console.error('Error deleting form fields:', deleteError);
+        throw new CustomError(
+          HttpStatus.Error.BadRequest,
+          `Error deleting form fields: ${deleteError.message}`,
+          ErrorBriefOperations.FAILED_TO_DELETE_FORM_FIELDS,
+        );
+      }
+    }
+
     // Perform bulk updates for fields with an id
     const updatePromises = fieldsToUpdate.map(({ id, ...field }) =>
-      client
-        .from('form_fields')
-        .update(field)
-        .eq('id', id ?? '')
+      client.from('form_fields').update(field).eq('id', id ?? '')
     );
 
     // Execute update queries in parallel

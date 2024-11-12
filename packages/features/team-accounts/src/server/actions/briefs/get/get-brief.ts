@@ -14,6 +14,7 @@ import {
   getUserRole,
 } from '../../members/get/get-member-account';
 import { fetchClientServices } from '../../services/get/get-services';
+import { Order } from '../../../../../../../../apps/web/lib/order.types';
 
 export const getBriefs = async (): Promise<
   Brief.Relationships.Services.Response[]
@@ -83,7 +84,7 @@ export const getBriefs = async (): Promise<
 };
 
 export const fetchFormfieldsWithResponses = async (
-  briefIds: Brief.Type['id'][] 
+  orderId: Order.Type['uuid']
 ): Promise<
   Brief.Relationships.FormFieldResponse.Response[]
 
@@ -97,7 +98,7 @@ export const fetchFormfieldsWithResponses = async (
         
         ` 
       )
-      .in('brief_id', briefIds);
+      .eq('order_id', orderId);
 
     if (errorBriefFormFields) {
       throw new Error(errorBriefFormFields.message);

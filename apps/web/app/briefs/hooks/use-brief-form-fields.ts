@@ -1,7 +1,5 @@
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
-import { arrayMove } from '@dnd-kit/sortable';
-
 import { FormField as ServerFormField } from '~/lib/form-field.types';
 
 import { useGenerateContent } from '../configs/content';
@@ -14,6 +12,7 @@ import {
   Option,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
+import { arrayMove } from '@dnd-kit/sortable';
 
 // Centralized FormField State Management Hook
 export const useBriefFormFields = (
@@ -49,7 +48,7 @@ export const useBriefFormFields = (
       // Process form fields
       const defaultFormFields = formFields
         .map((field) => {
-          const newField = {
+          const newField: FormField = {
             ...field,
             options: isValidOptions(field.options) ? field.options : null, // Ensure options are valid
           };
@@ -170,8 +169,6 @@ export const useBriefFormFields = (
   const swapFormFields = (fromIndex: number, toIndex: number) => {
     setFormFields((prevFields) => {
       const reorderedFields = arrayMove(prevFields, fromIndex, toIndex);
-      console.log('reorderedFields', reorderedFields);
-      console.log('new positions', updateFieldPositions(reorderedFields));
       return updateFieldPositions(reorderedFields);
     });
   };

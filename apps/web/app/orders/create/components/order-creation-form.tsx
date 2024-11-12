@@ -104,7 +104,7 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
             return {
               form_field_id: field.id,
               brief_id: values.briefSelection.selectedBriefId,
-              order_id: uniqueId,
+              order_id: values.briefCompletion.uuid,
               response: values.briefCompletion.brief_responses[field.id] ?? '',
             };
           })
