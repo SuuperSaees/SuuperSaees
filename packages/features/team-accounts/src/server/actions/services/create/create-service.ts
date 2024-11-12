@@ -213,7 +213,7 @@ async function createStripePrice(
 }
 
 async function updateServiceWithPriceId(
-  client: SupabaseClient<Database>,
+  client,
   serviceId: number,
   priceId: string,
 ) {
@@ -278,7 +278,6 @@ export async function insertServiceToClient(
   userId: Account.Type['id'],
   agencyId: string,
 ) {
-
   try {
     const { data: serviceAddedData, error: serviceAddedError } = await client
       .from('client_services')
@@ -305,4 +304,3 @@ export async function insertServiceToClient(
     throw error;
   }
 }
-
