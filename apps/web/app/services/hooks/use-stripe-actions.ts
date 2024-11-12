@@ -71,37 +71,45 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     organizationId: string,
   ) => {
     try {
-      console.log('handleCheckout');
-      console.log('priceId', priceId);
-      console.log('stripeId', stripeId);
-      console.log('service', service);
-      console.log('organizationId', organizationId);
+      // Log all parameters before the call
+      console.log('handleCheckout parameters:', {
+        priceId,
+        stripeId,
+        service,
+        organizationId,
+      });
+  
+      if (!priceId || !stripeId || !service || !organizationId) {
+        console.error('Missing required parameters:', {
+          hasPriceId: !!priceId,
+          hasStripeId: !!stripeId,
+          hasService: !!service,
+          hasOrgId: !!organizationId,
+        });
+        throw new Error('Missing required parameters');
+      }
+  
       const sessionUrl = await createUrlForCheckout({
         stripeId,
         priceId,
         service,
         organizationId,
       });
-
+  
       console.log('sessionUrl', sessionUrl);
-
-      navigator.clipboard
-        .writeText(sessionUrl)
-        .then(() => {
-          toast.success('URL copiado en el portapapeles');
-        })
-        .catch((err) => {
-          toast.error('Error al copiar al portapapeles', {
-            description: err.message,
-          });
-          console.error('Error al copiar al portapapeles:', err);
-        });
+  
+      await navigator.clipboard.writeText(sessionUrl);
+      toast.success('URL copiado en el portapapeles');
     } catch (error) {
-      console.log('error', error);
+      console.error('Checkout error:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+      
       toast.error('Error creating checkout URL', {
         description: error?.message,
       });
-      console.error(error);
     }
   };
 
