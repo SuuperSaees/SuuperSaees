@@ -89,6 +89,9 @@ export function useStripeActions({ userRole }: UseStripeActions) {
           console.error('Error al copiar al portapapeles:', err);
         });
     } catch (error) {
+      toast.error('Error creating checkout URL', {
+        description: error?.message,
+      });
       console.error(error);
     }
   };
