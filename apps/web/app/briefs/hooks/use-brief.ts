@@ -114,13 +114,13 @@ export const useBrief = (
     },
 
     onSuccess: async () => {
-      
+      setBrief(defaultBrief);
+      setFormFields([]);
       await queryClient.invalidateQueries({
         queryKey: ['briefs'],
       });
       // reset
-      setBrief(defaultBrief);
-      setFormFields([]);
+
       router.push('/services?briefs=true'); // Redirect to briefs page
     },
   });

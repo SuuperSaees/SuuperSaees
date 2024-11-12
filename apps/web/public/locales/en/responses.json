@@ -31,7 +31,9 @@
       "failedToDeleteBrief": "Couldn't delete the brief. Please try again.",
       "failedToConnectService": "Couldn't connect the service to the brief. Please try again later.",
       "failedToUpdateFields": "Couldn't update the fields. Please try again later.",
-      "failedToDeleteFormFields": "Couldn't delete the form fields. Please try again later."
+      "failedToDeleteFormFields": "Couldn't delete the form fields. Please try again later.",
+      "failedToGetFormFields": "Couldn't retrieve the form fields. Please try again later.",
+      "failedToCreateFormFields": "Couldn't create the form fields. Please try again later."
     },
     "orders": {
       "failedToCreateOrder": "Couldn't create the order. Please try again.",

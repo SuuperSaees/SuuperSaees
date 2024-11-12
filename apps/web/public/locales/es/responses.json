@@ -31,7 +31,9 @@
       "failedToDeleteBrief": "No se pudo eliminar el brief. Inténtalo otra vez.",
       "failedToConnectService": "No se pudo conectar el servicio al brief. Intenta más tarde.",
       "failedToUpdateFields": "No se pudieron actualizar los campos. Reinténtalo más tarde.",
-      "failedToDeleteFormFields": "No se pudieron eliminar los campos del formulario. Inténtalo de nuevo."
+      "failedToDeleteFormFields": "No se pudieron eliminar los campos del formulario. Inténtalo de nuevo.",
+      "failedToGetFormFields": "No se pudieron recuperar los campos del formulario. Inténtalo de nuevo.",
+      "failedToCreateFormFields": "No se pudieron crear los campos del formulario. Inténtalo de nuevo."
     },
     "orders": {
       "faildeToCreateOrder": "No se pudo crear el pedido. Verifica la información e inténtalo nuevamente.",

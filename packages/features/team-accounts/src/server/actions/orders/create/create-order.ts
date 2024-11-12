@@ -211,21 +211,23 @@ export const createOrders = async (
       // If there are files to insert
       if (combinedFileIds.length > 0) {
         for (const fileId of combinedFileIds) {
-          const orderFileToInsert = {
-            order_id: orderData.uuid,
-            file_id: fileId.trim(),
-          };
+          if (fileId) {
+            const orderFileToInsert = {
+              order_id: orderData.uuid,
+              file_id: fileId.trim(),
+            };
 
-          const { error: orderFilesError } = await client
-            .from('order_files')
-            .insert(orderFileToInsert);
+            const { error: orderFilesError } = await client
+              .from('order_files')
+              .insert(orderFileToInsert);
 
-          if (orderFilesError)
-            throw new CustomError(
-              HttpStatus.Error.BadRequest,
-              orderFilesError.message,
-              ErrorOrderOperations.FAILED_TO_INSERT_FILES,
-            );
+            if (orderFilesError)
+              throw new CustomError(
+                HttpStatus.Error.BadRequest,
+                orderFilesError.message,
+                ErrorOrderOperations.FAILED_TO_INSERT_FILES,
+              );
+          }
         }
       }
     }
@@ -305,6 +307,6 @@ export const createOrders = async (
     return CustomResponse.success(orderData, 'orderCreated').toJSON();
   } catch (error) {
     console.error(error);
-    return CustomResponse.error(error).toJSON()
+    return CustomResponse.error(error).toJSON();
   }
 };
