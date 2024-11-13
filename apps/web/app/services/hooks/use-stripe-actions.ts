@@ -2,16 +2,19 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+
+
 import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { Database } from '~/lib/database.types';
 import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 // import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
-import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 
 interface UseStripeActions {
   userRole: Database['public']['Tables']['accounts_memberships']['Row']['account_role'];
@@ -64,53 +67,49 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     }
   }, [userRole]);
 
-  const handleCheckout = async (
-    priceId: string,
-    stripeId: string,
-    service: Service.Type,
-    organizationId: string,
-  ) => {
-    try {
-      // Log all parameters before the call
-      console.log('handleCheckout parameters:', {
-        priceId,
-        stripeId,
-        service,
-        organizationId,
-      });
-  
-      if (!priceId || !stripeId || !service || !organizationId) {
-        console.error('Missing required parameters:', {
-          hasPriceId: !!priceId,
-          hasStripeId: !!stripeId,
-          hasService: !!service,
-          hasOrgId: !!organizationId,
-        });
-        throw new Error('Missing required parameters');
-      }
-  
-      const sessionUrl = await createUrlForCheckout({
-        stripeId,
-        priceId,
-        service,
-        organizationId,
-      });
-  
+  const createCheckoutMutation = useMutation({
+    mutationFn: createUrlForCheckout,
+    onSuccess: (sessionUrl: string) => {
       console.log('sessionUrl', sessionUrl);
-  
-      await navigator.clipboard.writeText(sessionUrl);
-      toast.success('URL copiado en el portapapeles');
-    } catch (error) {
+      navigator.clipboard.writeText(sessionUrl).catch((error) => {
+        console.error('Error copying checkout URL to clipboard:', error);
+      });
+      toast.success('Checkout URL copied to clipboard');
+    },
+    onError: (error: Error) => {
       console.error('Checkout error:', {
         name: error.name,
         message: error.message,
         stack: error.stack,
       });
-      
       toast.error('Error creating checkout URL', {
         description: error?.message,
       });
+    },
+  });
+
+  const handleCheckout = (
+    priceId: string,
+    stripeId: string,
+    service: Service.Type,
+    organizationId: string,
+  ) => {
+    if (!priceId || !stripeId || !service || !organizationId) {
+      console.error('Missing required parameters:', {
+        hasPriceId: !!priceId,
+        hasStripeId: !!stripeId,
+        hasService: !!service,
+        hasOrgId: !!organizationId,
+      });
+      throw new Error('Missing required parameters');
     }
+
+    createCheckoutMutation.mutate({
+      stripeId,
+      priceId,
+      service,
+      organizationId,
+    });
   };
 
   useEffect(() => {
