@@ -99,7 +99,7 @@ export const createUrlForCheckout = async ({
         code: tokenError.code,
         stack: tokenError.stack,
       });
-      return "this is a test token"
+      return JSON.stringify(tokenError);
       throw tokenError;
     }
 
