@@ -52,7 +52,6 @@ const BriefCreationForm = ({
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
   const isUpdate = defaultFormFields.length > 0; // Check if the form is for updating an existing brief
   const {
-    addFormField,
     setFormFields,
     setBrief,
     onSubmit,
@@ -60,16 +59,18 @@ const BriefCreationForm = ({
     formFields,
     brief,
     form,
+    setActiveTab,
+    stopEditing
   } = useBriefsContext(); // Context to manage form fields
 
   // Handle adding a new question to the form
   const handleAddQuestion = () => {
-    const newQuestion = addFormField('text-short'); // Create a new question field
-    // Update the form's questions state with the new question
-    form.setValue('questions', [...form.getValues('questions'), newQuestion]);
+    setActiveTab('widgets');
+    stopEditing();
   };
 
   useEffect(() => {
+    
     if (defaultFormFields.length && !formFields.length) {
       const {
         defaultFormFields: formattedDefaultFormFields,
@@ -80,8 +81,8 @@ const BriefCreationForm = ({
       if (defaultInitialFormField) {
         form.setValue('default_question', defaultInitialFormField);
       }
-      console.log('defaultQuestion', defaultInitialFormField);
-      console.log('formattedDefaultFormFields', formattedDefaultFormFields);
+      // console.log('defaultQuestion', defaultInitialFormField);
+      // console.log('formattedDefaultFormFields', formattedDefaultFormFields);
       // form.setValue('questions', formattedDefaultFormFields);
       setFormFields(formattedDefaultFormFields);
       // form.setValue('name', defaultBriefInfo.name);
@@ -105,8 +106,8 @@ const BriefCreationForm = ({
 
   // Sync form state with context whenever formFields change
   useEffect(() => {
-    console.log('form', form.getValues(), 'errors', form.formState.errors);
-    console.log('formFields2', formFields);
+    // console.log('form', form.getValues(), 'errors', form.formState.errors);
+    // console.log('formFields', formFields);
     form.setValue('questions', formFields); // Ensure form state stays in sync with context
     form.setValue('name', brief.name);
     form.setValue('description', brief.description);

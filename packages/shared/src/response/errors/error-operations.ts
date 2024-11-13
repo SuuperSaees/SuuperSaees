@@ -70,7 +70,7 @@ export enum ErrorClientOperations {
     FAILED_TO_DELETE_FORM_FIELDS = 'failedToDeleteFormFields',
     FAILED_TO_CREATE_BRIEF_RESPONSES = 'failedToCreateBriefResponses',
     FAILED_TO_GET_FORM_FIELDS = 'failedToGetFormFields',
-
+    FAILED_TO_CREATE_FORM_FIELDS = 'failedToCreateFormFields',
   }
 
   

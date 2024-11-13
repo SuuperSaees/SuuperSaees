@@ -9,7 +9,8 @@ import {
   useState,
 } from 'react';
 
-import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UseMutationResult } from '@tanstack/react-query';
@@ -17,6 +18,9 @@ import { Plus } from 'lucide-react';
 import { UseFormReturn, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+
+import { FormField as FormFieldServer } from '~/lib/form-field.types';
+
 import { BriefCreationForm } from '../components/brief-creation-form';
 import Options from '../components/form-field-actions';
 import InputCard from '../components/input-card';
@@ -33,7 +37,7 @@ import {
   InputTypes,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
-import { FormField as FormFieldServer } from '~/lib/form-field.types';
+
 interface BriefsContext {
   brief: Brief;
   inputs: Input[];
@@ -43,7 +47,10 @@ interface BriefsContext {
   contentMap: Map<ContentTypes, Content>;
   isEditing: boolean;
   currentFormField: FormField | undefined;
-  createDefaultFormFields: (formFields: FormFieldServer.Response[]) => { defaultFormFields: FormField[]; defaultInitialFormField: FormField | null };
+  createDefaultFormFields: (formFields: FormFieldServer.Response[]) => {
+    defaultFormFields: FormField[];
+    defaultInitialFormField: FormField | null;
+  };
   updateBrief: (updatedBrief: Brief) => void;
   addFormField: (formFieldType: FormField['type']) => FormField;
   removeFormField: (id: string) => void;
@@ -77,7 +84,9 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeTab, setActiveTab] = useState<'widgets' | 'settings'>('widgets');
   const { t } = useTranslation('briefs');
   const formFieldsContext = useBriefFormFields(setActiveTab);
-  const sortedFormFields = formFieldsContext.formFields.sort((a, b) => a.position - b.position);
+  const sortedFormFields = formFieldsContext.formFields.sort(
+    (a, b) => a.position - b.position,
+  );
   const briefContext = useBrief(formFieldsContext.setFormFields);
 
   const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
@@ -154,7 +163,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }, [widget.type, formFieldsContext.inputsMap, formFieldsContext.contentMap]);
-  
+
   return (
     <BriefsContext.Provider
       value={{
@@ -171,7 +180,8 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}
         sensors={sensors}
-        collisionDetection={closestCorners}
+        collisionDetection={closestCenter}
+        modifiers={isDragging && widget.isDragging ? [] : [restrictToVerticalAxis]}
       >
         <SortableContext items={formFieldsContext.formFields}>
           {children}
