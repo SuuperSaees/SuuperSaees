@@ -243,7 +243,6 @@ class WebhookRouterService {
                 .single();
 
             if (clientError) {
-              console.log('Error fetching user account: ', clientError);
               console.error('Error fetching user account: ', clientError);
             }
             let client;
