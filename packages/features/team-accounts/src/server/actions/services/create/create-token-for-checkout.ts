@@ -61,29 +61,22 @@ export const createUrlForCheckout = async ({
   service: Service.Type;
   organizationId: string;
 }) => {
-  console.log('createUrlForCheckout - Starting with params:', {
-    stripeId: stripeId ? 'present' : 'missing',
-    priceId: priceId ? 'present' : 'missing',
-    service: service ? service : 'missing',
-    organizationId: organizationId ? 'present' : 'missing',
-  });
-
   try {
     // Validate input parameters
     if (!stripeId || !priceId || !service || !organizationId) {
-      throw new Error('Missing required parameters: ' + 
-        JSON.stringify({
-          hasStripeId: !!stripeId,
-          hasPriceId: !!priceId,
-          hasService: !!service,
-          hasOrgId: !!organizationId
-        })
+      throw new Error(
+        'Missing required parameters: ' +
+          JSON.stringify({
+            hasStripeId: !!stripeId,
+            hasPriceId: !!priceId,
+            hasService: !!service,
+            hasOrgId: !!organizationId,
+          }),
       );
     }
 
-    console.log('Creating token...');
     let token: { accessToken: string; tokenId: string } | undefined;
-  
+
     try {
       token = await createToken({
         account_id: stripeId,
@@ -92,14 +85,12 @@ export const createUrlForCheckout = async ({
         expires_at: new Date(),
         organization_id: organizationId,
       });
-      return token.tokenId;
     } catch (tokenError: any) {
       console.error('Token creation failed:', {
         error: tokenError.message,
         code: tokenError.code,
         stack: tokenError.stack,
       });
-      return JSON.stringify(tokenError);
       throw tokenError;
     }
 
@@ -118,7 +109,9 @@ export const createUrlForCheckout = async ({
     }
 
     if (!baseUrl) {
-      throw new Error(`Invalid baseUrl returned for organizationId: ${organizationId}`);
+      throw new Error(
+        `Invalid baseUrl returned for organizationId: ${organizationId}`,
+      );
     }
 
     const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
@@ -137,8 +130,8 @@ export const createUrlForCheckout = async ({
         hasStripeId: !!stripeId,
         hasPriceId: !!priceId,
         hasService: !!service,
-        hasOrgId: !!organizationId
-      }
+        hasOrgId: !!organizationId,
+      },
     });
     throw error;
   }
