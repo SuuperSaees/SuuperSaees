@@ -60,13 +60,32 @@ export function WidgetEditForm() {
 
   const {
     fields: optionsFields,
-    append,
-    remove,
   } = useFieldArray({
     control: form.control,
     name: 'options',
   });
-
+  // Remove function for options // should also updateFormField
+  const removeOption = (index: number) => {
+    // remove(index);
+    const optionsFields = form.getValues('options');
+    const newOPtions = optionsFields?.filter((option, i) => i !== index)
+    form.setValue('options', newOPtions);
+    if (currentFormField) {
+      updateFormField(currentFormField.id, { ...currentFormField, options: newOPtions});
+    }
+  };
+  const addOption = () => {
+    const optionsFields = form.getValues('options');
+    const newOption = {
+      label: '',
+      value: '',
+    };
+    form.setValue('options', [...(optionsFields ?? []), newOption]);
+    const updatedOptions = optionsFields ? [...optionsFields, newOption] : [newOption];
+    if(currentFormField) {
+      updateFormField(currentFormField.id, { ...currentFormField, options: updatedOptions});
+    }
+  }
   // Helper for updating form and context state
   const handleChange = (
     e: ChangeEvent<HTMLInputElement>,
@@ -117,7 +136,7 @@ export function WidgetEditForm() {
         <div key={option.id} className="relative flex flex-col gap-2">
           {renderFieldInput(
             `options.${index}.label`,
-            t('creation.form.marks.options.' + (index + 1)+ '.label'),
+            t('creation.form.marks.options.label', { number: index + 1 }),
             type,
             index,
             false,
@@ -125,7 +144,7 @@ export function WidgetEditForm() {
 
           {renderFieldInput(
             `options.${index}.value`,
-            t('creation.form.marks.options.' + (index + 1)+ '.value'),
+            t('creation.form.marks.options.value', { number: index + 1 }),
             type,
             index,
             true,
@@ -133,7 +152,7 @@ export function WidgetEditForm() {
 
           <Button
             type="button"
-            onClick={() => remove(index)}
+            onClick={() => removeOption(index)}
             className="absolute right-0 top-0 h-[1.3rem] w-[1.3rem] rounded-full bg-transparent p-0 text-gray-600 shadow-none hover:bg-transparent hover:text-gray-900"
           >
             <Trash className="w-full" />
@@ -143,7 +162,7 @@ export function WidgetEditForm() {
       <div className="flex justify-center">
         <Button
           type="button"
-          onClick={() => append({ label: '', value: '' })}
+          onClick={() => addOption()}
           className="h-9 w-9 rounded-full bg-gray-50 bg-transparent p-2 text-gray-600 shadow-none hover:bg-gray-100"
         >
           <Plus className="w-full" />
