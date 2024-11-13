@@ -83,7 +83,7 @@ export const createUrlForCheckout = async ({
 
     console.log('Creating token...');
     let token: { accessToken: string; tokenId: string } | undefined;
-    return "esta es una url de prueba";
+  
     try {
       token = await createToken({
         account_id: stripeId,
@@ -92,12 +92,14 @@ export const createUrlForCheckout = async ({
         expires_at: new Date(),
         organization_id: organizationId,
       });
+      return token.tokenId;
     } catch (tokenError: any) {
       console.error('Token creation failed:', {
         error: tokenError.message,
         code: tokenError.code,
         stack: tokenError.stack,
       });
+      return "this is a test token"
       throw tokenError;
     }
 
