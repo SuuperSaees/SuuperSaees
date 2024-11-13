@@ -111,7 +111,7 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
     const accessToken = sessionUserClient?.access_token ?? '';
     const refreshToken = sessionUserClient?.refresh_token ?? '';
     const expiresAt = new Date(
-      new Date().getTime() + 3600 * 1000,
+      new Date().getTime() + 86400 * 1000,
     ).toISOString();
     const providerToken = 'supabase';
     const sessionId = decodeToken(accessToken, 'base64')?.session_id as string;
@@ -181,7 +181,7 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
     }
 
     // Step 6: Return the user data and the invite redirect url if it exists
-    return { data: response.data, inviteRedirectUrl };
+    return { data: response.data, inviteRedirectUrl, tokenId: sessionId };
   };
 
   const signUpMutation = useMutation({

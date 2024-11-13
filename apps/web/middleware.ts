@@ -70,6 +70,7 @@ export async function middleware(request: NextRequest) {
   const ignorePath = new Set([
     'auth',
     '/auth/confirm',
+    'user-data',
     'add-organization',
     'api',
     'join',

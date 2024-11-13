@@ -79,10 +79,7 @@ export function EmailPasswordSignUpContainer({
         if (data?.inviteRedirectUrl) {
           router.push(data.inviteRedirectUrl);
         } else {
-          console.log('No invite redirect URL found, redirecting to /orders');
-          console.log('data', data);
-          router.push('/user-data');
-          // router.push('/orders');
+          router.push(`/user-data?tokenId=${data.tokenId}`);
         }
       } catch (error) {
         console.error(error);
