@@ -4,6 +4,7 @@ import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { getDomainByOrganizationId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { createToken } from '../../../../../../../tokens/src/create-token';
 
+
 // export const createUrlForCheckout = async ({
 //   stripeId,
 //   priceId,
@@ -81,7 +82,8 @@ export const createUrlForCheckout = async ({
     }
 
     console.log('Creating token...');
-    let token;
+    let token: { accessToken: string; tokenId: string } | undefined;
+    return "esta es una url de prueba";
     try {
       token = await createToken({
         account_id: stripeId,
@@ -101,9 +103,9 @@ export const createUrlForCheckout = async ({
 
     console.log('Token created successfully:', { tokenId: token?.tokenId });
 
-    let baseUrl;
+    let baseUrl: string | undefined;
     try {
-      baseUrl = await getDomainByOrganizationId(organizationId, true);
+      baseUrl = await getDomainByOrganizationId(organizationId, true, true);
     } catch (domainError: any) {
       console.error('Domain retrieval failed:', {
         error: domainError.message,
