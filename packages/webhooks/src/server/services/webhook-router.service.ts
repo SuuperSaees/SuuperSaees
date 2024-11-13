@@ -91,7 +91,7 @@ class WebhookRouterService {
                 .single();
 
             if (clientError) {
-              console.error('Error fetching client:', clientError);
+              console.error('Error fetching user account:', clientError);
             }
             let client;
             if (!clientData) {
@@ -136,7 +136,27 @@ class WebhookRouterService {
               if (clientError) {
                 console.error('Error fetching client:', clientError);
               }
-              clientId = clientDataWithChecker?.id ?? client?.success?.data?.id;
+              // clientId = clientDataWithChecker?.id ?? client?.success?.data?.id;
+              if (clientDataWithChecker) {
+                clientId = clientDataWithChecker.id;
+              } else {
+                const { data: createClientDataWithChecker, error: clientError } =
+                await this.adminClient
+                  .from('clients')
+                  .insert({
+                    agency_id: accountDataAgencyOwnerData.organization_id ?? '',
+                    organization_client_id: clientOrganizationId ?? '',
+                    user_client_id: clientData.id,
+                  })
+                  .select('id')
+                  .single();
+
+                if (clientError) {
+                  console.error('Error creating client:', clientError);
+                }
+
+                clientId = createClientDataWithChecker?.id;
+              }
             } else {
               clientId = client?.success?.data?.id;
             }
@@ -223,8 +243,8 @@ class WebhookRouterService {
                 .single();
 
             if (clientError) {
-              console.log('Error fetching client:', clientError);
-              console.error('Error fetching client:', clientError);
+              console.log('Error fetching user account: ', clientError);
+              console.error('Error fetching user account: ', clientError);
             }
             let client;
             if (!clientData) {
@@ -270,7 +290,28 @@ class WebhookRouterService {
               if (clientError) {
                 console.error('Error fetching client:', clientError);
               }
-              clientId = clientDataWithChecker?.id ?? client?.success?.data?.id;
+              // clientId = clientDataWithChecker?.id ?? client?.success?.data?.id;
+              if (clientDataWithChecker) {
+                clientId = clientDataWithChecker.id;
+              } else {
+                const { data: createClientDataWithChecker, error: clientError } =
+                await this.adminClient
+                  .from('clients')
+                  .insert({
+                    agency_id: accountDataAgencyOwnerData.organization_id ?? '',
+                    organization_client_id: clientOrganizationId ?? '',
+                    user_client_id: clientData.id,
+                  })
+                  .select('id')
+                  .single();
+
+                if (clientError) {
+                  console.error('Error creating client:', clientError);
+                }
+
+                clientId = createClientDataWithChecker?.id;
+              }
+
             } else {
               clientId = client?.success?.data?.id;
             }
@@ -288,7 +329,7 @@ class WebhookRouterService {
               .update({
                 deleted_on: new Date().toISOString(),
               })
-              .eq('id', data.metadata.sessionId);
+              .eq('id', checkoutServiceData?.id);
 
 
           } else {

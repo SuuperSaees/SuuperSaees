@@ -7,6 +7,8 @@ import { getTokenData } from '~/team-accounts/src/server/actions/tokens/get/get-
 
 import { decodeToken } from '../../../../packages/tokens/src/decode-token';
 import DetailsSide from './components/details';
+import { getOrganizationSettingsByOrganizationId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -25,20 +27,26 @@ async function ServiceCheckoutPage({
 
   const tokendecoded = decodeToken(token?.access_token ?? '');
 
+  const organizationSettings = await getOrganizationSettingsByOrganizationId(tokendecoded.organization_id, true);
+
+  console.log('organizationSettings', organizationSettings);
+
   return (
-    <PageBody className="min-h-screen flex flex-col">
-      <img src={suuperLogo}  className='w-36 h-8 mt-4 mb-2'/>
-      <div className="flex flex-col w-full items-center flex-grow mb-10">
-        <div className="mb-4 w-full">
-          <Separator className="w-full" />
+    <OrganizationSettingsProvider initialSettings={organizationSettings}>
+      <PageBody className="min-h-screen flex flex-col">
+        <img src={organizationSettings.find(setting => setting.key === 'logo_url')?.value ?? suuperLogo}  className='w-36 h-auto mt-4 mb-2'/>
+        <div className="flex flex-col w-full items-center flex-grow mb-10">
+          <div className="mb-4 w-full">
+            <Separator className="w-full" />
+          </div>
+          <DetailsSide
+            service={tokendecoded.service}
+            stripeId={tokendecoded.account_id}
+            organizationId={tokendecoded.organization_id}
+          />
         </div>
-        <DetailsSide
-          service={tokendecoded.service}
-          stripeId={tokendecoded.account_id}
-          organizationId={tokendecoded.organization_id}
-        />
-      </div>
-    </PageBody>
+      </PageBody>
+    </OrganizationSettingsProvider>
   );
 }
 
