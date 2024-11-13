@@ -65,6 +65,7 @@ export const createUrlForCheckout = async ({
         `Invalid baseUrl returned for organizationId: ${organizationId}`,
       );
     }
+    
 
     const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
 

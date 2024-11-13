@@ -29,8 +29,6 @@ async function ServiceCheckoutPage({
 
   const organizationSettings = await getOrganizationSettingsByOrganizationId(tokendecoded.organization_id, true);
 
-  console.log('organizationSettings', organizationSettings);
-
   return (
     <OrganizationSettingsProvider initialSettings={organizationSettings}>
       <PageBody className="min-h-screen flex flex-col">
