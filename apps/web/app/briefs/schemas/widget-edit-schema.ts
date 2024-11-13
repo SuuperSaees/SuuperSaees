@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const widgetEditSchema = z.object({
+  id: z.string(),
   label: z.string().min(1, { message: 'Label cannot be empty.' }),
   description: z.string().optional().nullable(),
   placeholder: z.string().optional().nullable(),
@@ -33,5 +34,6 @@ export const widgetEditSchema = z.object({
         selected: z.boolean().optional(),
       }),
     )
-    .optional(),
+    .optional().nullable(),
+    required: z.boolean().optional().nullable(),
 });

@@ -9,15 +9,17 @@ import {
   useState,
 } from 'react';
 
-import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UseMutationResult } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { UseFormReturn, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { Brief } from '~/lib/brief.types';
+import { FormField as FormFieldServer } from '~/lib/form-field.types';
 
 import { BriefCreationForm } from '../components/brief-creation-form';
 import Options from '../components/form-field-actions';
@@ -27,39 +29,43 @@ import { useBriefDragAndDrop } from '../hooks/use-brief-drag-and-drop';
 import { useBriefFormFields } from '../hooks/use-brief-form-fields';
 import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
 import {
+  Brief,
   Content,
   ContentTypes,
+  FormField,
   Input,
   InputTypes,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
-import { useTranslation } from 'react-i18next';
-import { FormField } from '~/lib/form-field.types';
 
 interface BriefsContext {
-  brief: Brief.Insert;
+  brief: Brief;
   inputs: Input[];
   content: Content[];
-  formFields: FormField.Type[];
+  formFields: FormField[];
   inputsMap: Map<InputTypes, Input>;
   contentMap: Map<ContentTypes, Content>;
   isEditing: boolean;
-  currentFormField: FormField.Type | undefined;
-  updateBrief: (updatedBrief: Brief.Insert) => void;
-  addFormField: (formFieldType: FormField.Type['type']) => FormField.Type;
-  removeFormField: (index: number) => void;
-  updateFormField: (index: number, updatedFormField: FormField.Type) => void;
-  duplicateFormField: (id: number) => void;
-  editFormField: (id: number) => void;
+  currentFormField: FormField | undefined;
+  createDefaultFormFields: (formFields: FormFieldServer.Response[]) => {
+    defaultFormFields: FormField[];
+    defaultInitialFormField: FormField | null;
+  };
+  updateBrief: (updatedBrief: Brief) => void;
+  addFormField: (formFieldType: FormField['type']) => FormField;
+  removeFormField: (id: string) => void;
+  updateFormField: (id: string, updatedFormField: FormField) => void;
+  duplicateFormField: (id: string) => void;
+  editFormField: (id: string) => void;
   stopEditing: () => void;
   startEditing: () => void;
-  setFormFields: Dispatch<SetStateAction<FormField.Type[]>>;
-  setBrief: Dispatch<SetStateAction<Brief.Insert>>;
-  form: UseFormReturn<BriefCreationForm>;
+  setFormFields: Dispatch<SetStateAction<FormField[]>>;
+  setBrief: Dispatch<SetStateAction<Brief>>;
   onSubmit: (
     values: z.infer<typeof briefCreationFormSchema>,
     isUpdate?: boolean,
   ) => void;
+  form: UseFormReturn<BriefCreationForm>;
   briefMutation: UseMutationResult<
     void,
     Error,
@@ -76,9 +82,11 @@ export const BriefsContext = createContext<BriefsContext | undefined>(
 
 export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeTab, setActiveTab] = useState<'widgets' | 'settings'>('widgets');
-  const { t } = useTranslation('briefs')
+  const { t } = useTranslation('briefs');
   const formFieldsContext = useBriefFormFields(setActiveTab);
-
+  const sortedFormFields = formFieldsContext.formFields.sort(
+    (a, b) => a.position - b.position,
+  );
   const briefContext = useBrief(formFieldsContext.setFormFields);
 
   const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
@@ -103,6 +111,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
         type: 'text-short', // not editable,
         required: true,
         position: 0,
+        id: 'create-form-field-' + 0,
       },
     },
   });
@@ -122,7 +131,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
 
     briefContext.briefMutation.mutate({ values: newValues, isUpdate });
 
-     // Trigger the mutation with form values
+    // Trigger the mutation with form values
     setActiveTab('settings');
   };
 
@@ -159,6 +168,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
     <BriefsContext.Provider
       value={{
         ...formFieldsContext,
+        formFields: sortedFormFields,
         ...briefContext,
         form,
         onSubmit,
@@ -170,7 +180,8 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}
         sensors={sensors}
-        collisionDetection={closestCorners}
+        collisionDetection={closestCenter}
+        modifiers={isDragging && widget.isDragging ? [] : [restrictToVerticalAxis]}
       >
         <SortableContext items={formFieldsContext.formFields}>
           {children}

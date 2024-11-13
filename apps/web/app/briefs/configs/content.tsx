@@ -28,6 +28,8 @@ export const useGenerateContent = (
           placeholder: '',
           description: '',
           type: 'h1',
+          position: -1,
+          id: 'create-form-field-0',
         },
         component: (props: ComponentProps) => (
           <FormTitleComponent
@@ -51,6 +53,8 @@ export const useGenerateContent = (
           placeholder: '',
           description: '',
           type: 'rich-text',
+          position: -1,
+          id: 'create-form-field-0',
         },
         component: (props: ComponentProps) => (
           <FormRichTextComponent
@@ -75,6 +79,8 @@ export const useGenerateContent = (
           label: 'Image',
           placeholder: '',
           type:'image',
+          position: -1,
+          id: 'create-form-field-0',
         },
         component: (props: ComponentProps) => (
           <UploadImagePreview

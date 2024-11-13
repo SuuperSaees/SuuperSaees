@@ -8,9 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { Brief } from '~/lib/brief.types';
 import { handleResponse } from '~/lib/response/handle-response';
-import { Service } from '~/lib/services.types';
 import {
   addFormFieldsToBriefs,
   addServiceBriefs,
@@ -23,7 +21,7 @@ import {
 } from '~/team-accounts/src/server/actions/briefs/update/update-brief';
 
 import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
-import { FormField } from '../types/brief.types';
+import { Brief, FormField } from '../types/brief.types';
 
 export const useBrief = (
   setFormFields: Dispatch<SetStateAction<FormField[]>>,
@@ -36,14 +34,10 @@ export const useBrief = (
     description: '',
     services: [],
   };
-  const [brief, setBrief] = useState<
-    Brief.Insert & {
-      services: Service.Response[];
-    }
-  >(defaultBrief);
+  const [brief, setBrief] = useState<Brief>(defaultBrief);
   const { t } = useTranslation(['briefs', 'responses']);
 
-  function updateBrief(updatedBrief: Brief.Insert) {
+  function updateBrief(updatedBrief: Brief) {
     setBrief(updatedBrief);
   }
 
@@ -56,18 +50,26 @@ export const useBrief = (
       values: z.infer<typeof briefCreationFormSchema>;
       isUpdate?: boolean;
     }) => {
+
       if (isUpdate) {
         const res = await updateBriefById({
-          id: brief.id,
+          id: brief.id ?? '',
           name: values.name,
           description: values.description ?? null,
           image_url: values.image_url ?? null,
-          propietary_organization_id: brief.propietary_organization_id,
         });
         await handleResponse(res, 'briefs', t);
-
+        
+        // Remove the id if start with 'create-form-field-'
+        const formattedFormFields = values.questions.map((question) => {
+          const newQuestion = { ...question };
+          if (newQuestion.id?.startsWith('create-form-field-')) {
+            newQuestion.id = undefined;
+          }
+          return newQuestion;
+        })
         await handleResponse(
-          await updateFormFieldsById(values.questions, brief.id),
+          await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
           'briefs',
           t,
         );
@@ -112,14 +114,14 @@ export const useBrief = (
     },
 
     onSuccess: async () => {
-      router.push('/services?briefs=true'); // Redirect to briefs page
-
+      setBrief(defaultBrief);
+      setFormFields([]);
       await queryClient.invalidateQueries({
         queryKey: ['briefs'],
       });
       // reset
-      setBrief(defaultBrief);
-      setFormFields([]);
+
+      router.push('/services?briefs=true'); // Redirect to briefs page
     },
   });
 

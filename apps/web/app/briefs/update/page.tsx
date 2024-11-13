@@ -1,14 +1,11 @@
 import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
-import { Brief } from '~/lib/brief.types';
-import { Database } from '~/lib/database.types';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { getBriefsById } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
+import { getBriefById } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 
 import BriefCreationForm from '../components/brief-creation-form';
 
@@ -27,44 +24,18 @@ async function UpdateBriefsPage({
     id: string;
   };
 }) {
-  const client = getSupabaseServerComponentClient<Database>();
-  const { data: userData } = await client.auth.getUser()
-
-  const propietary_organization_id = userData.user!.id;
   const userRole = await getUserRole().catch((err) => {
-    console.error(`Error client, getting user role: ${err}`)
-    return ''
+    console.error(`Error client, getting user role: ${err}`);
+    return '';
   });
-  const briefId = id;
 
+  const brief = await getBriefById(id)
+  const formattedBrief = {
+    ...brief,
+    formFields: brief.brief_form_fields.map((item) => item.field).filter((field) => field !== null),
+  }
   // Get the form fields associated with the brief and the brief information
-  const briefRelevantInfo = (await getBriefsById(briefId)).map(info => ({
-    id: info.id,
-    created_at: info.created_at,
-    name: info.name,
-    propietary_organization_id: info.propietary_organization_id,
-    description: info.description,
-    image_url: info.image_url,
-    brief_form_fields: info.brief_form_fields,
-    services: info.services,
-  }));
 
-  const briefRelevantInfoFiltered = ( briefRelevantInfo.map(info => ({
-    id: info.id,
-    created_at: info.created_at,
-    name: info.name,
-    propietary_organization_id: info.propietary_organization_id,
-    description: info.description,
-    image_url: info.image_url,
-    services: info.services,
-  })));
-
-
-  const briefFormFields = briefRelevantInfo.map(info => info.brief_form_fields).flat();
-  const formFields = briefFormFields
-    .map((item) => item.field)
-    .filter((field) => field !== null);
-  
   return (
     <PageBody className="mx-auto flex w-full max-w-7xl p-8 lg:px-16">
       <div className="mb-[32px] flex w-full items-center justify-between">
@@ -78,10 +49,9 @@ async function UpdateBriefsPage({
       </div>
 
       <BriefCreationForm
-        propietaryOrganizationId={propietary_organization_id}
         userRole={userRole}
-        defaultValues={formFields as Brief.Relationships.FormField[]}
-        defaultBriefInfo={briefRelevantInfoFiltered[0]}
+        defaultFormFields={formattedBrief.formFields}
+        defaultBriefInfo={formattedBrief}
       />
     </PageBody>
   );

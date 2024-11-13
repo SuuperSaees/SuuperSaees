@@ -3,11 +3,12 @@ import { UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 import { uploadFileToBucket } from '~/utils/upload-video';
 import { BriefCreationForm } from '../components/brief-creation-form';
+import { ComponentProps } from '../types/brief.types';
 
 export const useVideoUpload = (
   index: number,
   form: UseFormReturn<BriefCreationForm>,
-  handleQuestionChange: (index: number, field: 'label', value: string) => void,
+  handleQuestionChange: ComponentProps['handleQuestionChange'],
   t: (key: string) => string
 ) => {
   const [videoUrl, setVideoUrl] = useState<string | null>(() => form.getValues(`questions.${index}.label`) as string | null);

@@ -69,7 +69,7 @@ export function WidgetEditForm() {
 
   // Helper for updating form and context state
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement>,
+    e: ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     form.setValue(name as keyof z.infer<typeof widgetEditSchema>, value);
@@ -77,19 +77,16 @@ export function WidgetEditForm() {
     if (currentFormField) {
       updateFormField(currentFormField.id, {
         ...form.getValues(),
-        id: currentFormField.id,
         [name]: value,
       });
     }
   };
 
-  const handleSwitchChange = (name: keyof WidgetEditFormValues, checked: boolean) => {
+  const handleSwitchChange = (name: 'required' , checked: boolean) => {
     form.setValue(name, checked)
-
     if (currentFormField) {
       updateFormField(currentFormField.id, {
         ...form.getValues(),
-        id: currentFormField.id,
         [name]: checked,
       })
     }
@@ -102,7 +99,6 @@ export function WidgetEditForm() {
     if (currentFormField) {
       updateFormField(currentFormField.id, {
         ...form.getValues(),
-        id: currentFormField.id,
         label: value,
       });
     }
@@ -204,7 +200,7 @@ export function WidgetEditForm() {
             </p>
             <FormControl>
               <Switch
-                checked={field.value}
+                checked={field.value ? true : false}
                 onCheckedChange={(checked) => {
                   field.onChange(checked)
                   handleSwitchChange('required', checked)
@@ -237,9 +233,9 @@ export function WidgetEditForm() {
                     // For label, we update both the label and the value fields
                     if (!isValueField && index !== undefined) {
                       const sanitizedValue = e.target.value
-                        .toLowerCase()
-                        .replace(/\s+/g, '_') // Replace spaces with underscores
-                        .replace(/[^\w_]+/g, ''); // Remove special characters
+                        // .toLowerCase()
+                        // .replace(/\s+/g, '_') // Replace spaces with underscores
+                        // .replace(/[^\w_]+/g, ''); // Remove special characters
 
                       form.setValue(`options.${index}.value`, sanitizedValue);
                     }
@@ -278,9 +274,9 @@ export function WidgetEditForm() {
                     // For label, we update both the label and the value fields
                     if (!isValueField && index !== undefined) {
                       const sanitizedValue = e.target.value
-                        .toLowerCase()
-                        .replace(/\s+/g, '_') // Replace spaces with underscores
-                        .replace(/[^\w_]+/g, ''); // Remove special characters
+                        // .toLowerCase()
+                        // .replace(/\s+/g, '_') // Replace spaces with underscores
+                        // .replace(/[^\w_]+/g, ''); // Remove special characters
 
                       form.setValue(`options.${index}.value`, sanitizedValue);
                     }
@@ -303,7 +299,7 @@ export function WidgetEditForm() {
     return (
       <UploadImageDropzone
         form={form}
-        index={currentFormField?.id}
+        index={currentFormField?.position}
         nameField={'label'}
         handleQuestionChange={handleChangeContent}
         defaultValue={currentFormField?.label}
@@ -313,9 +309,10 @@ export function WidgetEditForm() {
   };
 
   const renderRichTextInput = () => {
+    if (!currentFormField) return null;
     return(
       <FormRichTextComponent
-        index={currentFormField?.id}
+        index={currentFormField?.position}
         form = {form}
         userRole = {''}
         inSidebar = {true}

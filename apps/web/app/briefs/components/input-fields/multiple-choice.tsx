@@ -2,33 +2,16 @@
 
 import React from 'react';
 
-import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
 import { ThemedCheckbox } from '../../../../../../packages/features/accounts/src/components/ui/checkbox-themed-with-settings';
 import { BriefsProvider } from '../../contexts/briefs-context';
-import { FormField as FormFieldType, Option } from '../../types/brief.types';
-import { BriefCreationForm } from '../brief-creation-form';
+import { ComponentProps, Option } from '../../types/brief.types';
 
-export interface FormFieldMultipleChoiceProps {
-  index: number;
-  question: FormFieldType;
-  form: UseFormReturn<BriefCreationForm>;
-  handleQuestionChange: (
-    index: number,
-    field:
-      | 'label'
-      | 'description'
-      | 'placeholder'
-      | `options.${number}.selected`,
-    value: string | boolean,
-  ) => void;
-  handleRemoveQuestion: (index: number) => void;
-}
 
-const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
+const FormFieldMultipleChoice: React.FC<ComponentProps> = ({
   index,
   question,
   form,
@@ -54,7 +37,7 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                       {...field}
                       value={question.label}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        handleQuestionChange(index, 'label', e.target.value)
+                        handleQuestionChange(question.id, 'label', e.target.value)
                       }
                       placeholder={t('multipleChoice.title')}
                       className="bg-transparent w-full border-none text-sm font-bold text-gray-600 focus:outline-none"
@@ -78,7 +61,7 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                       value={question.description ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleQuestionChange(
-                          index,
+                          question.id,
                           'description',
                           e.target.value,
                         )
@@ -102,7 +85,7 @@ const FormFieldMultipleChoice: React.FC<FormFieldMultipleChoiceProps> = ({
                     checked={option.selected}
                     onCheckedChange={(checked) => {
                       handleQuestionChange(
-                        index,
+                        question.id,
                         `options.${optIndex}.selected`,
                         checked,
                       );
