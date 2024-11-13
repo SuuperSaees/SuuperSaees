@@ -3,12 +3,10 @@ import { Separator } from '@kit/ui/separator';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { getTokenData } from '~/team-accounts/src/server/actions/tokens/get/get-token';
-
-import { decodeToken } from '../../../../packages/tokens/src/decode-token';
 import DetailsSide from './components/details';
 import { getOrganizationSettingsByOrganizationId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+import { decodeTokenData } from '../../../../packages/features/team-accounts/src/server/actions/tokens/decode/decode-token';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -23,9 +21,8 @@ async function ServiceCheckoutPage({
   searchParams: { tokenId: string };
 }) {
   const suuperLogo = process.env.NEXT_PUBLIC_SUUPER_LOGO_IMAGE;
-  const token = await getTokenData(tokenId);
 
-  const tokendecoded = decodeToken(token?.access_token ?? '');
+  const tokendecoded = await decodeTokenData(tokenId);
 
   const organizationSettings = await getOrganizationSettingsByOrganizationId(tokendecoded.organization_id, true);
 
