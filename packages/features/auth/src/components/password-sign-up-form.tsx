@@ -24,6 +24,8 @@ import { useAuthDetails } from '../sign-in';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
 
 import { getTextColorBasedOnBackground } from '../../../../../apps/web/app/utils/generate-colors';
+import { EyeOff, Eye } from 'lucide-react';
+import { useState } from 'react';
 
 
 export function PasswordSignUpForm({
@@ -49,6 +51,7 @@ export function PasswordSignUpForm({
   className?: string;
 }) {
   const { t } = useTranslation();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(PasswordSignUpSchema),
@@ -128,7 +131,6 @@ export function PasswordSignUpForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name={'password'}
@@ -139,25 +141,30 @@ export function PasswordSignUpForm({
               </FormLabel>
 
               <FormControl>
-                {/* <ThemedInput
-                  required
-                  data-test={'password-input'}
-                  type="password"
-                  placeholder={''}
-                  {...field}
-                /> */}
-                <ThemedInput
-                  required
-                  data-test={'password-input'}
-                  type="password"
-                  placeholder={''}
-                  {...field}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    field.onChange(e);
-                    // Automatically set repeatPassword to match password
-                    form.setValue('repeatPassword', e.target.value);
-                  }}
-                />
+                <div className="relative">
+                  <ThemedInput
+                    required
+                    data-test={'password-input'}
+                    type={showPassword ? "text" : "password"}
+                    placeholder={''}
+                    {...field}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      field.onChange(e);
+                      form.setValue('repeatPassword', e.target.value);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    {showPassword ? (
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <EyeOff className="h-4 w-4 text-gray-500" />
+                    )}
+                  </button>
+                </div>
               </FormControl>
 
               <FormMessage />
@@ -172,19 +179,17 @@ export function PasswordSignUpForm({
 
         <Button 
           type='submit' 
-          onClick={() => {
-            console.log('clicked');
-            // console.log(form.getValues());
-          }}
           disabled={loading}
           data-test={'auth-submit-button'}
-          className='rounded-full w-fit p-4'
+          className='flex w-56 h-14 px-8 py-4 justify-center items-center flex-shrink-0 rounded-full mt-8'
           style={{
             backgroundColor: authDetails?.theme_color ?? '#1a38d7',
             color: getTextColorBasedOnBackground(authDetails?.theme_color ? authDetails.theme_color : '#000000'),
           }}
         >
-          <Trans i18nKey={'auth:createOrganization'} />
+          <div className='text-white text-center text-lg font-semibold tracking-[-0.18px]'>
+            <Trans i18nKey={'auth:createOrganization'}/>
+          </div>
         </Button>
        </div>
       </form>

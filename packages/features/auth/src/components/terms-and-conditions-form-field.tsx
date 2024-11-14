@@ -26,7 +26,7 @@ export function TermsAndConditionsFormField(
                       TermsOfServiceLink: (
                         <Link
                           target={'_blank'}
-                          className={'underline'}
+                          className={'text-brand'}
                           href={'/terms-of-service'}
                         >
                           <Trans i18nKey={'auth:termsOfService'} />
@@ -35,7 +35,7 @@ export function TermsAndConditionsFormField(
                       PrivacyPolicyLink: (
                         <Link
                           target={'_blank'}
-                          className={'underline'}
+                          className={'text-brand'}
                           href={'/privacy-policy'}
                         >
                           <Trans i18nKey={'auth:privacyPolicy'} />
