@@ -289,11 +289,6 @@ const useGetColumns = (
                     <Button
                       variant="ghost"
                       onClick={async () => {
-                        console.log('handleCheckout button clicked');
-                        console.log('priceId', priceId);
-                        console.log('stripeId', stripeId);
-                        console.log('service', service);
-                        console.log('organizationId', organizationId);
                         if (service.price_id) {
                           await handleCheckout(priceId, stripeId, service, organizationId);
                         }

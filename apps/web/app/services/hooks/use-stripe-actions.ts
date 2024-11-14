@@ -70,7 +70,6 @@ export function useStripeActions({ userRole }: UseStripeActions) {
   const createCheckoutMutation = useMutation({
     mutationFn: createUrlForCheckout,
     onSuccess: (sessionUrl: string) => {
-      console.log('sessionUrl', sessionUrl);
       navigator.clipboard.writeText(sessionUrl).catch((error) => {
         console.error('Error copying checkout URL to clipboard:', error);
       });

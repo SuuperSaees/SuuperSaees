@@ -430,8 +430,9 @@ export async function getUserByEmail(
       .eq('user_client_id', userData.id)
       .single();
 
+
     if (clientError ?? !clientId) {
-      return null;
+      return { userData, clientId: null };
     }
 
     return { userData, clientId };
