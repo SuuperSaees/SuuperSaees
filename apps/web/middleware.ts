@@ -3,7 +3,7 @@ import { NextResponse, URLPattern } from 'next/server';
 
 
 
-import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
+// import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
 
@@ -18,6 +18,8 @@ import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/orga
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
+import { Database } from './lib/database.types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 // import { handleDomainCheck } from './handlers/domain-check-handler';
 
@@ -269,7 +271,7 @@ function getPatterns() {
       },
     },
     {
-      pattern: new URLPattern({ pathname: '/home/*?' }),
+      pattern: new URLPattern({ pathname: '/*?' }),
       handler: async (req: NextRequest, res: NextResponse) => {
         const {
           data: { user },
@@ -282,21 +284,16 @@ function getPatterns() {
         if (!user) {
           const signIn = pathsConfig.auth.signIn;
           const redirectPath = `${signIn}?next=${next}`;
-          // const signUp = pathsConfig.auth.signUp;
-          // const redirectPath = `${signUp}?next=${next}`;
-
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
 
         const supabase = createMiddlewareClient(req, res);
 
-        const requiresMultiFactorAuthentication =
-          await checkRequiresMultiFactorAuthentication(supabase);
-
-        // If user requires multi-factor authentication, redirect to MFA page.
-        if (requiresMultiFactorAuthentication) {
+        // Verify phone number
+        const hasPhoneNumber = await checkPhoneNumber(supabase, user.id);
+        if (!hasPhoneNumber && !req.nextUrl.pathname.includes('user-data')) {
           return NextResponse.redirect(
-            new URL(pathsConfig.auth.verifyMfa, origin).href,
+            new URL('/user-data', origin).href,
           );
         }
       },
@@ -387,4 +384,20 @@ function setCORSHeaders(response: NextResponse) {
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
   );
+}
+
+// This function is to verify the phone number
+async function checkPhoneNumber(supabase: SupabaseClient<Database>, userId: string) {
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('phone_number')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error checking phone number:', error);
+    return false;
+  }
+
+  return data?.phone_number !== null;
 }

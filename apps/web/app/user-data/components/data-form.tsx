@@ -6,14 +6,15 @@ import { useForm } from "react-hook-form"
 import { Form, FormItem, FormLabel, FormControl, FormMessage, FormField } from '@kit/ui/form';
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
-import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { useState } from "react";
 import { createIngress } from '~/multitenancy/aws-cluster-ingress/src/actions/create';
-// import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
+import { updateTokenData } from "~/team-accounts/src/server/actions/tokens/update/update-token";
+import { updateAccountData } from "~/team-accounts/src/server/actions/accounts/update/update-account";
+import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
 
 const formSchema = z.object({
     portalUrl: z.string().min(2).max(50),
@@ -22,44 +23,40 @@ const formSchema = z.object({
 })
 
 export function UserDataForm(
-  {userId, tokenId}: {userId: string, tokenId: string}
+  {userId, tokenId, accountData}: {userId: string, tokenId: string, accountData: {name: string, phone_number: string, subdomain: string} | null}
 ) {
   const {t} = useTranslation('auth');
   const router = useRouter();
-  const supabase = useSupabase();
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      portalUrl: "",
-      userFullName: "",
-      userphoneNumber: "",
+      portalUrl: accountData?.subdomain?.replace('.suuper.co', ''),
+      userFullName: accountData?.name,
+      userphoneNumber: accountData?.phone_number,
     },
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setLoading(true);
     try {
-      console.log(data);
-      await supabase.from('tokens')
-      .update({
-          expires_at: new Date().toISOString(),
-      })
-      .eq('id_token_provider', tokenId);
-      await supabase.from('accounts')
-      .update({
-          name: data.userFullName,
-          phone_number: data.userphoneNumber,
-      })
-      .eq('id', userId);
-      // const { userId: suscribtionId } = await createSubscription();
+      await updateTokenData(tokenId, {
+        expires_at: new Date().toISOString(),
+      });
+      await updateAccountData(userId, {
+        name: data.userFullName,
+        phone_number: data.userphoneNumber,
+      });
+
       const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
-      // const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId: suscribtionId });
       const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
       const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
       const BASE_URL = IS_PROD
         ? `https://${subdomain.domain}`
         : process.env.NEXT_PUBLIC_SITE_URL;
+      if (IS_PROD) {
+        await createSubscription();
+      }
       router.push(`${BASE_URL}/orders`);
     } catch (error) {
       console.log(error);
@@ -146,7 +143,6 @@ export function UserDataForm(
             </FormItem>
           )}
         />
-        {/* <Button type="submit">Submit</Button> */}
         <Button 
           type='submit' 
           disabled={loading}
