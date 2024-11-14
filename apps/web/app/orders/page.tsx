@@ -48,7 +48,7 @@ async function OrdersPage() {
             </div>
           </div>
           <div>
-            <OrderList orders={processedOrders ?? []} role={role} agencyStatuses={agencyStatuses}></OrderList>
+            <OrderList orders={processedOrders ?? []} role={role} agencyStatuses={agencyStatuses ?? []}></OrderList>
           </div>
         </div>
       </PageBody>

@@ -10,9 +10,10 @@ import { AgencyStatus } from '~/lib/agency-statuses.types'
 import { Order } from '~/lib/order.types'
 import { Subtask } from '~/lib/tasks.types'
 import { useTranslation } from 'react-i18next'
-
+import { Dispatch, SetStateAction } from 'react'
 interface StatusComboboxItemProps {
   status: AgencyStatus.Type
+  currentStatusId: number
   onSelect: (value: string) => void
   onDelete: (id: number) => void
   order?: Order.Type
@@ -20,10 +21,12 @@ interface StatusComboboxItemProps {
   agency_id: string
   mode: 'order' | 'subtask'
   setPopoverValue: (value: string) => void
+  setCurrentStatusData: Dispatch<SetStateAction<AgencyStatus.Type | undefined>>
 }
 
 export default function StatusComboboxItem({
   status,
+  currentStatusId,
   onSelect,
   onDelete,
   order,
@@ -31,6 +34,7 @@ export default function StatusComboboxItem({
   agency_id,
   mode,
   setPopoverValue,
+  setCurrentStatusData
 }: StatusComboboxItemProps) {
   const {t} = useTranslation('orders')
   const [isHovered, setIsHovered] = useState(false)
@@ -63,18 +67,20 @@ export default function StatusComboboxItem({
             <div onClick={() => setOpen(true)}>
               <EditStatusPopover
                 status_id={status.id}
+                currentStatusId={currentStatusId}
                 status_color={status?.status_color ?? ''}
                 status_name={status?.status_name ?? ''}
                 order_id={order?.id}
                 task_id={subtask?.id}
                 agency_id={agency_id}
-                setValue={setPopoverValue}
+                setPopoverValue={setPopoverValue}
                 mode={mode}
                 preventEditName={preventEditName}
                 open={open}
                 setOpen={setOpen}
                 isHovered={isHovered}
                 setIsHovered={setIsHovered}
+                setCurrentStatusData={setCurrentStatusData}
               />
             </div>
             

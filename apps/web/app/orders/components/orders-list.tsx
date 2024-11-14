@@ -3,11 +3,9 @@
 import React, { useState } from 'react';
 
 
-
 import Link from 'next/link';
 // import { useRouter } from 'next/navigation';
 import { FormattedDate } from './formatted-date';
-
 
 // import { ChevronDownIcon } from '@radix-ui/react-icons';
 // import { useMutation } from '@tanstack/react-query';
@@ -17,7 +15,7 @@ import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/t
 import { updateOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
+import { AgencyStatusesProvider } from './context/agency-statuses-context';
 
 
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
@@ -38,6 +36,7 @@ import { Trans } from '@kit/ui/trans';
 import EmptyState from '~/components/ui/empty-state';
 import StatusCombobox from '../[id]/components/status-combobox';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { Dispatch, SetStateAction } from 'react';
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -55,19 +54,20 @@ type OrdersCardTableProps = {
   orders: ExtendedOrderType[];
   role: string;
   updateOrderDate: (dueDate: string, orderId: number) => Promise<void>;
-  agencyStatuses?: AgencyStatus.Type[];
+  setOrdersData: Dispatch<SetStateAction<ExtendedOrderType[]>>;
 };
 
 const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   orders,
   role,
   updateOrderDate,
-  agencyStatuses,
+  setOrdersData,
 }) => {
   const { t } = useTranslation(['orders', 'responses']);
 
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
+
 
   // Calculate the data for the current page
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -136,7 +136,7 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
                     'agency_owner',
                     'agency_project_manager',
                   ].includes(role) ? (
-                    <StatusCombobox order={order} statusData={order.statusData} agencyStatuses={agencyStatuses} agency_id={order.agency_id} mode='order' />
+                    <StatusCombobox order={order} agency_id={order.agency_id} mode='order' setOrdersData={setOrdersData} />
                   ) : (
                     // Display the status or an empty space if there is no status
                     <span className="pl-2 pr-2">
@@ -265,31 +265,40 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
 export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
   const { t } = useTranslation('orders');
   const [searchTerm, setSearchTerm] = useState('');
+ 
   const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
     'open',
   );
-  // Filtra las órdenes basadas en el término de búsqueda
-  const filteredOrders = orders.filter((order) =>
+
+  const [ordersData, setOrdersData] = useState<ExtendedOrderType[]>(orders);
+  // Filter orders by search term
+  const filteredOrders = ordersData.filter((order) =>
     order.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  
   // Filter orders by active tab
   const getTabFilteredOrders = (tab: string) => {
     switch (tab) {
       case 'completed':
         return filteredOrders.filter((order) => order.status === 'completed');
-      case 'open':
-        return filteredOrders.filter(
-          (order) =>
-            order.status !== 'completed' && order.status !== 'annulled',
-        );
-      case 'all':
-      default:
-        return filteredOrders;
-    }
-  };
-
-  const tabFilteredOrders = getTabFilteredOrders(activeTab);
+        case 'open':
+          return filteredOrders.filter(
+            (order) =>
+              order.status !== 'completed' && order.status !== 'annulled',
+          );
+          case 'all':
+            default:
+              return filteredOrders;
+            }
+          };
+          
+          const [tabFilteredOrders, setTabFilteredOrders] = useState<ExtendedOrderType[]>(getTabFilteredOrders(activeTab));
+          // const tabFilteredOrders = getTabFilteredOrders(activeTab);
+    const changeTabFilteredOrders = (tab: 'open' | 'completed' | 'all') => {
+      setActiveTab(tab);
+      setTabFilteredOrders(getTabFilteredOrders(tab));
+    };
 
   const updateOrderDate = async (due_date: string, orderId: number) => {
     try {
@@ -311,10 +320,10 @@ export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
           <Tabs
             defaultValue={activeTab}
             onValueChange={(value: string) => {
-              setActiveTab(value as 'open' | 'completed' | 'all');
+              changeTabFilteredOrders(value as 'open' | 'completed' | 'all');
             }}
           >
-            <div className="flex flex-wrap items-center gap-4 mb-[24px] flex items-baseline">
+            <div className="flex flex-wrap items-center gap-4 mb-[24px] items-baseline">
               <TabsList className='gap-2 bg-transparent'>
                 <ThemedTabTrigger value="open" activeTab={activeTab} option={'open'}>
                   {t('openOrders')}
@@ -348,13 +357,14 @@ export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
               </div>
             </div>
             <Separator />
+            <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []}>
             <div className="mt-4">
               <TabsContent className='bg-white rounded-xl' value="open">
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
-                  agencyStatuses={agencyStatuses}
+                  setOrdersData={setOrdersData}
                 />
               </TabsContent>
               <TabsContent value="completed" className='bg-white'>
@@ -362,7 +372,7 @@ export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
-                  agencyStatuses={agencyStatuses}
+                  setOrdersData={setOrdersData}
                 />
               </TabsContent>
               <TabsContent value="all" className='bg-white'>
@@ -370,10 +380,11 @@ export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
-                  agencyStatuses={agencyStatuses}
+                  setOrdersData={setOrdersData}
                 />
               </TabsContent>
             </div>
+            </AgencyStatusesProvider>
           </Tabs>
         </main>
       </div>
