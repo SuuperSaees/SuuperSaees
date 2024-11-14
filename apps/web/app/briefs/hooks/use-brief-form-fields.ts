@@ -1,5 +1,7 @@
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
+import { arrayMove } from '@dnd-kit/sortable';
+
 import { FormField as ServerFormField } from '~/lib/form-field.types';
 
 import { useGenerateContent } from '../configs/content';
@@ -12,7 +14,6 @@ import {
   Option,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
-import { arrayMove } from '@dnd-kit/sortable';
 
 // Centralized FormField State Management Hook
 export const useBriefFormFields = (
@@ -42,9 +43,14 @@ export const useBriefFormFields = (
 
   // Helper to create default form fields
   const createDefaultFormFields = useCallback(
-    (formFields: ServerFormField.Response[]): { defaultFormFields: FormField[]; defaultInitialFormField: FormField | null } => {
+    (
+      formFields: ServerFormField.Response[],
+    ): {
+      defaultFormFields: FormField[];
+      defaultInitialFormField: FormField | null;
+    } => {
       let defaultInitialFormField: FormField | null = null;
-        
+
       // Process form fields
       const defaultFormFields = formFields
         .map((field) => {
@@ -52,24 +58,24 @@ export const useBriefFormFields = (
             ...field,
             options: isValidOptions(field.options) ? field.options : null, // Ensure options are valid
           };
-  
+
           // Check if the field is the default initial one (position 0)
           if (field.position === 0) {
             defaultInitialFormField = newField; // Assign the default initial field
-            defaultInitialFormField.position = 0
+            defaultInitialFormField.position = 0;
             return null; // Exclude from the defaultFormFields array
           }
-  
+
           return newField;
         })
         .filter((field) => field !== null); // Filter out null values
-  
+
       return {
         defaultFormFields,
         defaultInitialFormField,
       };
     },
-    []
+    [],
   );
 
   // Helper to update field positions consistently
@@ -193,14 +199,20 @@ export const useBriefFormFields = (
     const formField = formFields[index];
     if (!formField) return;
 
-    const duplicatedFormField = {
+    const duplicatedFormField: FormField = {
       ...formField,
-      id: 'create-form-field-' + formFields.length + 1,
+      id: 'create-form-field-' + (formFields.length + 1),
     };
 
-    setFormFields((prevFields) =>
-      updateFieldPositions([...prevFields, duplicatedFormField]),
-    );
+    setFormFields((prevFields) => {
+      // Create a copy of the form fields and insert the duplicate immediately after the original
+      const updatedFields = [...prevFields];
+      updatedFields.splice(index + 1, 0, duplicatedFormField);
+
+      // Update positions after inserting the duplicated form field
+      return updateFieldPositions(updatedFields);
+    });
+
     setActiveTab('widgets');
   };
 

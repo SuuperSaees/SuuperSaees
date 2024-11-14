@@ -25,8 +25,8 @@ export const useGenerateContent = (
         action: () => action('h1'), // Action passed dynamically,
         content: {
           label: 'Title',
-          placeholder: '',
           description: '',
+          placeholder: '',
           type: 'h1',
           position: -1,
           id: 'create-form-field-0',
@@ -50,8 +50,8 @@ export const useGenerateContent = (
         action: () => action('rich-text'), // Action passed dynamically,
         content: {
           label: '',
-          placeholder: '',
           description: '',
+          placeholder: '',
           type: 'rich-text',
           position: -1,
           id: 'create-form-field-0',
