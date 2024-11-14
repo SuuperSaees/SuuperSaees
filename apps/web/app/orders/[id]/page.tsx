@@ -73,6 +73,7 @@ async function OrderDetailsPage({
             userRole={role}
             orderId={id}
             orderAgencyId={order?.agency_id ?? ''}
+            agencyStatuses={agencyStatuses ?? []}
           />
         </div>
         <AsideOrderInformation order={order} className="hidden lg:flex " agencyStatuses={agencyStatuses ?? []}/>

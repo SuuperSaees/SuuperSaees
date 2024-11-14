@@ -2246,6 +2246,7 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_types"] | null
           start_date: string | null
           state: string | null
+          state_id: number | null
         }
         Insert: {
           completed?: boolean | null
@@ -2260,6 +2261,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
           state?: string | null
+          state_id?: number | null
         }
         Update: {
           completed?: boolean | null
@@ -2274,6 +2276,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
           state?: string | null
+          state_id?: number | null
         }
         Relationships: [
           {
@@ -2281,6 +2284,13 @@ export type Database = {
             columns: ["parent_task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtasks_state_id_fkey"
+            columns: ["state_id"]
+            isOneToOne: false
+            referencedRelation: "agency_statuses"
             referencedColumns: ["id"]
           },
         ]
