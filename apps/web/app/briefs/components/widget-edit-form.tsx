@@ -233,9 +233,9 @@ export function WidgetEditForm() {
                     // For label, we update both the label and the value fields
                     if (!isValueField && index !== undefined) {
                       const sanitizedValue = e.target.value
-                        .toLowerCase()
-                        .replace(/\s+/g, '_') // Replace spaces with underscores
-                        .replace(/[^\w_]+/g, ''); // Remove special characters
+                        // .toLowerCase()
+                        // .replace(/\s+/g, '_') // Replace spaces with underscores
+                        // .replace(/[^\w_]+/g, ''); // Remove special characters
 
                       form.setValue(`options.${index}.value`, sanitizedValue);
                     }
@@ -274,9 +274,9 @@ export function WidgetEditForm() {
                     // For label, we update both the label and the value fields
                     if (!isValueField && index !== undefined) {
                       const sanitizedValue = e.target.value
-                        .toLowerCase()
-                        .replace(/\s+/g, '_') // Replace spaces with underscores
-                        .replace(/[^\w_]+/g, ''); // Remove special characters
+                        // .toLowerCase()
+                        // .replace(/\s+/g, '_') // Replace spaces with underscores
+                        // .replace(/[^\w_]+/g, ''); // Remove special characters
 
                       form.setValue(`options.${index}.value`, sanitizedValue);
                     }

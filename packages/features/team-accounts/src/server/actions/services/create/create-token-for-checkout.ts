@@ -15,17 +15,76 @@ export const createUrlForCheckout = async ({
   service: Service.Type;
   organizationId: string;
 }) => {
-  const token = await createToken({
-    account_id: stripeId,
-    price_id: priceId,
-    service: service,
-    expires_at: new Date(),
-    organization_id: organizationId,
-  });
+  try {
+    // Validate input parameters
+    if (!stripeId || !priceId || !service || !organizationId) {
+      throw new Error(
+        'Missing required parameters: ' +
+          JSON.stringify({
+            hasStripeId: !!stripeId,
+            hasPriceId: !!priceId,
+            hasService: !!service,
+            hasOrgId: !!organizationId,
+          }),
+      );
+    }
 
-  const baseUrl = await getDomainByOrganizationId(organizationId, true);
+    let token: { accessToken: string; tokenId: string } | undefined;
 
-  const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
+    try {
+      token = await createToken({
+        account_id: stripeId,
+        price_id: priceId,
+        service: service,
+        expires_at: new Date(),
+        organization_id: organizationId,
+      });
+    } catch (tokenError) {
+      console.error('Token creation failed:', {
+        error: tokenError.message,
+        code: tokenError.code,
+        stack: tokenError.stack,
+      });
+      throw tokenError;
+    }
 
-  return url;
+    let baseUrl: string | undefined;
+    try {
+      baseUrl = await getDomainByOrganizationId(organizationId, true, true);
+    } catch (domainError) {
+      console.error('Domain retrieval failed:', {
+        error: domainError.message,
+        code: domainError.code,
+        stack: domainError.stack,
+      });
+      throw domainError;
+    }
+
+    if (!baseUrl) {
+      throw new Error(
+        `Invalid baseUrl returned for organizationId: ${organizationId}`,
+      );
+    }
+    
+
+    const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
+
+    return url;
+  } catch (error) {
+    // Enhanced error logging
+    console.error('createUrlForCheckout failed:', {
+      errorName: error.name,
+      errorMessage: error.message,
+      errorCode: error.code,
+      errorStack: error.stack,
+      errorType: Object.prototype.toString.call(error),
+      params: {
+        hasStripeId: !!stripeId,
+        hasPriceId: !!priceId,
+        hasService: !!service,
+        hasOrgId: !!organizationId,
+      },
+    });
+    throw error;
+  }
 };

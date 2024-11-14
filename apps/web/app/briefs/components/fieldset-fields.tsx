@@ -72,7 +72,7 @@ export default function FieldsetFields({
           if (typeof FormFieldComponent === 'function') {
             return (
               <Sortable
-                key={'q' + index}
+                key={'q' + question.id}
                 id={question.id}
                 className="group relative cursor-grab rounded-md hover:bg-[#f2f2f2] px-6 py-6"
               >
