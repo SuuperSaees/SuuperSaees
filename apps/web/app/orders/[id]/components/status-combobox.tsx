@@ -65,7 +65,7 @@ function StatusCombobox({
     agency_id,
   );
   const [currentStatusData, setCurrentStatusData] = useState<AgencyStatus.Type | undefined>(
-    statuses?.find(status => status.id === order?.status_id)
+    mode === 'order' ? statuses?.find(status => status.id === order?.status_id) : statuses?.find(status => status.id === subtask?.state_id)
   );
 
   console.log('currentStatusData', order?.status_id);
@@ -181,12 +181,24 @@ function StatusCombobox({
     mutationFn: async ({
       subtaskId,
       status,
+      status_id,
     }: {
       subtaskId: Subtask.Type['id'];
       status: string;
+      status_id: number;
     }) => {
+      setCurrentStatusData(statuses?.find(status => status.id === status_id));
+      // if(setOrdersData) {
+      //   setOrdersData(prevOrders => 
+      //     prevOrders.map(order => 
+      //       order.id === orderId 
+      //       ? { ...order, status, status_id } 
+      //       : order
+      //   )
+      // );
       await updateSubtaskById(subtaskId, {
         state: status,
+        state_id: status_id,
         completed: status === 'completed',
       });
       router.refresh();
@@ -322,6 +334,7 @@ function StatusCombobox({
                                   changeSubtaskStatus.mutate({
                                     subtaskId: subtask?.id ?? '',
                                     status: convertToSnakeCase(status?.status_name ?? ''),
+                                    status_id: status.id,
                                   })
                                 }
                                 setPopoverValue(currentValue === currentStatusData?.status_name ? '' : currentValue)
