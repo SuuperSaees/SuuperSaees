@@ -10,9 +10,9 @@ export const deleteStatusById = async (
         const client = getSupabaseServerComponentClient();
         
         const { data: statusData, error: statusError } = await client
-            .from('agency_statuses')
-            .delete()
-            .eq('id', status_id)
+          .from('agency_statuses')
+          .update({ deleted_on: new Date().toISOString() })
+          .eq('id', status_id);
         if (statusError) throw new Error(statusError.message);
 
         return statusData;
