@@ -24,15 +24,18 @@ import { createHandlers } from '../hooks/subtasks/subtask-handlers';
 import { generateDropdownOptions, getPriorityClassName } from '../utils/generate-options-and-classnames';
 import { priorityColors } from '../utils/get-color-class-styles';
 import SubtaskItem from './subtasks/subtask-item';
-
+import { AgencyStatusesProvider } from '../../components/context/agency-statuses-context';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
 function TaskDropdown({
   userRole,
   orderId,
   orderAgencyId,
+  agencyStatuses,
 }: {
   userRole: string;
   orderId: string;
   orderAgencyId: string;
+  agencyStatuses: AgencyStatus.Type[];
 }) {
   const {
     tasks,
@@ -137,6 +140,7 @@ function TaskDropdown({
   }
 
   return (
+    <AgencyStatusesProvider initialStatuses={agencyStatuses}>
     <div className="no-scrollbar max-h-[76vh] overflow-y-auto">
       {loading ? (
         <div className="flex items-center justify-center">
@@ -291,6 +295,7 @@ function TaskDropdown({
         </>
       )}
     </div>
+    </AgencyStatusesProvider>
   );
 }
 

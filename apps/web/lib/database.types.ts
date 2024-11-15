@@ -44,6 +44,7 @@ export type Database = {
           is_personal_account: boolean
           name: string
           organization_id: string | null
+          phone_number: string | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
@@ -61,6 +62,7 @@ export type Database = {
           is_personal_account?: boolean
           name: string
           organization_id?: string | null
+          phone_number?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -78,6 +80,7 @@ export type Database = {
           is_personal_account?: boolean
           name?: string
           organization_id?: string | null
+          phone_number?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -265,6 +268,7 @@ export type Database = {
         Row: {
           agency_id: string | null
           created_at: string
+          deleted_on: string | null
           id: number
           position: number | null
           status_color: string | null
@@ -273,6 +277,7 @@ export type Database = {
         Insert: {
           agency_id?: string | null
           created_at?: string
+          deleted_on?: string | null
           id?: number
           position?: number | null
           status_color?: string | null
@@ -281,6 +286,7 @@ export type Database = {
         Update: {
           agency_id?: string | null
           created_at?: string
+          deleted_on?: string | null
           id?: number
           position?: number | null
           status_color?: string | null
@@ -1455,6 +1461,7 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: string | null
+          status_id: number | null
           stripe_account_id: string | null
           title: string
           uuid: string
@@ -1472,6 +1479,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status?: string | null
+          status_id?: number | null
           stripe_account_id?: string | null
           title: string
           uuid: string
@@ -1489,6 +1497,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
           status?: string | null
+          status_id?: number | null
           stripe_account_id?: string | null
           title?: string
           uuid?: string
@@ -1534,6 +1543,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "agency_statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -2239,6 +2255,7 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_types"] | null
           start_date: string | null
           state: string | null
+          state_id: number | null
         }
         Insert: {
           completed?: boolean | null
@@ -2253,6 +2270,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
           state?: string | null
+          state_id?: number | null
         }
         Update: {
           completed?: boolean | null
@@ -2267,6 +2285,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
           state?: string | null
+          state_id?: number | null
         }
         Relationships: [
           {
@@ -2274,6 +2293,13 @@ export type Database = {
             columns: ["parent_task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtasks_state_id_fkey"
+            columns: ["state_id"]
+            isOneToOne: false
+            referencedRelation: "agency_statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -2434,6 +2460,7 @@ export type Database = {
           is_personal_account: boolean
           name: string
           organization_id: string | null
+          phone_number: string | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
@@ -2830,6 +2857,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2843,6 +2871,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2856,6 +2885,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2877,6 +2907,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2887,6 +2918,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2897,6 +2929,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -3032,6 +3065,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {

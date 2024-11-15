@@ -13,6 +13,7 @@ import ActivityPage from './activity';
 import DetailsPage from './details';
 import TasksSection from './tasks';
 import CalendarSection from './calendar-section';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
 // import { TaskCounter } from 'node_modules/@kit/accounts/src/components/ui/tasks-cantity-themed-with-settings';
 // import { countIncompleteTasks } from '~/utils/task-counter';
 // import { useRealTimeTasks } from '../hooks/use-tasks';
@@ -30,9 +31,10 @@ type OrderTabsProps = {
   userRole: string;
   orderId: string;
   orderAgencyId: string;
+  agencyStatuses: AgencyStatus.Type[];  
 };
 
-export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId }: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId, agencyStatuses }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
@@ -102,6 +104,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
             userRole={userRole}
             orderId={orderId}
             orderAgencyId={orderAgencyId}
+            agencyStatuses={agencyStatuses}
           />
         </div>
       </TabsContent>

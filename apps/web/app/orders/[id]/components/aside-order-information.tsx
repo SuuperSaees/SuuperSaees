@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { CalendarIcon, FlagIcon, Loader } from 'lucide-react';
+import { AgencyStatusesProvider } from '../../components/context/agency-statuses-context';
 import {
   getAgencyClients,
   getOrderAgencyMembers,
@@ -25,6 +26,7 @@ import {
   updateOrderAssigns,
   updateOrderFollowers,
 } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { useActivityContext } from '../context/activity-context';
 import deduceNameFromEmail from '../utils/deduce-name-from-email';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
@@ -40,10 +42,12 @@ interface AsideOrderInformationProps {
   order: Order.Relational;
   className?: string;
   [key: string]: unknown;
+  agencyStatuses: AgencyStatus.Type[];
 }
 const   AsideOrderInformation = ({
   order,
   className,
+  agencyStatuses,
   ...rest
 }: AsideOrderInformationProps) => {
   const { t, i18n } = useTranslation(['orders', 'responses']);
@@ -217,6 +221,7 @@ const   AsideOrderInformation = ({
   ]);
 
   return (
+    <AgencyStatusesProvider initialStatuses={agencyStatuses}>
     <div
       className={`pt-4 no-scrollbar relative  flex h-full min-h-full w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 overflow-y-auto border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 text-gray-700 ${className}`}
       {...rest}
@@ -351,6 +356,7 @@ const   AsideOrderInformation = ({
         </div>
       )}
     </div>
+    </AgencyStatusesProvider>
   );
 };
 

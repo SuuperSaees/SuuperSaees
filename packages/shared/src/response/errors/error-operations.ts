@@ -36,7 +36,7 @@ export enum ErrorClientOperations {
     ORDER_ALREADY_EXISTS = 'orderAlreadyExists',
     FAILED_TO_REMOVE_FOLLOWER = 'failedToRemoveFollower',
     FAILED_TO_REMOVE_FOLLOWERS = 'failedToRemoveFollowers',
-    FAILED_TO_CREATE_ORDER = 'faildeToCreateOrder',
+    FAILED_TO_CREATE_ORDER = 'failedToCreateOrder',
     INSUFFICIENT_PERMISSIONS = 'insufficientPermissions',
     FAILED_TO_INSERT_FILES = 'failedToInsertFiles',
     FAILED_TO_ADD_ASSIGNEES = 'failedToAddAssignees',

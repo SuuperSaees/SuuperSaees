@@ -1,6 +1,6 @@
 import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
-
+import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
@@ -18,6 +18,8 @@ export const generateMetadata = async () => {
 
 async function OrdersPage() {
   const ordersData = await getOrders().catch((err) => console.error(err));
+  const agencyId = ordersData?.[0]?.agency_id;
+  const agencyStatuses = await getAgencyStatuses(agencyId).catch((err) => console.error(err));
   const processedOrders =
     ordersData?.map((order) => ({
       ...order,
@@ -46,7 +48,7 @@ async function OrdersPage() {
             </div>
           </div>
           <div>
-            <OrderList orders={processedOrders ?? []} role={role}></OrderList>
+            <OrderList orders={processedOrders ?? []} role={role} agencyStatuses={agencyStatuses ?? []}></OrderList>
           </div>
         </div>
       </PageBody>

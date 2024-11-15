@@ -1,3 +1,5 @@
+'use client';
+
 import { useRef, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
@@ -16,30 +18,33 @@ import { updateOrder } from '~/team-accounts/src/server/actions/orders/update/up
 import { updateStatusById } from '~/team-accounts/src/server/actions/statuses/update/update-agency-status';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 import { convertToCamelCase, convertToSnakeCase, convertToTitleCase } from '../utils/format-agency-names';
-import { getCache, updateCache } from '~/utils/handle-caching';
-import { AgencyStatus } from '~/lib/agency-statuses.types';
-import { CACHE_KEY, CACHE_EXPIRY } from '../hooks/agency-statuses/use-status-drag-and-drop';
 import { useTranslation } from 'react-i18next';
-
+import { updateCache } from '~/utils/handle-caching';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { useAgencyStatuses } from '../../components/context/agency-statuses-context';
+import { Dispatch, SetStateAction } from 'react';
 interface EditStatusPopoverProps {
   status_id: number;
   status_name: string;
+  currentStatusId: number;
   status_color: string;
   order_id?: number;
   task_id?: string;
   mode?: 'order' | 'subtask';
   agency_id: string;
   preventEditName?: boolean;
-  setValue: (value: string) => void;
+  setPopoverValue: (value: string) => void;
   open: boolean;
   setOpen: (value: boolean) => void;
   isHovered?: boolean;
   setIsHovered?: (value: boolean) => void;
+  setCurrentStatusData: Dispatch<SetStateAction<AgencyStatus.Type | undefined>>;
 }
 
 function EditStatusPopover({
   status_id,
   status_name,
+  currentStatusId,
   status_color,
   order_id,
   task_id,
@@ -49,14 +54,16 @@ function EditStatusPopover({
   setOpen,
   setIsHovered,
   preventEditName = false,
-  setValue,
+  setPopoverValue,
+  setCurrentStatusData
 }: EditStatusPopoverProps) {
   const [name, setName] = useState<string>(status_name ?? '');
   const [color, setColor] = useState<string>(status_color ?? '');
+  const { updateStatuses } = useAgencyStatuses();
+ 
   const router = useRouter();
   const queryClient = useQueryClient()
   const {t} = useTranslation('orders')
-
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,28 +74,38 @@ function EditStatusPopover({
     inputRef.current?.click()
   }
 
-  const isDefaultState = ['pending', 'completed', 'in_review', 'annulled','anulled', 'in_progress'].includes(name ?? '')
+  const defaultStatuses = new Set(['pending', 'completed', 'in_review', 'annulled', 'anulled', 'in_progress']);
+  const isDefaultState = defaultStatuses.has(name);
 
   const updateStatusMutation = useMutation({
     mutationFn: async() =>
       await updateStatusById(status_id, { status_name: convertToSnakeCase(name), status_color: color }),
     onSuccess: (updatedStatus) => {
-      const cachedStatuses = getCache<AgencyStatus.Type[]>(`${CACHE_KEY}_${agency_id}`);
-      if (cachedStatuses) {
-        const updatedStatuses = cachedStatuses.map(status =>
-          status.id === status_id ? { ...status, ...updatedStatus } : status
-        );
+      // const cachedStatuses = getCache<AgencyStatus.Type[]>(`${CACHE_KEY}_${agency_id}`);
+      // if (cachedStatuses) {
+      //   const updatedStatuses = cachedStatuses.map(status =>
+      //     status.id === status_id ? { ...status, ...updatedStatus } : status
+      //   );
+      updateStatuses(updatedStatus as AgencyStatus.Type);
+      if(status_id === currentStatusId) {
+        setCurrentStatusData(updatedStatus as AgencyStatus.Type);
+      }
+      
         updateCache(
-          `${CACHE_KEY}_${agency_id}`,
-          updatedStatuses,
+          updatedStatus,
           queryClient,
           ['agencyStatuses', agency_id],
-          CACHE_EXPIRY
         );
-      }
+
+
       toast.success('Status updated successfully');
-      setValue(convertToSnakeCase(name));
+      if(name !== status_name && status_id === currentStatusId) {
+        setPopoverValue(convertToSnakeCase(name));
+      }
+
       setOpen(false);
+      // setRefresh();
+      router.refresh();
     },
     onError: () => {
       toast.error('Failed to update status');
@@ -96,7 +113,7 @@ function EditStatusPopover({
   });
 
   const updateOrderMutation = useMutation({
-    mutationFn: () => updateOrder(order_id, { status: convertToSnakeCase(name) }),
+    mutationFn: () => updateOrder(order_id as number, { status: convertToSnakeCase(name) }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['orders'] })
       router.refresh()
@@ -108,7 +125,7 @@ function EditStatusPopover({
 
   const changeSubtaskStatus = useMutation({
     mutationFn: async () => {
-      await updateSubtaskById(task_id, { state: convertToSnakeCase(name) });
+      await updateSubtaskById(task_id as string, { state: convertToSnakeCase(name) });
       router.refresh();
     },
     onSuccess: () => {
@@ -189,7 +206,7 @@ function EditStatusPopover({
               {t('cancel')}
             </Button>
             <ThemedButton
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent) => {
                 handleSave(e)
                 setIsHovered?.(false)
               }}

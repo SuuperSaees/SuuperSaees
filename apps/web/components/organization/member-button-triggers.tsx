@@ -37,7 +37,7 @@ export default function MemberButtonTriggers({
           className="w-full rounded-lg bg-background pr-8 md:w-[200px] lg:w-[320px]"
         />
       </div>
-      {(currentUserRole === 'agency_owner' ||
+      {(currentUserRole === 'agency_owner' || currentUserRole === 'agency_project_manager' ||
         currentUserRole === 'client_owner') && (
         <InviteClientMembersDialogContainer
           clientOrganizationId={clientOrganizationId}

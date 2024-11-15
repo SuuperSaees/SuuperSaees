@@ -88,14 +88,15 @@ type Client = Pick<
 
 type ClientsTableProps = {
   clients: ClientsWithOrganization[];
-  accountIds: string[];
-  accountNames: string[];
+  // accountIds: string[];
+  // accountNames: string[];
   view?: 'clients' | 'organizations';
+  userRole: string;
 };
 
 // CLIENTS TABLE 
 // accountIds, accountNames
-export function ClientsTable({ clients, view }: ClientsTableProps) {
+export function ClientsTable({ clients, view, userRole }: ClientsTableProps) {
   const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clients' | 'organizations'>(
     'clients',
@@ -120,7 +121,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
     [clients],
   );
   const organizationColumns = useOrganizationColumns(t);
-  const clientColumns = useClientColumns(t);
+  const clientColumns = useClientColumns(t, userRole);
   const columns =
     activeButton === 'clients' ? clientColumns : organizationColumns;
 
@@ -269,6 +270,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
 
 const useClientColumns = (
   t: TFunction<'clients', undefined>,
+  userRole: string,
 ): ColumnDef<Client>[] => {
   return useMemo(
     () => [
@@ -396,8 +398,8 @@ const useClientColumns = (
         enableHiding: false,
         cell: ({ row }) => {
           const client = row.original;
-
-          return (
+          
+          return userRole === 'agency_owner' &&(
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <UpdateClientDialog {...client} /> */}
               <DeleteUserDialog userId={client.id} />
