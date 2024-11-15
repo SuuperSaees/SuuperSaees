@@ -57,7 +57,7 @@ export function UpdateAccountDetailsForm({
   };
 
   return (
-    <div className={'flex flex-col space-y-8'}>
+    <div className={'flex flex-col w-full'}>
       <Form {...form}>
         <form
           data-test={'update-account-name-form'}
@@ -68,9 +68,6 @@ export function UpdateAccountDetailsForm({
             name={'displayName'}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans i18nKey={'account:name'} />
-                </FormLabel>
 
                 <FormControl>
                   <ThemedInput
@@ -88,8 +85,8 @@ export function UpdateAccountDetailsForm({
           />
 
           <div>
-            <ThemedButton disabled={updateAccountMutation.isPending}>
-              <Trans i18nKey={'account:updateProfileSubmitLabel'} />
+            <ThemedButton className='w-full' disabled={updateAccountMutation.isPending}>
+              {t('updateProfileSubmitLabel')}
             </ThemedButton>
           </div>
         </form>
