@@ -3,7 +3,6 @@
 import {
   CustomError,
   CustomResponse,
-  ErrorBriefOperations,
   ErrorOrderOperations,
   ErrorOrganizationOperations,
 } from '@kit/shared/response';
@@ -25,8 +24,8 @@ type OrderInsert = Omit<
   fileIds?: string[];
 };
 
-export const createOrders = async (
-  orders: OrderInsert[],
+export const createOrder = async (
+  order: OrderInsert,
   briefResponses?: Brief.Relationships.FormFieldResponses[],
   orderFollowers?: string[],
 ) => {
@@ -79,18 +78,6 @@ export const createOrders = async (
       .single();
     if (emailError) throw new Error(emailError.message);
 
-    const { data: roleData, error: roleError } = await client
-      .from('accounts_memberships')
-      .select('account_role')
-      .eq('user_id', userId)
-      .single();
-    if (roleError)
-      throw new CustomError(
-        HttpStatus.Error.BadRequest,
-        roleError.message,
-        ErrorOrganizationOperations.FAILED_TO_ASSOCIATE_ROLE,
-      );
-
     // Step 1: Check if the user has permission to create orders
     const hasPermission = await hasPermissionToCreateOrder(
       agencyClientId,
@@ -111,186 +98,42 @@ export const createOrders = async (
 
     const titleFromBrief =
       briefResponses?.[0]?.response ??
-      orders[0]?.title ??
+      order?.title ??
       `Order from ${emailData.email}`;
 
-    const ordersToInsert = orders.map(
-      ({ fileIds: _fileIds, ...orderWithoutFileIds }) => ({
-        ...orderWithoutFileIds,
-        title: titleFromBrief,
-        customer_id: userId,
-        client_organization_id: clientOrganizationId ?? '',
-        propietary_organization_id:
-          agencyOrganizationData.primary_owner_user_id,
-        agency_id: agencyOrganizationData.id,
-        brief_ids:
-          Array.from(briefIds).length > 0 ? Array.from(briefIds) : undefined,
-      }),
+    const orderToInsert = {
+      ...order,
+      title: titleFromBrief,
+      customer_id: userId,
+      client_organization_id: clientOrganizationId ?? '',
+      propietary_organization_id: agencyOrganizationData.primary_owner_user_id,
+      agency_id: agencyOrganizationData.id,
+      brief_ids:
+        Array.from(briefIds).length > 0 ? Array.from(briefIds) : undefined,
+    };
+    delete orderToInsert.fileIds;
+
+    console.log('orderToInsert', orderToInsert);
+    const { data: orderData, error: orderError } = await client.rpc(
+      'create_order',
+      {
+        _order: orderToInsert,
+        _brief_responses: briefResponses ?? [],
+        _order_followers: orderFollowers ?? [],
+        _order_file_ids: order.fileIds ?? [],
+      },
     );
 
-    // Step 3: Insert orders into the database
-    const { data: orderData, error: orderError } = await client
-      .from('orders_v2')
-      .insert(ordersToInsert)
-      .select()
-      .single();
-    if (orderError)
+    if (orderError) {
+      console.error('Error in the order transaction:', orderError);
       throw new CustomError(
         HttpStatus.Error.BadRequest,
-        `
-      There was an error creating the order: ${orderError.message}`,
+        orderError.message,
         ErrorOrderOperations.FAILED_TO_CREATE_ORDER,
       );
-
-    // Step 3.5: Insert brief responses if present
-    if (briefResponses && briefResponses.length > 0) {
-      const { error: briefResponsesError } = await client
-        .from('brief_responses')
-        .insert(briefResponses);
-
-      if (briefResponsesError)
-        throw new CustomError(
-          HttpStatus.Error.BadRequest,
-          `Error creating the order brief, ${briefResponsesError.message}`,
-          ErrorBriefOperations.FAILED_TO_CREATE_BRIEF_RESPONSES,
-        );
     }
 
-    // Step 4: Insert brief order files if present
-    const { data: formFieldIds, error: formFieldIdsError } = await client
-      .from('brief_form_fields')
-      .select('form_field_id')
-      .in('brief_id', Array.from(briefIds));
-
-    if (formFieldIdsError)
-      throw new CustomError(
-        HttpStatus.Error.InternalServerError,
-        formFieldIdsError.message,
-        ErrorBriefOperations.FAILED_TO_GET_FORM_FIELDS,
-      );
-
-    const { data: fileFields, error: fileFieldsError } = await client
-      .from('form_fields')
-      .select('id')
-      .in(
-        'id',
-        formFieldIds.map((f) => f.form_field_id),
-      )
-      .eq('type', 'file');
-
-    if (fileFieldsError)
-      throw new CustomError(
-        HttpStatus.Error.InternalServerError,
-        `Error getting file fields: ${fileFieldsError.message}`,
-        ErrorBriefOperations.FAILED_TO_GET_FORM_FIELDS,
-      );
-
-    const { data: filesFromBrief, error: filesFromBriefError } = await client
-      .from('brief_responses')
-      .select('response')
-      .in(
-        'order_id',
-        ordersToInsert.map((o) => o.uuid),
-      )
-      .in(
-        'form_field_id',
-        fileFields.map((f) => f.id),
-      );
-
-    if (filesFromBriefError) throw new Error(filesFromBriefError.message);
-
-    const fileIdsFromBrief = filesFromBrief
-      .map((f) => f.response.split(',').map((id) => id.trim()))
-      .flat();
-
-    // Step 5: Insert order files if present
-    for (const order of orders) {
-      // Join the fileIds of the order with those of the brief form fields
-      const combinedFileIds = [...(order.fileIds ?? []), ...fileIdsFromBrief];
-
-      // If there are files to insert
-      if (combinedFileIds.length > 0) {
-        for (const fileId of combinedFileIds) {
-          if (fileId) {
-            const orderFileToInsert = {
-              order_id: orderData.uuid,
-              file_id: fileId.trim(),
-            };
-
-            const { error: orderFilesError } = await client
-              .from('order_files')
-              .insert(orderFileToInsert);
-
-            if (orderFilesError)
-              throw new CustomError(
-                HttpStatus.Error.BadRequest,
-                orderFilesError.message,
-                ErrorOrderOperations.FAILED_TO_INSERT_FILES,
-              );
-          }
-        }
-      }
-    }
-
-    // Step 6: Assign agency members to the order
-    const agencyRoles = new Set([
-      'agency_owner',
-      'agency_member',
-      'agency_project_manager',
-    ]);
-
-    if (agencyRoles.has(roleData.account_role)) {
-      const assignationData = {
-        agency_member_id: userId,
-        order_id: orderData.id,
-      };
-      const { error: assignedOrdersError } = await client
-        .from('order_assignations')
-        .insert(assignationData);
-      if (assignedOrdersError)
-        throw new CustomError(
-          HttpStatus.Error.InternalServerError,
-          'Error adding order assignements',
-          ErrorOrderOperations.FAILED_TO_ADD_ASSIGNEES,
-        );
-    }
-
-    // Step 7: add order followers if present
-    if (orderFollowers && orderFollowers.length > 0) {
-      const { error: followUpError } = await client
-        .from('order_followers')
-        .insert(
-          orderFollowers.map((followerId) => ({
-            order_id: orderData.id,
-            client_member_id: followerId,
-          })),
-        );
-      if (followUpError)
-        throw new CustomError(
-          HttpStatus.Error.InternalServerError,
-          'Error adding order followers',
-          ErrorOrderOperations.FAILED_TO_ADD_FOLLOWERS,
-        );
-    }
-
-    // Step 8: Add order follow-up for client owners/members
-    if (['client_owner', 'client_member'].includes(roleData.account_role)) {
-      const followUpData = {
-        order_id: orderData.id,
-        client_member_id: userId,
-      };
-
-      const { error: followUpError } = await client
-        .from('order_followers')
-        .insert(followUpData);
-      if (followUpError)
-        throw new CustomError(
-          HttpStatus.Error.InternalServerError,
-          'Error adding order followers',
-          ErrorOrderOperations.FAILED_TO_ADD_FOLLOWERS,
-        );
-    }
-
+    console.log('orderTransaction', orderData);
     // Step 9: Send email notification
     if (emailData.email) {
       await sendOrderCreationEmail(
@@ -302,11 +145,12 @@ export const createOrders = async (
       );
     }
 
-    // Step 9: Redirect to orders page after successful order creation
-
     return CustomResponse.success(orderData, 'orderCreated').toJSON();
   } catch (error) {
     console.error(error);
+    // Remove files (files table) from the database and storage. Is the only thing that not works with transactions.
+    // Files are uploaded independently
+
     return CustomResponse.error(error).toJSON();
   }
 };

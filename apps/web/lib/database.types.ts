@@ -1915,51 +1915,6 @@ export type Database = {
         }
         Relationships: []
       }
-      sessions: {
-        Row: {
-          client_address: string | null
-          client_city: string | null
-          client_country: string | null
-          client_email: string | null
-          client_name: string | null
-          client_postal_code: string | null
-          client_state: string | null
-          created_at: string
-          deleted_on: string | null
-          id: string
-          provider: string | null
-          provider_id: string | null
-        }
-        Insert: {
-          client_address?: string | null
-          client_city?: string | null
-          client_country?: string | null
-          client_email?: string | null
-          client_name?: string | null
-          client_postal_code?: string | null
-          client_state?: string | null
-          created_at?: string
-          deleted_on?: string | null
-          id?: string
-          provider?: string | null
-          provider_id?: string | null
-        }
-        Update: {
-          client_address?: string | null
-          client_city?: string | null
-          client_country?: string | null
-          client_email?: string | null
-          client_name?: string | null
-          client_postal_code?: string | null
-          client_state?: string | null
-          created_at?: string
-          deleted_on?: string | null
-          id?: string
-          provider?: string | null
-          provider_id?: string | null
-        }
-        Relationships: []
-      }
       subdomains: {
         Row: {
           created_at: string
@@ -2418,6 +2373,56 @@ export type Database = {
           updated_at: string
         }
       }
+      create_order: {
+        Args: {
+          _order: Json
+          _brief_responses: Json[]
+          _order_followers: string[]
+          _order_file_ids: string[]
+        }
+        Returns: {
+          agency_id: string
+          brief_ids: string[] | null
+          client_organization_id: string
+          created_at: string
+          customer_id: string
+          deleted_on: string | null
+          description: string
+          due_date: string | null
+          id: number
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status: string | null
+          stripe_account_id: string | null
+          title: string
+          uuid: string
+        }
+      }
+      create_order_v2: {
+        Args: {
+          _order: Json
+          _brief_responses: Json[]
+          _order_followers: string[]
+          _order_file_ids: string[]
+        }
+        Returns: {
+          agency_id: string
+          brief_ids: string[] | null
+          client_organization_id: string
+          created_at: string
+          customer_id: string
+          deleted_on: string | null
+          description: string
+          due_date: string | null
+          id: number
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status: string | null
+          stripe_account_id: string | null
+          title: string
+          uuid: string
+        }
+      }
       create_team_account: {
         Args: {
           account_name: string
@@ -2826,6 +2831,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -2839,6 +2845,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -2852,6 +2859,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -2873,6 +2881,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -2883,6 +2892,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -2893,6 +2903,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -3028,6 +3039,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {
