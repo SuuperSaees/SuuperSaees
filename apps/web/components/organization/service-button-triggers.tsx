@@ -24,7 +24,7 @@ export function ServiceButtonTriggers({
   currentUserRole,
 }: ServiceButtonTriggersProps) {
   if (
-    currentUserRole !== 'agency_owner' ??
+    currentUserRole !== 'agency_owner' &&
     currentUserRole !== 'agency_project_manager'
   )
     return null;

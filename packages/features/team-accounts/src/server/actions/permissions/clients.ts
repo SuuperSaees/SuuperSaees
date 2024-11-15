@@ -18,7 +18,7 @@ export const hasPermissionToCreateClientOrg = async (
     );
 
     // Step 2: Check the user role
-    const validRoles = ['agency_owner'];
+    const validRoles = ['agency_owner', 'agency_project_manager'];
     const userAccountRole = await getUserRole();
 
     // Validate role
@@ -60,7 +60,7 @@ export const hasPermissionToAddClientMembers = async (
     );
 
     // Step 2: Check the user role
-    const validRoles = ['agency_owner', 'client_owner'];
+    const validRoles = ['agency_owner', 'client_owner', 'agency_project_manager'];
     const userAccountRole = await getUserRole();
 
     // Check if the role is valid
@@ -71,7 +71,7 @@ export const hasPermissionToAddClientMembers = async (
 
     // Step 3: Ensure the user belongs to the correct agency if they are an agency owner
     if (
-      userAccountRole === 'agency_owner' &&
+      (userAccountRole === 'agency_owner' || userAccountRole === 'agency_project_manager') &&
       currentUserAccount.organization_id !== agencyOrganizationId
     ) {
       console.error(
@@ -171,7 +171,7 @@ export const hasPermissionToReadAgencyClients = async (agencyOrganizationId: str
     const userAccountRole = await getUserRole();
     
     // Step 3: Check if the user is an agency owner
-    if (userAccountRole === 'agency_owner') {
+    if (userAccountRole === 'agency_owner' || userAccountRole === 'agency_project_manager') {
       // Ensure the user belongs to the correct agency
       if (currentUserAccount.organization_id === agencyOrganizationId) {
         return true;
