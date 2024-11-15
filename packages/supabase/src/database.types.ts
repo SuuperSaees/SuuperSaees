@@ -43,6 +43,7 @@ export type Database = {
           is_personal_account: boolean
           name: string
           organization_id: string | null
+          phone_number: string | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
@@ -59,6 +60,7 @@ export type Database = {
           is_personal_account?: boolean
           name: string
           organization_id?: string | null
+          phone_number?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -75,6 +77,7 @@ export type Database = {
           is_personal_account?: boolean
           name?: string
           organization_id?: string | null
+          phone_number?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -2430,6 +2433,7 @@ export type Database = {
           is_personal_account: boolean
           name: string
           organization_id: string | null
+          phone_number: string | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
