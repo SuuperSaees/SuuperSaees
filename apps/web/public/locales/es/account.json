@@ -167,6 +167,8 @@
   "brandDarkLogo": "Logotipo de marca para temas oscuros",
   "brandDarkLogoSelectLabel": "Selecciona un logotipo para temas oscuros",
   "bradDarkLogoDescription": "Sube un logotipo para temas oscuros que represente tu marca. Se recomienda que el fondo sea transparente. Tamaño recomendado: 200x100 píxeles.",
+  "lightVersion": "Versión clara",
+  "darkVersion": "Versión oscura",
   "brandLogoSubmit": "Actualizar logotipo",
   "brandLogoSuccess": "Logotipo actualizado con éxito",
   "brandLogoError": "Error al actualizar el logotipo",

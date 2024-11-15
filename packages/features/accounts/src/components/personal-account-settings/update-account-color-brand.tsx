@@ -53,27 +53,26 @@ export default function UpdateAccountColorBrand() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex gap-5">
         <FormField
           control={form.control}
           name="value"
           render={({ field }) => (
-            <FormItem className="w-fit">
-              <FormLabel>{t('account:brandColorSelectLabel')}</FormLabel>
+            <FormItem className="w-fit mb-3">
               <FormControl>
                 <Input
                   placeholder="Color Brand"
                   {...field}
                   type="color"
-                  className="max-w-14"
+                  className="w-32"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex gap-4">
-          <ThemedButton type="submit" className={`bg-brand flex gap-2`}>
+        <div className="flex gap-4 w-full justify-between">
+          <ThemedButton type="submit" className={`bg-brand flex gap-2 w-[80%]`}>
             <span>{t('account:brandColorSubmit')}</span>
             {updateOrganizationSetting.isPending &&
               updateOrganizationSetting.variables?.key === 'theme_color' && (
@@ -84,7 +83,7 @@ export default function UpdateAccountColorBrand() {
             variant={'ghost'}
             type="button"
             onClick={onReset}
-            className="flex gap-2"
+            className="flex gap-2 w-[20%] bg-gray-200"
           >
             <span>{t('account:brandColorReset')}</span>
           </Button>

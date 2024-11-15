@@ -167,6 +167,8 @@
   "brandDarkLogo": "Brand Logo for dark themes",
   "brandDarkLogoSelectLabel": "Select a Logo for dark themes",
   "brandDarkLogoDescription": "Upload a logo for dark themes that represents your brand. A transparent background is recommended. Recommended size: 200x100 pixels.",
+  "lightVersion": "Light Version",
+  "darkVersion": "Dark Version",
   "brandLogoSubmit": "Update Logo",
   "brandLogoSuccess": "Logo updated successfully",
   "brandLogoError": "Error updating logo",
