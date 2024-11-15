@@ -21,7 +21,7 @@ import { Brief } from '~/lib/brief.types';
 import { FormField } from '~/lib/form-field.types';
 import { Order } from '~/lib/order.types';
 import { handleResponse } from '~/lib/response/handle-response';
-import { createOrder } from '~/team-accounts/src/server/actions/orders/create/create-order';
+import { createOrders } from '~/team-accounts/src/server/actions/orders/create/create-order';
 import { generateUUID } from '~/utils/generate-uuid';
 
 import { generateOrderCreationSchema } from '../schemas/order-creation-schema';
@@ -114,8 +114,8 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
           );
       }
 
-      const res = await createOrder(
-        newOrder as OrderInsert,
+      const res = await createOrders(
+        [newOrder as OrderInsert],
         briefResponses,
         order_followers,
       );

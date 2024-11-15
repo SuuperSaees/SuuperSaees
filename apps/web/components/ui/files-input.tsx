@@ -20,13 +20,12 @@ interface FileInfo {
   serverId?: string;
   progress: number;
   error?: string;
-  url?: string;
 }
 
 interface UploadFileComponentProps {
   bucketName: string;
   uuid: string;
-  onFileIdsChange: (fileIds: string[], fileUrls?: string[]) => void;
+  onFileIdsChange: (fileIds: string[]) => void;
   removeResults?: boolean;
   toggleExternalUpload?: () => void;
 }
@@ -184,16 +183,13 @@ export default function UploadFileComponent({
       setFiles((prevFiles) => {
         const updatedFiles = {
           ...prevFiles,
-          [id]: { ...prevFiles[id], serverId: createdFiles[0].id, url: createdFiles[0].url },
+          [id]: { ...prevFiles[id], serverId: createdFiles[0].id },
         };
         // Llamar a onFileIdsChange con todos los IDs de servidor actualizados
         const allServerIds = Object.values(updatedFiles)
           .map(file => file.serverId)
           .filter(Boolean);
-          const allFileUrls = Object.values(updatedFiles)
-          .map(file => file.url)
-          .filter(Boolean);
-        onFileIdsChange(allServerIds, allFileUrls);
+        onFileIdsChange(allServerIds);
         return updatedFiles;
       });
     } catch (error) {
@@ -207,7 +203,7 @@ export default function UploadFileComponent({
   const handleDelete = async (id: string) => {
     setFiles((prevFiles) => {
       const { [id]: _, ...rest } = prevFiles;
-      onFileIdsChange(Object.values(rest).map(file => file.serverId).filter(Boolean), Object.values(rest).map(file => file.url).filter(Boolean));
+      onFileIdsChange(Object.values(rest).map(file => file.serverId).filter(Boolean));
       return rest;
     });
     if (files[id]?.serverId) {

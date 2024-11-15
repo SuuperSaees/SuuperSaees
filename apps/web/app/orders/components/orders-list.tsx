@@ -105,10 +105,10 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
                     <span className="block max-w-[200px] truncate font-medium">
                       {order.title}
                     </span>
+                  </Link>
                   <span className="block max-w-[150px] truncate text-sm">
                     {order.customer_organization ?? 'Sin descripción'}
                   </span>
-                  </Link>
                 </TableCell>
                 <TableCell className="flex-1">
                   <span className="block text-sm">#{order.id}</span>
