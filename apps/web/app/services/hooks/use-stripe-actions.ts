@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+
+
 import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { Database } from '~/lib/database.types';
@@ -10,6 +13,7 @@ import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
+// import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
 
 interface UseStripeActions {
@@ -63,31 +67,48 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     }
   }, [userRole]);
 
-  const handleCheckout = async (
+  const createCheckoutMutation = useMutation({
+    mutationFn: createUrlForCheckout,
+    onSuccess: (sessionUrl: string) => {
+      navigator.clipboard.writeText(sessionUrl).catch((error) => {
+        console.error('Error copying checkout URL to clipboard:', error);
+      });
+      toast.success('Checkout URL copied to clipboard');
+    },
+    onError: (error: Error) => {
+      console.error('Checkout error:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+      toast.error('Error creating checkout URL', {
+        description: error?.message,
+      });
+    },
+  });
+
+  const handleCheckout = (
     priceId: string,
     stripeId: string,
     service: Service.Type,
     organizationId: string,
   ) => {
-    try {
-      const sessionUrl = await createUrlForCheckout({
-        stripeId,
-        priceId,
-        service,
-        organizationId,
+    if (!priceId || !stripeId || !service || !organizationId) {
+      console.error('Missing required parameters:', {
+        hasPriceId: !!priceId,
+        hasStripeId: !!stripeId,
+        hasService: !!service,
+        hasOrgId: !!organizationId,
       });
-
-      navigator.clipboard
-        .writeText(sessionUrl)
-        .then(() => {
-          toast.success('URL copiado en el portapapeles');
-        })
-        .catch((err) => {
-          console.error('Error al copiar al portapapeles:', err);
-        });
-    } catch (error) {
-      console.error(error);
+      throw new Error('Missing required parameters');
     }
+
+    createCheckoutMutation.mutate({
+      stripeId,
+      priceId,
+      service,
+      organizationId,
+    });
   };
 
   useEffect(() => {

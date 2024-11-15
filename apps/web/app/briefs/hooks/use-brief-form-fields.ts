@@ -1,7 +1,5 @@
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
-import { arrayMove } from '@dnd-kit/sortable';
-
 import { FormField as ServerFormField } from '~/lib/form-field.types';
 
 import { useGenerateContent } from '../configs/content';
@@ -14,6 +12,7 @@ import {
   Option,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
+import { arrayMove } from '@dnd-kit/sortable';
 
 // Centralized FormField State Management Hook
 export const useBriefFormFields = (
