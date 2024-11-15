@@ -15,7 +15,6 @@
     "./hooks": "./src/hooks/index.ts",
     "./events": "./src/events/index.tsx",
     "./response": "./src/response/index.ts"
-
   },
   "devDependencies": {
     "@kit/eslint-config": "workspace:*",

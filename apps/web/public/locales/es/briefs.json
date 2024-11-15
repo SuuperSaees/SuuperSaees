@@ -50,19 +50,8 @@
           "alert_message": "Mensaje informativo",
           "placeholder": "Placeholder",
           "options": {
-            "1": {
-              "label": "Opción 1",
-              "value": "Valor de la opción 1"
-            },
-            "2": {
-              "label": "Opción 2",
-              "value": "Valor de la opción 2"
-
-            },
-            "3": {
-              "label": "Opción 3",
-              "value": "Valor de la opción 3"
-            }
+            "label": "Opción {{number}}",
+            "value": "Valor {{number}}"
           }
         }
     },
