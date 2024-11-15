@@ -7,16 +7,16 @@ import { getOrganizationByUserId } from '../../organizations/get/get-organizatio
 export const getAccountOnbardingData = async (accountId: string) => {
     try {
       const client = getSupabaseServerComponentClient();
-  
+
       const { data: userData, error: userDataError } = await client
-        .from('accounts')
-        .select(`phone_number, name`)
-        .eq('id', accountId)
+        .from('user_settings')
+        .select(`phone_number, name, user_id`)
+        .eq('user_id', accountId)
         .single();
         
       if (userDataError) return null;
   
-      const organizationData = await getOrganizationByUserId(accountId);
+      const organizationData = await getOrganizationByUserId(userData.user_id);
       if (!organizationData) return null;
   
       const { data: organizationSubdomainData, error: organizationSubdomainDataError } = await client

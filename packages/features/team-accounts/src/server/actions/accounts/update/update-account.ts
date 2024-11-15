@@ -1,23 +1,48 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { User } from '../../../../../../../../apps/web/lib/user.types';
+import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
 
-
-export const updateAccountData = async (accountId: string, accountData: User.Update) => {
+export const updateAccountData = async (accountId: string, accountDataToUpdate: UserSettings.Insert) => {
   try {
     const client = getSupabaseServerComponentClient();
 
-    const { data: userData, error: userDataError } = await client
+    let dataToUpdate = {};
+
+    dataToUpdate = {
+      ...accountDataToUpdate,
+    }
+
+    const { data: accountData, error: accountDataError } = await client
         .from('accounts')
-        .update(accountData)
+        .update({
+          name: accountDataToUpdate.name ?? '',
+        })
         .eq('id', accountId)
-        .select(`id, name, phone_number, email`)
+        .select(`id, email`)
+        .single();
+
+    if (accountDataError) throw new Error(accountDataError.message);
+
+    if (accountData) {
+      dataToUpdate = {
+        ...dataToUpdate,
+        user_id: accountData.id ?? ''
+      }
+    }
+
+    const { data: userData, error: userDataError } = await client
+        .from('user_settings')
+        .insert(dataToUpdate)
+        .select()
         .single();
       
     if (userDataError) throw new Error(userDataError.message);
 
-    return userData;
+    return {
+      userData,
+      accountData,
+    };
   } catch (error) {
     console.error('Error updating account:', error);
   }

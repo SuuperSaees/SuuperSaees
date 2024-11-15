@@ -26,6 +26,7 @@ import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
 import { getTextColorBasedOnBackground } from '../../../../../apps/web/app/utils/generate-colors';
 import { EyeOff, Eye } from 'lucide-react';
 import { useState } from 'react';
+import { Spinner } from '@kit/ui/spinner';
 
 
 export function PasswordSignUpForm({
@@ -187,9 +188,13 @@ export function PasswordSignUpForm({
             color: getTextColorBasedOnBackground(authDetails?.theme_color ? authDetails.theme_color : '#000000'),
           }}
         >
-          <div className='text-white text-center text-lg font-semibold tracking-[-0.18px]'>
-            <Trans i18nKey={'auth:createOrganization'}/>
-          </div>
+          {loading ? (
+            <Spinner className="h-5 w-5 animate-spin" />
+          ) : (
+            <div className='text-white text-center text-lg font-semibold tracking-[-0.18px]'>
+              <Trans i18nKey={'auth:createOrganization'}/>
+            </div>
+          )}
         </Button>
        </div>
       </form>

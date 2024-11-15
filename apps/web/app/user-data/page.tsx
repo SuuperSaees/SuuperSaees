@@ -32,16 +32,17 @@ async function UserDataPage({
 
   const sanitizedAccountData = accountData ? {
     ...accountData,
+    name: accountData.name ?? '',
     phone_number: accountData.phone_number ?? '',
     subdomain: accountData.subdomain ?? ''
   } : null;
 
-  if(!tokendecoded) {
-    if(sanitizedAccountData?.phone_number || sanitizedAccountData?.subdomain ) {
+  if(tokendecoded) {
+    if(tokendecoded.expires_at && new Date(tokendecoded.expires_at).getTime() < new Date().getTime() && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain) {
       redirect('/orders');
-    } 
+    }
   } else {
-    if(tokendecoded.expires_at && new Date(tokendecoded.expires_at).getTime() < new Date().getTime() || sanitizedAccountData?.phone_number || sanitizedAccountData?.subdomain) {
+    if(sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain ) {
       redirect('/orders');
     }
   }

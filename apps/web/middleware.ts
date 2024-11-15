@@ -194,7 +194,7 @@ function getPatterns() {
       pattern: new URLPattern({ pathname: '/' }),
       handler: (req: NextRequest) => {
         return NextResponse.redirect(
-          new URL(pathsConfig.app.home, req.nextUrl.origin).href,
+          new URL(pathsConfig.app.orders, req.nextUrl.origin).href,
         );
       },
     },
@@ -389,9 +389,9 @@ function setCORSHeaders(response: NextResponse) {
 // This function is to verify the phone number
 async function checkPhoneNumber(supabase: SupabaseClient<Database>, userId: string) {
   const { data, error } = await supabase
-    .from('accounts')
+    .from('user_settings')
     .select('phone_number')
-    .eq('id', userId)
+    .eq('user_id', userId)
     .single();
 
   if (error) {

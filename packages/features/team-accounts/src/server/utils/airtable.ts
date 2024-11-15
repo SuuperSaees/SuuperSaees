@@ -3,6 +3,7 @@ import Airtable from 'airtable';
 const AIRTABLE_API_KEY = process.env.NEXT_PUBLIC_AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID;
 const AIRTABLE_TABLE_NAME = process.env.NEXT_PUBLIC_AIRTABLE_TABLE_NAME;
+const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
 
 export async function addUserToAirtable({
   name,
@@ -15,6 +16,10 @@ export async function addUserToAirtable({
   phoneNumber?: string;
   organizationName: string;
 }) {
+  if (!IS_PROD) {
+    console.log('Skipping Airtable update - not in production environment');
+    return;
+  }
 
   if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID || !AIRTABLE_TABLE_NAME) {
     console.error('Missing Airtable configuration');
@@ -24,7 +29,7 @@ export async function addUserToAirtable({
   const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 
   try {
-    await base('Onboarding_Process').create([
+    await base(AIRTABLE_TABLE_NAME).create([
       {
         fields: {
           'Customer Name': name ?? email.split('@')[0],
@@ -35,7 +40,6 @@ export async function addUserToAirtable({
       },
     ]);
   } catch (error) {
-    // Mejor manejo del error
     if (error instanceof Error) {
         console.error('Error de Airtable:', {
           mensaje: error.message,
@@ -43,6 +47,6 @@ export async function addUserToAirtable({
           detalles: error
         });
       }
-      throw new Error('Error al agregar usuario a Airtable: ' + error);
+      throw new Error('Error to add user to Airtable: ' + error);
   }
 }
