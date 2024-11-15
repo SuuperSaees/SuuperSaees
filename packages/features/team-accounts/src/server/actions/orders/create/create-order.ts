@@ -110,8 +110,7 @@ export const createOrders = async (
     );
 
     const titleFromBrief =
-      briefResponses?.[0]?.response ??
-      orders[0]?.title ??
+    orders[0]?.title ??
       `Order from ${emailData.email}`;
 
     const ordersToInsert = orders.map(

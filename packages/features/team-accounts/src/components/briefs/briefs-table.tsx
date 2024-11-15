@@ -145,7 +145,7 @@ export function BriefsTable({
             title={t('briefs:empty.agency.title')}
             description={t('briefs:empty.agency.description')}
             button={
-              accountRole === 'agency_owner' ? (
+              accountRole === 'agency_owner' || accountRole === 'agency_project_manager' ? (
                 <Link href="/briefs/create">
                   <ThemedButton>{t('createBrief')}</ThemedButton>
                 </Link>
