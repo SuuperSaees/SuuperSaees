@@ -222,16 +222,25 @@ function StatusCombobox({
 
   const deleteStatus = useMutation({
     mutationFn: deleteStatusById,
-    onSuccess: (_, deletedStatusId) => {
-      const updatedStatuses = statuses?.filter(status => status.id !== deletedStatusId) ?? [];
+    onMutate: (deletedStatusId: number) => {
+      const updatedStatuses = statuses?.map(status => status.id === deletedStatusId ? { ...status, deleted_on: new Date().toISOString() } : status) ?? [];
       setStatuses(updatedStatuses);
       updateCache(
         updatedStatuses,
         queryClient,
         ['agencyStatuses', agency_id]
       );
-      toast.success('Success', { description: 'Status deleted successfully!' });
       router.refresh();
+    },
+    onSuccess: () => {
+      // const updatedStatuses = statuses?.map(status => status.id === deletedStatusId ? { ...status, deleted_on: new Date().toISOString() } : status) ?? [];
+      // setStatuses(updatedStatuses);
+      // updateCache(
+      //   updatedStatuses,
+      //   queryClient,
+      //   ['agencyStatuses', agency_id]
+      // );
+      toast.success('Success', { description: 'Status deleted successfully!' });
     },
     onError: () => {
       toast.error('Error', { description: 'Failed to delete status.' });
@@ -318,7 +327,8 @@ function StatusCombobox({
                     strategy={verticalListSortingStrategy}
                   >
                     {statusesOrderByPosition
-                      ?.map((orderedStatus) => {
+                      ?.filter(status => !status.deleted_on)
+                      .map((orderedStatus) => {
                         const status = statuses?.find(s => s.id === orderedStatus.id);
                         if (!status) return null;
                         
