@@ -97,7 +97,7 @@ export const hasPermissionToReadOrders = async () => {
       console.error(followerError.message);
       throw new Error('Error fetching follower orders');
     }
-  
+
   if (followerOrders?.length > 0) {
     // map the follower orders to get the order ids and filter the orders that are not equal to the orders in the ordersData array by id
     const followerOrderIds = followerOrders
@@ -129,7 +129,7 @@ export const hasPermissionToReadOrders = async () => {
             )
             .eq('id', orderId as number)
             .is('deleted_on', null)
-            .single();
+            .maybeSingle();
 
         if (followerOrderError) {
           console.error(followerOrderError.message);
