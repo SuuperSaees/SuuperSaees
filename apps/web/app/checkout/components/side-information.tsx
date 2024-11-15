@@ -15,6 +15,7 @@ import { Button } from '@kit/ui/button';
 import { Spinner } from '@kit/ui/spinner';
 import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 interface SideDataFieldsProps {
   form: UseFormReturn<FormData>;
@@ -142,14 +143,14 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
           <CheckCircle className="mr-2 h-4 w-4 text-white transition-opacity duration-300" />
         </Button>
       ) : (
-        <Button
+        <ThemedButton 
           type="submit"
           disabled={loading}
-          className="w-full bg-brand text-white transition duration-300 ease-in-out transform hover:scale-105"
+          className="w-full transition duration-300 ease-in-out transform hover:scale-105"
         >
           {t('checkout.subscribe')}
           {loading && <Spinner className="ml-2 h-4 w-4" />}
-        </Button>
+        </ThemedButton>
       )}
       <div>
         {errorMessage && (

@@ -117,13 +117,6 @@ export const handleSubmitPayment = async ({
 }: HandlePaymentProps) => {
   try {
 
-      const userAlreadyExists = await getUserByEmail(values.email, true); 
-
-      let accountAlreadyExists = false;
-      if (userAlreadyExists) {
-        accountAlreadyExists = true
-      }
-
       const sessionCreated = await createSession({
         client_address: values.address,
         client_city: values.city,
@@ -155,6 +148,13 @@ export const handleSubmitPayment = async ({
           coupon,
           sessionId: sessionCreated?.id ?? '',
         });
+
+        const userAlreadyExists = await getUserByEmail(values.email, true); 
+
+        let accountAlreadyExists = false;
+        if (userAlreadyExists?.userData?.id) {
+          accountAlreadyExists = true
+        }
 
     return { success: true, error: null, accountAlreadyExists };
   } catch (error) {
