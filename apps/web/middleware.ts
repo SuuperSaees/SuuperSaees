@@ -77,6 +77,8 @@ export async function middleware(request: NextRequest) {
     '/join?invite_token=',
     '/join',
     'home',
+    'checkout',
+    'buy-success',
     '/__nextjs_original-stack-frame',
   ]);
   const shouldIgnorePath = (pathname: string) =>

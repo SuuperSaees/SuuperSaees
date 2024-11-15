@@ -43,6 +43,10 @@ export abstract class BillingWebhookHandlerService {
       // one-time payments
       onPaymentSucceeded: (sessionId: string) => Promise<unknown>;
 
+      // this method is called when a subscription is created
+      // subscription is created when a payment is succeeded
+      onPaymentIntentSucceeded: (data: UpsertSubscriptionParams) => Promise<unknown>;
+
       // this method is called when a payment is failed. This is used for
       // one-time payments
       onPaymentFailed: (sessionId: string) => Promise<unknown>;

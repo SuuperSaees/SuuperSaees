@@ -37,8 +37,10 @@ type ServicesTableProps = {
   activeTab: string;
   accountRole: string;
   hasTheEmailAssociatedWithStripe: boolean;
-  handleCheckout: (priceId: string, serviceId: number) => Promise<void>;
+  handleCheckout: (priceId: string, stripeId: string, service: Service.Type, organizationId: string) => Promise<void>;
   isLoading: boolean;
+  stripeId: string;
+  organizationId: string;
 };
 
 // SERVICES TABLE
@@ -49,6 +51,8 @@ export function ServicesTable({
   hasTheEmailAssociatedWithStripe,
   handleCheckout,
   isLoading,
+  stripeId,
+  organizationId,
 }: ServicesTableProps) {
   const { t } = useTranslation(['services', 'briefs']);
 
@@ -69,6 +73,8 @@ export function ServicesTable({
     accountRole,
     hasTheEmailAssociatedWithStripe,
     handleCheckout,
+    stripeId,
+    organizationId,
   );
 
   const filteredServices = services.filter((service) => {
@@ -174,7 +180,9 @@ const useGetColumns = (
   t: TFunction<'services', undefined>,
   accountRole: string,
   hasTheEmailAssociatedWithStripe: boolean,
-  handleCheckout: (priceId: string, serviceId: number) => Promise<void>,
+  handleCheckout: (priceId: string, stripeId: string, service: Service.Type, organizationId:string) => Promise<void>,
+  stripeId: string,
+  organizationId: string,
 ): ColumnDef<Service.Type>[] => {
   return useMemo(
     () => [
@@ -278,12 +286,14 @@ const useGetColumns = (
               {accountRole === 'agency_owner' && (
                 <div>
                   {hasTheEmailAssociatedWithStripe && (
-                    <Link2
+                    <Button
+                      variant="ghost"
                       onClick={() =>
-                        service.price_id && handleCheckout(service.price_id, service.id)
+                        service.price_id && handleCheckout(priceId, stripeId, service, organizationId)
                       }
-                      className="h-6 w-6 cursor-pointer text-gray-500"
-                    />
+                    >
+                      <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />
+                    </Button>
                   )}
                 </div>
               )}
