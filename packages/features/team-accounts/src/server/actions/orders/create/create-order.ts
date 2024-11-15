@@ -1,19 +1,16 @@
 'use server';
 
-import {
-  CustomError,
-  CustomResponse,
-  ErrorBriefOperations,
-  ErrorOrderOperations,
-  ErrorOrganizationOperations,
-} from '@kit/shared/response';
+import { CustomError, CustomResponse, ErrorBriefOperations, ErrorOrderOperations, ErrorOrganizationOperations } from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { hasPermissionToCreateOrder } from '../../permissions/orders';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
+
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -113,6 +110,17 @@ export const createOrders = async (
     orders[0]?.title ??
       `Order from ${emailData.email}`;
 
+    let defaultStatusId = 1;
+    const { data: statusData, error: statusError } = await client
+      .from('agency_statuses')
+      .select('id')
+      .eq('status_name', 'pending')
+      .eq('agency_id', agencyOrganizationData.id)
+      .single();
+    if (statusError) throw new Error(statusError.message);
+
+    defaultStatusId = statusData?.id;
+
     const ordersToInsert = orders.map(
       ({ fileIds: _fileIds, ...orderWithoutFileIds }) => ({
         ...orderWithoutFileIds,
@@ -122,6 +130,7 @@ export const createOrders = async (
         propietary_organization_id:
           agencyOrganizationData.primary_owner_user_id,
         agency_id: agencyOrganizationData.id,
+        status_id: defaultStatusId,
         brief_ids:
           Array.from(briefIds).length > 0 ? Array.from(briefIds) : undefined,
       }),

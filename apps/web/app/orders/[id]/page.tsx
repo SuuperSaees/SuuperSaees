@@ -11,6 +11,8 @@ import AsideOrderInformation from './components/aside-order-information';
 import { OrderHeader } from './components/order-header';
 import { OrderTabs } from './components/order-tabs';
 import { ActivityProvider } from './context/activity-context';
+import { Order } from '~/lib/order.types';
+import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -27,7 +29,11 @@ async function OrderDetailsPage({
 }) {
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
-  );
+  ) as Order.Relational;
+
+  const agencyStatuses = await getAgencyStatuses(order?.agency_id).catch((err) =>
+    console.error(err),
+  ) 
   const organizationId = await getPropietaryOrganizationIdOfOrder(id);
   const i18n = await createI18nServerInstance();
   const ordersTitle = i18n.t('orders:title');
@@ -47,15 +53,16 @@ async function OrderDetailsPage({
         files={order?.files ?? []}
         activities={order?.activities ?? []}
         reviews={order?.reviews ?? []}
-        order={order!}
+        order={order}
         userRole={role}
       >
         
 
     <div className="flex h-full max-h-full w-full flex-col text-gray-700">
       <div className="flex max-h-full h-full w-full justify-between">
+    
         <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem] pt-2">
-          <OrderHeader order={order!} />
+          <OrderHeader order={order} />
           <OrderTabs
             organizationId={
               organizationId
@@ -68,10 +75,10 @@ async function OrderDetailsPage({
             orderAgencyId={order?.agency_id ?? ''}
           />
         </div>
-        <AsideOrderInformation order={order!} className="hidden lg:flex " />
+        <AsideOrderInformation order={order} className="hidden lg:flex " agencyStatuses={agencyStatuses ?? []}/>
+    
       </div>
     </div>
-
       </ActivityProvider>
     </PageBody>
   );

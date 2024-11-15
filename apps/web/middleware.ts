@@ -21,6 +21,7 @@ import { handleCsrf } from './handlers/csrf-handler';
 import { Database } from './lib/database.types';
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
 // import { handleDomainCheck } from './handlers/domain-check-handler';
 
 export const config = {
@@ -147,7 +148,7 @@ export async function middleware(request: NextRequest) {
   if (request.headers.has('next-action')) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
-
+  
   setCORSHeaders(csrfResponse);
 
   return csrfResponse;

@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 
+
 export const getCache = <T>(key: string): T | null => {
   const cached = localStorage.getItem(key);
   if (cached) {
@@ -17,12 +18,12 @@ export const setCache = <T>(key: string, data: T, cacheExpiry: number): void => 
 };
 
 export function updateCache<T>(
-  key: string,
+  // key: string,
   newData: T,
   queryClient: ReturnType<typeof useQueryClient>,
   queryKey: unknown[],
-  cacheExpiry: number
+  // cacheExpiry: number
 ): void {
-  setCache(key, newData, cacheExpiry);
+  // setCache(key, newData, cacheExpiry);
   queryClient.setQueryData(queryKey, newData);
 }
