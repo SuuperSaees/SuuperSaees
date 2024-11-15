@@ -55,6 +55,8 @@ type OrdersCardTableProps = {
   role: string;
   updateOrderDate: (dueDate: string, orderId: number) => Promise<void>;
   setOrdersData: Dispatch<SetStateAction<ExtendedOrderType[]>>;
+  changeTabFilteredOrders: (tab: 'open' | 'completed' | 'all') => void;
+  activeTab: 'open' | 'completed' | 'all';
 };
 
 const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
@@ -62,6 +64,8 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   role,
   updateOrderDate,
   setOrdersData,
+  changeTabFilteredOrders,
+  activeTab,
 }) => {
   const { t } = useTranslation(['orders', 'responses']);
 
@@ -136,7 +140,7 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
                     'agency_owner',
                     'agency_project_manager',
                   ].includes(role) ? (
-                    <StatusCombobox order={order} agency_id={order.agency_id} mode='order' setOrdersData={setOrdersData} />
+                    <StatusCombobox order={order} agency_id={order.agency_id} mode='order' setOrdersData={setOrdersData} changeTabFilteredOrders={changeTabFilteredOrders} activeTab={activeTab} />
                   ) : (
                     // Display the status or an empty space if there is no status
                     <span className="pl-2 pr-2">
@@ -272,20 +276,20 @@ export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
 
   const [ordersData, setOrdersData] = useState<ExtendedOrderType[]>(orders);
   // Filter orders by search term
-  const filteredOrders = ordersData.filter((order) =>
-    order.title.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
+  
   
   // Filter orders by active tab
   const getTabFilteredOrders = (tab: string) => {
+    const filteredOrders = ordersData.filter((order) =>
+      order.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
     switch (tab) {
       case 'completed':
         return filteredOrders.filter((order) => order.status === 'completed');
         case 'open':
           return filteredOrders.filter(
             (order) =>
-              order.status !== 'completed' && order.status !== 'annulled',
+              order.status !== 'completed' && order.status !== 'anulled',
           );
           case 'all':
             default:
@@ -293,8 +297,8 @@ export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
             }
           };
           
-          const [tabFilteredOrders, setTabFilteredOrders] = useState<ExtendedOrderType[]>(getTabFilteredOrders(activeTab));
-          // const tabFilteredOrders = getTabFilteredOrders(activeTab);
+    const [tabFilteredOrders, setTabFilteredOrders] = useState<ExtendedOrderType[]>(getTabFilteredOrders(activeTab));
+    // const tabFilteredOrders = getTabFilteredOrders(activeTab);
     const changeTabFilteredOrders = (tab: 'open' | 'completed' | 'all') => {
       setActiveTab(tab);
       setTabFilteredOrders(getTabFilteredOrders(tab));
@@ -365,6 +369,8 @@ export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
                   role={role}
                   updateOrderDate={updateOrderDate}
                   setOrdersData={setOrdersData}
+                  changeTabFilteredOrders={changeTabFilteredOrders}
+                  activeTab={activeTab}
                 />
               </TabsContent>
               <TabsContent value="completed" className='bg-white'>
@@ -373,6 +379,8 @@ export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
                   role={role}
                   updateOrderDate={updateOrderDate}
                   setOrdersData={setOrdersData}
+                  changeTabFilteredOrders={changeTabFilteredOrders}
+                  activeTab={activeTab}
                 />
               </TabsContent>
               <TabsContent value="all" className='bg-white'>
@@ -381,6 +389,8 @@ export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
                   role={role}
                   updateOrderDate={updateOrderDate}
                   setOrdersData={setOrdersData}
+                  changeTabFilteredOrders={changeTabFilteredOrders}
+                  activeTab={activeTab}
                 />
               </TabsContent>
             </div>
