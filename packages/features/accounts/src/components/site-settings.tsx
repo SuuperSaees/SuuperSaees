@@ -97,7 +97,21 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
     <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap'>
       {role === 'agency_owner' && (
         <div className="flex w-full flex-col space-y-6">
+          <div className="flex justify-between">
+            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+              <p className="font-bold">{t('brandName')}</p>
+            </div>
 
+            <UpdateAccountOrganizationName />
+          </div>
+          <Separator />
+          <div className="flex justify-between">
+            <p className="mr-7 w-[45%] whitespace-nowrap font-bold text-gray-700">
+              {t('language')}
+            </p>
+            <LanguageSelector onChange={handleChangeLanguage} />
+          </div>
+          <Separator />
           <div className="flex gap-20">
             <div className="mr-7 flex w-[30%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">{t('brandLogo')}</p>
@@ -136,21 +150,6 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
             <div>
               <UpdateAccountOrganizationFavicon className="h-20 w-20" />
             </div>
-          </div>
-          <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
-              <p className="font-bold">{t('brandName')}</p>
-            </div>
-
-            <UpdateAccountOrganizationName />
-          </div>
-          <Separator />
-          <div className="flex justify-between">
-            <p className="mr-7 w-[45%] whitespace-nowrap font-bold text-gray-700">
-              {t('language')}
-            </p>
-            <LanguageSelector onChange={handleChangeLanguage} />
           </div>
           <Separator />
           <div className="flex justify-between">
