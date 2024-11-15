@@ -262,6 +262,7 @@ export type Database = {
         Row: {
           agency_id: string | null
           created_at: string
+          deleted_on: string | null
           id: number
           position: number | null
           status_color: string | null
@@ -270,6 +271,7 @@ export type Database = {
         Insert: {
           agency_id?: string | null
           created_at?: string
+          deleted_on?: string | null
           id?: number
           position?: number | null
           status_color?: string | null
@@ -278,6 +280,7 @@ export type Database = {
         Update: {
           agency_id?: string | null
           created_at?: string
+          deleted_on?: string | null
           id?: number
           position?: number | null
           status_color?: string | null
