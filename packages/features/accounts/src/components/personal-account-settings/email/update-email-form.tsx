@@ -78,7 +78,7 @@ export function UpdateEmailForm({
   return (
     <Form {...form}>
       <form
-        className={'flex flex-col space-y-4'}
+        className={'flex flex-col w-full'}
         data-test={'account-email-form'}
         onSubmit={form.handleSubmit(updateEmail)}
       >
@@ -100,16 +100,13 @@ export function UpdateEmailForm({
           <FormField
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans i18nKey={'account:newEmail'} />
-                </FormLabel>
 
                 <FormControl>
                   <ThemedInput
                     data-test={'account-email-form-email-input'}
                     required
                     type={'email'}
-                    placeholder={''}
+                    placeholder={t('newEmail')}
                     {...field}
                   />
                 </FormControl>
@@ -123,15 +120,13 @@ export function UpdateEmailForm({
           <FormField
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans i18nKey={'account:repeatEmail'} />
-                </FormLabel>
 
                 <FormControl>
                   <ThemedInput
                     {...field}
                     data-test={'account-email-form-repeat-email-input'}
                     required
+                    placeholder={t('repeatEmail')}
                     type={'email'}
                   />
                 </FormControl>
@@ -143,8 +138,8 @@ export function UpdateEmailForm({
           />
 
           <div>
-            <ThemedButton disabled={updateUserMutation.isPending}>
-              <Trans i18nKey={'account:updateEmailSubmitLabel'} />
+            <ThemedButton className='w-full' disabled={updateUserMutation.isPending}>
+              {t('updateEmailSubmitLabel')}
             </ThemedButton>
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
 // import { If } from '@kit/ui/if';
 import { LanguageSelector } from '@kit/ui/language-selector';
@@ -34,6 +34,7 @@ import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './update-ac
 import UpdateAccountOrganizationDarkLogo from './update-account-organization-dark-logo';
 import PlansContainer from '../../../../../../apps/web/app/select-plan/components/plans-container';
 import { Separator } from '@kit/ui/separator';
+import ProfileSettings from '../profile-settings';
 
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -56,6 +57,7 @@ export function PersonalAccountSettingsContainer(
 ) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { t } = useTranslation('account');
   const tab = searchParams.get('tab');
   const checkoutResult = searchParams.get('checkout');
   const [user, setUser] = useState<Account.Type | null>();
@@ -159,6 +161,13 @@ export function PersonalAccountSettingsContainer(
               activeTab={accountBillingTab}
             >
               <Trans i18nKey={'account:profile'} />
+            </ThemedTabTrigger>
+            <ThemedTabTrigger
+              value="profile"
+              option="profile"
+              activeTab={accountBillingTab}
+            >
+              {t('profileTab')}
             </ThemedTabTrigger>
             <ThemedTabTrigger
               value="billing"
@@ -428,6 +437,9 @@ export function PersonalAccountSettingsContainer(
               </Card>
             </div>
           </div>
+        </TabsContent>
+        <TabsContent value="profile">
+          <ProfileSettings user={user} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} />
         </TabsContent>
 
         <TabsContent value="billing">
