@@ -36,6 +36,7 @@ export type Database = {
     Tables: {
       accounts: {
         Row: {
+          calendar: string | null
           created_at: string | null
           created_by: string | null
           email: string | null
@@ -53,6 +54,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          calendar?: string | null
           created_at?: string | null
           created_by?: string | null
           email?: string | null
@@ -70,6 +72,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          calendar?: string | null
           created_at?: string | null
           created_by?: string | null
           email?: string | null
@@ -2449,6 +2452,7 @@ export type Database = {
           account_name: string
         }
         Returns: {
+          calendar: string | null
           created_at: string | null
           created_by: string | null
           email: string | null
