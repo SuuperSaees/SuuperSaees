@@ -54,27 +54,26 @@ export default function UpdateAccountOrganizationSidebar() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex gap-5">
         <FormField
           control={form.control}
           name="value"
           render={({ field }) => (
             <FormItem className="w-fit">
-              <FormLabel>{t('account:brandSidebarLabel')}</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Sidebar Color"
                   {...field}
                   type="color"
-                  className="max-w-14"
+                  className="w-32"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex gap-4">
-          <ThemedButton className={`bg-brand flex gap-2`}>
+        <div className="flex gap-4 w-full justify-between">
+          <ThemedButton className={`bg-brand flex gap-2 w-[80%]`}>
             <span>{t('account:brandSidebarSubmit')}</span>
             {updateOrganizationSetting.isPending &&
               updateOrganizationSetting.variables.key ===
@@ -86,7 +85,7 @@ export default function UpdateAccountOrganizationSidebar() {
             variant={'ghost'}
             type="button"
             onClick={onReset}
-            className="flex gap-2"
+            className="flex gap-2 w-[20%] bg-gray-200"
           >
             <span>{t('account:brandColorReset')}</span>
           </Button>
