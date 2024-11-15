@@ -288,9 +288,11 @@ const useGetColumns = (
                   {hasTheEmailAssociatedWithStripe && (
                     <Button
                       variant="ghost"
-                      onClick={() =>
-                        service.price_id && handleCheckout(priceId, stripeId, service, organizationId)
-                      }
+                      onClick={async () => {
+                        if (service.price_id) {
+                          await handleCheckout(priceId, stripeId, service, organizationId);
+                        }
+                      }}
                     >
                       <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />
                     </Button>
