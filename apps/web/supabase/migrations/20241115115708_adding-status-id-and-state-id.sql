@@ -6,6 +6,6 @@ alter table "public"."orders_v2" add constraint "orders_v2_status_id_fkey" FOREI
 
 alter table "public"."orders_v2" validate constraint "orders_v2_status_id_fkey";
 
-alter table "public"."subtasks" add constraint "subtasks_state_id_fkey" FOREIGN KEY (state_id) REFERENCES agency_statuses(id) not valid;
+alter table "public"."subtasks" add constraint "subtasks_state_id_fkey" FOREIGN KEY (state_id) REFERENCES agency_statuses(id) ON DELETE SET NULL not valid;
 
 alter table "public"."subtasks" validate constraint "subtasks_state_id_fkey";
