@@ -114,7 +114,7 @@ export const hasPermissionToReadOrders = async () => {
               )
               .eq('id', orderId as number)
               .is('deleted_on', null)
-              .single();
+              .maybeSingle();
 
           if (followerOrderError) {
             console.error(followerOrderError.message);

@@ -138,7 +138,7 @@ export function ServicesTable({
               className="bg-background w-full rounded-lg pr-8 md:w-[200px] lg:w-[320px]"
             />
           </div>
-          {services.length > 0 && accountRole === 'agency_owner' ? (
+          {services.length > 0 && (accountRole === 'agency_owner' || accountRole === 'agency_project_manager') ? (
             <Link href="/services/create">
               <ThemedButton>{t('createService')}</ThemedButton>
             </Link>
@@ -156,7 +156,7 @@ export function ServicesTable({
             title={t('startFirstService')}
             description={t('noServicesMessage')}
             button={
-              accountRole === 'agency_owner' ? (
+              accountRole === 'agency_owner' || accountRole === 'agency_project_manager' ? (
                 <Link href="/services/create">
                   <ThemedButton>{t('createService')}</ThemedButton>
                 </Link>
@@ -299,12 +299,13 @@ const useGetColumns = (
                   )}
                 </div>
               )}
-              {accountRole === 'agency_owner' && (
+              {/* {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />} */}
+              {(accountRole === 'agency_owner' || accountRole === 'agency_project_manager') && (
                 <Link href={`/services/update?id=${service.id}`}>
                   <Pen className="h-4 w-4 cursor-pointer text-gray-600" />
                 </Link>
               )}
-              {accountRole === 'agency_owner' && (
+              {(accountRole === 'agency_owner' || accountRole === 'agency_project_manager') && (
                 <DeleteServiceDialog priceId={priceId} />
               )}
             </div>

@@ -6,9 +6,10 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { createIngress } from '~/multitenancy/aws-cluster-ingress/src';
 
-export async function createIngressAndSubdomain(req: NextRequest) {
-  // Step 1: Obtain and validate the subdomain data from the request body
+export async function createIngressAndSubdomain(req: NextRequest) {  
+  // Step 1: Obtain and validate the subdomain data
   const subdomainDataBody = (await req.json()) as Subdomain.Api.Create;
+
   if (!subdomainDataBody.namespace || !subdomainDataBody.service_name) {
     return NextResponse.json(
       {
@@ -22,28 +23,24 @@ export async function createIngressAndSubdomain(req: NextRequest) {
   }
 
   const client = getSupabaseServerComponentClient();
+
   try {
     let ingress;
     let domain = subdomainDataBody.domain;
 
-    // Function to check if a subdomain already exists
-    const checkSubdomainExists = async (
-      domainToCheck: string,
-      isCustom: boolean,
-    ) => {
+    // Log before checking subdomain
+    const checkSubdomainExists = async (domainToCheck: string, isCustom: boolean) => {
+      const fullDomain = isCustom ? domainToCheck : `${domainToCheck}.suuper.co`;
       const { data } = await client
         .from('subdomains')
         .select('id')
-        .eq('domain', isCustom ? domainToCheck : `${domainToCheck}.suuper.co`)
+        .eq('domain', fullDomain)
         .single();
       return !!data;
     };
 
-    // Function to generate a unique domain name
-    const generateUniqueDomain = async (
-      baseDomain: string,
-      isCustom: boolean,
-    ) => {
+    // Log domain generation
+    const generateUniqueDomain = async (baseDomain: string, isCustom: boolean) => {
       let newDomain = baseDomain;
       let suffix = 1;
       while (await checkSubdomainExists(newDomain, isCustom)) {
@@ -53,13 +50,8 @@ export async function createIngressAndSubdomain(req: NextRequest) {
       return newDomain;
     };
 
-    // Generate a unique domain name
-    domain = await generateUniqueDomain(
-      domain,
-      subdomainDataBody.isCustom ?? false,
-    );
+    domain = await generateUniqueDomain(domain, subdomainDataBody.isCustom ?? false);
 
-    // Step 2: Create ingress or use provided data based on isCustom flag
     if (subdomainDataBody.isCustom) {
       ingress = await createIngress({
         domain,
@@ -87,36 +79,32 @@ export async function createIngressAndSubdomain(req: NextRequest) {
       status: ingress.status,
     };
 
-    const { error: insertError } = await client
+    const { data: insertSubdomainData, error: insertError } = await client
       .from('subdomains')
-      .insert(newSubdomainData);
+      .insert(newSubdomainData)
+      .select()
+      .single();
+      
 
     if (insertError) {
+      console.error('[createIngressAndSubdomain] Insert error:', insertError);
       throw new Error(`Error creating subdomain: ${insertError.message}`);
     }
 
-    // Step 4: Return the created subdomain
-    const { data: subdomainFetchData, error: subdomainFetchError } =
-      await client
-        .from('subdomains')
-        .select('*')
-        .eq(
-          'domain',
-          subdomainDataBody.isCustom
-            ? ingress.domain
-            : `${ingress.domain}.suuper.co`,
-        )
-        .single();
+    const { data: subdomainFetchData, error: subdomainFetchError } = await client
+      .from('subdomains')
+      .select('*')
+      .eq('domain', subdomainDataBody.isCustom ? insertSubdomainData.domain : `${insertSubdomainData.domain}`)
+      .single();
 
     if (subdomainFetchError) {
-      throw new Error(
-        `Error getting subdomain: ${subdomainFetchError.message}`,
-      );
+      console.error('[createIngressAndSubdomain] Fetch error:', subdomainFetchError);
+      throw new Error(`Error getting subdomain: ${subdomainFetchError.message}`);
     }
 
     return NextResponse.json(subdomainFetchData, { status: 201 });
   } catch (error) {
-    // Error handling
+    console.error('[createIngressAndSubdomain] Fatal error:', error);
     return NextResponse.json(
       {
         code: 500,

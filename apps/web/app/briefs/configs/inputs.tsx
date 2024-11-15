@@ -38,8 +38,8 @@ export const useGenerateInputs = (
         action: () => action('text-short'), // Action passed dynamically
         content: {
           label: '',
-          placeholder: '',
           description: '',
+          placeholder: '',
           type: 'text-short',
           required: false,
           position: -1,
@@ -64,8 +64,8 @@ export const useGenerateInputs = (
         action: () => action('text-large'), // Action passed dynamically
         content: {
           label: '',
-          placeholder: '',
           description: '',
+          placeholder: '',
           type: 'text-large',
           required: false,
           position: -1,
@@ -90,8 +90,8 @@ export const useGenerateInputs = (
         action: () => action('file'), // Action passed dynamically
         content: {
           label: '',
-          placeholder: '',
           description: '',
+          placeholder: '',
           type: 'file',
           required: false,
           position: -1,
@@ -116,8 +116,8 @@ export const useGenerateInputs = (
         action: () => action('multiple_choice'), // Action passed dynamically
         content: {
           label: '',
-          placeholder: '',
           description: '',
+          placeholder: '',
           type: 'multiple_choice',
           options: [
             {
@@ -156,8 +156,8 @@ export const useGenerateInputs = (
         action: () => action('select'), // Action passed dynamically
         content: {
           label: '',
-          placeholder: '',
           description: '',
+          placeholder: '',
           type: 'select',
           options: [
             {
@@ -196,8 +196,8 @@ export const useGenerateInputs = (
         action: () => action('dropdown'), // Action passed dynamically
         content: {
           label: '',
-          placeholder: '',
           description: '',
+          placeholder: '',
           type: 'dropdown',
           options: [
             {
@@ -236,8 +236,8 @@ export const useGenerateInputs = (
         action: () => action('date'), // Action passed dynamically
         content: {
           label: '',
-          placeholder: '',
           description: '',
+          placeholder: '',
           type: 'date',
           required: false,
           position: -1,

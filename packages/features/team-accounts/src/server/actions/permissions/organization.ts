@@ -38,7 +38,7 @@ export const hasPermissionToViewOrganization = async (
     }
 
     // Step 4: If the user is an agency owner, check if the organization belongs to their client
-    if (userAccountRole === 'agency_owner') {
+    if (userAccountRole === 'agency_owner' || userAccountRole === 'agency_project_manager') {
       // Check if the requested organization is managed by the user's agency
       const { data: agencyClients, error: agencyClientsError } = await client
         .from('clients')

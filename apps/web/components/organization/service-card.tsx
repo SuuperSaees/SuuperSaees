@@ -73,7 +73,7 @@ export default function ServiceCard({
           {service.service_description}
         </p>
       </div>
-      {(currentUserRole === 'agency_owner' ??
+      {(currentUserRole === 'agency_owner' ||
         currentUserRole === 'agency_project_manager') && (
         <Dropdown options={serviceOptions}>
           <Button

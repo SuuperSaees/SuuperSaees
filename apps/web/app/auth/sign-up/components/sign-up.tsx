@@ -56,25 +56,29 @@ export default function SignUp({ searchParams }: Props) {
         color: textcolor,
       }}
     >
+      {!isCustomDomain && (
+            <div
+              className="flex hidden h-screen items-center justify-center bg-no-repeat lg:flex lg:w-full"
+              style={{
+                backgroundImage: "url('/images/oauth/signUpBackground_V3.jpg')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+              }}
+            >
+            </div>
+          )}
       {isLoading && !authDetails && isCustomDomain ? (
         <SkeletonPasswordSignInForm/>
       ) : (
         <>
           <div
-            className={`flex h-full items-center justify-center ${isCustomDomain ? 'mx-auto w-full flex-col gap-8' : 'flex-row lg:w-1/2'}`}
+            className={`flex h-full items-center justify-start px-8 ${isCustomDomain ? 'mx-auto w-full flex-col gap-8' : 'flex-row lg:w-full'}`}
             style={{
               background: `linear-gradient(to right, ${authDetails?.background_color}, ${authDetails?.background_color})`,
             }}
           >
-            {!isCustomDomain && (
-              <div
-                className={`absolute hidden lg:left-8 lg:top-8 lg:block lg:h-auto w-fullmd:object-contain`}
-              >
-                <AppLogo logoUrl={authDetails?.logo_url} />
-              </div>
-            )}
             <div
-              className={`${isCustomDomain && 'shadow-lg max-w-[360px] w-full'} rounded-lg bg-white p-8 text-black lg:w-1/2`}
+              className={`${isCustomDomain && 'shadow-lg max-w-[360px] w-full'} rounded-lg bg-white p-8 text-black lg:w-full`}
               style={{
                 color: getTextColorBasedOnBackground(
                   authDetails?.auth_card_background_color
@@ -86,6 +90,13 @@ export default function SignUp({ searchParams }: Props) {
                   : 'white',
               }}
             >
+              {!isCustomDomain && (
+              <div
+                className={`hidden lg:left-8 lg:top-8 lg:block lg:h-auto w-full md:object-contain`}
+              >
+                <AppLogo logoUrl={authDetails?.logo_url} />
+              </div>
+            )}
               {isCustomDomain && (
                 <div className="flex w-full items-start justify-center pb-[32px]">
                   <AppLogo logoUrl={authDetails?.logo_url} />
@@ -93,7 +104,7 @@ export default function SignUp({ searchParams }: Props) {
               )}
               {!isCustomDomain && (
                 <h2
-                  className={`font-inter mb-[32px] hidden font-semibold leading-[44px] tracking-[-0.72px] lg:block ${isCustomDomain ? 'text-center text-2xl' : 'text-start text-[36px]'}`}
+                  className={`font-inter my-12 hidden font-semibold leading-[44px] tracking-[-0.72px] lg:block ${isCustomDomain ? 'text-center text-2xl' : 'text-start text-5xl font-semibold '}`}
                 >
                   <Trans i18nKey={'auth:signUpHeading'} />
                 </h2>
@@ -163,66 +174,6 @@ export default function SignUp({ searchParams }: Props) {
               </div>
             )}
           </div>
-          {!isCustomDomain && (
-            <div
-              className="flex hidden h-screen items-center justify-center bg-no-repeat lg:flex lg:w-1/2"
-              style={{
-                backgroundImage: "url('/images/oauth/signUpBackground.png')",
-                backgroundSize: 'cover',
-                backgroundPosition: 'center center',
-              }}
-            >
-              <div className="mt-56 w-full px-[64px] py-[96px] lg:w-full">
-                <div>
-                  <img src="/images/oauth/stars.png" alt="Stars" />
-                </div>
-                <div className="leading-72 leading-72 mb-[20px] text-left text-6xl font-semibold tracking-[-2%] text-white">
-                  <Trans i18nKey={'auth:suuper:title'} />
-                </div>
-                <div className="font-inter text-medium leading-28 leading-28 mb-[32px] text-left tracking-tight text-white">
-                  <Trans i18nKey={'auth:suuper.body.line1'} /> <br></br>
-                  <Trans i18nKey={'auth:suuper.body.line2'} />
-                </div>
-                <div className="flex gap-4">
-                  <img
-                    src="/images/oauth/avatarGroup.png"
-                    alt="AvatarGroup"
-                    className=""
-                  />
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src="/images/oauth/califications.png"
-                        alt="Califications"
-                        className=""
-                      />
-                      <div className="font-inter text-[16px] font-semibold leading-[24px] text-white">
-                        <Trans i18nKey={'auth:suuper:footer.calification'} />
-                      </div>
-                    </div>
-                    <div className="font-inter text-left text-[16px] font-semibold leading-[24px] text-white">
-                      <Trans i18nKey={'auth:suuper:footer.reviews'} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* <SignUpMethodsContainer
-                providers={authConfig.providers}
-                displayTermsCheckbox={authConfig.displayTermsCheckbox}
-                inviteToken={inviteToken}
-                paths={paths}
-              />
-    
-              <div className="flex justify-center mt-4">
-                <Button asChild variant={'link'} size={'sm'}>
-                  <Link href={signInPath}>
-                    <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
-                  </Link>
-                </Button>
-              </div> */}
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>
