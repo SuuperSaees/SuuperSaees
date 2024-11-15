@@ -11,7 +11,7 @@ import { If } from '@kit/ui/if';
 import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
-import { useBilling } from '../../home/[account]/hooks/use-billing';
+// import { useBilling } from '../../home/[account]/hooks/use-billing';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -66,7 +66,7 @@ const ClientsMembersPagePresentation = ({
 }) => {
   // const [showDropdown, setShowDropdown] = useState(false);
   // const [addMemberIsAvailable, setAddMemberIsAvailable] = useState(false);
-  const { subscriptionFetchedStripe } = useBilling();
+  // const { subscriptionFetchedStripe } = useBilling();
   // const { t } = useTranslation('team');
   // const router = useRouter();
 // const seatByPlans = {

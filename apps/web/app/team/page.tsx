@@ -1,7 +1,10 @@
 import React from 'react';
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+
 import { loadMembersPageData } from './_lib/server/members-page.loader';
 import ClientsMembersPagePresentation from './components/clients-members-page-presentation';
 
@@ -91,7 +94,10 @@ async function ClientsMembersPage() {
   const slug = organizationAccount?.slug ?? '';
 
   const [members, invitations, canAddMember, { user }] =
-    await loadMembersPageData(client, slug);
+    await loadMembersPageData(client, slug).catch((error) => {
+      console.error('Error loading members page data:', error);
+      return [];
+    });
 
   const canManageRoles =
     account?.permissions?.includes('roles.manage') ?? false;
@@ -111,7 +117,12 @@ async function ClientsMembersPage() {
       slug={slug}
       members={members}
       invitations={invitations}
-      canAddMember={await canAddMember()}
+      canAddMember={await canAddMember()
+        .then((result) => result ?? false)
+        .catch((err) => {
+          console.error('Error from members page, canAddMember:', err);
+          return false;
+        })}
       user={user}
       canManageRoles={canManageRoles}
       canManageInvitations={canManageInvitations}

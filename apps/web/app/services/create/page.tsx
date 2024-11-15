@@ -20,7 +20,7 @@ async function CreateServicePage() {
     console.error(`Error client, getting user role: ${err}`)
     return ''
   });
-  if(accountRole !== "agency_owner"){
+  if(accountRole !== "agency_owner" && accountRole !== "agency_project_manager"){
     return redirect("/orders")
   }
   return (

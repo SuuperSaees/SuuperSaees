@@ -50,7 +50,7 @@ export function EmailPasswordSignUpContainer({
   const loading = signUpMutation.isPending || redirecting.current;
 
   const onSignupRequested = useCallback(
-    async (credentials: { email: string; password: string }) => {
+    async (credentials: { email: string; password: string; organizationName: string; repeatPassword: string }) => {
       if (loading) {
         return;
       }
@@ -58,6 +58,7 @@ export function EmailPasswordSignUpContainer({
       try {
         const data = await signUpMutation.mutateAsync({
           ...credentials,
+          organizationName: credentials.organizationName,
           emailRedirectTo,
           captchaToken,
         });
@@ -77,6 +78,8 @@ export function EmailPasswordSignUpContainer({
 
         if (data?.inviteRedirectUrl) {
           router.push(data.inviteRedirectUrl);
+        } else {
+          router.push(`/user-data?tokenId=${data.tokenId}`);
         }
       } catch (error) {
         console.error(error);
