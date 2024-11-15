@@ -15,6 +15,8 @@ import { createIngress } from '~/multitenancy/aws-cluster-ingress/src/actions/cr
 import { updateTokenData } from "~/team-accounts/src/server/actions/tokens/update/update-token";
 import { updateAccountData } from "~/team-accounts/src/server/actions/accounts/update/update-account";
 import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
+import { addUserToAirtable } from "~/team-accounts/src/server/utils/airtable";
+import { getOrganizationByUserId } from "~/team-accounts/src/server/actions/organizations/get/get-organizations";
 
 const formSchema = z.object({
     portalUrl: z.string().min(2).max(50),
@@ -43,10 +45,38 @@ export function UserDataForm(
       await updateTokenData(tokenId, {
         expires_at: new Date().toISOString(),
       });
-      await updateAccountData(userId, {
+      const userData = await updateAccountData(userId, {
         name: data.userFullName,
         phone_number: data.userphoneNumber,
       });
+
+      const organizationData = await getOrganizationByUserId(userId);
+
+      if (userData) {
+        try {
+          if (!process.env.NEXT_PUBLIC_AIRTABLE_API_KEY) {
+            console.warn('⚠️ Airtable: API Key no configurada');
+            return; // Continuar con el flujo sin agregar a Airtable
+          }
+          
+          await addUserToAirtable({
+            name: userData?.name ?? '',
+            email: userData?.email ?? '',
+            organizationName: organizationData.name,
+            phoneNumber: userData?.phone_number ?? '',
+          });
+        } catch (error) {
+          // Mejorar el log del error pero continuar con el flujo
+          console.error('❌ Error en Airtable:', {
+            message: error instanceof Error ? error.message : 'Error desconocido',
+            context: 'Registro de usuario',
+            email: userData?.email ?? '',
+          });
+          // No lanzar el error para no interrumpir el flujo principal de registro
+        }
+      }
+
+
 
       const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
       const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });

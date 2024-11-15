@@ -12,7 +12,7 @@ export const updateAccountData = async (accountId: string, accountData: User.Upd
         .from('accounts')
         .update(accountData)
         .eq('id', accountId)
-        .select(`id`)
+        .select(`id, name, phone_number, email`)
         .single();
       
     if (userDataError) throw new Error(userDataError.message);
