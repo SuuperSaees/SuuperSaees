@@ -47,6 +47,8 @@ interface StatusComboboxProps {
   mode: 'order' | 'subtask';
   statusName?: string;
   setOrdersData?: Dispatch<SetStateAction<ExtendedOrderType[]>>;
+  changeTabFilteredOrders?: (tab: 'open' | 'completed' | 'all') => void;
+  activeTab?: 'open' | 'completed' | 'all';
 }
 
 const defaultStatusColor = '#8fd6fc'
@@ -57,6 +59,8 @@ function StatusCombobox({
   mode,
   agency_id,
   setOrdersData,
+  changeTabFilteredOrders,
+  activeTab,
 }: StatusComboboxProps) {
   const [open, setOpen] = useState<boolean>(false);
   const { statuses, setStatuses } = useAgencyStatuses();
@@ -67,8 +71,6 @@ function StatusCombobox({
   const [currentStatusData, setCurrentStatusData] = useState<AgencyStatus.Type | undefined>(
     mode === 'order' ? statuses?.find(status => status.id === order?.status_id) : statuses?.find(status => status.id === subtask?.state_id)
   );
-
-  console.log('currentStatusData', order?.status_id);
 
   // const currentStatusDataUseOnlyInSpecialCases = statuses?.find(status => status.id === order?.status_id);
   
@@ -125,6 +127,9 @@ function StatusCombobox({
         )
       );
     }
+    if(changeTabFilteredOrders && activeTab) {
+      changeTabFilteredOrders(activeTab);
+    } 
       await updateOrder(orderId, { status, status_id });
       return { status, status_id, orderId };
     },
