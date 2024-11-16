@@ -6,8 +6,6 @@ const AIRTABLE_API_KEY = process.env.NEXT_PUBLIC_AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID;
 const AIRTABLE_TABLE_NAME = process.env.NEXT_PUBLIC_AIRTABLE_TABLE_NAME;
 
-// const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-
 export async function addUserToAirtable({
   name,
   email,
@@ -20,10 +18,6 @@ export async function addUserToAirtable({
   organizationName: string;
 }) {  
   try {
-    // if (!IS_PROD) {
-    //   return CustomResponse.success(null, 'airtableSkipped').toJSON();
-    // }
-
     // Check Airtable config
     if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID || !AIRTABLE_TABLE_NAME) {
       throw new CustomError(
