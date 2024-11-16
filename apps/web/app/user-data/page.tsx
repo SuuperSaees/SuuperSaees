@@ -44,7 +44,7 @@ async function UserDataPage({
       redirect('/orders');
     }
   } else {
-    if(sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain ) {
+    if( (userRole === 'agency_owner' && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain ) || (userRole !== 'agency_owner' && sanitizedAccountData?.phone_number) ) {
       redirect('/orders');
     }
   }
