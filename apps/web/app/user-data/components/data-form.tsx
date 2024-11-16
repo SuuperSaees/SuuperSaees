@@ -15,6 +15,8 @@ import { createIngress } from '~/multitenancy/aws-cluster-ingress/src/actions/cr
 import { updateTokenData } from "~/team-accounts/src/server/actions/tokens/update/update-token";
 import { updateAccountData } from "~/team-accounts/src/server/actions/accounts/update/update-account";
 import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
+import { addUserToAirtable } from "~/team-accounts/src/server/utils/airtable";
+import { getOrganizationByUserId } from "~/team-accounts/src/server/actions/organizations/get/get-organizations";
 
 const formSchema = z.object({
     portalUrl: z.string().min(2).max(50),
@@ -43,10 +45,44 @@ export function UserDataForm(
       await updateTokenData(tokenId, {
         expires_at: new Date().toISOString(),
       });
-      await updateAccountData(userId, {
+      const userData = await updateAccountData(userId, {
         name: data.userFullName,
         phone_number: data.userphoneNumber,
+        user_id: userId,
       });
+
+      const organizationData = await getOrganizationByUserId(userId);
+
+      if (userData) {
+        try {
+          // Working on production
+          if (!process.env.AIRTABLE_API_KEY) {
+            console.warn('⚠️ Airtable: API Key no configured');
+            return;
+          }
+
+          // Working on local
+          // if (!process.env.NEXT_PUBLIC_AIRTABLE_API_KEY) {
+          //   console.warn('⚠️ Airtable: API Key no configured');
+          //   return;
+          // }
+          
+          await addUserToAirtable({
+            name: userData?.userData?.name ?? '',
+            email: userData?.accountData?.email ?? '',
+            organizationName: organizationData.name,
+            phoneNumber: userData?.userData?.phone_number ?? '',
+          });
+        } catch (error) {
+          console.error('❌ Error adding user to Airtable:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            context: 'Register user',
+            email: userData?.accountData?.email ?? '',
+          });
+        }
+      }
+
+
 
       const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
       const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
@@ -82,12 +118,7 @@ export function UserDataForm(
             <FormControl>
               <div className="flex items-center">
                 <Input 
-                  disabled
-                  value="https://"
-                  className="rounded-r-none border-r-0 bg-gray-50 w-[85px] cursor-default"
-                />
-                <Input 
-                  className="rounded-none border-x-0" 
+                  className=" border-r-0" 
                   placeholder={t('userData.portalUrlPlaceholder')} 
                   {...field} 
                 />
@@ -128,7 +159,8 @@ export function UserDataForm(
                   onChange={(phone) => field.onChange(phone)}
                   inputClass="!w-full p-2 border rounded-md"
                   containerClass="!w-full"
-                  buttonClass="!border-r-0"
+                  // buttonClass="!border-r-0"
+                  buttonClass="!border-r-0 !border !border-[#ECEBEC] hover:!border-[#ECEBEC] !rounded-l-md"
                   inputStyle={{
                     width: '100%',
                     height: '40px',

@@ -176,6 +176,7 @@ export async function getOrganizationByUserId(
   adminActivated = false,
 ): Promise<{
   id: string;
+  name: string;
 }> {
   try {
     const client = getSupabaseServerComponentClient({
@@ -202,7 +203,7 @@ export async function getOrganizationByUserId(
 
     const { data: organizationData, error: organizationError } = await client
       .from('accounts')
-      .select('id') // if we need more data we can add it here, but for now we only need the id.
+      .select('id, name') // if we need more data we can add it here, but for now we only need the id.
       //IMPORTANT: ask to the team for more params on the future
       .eq('id', organizationId)
       .single();

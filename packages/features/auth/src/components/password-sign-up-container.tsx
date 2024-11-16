@@ -3,14 +3,8 @@
 import { useCallback, useRef, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
-
-import { CheckCircledIcon } from '@radix-ui/react-icons';
-
 import { useAppEvents } from '@kit/shared/events';
 import { useSignUpWithEmailAndPassword } from '@kit/supabase/hooks/use-sign-up-with-email-password';
-import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
-import { If } from '@kit/ui/if';
-import { Trans } from '@kit/ui/trans';
 
 import { useCaptchaToken } from '../captcha/client';
 import { AuthErrorAlert } from './auth-error-alert';
@@ -44,10 +38,10 @@ export function EmailPasswordSignUpContainer({
 
   const signUpMutation = useSignUpWithEmailAndPassword(currentBaseUrl);
   const redirecting = useRef(false);
-  const [showVerifyEmailAlert, setShowVerifyEmailAlert] = useState(false);
   const appEvents = useAppEvents();
   const router = useRouter();
-  const loading = signUpMutation.isPending || redirecting.current;
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const loading = signUpMutation.isPending || redirecting.current || isRedirecting;
 
   const onSignupRequested = useCallback(
     async (credentials: { email: string; password: string; organizationName: string; repeatPassword: string }) => {
@@ -56,14 +50,13 @@ export function EmailPasswordSignUpContainer({
       }
 
       try {
+        setIsRedirecting(true);
         const data = await signUpMutation.mutateAsync({
           ...credentials,
           organizationName: credentials.organizationName,
           emailRedirectTo,
           captchaToken,
         });
-
-        showConfirmEmail && setShowVerifyEmailAlert(true);
 
         appEvents.emit({
           type: 'user.signedUp',
@@ -83,6 +76,7 @@ export function EmailPasswordSignUpContainer({
         }
       } catch (error) {
         console.error(error);
+        setIsRedirecting(false);
       } finally {
         resetCaptchaToken();
       }
@@ -102,37 +96,15 @@ export function EmailPasswordSignUpContainer({
 
   return (
     <>
-      <If condition={showVerifyEmailAlert}>
-        <SuccessAlert />
-      </If>
+      <AuthErrorAlert error={signUpMutation.error} />
 
-      <If condition={!showVerifyEmailAlert}>
-        <AuthErrorAlert error={signUpMutation.error} />
-
-        <PasswordSignUpForm
-          onSubmit={onSignupRequested}
-          loading={loading}
-          defaultValues={defaultValues}
-          displayTermsCheckbox={displayTermsCheckbox}
-          className={className}
-        />
-      </If>
+      <PasswordSignUpForm
+        onSubmit={onSignupRequested}
+        loading={loading}
+        defaultValues={defaultValues}
+        displayTermsCheckbox={displayTermsCheckbox}
+        className={className}
+      />
     </>
-  );
-}
-
-function SuccessAlert() {
-  return (
-    <Alert variant={'success'}>
-      <CheckCircledIcon className={'w-4'} />
-
-      <AlertTitle>
-        <Trans i18nKey={'auth:emailConfirmationAlertHeading'} />
-      </AlertTitle>
-
-      <AlertDescription data-test={'email-confirmation-alert'}>
-        <Trans i18nKey={'auth:emailConfirmationAlertBody'} />
-      </AlertDescription>
-    </Alert>
   );
 }
