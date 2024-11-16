@@ -86,9 +86,9 @@ export function UserDataForm(
         
         try {
           if (IS_PROD && data.portalUrl) {
-            await createSubscription();
             const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
             const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
+            // await createSubscription();
             router.push(`https://${subdomain.domain}/orders`);
           } else {
             router.push('/orders');
