@@ -60,7 +60,7 @@ export function UserDataForm(
       if (userData) {
         try {
           if (!process.env.NEXT_PUBLIC_AIRTABLE_API_KEY) {
-            setError('Configuration error: Try again later');
+            setError('Configuration error: Missing Airtable API key');
             return;
           }
           
@@ -76,30 +76,40 @@ export function UserDataForm(
             context: 'Register user',
             email: userData?.accountData?.email ?? '',
           });
-          setError('Failed to sync user data. Please try again later.');
+          setError(`Airtable sync error: ${error instanceof Error ? error.message : 'Unknown error'}`);
           return;
         }
       }
 
-
-
       if (userRole === 'agency_owner' && data.portalUrl) {
-        const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
-        const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
-        const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-        const BASE_URL = IS_PROD
-          ? `https://${subdomain.domain}`
-          : process.env.NEXT_PUBLIC_SITE_URL;
-        if (IS_PROD) {
-          await createSubscription();
+        try {
+          const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
+          const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
+          const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+          const BASE_URL = IS_PROD
+            ? `https://${subdomain.domain}`
+            : process.env.NEXT_PUBLIC_SITE_URL;
+          if (IS_PROD) {
+            await createSubscription();
+          }
+          router.push(`${BASE_URL}/orders`);
+        } catch (error) {
+          setError(`Failed to create subdomain: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          setLoading(false);
+          return;
         }
-        router.push(`${BASE_URL}/orders`);
       } else {
         // Si no es agency_owner, redirigir directamente
         router.push('/orders');
       }
     } catch (error) {
-      setError('Failed to create user. Please try again later.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('❌ User creation error:', {
+        message: errorMessage,
+        context: 'User creation',
+        userId,
+      });
+      setError(`Failed to create user: ${errorMessage}`);
       setLoading(false);
     } 
   }
