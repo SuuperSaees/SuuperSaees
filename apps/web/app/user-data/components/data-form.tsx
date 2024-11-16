@@ -55,10 +55,17 @@ export function UserDataForm(
 
       if (userData) {
         try {
-          if (!process.env.NEXT_PUBLIC_AIRTABLE_API_KEY) {
-            console.warn('⚠️ Airtable: API Key no configurada');
+          // Working on production
+          if (!process.env.AIRTABLE_API_KEY) {
+            console.warn('⚠️ Airtable: API Key no configured');
             return;
           }
+
+          // Working on local
+          // if (!process.env.NEXT_PUBLIC_AIRTABLE_API_KEY) {
+          //   console.warn('⚠️ Airtable: API Key no configured');
+          //   return;
+          // }
           
           await addUserToAirtable({
             name: userData?.userData?.name ?? '',
@@ -67,9 +74,9 @@ export function UserDataForm(
             phoneNumber: userData?.userData?.phone_number ?? '',
           });
         } catch (error) {
-          console.error('❌ Error en Airtable:', {
-            message: error instanceof Error ? error.message : 'Error desconocido',
-            context: 'Registro de usuario',
+          console.error('❌ Error adding user to Airtable:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            context: 'Register user',
             email: userData?.accountData?.email ?? '',
           });
         }
