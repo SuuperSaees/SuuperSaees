@@ -5,11 +5,19 @@ import { NextRequest, NextResponse } from "next/server";
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
-    const { searchParams } = new URL(req.url);
+  const { searchParams } = new URL(req.url);
   const customer = searchParams.get('customerId');
   const price = searchParams.get('priceId');
-    try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
+  if (!customer || !price) {
+    return NextResponse.json(
+        { error: { message: "Missing required parameters: customerId or priceId" } },
+        { status: 400 }
+    );
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
            const subscription = await stripe.subscriptions.create({
             customer: customer,
             items: [
@@ -21,7 +29,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(subscription);
     } catch (error) {
         return NextResponse.json(
-            {error: {message: "Internal Server Error"}},
+            {error: {message: `Internal Server Error: ${error.message}`}},
             {status: 500}
         )
     }

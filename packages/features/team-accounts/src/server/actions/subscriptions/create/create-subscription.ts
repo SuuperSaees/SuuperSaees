@@ -26,6 +26,7 @@ export const createSubscription = async (): Promise<{
       // throw new Error('Error to get user account');
     }
     const email = user?.email as string;
+    console.log('email', email);
     let { domain: baseUrl } = await getDomainByUserId(user.id, true);
     if (!baseUrl) {
       // get host from window
@@ -53,6 +54,8 @@ export const createSubscription = async (): Promise<{
 
     const customerData = await customerResponse.json();
 
+    console.log('customerData', customerData);
+
     // Search Free Subscription
     const priceId = process.env.PLAN_FREE_ID as string;
     // create subscription in stripe
@@ -67,6 +70,7 @@ export const createSubscription = async (): Promise<{
     );
 
     if (!subscriptionResponse.ok) {
+      console.log('subscriptionResponse', subscriptionResponse);
       throw new Error('Failed to create subscription');
     }
 
