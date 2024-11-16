@@ -58,7 +58,7 @@ export function UserDataForm(
       if (userData) {
         try {
           if (!process.env.NEXT_PUBLIC_AIRTABLE_API_KEY) {
-            setError('Configuration error: Airtable API key is missing');
+            setError('Configuration error: Try again later');
             return;
           }
           
