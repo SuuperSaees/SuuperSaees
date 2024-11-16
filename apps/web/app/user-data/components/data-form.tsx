@@ -81,25 +81,24 @@ export function UserDataForm(
         }
       }
 
-      if (userRole === 'agency_owner' && data.portalUrl) {
+      if (userRole === 'agency_owner') {
+        const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+        
         try {
-          const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
-          const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
-          const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-          const BASE_URL = IS_PROD
-            ? `https://${subdomain.domain}`
-            : process.env.NEXT_PUBLIC_SITE_URL;
-          if (IS_PROD) {
+          if (IS_PROD && data.portalUrl) {
             await createSubscription();
+            const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
+            const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
+            router.push(`https://${subdomain.domain}/orders`);
+          } else {
+            router.push('/orders');
           }
-          router.push(`${BASE_URL}/orders`);
         } catch (error) {
           setError(`Failed to create subdomain: ${error instanceof Error ? error.message : 'Unknown error'}`);
           setLoading(false);
           return;
         }
       } else {
-        // Si no es agency_owner, redirigir directamente
         router.push('/orders');
       }
     } catch (error) {
