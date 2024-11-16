@@ -17,6 +17,7 @@ import { updateAccountData } from "~/team-accounts/src/server/actions/accounts/u
 import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
 import { addUserToAirtable } from "~/team-accounts/src/server/utils/airtable";
 import { getOrganizationByUserId } from "~/team-accounts/src/server/actions/organizations/get/get-organizations";
+import { Spinner } from "@kit/ui/spinner";
 
 const formSchema = z.object({
     portalUrl: z.string().min(2).max(50),
@@ -93,9 +94,8 @@ export function UserDataForm(
       router.push(`${BASE_URL}/orders`);
     } catch (error) {
       setError('Failed to create user. Please try again later.');
-    } finally {
       setLoading(false);
-    }
+    } 
   }
 
   return (
@@ -183,9 +183,11 @@ export function UserDataForm(
           data-test={'auth-submit-button'}
           className='flex w-full sm:w-56 h-12 sm:h-14 px-6 sm:px-8 py-3 sm:py-4 justify-center items-center flex-shrink-0 rounded-full mt-6 sm:mt-8 bg-brand'
         >
-          <div className='text-white text-center text-base sm:text-lg font-semibold tracking-[-0.18px]'>
-            {t('userData.signUpUserDataButton')}
-          </div>
+          {loading ? <Spinner className="w-4 h-4" />: (
+            <div className='text-white text-center text-base sm:text-lg font-semibold tracking-[-0.18px]'>
+              {t('userData.signUpUserDataButton')}
+            </div>
+          )}
         </Button>
       </form>
     </Form>
