@@ -7,6 +7,7 @@ import { decodeTokenData } from '~/team-accounts/src/server/actions/tokens/decod
 import { AppLogo } from '~/components/app-logo';
 import { Trans } from '@kit/ui/trans';
 import { getAccountOnbardingData } from '~/team-accounts/src/server/actions/accounts/get/get-account';
+import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -29,6 +30,7 @@ async function UserDataPage({
   if (userError) throw userError.message;
 
   const accountData = await getAccountOnbardingData(userData.user.id);
+  const userRole = await getUserRoleById(userData.user.id);
 
   const sanitizedAccountData = accountData ? {
     ...accountData,
@@ -65,7 +67,7 @@ async function UserDataPage({
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight tracking-[-0.252px] mb-8 md:mb-12">
               <Trans i18nKey={'auth:signUpUserDataHeading'} />
             </h2>
-            <UserDataForm userId={userData?.user.id} tokenId={tokenId} accountData={sanitizedAccountData} />
+            <UserDataForm userId={userData?.user.id} tokenId={tokenId} accountData={sanitizedAccountData} userRole={userRole} />
           </div>
         </div>
         
