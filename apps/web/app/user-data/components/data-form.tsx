@@ -30,6 +30,7 @@ export function UserDataForm(
   const {t} = useTranslation('auth');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,6 +42,7 @@ export function UserDataForm(
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setLoading(true);
+    setError(null);
     try {
       await updateTokenData(tokenId, {
         expires_at: new Date().toISOString(),
@@ -55,17 +57,10 @@ export function UserDataForm(
 
       if (userData) {
         try {
-          // Working on production
-          if (!process.env.AIRTABLE_API_KEY) {
-            console.warn('⚠️ Airtable: API Key no configured');
+          if (!process.env.NEXT_PUBLIC_AIRTABLE_API_KEY) {
+            setError('Configuration error: Airtable API key is missing');
             return;
           }
-
-          // Working on local
-          // if (!process.env.NEXT_PUBLIC_AIRTABLE_API_KEY) {
-          //   console.warn('⚠️ Airtable: API Key no configured');
-          //   return;
-          // }
           
           await addUserToAirtable({
             name: userData?.userData?.name ?? '',
@@ -79,6 +74,8 @@ export function UserDataForm(
             context: 'Register user',
             email: userData?.accountData?.email ?? '',
           });
+          setError('Failed to sync user data. Please try again later.');
+          return;
         }
       }
 
@@ -95,7 +92,7 @@ export function UserDataForm(
       }
       router.push(`${BASE_URL}/orders`);
     } catch (error) {
-      console.log(error);
+      setError('Failed to create user. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -104,6 +101,11 @@ export function UserDataForm(
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
+      {error && (
+        <div className="p-4 text-red-600 bg-red-50 rounded-md border border-red-200">
+          {error}
+        </div>
+      )}
       <FormField
         control={form.control}
         name="portalUrl"
