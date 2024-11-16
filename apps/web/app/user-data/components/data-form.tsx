@@ -19,23 +19,24 @@ import { addUserToAirtable } from "~/team-accounts/src/server/utils/airtable";
 import { getOrganizationByUserId } from "~/team-accounts/src/server/actions/organizations/get/get-organizations";
 import { Spinner } from "@kit/ui/spinner";
 
-const formSchema = z.object({
-    portalUrl: z.string().min(2).max(50),
-    userFullName: z.string().min(2).max(50),
-    userphoneNumber: z.string().min(2).max(50).regex(/^\d+$/, "Solo se permiten números"),
-})
-
 export function UserDataForm(
-  {userId, tokenId, accountData}: {userId: string, tokenId: string, accountData: {name: string, phone_number: string, subdomain: string} | null}
+  {userId, tokenId, accountData, userRole}: {userId: string, tokenId: string, accountData: {name: string, phone_number: string, subdomain: string} | null, userRole: string }
 ) {
   const {t} = useTranslation('auth');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formSchema = z.object({
+    portalUrl: userRole === 'agency_owner' 
+      ? z.string().min(2).max(50)
+      : z.string().min(2).max(50).optional(),
+    userFullName: z.string().min(2).max(50),
+    userphoneNumber: z.string().min(2).max(50).regex(/^\d+$/, "Only numbers are allowed"),
+})
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      portalUrl: accountData?.subdomain?.replace('.suuper.co', ''),
+      portalUrl: accountData?.subdomain?.replace('.suuper.co', ''), 
       userFullName: accountData?.name,
       userphoneNumber: accountData?.phone_number,
     },
@@ -82,16 +83,21 @@ export function UserDataForm(
 
 
 
-      const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
-      const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
-      const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-      const BASE_URL = IS_PROD
-        ? `https://${subdomain.domain}`
-        : process.env.NEXT_PUBLIC_SITE_URL;
-      if (IS_PROD) {
-        await createSubscription();
+      if (userRole === 'agency_owner' && data.portalUrl) {
+        const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
+        const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
+        const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+        const BASE_URL = IS_PROD
+          ? `https://${subdomain.domain}`
+          : process.env.NEXT_PUBLIC_SITE_URL;
+        if (IS_PROD) {
+          await createSubscription();
+        }
+        router.push(`${BASE_URL}/orders`);
+      } else {
+        // Si no es agency_owner, redirigir directamente
+        router.push('/orders');
       }
-      router.push(`${BASE_URL}/orders`);
     } catch (error) {
       setError('Failed to create user. Please try again later.');
       setLoading(false);
@@ -106,7 +112,8 @@ export function UserDataForm(
           {error}
         </div>
       )}
-      <FormField
+      {userRole === 'agency_owner' && (
+        <FormField
         control={form.control}
         name="portalUrl"
         render={({ field }) => (
@@ -135,6 +142,7 @@ export function UserDataForm(
           </FormItem>
         )}
       />
+      )}
         <FormField
           control={form.control}
           name="userFullName"
