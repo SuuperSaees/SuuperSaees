@@ -14,12 +14,12 @@ import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/
 import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 
-
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
 import { Database } from './lib/database.types';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 
 
 // import { handleDomainCheck } from './handlers/domain-check-handler';
@@ -290,12 +290,15 @@ function getPatterns() {
 
         const supabase = createMiddlewareClient(req, res);
 
-        // Verify phone number
-        const hasPhoneNumber = await checkPhoneNumber(supabase, user.id);
-        if (!hasPhoneNumber && !req.nextUrl.pathname.includes('user-data')) {
-          return NextResponse.redirect(
-            new URL('/user-data', origin).href,
-          );
+        // Obtain the user role
+        const userRole = await getUserRoleById(user.id);
+        if (userRole === 'agency_owner') {
+          const hasPhoneNumber = await checkPhoneNumber(supabase, user.id);
+          if (!hasPhoneNumber && !req.nextUrl.pathname.includes('user-data')) {
+            return NextResponse.redirect(
+              new URL('/user-data', origin).href,
+            );
+          }
         }
       },
     },
