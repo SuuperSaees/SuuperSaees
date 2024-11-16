@@ -23,18 +23,20 @@ export const createSubscription = async (): Promise<{
 
     if (!user) {
       return { error: 'Error to get user account' };
-      // throw new Error('Error to get user account');
     }
+
     const email = user?.email as string;
-    console.log('email', email);
-    let { domain: baseUrl } = await getDomainByUserId(user.id, true);
-    if (!baseUrl) {
-      // get host from window
+
+    let { domain: userBaseUrl } = await getDomainByUserId(user.id, true);
+
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+    if (!userBaseUrl) {
       if (typeof window !== 'undefined') {
-        baseUrl = window.location.origin;
+        userBaseUrl = window.location.origin;
       }
     }
-    // create customer in stripe
+
     const customerResponse = await fetch(
       `${baseUrl}/api/stripe/create-customer`,
       {
@@ -49,16 +51,14 @@ export const createSubscription = async (): Promise<{
     );
 
     if (!customerResponse.ok) {
+      console.error('Failed to create customer. Status:', customerResponse.status);
       throw new Error('Failed to create customer');
     }
 
     const customerData = await customerResponse.json();
 
-    console.log('customerData', customerData);
-
-    // Search Free Subscription
     const priceId = process.env.PLAN_FREE_ID as string;
-    // create subscription in stripe
+
     const subscriptionResponse = await fetch(
       `${baseUrl}/api/stripe/create-subscription?customerId=${encodeURIComponent(customerData?.id)}&priceId=${encodeURIComponent(priceId)}`,
       {
@@ -70,14 +70,14 @@ export const createSubscription = async (): Promise<{
     );
 
     if (!subscriptionResponse.ok) {
-      console.log('subscriptionResponse', subscriptionResponse);
+      console.error('Failed to create subscription. Status:', subscriptionResponse.status);
       throw new Error('Failed to create subscription');
     }
 
     const subscriptionData = await subscriptionResponse.json();
 
-    // Create subscription in db
     const primary_owner_user_id = await getPrimaryOwnerId();
+
     const newDate = new Date().toISOString();
     const newSubscription: Subscription.Type = {
       id: subscriptionData?.id as string,
@@ -97,25 +97,29 @@ export const createSubscription = async (): Promise<{
       account_id: null,
     };
 
-    const { error: subscriptionCreateError } = await client
+    const { error: subscriptionCreateError} = await client
       .from('subscriptions')
       .insert(newSubscription)
       .select('*')
       .single();
 
+    
     if (subscriptionCreateError) {
       console.error(
-        'Error creating subscription:',
+        'Error creating subscription in database:',
         subscriptionCreateError.message,
+        'Full error:',
+        subscriptionCreateError
       );
+      return { error: subscriptionCreateError.message };
     }
-
     return { userId: user.id };
   } catch (error) {
-    // console.error('Error while creating the organization account:', error);
-    // throw error; // Throw the error to ensure the caller knows the function failed
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    console.error('Error while creating the subscription:', errorMessage);
+    console.error('Error in createSubscription:', errorMessage);
+    if (error instanceof Error && error.stack) {
+      console.error('Stack trace:', error.stack);
+    }
     return { error: errorMessage };
   }
 };

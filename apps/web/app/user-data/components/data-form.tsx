@@ -82,22 +82,22 @@ export function UserDataForm(
       }
 
       if (userRole === 'agency_owner') {
-        const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
         
         try {
           const cleanedDomain = data.portalUrl?.replace(/[^a-zA-Z0-9]/g, '') ?? ''  ;
           const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
-          if (IS_PROD) {
-            const subscriptionResult = await createSubscription();
+          const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+          const BASE_URL = IS_PROD
+          ? `https://${subdomain.domain}`
+          : process.env.NEXT_PUBLIC_SITE_URL;
+          const subscriptionResult = await createSubscription();
             if ('error' in subscriptionResult) {
               setError(`Subscription creation failed: ${subscriptionResult.error}`);
               setLoading(false);
               return;
             }
-            // router.push(`https://${subdomain.domain}/orders`);
-          } else {
-            router.push('/orders');
-          }
+          router.push(`${BASE_URL}/orders`);
+          
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           setError(`Failed to setup account: ${errorMessage}`);
