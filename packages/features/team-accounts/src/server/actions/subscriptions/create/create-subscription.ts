@@ -13,7 +13,7 @@ import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
 export const createSubscription = async (): Promise<{
   userId: string;
-}> => {
+} | { error: string }> => {
   try {
     const client = getSupabaseServerComponentClient();
 
@@ -22,7 +22,8 @@ export const createSubscription = async (): Promise<{
     } = await client.auth.getUser();
 
     if (!user) {
-      throw new Error('Error to get user account');
+      return { error: 'Error to get user account' };
+      // throw new Error('Error to get user account');
     }
     const email = user?.email as string;
     let { domain: baseUrl } = await getDomainByUserId(user.id, true);
@@ -107,7 +108,10 @@ export const createSubscription = async (): Promise<{
 
     return { userId: user.id };
   } catch (error) {
-    console.error('Error while creating the organization account:', error);
-    throw error; // Throw the error to ensure the caller knows the function failed
+    // console.error('Error while creating the organization account:', error);
+    // throw error; // Throw the error to ensure the caller knows the function failed
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('Error while creating the subscription:', errorMessage);
+    return { error: errorMessage };
   }
 };

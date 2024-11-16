@@ -88,13 +88,19 @@ export function UserDataForm(
           const cleanedDomain = data.portalUrl?.replace(/[^a-zA-Z0-9]/g, '') ?? ''  ;
           const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
           if (IS_PROD) {
-            await createSubscription();
+            const subscriptionResult = await createSubscription();
+            if ('error' in subscriptionResult) {
+              setError(`Subscription creation failed: ${subscriptionResult.error}`);
+              setLoading(false);
+              return;
+            }
             // router.push(`https://${subdomain.domain}/orders`);
           } else {
             router.push('/orders');
           }
         } catch (error) {
-          setError(`Failed to create subdomain: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          setError(`Failed to setup account: ${errorMessage}`);
           setLoading(false);
           return;
         }
