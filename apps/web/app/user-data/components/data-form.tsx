@@ -85,11 +85,11 @@ export function UserDataForm(
         const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
         
         try {
-          if (IS_PROD && data.portalUrl) {
-            const cleanedDomain = data.portalUrl.replace(/[^a-zA-Z0-9]/g, '');
-            const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
-            // await createSubscription();
-            router.push(`https://${subdomain.domain}/orders`);
+          const cleanedDomain = data.portalUrl?.replace(/[^a-zA-Z0-9]/g, '') ?? ''  ;
+          const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
+          if (IS_PROD) {
+            await createSubscription();
+            // router.push(`https://${subdomain.domain}/orders`);
           } else {
             router.push('/orders');
           }
