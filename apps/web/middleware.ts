@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest) {
   const ignorePath = new Set([
     'auth',
     '/auth/confirm',
-    'user-data',
+    '/auth/onboarding',
     'add-organization',
     'api',
     'join',
@@ -254,12 +254,13 @@ function getPatterns() {
         // Check if this request is for the activation link (e.g., /auth/confirm)
         const isActivationLink =
           req.nextUrl.pathname.startsWith('/auth/confirm');
+        const isOnboarding = req.nextUrl.pathname.startsWith('/auth/onboarding');
 
         // Check if we need to verify MFA (user is authenticated but needs to verify MFA)
         const isVerifyMfa = req.nextUrl.pathname === pathsConfig.auth.verifyMfa;
 
         // If it's an activation link, do not redirect to home, continue with the request
-        if (isActivationLink) {
+        if (isActivationLink || isOnboarding) {
           return; // Allow the process to continue for the activation flow => auth-callback.service.ts
         }
         // If user is logged in and does not need to verify MFA,
@@ -294,9 +295,9 @@ function getPatterns() {
         const userRole = await getUserRoleById(user.id);
         if (userRole === 'agency_owner') {
           const hasPhoneNumber = await checkPhoneNumber(supabase, user.id);
-          if (!hasPhoneNumber && !req.nextUrl.pathname.includes('user-data')) {
+          if (!hasPhoneNumber && !req.nextUrl.pathname.includes('auth/onboarding')) {
             return NextResponse.redirect(
-              new URL('/user-data', origin).href,
+              new URL('/auth/onboarding', origin).href,
             );
           }
         }
