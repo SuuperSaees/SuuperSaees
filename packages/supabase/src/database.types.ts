@@ -2398,31 +2398,6 @@ export type Database = {
           uuid: string
         }
       }
-      create_order_v2: {
-        Args: {
-          _order: Json
-          _brief_responses: Json[]
-          _order_followers: string[]
-          _order_file_ids: string[]
-        }
-        Returns: {
-          agency_id: string
-          brief_ids: string[] | null
-          client_organization_id: string
-          created_at: string
-          customer_id: string
-          deleted_on: string | null
-          description: string
-          due_date: string | null
-          id: number
-          priority: Database["public"]["Enums"]["priority_types"] | null
-          propietary_organization_id: string
-          status: string | null
-          stripe_account_id: string | null
-          title: string
-          uuid: string
-        }
-      }
       create_team_account: {
         Args: {
           account_name: string
@@ -2585,6 +2560,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_user_in_agency_organization: {
+        Args: {
+          user_id: string
+          target_organization_id: string
+        }
+        Returns: boolean
+      }
+      is_user_in_client_organization: {
+        Args: {
+          user_id: string
+          target_organization_id: string
+        }
+        Returns: boolean
+      }
       team_account_workspace: {
         Args: {
           account_slug: string
@@ -2691,6 +2680,10 @@ export type Database = {
         | "tasks.delete"
         | "messages.write"
         | "messages.read"
+        | "orders.write"
+        | "orders.read"
+        | "orders.manage"
+        | "orders.delete"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
       field_types:
