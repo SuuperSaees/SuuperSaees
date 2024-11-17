@@ -72,7 +72,7 @@ export function EmailPasswordSignUpContainer({
         if (data?.inviteRedirectUrl) {
           router.push(data.inviteRedirectUrl);
         } else {
-          router.push(`/user-data?tokenId=${data.tokenId}`);
+          router.push(`/auth/onboarding?tokenId=${data.tokenId}`);
         }
       } catch (error) {
         console.error(error);
