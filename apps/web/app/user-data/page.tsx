@@ -53,39 +53,39 @@ async function UserDataPage({
     <div className="w-full min-h-screen flex flex-col md:flex-row">
       <div className="hidden md:block md:w-1/2 h-screen sticky top-0">
         <img
-          src="/images/oauth/dataBackground.jpg"
+          src="/images/oauth/dataBackground.avif"
           alt="Description"
-          className="w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-center"
         />
       </div>
-      <div className="w-full md:w-1/2 min-h-screen p-4 sm:p-6 flex flex-col items-center justify-between">
-        <div className="w-full max-w-md mx-auto flex-1 flex flex-col">
-          <div className="flex-1 flex flex-col">
-            <div className={`hidden lg:block w-full md:object-contain py-8`}>
-              <AppLogo  />
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight tracking-[-0.252px] mb-8 md:mb-12">
+        <div className="w-full lg:w-1/2 flex flex-col">
+        <div className="flex-1 px-4 py-6 sm:px-6 md:px-8 flex flex-col">
+          <div className="hidden md:block w-full flex justify-center lg:justify-start mb-6">
+            <AppLogo  />
+          </div>
+
+          <div className="flex-1 w-full max-w-md mx-auto flex flex-col justify-center">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-center lg:text-left mb-8">
               <Trans i18nKey={'auth:signUpUserDataHeading'} />
             </h2>
+
             <UserDataForm userId={userData?.user.id} tokenId={tokenId} accountData={sanitizedAccountData} userRole={userRole} />
           </div>
         </div>
         
-        <div className="w-full mt-8 py-4 px-4 sm:px-6 bg-white">
-          <div className="max-w-md mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-sm font-normal text-[#475467]">
-              © Suuper 2024
-            </div>
+        <footer className="w-full py-4 px-4 border-t">
+          <div className="max-w-md mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div className="text-sm text-gray-600">© Suuper 2024</div>
             <div className="flex items-center gap-2">
-              <div className="text-[#475467]">
-                <img src="/images/icons/mail-01.svg" alt="mailicon" />
-              </div>
-              <div className="text-sm font-normal text-[#475467]">
-                soporte@suuper.co
-              </div>
+              <img 
+                src="/images/icons/mail-01.svg" 
+                alt="mail icon"
+                className="w-5 h-5"
+              />
+              <span className="text-sm text-gray-600">soporte@suuper.co</span>
             </div>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
   );
