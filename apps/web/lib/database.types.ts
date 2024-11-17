@@ -262,6 +262,7 @@ export type Database = {
         Row: {
           agency_id: string | null
           created_at: string
+          deleted_on: string | null
           id: number
           position: number | null
           status_color: string | null
@@ -270,6 +271,7 @@ export type Database = {
         Insert: {
           agency_id?: string | null
           created_at?: string
+          deleted_on?: string | null
           id?: number
           position?: number | null
           status_color?: string | null
@@ -278,6 +280,7 @@ export type Database = {
         Update: {
           agency_id?: string | null
           created_at?: string
+          deleted_on?: string | null
           id?: number
           position?: number | null
           status_color?: string | null
@@ -1452,6 +1455,7 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: string | null
+          status_id: number | null
           stripe_account_id: string | null
           title: string
           uuid: string
@@ -1469,6 +1473,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status?: string | null
+          status_id?: number | null
           stripe_account_id?: string | null
           title: string
           uuid: string
@@ -1486,6 +1491,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
           status?: string | null
+          status_id?: number | null
           stripe_account_id?: string | null
           title?: string
           uuid?: string
@@ -1531,6 +1537,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "agency_statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -1915,6 +1928,51 @@ export type Database = {
         }
         Relationships: []
       }
+      sessions: {
+        Row: {
+          client_address: string | null
+          client_city: string | null
+          client_country: string | null
+          client_email: string | null
+          client_name: string | null
+          client_postal_code: string | null
+          client_state: string | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          provider: string | null
+          provider_id: string | null
+        }
+        Insert: {
+          client_address?: string | null
+          client_city?: string | null
+          client_country?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_postal_code?: string | null
+          client_state?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          provider?: string | null
+          provider_id?: string | null
+        }
+        Update: {
+          client_address?: string | null
+          client_city?: string | null
+          client_country?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_postal_code?: string | null
+          client_state?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          provider?: string | null
+          provider_id?: string | null
+        }
+        Relationships: []
+      }
       subdomains: {
         Row: {
           created_at: string
@@ -2191,6 +2249,7 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_types"] | null
           start_date: string | null
           state: string | null
+          state_id: number | null
         }
         Insert: {
           completed?: boolean | null
@@ -2205,6 +2264,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
           state?: string | null
+          state_id?: number | null
         }
         Update: {
           completed?: boolean | null
@@ -2219,6 +2279,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_types"] | null
           start_date?: string | null
           state?: string | null
+          state_id?: number | null
         }
         Relationships: [
           {
@@ -2226,6 +2287,13 @@ export type Database = {
             columns: ["parent_task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtasks_state_id_fkey"
+            columns: ["state_id"]
+            isOneToOne: false
+            referencedRelation: "agency_statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -2300,6 +2368,55 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      user_settings: {
+        Row: {
+          calendar: string | null
+          created_at: string
+          name: string | null
+          phone_number: string | null
+          picture_url: string | null
+          user_id: string
+        }
+        Insert: {
+          calendar?: string | null
+          created_at?: string
+          name?: string | null
+          phone_number?: string | null
+          picture_url?: string | null
+          user_id: string
+        }
+        Update: {
+          calendar?: string | null
+          created_at?: string
+          name?: string | null
+          phone_number?: string | null
+          picture_url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -2393,6 +2510,7 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: string | null
+          status_id: number | null
           stripe_account_id: string | null
           title: string
           uuid: string
@@ -2410,6 +2528,7 @@ export type Database = {
           is_personal_account: boolean
           name: string
           organization_id: string | null
+          phone_number: number | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
