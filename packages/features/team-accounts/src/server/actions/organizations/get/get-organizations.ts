@@ -176,6 +176,8 @@ export async function getOrganizationByUserId(
   adminActivated = false,
 ): Promise<{
   id: string;
+  name: string;
+  primary_owner_user_id: string;
 }> {
   try {
     const client = getSupabaseServerComponentClient({
@@ -202,7 +204,7 @@ export async function getOrganizationByUserId(
 
     const { data: organizationData, error: organizationError } = await client
       .from('accounts')
-      .select('id') // if we need more data we can add it here, but for now we only need the id.
+      .select('id, name, primary_owner_user_id') // if we need more data we can add it here, but for now we only need the id.
       //IMPORTANT: ask to the team for more params on the future
       .eq('id', organizationId)
       .single();
@@ -322,6 +324,8 @@ export async function getAgencyForClient(clientOrganizationId: string) {
 
 export async function getAgencyForClientByUserId(userId: string): Promise<{
   id: string;
+  name: string;
+  primary_owner_user_id: string;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
@@ -337,7 +341,7 @@ export async function getAgencyForClientByUserId(userId: string): Promise<{
 
     const { data: agencyData, error: agencyError } = await client
       .from('accounts')
-      .select('id') // if we need more data we can add it here, but for now we only need the id.
+      .select('id, name, primary_owner_user_id') // if we need more data we can add it here, but for now we only need the id.
       //IMPORTANT: ask to the team for more params on the future
       .eq('id', clientData.agency_id)
       .eq('is_personal_account', false)
