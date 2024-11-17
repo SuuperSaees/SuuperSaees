@@ -48,7 +48,7 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
   const uniqueId = generateUUID();
   const { t } = useTranslation(['orders', 'responses']);
   const router = useRouter();
-  console.log('briefs', briefs);
+
   const [formFields, setFormFields] = useState<FormField.Type[]>([]);
   const [orderCreationFormSchema, setOrderCreationFormSchema] = useState(
     generateOrderCreationSchema(briefs.length > 0, t, formFields),
@@ -114,8 +114,11 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
           );
       }
 
+      const titleFormFieldId = selectedBrief?.form_fields?.find((field) => field.field?.position === 0)?.field?.id;
+      const titleFormField = values.briefCompletion.brief_responses[titleFormFieldId ?? ''];
+
       const res = await createOrder(
-        newOrder as OrderInsert,
+        {...newOrder, title: titleFormField} as OrderInsert,
         briefResponses,
         order_followers,
       );
@@ -140,7 +143,6 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
     ) ?? null;
 
   // see errors in form
-  console.log('errors', form.formState.errors, 'values', form.getValues());
   useEffect(() => {
     if (selectedBrief) {
       const fields = (selectedBrief.form_fields?.map((field) => field.field) ??
@@ -151,8 +153,7 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
       );
     }
   }, [selectedBrief, t, briefs.length]);
-  console.log('formSchema', formSchema);
-  console.log('selectedBriefs', selectedBrief);
+
   return (
     <MultiStepForm
       schema={formSchema}

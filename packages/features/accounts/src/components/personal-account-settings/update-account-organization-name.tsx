@@ -38,7 +38,7 @@ export function UpdateAccountOrganizationName() {
   };
 
   return (
-    <div className={'flex flex-col space-y-8'}>
+    <div className={'flex flex-col w-full'}>
       <Form {...form}>
         <form
           data-test={'update-account-name-form'}
@@ -49,9 +49,6 @@ export function UpdateAccountOrganizationName() {
             name={'name'}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans i18nKey={'account:brandName'} />
-                </FormLabel>
 
                 <FormControl>
                   <ThemedInput
@@ -74,6 +71,7 @@ export function UpdateAccountOrganizationName() {
                 updateOrganizationSetting.isPending &&
                 updateOrganizationSetting.variables.key === 'portal_name'
               }
+              className='w-full'
             >
               <Trans i18nKey={'account:brandNameSubmit'} />
             </ThemedButton>

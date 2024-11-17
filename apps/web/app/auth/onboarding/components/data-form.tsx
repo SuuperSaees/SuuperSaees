@@ -1,0 +1,218 @@
+'use client';
+
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { Form, FormItem, FormLabel, FormControl, FormMessage, FormField } from '@kit/ui/form';
+import { Button } from '@kit/ui/button';
+import { Input } from '@kit/ui/input';
+import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import { useState } from "react";
+import { createIngress } from '~/multitenancy/aws-cluster-ingress/src/actions/create';
+import { updateTokenData } from "~/team-accounts/src/server/actions/tokens/update/update-token";
+import { updateAccountData } from "~/team-accounts/src/server/actions/accounts/update/update-account";
+import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
+import { addUserToAirtable } from "~/team-accounts/src/server/utils/airtable";
+import { getOrganizationByUserId } from "~/team-accounts/src/server/actions/organizations/get/get-organizations";
+import { Spinner } from "@kit/ui/spinner";
+
+export function UserDataForm(
+  {userId, tokenId, accountData, userRole}: {userId: string, tokenId: string, accountData: {name: string, phone_number: string, subdomain: string} | null, userRole: string }
+) {
+  const {t} = useTranslation('auth');
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const formSchema = z.object({
+    portalUrl: userRole === 'agency_owner' 
+      ? z.string().min(2).max(50)
+      : z.string().min(2).max(50).optional(),
+    userFullName: z.string().min(2).max(50),
+    userphoneNumber: z.string().min(2).max(50).regex(/^\d+$/, "Only numbers are allowed"),
+})
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      portalUrl: accountData?.subdomain?.replace('.suuper.co', ''), 
+      userFullName: accountData?.name,
+      userphoneNumber: accountData?.phone_number,
+    },
+  });
+
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    setLoading(true);
+    setError(null);
+    try {
+      await updateTokenData(tokenId, {
+        expires_at: new Date().toISOString(),
+      });
+      const userData = await updateAccountData(userId, {
+        name: data.userFullName,
+        phone_number: data.userphoneNumber,
+        user_id: userId,
+      });
+
+      const organizationData = await getOrganizationByUserId(userId);
+
+      if (userData) {
+        try {
+          if (!process.env.NEXT_PUBLIC_AIRTABLE_API_KEY) {
+            setError('Configuration error: Missing Airtable API key');
+            return;
+          }
+          
+          await addUserToAirtable({
+            name: userData?.userData?.name ?? '',
+            email: userData?.accountData?.email ?? '',
+            organizationName: organizationData.name,
+            phoneNumber: userData?.userData?.phone_number ?? '',
+          });
+        } catch (error) {
+          console.error('❌ Error adding user to Airtable:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            context: 'Register user',
+            email: userData?.accountData?.email ?? '',
+          });
+          setError(`Airtable sync error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          return;
+        }
+      }
+
+      if (userRole === 'agency_owner') {
+        
+        try {
+          const cleanedDomain = data.portalUrl?.replace(/[^a-zA-Z0-9]/g, '') ?? ''  ;
+          const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
+          const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+          const BASE_URL = IS_PROD
+          ? `https://${subdomain.domain}`
+          : process.env.NEXT_PUBLIC_SITE_URL;
+          const subscriptionResult = await createSubscription();
+            if ('error' in subscriptionResult) {
+              setError(`Subscription creation failed: ${subscriptionResult.error}`);
+              setLoading(false);
+              return;
+            }
+          router.push(`${BASE_URL}/orders`);
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          setError(`Failed to setup account: ${errorMessage}`);
+          setLoading(false);
+          return;
+        }
+      } else {
+        router.push('/orders');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('❌ User creation error:', {
+        message: errorMessage,
+        context: 'User creation',
+        userId,
+      });
+      setError(`Failed to create user: ${errorMessage}`);
+      setLoading(false);
+    } 
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
+      {error && (
+        <div className="p-4 text-red-600 bg-red-50 rounded-md border border-red-200">
+          {error}
+        </div>
+      )}
+      {userRole === 'agency_owner' && (
+        <FormField
+        control={form.control}
+        name="portalUrl"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              <div className="flex items-center gap-2">
+                {t('userData.portalUrl')}
+                <span className="text-black text-sm font-extralight leading-[23.04px] tracking-[-0.144px]">{t('userData.portalUrlHint')}</span>
+              </div>
+            </FormLabel>
+            <FormControl>
+              <div className="flex items-center">
+                <Input 
+                  className=" border-r-0" 
+                  placeholder={t('userData.portalUrlPlaceholder')} 
+                  {...field} 
+                />
+                <Input 
+                  disabled
+                  value=".suuper.co"
+                  className="rounded-l-none border-l-0 bg-gray-50 w-[105px] cursor-default"
+                />
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      )}
+        <FormField
+          control={form.control}
+          name="userFullName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('userData.fullName')}</FormLabel>
+              <FormControl>
+                <Input placeholder={t('userData.fullNamePlaceholder')} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="userphoneNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('userData.phoneNumber')}</FormLabel>
+              <FormControl>
+                <PhoneInput
+                  country={'co'}
+                  value={field.value}
+                  onChange={(phone) => field.onChange(phone)}
+                  inputClass="!w-full p-2 border rounded-md"
+                  containerClass="!w-full"
+                  // buttonClass="!border-r-0"
+                  buttonClass="!border-r-0 !border !border-[#ECEBEC] hover:!border-[#ECEBEC] !rounded-l-md"
+                  inputStyle={{
+                    width: '100%',
+                    height: '40px',
+                    borderRadius: '7px',
+                    borderColor: '#ECEBEC',
+                    boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
+                  }}
+                  placeholder={t('userData.phoneNumberPlaceholder')}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button 
+          type='submit' 
+          disabled={loading}
+          data-test={'auth-submit-button'}
+          className='flex w-full sm:w-56 h-12 sm:h-14 px-6 sm:px-8 py-3 sm:py-4 justify-center items-center flex-shrink-0 rounded-full mt-6 sm:mt-8 bg-brand'
+        >
+          {loading ? <Spinner className="w-4 h-4" />: (
+            <div className='text-white text-center text-base sm:text-lg font-semibold tracking-[-0.18px]'>
+              {t('userData.signUpUserDataButton')}
+            </div>
+          )}
+        </Button>
+      </form>
+    </Form>
+  );
+}

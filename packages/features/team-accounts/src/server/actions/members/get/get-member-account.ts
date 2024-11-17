@@ -128,7 +128,7 @@ export async function getUserById(userId: string) {
 
     const { data: userData, error: userError } = await client
       .from('accounts')
-      .select('name, email, id, picture_url')
+      .select('name, email, id, picture_url, phone_number')
       .eq('id', userId)
       .single();
 

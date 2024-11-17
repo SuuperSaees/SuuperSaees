@@ -34,8 +34,8 @@ export function useSignOut() {
 
         // Determine the appropriate landing page URL
         const landingPageParsed = IS_PROD
-          ? `https://${domain}/auth/sign-in`
-          : landingPage;
+          ? domain.startsWith('http') ? `${domain}/auth/sign-in` : `https://${domain}/auth/sign-in`
+          : landingPage
 
         // Sign out the user
         await client.auth.signOut();

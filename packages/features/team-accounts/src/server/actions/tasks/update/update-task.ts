@@ -90,6 +90,7 @@ export const updateSubtasksPositions = async (subtasks: Subtask.Type[]) => {
   }
 };
 
+
 export const updateSubtaskById = async (
   subtaskId: string,
   subtask: Subtask.Insert,

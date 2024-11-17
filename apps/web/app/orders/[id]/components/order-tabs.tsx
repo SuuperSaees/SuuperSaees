@@ -12,6 +12,8 @@ import FileSection from '~/components/organization/files';
 import ActivityPage from './activity';
 import DetailsPage from './details';
 import TasksSection from './tasks';
+import CalendarSection from './calendar-section';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
 // import { TaskCounter } from 'node_modules/@kit/accounts/src/components/ui/tasks-cantity-themed-with-settings';
 // import { countIncompleteTasks } from '~/utils/task-counter';
 // import { useRealTimeTasks } from '../hooks/use-tasks';
@@ -29,9 +31,10 @@ type OrderTabsProps = {
   userRole: string;
   orderId: string;
   orderAgencyId: string;
+  agencyStatuses: AgencyStatus.Type[];  
 };
 
-export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId }: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId, agencyStatuses }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
@@ -77,6 +80,13 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         >
           <Trans i18nKey={'orders:details.navigation.files'} />
         </ThemedTabTrigger>
+        <ThemedTabTrigger 
+          value="calendar" 
+          activeTab={activeTab} 
+          option={'calendar'}
+        >
+          <Trans i18nKey={'account:calendar'} />
+        </ThemedTabTrigger>
       </TabsList>
 
       <TabsContent
@@ -94,6 +104,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
             userRole={userRole}
             orderId={orderId}
             orderAgencyId={orderAgencyId}
+            agencyStatuses={agencyStatuses}
           />
         </div>
       </TabsContent>
@@ -103,6 +114,15 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
             key={'files'}
             clientOrganizationId={organizationId?.account_id ?? ''}
             currentPath={currentPath}
+          />
+        </div>
+      </TabsContent>
+      <TabsContent value="calendar">
+        <div className="w-full">
+          <CalendarSection 
+            userRole={userRole}
+            orderId={orderId}
+            orderAgencyId={orderAgencyId}
           />
         </div>
       </TabsContent>

@@ -70,23 +70,23 @@ export const OrderBriefs = ({
   const [_uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const uniqueId = generateUUID();
 
-  const handleFileIdsChange = (fileIds: string[], fileUrls?: string[]) => {
+  const handleFileIdsChange = (fileIds: string[]) => {
     setUploadedFileIds(fileIds);
-    const responseValue = fileUrls?.join(',') ?? '';
-    return {responseValue, fileIds};
+    const responseValue = fileIds.join(', ');
+    return responseValue;
   };
+
   const setFormResponse = (
     currentFieldIndex: number,
     formField: FormFieldType.Type,
     responseValue: string,
-    uploadedFileIds: string[],
   ) => {
     form.setValue(
       `briefCompletion.brief_responses.${formField?.id}`,
       responseValue as never,
     );
-    form.setValue('briefCompletion.fileIds', uploadedFileIds);
   };
+
   const renderSpecialFormField = (formField: FormFieldType.Type) => {
     switch (formField.type) {
       case 'h1':
@@ -264,14 +264,13 @@ export const OrderBriefs = ({
                               <UploadFileComponent
                                 bucketName="orders"
                                 uuid={uniqueId}
-                                onFileIdsChange={(fileIds, fileUrls) => {
-                                  const { responseValue, fileIds: newFileIds} =
-                                    handleFileIdsChange(fileIds, fileUrls);
+                                onFileIdsChange={(fileIds) => {
+                                  const responseValues =
+                                    handleFileIdsChange(fileIds);
                                   setFormResponse(
                                     currentFieldIndex,
                                     formField.field as FormFieldType.Type,
-                                    responseValue as never,
-                                    newFileIds
+                                    responseValues as never,
                                   );
                                 }}
                               />

@@ -3,7 +3,7 @@ import { NextResponse, URLPattern } from 'next/server';
 
 
 
-import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
+// import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
 
@@ -14,10 +14,13 @@ import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/
 import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 
-
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
+import { Database } from './lib/database.types';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+
 
 // import { handleDomainCheck } from './handlers/domain-check-handler';
 
@@ -70,6 +73,7 @@ export async function middleware(request: NextRequest) {
   const ignorePath = new Set([
     'auth',
     '/auth/confirm',
+    '/auth/onboarding',
     'add-organization',
     'api',
     'join',
@@ -144,7 +148,7 @@ export async function middleware(request: NextRequest) {
   if (request.headers.has('next-action')) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
-
+  
   setCORSHeaders(csrfResponse);
 
   return csrfResponse;
@@ -191,7 +195,7 @@ function getPatterns() {
       pattern: new URLPattern({ pathname: '/' }),
       handler: (req: NextRequest) => {
         return NextResponse.redirect(
-          new URL(pathsConfig.app.home, req.nextUrl.origin).href,
+          new URL(pathsConfig.app.orders, req.nextUrl.origin).href,
         );
       },
     },
@@ -250,12 +254,13 @@ function getPatterns() {
         // Check if this request is for the activation link (e.g., /auth/confirm)
         const isActivationLink =
           req.nextUrl.pathname.startsWith('/auth/confirm');
+        const isOnboarding = req.nextUrl.pathname.startsWith('/auth/onboarding');
 
         // Check if we need to verify MFA (user is authenticated but needs to verify MFA)
         const isVerifyMfa = req.nextUrl.pathname === pathsConfig.auth.verifyMfa;
 
         // If it's an activation link, do not redirect to home, continue with the request
-        if (isActivationLink) {
+        if (isActivationLink || isOnboarding) {
           return; // Allow the process to continue for the activation flow => auth-callback.service.ts
         }
         // If user is logged in and does not need to verify MFA,
@@ -268,7 +273,7 @@ function getPatterns() {
       },
     },
     {
-      pattern: new URLPattern({ pathname: '/home/*?' }),
+      pattern: new URLPattern({ pathname: '/*?' }),
       handler: async (req: NextRequest, res: NextResponse) => {
         const {
           data: { user },
@@ -281,22 +286,20 @@ function getPatterns() {
         if (!user) {
           const signIn = pathsConfig.auth.signIn;
           const redirectPath = `${signIn}?next=${next}`;
-          // const signUp = pathsConfig.auth.signUp;
-          // const redirectPath = `${signUp}?next=${next}`;
-
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
 
         const supabase = createMiddlewareClient(req, res);
 
-        const requiresMultiFactorAuthentication =
-          await checkRequiresMultiFactorAuthentication(supabase);
-
-        // If user requires multi-factor authentication, redirect to MFA page.
-        if (requiresMultiFactorAuthentication) {
-          return NextResponse.redirect(
-            new URL(pathsConfig.auth.verifyMfa, origin).href,
-          );
+        // Obtain the user role
+        const userRole = await getUserRoleById(user.id);
+        if (userRole === 'agency_owner') {
+          const hasPhoneNumber = await checkPhoneNumber(supabase, user.id);
+          if (!hasPhoneNumber && !req.nextUrl.pathname.includes('auth/onboarding')) {
+            return NextResponse.redirect(
+              new URL('/auth/onboarding', origin).href,
+            );
+          }
         }
       },
     },
@@ -386,4 +389,20 @@ function setCORSHeaders(response: NextResponse) {
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
   );
+}
+
+// This function is to verify the phone number
+async function checkPhoneNumber(supabase: SupabaseClient<Database>, userId: string) {
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('phone_number')
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error checking phone number:', error);
+    return false;
+  }
+
+  return data?.phone_number !== null;
 }

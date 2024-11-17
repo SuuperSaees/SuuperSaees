@@ -1,12 +1,30 @@
 drop policy "orders_insert" on "public"."orders_v2";
 
-alter type "public"."app_permissions" rename to "app_permissions__old_version_to_be_dropped";
+-- Check and add 'orders.write', 'orders.read', etc. to the app_permissions enum if not already present
+DO $$
+BEGIN
+    -- Add 'orders.write' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'orders.write' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'orders.write';
+    END IF;
 
-create type "public"."app_permissions" as enum ('roles.manage', 'billing.manage', 'settings.manage', 'members.manage', 'invites.manage', 'tasks.write', 'tasks.delete', 'messages.write', 'messages.read', 'orders.write', 'orders.read', 'orders.manage', 'orders.delete');
+    -- Add 'orders.read' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'orders.read' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'orders.read';
+    END IF;
 
-alter table "public"."role_permissions" alter column permission type "public"."app_permissions" using permission::text::"public"."app_permissions";
+    -- Add 'orders.manage' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'orders.manage' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'orders.manage';
+    END IF;
 
-drop type "public"."app_permissions__old_version_to_be_dropped";
+    -- Add 'orders.delete' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'orders.delete' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'orders.delete';
+    END IF;
+END $$;
+
+COMMIT;
 
 
 CREATE OR REPLACE FUNCTION public.create_order(_order jsonb, _brief_responses jsonb[], _order_followers text[], _order_file_ids uuid[])
@@ -25,6 +43,7 @@ AS $function$DECLARE
   agencyRoles text[] := ARRAY['agency_owner', 'agency_member', 'agency_project_manager'];  -- List of agency roles
   clientRoles text[] := ARRAY['client_owner', 'client_member'];  -- List of client roles
   all_followers text[];  -- Array to hold all followers
+  default_status_id integer;  -- To hold the default status ID
 BEGIN
   -- Step 0: Verify the user is authenticated
   IF current_user_id IS NULL THEN
@@ -59,7 +78,19 @@ BEGIN
   WHERE id = agency_client_id
   LIMIT 1;
 
-  -- Step 0.5: Prepare the order for insertion
+  -- Step 0.6: Get default status ID
+  SELECT id INTO default_status_id
+  FROM public.agency_statuses
+  WHERE status_name = 'pending'
+  AND agency_id = agency_organization_data.id
+  LIMIT 1;
+
+  -- Step 0.7: If no status found, set default status_id to 1
+  IF default_status_id IS NULL THEN
+    default_status_id := 1;
+  END IF;
+
+  -- Step 0.8: Prepare the order for insertion
   brief_ids := ARRAY(
     SELECT (response_item->>'brief_id')::uuid
     FROM unnest(_brief_responses) AS response_item
@@ -85,7 +116,8 @@ BEGIN
     propietary_organization_id,
     status,
     title,
-    uuid
+    uuid,
+    status_id
   )
   VALUES (
     COALESCE(NULLIF(_order->>'agency_id', '')::uuid, NULL),
@@ -105,7 +137,8 @@ BEGIN
     (_order->>'propietary_organization_id')::uuid,
     COALESCE(_order->>'status', 'pending'),
     _order->>'title',
-    _order->>'uuid'
+    _order->>'uuid',
+    default_status_id
   )
   RETURNING * INTO new_order;
 

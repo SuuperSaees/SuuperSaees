@@ -63,7 +63,7 @@ export function UpdateAccountOrganizationSenderEmailAndSenderDomain() {
   };
 
   return (
-    <div className={'flex flex-col space-y-8'}>
+    <div className={'flex flex-col w-full'}>
       <Form {...form}>
         <form
           data-test={'update-account-sender-email-and-sender-domain-form'}
@@ -74,9 +74,6 @@ export function UpdateAccountOrganizationSenderEmailAndSenderDomain() {
             name={'sender_email'}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans i18nKey={'account:brandSenderEmail'} />
-                </FormLabel>
 
                 <div className={'flex items-center gap-2'}>
                 <FormControl>
@@ -103,6 +100,7 @@ export function UpdateAccountOrganizationSenderEmailAndSenderDomain() {
                 updateOrganizationSetting.isPending &&
                 updateOrganizationSetting.variables.key === 'sender_email'
               }
+              className='w-full'
             >
               <Trans i18nKey={'account:brandSenderEmailSubmit'} />
             </ThemedButton>

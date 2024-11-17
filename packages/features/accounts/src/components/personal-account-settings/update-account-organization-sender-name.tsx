@@ -37,7 +37,7 @@ export function UpdateAccountOrganizationSenderName() {
   };
 
   return (
-    <div className={'flex flex-col space-y-8'}>
+    <div className={'flex flex-col w-full'}>
       <Form {...form}>
         <form
           data-test={'update-account-name-form'}
@@ -48,9 +48,6 @@ export function UpdateAccountOrganizationSenderName() {
             name={'sender_name'}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans i18nKey={'account:brandSenderName'} />
-                </FormLabel>
 
                 <FormControl>
                   <ThemedInput
@@ -73,6 +70,7 @@ export function UpdateAccountOrganizationSenderName() {
                 updateOrganizationSetting.isPending &&
                 updateOrganizationSetting.variables.key === 'sender_name'
               }
+              className='w-full'
             >
               <Trans i18nKey={'account:brandSenderNameSubmit'} />
             </ThemedButton>
