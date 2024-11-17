@@ -55,12 +55,13 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     notFound();
   }
 
-  const auth = await requireUser(client);
+  // const auth = await requireUser(client);
+  const auth = await client.auth.getUser();
 
   // if the user is not logged in or there is an error
   // redirect to the sign up page with the invite token
   // so that they will get back to this page after signing up
-  if ((auth.error ?? !auth.data) && !verifyAccountData) {
+  if (!auth.data.user && !verifyAccountData) {
     const urlParams = new URLSearchParams({
       invite_token: token,
       email: searchParams.email ?? '',

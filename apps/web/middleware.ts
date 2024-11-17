@@ -282,6 +282,15 @@ function getPatterns() {
         const origin = req.nextUrl.origin;
         const next = req.nextUrl.pathname;
 
+        // Check if this is an invitation URL
+        const isInvitationUrl = req.nextUrl.pathname === '/join' && 
+        req.nextUrl.searchParams.has('invite_token');
+
+        // Skip authentication check for invitation URLs
+        if (isInvitationUrl) {
+          return;
+        }
+
         // If user is not logged in, redirect to sign in page.
         if (!user) {
           const signIn = pathsConfig.auth.signIn;
