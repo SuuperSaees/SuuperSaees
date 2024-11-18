@@ -37,8 +37,18 @@ function ProfileSettings({
   const validateUrl = useCallback((url: string) => {
     if (url === '') return true;
     try {
-      new URL(url);
-      return true;
+      const parsedUrl = new URL(url);
+      const allowedDomains = [
+        'hubspot.com',
+        'calendly.com',
+        'cal.com',
+        'google.com',
+        'outlook.com',
+        'outlook.office.com',
+        'tidycal.com'
+      ];
+      const domain = parsedUrl.hostname.replace('www.', '');
+      return allowedDomains.some(allowedDomain => domain.endsWith(allowedDomain));
     } catch (e) {
       return false;
     }
