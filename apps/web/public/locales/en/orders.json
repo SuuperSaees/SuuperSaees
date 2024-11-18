@@ -21,7 +21,9 @@
   "deleteConfirmation": "Do you really want to delete this project?",
   "deleteSuccess": "Project deleted successfully",
   "deleteError": "Error deleting project",
-  "create":"Create",
+  "create": "Create",
+  "calendarTitle": "Available calendars",
+  "calendarEmpty": "No calendars available",
   "creation": {
     "title": "Create project",
     "form": {
@@ -107,7 +109,7 @@
         "title": "Assign a client",
         "label": "Name of the organization",
         "select": {
-          "placeholder": "Select an organization"   
+          "placeholder": "Select an organization"
         },
         "members": {
           "label": "Members",
@@ -118,4 +120,3 @@
     }
   }
 }
-  

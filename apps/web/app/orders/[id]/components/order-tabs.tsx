@@ -14,9 +14,9 @@ import DetailsPage from './details';
 import TasksSection from './tasks';
 import CalendarSection from './calendar-section';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
-// import { TaskCounter } from 'node_modules/@kit/accounts/src/components/ui/tasks-cantity-themed-with-settings';
-// import { countIncompleteTasks } from '~/utils/task-counter';
-// import { useRealTimeTasks } from '../hooks/use-tasks';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { getOrderAgencyMembers } from '~/team-accounts/src/server/actions/orders/get/get-order';
+import { UserWithSettings } from '~/lib/account.types';
 
 type OrderTabsProps = {
   organizationId:
@@ -34,10 +34,27 @@ type OrderTabsProps = {
   agencyStatuses: AgencyStatus.Type[];  
 };
 
+
 export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId, agencyStatuses }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
+
+  const [loadingCalendars, setLoadingCalendars] = useState(true);
+  const { data: orderAgencyMembers } = useQuery<UserWithSettings[]>({
+    queryKey: ['order-agency-members', orderId],
+    queryFn: async () => {
+      setLoadingCalendars(true);
+      const data = await getOrderAgencyMembers(orderAgencyId, Number(orderId));
+      setLoadingCalendars(false);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled:
+      userRole === 'agency_owner' ||
+      userRole === 'agency_member' ||
+      userRole === 'agency_project_manager',
+  }) as UseQueryResult<UserWithSettings[], unknown>;
 
   return (
     <Tabs
@@ -120,9 +137,8 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
       <TabsContent value="calendar">
         <div className="w-full">
           <CalendarSection 
-            userRole={userRole}
-            orderId={orderId}
-            orderAgencyId={orderAgencyId}
+            orderAgencyMembers={orderAgencyMembers ?? []}
+            loading={loadingCalendars}
           />
         </div>
       </TabsContent>
