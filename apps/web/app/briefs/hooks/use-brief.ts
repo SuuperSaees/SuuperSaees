@@ -41,6 +41,31 @@ export const useBrief = (
     setBrief(updatedBrief);
   }
 
+  async function updateBriefFormFields(
+    values: z.infer<typeof briefCreationFormSchema>['questions'],
+  ) {
+    // Remove the id if start with 'create-form-field-'
+    try {
+      const formattedFormFields = values.map((question) => {
+        const newQuestion = { ...question };
+        if (newQuestion.id?.startsWith('create-form-field-')) {
+          newQuestion.id = undefined;
+        }
+        return newQuestion;
+      });
+      if (formattedFormFields.length > 0) {
+        await handleResponse(
+          await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
+          'briefs',
+          t,
+        );
+      }
+    } catch (error) {
+      console.error('Error updating brief form fields from client');
+      throw error;
+    }
+  }
+
   // Mutation to handle brief creation
   const briefMutation = useMutation({
     mutationFn: async ({
@@ -50,7 +75,6 @@ export const useBrief = (
       values: z.infer<typeof briefCreationFormSchema>;
       isUpdate?: boolean;
     }) => {
-
       if (isUpdate) {
         const res = await updateBriefById({
           id: brief.id ?? '',
@@ -59,20 +83,8 @@ export const useBrief = (
           image_url: values.image_url ?? null,
         });
         await handleResponse(res, 'briefs', t);
-        
-        // Remove the id if start with 'create-form-field-'
-        const formattedFormFields = values.questions.map((question) => {
-          const newQuestion = { ...question };
-          if (newQuestion.id?.startsWith('create-form-field-')) {
-            newQuestion.id = undefined;
-          }
-          return newQuestion;
-        })
-        await handleResponse(
-          await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
-          'briefs',
-          t,
-        );
+
+        await updateBriefFormFields(values.questions);
 
         // Call updateServiceBriefs to handle connected services
         await updateServiceBriefs(
@@ -130,5 +142,6 @@ export const useBrief = (
     briefMutation,
     setBrief,
     updateBrief,
+    updateBriefFormFields,
   };
 };

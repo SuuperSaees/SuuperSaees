@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +25,7 @@ import BriefServicesAssignation from './brief-services-assignation';
 import FieldsetFields from './fieldset-fields';
 import FieldsetInformation from './fieldset-information';
 
-type FormFieldType = FormFieldType.Response
+type FormFieldType = FormFieldType.Response;
 
 type CreateBriefDialogProps = {
   userRole: string;
@@ -51,16 +51,17 @@ const BriefCreationForm = ({
 }: CreateBriefDialogProps) => {
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
   const isUpdate = defaultFormFields.length > 0; // Check if the form is for updating an existing brief
+  const renderNumber = useRef(1);
   const {
+    formFields,
+    brief,
+    form,
     setFormFields,
     setBrief,
     onSubmit,
     createDefaultFormFields,
-    formFields,
-    brief,
-    form,
     setActiveTab,
-    stopEditing
+    stopEditing,
   } = useBriefsContext(); // Context to manage form fields
 
   // Handle adding a new question to the form
@@ -70,8 +71,7 @@ const BriefCreationForm = ({
   };
 
   useEffect(() => {
-    
-    if (defaultFormFields.length && !formFields.length) {
+    if (defaultFormFields.length && !formFields.length && renderNumber.current === 1) {
       const {
         defaultFormFields: formattedDefaultFormFields,
         defaultInitialFormField,
@@ -93,6 +93,7 @@ const BriefCreationForm = ({
       //   defaultBriefInfo?.services.map((service) => service.id),
       // );
       setBrief(defaultBriefInfo);
+      renderNumber.current = renderNumber.current + 1;
     }
   }, [
     createDefaultFormFields,
@@ -101,7 +102,7 @@ const BriefCreationForm = ({
     form,
     setBrief,
     setFormFields,
-    formFields.length
+    formFields.length,
   ]);
 
   // Sync form state with context whenever formFields change
@@ -125,8 +126,9 @@ const BriefCreationForm = ({
     brief.image_url,
     brief?.services,
     setFormFields,
-  ]); // Re-run effect when formFields or form change
-
+  ]);
+  // Re-run effect when formFields or form change
+  // console.log('formfields', formFields, );
   return (
     <Form {...form}>
       <form

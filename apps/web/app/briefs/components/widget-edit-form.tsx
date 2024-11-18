@@ -5,6 +5,7 @@ import React, { ChangeEvent, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash } from 'lucide-react';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -18,16 +19,31 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
+import { Switch } from '@kit/ui/switch';
 
+import { FormField as FormFieldType } from '~/lib/form-field.types';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { useVideoHandler } from '../hooks/use-video-handler';
 import { widgetEditSchema } from '../schemas/widget-edit-schema';
+import FormRichTextComponent from './content-fields/rich-text-content';
 import { RenderVideoContent } from './render-video-content';
 import UploadImageDropzone from './upload-image-dropzone';
-import FormRichTextComponent from './content-fields/rich-text-content';
-import { Switch } from '@kit/ui/switch';
-import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
+
+function organizeFormField(field: FormFieldType.Type) {
+  // Create a new object with keys in the desired order
+  return {
+    label: field.label,
+    description: field.description,
+    placeholder: field.placeholder,
+    options: field.options,
+    type: field.type,
+    position: field.position,
+    alert_message: field.alert_message,
+    required: field.required,
+    id: field.id,
+  };
+}
 
 export type WidgetCreationForm = z.infer<typeof widgetEditSchema>;
 export function WidgetEditForm() {
@@ -58,9 +74,7 @@ export function WidgetEditForm() {
     checkVideoValidity,
   } = useVideoHandler(t, form, currentFormField, updateFormField);
 
-  const {
-    fields: optionsFields,
-  } = useFieldArray({
+  const { fields: optionsFields } = useFieldArray({
     control: form.control,
     name: 'options',
   });
@@ -68,10 +82,13 @@ export function WidgetEditForm() {
   const removeOption = (index: number) => {
     // remove(index);
     const optionsFields = form.getValues('options');
-    const newOPtions = optionsFields?.filter((option, i) => i !== index)
+    const newOPtions = optionsFields?.filter((option, i) => i !== index);
     form.setValue('options', newOPtions);
     if (currentFormField) {
-      updateFormField(currentFormField.id, { ...currentFormField, options: newOPtions});
+      updateFormField(currentFormField.id, {
+        ...currentFormField,
+        options: newOPtions,
+      });
     }
   };
   const addOption = () => {
@@ -81,15 +98,18 @@ export function WidgetEditForm() {
       value: '',
     };
     form.setValue('options', [...(optionsFields ?? []), newOption]);
-    const updatedOptions = optionsFields ? [...optionsFields, newOption] : [newOption];
-    if(currentFormField) {
-      updateFormField(currentFormField.id, { ...currentFormField, options: updatedOptions});
+    const updatedOptions = optionsFields
+      ? [...optionsFields, newOption]
+      : [newOption];
+    if (currentFormField) {
+      updateFormField(currentFormField.id, {
+        ...currentFormField,
+        options: updatedOptions,
+      });
     }
-  }
+  };
   // Helper for updating form and context state
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     form.setValue(name as keyof z.infer<typeof widgetEditSchema>, value);
 
@@ -101,16 +121,15 @@ export function WidgetEditForm() {
     }
   };
 
-  const handleSwitchChange = (name: 'required' , checked: boolean) => {
-    form.setValue(name, checked)
+  const handleSwitchChange = (name: 'required', checked: boolean) => {
+    form.setValue(name, checked);
     if (currentFormField) {
       updateFormField(currentFormField.id, {
         ...form.getValues(),
         [name]: checked,
-      })
+      });
     }
-    
-  }
+  };
 
   const handleChangeContent = (value: string) => {
     form.setValue('label' as keyof z.infer<typeof widgetEditSchema>, value);
@@ -123,7 +142,6 @@ export function WidgetEditForm() {
     }
   };
 
-
   const onSubmit = (values: z.infer<typeof widgetEditSchema>) => {
     if (currentFormField) {
       updateFormField(currentFormField.id, { ...currentFormField, ...values });
@@ -133,7 +151,7 @@ export function WidgetEditForm() {
   const renderOptionFields = (type: string) => (
     <React.Fragment>
       {optionsFields.map((option, index) => (
-        <div key={option.id} className="relative flex flex-col gap-2">
+        <div key={option.id} className="relative flex flex-col gap-2 group">
           {renderFieldInput(
             `options.${index}.label`,
             t('creation.form.marks.options.label', { number: index + 1 }),
@@ -153,7 +171,8 @@ export function WidgetEditForm() {
           <Button
             type="button"
             onClick={() => removeOption(index)}
-            className="absolute right-0 top-0 h-[1.3rem] w-[1.3rem] rounded-full bg-transparent p-0 text-gray-600 shadow-none hover:bg-transparent hover:text-gray-900"
+            className="text-red absolute right-1 top-0 h-4 w-4 rounded-full bg-transparent p-0 text-gray-600 shadow-none hover:bg-transparent hover:text-gray-900
+            group-hover:block hidden"
           >
             <Trash className="w-full" />
           </Button>
@@ -180,20 +199,25 @@ export function WidgetEditForm() {
   ) => {
     const fieldIsType = fieldName == 'type';
     const fieldIsPosition = fieldName == 'position';
-    const hideSelectFields =
-      fieldName == 'placeholder' && type == 'select';
+    const hideSelectFields = fieldName == 'placeholder' && type == 'select';
     const hideMultipleChoiceFields =
       fieldName == 'placeholder' && type == 'multiple_choice';
-    const hideDropdownFields =
-      fieldName == 'placeholder' && type == 'dropdown';
+    const hideDropdownFields = fieldName == 'placeholder' && type == 'dropdown';
     const hideDateFields = fieldName == 'placeholder' && type == 'date';
     const hideTitleFields =
       (fieldName == 'placeholder' || fieldName == 'description') &&
       type == 'h1';
     const hideRichTextFields =
-      (fieldName == 'placeholder' || fieldName == 'description' || fieldName == 'questions') &&
+      (fieldName == 'placeholder' ||
+        fieldName == 'description' ||
+        fieldName == 'questions') &&
       type == 'rich-text';
-    
+    const hideAletFields = fieldName === 'alert_message';
+    const hideFilePlaceholder = fieldName === 'placeholder' && type === 'file';
+    const hideOptions =
+      fieldName === 'options' &&
+      type !== 'multiple_choice' &&
+      type !== 'select';
 
     if (
       fieldIsType ||
@@ -203,34 +227,37 @@ export function WidgetEditForm() {
       hideDateFields ||
       hideTitleFields ||
       hideMultipleChoiceFields ||
-      hideRichTextFields
+      hideRichTextFields ||
+      hideAletFields ||
+      hideFilePlaceholder ||
+      hideOptions
     ) {
       return null;
-    } else if(fieldName == 'required'){
+    } else if (fieldName == 'required') {
       return (
         <FormField
-        key={fieldName}
-        name={fieldName as keyof z.infer<typeof widgetEditSchema>}
-        control={form.control}
-        render={({ field }) => (
-          <FormItem className="space-y-0 flex items-center justify-between">
-            <p className='text-gray-600 font-bold text-sm'>
-              Required
-            </p>
-            <FormControl>
-              <Switch
-                checked={field.value ? true : false}
-                onCheckedChange={(checked) => {
-                  field.onChange(checked)
-                  handleSwitchChange('required', checked)
-                }}
-              />
-            </FormControl>
-          </FormItem>
-        )}
+          key={fieldName}
+          name={fieldName as keyof z.infer<typeof widgetEditSchema>}
+          control={form.control}
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between space-y-0">
+              <p className="text-sm font-bold text-gray-600">
+                {t('validation.required')}
+              </p>
+              <FormControl>
+                <Switch
+                  checked={field.value ? true : false}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    handleSwitchChange('required', checked);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+          )}
         />
-      )
-    } else if(fieldName === 'description') {
+      );
+    } else if (fieldName === 'description') {
       return (
         <FormField
           key={fieldName}
@@ -239,22 +266,28 @@ export function WidgetEditForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel
-                className={isValueField ? 'hidden' : 'text-gray-600 font-bold text-sm'}
+                className={
+                  isValueField ? 'hidden' : 'text-sm font-bold text-gray-600'
+                }
               >
                 {label}
               </FormLabel>
               <FormControl>
                 <ThemedTextarea
                   {...field}
-                  className={isValueField ? 'hidden' : 'text-gray-500'}
+                  className={
+                    isValueField
+                      ? 'hidden'
+                      : 'focus-visible:ring-none text-gray-500 focus-visible:ring-0'
+                  }
                   placeholder={label}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     // For label, we update both the label and the value fields
                     if (!isValueField && index !== undefined) {
-                      const sanitizedValue = e.target.value
-                        // .toLowerCase()
-                        // .replace(/\s+/g, '_') // Replace spaces with underscores
-                        // .replace(/[^\w_]+/g, ''); // Remove special characters
+                      const sanitizedValue = e.target.value;
+                      // .toLowerCase()
+                      // .replace(/\s+/g, '_') // Replace spaces with underscores
+                      // .replace(/[^\w_]+/g, ''); // Remove special characters
 
                       form.setValue(`options.${index}.value`, sanitizedValue);
                     }
@@ -270,8 +303,7 @@ export function WidgetEditForm() {
           )}
         />
       );
-    } 
-    else {
+    } else {
       return (
         <FormField
           key={fieldName}
@@ -280,7 +312,9 @@ export function WidgetEditForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel
-                className={isValueField ? 'hidden' : 'text-gray-600 font-bold text-sm'}
+                className={
+                  isValueField ? 'hidden' : 'text-sm font-bold text-gray-600'
+                }
               >
                 {label}
               </FormLabel>
@@ -292,10 +326,10 @@ export function WidgetEditForm() {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     // For label, we update both the label and the value fields
                     if (!isValueField && index !== undefined) {
-                      const sanitizedValue = e.target.value
-                        // .toLowerCase()
-                        // .replace(/\s+/g, '_') // Replace spaces with underscores
-                        // .replace(/[^\w_]+/g, ''); // Remove special characters
+                      const sanitizedValue = e.target.value;
+                      // .toLowerCase()
+                      // .replace(/\s+/g, '_') // Replace spaces with underscores
+                      // .replace(/[^\w_]+/g, ''); // Remove special characters
 
                       form.setValue(`options.${index}.value`, sanitizedValue);
                     }
@@ -322,36 +356,50 @@ export function WidgetEditForm() {
         nameField={'label'}
         handleQuestionChange={handleChangeContent}
         defaultValue={currentFormField?.label}
-        handleRemove={currentFormField ? () => updateFormField(currentFormField?.id, { ...currentFormField, label: '' }) : () => null}
+        handleRemove={
+          currentFormField
+            ? () =>
+                updateFormField(currentFormField?.id, {
+                  ...currentFormField,
+                  label: '',
+                })
+            : () => null
+        }
       />
     );
   };
 
   const renderRichTextInput = () => {
     if (!currentFormField) return null;
-    return(
+    return (
       <FormRichTextComponent
         index={currentFormField?.position}
-        form = {form}
-        userRole = {''}
-        inSidebar = {true}
+        form={form}
+        userRole={''}
+        inSidebar={true}
         handleQuestionChange={handleChangeContent}
       />
-    )
-  }
-
+    );
+  };
   const renderFormFields = () => {
     if (!currentFormField) return null;
     const type = form.getValues('type');
 
-    return Object.keys(currentFormField)
+    return Object.keys(organizeFormField(currentFormField))
       .filter((key) => key !== 'id')
       .map((fieldName) => {
-        if (fieldName === 'options') return renderOptionFields(type!);
+        if (
+          fieldName === 'options' &&
+          (type === 'multiple_choice' ||
+            type === 'select' ||
+            type === 'dropdown')
+        )
+          return renderOptionFields(type);
         if (type === 'image' && fieldName == 'placeholder')
           return renderImageInput();
         if (type === 'image' && fieldName == 'label') return null;
-        if (type === 'rich-text' && fieldName == 'label') return renderRichTextInput()
+        if (type === 'rich-text' && fieldName == 'label')
+          return renderRichTextInput();
         if (type === 'video' && fieldName === 'label') {
           return (
             <div key={fieldName}>
