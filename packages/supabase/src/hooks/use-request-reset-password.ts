@@ -25,7 +25,6 @@ export function useRequestResetPassword() {
 
   const mutationFn = async (params: Params) => {
     // step 1: validate if the email is in the database
-    console.log('params', params.email);
     const userData = await getUserAccountByEmail(
       params.email,
       undefined,
