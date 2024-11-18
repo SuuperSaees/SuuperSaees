@@ -199,7 +199,7 @@ export function PasswordSignUpForm({
             <Spinner className="h-5 w-5 animate-spin" />
           ) : (
             <div className='text-white text-center text-lg font-semibold tracking-[-0.18px]'>
-              <Trans i18nKey={'auth:createOrganization'}/>
+              {inviteToken ? <Trans i18nKey={'auth:createAccount'}/> : <Trans i18nKey={'auth:createOrganization'}/>}
             </div>
           )}
         </Button>
