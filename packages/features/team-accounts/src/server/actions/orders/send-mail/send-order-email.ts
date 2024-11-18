@@ -10,23 +10,38 @@ import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { getFormSendIdentity } from '../utils/get-form-send-identity';
+import { fetchCurrentUser } from '../../members/get/get-member-account';
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
 const emailSender = process.env.EMAIL_SENDER ?? '';
 
 export async function sendOrderCreationEmail(
-  toEmail: string,
   orderId: string,
   orderData: Order.Type,
-  agencyName: string,
-  userId: string,
 ) {
+  const client = getSupabaseServerComponentClient();
   const logger = await getLogger();
   const mailer = await getMailer();
-  const { domain: siteURL, organizationId } = await getDomainByUserId(
+  const {id: userId} = await fetchCurrentUser(client);
+ 
+  if (!userId) {
+    throw new Error('User id not found');
+  }
+  
+  const { domain: siteURL, organizationId, ownerEmail, organization } = await getDomainByUserId(
     userId,
     true,
+    true,
   );
+
+  if(!organization || !ownerEmail) {
+    throw new Error('Domain - organization not found');
+  }
+
+  const toEmail = ownerEmail;
+  const agencyName = organization.name;
+
   const lang = getLanguageFromCookie() as 'en' | 'es';
   const { t } = getEmailTranslations('orderCreation', lang);
 
@@ -37,7 +52,7 @@ export async function sendOrderCreationEmail(
 
   await mailer
     .sendEmail({
-      to: toEmail,
+      to: ownerEmail,
       from: fromSenderIdentity,
       subject: t('subject'),
       html: `

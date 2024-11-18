@@ -36,7 +36,6 @@ export type Database = {
     Tables: {
       accounts: {
         Row: {
-          calendar: string | null
           created_at: string | null
           created_by: string | null
           email: string | null
@@ -44,7 +43,6 @@ export type Database = {
           is_personal_account: boolean
           name: string
           organization_id: string | null
-          phone_number: string | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
@@ -54,7 +52,6 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
-          calendar?: string | null
           created_at?: string | null
           created_by?: string | null
           email?: string | null
@@ -62,7 +59,6 @@ export type Database = {
           is_personal_account?: boolean
           name: string
           organization_id?: string | null
-          phone_number?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -72,7 +68,6 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
-          calendar?: string | null
           created_at?: string | null
           created_by?: string | null
           email?: string | null
@@ -80,7 +75,6 @@ export type Database = {
           is_personal_account?: boolean
           name?: string
           organization_id?: string | null
-          phone_number?: string | null
           picture_url?: string | null
           primary_owner_user_id?: string
           public_data?: Json
@@ -2375,6 +2369,55 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          calendar: string | null
+          created_at: string
+          name: string | null
+          phone_number: string | null
+          picture_url: string | null
+          user_id: string
+        }
+        Insert: {
+          calendar?: string | null
+          created_at?: string
+          name?: string | null
+          phone_number?: string | null
+          picture_url?: string | null
+          user_id: string
+        }
+        Update: {
+          calendar?: string | null
+          created_at?: string
+          name?: string | null
+          phone_number?: string | null
+          picture_url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       user_account_workspace: {
@@ -2447,12 +2490,37 @@ export type Database = {
           updated_at: string
         }
       }
+      create_order: {
+        Args: {
+          _order: Json
+          _brief_responses: Json[]
+          _order_followers: string[]
+          _order_file_ids: string[]
+        }
+        Returns: {
+          agency_id: string
+          brief_ids: string[] | null
+          client_organization_id: string
+          created_at: string
+          customer_id: string
+          deleted_on: string | null
+          description: string
+          due_date: string | null
+          id: number
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status: string | null
+          status_id: number | null
+          stripe_account_id: string | null
+          title: string
+          uuid: string
+        }
+      }
       create_team_account: {
         Args: {
           account_name: string
         }
         Returns: {
-          calendar: string | null
           created_at: string | null
           created_by: string | null
           email: string | null
@@ -2460,7 +2528,7 @@ export type Database = {
           is_personal_account: boolean
           name: string
           organization_id: string | null
-          phone_number: string | null
+          phone_number: number | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json
@@ -2611,6 +2679,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_user_in_agency_organization: {
+        Args: {
+          user_id: string
+          target_organization_id: string
+        }
+        Returns: boolean
+      }
+      is_user_in_client_organization: {
+        Args: {
+          user_id: string
+          target_organization_id: string
+        }
+        Returns: boolean
+      }
       team_account_workspace: {
         Args: {
           account_slug: string
@@ -2717,6 +2799,10 @@ export type Database = {
         | "tasks.delete"
         | "messages.write"
         | "messages.read"
+        | "orders.write"
+        | "orders.read"
+        | "orders.manage"
+        | "orders.delete"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
       field_types:
