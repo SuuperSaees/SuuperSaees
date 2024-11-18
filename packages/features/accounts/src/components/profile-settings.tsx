@@ -30,7 +30,7 @@ function ProfileSettings({
 }: ProfileSettingsProps) {
   const { t } = useTranslation('account');
   const [calendarValue, setCalendarValue] =
-    useState<UserSettings.Type['calendar']>(userSettings.calendar ?? '');
+    useState<UserSettings.Type['calendar']>(userSettings?.calendar ?? '');
   const [isValidUrl, setIsValidUrl] = useState(true);
 
 
@@ -93,7 +93,7 @@ function ProfileSettings({
           <div>
             <UpdateAccountImageContainer
               user={{
-                pictureUrl: userSettings.picture_url,
+                pictureUrl: userSettings?.picture_url,
                 id: user.id,
               }}
               className="h-20 w-20"
