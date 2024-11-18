@@ -8,8 +8,8 @@ import { getColorLuminance } from '~/utils/generate-colors';
 function LogoImage({ className }: { className?: string }) {
   return (
     <svg 
-      width="186" 
-      height="42" 
+      width="142" 
+      height="32" 
       viewBox="0 0 373 83" 
       preserveAspectRatio="xMinYMid meet"
       fill="none" 

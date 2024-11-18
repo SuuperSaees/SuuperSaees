@@ -237,6 +237,13 @@ function getPatterns() {
           data: { user },
         } = await getUser(req, res);
 
+        // If the user is not logged in and the request is for the onboarding page, redirect to the sign-up page
+        if (!user && req.nextUrl.pathname === '/auth/onboarding') {
+          return NextResponse.redirect(
+            new URL(pathsConfig.auth.signUp, req.nextUrl.origin).href,
+          );
+        }
+
         // the user is logged out, so we don't need to do anything
         if (!user) {
           return;
