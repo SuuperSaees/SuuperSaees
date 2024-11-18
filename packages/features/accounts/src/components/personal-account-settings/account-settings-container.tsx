@@ -20,6 +20,9 @@ import PlansContainer from '../../../../../../apps/web/app/select-plan/component
 import { Separator } from '@kit/ui/separator';
 import ProfileSettings from '../profile-settings';
 import SiteSettings from '../site-settings';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { UserSettings } from '../../../../../../apps/web/lib/user-settings.types';
+import { getAccountSettings } from '../../../../team-accounts/src/server/actions/accounts/get/get-account';
 
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -60,6 +63,17 @@ export function PersonalAccountSettingsContainer(
     if (userAccountError) console.error(userAccountError.message);
     return user;
   };
+
+  const {data: userSettings} = useQuery<UserSettings.Type>({
+    queryKey: ['user-settings', props.userId],
+    queryFn: async () => {
+      const data = await getAccountSettings(props.userId);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+  }) as UseQueryResult<UserSettings.Type, unknown>;
+
+
 
   const [accountStripe, setAccountStripe] = useState<AccountStripe>({
     id: '',
@@ -176,7 +190,7 @@ export function PersonalAccountSettingsContainer(
           <SiteSettings role = {role} handleChangeLanguage = {handleChangeLanguage} user={user}/>
         </TabsContent>
         <TabsContent value="profile">
-          <ProfileSettings user={user} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} />
+          <ProfileSettings user={user} userSettings = {userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} />
         </TabsContent>
 
         <TabsContent value="billing">

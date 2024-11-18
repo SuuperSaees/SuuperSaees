@@ -18,13 +18,24 @@ interface CalendarSectionProps {
   userRole: string;
 }
 
+type UserWithSettings = {
+  id: string;
+  name: string;
+  email: string;
+  user_settings: {
+    phone_number: string | null;
+    picture_url: string | null;
+    calendar: string | null;
+  };
+}
+
 function CalendarSection({
   orderId,
   orderAgencyId,
   userRole,
 }: CalendarSectionProps) {
   const [loading, setLoading] = useState(true);
-  const { data: orderAgencyMembers } = useQuery<Account.Type[]>({
+  const { data: orderAgencyMembers } = useQuery<UserWithSettings[]>({
     queryKey: ['order-agency-members', orderId],
     queryFn: async () => {
       setLoading(true);
@@ -37,7 +48,7 @@ function CalendarSection({
       userRole === 'agency_owner' ||
       userRole === 'agency_member' ||
       userRole === 'agency_project_manager',
-  }) as UseQueryResult<Account.Type[], unknown>;
+  }) as UseQueryResult<UserWithSettings[], unknown>;
 
   const [activeTab, setActiveTab] = useState<string>(
     orderAgencyMembers?.[0]?.id ?? '',
@@ -62,7 +73,7 @@ function CalendarSection({
         >
           <TabsList className="flex w-fit gap-2 bg-transparent">
             {orderAgencyMembers?.map((member) =>
-              member.calendar ? (
+              member.user_settings.calendar ? (
                 <ThemedTabTrigger
                   className="flex items-center rounded-full p-0"
                   key={member.id}
@@ -71,7 +82,7 @@ function CalendarSection({
                   option={member.id}
                 >
                   <Avatar className="scale-50 p-0">
-                    <AvatarImage src={member.picture_url ?? ''} />
+                    <AvatarImage src={member.user_settings.picture_url ?? ''} />
                     <AvatarFallback>
                       {member.name.charAt(0).toUpperCase() || 'N/A'}
                     </AvatarFallback>
@@ -84,13 +95,13 @@ function CalendarSection({
             )}
           </TabsList>
           {orderAgencyMembers?.map((member) =>
-            member.calendar ? (
+            member.user_settings.calendar ? (
               <TabsContent key={member.id} value={member.id}>
                 <div className="max-h-screen w-full">
                   <div className="aspect-[4/3] h-full max-h-96 w-full overflow-auto lg:max-h-[30rem]">
                     <iframe
                       className="h-full w-full overflow-scroll"
-                      src={member.calendar ?? ''}
+                      src={member.user_settings.calendar ?? ''}
                     ></iframe>
                   </div>
                 </div>

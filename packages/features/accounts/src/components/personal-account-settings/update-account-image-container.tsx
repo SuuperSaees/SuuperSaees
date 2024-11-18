@@ -92,11 +92,11 @@ function UploadProfileAvatarForm(props: {
             uploadUserProfilePhoto(client, file, props.userId, props.bucketName)
               .then((pictureUrl) => {
                 return client
-                  .from('accounts')
+                  .from('user_settings')
                   .update({
                     picture_url: pictureUrl,
                   })
-                  .eq('id', props.userId)
+                  .eq('user_id', props.userId)
                   .throwOnError();
               })
               .then(() => {
@@ -110,11 +110,11 @@ function UploadProfileAvatarForm(props: {
           removeExistingStorageFile()
             .then(() => {
               return client
-                .from('accounts')
+                .from('user_settings')
                 .update({
                   picture_url: null,
                 })
-                .eq('id', props.userId)
+                .eq('user_id', props.userId)
                 .throwOnError();
             })
             .then(() => {
