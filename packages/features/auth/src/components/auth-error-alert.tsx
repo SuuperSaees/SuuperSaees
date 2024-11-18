@@ -22,7 +22,7 @@ export function AuthErrorAlert({
 
   const DefaultError = <Trans i18nKey="auth:errors.default" />;
   const errorCode = error instanceof Error ? error.message : error;
-
+  const formattedErrorCode = errorCode.replace(/ /g, '');
   return (
     <Alert variant={'destructive'}>
       <ExclamationTriangleIcon className={'w-4'} />
@@ -33,7 +33,7 @@ export function AuthErrorAlert({
 
       <AlertDescription data-test={'auth-error-message'}>
         <Trans
-          i18nKey={`auth:errors.${errorCode}`}
+          i18nKey={`auth:errors.${formattedErrorCode}`}
           defaults={'<DefaultError />'}
           components={{ DefaultError }}
         />

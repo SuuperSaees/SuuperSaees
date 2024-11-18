@@ -17,8 +17,9 @@ export const generateMetadata = async () => {
   };
 };
 
-const { callback, passwordUpdate, signIn } = pathsConfig.auth;
-const redirectPath = `${callback}?next=${passwordUpdate}`;
+const { callback, signIn } = pathsConfig.auth;
+const { setPassword } = pathsConfig.app;
+const redirectPath = `${callback}?next=${setPassword}`;
 
 function PasswordResetPage() {
   return (
