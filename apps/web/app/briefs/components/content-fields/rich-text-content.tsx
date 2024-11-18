@@ -18,16 +18,16 @@ const FormRichTextComponent: React.FC<ComponentProps> = ({
   userRole,
   inSidebar = false,
   question,
-  handleQuestionChange
+  handleQuestionChange,
+  // handleQuestionFocus
 }) => {
-
+  console.log('label', question)
   return (
     <FormField
       control={form.control}
       name={`questions.${index}.label`}
-      render={({ field, fieldState }) => (
-        <FormItem className="flex w-full flex-col gap-2 space-y-4 group relative">
-          <div className="flex flex-col gap-2">
+      render={({ fieldState, field }) => (
+        <FormItem className="flex w-full flex-col group relative">
             <FormControl>
               <RichTextEditor
                 {...field}
@@ -35,13 +35,12 @@ const FormRichTextComponent: React.FC<ComponentProps> = ({
                 onChange={handleQuestionChange}
                 userRole={userRole ?? ''}
                 hideSubmitButton={true}
-                showToolbar={inSidebar}
-                isEditable={inSidebar ? true : false}
-                className='text-gray-600 text-sm'
+                showToolbar={true}
+                isEditable={true}
+                className='text-gray-600 text-sm bg-white'
               />
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>
-          </div>
           {!inSidebar ? (
             <BriefsProvider.Options formFieldId={question?.id ?? 'create-form-field-' + index} className="ml-auto group-hover:flex hidden absolute right-0 top-0" />
           ) : (

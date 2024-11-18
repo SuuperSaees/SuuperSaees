@@ -52,6 +52,8 @@ export const useGenerateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
+            handleQuestionFocus={props.handleQuestionFocus}
+            handleQuestionBlur={props.handleQuestionBlur}
           />
         ), // Custom component
       },
@@ -78,6 +80,8 @@ export const useGenerateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
+            handleQuestionFocus={props.handleQuestionFocus}
+            handleQuestionBlur={props.handleQuestionBlur}
           />
         ), // Custom component
       },
@@ -104,6 +108,8 @@ export const useGenerateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
+            handleQuestionFocus={props.handleQuestionFocus}
+            handleQuestionBlur={props.handleQuestionBlur}
           />
         ), // Custom component
       },
@@ -144,6 +150,8 @@ export const useGenerateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
+            handleQuestionFocus={props.handleQuestionFocus}
+            handleQuestionBlur={props.handleQuestionBlur}
           />
         ), // Custom component
       },
@@ -184,6 +192,8 @@ export const useGenerateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
+            handleQuestionFocus={props.handleQuestionFocus}
+            handleQuestionBlur={props.handleQuestionBlur}
           />
         ), // Custom component
       },
@@ -224,6 +234,8 @@ export const useGenerateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
+            handleQuestionFocus={props.handleQuestionFocus}
+            handleQuestionBlur={props.handleQuestionBlur}
           />
         ),
       },
@@ -250,6 +262,8 @@ export const useGenerateInputs = (
             form={props.form}
             handleQuestionChange={props.handleQuestionChange}
             handleRemoveQuestion={props.handleRemoveQuestion}
+            handleQuestionFocus={props.handleQuestionFocus}
+            handleQuestionBlur={props.handleQuestionBlur}
           />
         ), // Custom component
       },
