@@ -11,18 +11,16 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 // import { Input } from '@kit/ui/input';
-import { Trans } from '@kit/ui/trans';
 
 import { useUpdateAccountData } from '../../hooks/use-update-account';
 import { AccountDetailsSchema } from '../../schema/account-details.schema';
-import { ThemedButton } from '../ui/button-themed-with-settings';
 import { ThemedInput } from '../ui/input-themed-with-settings';
 
 type UpdateUserDataParams = Database['public']['Tables']['accounts']['Update'];
+
 
 export function UpdateAccountDetailsForm({
   displayName,
@@ -42,6 +40,7 @@ export function UpdateAccountDetailsForm({
     },
   });
 
+
   const onSubmit = ({ displayName }: { displayName: string }) => {
     const data = { name: displayName };
 
@@ -56,13 +55,14 @@ export function UpdateAccountDetailsForm({
     });
   };
 
+
   return (
     <div className={'flex flex-col w-full'}>
       <Form {...form}>
         <form
           data-test={'update-account-name-form'}
           className={'flex flex-col space-y-4'}
-          onSubmit={form.handleSubmit(onSubmit)}
+          onBlur={form.handleSubmit(onSubmit)}
         >
           <FormField
             name={'displayName'}
@@ -83,12 +83,6 @@ export function UpdateAccountDetailsForm({
               </FormItem>
             )}
           />
-
-          <div>
-            <ThemedButton className='w-full' disabled={updateAccountMutation.isPending}>
-              {t('updateProfileSubmitLabel')}
-            </ThemedButton>
-          </div>
         </form>
       </Form>
     </div>

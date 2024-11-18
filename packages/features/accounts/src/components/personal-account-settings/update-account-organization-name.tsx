@@ -7,15 +7,12 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-// import { Input } from '@kit/ui/input';
-import { Trans } from '@kit/ui/trans';
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
-import { ThemedButton } from '../ui/button-themed-with-settings';
 import { ThemedInput } from '../ui/input-themed-with-settings';
+
 
 const AccountOrganizationNameSchem = z.object({
   name: z.string().min(2).max(100),
@@ -43,7 +40,7 @@ export function UpdateAccountOrganizationName() {
         <form
           data-test={'update-account-name-form'}
           className={'flex flex-col space-y-4'}
-          onSubmit={form.handleSubmit(onSubmit)}
+          onBlur={form.handleSubmit(onSubmit)}
         >
           <FormField
             name={'name'}
@@ -65,17 +62,6 @@ export function UpdateAccountOrganizationName() {
             )}
           />
 
-          <div>
-            <ThemedButton
-              disabled={
-                updateOrganizationSetting.isPending &&
-                updateOrganizationSetting.variables.key === 'portal_name'
-              }
-              className='w-full'
-            >
-              <Trans i18nKey={'account:brandNameSubmit'} />
-            </ThemedButton>
-          </div>
         </form>
       </Form>
     </div>

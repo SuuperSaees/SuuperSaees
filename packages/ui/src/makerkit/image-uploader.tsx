@@ -83,7 +83,7 @@ export function ImageUploader(
       >
         <Image
           fill
-          className={'h-full w-full rounded-full object-cover'}
+          className={'h-full w-full rounded-full object-contain'}
           src={image}
           alt={''}
         />
