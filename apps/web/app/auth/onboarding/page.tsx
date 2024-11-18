@@ -55,7 +55,7 @@ async function UserDataPage({
         <img
           src="/images/oauth/dataBackground.avif"
           alt="Description"
-          className="absolute inset-0 w-full h-full object-center"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
         <div className="w-full lg:w-1/2 flex flex-col">

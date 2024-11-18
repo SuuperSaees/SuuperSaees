@@ -57,7 +57,7 @@ export default function SignUp({ searchParams }: Props) {
               <img
                 src="/images/oauth/signUpBackground.avif"
                 alt="Background"
-                className="absolute inset-0 w-full h-full object-center"
+                className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
           )}
