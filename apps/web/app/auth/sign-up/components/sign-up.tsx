@@ -64,16 +64,19 @@ export default function SignUp({ searchParams }: Props) {
 
           <div className={`w-full flex flex-col ${isCustomDomain ? 'items-center' : 'lg:w-1/2'}`}>
             <div className="flex-1 px-4 py-6 sm:px-6 md:px-8 flex flex-col">
-              {!isCustomDomain && (
-                <div className="hidden md:block w-full flex justify-center lg:justify-start mb-6">
-                  <AppLogo/>
-                </div>
-              )}
+              
 
               <div className="flex-1 w-full max-w-md mx-auto flex flex-col justify-center">
+                {!isCustomDomain && (
+                  <div className="hidden md:block w-full flex justify-center lg:justify-start mb-12">
+                    <AppLogo/>
+                  </div>
+                )}
                 {!isCustomDomain ? (
                   <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-center lg:text-left mb-8">
-                    <Trans i18nKey={'auth:signUpHeading'} />
+                    <Trans i18nKey={'auth:signUpHeading1'} />
+                    <br />
+                    <Trans i18nKey={'auth:signUpHeading2'} />
                   </h2>
                 ) : null}
                 {isCustomDomain && (

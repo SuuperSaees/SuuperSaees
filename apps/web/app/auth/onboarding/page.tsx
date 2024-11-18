@@ -60,13 +60,16 @@ async function UserDataPage({
       </div>
         <div className="w-full lg:w-1/2 flex flex-col">
         <div className="flex-1 px-4 py-6 sm:px-6 md:px-8 flex flex-col">
-          <div className="hidden md:block w-full flex justify-center lg:justify-start mb-6">
-            <AppLogo  />
-          </div>
+          
 
           <div className="flex-1 w-full max-w-md mx-auto flex flex-col justify-center">
+            <div className="hidden md:block w-full flex justify-center lg:justify-start mb-12">
+              <AppLogo  />
+            </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-center lg:text-left mb-8">
-              <Trans i18nKey={'auth:signUpUserDataHeading'} />
+              <Trans i18nKey={'auth:signUpUserDataHeading1'} />
+              <br />
+              <Trans i18nKey={'auth:signUpUserDataHeading2'} />
             </h2>
 
             <UserDataForm userId={userData?.user.id} tokenId={tokenId} accountData={sanitizedAccountData} userRole={userRole} />
