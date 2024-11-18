@@ -7,15 +7,17 @@ import { toast } from 'sonner';
 import { Separator } from '@kit/ui/separator';
 
 import { Account } from '../../../../../apps/web/lib/account.types';
-import { updateUserAccount } from '../../../../../packages/features/team-accounts/src/server/actions/members/update/update-account';
+import { updateUserSettings } from '../../../../../packages/features/team-accounts/src/server/actions/members/update/update-account';
 import { UpdateEmailFormContainer } from './personal-account-settings/email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './personal-account-settings/password/update-password-container';
 import { UpdateAccountDetailsFormContainer } from './personal-account-settings/update-account-details-form-container';
 import { UpdateAccountImageContainer } from './personal-account-settings/update-account-image-container';
 import { Input } from '@kit/ui/input';
+import { UserSettings } from '../../../../../apps/web/lib/user-settings.types';
 
 interface ProfileSettingsProps {
   user: Account.Type;
+  userSettings : UserSettings.Type;
   callback: string;
   handleChangeLanguage: (locale: string) => void;
 }
@@ -24,11 +26,13 @@ function ProfileSettings({
   user,
   callback,
   handleChangeLanguage,
+  userSettings,
 }: ProfileSettingsProps) {
   const { t } = useTranslation('account');
   const [calendarValue, setCalendarValue] =
-    useState<Account.Type['calendar']>(user.calendar ?? '');
+    useState<UserSettings.Type['calendar']>(userSettings.calendar ?? '');
   const [isValidUrl, setIsValidUrl] = useState(true);
+
 
   const validateUrl = useCallback((url: string) => {
     if (url === '') return true;
@@ -41,9 +45,9 @@ function ProfileSettings({
   }, []);
 
   const updateAccountCalendar = useMutation({
-    mutationFn: async (calendar: Account.Type['calendar']) => {
+    mutationFn: async (calendar: UserSettings.Type['calendar']) => {
       if (user?.id) {
-        await updateUserAccount({ calendar: calendar }, user.id);
+        await updateUserSettings(user.id, { calendar: calendar ?? ''});
       } else {
         throw new Error('User ID is undefined');
       }
@@ -79,7 +83,7 @@ function ProfileSettings({
           <div>
             <UpdateAccountImageContainer
               user={{
-                pictureUrl: user.picture_url,
+                pictureUrl: userSettings.picture_url,
                 id: user.id,
               }}
               className="h-20 w-20"
