@@ -1,55 +1,24 @@
 import { useEffect, useState } from 'react';
 
-import { UseQueryResult, useQuery } from '@tanstack/react-query';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
-
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 import { Spinner } from '@kit/ui/spinner';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
-import { Account } from '~/lib/account.types';
-import { getOrderAgencyMembers } from '~/team-accounts/src/server/actions/orders/get/get-order';
-
+import { UserWithSettings } from '~/lib/account.types';
 import deduceNameFromEmail from '../utils/deduce-name-from-email';
+import { useTranslation } from 'react-i18next';
 
 interface CalendarSectionProps {
-  orderId: string;
-  orderAgencyId: string;
-  userRole: string;
-}
-
-type UserWithSettings = {
-  id: string;
-  name: string;
-  email: string;
-  user_settings: {
-    phone_number: string | null;
-    picture_url: string | null;
-    calendar: string | null;
-  };
+  orderAgencyMembers: UserWithSettings[];
+  loading: boolean;
 }
 
 function CalendarSection({
-  orderId,
-  orderAgencyId,
-  userRole,
+  orderAgencyMembers,
+  loading,
 }: CalendarSectionProps) {
-  const [loading, setLoading] = useState(true);
-  const { data: orderAgencyMembers } = useQuery<UserWithSettings[]>({
-    queryKey: ['order-agency-members', orderId],
-    queryFn: async () => {
-      setLoading(true);
-      const data = await getOrderAgencyMembers(orderAgencyId, Number(orderId));
-      setLoading(false);
-      return data;
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    enabled:
-      userRole === 'agency_owner' ||
-      userRole === 'agency_member' ||
-      userRole === 'agency_project_manager',
-  }) as UseQueryResult<UserWithSettings[], unknown>;
-
+  const {t} = useTranslation('orders');
   const [activeTab, setActiveTab] = useState<string>(
     orderAgencyMembers?.[0]?.id ?? '',
   );
@@ -60,15 +29,17 @@ function CalendarSection({
 
   return (
     <div>
-      <p className="mb-2 font-semibold">Agendas disponibles</p>
+      <p className="mb-2 font-bold">{t('calendarTitle')}</p>
       {loading ? (
         <Spinner className="h-7 w-7" />
+      ) : orderAgencyMembers.every((member) => !member.user_settings.calendar) ? (
+        <p>{t('calendarEmpty')}</p>
       ) : (
         <Tabs
           className="flex h-full max-h-full min-h-0 flex-col"
           value={activeTab}
           onValueChange={(value: string) => {
-            setActiveTab(value as 'activity' | 'details');
+            setActiveTab(value);
           }}
         >
           <TabsList className="flex w-fit gap-2 bg-transparent">
