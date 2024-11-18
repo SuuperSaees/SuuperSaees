@@ -4,9 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { LanguageSelector } from '@kit/ui/language-selector';
 import { Separator } from '@kit/ui/separator';
-import { Textarea } from '@kit/ui/textarea';
 
 import { Account } from '../../../../../apps/web/lib/account.types';
 import { updateUserAccount } from '../../../../../packages/features/team-accounts/src/server/actions/members/update/update-account';
@@ -14,7 +12,7 @@ import { UpdateEmailFormContainer } from './personal-account-settings/email/upda
 import { UpdatePasswordFormContainer } from './personal-account-settings/password/update-password-container';
 import { UpdateAccountDetailsFormContainer } from './personal-account-settings/update-account-details-form-container';
 import { UpdateAccountImageContainer } from './personal-account-settings/update-account-image-container';
-import { ThemedButton } from './ui/button-themed-with-settings';
+import { Input } from '@kit/ui/input';
 
 interface ProfileSettingsProps {
   user: Account.Type;
@@ -63,7 +61,7 @@ function ProfileSettings({
   });
 
   const handleCalendarChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setCalendarValue(value);
       setIsValidUrl(validateUrl(value));
@@ -102,10 +100,29 @@ function ProfileSettings({
         <Separator />
 
         <div className="flex justify-between">
-          <p className="mr-7 w-[45%] whitespace-nowrap font-bold text-gray-700">
-            {t('language')}
-          </p>
-          <LanguageSelector onChange={handleChangeLanguage} />
+          <div className="mr-7 flex w-[45%] flex-col text-gray-700">
+            <p className="whitespace-nowrap font-bold">{t('calendar')}</p>
+            <p>{t('calendarDescription')}</p>
+          </div>
+          <div className="flex w-full flex-col gap-4">
+            <Input
+              placeholder={t('pasteCalendar')}
+              rows={8}
+              value={calendarValue}
+              onChange={handleCalendarChange}
+              className={
+                !isValidUrl && calendarValue !== '' ? 'border-red-500' : ''
+              }
+              onBlur={() => {
+                if (isValidUrl) {
+                  updateAccountCalendar.mutate(calendarValue)
+                }
+              }}
+            />
+            {!isValidUrl && calendarValue !== '' && (
+              <p className="text-sm text-red-500">Please enter a valid URL</p>
+            )}
+          </div>
         </div>
         <Separator />
         <div className="flex justify-between">
@@ -116,34 +133,6 @@ function ProfileSettings({
             <p>{t('updateEmailCardDescription')}</p>
           </div>
           <UpdateEmailFormContainer callbackPath={callback} />
-        </div>
-        <Separator />
-        <div className="flex justify-between">
-          <div className="mr-7 flex w-[45%] flex-col text-gray-700">
-            <p className="whitespace-nowrap font-bold">{t('calendar')}</p>
-            <p>{t('calendarDescription')}</p>
-          </div>
-          <div className="flex w-full flex-col gap-4">
-            <Textarea
-              placeholder={t('pasteCalendar')}
-              rows={8}
-              value={calendarValue}
-              onChange={handleCalendarChange}
-              className={
-                !isValidUrl && calendarValue !== '' ? 'border-red-500' : ''
-              }
-            />
-            {!isValidUrl && calendarValue !== '' && (
-              <p className="text-sm text-red-500">Please enter a valid URL</p>
-            )}
-            <ThemedButton
-              className="w-full"
-              onClick={() => updateAccountCalendar.mutate(calendarValue)}
-              disabled={!isValidUrl}
-            >
-              {t('saveCalendar')}
-            </ThemedButton>
-          </div>
         </div>
         <Separator />
         <div className="flex justify-between">

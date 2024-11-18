@@ -94,23 +94,33 @@ const OrganizationSettingsProvider = ({
     }) =>  {
       const rest = await upsertOrganizationSettings(organizationSetting)
       await handleResponse(rest, 'organizations', t);
+      if(rest.ok){
+        const { key, value } = rest.success?.data;
+        // Update only if valid color when it's the theme color
+        const newValue =
+          key === 'theme_color' && !isValidHexColor(value) ? '' : value;
+
+        setOrganizationSettings((prev) => ({
+          ...prev,
+          [key]: newValue,
+        }));
+      }
     },
 
-    onSuccess: (updatedSetting) => {
-      // console.log('Updated Setting', updatedSetting);
-      const { key, value } = updatedSetting;
+    // onSuccess: (updatedSetting) => {
+    //   // console.log('Updated Setting', updatedSetting);
+    //   const { key, value } = updatedSetting;
 
-      // Update only if valid color when it's the theme color
-      const newValue =
-        key === 'theme_color' && !isValidHexColor(value) ? '' : value;
+    //   // Update only if valid color when it's the theme color
+    //   const newValue =
+    //     key === 'theme_color' && !isValidHexColor(value) ? '' : value;
 
-      setOrganizationSettings((prev) => ({
-        ...prev,
-        [key]: newValue,
-      }));
-
-
-    },
+    //   setOrganizationSettings((prev) => ({
+    //     ...prev,
+    //     [key]: newValue,
+    //   }));
+    // },
+    
     onError: () => {
       console.error('Error updating organization setting');
     },

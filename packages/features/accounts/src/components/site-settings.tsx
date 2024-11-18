@@ -208,7 +208,7 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
             </div>
             {(!accountStripe?.id || !accountStripe.charges_enabled) && (
               <ThemedButton className="w-full">
-                <Link href={'/stripe'}>
+                <Link href={'/stripe'} className='w-full h-full'>
                   {accountStripe?.id ? 'Connect' : 'Continue'}
                 </Link>
               </ThemedButton>
