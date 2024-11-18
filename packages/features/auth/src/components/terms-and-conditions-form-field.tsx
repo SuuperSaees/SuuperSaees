@@ -27,7 +27,7 @@ export function TermsAndConditionsFormField(
                         <Link
                           target={'_blank'}
                           className={'text-brand'}
-                          href={'/terms-of-service'}
+                          href={'https://suuper.co/terms-of-service'}
                         >
                           <Trans i18nKey={'auth:termsOfService'} />
                         </Link>
@@ -36,7 +36,7 @@ export function TermsAndConditionsFormField(
                         <Link
                           target={'_blank'}
                           className={'text-brand'}
-                          href={'/privacy-policy'}
+                          href={'https://suuper.co/privacy-policy'}
                         >
                           <Trans i18nKey={'auth:privacyPolicy'} />
                         </Link>

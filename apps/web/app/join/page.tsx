@@ -152,7 +152,7 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
 
 function InviteNotFoundOrExpired() {
   return (
-    <div className={'flex flex-col space-y-4'}>
+    <div className={'flex flex-col items-center justify-center space-y-4 text-center'}>
       <Heading level={6}>
         <Trans i18nKey={'team:inviteNotFoundOrExpired'} />
       </Heading>
@@ -161,7 +161,7 @@ function InviteNotFoundOrExpired() {
         <Trans i18nKey={'team:inviteNotFoundOrExpiredDescription'} />
       </p>
 
-      <Button asChild className={'w-full'} variant={'outline'}>
+      <Button asChild className={'w-full max-w-xs'} variant={'outline'}>
         <Link href={pathsConfig.app.home}>
           <ArrowLeft className={'mr-2 w-4'} />
           <Trans i18nKey={'team:backToHome'} />
