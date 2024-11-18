@@ -21,6 +21,7 @@ interface EmailPasswordSignUpContainerProps {
   className?: string;
   showConfirmEmail?: boolean;
   currentAppOrigin?: string;
+  inviteToken?: string;
 }
 
 export function EmailPasswordSignUpContainer({
@@ -30,7 +31,8 @@ export function EmailPasswordSignUpContainer({
   displayTermsCheckbox,
   showConfirmEmail,
   className,
-  currentAppOrigin
+  currentAppOrigin,
+  inviteToken,
 }: EmailPasswordSignUpContainerProps) {
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
 
@@ -91,6 +93,7 @@ export function EmailPasswordSignUpContainer({
       signUpMutation,
       showConfirmEmail,
       router,
+      inviteToken,
     ],
   );
 
@@ -104,6 +107,7 @@ export function EmailPasswordSignUpContainer({
         defaultValues={defaultValues}
         displayTermsCheckbox={displayTermsCheckbox}
         className={className}
+        inviteToken={inviteToken}
       />
     </>
   );

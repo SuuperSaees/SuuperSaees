@@ -163,7 +163,7 @@ export function UserDataForm(
           name="userFullName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('userData.fullName')}</FormLabel>
+              <FormLabel className="flex items-center gap-2">{t('userData.fullName')}</FormLabel>
               <FormControl>
                 <Input placeholder={t('userData.fullNamePlaceholder')} {...field} />
               </FormControl>
@@ -176,7 +176,7 @@ export function UserDataForm(
           name="userphoneNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('userData.phoneNumber')}</FormLabel>
+              <FormLabel className="flex items-center gap-2">{t('userData.phoneNumber')}</FormLabel>
               <FormControl>
                 <PhoneInput
                   country={'co'}

@@ -34,7 +34,8 @@ export function PasswordSignUpForm({
   displayTermsCheckbox,
   onSubmit,
   loading,
-  className
+  className,
+  inviteToken,
 }: {
   defaultValues?: {
     email: string;
@@ -50,6 +51,7 @@ export function PasswordSignUpForm({
   }) => unknown;
   loading: boolean;
   className?: string;
+  inviteToken?: string;
 }) {
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
@@ -60,6 +62,7 @@ export function PasswordSignUpForm({
       email: defaultValues?.email ?? '',
       password: '',
       organizationName: '',
+      invite_token: inviteToken ?? '',
       termsAccepted: false,
       repeatPassword: '',
     },
@@ -80,30 +83,34 @@ export function PasswordSignUpForm({
         onSubmit={form.handleSubmit(onSubmit)}
       >
        <div className='flex flex-col gap-2.5 '>
-       <FormField
-          control={form.control}
-          name={'organizationName'}
-          render={({ field }) => (
-            <FormItem className="text-start w-full">
-              <FormLabel>
-                <Trans i18nKey={'common:organizationNamelabel'} />
-              </FormLabel>
+       {
+        !inviteToken && (
+          <FormField
+            control={form.control}
+            name={'organizationName'}
+            render={({ field }) => (
+              <FormItem className="text-start w-full">
+                <FormLabel>
+                  <Trans i18nKey={'common:organizationNamelabel'} />
+                </FormLabel>
 
-              <FormControl>
-                <ThemedInput
-                  className='w-full'
-                  data-test={'email-input'}
-                  required
-                  type='text'
-                  placeholder={t('organizationNamePlaceholder')}
-                  {...field}
-                />
-              </FormControl>
+                <FormControl>
+                  <ThemedInput
+                    className='w-full'
+                    data-test={'email-input'}
+                    required
+                    type='text'
+                    placeholder={t('organizationNamePlaceholder')}
+                    {...field}
+                  />
+                </FormControl>
 
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )
+       }
 
 
 
