@@ -1,5 +1,7 @@
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
+import { arrayMove } from '@dnd-kit/sortable';
+
 import { FormField as ServerFormField } from '~/lib/form-field.types';
 
 import { useGenerateContent } from '../configs/content';
@@ -8,18 +10,18 @@ import {
   ContentTypes,
   FormField,
   Input,
+  InputToEdit,
   InputTypes,
   Option,
 } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
-import { arrayMove } from '@dnd-kit/sortable';
 
 // Centralized FormField State Management Hook
 export const useBriefFormFields = (
   setActiveTab: Dispatch<SetStateAction<'widgets' | 'settings'>>,
 ) => {
   const [formFields, setFormFields] = useState<FormField[]>([]);
-
+  const [inputToEdit, setInputToEdit] = useState<InputToEdit | null>(null);
   const [currentFormField, setCurrentFormField] = useState<
     FormField | undefined
   >(undefined);
@@ -146,16 +148,25 @@ export const useBriefFormFields = (
 
   // Remove a form field by id
   const removeFormField = (id: string) => {
+    let newFormFields: FormField[] = []; 
+
     setFormFields((prevFields) => {
       const updatedFormFields = prevFields.filter((field) => field.id !== id);
-      return updateFieldPositions(updatedFormFields);
+      newFormFields = updateFieldPositions(updatedFormFields);
+      return newFormFields
     });
+
     setCurrentFormField(undefined);
     stopEditing();
+    return newFormFields;
   };
 
   // Update a form field
-  const updateFormField = (id: string, updatedFormField: FormField) => {
+  const updateFormField = (
+    id: string,
+    updatedFormField: FormField,
+    focusedInput?: InputToEdit['name'],
+  ) => {
     setFormFields((prevFields) => {
       const index = prevFields.findIndex((field) => field.id === id);
       if (index !== -1) {
@@ -165,8 +176,10 @@ export const useBriefFormFields = (
       }
       return prevFields;
     });
-    if (updatedFormField.type == 'image') {
-      setCurrentFormField(updatedFormField);
+
+    setCurrentFormField(updatedFormField);
+    if (focusedInput) {
+      setInputToEdit({ name: focusedInput, isFocus: true });
     }
   };
 
@@ -185,18 +198,20 @@ export const useBriefFormFields = (
   const startEditing = () => setIsEditing(true);
 
   // Edit form field
-  const editFormField = (id: string) => {
+  const editFormField = (id: string, field?: InputToEdit['name']) => {
     const index = formFields.findIndex((formField) => formField.id === id);
     setCurrentFormField(formFields[index]);
     startEditing();
     setActiveTab('widgets');
+    field && setInputToEdit({ name: field, isFocus: true });
   };
 
   // Duplicate form field
   const duplicateFormField = (id: string) => {
+    let newFormFields: FormField[] = []; 
     const index = formFields.findIndex((formField) => formField.id === id);
     const formField = formFields[index];
-    if (!formField) return;
+    if (!formField) return [];
 
     const duplicatedFormField: FormField = {
       ...formField,
@@ -207,12 +222,13 @@ export const useBriefFormFields = (
       // Create a copy of the form fields and insert the duplicate immediately after the original
       const updatedFields = [...prevFields];
       updatedFields.splice(index + 1, 0, duplicatedFormField);
-
+      newFormFields = updateFieldPositions(updatedFields);
       // Update positions after inserting the duplicated form field
-      return updateFieldPositions(updatedFields);
+      return newFormFields
     });
 
     setActiveTab('widgets');
+    return newFormFields
   };
 
   return {
@@ -223,6 +239,8 @@ export const useBriefFormFields = (
     formFields,
     currentFormField,
     isEditing,
+    inputToEdit,
+    setInputToEdit,
     setFormFields,
     createDefaultFormFields,
     addFormField,
@@ -233,6 +251,7 @@ export const useBriefFormFields = (
     stopEditing,
     startEditing,
     swapFormFields,
+    setCurrentFormField
   };
 };
 

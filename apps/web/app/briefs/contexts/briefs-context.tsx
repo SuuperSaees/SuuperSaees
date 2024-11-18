@@ -1,25 +1,15 @@
 'use client';
 
-import {
-  Dispatch,
-  SetStateAction,
-  createContext,
-  useCallback,
-  useContext,
-  useState,
-} from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 
 import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UseMutationResult } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
-import { UseFormReturn, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-
-import { FormField as FormFieldServer } from '~/lib/form-field.types';
 
 import { BriefCreationForm } from '../components/brief-creation-form';
 import Options from '../components/form-field-actions';
@@ -27,56 +17,14 @@ import InputCard from '../components/input-card';
 import { useBrief } from '../hooks/use-brief';
 import { useBriefDragAndDrop } from '../hooks/use-brief-drag-and-drop';
 import { useBriefFormFields } from '../hooks/use-brief-form-fields';
-import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
 import {
-  Brief,
-  Content,
-  ContentTypes,
-  FormField,
-  Input,
-  InputTypes,
-} from '../types/brief.types';
+  briefCreationFormSchema,
+  generateBriefFormSchema,
+} from '../schemas/brief-creation-schema';
+import { BriefsContext as BriefsContextType } from '../types/brief.types';
 import { isContentType, isInputType } from '../utils/type-guards';
 
-interface BriefsContext {
-  brief: Brief;
-  inputs: Input[];
-  content: Content[];
-  formFields: FormField[];
-  inputsMap: Map<InputTypes, Input>;
-  contentMap: Map<ContentTypes, Content>;
-  isEditing: boolean;
-  currentFormField: FormField | undefined;
-  createDefaultFormFields: (formFields: FormFieldServer.Response[]) => {
-    defaultFormFields: FormField[];
-    defaultInitialFormField: FormField | null;
-  };
-  updateBrief: (updatedBrief: Brief) => void;
-  addFormField: (formFieldType: FormField['type']) => FormField;
-  removeFormField: (id: string) => void;
-  updateFormField: (id: string, updatedFormField: FormField) => void;
-  duplicateFormField: (id: string) => void;
-  editFormField: (id: string) => void;
-  stopEditing: () => void;
-  startEditing: () => void;
-  setFormFields: Dispatch<SetStateAction<FormField[]>>;
-  setBrief: Dispatch<SetStateAction<Brief>>;
-  onSubmit: (
-    values: z.infer<typeof briefCreationFormSchema>,
-    isUpdate?: boolean,
-  ) => void;
-  form: UseFormReturn<BriefCreationForm>;
-  briefMutation: UseMutationResult<
-    void,
-    Error,
-    { values: z.infer<typeof briefCreationFormSchema>; isUpdate?: boolean },
-    unknown
-  >;
-  activeTab: 'widgets' | 'settings';
-  setActiveTab: Dispatch<SetStateAction<'widgets' | 'settings'>>;
-}
-
-export const BriefsContext = createContext<BriefsContext | undefined>(
+export const BriefsContext = createContext<BriefsContextType | undefined>(
   undefined,
 );
 
@@ -98,7 +46,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Initialize the form with Zod schema for validation and set default values
   const form = useForm<BriefCreationForm>({
-    resolver: zodResolver(briefCreationFormSchema), // Resolver for Zod validation
+    resolver: zodResolver(generateBriefFormSchema(t)), // Resolver for Zod validation
     defaultValues: {
       name: '', // Default name field,
       description: '',
@@ -181,7 +129,9 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
         onDragStart={handleDragStart}
         sensors={sensors}
         collisionDetection={closestCenter}
-        modifiers={isDragging && widget.isDragging ? [] : [restrictToVerticalAxis]}
+        modifiers={
+          isDragging && widget.isDragging ? [] : [restrictToVerticalAxis]
+        }
       >
         <SortableContext items={formFieldsContext.formFields}>
           {children}
