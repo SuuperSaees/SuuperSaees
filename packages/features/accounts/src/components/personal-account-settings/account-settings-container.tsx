@@ -168,13 +168,7 @@ export function PersonalAccountSettingsContainer(
             >
               {t('profileTab')}
             </ThemedTabTrigger>
-            <ThemedTabTrigger
-              value="billing"
-              option="billing"
-              activeTab={accountBillingTab}
-            >
-              <Trans i18nKey={'account:billing'} />
-            </ThemedTabTrigger>
+
             <ThemedTabTrigger
               value="subscription"
               option="subscription"
@@ -192,12 +186,8 @@ export function PersonalAccountSettingsContainer(
         <TabsContent value="profile">
           <ProfileSettings user={user} userSettings = {userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} />
         </TabsContent>
-
-        <TabsContent value="billing">
-          <BillingContainerConfig tab={tab ?? ''} />
-        </TabsContent>
         <TabsContent value="subscription">
-          <PlansContainer />
+          <BillingContainerConfig tab={tab ?? ''} />
         </TabsContent>
       </Tabs>
     </div>
