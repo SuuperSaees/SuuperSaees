@@ -77,32 +77,34 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
     const newUserData = response.data;
     const userId = newUserData.user?.id;
 
-    // New Step: Create organization account
-    const { data: accountData, error: accountError } = await client
-      .from('accounts')
-      .insert({
-        primary_owner_user_id: userId,
-        name: credentials.organizationName,
-        email: null,
-        is_personal_account: false,
-      })
-      .select('id')
-      .single();
+    if (!inviteToken) {
+      // New Step: Create organization account
+      const { data: accountData, error: accountError } = await client
+        .from('accounts')
+        .insert({
+          primary_owner_user_id: userId,
+          name: credentials.organizationName,
+          email: null,
+          is_personal_account: false,
+        })
+        .select('id')
+        .single();
 
-    if (accountError) {
-      console.error('Error creating account:', accountError);
-      throw new Error('Error occurred while creating the organization account');
-    }
+      if (accountError) {
+        console.error('Error creating account:', accountError);
+        throw new Error('Error occurred while creating the organization account');
+      }
 
-    // Update user with organization_id
-    const { error: userUpdateError } = await client
-      .from('accounts')
-      .update({ organization_id: accountData.id })
-      .eq('id', userId ?? '');
+      // Update user with organization_id
+      const { error: userUpdateError } = await client
+        .from('accounts')
+        .update({ organization_id: accountData.id })
+        .eq('id', userId ?? '');
 
-    if (userUpdateError) {
-      console.error('Error updating user:', userUpdateError);
-      throw new Error('Error occurred while updating user organization');
+      if (userUpdateError) {
+        console.error('Error updating user:', userUpdateError);
+        throw new Error('Error occurred while updating user organization');
+      }
     }
 
     // Step 2: Take the object session and decode the access_token as jwt to get the session id
