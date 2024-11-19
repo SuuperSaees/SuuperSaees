@@ -108,7 +108,8 @@ export async function getOrderAgencyMembers(
     if (
       accountMembershipsData.account_role &&
       accountMembershipsData.account_role !== 'agency_project_manager' &&
-      accountMembershipsData.account_role !== 'agency_owner'
+      accountMembershipsData.account_role !== 'agency_owner' &&
+      accountMembershipsData.account_role !== 'agency_member'
     ) {
       throw new Error('Unauthorized access to order agency members');
     }
