@@ -36,14 +36,6 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
     (a, b) => a.position - b.position,
   );
 
-
-  const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
-    useBriefDragAndDrop({
-      swapFormFields: formFieldsContext.swapFormFields,
-      formFields: formFieldsContext.formFields,
-      addFormField: formFieldsContext.addFormField,
-    });
-
   // Initialize the form with Zod schema for validation and set default values
   const form = useForm<BriefCreationForm>({
     resolver: zodResolver(generateBriefFormSchema(t)), // Resolver for Zod validation
@@ -64,6 +56,15 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
     },
   });
   const briefContext = useBrief(formFieldsContext.setFormFields, form);
+
+  const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
+    useBriefDragAndDrop({
+      swapFormFields: formFieldsContext.swapFormFields,
+      formFields: formFieldsContext.formFields,
+      addFormField: formFieldsContext.addFormField,
+      updateFn: briefContext.updateBriefFormFields,
+    });
+
   // Form submission handler
   const onSubmit = (
     values: z.infer<typeof briefCreationFormSchema>,

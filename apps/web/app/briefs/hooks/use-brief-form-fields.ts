@@ -185,10 +185,14 @@ export const useBriefFormFields = (
 
   // Swap two form fields and update their positions
   const swapFormFields = (fromIndex: number, toIndex: number) => {
+    let newFormFields: FormField[] = []; 
+    
     setFormFields((prevFields) => {
       const reorderedFields = arrayMove(prevFields, fromIndex, toIndex);
-      return updateFieldPositions(reorderedFields);
+      newFormFields = updateFieldPositions(reorderedFields);
+      return newFormFields
     });
+    return newFormFields
   };
 
   // Stop editing
