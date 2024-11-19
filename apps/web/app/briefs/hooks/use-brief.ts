@@ -2,7 +2,7 @@
 
 import { Dispatch, SetStateAction, useState } from 'react';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +28,8 @@ export const useBrief = (
 ) => {
   const router = useRouter();
   const queryClient = useQueryClient();
-
+  const pathname = usePathname();
+  const isUpdate = pathname === '/briefs/update';
   const defaultBrief = {
     name: '',
     description: '',
@@ -45,24 +46,27 @@ export const useBrief = (
     values: z.infer<typeof briefCreationFormSchema>['questions'],
   ) {
     // Remove the id if start with 'create-form-field-'
-    try {
-      const formattedFormFields = values.map((question) => {
-        const newQuestion = { ...question };
-        if (newQuestion.id?.startsWith('create-form-field-')) {
-          newQuestion.id = undefined;
+    if(isUpdate){
+
+      try {
+        const formattedFormFields = values.map((question) => {
+          const newQuestion = { ...question };
+          if (newQuestion.id?.startsWith('create-form-field-')) {
+            newQuestion.id = undefined;
+          }
+          return newQuestion;
+        });
+        if (formattedFormFields.length > 0) {
+          await handleResponse(
+            await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
+            'briefs',
+            t,
+          );
         }
-        return newQuestion;
-      });
-      if (formattedFormFields.length > 0) {
-        await handleResponse(
-          await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
-          'briefs',
-          t,
-        );
+      } catch (error) {
+        console.error('Error updating brief form fields from client');
+        throw error;
       }
-    } catch (error) {
-      console.error('Error updating brief form fields from client');
-      throw error;
     }
   }
 
