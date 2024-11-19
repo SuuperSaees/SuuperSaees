@@ -138,7 +138,7 @@ export function UpdateEmailForm({
           />
 
           <div>
-            <ThemedButton className='w-full' disabled={updateUserMutation.isPending}>
+            <ThemedButton className='w-64' disabled={updateUserMutation.isPending}>
               {t('updateEmailSubmitLabel')}
             </ThemedButton>
           </div>
