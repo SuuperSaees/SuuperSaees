@@ -52,7 +52,7 @@ const routes = [
   //   Icon: <Wallet className={iconClasses} />,
   // },
   {
-    label: 'Configuraciones',
+    label: 'common:settingsName',
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
   },
