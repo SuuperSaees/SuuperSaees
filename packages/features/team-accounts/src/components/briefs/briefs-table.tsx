@@ -99,7 +99,7 @@ export function BriefsTable({
       await handleResponse(res, 'briefs', t);
 
       if (res.ok && res?.success?.data) {
-        router.push(`briefs/update/?id=${res?.success?.data?.id}`);
+        router.push(`briefs/${res?.success?.data?.id}`);
       }
     },
     onError: () => {
@@ -326,7 +326,7 @@ const useGetColumns = (
           return (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <UpdateBriefDialog {...brief} /> */}
-              <Link href={`/briefs/update?id=${brief.id}`}>
+              <Link href={`/briefs/${brief.id}`}>
                 <Pen className="h-4 w-4 cursor-pointer text-gray-600" />
               </Link>
               <DeleteBriefDialog briefId={brief.id} />

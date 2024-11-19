@@ -32,7 +32,7 @@ export const useBrief = (
   const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = usePathname();
-  const isUpdate = pathname === '/briefs/update';
+  const isUpdate = pathname.startsWith('/briefs/') && pathname.length > '/briefs/'.length;
   const defaultBrief = {
     name: '',
     description: '',

@@ -55,7 +55,7 @@ export const createBrief = async (clientData: Brief.Request.Create) => {
         ErrorBriefOperations.FAILED_TO_CREATE_BRIEF,
       );
     }
-    revalidatePath(`/briefs/update?id=${briefData.id}`);
+    revalidatePath(`/briefs/${briefData.id}`);
     return CustomResponse.success(briefData, 'briefCreated').toJSON();
   } catch (error) {
     console.error('Error creating the brief:', error);
