@@ -25,7 +25,12 @@ export default async function UserAddOrganizationPage() {
   const supabase = getSupabaseServerComponentClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError) throw userError.message;
-  const { domain: baseUrl } = await getDomainByUserId(userData?.user.id, true);
+  const { domain: baseUrl } = await getDomainByUserId(userData?.user.id, true).catch(
+    () => {
+      console.error('Error getting domain');
+      return { domain: '' };
+    }
+  );
 
   return (
     <>

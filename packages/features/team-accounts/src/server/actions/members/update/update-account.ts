@@ -6,6 +6,8 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
@@ -64,6 +66,7 @@ export const updateUserSettings = async (
     throw error;
   }
 };
+
 export const generateMagicLinkRecoveryPassword = async (
   email: Account.Type['email'],
   databaseClient?: SupabaseClient<Database>,
@@ -80,7 +83,7 @@ export const generateMagicLinkRecoveryPassword = async (
         type: 'magiclink',
         email: email ?? '',
         options: {
-          redirectTo: `/auth/callback`,
+          redirectTo: `/`,
         },
       });
 

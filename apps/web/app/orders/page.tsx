@@ -19,7 +19,7 @@ export const generateMetadata = async () => {
 async function OrdersPage() {
   const ordersData = await getOrders().catch((err) => console.error(err));
   const agencyId = ordersData?.[0]?.agency_id;
-  const agencyStatuses = await getAgencyStatuses(agencyId).catch((err) => console.error(err));
+  const agencyStatuses = await getAgencyStatuses(agencyId).catch((err) => console.error(err)).catch(() => []);
   const processedOrders =
     ordersData?.map((order) => ({
       ...order,

@@ -1,10 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 
+
+
 import { OrganizationSettings } from '../../../../apps/web/lib/organization-settings.types';
 import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/src/server/actions/clients/send-email/utils/client-confirm-email-template';
 import { getUserAccountByEmail } from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
-// import { useSupabase } from './use-supabase';
 import { generateMagicLinkRecoveryPassword } from '../../../features/team-accounts/src/server/actions/members/update/update-account';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
 import { getFullDomainBySubdomain } from '../../../multitenancy/utils/get/get-domain';
@@ -61,7 +62,6 @@ const SUUPER_CLIENT_SECRET = z
  * /password-reset where their password can be updated.
  */
 export function useRequestResetPassword() {
-  // const client = useSupabase();
   const mutationKey = ['auth', 'reset-password'];
 
   const mutationFn = async (params: Params) => {
@@ -96,7 +96,7 @@ export function useRequestResetPassword() {
     const url = new URL(params.redirectTo);
     const baseUrl = url.origin;
     // step 3: Send an email with the token to the user
-    const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${params.email}&type=recovery`;
+    const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${params.email}&type=recovery&next=${baseUrl}/set-password`;
     const lang = 'en';
     const { settings } = await getFullDomainBySubdomain(url.host, true, [
       logoUrlKey,

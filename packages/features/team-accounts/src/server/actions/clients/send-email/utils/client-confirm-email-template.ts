@@ -13,7 +13,7 @@ export const getClientConfirmEmailTemplate = (
   textColor: string,
   type: 'confirm' | 'recovery' = 'confirm',
 ) => {
-  const { t } = getEmailTranslations('clientConfirmEmail', lang);
+  const { t } = type === 'confirm' ? getEmailTranslations('clientConfirmEmail', lang) : getEmailTranslations('clientRecoveryEmail', lang);
   const template = `
   <!doctype html>
 <html dir="ltr" lang="${lang}">

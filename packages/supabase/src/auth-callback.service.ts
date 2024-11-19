@@ -47,16 +47,7 @@ class AuthCallbackService {
     const searchParams = url.searchParams;
     const token_hash_session = searchParams.get('token_hash_session');
     const tokenHashRecovery = searchParams.get('token_hash_recovery');
-    // const { data: currentSession} = await this.client.auth.getSession()
-    // console.log('token_hash_session', currentSession?.session?.access_token);
-    // const currentSessionId =  currentSession?.session?.access_token ? decodeToken(
-    //   currentSession?.session?.access_token ?? '',
-    // )?.session_id : '';
-    // console.log('currentSessionId', currentSessionId);
-    // if (token_hash_session !== currentSessionId) {
-    //    await logOutUser(this.client);
-    // } 
-    // await logOutUser(this.client);
+    const callbackNextPath = searchParams.get('next');
     const host = request.headers.get('host');
 
     // set the host to the request host since outside of Vercel it gets set as "localhost"
@@ -75,9 +66,6 @@ class AuthCallbackService {
     const callbackUrl = callbackParam ? new URL(callbackParam) : null;
 
     if (callbackUrl) {
-      // if we have a callback url, we check if it has a next path
-      const callbackNextPath = callbackUrl.searchParams.get('next');
-
       // if we have a next path in the callback url, we use that
       if (callbackNextPath) {
         nextPath = callbackNextPath;
@@ -107,7 +95,6 @@ class AuthCallbackService {
         '',
         tokenHashRecovery,
       ) as { isValidToken: boolean; payload?: TokenRecoveryType };
-      console.log('payload', payload?.redirectTo);
       if (!isValidToken) {
         console.error('Error verifying token hash session');
       }
@@ -128,16 +115,9 @@ class AuthCallbackService {
       const accessToken = query.get('access_token');
       const refreshToken = query.get('refresh_token');
       
-      if (accessToken && refreshToken) {
-        const { error } = await this.client.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-
-        if (!error) {
-          url.href = newUrlPayload.searchParams.get('redirect_to') ?? url.href;
-          return url;
-        }
+      if (accessToken && refreshToken && !(await this.client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })).error) {       
+        url.href = callbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
+        return url;
       }
       };
     
@@ -230,12 +210,6 @@ class AuthCallbackService {
     const inviteToken = searchParams.get('invite_token');
     const emailParam = searchParams.get('email');
     const errorPath = params.errorPath ?? '/auth/callback/error';
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-
-    console.log('accessToken', accessToken);
-    console.log('refreshToken', refreshToken);
-
     let nextUrl = nextUrlPathFromParams ?? params.redirectPath;
 
     // if we have an invite token, we redirect to the join team page
