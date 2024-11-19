@@ -96,7 +96,9 @@ export function PasswordResetRequestContainer(params: {
                   </FormItem>
                 )}
               />
-              <ThemedButton>
+              <ThemedButton
+                disabled={resetPasswordMutation.isPending}
+              >
                 <Trans i18nKey={'auth:passwordResetLabel'} />
               </ThemedButton>
             </div>

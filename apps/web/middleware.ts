@@ -3,6 +3,10 @@ import { NextResponse, URLPattern } from 'next/server';
 
 
 
+import { SupabaseClient } from '@supabase/supabase-js';
+
+
+
 // import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
@@ -11,15 +15,15 @@ import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 import pathsConfig from '~/config/paths.config';
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
+import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+
 
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 import { handleCsrf } from './handlers/csrf-handler';
 import { Database } from './lib/database.types';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 
 
 // import { handleDomainCheck } from './handlers/domain-check-handler';
@@ -74,6 +78,7 @@ export async function middleware(request: NextRequest) {
     'auth',
     '/auth/confirm',
     '/auth/onboarding',
+    'set-password',
     'add-organization',
     'api',
     'join',
@@ -253,8 +258,13 @@ function getPatterns() {
         const searchParams = req.nextUrl.searchParams;
         const hasInviteToken = searchParams.has('invite_token');
         const hasEmail = searchParams.has('email');
+        const hasTokenHashSession = searchParams.has('token_hash_session');
 
         if (hasInviteToken && hasEmail) {
+          return;
+        }
+
+        if (hasTokenHashSession && hasEmail) {
           return;
         }
 
