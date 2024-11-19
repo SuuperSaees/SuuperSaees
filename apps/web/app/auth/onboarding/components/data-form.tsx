@@ -94,7 +94,7 @@ export function UserDataForm(
             setLoading(false);
             return;
           }
-          router.push(`${BASE_URL}/orders`);
+          router.push(`${BASE_URL}/auth/sign-in`);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           setError(`Failed to setup account: ${errorMessage}`);
