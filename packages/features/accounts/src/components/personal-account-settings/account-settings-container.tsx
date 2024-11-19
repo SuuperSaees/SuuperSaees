@@ -125,6 +125,9 @@ export function PersonalAccountSettingsContainer(
           router.push('/home/settings')
         }
         setRole(role);
+        if(role !== 'agency_owner'){
+          setAccountBillingTab('profile');
+        }
       } catch (error) {
         console.error(error);
       }
@@ -154,13 +157,18 @@ export function PersonalAccountSettingsContainer(
         {role !== 'client_member' && role !== 'client_owner' && (
           <div className="flex items-center justify-between pb-[24px]">
           <TabsList className='gap-2 bg-transparent '>
-            <ThemedTabTrigger
-              value="site"
-              option="site"
-              activeTab={accountBillingTab}
-            >
-              Portal
-            </ThemedTabTrigger>
+            {
+              role == 'agency_owner' && (
+                <ThemedTabTrigger
+                value="site"
+                option="site"
+                activeTab={accountBillingTab}
+              >
+                Portal
+                </ThemedTabTrigger>
+              )
+            }
+            
             <ThemedTabTrigger
               value="profile"
               option="profile"
@@ -180,9 +188,14 @@ export function PersonalAccountSettingsContainer(
           </div>
         )}
         <Separator />
-        <TabsContent value="site">
-          <SiteSettings role = {role} handleChangeLanguage = {handleChangeLanguage} user={user}/>
-        </TabsContent>
+        {
+          role === 'agency_owner' && (
+            <TabsContent value="site">
+              <SiteSettings role = {role} handleChangeLanguage = {handleChangeLanguage} user={user}/>
+            </TabsContent>
+          )
+        }
+        
         <TabsContent value="profile">
           <ProfileSettings user={user} userSettings = {userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} />
         </TabsContent>
