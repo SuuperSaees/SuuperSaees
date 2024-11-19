@@ -82,16 +82,7 @@ CREATE TRIGGER after_update_organization_settings
     EXECUTE FUNCTION trigger_after_organization_settings_changes();
 
 
-GRANT EXECUTE ON FUNCTION public.trigger_after_accounts_changes() TO authenticated;
-GRANT EXECUTE ON FUNCTION public.trigger_after_accounts_changes() TO anon;
-GRANT EXECUTE ON FUNCTION public.trigger_after_accounts_changes() TO service_role;
-GRANT EXECUTE ON FUNCTION public.trigger_after_organization_settings_changes() TO authenticated;
-GRANT EXECUTE ON FUNCTION public.trigger_after_organization_settings_changes() TO anon;
-GRANT EXECUTE ON FUNCTION public.trigger_after_organization_settings_changes() TO service_role;
-
-GRANT EXECUTE ON FUNCTION public.handle_account_name_changes(uuid, text, boolean, text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.handle_account_name_changes(uuid, text, boolean, text) TO anon;
-GRANT EXECUTE ON FUNCTION public.handle_account_name_changes(uuid, text, boolean, text) TO service_role;
-GRANT EXECUTE ON FUNCTION public.handle_organization_settings_portal_name_changes(uuid, organization_setting_key, text, text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.handle_organization_settings_portal_name_changes(uuid, organization_setting_key, text, text) TO anon;
-GRANT EXECUTE ON FUNCTION public.handle_organization_settings_portal_name_changes(uuid, organization_setting_key, text, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.trigger_after_accounts_changes() TO authenticated, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.trigger_after_organization_settings_changes() TO authenticated, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.handle_account_name_changes(uuid, text, boolean, text) TO authenticated, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.handle_organization_settings_portal_name_changes(uuid, organization_setting_key, text, text) TO authenticated, anon, service_role;
