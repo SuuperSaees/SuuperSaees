@@ -72,5 +72,17 @@
     "activateAccount": "Activate account",
     "at": "at",
     "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  },
+  "clientRecoveryEmail": {
+    "subject": "Recover your password",
+    "body": "Recover your password",
+    "yourUsername": "Your username:",
+    "at": "at",
+    "team": "The team",
+    "thanks": "Thanks,",
+    "activateAccount": "Recover password",
+    "greeting": "Hi ${toEmail}",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
   }
 }
+

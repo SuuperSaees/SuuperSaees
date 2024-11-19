@@ -73,5 +73,16 @@
     "activateAccount": "Activar cuenta",
     "at": "de",
     "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+  },
+  "clientRecoveryEmail": {
+    "subject": "Recupera tu contraseña",
+    "body": "Recupera tu contraseña",
+    "yourUsername": "Tu nombre de usuario:",
+    "at": "de",
+    "team": "El equipo",
+    "thanks": "Gracias,",
+    "activateAccount": "Recuperar contraseña",
+    "greeting": "Hola ${toEmail}",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
   }
 }

@@ -11,8 +11,9 @@ export const getClientConfirmEmailTemplate = (
   agencyLogo: string,
   agencyColor: string,
   textColor: string,
+  type: 'confirm' | 'recovery' = 'confirm',
 ) => {
-  const { t } = getEmailTranslations('clientConfirmEmail', lang);
+  const { t } = type === 'confirm' ? getEmailTranslations('clientConfirmEmail', lang) : getEmailTranslations('clientRecoveryEmail', lang);
   const template = `
   <!doctype html>
 <html dir="ltr" lang="${lang}">
@@ -154,7 +155,7 @@ export const getClientConfirmEmailTemplate = (
                             </p>
 
                             <a
-                              href="${baseUrl}/auth/confirm?token_hash_session=${sessionId}&amp;type=invite&amp;callback=${callbackUrl}"
+                              href="${type === 'confirm' ? `${baseUrl}/auth/confirm?token_hash_session=${sessionId}&amp;type=invite&amp;callback=${callbackUrl}` : `${callbackUrl}`}"
                               style="
                                 line-height: 100%;
                                 text-decoration: none;
