@@ -94,7 +94,7 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
   }, []);
 
   return (
-    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap'>
+    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap text-sm'>
       {role === 'agency_owner' && (
         <div className="flex w-full flex-col space-y-6">
           <div className="flex justify-between">

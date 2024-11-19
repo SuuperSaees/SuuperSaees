@@ -83,7 +83,7 @@ function ProfileSettings({
     [validateUrl],
   );
   return (
-    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap'>
+    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap text-sm'>
       <div className="flex w-full flex-col space-y-6">
         <div className="flex gap-48">
           <div className="mr-7 flex flex-col whitespace-nowrap text-gray-700">
