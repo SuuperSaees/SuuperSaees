@@ -35,7 +35,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   const sortedFormFields = formFieldsContext.formFields.sort(
     (a, b) => a.position - b.position,
   );
-  const briefContext = useBrief(formFieldsContext.setFormFields);
+
 
   const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
     useBriefDragAndDrop({
@@ -63,7 +63,7 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
       },
     },
   });
-
+  const briefContext = useBrief(formFieldsContext.setFormFields, form);
   // Form submission handler
   const onSubmit = (
     values: z.infer<typeof briefCreationFormSchema>,

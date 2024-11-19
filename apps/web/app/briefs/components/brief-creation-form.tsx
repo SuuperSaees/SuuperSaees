@@ -71,8 +71,8 @@ const BriefCreationForm = ({
   };
 
   useEffect(() => {
-    if (defaultFormFields.length && !formFields.length && renderNumber.current === 1) {
-      const {
+    if (defaultBriefInfo.name && !formFields.length && renderNumber.current === 1) {
+      const { 
         defaultFormFields: formattedDefaultFormFields,
         defaultInitialFormField,
       } = createDefaultFormFields(defaultFormFields);
@@ -104,7 +104,7 @@ const BriefCreationForm = ({
     setFormFields,
     formFields.length,
   ]);
-
+  
   // Sync form state with context whenever formFields change
   useEffect(() => {
     // console.log('form', form.getValues(), 'errors', form.formState.errors);

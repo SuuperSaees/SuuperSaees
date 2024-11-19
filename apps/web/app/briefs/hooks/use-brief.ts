@@ -22,14 +22,17 @@ import {
 
 import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
 import { Brief, FormField } from '../types/brief.types';
+import { BriefCreationForm } from '../components/brief-creation-form';
+import { UseFormReturn } from 'react-hook-form';
 
 export const useBrief = (
   setFormFields: Dispatch<SetStateAction<FormField[]>>,
+  form: UseFormReturn<BriefCreationForm>,
 ) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = usePathname();
-  const isUpdate = pathname === '/briefs/update';
+  const isUpdate = pathname.startsWith('/briefs/') && pathname.length > '/briefs/'.length;
   const defaultBrief = {
     name: '',
     description: '',
@@ -46,8 +49,12 @@ export const useBrief = (
     values: z.infer<typeof briefCreationFormSchema>['questions'],
   ) {
     // Remove the id if start with 'create-form-field-'
-    if(isUpdate){
-
+    // verify theres's no error on the form
+    await form.trigger('questions');
+    const hasErrors = form.formState.errors.questions?.length;
+   
+    if(isUpdate && !hasErrors) {
+      
       try {
         const formattedFormFields = values.map((question) => {
           const newQuestion = { ...question };
