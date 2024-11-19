@@ -8,7 +8,6 @@ export const updateAccountData = async (accountId: string, accountDataToUpdate: 
     const client = getSupabaseServerComponentClient();
 
     let dataToUpdate = {};
-
     dataToUpdate = {
       ...accountDataToUpdate,
     }
@@ -22,7 +21,10 @@ export const updateAccountData = async (accountId: string, accountDataToUpdate: 
         .select(`id, email`)
         .single();
 
-    if (accountDataError) throw new Error(accountDataError.message);
+    if (accountDataError) {
+      console.error('Error updating accounts table:', accountDataError);
+      throw new Error(accountDataError.message);
+    }
 
     if (accountData) {
       dataToUpdate = {
@@ -33,11 +35,20 @@ export const updateAccountData = async (accountId: string, accountDataToUpdate: 
 
     const { data: userData, error: userDataError } = await client
         .from('user_settings')
-        .insert(dataToUpdate)
+        .update({
+          name: accountDataToUpdate.name ?? '',
+          phone_number: accountDataToUpdate.phone_number ?? '',
+          calendar: accountDataToUpdate.calendar ?? '',
+          picture_url: accountDataToUpdate.picture_url ?? '',
+        })
+        .eq('user_id', accountId)
         .select()
         .single();
       
-    if (userDataError) throw new Error(userDataError.message);
+    if (userDataError) {
+      console.error('Error updating user_settings:', userDataError);
+      throw new Error(userDataError.message);
+    }
 
     return {
       userData,
