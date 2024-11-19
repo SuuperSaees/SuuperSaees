@@ -80,8 +80,6 @@ export function UserDataForm(
           return;
         }
       }
-
-      if (userRole === 'agency_owner') {
         
         try {
           const cleanedDomain = data.portalUrl?.replace(/[^a-zA-Z0-9]/g, '') ?? ''  ;
@@ -91,22 +89,19 @@ export function UserDataForm(
           ? `https://${subdomain.domain}`
           : process.env.NEXT_PUBLIC_SITE_URL;
           const subscriptionResult = await createSubscription();
-            if ('error' in subscriptionResult) {
-              setError(`Subscription creation failed: ${subscriptionResult.error}`);
-              setLoading(false);
-              return;
-            }
+          if ('error' in subscriptionResult) {
+            setError(`Subscription creation failed: ${subscriptionResult.error}`);
+            setLoading(false);
+            return;
+          }
           router.push(`${BASE_URL}/orders`);
-          
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           setError(`Failed to setup account: ${errorMessage}`);
           setLoading(false);
           return;
         }
-      } else {
-        router.push('/orders');
-      }
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('❌ User creation error:', {
