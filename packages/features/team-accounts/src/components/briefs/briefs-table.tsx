@@ -4,7 +4,9 @@ import { useMemo } from 'react';
 import * as React from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
+import { useMutation } from '@tanstack/react-query';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -21,15 +23,18 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@kit/ui/button';
 import { DataTable } from '@kit/ui/data-table';
 import { Separator } from '@kit/ui/separator';
+import { Spinner } from '@kit/ui/spinner';
 import { TabsList } from '@kit/ui/tabs';
 
 import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
 import { SkeletonTable } from '../../../../../../apps/web/components/ui/skeleton';
 import { Brief } from '../../../../../../apps/web/lib/brief.types';
+import { handleResponse } from '../../../../../../apps/web/lib/response/handle-response';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings';
+import { createBrief } from '../../server/actions/briefs/create/create-briefs';
 // import CreateBriefDialog from '../../server/actions/briefs/create/create-brief-ui';
 import DeleteBriefDialog from '../../server/actions/briefs/delete/delete-brief-ui';
 
@@ -57,7 +62,7 @@ export function BriefsTable({
   );
 
   const [search, setSearch] = React.useState('');
-
+  const router = useRouter();
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -88,7 +93,19 @@ export function BriefsTable({
   };
 
   // const importantPropietaryOrganizationId = accountIds[0];
+  const briefMutation = useMutation({
+    mutationFn: async () => {
+      const res = await createBrief({});
+      await handleResponse(res, 'briefs', t);
 
+      if (res.ok && res?.success?.data) {
+        router.push(`briefs/update/?id=${res?.success?.data?.id}`);
+      }
+    },
+    onError: () => {
+      console.error('Error creating the brief from the table');
+    },
+  });
   return (
     <div className="w-full">
       <div className="flex items-center justify-between pb-[24px]">
@@ -128,9 +145,20 @@ export function BriefsTable({
             propietary_organization_id={importantPropietaryOrganizationId ?? ''}
           /> */}
           {briefs.length > 0 && (
-            <Link href="/briefs/create">
-              <ThemedButton>{t('createBrief')}</ThemedButton>
-            </Link>
+            <ThemedButton
+              onClick={async () => await briefMutation.mutateAsync()}
+              disabled={briefMutation.isPending}
+              className="flex items-center gap-2"
+            >
+              {briefMutation.isPending ? (
+                <>
+                  <span>{t('createBrief')}</span>
+                  <Spinner className="h-4 w-4" />
+                </>
+              ) : (
+                <span>{t('createBrief')}</span>
+              )}
+            </ThemedButton>
           )}
         </div>
       </div>
@@ -140,28 +168,38 @@ export function BriefsTable({
         <SkeletonTable columns={4} rows={7} className="mt-4" />
       ) : !briefs.length ? (
         // <div className="mt-6 flex h-full flex-col rounded-md border bg-white p-2">
-          <EmptyState
-            imageSrc="/images/illustrations/Illustration-cloud.svg"
-            title={t('briefs:empty.agency.title')}
-            description={t('briefs:empty.agency.description')}
-            button={
-              accountRole === 'agency_owner' || accountRole === 'agency_project_manager' ? (
-                <Link href="/briefs/create">
-                  <ThemedButton>{t('createBrief')}</ThemedButton>
-                </Link>
-              ) : undefined
-            }
-          />
-        // </div>
+        <EmptyState
+          imageSrc="/images/illustrations/Illustration-cloud.svg"
+          title={t('briefs:empty.agency.title')}
+          description={t('briefs:empty.agency.description')}
+          button={
+            accountRole === 'agency_owner' ||
+            accountRole === 'agency_project_manager' ? (
+              <ThemedButton
+                onClick={async () => await briefMutation.mutateAsync()}
+                disabled={briefMutation.isPending}
+                className="flex items-center gap-2"
+              >
+                {briefMutation.isPending ? (
+                  <>
+                    <span>{t('createBrief')}</span>
+                    <Spinner className="h-4 w-4" />
+                  </>
+                ) : (
+                  <span>{t('createBrief')}</span>
+                )}
+              </ThemedButton>
+            ) : undefined
+          }
+        />
       ) : (
-
-          <DataTable
-            data={filteredBriefs}
-            columns={columns}
-            options={options}
-            className='mt-4 bg-white'
-          />
-    
+        // </div>
+        <DataTable
+          data={filteredBriefs}
+          columns={columns}
+          options={options}
+          className="mt-4 bg-white"
+        />
       )}
     </div>
   );
