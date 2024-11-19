@@ -6,6 +6,8 @@ import { type EmailOtpType, SupabaseClient } from '@supabase/supabase-js';
 
 
 
+import { TokenRecoveryType } from '../../tokens/src/domain/token-type';
+import { verifyToken } from '../../tokens/src/verify-token';
 // import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
 
@@ -44,6 +46,7 @@ class AuthCallbackService {
     const url = new URL(request.url);
     const searchParams = url.searchParams;
     const token_hash_session = searchParams.get('token_hash_session');
+    const tokenHashRecovery = searchParams.get('token_hash_recovery');
     // const { data: currentSession} = await this.client.auth.getSession()
     // console.log('token_hash_session', currentSession?.session?.access_token);
     // const currentSessionId =  currentSession?.session?.access_token ? decodeToken(
@@ -97,6 +100,48 @@ class AuthCallbackService {
     if (nextPath) {
       url.pathname = nextPath;
     }
+
+    if (tokenHashRecovery && type) {
+      // search in the database for the token_hash_session
+      const { isValidToken, payload } = await verifyToken(
+        '',
+        tokenHashRecovery,
+      ) as { isValidToken: boolean; payload?: TokenRecoveryType };
+      console.log('payload', payload?.redirectTo);
+      if (!isValidToken) {
+        console.error('Error verifying token hash session');
+      }
+      const newUrlPayload = new URL(payload?.redirectTo ?? '');
+      const response = await fetch(payload?.redirectTo ?? '', {
+        method: 'GET',
+        redirect: 'manual',
+      });
+  
+      const location = response.headers.get('Location');
+  
+      if (!location) {
+        throw new Error(`Error generating magic link. Location header not found`);
+      }
+  
+      const hash = new URL(location).hash.substring(1);
+      const query = new URLSearchParams(hash);
+      const accessToken = query.get('access_token');
+      const refreshToken = query.get('refresh_token');
+      
+      if (accessToken && refreshToken) {
+        const { error } = await this.client.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (!error) {
+          url.href = newUrlPayload.searchParams.get('redirect_to') ?? url.href;
+          return url;
+        }
+      }
+      };
+    
+
 
     // if we have an invite token, we append it to the redirect url
     if (inviteToken) {
@@ -183,7 +228,13 @@ class AuthCallbackService {
     const error = searchParams.get('error');
     const nextUrlPathFromParams = searchParams.get('next');
     const inviteToken = searchParams.get('invite_token');
+    const emailParam = searchParams.get('email');
     const errorPath = params.errorPath ?? '/auth/callback/error';
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+
+    console.log('accessToken', accessToken);
+    console.log('refreshToken', refreshToken);
 
     let nextUrl = nextUrlPathFromParams ?? params.redirectPath;
 
@@ -191,9 +242,8 @@ class AuthCallbackService {
     // instead of the default next url. This is because the user is trying
     // to join a team and we want to make sure they are redirected to the
     // correct page.
-    if (inviteToken) {
-      const emailParam = searchParams.get('email');
 
+    if (inviteToken) {
       const urlParams = new URLSearchParams({
         invite_token: inviteToken,
         email: emailParam ?? '',
@@ -231,6 +281,7 @@ class AuthCallbackService {
         });
       }
     }
+
 
     if (error) {
       return onError({
@@ -281,10 +332,10 @@ function getAuthErrorMessage(error: string) {
 }
 
 // function to log out the user before starting the new session:
-async function logOutUser(supabase: SupabaseClient) {
-  const { error } = await supabase.auth.signOut();
+// async function logOutUser(supabase: SupabaseClient) {
+//   const { error } = await supabase.auth.signOut();
 
-  if (error) {
-    console.error('Error logging out user', error);
-  }
-}
+//   if (error) {
+//     console.error('Error logging out user', error);
+//   }
+// }

@@ -5,10 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Tokens } from '../../../apps/web/lib/tokens.types';
 import { getSupabaseServerComponentClient } from '../../../packages/supabase/src/clients/server-component.client';
-import { PayToken, Token } from './domain/token-type';
+import { PayToken, Token, TokenRecoveryType } from './domain/token-type';
 
 export async function createToken(
-  payload: Token | PayToken,
+  payload: Token | PayToken | TokenRecoveryType,
 ): Promise<{ accessToken: string; tokenId: string }> {
   const header = {
     alg: 'HS256',
