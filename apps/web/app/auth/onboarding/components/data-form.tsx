@@ -94,7 +94,9 @@ export function UserDataForm(
             setLoading(false);
             return;
           }
-          router.push(`${BASE_URL}/auth/sign-in`);
+
+          const redirectUrl = `${BASE_URL}/orders`;
+          window.location.href = redirectUrl; 
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           setError(`Failed to setup account: ${errorMessage}`);
