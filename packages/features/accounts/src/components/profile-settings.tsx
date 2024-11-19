@@ -63,13 +63,13 @@ function ProfileSettings({
       }
     },
     onSuccess: () => {
-      toast.success('Success', {
-        description: 'Calendar updated successfully!',
+      toast.success(t('updateSuccess'), {
+        description: t('updateCalendarSuccess'),
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'Could not update calendar.',
+        description: t('updateCalendarError'),
       });
     },
   });
