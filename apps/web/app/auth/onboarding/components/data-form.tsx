@@ -94,6 +94,7 @@ export function UserDataForm(
             setLoading(false);
             return;
           }
+
           const redirectUrl = `${BASE_URL}/orders`;
           window.location.href = redirectUrl; 
         } catch (error) {

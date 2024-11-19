@@ -80,7 +80,6 @@ export const useStatusDragAndDrop = (
         const oldIndex = items?.findIndex((item) => item.id === active.id);
         const newIndex = items?.findIndex((item) => item.id === over?.id);
         newStatuses = arrayMove(items, oldIndex, newIndex);
-        console.log('newStatuses', newStatuses);
         setStatusesContext(newStatuses);
         return newStatuses;
       });

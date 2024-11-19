@@ -6,7 +6,6 @@ interface FormattedDateProps {
   }
   
   export const FormattedDate: React.FC<FormattedDateProps> = ({ date, className }) => {
-    console.log('date', date);
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
       

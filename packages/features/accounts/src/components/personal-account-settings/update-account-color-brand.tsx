@@ -19,7 +19,6 @@ import { Input } from '@kit/ui/input';
 import { Spinner } from '@kit/ui/spinner';
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
-import { ThemedButton } from '../ui/button-themed-with-settings';
 
 const KeyEnum = z.enum(['theme_color']);
 
@@ -52,39 +51,44 @@ export default function UpdateAccountColorBrand() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex gap-5">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex gap-5 items-center justify-between">
         <FormField
           control={form.control}
           name="value"
           render={({ field }) => (
-            <FormItem className="w-fit mb-3">
+            <FormItem className="ml-20 w-fit">
               <FormControl>
-                <Input
-                  placeholder="Color Brand"
-                  {...field}
-                  type="color"
-                  className="w-32"
-                />
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border">
+                  <Input
+                    {...field}
+                    type="color"
+                    className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
+                  />
+                  <div
+                    style={{ backgroundColor: field.value }}
+                    className="w-full h-full"
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex gap-4 w-full justify-between">
-          <ThemedButton type="submit" className={`bg-brand flex gap-2 w-[80%]`}>
-            <span>{t('account:brandColorSubmit')}</span>
-            {updateOrganizationSetting.isPending &&
+        <div className="flex gap-4 w-full justify-end">
+          <Button variant='static' className={`bg-none flex p-0`}>
+            <span className='text-brand font-semibold'>{t('account:brandColorSubmit')}</span>
+            {/* {updateOrganizationSetting.isPending &&
               updateOrganizationSetting.variables?.key === 'theme_color' && (
                 <Spinner className="h-4 w-4 text-white" />
-              )}
-          </ThemedButton>
+              )} */}
+          </Button>
           <Button
-            variant={'ghost'}
+            variant='static'
             type="button"
             onClick={onReset}
-            className="flex gap-2 w-[20%] bg-gray-200"
+            className="flex p-0 bg-none"
           >
-            <span>{t('account:brandColorReset')}</span>
+            <span className='text-gray-600 font-semibold'>{t('account:brandColorReset')}</span>
           </Button>
         </div>
       </form>

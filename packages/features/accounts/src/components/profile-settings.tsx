@@ -63,13 +63,13 @@ function ProfileSettings({
       }
     },
     onSuccess: () => {
-      toast.success('Success', {
-        description: 'Calendar updated successfully!',
+      toast.success(t('updateSuccess'), {
+        description: t('updateCalendarSuccess'),
       });
     },
     onError: () => {
       toast.error('Error', {
-        description: 'Could not update calendar.',
+        description: t('updateCalendarError'),
       });
     },
   });
@@ -83,7 +83,7 @@ function ProfileSettings({
     [validateUrl],
   );
   return (
-    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap'>
+    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap text-sm'>
       <div className="flex w-full flex-col space-y-6">
         <div className="flex gap-48">
           <div className="mr-7 flex flex-col whitespace-nowrap text-gray-700">
@@ -105,7 +105,7 @@ function ProfileSettings({
         <div className="flex justify-between">
           <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
             <p className="font-bold">{t('name')}</p>
-            <p>{t('nameDescription')}</p>
+            <p className='text-wrap'>{t('nameDescription')}</p>
           </div>
 
           <UpdateAccountDetailsFormContainer user={user} />
