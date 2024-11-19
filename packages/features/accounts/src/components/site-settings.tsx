@@ -10,15 +10,13 @@ import { Trans } from '@kit/ui/trans';
 import { Account } from '../../../../../apps/web/lib/account.types';
 import { getDomainByUserId } from '../../../../multitenancy/utils/get/get-domain';
 import UpdateAccountColorBrand from './personal-account-settings/update-account-color-brand';
-import UpdateAccountOrganizationDarkLogo from './personal-account-settings/update-account-organization-dark-logo';
-import UpdateAccountOrganizationFavicon from './personal-account-settings/update-account-organization-favicon';
-import UpdateAccountOrganizationLogo from './personal-account-settings/update-account-organization-logo';
 import { UpdateAccountOrganizationName } from './personal-account-settings/update-account-organization-name';
 import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './personal-account-settings/update-account-organization-sender-email-and-sender-domain';
 import { UpdateAccountOrganizationSenderName } from './personal-account-settings/update-account-organization-sender-name';
 import UpdateAccountOrganizationSidebar from './personal-account-settings/update-account-organization-sidebar';
 import { ThemedButton } from './ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
+import UpdateImage from './personal-account-settings/update-image';
 
 interface SiteSettingsProps {
   role: string;
@@ -119,26 +117,18 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
                 {t('brandLogoDescription')}
               </p>
             </div>
-            <div className=' flex flex-col gap-2'>
+            <div className='flex flex-col gap-2 w-full'>
               <p className='font-bold text-gray-700'>{t('lightVersion')}</p>
-              <UpdateAccountOrganizationLogo
-                organizationId={user?.organization_id ?? ''}
-                className="h-20 w-20"
-              />
+              <UpdateImage organizationId={user?.organization_id ?? ''} mode='lightLogo' />
             </div>
           </div>
 
           <div className="flex gap-20">
             <div className="mr-7 flex w-[30%] flex-col whitespace-nowrap text-gray-700">
-              {/* <p className="font-bold">Dark brand logo</p> */}
-              {/* <p>{t('accountImageDescription')}</p> */}
             </div>
-            <div className=' flex flex-col gap-2'>
+            <div className=' flex flex-col gap-2 w-full'>
               <p className='font-bold text-gray-700'>{t('darkVersion')}</p>
-              <UpdateAccountOrganizationDarkLogo
-                organizationId={user?.organization_id ?? ''}
-                className="h-20 w-20"
-              />
+              <UpdateImage organizationId={user?.organization_id ?? ''} mode='darkLogo' />
             </div>
           </div>
           <Separator />
@@ -147,8 +137,8 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
               <p className="font-bold">{t('brandFavicon')}</p>
               <p className='text-wrap'>{t('brandFaviconDescription')}</p>
             </div>
-            <div>
-              <UpdateAccountOrganizationFavicon className="h-20 w-20" />
+            <div className='w-full'>
+            <UpdateImage organizationId={user?.organization_id ?? ''} mode='favicon' />
             </div>
           </div>
           <Separator />
