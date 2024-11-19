@@ -15,13 +15,15 @@ export function useBriefDragAndDrop({
   swapFormFields,
   formFields,
   addFormField,
+  updateFn
 }: {
-  swapFormFields: (fromIndex: number, toIndex: number) => void;
+  swapFormFields: (fromIndex: number, toIndex: number) => FormField[];
   formFields: FormField[];
   addFormField: (
     formFieldType: FormField['type'],
     insertAtIndex?: number,
   ) => FormField;
+  updateFn: (values: FormField[]) => Promise<void>;
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [widget, setWidget] = useState({
@@ -62,7 +64,7 @@ export function useBriefDragAndDrop({
     }
   }
 
-  function handleDragEnd(event: DragEndEvent) {
+  async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
     // Find indexes in formFields
@@ -71,7 +73,9 @@ export function useBriefDragAndDrop({
 
     if (oldIndex !== -1 && newIndex !== -1) {
       // Use the swapFormFields method to reorder the fields
-      swapFormFields(oldIndex, newIndex);
+      const newFormFields = swapFormFields(oldIndex, newIndex);
+      await updateFn(newFormFields);
+      
     } else {
       // Different container (e.g., dragging from widget list)
       const draggedItemData = active.data.current;

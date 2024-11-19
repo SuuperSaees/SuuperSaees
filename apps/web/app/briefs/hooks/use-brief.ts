@@ -5,6 +5,7 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
@@ -20,10 +21,9 @@ import {
   updateServiceBriefs,
 } from '~/team-accounts/src/server/actions/briefs/update/update-brief';
 
+import { BriefCreationForm } from '../components/brief-creation-form';
 import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
 import { Brief, FormField } from '../types/brief.types';
-import { BriefCreationForm } from '../components/brief-creation-form';
-import { UseFormReturn } from 'react-hook-form';
 
 export const useBrief = (
   setFormFields: Dispatch<SetStateAction<FormField[]>>,
@@ -32,7 +32,8 @@ export const useBrief = (
   const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = usePathname();
-  const isUpdate = pathname.startsWith('/briefs/') && pathname.length > '/briefs/'.length;
+  const isUpdate =
+    pathname.startsWith('/briefs/') && pathname.length > '/briefs/'.length;
   const defaultBrief = {
     name: '',
     description: '',
@@ -52,9 +53,8 @@ export const useBrief = (
     // verify theres's no error on the form
     await form.trigger('questions');
     const hasErrors = form.formState.errors.questions?.length;
-   
-    if(isUpdate && !hasErrors) {
-      
+
+    if (isUpdate && !hasErrors) {
       try {
         const formattedFormFields = values.map((question) => {
           const newQuestion = { ...question };
@@ -63,13 +63,12 @@ export const useBrief = (
           }
           return newQuestion;
         });
-        if (formattedFormFields.length > 0) {
-          await handleResponse(
-            await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
-            'briefs',
-            t,
-          );
-        }
+
+        await handleResponse(
+          await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
+          'briefs',
+          t,
+        );
       } catch (error) {
         console.error('Error updating brief form fields from client');
         throw error;
