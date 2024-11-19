@@ -131,8 +131,6 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
 
   const accountHome = pathsConfig.app.orders;
   const email = auth.data?.email ?? '';
-  console.log('Email:', email);
-  console.log('I AM HERE 2', email);
   return (
     <AuthLayoutShell Logo={AppLogo}>
       <AcceptInvitationContainer

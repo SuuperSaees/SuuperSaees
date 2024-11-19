@@ -20,11 +20,6 @@ export function AgencyStatusesProvider({ children, initialStatuses, agencyId }: 
   
     const updateStatuses = useCallback((updatedStatus: AgencyStatus.Type) => {
       setStatuses(prevStatuses => {
-        console.log('Updating statuses:', {
-          previous: prevStatuses,
-          updated: updatedStatus
-        });
-        
         return prevStatuses.map(status => 
           status.id === updatedStatus.id 
             ? updatedStatus 

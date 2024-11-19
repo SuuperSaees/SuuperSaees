@@ -1450,7 +1450,7 @@ export const UpdatePasswordForm = ({
           <div>
             <ThemedButton
               disabled={updateUserMutation.isPending}
-              className='w-full'
+              className='w-64'
             >
               {t('updatePasswordSubmitLabel')}
             </ThemedButton>

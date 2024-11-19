@@ -18,7 +18,6 @@ export const deleteClient = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    console.log('ids',clientId, organizationId);
     // Step 1: Determine the organization ID and check for required permissions
     let clientOrganizationId = organizationId;
     if (clientId && !organizationId) {

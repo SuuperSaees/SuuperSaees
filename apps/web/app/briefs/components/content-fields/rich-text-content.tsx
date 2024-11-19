@@ -21,7 +21,6 @@ const FormRichTextComponent: React.FC<ComponentProps> = ({
   handleQuestionChange,
   // handleQuestionFocus
 }) => {
-  console.log('label', question)
   return (
     <FormField
       control={form.control}

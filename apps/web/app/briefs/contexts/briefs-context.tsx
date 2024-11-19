@@ -35,14 +35,6 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
   const sortedFormFields = formFieldsContext.formFields.sort(
     (a, b) => a.position - b.position,
   );
-  const briefContext = useBrief(formFieldsContext.setFormFields);
-
-  const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
-    useBriefDragAndDrop({
-      swapFormFields: formFieldsContext.swapFormFields,
-      formFields: formFieldsContext.formFields,
-      addFormField: formFieldsContext.addFormField,
-    });
 
   // Initialize the form with Zod schema for validation and set default values
   const form = useForm<BriefCreationForm>({
@@ -63,6 +55,15 @@ export const BriefsProvider = ({ children }: { children: React.ReactNode }) => {
       },
     },
   });
+  const briefContext = useBrief(formFieldsContext.setFormFields, form);
+
+  const { isDragging, widget, handleDragStart, handleDragEnd, sensors } =
+    useBriefDragAndDrop({
+      swapFormFields: formFieldsContext.swapFormFields,
+      formFields: formFieldsContext.formFields,
+      addFormField: formFieldsContext.addFormField,
+      updateFn: briefContext.updateBriefFormFields,
+    });
 
   // Form submission handler
   const onSubmit = (

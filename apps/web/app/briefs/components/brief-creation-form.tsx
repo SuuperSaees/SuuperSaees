@@ -71,8 +71,8 @@ const BriefCreationForm = ({
   };
 
   useEffect(() => {
-    if (defaultFormFields.length && !formFields.length && renderNumber.current === 1) {
-      const {
+    if (defaultBriefInfo.name && !formFields.length && renderNumber.current === 1) {
+      const { 
         defaultFormFields: formattedDefaultFormFields,
         defaultInitialFormField,
       } = createDefaultFormFields(defaultFormFields);
@@ -104,7 +104,7 @@ const BriefCreationForm = ({
     setFormFields,
     formFields.length,
   ]);
-
+  
   // Sync form state with context whenever formFields change
   useEffect(() => {
     // console.log('form', form.getValues(), 'errors', form.formState.errors);
@@ -135,7 +135,7 @@ const BriefCreationForm = ({
         onSubmit={form.handleSubmit((values) =>
           onSubmit(values, isUpdate ?? false),
         )}
-        className="no-scrollbar flex h-full w-full flex-col space-y-8 overflow-y-auto"
+        className="no-scrollbar flex h-full w-full flex-col space-y-2 overflow-y-auto"
       >
         {/* Brief Name Input */}
         {showInfo && (
@@ -147,25 +147,25 @@ const BriefCreationForm = ({
 
         {/* Default and not editable input field */}
         {showFormFields && (
-          <FormField
-            control={form.control}
-            name="default_question.description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-bold text-gray-600">
-                  {form.getValues().default_question.label}
-                </FormLabel>
-                <FormControl>
-                  <ThemedInput
-                    {...field}
-                    placeholder={t('creation.form.defaultPlaceholder')}
-                    className="focus-visible:ring-none border-transparent p-0 font-medium text-gray-500 shadow-none placeholder:font-normal placeholder:text-gray-400 focus:border-input focus:px-4"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className='px-6 py-6'>
+            <FormField
+              control={form.control}
+              name="default_question.description"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel className='text-gray-600 font-bold'>{form.getValues().default_question.label}</FormLabel>
+                  <FormControl>
+                    <ThemedInput
+                      {...field}
+                      placeholder={t('creation.form.defaultPlaceholder')}
+                      className="focus-visible:ring-none bg-white text-gray-400"
+                    />
+                  </FormControl>
+                  <FormMessage>{fieldState.error?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
+          </div>
         )}
 
         {showFormFields && (
