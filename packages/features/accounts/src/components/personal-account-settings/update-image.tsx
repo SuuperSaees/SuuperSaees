@@ -35,7 +35,13 @@ export default function UpdateImage({organizationId, mode}: UpdateImageProps) {
       await handleDelete();
       const fileExtension = file.name.split('.').pop();
       const fileUuid = generateUUID();
-      const fileName = `${organizationId}-${mode}-${fileUuid}.${fileExtension}`;
+      let fileName = '';
+      if(mode == 'favicon'){
+        const host = window.location.host;
+        fileName = `${host}_favicon_url`;
+      }else{
+        fileName = `${organizationId}-${mode}-${fileUuid}.${fileExtension}`;
+      }
       const bucket = client.storage.from('organization');
       const result = await bucket.upload(fileName, file);
 
