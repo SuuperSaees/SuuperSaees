@@ -5,15 +5,16 @@ import { useCallback, useEffect, useState } from 'react';
 
 
 import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-
-
 import { Database } from '~/lib/database.types';
+import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
+// import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
-
 
 interface UseStripeActions {
   userRole: Database['public']['Tables']['accounts_memberships']['Row']['account_role'];
@@ -37,10 +38,12 @@ export function useStripeActions({ userRole }: UseStripeActions) {
 
   const services = servicesQueryData.data?.products ?? [];
   const briefs = briefsQueryData.data ?? [];
-  const servicesAreLoading = servicesQueryData.isPending || servicesQueryData.isLoading;
+  const servicesAreLoading =
+    servicesQueryData.isPending || servicesQueryData.isLoading;
   const servicesError = !!servicesQueryData.error;
   // briefLoading
-  const briefsAreLoading = briefsQueryData.isPending || briefsQueryData.isLoading;
+  const briefsAreLoading =
+    briefsQueryData.isPending || briefsQueryData.isLoading;
   const briefsError = !!briefsQueryData.error;
 
   const fetchAccountStripeConnect = useCallback(async () => {
@@ -64,35 +67,48 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     }
   }, [userRole]);
 
-  
-  const handleCheckout = async (priceId: string, serviceId: number) => {
-    try {
-      const { stripeId } = await getStripeAccountID();
-      const response = await fetch('/api/stripe/checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ priceId, stripeId, serviceId }),
+  const createCheckoutMutation = useMutation({
+    mutationFn: createUrlForCheckout,
+    onSuccess: (sessionUrl: string) => {
+      navigator.clipboard.writeText(sessionUrl).catch((error) => {
+        console.error('Error copying checkout URL to clipboard:', error);
       });
+      toast.success('Checkout URL copied to clipboard');
+    },
+    onError: (error: Error) => {
+      console.error('Checkout error:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+      toast.error('Error creating checkout URL', {
+        description: error?.message,
+      });
+    },
+  });
 
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const { sessionUrl } = await response.json();
-
-      navigator.clipboard
-        .writeText(sessionUrl)
-        .then(() => {
-          toast.success('URL copiado en el portapapeles');
-        })
-        .catch((err) => {
-          console.error('Error al copiar al portapapeles:', err);
-        });
-    } catch (error) {
-      console.error(error);
+  const handleCheckout = (
+    priceId: string,
+    stripeId: string,
+    service: Service.Type,
+    organizationId: string,
+  ) => {
+    if (!priceId || !stripeId || !service || !organizationId) {
+      console.error('Missing required parameters:', {
+        hasPriceId: !!priceId,
+        hasStripeId: !!stripeId,
+        hasService: !!service,
+        hasOrgId: !!organizationId,
+      });
+      throw new Error('Missing required parameters');
     }
+
+    createCheckoutMutation.mutate({
+      stripeId,
+      priceId,
+      service,
+      organizationId,
+    });
   };
 
   useEffect(() => {
@@ -108,6 +124,6 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     servicesAreLoading,
     servicesError,
     fetchAccountStripeConnect,
-    handleCheckout
+    handleCheckout,
   };
 }

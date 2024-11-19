@@ -7,7 +7,6 @@ import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.ty
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { hasPermissionToReadOrders } from '../../permissions/permissions';
 
-
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -107,9 +106,10 @@ export async function getOrderAgencyMembers(
     if (orderError) throw orderError;
 
     if (
-      accountMembershipsData.account_role 
-      && accountMembershipsData.account_role !== 'agency_project_manager'
-      && accountMembershipsData.account_role !== 'agency_owner'
+      accountMembershipsData.account_role &&
+      accountMembershipsData.account_role !== 'agency_project_manager' &&
+      accountMembershipsData.account_role !== 'agency_owner' &&
+      accountMembershipsData.account_role !== 'agency_member'
     ) {
       throw new Error('Unauthorized access to order agency members');
     }
@@ -118,7 +118,7 @@ export async function getOrderAgencyMembers(
       const { data: agencyMembersData, error: agencyMembersError } =
         await client
           .from('accounts')
-          .select('id, name, email, picture_url')
+          .select('id, name, email, picture_url, calendar')
           .eq('organization_id', agencyId ?? accountData.organization_id);
 
       if (agencyMembersError) throw agencyMembersError;
@@ -127,7 +127,18 @@ export async function getOrderAgencyMembers(
 
     const { data: agencyMembersData, error: agencyMembersError } = await client
       .from('accounts')
-      .select('id, name, email, picture_url')
+      .select(
+        `
+        id, 
+        name, 
+        email,
+        user_settings (
+          phone_number,
+          picture_url,
+          calendar
+        )
+      `,
+      )
       .eq('organization_id', agencyId ?? accountData.primary_owner_user_id);
 
     if (agencyMembersError) throw agencyMembersError;

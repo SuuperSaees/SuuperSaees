@@ -1,21 +1,29 @@
 'use server';
 
-import { getUserRoleById } from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
+import { Account } from '../../../../apps/web/lib/account.types';
+import {
+  getUserAccountById,
+  getUserRoleById,
+} from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
 import { getAgencyForClientByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getOrganizationByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getOrganizationSettingsByOrganizationId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getSupabaseServerComponentClient } from '../../../supabase/src/clients/server-component.client';
 
-
 export async function getDomainByUserId(
   userId: string,
   parsedUrl: boolean = false,
+  includeDomainOwnerEmail?: boolean,
 ): Promise<{
   domain: string;
   organizationId: string;
+  ownerEmail: string | null;
+  organization: null | Pick<Account.Type, 'name' | 'primary_owner_user_id'>;
 }> {
   // GET ROLE
+
   try {
+    const client = getSupabaseServerComponentClient();
     const userRole = await getUserRoleById(userId);
     const availableRolesAgency = new Set([
       'agency_member',
@@ -24,22 +32,42 @@ export async function getDomainByUserId(
     ]);
     const availableRolesClient = new Set(['client_owner', 'client_member']);
     let organizationId: string | null = null;
+    let ownerEmail: null | string = null;
+    let organization: null | Pick<
+      Account.Type,
+      'name' | 'primary_owner_user_id'
+    > = null;
+
+    const getOwnerEmail = async (id: string) => {
+      if (includeDomainOwnerEmail) {
+        const domainOwnerAccount = await getUserAccountById(client, id);
+        ownerEmail = domainOwnerAccount?.email ?? null;
+        return ownerEmail;
+      }
+      return null;
+    };
 
     if (availableRolesAgency.has(userRole)) {
       // Case 1: Agency roles
       const organizationData = await getOrganizationByUserId(userId);
 
+      organization = organizationData;
       organizationId = organizationData?.id;
+      ownerEmail = await getOwnerEmail(organizationData?.primary_owner_user_id);
     } else if (availableRolesClient.has(userRole)) {
       // Case 2: Client roles
       const agencyData = await getAgencyForClientByUserId(userId);
 
+      organization = agencyData;
+      ownerEmail = await getOwnerEmail(agencyData?.primary_owner_user_id);
       organizationId = agencyData?.id;
     } else {
       // Unknown role, use default domain
       return {
         domain: process.env.NEXT_PUBLIC_SITE_URL ?? '',
         organizationId: '',
+        organization,
+        ownerEmail,
       };
     }
 
@@ -52,12 +80,16 @@ export async function getDomainByUserId(
     return {
       domain: parsedUrl ? `${IS_PROD ? 'https' : 'http'}://${domain}/` : domain,
       organizationId: organizationId,
+      organization,
+      ownerEmail,
     };
   } catch (error) {
-    console.error(error);
+    console.error('Error getting domain by user id:', error);
     return {
       domain: process.env.NEXT_PUBLIC_SITE_URL ?? '',
       organizationId: '',
+      organization: null,
+      ownerEmail: null,
     };
   }
 }
@@ -102,7 +134,9 @@ export async function getDomainBySubdomain(
     .single();
 
   if (domainError) {
-    throw new Error(`Error getting domain by subdomain: ${domainError.message}`);
+    throw new Error(
+      `Error getting domain by subdomain: ${domainError.message}`,
+    );
   }
 
   return domainData;
@@ -121,14 +155,15 @@ export async function getFullDomainBySubdomain(
     // Fetch domain data and handle possible errors
     const domainData = await getDomainBySubdomain(subdomain, adminActived);
 
-
     // Fetch organization subdomain data and handle errors
-    const { data: organizationSubdomainData, error: organizationSubdomainError } =
-      await supabase
-        .from('organization_subdomains')
-        .select('organization_id')
-        .eq('subdomain_id', domainData.id)
-        .single();
+    const {
+      data: organizationSubdomainData,
+      error: organizationSubdomainError,
+    } = await supabase
+      .from('organization_subdomains')
+      .select('organization_id')
+      .eq('subdomain_id', domainData.id)
+      .single();
 
     if (organizationSubdomainError) {
       throw new Error(
@@ -137,7 +172,9 @@ export async function getFullDomainBySubdomain(
     }
 
     if (!organizationSubdomainData) {
-      throw new Error(`No organization subdomain found for subdomain: ${subdomain}`);
+      throw new Error(
+        `No organization subdomain found for subdomain: ${subdomain}`,
+      );
     }
 
     // Fetch organization settings and handle possible errors
@@ -152,7 +189,6 @@ export async function getFullDomainBySubdomain(
       domainData,
       settings: organizationSettings,
     };
-
   } catch (error) {
     console.error(`Error in getFullDomainBySubdomain: ${error}`);
     throw new Error(`Failed to get full domain by subdomain: ${error}`);

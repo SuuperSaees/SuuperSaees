@@ -55,12 +55,13 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
     notFound();
   }
 
-  const auth = await requireUser(client);
+  // const auth = await requireUser(client);
+  const auth = await client.auth.getUser();
 
   // if the user is not logged in or there is an error
   // redirect to the sign up page with the invite token
   // so that they will get back to this page after signing up
-  if ((auth.error ?? !auth.data) && !verifyAccountData) {
+  if (!auth.data.user && !verifyAccountData) {
     const urlParams = new URLSearchParams({
       invite_token: token,
       email: searchParams.email ?? '',
@@ -151,7 +152,7 @@ export default async function JoinTeamAccountPage({ searchParams }: Context) {
 
 function InviteNotFoundOrExpired() {
   return (
-    <div className={'flex flex-col space-y-4'}>
+    <div className={'flex flex-col items-center justify-center space-y-4 text-center'}>
       <Heading level={6}>
         <Trans i18nKey={'team:inviteNotFoundOrExpired'} />
       </Heading>
@@ -160,7 +161,7 @@ function InviteNotFoundOrExpired() {
         <Trans i18nKey={'team:inviteNotFoundOrExpiredDescription'} />
       </p>
 
-      <Button asChild className={'w-full'} variant={'outline'}>
+      <Button asChild className={'w-full max-w-xs'} variant={'outline'}>
         <Link href={pathsConfig.app.home}>
           <ArrowLeft className={'mr-2 w-4'} />
           <Trans i18nKey={'team:backToHome'} />

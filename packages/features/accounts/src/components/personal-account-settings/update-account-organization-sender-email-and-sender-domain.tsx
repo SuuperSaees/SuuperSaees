@@ -48,6 +48,7 @@ export function UpdateAccountOrganizationSenderEmailAndSenderDomain() {
   });
 
   const onSubmit = ({ sender_email, sender_domain }: { sender_email?: string; sender_domain?: string }) => {
+
     if (sender_email) {
       updateOrganizationSetting.mutate({
         key: 'sender_email',
@@ -63,20 +64,17 @@ export function UpdateAccountOrganizationSenderEmailAndSenderDomain() {
   };
 
   return (
-    <div className={'flex flex-col space-y-8'}>
+    <div className={'flex flex-col w-full'}>
       <Form {...form}>
         <form
           data-test={'update-account-sender-email-and-sender-domain-form'}
           className={'flex flex-col space-y-4'}
-          onSubmit={form.handleSubmit((e) => onSubmit({sender_email: e.sender_email}))}
+          onBlur={form.handleSubmit((e) => onSubmit({sender_email: e.sender_email}))}
         >
           <FormField
             name={'sender_email'}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans i18nKey={'account:brandSenderEmail'} />
-                </FormLabel>
 
                 <div className={'flex items-center gap-2'}>
                 <FormControl>
@@ -96,17 +94,6 @@ export function UpdateAccountOrganizationSenderEmailAndSenderDomain() {
 
             )}
           />
-
-        <div>
-            <ThemedButton
-              disabled={
-                updateOrganizationSetting.isPending &&
-                updateOrganizationSetting.variables.key === 'sender_email'
-              }
-            >
-              <Trans i18nKey={'account:brandSenderEmailSubmit'} />
-            </ThemedButton>
-          </div>
 
           {shouldShowDomainSelect && (
             <FormField

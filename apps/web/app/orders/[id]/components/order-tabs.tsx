@@ -12,9 +12,11 @@ import FileSection from '~/components/organization/files';
 import ActivityPage from './activity';
 import DetailsPage from './details';
 import TasksSection from './tasks';
-// import { TaskCounter } from 'node_modules/@kit/accounts/src/components/ui/tasks-cantity-themed-with-settings';
-// import { countIncompleteTasks } from '~/utils/task-counter';
-// import { useRealTimeTasks } from '../hooks/use-tasks';
+import CalendarSection from './calendar-section';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { getOrderAgencyMembers } from '~/team-accounts/src/server/actions/orders/get/get-order';
+import { UserWithSettings } from '~/lib/account.types';
 
 type OrderTabsProps = {
   organizationId:
@@ -29,12 +31,30 @@ type OrderTabsProps = {
   userRole: string;
   orderId: string;
   orderAgencyId: string;
+  agencyStatuses: AgencyStatus.Type[];  
 };
 
-export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId }: OrderTabsProps) => {
+
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId, agencyStatuses }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
+
+  const [loadingCalendars, setLoadingCalendars] = useState(true);
+  const { data: orderAgencyMembers } = useQuery<UserWithSettings[]>({
+    queryKey: ['order-agency-members', orderId],
+    queryFn: async () => {
+      setLoadingCalendars(true);
+      const data = await getOrderAgencyMembers(orderAgencyId, Number(orderId));
+      setLoadingCalendars(false);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled:
+      userRole === 'agency_owner' ||
+      userRole === 'agency_member' ||
+      userRole === 'agency_project_manager',
+  }) as UseQueryResult<UserWithSettings[], unknown>;
 
   return (
     <Tabs
@@ -77,6 +97,13 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         >
           <Trans i18nKey={'orders:details.navigation.files'} />
         </ThemedTabTrigger>
+        <ThemedTabTrigger 
+          value="calendar" 
+          activeTab={activeTab} 
+          option={'calendar'}
+        >
+          <Trans i18nKey={'account:calendar'} />
+        </ThemedTabTrigger>
       </TabsList>
 
       <TabsContent
@@ -94,6 +121,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
             userRole={userRole}
             orderId={orderId}
             orderAgencyId={orderAgencyId}
+            agencyStatuses={agencyStatuses}
           />
         </div>
       </TabsContent>
@@ -103,6 +131,14 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
             key={'files'}
             clientOrganizationId={organizationId?.account_id ?? ''}
             currentPath={currentPath}
+          />
+        </div>
+      </TabsContent>
+      <TabsContent value="calendar">
+        <div className="w-full">
+          <CalendarSection 
+            orderAgencyMembers={orderAgencyMembers ?? []}
+            loading={loadingCalendars}
           />
         </div>
       </TabsContent>

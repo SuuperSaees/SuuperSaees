@@ -18,7 +18,8 @@
     "validation": {
       "required": "Required",
        "minCharacters" : "Minimum 2 characters required",
-       "maxCharacters" : "Maximum 3000 characters allowed"
+       "maxCharacters" : "Maximum 3000 characters allowed",
+       "labelRequired": "Title cannot be empty"
     },
     "search": "Search brief...",
     "creation": {

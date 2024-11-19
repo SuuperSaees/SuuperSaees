@@ -18,10 +18,12 @@
   "dueDateLabel": "Fecha de vencimiento",
   "select_date_range": "Seleccionar rango de fechas",
   "delete": "Eliminar orden",
-  "deleteConfirmation": "¿Estás seguro de que deseas eliminar este proyecto?", 
+  "deleteConfirmation": "¿Estás seguro de que deseas eliminar este proyecto?",
   "deleteSuccess": "Proyecto eliminado con éxito",
   "deleteError": "Error al eliminar el proyecto",
-  "create":"Crear",
+  "create": "Crear",
+  "calendarTitle": "Agendas disponibles",
+  "calendarEmpty": "No hay calendarios disponibles",
   "creation": {
     "title": "Crear proyecto",
     "form": {

@@ -7,13 +7,10 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-import { Trans } from '@kit/ui/trans';
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
-import { ThemedButton } from '../ui/button-themed-with-settings';
 import { ThemedInput } from '../ui/input-themed-with-settings';
 
 const AccountOrganizationSenderNameSchema = z.object({
@@ -37,20 +34,17 @@ export function UpdateAccountOrganizationSenderName() {
   };
 
   return (
-    <div className={'flex flex-col space-y-8'}>
+    <div className={'flex flex-col w-full'}>
       <Form {...form}>
         <form
           data-test={'update-account-name-form'}
           className={'flex flex-col space-y-4'}
-          onSubmit={form.handleSubmit(onSubmit)}
+          onBlur={form.handleSubmit(onSubmit)}
         >
           <FormField
             name={'sender_name'}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans i18nKey={'account:brandSenderName'} />
-                </FormLabel>
 
                 <FormControl>
                   <ThemedInput
@@ -66,17 +60,6 @@ export function UpdateAccountOrganizationSenderName() {
               </FormItem>
             )}
           />
-
-          <div>
-            <ThemedButton
-              disabled={
-                updateOrganizationSetting.isPending &&
-                updateOrganizationSetting.variables.key === 'sender_name'
-              }
-            >
-              <Trans i18nKey={'account:brandSenderNameSubmit'} />
-            </ThemedButton>
-          </div>
         </form>
       </Form>
     </div>

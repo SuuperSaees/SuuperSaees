@@ -406,3 +406,38 @@ export async function fetchDeletedClients(client: SupabaseClient<Database>, agen
     throw error;
   }
 }
+
+export async function getUserByEmail(
+  email: string,
+  isAdminuser: boolean,
+) {
+  try {
+    const client = getSupabaseServerComponentClient({ admin: isAdminuser });
+
+    const { data: userData, error: userError } = await client
+      .from('accounts')
+      .select('id, email, organization_id')
+      .eq('email', email)
+      .single();
+
+    if (userError ?? !userData) {
+      return null;
+    }
+
+    const { data: clientId, error: clientError } = await client
+      .from('clients')
+      .select('id')
+      .eq('user_client_id', userData.id)
+      .single();
+
+
+    if (clientError ?? !clientId) {
+      return { userData, clientId: null };
+    }
+
+    return { userData, clientId };
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw error;
+  }
+}

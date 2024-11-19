@@ -1,5 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 
+
+
+import { getUserAccountByEmail } from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
+import { CustomError, ErrorUserOperations } from '../../../shared/src/response';
+import { HttpStatus } from '../../../shared/src/response/http-status';
 import { useSupabase } from './use-supabase';
 
 interface Params {
@@ -19,6 +24,27 @@ export function useRequestResetPassword() {
   const mutationKey = ['auth', 'reset-password'];
 
   const mutationFn = async (params: Params) => {
+    // step 1: validate if the email is in the database
+    const userData = await getUserAccountByEmail(
+      params.email,
+      undefined,
+      true,
+    ).catch(() => {
+      console.error('Error getting user data');
+    });
+
+    if (!userData) {
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        `user Not Found`,
+        ErrorUserOperations.USER_NOT_FOUND,
+      );
+    }
+
+    // step 2: Generate a token from supabase and save it in the database
+
+    // step 3: Send an email with the token to the user
+
     const { error, data } = await client.auth.resetPasswordForEmail(
       params.email,
       {

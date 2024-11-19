@@ -12,7 +12,7 @@ export const useBilling = () => {
     propietary_organization_id: string;
 } | null>(null);
   const [showUpgradeComponent, setShowUpgradeComponent] = useState(false);
-  const [accountBillingTab, setAccountBillingTab] = useState("account");
+  const [accountBillingTab, setAccountBillingTab] = useState("site");
   const [subscriptionFetchedStripe, setSubscriptionFetchedStripe] = useState<any>(null);
   const [productSubscription, setProductSubscription] = useState<any>(null);
   const [productsDataConfig, setProductsDataConfig] = useState<{
