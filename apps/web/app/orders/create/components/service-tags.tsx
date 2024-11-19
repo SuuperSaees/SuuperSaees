@@ -8,7 +8,7 @@ interface ServiceTagProps {
   maxTags?: number;
 }
 
-export default function ServiceTags({ services, className, maxTags=4 }: ServiceTagProps) {
+export default function ServiceTags({ services, className }: ServiceTagProps) {
   const tagColors = useMemo(
     () => [
       {
@@ -40,33 +40,19 @@ export default function ServiceTags({ services, className, maxTags=4 }: ServiceT
     []
   );
 
-
-
   return (
-    <div className={`flex gap-2 ${className} text-sm max-w-full`}>
+    <div className={`flex gap-2 ${className} text-sm max-w-full flex-wrap items-center`}>
       {services?.map((service, index) => {
-        // Assign a deterministic tag color based on the service's index
         const tagColor = tagColors[index % tagColors.length];
-
-        if (index + 1 === services.length && index + 1 > maxTags) {
-          return (
-            <div
-              key={index}
-              className="h-fit flex items-center gap-1 truncate rounded-full border border-neutral-200 bg-gray-100 px-2 text-sm font-medium text-gray-500"
-            >
-              +{services.length - index}
-            </div>
-          );
-        } else {
-          return (
-            <div
-              key={index}
-              className={`h-fit boder-neutral-400 rounded-full border px-2 ${tagColor?.bgColor} ${tagColor?.textColor} ${tagColor?.borderColor} truncate font-semibold`}
-            >
-              {service.name}
-            </div>
-          );
-        }
+        
+        return (
+          <div
+            key={index}
+            className={`h-fit boder-neutral-400 rounded-full border px-2 ${tagColor?.bgColor} ${tagColor?.textColor} ${tagColor?.borderColor} truncate font-semibold`}
+          >
+            {service.name}
+          </div>
+        );
       })}
     </div>
   );

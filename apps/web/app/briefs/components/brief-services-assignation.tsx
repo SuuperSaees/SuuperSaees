@@ -88,29 +88,31 @@ export default function BriefServicesAssignation({
       <h4 className="text-sm font-semibold">
         {t('creation.panel.settings.services.title')}
       </h4>
-      <div className="no-scrollbar flex max-h-52 flex-wrap items-center gap-2 overflow-y-auto">
-        <ServiceTags services={selectedServices} maxTags={8} />
+      <div className="no-scrollbar flex max-h-52 items-center gap-2 overflow-y-auto">
+        <div className="inline-flex flex-wrap gap-2 items-center">
+          <ServiceTags services={selectedServices} className="inline-flex" />
+          <CheckboxCombobox
+            customItemTrigger={
+              <Button
+                type="button"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 p-0 text-black hover:bg-gray-200 text-gray-700"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            }
+            options={serviceOptions}
+            defaultValues={{
+              serviceIds: brief.services.map((service) => String(service.id)) ?? [],
+            }}
+            values={selectedServices.map((service) => String(service.id))}
+            onSubmit={handleFormSubmit}
+            schema={z.object({
+              serviceIds: z.array(z.string()),
+            })}
+            onSelect={handleSelect}
+          />
+        </div>
       </div>
-      <CheckboxCombobox
-        customItemTrigger={
-          <Button
-            type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 p-0 text-black hover:bg-gray-200 text-gray-700"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        }
-        options={serviceOptions}
-        defaultValues={{
-          serviceIds: brief.services.map((service) => String(service.id)) ?? [],
-        }}
-        values={selectedServices.map((service) => String(service.id))}
-        onSubmit={handleFormSubmit}
-        schema={z.object({
-          serviceIds: z.array(z.string()),
-        })}
-        onSelect={handleSelect}
-      />
     </div>
   );
 }
