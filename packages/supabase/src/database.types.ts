@@ -441,7 +441,9 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          isDraft: boolean | null
           name: string
+          number: number | null
           propietary_organization_id: string
         }
         Insert: {
@@ -450,7 +452,9 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          isDraft?: boolean | null
           name: string
+          number?: number | null
           propietary_organization_id: string
         }
         Update: {
@@ -459,7 +463,9 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          isDraft?: boolean | null
           name?: string
+          number?: number | null
           propietary_organization_id?: string
         }
         Relationships: [
@@ -2528,7 +2534,6 @@ export type Database = {
           is_personal_account: boolean
           name: string
           organization_id: string | null
-          phone_number: number | null
           picture_url: string | null
           primary_owner_user_id: string
           public_data: Json

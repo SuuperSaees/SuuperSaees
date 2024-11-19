@@ -18,7 +18,10 @@ export const updateBriefById = async (briefData: Brief.Request.Update) => {
     const client = getSupabaseServerComponentClient();
     const { error } = await client
       .from('briefs')
-      .update(briefData)
+      .update({
+        ...briefData,
+        isDraft: false,
+      })
       .eq('id', briefData.id);
 
     if (error) {

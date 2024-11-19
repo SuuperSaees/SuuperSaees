@@ -33,7 +33,9 @@ export namespace Brief {
 
   // This represent the request from the client to the server
   export namespace Request {
-    export type Create = Omit<Brief.Insert, 'propietary_organization_id'>;
+    export type Create = Omit<Brief.Insert, 'propietary_organization_id' | 'name'> & {
+      name?: string;
+    };
     export type Update = Omit<Brief.Update, 'propietary_organization_id'> & {
       id: Brief.Type['id'];
     }
