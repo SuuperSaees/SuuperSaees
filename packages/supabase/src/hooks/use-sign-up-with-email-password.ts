@@ -107,6 +107,19 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
       }
     }
 
+    const { error: accountInsertDataError } = await client
+        .from('user_settings')
+        .insert({
+          user_id: userId ?? '',
+        })
+        .select('user_id')
+        .single();
+    
+    if (accountInsertDataError) {
+      console.error('Error inserting account settings:', accountInsertDataError);
+      throw new Error('Error occurred while inserting account settings');
+    }
+
     // Step 2: Take the object session and decode the access_token as jwt to get the session id
     const sessionUserClient = newUserData?.session;
     const createdAtAndUpdatedAt = new Date().toISOString();
