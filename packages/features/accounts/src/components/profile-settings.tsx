@@ -105,7 +105,7 @@ function ProfileSettings({
         <div className="flex justify-between">
           <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
             <p className="font-bold">{t('name')}</p>
-            <p>{t('nameDescription')}</p>
+            <p className='text-wrap'>{t('nameDescription')}</p>
           </div>
 
           <UpdateAccountDetailsFormContainer user={user} />
