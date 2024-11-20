@@ -25,11 +25,18 @@ async function ServiceCheckoutPage({
   const tokendecoded = await decodeTokenData(tokenId);
 
   const organizationSettings = await getOrganizationSettingsByOrganizationId(tokendecoded.organization_id, true);
+  const logoUrl = organizationSettings.find(setting => setting.key === 'logo_url')?.value;
+  const sidebarBackgroundColor = organizationSettings.find(setting => setting.key === 'sidebar_background_color')?.value;
 
   return (
     <OrganizationSettingsProvider initialSettings={organizationSettings}>
       <PageBody className="min-h-screen flex flex-col">
-        <img src={organizationSettings.find(setting => setting.key === 'logo_url')?.value ?? suuperLogo}  className='w-36 h-auto mt-4 mb-2'/>
+        <div className="w-full h-20 flex justify-start" style={{ backgroundColor: sidebarBackgroundColor }}>
+          <img 
+            src={logoUrl ?? suuperLogo}  
+            className='w-36 py-4 px-4'
+          />
+        </div>
         <div className="flex flex-col w-full items-center flex-grow mb-10">
           <div className="mb-4 w-full">
             <Separator className="w-full" />

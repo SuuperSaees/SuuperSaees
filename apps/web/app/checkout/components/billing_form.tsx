@@ -244,28 +244,28 @@ const BillingForm: React.FC<{
                 accountId={stripeId}
                 validSuccess={validSuccess}
               />
-              <div className="flex flex-col items-center justify-center">
-                <div className="mb-10">
-                  <span className="text-center text-sm font-medium leading-[1.42857] text-gray-700">
-                    {t('checkout.securePayment')}
-                  </span>
+              <footer className="mt-auto">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="mb-4">
+                    <span className="text-center text-sm font-medium leading-[1.42857] text-gray-700">
+                      {t('checkout.securePayment')}
+                    </span>
+                  </div>
+                  <Separator className="w-full max-w-md mb-4" />
+                  <div className="flex flex-col items-center gap-2">
+                    <img
+                      src={paymentMethodsImage}
+                      alt="Visa"
+                      className="h-7 w-40"
+                    />
+                    <img
+                      src={poweredByStripeImage}
+                      alt="Powered By Stripe"
+                      className="h-12 w-40"
+                    />
+                  </div>
                 </div>
-                <Separator className="w-full" />
-                <div className="mt-10">
-                  <img
-                    src={paymentMethodsImage}
-                    alt="Visa"
-                    className="h-7 w-40"
-                  />
-                </div>
-                <div>
-                  <img
-                    src={poweredByStripeImage}
-                    alt="Powered By Stripe"
-                    className="h-12 w-40"
-                  />
-                </div>
-              </div>
+              </footer>
             </div>
           </div>
         </form>

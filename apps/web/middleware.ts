@@ -303,8 +303,12 @@ function getPatterns() {
         const isInvitationUrl = req.nextUrl.pathname === '/join' && 
         req.nextUrl.searchParams.has('invite_token');
 
+        // Check if this is a checkout URL
+        const isCheckoutUrl = req.nextUrl.pathname === '/checkout' && 
+        req.nextUrl.searchParams.has('tokenId');
+
         // Skip authentication check for invitation URLs
-        if (isInvitationUrl) {
+        if (isInvitationUrl || isCheckoutUrl) {
           return;
         }
 
