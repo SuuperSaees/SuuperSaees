@@ -19,14 +19,16 @@ const FormRichTextComponent: React.FC<ComponentProps> = ({
   inSidebar = false,
   question,
   handleQuestionChange,
-  // handleQuestionFocus
+  handleQuestionFocus,
+  handleQuestionBlur
 }) => {
+
   return (
     <FormField
       control={form.control}
       name={`questions.${index}.label`}
       render={({ fieldState, field }) => (
-        <FormItem className="flex w-full flex-col group relative">
+        <FormItem className="flex w-full flex-col group relative" >
             <FormControl>
               <RichTextEditor
                 {...field}
@@ -37,6 +39,8 @@ const FormRichTextComponent: React.FC<ComponentProps> = ({
                 showToolbar={true}
                 isEditable={true}
                 className='text-gray-600 text-sm bg-white'
+                onFocus={() => handleQuestionFocus && handleQuestionFocus(question.id, 'label')}
+                onBlur={handleQuestionBlur}
               />
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>

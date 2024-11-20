@@ -9,17 +9,11 @@ import { getUserAccountByEmail } from '../../../features/team-accounts/src/serve
 import { generateMagicLinkRecoveryPassword } from '../../../features/team-accounts/src/server/actions/members/update/update-account';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
 import { getFullDomainBySubdomain } from '../../../multitenancy/utils/get/get-domain';
-import {
-  CustomError,
-  CustomSuccess,
-  ErrorUserOperations,
-} from '../../../shared/src/response';
-import {
-  HttpStatus,
-  statusCodeMap,
-} from '../../../shared/src/response/http-status';
+import { CustomError, CustomSuccess, ErrorUserOperations } from '../../../shared/src/response';
+import { HttpStatus, statusCodeMap } from '../../../shared/src/response/http-status';
 import { createToken } from '../../../tokens/src/create-token';
 import { TokenRecoveryType } from '../../../tokens/src/domain/token-type';
+
 
 interface Params {
   email: string;
@@ -30,6 +24,7 @@ const senderNameKey = OrganizationSettings.KEYS.sender_name;
 const senderEmailKey = OrganizationSettings.KEYS.sender_email;
 const logoUrlKey = OrganizationSettings.KEYS.logo_url;
 const themeColorKey = OrganizationSettings.KEYS.theme_color;
+const langKey = OrganizationSettings.KEYS.language;
 const defaultAgencySenderName =
   OrganizationSettings.EXTRA_KEYS.default_sender_name;
 const defaultAgencyName = OrganizationSettings.EXTRA_KEYS.default_agency_name;
@@ -97,10 +92,14 @@ export function useRequestResetPassword() {
     const baseUrl = url.origin;
     // step 3: Send an email with the token to the user
     const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${params.email}&type=recovery&next=${baseUrl}/set-password`;
-    const lang = 'en';
+    let lang: 'en' | 'es' = 'en';
     const { settings } = await getFullDomainBySubdomain(url.host, true, [
       logoUrlKey,
       themeColorKey,
+      senderNameKey,
+      senderDomainKey,
+      senderEmailKey,
+      langKey,
     ]);
 
     let senderName = '',
@@ -124,6 +123,9 @@ export function useRequestResetPassword() {
       }
       if (setting.key === senderEmailKey) {
         senderEmail = setting.value;
+      }
+      if (setting.key === langKey) {
+        lang = setting.value as 'en' | 'es';
       }
     });
 

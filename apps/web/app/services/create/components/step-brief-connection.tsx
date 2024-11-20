@@ -108,8 +108,9 @@ export default function BriefConnectionStep(
     queryFn: async () => await getBriefs(),
   });
 
-  const briefs = briefsQuery.data ?? [];
-
+  const briefs = (briefsQuery.data ?? []).filter(
+    (brief) => !selectedBriefs.some((selected) => selected.id === brief.id)
+  );
   const briefOptions = briefs.map((brief) => ({
     value: brief.name,
     label: brief.name.charAt(0).toUpperCase() + brief.name.slice(1),

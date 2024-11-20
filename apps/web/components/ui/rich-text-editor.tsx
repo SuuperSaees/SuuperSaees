@@ -19,8 +19,8 @@ import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import {
   Bold,
-  Heading1,
-  Heading2,
+  // Heading1,
+  // Heading2,
   Image,
   Italic,
   List,
@@ -149,6 +149,7 @@ interface RichTextEditorProps {
   showToolbar? : boolean;
   isEditable? : boolean;
   className?: string;
+  [key: string]: unknown;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
 function extractImageUrls(text: string) {
@@ -168,7 +169,8 @@ const RichTextEditor = ({
   hideSubmitButton = false,
   showToolbar = true,
   isEditable = true,
-  className
+  className,
+  ...rest
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
@@ -344,9 +346,15 @@ const RichTextEditor = ({
     }
   }, [editor]);
 
+  // Update the editor content and set caret position
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content ?? '');
+    }
 
+  }, [content, editor]);
   return (
-    <div className={"relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 " + (className ?? '')}>
+    <div className={"relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 " + (className ?? '')} {...rest}>
       <div
         onClick={() => editor?.commands.focus()}
         className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
