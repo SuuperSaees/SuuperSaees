@@ -47,6 +47,7 @@ const defaultOrganizationName =
   OrganizationSettings.EXTRA_KEYS.default_agency_name;
 const defaultFromSenderIdentity =
   OrganizationSettings.EXTRA_KEYS.default_from_sender_identity;
+  
 export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
   const client = useSupabase();
   const mutationKey = ['auth', 'sign-up-with-email-password'];

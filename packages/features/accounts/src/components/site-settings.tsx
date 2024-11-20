@@ -92,7 +92,7 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
   }, []);
 
   return (
-    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap'>
+    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap text-sm'>
       {role === 'agency_owner' && (
         <div className="flex w-full flex-col space-y-6">
           <div className="flex justify-between">
@@ -108,6 +108,19 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
               {t('language')}
             </p>
             <LanguageSelector onChange={handleChangeLanguage} />
+          </div>
+          <Separator />
+          <div className="flex justify-between">
+            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+              <p className="font-bold">{t('brandColor')}</p>
+            </div>
+            <UpdateAccountColorBrand />
+          </div>
+          <div className="flex justify-between">
+            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+              <p className="font-bold">{t('brandSidebar')}</p>
+            </div>
+            <UpdateAccountOrganizationSidebar />
           </div>
           <Separator />
           <div className="flex gap-20">
@@ -151,23 +164,9 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
           <Separator />
           <div className="flex justify-between">
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
-              <p className="font-bold">{t('brandSenderEmailAndDomain')}</p>
+              <p className="font-bold text-wrap">{t('brandSenderEmailAndDomain')}</p>
             </div>
             <UpdateAccountOrganizationSenderEmailAndSenderDomain />
-          </div>
-          <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
-              <p className="font-bold">{t('brandColor')}</p>
-            </div>
-            <UpdateAccountColorBrand />
-          </div>
-          <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
-              <p className="font-bold">{t('brandSidebar')}</p>
-            </div>
-            <UpdateAccountOrganizationSidebar />
           </div>
           <Separator />
           <div className="flex justify-between">

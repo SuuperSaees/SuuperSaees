@@ -50,9 +50,6 @@ export function PriorityCombobox({
   const priorities = ['low', 'medium', 'high'];
   const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
   const router = useRouter();
-  if (mode === 'subtask') {
-    console.log(subtask);
-  }
 
   const changeSubtaskPriority = useMutation({
     mutationFn: async (priority: Order.Type['priority']) => {

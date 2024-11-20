@@ -20,9 +20,11 @@ export default function Panel() {
   const { t } = useTranslation('briefs');
 
   const pathname = usePathname();
-  const showWidgets = pathname === '/briefs/create' || pathname === '/briefs/update'; 
+ // Check if the pathname starts with '/briefs/' and has a valid-looking ID part
+ const isUpdatePath = pathname.startsWith('/briefs/') && pathname.length > '/briefs/'.length;
+ const showWidgets = pathname === '/briefs/create' || isUpdatePath;
 
-  if (!showWidgets) {
+ if (!showWidgets) {
     return null;
   }
 
@@ -78,7 +80,7 @@ export default function Panel() {
         className="flex gap-2"
         onClick={async () => {
           setActiveTab('settings');
-          await form.handleSubmit((values) => onSubmit(values, pathname === '/briefs/update'))();
+          await form.handleSubmit((values) => onSubmit(values, isUpdatePath))();
         }}
       >
         <span>

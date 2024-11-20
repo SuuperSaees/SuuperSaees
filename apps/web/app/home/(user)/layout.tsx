@@ -60,7 +60,6 @@ function getLayoutStyle() {
 }
 
 async function loadOrganizationSettings() {
-  console.log('Cargando los organizationSettings');
   try {
     return await getOrganizationSettings();
   } catch (error) {

@@ -49,26 +49,27 @@ export default function UpdateAccountOrganizationDarkLogo(props: {
         if (logo_dark_url) {
           return deleteLogoImage(client, logo_dark_url) ?? Promise.resolve();
         }
-
         return Promise.resolve();
       };
 
       if (file) {
         const promise = () =>
-          removeExistingStorageFile().then(
-            () =>
-              uploadOrganizationLogo(client, file, props.organizationId).then(
-                (value) => {
-                  updateOrganizationSetting.mutate({
-                    key: 'logo_dark_url',
-                    value,
-                  });
-                },
-              ),
-            // .then(() => {
-            //   props.onLogoUpdated();
-            // }),
-          );
+          removeExistingStorageFile()
+            .then(() => {
+              return uploadOrganizationLogo(client, file, props.organizationId);
+            })
+            .then(
+              (value) => {
+                updateOrganizationSetting.mutate({
+                  key: 'logo_dark_url',
+                  value,
+                });
+              },
+            )
+            .catch((error) => {
+              console.error('[Dark Logo Upload] Error during upload process', error);
+              throw error;
+            });
 
         createToaster(promise);
       } else {
@@ -88,7 +89,6 @@ export default function UpdateAccountOrganizationDarkLogo(props: {
     },
     [client, createToaster, logo_dark_url, props, updateOrganizationSetting],
   );
-  // console.log('logo_dark_url', logo_dark_url);
   return (
     <ImageUploader value={logo_dark_url} onValueChange={onValueChange} className={props.className}
     style={{
@@ -124,18 +124,25 @@ async function uploadOrganizationLogo(
   photoFile: File,
   organizationId: string,
 ) {
-  const bytes = await photoFile.arrayBuffer();
-  const bucket = client.storage.from(ORGANIZATION_BUCKET);
-  const extension = photoFile.name.split('.').pop();
-  const fileName = await getAvatarFileName(organizationId, extension);
-
-  const result = await bucket.upload(fileName, bytes);
-
-  if (!result.error) {
-    return bucket.getPublicUrl(fileName).data.publicUrl;
+  try {
+    const bytes = await photoFile.arrayBuffer();
+    const bucket = client.storage.from(ORGANIZATION_BUCKET);
+    const extension = photoFile.name.split('.').pop();
+    const fileName = await getAvatarFileName(organizationId, extension);
+  
+    const result = await bucket.upload(fileName, bytes);
+  
+    if (!result.error) {
+      const publicUrl = bucket.getPublicUrl(fileName).data.publicUrl;
+      return publicUrl;
+      // return bucket.getPublicUrl(fileName).data.publicUrl;
+    }
+    console.error('[Dark Logo Upload] Upload failed', result.error);
+    throw result.error;
+  } catch (error) {
+    console.error('[Dark Logo Upload] Unexpected error during upload', error);
+    throw error;
   }
-
-  throw result.error;
 }
 
 async function getAvatarFileName(
@@ -148,5 +155,5 @@ async function getAvatarFileName(
   // the browser always fetches the latest image
   const uniqueId = nanoid(16);
 
-  return `${organizationId}.${extension}?v=${uniqueId}`;
+  return `${organizationId}.dark.${extension}?v=${uniqueId}`;
 }

@@ -5,6 +5,7 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
@@ -20,16 +21,19 @@ import {
   updateServiceBriefs,
 } from '~/team-accounts/src/server/actions/briefs/update/update-brief';
 
+import { BriefCreationForm } from '../components/brief-creation-form';
 import { briefCreationFormSchema } from '../schemas/brief-creation-schema';
 import { Brief, FormField } from '../types/brief.types';
 
 export const useBrief = (
   setFormFields: Dispatch<SetStateAction<FormField[]>>,
+  form: UseFormReturn<BriefCreationForm>,
 ) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = usePathname();
-  const isUpdate = pathname === '/briefs/update';
+  const isUpdate =
+    pathname.startsWith('/briefs/') && pathname.length > '/briefs/'.length;
   const defaultBrief = {
     name: '',
     description: '',
@@ -46,8 +50,11 @@ export const useBrief = (
     values: z.infer<typeof briefCreationFormSchema>['questions'],
   ) {
     // Remove the id if start with 'create-form-field-'
-    if(isUpdate){
+    // verify theres's no error on the form
+    await form.trigger('questions');
+    const hasErrors = form.formState.errors.questions?.length;
 
+    if (isUpdate && !hasErrors) {
       try {
         const formattedFormFields = values.map((question) => {
           const newQuestion = { ...question };
@@ -56,13 +63,12 @@ export const useBrief = (
           }
           return newQuestion;
         });
-        if (formattedFormFields.length > 0) {
-          await handleResponse(
-            await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
-            'briefs',
-            t,
-          );
-        }
+
+        await handleResponse(
+          await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
+          'briefs',
+          t,
+        );
       } catch (error) {
         console.error('Error updating brief form fields from client');
         throw error;
