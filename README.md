@@ -10,7 +10,7 @@ This repository is the demo version hosted on Cloudflare Pages. Please use the v
 
 [Please follow the documentation to get started](https://makerkit.dev/docs/next-supabase-turbo/introduction).
 
-# Stripe Integration 🚀
+# Stripe Integration [Depracted]
 
 ```mermaid
 graph TD;
@@ -50,7 +50,7 @@ graph TD;
 ```
 Files: [update-service.tsx](./packages/features/team-accounts/src/server/actions/services/update/update-service.tsx)
 
-## Stripe Billing
+## Stripe Billing Suuper
 
 ```mermaid
 sequenceDiagram
@@ -108,4 +108,24 @@ sequenceDiagram
     Supabase->>Database: Search in the database
     Database-->>Supabase: If exists, retrieve accessToken and refreshToken
     Supabase-->>User: Set session
+```
+
+## Billing integration for agencies [Treli, Stripe]
+
+```mermaid
+graph TD
+    A[Agency creates service] --> B{Has payment methods<br/>configured?}
+    B -->|No| C[Save only in local DB]
+    B -->|Yes| D[Sync with providers]
+    D --> E[Stripe Sync]
+    D --> F[Treli Sync]
+    
+    G[Webhook Provider] --> H{Event Type}
+    H -->|Payment successful| I[Update payment status]
+    H -->|Service update| J[Sync changes]
+    
+    K[Agency connects
+    new provider] --> L[Sync existing services]
+    L --> M[Create services in
+    new provider]
 ```
