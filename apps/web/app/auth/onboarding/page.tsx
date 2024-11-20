@@ -40,11 +40,11 @@ async function UserDataPage({
   } : null;
 
   if(tokendecoded) {
-    if(tokendecoded.expires_at && new Date(tokendecoded.expires_at).getTime() < new Date().getTime() && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain) {
+    if((tokendecoded.expires_at && new Date(tokendecoded.expires_at).getTime() < new Date().getTime() && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain) ?? (userRole === 'agency_owner' && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain)) {
       redirect('/orders');
     }
   } else {
-    if( (userRole === 'agency_owner' && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain ) || (userRole !== 'agency_owner' && sanitizedAccountData?.phone_number) ) {
+    if( (userRole === 'agency_owner' && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain ) ?? (userRole !== 'agency_owner' && sanitizedAccountData?.phone_number) ) {
       redirect('/orders');
     }
   }

@@ -164,7 +164,6 @@ export function WidgetEditForm() {
 
   const handleChangeContent = (value: string) => {
     form.setValue('label' as keyof z.infer<typeof widgetEditSchema>, value);
-
     if (currentFormField) {
       updateFormField(currentFormField.id, {
         ...form.getValues(),
@@ -413,6 +412,7 @@ export function WidgetEditForm() {
         userRole={''}
         inSidebar={true}
         handleQuestionChange={handleChangeContent}
+        question={currentFormField}
       />
     );
   };

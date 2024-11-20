@@ -123,7 +123,13 @@ export default function FieldsetFields({
                   index={index}
                   question={question}
                   form={form}
-                  handleQuestionChange={handleQuestionChange}
+                  handleQuestionChange={
+                    question.type === 'rich-text'
+                      ? (value: string) => {
+                          handleQuestionChange(question.id, 'label', value);
+                        }
+                      : handleQuestionChange
+                  }
                   handleRemoveQuestion={handleRemoveQuestion}
                   handleQuestionFocus={handleQuestionFocus}
                   handleQuestionBlur={handleQuestionBlur}
