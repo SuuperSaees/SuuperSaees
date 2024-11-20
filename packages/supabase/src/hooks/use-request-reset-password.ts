@@ -9,17 +9,11 @@ import { getUserAccountByEmail } from '../../../features/team-accounts/src/serve
 import { generateMagicLinkRecoveryPassword } from '../../../features/team-accounts/src/server/actions/members/update/update-account';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
 import { getFullDomainBySubdomain } from '../../../multitenancy/utils/get/get-domain';
-import {
-  CustomError,
-  CustomSuccess,
-  ErrorUserOperations,
-} from '../../../shared/src/response';
-import {
-  HttpStatus,
-  statusCodeMap,
-} from '../../../shared/src/response/http-status';
+import { CustomError, CustomSuccess, ErrorUserOperations } from '../../../shared/src/response';
+import { HttpStatus, statusCodeMap } from '../../../shared/src/response/http-status';
 import { createToken } from '../../../tokens/src/create-token';
 import { TokenRecoveryType } from '../../../tokens/src/domain/token-type';
+
 
 interface Params {
   email: string;
@@ -101,6 +95,9 @@ export function useRequestResetPassword() {
     const { settings } = await getFullDomainBySubdomain(url.host, true, [
       logoUrlKey,
       themeColorKey,
+      senderNameKey,
+      senderDomainKey,
+      senderEmailKey,
     ]);
 
     let senderName = '',
