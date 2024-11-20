@@ -18,7 +18,6 @@ import { createSubscription } from '~/team-accounts/src/server/actions/subscript
 import { addUserToAirtable } from "~/team-accounts/src/server/utils/airtable";
 import { getOrganizationByUserId } from "~/team-accounts/src/server/actions/organizations/get/get-organizations";
 import { Spinner } from "@kit/ui/spinner";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@kit/ui/alert-dialog";
 
 export function UserDataForm(
   {userId, tokenId, accountData, userRole}: {userId: string, tokenId: string, accountData: {name: string, phone_number: string, subdomain: string} | null, userRole: string }
@@ -27,7 +26,6 @@ export function UserDataForm(
   // const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState('');
   const formSchema = z.object({
     portalUrl: userRole === 'agency_owner' 
@@ -98,10 +96,16 @@ export function UserDataForm(
 
           if (IS_PROD) {
             setRedirectUrl(`https://${subdomain.domain}/orders`);
+            window.location.href = redirectUrl;
           } else {
-            setRedirectUrl(`${BASE_URL}/orders`);
+            if (BASE_URL?.startsWith('https://app.suuper.co')) {
+              setRedirectUrl(`https://${subdomain.domain}/orders`);
+              window.location.href = redirectUrl;
+            } else {
+              setRedirectUrl(`${BASE_URL}/orders`);
+              window.location.href = redirectUrl;
+            }
           }
-          setShowSuccessDialog(true);
           setLoading(false);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -218,27 +222,6 @@ export function UserDataForm(
           </Button>
         </form>
       </Form>
-
-      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('userData.successDialog.heading')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('userData.successDialog.body')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              className="bg-brand text-white"
-              onClick={() => {
-                window.location.href = redirectUrl;
-              }}
-            >
-              {t('userData.successDialog.continueButton')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
