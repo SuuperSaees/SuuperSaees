@@ -11,9 +11,9 @@ import { updateUserSettings } from '../../../../../packages/features/team-accoun
 import { UpdateEmailFormContainer } from './personal-account-settings/email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './personal-account-settings/password/update-password-container';
 import { UpdateAccountDetailsFormContainer } from './personal-account-settings/update-account-details-form-container';
-import { UpdateAccountImageContainer } from './personal-account-settings/update-account-image-container';
 import { Input } from '@kit/ui/input';
 import { UserSettings } from '../../../../../apps/web/lib/user-settings.types';
+import UpdateImage from './personal-account-settings/update-image';
 
 interface ProfileSettingsProps {
   user: Account.Type;
@@ -85,18 +85,18 @@ function ProfileSettings({
   return (
     <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap'>
       <div className="flex w-full flex-col space-y-6">
-        <div className="flex gap-48">
-          <div className="mr-7 flex flex-col whitespace-nowrap text-gray-700">
+        <div className="flex justify-between">
+          <div className="mr-24 flex flex-col whitespace-nowrap text-gray-700">
             <p className="font-bold">{t('accountImage')}</p>
             <p>{t('accountImageDescription')}</p>
           </div>
-          <div>
-            <UpdateAccountImageContainer
+          <div className='w-full'>
+            <UpdateImage 
               user={{
                 pictureUrl: userSettings?.picture_url,
                 id: user.id,
-              }}
-              className="h-20 w-20"
+              }} 
+              mode='profilePicture'
             />
           </div>
         </div>
