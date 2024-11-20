@@ -51,7 +51,9 @@ export const useBrief = (
   ) {
     // Remove the id if start with 'create-form-field-'
     // verify theres's no error on the form
-    await form.trigger('questions');
+    // Perform validation on the reordered values
+    form.reset({ questions: values }, { keepErrors: true });
+    await form.trigger('questions')
     const hasErrors = form.formState.errors.questions?.length;
 
     if (isUpdate && !hasErrors) {
