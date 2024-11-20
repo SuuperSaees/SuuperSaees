@@ -24,6 +24,7 @@ const senderNameKey = OrganizationSettings.KEYS.sender_name;
 const senderEmailKey = OrganizationSettings.KEYS.sender_email;
 const logoUrlKey = OrganizationSettings.KEYS.logo_url;
 const themeColorKey = OrganizationSettings.KEYS.theme_color;
+const langKey = OrganizationSettings.KEYS.language;
 const defaultAgencySenderName =
   OrganizationSettings.EXTRA_KEYS.default_sender_name;
 const defaultAgencyName = OrganizationSettings.EXTRA_KEYS.default_agency_name;
@@ -91,13 +92,14 @@ export function useRequestResetPassword() {
     const baseUrl = url.origin;
     // step 3: Send an email with the token to the user
     const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${params.email}&type=recovery&next=${baseUrl}/set-password`;
-    const lang = 'en';
+    let lang: 'en' | 'es' = 'en';
     const { settings } = await getFullDomainBySubdomain(url.host, true, [
       logoUrlKey,
       themeColorKey,
       senderNameKey,
       senderDomainKey,
       senderEmailKey,
+      langKey,
     ]);
 
     let senderName = '',
@@ -121,6 +123,9 @@ export function useRequestResetPassword() {
       }
       if (setting.key === senderEmailKey) {
         senderEmail = setting.value;
+      }
+      if (setting.key === langKey) {
+        lang = setting.value as 'en' | 'es';
       }
     });
 
