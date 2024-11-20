@@ -1,4 +1,6 @@
 {
+  "update": "Update",
+  "delete": "Delete",
   "generalTab": "My Details",
   "rememberMe": "Remember Me",
   "userDataPage": "Onboarding",
