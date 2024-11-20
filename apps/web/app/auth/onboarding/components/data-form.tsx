@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { Form, FormItem, FormLabel, FormControl, FormMessage, FormField } from '@kit/ui/form';
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -23,10 +23,9 @@ export function UserDataForm(
   {userId, tokenId, accountData, userRole}: {userId: string, tokenId: string, accountData: {name: string, phone_number: string, subdomain: string} | null, userRole: string }
 ) {
   const {t} = useTranslation('auth');
-  // const router = useRouter();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [redirectUrl, setRedirectUrl] = useState('');
   const formSchema = z.object({
     portalUrl: userRole === 'agency_owner' 
       ? z.string().min(2, {message: t('userData.formErrors.portalUrl')}).max(50, {message: t('userData.formErrors.portalUrl')})
@@ -95,15 +94,12 @@ export function UserDataForm(
           }
 
           if (IS_PROD) {
-            setRedirectUrl(`https://${subdomain.domain}/orders`);
-            window.location.href = redirectUrl;
+            router.push(`https://${subdomain.domain}/orders`);
           } else {
-            if (BASE_URL?.startsWith('https://app.suuper.co')) {
-              setRedirectUrl(`https://${subdomain.domain}/orders`);
-              window.location.href = redirectUrl;
+            if (BASE_URL === 'https://app.suuper.co/') {
+              router.push(`https://${subdomain.domain}/orders`);
             } else {
-              setRedirectUrl(`${BASE_URL}/orders`);
-              window.location.href = redirectUrl;
+              router.push(`${BASE_URL}/orders`);
             }
           }
           setLoading(false);
