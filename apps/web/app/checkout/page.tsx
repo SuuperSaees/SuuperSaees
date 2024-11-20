@@ -1,4 +1,3 @@
-import { PageBody } from '@kit/ui/page';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import DetailsSide from './components/details';
@@ -28,7 +27,6 @@ async function ServiceCheckoutPage({
 
   return (
     <OrganizationSettingsProvider initialSettings={organizationSettings}>
-      <PageBody className="min-h-screen flex flex-col">
         <div className="flex flex-col w-full items-center flex-grow mb-10">
           <DetailsSide
             service={tokendecoded.service}
@@ -38,7 +36,6 @@ async function ServiceCheckoutPage({
             sidebarBackgroundColor={sidebarBackgroundColor ?? '#000000'}
           />
         </div>
-      </PageBody>
     </OrganizationSettingsProvider>
   );
 }
