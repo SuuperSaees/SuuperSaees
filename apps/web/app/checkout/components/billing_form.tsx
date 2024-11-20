@@ -172,15 +172,15 @@ const BillingForm: React.FC<{
   return (
     <div className="relative h-full w-full">
       <div 
-        className="absolute top-0 left-0 w-full h-16" 
+        className="absolute top-0 left-0 w-full h-20" 
         style={{ backgroundColor: sidebarBackgroundColor }}
       />
       
       <div className='relative h-full w-full mx-auto flex flex-col justify-center items-center px-2 md:px-4'>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-[1200px]">
-            <div className="flex justify-center lg:justify-start">
-              <img src={logoUrl} alt="Logo" className="h-12 w-auto object-contain relative mt-2" />
+            <div className="flex justify-start lg:justify-start mb-16 mt-4">
+              <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain relative" />
             </div>
             <div className="flex flex-col lg:flex-row gap-8">
               <div className="w-full lg:w-[60%]">
