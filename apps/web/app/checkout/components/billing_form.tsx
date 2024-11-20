@@ -35,13 +35,13 @@ import { SideInfo } from './side-information';
 import { UserInfo } from './user-info';
 import { toast } from 'sonner';
 
-
-
 const BillingForm: React.FC<{
   service: ServiceType;
   stripeId: string;
   organizationId: string;
-}> = ({ service, stripeId, organizationId }) => {
+  logoUrl: string;
+  sidebarBackgroundColor: string;
+}> = ({ service, stripeId, organizationId, logoUrl, sidebarBackgroundColor }) => {
   const paymentMethodsImage = process.env.NEXT_PUBLIC_PAYMENT_METHODS_IMAGE;
   const poweredByStripeImage = process.env.NEXT_PUBLIC_POWERED_BY_STRIPE_IMAGE; 
   const { t } = useTranslation('services');
@@ -170,94 +170,104 @@ const BillingForm: React.FC<{
   }
 
   return (
-    <div className='h-full'>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex gap-8">
-            <div className="w-auto">
-              <div className="font-inter mb-5 text-2xl font-semibold leading-[1.27] text-gray-900">
-                {t('checkout.billing_details')}
-              </div>
-              <UserInfo form={form} />
-              <ServiceTypeSection service={service} />
-              <>
-                <div className="text-gray-900 font-inter text-base font-semibold leading-[2.375]">
-                  {t('checkout.paymentMethod')}
-                </div>
-                <div className="flex w-full gap-4">
-                  <FormField
-                    name="card_name"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem className="w-full">
-                        <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-                          {t('checkout.cardName')}
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="w-full flex-col gap-1.5">
-                    <Label className="mb-1.5 text-sm font-medium leading-[20px] text-gray-700">
-                      {t('checkout.expirationDate')}
-                    </Label>
-                    <CardExpiryElement
-                      id="card_expiry"
-                      className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                    />
-                  </div>
-                </div>
-                <div className="mt-4 flex w-full gap-4">
-                  <div className="w-full flex-col gap-1.5">
-                    <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                      {t('checkout.cardNumber')}
-                    </Label>
-                    <CardNumberElement
-                      id="card_number"
-                      className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                    />
-                  </div>
-                  <div className="w-full flex-col gap-1.5">
-                    <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                      {t('checkout.securityCode')}
-                    </Label>
-                    <CardCvcElement
-                      id="card_cvc"
-                      className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                    />
-                  </div>
-                </div>
-              </>
+    <div className="relative h-full w-full">
+      <div 
+        className="absolute top-0 left-0 w-full h-16" 
+        style={{ backgroundColor: sidebarBackgroundColor }}
+      />
+      
+      <div className='relative h-full w-full mx-auto flex flex-col justify-center items-center px-2 md:px-4'>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-[1200px]">
+            <div className="flex justify-center lg:justify-start">
+              <img src={logoUrl} alt="Logo" className="h-12 w-auto object-contain relative mt-2" />
             </div>
-            <div className="flex flex-col justify-between">
-              <SideInfo
-                form={form}
-                service={service}
-                loading={loading}
-                errorMessage={errorMessage ?? ''}
-                accountId={stripeId}
-                validSuccess={validSuccess}
-              />
-              <footer className="mt-auto">
-                <div className="flex flex-col items-center justify-center">
-                  <div className="mb-4">
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="w-full lg:w-[60%]">
+                <div className="font-inter mb-5 text-2xl font-semibold leading-[1.27] text-gray-900">
+                  {t('checkout.billing_details')}
+                </div>
+                <UserInfo form={form} />
+                <ServiceTypeSection service={service} />
+                <>
+                  <div className="text-gray-900 font-inter text-base font-semibold leading-[2.375]">
+                    {t('checkout.paymentMethod')}
+                  </div>
+                  <div className="flex flex-col sm:flex-row w-full gap-4">
+                    <FormField
+                      name="card_name"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
+                            {t('checkout.cardName')}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="w-full flex-col gap-1.5">
+                      <Label className="mb-1.5 text-sm font-medium leading-[20px] text-gray-700">
+                        {t('checkout.expirationDate')}
+                      </Label>
+                      <CardExpiryElement
+                        id="card_expiry"
+                        className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-col sm:flex-row w-full gap-4">
+                    <div className="w-full flex-col gap-1.5">
+                      <Label className="text-sm font-medium leading-[20px] text-gray-700">
+                        {t('checkout.cardNumber')}
+                      </Label>
+                      <CardNumberElement
+                        id="card_number"
+                        className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                      />
+                    </div>
+                    <div className="w-full flex-col gap-1.5">
+                      <Label className="text-sm font-medium leading-[20px] text-gray-700">
+                        {t('checkout.securityCode')}
+                      </Label>
+                      <CardCvcElement
+                        id="card_cvc"
+                        className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                      />
+                    </div>
+                  </div>
+                </>
+              </div>
+              <div className="w-full lg:w-[40%] flex flex-col justify-between">
+                <SideInfo
+                  form={form}
+                  service={service}
+                  loading={loading}
+                  errorMessage={errorMessage ?? ''}
+                  accountId={stripeId}
+                  validSuccess={validSuccess}
+                />
+                <div className="flex flex-col items-center justify-center mt-6 lg:mt-0">
+                  <div className="mb-10">
                     <span className="text-center text-sm font-medium leading-[1.42857] text-gray-700">
                       {t('checkout.securePayment')}
                     </span>
                   </div>
-                  <Separator className="w-full max-w-md mb-4" />
-                  <div className="flex flex-col items-center gap-2">
+                  <Separator className="w-full" />
+                  <div className="mt-10">
                     <img
                       src={paymentMethodsImage}
                       alt="Visa"
                       className="h-7 w-40"
                     />
+                  </div>
+                  <div>
                     <img
                       src={poweredByStripeImage}
                       alt="Powered By Stripe"
@@ -265,11 +275,11 @@ const BillingForm: React.FC<{
                     />
                   </div>
                 </div>
-              </footer>
+              </div>
             </div>
-          </div>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 };
