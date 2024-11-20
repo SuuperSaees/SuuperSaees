@@ -2,11 +2,11 @@ import { getAllClients } from 'node_modules/@kit/team-accounts/src/server/action
 
 import { ClientsTable } from '@kit/team-accounts/components';
 import { PageBody } from '@kit/ui/page';
-import { Trans } from '@kit/ui/trans';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { getUserRole } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import { PageTitle } from '../components/page-title';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -24,15 +24,7 @@ async function ClientsMembersPage() {
   return (
     <PageBody>
       <div className="p-[35px]">
-        <div className="mb-[36px] flex items-center justify-between">
-          <div className="flex-grow">
-            <span>
-              <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
-                <Trans i18nKey={'clients:client'} />
-              </div>
-            </span>
-          </div>
-        </div>
+        <PageTitle i18nKey="clients:client" />
         <ClientsTable
           clients={clientsWithOrganizations ?? []}
           userRole={userRole}

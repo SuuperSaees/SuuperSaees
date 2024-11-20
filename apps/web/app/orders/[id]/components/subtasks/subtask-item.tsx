@@ -23,7 +23,7 @@ import StatusCombobox from '../status-combobox';
 import SubtaskAssignations from './subtask-assignations';
 import SubtaskFollowers from './subtask-followers';
 import { PriorityCombobox } from '../priority-combobox';
-import { useTranslation } from 'react-i18next';
+import { TimeTracker } from '../time-tracker';
 
 const SubtaskItem = ({
   t,
@@ -278,7 +278,13 @@ const SubtaskItem = ({
           subtask={subtask}
           subtaskId={subtask.id}
         />
-        <div className="ml-3 h-4 w-4">
+        <div className="flex items-center">
+          <TimeTracker
+            subtaskId={subtask.id}
+            taskId={subtask.parent_task_id}
+            isHovered={isHovered}
+            subtaskName={subtask.name}
+          />
           <TrashIcon
             className={`h-4 w-4 cursor-pointer ${isHovered ? 'text-gray-500 hover:text-red-500' : 'text-transparent'}`}
             onClick={async () =>

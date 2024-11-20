@@ -15,6 +15,7 @@ import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table'
 
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
 import { useStripeActions } from '../hooks/use-stripe-actions';
+import { PageTitle } from '../../components/page-title';
 
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
@@ -62,15 +63,7 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
       <Elements stripe={stripePromise}>
         <PageBody>
           <div className="p-[35px]">
-            <div className="mb-[32px] flex items-center justify-between">
-              <div className="flex-grow">
-                <span>
-                  <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
-                    {t('services:title')}
-                  </div>
-                </span>
-              </div>
-            </div>
+            <PageTitle i18nKey="services:title" />
             <TabsContent className="bg-transparent" value="services">
               <ServicesTable
                 activeTab={activeTab}

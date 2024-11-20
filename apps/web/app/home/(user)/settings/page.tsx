@@ -9,8 +9,8 @@ import featureFlagsConfig from '~/config/feature-flags.config';
 import pathsConfig from '~/config/paths.config';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
-import { Trans } from '@kit/ui/trans';
 import { withI18n } from '~/lib/i18n/with-i18n';
+import { PageTitle } from '../../../components/page-title';
 
 const features = {
   enableAccountDeletion: featureFlagsConfig.enableAccountDeletion,
@@ -35,15 +35,7 @@ function PersonalAccountSettingsPage() {
   return (
     <PageBody>
       <div className="p-[35px]">
-        <div className="mb-[32px] flex items-center justify-between">
-          <div className="flex-grow">
-            <span>
-              <div className="text-primary-900 font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px]">
-                <Trans i18nKey={'account:settingsTab'} />
-              </div>
-            </span>
-          </div>
-        </div>
+        <PageTitle i18nKey="account:settingsTab" />
 
         <PersonalAccountSettingsContainer
           userId={user.id}
