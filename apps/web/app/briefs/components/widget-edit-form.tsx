@@ -1,12 +1,12 @@
 'use client';
 
-import React, { ChangeEvent, useEffect } from 'react';
+import React, { ChangeEvent, useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash } from 'lucide-react';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
@@ -22,10 +22,12 @@ import {
 import { Switch } from '@kit/ui/switch';
 
 import { FormField as FormFieldType } from '~/lib/form-field.types';
+import { deepEqual } from '~/utils/compare';
 
 import { useBriefsContext } from '../contexts/briefs-context';
 import { useVideoHandler } from '../hooks/use-video-handler';
 import { widgetEditSchema } from '../schemas/widget-edit-schema';
+import { FormField as FormFieldBrief, Option } from '../types/brief.types';
 import FormRichTextComponent from './content-fields/rich-text-content';
 import { RenderVideoContent } from './render-video-content';
 import UploadImageDropzone from './upload-image-dropzone';
@@ -47,13 +49,20 @@ function organizeFormField(field: FormFieldType.Type) {
 
 export type WidgetCreationForm = z.infer<typeof widgetEditSchema>;
 export function WidgetEditForm() {
-  const { currentFormField, updateFormField } = useBriefsContext();
+  const {
+    currentFormField,
+    updateFormField,
+    updateBriefFormFields,
+    formFields,
+  } = useBriefsContext();
   const { t } = useTranslation('briefs');
   const form = useForm<z.infer<typeof widgetEditSchema>>({
     resolver: zodResolver(widgetEditSchema),
     defaultValues: currentFormField,
     mode: 'onChange',
   });
+  const initialFormState =
+    useRef<Partial<FormFieldBrief | undefined>>(currentFormField);
   const {
     isUploading,
     videoUrl,
@@ -74,10 +83,6 @@ export function WidgetEditForm() {
     checkVideoValidity,
   } = useVideoHandler(t, form, currentFormField, updateFormField);
 
-  const { fields: optionsFields } = useFieldArray({
-    control: form.control,
-    name: 'options',
-  });
   // Remove function for options // should also updateFormField
   const removeOption = (index: number) => {
     // remove(index);
@@ -113,11 +118,37 @@ export function WidgetEditForm() {
     const { name, value } = e.target;
     form.setValue(name as keyof z.infer<typeof widgetEditSchema>, value);
 
-    if (currentFormField) {
+    const isOption = name.startsWith('options');
+    if (currentFormField && !isOption) {
       updateFormField(currentFormField.id, {
         ...form.getValues(),
         [name]: value,
       });
+    } else if (isOption && currentFormField) {
+      const optionIndex = parseInt(name.split('.')[1] ?? "0", 10); // Default to 0 if split fails
+      const newOptions = [...(currentFormField?.options ?? [])];
+      newOptions[optionIndex] = {
+        ...(currentFormField?.options?.[optionIndex] as Option),
+        label: value,
+      };
+      updateFormField(currentFormField.id, {
+        ...form.getValues(),
+        ['options']: newOptions,
+      });
+    }
+  };
+
+  const handleBlur = async () => {
+    const currentFormState = form.getValues();
+    const updatedFields = formFields.map((field) =>
+      field.id === currentFormField?.id
+        ? { ...field, ...currentFormField }
+        : field,
+    );
+    // Use the custom deep equality check
+    if (!deepEqual(initialFormState.current, currentFormState)) {
+      await updateBriefFormFields(updatedFields);
+      initialFormState.current = currentFormField;
     }
   };
 
@@ -148,10 +179,13 @@ export function WidgetEditForm() {
     }
   };
 
-  const renderOptionFields = (type: string) => (
+  const renderOptionFields = (type: string, options: Option[]) => (
     <React.Fragment>
-      {optionsFields.map((option, index) => (
-        <div key={option.id} className="relative flex flex-col gap-2 group">
+      {options.map((_, index) => (
+        <div
+          key={'opt-' + index}
+          className="group relative flex flex-col gap-2"
+        >
           {renderFieldInput(
             `options.${index}.label`,
             t('creation.form.marks.options.label', { number: index + 1 }),
@@ -171,8 +205,7 @@ export function WidgetEditForm() {
           <Button
             type="button"
             onClick={() => removeOption(index)}
-            className="text-red absolute right-1 top-0 h-4 w-4 rounded-full bg-transparent p-0 text-gray-600 shadow-none hover:bg-transparent hover:text-gray-900
-            group-hover:block hidden"
+            className="text-red absolute right-1 top-0 hidden h-4 w-4 rounded-full bg-transparent p-0 text-gray-600 shadow-none hover:bg-transparent hover:text-gray-900 group-hover:block"
           >
             <Trash className="w-full" />
           </Button>
@@ -240,7 +273,10 @@ export function WidgetEditForm() {
           name={fieldName as keyof z.infer<typeof widgetEditSchema>}
           control={form.control}
           render={({ field }) => (
-            <FormItem className="flex items-center justify-between space-y-0">
+            <FormItem
+              className="flex items-center justify-between space-y-0"
+              onBlur={handleBlur}
+            >
               <p className="text-sm font-bold text-gray-600">
                 {t('validation.required')}
               </p>
@@ -264,7 +300,7 @@ export function WidgetEditForm() {
           name={fieldName as keyof z.infer<typeof widgetEditSchema>}
           control={form.control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem onBlur={handleBlur}>
               <FormLabel
                 className={
                   isValueField ? 'hidden' : 'text-sm font-bold text-gray-600'
@@ -310,7 +346,7 @@ export function WidgetEditForm() {
           name={fieldName as keyof z.infer<typeof widgetEditSchema>}
           control={form.control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem onBlur={handleBlur}>
               <FormLabel
                 className={
                   isValueField ? 'hidden' : 'text-sm font-bold text-gray-600'
@@ -330,7 +366,6 @@ export function WidgetEditForm() {
                       // .toLowerCase()
                       // .replace(/\s+/g, '_') // Replace spaces with underscores
                       // .replace(/[^\w_]+/g, ''); // Remove special characters
-
                       form.setValue(`options.${index}.value`, sanitizedValue);
                     }
 
@@ -394,7 +429,7 @@ export function WidgetEditForm() {
             type === 'select' ||
             type === 'dropdown')
         )
-          return renderOptionFields(type);
+          return renderOptionFields(type, currentFormField.options as Option[]);
         if (type === 'image' && fieldName == 'placeholder')
           return renderImageInput();
         if (type === 'image' && fieldName == 'label') return null;
