@@ -11,8 +11,6 @@ export const OrderTimer = () => {
   const { activeTimer } = useTimeTracker();
   const [time, setTime] = useState(0);
 
-  console.log('activeTimer', activeTimer);
-
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     

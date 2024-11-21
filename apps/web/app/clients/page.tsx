@@ -6,7 +6,8 @@ import { PageBody } from '@kit/ui/page';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { getUserRole } from '~/team-accounts/src/server/actions/members/get/get-member-account';
-import { PageTitle } from '../components/page-title';
+import { PageHeader } from '../components/page-header';
+import { OrderTimer } from '../components/timer';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -24,7 +25,10 @@ async function ClientsMembersPage() {
   return (
     <PageBody>
       <div className="p-[35px]">
-        <PageTitle i18nKey="clients:client" />
+        <PageHeader
+            title="clients:client" 
+            rightContent={<OrderTimer/>}
+        />
         <ClientsTable
           clients={clientsWithOrganizations ?? []}
           userRole={userRole}

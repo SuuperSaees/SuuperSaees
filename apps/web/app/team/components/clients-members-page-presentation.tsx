@@ -7,12 +7,11 @@ import {
   InviteMembersDialogContainer,
 } from '@kit/team-accounts/components';
 import { If } from '@kit/ui/if';
-// import { InfoIcon } from "lucide-react";
 import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
-import { PageTitle } from '../../components/page-title';
-// import { useBilling } from '../../home/[account]/hooks/use-billing';
+import { PageHeader } from '../../components/page-header';
+import { OrderTimer } from '../../components/timer';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -88,7 +87,10 @@ const ClientsMembersPagePresentation = ({
   return (
     <PageBody>
       <div className="p-[35px]">
-        <PageTitle i18nKey="team:team" />
+        <PageHeader 
+          title='team:team'
+          rightContent={<OrderTimer/>}
+        />
 
         <div className="w-full">
           <div className="flex items-center justify-between pb-[28px]">

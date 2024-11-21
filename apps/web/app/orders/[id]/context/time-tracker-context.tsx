@@ -2,28 +2,12 @@
 
 
 import React, { createContext, useContext, useState } from 'react';
-
-interface TimeTrackerContextType {
-  activeTimer: {
-    subtaskId: string | null;
-    taskId: string | null;
-    subtaskName: string | null;
-    startTime: number | null;
-    elapsedTime: number;
-  };
-  setActiveTimer: (data: {
-    subtaskId: string | null;
-    taskId: string | null;
-    subtaskName: string | null;
-    startTime: number | null;
-    elapsedTime: number;
-  }) => void;
-}
+import { Timer, TimeTrackerContextType } from '~/lib/timer.types';
 
 const TimeTrackerContext = createContext<TimeTrackerContextType | undefined>(undefined);
 
 export function TimeTrackerProvider({ children }: { children: React.ReactNode }) {
-  const [activeTimer, setActiveTimer] = useState<TimeTrackerContextType['activeTimer']>({
+  const [activeTimer, setActiveTimer] = useState<Timer>({
     subtaskId: null,
     taskId: null,
     subtaskName: null,

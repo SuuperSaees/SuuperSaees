@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Elements } from '@stripe/react-stripe-js';
 import { Stripe } from '@stripe/stripe-js';
-import { useTranslation } from 'react-i18next';
 
 import { PageBody } from '@kit/ui/page';
 import { Tabs, TabsContent } from '@kit/ui/tabs';
@@ -15,7 +14,8 @@ import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table'
 
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
 import { useStripeActions } from '../hooks/use-stripe-actions';
-import { PageTitle } from '../../components/page-title';
+import { PageHeader } from '../../components/page-header';
+import { OrderTimer } from '../../components/timer';
 
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
@@ -33,8 +33,6 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
   const searchParams = useSearchParams();
   const briefsView = searchParams.get('briefs');
   const router = useRouter();
-
-  const { t } = useTranslation('orders');
 
   const [activeTab, setActiveTab] = useState<'services' | 'briefs'>(
     briefsView === 'true' ? 'briefs' : 'services',
@@ -63,7 +61,10 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
       <Elements stripe={stripePromise}>
         <PageBody>
           <div className="p-[35px]">
-            <PageTitle i18nKey="services:title" />
+            <PageHeader
+              title='services:title'
+              rightContent={<OrderTimer/>}
+            />
             <TabsContent className="bg-transparent" value="services">
               <ServicesTable
                 activeTab={activeTab}

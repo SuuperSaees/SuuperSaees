@@ -10,7 +10,8 @@ import pathsConfig from '~/config/paths.config';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { PageTitle } from '../../../components/page-title';
+import { PageHeader } from '../../../components/page-header';
+import { OrderTimer } from '../../../components/timer';
 
 const features = {
   enableAccountDeletion: featureFlagsConfig.enableAccountDeletion,
@@ -35,7 +36,10 @@ function PersonalAccountSettingsPage() {
   return (
     <PageBody>
       <div className="p-[35px]">
-        <PageTitle i18nKey="account:settingsTab" />
+        <PageHeader
+          title='account:settingsTab'
+          rightContent={<OrderTimer/>}
+        />
 
         <PersonalAccountSettingsContainer
           userId={user.id}
