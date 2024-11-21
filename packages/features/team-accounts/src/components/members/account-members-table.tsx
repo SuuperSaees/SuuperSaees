@@ -25,6 +25,7 @@ import { RemoveMemberDialog } from './remove-member-dialog';
 import { RoleBadge } from './role-badge';
 import { TransferOwnershipDialog } from './transfer-ownership-dialog';
 import { UpdateMemberRoleDialog } from './update-member-role-dialog';
+import Link from 'next/link';
 
 type Members =
   Database['public']['Functions']['get_account_members']['Returns'];
@@ -130,9 +131,9 @@ function useGetColumns(
           const member = row.original;
           const displayName = member.name ?? member.email.split('@')[0];
           const isSelf = member.user_id === params.currentUserId;
-
+          
           return (
-            <span className={'flex items-center space-x-4 text-left'}>
+            <Link className={'flex items-center space-x-4 text-left'} href={`/team/${member.id}`}>
               <span>
                 <ProfileAvatar
                   displayName={displayName}
@@ -145,7 +146,7 @@ function useGetColumns(
               <If condition={isSelf}>
                 <Badge variant={'outline'}>{t('youLabel')}</Badge>
               </If>
-            </span>
+            </Link>
           );
         },
       },
