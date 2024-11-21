@@ -16,6 +16,7 @@
   "settingsTabDescription": "Administra tus configuraciones y preferencias.",
   "emailAddress": "Correo electrónico",
   "password": "Contraseña",
+  "confirmClose": "¿Estás seguro de que quieres continuar?",
   "modalConfirmationQuestion": "¿Estás seguro de que quieres continuar?",
   "loading": "Estamos cargando la pagina...",
   "genericServerErrorHeading": "Lo siento, algo salió mal al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
