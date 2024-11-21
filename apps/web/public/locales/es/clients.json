@@ -72,6 +72,23 @@
   "noClientsDescription": "Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.",
   "clients": "Clientes",
   "searchClients": "Buscar",
-  "searchOrganizations": "Buscar"
+  "searchOrganizations": "Buscar",
+  "deletion": {
+    "title": "Eliminar cliente",
+    "description": "¿Estás seguro de que deseas eliminar este cliente?",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "editUser": {
+    "editUserInfo": "Editar usuario",
+    "supplant": "Suplantar",
+    "resetPassword": "Reestablecer contraseña",
+    "edit" : "Editar",
+    "fullName": "Nombre completo",
+    "email": "Correo electrónico",
+    "role": "Rol",
+    "saveChanges": "Guardar cambios",
+    "switchOrganization": "Cambiar organización"
+  }
 }
 

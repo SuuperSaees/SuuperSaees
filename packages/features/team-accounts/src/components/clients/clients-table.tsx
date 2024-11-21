@@ -31,6 +31,7 @@ import DeleteUserDialog from '../../../../../../packages/features/team-accounts/
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { ClientsWithOrganization } from '../../server/actions/clients/get/get-clients';
 import { Account } from '../../../../../../apps/web/lib/account.types';
+import AgencyClientCrudMenu from './agency-client-crud-menu';
 
 // import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 
@@ -402,7 +403,8 @@ const useClientColumns = (
           return userRole === 'agency_owner' &&(
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <UpdateClientDialog {...client} /> */}
-              <DeleteUserDialog userId={client.id} />
+              {/* <DeleteUserDialog userId={client.id} /> */}
+              <AgencyClientCrudMenu userId = {client.id} />
             </div>
           );
         },
