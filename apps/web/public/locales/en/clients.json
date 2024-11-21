@@ -71,5 +71,22 @@
   "noClientsDescription": "You haven't created any clients yet, add one by clicking below.",
   "clients": "Clients",
   "searchClients": "Search",
-  "searchOrganizations": "Search"
+  "searchOrganizations": "Search",
+  "deletion": {
+    "title": "Delete client",
+    "description": "Are you sure you want to delete this client?",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "editUser": {
+    "editUserInfo": "Edit user",
+    "supplant": "Supplant",
+    "resetPassword": "Reset password",
+    "edit" : "Edit",
+    "fullName": "Full Name",
+    "email": "Email",
+    "role": "Role",
+    "saveChanges": "Save changes",
+    "switchOrganization": "Switch organization"
+  }
 }
