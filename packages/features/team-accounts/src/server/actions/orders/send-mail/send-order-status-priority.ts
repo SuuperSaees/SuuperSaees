@@ -31,13 +31,15 @@ export async function sendOrderStatusPriorityEmail(
   const { t } = getEmailTranslations('orderStatusPriority', lang);
 
   const fieldKey = field as 'status' | 'priority' | 'due_date';
+  const fieldKeySubject = `${fieldKey}.subject` as keyof typeof t;
+  const fieldKeyBody = `${fieldKey}.body` as keyof typeof t;
 
-  const subject = t(fieldKey, {
+  const subject = t(fieldKeySubject, {
     actualName,
     orderTitle,
     message,
   });
-  const bodyMessage = t(fieldKey, {
+  const bodyMessage = t(fieldKeyBody, {
     actualName,
     orderTitle,
     message,
@@ -113,7 +115,7 @@ export async function sendOrderStatusPriorityEmail(
                                       <img
                                         src="${logoUrl}"
                                         alt="Company Logo"
-                                        style="width: 142px; height: 32px; margin-bottom: 20px;"
+                                        style="width: 142px; height: auto; margin-bottom: 20px;"
                                       />
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${t('greeting', { actualName })}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${bodyMessage}.</p>
