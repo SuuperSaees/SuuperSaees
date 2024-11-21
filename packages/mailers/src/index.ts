@@ -81,13 +81,25 @@ const translations = {
 //   key: TranslationKeys<T>;
 //   replacements?: Record<string, string>;
 // };
+type TranslationObject = Record<string, string | Record<string, string>>;
 
 export function getEmailTranslations<T extends EmailTypes>(emailType: T, lang: 'en' | 'es' = 'en') {
   const emailTranslations = translations[lang][emailType];
 
   return {
     t: ((key: TranslationKeys<T>, replacements?: Record<string, string>) => {
-      const rawText = emailTranslations[key as keyof typeof emailTranslations];
+      const keyPath = (key as string).split('.');
+      
+      const rawText = keyPath.reduce((obj: TranslationObject, key) => {
+        return (obj?.[key] ?? {}) as TranslationObject;
+      }, emailTranslations as TranslationObject);
+
+      // Handle undefined or non-string values
+      if (rawText === undefined) {
+        console.warn(`Translation key not found: ${key as string}`);
+        return key;
+      }
+
       const text = typeof rawText === 'string' ? rawText : String(rawText);
       
       if (replacements) {

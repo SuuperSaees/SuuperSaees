@@ -101,7 +101,7 @@ export async function sendOrderCompleted(
                                       <img
                                         src="${logoUrl}"
                                         alt="Company Logo"
-                                        style="width: 142px; height: 32px; margin-bottom: 20px;"
+                                        style="width: 142px; height: auto; margin-bottom: 20px;"
                                       />
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:700;line-height:24px;">${t('greeting', { actualName })}</p>
                                       <p style="color: var(--Gray-700, #344054);font-size:16px;font-style:normal;font-weight:400;line-height:24px;">${bodyMessage}</p>
