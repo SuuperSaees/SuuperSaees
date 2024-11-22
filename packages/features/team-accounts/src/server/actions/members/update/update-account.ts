@@ -43,6 +43,71 @@ export const updateUserAccount = async (
   }
 };
 
+export const updateUserRole = async(
+  userId: Account.Type['id'],
+  role: string,
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
+) => {
+  databaseClient =
+    databaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+  try {
+    const { data: userRoleData, error: errorUpdateUserRole } =
+      await databaseClient
+        .from('accounts_memberships')
+        .update({account_role: role})
+        .eq('user_id', userId);
+
+    if (errorUpdateUserRole)
+      throw new Error(
+        `Error updating the user role: ${errorUpdateUserRole.message}`,
+      );
+
+    return userRoleData;
+  } catch (error) {
+    console.error('Error updating the user role', error);
+    throw error;
+  }
+}
+
+export const updateUserEmail = async(
+  userId: Account.Type['id'],
+  email: Account.Type['email'],
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
+) => {
+  databaseClient =
+    databaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+  
+  try{
+    console.log('newEmail', email)
+    const { data, error } = await databaseClient.auth.admin.updateUserById(
+      userId,
+      {email: email}
+    )
+
+
+    if (error){
+      console.log('full error:')
+      console.log(error)
+      throw new Error(
+        `Error updating the user email: ${error.message}`,
+      );
+    }
+    
+    return data;
+  }catch(error){
+    console.error('Error updating the user email', error);
+    throw error;
+  }
+}
+
 export const updateUserSettings = async (
   userId: Account.Type['id'],
   userSettings: UserSettings.Update,

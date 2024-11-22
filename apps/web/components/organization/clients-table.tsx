@@ -21,6 +21,7 @@ import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
 
 import { Account } from '~/lib/account.types';
+import AgencyClientCrudMenu from '~/team-accounts/src/components/clients/agency-client-crud-menu';
 
 
 type Members = Pick<
@@ -112,10 +113,11 @@ function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
             permissions.canRemoveFromAccount(row.original.id) && (
               <div className="h-18 flex items-center gap-4 self-stretch p-4">
                 {/* <UpdateClientDialog {...client} /> */}
-                <DeleteUserDialog
+                {/* <DeleteUserDialog
                   userId={client.id}
                   queryKey={permissions.queryKey}
-                />
+                /> */}
+                <AgencyClientCrudMenu userId={client.id} name={client.name} email={client.email ?? ''} queryKey={permissions.queryKey} />
               </div>
             )
           );

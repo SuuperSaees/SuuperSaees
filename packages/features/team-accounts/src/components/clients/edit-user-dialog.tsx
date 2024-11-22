@@ -1,16 +1,18 @@
-import React, { useState, useCallback } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { Pen } from 'lucide-react';
+import React, { useCallback} from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { Avatar, AvatarFallback} from '@kit/ui/avatar';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@kit/ui/dialog';
 import {
   Form,
@@ -21,81 +23,110 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@kit/ui/select';
+
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@kit/ui/select';
-import { useTranslation } from 'react-i18next';
+import { updateUserAccount, updateUserEmail, updateUserRole } from '../../server/actions/members/update/update-account';
 
-const mockRoles = [
-  { label: 'User', value: 'user' },
-  { label: 'Admin', value: 'admin' },
-  { label: 'Moderator', value: 'moderator' },
-];
+interface EditUserDialogProps {
+  userId: string;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  name: string;
+  email: string;
+}
 
-const formSchema = z.object({
-  fullName: z.string().min(2, {
-    message: 'fullName must be at least 2 characters.',
-  }),
-  email: z.string().email({
-    message: 'Please enter a valid email address.',
-  }),
-  role: z.string().min(2, {
-    message: 'Role must be at least 2 characters.',
-  }),
-});
+function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDialogProps) {
 
-function EditUserDialog() {
-  const [isOpen, setIsOpen] = useState(false);
-  const {t} = useTranslation('clients');
+  const { t } = useTranslation('clients');
+
+  const roles = [
+    {value : 'client_member', label : t('clientMember') },
+    {value : 'client_owner', label : t('clientOwner') },
+  ];
+
+  const formSchema = z.object({
+    fullName: z.string().min(3, {
+      message: t('editUser.badInputFullName'),
+    }),
+    email: z.string().email({
+      message: t('editUser.badInputEmail'),
+    }),
+    role: z.string().refine((value) => roles.some((role) => role.value === value), {
+      message: t('editUser.badInputRole'),
+    }),
+  });
+
+  const mutateUser = useMutation({
+    mutationFn: async () => {
+      await updateUserEmail(userId, form.getValues('email'), undefined, true);
+      await updateUserAccount(
+        {
+          name: form.getValues('fullName'),
+          email: form.getValues('email'),
+        },
+        userId,
+        undefined,
+        true,
+      );
+      await updateUserRole(userId, form.getValues('role'), undefined, true);
+    },
+    onSuccess: () => {
+      toast.success(t('success'), {
+        description: t('editUser.successEdit'),
+      });
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error('Error', {
+        description: t('editUser.failureEdit'),
+      });
+    },
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
+      fullName: name,
+      email: email,
       role: '',
     },
   });
 
   const onSubmit = useCallback((values: z.infer<typeof formSchema>) => {
     console.log(values);
+    mutateUser.mutate();
     setIsOpen(false);
   }, []);
 
-  const handleOpenChange = useCallback((open: boolean) => {
-    if (!open) {
-      form.reset();
-    }
-    setIsOpen(open);
-  }, [form]);
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        form.reset();
+      }
+      setIsOpen(open);
+    },
+    [form],
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <button
-          className="w-full text-left"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsOpen(true);
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <Pen className="h-4 w-4" />
-            {t('editUser.edit')}
-          </div>
-        </button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            <p className="text-base font-semibold">{t('editUser.editUserInfo')}</p>
+            <p className="text-base font-semibold">
+              {t('editUser.editUserInfo')}
+            </p>
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="fullName"
@@ -104,15 +135,22 @@ function EditUserDialog() {
                   <Avatar className="mt-[12px] scale-150 p-0">
                     <AvatarFallback>{'T'}</AvatarFallback>
                   </Avatar>
-                  <FormControl className="mt-0 w-full">
-                    <div>
-                      <FormLabel aria-required={true}>
-                        {t('editUser.fullName')}
-                      </FormLabel>
-                      <Input required={true} placeholder="Enter full name" {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
+                  <div className='w-full'>
+                    <FormControl className="mt-0 w-full">
+                      <div>
+                        <FormLabel>{t('editUser.fullName')}</FormLabel>
+                        <Input
+                          required={true}
+                          placeholder="Enter full name"
+                          type='text'
+                          {...field}
+                          className='mt-2'
+
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage className='mt-4' />
+                  </div>
                 </FormItem>
               )}
             />
@@ -123,8 +161,16 @@ function EditUserDialog() {
                 <FormItem className="space-y-0">
                   <FormControl className="w-full">
                     <div className="my-4">
-                      <FormLabel aria-required={true}>{t('editUser.email')}</FormLabel>
-                      <Input required={true} type="email" placeholder="Enter email" {...field} />
+                      <FormLabel aria-required={true}>
+                        {t('editUser.email')}
+                      </FormLabel>
+                      <Input
+                        required={true}
+                        type="email"
+                        placeholder="Enter email"
+                        {...field}
+                        className='mt-2'
+                      />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -140,11 +186,11 @@ function EditUserDialog() {
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
+                        <SelectValue placeholder={t('editUser.badInputRole')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {mockRoles.map((role) => (
+                      {roles.map((role) => (
                         <SelectItem key={role.value} value={role.value}>
                           {role.label}
                         </SelectItem>
@@ -166,4 +212,3 @@ function EditUserDialog() {
 }
 
 export default EditUserDialog;
-
