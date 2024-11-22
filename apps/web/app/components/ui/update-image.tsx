@@ -67,7 +67,7 @@ export default function UpdateImage({
           fileName = `${bucketStorage.id}.${fileExtension}?v=${fileUuid}`;
         }
       }
-      console.log('fileName', fileName);
+      
       const bucket = client.storage.from(bucketStorage.name);
       const result = await bucket.upload(fileName, bytes);
 

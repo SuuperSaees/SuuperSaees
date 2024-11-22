@@ -3,22 +3,28 @@
 import EditableHeader from '~/components/editable-header';
 
 import UpdateImage from '../ui/update-image';
+import { Account } from '~/lib/account.types';
 
+type AccountType = Pick<Account.Type, 'id' | 'name' | 'email' | 'picture_url'>;
+
+type BucketStorage = {
+  id: string;
+  name: string;
+  identifier: string;
+}
+
+type Controllers = {
+  onUpdateAccountImage: (value: string) => Promise<void>;
+  onUpdateAccountName: (value: string) => Promise<void>;
+}
 interface AccountHeaderProps {
   id: string;
   currentUserRole: string;
-  account: {
-    id: string;
-    name: string;
-    picture_url?: string;
-    email?: string | null;
-  };
-  bucketStorage: { id: string; name: string; identifier: string };
+  account:  AccountType
+  rolesThatCanEdit: Set<string>;
+  bucketStorage: BucketStorage;
   emailLabel?: string;
-  controllers: {
-    onUpdateAccountImage: (value: string) => Promise<void>;
-    onUpdateAccountName: (value: string) => Promise<void>;
-  };
+  controllers: Controllers
 }
 
 function Header({
@@ -28,12 +34,8 @@ function Header({
   bucketStorage,
   controllers,
   emailLabel,
+  rolesThatCanEdit,
 }: AccountHeaderProps) {
-  const rolesThatCanEdit = new Set([
-    'agency_member',
-    'agency_project_manager',
-    'agency_owner',
-  ]);
 
   return (
     <div className="flex w-full gap-4">
