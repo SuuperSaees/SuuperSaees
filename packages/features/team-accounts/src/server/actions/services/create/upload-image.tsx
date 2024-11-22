@@ -27,7 +27,7 @@ export default function UploadImageComponent({
     'Seleccionar una imagen',
   );
 
-  const handleButtonClick = (e) => {
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const fileInput = document.getElementById('file-input');
     if (fileInput) {
@@ -50,12 +50,12 @@ export default function UploadImageComponent({
 
     try {
       const filePath = `images/${Date.now()}_${file.name}`;
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage // data never used
         .from('services')
         .upload(filePath, file);
 
       if (uploadError) {
-        throw new Error(`Error al subir la imagen: ${uploadError.message}`);
+        throw new Error(`Error to upload image: ${uploadError.message}`);
       }
 
       const { data: publicURL } = supabase.storage
@@ -63,13 +63,13 @@ export default function UploadImageComponent({
         .getPublicUrl(filePath);
 
       if (!publicURL) {
-        throw new Error('Error al obtener la URL pública');
+        throw new Error('Error to get public URL');
       }
 
       onImageUpload(publicURL.publicUrl);
     } catch (error) {
-      console.error('Error al subir la imagen:', error);
-      setError('Hubo un error al subir la imagen. Intenta nuevamente.');
+      console.error('Error to upload image:', error);
+      setError('There was an error uploading the image. Try again.');
     }
   };
 
