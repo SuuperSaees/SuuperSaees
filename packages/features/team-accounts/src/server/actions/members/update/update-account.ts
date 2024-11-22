@@ -87,6 +87,11 @@ export const updateUserEmail = async(
   
   try{
     console.log('newEmail', email)
+
+    if(email === undefined || email === null || email === '') {
+      throw new Error('Email is required')
+    }
+
     const { data, error } = await databaseClient.auth.admin.updateUserById(
       userId,
       {email: email}
