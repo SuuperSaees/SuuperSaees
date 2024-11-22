@@ -10,83 +10,99 @@ This repository is the demo version hosted on Cloudflare Pages. Please use the v
 
 [Please follow the documentation to get started](https://makerkit.dev/docs/next-supabase-turbo/introduction).
 
-# Stripe Integration 🚀
+# Stripe Integration
 
 ```mermaid
-graph TD;
-    A[Suuper] --> B[Stripe API Integration];
-    B --> C[Connected Companies];
-    C --> D[Generate Stripe Account ID];
-    D --> E{Is Onboarding Completed?};
-    E -- No --> F[Allow Creation and Configuration on the Platform];
-    E -- Yes --> G[Create Products and Services on the Platform];
-    F --> G;
-    D --> H[Store Stripe Account ID in Database];
-    H --> G;
-    G --> I[View Invoices];
-    G --> L[List Prices and products]
-    G --> J[Generate Checkout];
-    I --> K[Connected Companies' Customers];
-    J --> K;
-    L --> K;
+graph TD
+    A[Suuper] --> B[Stripe API Integration]
+    B --> C[Connected Accounts]
+    C --> D[OAuth Flow]
+    D --> E[Generate Stripe Account ID]
+    E --> F[Automatic Onboarding]
+    
+    F --> G[Create Products and Services]
+    G --> H[Generate Checkout]
+    
+    I[Payment Events] --> J[Automatic Webhook<br/>Management]
+    J --> K[Suuper Webhook Endpoint]
+    K --> L[Update Payment Status]
 ```
+
+# Treli Integration
+
+```mermaid
+graph TD
+    A[Suuper] --> B[Treli API Integration]
+    B --> C[Agency Account]
+    C --> D[Manual API Credentials Input]
+    D --> E[Store API Credentials<br/>username & secret]
+    E --> F[Create Products and Services]
+    
+    G[Agency Dashboard] --> H[Configure Webhook URL]
+    H --> I[Store Webhook Configuration<br/>in Treli Dashboard]
+    
+    J[Payment Events] --> K[Webhook Notifications]
+    K --> L[Suuper Webhook Endpoint]
+    L --> M[Update Payment Status]
+```
+
 
 ## Update service stripe
 
 ```mermaid
 graph TD;
-    A[Inicio] --> B[Obtención de los datos en <strong>update-service.tsx</strong>]
-    B --> C[Llamada a updateService en update-service-server.tsx]
-    subgraph "Actualización"
+    A[Start] --> B[Get data in <strong>update-service.tsx</strong>]
+    B --> C[Call updateService in update-service-server.tsx]
+    subgraph "Update Process"
         direction TB
-        style Actualización fill:#6A5ACD,stroke:#333,stroke-width:4px
-        C -->D[Actualizar servicio en la base de datos]
-        D -->E[GET de price para obtener el productId, Llamada a /api/stripe/create-service-price]
-        E --> F[Actualización del nuevo Price en Stripe]
-        F --> G[Llamada a /api/stripe/update-service]
-        G --> H[Actualización del servicio en Stripe]
+        style Update Process fill:#87CEEB,stroke:#333,stroke-width:4px
+        C -->D[Update service in database]
+        D -->E[GET price to obtain productId, Call /api/stripe/create-service-price]
+        E --> F[Update new Price in Stripe]
+        F --> G[Call /api/stripe/update-service]
+        G --> H[Update service in Stripe]
     end
-    H --> I[Fin]
+    H --> I[End]
 ```
 Files: [update-service.tsx](./packages/features/team-accounts/src/server/actions/services/update/update-service.tsx)
 
-## Stripe Billing
+## Stripe Billing Suuper
 
 ```mermaid
 sequenceDiagram
-    participant Usuario
-    participant Plataforma
+    participant User
+    participant Platform
     participant Stripe
 
-    Usuario->>Plataforma: Registro en la plataforma
-    activate Plataforma
-    Plataforma-->>Usuario: Plan Free asignado por defecto
-    deactivate Plataforma
+    User->>Platform: Platform registration
+    activate Platform
+    Platform-->>User: Free plan assigned by default
+    deactivate Platform
 
-    Usuario->>Plataforma: Accede a "Billing" en Settings
-    activate Plataforma
-    Plataforma-->>Usuario: Muestra plan actual, facturas, opción de actualización de plan y tarjeta
-    deactivate Plataforma
+    User->>Platform: Access "Billing" in Settings
+    activate Platform
+    Platform-->>User: Shows current plan, invoices, plan upgrade option and card
+    deactivate Platform
 
-    Usuario->>Plataforma: Selecciona nuevo plan
-    activate Plataforma
-    Plataforma->>Stripe: Actualiza suscripción con nuevo plan y número de miembros
+    User->>Platform: Selects new plan
+    activate Platform
+    Platform->>Stripe: Updates subscription with new plan and member count
     activate Stripe
-    Stripe-->>Plataforma: Confirmación de actualización de suscripción
+    Stripe-->>Platform: Subscription update confirmation
     deactivate Stripe
-    Plataforma-->>Usuario: Plan actualizado
-    deactivate Plataforma
+    Platform-->>User: Plan updated
+    deactivate Platform
 
-    Usuario->>Plataforma: Actualiza tarjeta de crédito
-    activate Plataforma
-    Plataforma->>Stripe: Actualiza método de pago
+    User->>Platform: Updates credit card
+    activate Platform
+    Platform->>Stripe: Updates payment method
     activate Stripe
-    Stripe-->>Plataforma: Confirmación de método de pago actualizado
+    Stripe-->>Platform: Payment method update confirmation
     deactivate Stripe
-    Plataforma-->>Usuario: Tarjeta actualizada
-    deactivate Plataforma
+    Platform-->>User: Card updated
+    deactivate Platform
 
-    Stripe->>Usuario: Envía factura ajustada por número de miembros
+    Stripe->>User: Sends invoice adjusted by member count
 ```
 ## Email Confirmation Flow Implementation for Supabase with Amazon SES Integration
 
@@ -109,3 +125,98 @@ sequenceDiagram
     Database-->>Supabase: If exists, retrieve accessToken and refreshToken
     Supabase-->>User: Set session
 ```
+
+## Billing integration for agencies [Treli, Stripe]
+
+```mermaid
+graph TD
+    A[Agency creates service] --> B{Has payment methods<br/>configured?}
+    B -->|No| C[Save only in local DB]
+    B -->|Yes| D[Sync with providers]
+    D --> E[Stripe Sync]
+    D --> F[Treli Sync]
+    
+    G[Webhook Provider] --> H{Event Type}
+    H -->|Payment successful| I[Update payment status]
+    H -->|Service update| J[Sync changes]
+    
+    K[Agency connects
+    new provider] --> L[Sync existing services]
+    L --> M[Create services in
+    new provider]
+```
+
+# Payment Provider Integration: Treli vs Stripe
+
+## Treli Integration
+
+### Connection Model
+- **Type**: Direct connection via API credentials
+- **Process**: Manual
+- **Required Credentials**:
+  - Username
+  - Production Secret Password
+  - Location: https://treli.co/account/settings/api/
+
+### Webhook Configuration
+- **Type**: Manual configuration per agency
+- **Process**:
+  1. Each agency must access their Treli dashboard
+  2. Navigate to: https://treli.co/account/settings/webhooks/
+  3. Configure the URL provided by Suuper
+  4. Activate all necessary events
+
+### Limitations
+- No parent/child account concept
+- Manual configuration required per agency
+- Individual webhook management
+
+## Stripe Integration
+
+### Connection Model
+- **Type**: OAuth + Connected Accounts
+- **Process**: Automated
+- **Credentials**:
+  - Automatic Stripe Account ID generation
+  - Automatic access token management
+
+### Webhook Configuration
+- **Type**: Automatic through API
+- **Process**:
+  1. One-time platform-level configuration
+  2. Webhooks automatically configured for all connected accounts
+  3. Centralized event management
+
+### Advantages
+- Automated onboarding system
+- Centralized connected account management
+- Automatic webhook configuration
+
+## Implementation Considerations
+
+### For Treli
+1. **Secure Credential Storage**
+   - Encrypt API credentials
+   - Implement secret rotation system
+
+2. **Onboarding Process**
+   - Create step-by-step guide for agencies
+   - Implement credential validation
+   - Verify webhook configuration
+
+3. **Monitoring**
+   - Implement webhook health checks
+   - Connection failure alert system
+
+### For Stripe
+1. **OAuth Management**
+   - Implement authorization flow
+   - Handle token renewal
+
+2. **Automation**
+   - Leverage APIs for automatic configuration
+   - Implement bidirectional synchronization
+
+3. **Monitoring**
+   - Use Stripe Dashboard for supervision
+   - Implement detailed event logging

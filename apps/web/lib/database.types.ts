@@ -310,6 +310,61 @@ export type Database = {
           },
         ]
       }
+      billing_accounts: {
+        Row: {
+          account_id: string
+          created_at: string
+          credentials: Json | null
+          deleted_on: string | null
+          id: string
+          provider: Database["public"]["Enums"]["billing_provider"]
+          provider_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_customers: {
         Row: {
           account_id: string
@@ -352,6 +407,44 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_services: {
+        Row: {
+          created_at: string
+          deleted_on: string | null
+          id: string
+          provider_id: string
+          service_id: number
+          status: Database["public"]["Enums"]["service_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          provider_id: string
+          service_id: number
+          status?: Database["public"]["Enums"]["service_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          provider_id?: string
+          service_id?: number
+          status?: Database["public"]["Enums"]["service_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -1853,6 +1946,7 @@ export type Database = {
           created_at: string
           credit_based: boolean | null
           credits: number | null
+          deleted_on: string | null
           hours: number | null
           id: number
           max_number_of_monthly_orders: number | null
@@ -1869,18 +1963,20 @@ export type Database = {
           service_image: string | null
           single_sale: boolean | null
           standard: boolean
-          status: string | null
+          status: Database["public"]["Enums"]["service_status"]
           test_period: boolean | null
           test_period_duration: number | null
           test_period_duration_unit_of_measurement: string | null
           test_period_price: number | null
           time_based: boolean | null
+          visibility: Database["public"]["Enums"]["visibility"]
         }
         Insert: {
           allowed_orders?: number | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
+          deleted_on?: string | null
           hours?: number | null
           id?: number
           max_number_of_monthly_orders?: number | null
@@ -1897,18 +1993,20 @@ export type Database = {
           service_image?: string | null
           single_sale?: boolean | null
           standard: boolean
-          status?: string | null
+          status?: Database["public"]["Enums"]["service_status"]
           test_period?: boolean | null
           test_period_duration?: number | null
           test_period_duration_unit_of_measurement?: string | null
           test_period_price?: number | null
           time_based?: boolean | null
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Update: {
           allowed_orders?: number | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
+          deleted_on?: string | null
           hours?: number | null
           id?: number
           max_number_of_monthly_orders?: number | null
@@ -1925,12 +2023,13 @@ export type Database = {
           service_image?: string | null
           single_sale?: boolean | null
           standard?: boolean
-          status?: string | null
+          status?: Database["public"]["Enums"]["service_status"]
           test_period?: boolean | null
           test_period_duration?: number | null
           test_period_duration_unit_of_measurement?: string | null
           test_period_price?: number | null
           time_based?: boolean | null
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Relationships: []
       }
@@ -2593,6 +2692,24 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      handle_account_name_changes: {
+        Args: {
+          p_account_id: string
+          p_name: string
+          p_is_personal_accounts: boolean
+          p_old_name: string
+        }
+        Returns: number
+      }
+      handle_organization_settings_portal_name_changes: {
+        Args: {
+          p_account_id: string
+          p_key: Database["public"]["Enums"]["organization_setting_key"]
+          p_value: string
+          p_old_value: string
+        }
+        Returns: number
+      }
       has_active_subscription: {
         Args: {
           target_account_id: string
@@ -2808,7 +2925,12 @@ export type Database = {
         | "orders.read"
         | "orders.manage"
         | "orders.delete"
-      billing_provider: "stripe" | "lemon-squeezy" | "paddle"
+      billing_provider:
+        | "stripe"
+        | "lemon-squeezy"
+        | "paddle"
+        | "treli"
+        | "suuper"
       chat_role: "user" | "assistant"
       field_types:
         | "date"
@@ -2856,6 +2978,16 @@ export type Database = {
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"
+      service_status:
+        | "active"
+        | "inactive"
+        | "draft"
+        | "expired"
+        | "paused"
+        | "blocked"
+        | "scheduled"
+        | "pending"
+        | "deleted"
       subscription_item_type: "flat" | "per_seat" | "metered"
       subscription_status:
         | "active"
@@ -2866,6 +2998,7 @@ export type Database = {
         | "incomplete"
         | "incomplete_expired"
         | "paused"
+      visibility: "public" | "private"
     }
     CompositeTypes: {
       invitation: {
