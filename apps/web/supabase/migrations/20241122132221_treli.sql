@@ -43,7 +43,7 @@ alter table "public"."subscriptions" alter column billing_provider type "public"
 
 alter table "public"."config" alter column "billing_provider" set default 'stripe'::billing_provider;
 
-drop type "public"."billing_provider__old_version_to_be_dropped";
+drop type "public"."billing_provider__old_version_to_be_dropped"; -- drop the old type, comment this line if you want to keep the old type
 
 alter table "public"."services" add column "deleted_on" timestamp with time zone;
 
