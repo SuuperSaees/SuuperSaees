@@ -52,6 +52,12 @@ export default function Member({
     }
   };
 
+  const rolesThatCanEdit = new Set([
+    'agency_member',
+    'agency_project_manager',
+    'agency_owner',
+  ]);
+
   return (
     <Header
       id={id}
@@ -72,6 +78,7 @@ export default function Member({
         onUpdateAccountImage: updateMemberImage,
         onUpdateAccountName: updateMemberName,
       }}
+      rolesThatCanEdit={rolesThatCanEdit}
     />
   );
 }
