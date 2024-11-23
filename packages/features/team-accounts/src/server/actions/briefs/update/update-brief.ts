@@ -11,7 +11,7 @@ import {
   ErrorBriefOperations,
 } from '../../../../../../../shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
-import { addFormFieldsToBriefs, createFormFields } from '../create/create-briefs';
+import {  createFormFields } from '../create/create-briefs';
 
 export const updateBriefById = async (briefData: Brief.Request.Update) => {
   try {
@@ -126,8 +126,22 @@ export const updateFormFieldsById = async (
     const allFields = [...updatedFields, ...createdFields];
 
     // Associate the updated and newly created fields with the brief
-    await addFormFieldsToBriefs(allFields, briefId);
+    const briefFormFields = allFields.map((field) => ({
+      brief_id: briefId,
+      form_field_id: field.id ?? '',
+    }));
 
+    const { error: briefFormFieldError } = await client
+    .from('brief_form_fields')
+    .insert(briefFormFields);
+    
+    if (briefFormFieldError) {
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        `Error associating fields to brief: ${briefFormFieldError.message}`,
+        ErrorBriefOperations.FAILED_TO_CREATE_FORM_FIELDS,
+      );
+    }
     return CustomResponse.success(allFields, 'fieldsUpdated').toJSON();
   } catch (error) {
     console.error('Error while updating/creating fields', error);
