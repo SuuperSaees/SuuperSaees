@@ -1,14 +1,10 @@
 'use client';
 
 // import { useState } from 'react';
-
-import { formatDisplayDate } from '@kit/shared/utils';
-
 import { useRouter } from 'next/navigation';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { CalendarIcon, FlagIcon, Loader } from 'lucide-react';
-import { AgencyStatusesProvider } from '../../components/context/agency-statuses-context';
 import {
   getAgencyClients,
   getOrderAgencyMembers,
@@ -17,8 +13,10 @@ import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/order
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { formatDisplayDate } from '@kit/shared/utils';
 import { Trans } from '@kit/ui/trans';
 
+import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Order } from '~/lib/order.types';
 
 import {
@@ -26,17 +24,18 @@ import {
   updateOrderAssigns,
   updateOrderFollowers,
 } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
-import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { AgencyStatusesProvider } from '../../components/context/agency-statuses-context';
 import { useActivityContext } from '../context/activity-context';
 import deduceNameFromEmail from '../utils/deduce-name-from-email';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import ActivityAssignations from './activity-assignations';
 import ActivityFollowers from './activity-followers';
+// import SelectAction from './ui/select-action';
+import { PriorityCombobox } from './priority-combobox';
+import { ReviewDialog } from './review-dialog';
 import StatusCombobox from './status-combobox';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
-// import SelectAction from './ui/select-action';
-import { PriorityCombobox } from './priority-combobox';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -44,7 +43,7 @@ interface AsideOrderInformationProps {
   [key: string]: unknown;
   agencyStatuses: AgencyStatus.Type[];
 }
-const   AsideOrderInformation = ({
+const AsideOrderInformation = ({
   order,
   className,
   agencyStatuses,
@@ -222,140 +221,152 @@ const   AsideOrderInformation = ({
 
   return (
     <AgencyStatusesProvider initialStatuses={agencyStatuses}>
-    <div
-      className={`pt-4 no-scrollbar relative  flex h-full min-h-full w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 overflow-y-auto border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 text-gray-700 ${className}`}
-      {...rest}
-    >
-      <div className="border-b border-gray-200 pb-7">
-        <h3 className="pb-4 font-bold">
-          <Trans i18nKey="details.createdBy" />
-        </h3>
-        <div className="flex gap-3">
-          <AvatarDisplayer
-            displayName={
-              order.client?.name
-                ? order.client?.name
-                : deduceNameFromEmail(order.client?.email ?? '')
-            }
-            pictureUrl={
-              order.client
-                ? order.client?.picture_url && order.client?.picture_url
-                : undefined
-            }
-          />
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-600">
-              {order.client?.email
-                ? deduceNameFromEmail(order.client?.email ?? '')
-                : ''}
-            </span>
-            <span className="text-sm text-gray-600">
-              {order.client_organization?.name
-                ? order.client_organization?.name
-                : ''}
-            </span>
-          </div>
-        </div>
-      </div>
-      <h3 className="font-medium">{t('details.summary')}</h3>
-
-      {userRoles.has(userRole) ? (
-        <>
-          <div className="flex items-center justify-between">
-            <span className="flex text-sm font-semibold">
-              <CalendarIcon className="mr-2 h-4 w-4" /> {t('details.deadline')}{' '}
-            </span>
-            <DatePicker
-              updateFn={changeDate.mutate}
-              defaultDate={order.due_date}
+      <div
+        className={`no-scrollbar relative flex h-full min-h-full w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 overflow-y-auto border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 pt-4 text-gray-700 ${className}`}
+        {...rest}
+      >
+        <div className="border-b border-gray-200 pb-7">
+          <h3 className="pb-4 font-bold">
+            <Trans i18nKey="details.createdBy" />
+          </h3>
+          <div className="flex gap-3">
+            <AvatarDisplayer
+              displayName={
+                order.client?.name
+                  ? order.client?.name
+                  : deduceNameFromEmail(order.client?.email ?? '')
+              }
+              pictureUrl={
+                order.client
+                  ? order.client?.picture_url && order.client?.picture_url
+                  : undefined
+              }
             />
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-[0.20rem] font-semibold">
-              <Loader className="mr-2 h-4 w-4" />
-              <p>{t('details.status')}</p>
-            </div>
-
-            <StatusCombobox order={order} agency_id={order.agency_id} mode='order' />
-          </div>
-          <div className='flex justify-between'>
-            <div className='flex items-center text-sm'>
-              <FlagIcon className='mr-2 h-4 w-4' />
-              <span className='font-semibold'>{t('details.priority')}</span>
-            </div>
-            <PriorityCombobox order = {order} mode = {'order'}/>
-          </div>
-          <ActivityAssignations
-            searchUserOptions={searchUserOptions}
-            assignedTo={order.assigned_to}
-            updateFunction={changeAgencyMembersAssigned.mutate}
-          />
-
-          <ActivityFollowers
-            searchUserOptions={searchUserOptionsFollowers}
-            followers={order.followers}
-            updateFunction={changeAgencyMembersFollowers.mutate}
-          />
-        </>
-      ) : (
-        <div className="flex flex-col gap-2">
-          <div className="mb-4 flex items-center justify-between">
-            <span className="flex text-sm font-semibold">
-              <CalendarIcon className="mr-2 h-4 w-4" /> {t('details.deadline')}{' '}
-            </span>
-            <span className="pl-2 pr-2">
-              {order.due_date ? (
-                formatDisplayDate(new Date(order.due_date), language)
-              ) : (
-                <Trans i18nKey="orders:details.deadlineNotSet" />
-              )}
-            </span>
-          </div>
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex">
-              <Loader className="mr-2 h-4 w-4" />
-              <span className="text-sm font-medium">{t('details.status')}</span>
-            </div>
-            <span
-              className={`rounded-full px-2 py-1 ${order.status ? statusColors[order.status] : undefined}`}
-            >
-              {order.status
-                ?.replace(/_/g, ' ')
-                .replace(/^\w/, (c) => c.toUpperCase())}
-            </span>
-          </div>
-
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex">
-              <FlagIcon className="mr-2 h-4 w-4" />
-              <span className="text-sm font-medium">
-                {t('details.priority')}
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-600">
+                {order.client?.email
+                  ? deduceNameFromEmail(order.client?.email ?? '')
+                  : ''}
+              </span>
+              <span className="text-sm text-gray-600">
+                {order.client_organization?.name
+                  ? order.client_organization?.name
+                  : ''}
               </span>
             </div>
-            <span
-              className={`flex items-center rounded-full px-2 py-1 ${order.priority ? priorityColors[order.priority] : undefined}`}
-            >
-              <div className="mr-2 h-2 w-2 rounded-full bg-current"></div>
-              {order.priority
-                ?.replace(/_/g, ' ')
-                .replace(/^\w/, (c) => c.toUpperCase())}
-            </span>
           </div>
-
-          <ActivityAssignations
-            searchUserOptions={searchUserOptions}
-            assignedTo={order.assigned_to}
-            updateFunction={changeAgencyMembersAssigned.mutate}
-          />
-
-          <ActivityFollowers
-            searchUserOptions={searchUserOptionsFollowers}
-            followers={order.followers}
-            updateFunction={changeAgencyMembersFollowers.mutate}
-          />
         </div>
-      )}
-    </div>
+
+        <h3 className="font-medium">{t('details.summary')}</h3>
+
+        {userRoles.has(userRole) ? (
+          <>
+            <div className="flex items-center justify-between">
+              <span className="flex text-sm font-semibold">
+                <CalendarIcon className="mr-2 h-4 w-4" />{' '}
+                {t('details.deadline')}{' '}
+              </span>
+              <DatePicker
+                updateFn={changeDate.mutate}
+                defaultDate={order.due_date}
+              />
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-[0.20rem] font-semibold">
+                <Loader className="mr-2 h-4 w-4" />
+                <p>{t('details.status')}</p>
+              </div>
+
+              <StatusCombobox
+                order={order}
+                agency_id={order.agency_id}
+                mode="order"
+              />
+            </div>
+            <div className="flex justify-between">
+              <div className="flex items-center text-sm">
+                <FlagIcon className="mr-2 h-4 w-4" />
+                <span className="font-semibold">{t('details.priority')}</span>
+              </div>
+              <PriorityCombobox order={order} mode={'order'} />
+            </div>
+            <ActivityAssignations
+              searchUserOptions={searchUserOptions}
+              assignedTo={order.assigned_to}
+              updateFunction={changeAgencyMembersAssigned.mutate}
+            />
+
+            <ActivityFollowers
+              searchUserOptions={searchUserOptionsFollowers}
+              followers={order.followers}
+              updateFunction={changeAgencyMembersFollowers.mutate}
+            />
+          </>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="flex text-sm font-semibold">
+                <CalendarIcon className="mr-2 h-4 w-4" />{' '}
+                {t('details.deadline')}{' '}
+              </span>
+              <span className="pl-2 pr-2">
+                {order.due_date ? (
+                  formatDisplayDate(new Date(order.due_date), language)
+                ) : (
+                  <Trans i18nKey="orders:details.deadlineNotSet" />
+                )}
+              </span>
+            </div>
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex">
+                <Loader className="mr-2 h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {t('details.status')}
+                </span>
+              </div>
+              <span
+                className={`rounded-full px-2 py-1 ${order.status ? statusColors[order.status] : undefined}`}
+              >
+                {order.status
+                  ?.replace(/_/g, ' ')
+                  .replace(/^\w/, (c) => c.toUpperCase())}
+              </span>
+            </div>
+
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex">
+                <FlagIcon className="mr-2 h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {t('details.priority')}
+                </span>
+              </div>
+              <span
+                className={`flex items-center rounded-full px-2 py-1 ${order.priority ? priorityColors[order.priority] : undefined}`}
+              >
+                <div className="mr-2 h-2 w-2 rounded-full bg-current"></div>
+                {order.priority
+                  ?.replace(/_/g, ' ')
+                  .replace(/^\w/, (c) => c.toUpperCase())}
+              </span>
+            </div>
+
+            <ActivityAssignations
+              searchUserOptions={searchUserOptions}
+              assignedTo={order.assigned_to}
+              updateFunction={changeAgencyMembersAssigned.mutate}
+            />
+
+            <ActivityFollowers
+              searchUserOptions={searchUserOptionsFollowers}
+              followers={order.followers}
+              updateFunction={changeAgencyMembersFollowers.mutate}
+            />
+          </div>
+        )}
+        {(userRole === 'client_owner' || userRole === 'client_member') && (
+          <ReviewDialog orderId={order.id} className="mt-auto mb-8 w-full" />
+        )}
+      </div>
     </AgencyStatusesProvider>
   );
 };

@@ -80,7 +80,10 @@ export default function Member({
 
   const views: ViewsMap = new Map([
     ['home', <HomeSection key={'home'} memberOrders={orders} />],
-    ['reviews', <ReviewsSection key={'reviews'}/>], 
+    [
+      'reviews',
+      <ReviewsSection key={'reviews'} userId={id} userRole={userRole} />,
+    ],
   ]);
 
   const rolesThatCanEdit = new Set([

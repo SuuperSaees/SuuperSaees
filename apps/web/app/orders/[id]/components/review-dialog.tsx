@@ -41,7 +41,7 @@ const reviewSchema = z.object({
     }),
 });
 
-export function ReviewDialog({ orderId }: { orderId: number }) {
+export function ReviewDialog({ orderId, className }: { orderId: number, className?: string }) {
   const form = useForm<z.infer<typeof reviewSchema>>({
     mode: 'onChange',
     resolver: zodResolver(reviewSchema),
@@ -75,12 +75,12 @@ export function ReviewDialog({ orderId }: { orderId: number }) {
   }
   return (
     <Form {...form}>
-      <form className="flex flex-col gap-4">
+      <form className={`flex flex-col gap-4 ${className}`}>
         <Dialog>
           <DialogTrigger asChild>
             <ThemedButton
               variant="outline"
-              className="w-fit bg-primary text-white hover:bg-primary/90 hover:text-white"
+              className="w-full bg-primary text-white hover:bg-primary/90 hover:text-white"
             >
               {t('details.dialog.button')}
             </ThemedButton>

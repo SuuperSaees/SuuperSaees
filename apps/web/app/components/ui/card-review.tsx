@@ -41,12 +41,12 @@ export default function CardReview({
           {content}
         </p>
         <div className="flex gap-1">
-          {Array.from({ length: rating ?? 0 }, (_, i) => (
+          {rating ? Array.from({ length: rating ?? 0 }, (_, i) => (
             <StarFilledIcon
               className="h-4 w-4 text-yellow-400"
               key={'start' + i}
             />
-          ))}
+          )): <span className="text-gray-500">{t('rating.noRated')}</span>}
         </div>
       </div>
     </div>

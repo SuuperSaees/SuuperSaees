@@ -19,7 +19,7 @@ export default function ReviewRating({
         <span className="text-5xl font-bold text-black">{!isValidRating ? t('rating.empty') : rating}</span>
         <div className="flex flex-col gap-1">
           <div className="flex gap-1">
-            {Array.from({ length: rating ?? 0 }, (_, i) => (
+            {Array.from({ length: Math.floor(rating ?? 0) }, (_, i) => (
               <StarFilledIcon
                 className="h-4 w-4 text-yellow-400"
                 key={'start' + i}
@@ -27,7 +27,7 @@ export default function ReviewRating({
             ))}
           </div>
           <small className="text-gray-500">
-            {t('rating.total', { total })}
+            {total > 1 ?t('rating.total.plural', { total }) : t('rating.total.singular', { total })}
           </small>
         </div>
       </div>
