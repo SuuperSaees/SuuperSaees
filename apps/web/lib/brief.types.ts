@@ -29,7 +29,7 @@ export namespace Brief {
     | 'image_url'
     | 'propietary_organization_id'
     | 'deleted_on'
-  > | null;
+  > ;
 
   // This represent the request from the client to the server
   export namespace Request {

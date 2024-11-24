@@ -1296,19 +1296,19 @@ export type Database = {
       }
       order_followers: {
         Row: {
-          client_member_id: string | null
+          client_member_id: string
           created_at: string | null
-          order_id: number | null
+          order_id: number
         }
         Insert: {
-          client_member_id?: string | null
+          client_member_id?: string
           created_at?: string | null
-          order_id?: number | null
+          order_id: number
         }
         Update: {
-          client_member_id?: string | null
+          client_member_id?: string
           created_at?: string | null
-          order_id?: number | null
+          order_id?: number
         }
         Relationships: [
           {
@@ -2592,6 +2592,24 @@ export type Database = {
       get_upper_system_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      handle_account_name_changes: {
+        Args: {
+          p_account_id: string
+          p_name: string
+          p_is_personal_accounts: boolean
+          p_old_name: string
+        }
+        Returns: number
+      }
+      handle_organization_settings_portal_name_changes: {
+        Args: {
+          p_account_id: string
+          p_key: Database["public"]["Enums"]["organization_setting_key"]
+          p_value: string
+          p_old_value: string
+        }
+        Returns: number
       }
       has_active_subscription: {
         Args: {

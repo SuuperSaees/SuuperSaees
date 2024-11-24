@@ -5,17 +5,19 @@ import { Task } from './tasks.types';
 import { Message } from './message.types';
 import { Review } from './review.types';
 import { User } from './user.types';
+import { Account } from './account.types';
 
 
 export namespace Order {
   export type Type = Database['public']['Tables']['orders_v2']['Row'] & {
-    client?: Database['public']['Tables']['clients']['Update'] | null;
+    customer?: Account.Type;
     user?: User.Type;
     messages?: Message.Type[];
     files?: File.Type[];
     tasks?: Task.Type[];
     assigned_to?: { agency_member: User.Type }[];
     followers?: { client_follower: User.Type }[];
+    organization?: Account.Type;
   };
   export type Relational = Order.Relationships.All & {
     messages: (Message.Type & { user: User.Response; files: File.Type[] })[];
