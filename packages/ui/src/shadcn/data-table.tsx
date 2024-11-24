@@ -53,14 +53,14 @@ export function DataTable<TData, TValue>({
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
   return (
-    <div className={"rounded-md border " + className} >
+    <div className={"rounded-lg border border-gray-100 " + className} >
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className='px-6 py-3 text-black '>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -81,9 +81,10 @@ export function DataTable<TData, TValue>({
                 key={row.id}
                 data-row-id={row.id}
                 data-state={row.getIsSelected() && 'selected'}
+                className='odd:bg-gray-50 even:bg-transparent'
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className='px-6 py-3'>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

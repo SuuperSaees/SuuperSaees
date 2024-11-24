@@ -9,13 +9,15 @@ import { Button } from '@kit/ui/button';
 import { Calendar } from '@kit/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { cn } from '@kit/ui/utils';
+import { CalendarIcon } from 'lucide-react';
 
 interface DatePickerProps {
   updateFn: (date: string) => void | Promise<void>;
   defaultDate?: string | undefined | null;
+  showIcon?: boolean;
 }
 
-const DatePicker = ({ updateFn, defaultDate }: DatePickerProps) => {
+const DatePicker = ({ updateFn, defaultDate, showIcon }: DatePickerProps) => {
   const { t, i18n } = useTranslation('orders');
 
   const [date, setDate] = React.useState<Date | undefined>(
@@ -58,10 +60,14 @@ const DatePicker = ({ updateFn, defaultDate }: DatePickerProps) => {
           <Button
             variant={'outline'}
             className={cn(
-              'w-fit justify-start bg-gray-50 shadow-none border-none text-left font-normal',
+              'w-fit justify-start bg-gray-50 shadow-none border-none text-left font-normal text-gray-600 flex gap-2 items-center',
               !date && 'text-muted-foreground',
             )}
           >
+            {
+              showIcon 
+              && <CalendarIcon className="ml-2 h-5 w-5" />
+            }
             {date ? formatDisplayDate(date, language) : t('selectDateLabel')}
           </Button>
         </PopoverTrigger>
