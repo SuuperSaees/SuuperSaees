@@ -100,7 +100,6 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
   });
 
   const onSubmit = useCallback((values: z.infer<typeof formSchema>) => {
-    console.log(values);
     mutateUser.mutate();
     setIsOpen(false);
   }, []);

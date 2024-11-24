@@ -86,7 +86,6 @@ export const updateUserEmail = async(
     });
   
   try{
-    console.log('newEmail', email)
 
     if(email === undefined || email === null || email === '') {
       throw new Error('Email is required')
@@ -97,10 +96,7 @@ export const updateUserEmail = async(
       {email: email}
     )
 
-
     if (error){
-      console.log('full error:')
-      console.log(error)
       throw new Error(
         `Error updating the user email: ${error.message}`,
       );
