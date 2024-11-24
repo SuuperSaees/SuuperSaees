@@ -13,6 +13,7 @@ import { updateUserSettings } from '~/team-accounts/src/server/actions/members/u
 
 // import Header from '../../../components/accounts/header';
 import HomeSection from './home-section';
+import ReviewsSection from './reviews-section';
 
 export default function Member({
   id,
@@ -79,6 +80,7 @@ export default function Member({
 
   const views: ViewsMap = new Map([
     ['home', <HomeSection key={'home'} memberOrders={orders} />],
+    ['reviews', <ReviewsSection key={'reviews'}/>], 
   ]);
 
   const rolesThatCanEdit = new Set([

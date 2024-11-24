@@ -3,7 +3,7 @@ import { User } from './user.types';
 
 export namespace Review {
   export type Type = Database['public']['Tables']['reviews']['Row'] & {
-    user?: User.Type;
+    user?: User.Response;
   };
   export type Insert = Database['public']['Tables']['reviews']['Insert'];
   export type Update = Database['public']['Tables']['reviews']['Update'];

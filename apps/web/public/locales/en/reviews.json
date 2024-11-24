@@ -1,0 +1,13 @@
+{
+  "createdBy": "By",
+  "date": "on {{date}}",
+  "empty": {
+    "title": "No reviews yet",
+   "description": "There are no reviews available yet. Once a client leaves feedback, you’ll be able to see their thoughts here."
+  },
+  "rating": {
+    "title": "Average Rating",
+    "total": "Based on {{total}} reviews",
+    "empty": "N/A"
+  }
+}
