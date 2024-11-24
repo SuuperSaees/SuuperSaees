@@ -6,6 +6,7 @@ import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
+import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import {
   fetchCurrentUser,
@@ -14,7 +15,6 @@ import {
   getUserRole,
 } from '../../members/get/get-member-account';
 import { fetchClientServices } from '../../services/get/get-services';
-import { Order } from '../../../../../../../../apps/web/lib/order.types';
 
 export const getBriefs = async (): Promise<
   Brief.Relationships.Services.Response[]
@@ -84,19 +84,17 @@ export const getBriefs = async (): Promise<
 };
 
 export const fetchFormfieldsWithResponses = async (
-  orderId: Order.Type['uuid']
-): Promise<
-  Brief.Relationships.FormFieldResponse.Response[]
-
-> => {
+  orderId: Order.Type['uuid'],
+): Promise<Brief.Relationships.FormFieldResponse.Response[]> => {
   try {
-    const client =  getSupabaseServerComponentClient();
+    const client = getSupabaseServerComponentClient();
     const { data: briefFormFields, error: errorBriefFormFields } = await client
       .from('brief_responses')
-      .select(`field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required),
+      .select(
+        `field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required),
         response
         
-        ` 
+        `,
       )
       .eq('order_id', orderId);
 
@@ -158,17 +156,29 @@ export const fetchClientBriefs = async (
 
 export const fetchBriefs = async (
   client: SupabaseClient<Database>,
+  briefIds: Brief.Type['id'][],
+  columns?: (keyof Brief.Type)[]
 ): Promise<Brief.Response[]> => {
   try {
-    const { data: briefsData, error: briefsError } = await client
-      .from('briefs')
-      .select(
-        ' id, created_at, name, propietary_organization_id, description, image_url, deleted_on, services ( name )',
-      );
-    if (briefsError)
-      throw new Error(`Error fetching the briefs, ${briefsError.message}`);
+    // Start with the default query
+    let query = client.from('briefs').select(
+      'id, created_at, name, propietary_organization_id, description, image_url, deleted_on, services (name)'
+    );
 
-    return briefsData;
+    // Modify the query if specific columns are provided
+    if (columns && columns.length > 0) {
+      query = client.from('briefs').select(columns.join(','));
+    }
+
+    // Filter by brief IDs
+    query = query.in('id', briefIds);
+
+    const { data: briefsData, error: briefsError } = await query;
+    if (briefsError) {
+      throw new Error(`Error fetching the briefs: ${briefsError.message}`);
+    }
+
+    return briefsData as Brief.Response[]; // Ensure the return type aligns with expected output
   } catch (error) {
     console.error(error);
     throw error;
@@ -200,9 +210,7 @@ export const fetchBriefsByOrgOwnerId = async (
   }
 };
 
-export const getBriefById = async (
-  id: string
-) => {
+export const getBriefById = async (id: string) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: briefData, error: briefsError } = await client
@@ -210,7 +218,7 @@ export const getBriefById = async (
       .select(
         `id, created_at, name, propietary_organization_id, description, image_url, brief_form_fields 
         ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
-         services (name, id)`
+         services (name, id)`,
       )
       .eq('id', id)
       .single();
@@ -224,5 +232,29 @@ export const getBriefById = async (
     console.error(error);
     throw error;
   }
-}
+};
+
+export const fetchBriefsResponsesforOrders = async (
+  client: SupabaseClient<Database>,
+  orderIds: Order.Type['uuid'][],
+) => {
+  try {
+    const { data: briefResponsesData, error: briefResponsesError } =
+      await client
+        .from('brief_responses')
+        .select('brief_id, order_id')
+        .in('order_id', orderIds);
+
+    if (briefResponsesError)
+      throw new Error(
+        `Error fetching the brief responses, ${briefResponsesError.message}`,
+      );
+
+    return briefResponsesData;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 
