@@ -33,7 +33,7 @@ async function TeamLayout({ children }: React.PropsWithChildren) {
       lang={language}
       organizationSettings={organizationSettings}
     >
-      <Page style={style}>
+      <Page style={style} className='bg-[#FAFAFA]'>
         <PageNavigation>
           <If condition={style === 'header'}>
             <HomeMenuNavigation workspace={workspace} />
