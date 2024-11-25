@@ -81,12 +81,17 @@ export const reactivateUserAction = adminAction(
 export const impersonateUserAction = adminAction(
   enhanceAction(
     async ({ userId }) => {
-      const service = getAdminAuthService();
-      const logger = await getLogger();
-
-      logger.info({ userId }, `Super Admin is impersonating user...`);
-
-      return await service.impersonateUser(userId);
+      try{
+        const service = getAdminAuthService();
+        const logger = await getLogger();
+  
+        logger.info({ userId }, `Super Admin is impersonating user...`);
+  
+        return await service.impersonateUser(userId);
+      }catch(error){
+        console.error(error);
+        throw error;
+      }
     },
     {
       schema: ImpersonateUserSchema,
