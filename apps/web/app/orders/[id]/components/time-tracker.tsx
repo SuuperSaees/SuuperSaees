@@ -4,6 +4,7 @@ import { useTimeTracker } from '../context/time-tracker-context';
 import { cn } from '@kit/ui/utils';
 import { createTimer } from '~/team-accounts/src/server/actions/timers/create/create-timer';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface TimeTrackerProps {
   elementId: string;
@@ -18,6 +19,7 @@ export const TimeTracker = ({
   elementName, 
   isHovered = true 
 }: TimeTrackerProps) => {
+  const { t } = useTranslation('common');
   const [time, setTime] = useState(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const { activeTimer, setActiveTimer, clearTimer } = useTimeTracker();
@@ -64,8 +66,7 @@ export const TimeTracker = ({
         });
       } catch (error) {
         console.error('Failed to create timer:', error);
-        toast.error('Failed to create timer');
-        // Handle error (maybe show a toast)
+        toast.error(t('timer.errorCreating'));
       }
     } else {
       if (intervalId) {
