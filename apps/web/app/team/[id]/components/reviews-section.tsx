@@ -57,7 +57,7 @@ export default function ReviewsSection({
   }
 
   return (
-    <div className="flex h-full max-h-full w-full flex-wrap gap-16 lg:flex-nowrap">
+    <div className="flex h-full max-h-full w-full flex-wrap gap-16 lg:flex-nowrap p-8">
       {!paginatedReviews.length ? (
         <div className="mx-auto mt-8 flex max-w-md flex-col gap-1 text-center">
           <span className="text-4xl font-bold text-gray-300">
@@ -72,7 +72,7 @@ export default function ReviewsSection({
           <ReviewRating
             rating={rating}
             total={reviews.length}
-            className="shrink-0"
+            className="shrink-0 p-8"
           />
           <div className="flex h-full w-full flex-col gap-4">
             {!paginatedReviews.length ? (
