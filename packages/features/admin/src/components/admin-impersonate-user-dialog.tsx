@@ -90,7 +90,8 @@ export function AdminImpersonateUserDialog(
             className={'flex flex-col space-y-8'}
             onSubmit={form.handleSubmit(
               async (data) => {
-                const tokens = await impersonateUserAction(data);                setTokens(tokens);
+                const tokens = await impersonateUserAction(data);
+                setTokens(tokens);
               },
               (errors) => {
                 console.error('Validation errors:', errors);
