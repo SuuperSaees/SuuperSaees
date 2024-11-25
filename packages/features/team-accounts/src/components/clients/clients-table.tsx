@@ -122,7 +122,7 @@ export function ClientsTable({ clients, view, userRole }: ClientsTableProps) {
     [clients],
   );
   const organizationColumns = useOrganizationColumns(t);
-  const clientColumns = useClientColumns(t, userRole);
+  const clientColumns = useClientColumns(t, userRole, uniqueOrganizations);
   const columns =
     activeButton === 'clients' ? clientColumns : organizationColumns;
 
@@ -272,6 +272,7 @@ export function ClientsTable({ clients, view, userRole }: ClientsTableProps) {
 const useClientColumns = (
   t: TFunction<'clients', undefined>,
   userRole: string,
+  uniqueOrganizations: Organization[],
 ): ColumnDef<Client>[] => {
   return useMemo(
     () => [
@@ -399,12 +400,12 @@ const useClientColumns = (
         enableHiding: false,
         cell: ({ row }) => {
           const client = row.original;
-          
+          const organizationOptions = uniqueOrganizations.map((org) => ({ id: org.id, name: org.name, slug: org.slug ?? '' }));
           return userRole === 'agency_owner' &&(
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <UpdateClientDialog {...client} /> */}
               {/* <DeleteUserDialog userId={client.id} /> */}
-              <AgencyClientCrudMenu userId = {client.id} name = {client.name} email = {client.email ?? ''} />
+              <AgencyClientCrudMenu organizationOptions = {organizationOptions} userId = {client.id} name = {client.name} email = {client.email ?? ''} />
             </div>
           );
         },

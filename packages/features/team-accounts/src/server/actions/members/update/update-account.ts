@@ -11,6 +11,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
+import { revalidatePath } from 'next/cache';
 
 export const updateUserAccount = async (
   userData: Account.Update,
@@ -35,7 +36,8 @@ export const updateUserAccount = async (
       throw new Error(
         `Error updating the user account: ${errorUpdateUserAccount.message}`,
       );
-
+    
+      revalidatePath('/clients');
     return userAccountData;
   } catch (error) {
     console.error('Error updating the user account', error);

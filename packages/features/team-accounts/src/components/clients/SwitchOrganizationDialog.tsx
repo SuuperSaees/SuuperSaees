@@ -1,52 +1,48 @@
 import { useState } from 'react';
-
-import { ArrowLeftRight } from 'lucide-react';
-
+import { ChevronDown} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@kit/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@kit/ui/select';
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@kit/ui/command';
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
+import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
+import { Button } from '@kit/ui/button';
+import { updateUserAccount } from '../../server/actions/members/update/update-account';
 
-const mockOrganizations = [
-  { label: 'Organization A', value: 'org-a' },
-  { label: 'Organization B', value: 'org-b' },
-  { label: 'Organization C', value: 'org-c' },
-];
+interface SwitchOrganizationDialogProps {
+  userId: string;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  organizationOptions : {id:string, name:string, slug:string}[];
+}
 
-function SwitchOrganizationDialog() {
-  const [isOpen, setIsOpen] = useState(false);
+function SwitchOrganizationDialog({userId, setIsOpen, isOpen, organizationOptions}: SwitchOrganizationDialogProps) {
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const {t} = useTranslation('clients')
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-  };
+  const handleChangeOrganization = async() => {
+    await updateUserAccount(
+      {
+        organization_id: selectedOrganization,
+      },
+      userId
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-      <DialogTrigger
-        className="flex items-center gap-2 w-full"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsOpen(true);
-        }}
-      >
-        <ArrowLeftRight className="h-4 w-4" />
-        {t('editUser.switchOrganization')}
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -55,28 +51,47 @@ function SwitchOrganizationDialog() {
             </p>
           </DialogTitle>
         </DialogHeader>
-        <Select
-          value={selectedOrganization}
-          onValueChange={(value) => setSelectedOrganization(value)}
-        >
-          <SelectTrigger>
-            <SelectValue>
+        <Popover open={isOpenPopup} onOpenChange={setIsOpenPopup}>
+          <PopoverTrigger asChild className='w-full'>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={isOpenPopup}
+              className="w-full justify-between"
+            >
               {selectedOrganization
-                ? mockOrganizations.find(
-                    (org) => org.value === selectedOrganization,
-                  )?.label
-                : 'Select organization'}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {mockOrganizations.map((org) => (
-              <SelectItem key={org.value} value={org.value}>
-                {org.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <ThemedButton className='w-full'>
+                ? organizationOptions?.find((org) => org.id === selectedOrganization)?.name
+                : t('editUser.selectOrganization')}
+              <ChevronDown className="opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full h-52 p-0">
+            <Command>
+              <CommandInput placeholder={t('editUser.selectOrganization')} />
+              <CommandList>
+                <CommandEmpty>{t('editUser.noOrganizations')}</CommandEmpty>
+                <CommandGroup>
+                  {organizationOptions?.map((org) => (
+                    <CommandItem
+                      key={org.slug}
+                      value={org.name ?? ''}
+                      onSelect={() => {
+                        setSelectedOrganization(org.id)
+                        setIsOpenPopup(false)
+                      }}
+                    >
+                      {org.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+        <ThemedButton className='w-full' disabled = {selectedOrganization == ''} onClick= {() => {
+          handleChangeOrganization().catch(console.error);
+          setIsOpen(false);
+        }}>
           {t('editUser.switchOrganization')}
         </ThemedButton>
       </DialogContent>
