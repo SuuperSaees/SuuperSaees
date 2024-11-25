@@ -2,21 +2,28 @@ import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import { useTimeTracker } from '../context/time-tracker-context';
 import { cn } from '@kit/ui/utils';
+import { createTimer } from '~/team-accounts/src/server/actions/timers/create/create-timer';
+import { toast } from 'sonner';
 
 interface TimeTrackerProps {
-  subtaskId: string;
-  taskId: string;
-  isHovered: boolean;
-  subtaskName: string;
+  elementId: string;
+  elementType: string;
+  elementName?: string;
+  isHovered?: boolean;
 }
 
-export const TimeTracker = ({ subtaskId, taskId, isHovered, subtaskName }: TimeTrackerProps) => {
+export const TimeTracker = ({ 
+  elementId, 
+  elementType, 
+  elementName, 
+  isHovered = true 
+}: TimeTrackerProps) => {
   const [time, setTime] = useState(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
-  const { activeTimer, setActiveTimer } = useTimeTracker();
+  const { activeTimer, setActiveTimer, clearTimer } = useTimeTracker();
 
-  const isTracking = activeTimer.subtaskId === subtaskId;
-  const isAnotherTimerActive = activeTimer.subtaskId !== null && !isTracking;
+  const isTracking = activeTimer.elementId === elementId;
+  const isAnotherTimerActive = activeTimer.elementId !== null && !isTracking;
 
   useEffect(() => {
     return () => {
@@ -26,35 +33,55 @@ export const TimeTracker = ({ subtaskId, taskId, isHovered, subtaskName }: TimeT
     };
   }, [intervalId]);
 
-  const toggleTimer = () => {
+  const toggleTimer = async () => {
     if (isAnotherTimerActive) return;
   
     if (!isTracking) {
       const startTime = Date.now();
-      const id = setInterval(() => {
-        setTime((prevTime) => prevTime + 1);
-      }, 1000);
-      setIntervalId(id);
-      setActiveTimer({
-        subtaskId,
-        taskId,
-        subtaskName,
-        startTime,
-        elapsedTime: 0
-      });
+      
+      // Create timer in database
+      try {
+        const timer = await createTimer({
+          elementId,
+          elementType,
+          elementName: elementName ?? '',
+          startTime,
+          elapsedTime: 0
+        });
+        
+        const id = setInterval(() => {
+          setTime((prevTime) => prevTime + 1);
+        }, 1000);
+        
+        setIntervalId(id);
+        setActiveTimer({
+          id: timer.data?.id ?? '',
+          elementId,
+          elementType,
+          elementName: elementName ?? '',
+          startTime,
+          elapsedTime: 0
+        });
+      } catch (error) {
+        console.error('Failed to create timer:', error);
+        toast.error('Failed to create timer');
+        // Handle error (maybe show a toast)
+      }
     } else {
       if (intervalId) {
         clearInterval(intervalId);
         setIntervalId(null);
       }
       setActiveTimer({
-        subtaskId: null,
-        taskId: null,
-        subtaskName: null,
+        id: null,
+        elementId: null,
+        elementType: null,
+        elementName: null,
         startTime: null,
         elapsedTime: time
       });
       setTime(0);
+      clearTimer();
     }
   };
 

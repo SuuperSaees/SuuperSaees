@@ -87,6 +87,13 @@
     "next": "Next",
     "previous": "Previous"
   },
+  "timer": {
+    "pauseTimer": "Pause timer",
+    "enterTimerName": "Enter the name of the timer",
+    "timerName": "Timer Name",
+    "cancel": "Cancel",
+    "confirm": "Save"
+  },
   "organizationName": "Organization",
   "selectOption": "Select an option",
   "success": "All set!",
