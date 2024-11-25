@@ -404,7 +404,7 @@ const useClientColumns = (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <UpdateClientDialog {...client} /> */}
               {/* <DeleteUserDialog userId={client.id} /> */}
-              <AgencyClientCrudMenu userId = {client.id} />
+              <AgencyClientCrudMenu userId = {client.id} name = {client.name} email = {client.email ?? ''} />
             </div>
           );
         },

@@ -88,7 +88,15 @@
     "email": "Correo electrónico",
     "role": "Rol",
     "saveChanges": "Guardar cambios",
-    "switchOrganization": "Cambiar organización"
-  }
+    "switchOrganization": "Cambiar organización",
+    "successEdit": "Usuario actualizado correctamente",
+    "failureEdit": "Error al actualizar el usuario",
+    "badInputFullName": "El nombre completo debe tener al menos 3 caracteres",
+    "badInputEmail": "Por favor, introduce una dirección de correo electrónico válida",
+    "badInputRole": "Por favor, selecciona un rol"
+  },
+  "success": "¡Todo listo!",
+  "clientOwner": "Cliente Líder",
+  "clientMember": "Cliente Miembro"
 }
 

@@ -171,10 +171,10 @@ export async function getUserRoleById(userId: string) {
       .select('account_role')
       .eq('user_id', userId)
       .single();
-
+    
     if (userAccountError) {
       throw new Error(
-        `Error fetching the user role, ${userAccountError.message}`,
+        `Error fetching the user role for ${userId}, ${userAccountError.message}`,
       );
     }
 

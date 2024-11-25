@@ -83,10 +83,19 @@
     "supplant": "Supplant",
     "resetPassword": "Reset password",
     "edit" : "Edit",
-    "fullName": "Full Name",
+    "fullName": "Full name",
     "email": "Email",
     "role": "Role",
     "saveChanges": "Save changes",
-    "switchOrganization": "Switch organization"
-  }
+    "switchOrganization": "Switch organization",
+    "successEdit": "User updated successfully",
+    "failureEdit": "Error updating user",
+    "badInputFullName": "Full Name must be at least 3 characters long",
+    "badInputEmail": "Please enter a valid email address",
+    "badInputRole": "Please select a role"
+
+  },
+  "success": "All set!",
+  "clientOwner": "Client Owner",
+  "clientMember": "Client Member"
 }
