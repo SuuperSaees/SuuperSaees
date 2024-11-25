@@ -1,6 +1,3 @@
-import { PageBody } from '@kit/ui/page';
-import { Separator } from '@kit/ui/separator';
-
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import DetailsSide from './components/details';
@@ -30,24 +27,15 @@ async function ServiceCheckoutPage({
 
   return (
     <OrganizationSettingsProvider initialSettings={organizationSettings}>
-      <PageBody className="min-h-screen flex flex-col">
-        <div className="w-full h-20 flex justify-start" style={{ backgroundColor: sidebarBackgroundColor }}>
-          <img 
-            src={logoUrl ?? suuperLogo}  
-            className='w-36 py-4 px-4'
-          />
-        </div>
         <div className="flex flex-col w-full items-center flex-grow mb-10">
-          <div className="mb-4 w-full">
-            <Separator className="w-full" />
-          </div>
           <DetailsSide
             service={tokendecoded.service}
             stripeId={tokendecoded.account_id}
             organizationId={tokendecoded.organization_id}
+            logoUrl={logoUrl ?? suuperLogo ?? ''}
+            sidebarBackgroundColor={sidebarBackgroundColor ?? '#000000'}
           />
         </div>
-      </PageBody>
     </OrganizationSettingsProvider>
   );
 }

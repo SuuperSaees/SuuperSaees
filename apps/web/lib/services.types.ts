@@ -10,6 +10,39 @@ export namespace Service {
     'id' | 'name' | 'price' | 'service_image' | 'service_description'
   >;
 
+  export type ServiceData = {
+    step_type_of_service: {
+      single_sale: boolean;
+      recurring_subscription: boolean;
+    };
+    step_service_details: {
+      service_image: string;
+      service_name: string;
+      service_description: string;
+    };
+    step_service_price: {
+      standard: boolean;
+      purchase_limit: number;
+      allowed_orders: number;
+      time_based: boolean;
+      hours: number;
+      credit_based: boolean;
+      credits: number;
+      price: number;
+      recurrence: string;
+      test_period: boolean;
+      test_period_duration: number;
+      test_period_duration_unit_of_measurement: string;
+      test_period_price: number;
+      max_number_of_simultaneous_orders: number;
+      max_number_of_monthly_orders: number;
+    };
+    step_connect_briefs: {
+      id: string;
+      name: string;
+    }[];
+  };
+
   export namespace Relationships {
     export namespace Client {
       export type Response = Service.Response & {

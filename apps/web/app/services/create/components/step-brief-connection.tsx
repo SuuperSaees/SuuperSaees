@@ -10,7 +10,7 @@ import { addServiceBriefs } from 'node_modules/@kit/team-accounts/src/server/act
 import { getPrimaryOwnerId } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 // import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { Service } from '~/lib/services.types';
 
 // import { z } from 'zod';
 import { Button } from '@kit/ui/button';
@@ -141,7 +141,7 @@ export default function BriefConnectionStep(
       if (!propietary_organization_id) {
         throw new Error('No propietary_organization_id provided');
       }
-      const values = form.getValues();
+      const values = form.getValues() as Service.ServiceData;
       const res = await createService({
         ...values,
       });
@@ -171,8 +171,8 @@ export default function BriefConnectionStep(
 
   const updateServiceMutation = useMutation({
     mutationFn: async () => {
-      const values = form.getValues();
-      const res = await updateService(values, previousService.price_id);
+      const values = form.getValues() as Service.ServiceData;
+      const res = await updateService(values, previousService?.price_id ?? '');
       await handleResponse(res, 'services', t);
     },
     onSuccess: async () => {
@@ -228,7 +228,7 @@ export default function BriefConnectionStep(
                             onSelect={(option: Option) => {
                               const selectedBrief = briefs.find(
                                 (brief) => brief.name === option.value,
-                              );
+                              );	
                               if (selectedBrief) {
                                 handleSelect(selectedBrief);
                               }

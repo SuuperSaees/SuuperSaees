@@ -56,7 +56,7 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
           console.error('Error changing language:', error);
         });
       }
-      return 
+      return ''
     },
     enabled: typeof window !== 'undefined',
   });

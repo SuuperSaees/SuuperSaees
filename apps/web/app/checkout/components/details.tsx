@@ -19,12 +19,16 @@ type DetailsSideProps = {
   service: ServiceType;
   stripeId: string;
   organizationId: string;
+  logoUrl: string;
+  sidebarBackgroundColor: string;
 };
 
 const DetailsSide: React.FC<DetailsSideProps> = ({
   service,
   stripeId,
   organizationId,
+  logoUrl,
+  sidebarBackgroundColor,
 }) => {
   const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY, {
     stripeAccount: stripeId,
@@ -43,6 +47,8 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
         service={service}
         stripeId={stripeId}
         organizationId={organizationId}
+        logoUrl={logoUrl}
+        sidebarBackgroundColor={sidebarBackgroundColor}
       />
     </Elements>
   );
