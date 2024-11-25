@@ -1,23 +1,26 @@
+import { Account } from './account.types';
 import { Activity } from './activity.types';
+import { Brief } from './brief.types';
 import { Database } from './database.types';
 import { File } from './file.types';
-import { Task } from './tasks.types';
 import { Message } from './message.types';
 import { Review } from './review.types';
+import { Task } from './tasks.types';
 import { User } from './user.types';
-import { Account } from './account.types';
-
 
 export namespace Order {
-  export type Type = Database['public']['Tables']['orders_v2']['Row'] & {
-    customer?: Account.Type;
-    user?: User.Type;
-    messages?: Message.Type[];
-    files?: File.Type[];
-    tasks?: Task.Type[];
-    assigned_to?: { agency_member: User.Type }[];
-    followers?: { client_follower: User.Type }[];
-    organization?: Account.Type;
+  export type Type = Database['public']['Tables']['orders_v2']['Row'];
+
+  export type Response = Order.Type & {
+    customer: Account.Type;
+    assigned_to: {
+      agency_member: User.Response;
+    }[];
+    followers: {
+      client_follower: User.Response;
+    }[];
+    client_organization: Pick<Account.Type, 'name' | 'slug' | 'id'>;
+    brief?: Pick<Brief.Response, 'name'>;
   };
   export type Relational = Order.Relationships.All & {
     messages: (Message.Type & { user: User.Response; files: File.Type[] })[];

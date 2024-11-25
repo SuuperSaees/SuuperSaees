@@ -1,6 +1,10 @@
-'use client';
-
-import deduceNameFromEmail from '../../utils/deduce-name-from-email';
+/**
+ * Displays multiple avatars in a row.
+ *
+ * @param {MultiAvatarDisplayerProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered component.
+ */
+// if avatars length is greater than maxAvatars props, show a circle with bg gray with the remaining avatars (eg. +5)
 import AvatarDisplayer from './avatar-displayer';
 
 export type Avatar = {
@@ -14,44 +18,33 @@ interface MultiAvatarDisplayerProps {
   avatars: Avatar[];
   maxAvatars?: number;
   className?: string;
-  displayNormal?: boolean;
+  avatarClassName?: string;
   [key: string]: unknown;
 }
 
-/**
- * Displays multiple avatars in a row.
- *
- * @param {MultiAvatarDisplayerProps} props - The props for the component.
- * @returns {JSX.Element} The rendered component.
- */
-// if avatars length is greater than maxAvatars props, show a circle with bg gray with the remaining avatars (eg. +5)
-const MultiAvatarDisplayer = ({
+export default function MultiAvatarDisplayer({
   avatars,
   maxAvatars = 5,
   className,
-  displayNormal = false,
+  avatarClassName,
   ...rest
-}: MultiAvatarDisplayerProps) => {
+}: MultiAvatarDisplayerProps) {
   return (
-    <div
-      className={`relative right-6 m-0 grid grid-cols-2 gap-2 p-0 ${className} w-full`}
-    >
+    <div className={`relative flex items-center ${className}`} {...rest}>
       {avatars.slice(0, maxAvatars).map((avatar, index) => (
         <AvatarDisplayer
-          displayName={deduceNameFromEmail(avatar?.email) ?? avatar?.name}
-          isAssignedOrFollower={!displayNormal ? true : false}
-          pictureUrl={avatar?.picture_url}
+          pictureUrl={avatar?.picture_url ?? ''}
+          displayName={avatar?.name}
           key={index + avatar?.name}
-          status={avatar?.status}
-          className={'h-8 w-8 border-2 border-white'}
+          className={`h-8 w-8 border-2 border-white ${avatarClassName}`}
           style={{
             position: 'relative',
             left: index === 0 ? 0 : `-${index * 33.33}%`,
             zIndex: maxAvatars - index,
           }}
-          {...rest}
         />
       ))}
+
       {avatars.length > maxAvatars && (
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 font-bold`}
@@ -66,6 +59,4 @@ const MultiAvatarDisplayer = ({
       )}
     </div>
   );
-};
-
-export default MultiAvatarDisplayer;
+}
