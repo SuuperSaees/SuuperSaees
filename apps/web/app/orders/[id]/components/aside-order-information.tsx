@@ -32,7 +32,6 @@ import ActivityAssignations from './activity-assignations';
 import ActivityFollowers from './activity-followers';
 // import SelectAction from './ui/select-action';
 import { PriorityCombobox } from './priority-combobox';
-import { ReviewDialog } from './review-dialog';
 import StatusCombobox from './status-combobox';
 // import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
@@ -363,9 +362,7 @@ const AsideOrderInformation = ({
             />
           </div>
         )}
-        {(userRole === 'client_owner' || userRole === 'client_member') && (
-          <ReviewDialog orderId={order.id} className="mt-auto mb-8 w-full" />
-        )}
+
       </div>
     </AgencyStatusesProvider>
   );

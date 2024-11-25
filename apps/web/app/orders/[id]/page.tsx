@@ -62,7 +62,7 @@ async function OrderDetailsPage({
       <div className="flex max-h-full h-full w-full justify-between">
     
         <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem] pt-2">
-          <OrderHeader order={order} />
+          <OrderHeader order={order} agencyStatuses={agencyStatuses ?? []} />
           <OrderTabs
             organizationId={
               organizationId

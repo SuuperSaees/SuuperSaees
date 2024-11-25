@@ -2,15 +2,12 @@
 
 import { useState } from 'react';
 
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StarFilledIcon } from '@radix-ui/react-icons';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedTextarea } from 'node_modules/@kit/accounts/src/components/ui/textarea-themed-with-settings';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 import {
@@ -27,7 +24,7 @@ import { Form, FormField } from '@kit/ui/form';
 import { Label } from '@kit/ui/label';
 
 import { createReview } from '../../../../../../packages/features/team-accounts/src/server/actions/review/create/create.review';
-
+import { handleResponse } from '~/lib/response/handle-response';
 
 const reviewSchema = z.object({
   rating: z.number().max(5).optional().nullable(),
@@ -41,7 +38,15 @@ const reviewSchema = z.object({
     }),
 });
 
-export function ReviewDialog({ orderId, className }: { orderId: number, className?: string }) {
+export function ReviewDialog({
+  orderId,
+  statusId,
+  className,
+}: {
+  orderId: number;
+  statusId: number | null;
+  className?: string;
+}) {
   const form = useForm<z.infer<typeof reviewSchema>>({
     mode: 'onChange',
     resolver: zodResolver(reviewSchema),
@@ -61,16 +66,13 @@ export function ReviewDialog({ orderId, className }: { orderId: number, classNam
   async function onSubmit() {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
+    if(!statusId) return
     const values = getValues();
     try {
-      await createReview({ ...values, order_id: orderId });
-      toast.success('Success', {
-        description: 'Review created successfully',
-      });
+      const res = await createReview({ ...values, order_id: orderId, status_id: statusId });
+      await handleResponse(res, 'reviews', t);
     } catch (error) {
-      toast.error('Error', {
-        description: 'Error creating the review',
-      });
+      console.error('Error creating the review');
     }
   }
   return (
@@ -141,9 +143,7 @@ export function ReviewDialog({ orderId, className }: { orderId: number, classNam
             </div>
             <DialogFooter>
               <DialogClose>
-                <ThemedButton type="button" onClick={onSubmit}
-                
-                >
+                <ThemedButton type="button" onClick={onSubmit}>
                   {t('details.dialog.button')}
                 </ThemedButton>
               </DialogClose>

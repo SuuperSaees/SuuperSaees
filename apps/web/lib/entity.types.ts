@@ -1,1 +1,1 @@
-export type Entity = 'organizations' | 'clients' | 'accounts' | 'services' | 'briefs' | 'tasks' | 'orders';
+export type Entity = 'organizations' | 'clients' | 'accounts' | 'services' | 'briefs' | 'tasks' | 'orders' | 'reviews';

@@ -51,6 +51,15 @@
       "failedToUpdateOrderPriority": "Couldn't update the order priority. Please try again later.",
       "failedToUpdateOrderName": "Couldn't update the order name. Please try again later.",
       "failedToDeleteOrder": "Couldn't delete the order. Please try again later."
+    },
+    "reviews": {
+      "reviewNotFound": "Review not found.",
+      "reviewAlreadyExists": "A review already exists for this project.",
+      "failedToCreateReview": "Couldn't create the review. Please try again later.",
+      "failedToUpdateReview": "Couldn't update the review. Please try again later.",
+      "failedToDeleteReview": "Couldn't delete the review. Please try again later.",
+      "failedToGetReviews": "Couldn't get the reviews. Please try again later.",
+      "failedToGetReview": "Couldn't get the review. Please try again later."
     }
   },
   "success": {
@@ -91,6 +100,9 @@
       "orderFollowersUpdated": "Order followers updated successfully.",
       "orderNameUpdated": "Order name updated successfully.",
       "orderDeleted": "Order deleted successfully."
+    },
+    "reviews": {
+      "reviewCreated": "Review added successfully."
     }
   }
 }
