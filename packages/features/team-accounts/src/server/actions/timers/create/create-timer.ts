@@ -3,6 +3,7 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { CustomError, CustomResponse, CustomSuccess } from '@kit/shared/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
+import { ErrorTimerOperations } from '@kit/shared/response';
 
 export async function createTimer(timer: {
   elementId: string;
@@ -19,7 +20,7 @@ export async function createTimer(timer: {
       throw new CustomError(
         HttpStatus.Error.Unauthorized,
         'User not authenticated',
-        'createTimer'
+        ErrorTimerOperations.INSUFFICIENT_PERMISSIONS
       );
     }
 
@@ -40,7 +41,7 @@ export async function createTimer(timer: {
       throw new CustomError(
         HttpStatus.Error.InternalServerError,
         timerError.message,
-        'createTimer'
+        ErrorTimerOperations.FAILED_TO_CREATE_TIMER
       );
     }
 
@@ -57,14 +58,14 @@ export async function createTimer(timer: {
         throw new CustomError(
           HttpStatus.Error.InternalServerError,
           relationError.message,
-          'createTimerRelation'
+          ErrorTimerOperations.FAILED_TO_CREATE_TIMER
         );
       }
     }
 
     return new CustomSuccess(
       HttpStatus.Success.Created,
-      'createTimer',
+      ErrorTimerOperations.TIMER_CREATED,
       'Timer created successfully',
       undefined,
       timerData

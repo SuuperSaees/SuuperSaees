@@ -1,7 +1,7 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { CustomError, CustomResponse, CustomSuccess } from '@kit/shared/response';
+import { CustomError, CustomResponse, CustomSuccess, ErrorTimerOperations } from '@kit/shared/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { TimerUpdate } from '../../../../../../../../apps/web/lib/timer.types';
 import { formatElapsedTime } from '../../../../../../../../apps/web/app/utils/format-time';
@@ -30,7 +30,7 @@ export async function updateActiveTimer(timerId: string, timer: TimerUpdate) {
       throw new CustomError(
         HttpStatus.Error.InternalServerError,
         error.message,
-        'upsertActiveTimer'
+        ErrorTimerOperations.FAILED_TO_UPDATE_TIMER
       );
     }
 

@@ -15,9 +15,14 @@ import {
 } from '@kit/ui/alert-dialog';
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
-import { updateActiveTimer } from '~/team-accounts/src/server/actions/timers/update/update-timer';
+// import { updateActiveTimer } from '~/team-accounts/src/server/actions/timers/update/update-timer';
+import { TimerUpdate } from '~/lib/timer.types';
 
-export const OrderTimer = () => {
+interface TimerProps {
+  onUpdate: (timerId: string, timer: TimerUpdate) => Promise<void>;
+}
+
+export const Timer = ({ onUpdate }: TimerProps) => {
   const { t } = useTranslation('common');
   const { activeTimer, setActiveTimer, clearTimer } = useTimeTracker();
   const [time, setTime] = useState(0);
@@ -40,7 +45,8 @@ export const OrderTimer = () => {
       };
       setIsPaused(false);
   
-      await updateActiveTimer(activeTimer.id!, timerUpdate);
+      // await updateActiveTimer(activeTimer.id!, timerUpdate);
+      await onUpdate(activeTimer.id!, timerUpdate);
       
       setActiveTimer({
         id: null,

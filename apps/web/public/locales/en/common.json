@@ -92,7 +92,8 @@
     "enterTimerName": "Enter the name of the timer",
     "timerName": "Timer Name",
     "cancel": "Cancel",
-    "confirm": "Save"
+    "confirm": "Save",
+    "errorCreating": "Failed to create timer"
   },
   "organizationName": "Organization",
   "selectOption": "Select an option",

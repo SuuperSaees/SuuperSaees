@@ -89,7 +89,8 @@
     "enterTimerName": "Ingrese el nombre del temporizador",
     "timerName": "Nombre del Temporizador",
     "cancel": "Cancelar",
-    "confirm": "Guardar"
+    "confirm": "Guardar",
+    "errorCreating": "Error al crear el temporizador"
   },
   "organizationName": "Organización",
   "selectOption": "Seleccionar una opción",

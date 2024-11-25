@@ -8,7 +8,7 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { OrderList } from './components/orders-list';
 import { PageHeader } from '../components/page-header';
-import { OrderTimer } from '../components/timer';
+import { TimerContainer } from '../components/timer-container';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -39,7 +39,9 @@ async function OrdersPage() {
         <div className="p-[35px]">
           <PageHeader 
             title='orders:title'
-            rightContent={<OrderTimer/>}
+            rightContent={
+              <TimerContainer />
+            }
           />
           <div>
             <OrderList orders={processedOrders ?? []} role={role} agencyStatuses={agencyStatuses ?? []}></OrderList>
