@@ -1,8 +1,13 @@
+'use client';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { toast } from 'sonner';
 
+import { isBrowser } from '@kit/shared/utils';
+
 const useInternalMessaging = () => {
+
   const [isInternalMessagingEnabled, setIsInternalMessagingEnabled] = useState(
     () => {
       const savedState = localStorage.getItem('internalMessagingEnabled');
@@ -54,6 +59,9 @@ const useInternalMessaging = () => {
     return savedState === 'true';
   }, []);
 
+  if(!isBrowser()) {
+    return null
+  }
   return {
     isInternalMessagingEnabled,
     handleSwitchChange,
