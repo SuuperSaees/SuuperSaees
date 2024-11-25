@@ -84,6 +84,14 @@
     "next": "Siguiente",
     "previous": "Anterior"
   },
+  "timer": {
+    "pauseTimer": "Pausar temporizador",
+    "enterTimerName": "Ingrese el nombre del temporizador",
+    "timerName": "Nombre del Temporizador",
+    "cancel": "Cancelar",
+    "confirm": "Guardar",
+    "errorCreating": "Error al crear el temporizador"
+  },
   "organizationName": "Organización",
   "selectOption": "Seleccionar una opción",
   "success": "¡Todo Listo!",

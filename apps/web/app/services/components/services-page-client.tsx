@@ -15,7 +15,7 @@ import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table'
 import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
 import { useStripeActions } from '../hooks/use-stripe-actions';
 import { PageHeader } from '../../components/page-header';
-import { OrderTimer } from '../../components/timer';
+import { TimerContainer } from '../../components/timer-container';
 
 interface ServicesPageClientProps {
   stripePromise: Promise<Stripe | null>;
@@ -63,7 +63,9 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
           <div className="p-[35px]">
             <PageHeader
               title='services:title'
-              rightContent={<OrderTimer/>}
+              rightContent={
+                <TimerContainer />
+              }
             />
             <TabsContent className="bg-transparent" value="services">
               <ServicesTable

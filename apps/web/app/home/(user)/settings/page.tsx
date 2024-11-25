@@ -11,7 +11,7 @@ import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { PageHeader } from '../../../components/page-header';
-import { OrderTimer } from '../../../components/timer';
+import { TimerContainer } from '../../../components/timer-container';
 
 const features = {
   enableAccountDeletion: featureFlagsConfig.enableAccountDeletion,
@@ -38,7 +38,9 @@ function PersonalAccountSettingsPage() {
       <div className="p-[35px]">
         <PageHeader
           title='account:settingsTab'
-          rightContent={<OrderTimer/>}
+          rightContent={
+            <TimerContainer />
+          }
         />
 
         <PersonalAccountSettingsContainer

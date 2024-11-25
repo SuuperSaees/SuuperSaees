@@ -280,10 +280,10 @@ const SubtaskItem = ({
         />
         <div className="flex items-center">
           <TimeTracker
-            subtaskId={subtask.id}
-            taskId={subtask.parent_task_id}
+            elementId={subtask.id}
+            elementType="subtask"
+            elementName={subtask.name ?? ''}
             isHovered={isHovered}
-            subtaskName={subtask.name}
           />
           <TrashIcon
             className={`h-4 w-4 cursor-pointer ${isHovered ? 'text-gray-500 hover:text-red-500' : 'text-transparent'}`}

@@ -11,7 +11,7 @@ import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 import { PageHeader } from '../../components/page-header';
-import { OrderTimer } from '../../components/timer';
+import { TimerContainer } from '../../components/timer-container';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -89,7 +89,9 @@ const ClientsMembersPagePresentation = ({
       <div className="p-[35px]">
         <PageHeader 
           title='team:team'
-          rightContent={<OrderTimer/>}
+          rightContent={
+            <TimerContainer />
+          }
         />
 
         <div className="w-full">

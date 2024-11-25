@@ -73,4 +73,17 @@ export enum ErrorClientOperations {
     FAILED_TO_CREATE_FORM_FIELDS = 'failedToCreateFormFields',
   }
 
-  
+  export enum ErrorTimerOperations {
+    TIMER_NOT_FOUND = 'timerNotFound',
+    TIMER_ALREADY_EXISTS = 'timerAlreadyExists',
+    FAILED_TO_CREATE_TIMER = 'failedToCreateTimer',
+    FAILED_TO_UPDATE_TIMER = 'failedToUpdateTimer',
+    FAILED_TO_DELETE_TIMER = 'failedToDeleteTimer',
+    FAILED_TO_START_TIMER = 'failedToStartTimer',
+    FAILED_TO_STOP_TIMER = 'failedToStopTimer',
+    FAILED_TO_PAUSE_TIMER = 'failedToPauseTimer',
+    FAILED_TO_RESUME_TIMER = 'failedToResumeTimer',
+    TIMER_ALREADY_RUNNING = 'timerAlreadyRunning',
+    INSUFFICIENT_PERMISSIONS = 'insufficientPermissions',
+    TIMER_CREATED = 'timerCreated',
+  }
