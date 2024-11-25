@@ -10,6 +10,7 @@ import EditUserDialog from './edit-user-dialog';
 import SwitchOrganizationDialog from './SwitchOrganizationDialog';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
+import {AdminImpersonateUserDialog} from '../../../../../features/admin/src/components/admin-impersonate-user-dialog';
 
 interface AgencyClientCrudMenuProps {
   userId: string;
@@ -21,6 +22,7 @@ interface AgencyClientCrudMenuProps {
 function AgencyClientCrudMenu({userId, name, email, queryKey}: AgencyClientCrudMenuProps) {
   const {t} = useTranslation('clients');
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
+  const [openImpersonateUserDialog, setOpenImpersonateUserDialog] = useState(false);
 
   return (
     <>
@@ -37,9 +39,13 @@ function AgencyClientCrudMenu({userId, name, email, queryKey}: AgencyClientCrudM
               {t('editUser.edit')}
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem className='flex gap-2 items-center'>
-            <Users className='w-4 h-4' />
-            {t('editUser.supplant')}
+          <DropdownMenuItem onSelect={() => {
+            setOpenImpersonateUserDialog(true);
+          }}>
+            <div className='flex gap-2 items-center w-full h-full cursor-pointer'>
+              <Users className='w-4 h-4' />
+              {t('editUser.supplant')}
+            </div>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
             <SwitchOrganizationDialog />
@@ -58,6 +64,9 @@ function AgencyClientCrudMenu({userId, name, email, queryKey}: AgencyClientCrudM
       </DropdownMenu>
       
       <EditUserDialog userId={userId} name={name} email={email} isOpen={openEditUserDialog} setIsOpen={setOpenEditUserDialog} />
+      <AdminImpersonateUserDialog userId={userId} isOpen = {openImpersonateUserDialog} setIsOpen={setOpenImpersonateUserDialog}>
+        <></>
+      </AdminImpersonateUserDialog>
     </>
   );
 }

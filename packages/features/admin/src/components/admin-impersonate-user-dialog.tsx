@@ -36,6 +36,8 @@ import { ImpersonateUserSchema } from '../lib/server/schema/admin-actions.schema
 export function AdminImpersonateUserDialog(
   props: React.PropsWithChildren<{
     userId: string;
+    isOpen?: boolean;
+    setIsOpen?: (open: boolean) => void;
   }>,
 ) {
   const form = useForm({
@@ -51,6 +53,12 @@ export function AdminImpersonateUserDialog(
     refreshToken: string;
   }>();
 
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  const isControlled = props.isOpen !== undefined && props.setIsOpen !== undefined;
+  const isOpen = isControlled ? props.isOpen : internalIsOpen;
+  const setIsOpen = isControlled ? props.setIsOpen : setInternalIsOpen;
+
   if (tokens) {
     return (
       <>
@@ -62,8 +70,10 @@ export function AdminImpersonateUserDialog(
   }
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+      
       <AlertDialogTrigger asChild>{props.children}</AlertDialogTrigger>
+      
 
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -78,11 +88,14 @@ export function AdminImpersonateUserDialog(
         <Form {...form}>
           <form
             className={'flex flex-col space-y-8'}
-            onSubmit={form.handleSubmit(async (data) => {
-              const tokens = await impersonateUserAction(data);
-
-              setTokens(tokens);
-            })}
+            onSubmit={form.handleSubmit(
+              async (data) => {
+                const tokens = await impersonateUserAction(data);                setTokens(tokens);
+              },
+              (errors) => {
+                console.error('Validation errors:', errors);
+              }
+            )}
           >
             <FormField
               name={'confirmation'}
