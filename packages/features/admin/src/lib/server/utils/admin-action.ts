@@ -18,7 +18,7 @@ export function adminAction<Args, Response>(fn: (params: Args) => Response) {
       return ''
     });
 
-    if(isAdmin || userRole === 'agency_owner') {
+    if(isAdmin || userRole === 'agency_owner' || userRole === 'agency_project_manager') {
       return fn(params);
     }else{
       notFound();
