@@ -16,6 +16,7 @@ import { Trans } from '@kit/ui/trans';
 
 import featuresFlagConfig from '~/config/feature-flags.config';
 import pathsConfig from '~/config/paths.config';
+import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
 
 const ModeToggle = dynamic(
   () => import('@kit/ui/mode-toggle').then((mod) => mod.ModeToggle),
@@ -50,13 +51,23 @@ function SuspendedPersonalAccountDropdown(props: { user: User | null }) {
   const user = useUser(props.user);
   const userData = user.data ?? props.user ?? null;
 
+  const handleSignOut = async () => {
+    const originalTokenId = localStorage.getItem("originalTokenId");
+    if (originalTokenId){
+      localStorage.removeItem('impersonating');
+      localStorage.removeItem('originalTokenId');
+      await deleteToken(originalTokenId);
+    }
+    await signOut.mutateAsync()
+  }
+
   if (userData) {
     return (
       <PersonalAccountDropdown
         paths={paths}
         features={features}
         user={userData}
-        signOutRequested={() => signOut.mutateAsync()}
+        signOutRequested={handleSignOut}
       />
     );
   }

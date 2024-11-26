@@ -5,6 +5,10 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import {saveToken} from '../../../../tokens/src/save-token'
+import {generateUUID} from '../../../../../apps/web/app/utils/generate-uuid'
+import {formatToTimestamptz} from '../../../../../apps/web/app/utils/format-to-timestamptz'
+import { Trans } from '@kit/ui/trans';
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import {
@@ -20,18 +24,12 @@ import {
 import { Button } from '@kit/ui/button';
 import {
   Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
 } from '@kit/ui/form';
-import { Input } from '@kit/ui/input';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 
 import { impersonateUserAction } from '../lib/server/admin-server-actions';
 import { ImpersonateUserSchema } from '../lib/server/schema/admin-actions.schema';
+import { useRouter } from 'next/navigation';
 
 export function AdminImpersonateUserDialog(
   props: React.PropsWithChildren<{
@@ -44,7 +42,6 @@ export function AdminImpersonateUserDialog(
     resolver: zodResolver(ImpersonateUserSchema),
     defaultValues: {
       userId: props.userId,
-      confirmation: '',
     },
   });
 
@@ -63,8 +60,6 @@ export function AdminImpersonateUserDialog(
     return (
       <>
         <ImpersonateUserAuthSetter tokens={tokens} />
-
-        <LoadingOverlay>Setting up your session...</LoadingOverlay>
       </>
     );
   }
@@ -77,11 +72,10 @@ export function AdminImpersonateUserDialog(
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Impersonate User</AlertDialogTitle>
+          <AlertDialogTitle><Trans i18nKey={'clients:editUser:supplant'} /></AlertDialogTitle>
 
           <AlertDialogDescription>
-            Are you sure you want to impersonate this user? You will be logged
-            in as this user. To stop impersonating, log out.
+            <Trans i18nKey={'clients:editUser:supplantDescription'} />
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -98,36 +92,11 @@ export function AdminImpersonateUserDialog(
               }
             )}
           >
-            <FormField
-              name={'confirmation'}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Type <b>CONFIRM</b> to confirm
-                  </FormLabel>
-
-                  <FormControl>
-                    <Input
-                      required
-                      pattern={'CONFIRM'}
-                      placeholder={'Type CONFIRM to confirm'}
-                      {...field}
-                    />
-                  </FormControl>
-
-                  <FormDescription>
-                    Are you sure you want to impersonate this user?
-                  </FormDescription>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel><Trans i18nKey={'clients:editUser:cancelSupplant'} /></AlertDialogCancel>
 
-              <Button type={'submit'}>Impersonate User</Button>
+              <Button type={'submit'}><Trans i18nKey={'clients:editUser:confirmSupplant'} /></Button>
             </AlertDialogFooter>
           </form>
         </Form>
@@ -151,20 +120,38 @@ function ImpersonateUserAuthSetter({
 
 function useSetSession(tokens: { accessToken: string; refreshToken: string }) {
   const supabase = useSupabase();
+  const router = useRouter();
 
   return useQuery({
     queryKey: ['impersonate-user', tokens.accessToken, tokens.refreshToken],
     gcTime: 0,
     queryFn: async () => {
-      await supabase.auth.signOut();
+      try{
+        //Saving previous session to enable 'stop impersonating' feature
+        const session = await supabase.auth.getSession();
+        const expires_at = session.data.session ? new Date(parseInt(session.data.session.expires_at!.toString()) * 1000) : new Date();
+        const tokenId = generateUUID()
+        const sessionToStore = session.data.session ? { access_token: session.data.session.access_token, refresh_token: session.data.session.refresh_token, expires_at: formatToTimestamptz(expires_at), provider:'supabase', id_token_provider:tokenId} : { access_token: '', refresh_token: '', expires_at: '',provider:'supabase', id_token_provider:tokenId};
+        await saveToken(sessionToStore);
+        localStorage.setItem('originalTokenId', tokenId)
+        localStorage.setItem('impersonating', 'true')
 
-      await supabase.auth.setSession({
-        refresh_token: tokens.refreshToken,
-        access_token: tokens.accessToken,
-      });
+        await supabase.auth.setSession({
+          refresh_token: tokens.refreshToken,
+          access_token: tokens.accessToken,
+        });
 
-      // use a hard refresh to avoid hitting cached pages
-      window.location.replace('/home');
+        //Push to /home page and then use refresh to reload the page with updated user data
+        router.push('/home');
+        router.refresh()
+
+        // This one below is no longer used to prevent useContext errors
+        // window.location.replace('/home');
+
+      }catch(error){
+        console.error(error)
+      }
+      
     },
   });
 }

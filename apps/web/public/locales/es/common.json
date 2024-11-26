@@ -86,5 +86,7 @@
   "organizationName": "Organización",
   "selectOption": "Seleccionar una opción",
   "success": "¡Todo Listo!",
-  "error": "¡Algo salió mal!"
+  "error": "¡Algo salió mal!",
+  "stopImpersonating": "Dejar de suplantar",
+  "stopImpersonatingDescription": "¡Todo listo! Regresarás a tu sesión en unos segundos"
 }

@@ -89,5 +89,7 @@
   "organizationName": "Organization",
   "selectOption": "Select an option",
   "success": "All set!",
-  "error": "Something went wrong!"
+  "error": "Something went wrong!",
+  "stopImpersonating": "Stop impersonating",
+  "stopImpersonatingDescription": "All set! You will go back to your session shortly"
 }

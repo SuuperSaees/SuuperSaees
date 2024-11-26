@@ -81,6 +81,9 @@
   "editUser": {
     "editUserInfo": "Edit user",
     "supplant": "Impersonate",
+    "supplantDescription": "Are you sure you want to impersonate this user? You will be logged in as this user.",
+    "cancelSupplant": "Cancel",
+    "confirmSupplant": "Impersonate user",
     "resetPassword": "Reset password",
     "edit" : "Edit",
     "fullName": "Full name",

@@ -82,6 +82,9 @@
   "editUser": {
     "editUserInfo": "Editar usuario",
     "supplant": "Suplantar",
+    "supplantDescription": "¿Estás seguro de que deseas suplantar a este usuario? Iniciarás sesión como este usuario.",
+    "cancelSupplant": "Cancelar",
+    "confirmSupplant": "Suplantar usuario",
     "resetPassword": "Reestablecer contraseña",
     "edit" : "Editar",
     "fullName": "Nombre completo",
