@@ -111,6 +111,42 @@ export const updateUserEmail = async(
   }
 }
 
+export const updateUserPassword = async(
+  userId: Account.Type['id'],
+  password: string,
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
+) => {
+  databaseClient =
+    databaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+  
+  try{
+
+    if(password === undefined || password === null || password === '') {
+      throw new Error('Password is required')
+    }
+
+    const { data, error } = await databaseClient.auth.admin.updateUserById(
+      userId,
+      {password: password}
+    )
+
+    if (error){
+      throw new Error(
+        `Error updating the user password: ${error.message}`,
+      );
+    }
+    
+    return data;
+  }catch(error){
+    console.error('Error updating the user password', error);
+    throw error;
+  }
+}
+
 export const updateUserSettings = async (
   userId: Account.Type['id'],
   userSettings: UserSettings.Update,

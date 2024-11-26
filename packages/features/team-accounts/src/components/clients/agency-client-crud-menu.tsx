@@ -11,6 +11,7 @@ import SwitchOrganizationDialog from './SwitchOrganizationDialog';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import {AdminImpersonateUserDialog} from '../../../../../features/admin/src/components/admin-impersonate-user-dialog';
+import ResetPasswordDialog from './reset-password-dialog';
 
 interface AgencyClientCrudMenuProps {
   userId: string;
@@ -25,6 +26,7 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOption
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
   const [openImpersonateUserDialog, setOpenImpersonateUserDialog] = useState(false);
   const [openSwitchOrganizationDialog, setOpenSwitchOrganizationDialog] = useState(false);
+  const [openResetPasswordDialog, setOpenResetPasswordDialog] = useState(false)
 
   return (
     <>
@@ -55,7 +57,7 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOption
               {t('editUser.switchOrganization')}
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem className='flex gap-2 items-center'>
+          <DropdownMenuItem className='flex gap-2 items-center w-full h-full cursor-pointer' onSelect={() => setOpenResetPasswordDialog(true)}>
             <LockKeyhole className='w-4 h-4' /> 
             {t('editUser.resetPassword')}
           </DropdownMenuItem>
@@ -73,6 +75,7 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOption
         <></>
       </AdminImpersonateUserDialog>
       <SwitchOrganizationDialog userId={userId} isOpen={openSwitchOrganizationDialog} setIsOpen={setOpenSwitchOrganizationDialog} organizationOptions = {organizationOptions} />
+      <ResetPasswordDialog userId={userId} isOpen={openResetPasswordDialog} setIsOpen={setOpenResetPasswordDialog} />
     </>
   );
 }
