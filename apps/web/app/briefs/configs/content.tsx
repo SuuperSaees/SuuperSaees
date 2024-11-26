@@ -1,11 +1,11 @@
 import { ALargeSmall, Image } from 'lucide-react';
 
 import FormTitleComponent from '../components/content-fields/title-content';
-import FormRichTextComponent from '../components/content-fields/rich-text-content';
+// import FormRichTextComponent from '../components/content-fields/rich-text-content';
 import { ComponentProps, Content, ContentTypes } from '../types/brief.types';
 // import FormVideoUpload from '../components/video-content';
 import UploadImagePreview from '../components/upload-image-preview';
-import { AlignCenter } from 'lucide-react';
+// import { AlignCenter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 type ContentKey = ContentTypes;
@@ -44,35 +44,35 @@ export const useGenerateContent = (
         ),
       },
     ],
-    [
-      'rich-text',
-      {
-        name: t('richText.value'),
-        icon: <AlignCenter className="h-8 w-8" />,
-        action: () => action('rich-text'), // Action passed dynamically,
-        content: {
-          label: '',
-          description: '',
-          placeholder: '',
-          type: 'rich-text',
-          position: -1,
-          id: 'create-form-field-0',
-        },
-        component: (props: ComponentProps) => (
-          <FormRichTextComponent
-            index={props.index}
-            question={props.question}
-            form={props.form}
-            handleQuestionChange={props.handleQuestionChange}
-            handleRemoveQuestion={props.handleRemoveQuestion}
-            handleQuestionFocus={props.handleQuestionFocus}
-            handleQuestionBlur={props.handleQuestionBlur}
-            userRole={props.userRole}
-            inSidebar = {false}
-          />
-        ),
-      },
-    ],
+    // [
+    //   'rich-text',
+    //   {
+    //     name: t('richText.value'),
+    //     icon: <AlignCenter className="h-8 w-8" />,
+    //     action: () => action('rich-text'), // Action passed dynamically,
+    //     content: {
+    //       label: '',
+    //       description: '',
+    //       placeholder: '',
+    //       type: 'rich-text',
+    //       position: -1,
+    //       id: 'create-form-field-0',
+    //     },
+    //     component: (props: ComponentProps) => (
+    //       <FormRichTextComponent
+    //         index={props.index}
+    //         question={props.question}
+    //         form={props.form}
+    //         handleQuestionChange={props.handleQuestionChange}
+    //         handleRemoveQuestion={props.handleRemoveQuestion}
+    //         handleQuestionFocus={props.handleQuestionFocus}
+    //         handleQuestionBlur={props.handleQuestionBlur}
+    //         userRole={props.userRole}
+    //         inSidebar = {false}
+    //       />
+    //     ),
+    //   },
+    // ],
     [
       'image',
       {

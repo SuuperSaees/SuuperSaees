@@ -52,13 +52,19 @@ export const useBrief = (
     // Remove the id if start with 'create-form-field-'
     // verify theres's no error on the form
     // Perform validation on the reordered values
-    form.reset({ questions: values }, { keepErrors: true });
-    await form.trigger('questions')
+    form.reset(
+      { ...form.getValues(), questions: values },
+      { keepErrors: true },
+    );
+    await form.trigger('questions');
     const hasErrors = form.formState.errors.questions?.length;
 
     if (isUpdate && !hasErrors) {
       try {
-        const formattedFormFields = values.map((question) => {
+        const formattedFormFields = [
+          ...values.filter((v) => v.position !== 0),
+          form.getValues('default_question'),
+        ]?.map((question) => {
           const newQuestion = { ...question };
           if (newQuestion.id?.startsWith('create-form-field-')) {
             newQuestion.id = undefined;
