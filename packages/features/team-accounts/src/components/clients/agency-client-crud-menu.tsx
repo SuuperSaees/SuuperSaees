@@ -11,18 +11,22 @@ import SwitchOrganizationDialog from './SwitchOrganizationDialog';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import {AdminImpersonateUserDialog} from '../../../../../features/admin/src/components/admin-impersonate-user-dialog';
+import ResetPasswordDialog from './reset-password-dialog';
 
 interface AgencyClientCrudMenuProps {
   userId: string;
   name: string;
   email: string;
   queryKey?: string;
+  organizationOptions : {id:string, name:string, slug:string}[];
 }
 
-function AgencyClientCrudMenu({userId, name, email, queryKey}: AgencyClientCrudMenuProps) {
+function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOptions}: AgencyClientCrudMenuProps) {
   const {t} = useTranslation('clients');
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
   const [openImpersonateUserDialog, setOpenImpersonateUserDialog] = useState(false);
+  const [openSwitchOrganizationDialog, setOpenSwitchOrganizationDialog] = useState(false);
+  const [openResetPasswordDialog, setOpenResetPasswordDialog] = useState(false)
 
   return (
     <>
@@ -47,10 +51,13 @@ function AgencyClientCrudMenu({userId, name, email, queryKey}: AgencyClientCrudM
               {t('editUser.supplant')}
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            <SwitchOrganizationDialog />
+          <DropdownMenuItem onSelect={() => setOpenSwitchOrganizationDialog(true)}>
+            <div className='flex gap-2 items-center w-full h-full cursor-pointer'>
+              <ArrowLeftRight className="h-4 w-4" />
+              {t('editUser.switchOrganization')}
+            </div>
           </DropdownMenuItem>
-          <DropdownMenuItem className='flex gap-2 items-center'>
+          <DropdownMenuItem className='flex gap-2 items-center w-full h-full cursor-pointer' onSelect={() => setOpenResetPasswordDialog(true)}>
             <LockKeyhole className='w-4 h-4' /> 
             {t('editUser.resetPassword')}
           </DropdownMenuItem>
@@ -67,6 +74,8 @@ function AgencyClientCrudMenu({userId, name, email, queryKey}: AgencyClientCrudM
       <AdminImpersonateUserDialog userId={userId} isOpen = {openImpersonateUserDialog} setIsOpen={setOpenImpersonateUserDialog}>
         <></>
       </AdminImpersonateUserDialog>
+      <SwitchOrganizationDialog userId={userId} isOpen={openSwitchOrganizationDialog} setIsOpen={setOpenSwitchOrganizationDialog} organizationOptions = {organizationOptions} />
+      <ResetPasswordDialog userId={userId} isOpen={openResetPasswordDialog} setIsOpen={setOpenResetPasswordDialog} />
     </>
   );
 }

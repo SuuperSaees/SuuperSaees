@@ -230,7 +230,8 @@ export async function getOrganizations() {
     // Get all organizations
     const { data: organizationsData, error: organizationError } = await client
       .from('accounts')
-      .select('id, name, primary_owner_user_id, slug, email, picture_url');
+      .select('id, name, primary_owner_user_id, slug, email, picture_url')
+      .eq('is_personal_account', false);
 
     if (organizationError) {
       console.error('Error fetching organizations:', organizationError);

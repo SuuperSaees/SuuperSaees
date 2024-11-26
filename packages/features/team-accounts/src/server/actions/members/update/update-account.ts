@@ -11,6 +11,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
+import { revalidatePath } from 'next/cache';
 
 export const updateUserAccount = async (
   userData: Account.Update,
@@ -35,7 +36,8 @@ export const updateUserAccount = async (
       throw new Error(
         `Error updating the user account: ${errorUpdateUserAccount.message}`,
       );
-
+    
+      revalidatePath('/clients');
     return userAccountData;
   } catch (error) {
     console.error('Error updating the user account', error);
@@ -105,6 +107,42 @@ export const updateUserEmail = async(
     return data;
   }catch(error){
     console.error('Error updating the user email', error);
+    throw error;
+  }
+}
+
+export const updateUserPassword = async(
+  userId: Account.Type['id'],
+  password: string,
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
+) => {
+  databaseClient =
+    databaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+  
+  try{
+
+    if(password === undefined || password === null || password === '') {
+      throw new Error('Password is required')
+    }
+
+    const { data, error } = await databaseClient.auth.admin.updateUserById(
+      userId,
+      {password: password}
+    )
+
+    if (error){
+      throw new Error(
+        `Error updating the user password: ${error.message}`,
+      );
+    }
+    
+    return data;
+  }catch(error){
+    console.error('Error updating the user password', error);
     throw error;
   }
 }
