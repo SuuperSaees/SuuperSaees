@@ -15,13 +15,13 @@ export default function AvatarDisplayer({
   ...rest
 }: AvatarDisplayerProps) {
   return (
-    <Avatar className={`${className}`} {...rest}>
-      <AvatarImage src={pictureUrl} alt="account picture" />
-      <Tooltip content={displayName}>
+    <Tooltip content={displayName}>
+      <Avatar className={`${className}`} {...rest}>
+        <AvatarImage src={pictureUrl} alt="account picture" />
         <AvatarFallback>
           {displayName ? displayName.charAt(0).toUpperCase() : 'N/A'}
         </AvatarFallback>
-      </Tooltip>
-    </Avatar>
+      </Avatar>
+    </Tooltip>
   );
 }

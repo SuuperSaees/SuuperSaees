@@ -27,7 +27,7 @@ export default async function MemberPage({
 
   if (!user) return null;
 
-  const memberOrders = await getOrdersByUserId(id, true, 60).catch((error) => {
+  const memberOrders = await getOrdersByUserId(id, true, 60, true).catch((error) => {
     console.error('Error fetching orders in team member page:', error);
     return [];
   }).then((res) => res?.success?.data);

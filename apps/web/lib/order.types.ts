@@ -21,6 +21,7 @@ export namespace Order {
     }[];
     client_organization: Pick<Account.Type, 'name' | 'slug' | 'id'>;
     brief?: Pick<Brief.Response, 'name'>;
+    review?: Review.Response;
   };
   export type Relational = Order.Relationships.All & {
     messages: (Message.Type & { user: User.Response; files: File.Type[] })[];

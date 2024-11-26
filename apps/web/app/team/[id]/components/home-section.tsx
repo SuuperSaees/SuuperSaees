@@ -1,19 +1,21 @@
 'use client';
+
 import { isAfter, isBefore, subDays } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 import { useColumns } from '~/hooks/use-columns';
 import { Order } from '~/lib/order.types';
 
 import Table from '../../../components/table/table';
 import CardStats from '../../../components/ui/card-stats';
-import { useTranslation } from 'react-i18next';
 
 interface HomeSectionProps {
   memberOrders: Order.Response[];
 }
 export default function HomeSection({ memberOrders }: HomeSectionProps) {
+  console.log('memberOrders', memberOrders);
   const columns = useColumns('orders');
-  const { t } = useTranslation('statistics'); 
+  const { t } = useTranslation('statistics');
   // Current Date
   const now = new Date();
 
@@ -35,7 +37,7 @@ export default function HomeSection({ memberOrders }: HomeSectionProps) {
   );
 
   // Calculate Stats
-  const calculateStats = (orders: Order.Type[]) => {
+  const calculateStats = (orders: Order.Response[]) => {
     const ordersExists = orders && orders.length > 0;
 
     return {
@@ -49,6 +51,11 @@ export default function HomeSection({ memberOrders }: HomeSectionProps) {
         ? orders.filter((order) => order.status === 'completed').length
         : null,
       total: ordersExists ? orders.length : null,
+      // Calculate the average rating of the reviews
+      averageRating: ordersExists
+        ? orders.reduce((acc, order) => acc + (order.review?.rating ?? 0), 0) /
+            orders.filter((order) => order.review?.rating).length || 0
+        : null,
     };
   };
 
@@ -68,7 +75,11 @@ export default function HomeSection({ memberOrders }: HomeSectionProps) {
         />
         <CardStats
           title={t('projects.rating.average')}
-          value={{ current: 4.5, previous: 4.7, unit: 'months' }} // Placeholder for rating
+          value={{
+            current: currentStats.averageRating,
+            previous: previousStats.averageRating,
+            unit: 'months',
+          }} // Placeholder for rating
         />
         <CardStats
           title={t('projects.month.last')}

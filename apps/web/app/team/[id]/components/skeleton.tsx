@@ -10,7 +10,7 @@ export default function SkeletonReviewsSection({
   numberOfCards?: number;
 }) {
   return (
-    <div className="flex h-full max-h-full w-full flex-wrap gap-16 lg:flex-nowrap">
+    <div className="flex h-full max-h-full w-full flex-wrap gap-16 lg:flex-nowrap p-8">
       <SkeletonReviewRating />
       <div className="flex h-full w-full flex-col gap-4">
         {Array.from({ length: numberOfCards }, (_, index) => (
@@ -23,10 +23,10 @@ export default function SkeletonReviewsSection({
 
 export function SkeletonReviewRating() {
   return (
-    <div className="flex w-full max-w-[171.2px] flex-col gap-2">
+    <div className="flex w-full max-w-[235.2px] flex-col gap-2 p-8">
       <SkeletonLineText className="h-4" />
       <div className="flex items-center gap-4">
-        <SkeletonBox className="h-12 w-5" />
+        <SkeletonBox className="h-12 w-10" />
         <div className="flex flex-col gap-2 w-full">
           <div className="flex gap-1">
             {Array.from({ length: 4 }, (_, i) => (

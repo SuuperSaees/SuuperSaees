@@ -23,6 +23,7 @@ import {
 } from '../../members/get/get-member-account';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { hasPermissionToReadOrders } from '../../permissions/permissions';
+import { getOrdersReviewsForUser } from '../../review/get/get-review';
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
@@ -135,7 +136,7 @@ export async function getOrderAgencyMembers(
       const { data: agencyMembersData, error: agencyMembersError } =
         await client
           .from('accounts')
-          .select('id, name, email, picture_url, calendar')
+          .select('id, name, email, picture_url, user_settings(name, picture_url, calendar)')
           .eq('organization_id', agencyId ?? accountData.organization_id);
 
       if (agencyMembersError) throw agencyMembersError;
@@ -149,7 +150,9 @@ export async function getOrderAgencyMembers(
         id, 
         name, 
         email,
+        picture_url,
         user_settings (
+          name,
           phone_number,
           picture_url,
           calendar
@@ -287,6 +290,7 @@ export async function getOrdersByUserId(
   userId: string,
   includeBrief?: boolean,
   timeInterval?: number,
+  includeReviews?: boolean,
 ) {
   try {
     const client = getSupabaseServerComponentClient();
@@ -331,7 +335,7 @@ export async function getOrdersByUserId(
       .select(
         `*, client_organization:accounts!client_organization_id(id, name),
       customer:accounts!customer_id(id, name),
-      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url))
+      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
       `,
       )
       .order('created_at', { ascending: false })
@@ -380,6 +384,19 @@ export async function getOrdersByUserId(
           brief: {
             name: brief?.name,
           },
+        };
+      });
+    }
+
+    if(includeReviews) {
+      const reviews = await getOrdersReviewsForUser(userId,);
+      orders = orders?.map((order) => {
+        const review = reviews.find(
+          (review) => review.order_id === order.id,
+        );
+        return {
+          ...order,
+          review: review,
         };
       });
     }
