@@ -118,5 +118,8 @@
         }
       }
     }
+  },
+  "timers": {
+    "timeTracking": "Tiempo total contabilizado:"
   }
 }

@@ -8,7 +8,7 @@ import { updateOrder } from '../../../../../../packages/features/team-accounts/s
 import EditableHeader from '../../../../components/editable-header';
 import { useActivityContext } from '../context/activity-context';
 import DeleteOrderDropdown from './delete-order-dropdown';
-import { TimerContainer } from '../../../components/timer-container';
+
 export const OrderHeader = ({ order }: { order: Order.Relational }) => {
   const { userRole } = useActivityContext();
   const rolesThatCanEdit = new Set([
@@ -29,7 +29,6 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
           label="Order title"
           fieldName="title"
         />
-        <TimerContainer />
         <DeleteOrderDropdown orderId={order?.id} />
         </div>
         <div className="flex items-center">

@@ -14,6 +14,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@kit/ui/sheet';
+import { Tabs, TabsList, TabsContent } from '@kit/ui/tabs';
+import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 
 import RichTextEditorV2 from '~/components/ui/rich-text-editor-v2';
 import { Subtask } from '~/lib/tasks.types';
@@ -24,6 +26,7 @@ import SubtaskAssignations from './subtask-assignations';
 import SubtaskFollowers from './subtask-followers';
 import { PriorityCombobox } from '../priority-combobox';
 import { TimeTracker } from '../time-tracker';
+import SubtaskTimers from './subtask-timers';
 
 const SubtaskItem = ({
   t,
@@ -187,72 +190,95 @@ const SubtaskItem = ({
                 </SheetClose>
               </div>
             </SheetHeader>
-            <div className="grid gap-3 py-4">
-              <div className="flex items-center justify-between">
-                <span className="flex text-sm font-semibold">
-                  <CalendarIcon className="mr-2 h-4 w-4" />{' '}
-                  {t('details.deadline')}
-                </span>
-                <DatePickerWithRange
-                  initialPeriod={
-                    subtask.start_date && subtask.end_date
-                      ? {
-                          from: new Date(subtask.start_date),
-                          to: new Date(subtask.end_date),
-                        }
-                      : undefined
-                  }
-                  handlePeriod={handleDateRangeChange}
-                  subtask={subtask}
-                  subtaskId={subtask.id}
-                />
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="flex text-sm font-semibold">
-                  <Loader className="mr-2 h-4 w-4" />
-                  <p>{t('details.status')}</p>
-                </span>
-                <StatusCombobox
-                  subtask={subtask}
-                  agency_id={orderAgencyId}
-                  mode="subtask"
-                />
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="flex gap-[0.20rem] text-sm font-semibold">
-                  <FlagIcon className="mr-2 h-4 w-4" />
-                  <p>{t('details.priority')}</p>
-                </span>
-                <PriorityCombobox mode={'subtask'} subtask={subtask} />
-              </div>
-              <SubtaskAssignations
-                onUserSelectionChange={(selectedUsers) =>
-                  handleAssignedToChange(selectedUsers)
-                }
-                searchUserOptions={searchUserOptions}
-                subtaskId={subtask.id}
-                userRole={userRole}
-              />
-              <SubtaskFollowers
-                onUserSelectionChange={(selectedUsers) =>
-                  handleFollowersChange(selectedUsers)
-                }
-                searchUserOptions={searchUserOptionsFollowers}
-                subtaskId={subtask.id}
-                userRole={userRole}
-              />
-              <div className="h-full">
-                <RichTextEditorV2
-                  content={content ?? ''}
-                  onChange={setContent}
-                  onBlur={() => handleContentChange(content ?? '')}
-                  userRole={userRole}
-                  hideSubmitButton={true}
-                  showToolbar={true}
-                  isEditable={true}
-                />
-              </div>
-            </div>
+
+            <Tabs defaultValue="notes" className="mt-6">
+              <TabsList className="flex w-fit gap-2 bg-transparent mb-7">
+                <ThemedTabTrigger value="notes" activeTab="notes" option="notes">
+                  Notes
+                </ThemedTabTrigger>
+                <ThemedTabTrigger value="details" activeTab="details" option="details">
+                  Details
+                </ThemedTabTrigger>
+                <ThemedTabTrigger value="time" activeTab="time" option="time">
+                  Time
+                </ThemedTabTrigger>
+              </TabsList>
+
+              <TabsContent value="details" className="mt-4">
+                <div className="grid gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="flex text-sm font-semibold">
+                      <CalendarIcon className="mr-2 h-4 w-4" /> {t('details.deadline')}
+                    </span>
+                    <DatePickerWithRange
+                      initialPeriod={
+                        subtask.start_date && subtask.end_date
+                          ? {
+                              from: new Date(subtask.start_date),
+                              to: new Date(subtask.end_date),
+                            }
+                          : undefined
+                      }
+                      handlePeriod={handleDateRangeChange}
+                      subtask={subtask}
+                      subtaskId={subtask.id}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex text-sm font-semibold">
+                      <Loader className="mr-2 h-4 w-4" />
+                      <p>{t('details.status')}</p>
+                    </span>
+                    <StatusCombobox
+                      subtask={subtask}
+                      agency_id={orderAgencyId}
+                      mode="subtask"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex gap-[0.20rem] text-sm font-semibold">
+                      <FlagIcon className="mr-2 h-4 w-4" />
+                      <p>{t('details.priority')}</p>
+                    </span>
+                    <PriorityCombobox mode={'subtask'} subtask={subtask} />
+                  </div>
+                  <SubtaskAssignations
+                    onUserSelectionChange={(selectedUsers) =>
+                      handleAssignedToChange(selectedUsers)
+                    }
+                    searchUserOptions={searchUserOptions}
+                    subtaskId={subtask.id}
+                    userRole={userRole}
+                  />
+                  <SubtaskFollowers
+                    onUserSelectionChange={(selectedUsers) =>
+                      handleFollowersChange(selectedUsers)
+                    }
+                    searchUserOptions={searchUserOptionsFollowers}
+                    subtaskId={subtask.id}
+                    userRole={userRole}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="notes" className="mt-4">
+                <div className="h-full">
+                  <RichTextEditorV2
+                    content={content ?? ''}
+                    onChange={setContent}
+                    onBlur={() => handleContentChange(content ?? '')}
+                    userRole={userRole}
+                    hideSubmitButton={true}
+                    showToolbar={true}
+                    isEditable={true}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="time" className="mt-4">
+                <SubtaskTimers subtaskId={subtask.id} userRole={userRole} />
+              </TabsContent>
+            </Tabs>
           </SheetContent>
         </Sheet>
 

@@ -5,6 +5,7 @@ import { cn } from '@kit/ui/utils';
 import { createTimer } from '~/team-accounts/src/server/actions/timers/create/create-timer';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TimeTrackerProps {
   elementId: string;
@@ -20,6 +21,7 @@ export const TimeTracker = ({
   isHovered = true 
 }: TimeTrackerProps) => {
   const { t } = useTranslation('common');
+  const queryClient = useQueryClient();
   const [time, setTime] = useState(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const { activeTimer, setActiveTimer, clearTimer } = useTimeTracker();
@@ -41,7 +43,6 @@ export const TimeTracker = ({
     if (!isTracking) {
       const startTime = Date.now();
       
-      // Create timer in database
       try {
         const timer = await createTimer({
           elementId,
@@ -64,6 +65,12 @@ export const TimeTracker = ({
           startTime,
           elapsedTime: 0
         });
+
+        if (elementType === 'subtask') {
+          queryClient.invalidateQueries({
+            queryKey: ['subtask_timers', elementId]
+          });
+        }
       } catch (error) {
         console.error('Failed to create timer:', error);
         toast.error(t('timer.errorCreating'));

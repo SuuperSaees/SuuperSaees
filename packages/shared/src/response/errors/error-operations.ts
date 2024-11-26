@@ -86,4 +86,5 @@ export enum ErrorClientOperations {
     TIMER_ALREADY_RUNNING = 'timerAlreadyRunning',
     INSUFFICIENT_PERMISSIONS = 'insufficientPermissions',
     TIMER_CREATED = 'timerCreated',
+    FAILED_TO_GET_TIMERS = 'failedToGetTimers',
   }

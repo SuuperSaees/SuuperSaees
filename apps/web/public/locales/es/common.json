@@ -90,7 +90,10 @@
     "timerName": "Nombre del Temporizador",
     "cancel": "Cancelar",
     "confirm": "Guardar",
-    "errorCreating": "Error al crear el temporizador"
+    "errorCreating": "Error al crear el temporizador",
+    "addTime": "Añadir tiempo",
+    "whatDidYouSpendTimeOn": "En qué invertiste este tiempo?*",
+    "writeHere": "Escribe aquí..."
   },
   "organizationName": "Organización",
   "selectOption": "Seleccionar una opción",

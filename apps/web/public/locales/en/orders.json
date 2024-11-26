@@ -118,5 +118,8 @@
         }
       }
     }
+  },
+  "timers": {
+    "timeTracking": "Total time recorded:"
   }
 }
