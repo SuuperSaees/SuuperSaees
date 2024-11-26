@@ -8,8 +8,7 @@ import AvatarDisplayer from '../ui/avatar-displayer';
 import { isValidName } from '../../utils/is-valid-name';
 import deduceNameFromEmail from '../../utils/deduce-name-from-email';
 import { getTimersBySubtaskId } from '~/team-accounts/src/server/actions/timers/get/get-timers';
-import { formatTimeToAMPM } from '~/utils/format-time';
-import { formatDayAndTime, formatTime } from '../../utils/format-time';
+import { formatTimeToAMPM, formatDayAndTime, formatTime } from '~/utils/format-time';
 
 interface SubtaskTimersProps {
   subtaskId: string;
@@ -18,16 +17,14 @@ interface SubtaskTimersProps {
 
 const SubtaskTimers = ({ subtaskId, userRole }: SubtaskTimersProps) => {
   const { t } = useTranslation('orders');
+  const enabledUserRole = new Set(['agency_owner', 'agency_member', 'agency_project_manager'])
 
   const { data: timers, isLoading } = useQuery({
     queryKey: ['subtask_timers', subtaskId],
     queryFn: () => getTimersBySubtaskId(subtaskId).then((res) => {
       return res;
     }),
-    enabled:
-      userRole === 'agency_owner' ||
-      userRole === 'agency_member' ||
-      userRole === 'agency_project_manager',
+    enabled: enabledUserRole.has(userRole)
   });
 
   const calculateTotalTime = (timers: any[]) => {
@@ -99,7 +96,7 @@ const SubtaskTimers = ({ subtaskId, userRole }: SubtaskTimersProps) => {
                         : deduceNameFromEmail(timer.timers.accounts.email)}
                     </span>
                     <span className="text-gray-600 text-xs font-normal">
-                        {formatDayAndTime(timer.timers.end_time)}
+                        {formatDayAndTime(timer.timers.end_time, t)}
                     </span>
                   </div>
                   <span className="text-gray-600 font-sans text-sm font-normal">

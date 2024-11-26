@@ -153,7 +153,7 @@ const SubtaskItem = ({
           <SheetTrigger asChild>
             {isHovered && (
               <Button className="mr-4 bg-gray-200 text-gray-500 hover:bg-slate-200">
-                {t('openOrders')}
+                {t('tasks.openSubtask')}
               </Button>
             )}
           </SheetTrigger>

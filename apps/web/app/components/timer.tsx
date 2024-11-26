@@ -2,7 +2,6 @@
 
 import { useTimeTracker } from '../orders/[id]/context/time-tracker-context';
 import { useState, useEffect } from 'react';
-import { formatTime } from '../orders/[id]/utils/format-time';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, CirclePause, X } from 'lucide-react';
 import {
@@ -14,7 +13,7 @@ import {
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
 import { TimerUpdate } from '~/lib/timer.types';
-import { formatTimeToAMPM } from '~/utils/format-time';
+import { formatTimeToAMPM, formatTime } from '~/utils/format-time';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import AvatarDisplayer from '~/orders/[id]/components/ui/avatar-displayer';
 import deduceNameFromEmail from '~/orders/[id]/utils/deduce-name-from-email';
