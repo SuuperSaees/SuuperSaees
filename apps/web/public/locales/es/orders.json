@@ -46,7 +46,8 @@
     "addTask": "Agregar tarea",
     "addSubtask": "Agregar subtarea",
     "newTask": "Nueva tarea",
-    "newSubtask": "Nueva subtarea"
+    "newSubtask": "Nueva subtarea",
+    "openSubtask": "Abrir"
   },
   "details": {
     "title": "Detalles del proyecto",
@@ -118,5 +119,15 @@
         }
       }
     }
+  },
+  "timers": {
+    "timeTracking": "Tiempo total contabilizado:",
+    "sunday": "Domingo",
+    "monday": "Lunes",
+    "tuesday": "Martes",
+    "wednesday": "Miércoles",
+    "thursday": "Jueves",
+    "friday": "Viernes",
+    "saturday": "Sábado"
   }
 }

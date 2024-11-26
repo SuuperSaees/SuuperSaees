@@ -46,7 +46,8 @@
     "addTask": "Add task",
     "addSubtask": "Add subtask",
     "newTask": "New task",
-    "newSubtask": "New subtask"
+    "newSubtask": "New subtask",
+    "openSubtask": "Open"
   },
   "details": {
     "title": "Project details",
@@ -118,5 +119,15 @@
         }
       }
     }
+  },
+  "timers": {
+    "timeTracking": "Total time recorded:",
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
   }
 }

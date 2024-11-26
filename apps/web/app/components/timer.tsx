@@ -2,21 +2,23 @@
 
 import { useTimeTracker } from '../orders/[id]/context/time-tracker-context';
 import { useState, useEffect } from 'react';
-import { formatTime } from '../orders/[id]/utils/format-time';
 import { useTranslation } from 'react-i18next';
-import { Pause } from 'lucide-react';
+import { ArrowRight, CirclePause, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
   AlertDialogTitle,
 } from '@kit/ui/alert-dialog';
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
-// import { updateActiveTimer } from '~/team-accounts/src/server/actions/timers/update/update-timer';
 import { TimerUpdate } from '~/lib/timer.types';
+import { formatTimeToAMPM, formatTime } from '~/utils/format-time';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import AvatarDisplayer from '~/orders/[id]/components/ui/avatar-displayer';
+import deduceNameFromEmail from '~/orders/[id]/utils/deduce-name-from-email';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { Spinner } from '@kit/ui/spinner';
 
 interface TimerProps {
   onUpdate: (timerId: string, timer: TimerUpdate) => Promise<void>;
@@ -24,11 +26,17 @@ interface TimerProps {
 
 export const Timer = ({ onUpdate }: TimerProps) => {
   const { t } = useTranslation('common');
+  const { workspace, user } = useUserWorkspace();
   const { activeTimer, setActiveTimer, clearTimer } = useTimeTracker();
   const [time, setTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [showPauseDialog, setShowPauseDialog] = useState(false);
-  const [timerName, setTimerName] = useState(activeTimer.elementName ?? '');
+  const [timerName, setTimerName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const userName = workspace.name;
+  const userPictureUrl = workspace.picture_url;
+  const userEmail = user.email;
 
   const handlePause = () => {
     setIsPaused(true);
@@ -37,6 +45,7 @@ export const Timer = ({ onUpdate }: TimerProps) => {
 
   const handlePauseConfirm = async () => {
     try {
+      setIsSaving(true);
       const timerUpdate = {
         name: timerName,
         elapsed_time: time,
@@ -45,7 +54,6 @@ export const Timer = ({ onUpdate }: TimerProps) => {
       };
       setIsPaused(false);
   
-      // await updateActiveTimer(activeTimer.id!, timerUpdate);
       await onUpdate(activeTimer.id!, timerUpdate);
       
       setActiveTimer({
@@ -59,10 +67,12 @@ export const Timer = ({ onUpdate }: TimerProps) => {
 
       clearTimer();
       setTime(0);
-      
+      setTimerName('');
       setShowPauseDialog(false);
     } catch (error) {
       console.error('Error updating timer:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -102,48 +112,88 @@ export const Timer = ({ onUpdate }: TimerProps) => {
 
   return (
     <>
-      <div className="flex items-center gap-2 text-brand">
-        <span className="text-sm font-medium">{formatTime(time)}</span>
-        <span className="text-sm text-gray-500">({activeTimer.elementName ?? ''})</span>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handlePause}
-          className="ml-2"
-        >
-          <Pause className="h-4 w-4" />
-        </Button>
+      <div className="flex items-center gap-4 text-gray-600">
+        <span className="text-gray-600 text-right text-base font-normal">{formatTime(time)}</span>
+        <CirclePause className="h-4 w-4 cursor-pointer" onClick={handlePause} />
       </div>
 
       <AlertDialog open={showPauseDialog} onOpenChange={setShowPauseDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('timer.pauseTimer')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('timer.enterTimerName')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="py-4">
-            <Input
-              value={timerName}
-              onChange={(e) => setTimerName(e.target.value)}
-              placeholder={t('timer.timerName')}
-            />
+        <AlertDialogContent className="max-w-md">
+          <div className="flex justify-between items-start">
+            <AlertDialogTitle className="text-xl font-semibold">
+              {t('timer.addTime')}
+            </AlertDialogTitle>
+            <button 
+              onClick={() => {
+                setShowPauseDialog(false);
+                setIsPaused(false);
+              }}
+              className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <AlertDialogFooter>
+
+          <div className="flex items-center gap-4 mt-4">
+            <AvatarDisplayer
+              displayName={
+                userName
+                  ? userName
+                  : deduceNameFromEmail(userEmail ?? '')
+              }
+              pictureUrl={
+                userPictureUrl
+                  ? userPictureUrl
+                  : undefined
+              }
+            />
+            <div className="flex-1">
+              <AlertDialogDescription className="mb-2 text-gray-700 text-sm font-medium">
+                {t('timer.whatDidYouSpendTimeOn')}
+              </AlertDialogDescription>
+              <Input
+                value={timerName}
+                onChange={(e) => setTimerName(e.target.value)}
+                placeholder={t('timer.writeHere')}
+                className="w-full"
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between mt-6 w-full">
+            <div className="flex gap-2 w-full items-center">
+              <div className="px-4 py-2 rounded border border-gray-200 text-gray-500">
+                {formatTimeToAMPM(activeTimer.startTime)}
+              </div>
+              <ArrowRight className="h-4 w-4" />
+              <div className="px-4 py-2 rounded border border-gray-200 text-gray-500">
+                {formatTimeToAMPM(Date.now())}
+              </div>
+            </div>
+            <div className="flex gap-2 items-center">
+              <div className="px-4 py-2 rounded border border-gray-200 text-gray-500">
+                {formatTime(time)}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 items-center justify-between mt-6 w-full">
             <Button
               variant="outline"
               onClick={() => {
                 setShowPauseDialog(false);
                 setIsPaused(false);
               }}
+              className="px-6"
             >
               {t('timer.cancel')}
             </Button>
-            <Button onClick={handlePauseConfirm}>
-              {t('timer.confirm')}
-            </Button>
-          </AlertDialogFooter>
+            <ThemedButton
+              onClick={handlePauseConfirm}
+              className="px-6"
+            >
+              {isSaving ? <Spinner className="w-4 h-4" /> : t('timer.confirm')}
+            </ThemedButton>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </>

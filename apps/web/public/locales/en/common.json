@@ -93,7 +93,10 @@
     "timerName": "Timer Name",
     "cancel": "Cancel",
     "confirm": "Save",
-    "errorCreating": "Failed to create timer"
+    "errorCreating": "Failed to create timer",
+    "addTime": "Add time",
+    "whatDidYouSpendTimeOn": "What did you spend time on?*",
+    "writeHere": "Write here..."
   },
   "organizationName": "Organization",
   "selectOption": "Select an option",
