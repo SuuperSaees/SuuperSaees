@@ -44,7 +44,6 @@ function ResetPasswordDialog({ userId, setIsOpen, isOpen }: ResetPasswordDialogP
       });
     },
     onError: (error) => {
-      console.log(error);
       toast.error('Error', {
         description: t('editUser.failureEdit'),
       });
