@@ -120,6 +120,9 @@
       }
     }
   },
+  "notesTitle": "Notas",
+  "detailsTitle": "Detalles",
+  "timeTitle": "Tiempo",
   "timers": {
     "timeTracking": "Tiempo total contabilizado:",
     "sunday": "Domingo",
@@ -128,6 +131,11 @@
     "wednesday": "Miércoles",
     "thursday": "Jueves",
     "friday": "Viernes",
-    "saturday": "Sábado"
+    "saturday": "Sábado",
+    "noTimeEntries": "Aún no hay entradas de tiempo",
+    "startAdding": "Comience agregando una nueva entrada de tiempo",
+    "addManualTime": "Agregar tiempo manual",
+    "deleteTimer": "Eliminar temporizador",
+    "editTimer": "Editar temporizador"
   }
 }

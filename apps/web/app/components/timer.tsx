@@ -3,7 +3,7 @@
 import { useTimeTracker } from '../orders/[id]/context/time-tracker-context';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, CirclePause, X } from 'lucide-react';
+import { ArrowRight, CirclePause, X} from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -13,12 +13,13 @@ import {
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
 import { TimerUpdate } from '~/lib/timer.types';
-import { formatTimeToAMPM, formatTime } from '~/utils/format-time';
+import { formatTimeToAMPM, formatTime, formatTimeInHours } from '~/utils/format-time';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import AvatarDisplayer from '~/orders/[id]/components/ui/avatar-displayer';
 import deduceNameFromEmail from '~/orders/[id]/utils/deduce-name-from-email';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Spinner } from '@kit/ui/spinner';
+import { handleEndTimeChange, handlePauseConfirm, handleStartTimeChange } from '~/utils/timer-utils';
 
 interface TimerProps {
   onUpdate: (timerId: string, timer: TimerUpdate) => Promise<void>;
@@ -34,6 +35,12 @@ export const Timer = ({ onUpdate }: TimerProps) => {
   const [timerName, setTimerName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // New state for editable times
+  const [editingStartTime, setEditingStartTime] = useState(false);
+  const [editingEndTime, setEditingEndTime] = useState(false);
+  const [startTime, setStartTime] = useState(activeTimer.startTime);
+  const [endTime, setEndTime] = useState(Date.now());
+
   const userName = workspace.name;
   const userPictureUrl = workspace.picture_url;
   const userEmail = user.email;
@@ -41,52 +48,46 @@ export const Timer = ({ onUpdate }: TimerProps) => {
   const handlePause = () => {
     setIsPaused(true);
     setShowPauseDialog(true);
+    setStartTime(activeTimer.startTime);
+    setEndTime(Date.now());
+    setEditingStartTime(false);
+    setEditingEndTime(false);
   };
 
-  const handlePauseConfirm = async () => {
-    try {
-      setIsSaving(true);
-      const timerUpdate = {
-        name: timerName,
-        elapsed_time: time,
-        end_time: Date.now(),
-        status: 'finished'
-      };
-      setIsPaused(false);
-  
-      await onUpdate(activeTimer.id!, timerUpdate);
-      
-      setActiveTimer({
-        id: null,
-        elementId: null,
-        elementType: null,
-        elementName: null,
-        startTime: null,
-        elapsedTime: 0,
-      });
+  const handleStartTimeChangeWrapper = (value: string) => {
+    handleStartTimeChange(value, setStartTime);
+    };
 
-      clearTimer();
-      setTime(0);
-      setTimerName('');
-      setShowPauseDialog(false);
-    } catch (error) {
-      console.error('Error updating timer:', error);
-    } finally {
-      setIsSaving(false);
-    }
+  const handleEndTimeChangeWrapper = (value: string) => {
+      handleEndTimeChange(value, setEndTime);
   };
+
+  const handlePauseConfirmWrapper = async () => {
+    await handlePauseConfirm(
+        activeTimer,
+        onUpdate,
+        timerName,
+        startTime,
+        endTime,
+        setActiveTimer,
+        clearTimer,
+        setTime,
+        setTimerName,
+        setShowPauseDialog,
+        setIsSaving
+    );
+};
+
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     
-    if (activeTimer.elementId && !isPaused) {
+    if (activeTimer.elementId) {
       const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
-        // We still need this for browser close/refresh
         e.preventDefault();
         e.returnValue = '';
         
-        //Save the timestamp before the page unloads
-        await handlePauseConfirm();
+        await handlePauseConfirmWrapper();
         return '';
       };
 
@@ -106,7 +107,38 @@ export const Timer = ({ onUpdate }: TimerProps) => {
         if (interval) clearInterval(interval);
       };
     } 
-  }, [activeTimer.elementId, activeTimer.startTime, isPaused, t, handlePauseConfirm]);
+  }, [activeTimer.elementId, activeTimer.startTime, isPaused, t, handlePauseConfirmWrapper]);
+
+  const renderEditableTime = (
+    type: 'startTime' | 'endTime',
+    value: number, 
+    editing: boolean, 
+    setEditing: (value: boolean) => void,
+    onChange: (value: string) => void
+  ) => {
+    if (!editing) {
+      return (
+        <div 
+          className="px-4 py-2 rounded border border-gray-200 text-gray-500 flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+          onClick={() => setEditing(true)}
+        >
+          {type === 'startTime' ? formatTimeToAMPM(value) : 
+           type === 'endTime' ? formatTimeToAMPM(value) : 
+           formatTime(value)}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        <Input
+          type="time"
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={() => setEditing(false)}
+        />
+      </div>
+    );
+  };
 
   if (!activeTimer.elementId) return null;
 
@@ -161,21 +193,26 @@ export const Timer = ({ onUpdate }: TimerProps) => {
           </div>
           <div className="flex items-center justify-between mt-6 w-full">
             <div className="flex gap-2 w-full items-center">
-              <div className="px-4 py-2 rounded border border-gray-200 text-gray-500">
-                {formatTimeToAMPM(activeTimer.startTime)}
-              </div>
+              {renderEditableTime(
+                'startTime', 
+                startTime ?? 0, 
+                editingStartTime, 
+                setEditingStartTime, 
+                handleStartTimeChangeWrapper
+              )}
               <ArrowRight className="h-4 w-4" />
-              <div className="px-4 py-2 rounded border border-gray-200 text-gray-500">
-                {formatTimeToAMPM(Date.now())}
-              </div>
+              {renderEditableTime(
+                'endTime', 
+                endTime, 
+                editingEndTime, 
+                setEditingEndTime, 
+                handleEndTimeChangeWrapper
+              )}
             </div>
-            <div className="flex gap-2 items-center">
-              <div className="px-4 py-2 rounded border border-gray-200 text-gray-500">
-                {formatTime(time)}
-              </div>
+            <div className="flex gap-2 items-center ">
+              {formatTime(formatTimeInHours(startTime, endTime))}
             </div>
           </div>
-
           <div className="flex gap-4 items-center justify-between mt-6 w-full">
             <Button
               variant="outline"
@@ -188,7 +225,7 @@ export const Timer = ({ onUpdate }: TimerProps) => {
               {t('timer.cancel')}
             </Button>
             <ThemedButton
-              onClick={handlePauseConfirm}
+              onClick={handlePauseConfirmWrapper}
               className="px-6"
             >
               {isSaving ? <Spinner className="w-4 h-4" /> : t('timer.confirm')}
