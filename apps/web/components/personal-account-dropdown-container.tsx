@@ -9,6 +9,7 @@ import { useUser } from '@kit/supabase/hooks/use-user';
 import featuresFlagConfig from '~/config/feature-flags.config';
 import pathsConfig from '~/config/paths.config';
 import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
+import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 const paths = {
   home: pathsConfig.app.home,
@@ -32,6 +33,7 @@ export function ProfileAccountDropdownContainer(props: {
   const signOut = useSignOut();
   const user = useUser(props.user);
   const userData = user.data as User;
+  const supabase = useSupabase();
 
   const handleSignOut = async () => {
     const originalTokenId = localStorage.getItem("originalTokenId");
@@ -40,7 +42,10 @@ export function ProfileAccountDropdownContainer(props: {
       localStorage.removeItem('originalTokenId');
       await deleteToken(originalTokenId);
     }
-    await signOut.mutateAsync()
+    const { error: userError } = await supabase.auth.getUser();
+    if(!userError){
+      await signOut.mutateAsync()
+    }
   }
 
   return (

@@ -71,9 +71,9 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     fullName: z.string().min(3, {
       message: t('editUser.badInputFullName'),
     }),
-    email: z.string().email({
-      message: t('editUser.badInputEmail'),
-    }),
+    // email: z.string().email({
+    //   message: t('editUser.badInputEmail'),
+    // }),
     role: z.string().refine((value) => roles.some((role) => role.value === value), {
       message: t('editUser.badInputRole'),
     }),
@@ -83,7 +83,7 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: name,
-      email: email,
+      // email: email,
       role: userRole,
     },
   });
@@ -93,16 +93,20 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
   const mutateUser = useMutation({
     mutationFn: async () => {
       // await updateUserEmail(userId, form.getValues('email'), undefined, true);
-      await updateUserAccount(
-        {
-          name: form.getValues('fullName'),
-          email: form.getValues('email'),
-        },
-        userId,
-        undefined,
-        true,
-      );
-      await updateUserRole(userId, form.getValues('role'), undefined, true);
+      if(name !== form.getValues('fullName')){
+        await updateUserAccount(
+          {
+            name: form.getValues('fullName'),
+            // email: form.getValues('email'),
+          },
+          userId,
+          undefined,
+          true,
+        );
+      }
+      if(userRole !== form.getValues('role')){
+        await updateUserRole(userId, form.getValues('role'), undefined, true);
+      }
     },
     onSuccess: () => {
       toast.success(t('success'), {
@@ -178,7 +182,7 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
                 </FormItem>
               )}
             />
-            <FormField
+            {/* <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
@@ -200,7 +204,7 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
             <FormField
               control={form.control}
               name="role"
