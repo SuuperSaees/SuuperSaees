@@ -12,6 +12,7 @@ import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
 import { revalidatePath } from 'next/cache';
+import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
 
 export const updateUserAccount = async (
   userData: Account.Update,
@@ -57,16 +58,49 @@ export const updateUserRole = async(
       admin: adminActivated,
     });
   try {
+
+    const {id: organizationId} = await getOrganizationByUserId(userId, true);
+
     const { data: userRoleData, error: errorUpdateUserRole } =
       await databaseClient
         .from('accounts_memberships')
-        .update({account_role: role})
+        .update({'account_role': role})
         .eq('user_id', userId);
+        
 
     if (errorUpdateUserRole)
       throw new Error(
         `Error updating the user role: ${errorUpdateUserRole.message}`,
       );
+    
+    if(role == 'client_owner') {
+      // Update the previous owner roles
+      const { data: updateRolesData, error: updateRolesError } =
+      await databaseClient
+        .from('accounts_memberships')
+        .update({account_role: 'client_member'})
+        .eq('account_role', 'client_owner')
+        .eq('account_id', organizationId)
+        .neq('user_id', userId);
+      if (updateRolesError)
+        throw new Error(
+          `Error updating the previous owner roles: ${updateRolesError.message}`,
+        );
+      
+      // Update the organization primary owner
+      const { data: updatePrimaryOwnerData, error: updatePrimaryOwnerError } =
+      await databaseClient
+        .from('accounts')
+        .update({primary_owner_user_id: userId})
+        .eq('id', organizationId);
+      
+      if (updatePrimaryOwnerError)
+        throw new Error(
+          `Error updating the organization primary owner: ${updatePrimaryOwnerError.message}`,
+        );
+    }
+
+    revalidatePath('/clients')
 
     return userRoleData;
   } catch (error) {

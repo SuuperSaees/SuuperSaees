@@ -18,7 +18,10 @@ import { ThemedButton } from '../../../../accounts/src/components/ui/button-them
 import { useTranslation } from 'react-i18next';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Button } from '@kit/ui/button';
-import { updateUserAccount } from '../../server/actions/members/update/update-account';
+import { updateUserAccount} from '../../server/actions/members/update/update-account';
+import { toast } from 'sonner';
+import { useMutation } from '@tanstack/react-query';
+import { updateClient } from '../../server/actions/clients/update/update-client';
 
 interface SwitchOrganizationDialogProps {
   userId: string;
@@ -32,14 +35,28 @@ function SwitchOrganizationDialog({userId, setIsOpen, isOpen, organizationOption
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const {t} = useTranslation('clients')
 
-  const handleChangeOrganization = async() => {
-    await updateUserAccount(
-      {
-        organization_id: selectedOrganization,
-      },
-      userId
-    );
-  }
+  const changeOrganizationMutation = useMutation({
+    mutationFn: async () => {
+      await updateUserAccount(
+        {
+          organization_id: selectedOrganization,
+        },
+        userId
+      );
+      await updateClient({organization_client_id: selectedOrganization}, userId,undefined, true);
+    },
+    onSuccess: () => {
+      toast.success(t('success'), {
+        description: t('editUser.successEdit'),
+      });
+    },
+    onError: (error) => {
+      console.error('Error changing organization:', error);
+      toast.error('Error', {
+        description: t('editUser.failureEdit'),
+      });
+    },
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
@@ -89,7 +106,7 @@ function SwitchOrganizationDialog({userId, setIsOpen, isOpen, organizationOption
           </PopoverContent>
         </Popover>
         <ThemedButton className='w-full' disabled = {selectedOrganization == ''} onClick= {() => {
-          handleChangeOrganization().catch(console.error);
+          changeOrganizationMutation.mutate();
           setIsOpen(false);
         }}>
           {t('editUser.switchOrganization')}
