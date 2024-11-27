@@ -1,13 +1,13 @@
-import React, { useCallback} from 'react';
+import React, { useCallback, useEffect} from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Avatar, AvatarFallback} from '@kit/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage} from '@kit/ui/avatar';
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,9 @@ import {
 
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { updateUserAccount, updateUserEmail, updateUserRole } from '../../server/actions/members/update/update-account';
+import { getAccountSettings } from '../../server/actions/accounts/get/get-account';
+import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
+import { Spinner } from '@kit/ui/spinner';
 
 interface EditUserDialogProps {
   userId: string;
@@ -50,6 +53,19 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     {value : 'client_member', label : t('clientMember') },
     {value : 'client_owner', label : t('clientOwner') },
   ];
+  const { data: userRole, isLoading, isPending} = useQuery({
+    queryKey: ['userRole', userId],
+    queryFn: async() => await getUserRoleById(userId, true),
+  });
+
+  const { data: userSettings} = useQuery({
+    queryKey: ['userSettings', userId],
+    queryFn: async() => await getAccountSettings(userId),
+    staleTime: 1000 * 60 * 5,
+    enabled: isOpen,
+    retry: 1,
+  });
+
 
   const formSchema = z.object({
     fullName: z.string().min(3, {
@@ -63,9 +79,20 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     }),
   });
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullName: name,
+      email: email,
+      role: userRole,
+    },
+  });
+
+
+
   const mutateUser = useMutation({
     mutationFn: async () => {
-      await updateUserEmail(userId, form.getValues('email'), undefined, true);
+      // await updateUserEmail(userId, form.getValues('email'), undefined, true);
       await updateUserAccount(
         {
           name: form.getValues('fullName'),
@@ -90,14 +117,6 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     },
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      fullName: name,
-      email: email,
-      role: '',
-    },
-  });
 
   const onSubmit = useCallback((values: z.infer<typeof formSchema>) => {
     mutateUser.mutate();
@@ -114,6 +133,11 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     [form],
   );
 
+  useEffect(() => {
+    if(userRole) {
+      form.setValue('role', userRole);
+    }
+  }, [userRole, form]);
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -132,7 +156,8 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
               render={({ field }) => (
                 <FormItem className="flex w-full items-center gap-7">
                   <Avatar className="mt-[12px] scale-150 p-0">
-                    <AvatarFallback>{'T'}</AvatarFallback>
+                    <AvatarImage className='object-contain' src={userSettings?.picture_url ?? ''} />
+                    <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className='w-full'>
                     <FormControl className="mt-0 w-full">
@@ -182,20 +207,24 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('editUser.role')}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('editUser.badInputRole')} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {roles.map((role) => (
-                        <SelectItem key={role.value} value={role.value}>
-                          {role.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {
+                    isLoading || isPending ? <Spinner className='h-5' /> : 
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('editUser.badInputRole')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {roles.map((role) => (
+                          <SelectItem key={role.value} value={role.value}>
+                            {role.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  }
+                  
                   <FormMessage />
                 </FormItem>
               )}
