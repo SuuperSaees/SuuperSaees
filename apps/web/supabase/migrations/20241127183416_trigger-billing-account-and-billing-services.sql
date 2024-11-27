@@ -46,7 +46,7 @@ END;
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION public.send_billing_service_webhook()
+CREATE OR REPLACE FUNCTION public.send_service_webhook()
  RETURNS trigger
  LANGUAGE plpgsql
 AS $function$
@@ -70,4 +70,4 @@ $function$
 
 CREATE TRIGGER billing_accounts_webhook AFTER INSERT OR UPDATE ON public.billing_accounts FOR EACH ROW EXECUTE FUNCTION send_billing_account_webhook();
 
-CREATE TRIGGER billing_services_webhook AFTER INSERT OR UPDATE ON public.billing_services FOR EACH ROW EXECUTE FUNCTION send_billing_service_webhook();
+CREATE TRIGGER services_webhook AFTER INSERT OR UPDATE ON public.services FOR EACH ROW EXECUTE FUNCTION send_service_webhook();
