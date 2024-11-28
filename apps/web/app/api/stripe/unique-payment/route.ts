@@ -6,7 +6,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, amount, currency, accountId, paymentMethodId, couponId, serviceId, sessionId } =
+    const { email, amount, currency, accountId, paymentMethodId, couponId, serviceId, sessionId, quantity } =
       await request.json();
 
     const supabase = getSupabaseServerComponentClient(
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       { stripeAccount: accountId },
     );
 
-    let finalAmount = amount;
+    let finalAmount = amount * quantity;
     if (couponId) {
       try {
         let discountDetails;
@@ -79,10 +79,10 @@ export async function POST(request: NextRequest) {
 
         if (discountDetails.valid) {
           if (discountDetails.amount_off) {
-            finalAmount = amount - discountDetails.amount_off;
+            finalAmount = (amount * quantity) - discountDetails.amount_off;
           } else if (discountDetails.percent_off) {
             finalAmount =
-              amount - Math.round((amount * discountDetails.percent_off) / 100);
+            (amount * quantity) - Math.round(((amount * quantity) * discountDetails.percent_off) / 100);
           }
         }
       } catch (error) {

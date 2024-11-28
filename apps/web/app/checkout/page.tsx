@@ -33,7 +33,7 @@ async function ServiceCheckoutPage({
             stripeId={tokendecoded.account_id}
             organizationId={tokendecoded.organization_id}
             logoUrl={logoUrl ?? suuperLogo ?? ''}
-            sidebarBackgroundColor={sidebarBackgroundColor ?? '#000000'}
+            sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
           />
         </div>
     </OrganizationSettingsProvider>
