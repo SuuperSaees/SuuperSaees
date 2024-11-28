@@ -4,24 +4,28 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { CustomError, CustomResponse, CustomSuccess, ErrorTimerOperations } from '@kit/shared/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { TimerUpdate } from '../../../../../../../../apps/web/lib/timer.types';
-import { formatElapsedTime } from '../../../../../../../../apps/web/app/utils/format-time';
+import { convertTimeStringToSeconds, formatTime, formatTimeInHours } from '../../../../../../../../apps/web/app/utils/format-time';
 
 export async function updateActiveTimer(timerId: string, timer: TimerUpdate) {
   try {
     const client = getSupabaseServerComponentClient();
 
+    const updateData: Partial<TimerUpdate> = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (timer.start_time) updateData.start_time = timer.start_time;
+    if (timer.start_time && timer.end_time) updateData.elapsed_time = convertTimeStringToSeconds(formatTime(formatTimeInHours(timer.start_time, timer.end_time)));
+    if (timer.end_time) updateData.end_time = timer.end_time;
+    if (timer.status) updateData.status = timer.status;
+    if (timer.name) updateData.name = timer.name;
+    if (timer.start_time && timer.end_time) updateData.timestamp = formatTime(formatTimeInHours(timer.start_time, timer.end_time));
+    if (timer.deleted_on) updateData.deleted_on = new Date();
+
     // Update the active timer
     const { data, error } = await client
         .from('timers')
-        .update({
-            start_time: timer.start_time,
-            elapsed_time: timer.elapsed_time,
-            end_time: timer.end_time,
-            status: timer.status,
-            name: timer.name,
-            updated_at: new Date().toISOString(),
-            timestamp: formatElapsedTime(timer.elapsed_time ? timer.elapsed_time : 0),
-        })
+        .update(updateData)
         .eq('id', timerId)
         .select()
         .single();

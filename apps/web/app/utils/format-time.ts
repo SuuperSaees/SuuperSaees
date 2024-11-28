@@ -26,6 +26,20 @@ export const formatTime = (seconds: number): string => {
   
   return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
 };
+
+export const formatTimeInHours = (startTime: number, endTime: number): number => {
+  const formattedStartTime = startTime ? new Date(startTime).getTime() : 0;
+  const formattedEndTime = endTime ? new Date(endTime).getTime() : Date.now();
+  const startTimeInSeconds = Math.floor(formattedStartTime / 1000);
+  const endTimeInSeconds = Math.floor(formattedEndTime / 1000);
+  
+  let differenceInSeconds = endTimeInSeconds - startTimeInSeconds;
+  if (differenceInSeconds < 0) {
+    differenceInSeconds += 24 * 3600;
+  }
+  
+  return differenceInSeconds;
+};
   
 export const formatDayAndTime = (timestamp: number, t: (key: string) => string) => {
   const date = new Date(timestamp);
@@ -38,3 +52,8 @@ export const formatDayAndTime = (timestamp: number, t: (key: string) => string) 
   
   return `${dayName} ${formattedHours}:${minutes} ${ampm}`;
 };
+
+export function convertTimeStringToSeconds(timeString: string): number {
+  const [hours, minutes, seconds] = timeString.split(':').map(Number);
+  return (hours * 3600) + (minutes * 60) + seconds;
+}

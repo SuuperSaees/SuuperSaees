@@ -4,14 +4,10 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { CustomError, CustomResponse, CustomSuccess } from '@kit/shared/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { ErrorTimerOperations } from '@kit/shared/response';
+import { Timer } from '../../../../../../../../apps/web/lib/timer.types';
+import { convertTimeStringToSeconds } from '../../../../../../../../apps/web/app/utils/format-time';
 
-export async function createTimer(timer: {
-  elementId: string;
-  elementType: string;
-  elementName: string;
-  startTime: number;
-  elapsedTime: number;
-}) {
+export async function createTimer(timer: Timer) {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: { user }, error: userError } = await client.auth.getUser();
@@ -30,9 +26,11 @@ export async function createTimer(timer: {
       .insert({
         user_id: user?.id ?? '',
         start_time: timer.startTime,
-        elapsed_time: timer.elapsedTime,
+        elapsed_time: timer.timestamp ? convertTimeStringToSeconds(timer.timestamp) : timer.elapsedTime,
         name: timer.elementName,
-        status: 'active'
+        end_time: timer.endTime ? timer.endTime : null,
+        status: timer.timestamp ?  'finished' : 'active',
+        timestamp: timer.timestamp ? timer.timestamp : null,
       })
       .select('id')
       .single();

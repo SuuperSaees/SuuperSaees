@@ -21,7 +21,8 @@ export const getTimersBySubtaskId = async (subtaskId: string) => {
     const { data: timersData, error: timersDataError } = await client
       .from('subtask_timers')
       .select(`*, timers(*, accounts(*))`)
-      .eq('subtask_id', subtaskId);
+      .eq('subtask_id', subtaskId)
+      .filter('timers.deleted_on', 'is', null);
 
     if (timersDataError) {
       throw new CustomError(
@@ -31,7 +32,9 @@ export const getTimersBySubtaskId = async (subtaskId: string) => {
       );
     }
 
-    return timersData;
+    const filteredTimersData = timersData.filter(timer => timer.timers !== null);
+    
+    return filteredTimersData;
 
   } catch (error) {
     if (error instanceof CustomError) {

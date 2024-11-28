@@ -120,6 +120,9 @@
       }
     }
   },
+  "notesTitle": "Notes",
+  "detailsTitle": "Details",
+  "timeTitle": "Time",
   "timers": {
     "timeTracking": "Total time recorded:",
     "sunday": "Sunday",
@@ -128,6 +131,11 @@
     "wednesday": "Wednesday",
     "thursday": "Thursday",
     "friday": "Friday",
-    "saturday": "Saturday"
+    "saturday": "Saturday",
+    "noTimeEntries": "There are no time entries yet",
+    "startAdding": "Start by adding a new time entry",
+    "addManualTime": "Add manual time",
+    "deleteTimer": "Delete timer",
+    "editTimer": "Edit timer"
   }
 }

@@ -1,12 +1,14 @@
 import { Database } from './database.types';
 
 export type Timer = {
-  id: string | null;
+  id?: string | null;
   elementId: string | null;
   elementType: string | null;
   elementName: string | null;
   startTime: number | null;
-  elapsedTime: number;
+  endTime?: number | null;
+  elapsedTime?: number;
+  timestamp?: string;
 };
 
 export interface TimerUpdate {
@@ -17,6 +19,7 @@ export interface TimerUpdate {
   end_time?: number | null;
   status?: string;
   name?: string;
+  deleted_on?: number;
 }
 
 export interface TimeTrackerContextType {

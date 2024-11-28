@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import React from 'react';
 
-import { UseMutationResult } from '@tanstack/react-query';
+import { UseMutationResult, useQueryClient } from '@tanstack/react-query';
 import { CalendarIcon, FlagIcon, Loader, TrashIcon, X } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
@@ -27,6 +27,9 @@ import SubtaskFollowers from './subtask-followers';
 import { PriorityCombobox } from '../priority-combobox';
 import { TimeTracker } from '../time-tracker';
 import SubtaskTimers from './subtask-timers';
+import { createTimer } from '~/team-accounts/src/server/actions/timers/create/create-timer';
+import { TimerUpdate } from '~/lib/timer.types';
+import { updateActiveTimer } from '~/team-accounts/src/server/actions/timers/update/update-timer';
 
 const SubtaskItem = ({
   t,
@@ -112,6 +115,15 @@ const SubtaskItem = ({
   >;
 }) => {
   const [content, setContent] = useState(subtask.content);
+  const enabledUserRole = new Set(['agency_owner', 'agency_member', 'agency_project_manager'])
+  const queryClient = useQueryClient();
+  const handleUpdate = async (timerId: string, timer: TimerUpdate) => {
+    await updateActiveTimer(timerId, timer);
+
+    queryClient.invalidateQueries({
+      queryKey: ['subtask_timers', timer.elementId]
+    });
+  };
   return (
     <div
       className="flex items-center justify-between py-3"
@@ -194,13 +206,13 @@ const SubtaskItem = ({
             <Tabs defaultValue="notes" className="mt-6">
               <TabsList className="flex w-fit gap-2 bg-transparent mb-7">
                 <ThemedTabTrigger value="notes" activeTab="notes" option="notes">
-                  Notes
+                  {t('notesTitle')}
                 </ThemedTabTrigger>
                 <ThemedTabTrigger value="details" activeTab="details" option="details">
-                  Details
+                  {t('detailsTitle')}
                 </ThemedTabTrigger>
                 <ThemedTabTrigger value="time" activeTab="time" option="time">
-                  Time
+                  {t('timeTitle')}
                 </ThemedTabTrigger>
               </TabsList>
 
@@ -276,7 +288,7 @@ const SubtaskItem = ({
               </TabsContent>
 
               <TabsContent value="time" className="mt-4">
-                <SubtaskTimers subtaskId={subtask.id} userRole={userRole} />
+                <SubtaskTimers subtaskId={subtask.id} userRole={userRole} onCreate={createTimer} onUpdate={handleUpdate}/>
               </TabsContent>
             </Tabs>
           </SheetContent>
@@ -305,12 +317,16 @@ const SubtaskItem = ({
           subtaskId={subtask.id}
         />
         <div className="flex items-center">
-          <TimeTracker
-            elementId={subtask.id}
-            elementType="subtask"
-            elementName={subtask.name ?? ''}
-            isHovered={isHovered}
-          />
+          {
+            enabledUserRole.has(userRole)  && (
+              <TimeTracker
+                elementId={subtask.id}
+                elementType="subtask"
+                elementName={subtask.name ?? ''}
+                isHovered={isHovered}
+              />
+            )
+          }
           <TrashIcon
             className={`h-4 w-4 cursor-pointer ${isHovered ? 'text-gray-500 hover:text-red-500' : 'text-transparent'}`}
             onClick={async () =>
