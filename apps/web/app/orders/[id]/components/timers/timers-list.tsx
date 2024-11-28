@@ -17,6 +17,7 @@ interface TimerListProps {
 
 const TimerList: React.FC<TimerListProps> = ({ t, timers, onUpdate, onEditClick, userRole, subtaskId }) => {
   const queryClient = useQueryClient();
+  const enabledUserRole = new Set(['agency_owner', 'agency_member', 'agency_project_manager'])
   return (
     <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {timers.map((timer) => (
@@ -41,32 +42,36 @@ const TimerList: React.FC<TimerListProps> = ({ t, timers, onUpdate, onEditClick,
                   <span className="text-gray-600 text-xs font-normal">
                     {formatDayAndTime(timer.timers.updated_at ?? timer.timers.created_at, t)}
                   </span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <EllipsisVertical className="h-[20px] w-[20px] cursor-pointer text-gray-400" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => onEditClick(timer.timers)}>
-                          {t('timers.editTimer')}
-                          <DropdownMenuShortcut>
-                            <Pen className="h-[20px] w-[20px]" />
-                          </DropdownMenuShortcut>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={async () => {
-                          await onUpdate(timer.timers.id, { deleted_on: Date.now() });
-                          queryClient.invalidateQueries({
-                            queryKey: ['subtask_timers', subtaskId]
-                          });
-                        }}>
-                          {t('timers.deleteTimer')}
-                          <DropdownMenuShortcut>
-                            <Ban className="h-[20px] w-[20px]" />
-                          </DropdownMenuShortcut>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {
+                    enabledUserRole.has(userRole)  && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <EllipsisVertical className="h-[20px] w-[20px] cursor-pointer text-gray-400" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem onClick={() => onEditClick(timer.timers)}>
+                              {t('timers.editTimer')}
+                              <DropdownMenuShortcut>
+                                <Pen className="h-[20px] w-[20px]" />
+                              </DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={async () => {
+                              await onUpdate(timer.timers.id, { deleted_on: Date.now() });
+                              queryClient.invalidateQueries({
+                                queryKey: ['subtask_timers', subtaskId]
+                              });
+                            }}>
+                              {t('timers.deleteTimer')}
+                              <DropdownMenuShortcut>
+                                <Ban className="h-[20px] w-[20px]" />
+                              </DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )
+                  }
                 </div>
               </div>
               <span className="text-gray-600 font-sans text-sm font-normal">{timer.timers.name}</span>

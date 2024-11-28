@@ -62,12 +62,12 @@ const SubtaskTimers = ({ subtaskId, userRole, onCreate, onUpdate }: SubtaskTimer
 
   const queryClient = useQueryClient();
 
-  const { data: timers, isLoading } = useQuery({
+  const { data: timers = [], isLoading } = useQuery({
     queryKey: ['subtask_timers', subtaskId],
     queryFn: () => getTimersBySubtaskId(subtaskId).then((res) => {
-      return res;
+      return res || [];
     }),
-    enabled: enabledUserRole.has(userRole)
+    // enabled: enabledUserRole.has(userRole)
   });
 
   const renderEditableTime = (
@@ -136,44 +136,58 @@ const SubtaskTimers = ({ subtaskId, userRole, onCreate, onUpdate }: SubtaskTimer
             {calculateTotalTime(timers)}
           </span>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowManualTimerDialog(true)}
-        >
-          <div className='flex gap-2 items-center'>
-            <Plus className='w-4 h-4 text-gray-500'/>
-            <span className='text-gray-500'>{t('timers.addManualTime')}</span>
-          </div>
-        </Button>
+        {
+            enabledUserRole.has(userRole) && (
+              <Button
+                variant="outline"
+                onClick={() => setShowManualTimerDialog(true)}
+              >
+                <div className='flex gap-2 items-center'>
+                  <Plus className='w-4 h-4 text-gray-500'/>
+                  <span className='text-gray-500'>{t('timers.addManualTime')}</span>
+                </div>
+              </Button>
+            )
+          }
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center">
           <Spinner className="h-4 w-4" />
         </div>
-      ) : timers?.length === 0 ? (
+      ) : timers.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center p-4 h-[calc(100vh-300px)] gap-4">
           <Clock className='h-10 w-10' />
           <span className="text-gray-500">{t('timers.noTimeEntries')}</span>
-          <span className="text-gray-400">{t('timers.startAdding')}</span>
-          <ThemedButton
-            onClick={() => {
-              setShowManualTimerDialog(true)
-            }}
-          >
-            {t('timers.addManualTime')}
-          </ThemedButton>
+          {
+            enabledUserRole.has(userRole)  && (
+              <>
+                <span className="text-gray-400">{t('timers.startAdding')}</span>
+                <ThemedButton
+                  onClick={() => {
+                    setShowManualTimerDialog(true)
+                  }}
+                >
+                  {t('timers.addManualTime')}
+                </ThemedButton>
+              </>
+            )
+          }
         </div>
       ) : (
         <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <TimerList
-            t={t}
-            timers={timers}
-            onUpdate={onUpdate}
-            onEditClick={handleUpdateClick}
-            userRole={userRole}
-            subtaskId={subtaskId}
-          />
+          {timers.length > 0 ? (
+            <TimerList
+              t={t}
+              timers={timers}
+              onUpdate={onUpdate}
+              onEditClick={handleUpdateClick}
+              userRole={userRole}
+              subtaskId={subtaskId}
+            />
+          ) : (
+            <span className="text-gray-500">{t('timers.noTimeEntries')}</span>
+          )}
         </div>
       )}
       <AlertDialog 

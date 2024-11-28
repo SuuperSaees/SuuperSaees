@@ -115,6 +115,7 @@ const SubtaskItem = ({
   >;
 }) => {
   const [content, setContent] = useState(subtask.content);
+  const enabledUserRole = new Set(['agency_owner', 'agency_member', 'agency_project_manager'])
   const queryClient = useQueryClient();
   const handleUpdate = async (timerId: string, timer: TimerUpdate) => {
     await updateActiveTimer(timerId, timer);
@@ -316,12 +317,16 @@ const SubtaskItem = ({
           subtaskId={subtask.id}
         />
         <div className="flex items-center">
-          <TimeTracker
-            elementId={subtask.id}
-            elementType="subtask"
-            elementName={subtask.name ?? ''}
-            isHovered={isHovered}
-          />
+          {
+            enabledUserRole.has(userRole)  && (
+              <TimeTracker
+                elementId={subtask.id}
+                elementType="subtask"
+                elementName={subtask.name ?? ''}
+                isHovered={isHovered}
+              />
+            )
+          }
           <TrashIcon
             className={`h-4 w-4 cursor-pointer ${isHovered ? 'text-gray-500 hover:text-red-500' : 'text-transparent'}`}
             onClick={async () =>
