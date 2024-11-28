@@ -18,7 +18,7 @@ interface AgencyClientCrudMenuProps {
   name: string;
   email: string;
   queryKey?: string;
-  organizationOptions : {id:string, name:string, slug:string}[];
+  organizationOptions? : {id:string, name:string, slug:string}[];
 }
 
 function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOptions}: AgencyClientCrudMenuProps) {

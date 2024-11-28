@@ -17,6 +17,7 @@ import { Trans } from '@kit/ui/trans';
 import featuresFlagConfig from '~/config/feature-flags.config';
 import pathsConfig from '~/config/paths.config';
 import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
+import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 const ModeToggle = dynamic(
   () => import('@kit/ui/mode-toggle').then((mod) => mod.ModeToggle),
@@ -47,6 +48,7 @@ export function SiteHeaderAccountSection({
 }
 
 function SuspendedPersonalAccountDropdown(props: { user: User | null }) {
+  const supabase = useSupabase();
   const signOut = useSignOut();
   const user = useUser(props.user);
   const userData = user.data ?? props.user ?? null;
@@ -58,7 +60,10 @@ function SuspendedPersonalAccountDropdown(props: { user: User | null }) {
       localStorage.removeItem('originalTokenId');
       await deleteToken(originalTokenId);
     }
-    await signOut.mutateAsync()
+    const { error: userError } = await supabase.auth.getUser();
+    if(!userError){
+      await signOut.mutateAsync()
+    }
   }
 
   if (userData) {
