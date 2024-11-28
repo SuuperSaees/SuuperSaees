@@ -34,42 +34,25 @@ COMMIT;
 INSERT INTO public.role_permissions (role, permission)
 VALUES
     -- Agency Owner Permissions
-    ('agency_owner', 'services.write'),
-    ('agency_owner', 'services.read'),
-    ('agency_owner', 'services.manage'),
-    ('agency_owner', 'services.delete'),
-    ('agency_owner', 'billing.write'),
-    ('agency_owner', 'billing.read'),
-    ('agency_owner', 'billing.delete'),
     ('agency_owner', 'timers.write'),
     ('agency_owner', 'timers.read'),
     ('agency_owner', 'timers.delete'),
     ('agency_owner', 'timers.manage'),
     -- Agency Member Permissions
-    ('agency_member', 'services.read'),
-    ('agency_member', 'billing.read'),
     ('agency_member', 'timers.read'),
     ('agency_member', 'timers.delete'),
     ('agency_member', 'timers.manage'),
     ('agency_member', 'timers.write'),
     -- Agency Project Manager Permissions
-    ('agency_project_manager', 'services.write'),
-    ('agency_project_manager', 'services.read'),
-    ('agency_project_manager', 'services.manage'),
-    ('agency_project_manager', 'billing.write'),
-    ('agency_project_manager', 'billing.read'),
     ('agency_project_manager', 'timers.write'),
     ('agency_project_manager', 'timers.read'),
     ('agency_project_manager', 'timers.delete'),
     ('agency_project_manager', 'timers.manage'),
     -- Client Owner Permissions
-    ('client_owner', 'services.read'),
-    ('client_owner', 'billing.read'),
     ('client_owner', 'timers.read'),
     -- Client Member Permissions
-    ('client_member', 'services.read'),
-    ('client_member', 'billing.read');
-    ('client_member', 'timers.read'),
+    ('client_member', 'timers.read');
+
 
 CREATE UNIQUE INDEX subtask_followers_pkey ON public.subtask_followers USING btree (created_at);
 
@@ -112,7 +95,7 @@ on "public"."timers"
 as permissive
 for update
 to authenticated
-using (((auth.uid() IS NOT NULL) AND (is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid())) AND has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'timers.update'::app_permissions) AND (auth.uid() = user_id))));
+using (((auth.uid() IS NOT NULL) AND (is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid())) AND has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'timers.manage'::app_permissions) AND (auth.uid() = user_id))));
 
 
 grant execute on function public.get_user_organization_id(uuid) to authenticated;
