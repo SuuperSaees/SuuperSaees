@@ -18,8 +18,6 @@ export async function getDomainByUserId(
   ownerEmail: string | null;
   organization: null | Pick<Account.Type, 'name' | 'primary_owner_user_id'>;
 }> {
-  // GET ROLE
-
   try {
     const client = getSupabaseServerComponentClient();
     const userRole = await getUserRoleById(userId);
@@ -35,49 +33,43 @@ export async function getDomainByUserId(
       Account.Type,
       'name' | 'primary_owner_user_id'
     > = null;
-
-    const getOwnerEmail = async (id: string) => {
-      if (includeDomainOwnerEmail) {
+     const getOwnerEmail = async (id: string | undefined) => {
+      if (includeDomainOwnerEmail && id) {
         const domainOwnerAccount = await getUserAccountById(client, id);
         ownerEmail = domainOwnerAccount?.email ?? null;
         return ownerEmail;
       }
       return null;
     };
-
-    if (availableRolesAgency.has(userRole)) {
+     if (availableRolesAgency.has(userRole)) {
       // Case 1: Agency roles
       const organizationData = await getOrganizationByUserId(userId);
-
       organization = organizationData;
-      organizationId = organizationData?.id;
+      organizationId = organizationData?.id ?? null;
       ownerEmail = await getOwnerEmail(organizationData?.primary_owner_user_id);
     } else if (availableRolesClient.has(userRole)) {
       // Case 2: Client roles
       const agencyData = await getAgencyForClientByUserId(userId);
-
       organization = agencyData;
       ownerEmail = await getOwnerEmail(agencyData?.primary_owner_user_id);
-      organizationId = agencyData?.id;
+      organizationId = agencyData?.id ?? null;
     } else {
       // Unknown role, use default domain
       return {
         domain: process.env.NEXT_PUBLIC_SITE_URL ?? '',
-        organizationId: '',
+        organizationId: null,
         organization,
         ownerEmail,
       };
     }
-
-    const domain =
+     const domain =
       (await getDomainByOrganizationId(organizationId)) ??
       process.env.NEXT_PUBLIC_SITE_URL ??
       '';
     const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-
-    return {
+     return {
       domain: parsedUrl ? `${IS_PROD ? 'https' : 'http'}://${domain}/` : domain,
-      organizationId: organizationId,
+      organizationId,
       organization,
       ownerEmail,
     };
@@ -85,7 +77,7 @@ export async function getDomainByUserId(
     console.error('Error getting domain by user id:', error);
     return {
       domain: process.env.NEXT_PUBLIC_SITE_URL ?? '',
-      organizationId: '',
+      organizationId: null,
       organization: null,
       ownerEmail: null,
     };
