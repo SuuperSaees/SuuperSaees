@@ -6,6 +6,7 @@ import { Check, PenLine } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@kit/ui/button';
+import { TimerContainer } from '../../web/app/components/timer-container'
 
 interface EditableHeaderProps {
   initialName: string;
@@ -94,6 +95,7 @@ const EditableHeader = ({
             {name.slice(0, 70).trim()}
             {name.length > 70 && '...'}
           </span>
+          <TimerContainer />
           {canEdit && (
             <Button
               variant="ghost"

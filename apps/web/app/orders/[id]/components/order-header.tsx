@@ -34,24 +34,26 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
     }
   };
   return (
-    <div>
-      <div className='flex'>
-      <EditableHeader
-        initialName={order.title}
-        id={order.id}
-        userRole={userRole}
-        updateFunction={handleUpdate}
-        rolesThatCanEdit={rolesThatCanEdit}
-      />
-      <DeleteOrderDropdown orderId={order?.id} />
+      <div>
+        <div className='flex'>
+        <EditableHeader
+          initialName={order.title}
+          id={order.id}
+          userRole={userRole}
+          updateFunction={(id, data) => updateOrder(id as Order.Type['id'], data)}
+          rolesThatCanEdit={rolesThatCanEdit}
+          label="Order title"
+          fieldName="title"
+        />
+        <DeleteOrderDropdown orderId={order?.id} />
+        </div>
+        <div className="flex items-center">
+          <h3 className="relative mb-2 text-[0.9em] text-lg font-normal text-gray-600">
+            <Trans i18nKey="details.orderId" /> {order?.id}
+          </h3>
+          
+        </div>
       </div>
-      <div className="flex items-center">
-        <h3 className="relative mb-2 text-[0.9em] text-lg font-normal text-gray-600">
-          <Trans i18nKey="details.orderId" /> {order?.id}
-        </h3>
-        
-      </div>
-    </div>
   );
 };
 

@@ -18,6 +18,7 @@
   "organizationNamelabel": "Name of your brand",
   "organizationNamePlaceholder": "Suuper Agency",
   "emailLabel": "Email",
+  "confirmClose": "Are you sure you want to continue?",
   "password": "Password",
   "plsDetailInputs": "Log In",
   "continueToYourAccount": "Continue to your account",
@@ -85,6 +86,17 @@
   "pagination": {
     "next": "Next",
     "previous": "Previous"
+  },
+  "timer": {
+    "pauseTimer": "Pause timer",
+    "enterTimerName": "Enter the name of the timer",
+    "timerName": "Timer Name",
+    "cancel": "Cancel",
+    "confirm": "Save",
+    "errorCreating": "Failed to create timer",
+    "addTime": "Add time",
+    "whatDidYouSpendTimeOn": "What did you spend time on?*",
+    "writeHere": "Write here..."
   },
   "organizationName": "Organization",
   "selectOption": "Select an option",

@@ -16,6 +16,7 @@
   "settingsTabDescription": "Administra tus configuraciones y preferencias.",
   "emailAddress": "Correo electrónico",
   "password": "Contraseña",
+  "confirmClose": "¿Estás seguro de que quieres continuar?",
   "modalConfirmationQuestion": "¿Estás seguro de que quieres continuar?",
   "loading": "Estamos cargando la pagina...",
   "genericServerErrorHeading": "Lo siento, algo salió mal al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
@@ -82,6 +83,17 @@
   "pagination": {
     "next": "Siguiente",
     "previous": "Anterior"
+  },
+  "timer": {
+    "pauseTimer": "Pausar temporizador",
+    "enterTimerName": "Ingrese el nombre del temporizador",
+    "timerName": "Nombre del Temporizador",
+    "cancel": "Cancelar",
+    "confirm": "Guardar",
+    "errorCreating": "Error al crear el temporizador",
+    "addTime": "Añadir tiempo",
+    "whatDidYouSpendTimeOn": "En qué invertiste este tiempo?*",
+    "writeHere": "Escribe aquí..."
   },
   "organizationName": "Organización",
   "selectOption": "Seleccionar una opción",

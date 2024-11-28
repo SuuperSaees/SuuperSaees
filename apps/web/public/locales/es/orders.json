@@ -46,7 +46,8 @@
     "addTask": "Agregar tarea",
     "addSubtask": "Agregar subtarea",
     "newTask": "Nueva tarea",
-    "newSubtask": "Nueva subtarea"
+    "newSubtask": "Nueva subtarea",
+    "openSubtask": "Abrir"
   },
   "details": {
     "title": "Detalles del proyecto",
@@ -118,5 +119,23 @@
         }
       }
     }
+  },
+  "notesTitle": "Notas",
+  "detailsTitle": "Detalles",
+  "timeTitle": "Tiempo",
+  "timers": {
+    "timeTracking": "Tiempo total contabilizado:",
+    "sunday": "Domingo",
+    "monday": "Lunes",
+    "tuesday": "Martes",
+    "wednesday": "Miércoles",
+    "thursday": "Jueves",
+    "friday": "Viernes",
+    "saturday": "Sábado",
+    "noTimeEntries": "Aún no hay entradas de tiempo",
+    "startAdding": "Comience agregando una nueva entrada de tiempo",
+    "addManualTime": "Agregar tiempo manual",
+    "deleteTimer": "Eliminar temporizador",
+    "editTimer": "Editar temporizador"
   }
 }

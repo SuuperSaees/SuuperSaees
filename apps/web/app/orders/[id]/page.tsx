@@ -47,41 +47,39 @@ async function OrderDetailsPage({
   });
 
   return (
-    <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
-      <ActivityProvider
-        messages={order?.messages ?? []}
-        files={order?.files ?? []}
-        activities={order?.activities ?? []}
-        reviews={order?.reviews ?? []}
-        order={order}
-        userRole={role}
-      >
-        
-
-    <div className="flex h-full max-h-full w-full flex-col text-gray-700">
-      <div className="flex max-h-full h-full w-full justify-between">
-    
-        <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem] pt-2">
-          <OrderHeader order={order} />
-          <OrderTabs
-            organizationId={
-              organizationId
-                ? { account_id: organizationId.client_organization_id }
-                : undefined
-            }
-            currentPath={currentPath}
-            userRole={role}
-            orderId={id}
-            orderAgencyId={order?.agency_id ?? ''}
-            agencyStatuses={agencyStatuses ?? []}
-          />
-        </div>
-        <AsideOrderInformation order={order} className="hidden lg:flex " agencyStatuses={agencyStatuses ?? []}/>
-    
-      </div>
-    </div>
-      </ActivityProvider>
-    </PageBody>
+      <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
+        <ActivityProvider
+          messages={order?.messages ?? []}
+          files={order?.files ?? []}
+          activities={order?.activities ?? []}
+          reviews={order?.reviews ?? []}
+          order={order}
+          userRole={role}
+        >
+          <div className="flex h-full max-h-full w-full flex-col text-gray-700">
+            <div className="flex max-h-full h-full w-full justify-between">
+          
+              <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem] pt-2">
+                <OrderHeader order={order} />
+                <OrderTabs
+                  organizationId={
+                    organizationId
+                      ? { account_id: organizationId.client_organization_id }
+                      : undefined
+                  }
+                  currentPath={currentPath}
+                  userRole={role}
+                  orderId={id}
+                  orderAgencyId={order?.agency_id ?? ''}
+                  agencyStatuses={agencyStatuses ?? []}
+                />
+              </div>
+              <AsideOrderInformation order={order} className="hidden lg:flex " agencyStatuses={agencyStatuses ?? []}/>
+          
+            </div>
+          </div>
+        </ActivityProvider>
+      </PageBody>
   );
 }
 
