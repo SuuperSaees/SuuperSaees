@@ -54,6 +54,28 @@ export async function fetchCurrentUserAccount(
   return currentUserAccount;
 }
 
+export async function fetchUsersAccounts(client: SupabaseClient<Database>, ids: Account.Type['id'][]) {
+  try {
+    // Fetch users accounts using their passed ids
+    // The ids can match either id or organization_id
+    const { data: usersAccounts, error: usersAccountsError } = await client
+      .from('accounts')
+      .select('id, name, email, picture_url, settings:user_settings(name, picture_url)')
+      .or(`id.in.(${ids.join(',')}),organization_id.in.(${ids.join(',')})`)
+      .eq('is_personal_account', true);
+      
+    if (usersAccountsError) {
+      console.error('Error fetching users accounts:', usersAccountsError);
+      throw new Error(`Error fetching users accounts: ${usersAccountsError.message}`);
+    }
+
+    return usersAccounts;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 export async function getPrimaryOwnerId(): Promise<string | undefined> {
   try {
     const client = getSupabaseServerComponentClient();
