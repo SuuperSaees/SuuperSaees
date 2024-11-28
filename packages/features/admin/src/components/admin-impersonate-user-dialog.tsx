@@ -133,8 +133,7 @@ function useSetSession(tokens: { accessToken: string; refreshToken: string }) {
         const tokenId = generateUUID()
         const sessionToStore = session.data.session ? { access_token: session.data.session.access_token, refresh_token: session.data.session.refresh_token, expires_at: formatToTimestamptz(expires_at), provider:'supabase', id_token_provider:tokenId} : { access_token: '', refresh_token: '', expires_at: '',provider:'supabase', id_token_provider:tokenId};
         await saveToken(sessionToStore);
-        localStorage.setItem('originalTokenId', tokenId)
-        localStorage.setItem('impersonating', 'true')
+        localStorage.setItem('impersonatingTokenId', tokenId)
 
         await supabase.auth.setSession({
           refresh_token: tokens.refreshToken,

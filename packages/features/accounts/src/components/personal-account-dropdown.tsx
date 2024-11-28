@@ -86,14 +86,12 @@ export function PersonalAccountDropdown({
 
   const supabase = useSupabase();
   const router = useRouter();
-  const [isImpersonating, setIsImpersonating] = useState(false);
-  const [originalTokenId, setOriginalTokenId] = useState('');
+  const [impersonatingTokenId, setImpersonatingTokenId] = useState('');
   const {t} = useTranslation('common');
 
   //This useEffect is used to gain access to localStorage in a client/browser context
   useEffect(() => {
-    setIsImpersonating(localStorage.getItem('impersonating') === 'true');
-    setOriginalTokenId(localStorage.getItem('originalTokenId') ?? '');
+    setImpersonatingTokenId(localStorage.getItem('impersonatingTokenId') ?? '');
   }, []);
 
   // The log below is used to see the current session every time
@@ -106,14 +104,13 @@ export function PersonalAccountDropdown({
   // }, []);
 
   const stopImpersonating = async () => {
-    const token = await getTokenData(originalTokenId);
+    const token = await getTokenData(impersonatingTokenId);
     if (token) {
       toast.success(t('success'), {
         description: t('stopImpersonatingDescription'),
       });
-      localStorage.removeItem('impersonating');
-      localStorage.removeItem('originalTokenId');
-      await deleteToken(originalTokenId);
+      localStorage.removeItem('impersonatingTokenId');
+      await deleteToken(impersonatingTokenId);
       await supabase.auth.setSession({
         refresh_token: token.refresh_token,
         access_token: token.access_token,
@@ -253,7 +250,7 @@ export function PersonalAccountDropdown({
           </span>
         </DropdownMenuItem>
         {
-          isImpersonating &&
+          impersonatingTokenId &&
           <>
             <DropdownMenuSeparator />
 

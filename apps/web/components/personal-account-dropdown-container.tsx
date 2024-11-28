@@ -36,11 +36,10 @@ export function ProfileAccountDropdownContainer(props: {
   const supabase = useSupabase();
 
   const handleSignOut = async () => {
-    const originalTokenId = localStorage.getItem("originalTokenId");
-    if (originalTokenId){
-      localStorage.removeItem('impersonating');
-      localStorage.removeItem('originalTokenId');
-      await deleteToken(originalTokenId);
+    const impersonatingTokenId = localStorage.getItem("impersonatingTokenId");
+    if (impersonatingTokenId){
+      localStorage.removeItem('impersonatingTokenId');
+      await deleteToken(impersonatingTokenId);
     }
     const { error: userError } = await supabase.auth.getUser();
     if(!userError){
