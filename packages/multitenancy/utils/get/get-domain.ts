@@ -14,7 +14,7 @@ export async function getDomainByUserId(
   includeDomainOwnerEmail?: boolean,
 ): Promise<{
   domain: string;
-  organizationId: string;
+  organizationId: string | null;
   ownerEmail: string | null;
   organization: null | Pick<Account.Type, 'name' | 'primary_owner_user_id'>;
 }> {
