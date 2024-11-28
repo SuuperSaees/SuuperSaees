@@ -34,12 +34,14 @@ export async function getDomainByUserId(
       'name' | 'primary_owner_user_id'
     > = null;
      const getOwnerEmail = async (id: string | undefined) => {
-      if (includeDomainOwnerEmail && id) {
-        const domainOwnerAccount = await getUserAccountById(client, id);
-        ownerEmail = domainOwnerAccount?.email ?? null;
-        return ownerEmail;
-      }
-      return null;
+      if (!id) return null;
+  
+    if (includeDomainOwnerEmail) {
+      const domainOwnerAccount = await getUserAccountById(client, id);
+      ownerEmail = domainOwnerAccount?.email ?? null;
+      return ownerEmail;
+    }
+    return null;
     };
      if (availableRolesAgency.has(userRole)) {
       // Case 1: Agency roles
