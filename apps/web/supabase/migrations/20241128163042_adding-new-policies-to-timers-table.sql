@@ -71,10 +71,6 @@ VALUES
     ('client_member', 'billing.read');
     ('client_member', 'timers.read'),
 
-CREATE UNIQUE INDEX subtask_followers_pkey ON public.subtask_followers USING btree (created_at);
-
-alter table "public"."subtask_followers" add constraint "subtask_followers_pkey" PRIMARY KEY using index "subtask_followers_pkey";
-
 create policy "Policy with security definer functions"
 on "public"."subtask_timers"
 as permissive
