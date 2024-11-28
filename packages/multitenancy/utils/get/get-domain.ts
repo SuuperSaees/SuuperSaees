@@ -1,14 +1,12 @@
 'use server';
 
 import { Account } from '../../../../apps/web/lib/account.types';
-import {
-  getUserAccountById,
-  getUserRoleById,
-} from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
+import { getUserAccountById, getUserRoleById } from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
 import { getAgencyForClientByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getOrganizationByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getOrganizationSettingsByOrganizationId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getSupabaseServerComponentClient } from '../../../supabase/src/clients/server-component.client';
+
 
 export async function getDomainByUserId(
   userId: string,
@@ -95,7 +93,7 @@ export async function getDomainByUserId(
 }
 
 export async function getDomainByOrganizationId(
-  organizationId: string,
+  organizationId: string | null,
   parsedUrl = false,
   adminActived = false,
 ): Promise<string> {
