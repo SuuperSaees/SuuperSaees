@@ -20,7 +20,7 @@ export async function getDomainByUserId(
 }> {
   try {
     const client = getSupabaseServerComponentClient();
-    const userRole = await getUserRoleById(userId);
+    const userRole = await getUserRoleById(userId) ?? '';
     const availableRolesAgency = new Set([
       'agency_member',
       'agency_owner',
