@@ -10,7 +10,6 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { CalendarIcon, FlagIcon, Loader } from 'lucide-react';
 import { AgencyStatusesProvider } from '../../components/context/agency-statuses-context';
 import {
-  getAgencyClients,
   getOrderAgencyMembers,
 } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/orders/pick-date/pick-date';
@@ -37,6 +36,7 @@ import StatusCombobox from './status-combobox';
 import AvatarDisplayer from './ui/avatar-displayer';
 // import SelectAction from './ui/select-action';
 import { PriorityCombobox } from './priority-combobox';
+import { getClientMembersForOrganization } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -156,7 +156,7 @@ const   AsideOrderInformation = ({
 
   const { data: orderAgencyClientsFollowers } = useQuery({
     queryKey: ['order-agency-clients-followers', order.id],
-    queryFn: () => getAgencyClients(order.agency_id, order.id),
+    queryFn: () => getClientMembersForOrganization(order.client_organization_id),
     retry: 5,
     enabled:
       userRole === 'agency_owner' ||
@@ -202,16 +202,16 @@ const   AsideOrderInformation = ({
 
   const searchUserOptions =
     orderAgencyMembers?.map((user) => ({
-      picture_url: user.picture_url,
+      picture_url: user?.user_settings?.picture_url ?? user.picture_url ?? '',
       value: user.id,
-      label: user.name,
+      label: user?.user_settings?.name ?? user.name ?? '',
     })) ?? [];
 
   const searchUserOptionsFollowers =
     orderAgencyClientsFollowers?.map((user) => ({
-      picture_url: user.picture_url,
+      picture_url: user?.settings?.name ?? user.name ?? '',
       value: user.id,
-      label: user.name,
+      label: user?.settings?.name ?? user.name ?? '',
     })) ?? [];
 
   const userRoles = new Set([
