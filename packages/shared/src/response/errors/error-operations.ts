@@ -73,4 +73,10 @@ export enum ErrorClientOperations {
     FAILED_TO_CREATE_FORM_FIELDS = 'failedToCreateFormFields',
   }
 
-  
+export enum ErrorBillingOperations {
+  FAILED_TO_FIND_STRIPE_ACCOUNT = 'failedToFindStripeAccount',
+  FAILED_TO_CREATE_STRIPE_ACCOUNT = 'failedToCreateStripeAccount',
+  FAILED_TO_CREATE_TRELI_ACCOUNT = 'failedToCreateTreliAccount',
+  FAILED_TO_DELETE_STRIPE_ACCOUNT = 'failedToDeleteStripeAccount',
+  FAILED_TO_DELETE_TRELI_ACCOUNT = 'failedToDeleteTreliAccount',
+}

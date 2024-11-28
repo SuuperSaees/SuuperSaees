@@ -21,3 +21,5 @@ async function getLogger(): Promise<LoggerInstance> {
 }
 
 export { getLogger };
+export * from './logger';
+export * from './logger.factory';

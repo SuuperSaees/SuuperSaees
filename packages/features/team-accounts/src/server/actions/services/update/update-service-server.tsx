@@ -270,7 +270,7 @@ const createStripeServicePrice = async (
 ) => {
   const unitAmount = (priceData?.price ?? 0) * 100;
 
-  const stripePriceResponse = await fetch(
+  const stripePriceResponse = await fetch( // Important: This endpoint is not used anymore.
     `${baseUrl}/api/stripe/create-service-price`,
     {
       method: 'POST',

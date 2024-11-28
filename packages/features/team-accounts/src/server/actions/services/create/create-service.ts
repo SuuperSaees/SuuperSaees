@@ -174,6 +174,7 @@ async function createStripeProduct(
 ) {
   const { domain: baseUrl } = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service`, {
+    // Important: This endpoint is not used anymore.
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -195,6 +196,7 @@ async function createStripePrice(
 ) {
   const { domain: baseUrl } = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
+    // Important: This endpoint is not used anymore.
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
