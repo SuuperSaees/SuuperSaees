@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
-
+import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import {
   CustomError,
   CustomResponse,
@@ -16,44 +16,11 @@ import { getStripeAccountID } from '../../members/get/get-member-account';
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
-interface ServiceData {
-  step_type_of_service: {
-    single_sale: boolean;
-    recurring_subscription: boolean;
-  };
-  step_service_details: {
-    service_image: string;
-    service_name: string;
-    service_description: string;
-  };
-  step_service_price: {
-    standard: boolean;
-    purchase_limit: number;
-    allowed_orders: number;
-    time_based: boolean;
-    hours: number;
-    credit_based: boolean;
-    credits: number;
-    price: number;
-    recurrence: string;
-    test_period: boolean;
-    test_period_duration: number;
-    test_period_duration_unit_of_measurement: string;
-    test_period_price: number;
-    max_number_of_simultaneous_orders: number;
-    max_number_of_monthly_orders: number;
-  };
-  step_connect_briefs: {
-    id: string;
-    name: string;
-  }[];
-}
-
 // Main function
 export const updateService = async (
-  clientData: ServiceData,
+  clientData: Service.ServiceData,
   priceId: string,
-  status?: string,
+  status?: Service.Type['status'],
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -100,9 +67,9 @@ type UpdatedServiceResult = {
 // Function to update service in Supabase
 const updateSupabaseService = async (
   client: SupabaseClient,
-  clientData: ServiceData,
+  clientData: Service.ServiceData,
   priceId: string,
-  status?: string,
+  status?: Service.Type['status'],
 ): Promise<string> => {
   const serviceUpdated = {
     status,
@@ -152,7 +119,7 @@ const updateSupabaseService = async (
 const manageServiceBriefs = async (
   client: SupabaseClient,
   serviceId: string,
-  newBriefs: ServiceData['step_connect_briefs'],
+  newBriefs: Service.ServiceData['step_connect_briefs'],
 ) => {
   const { data: existingBriefs, error: getBriefsError } = await client
     .from('service_briefs')
@@ -237,7 +204,7 @@ const handleStripeServiceUpdate = async (
   baseUrl: string,
   stripeAccountID: string,
   priceId: string,
-  clientData: ServiceData,
+  clientData: Service.ServiceData,
 ) => {
   const getPriceResponse = await fetch(
     `${baseUrl}/api/stripe/get-price?accountId=${encodeURIComponent(stripeAccountID)}&priceId=${encodeURIComponent(priceId)}`,
@@ -271,7 +238,7 @@ const updateStripeProduct = async (
   baseUrl: string,
   accountId: string,
   productId: string,
-  clientData: ServiceData,
+  clientData: Service.ServiceData,
 ) => {
   const stripeResponse = await fetch(
     `${baseUrl}/api/stripe/update-service?productId=${encodeURIComponent(productId)}`,
@@ -297,13 +264,13 @@ const createStripeServicePrice = async (
   baseUrl: string,
   accountId: string,
   productId: string,
-  priceData: ServiceData['step_service_price'],
+  priceData: Service.ServiceData['step_service_price'],
   isRecurring: boolean,
   interval?: string,
 ) => {
   const unitAmount = (priceData?.price ?? 0) * 100;
 
-  const stripePriceResponse = await fetch(
+  const stripePriceResponse = await fetch( // Important: This endpoint is not used anymore.
     `${baseUrl}/api/stripe/create-service-price`,
     {
       method: 'POST',

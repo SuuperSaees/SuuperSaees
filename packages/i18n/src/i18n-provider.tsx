@@ -46,7 +46,8 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
   const queryGetFullDomainBySubdomain = useQuery({
     queryKey: ['getFullDomainBySubdomain'],
     queryFn: async () => {
-      const domainFullData = await getFullDomainBySubdomain(window.location.host, true, values);
+      const domainFullData = await getFullDomainBySubdomain(window.location.host, true, values).catch(err => console.error(`
+        Error in i18n, fetching domain data: ${err}`));
       if(domainFullData){
         const databaseLanguage = domainFullData.settings.find(
           (setting) => setting.key === 'language'
@@ -56,7 +57,7 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
           console.error('Error changing language:', error);
         });
       }
-      return 
+      return ''
     },
     enabled: typeof window !== 'undefined',
   });

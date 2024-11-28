@@ -11,6 +11,8 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
+import { revalidatePath } from 'next/cache';
+import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
 
 export const updateUserAccount = async (
   userData: Account.Update,
@@ -35,13 +37,152 @@ export const updateUserAccount = async (
       throw new Error(
         `Error updating the user account: ${errorUpdateUserAccount.message}`,
       );
+    
+      revalidatePath('/clients');
+      revalidatePath(`/clients/organizations/*`);
 
+      
     return userAccountData;
   } catch (error) {
     console.error('Error updating the user account', error);
     throw error;
   }
 };
+
+export const updateUserRole = async(
+  userId: Account.Type['id'],
+  role: string,
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
+) => {
+  databaseClient =
+    databaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+  try {
+
+    const {id: organizationId} = await getOrganizationByUserId(userId, true);
+
+    const { data: userRoleData, error: errorUpdateUserRole } =
+      await databaseClient
+        .from('accounts_memberships')
+        .update({'account_role': role})
+        .eq('user_id', userId);
+        
+
+    if (errorUpdateUserRole)
+      throw new Error(
+        `Error updating the user role: ${errorUpdateUserRole.message}`,
+      );
+    
+    if(role == 'client_owner') {
+      // Update the previous owner roles
+      const { data: updateRolesData, error: updateRolesError } =
+      await databaseClient
+        .from('accounts_memberships')
+        .update({account_role: 'client_member'})
+        .eq('account_role', 'client_owner')
+        .eq('account_id', organizationId)
+        .neq('user_id', userId);
+      if (updateRolesError)
+        throw new Error(
+          `Error updating the previous owner roles: ${updateRolesError.message}`,
+        );
+      
+      // Update the organization primary owner
+      const { data: updatePrimaryOwnerData, error: updatePrimaryOwnerError } =
+      await databaseClient
+        .from('accounts')
+        .update({primary_owner_user_id: userId})
+        .eq('id', organizationId);
+      
+      if (updatePrimaryOwnerError)
+        throw new Error(
+          `Error updating the organization primary owner: ${updatePrimaryOwnerError.message}`,
+        );
+    }
+
+    revalidatePath('/clients')
+
+    return userRoleData;
+  } catch (error) {
+    console.error('Error updating the user role', error);
+    throw error;
+  }
+}
+
+export const updateUserEmail = async(
+  userId: Account.Type['id'],
+  email: Account.Type['email'],
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
+) => {
+  databaseClient =
+    databaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+  
+  try{
+
+    if(email === undefined || email === null || email === '') {
+      throw new Error('Email is required')
+    }
+
+    const { data, error } = await databaseClient.auth.admin.updateUserById(
+      userId,
+      {email: email}
+    )
+
+    if (error){
+      throw new Error(
+        `Error updating the user email: ${error.message}`,
+      );
+    }
+    
+    return data;
+  }catch(error){
+    console.error('Error updating the user email', error);
+    throw error;
+  }
+}
+
+export const updateUserPassword = async(
+  userId: Account.Type['id'],
+  password: string,
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
+) => {
+  databaseClient =
+    databaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+  
+  try{
+
+    if(password === undefined || password === null || password === '') {
+      throw new Error('Password is required')
+    }
+
+    const { data, error } = await databaseClient.auth.admin.updateUserById(
+      userId,
+      {password: password}
+    )
+
+    if (error){
+      throw new Error(
+        `Error updating the user password: ${error.message}`,
+      );
+    }
+    
+    return data;
+  }catch(error){
+    console.error('Error updating the user password', error);
+    throw error;
+  }
+}
 
 export const updateUserSettings = async (
   userId: Account.Type['id'],

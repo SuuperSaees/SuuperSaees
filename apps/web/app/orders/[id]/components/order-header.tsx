@@ -8,8 +8,11 @@ import { updateOrder } from '../../../../../../packages/features/team-accounts/s
 import EditableHeader from '../../../../components/editable-header';
 import { useActivityContext } from '../context/activity-context';
 import DeleteOrderDropdown from './delete-order-dropdown';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export const OrderHeader = ({ order }: { order: Order.Relational }) => {
+  const { t } = useTranslation('responses');
   const { userRole } = useActivityContext();
   const rolesThatCanEdit = new Set([
     'agency_member',
@@ -17,6 +20,19 @@ export const OrderHeader = ({ order }: { order: Order.Relational }) => {
     'agency_owner',
   ]);
 
+  const handleUpdate = async (value: string) => {
+    try {
+      await updateOrder(order.id, { title: value });  
+      toast.success('Success', {
+        description: t('success.orders.orderNameUpdated'),
+      });
+    } catch (error) {
+      toast.error('Error', {
+        description: t('error.orders.failedToUpdateOrderName'),
+      });
+      
+    }
+  };
   return (
       <div>
         <div className='flex'>

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { Check, PenLine } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Button } from '@kit/ui/button';
@@ -13,47 +12,34 @@ interface EditableHeaderProps {
   initialName: string;
   id: string | number;
   userRole: string;
-  updateFunction: (
-    id: string | number,
-    data: Record<string, string>,
+  updateFunction: (value: string
   ) => Promise<void>;
   rolesThatCanEdit: Set<string>;
-  label: string;
-  fieldName: string;
 }
 
 const EditableHeader = ({
   initialName,
-  id,
   userRole,
   updateFunction,
   rolesThatCanEdit,
-  label,
-  fieldName,
 }: EditableHeaderProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(initialName);
   const inputRef = useRef<HTMLInputElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
-  const { t } = useTranslation('responses');
+
   const handleSave = async () => {
     if (name.trim() === '') {
-      toast.error(`${label} cannot be empty`);
+      toast.error(`The given name cannot be empty`);
       resetEditing();
       return;
     }
     if (name !== initialName) {
       try {
-        await updateFunction(id, { [fieldName]: name });
+        await updateFunction(name);
         setIsEditing(false);
-        toast.success('Success', {
-          description: t('success.orders.orderNameUpdated'),
-        });
       } catch (error) {
-        console.error(`Error updating ${label.toLowerCase()}:`, error);
-        toast.error('Error', {
-          description: t('error.orders.failedToUpdateOrderName'),
-        });
+        console.error(`Error updating the name/title:`, error);
       }
     } else {
       resetEditing();
