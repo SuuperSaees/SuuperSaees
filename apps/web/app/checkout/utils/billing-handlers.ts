@@ -25,6 +25,7 @@ type HandlePaymentProps = {
   organizationId: string;
   paymentMethodId: string;
   coupon: string;
+  quantity?: number;
 };
 
 type HandlePaymentStripeProps = {
@@ -35,6 +36,7 @@ type HandlePaymentStripeProps = {
   paymentMethodId: string;
   coupon: string;
   sessionId: string;
+  quantity?: number;
 };
 
 export const handleRecurringPayment = async ({
@@ -80,6 +82,7 @@ export const handleOneTimePayment = async ({
   paymentMethodId,
   coupon,
   sessionId,
+  quantity,
 }: HandlePaymentStripeProps) => {
   const res = await fetch('/api/stripe/unique-payment', {
     method: 'POST',
@@ -95,6 +98,7 @@ export const handleOneTimePayment = async ({
       couponId: coupon,
       serviceId: service.id,
       sessionId: sessionId,
+      quantity: quantity,
     }),
   });
 
@@ -114,6 +118,7 @@ export const handleSubmitPayment = async ({
   organizationId,
   paymentMethodId,
   coupon,
+  quantity,
 }: HandlePaymentProps) => {
   try {
 
@@ -147,6 +152,7 @@ export const handleSubmitPayment = async ({
           paymentMethodId,
           coupon,
           sessionId: sessionCreated?.id ?? '',
+          quantity,
         });
 
         const userAlreadyExists = await getUserByEmail(values.email, true); 

@@ -14,7 +14,7 @@ import { FormData, ServiceType } from '../types/billing-form-types';
 import { Button } from '@kit/ui/button';
 import { Spinner } from '@kit/ui/spinner';
 import { useState } from 'react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Minus, Plus } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 interface SideDataFieldsProps {
@@ -24,13 +24,16 @@ interface SideDataFieldsProps {
   errorMessage: string;
   accountId: string;
   validSuccess: boolean;
+  quantity: number;
+  setQuantity: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading, errorMessage, accountId, validSuccess }) => {
+export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading, errorMessage, accountId, validSuccess, quantity, setQuantity }) => {
   const defaultServiceImage = process.env.NEXT_PUBLIC_SERVICE_DEFAULT_IMAGE;
   const { t } = useTranslation('services');
   const [discountAmount, setDiscountAmount] = useState<number | null>(null);
   const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
+  
 
   const handleApplyDiscount = async () => {
     const discountCode = form.getValues("discount_coupon");
@@ -48,7 +51,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
         setDiscountAmount(data.discountAmount);
       } else {
         setDiscountAmount(null); // No discount if invalid code
-        form.setError("discount_coupon", { message: "Cupón inválido" });
+        form.setError("discount_coupon", { message: t('checkout.invalid_coupon') });
       }
     } catch (error) {
       console.error("Failed to apply discount:", error);
@@ -58,7 +61,16 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
     }
   };
 
-  const discountedTotal = discountAmount ? (service.price ?? 0) - discountAmount : service.price;
+  const handleIncrease = () => {
+    setQuantity((prev) => prev + 1);
+  };
+
+  const handleDecrease = () => {
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  };
+
+  const discountedTotal = (discountAmount ? (service.price ?? 0) - discountAmount : service.price) * quantity;
+
   return (
     <div>
       <div className="font-inter mb-4 text-2xl font-semibold leading-[1.27] text-gray-900">
@@ -124,6 +136,14 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
           </div>
         </div>
       )}
+      {
+        !service.recurring_subscription &&
+        <div className="flex items-center justify-center w-full my-2">
+          <button type='button' onClick={handleDecrease} className="border rounded-lg p-2"><Minus className='w-4 h-4'/></button>
+          <span className="mx-2">{quantity}</span>
+          <button type='button' onClick={handleIncrease} className="border rounded-lg p-2"><Plus className='w-4 h-4'/></button>
+        </div>
+      }
       <div className="mb-[18px] flex justify-between">
         <div className="text-sm font-medium leading-5 text-gray-700">
           {t('checkout.total')}

@@ -50,6 +50,7 @@
         "enterprise_name": "Nombre de la empresa",
         "tax_code": "Código fiscal",
         "discount_coupon": "Cupón de descuento",
+        "invalid_coupon": "Cupón de descuento inválido",
         "apply": "Aplicar",
         "subtotal": "Subtotal",
         "total": "Total (USD)",
