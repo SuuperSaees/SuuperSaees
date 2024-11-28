@@ -162,19 +162,21 @@ export async function getUserRole() {
   }
 }
 
-export async function getUserRoleById(userId: string) {
+export async function getUserRoleById(userId: string,
+  adminActivated = false) {
   try {
-    const client = getSupabaseServerComponentClient();
+    const client = getSupabaseServerComponentClient({admin: adminActivated});
 
     const { error: userAccountError, data: userAccountData } = await client
       .from('accounts_memberships')
-      .select('account_role')
+      .select()
       .eq('user_id', userId)
-      .single();
-
+      .maybeSingle();
+    
+    
     if (userAccountError) {
       throw new Error(
-        `Error fetching the user role, ${userAccountError.message}`,
+        `Error fetching the user role for ${userId}, ${userAccountError.message}`,
       );
     }
 

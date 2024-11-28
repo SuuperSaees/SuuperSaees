@@ -72,6 +72,41 @@
   "noClientsDescription": "Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.",
   "clients": "Clientes",
   "searchClients": "Buscar",
-  "searchOrganizations": "Buscar"
+  "searchOrganizations": "Buscar",
+  "deletion": {
+    "title": "Eliminar cliente",
+    "description": "¿Estás seguro de que deseas eliminar este cliente?",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "editUser": {
+    "editUserInfo": "Editar usuario",
+    "supplant": "Suplantar",
+    "supplantDescription": "¿Estás seguro de que deseas suplantar a este usuario? Iniciarás sesión como este usuario.",
+    "cancelSupplant": "Cancelar",
+    "confirmSupplant": "Suplantar usuario",
+    "resetPassword": "Reestablecer contraseña",
+    "edit" : "Editar",
+    "fullName": "Nombre completo",
+    "email": "Correo electrónico",
+    "role": "Rol",
+    "saveChanges": "Guardar cambios",
+    "switchOrganization": "Cambiar organización",
+    "selectOrganization": "Selecciona una organización...",
+    "searchOrganization": "Buscar organización...",
+    "noOrganizations": "No se encontraron organizaciones",
+    "enterNewPassword": "Ingresa la nueva contraseña para el usuario",
+    "confirmNewPassword": "Confirma la nueva contraseña",
+    "passwordsNotEqual": "Las contraseñas no coinciden",
+    "passwordMinimalLength": "La contraseña debe tener al menos 8 caracteres",
+    "successEdit": "Usuario actualizado correctamente",
+    "failureEdit": "Error al actualizar el usuario",
+    "badInputFullName": "El nombre completo debe tener al menos 3 caracteres",
+    "badInputEmail": "Por favor, introduce una dirección de correo electrónico válida",
+    "badInputRole": "Por favor, selecciona un rol"
+  },
+  "success": "¡Todo listo!",
+  "clientOwner": "Cliente Líder",
+  "clientMember": "Cliente Miembro"
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -12,6 +12,7 @@ import {
   LogOut,
   // MessageCircleQuestion,
   Shield,
+  Users,
 } from 'lucide-react';
 
 import {
@@ -26,8 +27,13 @@ import { If } from '@kit/ui/if';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
-
+import {getTokenData} from '../../../team-accounts/src/server/actions/tokens/get/get-token'
+import {deleteToken} from '../../../team-accounts/src/server/actions/tokens/delete/delete-token'
 import { usePersonalAccountData } from '../hooks/use-personal-account-data';
+import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 export function PersonalAccountDropdown({
   className,
@@ -77,6 +83,44 @@ export function PersonalAccountDropdown({
   const isSuperAdmin = useMemo(() => {
     return user?.app_metadata.role === 'super-admin';
   }, [user]);
+
+  const supabase = useSupabase();
+  const router = useRouter();
+  const [impersonatingTokenId, setImpersonatingTokenId] = useState('');
+  const {t} = useTranslation('common');
+
+  //This useEffect is used to gain access to localStorage in a client/browser context
+  useEffect(() => {
+    setImpersonatingTokenId(localStorage.getItem('impersonatingTokenId') ?? '');
+  }, []);
+
+  // The log below is used to see the current session every time
+  // const logSession = async () => {
+  //   console.log(await supabase.auth.getSession());
+  // };
+
+  // useEffect(() => {
+  //   logSession().catch(console.error);
+  // }, []);
+
+  const stopImpersonating = async () => {
+    const token = await getTokenData(impersonatingTokenId);
+    if (token) {
+      toast.success(t('success'), {
+        description: t('stopImpersonatingDescription'),
+      });
+      localStorage.removeItem('impersonatingTokenId');
+      await deleteToken(impersonatingTokenId);
+      await supabase.auth.setSession({
+        refresh_token: token.refresh_token,
+        access_token: token.access_token,
+      });
+
+      //Push to /home page and then use refresh to reload the page with updated user data
+      router.push('/home');
+      router.refresh()
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -205,6 +249,25 @@ export function PersonalAccountDropdown({
             </span>
           </span>
         </DropdownMenuItem>
+        {
+          impersonatingTokenId &&
+          <>
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem
+              className={'cursor-pointer'}
+              onClick={stopImpersonating}
+            >
+              <span className={'flex w-full items-center space-x-2'}>
+                <Users className='h-5' />
+                <span className={'flex w-full items-center space-x-2'}>
+                  {t('stopImpersonating')}
+                </span>
+              </span>
+            </DropdownMenuItem>
+          </>
+        }
+        
       </DropdownMenuContent>
     </DropdownMenu>
   );
