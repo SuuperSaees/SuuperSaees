@@ -46,11 +46,27 @@ export async function POST(request: NextRequest) {
     );
 
     let subscription = null;
+    let discountDetails;
 
     if (couponId) {
       try {
+        const promotionCodes = await stripe.promotionCodes.list({
+          limit: 100, // Adjust as needed
+        }, {
+          stripeAccount: accountId,
+        });
+        const matchingPromoCode = promotionCodes.data.find(
+          promo => promo.code === couponId.toUpperCase()
+        );
+
+        if (matchingPromoCode) {
+          discountDetails = matchingPromoCode.coupon.id;
+        } else {
+          discountDetails = couponId;
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        const coupon = await stripe.coupons.retrieve(couponId, {
+        const coupon = await stripe.coupons.retrieve(discountDetails, {
           stripeAccount: accountId,
         });
         if (coupon.valid) {
@@ -59,7 +75,7 @@ export async function POST(request: NextRequest) {
             {
               customer: customer.id,
               items: [{ price: priceId }],
-              discounts: couponId ? [{ coupon: couponId }] : undefined,
+              discounts: discountDetails ? [{ coupon: discountDetails }] : undefined,
               expand: ['latest_invoice.payment_intent'],
               metadata: { sessionId: sessionId },
             },
@@ -106,6 +122,9 @@ export async function POST(request: NextRequest) {
             { status: 400 },
           );
         }
+
+
+        
       } catch (error) {
         console.error('Error retrieving coupon:', error);
         return NextResponse.json(

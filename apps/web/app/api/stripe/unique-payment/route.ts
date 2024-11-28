@@ -48,20 +48,45 @@ export async function POST(request: NextRequest) {
     let finalAmount = amount;
     if (couponId) {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        const coupon = await stripe.coupons.retrieve(couponId, {
-          stripeAccount: accountId,
-        });
-        if (coupon.valid) {
-          if (coupon.amount_off) {
-            finalAmount = amount - coupon.amount_off;
-          } else if (coupon.percent_off) {
+        let discountDetails;
+        let discountType = '';
+
+        // Determine if the code format matches a promotion code or coupon
+        const isPromotionCodeFormat = /^[A-Za-z0-9]{8,}$/.test(couponId);
+        
+        if (isPromotionCodeFormat) {
+          // Try promotion code first
+          const promotionCodes = await stripe.promotionCodes.list({
+            limit: 100,
+            code: couponId.toUpperCase(),
+          }, {
+            stripeAccount: accountId,
+          });
+
+          if (promotionCodes.data.length > 0) {
+            discountType = 'promotion';
+            discountDetails = promotionCodes.data[0].coupon;
+          }
+        }
+
+        // If not found as promotion code or format doesn't match, try as coupon
+        if (!discountDetails) {
+          discountDetails = await stripe.coupons.retrieve(couponId, {
+            stripeAccount: accountId,
+          });
+          discountType = 'coupon';
+        }
+
+        if (discountDetails.valid) {
+          if (discountDetails.amount_off) {
+            finalAmount = amount - discountDetails.amount_off;
+          } else if (discountDetails.percent_off) {
             finalAmount =
-              amount - Math.round((amount * coupon.percent_off) / 100);
+              amount - Math.round((amount * discountDetails.percent_off) / 100);
           }
         }
       } catch (error) {
-        console.error('Error retrieving coupon:', error);
+        console.error('Error retrieving discount:', error);
         return NextResponse.json(
           { error: { message: 'Invalid or expired discount code' } },
           { status: 400 },
