@@ -1,10 +1,10 @@
-drop policy "Users can delete their own timers" on "public"."timers";
+DROP POLICY IF EXISTS "Users can delete their own timers" ON "public"."timers";
 
-drop policy "Users can insert their own timers" on "public"."timers";
+DROP POLICY IF EXISTS  "Users can insert their own timers" ON "public"."timers";
 
-drop policy "Users can update their own timers" on "public"."timers";
+DROP POLICY IF EXISTS  "Users can update their own timers" ON "public"."timers";
 
-drop policy "Users can view their own timers" on "public"."timers";
+DROP POLICY IF EXISTS  "Users can view their own timers" ON "public"."timers";
 
 DO $$
 BEGIN
