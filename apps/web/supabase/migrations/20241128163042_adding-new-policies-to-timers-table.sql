@@ -1,10 +1,10 @@
-drop policy "Users can delete their own timers" on "public"."timers";
+DROP POLICY IF EXISTS "Users can delete their own timers" ON "public"."timers";
 
-drop policy "Users can insert their own timers" on "public"."timers";
+DROP POLICY IF EXISTS  "Users can insert their own timers" ON "public"."timers";
 
-drop policy "Users can update their own timers" on "public"."timers";
+DROP POLICY IF EXISTS  "Users can update their own timers" ON "public"."timers";
 
-drop policy "Users can view their own timers" on "public"."timers";
+DROP POLICY IF EXISTS  "Users can view their own timers" ON "public"."timers";
 
 DO $$
 BEGIN
@@ -53,10 +53,6 @@ VALUES
     -- Client Member Permissions
     ('client_member', 'timers.read');
 
-
-CREATE UNIQUE INDEX subtask_followers_pkey ON public.subtask_followers USING btree (created_at);
-
-alter table "public"."subtask_followers" add constraint "subtask_followers_pkey" PRIMARY KEY using index "subtask_followers_pkey";
 
 create policy "Policy with security definer functions"
 on "public"."subtask_timers"
