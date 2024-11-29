@@ -23,6 +23,7 @@ export const updateClient = async (
         .from('clients')
         .update(updateData)
         .eq('user_client_id', clientId);
+
     console.log('after update client (clientData):', updateData);
     console.log('after update client (errorUpdateClient):', errorUpdateClient);
     if (errorUpdateClient)
@@ -34,7 +35,7 @@ export const updateClient = async (
     revalidatePath('/clients');
     revalidatePath(`/clients/organizations/*`);
 
-    return clientData;
+    return clientId;
   } catch (error) {
     console.error('Error updating the client', error);
     throw error;

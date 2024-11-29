@@ -43,7 +43,7 @@ export const updateUserAccount = async (
       revalidatePath(`/clients/organizations/*`);
 
       
-    return userAccountData;
+    return userId;
   } catch (error) {
     console.error('Error updating the user account', error);
     throw error;
