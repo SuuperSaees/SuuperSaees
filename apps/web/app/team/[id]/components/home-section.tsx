@@ -13,7 +13,7 @@ interface HomeSectionProps {
   memberOrders: Order.Response[];
 }
 export default function HomeSection({ memberOrders }: HomeSectionProps) {
-  console.log('memberOrders', memberOrders);
+  // console.log('memberOrders', memberOrders);
   const columns = useColumns('orders');
   const { t } = useTranslation('statistics');
   // Current Date
