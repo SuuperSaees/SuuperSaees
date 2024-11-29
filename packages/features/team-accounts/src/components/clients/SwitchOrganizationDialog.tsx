@@ -49,7 +49,7 @@ function SwitchOrganizationDialog({userId, setIsOpen, isOpen, organizationOption
     onError: (error) => {
       console.error('Error changing organization:', error);
       toast.error('Error', {
-        description: t('editUser.failureEdit'),
+        description: error.message,
       });
     },
   });
