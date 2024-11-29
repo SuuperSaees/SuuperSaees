@@ -213,8 +213,6 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
                   <FormLabel>{t('editUser.role')}</FormLabel>
                   {
                     isLoading || isPending ? <Spinner className='h-5' /> : 
-                    <>
-                    <p>{userRole}</p>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -229,7 +227,6 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
                         ))}
                       </SelectContent>
                     </Select>
-                    </>
                   }
                   
                   <FormMessage />
