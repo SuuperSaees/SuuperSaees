@@ -92,6 +92,22 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
           </div>
         </div>
       </div>
+      {
+        !service.recurring_subscription &&
+        <div className='justify-between flex items-center mb-[18px]'>
+          <div className="text-sm font-medium leading-5 text-gray-700">
+            {t('checkout.quantity')}
+          </div>
+          <div className="flex items-center justify-center my-2">
+            <button type='button' onClick={handleDecrease} className="border rounded-lg p-2"><Minus className='w-2 h-2 text-gray-700'/></button>
+            {/* <span className="mx-2">{quantity}</span> */}
+            <div className="text-sm font-medium leading-5 text-gray-700 mx-2 w-4 items-center flex justify-center">
+              {quantity}
+            </div>
+            <button type='button' onClick={handleIncrease} className="border rounded-lg p-2"><Plus className='w-2 h-2 text-gray-700'/></button>
+          </div>
+        </div>
+      }
       <FormField
         name="discount_coupon"
         control={form.control}
@@ -123,7 +139,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
           {t('checkout.subtotal')}
         </div>
         <div className="text-sm font-medium leading-5 text-gray-700">
-          ${service.price?.toFixed(2)}
+          ${(service.price! * quantity)?.toFixed(2)}
         </div>
       </div>
       {discountAmount !== null && (
@@ -132,18 +148,10 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
             {t('checkout.discount')}
           </div>
           <div className="text-sm font-medium leading-5">
-            -${discountAmount.toFixed(2)}
+            -${(discountAmount * quantity).toFixed(2)}
           </div>
         </div>
       )}
-      {
-        !service.recurring_subscription &&
-        <div className="flex items-center justify-center w-full my-2">
-          <button type='button' onClick={handleDecrease} className="border rounded-lg p-2"><Minus className='w-4 h-4'/></button>
-          <span className="mx-2">{quantity}</span>
-          <button type='button' onClick={handleIncrease} className="border rounded-lg p-2"><Plus className='w-4 h-4'/></button>
-        </div>
-      }
       <div className="mb-[18px] flex justify-between">
         <div className="text-sm font-medium leading-5 text-gray-700">
           {t('checkout.total')}

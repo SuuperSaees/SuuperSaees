@@ -94,7 +94,8 @@
             "stateProvinceRegionRequired": "State/Province/Region is required",
             "postalCodeRequired": "Postal code is required",
             "cardNameRequired": "Card name is required"
-        }
+        },
+        "quantity": "Quantity"
     },
     "step_connect_briefs": "Connect Briefs",
     "single_sale": "One-time Sale",
