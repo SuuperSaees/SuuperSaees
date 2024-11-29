@@ -202,9 +202,9 @@ const RowAssignedTo = ({ row }: { row: EntityData['orders'][number] }) => {
 
   const avatars =
     row?.assigned_to?.map((assignee) => ({
-      name: assignee.agency_member?.settings?.name ?? assignee.agency_member.name ?? '',
-      email: assignee.agency_member.email ?? '',
-      picture_url: assignee.agency_member?.settings.picture_url ?? assignee?.agency_member.picture_url ?? '',
+      name: assignee.agency_member?.settings?.name ?? assignee?.agency_member.name ?? '',
+      email: assignee.agency_member?.email ?? '',
+      picture_url: assignee.agency_member?.settings?.picture_url ?? assignee?.agency_member?.picture_url ?? '',
     })) ?? [];
 
   const CustomUserItem = ({
