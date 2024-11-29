@@ -39,8 +39,8 @@ export const updateUserAccount = async (
         `Error updating the user account: ${errorUpdateUserAccount.message}`,
       );
     
-      revalidatePath('/clients');
-      revalidatePath(`/clients/organizations/*`);
+      // revalidatePath('/clients');
+      // revalidatePath(`/clients/organizations/*`);
 
       
     return userId;
