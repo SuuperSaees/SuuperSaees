@@ -62,7 +62,7 @@ export const switchUserOrganization = async (
       userId,
     );
 
-    // await updateClient({organization_client_id: organizationId ?? ''}, userId,undefined, true);
+    await updateClient({organization_client_id: organizationId ?? ''}, userId,undefined, true);
 
   } catch (error) {
     console.error('Error switching the user organization', error);
