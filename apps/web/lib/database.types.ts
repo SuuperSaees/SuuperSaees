@@ -1392,19 +1392,19 @@ export type Database = {
       }
       order_followers: {
         Row: {
-          client_member_id: string | null
+          client_member_id: string
           created_at: string | null
-          order_id: number | null
+          order_id: number
         }
         Insert: {
-          client_member_id?: string | null
+          client_member_id?: string
           created_at?: string | null
-          order_id?: number | null
+          order_id: number
         }
         Update: {
-          client_member_id?: string | null
+          client_member_id?: string
           created_at?: string | null
-          order_id?: number | null
+          order_id?: number
         }
         Relationships: [
           {

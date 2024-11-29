@@ -6,7 +6,7 @@ import React from 'react';
 export const SkeletonUser = ({ className }: { className?: string }) => {
   return (
     <div
-      className={`relative isolate h-[20px] w-[20px] overflow-hidden rounded-full bg-gray/[.06] ${className} before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1s_infinite_ease] before:bg-gradient-to-r before:from-transparent before:via-gray/[.05] before:to-transparent`}
+      className={`relative isolate overflow-hidden rounded-full bg-gray/[.06] ${className} before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1s_infinite_ease] before:bg-gradient-to-r before:from-transparent before:via-gray/[.05] before:to-transparent`}
     ></div>
   );
 };

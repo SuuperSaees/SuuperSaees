@@ -1,3 +1,4 @@
+'use client';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { AgencyStatus } from '~/lib/agency-statuses.types';

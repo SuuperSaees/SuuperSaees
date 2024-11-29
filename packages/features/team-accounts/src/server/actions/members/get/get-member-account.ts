@@ -2,15 +2,10 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-
 
 // Helper function to fetch current user data
 export async function fetchCurrentUser(client: SupabaseClient<Database>) {
@@ -35,23 +30,28 @@ export async function fetchCurrentUserAccount(
   client: SupabaseClient<Database>,
   userId: string,
 ) {
-  const { data: currentUserAccount, error: currentUserError } = await client
-    .from('accounts')
-    .select('organization_id')
-    .eq('id', userId)
-    .eq('is_personal_account', true)
-    .single();
+  try {
+    const { data: currentUserAccount, error: currentUserError } = await client
+      .from('accounts')
+      .select('organization_id')
+      .eq('id', userId)
+      .eq('is_personal_account', true)
+      .single();
 
-  if (currentUserError) {
-    throw new Error(
-      `Error fetching current user account data: ${currentUserError.message}`,
-    );
-  }
-  if (!currentUserAccount?.organization_id) {
-    throw new Error('Current user account has no associated organization.');
-  }
+    if (currentUserError) {
+      throw new Error(
+        `Error fetching current user account data: ${currentUserError.message}`,
+      );
+    }
+    if (!currentUserAccount?.organization_id) {
+      throw new Error('Current user account has no associated organization.');
+    }
 
-  return currentUserAccount;
+    return currentUserAccount;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 export async function fetchUsersAccounts(client: SupabaseClient<Database>, ids: Account.Type['id'][]) {
@@ -273,9 +273,11 @@ export const getUserAccountByEmail = async (
   databaseClient?: SupabaseClient<Database>,
   adminActivated = false,
 ) => {
-  databaseClient = databaseClient ?? getSupabaseServerComponentClient({
-    admin: adminActivated,
-  });
+  databaseClient =
+    databaseClient ??
+    getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
   try {
     if (!email) return null;
     const { data: userAccountData, error: clientAccountError } =

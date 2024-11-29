@@ -14,6 +14,7 @@ interface MultiAvatarDisplayerProps {
   avatars: Avatar[];
   maxAvatars?: number;
   className?: string;
+  displayNormal?: boolean;
   [key: string]: unknown;
 }
 
@@ -28,6 +29,7 @@ const MultiAvatarDisplayer = ({
   avatars,
   maxAvatars = 5,
   className,
+  displayNormal = false,
   ...rest
 }: MultiAvatarDisplayerProps) => {
   return (
@@ -37,7 +39,7 @@ const MultiAvatarDisplayer = ({
       {avatars.slice(0, maxAvatars).map((avatar, index) => (
         <AvatarDisplayer
           displayName={deduceNameFromEmail(avatar?.email) ?? avatar?.name}
-          isAssignedOrFollower={true}
+          isAssignedOrFollower={!displayNormal ? true : false}
           pictureUrl={avatar?.picture_url}
           key={index + avatar?.name}
           status={avatar?.status}

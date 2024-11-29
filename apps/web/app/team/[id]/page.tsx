@@ -4,6 +4,8 @@ import {
   getUserById,
   getUserRole,
 } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import {  getOrdersByUserId } from '~/team-accounts/src/server/actions/orders/get/get-order';
+import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 
 import Member from './components/member';
 
@@ -25,9 +27,26 @@ export default async function MemberPage({
 
   if (!user) return null;
 
+  const memberOrders = await getOrdersByUserId(id, true, 60, true).catch((error) => {
+    console.error('Error fetching orders in team member page:', error);
+    return [];
+  }).then((res) => res?.success?.data);
+
+  const agencyStatuses =
+    (await getAgencyStatuses(memberOrders[0]?.agency_id).catch((err) => {
+      console.error(err);
+      return [];
+    })) ?? [];
+    
   return (
     <PageBody className="flex h-full flex-col gap-8 p-8 py-8 lg:px-8">
-      <Member id={id} userRole={userRole} user={user} />
+      <Member
+        id={id}
+        userRole={userRole}
+        user={user}
+        orders={memberOrders}
+        agencyStatuses={agencyStatuses}
+      />
     </PageBody>
   );
 }

@@ -42,6 +42,7 @@ export enum ErrorClientOperations {
     FAILED_TO_ADD_ASSIGNEES = 'failedToAddAssignees',
     FAILED_TO_ADD_FOLLOWERS = 'failedToAddFollowers',
     FAILED_TO_DELETE_ORDER= 'failedToDeleteOrder',
+    FAILED_TO_UPDATE_ORDER_STATUS = 'failedToUpdateOrderStatus',
   }
   
   export enum ErrorServiceOperations {
@@ -73,6 +74,16 @@ export enum ErrorClientOperations {
     FAILED_TO_CREATE_FORM_FIELDS = 'failedToCreateFormFields',
   }
 
+  export enum ErrorReviewOperations {
+    REVIEW_NOT_FOUND = 'reviewNotFound',
+    REVIEW_ALREADY_EXISTS = 'reviewAlreadyExists',
+    FAILED_TO_CREATE_REVIEW = 'failedToCreateReview',
+    FAILED_TO_UPDATE_REVIEW = 'failedToUpdateReview',
+    FAILED_TO_DELETE_REVIEW = 'failedToDeleteReview',
+    FAILED_TO_GET_REVIEWS = 'failedToGetReviews',
+    FAILED_TO_GET_REVIEW = 'failedToGetReview',
+  }
+  
  export enum ErrorTimerOperations {
     TIMER_NOT_FOUND = 'timerNotFound',
     TIMER_ALREADY_EXISTS = 'timerAlreadyExists',
