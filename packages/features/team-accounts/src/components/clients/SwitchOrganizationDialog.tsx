@@ -37,13 +37,7 @@ function SwitchOrganizationDialog({userId, setIsOpen, isOpen, organizationOption
 
   const changeOrganizationMutation = useMutation({
     mutationFn: async () => {
-      await updateUserAccount(
-        {
-          organization_id: selectedOrganization,
-        },
-        userId
-      );
-      await updateClient({organization_client_id: selectedOrganization}, userId,undefined, true);
+      await changeOrganization();
     },
     onSuccess: () => {
       toast.success(t('success'), {
@@ -57,6 +51,16 @@ function SwitchOrganizationDialog({userId, setIsOpen, isOpen, organizationOption
       });
     },
   });
+
+  async function changeOrganization() {
+    await updateUserAccount(
+      {
+        organization_id: selectedOrganization,
+      },
+      userId
+    );
+    await updateClient({organization_client_id: selectedOrganization}, userId,undefined, true);
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
