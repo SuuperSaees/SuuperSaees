@@ -4,9 +4,29 @@ create type "public"."visibility" as enum ('public', 'private');
 
 alter table "public"."config" alter column "billing_provider" drop default;
 
-alter type "public"."billing_provider" rename to "billing_provider__old_version_to_be_dropped";
+-- alter type "public"."billing_provider" rename to "billing_provider__old_version_to_be_dropped";
 
-create type "public"."billing_provider" as enum ('stripe', 'lemon-squeezy', 'paddle', 'treli', 'suuper');
+-- create type "public"."billing_provider" as enum ('stripe', 'lemon-squeezy', 'paddle', 'treli', 'suuper');
+
+DO $$
+BEGIN
+    -- Add 'stripe' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'stripe' AND enumtypid = 'public.billing_provider'::regtype) THEN
+        ALTER TYPE public.billing_provider ADD VALUE 'stripe';
+    END IF;
+
+    -- Add 'treli' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'treli' AND enumtypid = 'public.billing_provider'::regtype) THEN
+        ALTER TYPE public.billing_provider ADD VALUE 'treli';
+    END IF;
+
+    -- Add 'suuper' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'suuper' AND enumtypid = 'public.billing_provider'::regtype) THEN
+        ALTER TYPE public.billing_provider ADD VALUE 'suuper';
+    END IF;
+END $$;
+
+COMMIT;
 
 create table "public"."billing_accounts" (
     "id" uuid not null default gen_random_uuid(),
@@ -43,7 +63,7 @@ alter table "public"."subscriptions" alter column billing_provider type "public"
 
 alter table "public"."config" alter column "billing_provider" set default 'stripe'::billing_provider;
 
-drop type "public"."billing_provider__old_version_to_be_dropped"; -- drop the old type, comment this line if you want to keep the old type
+-- drop type "public"."billing_provider__old_version_to_be_dropped"; -- drop the old type, comment this line if you want to keep the old type
 
 alter table "public"."services" add column "deleted_on" timestamp with time zone;
 

@@ -21,15 +21,18 @@ import {
 import { deleteClient } from './delete-client-server';
 import { handleResponse } from '../../../../../../../../apps/web/lib/response/handle-response';
 import { useTranslation } from 'react-i18next';
+import { Trans } from '@kit/ui/trans';
 
 const DeleteUserDialog = ({
   userId,
   queryKey,
   organizationId,
+  showLabel = false,
 }: {
   userId: string;
   queryKey?: string;
   organizationId?: string;
+  showLabel?: boolean;
 }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -66,21 +69,28 @@ const DeleteUserDialog = ({
   return (
     <>
       <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Trash2 className="h-4 w-4 cursor-pointer text-gray-600" />
+        <AlertDialogTrigger asChild className={`${showLabel ? 'w-full' : ''}`}>
+          <div className='flex gap-2 items-center text-gray-600'>
+            <Trash2 className="h-4 w-4 cursor-pointer" />
+            {
+              showLabel && 
+              <p>
+                <Trans i18nKey={'clients:deletion:delete'} />
+              </p>
+            }
+          </div>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <div className="flex">
-            <Trash2 className="text-error-600 h-4 w-4" />
             <AlertDialogHeader>
-              <AlertDialogTitle>Eliminar cliente</AlertDialogTitle>
+              <AlertDialogTitle><Trans i18nKey={'clients:deletion:title'} /> </AlertDialogTitle>
               <AlertDialogDescription>
-                ¿Está seguro de que desea eliminar este cliente?
+              <Trans i18nKey={'clients:deletion:description'} />
               </AlertDialogDescription>
             </AlertDialogHeader>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel><Trans i18nKey={'clients:deletion:cancel'} /></AlertDialogCancel>
             <AlertDialogAction
               onClick={
                 queryKey
@@ -88,7 +98,7 @@ const DeleteUserDialog = ({
                   : handleDelete
               }
             >
-              Eliminar
+              <Trans i18nKey={'clients:deletion:delete'} />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

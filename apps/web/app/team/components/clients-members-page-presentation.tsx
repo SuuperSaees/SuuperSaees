@@ -7,11 +7,11 @@ import {
   InviteMembersDialogContainer,
 } from '@kit/team-accounts/components';
 import { If } from '@kit/ui/if';
-// import { InfoIcon } from "lucide-react";
 import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
-// import { useBilling } from '../../home/[account]/hooks/use-billing';
+import { PageHeader } from '../../components/page-header';
+import { TimerContainer } from '../../components/timer-container';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -87,15 +87,12 @@ const ClientsMembersPagePresentation = ({
   return (
     <PageBody>
       <div className="p-[35px]">
-        <div className="mb-[32px] flex items-center justify-between">
-          <div className="flex-grow">
-            <span>
-              <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
-                <Trans i18nKey={'team:team'} />
-              </div>
-            </span>
-          </div>
-        </div>
+        <PageHeader 
+          title='team:team'
+          rightContent={
+            <TimerContainer />
+          }
+        />
 
         <div className="w-full">
           <div className="flex items-center justify-between pb-[28px]">

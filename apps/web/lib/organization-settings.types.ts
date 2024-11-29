@@ -27,6 +27,8 @@ export namespace OrganizationSettings {
     sender_email: 'sender_email',
     sender_domain: 'sender_domain',
     logo_dark_url: 'logo_dark_url',
+    auth_card_background_color: 'auth_card_background_color',
+    auth_section_background_color: 'auth_section_background_color',
     // If you want to add more keys, make sure they are defined in the 'organization_setting_key' enum in 'database.types.ts'
   };
 

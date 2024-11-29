@@ -317,6 +317,7 @@ export type Database = {
           credentials: Json | null
           deleted_on: string | null
           id: string
+          namespace: string
           provider: Database["public"]["Enums"]["billing_provider"]
           provider_id: string
           updated_at: string | null
@@ -327,6 +328,7 @@ export type Database = {
           credentials?: Json | null
           deleted_on?: string | null
           id?: string
+          namespace?: string
           provider?: Database["public"]["Enums"]["billing_provider"]
           provider_id: string
           updated_at?: string | null
@@ -337,6 +339,7 @@ export type Database = {
           credentials?: Json | null
           deleted_on?: string | null
           id?: string
+          namespace?: string
           provider?: Database["public"]["Enums"]["billing_provider"]
           provider_id?: string
           updated_at?: string | null
@@ -2692,6 +2695,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_organization_id: {
+        Args: {
+          user_id: string
+        }
+        Returns: string
+      }
       handle_account_name_changes: {
         Args: {
           p_account_id: string
@@ -2730,14 +2739,23 @@ export type Database = {
         }
         Returns: boolean
       }
-      has_permission: {
-        Args: {
-          user_id: string
-          account_id: string
-          permission_name: Database["public"]["Enums"]["app_permissions"]
-        }
-        Returns: boolean
-      }
+      has_permission:
+        | {
+            Args: {
+              user_id: string
+              account_id: string
+              permission_name: Database["public"]["Enums"]["app_permissions"]
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              user_id: string
+              account_id: string
+              permission_name: Database["public"]["Enums"]["app_permissions__old_version_to_be_dropped"]
+            }
+            Returns: boolean
+          }
       has_role_on_account: {
         Args: {
           account_id: string
@@ -2828,7 +2846,7 @@ export type Database = {
           role_hierarchy_level: number
           primary_owner_user_id: string
           subscription_status: Database["public"]["Enums"]["subscription_status"]
-          permissions: Database["public"]["Enums"]["app_permissions"][]
+          permissions: Database["public"]["Enums"]["app_permissions__old_version_to_be_dropped"][]
         }[]
       }
       transfer_team_account_ownership: {
@@ -2844,7 +2862,7 @@ export type Database = {
           target_customer_id: string
           target_order_id: string
           status: Database["public"]["Enums"]["payment_status"]
-          billing_provider: Database["public"]["Enums"]["billing_provider"]
+          billing_provider: Database["public"]["Enums"]["billing_provider__old_version_to_be_dropped"]
           total_amount: number
           currency: string
           line_items: Json
@@ -2868,7 +2886,7 @@ export type Database = {
           target_subscription_id: string
           active: boolean
           status: Database["public"]["Enums"]["subscription_status"]
-          billing_provider: Database["public"]["Enums"]["billing_provider"]
+          billing_provider: Database["public"]["Enums"]["billing_provider__old_version_to_be_dropped"]
           cancel_at_period_end: boolean
           currency: string
           period_starts_at: string
@@ -2925,12 +2943,37 @@ export type Database = {
         | "orders.read"
         | "orders.manage"
         | "orders.delete"
+        | "services.write"
+        | "services.read"
+        | "services.manage"
+        | "services.delete"
+        | "billing.write"
+        | "billing.read"
+        | "billing.delete"
+      app_permissions__old_version_to_be_dropped:
+        | "roles.manage"
+        | "billing.manage"
+        | "settings.manage"
+        | "members.manage"
+        | "invites.manage"
+        | "tasks.write"
+        | "tasks.delete"
+        | "messages.write"
+        | "messages.read"
+        | "orders.write"
+        | "orders.read"
+        | "orders.manage"
+        | "orders.delete"
       billing_provider:
         | "stripe"
         | "lemon-squeezy"
         | "paddle"
         | "treli"
         | "suuper"
+      billing_provider__old_version_to_be_dropped:
+        | "stripe"
+        | "lemon-squeezy"
+        | "paddle"
       chat_role: "user" | "assistant"
       field_types:
         | "date"

@@ -12,6 +12,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { generateRootMetadata } from '~/lib/root-metdata';
 
 import '../styles/globals.css';
+import { TimeTrackerProvider } from './orders/[id]/context/time-tracker-context';
 
 const inter = Inter({ subsets: ['latin'] }); // Cambiado a 'Inter'
 export default async function RootLayout({
@@ -33,7 +34,9 @@ export default async function RootLayout({
           lang={language}
           organizationSettings={organizationSettings}
         >
-          {children}
+          <TimeTrackerProvider>
+            {children}
+          </TimeTrackerProvider>
         </RootProviders>
 
         <Toaster richColors={false} />

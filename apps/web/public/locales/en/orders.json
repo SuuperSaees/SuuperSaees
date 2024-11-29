@@ -46,7 +46,8 @@
     "addTask": "Add task",
     "addSubtask": "Add subtask",
     "newTask": "New task",
-    "newSubtask": "New subtask"
+    "newSubtask": "New subtask",
+    "openSubtask": "Open"
   },
   "details": {
     "title": "Project details",
@@ -118,5 +119,23 @@
         }
       }
     }
+  },
+  "notesTitle": "Notes",
+  "detailsTitle": "Details",
+  "timeTitle": "Time",
+  "timers": {
+    "timeTracking": "Total time recorded:",
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "noTimeEntries": "There are no time entries yet",
+    "startAdding": "Start by adding a new time entry",
+    "addManualTime": "Add manual time",
+    "deleteTimer": "Delete timer",
+    "editTimer": "Edit timer"
   }
 }

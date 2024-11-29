@@ -1,10 +1,80 @@
-alter type "public"."app_permissions" rename to "app_permissions__old_version_to_be_dropped";
+-- alter type "public"."app_permissions" rename to "app_permissions__old_version_to_be_dropped";
 
-create type "public"."app_permissions" as enum ('roles.manage', 'billing.manage', 'settings.manage', 'members.manage', 'invites.manage', 'tasks.write', 'tasks.delete', 'messages.write', 'messages.read', 'orders.write', 'orders.read', 'orders.manage', 'orders.delete', 'services.write', 'services.read', 'services.manage', 'services.delete', 'billing.write', 'billing.read', 'billing.delete');
+-- create type "public"."app_permissions" as enum ('roles.manage', 'billing.manage', 'settings.manage', 'members.manage', 'invites.manage', 'tasks.write', 'tasks.delete', 'messages.write', 'messages.read', 'orders.write', 'orders.read', 'orders.manage', 'orders.delete', 'services.write', 'services.read', 'services.manage', 'services.delete', 'billing.write', 'billing.read', 'billing.delete');
 
-alter table "public"."role_permissions" alter column permission type "public"."app_permissions" using permission::text::"public"."app_permissions";
+-- alter table "public"."role_permissions" alter column permission type "public"."app_permissions" using permission::text::"public"."app_permissions";
 
-drop type "public"."app_permissions__old_version_to_be_dropped";
+-- drop type "public"."app_permissions__old_version_to_be_dropped";
+
+DO $$
+BEGIN
+    -- Add 'services.write' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'services.write' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'services.write';
+    END IF;
+
+    -- Add 'services.read' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'services.read' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'services.read';
+    END IF;
+
+    -- Add 'services.manage' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'services.manage' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'services.manage';
+    END IF;
+
+    -- Add 'services.delete' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'services.delete' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'services.delete';
+    END IF;
+
+    -- Add 'billing.write' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'billing.write' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'billing.write';
+    END IF;
+
+    -- Add 'billing.read' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'billing.read' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'billing.read';
+    END IF;
+
+    -- Add 'billing.delete' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'billing.delete' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'billing.delete';
+    END IF;
+END $$;
+
+COMMIT;
+
+INSERT INTO public.role_permissions (role, permission) 
+VALUES
+    -- Agency Owner Permissions
+    ('agency_owner', 'services.write'),
+    ('agency_owner', 'services.read'),
+    ('agency_owner', 'services.manage'),
+    ('agency_owner', 'services.delete'),
+    ('agency_owner', 'billing.write'),
+    ('agency_owner', 'billing.read'),
+    ('agency_owner', 'billing.delete'),
+
+    -- Agency Member Permissions
+    ('agency_member', 'services.read'),
+    ('agency_member', 'billing.read'),
+
+    -- Agency Project Manager Permissions
+    ('agency_project_manager', 'services.write'),
+    ('agency_project_manager', 'services.read'),
+    ('agency_project_manager', 'services.manage'),
+    ('agency_project_manager', 'billing.write'),
+    ('agency_project_manager', 'billing.read'),
+
+    -- Client Owner Permissions
+    ('client_owner', 'services.read'),
+    ('client_owner', 'billing.read'),
+
+    -- Client Member Permissions
+    ('client_member', 'services.read'),
+    ('client_member', 'billing.read');
 
 set check_function_bodies = off;
 

@@ -1,0 +1,246 @@
+import React, { useCallback, useEffect} from 'react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { Avatar, AvatarFallback, AvatarImage} from '@kit/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@kit/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@kit/ui/form';
+import { Input } from '@kit/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@kit/ui/select';
+
+import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
+import { updateUserAccount, updateUserEmail, updateUserRole } from '../../server/actions/members/update/update-account';
+import { getAccountSettings } from '../../server/actions/accounts/get/get-account';
+import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
+import { Spinner } from '@kit/ui/spinner';
+
+interface EditUserDialogProps {
+  userId: string;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  name: string;
+  email: string;
+}
+
+function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDialogProps) {
+
+  const { t } = useTranslation('clients');
+
+  const roles = [
+    {value : 'client_member', label : t('clientMember') },
+    {value : 'client_owner', label : t('clientOwner') },
+  ];
+  const { data: userRole, isLoading, isPending} = useQuery({
+    queryKey: ['userRole', userId],
+    queryFn: async() => await getUserRoleById(userId, true),
+  });
+
+  const { data: userSettings} = useQuery({
+    queryKey: ['userSettings', userId],
+    queryFn: async() => await getAccountSettings(userId),
+    staleTime: 1000 * 60 * 5,
+    enabled: isOpen,
+    retry: 1,
+  });
+
+
+  const formSchema = z.object({
+    fullName: z.string().min(3, {
+      message: t('editUser.badInputFullName'),
+    }),
+    // email: z.string().email({
+    //   message: t('editUser.badInputEmail'),
+    // }),
+    role: z.string().refine((value) => roles.some((role) => role.value === value), {
+      message: t('editUser.badInputRole'),
+    }),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullName: name,
+      // email: email,
+      role: userRole,
+    },
+  });
+
+
+
+  const mutateUser = useMutation({
+    mutationFn: async () => {
+      // await updateUserEmail(userId, form.getValues('email'), undefined, true);
+      if(name !== form.getValues('fullName')){
+        await updateUserAccount(
+          {
+            name: form.getValues('fullName'),
+            // email: form.getValues('email'),
+          },
+          userId,
+          undefined,
+          true,
+        );
+      }
+      if(userRole !== form.getValues('role')){
+        await updateUserRole(userId, form.getValues('role'), undefined, true);
+      }
+    },
+    onSuccess: () => {
+      toast.success(t('success'), {
+        description: t('editUser.successEdit'),
+      });
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error('Error', {
+        description: t('editUser.failureEdit'),
+      });
+    },
+  });
+
+
+  const onSubmit = useCallback((values: z.infer<typeof formSchema>) => {
+    mutateUser.mutate();
+    setIsOpen(false);
+  }, []);
+
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        form.reset();
+      }
+      setIsOpen(open);
+    },
+    [form],
+  );
+
+  useEffect(() => {
+    if(userRole) {
+      form.setValue('role', userRole);
+    }
+  }, [userRole, form, isLoading, isPending]);
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>
+            <p className="text-base font-semibold">
+              {t('editUser.editUserInfo')}
+            </p>
+          </DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="fullName"
+              render={({ field }) => (
+                <FormItem className="flex w-full items-center gap-7">
+                  <Avatar className="mt-[12px] scale-150 p-0">
+                    <AvatarImage className='object-contain' src={userSettings?.picture_url ?? ''} />
+                    <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className='w-full'>
+                    <FormControl className="mt-0 w-full">
+                      <div>
+                        <FormLabel>{t('editUser.fullName')}</FormLabel>
+                        <Input
+                          required={true}
+                          placeholder="Enter full name"
+                          type='text'
+                          {...field}
+                          className='mt-2'
+
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage className='mt-4' />
+                  </div>
+                </FormItem>
+              )}
+            />
+            {/* <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="space-y-0">
+                  <FormControl className="w-full">
+                    <div className="my-4">
+                      <FormLabel aria-required={true}>
+                        {t('editUser.email')}
+                      </FormLabel>
+                      <Input
+                        required={true}
+                        type="email"
+                        placeholder="Enter email"
+                        {...field}
+                        className='mt-2'
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('editUser.role')}</FormLabel>
+                  {
+                    isLoading || isPending ? <Spinner className='h-5' /> : 
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('editUser.badInputRole')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {roles.map((role) => (
+                          <SelectItem key={role.value} value={role.value}>
+                            {role.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  }
+                  
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <ThemedButton className="w-full" type="submit">
+              {t('editUser.saveChanges')}
+            </ThemedButton>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default EditUserDialog;

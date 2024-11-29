@@ -240,10 +240,20 @@ export const insertClient = async (
       })
       .select()
       .single();
+    
+    //Create user_settings row for the user
+    const {data: clientSettings, error: clientSettingsError} = await supabaseClient
+      .from('user_settings')
+      .insert({
+        user_id: userId
+      })
 
     if (clientError) {
       console.error('Error inserting client', clientError.message);
       throw new Error(`Error inserting client: ${clientError.message}`);
+    }else if(clientSettingsError) {
+      console.error('Error inserting client settings', clientSettingsError.message);
+      throw new Error(`Error inserting client settings: ${clientSettingsError.message}`);
     }
 
     return clientData;

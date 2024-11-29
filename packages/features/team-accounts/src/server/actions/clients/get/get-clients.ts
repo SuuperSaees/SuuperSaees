@@ -80,7 +80,7 @@ async function fetchClientMembers(
   const { data: clientAccounts, error: clientAccountsError } = await client
     .from('accounts')
     .select(
-      'id, email, picture_url, name, organization_id, primary_owner_user_id, created_at, is_personal_account',
+      'id, email, picture_url, name, organization_id, primary_owner_user_id, created_at, is_personal_account, settings:user_settings!user_id(name, picture_url)',
     )
     .in('id', clientsIds);
 
