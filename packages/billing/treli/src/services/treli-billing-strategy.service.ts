@@ -1,38 +1,37 @@
 import 'server-only';
 
-
-
-import type { Stripe } from 'stripe';
 import { z } from 'zod';
 
-
-
 import { BillingStrategyProviderService } from '@kit/billing';
-import { CancelSubscriptionParamsSchema, CreateBillingCheckoutSchema, CreateBillingPortalSessionSchema, QueryBillingUsageSchema, ReportBillingUsageSchema, RetrieveCheckoutSessionSchema, UpdateSubscriptionParamsSchema } from '@kit/billing/schema';
+import {
+  CancelSubscriptionParamsSchema,
+  CreateBillingCheckoutSchema,
+  CreateBillingPortalSessionSchema,
+  QueryBillingUsageSchema,
+  ReportBillingUsageSchema,
+  RetrieveCheckoutSessionSchema,
+  UpdateSubscriptionParamsSchema,
+} from '@kit/billing/schema';
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
-
-
-import { createStripeBillingPortalSession } from './create-stripe-billing-portal-session';
-import { createStripeCheckout } from './create-stripe-checkout';
-import { createStripeClient } from './stripe-sdk';
-import { createStripeSubscriptionPayloadBuilderService } from './stripe-subscription-payload-builder.service';
-
+import { createStripeBillingPortalSession } from './create-treli-billing-portal-session';
+import { createStripeCheckout } from './treli-stripe-checkout';
+import { createStripeSubscriptionPayloadBuilderService } from './treli-subscription-payload-builder.service';
 
 type ServiceType = Database['public']['Tables']['services']['Row'];
 type BillingAccountType =
   Database['public']['Tables']['billing_accounts']['Row'];
 /**
- * @name StripeBillingStrategyService
- * @description The Stripe billing strategy service
- * @class StripeBillingStrategyService
+ * @name TreliBillingStrategyService
+ * @description The Treli billing strategy service
+ * @class TreliBillingStrategyService
  * @implements {BillingStrategyProviderService}
  */
-export class StripeBillingStrategyService
+export class TreliBillingStrategyService
   implements BillingStrategyProviderService
 {
-  private readonly namespace = 'billing.stripe';
+  private readonly namespace = 'billing.treli';
 
   /**
    * @name createCheckoutSession
@@ -42,7 +41,7 @@ export class StripeBillingStrategyService
   async createCheckoutSession(
     params: z.infer<typeof CreateBillingCheckoutSchema>,
   ) {
-    const stripe = await this.stripeProvider();
+    // const stripe = await this.stripeProvider();
     const logger = await getLogger();
 
     const ctx = {
@@ -74,7 +73,7 @@ export class StripeBillingStrategyService
   async createBillingPortalSession(
     params: z.infer<typeof CreateBillingPortalSessionSchema>,
   ) {
-    const stripe = await this.stripeProvider();
+    // const stripe = await this.stripeProvider();
     const logger = await getLogger();
 
     const ctx = {
@@ -103,7 +102,7 @@ export class StripeBillingStrategyService
   async cancelSubscription(
     params: z.infer<typeof CancelSubscriptionParamsSchema>,
   ) {
-    const stripe = await this.stripeProvider();
+    // const stripe = await this.stripeProvider();
     const logger = await getLogger();
 
     const ctx = {
@@ -114,9 +113,9 @@ export class StripeBillingStrategyService
     logger.info(ctx, 'Cancelling subscription...');
 
     try {
-      await stripe.subscriptions.cancel(params.subscriptionId, {
-        invoice_now: params.invoiceNow ?? true,
-      });
+      // await stripe.subscriptions.cancel(params.subscriptionId, {
+      //   invoice_now: params.invoiceNow ?? true,
+      // });
 
       logger.info(ctx, 'Subscription cancelled successfully');
 
@@ -146,7 +145,7 @@ export class StripeBillingStrategyService
   async retrieveCheckoutSession(
     params: z.infer<typeof RetrieveCheckoutSessionSchema>,
   ) {
-    const stripe = await this.stripeProvider();
+    // const stripe = await this.stripeProvider();
     const logger = await getLogger();
 
     const ctx = {
@@ -189,7 +188,7 @@ export class StripeBillingStrategyService
    * @param params
    */
   async reportUsage(params: z.infer<typeof ReportBillingUsageSchema>) {
-    const stripe = await this.stripeProvider();
+    // const stripe = await this.stripeProvider();
     const logger = await getLogger();
 
     const ctx = {
@@ -236,7 +235,7 @@ export class StripeBillingStrategyService
    * @description Reports the total usage for a subscription with the Metrics API
    */
   async queryUsage(params: z.infer<typeof QueryBillingUsageSchema>) {
-    const stripe = await this.stripeProvider();
+    //    const stripe = await this.stripeProvider();
     const logger = await getLogger();
 
     const ctx = {
@@ -294,7 +293,7 @@ export class StripeBillingStrategyService
   async updateSubscriptionItem(
     params: z.infer<typeof UpdateSubscriptionParamsSchema>,
   ) {
-    const stripe = await this.stripeProvider();
+    // const stripe = await this.stripeProvider();
     const logger = await getLogger();
 
     const ctx = {
@@ -341,7 +340,7 @@ export class StripeBillingStrategyService
 
     logger.info(ctx, 'Retrieving plan by id...');
 
-    const stripe = await this.stripeProvider();
+    //  const stripe = await this.stripeProvider();
 
     try {
       const plan = await stripe.plans.retrieve(planId);
@@ -362,7 +361,7 @@ export class StripeBillingStrategyService
   }
 
   async getSubscription(subscriptionId: string) {
-    const stripe = await this.stripeProvider();
+    // const stripe = await this.stripeProvider();
     const logger = await getLogger();
 
     const ctx = {
@@ -375,108 +374,45 @@ export class StripeBillingStrategyService
     const subscriptionPayloadBuilder =
       createStripeSubscriptionPayloadBuilderService();
 
-    try {
-      const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
-        expand: ['line_items'],
-      });
+    return subscriptionPayloadBuilder.build({});
 
-      logger.info(ctx, 'Subscription retrieved successfully');
+    // try {
+    //   const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+    //     expand: ['line_items'],
+    //   });
 
-      const customer = subscription.customer as string;
-      const accountId = subscription.metadata?.accountId as string;
+    //   logger.info(ctx, 'Subscription retrieved successfully');
 
-      return subscriptionPayloadBuilder.build({
-        customerId: customer,
-        accountId,
-        id: subscription.id,
-        lineItems: subscription.items.data,
-        status: subscription.status,
-        currency: subscription.currency,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        periodStartsAt: subscription.current_period_start,
-        periodEndsAt: subscription.current_period_end,
-        trialStartsAt: subscription.trial_start,
-        trialEndsAt: subscription.trial_end,
-      });
-    } catch (error) {
-      logger.error({ ...ctx, error }, 'Failed to retrieve subscription');
+    //   const customer = subscription.customer as string;
+    //   const accountId = subscription.metadata?.accountId as string;
 
-      throw new Error('Failed to retrieve subscription');
-    }
+    //   return subscriptionPayloadBuilder.build({
+    //     customerId: customer,
+    //     accountId,
+    //     id: subscription.id,
+    //     lineItems: subscription.items.data,
+    //     status: subscription.status,
+    //     currency: subscription.currency,
+    //     cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    //     periodStartsAt: subscription.current_period_start,
+    //     periodEndsAt: subscription.current_period_end,
+    //     trialStartsAt: subscription.trial_start,
+    //     trialEndsAt: subscription.trial_end,
+    //   });
+    // } catch (error) {
+    //   logger.error({ ...ctx, error }, 'Failed to retrieve subscription');
+
+    //   throw new Error('Failed to retrieve subscription');
+    // }
   }
 
   async createService(
     service: ServiceType,
     billingAccount: BillingAccountType,
-    baseUrl: string,
   ) {
-    const logger = await getLogger();
-    const ctx = {
-      name: this.namespace,
-      service,
-      billingAccount,
-      baseUrl,
-    };
-
-    logger.info(ctx, 'Creating service in Stripe...');
-
-    // Create a service in Stripe
-    const responseProductCreated = await fetch(
-      `${baseUrl}/api/stripe/create-service`,
-      {
-        // Important: This endpoint is not used anymore.
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          accountId: billingAccount.provider_id,
-          name: service.name,
-          description: service.service_description,
-          imageUrl: service.service_image,
-        }),
-      },
-    );
-
-    if (!responseProductCreated.ok) {
-      logger.error(ctx, 'Failed to create service');
-      return {
-        success: false,
-      };
-    }
-
-    const productCreated = await responseProductCreated.json();
-    const responsePriceCreated = await fetch(
-      `${baseUrl}/api/stripe/create-service-price`,
-      {
-        // Important: This endpoint is not used anymore.
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          accountId: billingAccount.provider_id,
-          productId: productCreated.productId,
-          serviceId: service.id,
-          unitAmount: (service.price ?? 0) * 100,
-          currency: 'usd',
-          isRecurring: service.recurring_subscription,
-          interval: service.recurrence,
-        }),
-      },
-    );
-
-    if (!responsePriceCreated.ok) {
-      logger.error(ctx, 'Failed to create price');
-      return {
-        success: false,
-      };
-    }
-
-    logger.info(ctx, 'Service created successfully');
-
+    await Promise.resolve();
     return {
       success: true,
     };
-  }
-
-  private async stripeProvider(): Promise<Stripe> {
-    return createStripeClient();
   }
 }

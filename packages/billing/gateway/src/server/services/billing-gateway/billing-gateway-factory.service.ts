@@ -1,11 +1,13 @@
 import 'server-only';
 
+
+
 import { z } from 'zod';
 
-import {
-  BillingProviderSchema,
-  BillingStrategyProviderService,
-} from '@kit/billing';
+
+
+import { BillingProviderSchema, BillingStrategyProviderService } from '@kit/billing';
+
 
 export class BillingGatewayFactoryService {
   static async GetProviderStrategy(
@@ -28,6 +30,12 @@ export class BillingGatewayFactoryService {
 
       case 'paddle': {
         throw new Error('Paddle is not supported yet');
+      }
+
+      case 'treli': {
+        const { TreliBillingStrategyService } = await import('@kit/treli');
+
+        return new TreliBillingStrategyService();
       }
 
       default:

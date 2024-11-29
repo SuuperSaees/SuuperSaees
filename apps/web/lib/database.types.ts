@@ -419,6 +419,7 @@ export type Database = {
           created_at: string
           deleted_on: string | null
           id: string
+          provider: Database["public"]["Enums"]["billing_provider"]
           provider_id: string
           service_id: number
           status: Database["public"]["Enums"]["service_status"]
@@ -428,6 +429,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
           provider_id: string
           service_id: number
           status?: Database["public"]["Enums"]["service_status"]
@@ -437,6 +439,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
           provider_id?: string
           service_id?: number
           status?: Database["public"]["Enums"]["service_status"]
@@ -2739,23 +2742,14 @@ export type Database = {
         }
         Returns: boolean
       }
-      has_permission:
-        | {
-            Args: {
-              user_id: string
-              account_id: string
-              permission_name: Database["public"]["Enums"]["app_permissions"]
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
-              user_id: string
-              account_id: string
-              permission_name: Database["public"]["Enums"]["app_permissions__old_version_to_be_dropped"]
-            }
-            Returns: boolean
-          }
+      has_permission: {
+        Args: {
+          user_id: string
+          account_id: string
+          permission_name: Database["public"]["Enums"]["app_permissions"]
+        }
+        Returns: boolean
+      }
       has_role_on_account: {
         Args: {
           account_id: string
@@ -2846,7 +2840,7 @@ export type Database = {
           role_hierarchy_level: number
           primary_owner_user_id: string
           subscription_status: Database["public"]["Enums"]["subscription_status"]
-          permissions: Database["public"]["Enums"]["app_permissions__old_version_to_be_dropped"][]
+          permissions: Database["public"]["Enums"]["app_permissions"][]
         }[]
       }
       transfer_team_account_ownership: {
@@ -2862,7 +2856,7 @@ export type Database = {
           target_customer_id: string
           target_order_id: string
           status: Database["public"]["Enums"]["payment_status"]
-          billing_provider: Database["public"]["Enums"]["billing_provider__old_version_to_be_dropped"]
+          billing_provider: Database["public"]["Enums"]["billing_provider"]
           total_amount: number
           currency: string
           line_items: Json
@@ -2886,7 +2880,7 @@ export type Database = {
           target_subscription_id: string
           active: boolean
           status: Database["public"]["Enums"]["subscription_status"]
-          billing_provider: Database["public"]["Enums"]["billing_provider__old_version_to_be_dropped"]
+          billing_provider: Database["public"]["Enums"]["billing_provider"]
           cancel_at_period_end: boolean
           currency: string
           period_starts_at: string
@@ -2950,30 +2944,12 @@ export type Database = {
         | "billing.write"
         | "billing.read"
         | "billing.delete"
-      app_permissions__old_version_to_be_dropped:
-        | "roles.manage"
-        | "billing.manage"
-        | "settings.manage"
-        | "members.manage"
-        | "invites.manage"
-        | "tasks.write"
-        | "tasks.delete"
-        | "messages.write"
-        | "messages.read"
-        | "orders.write"
-        | "orders.read"
-        | "orders.manage"
-        | "orders.delete"
       billing_provider:
         | "stripe"
         | "lemon-squeezy"
         | "paddle"
         | "treli"
         | "suuper"
-      billing_provider__old_version_to_be_dropped:
-        | "stripe"
-        | "lemon-squeezy"
-        | "paddle"
       chat_role: "user" | "assistant"
       field_types:
         | "date"

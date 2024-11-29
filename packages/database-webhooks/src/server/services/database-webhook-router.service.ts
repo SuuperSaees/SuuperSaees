@@ -1,8 +1,14 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
+import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
+
+
 import { RecordChange, Tables } from '../record-change.type';
+
 
 export function createDatabaseWebhookRouterService(
   adminClient: SupabaseClient<Database>,
@@ -30,6 +36,12 @@ class DatabaseWebhookRouterService {
         return this.handleInvitationsWebhook(payload);
       }
 
+      case 'services': {
+        const payload = body as RecordChange<typeof body.table>;
+
+        return this.handleServicesWebhook(payload);
+      }
+
       // case 'subscriptions': {
       //   const payload = body as RecordChange<typeof body.table>;
 
@@ -45,6 +57,21 @@ class DatabaseWebhookRouterService {
       default: {
         return;
       }
+    }
+  }
+
+  private async handleServicesWebhook(body: RecordChange<'services'>) {
+    const logger = await getLogger();
+    if (body.type === 'INSERT' && body.record) {
+      const { createBillingWebhooksService } = await import(
+        '@kit/billing-gateway'
+    );
+
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''; // if this baseUrl fail, use getDomainByUserId function
+
+      const service = createBillingWebhooksService(this.adminClient, baseUrl);
+      logger.info(body, 'Handling services webhook');
+      return service.handleServiceCreatedWebhook(body.record);
     }
   }
 
@@ -86,4 +113,4 @@ class DatabaseWebhookRouterService {
 }
 
 
-// Here manage the cancel subscription and update subscription of upgrade 
+// Here manage the cancel subscription and update subscription of upgrade
