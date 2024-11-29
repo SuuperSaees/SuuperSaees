@@ -29,6 +29,7 @@ function MemberSection({
       queryKey: ['clientsWithOrganizations', clientOrganizationId],
       queryFn: async () =>
         await getClientMembersForOrganization(clientOrganizationId ?? ''),
+      staleTime: 0, // Ensure refetching
     }) ?? [];
 
   if (!clientsWithOrganizations.data) return null;

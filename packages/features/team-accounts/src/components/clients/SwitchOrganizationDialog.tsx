@@ -18,10 +18,10 @@ import { ThemedButton } from '../../../../accounts/src/components/ui/button-them
 import { useTranslation } from 'react-i18next';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Button } from '@kit/ui/button';
-import { updateUserAccount} from '../../server/actions/members/update/update-account';
+import { switchUserOrganization} from '../../server/actions/members/update/update-account';
 import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
-import { updateClient } from '../../server/actions/clients/update/update-client';
+import { useRouter } from 'next/navigation';
 
 interface SwitchOrganizationDialogProps {
   userId: string;
@@ -34,10 +34,12 @@ function SwitchOrganizationDialog({userId, setIsOpen, isOpen, organizationOption
   const [isOpenPopup, setIsOpenPopup] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const {t} = useTranslation('clients')
+  const router = useRouter()
 
   const changeOrganizationMutation = useMutation({
     mutationFn: async () => {
-      await changeOrganization();
+      await switchUserOrganization(selectedOrganization, userId);
+      router.refresh()
     },
     onSuccess: () => {
       toast.success(t('success'), {
@@ -51,16 +53,6 @@ function SwitchOrganizationDialog({userId, setIsOpen, isOpen, organizationOption
       });
     },
   });
-
-  async function changeOrganization() {
-    await updateUserAccount(
-      {
-        organization_id: selectedOrganization,
-      },
-      userId
-    );
-    await updateClient({organization_client_id: selectedOrganization}, userId,undefined, true);
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>

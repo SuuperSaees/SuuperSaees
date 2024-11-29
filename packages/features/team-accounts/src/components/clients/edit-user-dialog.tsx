@@ -141,7 +141,7 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     if(userRole) {
       form.setValue('role', userRole);
     }
-  }, [userRole, form]);
+  }, [userRole, form, isLoading, isPending]);
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -213,6 +213,8 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
                   <FormLabel>{t('editUser.role')}</FormLabel>
                   {
                     isLoading || isPending ? <Spinner className='h-5' /> : 
+                    <>
+                    <p>{userRole}</p>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -227,6 +229,7 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
                         ))}
                       </SelectContent>
                     </Select>
+                    </>
                   }
                   
                   <FormMessage />
