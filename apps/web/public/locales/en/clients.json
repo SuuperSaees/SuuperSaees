@@ -100,7 +100,7 @@
     "passwordMinimalLength": "Password must be at least 8 characters long",
     "successEdit": "User updated successfully",
     "failureEdit": "Error updating user",
-    "badInputFullName": "Full Name must be at least 3 characters long",
+    "badInputFullName": "Full name must be at least 3 characters long",
     "badInputEmail": "Please enter a valid email address",
     "badInputRole": "Please select a role"
 
