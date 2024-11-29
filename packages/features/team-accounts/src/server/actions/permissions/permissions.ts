@@ -140,7 +140,10 @@ export const hasPermissionToReadOrders = async () => {
       }) ?? [],
     );
 
-    ordersData = [...ordersData, ...followerOrdersData];
+    // ordersData = [...ordersData, ...followerOrdersData];
+
+    const uniqueOrderIds = new Set(ordersData.map(order => order.id));
+    ordersData = [...ordersData, ...followerOrdersData.filter(order => !uniqueOrderIds.has(order.id))];
   }
   } else if (isTeamMember) {
     const { data: orderAssignedData, error: orderAssignedError } = await client
