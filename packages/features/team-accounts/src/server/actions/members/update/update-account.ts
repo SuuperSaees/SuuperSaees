@@ -43,7 +43,7 @@ export const updateUserAccount = async (
       revalidatePath(`/clients/organizations/*`);
 
       
-    return userAccountData;
+    return userId;
   } catch (error) {
     console.error('Error updating the user account', error);
     throw error;
@@ -62,7 +62,7 @@ export const switchUserOrganization = async (
       userId,
     );
 
-    // await updateClient({organization_client_id: organizationId ?? ''}, userId,undefined, true);
+    await updateClient({organization_client_id: organizationId ?? ''}, userId,undefined, true);
 
   } catch (error) {
     console.error('Error switching the user organization', error);
