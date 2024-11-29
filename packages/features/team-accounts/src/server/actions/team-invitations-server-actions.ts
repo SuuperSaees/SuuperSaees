@@ -203,13 +203,20 @@ export const acceptInvitationAction = enhanceAction(
     }
 
     // Associate the new member with the sender's organization
-    await client
+    const { error: associateMemberError } = await client
       .from('accounts')
       .update({ organization_id: senderOrganization?.organization_id })
       .eq('id', user.id);
-
+      
+    if (associateMemberError) {
+      console.error('Failed to associate member with organization');
+      throw new Error(associateMemberError.message);
+    }
     // Increase the seats for the account
-    await perSeatBillingService.increaseSeats(accountId);
+    await perSeatBillingService.increaseSeats(accountId).catch((error) => {
+      console.error('Failed to increase seats', error);
+      throw new Error(error.message);
+    });
 
     // Redirect to the next path
     return redirect(nextPath);

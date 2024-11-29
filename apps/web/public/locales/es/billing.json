@@ -113,36 +113,53 @@
     }
   },
   "plans": {
+    "currentPlan": "Actual",
+    "upgrade": "Aumentar de plan",
+    "scheduleDemo": "Agenda una demo",
+    "whatIncludes": "Qué incluye",
     "features": {
+      "base": "Funcionalidades más básicas y...",
       "maxTasks": "Hasta 10 tareas",
-      "chatSupport": "Soporte por chat"
+      "chatSupport": "Soporte por chat",
+      "perMemberPerMonth": "por miembro de tu equipo al mes"
     },
     "starter": {
-      "name": "Inicio",
-      "description": "Para equipos pequeños que recién comienzan",
+      "name": "Plan Starter",
+      "description": "Ideal para comenzar tu negocio de servicios digitales.",
       "badge": "Valor",
       "base": "Base",
       "features": {
-        "maxTokens": "Hasta 500k tokens"
+        "base": "Funcionalidades más básicas y...",
+        "maxTokens": "Hasta 500k tokens",
+        "unlimitedServices": "Servicios ilimitados",
+        "unlimitedClients": "Clientes ilimitados",
+        "unlimitedProjects": "Proyectos ilimitados"
       }
     },
-    "pro": {
-      "name": "Pro",
-      "description": "Para equipos en crecimiento",
-      "badge": "Popular",
+    "premium": {
+      "name": "Plan Premium",
+      "description": "Para agencias y estudios creativos con gran potencial.",
+      "badge": "Más Popular",
       "base": "Base",
       "features": {
-        "maxTokens": "Hasta 3M tokens"
+        "base": "Todo lo del <strong>Plan Starter</strong> más...",
+        "maxTokens": "Hasta 3M tokens",
+        "calendarView": "Vista de calendario",
+        "whiteBrandingPortal": "Portal marca blanca",
+        "customDomain": "Dominio personalizado"
       }
     },
-    "enterprise": {
-      "name": "Empresa",
-      "description": "Para grandes equipos y organizaciones",
+    "advanced": {
+      "name": "Plan Advanced",
+      "description": "Para equipos ya establecidos con necesidades avanzadas.",
       "badge": "Costumbre",
       "base": "Base",
       "features": {
+        "base": "Todo lo del <strong>Plan Premium</strong> más...",
         "maxTokens": "Tokens ilimitadas",
-        "chatSupport": "Apoyo prioritario"
+        "customEmails": "Emails personalizados",
+        "apiIntegration": "Integración con API",
+        "zapierAutomation": "Automatizaciones con Zapier"
       }
     }
   }

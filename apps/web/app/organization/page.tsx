@@ -22,7 +22,10 @@ async function OrganizationsPage() {
     organization.primary_owner_user_id,
   );
 
-  const userRole = await getUserRole();
+  const userRole = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
   // Create a new object that includes the owner property
   const newOrganization = {
     ...organization,

@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 import { useRequestResetPassword } from '@kit/supabase/hooks/use-request-reset-password';
 import { Alert, AlertDescription } from '@kit/ui/alert';
-import { Button } from '@kit/ui/button';
+// import { Button } from '@kit/ui/button';
 import {
   Form,
   FormControl,
@@ -60,6 +60,8 @@ export function PasswordResetRequestContainer(params: {
                 email,
                 redirectTo: new URL(params.redirectPath, window.location.origin)
                   .href,
+              }).catch(() => {
+                console.error('Error requesting password reset');
               });
             })}
             className={'w-full'}
@@ -94,7 +96,9 @@ export function PasswordResetRequestContainer(params: {
                   </FormItem>
                 )}
               />
-              <ThemedButton>
+              <ThemedButton
+                disabled={resetPasswordMutation.isPending}
+              >
                 <Trans i18nKey={'auth:passwordResetLabel'} />
               </ThemedButton>
             </div>

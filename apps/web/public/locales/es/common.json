@@ -10,6 +10,7 @@
   "organizationSettingsTabLabel": "Organización",
   "settingsTabLabel": "Configuraciones",
   "profileSettingsTabLabel": "Perfil",
+  "organizationNamelabel": "Nombre de tu marca",
   "subscriptionSettingsTabLabel": "Suscripción",
   "dashboardTabDescription": "Un resumen de la actividad y rendimiento de tu organización en todos tus proyectos.",
   "settingsTabDescription": "Administra tus configuraciones y preferencias.",
@@ -23,12 +24,14 @@
   "genericError": "Lo siento, algo salió mal.",
   "genericErrorSubHeading": "Lo sentimos, ocurrió un error al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
   "goBack": "Volver",
-  "plsDetailInputs": "Por favor ingresa tus detalles",
+  "continueToYourAccount": "Continúa con tu cuenta",
+  "plsDetailInputs": "Inicia sesión",
   "backToHomePage": "Regresar a la página principal",
   "anonymousUser": "Anónimo",
   "profile": "Mi perfil",
   "billing": "Facturación",
-  "orders": "Pedidos",
+  "subscription": "Suscripción",
+  "orders": "Proyectos",
   "tryAgain": "Intentar de Nuevo",
   "theme": "Tema",
   "contactUs": "Contactanos",
@@ -52,7 +55,7 @@
   "servicesName": "Servicios",
   "settingsName": "Configuraciones",
   "usersName": "Usuarios",
-  "ordersName": "Pedidos",
+  "ordersName": "Proyectos",
   "clientsName": "Clientes",
   "teamName": "Equipo",
   "nameInput": "Nombre",
@@ -81,5 +84,7 @@
     "previous": "Anterior"
   },
   "organizationName": "Organización",
-  "selectOption": "Seleccionar una opción"
+  "selectOption": "Seleccionar una opción",
+  "success": "¡Todo Listo!",
+  "error": "¡Algo salió mal!"
 }

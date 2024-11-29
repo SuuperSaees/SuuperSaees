@@ -1,6 +1,16 @@
 import 'server-only';
 
+
+
 import { type EmailOtpType, SupabaseClient } from '@supabase/supabase-js';
+
+
+
+import { TokenRecoveryType } from '../../tokens/src/domain/token-type';
+import { verifyToken } from '../../tokens/src/verify-token';
+// import { decodeToken } from '../../tokens/src/decode-token';
+import { getSupabaseServerComponentClient } from './clients/server-component.client';
+
 
 /**
  * @name createAuthCallbackService
@@ -35,7 +45,9 @@ class AuthCallbackService {
   ): Promise<URL> {
     const url = new URL(request.url);
     const searchParams = url.searchParams;
-
+    const token_hash_session = searchParams.get('token_hash_session');
+    const tokenHashRecovery = searchParams.get('token_hash_recovery');
+    const callbackNextPath = searchParams.get('next');
     const host = request.headers.get('host');
 
     // set the host to the request host since outside of Vercel it gets set as "localhost"
@@ -54,9 +66,6 @@ class AuthCallbackService {
     const callbackUrl = callbackParam ? new URL(callbackParam) : null;
 
     if (callbackUrl) {
-      // if we have a callback url, we check if it has a next path
-      const callbackNextPath = callbackUrl.searchParams.get('next');
-
       // if we have a next path in the callback url, we use that
       if (callbackNextPath) {
         nextPath = callbackNextPath;
@@ -70,6 +79,7 @@ class AuthCallbackService {
 
     // remove the query params from the url
     searchParams.delete('token_hash');
+    searchParams.delete('token_hash_session');
     searchParams.delete('type');
     searchParams.delete('next');
     searchParams.delete('callback');
@@ -78,6 +88,40 @@ class AuthCallbackService {
     if (nextPath) {
       url.pathname = nextPath;
     }
+
+    if (tokenHashRecovery && type) {
+      // search in the database for the token_hash_session
+      const { isValidToken, payload } = await verifyToken(
+        '',
+        tokenHashRecovery,
+      ) as { isValidToken: boolean; payload?: TokenRecoveryType };
+      if (!isValidToken) {
+        console.error('Error verifying token hash session');
+      }
+      const newUrlPayload = new URL(payload?.redirectTo ?? '');
+      const response = await fetch(payload?.redirectTo ?? '', {
+        method: 'GET',
+        redirect: 'manual',
+      });
+  
+      const location = response.headers.get('Location');
+  
+      if (!location) {
+        throw new Error(`Error generating magic link. Location header not found`);
+      }
+  
+      const hash = new URL(location).hash.substring(1);
+      const query = new URLSearchParams(hash);
+      const accessToken = query.get('access_token');
+      const refreshToken = query.get('refresh_token');
+      
+      if (accessToken && refreshToken && !(await this.client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })).error) {       
+        url.href = callbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
+        return url;
+      }
+      };
+    
+
 
     // if we have an invite token, we append it to the redirect url
     if (inviteToken) {
@@ -103,6 +147,35 @@ class AuthCallbackService {
 
       if (!error) {
         return url;
+      }
+    }
+    const supabaseServerComponentClient = getSupabaseServerComponentClient({
+      admin: true,
+    });
+    if (token_hash_session) {
+      // search in the database for the token_hash_session
+      const { data, error } = await supabaseServerComponentClient
+        .from('tokens')
+        .select('*')
+        .eq('id', token_hash_session)
+        .single();
+
+      if (error) {
+        console.error('Error verifying token hash session', error);
+      }
+      if (data) {
+        // set session with the user data
+        const { error } = await this.client.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+        url.pathname = callbackParam ?? baseUrl;
+        url.href = callbackParam ?? baseUrl;
+        
+        if (!error) {
+          return url;
+        }
       }
     }
 
@@ -135,17 +208,16 @@ class AuthCallbackService {
     const error = searchParams.get('error');
     const nextUrlPathFromParams = searchParams.get('next');
     const inviteToken = searchParams.get('invite_token');
+    const emailParam = searchParams.get('email');
     const errorPath = params.errorPath ?? '/auth/callback/error';
-
     let nextUrl = nextUrlPathFromParams ?? params.redirectPath;
 
     // if we have an invite token, we redirect to the join team page
     // instead of the default next url. This is because the user is trying
     // to join a team and we want to make sure they are redirected to the
     // correct page.
-    if (inviteToken) {
-      const emailParam = searchParams.get('email');
 
+    if (inviteToken) {
       const urlParams = new URLSearchParams({
         invite_token: inviteToken,
         email: emailParam ?? '',
@@ -183,6 +255,7 @@ class AuthCallbackService {
         });
       }
     }
+
 
     if (error) {
       return onError({
@@ -231,3 +304,12 @@ function getAuthErrorMessage(error: string) {
     ? `auth:errors.codeVerifierMismatch`
     : `auth:authenticationErrorAlertBody`;
 }
+
+// function to log out the user before starting the new session:
+// async function logOutUser(supabase: SupabaseClient) {
+//   const { error } = await supabase.auth.signOut();
+
+//   if (error) {
+//     console.error('Error logging out user', error);
+//   }
+// }

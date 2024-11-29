@@ -18,15 +18,15 @@ export const generateMetadata = async () => {
 async function OrganizationsPage({ params }: { params: { id: string } }) {
   const organization = await getOrganizationById(params.id);
 
-  // console.log('organization', organization);
-
   const organizationOwner = await getUserById(
     organization.primary_owner_user_id,
   );
-  const userRole = await getUserRole();
+  const userRole = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
   const newOrganization = { ...organization, owner: organizationOwner };
 
-  // console.log('organization', newOrganization);
   return (
     <OrganizationSection
       name={newOrganization.name}

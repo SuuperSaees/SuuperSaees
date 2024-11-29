@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import {
   AccountInvitationsTable,
@@ -8,12 +7,11 @@ import {
   InviteMembersDialogContainer,
 } from '@kit/team-accounts/components';
 import { If } from '@kit/ui/if';
-import { InfoIcon } from "lucide-react";
+// import { InfoIcon } from "lucide-react";
 import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
-import { useBilling } from '../../home/[account]/hooks/use-billing';
-import { useRouter } from 'next/navigation';
+// import { useBilling } from '../../home/[account]/hooks/use-billing';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -27,7 +25,10 @@ const ClientsMembersPagePresentation = ({
   canManageInvitations,
   isPrimaryOwner,
 }: {
-    account: unknown;
+    account: {
+      id: string;
+      role_hierarchy_level: number;
+    };
     currentUserRoleHierarchy: number | undefined;
     slug: string;
     members: {
@@ -56,30 +57,32 @@ const ClientsMembersPagePresentation = ({
         inviter_email: string;
     }[];
     canAddMember: boolean;
-    user: unknown;
+    user: {
+      id: string;
+    };
     canManageRoles: boolean;
     canManageInvitations: boolean;
     isPrimaryOwner: boolean;
 }) => {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [addMemberIsAvailable, setAddMemberIsAvailable] = useState(false);
-  const { setShowUpgradeComponent, subscriptionFetchedStripe, setAccountBillingTab } = useBilling();
-  const router = useRouter();
-const seatByPlans = {
-  0: 1,
-  25: 5,
-  45: 10,
-};
-    useEffect(() => {
-        if (subscriptionFetchedStripe) {
-          if (members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans]) {
-              setAddMemberIsAvailable(true);
-          } else {
-            console.log('members.length', members.length)
-              setAddMemberIsAvailable(false);
-          }
-        }
-    }, [members, subscriptionFetchedStripe]);
+  // const [showDropdown, setShowDropdown] = useState(false);
+  // const [addMemberIsAvailable, setAddMemberIsAvailable] = useState(false);
+  // const { subscriptionFetchedStripe } = useBilling();
+  // const { t } = useTranslation('team');
+  // const router = useRouter();
+// const seatByPlans = {
+//   0: 1,
+//   25: 5,
+//   45: 10,
+// };
+    // useEffect(() => {
+        // if (subscriptionFetchedStripe) {
+        //   if (members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans]) {
+        //       setAddMemberIsAvailable(true);
+        //   } else {
+        //       setAddMemberIsAvailable(false);
+        //   }
+        // }
+    // }, [members, subscriptionFetchedStripe]);
 
   return (
     <PageBody>
@@ -87,7 +90,7 @@ const seatByPlans = {
         <div className="mb-[32px] flex items-center justify-between">
           <div className="flex-grow">
             <span>
-              <div className="text-primary-900 font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px]">
+              <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
                 <Trans i18nKey={'team:team'} />
               </div>
             </span>
@@ -95,7 +98,7 @@ const seatByPlans = {
         </div>
 
         <div className="w-full">
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between pb-[28px]">
             <If condition={canManageInvitations && canAddMember}>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold">
@@ -114,16 +117,15 @@ const seatByPlans = {
                   </div>
                 )}
               </div>
-              {account.role_hierarchy_level === 2 && subscriptionFetchedStripe && (
+              {/* {account?.role_hierarchy_level === 2 && subscriptionFetchedStripe && ( */}
                   <div
-                    className="invite-button-container"
-                    onMouseEnter={() => setShowDropdown(true)}
-                    onMouseLeave={() => setShowDropdown(false)}
+                    // className="invite-button-container"
+                    // onMouseEnter={() => setShowDropdown(true)}
+                    // onMouseLeave={() => setShowDropdown(false)}
                   >
                     <ThemedButton
-                      size={'sm'}
                       data-test={'invite-members-form-trigger'}
-                      disabled={addMemberIsAvailable}
+                      // disabled={addMemberIsAvailable}
                       className="p-0"
                     >
                         <InviteMembersDialogContainer
@@ -136,26 +138,29 @@ const seatByPlans = {
                 </InviteMembersDialogContainer>
                       
                     </ThemedButton>
-                    {showDropdown && members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans] && (
+                    {/* {showDropdown && members.length >= seatByPlans[subscriptionFetchedStripe?.plan?.amount as keyof typeof seatByPlans] && (
                       <div className="dropdown absolute top-4 right-24 px-9 py-14 rounded-md w-fit transform transition-transform duration-300 ease-in-out animate-fade-in">
                         <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground gap-3 items-center">
                         <div className='flex mb-2'>
                         <InfoIcon size="14" strokeWidth={2} />
-                        <div className='pl-2'>Haz alcanzado el límite de miembros</div>
+                        <div className='pl-2'>
+                          {t('plan.message')}
+                        </div>
                         </div>
                         <ThemedButton
                           size={'sm'}
                           onClick={() => {
                             router.push('/home/settings?tab=billing')
                         }}
-                        > Upgrade Plan 
+                        > 
+                          {t('plan.upgradeButton')}
                         </ThemedButton>
                         </div>
 
                       </div>
-                    )}
+                    )} */}
                   </div>
-              )}
+              {/* )} */}
             </If>
           </div>
         </div>

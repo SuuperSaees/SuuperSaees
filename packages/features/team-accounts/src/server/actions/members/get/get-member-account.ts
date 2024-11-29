@@ -21,8 +21,15 @@ export async function fetchCurrentUser(client: SupabaseClient<Database>) {
   return userData.user;
 }
 // organization_id, name, email, id, picture_url, primary_owner_user_id
-type AccountGet = Pick<Account.Type, 
-  'organization_id' | 'name' | 'email' | 'id' | 'picture_url' | 'primary_owner_user_id'>;
+type AccountGet = Pick<
+  Account.Type,
+  | 'organization_id'
+  | 'name'
+  | 'email'
+  | 'id'
+  | 'picture_url'
+  | 'primary_owner_user_id'
+>;
 // Helper function to fetch the current user's account details
 export async function fetchCurrentUserAccount(
   client: SupabaseClient<Database>,
@@ -45,6 +52,28 @@ export async function fetchCurrentUserAccount(
   }
 
   return currentUserAccount;
+}
+
+export async function fetchUsersAccounts(client: SupabaseClient<Database>, ids: Account.Type['id'][]) {
+  try {
+    // Fetch users accounts using their passed ids
+    // The ids can match either id or organization_id
+    const { data: usersAccounts, error: usersAccountsError } = await client
+      .from('accounts')
+      .select('id, name, email, picture_url, settings:user_settings(name, picture_url)')
+      .or(`id.in.(${ids.join(',')}),organization_id.in.(${ids.join(',')})`)
+      .eq('is_personal_account', true);
+      
+    if (usersAccountsError) {
+      console.error('Error fetching users accounts:', usersAccountsError);
+      throw new Error(`Error fetching users accounts: ${usersAccountsError.message}`);
+    }
+
+    return usersAccounts;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 export async function getPrimaryOwnerId(): Promise<string | undefined> {
@@ -178,7 +207,10 @@ export async function getUserRoleById(userId: string) {
   }
 }
 
-export async function getStripeAccountID() {
+export async function getStripeAccountID(): Promise<{
+  userId: string;
+  stripeId: string;
+}> {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
@@ -192,11 +224,18 @@ export async function getStripeAccountID() {
 
     if (accountsError) throw accountsError;
 
-    const stripetId = userAccountData?.stripe_id;
+    const stripeId = userAccountData?.stripe_id;
 
-    return stripetId;
+    return {
+      stripeId: stripeId ?? '',
+      userId: userData.user.id,
+    };
   } catch (error) {
     console.error('Error fetching primary owner:', error);
+    return {
+      stripeId: '',
+      userId: '',
+    };
   }
 }
 
@@ -228,9 +267,13 @@ export async function getUserAccountById(
 }
 
 export const getUserAccountByEmail = async (
-  databaseClient: SupabaseClient<Database>,
   email: Account.Type['email'],
+  databaseClient?: SupabaseClient<Database>,
+  adminActivated = false,
 ) => {
+  databaseClient = databaseClient ?? getSupabaseServerComponentClient({
+    admin: adminActivated,
+  });
   try {
     if (!email) return null;
     const { data: userAccountData, error: clientAccountError } =

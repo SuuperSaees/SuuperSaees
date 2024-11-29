@@ -19,7 +19,10 @@ import './styles/home-sidebar.css';
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 export async function HomeSidebar(props: { workspace: UserWorkspace }) {
   const { workspace, user } = props.workspace;
-  const userRole = await getUserRole().catch(() => null);
+  const userRole = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
 
   // Filter the navigation config to remove the /clients path if userRole is 'agency_owner' or 'client_owner'
   const filterNavigationConfig = (config: NavigationConfig) => {
@@ -55,7 +58,7 @@ export async function HomeSidebar(props: { workspace: UserWorkspace }) {
         <AppLogo />
       </div>
 
-      <SidebarContent className={`mt-5 h-[calc(100%-160px)] overflow-y-auto`}>
+      <SidebarContent className={`mt-5 h-[calc(100%-160px)] b-["#f2f2f2"] overflow-y-auto`}>
         <SidebarNavigation config={selectedNavigationConfig} />
         <SidebarContent></SidebarContent>
       </SidebarContent>

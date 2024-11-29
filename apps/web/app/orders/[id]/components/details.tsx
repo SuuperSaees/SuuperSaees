@@ -2,16 +2,18 @@
 
 import React from 'react';
 
+import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
 
-
-import { Trans } from '@kit/ui/trans';
-
+import { Brief } from '~/lib/brief.types';
 import { File as ServerFile } from '~/lib/file.types';
+import { fetchFormfieldsWithResponses } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 
 import { useActivityContext } from '../context/activity-context';
-import PreviewImage from './file-types/preview-image';
 import PreviewPDF from './file-types/preview-pdf';
 import PreviewVideo from './file-types/preview-video';
+import { SkeletonBox } from '~/components/ui/skeleton';
+import ImageWithOptions from '../hoc/with-image-options';
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -27,7 +29,7 @@ const getFilePreviewComponent = (file: ServerFile.Type) => {
   const { type, url, name } = file;
 
   if (type.startsWith('image/')) {
-    return <PreviewImage url={url} alt={name} />;
+    return <ImageWithOptions src={url} alt={name} bucketName="orders" />;
   }
   if (type.startsWith('video/')) {
     return <PreviewVideo url={url} />;
@@ -46,25 +48,78 @@ const DetailsPage = () => {
   const { order } = useActivityContext();
 
   const convertLinks = (text: string) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urlRegex =
+      /\b(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*))/gi;
     return text.replace(
       urlRegex,
       (url) =>
-        `<a href="${url}" target="_blank" class="text-blue-600 underline">${url}</a>`,
+        `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">${url}</a>`,
+    );
+  };
+
+  const briefsWithResponsesQuery = useQuery({
+    queryKey: ['briefsWithResponses', order.brief_ids],
+    queryFn: async () =>
+      await fetchFormfieldsWithResponses(order.uuid),
+  });
+  
+  const briefsWithResponses = briefsWithResponsesQuery.data ?? [];
+  const notValidFormTypes = new Set([
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'rich-text',
+    'image',
+    'video',
+  ]);
+  const Field = ({
+    formField,
+  }: {
+    formField: Brief.Relationships.FormFieldResponse.Response;
+  }) => {
+    const formatResponse = (
+      formField: Brief.Relationships.FormFieldResponse.Response,
+    ) => {
+      if (formField.field?.type === 'date') {
+        // Improve formate to be more readable with dateFns
+        return format(formField.response, 'PPPP');
+      }
+      if (formField.field?.type === 'rich-text') {
+        return formField.response;
+      } else {
+        return convertLinks(formField.response);
+      }
+    };
+    return (
+      <div className="flex w-full flex-col gap-2 rounded-lg px-3 py-2">
+        <span className="overflow-hidden text-ellipsis font-bold leading-6 text-gray-700">
+          {formField.field?.label}
+        </span>
+        <span
+          className="font-medium leading-[1.42857] text-gray-600"
+          dangerouslySetInnerHTML={{ __html: formatResponse(formField) }}
+        />
+      </div>
     );
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex w-full min-w-full gap-2">
+    <div className="h-[76vh] overflow-hidden overflow-y-auto no-scrollbar flex flex-col gap-6">
+      {/* <div className="flex w-full min-w-full gap-2">
         <div className="w-full rounded-lg border border-gray-300 px-[12px] py-[8px]">
           <span className="font-inter text-md overflow-hidden text-ellipsis leading-6 text-gray-500">
             {order.title}
           </span>
         </div>
-      </div>
-      <div className="flex flex-col gap-2">
-        <div className="mb-[6px] flex">
+      </div> */}
+      {briefsWithResponsesQuery.isLoading ? (
+        Array.from({ length: 5 }, (_, i) => 
+          <SkeletonBox className='h-20 w-full' key={i} />
+        )
+      ) : (
+        <div className="flex flex-col gap-8">
+          {/* <div className="mb-[6px] flex">
           <span className="font-inter text-sm font-medium leading-5 text-gray-700">
             <Trans i18nKey="orders:OrderDescriptionTitle" />{' '}
           </span>
@@ -72,8 +127,21 @@ const DetailsPage = () => {
         <div
           className="rounded-lg border border-gray-300 px-[14px] py-[12px]"
           dangerouslySetInnerHTML={{ __html: convertLinks(order.description) }}
-        />
-      </div>
+        /> */}
+          {briefsWithResponses
+            .filter(a => a?.field?.position !== undefined)
+            .sort((a, b) => (a.field?.position ?? 0) - (b.field?.position ?? 0))
+            .map((formField) => {
+              if (notValidFormTypes.has(formField.field?.type ?? '')) {
+                return null;
+              }
+              else if (formField.field?.type !== 'file') {
+                return <Field key={formField.field?.id} formField={formField} />;
+              }
+              return null;
+          })}
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-8 pb-8">
         {order?.files?.map((file) => (
@@ -81,7 +149,7 @@ const DetailsPage = () => {
             key={file.id}
             className="flex h-[209px] w-[220px] flex-col items-start gap-2 rounded-md border border-gray-200 bg-white p-[10px] px-[14px]"
           >
-            <div className="h-[137px] w-[192px] overflow-y-auto">
+            <div className="h-[137px] w-[192px] overflow-y-auto overflow-x-hidden flex items-center justify-center">
               {getFilePreviewComponent(file)}
             </div>
             <span className="line-clamp-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium text-gray-700">
@@ -96,6 +164,5 @@ const DetailsPage = () => {
     </div>
   );
 };
-
 
 export default DetailsPage;

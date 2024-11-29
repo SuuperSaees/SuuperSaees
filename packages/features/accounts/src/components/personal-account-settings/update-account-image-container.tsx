@@ -2,6 +2,8 @@
 
 import { useCallback } from 'react';
 
+
+
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { useTranslation } from 'react-i18next';
@@ -18,11 +20,19 @@ const AVATARS_BUCKET = 'account_image';
 
 export function UpdateAccountImageContainer({
   user,
+  bucketName = AVATARS_BUCKET,
+  showDescriptions = true,
+  floatingDeleteButton = false,
+  className,
 }: {
   user: {
     pictureUrl: string | null;
     id: string;
   };
+  bucketName?: string;
+  showDescriptions?: boolean;
+  floatingDeleteButton?: boolean;
+  className?: string;
 }) {
   const revalidateUserDataQuery = useRevalidatePersonalAccountDataQuery();
 
@@ -31,6 +41,10 @@ export function UpdateAccountImageContainer({
       pictureUrl={user.pictureUrl ?? null}
       userId={user.id}
       onAvatarUpdated={() => revalidateUserDataQuery(user.id)}
+      bucketName={bucketName}
+      floatingDeleteButton={floatingDeleteButton}
+      showDescriptions={showDescriptions}
+      className={className}
     />
   );
 }
@@ -39,6 +53,11 @@ function UploadProfileAvatarForm(props: {
   pictureUrl: string | null;
   userId: string;
   onAvatarUpdated: () => void;
+  bucketName?: string;
+  floatingDeleteButton?: boolean;
+  showDescriptions?: boolean;
+  className?: string;
+  useAvatar?: boolean;
 }) {
   const client = useSupabase();
   const { t } = useTranslation('account');
@@ -59,7 +78,8 @@ function UploadProfileAvatarForm(props: {
       const removeExistingStorageFile = () => {
         if (props.pictureUrl) {
           return (
-            deleteProfilePhoto(client, props.pictureUrl) ?? Promise.resolve()
+            deleteProfilePhoto(client, props.pictureUrl, props.bucketName) ??
+            Promise.resolve()
           );
         }
 
@@ -69,14 +89,14 @@ function UploadProfileAvatarForm(props: {
       if (file) {
         const promise = () =>
           removeExistingStorageFile().then(() =>
-            uploadUserProfilePhoto(client, file, props.userId)
+            uploadUserProfilePhoto(client, file, props.userId, props.bucketName)
               .then((pictureUrl) => {
                 return client
-                  .from('accounts')
+                  .from('user_settings')
                   .update({
                     picture_url: pictureUrl,
                   })
-                  .eq('id', props.userId)
+                  .eq('user_id', props.userId)
                   .throwOnError();
               })
               .then(() => {
@@ -90,11 +110,11 @@ function UploadProfileAvatarForm(props: {
           removeExistingStorageFile()
             .then(() => {
               return client
-                .from('accounts')
+                .from('user_settings')
                 .update({
                   picture_url: null,
                 })
-                .eq('id', props.userId)
+                .eq('user_id', props.userId)
                 .throwOnError();
             })
             .then(() => {
@@ -108,22 +128,33 @@ function UploadProfileAvatarForm(props: {
   );
 
   return (
-    <ImageUploader value={props.pictureUrl} onValueChange={onValueChange}>
-      <div className={'flex flex-col space-y-1'}>
-        <span className={'text-sm'}>
-          <Trans i18nKey={'account:profilePictureHeading'} />
-        </span>
+    <ImageUploader
+      value={props.pictureUrl}
+      onValueChange={onValueChange}
+      floatingDeleteButton={props.floatingDeleteButton}
+      className={props.className}
+    >
+      {props.showDescriptions && (
+        <div className={'flex flex-col space-y-1'}>
+          <span className={'text-sm'}>
+            <Trans i18nKey={'account:profilePictureHeading'} />
+          </span>
 
-        <span className={'text-xs'}>
-          <Trans i18nKey={'account:profilePictureSubheading'} />
-        </span>
-      </div>
+          <span className={'text-xs'}>
+            <Trans i18nKey={'account:profilePictureSubheading'} />
+          </span>
+        </div>
+      )}
     </ImageUploader>
   );
 }
 
-function deleteProfilePhoto(client: SupabaseClient<Database>, url: string) {
-  const bucket = client.storage.from(AVATARS_BUCKET);
+function deleteProfilePhoto(
+  client: SupabaseClient<Database>,
+  url: string,
+  bucketName?: string,
+) {
+  const bucket = client.storage.from(bucketName ?? AVATARS_BUCKET);
   const fileName = url.split('/').pop()?.split('?')[0];
 
   if (!fileName) {
@@ -137,9 +168,10 @@ async function uploadUserProfilePhoto(
   client: SupabaseClient<Database>,
   photoFile: File,
   userId: string,
+  bucketName?: string,
 ) {
   const bytes = await photoFile.arrayBuffer();
-  const bucket = client.storage.from(AVATARS_BUCKET);
+  const bucket = client.storage.from(bucketName ?? AVATARS_BUCKET);
   const extension = photoFile.name.split('.').pop();
   const fileName = await getAvatarFileName(userId, extension);
 

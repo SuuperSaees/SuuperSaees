@@ -34,8 +34,6 @@ export async function POST(req: NextRequest) {
         
         const subscription = await stripe.subscriptions.update(subscriptionId, subscriptionData);
 
-        console.log(subscription, "SUBSCRIPTION UPDATED")
-
         return NextResponse.json({ subscription });
     } catch (error) {
         console.error("Error creating product:", error);

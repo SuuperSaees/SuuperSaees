@@ -5,6 +5,7 @@
   "membersTabDescription": "Manage the members of your organization",
   "billingTabLabel": "Billing",
   "billingTabDescription": "Manage your billing and subscription",
+  "briefsName": "Briefs",
   "yourAccountTabLabel": "Account Settings",
   "dashboardTabLabel": "Dashboard",
   "organizationSettingsTabLabel": "Organization",
@@ -14,8 +15,12 @@
   "dashboardTabDescription": "An overview of your organization's activity and performance across all your projects.",
   "settingsTabDescription": "Manage your settings and preferences.",
   "emailAddress": "Email",
+  "organizationNamelabel": "Name of your brand",
+  "organizationNamePlaceholder": "Suuper Agency",
+  "emailLabel": "Email",
   "password": "Password",
-  "plsDetailInputs": "Please enter your details",
+  "plsDetailInputs": "Log In",
+  "continueToYourAccount": "Continue to your account",
   "modalConfirmationQuestion": "Are you sure you want to continue?",
   "loading": "Loading the page...",
   "genericServerErrorHeading": "Sorry, something went wrong while processing your request. Please contact us if the issue persists.",
@@ -51,12 +56,13 @@
   "servicesName": "Services",
   "settingsName": "Settings",
   "usersName": "Users",
-  "ordersName": "Orders",
+  "ordersName": "Projects",
   "clientsName": "Clients",
   "teamName": "Team",
-  "orders": "Orders",
+  "orders": "Projects",
   "profile": "My profile",
   "billing": "Billing",
+  "subscription": "Subscription",
   "storage": "Storage",
   "roles": {
     "agency_owner": {
@@ -81,5 +87,7 @@
     "previous": "Previous"
   },
   "organizationName": "Organization",
-  "selectOption": "Select an option"
+  "selectOption": "Select an option",
+  "success": "All set!",
+  "error": "Something went wrong!"
 }

@@ -13,7 +13,7 @@
   "nameLabel": "Enter their name",
   "emailLabel": "Enter their email",
   "organizationLabelInput": "Enter the name of their organization",
-  "searchClientsPlaceholder": "Search clients...",
+  "searchClientsPlaceholder": "Search",
   "organizationLabel": "Organization",
   "ActionsLabel": "Actions",
   "lastSignInLabel": "Last sign in",
@@ -24,7 +24,7 @@
   "actions": "Actions",
   "organizationName": "Organization Name",
   "organizationMembers": "Members",
-  "searchPlaceholder": "Search clients...",
+  "searchPlaceholder": "Search",
   "noResults": "No results.",
   "roleSelection": "Select their role",
   "page": "Page",
@@ -51,7 +51,7 @@
       "inviting": "Inviting members...",
       "addAnother": "Add another",
       "add": "Add member",
-      "search": "Search members..."
+      "search": "Search"
     }
   },
   "services": {
@@ -70,6 +70,6 @@
   "startWithFirstClientTitle": "Let's start with your first client",
   "noClientsDescription": "You haven't created any clients yet, add one by clicking below.",
   "clients": "Clients",
-  "searchClients": "Search clients...",
-  "searchOrganizations": "Search organizations..."
+  "searchClients": "Search",
+  "searchOrganizations": "Search"
 }

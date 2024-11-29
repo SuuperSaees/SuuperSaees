@@ -258,6 +258,58 @@ export type Database = {
           },
         ]
       }
+      agency_statuses: {
+        Row: {
+          agency_id: string | null
+          created_at: string
+          deleted_on: string | null
+          id: number
+          position: number | null
+          status_color: string | null
+          status_name: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: number
+          position?: number | null
+          status_color?: string | null
+          status_name?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: number
+          position?: number | null
+          status_color?: string | null
+          status_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_customers: {
         Row: {
           account_id: string
@@ -346,6 +398,7 @@ export type Database = {
           created_at: string
           form_field_id: string
           id: string
+          order_id: string
           response: string
         }
         Insert: {
@@ -353,6 +406,7 @@ export type Database = {
           created_at?: string
           form_field_id: string
           id?: string
+          order_id: string
           response: string
         }
         Update: {
@@ -360,6 +414,7 @@ export type Database = {
           created_at?: string
           form_field_id?: string
           id?: string
+          order_id?: string
           response?: string
         }
         Relationships: [
@@ -382,23 +437,60 @@ export type Database = {
       briefs: {
         Row: {
           created_at: string
+          deleted_on: string | null
+          description: string | null
           id: string
+          image_url: string | null
+          isDraft: boolean | null
           name: string
-          propietary_organization_id: string | null
+          number: number | null
+          propietary_organization_id: string
         }
         Insert: {
           created_at?: string
+          deleted_on?: string | null
+          description?: string | null
           id?: string
+          image_url?: string | null
+          isDraft?: boolean | null
           name: string
-          propietary_organization_id?: string | null
+          number?: number | null
+          propietary_organization_id: string
         }
         Update: {
           created_at?: string
+          deleted_on?: string | null
+          description?: string | null
           id?: string
+          image_url?: string | null
+          isDraft?: boolean | null
           name?: string
-          propietary_organization_id?: string | null
+          number?: number | null
+          propietary_organization_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_messages: {
         Row: {
@@ -504,6 +596,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      checkout_services: {
+        Row: {
+          checkout_id: string | null
+          id: string
+          service_id: number | null
+        }
+        Insert: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Update: {
+          checkout_id?: string | null
+          id?: string
+          service_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_services_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "checkouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkout_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkouts: {
+        Row: {
+          created_at: string | null
+          deleted_on: string | null
+          id: string
+          provider: string
+          provider_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider: string
+          provider_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_on?: string | null
+          id?: string
+          provider?: string
+          provider_id?: string
+        }
+        Relationships: []
       }
       client_services: {
         Row: {
@@ -616,18 +765,21 @@ export type Database = {
       clients: {
         Row: {
           agency_id: string
+          deleted_on: string | null
           id: string
           organization_client_id: string
           user_client_id: string
         }
         Insert: {
           agency_id: string
+          deleted_on?: string | null
           id?: string
           organization_client_id: string
           user_client_id: string
         }
         Update: {
           agency_id?: string
+          deleted_on?: string | null
           id?: string
           organization_client_id?: string
           user_client_id?: string
@@ -839,30 +991,39 @@ export type Database = {
       }
       form_fields: {
         Row: {
+          alert_message: string | null
           created_at: string
           description: string | null
           id: string
           label: string
           options: Json[] | null
           placeholder: string | null
+          position: number
+          required: boolean | null
           type: Database["public"]["Enums"]["field_types"]
         }
         Insert: {
+          alert_message?: string | null
           created_at?: string
           description?: string | null
           id?: string
           label: string
           options?: Json[] | null
           placeholder?: string | null
+          position: number
+          required?: boolean | null
           type?: Database["public"]["Enums"]["field_types"]
         }
         Update: {
+          alert_message?: string | null
           created_at?: string
           description?: string | null
           id?: string
           label?: string
           options?: Json[] | null
           placeholder?: string | null
+          position?: number
+          required?: boolean | null
           type?: Database["public"]["Enums"]["field_types"]
         }
         Relationships: []
@@ -1289,45 +1450,54 @@ export type Database = {
       orders_v2: {
         Row: {
           agency_id: string
+          brief_ids: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
+          deleted_on: string | null
           description: string
           due_date: string | null
           id: number
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
-          status: Database["public"]["Enums"]["order_status_types"] | null
+          status: string | null
+          status_id: number | null
           stripe_account_id: string | null
           title: string
           uuid: string
         }
         Insert: {
           agency_id: string
+          brief_ids?: string[] | null
           client_organization_id: string
           created_at?: string
           customer_id: string
+          deleted_on?: string | null
           description: string
           due_date?: string | null
           id?: number
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
-          status?: Database["public"]["Enums"]["order_status_types"] | null
+          status?: string | null
+          status_id?: number | null
           stripe_account_id?: string | null
           title: string
           uuid: string
         }
         Update: {
           agency_id?: string
+          brief_ids?: string[] | null
           client_organization_id?: string
           created_at?: string
           customer_id?: string
+          deleted_on?: string | null
           description?: string
           due_date?: string | null
           id?: number
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
-          status?: Database["public"]["Enums"]["order_status_types"] | null
+          status?: string | null
+          status_id?: number | null
           stripe_account_id?: string | null
           title?: string
           uuid?: string
@@ -1373,6 +1543,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "agency_statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -1422,6 +1599,53 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_subdomains: {
+        Row: {
+          id: string
+          organization_id: string
+          subdomain_id: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          subdomain_id: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          subdomain_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_subdomain_id_fkey"
+            columns: ["subdomain_id"]
+            isOneToOne: false
+            referencedRelation: "subdomains"
             referencedColumns: ["id"]
           },
         ]
@@ -1710,6 +1934,90 @@ export type Database = {
         }
         Relationships: []
       }
+      sessions: {
+        Row: {
+          client_address: string | null
+          client_city: string | null
+          client_country: string | null
+          client_email: string | null
+          client_name: string | null
+          client_postal_code: string | null
+          client_state: string | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          provider: string | null
+          provider_id: string | null
+        }
+        Insert: {
+          client_address?: string | null
+          client_city?: string | null
+          client_country?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_postal_code?: string | null
+          client_state?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          provider?: string | null
+          provider_id?: string | null
+        }
+        Update: {
+          client_address?: string | null
+          client_city?: string | null
+          client_country?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_postal_code?: string | null
+          client_state?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          provider?: string | null
+          provider_id?: string | null
+        }
+        Relationships: []
+      }
+      subdomains: {
+        Row: {
+          created_at: string
+          deleted_on: string | null
+          domain: string
+          id: string
+          namespace: string
+          provider: string
+          provider_id: string
+          service_name: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_on?: string | null
+          domain: string
+          id?: string
+          namespace: string
+          provider?: string
+          provider_id?: string
+          service_name?: string | null
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_on?: string | null
+          domain?: string
+          id?: string
+          namespace?: string
+          provider?: string
+          provider_id?: string
+          service_name?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscription_items: {
         Row: {
           created_at: string
@@ -1769,11 +2077,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string | null
           currency: string
+          days_used: number
           id: string
           period_ends_at: string | null
           period_starts_at: string | null
-          propietary_organization_id: string
+          propietary_organization_id: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          token_id: string
           trial_ends_at: string | null
           trial_starts_at: string | null
           updated_at: string | null
@@ -1786,11 +2096,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at?: string | null
           currency: string
+          days_used?: number
           id: string
           period_ends_at?: string | null
           period_starts_at?: string | null
-          propietary_organization_id: string
+          propietary_organization_id?: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          token_id?: string
           trial_ends_at?: string | null
           trial_starts_at?: string | null
           updated_at?: string | null
@@ -1803,11 +2115,13 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string | null
           currency?: string
+          days_used?: number
           id?: string
           period_ends_at?: string | null
           period_starts_at?: string | null
-          propietary_organization_id?: string
+          propietary_organization_id?: string | null
           status?: Database["public"]["Enums"]["subscription_status"]
+          token_id?: string
           trial_ends_at?: string | null
           trial_starts_at?: string | null
           updated_at?: string | null
@@ -1836,53 +2150,275 @@ export type Database = {
           },
         ]
       }
-      tasks: {
+      subtask_assignations: {
         Row: {
-          account_id: string
-          created_at: string
-          description: string | null
-          done: boolean
-          id: string
-          title: string
-          updated_at: string
+          agency_member_id: string
+          subtask_id: string | null
         }
         Insert: {
-          account_id: string
-          created_at?: string
-          description?: string | null
-          done?: boolean
-          id?: string
-          title: string
-          updated_at?: string
+          agency_member_id: string
+          subtask_id?: string | null
         }
         Update: {
-          account_id?: string
-          created_at?: string
-          description?: string | null
-          done?: boolean
-          id?: string
-          title?: string
-          updated_at?: string
+          agency_member_id?: string
+          subtask_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_assignations_subtask_id_fkey"
+            columns: ["subtask_id"]
+            isOneToOne: false
+            referencedRelation: "subtasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subtask_followers: {
+        Row: {
+          client_member_id: string | null
+          created_at: string
+          subtask_id: string | null
+        }
+        Insert: {
+          client_member_id?: string | null
+          created_at?: string
+          subtask_id?: string | null
+        }
+        Update: {
+          client_member_id?: string | null
+          created_at?: string
+          subtask_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
             isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tasks_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
             isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_followers_subtask_id_fkey"
+            columns: ["subtask_id"]
+            isOneToOne: false
+            referencedRelation: "subtasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subtasks: {
+        Row: {
+          completed: boolean | null
+          content: string | null
+          created_at: string
+          deleted_on: string | null
+          end_date: string | null
+          id: string
+          name: string | null
+          parent_task_id: string | null
+          position: number | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          start_date: string | null
+          state: string | null
+          state_id: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          content?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string | null
+          parent_task_id?: string | null
+          position?: number | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
+          state?: string | null
+          state_id?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          content?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string | null
+          parent_task_id?: string | null
+          position?: number | null
+          priority?: Database["public"]["Enums"]["priority_types"] | null
+          start_date?: string | null
+          state?: string | null
+          state_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtasks_state_id_fkey"
+            columns: ["state_id"]
+            isOneToOne: false
+            referencedRelation: "agency_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          name: string | null
+          order_id: number | null
+          position: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: number | null
+          position?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string | null
+          order_id?: number | null
+          position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          id_token_provider: string
+          provider: string
+          refresh_token: string
+          updated_at: string | null
+        }
+        Insert: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          id_token_provider?: string
+          provider?: string
+          refresh_token?: string
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          id_token_provider?: string
+          provider?: string
+          refresh_token?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          calendar: string | null
+          created_at: string
+          name: string | null
+          phone_number: string | null
+          picture_url: string | null
+          user_id: string
+        }
+        Insert: {
+          calendar?: string | null
+          created_at?: string
+          name?: string | null
+          phone_number?: string | null
+          picture_url?: string | null
+          user_id: string
+        }
+        Update: {
+          calendar?: string | null
+          created_at?: string
+          name?: string | null
+          phone_number?: string | null
+          picture_url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -1958,6 +2494,32 @@ export type Database = {
           invited_by: string
           role: string
           updated_at: string
+        }
+      }
+      create_order: {
+        Args: {
+          _order: Json
+          _brief_responses: Json[]
+          _order_followers: string[]
+          _order_file_ids: string[]
+        }
+        Returns: {
+          agency_id: string
+          brief_ids: string[] | null
+          client_organization_id: string
+          created_at: string
+          customer_id: string
+          deleted_on: string | null
+          description: string
+          due_date: string | null
+          id: number
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status: string | null
+          status_id: number | null
+          stripe_account_id: string | null
+          title: string
+          uuid: string
         }
       }
       create_team_account: {
@@ -2082,6 +2644,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_service_brief_relation:
+        | {
+            Args: {
+              service_id: number
+              brief_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              service_id: string
+              brief_id: string
+            }
+            Returns: undefined
+          }
       is_account_owner: {
         Args: {
           account_id: string
@@ -2104,6 +2681,20 @@ export type Database = {
         Args: {
           account_id: string
           user_id: string
+        }
+        Returns: boolean
+      }
+      is_user_in_agency_organization: {
+        Args: {
+          user_id: string
+          target_organization_id: string
+        }
+        Returns: boolean
+      }
+      is_user_in_client_organization: {
+        Args: {
+          user_id: string
+          target_organization_id: string
         }
         Returns: boolean
       }
@@ -2177,11 +2768,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string | null
           currency: string
+          days_used: number
           id: string
           period_ends_at: string | null
           period_starts_at: string | null
-          propietary_organization_id: string
+          propietary_organization_id: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          token_id: string
           trial_ends_at: string | null
           trial_starts_at: string | null
           updated_at: string | null
@@ -2189,7 +2782,7 @@ export type Database = {
       }
     }
     Enums: {
-      action_type: "create" | "update" | "delete"
+      action_type: "create" | "update" | "delete" | "complete"
       activity_type:
         | "message"
         | "review"
@@ -2200,6 +2793,7 @@ export type Database = {
         | "description"
         | "title"
         | "assigned_to"
+        | "task"
       app_permissions:
         | "roles.manage"
         | "billing.manage"
@@ -2210,9 +2804,29 @@ export type Database = {
         | "tasks.delete"
         | "messages.write"
         | "messages.read"
+        | "orders.write"
+        | "orders.read"
+        | "orders.manage"
+        | "orders.delete"
       billing_provider: "stripe" | "lemon-squeezy" | "paddle"
       chat_role: "user" | "assistant"
-      field_types: "date" | "multiple_choice" | "select" | "text"
+      field_types:
+        | "date"
+        | "multiple_choice"
+        | "select"
+        | "text"
+        | "h1"
+        | "h2"
+        | "h3"
+        | "h4"
+        | "text-short"
+        | "text-large"
+        | "number"
+        | "file"
+        | "dropdown"
+        | "rich-text"
+        | "image"
+        | "video"
       file_types: "image" | "video" | "pdf" | "fig"
       messages_types: "public" | "internal_agency"
       notification_channel: "in_app" | "email"
@@ -2232,6 +2846,13 @@ export type Database = {
         | "date_format"
         | "sidebar_background_color"
         | "portal_name"
+        | "favicon_url"
+        | "sender_name"
+        | "sender_email"
+        | "sender_domain"
+        | "logo_dark_url"
+        | "auth_card_background_color"
+        | "auth_section_background_color"
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"

@@ -9,8 +9,8 @@ import {
 } from '@kit/ui/card';
 import { Trans } from '@kit/ui/trans';
 import { UpdatePasswordFormContainer } from '../../../../packages/features/accounts/src/components/personal-account-settings/password/update-password-container';
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+import { getDomainByUserId } from '../../../../packages/multitenancy/utils/get/get-domain';
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -21,7 +21,17 @@ export const generateMetadata = async () => {
   };
 };
 
-export default function UserAddOrganizationPage() {
+export default async function UserAddOrganizationPage() {
+  const supabase = getSupabaseServerComponentClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError) throw userError.message;
+  const { domain: baseUrl } = await getDomainByUserId(userData?.user.id, true).catch(
+    () => {
+      console.error('Error getting domain');
+      return { domain: '' };
+    }
+  );
+
   return (
     <>
       <PageBody className='flex flex-col items-center justify-center'>

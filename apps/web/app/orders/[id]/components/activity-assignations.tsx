@@ -68,8 +68,8 @@ const ActivityAssignations = ({
   };
   // console.log('assignedTo', assignedTo);
   return (
-    <div className="flex flex-col gap-2">
-      <span className="font-semibold">{t('details.assignedTo')}</span>
+    <div className="flex flex-col gap-2  mt-[22.5px]">
+      <span className="font-medium">{t('details.assignedTo')}</span>
       <div className="no-scrollbar flex max-h-[300px] flex-wrap items-center justify-start gap-2 overflow-y-auto">
         {avatarsWithStatus.map((avatar, index) => {
           return (

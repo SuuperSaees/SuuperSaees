@@ -2,274 +2,305 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-export async function getFilesWithoutFolder(
-    clientOrganizationId: string
-){
-    const client = getSupabaseServerComponentClient();
+export async function getFilesWithoutFolder(clientOrganizationId: string) {
+  const client = getSupabaseServerComponentClient();
 
-    // Fetch the current user data
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
+  // Fetch the current user data
+  const { data: userData, error: userError } = await client.auth.getUser();
+  if (userError) throw userError;
 
-    //Fetch the role of the user
+  //Fetch the role of the user
 
-    const { data: userRole, error: userRoleError } = await client
-        .from('accounts_memberships')
-        .select('account_role')
-        .eq('user_id', userData.user.id)
-        .single();
-    
-    if (userRoleError) throw userRoleError;
+  const { data: userRole, error: userRoleError } = await client
+    .from('accounts_memberships')
+    .select('account_role')
+    .eq('user_id', userData.user.id)
+    .single();
 
-    if ( userRole.account_role === 'agency_owner' || userRole.account_role === 'agency_member' || userRole.account_role === 'agency_project_manager') {
-        // Fetch the agencies of the user
-        const { data: agencies, error: agenciesError } = await client
-            .from('accounts')
-            .select('id')
-            .eq('primary_owner_user_id', userData.user.id)
-            .eq('is_personal_account', false);
+  if (userRoleError) throw userRoleError;
 
-        if (agenciesError) throw agenciesError;
+  if (
+    userRole.account_role === 'agency_owner' ||
+    userRole.account_role === 'agency_member' ||
+    userRole.account_role === 'agency_project_manager'
+  ) {
+    // Fetch the agencies of the user
+    const { data: agencies, error: agenciesError } = await client
+      .from('accounts')
+      .select('id')
+      .eq('primary_owner_user_id', userData.user.id)
+      .eq('is_personal_account', false);
 
-        // Fetch the files without order
-        const { data: filesWithoutOrder, error: filesWithoutOrderError } = await client
-            .from('folder_files')
-            .select('file_id')
-            .eq('client_organization_id', clientOrganizationId)
-            .eq('agency_id', agencies?.[0]?.id ?? '')
-            .is('folder_id', null);
-            ;
-
-        if (filesWithoutOrderError) throw filesWithoutOrderError;
-
-        // Check for associated files
-        if (!filesWithoutOrder || filesWithoutOrder.length === 0) {
-            return [];
-        }
-
-        // Obtain the files corresponding to the obtained IDs
-        const { data: files, error: filesError } = await client
-            .from('files')
-            .select('url, id, name, type')
-            .in('id', filesWithoutOrder.map((file) => file.file_id));
-        
-        if (filesError) throw filesError;
-
-        return files;
-    }
+    if (agenciesError) throw agenciesError;
 
     // Fetch the files without order
-    const { data: filesWithoutOrder, error: filesWithoutOrderError } = await client
+    const { data: filesWithoutOrder, error: filesWithoutOrderError } =
+      await client
         .from('folder_files')
         .select('file_id')
         .eq('client_organization_id', clientOrganizationId)
-        .is('folder_id', null); 
-
+        .eq('agency_id', agencies?.[0]?.id ?? '')
+        .is('folder_id', null);
     if (filesWithoutOrderError) throw filesWithoutOrderError;
 
     // Check for associated files
     if (!filesWithoutOrder || filesWithoutOrder.length === 0) {
-        return [];
+      return [];
     }
 
     // Obtain the files corresponding to the obtained IDs
     const { data: files, error: filesError } = await client
-        .from('files')
-        .select('url, id, name, type')
-        .in('id', filesWithoutOrder.map((file) => file.file_id));
+      .from('files')
+      .select('url, id, name, type')
+      .in(
+        'id',
+        filesWithoutOrder.map((file) => file.file_id),
+      );
 
     if (filesError) throw filesError;
 
     return files;
+  }
+
+  // Fetch the files without order
+  const { data: filesWithoutOrder, error: filesWithoutOrderError } =
+    await client
+      .from('folder_files')
+      .select('file_id')
+      .eq('client_organization_id', clientOrganizationId)
+      .is('folder_id', null);
+
+  if (filesWithoutOrderError) throw filesWithoutOrderError;
+
+  // Check for associated files
+  if (!filesWithoutOrder || filesWithoutOrder.length === 0) {
+    return [];
+  }
+
+  // Obtain the files corresponding to the obtained IDs
+  const { data: files, error: filesError } = await client
+    .from('files')
+    .select('url, id, name, type')
+    .in(
+      'id',
+      filesWithoutOrder.map((file) => file.file_id),
+    );
+
+  if (filesError) throw filesError;
+
+  return files;
 }
 
+export async function getFilesByFolder(folderId: string) {
+  if (!folderId) {
+    return [];
+  }
+  const client = getSupabaseServerComponentClient();
 
-export async function getFilesByFolder(folderId: string,) {
-    const client = getSupabaseServerComponentClient();
+  // Checking if the folder is out of order
+  const { data: foldersWithoutOrder } = await client
+    .from('folders')
+    .select('id')
+    .eq('id', folderId);
 
-    // Checking if the folder is out of order
-    const { data: foldersWithoutOrder, error: folderError } = await client
-        .from('folders')
-        .select('id')
-        .eq('id', folderId);
-
-    if (folderError) throw folderError;
-
-    if (foldersWithoutOrder.length === 0) {
-        // Get the IDs of the files associated with the folder
-        const { data: orderFiles, error: orderFilesError } = await client
-            .from('order_files')
-            .select('file_id')
-            .eq('order_id', folderId);
-
-        if (orderFilesError) throw orderFilesError;
-
-        // Check for associated files
-        if (!orderFiles || orderFiles.length === 0) {
-            return [];
-        }
-
-        // Obtain the files corresponding to the obtained IDs
-        const { data: files, error: filesError } = await client
-            .from('files')
-            .select('url, id, name, type')
-            .in('id', orderFiles.map((orderFile) => orderFile.file_id)); 
-
-        if (filesError) throw filesError;
-
-        return files;
-    }
-
-
-    // Get the IDs of the files associated with the folder
-    const { data: folderFiles, error: folderFilesError } = await client
-        .from('folder_files')
-        .select('file_id')
-        .eq('folder_id', folderId);
-    
-    if (folderFilesError) throw folderFilesError;
-
-    // Check for associated files
-    if (!folderFiles || folderFiles.length === 0) {
-        return [];
-    }
-
-    // Obtain the files corresponding to the obtained IDs
+  if (foldersWithoutOrder?.length === 0) {
+    // Get files from 'order_files' associated with the folder
     const { data: files, error: filesError } = await client
-        .from('files')
-        .select('url, id, name, type')
-        .in('id', folderFiles.map((folderFile) => folderFile.file_id));
-    
+      .from('order_files')
+      .select('file_id:files(id, url, name, type)')
+      .eq('order_id', folderId);
+
     if (filesError) throw filesError;
 
-    return files;
-    
-}
+    // If no files are associated, return an empty array
+    if (!files || files.length === 0) {
+      return [];
+    }
 
+    return files.map((orderFile) => orderFile.file_id);
+  }
+
+  // Get files from 'folder_files' associated with the folder
+  const { data: files, error: filesError } = await client
+    .from('folder_files')
+    .select('file_id:files(id, url, name, type)')
+    .eq('folder_id', folderId);
+
+  if (filesError) throw filesError;
+
+  // If no files are associated, return an empty array
+  if (!files || files.length === 0) {
+    return [];
+  }
+
+  return files.map((folderFile) => folderFile.file_id);
+}
 
 export async function verifyItIsOrderFile(fileId: string) {
-    const client = getSupabaseServerComponentClient();
+  const client = getSupabaseServerComponentClient();
 
+  // Checking if the file is out of order
+  const { data: fileData, error: fileDataError } = await client
+    .from('order_files')
+    .select('file_id')
+    .eq('file_id', fileId);
 
-    // Checking if the file is out of order
-    const { data: fileData, error: fileDataError } = await client
-        .from('order_files')
-        .select('file_id')
-        .eq('file_id', fileId);
+  if (fileDataError) throw fileDataError;
 
-    if (fileDataError) throw fileDataError;
+  if (fileData.length === 0) {
+    return false;
+  }
 
-    if (fileData.length === 0) {
-        return false;
-    }
-
-    return true;
-    
+  return true;
 }
 
 export async function getMemberFiles(clientOrganizationId: string) {
-    const client = getSupabaseServerComponentClient();
+  const client = getSupabaseServerComponentClient();
 
-    // Fetch the files associated with the client organization
-    const { data: fileData, error: fileDataError } = await client
-        .from('folder_files')
-        .select('file_id')
-        .eq('client_organization_id', clientOrganizationId);
+  // Fetch the files associated with the client organization
+  const { data: fileData, error: fileDataError } = await client
+    .from('folder_files')
+    .select('file:files(id, url, name, type, user_id)')
+    .eq('client_organization_id', clientOrganizationId);
 
-    if (fileDataError) throw fileDataError;
+  if (fileDataError) throw fileDataError;
 
-    // Fetch the orders of the client organization
-    const { data: ordersData, error: ordersDataError } = await client
-        .from('orders_v2')
-        .select('uuid')
-        .eq('client_organization_id', clientOrganizationId);
+  // Flatten the file objects to remove the 'file' nesting
+  const flattenedFileData = fileData.map(({ file }) => ({
+    id: file?.id,
+    url: file?.url,
+    name: file?.name,
+    type: file?.type,
+    user_id: file?.user_id,
+  }));
 
-    if (ordersDataError) throw ordersDataError;
+  // Fetch the orders of the client organization
+  const { data: ordersData, error: ordersDataError } = await client
+    .from('orders_v2')
+    .select('uuid')
+    .eq('client_organization_id', clientOrganizationId);
 
-    // Fetch the files associated with the orders
-    const { data: orderFilesData, error: orderFilesDataError } = await client
-        .from('order_files')
-        .select('file_id')
-        .in('order_id', ordersData.map((orderData) => orderData.uuid));
+  if (ordersDataError) throw ordersDataError;
 
-    if (orderFilesDataError) throw orderFilesDataError;
+  // Fetch the files associated with the orders
+  const { data: orderFilesData, error: orderFilesDataError } = await client
+    .from('order_files')
+    .select('file:files(id, url, name, type, user_id)')
+    .in(
+      'order_id',
+      ordersData.map((orderData) => orderData.uuid),
+    );
 
-    // Combine the file data
-    const allFileIds = [...fileData.map(f => f.file_id), ...orderFilesData.map(f => f.file_id)];
+  if (orderFilesDataError) throw orderFilesDataError;
 
-    // Fetch file details
-    const { data: files, error: filesError } = await client
-        .from('files')
-        .select('url, id, name, type, user_id')
-        .in('id', allFileIds);
+  // Flatten the file objects to remove the 'file' nesting
+  const flattenedOrderFileData = orderFilesData.map(({ file }) => ({
+    id: file?.id,
+    url: file?.url,
+    name: file?.name,
+    type: file?.type,
+    user_id: file?.user_id,
+  }));
 
-    if (filesError) throw filesError;
+  // Combine the file data
+  const allFiles = [...flattenedFileData, ...flattenedOrderFileData];
 
-    // Fetch the list of client user_ids
-    const { data: clientUsers, error: clientUsersError } = await client
-        .from('clients')
-        .select('user_client_id');
+  // Fetch the list of client user_ids
+  const { data: clientUsers, error: clientUsersError } = await client
+    .from('clients')
+    .select('user_client_id');
 
-    if (clientUsersError) throw clientUsersError;
+  if (clientUsersError) throw clientUsersError;
 
-    const clientUserIds = clientUsers.map(client => client.user_client_id);
+  const clientUserIds = clientUsers.map((client) => client.user_client_id);
 
-    // Filter files that are not associated with clients
-    const nonClientFiles = files.filter(file => !clientUserIds.includes(file.user_id));
+  // Filter files that are not associated with clients
+  const nonClientFiles = allFiles.filter(
+    (file) => !clientUserIds.includes(file.user_id ?? ''),
+  );
 
-    return nonClientFiles;
+  return nonClientFiles.map(({ user_id: _user_id, ...rest }) => rest);
 }
 
-
 export async function getClientFiles(clientOrganizationId: string) {
-    const client = getSupabaseServerComponentClient();
+  const client = getSupabaseServerComponentClient();
 
-    // Fetch the files associated with the client organization
-    const { data: fileData, error: fileDataError } = await client
-        .from('folder_files')
-        .select('file_id')
-        .eq('client_organization_id', clientOrganizationId);
+  // Fetch the files associated with the client organization
+  const { data: fileData, error: fileDataError } = await client
+    .from('folder_files')
+    .select('file:files(id, url, name, type, user_id)')
+    .eq('client_organization_id', clientOrganizationId);
 
-    if (fileDataError) throw fileDataError;
+  if (fileDataError) throw fileDataError;
 
-    // Fetch the orders of the client organization
-    const { data: ordersData, error: ordersDataError } = await client
-        .from('orders_v2')
-        .select('uuid')
-        .eq('client_organization_id', clientOrganizationId);
+  // Flatten the file objects to remove the 'file' nesting
+  const flattenedFileData = fileData.map(({ file }) => ({
+    id: file?.id,
+    url: file?.url,
+    name: file?.name,
+    type: file?.type,
+    user_id: file?.user_id,
+  }));
 
-    if (ordersDataError) throw ordersDataError;
+  // Fetch the orders of the client organization
+  const { data: ordersData, error: ordersDataError } = await client
+    .from('orders_v2')
+    .select('uuid')
+    .eq('client_organization_id', clientOrganizationId);
 
-    // Fetch the files associated with the orders
-    const { data: orderFilesData, error: orderFilesDataError } = await client
-        .from('order_files')
-        .select('file_id')
-        .in('order_id', ordersData.map((orderData) => orderData.uuid));
+  if (ordersDataError) throw ordersDataError;
 
-    if (orderFilesDataError) throw orderFilesDataError;
+  // Fetch the files associated with the orders
+  const { data: orderFilesData, error: orderFilesDataError } = await client
+    .from('order_files')
+    .select('file:files(id, url, name, type, user_id)')
+    .in(
+      'order_id',
+      ordersData.map((orderData) => orderData.uuid),
+    );
 
-    // Combine the file data
-    const allFileIds = [...fileData.map(f => f.file_id), ...orderFilesData.map(f => f.file_id)];
+  if (orderFilesDataError) throw orderFilesDataError;
 
-    // Fetch file details
-    const { data: files, error: filesError } = await client
-        .from('files')
-        .select('url, id, name, type, user_id')
-        .in('id', allFileIds);
+  // Flatten the file objects to remove the 'file' nesting
+  const flattenedOrderFileData = orderFilesData.map(({ file }) => ({
+    id: file?.id,
+    url: file?.url,
+    name: file?.name,
+    type: file?.type,
+    user_id: file?.user_id,
+  }));
 
-    if (filesError) throw filesError;
+  // Combine the file data
+  const allFiles = [...flattenedFileData, ...flattenedOrderFileData];
 
-    // Fetch the list of client user_ids
-    const { data: clientUsers, error: clientUsersError } = await client
-        .from('clients')
-        .select('user_client_id');
+  // Fetch the list of client user_ids
+  const { data: clientUsers, error: clientUsersError } = await client
+    .from('clients')
+    .select('user_client_id');
 
-    if (clientUsersError) throw clientUsersError;
+  if (clientUsersError) throw clientUsersError;
 
-    const clientUserIds = clientUsers.map(client => client.user_client_id);
+  const clientUserIds = clientUsers.map((client) => client.user_client_id);
 
-    // Filter files that are associated with clients
-    const clientFiles = files.filter(file => clientUserIds.includes(file.user_id));
+  // Filter files that are associated with clients
+  const clientFiles = allFiles.filter((file) =>
+    clientUserIds.includes(file.user_id ?? ''),
+  );
 
-    return clientFiles;
+  return clientFiles.map(({ user_id: _user_id, ...rest }) => rest);
+}
+
+export async function getUrlFile(fileId: string) {
+  const client = getSupabaseServerComponentClient();
+
+  // Fetch the file details
+  const { data: fileData, error: fileDataError } = await client
+    .from('files')
+    .select('url')
+    .eq('id', fileId)
+    .single();
+
+  if (fileDataError) throw fileDataError;
+
+  return fileData.url;
 }

@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Definición de tipos para los datos entrantes
 interface ProductRequest {
     accountId: string;
 }
@@ -11,28 +10,44 @@ interface ProductRequest {
 export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const { accountId }: ProductRequest = await req.json();
-    const productId = searchParams.get('productId')
+    const priceId = searchParams.get('priceId');
 
-    if (!productId) {
+    if (!priceId) {
         return NextResponse.json(
-            { error: { message: "Product ID is required" } },
+            { error: { message: "Price ID is required" } },
             { status: 400 }
         );
     }
 
     try {
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        const product = await stripe.products.del(productId, {
-            stripeAccount: accountId, // ID de la cuenta conectada
+        // Get the price to identify the associated product
+        const price = await stripe.prices.retrieve(priceId, {
+            stripeAccount: accountId, // Connected account ID
         });
 
-        return NextResponse.json({ product });
+        const productId = price.product;
+
+        // Deactivate the price
+        await stripe.prices.update(priceId, {
+            active: false,
+        }, {
+            stripeAccount: accountId,
+        });
+
+        // Deactivate the product (instead of deleting it)
+        const product = await stripe.products.update(productId, {
+            active: false, // Change to archived: true if you want to archive
+        }, {
+            stripeAccount: accountId,
+        });
+
+        return NextResponse.json({ message: "Price and product deactivated successfully", product });
     } catch (error) {
-        console.error("Error creating product:", error);
+        console.error("Error deactivating price and product:", error);
         return NextResponse.json(
             { error: { message: "Internal Server Error" } },
             { status: 500 }
         );
     }
 }
+

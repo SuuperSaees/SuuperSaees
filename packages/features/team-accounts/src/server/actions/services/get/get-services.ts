@@ -1,7 +1,10 @@
 'use server';
 
+import { SupabaseClient } from '@supabase/supabase-js';
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import {
   fetchCurrentUser,
@@ -10,11 +13,35 @@ import {
 import { getAgencyForClient } from '../../organizations/get/get-organizations';
 import { hasPermissionToReadClientServices } from '../../permissions/services';
 
-export const getServiceById = async (serviceId: Service.Type['id']) => {
+export const getServiceById = async (
+  serviceId: Service.Type['id'],
+  briefsNeeded?: boolean,
+) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
+
+    if (briefsNeeded) {
+      const { data: serviceData, error: serviceError } = await client
+        .from('services')
+        .select(
+          `*, 
+        service_briefs(*, 
+          brief:briefs(id, name, description, created_at)
+        )`,
+        )
+        .eq('id', serviceId)
+        .single();
+
+      if (serviceError) throw serviceError.message;
+
+      const proccesedData = {
+        ...serviceData,
+      };
+
+      return proccesedData;
+    }
 
     const { data: serviceData, error: orderError } = await client
       .from('services')
@@ -56,6 +83,32 @@ export const getServices = async (): Promise<Service.Response[]> => {
   }
 };
 
+export async function fetchClientServices(
+  client: SupabaseClient<Database>,
+  clientOrganizationId: string,
+) {
+  try {
+    
+    const { data: clientServicesData, error: clientServicesError } =
+      await client
+        .from('client_services')
+        .select('id, created_at, info:services(id, name, price, service_description, service_image)')
+        .eq('client_organization_id', clientOrganizationId);
+
+    if (clientServicesError) {
+
+      throw new Error(
+        `Error getting client services, ${clientServicesError.message}`,
+      );
+    }
+
+    return clientServicesData;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 export async function getClientServices(
   clientOrganizationId: string,
 ): Promise<Service.Relationships.Client.Response[]> {
@@ -66,18 +119,7 @@ export async function getClientServices(
     if (!user) throw new Error('No user found');
 
     // Step 2: Get the client's service
-    const { data: clientServiceData, error: clientServiceError } = await client
-      .from('client_services')
-      .select(
-        'id, created_at, info:services(id, name, price, service_description, service_image)',
-      )
-      .eq('client_organization_id', clientOrganizationId);
-
-    if (clientServiceError) {
-      throw new Error(
-        `Error while getting client services: ${clientServiceError.message}`,
-      );
-    }
+    const clientServiceData= await fetchClientServices(client, clientOrganizationId)
 
     // Step 3: Get the client's agency
     const agencyData = await getAgencyForClient(clientOrganizationId);

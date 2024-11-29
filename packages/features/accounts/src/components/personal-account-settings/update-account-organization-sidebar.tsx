@@ -4,21 +4,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-
 import { Button } from '@kit/ui/button';
+
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 import { Spinner } from '@kit/ui/spinner';
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
-import { ThemedButton } from '../ui/button-themed-with-settings';
 
 // import type { Database } from '../../../../../../apps/web/lib/database.types'
 const KeyEnum = z.enum(['sidebar_background_color']);
@@ -54,41 +52,45 @@ export default function UpdateAccountOrganizationSidebar() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex items-center justify-between">
         <FormField
           control={form.control}
           name="value"
           render={({ field }) => (
-            <FormItem className="w-fit">
-              <FormLabel>{t('account:brandSidebarLabel')}</FormLabel>
+            <FormItem className="ml-20 w-fit">
               <FormControl>
-                <Input
-                  placeholder="Sidebar Color"
-                  {...field}
-                  type="color"
-                  className="max-w-14"
-                />
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border">
+                  <Input
+                    {...field}
+                    type="color"
+                    className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
+                  />
+                  <div
+                    style={{ backgroundColor: field.value }}
+                    className="w-full h-full"
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex gap-4">
-          <ThemedButton className={`bg-brand flex gap-2`}>
-            <span>{t('account:brandSidebarSubmit')}</span>
-            {updateOrganizationSetting.isPending &&
+        <div className="flex gap-4 w-full justify-end">
+          <Button variant='static' className={`bg-none flex p-0`}>
+            <span className='text-brand font-semibold'>{t('account:brandSidebarSubmit')}</span>
+            {/* {updateOrganizationSetting.isPending &&
               updateOrganizationSetting.variables.key ===
                 'sidebar_background_color' && (
                 <Spinner className="h-4 w-4 text-white" />
-              )}
-          </ThemedButton>
+              )} */}
+          </Button>
           <Button
-            variant={'ghost'}
+            variant='static'
             type="button"
             onClick={onReset}
-            className="flex gap-2"
+            className="flex p-0 bg-none"
           >
-            <span>{t('account:brandColorReset')}</span>
+            <span className='text-gray-600 font-semibold'>{t('account:brandColorReset')}</span>
           </Button>
         </div>
       </form>

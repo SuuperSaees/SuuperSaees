@@ -1392,8 +1392,9 @@ export const UpdatePasswordForm = ({
       <form
         data-test={'account-password-form'}
         onSubmit={form.handleSubmit(updatePasswordCallback)}
+        className='w-full'
       >
-        <div className={'flex flex-col space-y-4'}>
+        <div className={'flex flex-col w-full gap-4'}>
           <If condition={updateUserMutation.data}>
             <SuccessAlert />
           </If>
@@ -1407,17 +1408,13 @@ export const UpdatePasswordForm = ({
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>
-                    <Label>
-                      <Trans i18nKey={'account:newPassword'} />
-                    </Label>
-                  </FormLabel>
 
                   <FormControl>
                     <ThemedInput
                       data-test={'account-password-form-password-input'}
                       required
                       type={'password'}
+                      placeholder={t('newPassword')}
                       {...field}
                     />
                   </FormControl>
@@ -1433,24 +1430,16 @@ export const UpdatePasswordForm = ({
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>
-                    <Label>
-                      <Trans i18nKey={'account:repeatPassword'} />
-                    </Label>
-                  </FormLabel>
 
                   <FormControl>
                     <ThemedInput
                       data-test={'account-password-form-repeat-password-input'}
                       required
                       type={'password'}
+                      placeholder={t('repeatPassword')}
                       {...field}
                     />
                   </FormControl>
-
-                  <FormDescription>
-                    <Trans i18nKey={'account:repeatPasswordDescription'} />
-                  </FormDescription>
 
                   <FormMessage />
                 </FormItem>
@@ -1461,9 +1450,9 @@ export const UpdatePasswordForm = ({
           <div>
             <ThemedButton
               disabled={updateUserMutation.isPending}
-              className='bg-brand'
+              className='w-64'
             >
-              <Trans i18nKey={'account:updatePasswordSubmitLabel'} />
+              {t('updatePasswordSubmitLabel')}
             </ThemedButton>
           </div>
         </div>

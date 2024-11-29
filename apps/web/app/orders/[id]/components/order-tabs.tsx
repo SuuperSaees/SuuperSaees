@@ -11,24 +11,54 @@ import FileSection from '~/components/organization/files';
 
 import ActivityPage from './activity';
 import DetailsPage from './details';
+import TasksSection from './tasks';
+import CalendarSection from './calendar-section';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { getOrderAgencyMembers } from '~/team-accounts/src/server/actions/orders/get/get-order';
+import { UserWithSettings } from '~/lib/account.types';
 
 type OrderTabsProps = {
-  organizationId: {
-    account_id: string;
-  } | undefined;
+  organizationId:
+    | {
+        account_id: string;
+      }
+    | undefined;
   currentPath: {
     title: string;
     uuid?: string;
   }[];
+  userRole: string;
+  orderId: string;
+  orderAgencyId: string;
+  agencyStatuses: AgencyStatus.Type[];  
 };
 
-export const OrderTabs = ({ organizationId, currentPath}: OrderTabsProps) => {
+
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId, agencyStatuses }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
+
+  const [loadingCalendars, setLoadingCalendars] = useState(true);
+  const { data: orderAgencyMembers } = useQuery<UserWithSettings[]>({
+    queryKey: ['order-agency-members', orderId],
+    queryFn: async () => {
+      setLoadingCalendars(true);
+      const data = await getOrderAgencyMembers(orderAgencyId, Number(orderId));
+      setLoadingCalendars(false);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled:
+      userRole === 'agency_owner' ||
+      userRole === 'agency_member' ||
+      userRole === 'agency_project_manager',
+  }) as UseQueryResult<UserWithSettings[], unknown>;
+
   return (
     <Tabs
-      className="flex h-full flex-grow flex-col gap-6"
+      className="flex max-h-full h-full flex-col gap-6 min-h-0"
       defaultValue={activeTab}
       onValueChange={(value: string) => {
         setActiveTab(value as 'activity' | 'details');
@@ -49,15 +79,51 @@ export const OrderTabs = ({ organizationId, currentPath}: OrderTabsProps) => {
         >
           <Trans i18nKey={'orders:details.navigation.details'} />
         </ThemedTabTrigger>
-        <ThemedTabTrigger value="files" activeTab={activeTab} option={'files'}>
+        <ThemedTabTrigger 
+          value="tasks" 
+          activeTab={activeTab} 
+          option={'tasks'}
+          className='flex items-center gap-1'
+        >
+          <Trans i18nKey={'orders:details.navigation.tasks'} />
+          {/* <TaskCounter
+            taskCount={countIncompleteTasks(tasks)}
+          /> */}
+        </ThemedTabTrigger>
+        <ThemedTabTrigger 
+          value="files" 
+          activeTab={activeTab} 
+          option={'files'}
+        >
           <Trans i18nKey={'orders:details.navigation.files'} />
         </ThemedTabTrigger>
+        <ThemedTabTrigger 
+          value="calendar" 
+          activeTab={activeTab} 
+          option={'calendar'}
+        >
+          <Trans i18nKey={'account:calendar'} />
+        </ThemedTabTrigger>
       </TabsList>
-      <TabsContent value="details" className="h-full max-h-full min-h-0 overflow-y-auto no-scrollbar">
+
+      <TabsContent
+        value="details"
+        className="no-scrollbar h-full max-h-full min-h-0 overflow-y-auto"
+      >
         <DetailsPage />
-      </TabsContent>  
+      </TabsContent>
       <TabsContent value="activity" className="h-full max-h-full min-h-0">
         <ActivityPage />
+      </TabsContent>
+      <TabsContent value="tasks">
+        <div className="w-full">
+          <TasksSection 
+            userRole={userRole}
+            orderId={orderId}
+            orderAgencyId={orderAgencyId}
+            agencyStatuses={agencyStatuses}
+          />
+        </div>
       </TabsContent>
       <TabsContent value="files">
         <div className="w-full">
@@ -65,6 +131,14 @@ export const OrderTabs = ({ organizationId, currentPath}: OrderTabsProps) => {
             key={'files'}
             clientOrganizationId={organizationId?.account_id ?? ''}
             currentPath={currentPath}
+          />
+        </div>
+      </TabsContent>
+      <TabsContent value="calendar">
+        <div className="w-full">
+          <CalendarSection 
+            orderAgencyMembers={orderAgencyMembers ?? []}
+            loading={loadingCalendars}
           />
         </div>
       </TabsContent>

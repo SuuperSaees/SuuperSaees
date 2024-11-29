@@ -2,17 +2,15 @@
 
 import { useState, useTransition } from 'react';
 
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, X } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { addClientMember } from 'node_modules/@kit/team-accounts/src/server/actions/clients/create/create-clients';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Button } from '@kit/ui/button';
@@ -40,6 +38,7 @@ import {
   TooltipTrigger,
 } from '@kit/ui/tooltip';
 import { Trans } from '@kit/ui/trans';
+import { handleResponse } from '~/lib/response/handle-response';
 
 type InviteModel = ReturnType<typeof createEmptyInviteModel>;
 
@@ -58,7 +57,8 @@ export function InviteClientMembersDialogContainer({
 }>) {
   const [pending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
-  const { t } = useTranslation('clients');
+  const { t } = useTranslation('responses');
+  const queryClient = useQueryClient();
 
   const inviteClientMembers = useMutation({
     mutationFn: async ({
@@ -69,6 +69,7 @@ export function InviteClientMembersDialogContainer({
       clientOrganizationId: string;
     }) => await addClientMember({ email, clientOrganizationId }),
   });
+
   const onSubmit = ({ invitations }: { invitations: InviteModel[] }) => {
     // Use transition to avoid blocking the UI thread
 
@@ -79,12 +80,14 @@ export function InviteClientMembersDialogContainer({
           inviteClientMembers.mutateAsync({ email, clientOrganizationId }),
         ),
       )
-        .then(() => {
-          toast.success(t('clients:organizations.members.invite.success'));
-        })
-        .catch(() =>
-          toast.error(t('clients:organizations.members.invite.error')),
-        );
+        .then(async (res) => {
+          await handleResponse(res[0], 'clients', t);
+          // toast.success(t('clients:organizations.members.invite.success'));
+
+          await queryClient.invalidateQueries({
+            queryKey: ['clientsWithOrganizations'],
+          });
+        }).catch(() => null);
     });
 
     setIsOpen(false);
@@ -192,7 +195,7 @@ function InviteClientMembersForm({
                                 placeholder={t('emailPlaceholder')}
                                 type="email"
                                 required
-                                className='focus-visible:ring-brand focus-visible:ring-1'
+                                className="focus-visible:ring-1 focus-visible:ring-brand"
                                 {...field}
                               />
                             </FormControl>

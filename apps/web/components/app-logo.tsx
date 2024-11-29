@@ -3,13 +3,15 @@
 import Link from 'next/link';
 
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+import { getColorLuminance } from '~/utils/generate-colors';
 
 function LogoImage({ className }: { className?: string }) {
   return (
     <svg 
-      width="373" 
-      height="83" 
+      width="142" 
+      height="32" 
       viewBox="0 0 373 83" 
+      preserveAspectRatio="xMinYMid meet"
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
       className={className}
@@ -46,21 +48,25 @@ export function AppLogo({
   href = '/',
   label = 'Home Page',
   className = '',
+  logoUrl,
 }: {
   href?: string;
   className?: string;
   label?: string;
+  logoUrl?: string;
 }) {
-  const { logo_url } = useOrganizationSettings();
-
+  const { logo_url, logo_dark_url, sidebar_background_color } = useOrganizationSettings();
+  const {theme} = getColorLuminance(sidebar_background_color ?? '#f2f2f2');
+  const themedLogoUrl = theme === 'dark' ? (logo_dark_url || logo_url): logo_url  
+  logoUrl = logoUrl ?? themedLogoUrl;
   return (
     <Link
       aria-label={label}
       href={href}
       className={`flex h-full max-h-[100px] w-full max-w-[200px] items-center justify-center overflow-hidden ${className}`}
     >
-      {logo_url ? (
-        <CustomLogoImage url={logo_url} className="h-full w-full" />
+      {logoUrl ? (
+        <CustomLogoImage url={logoUrl} className="h-full w-full" />
       ) : (
         <LogoImage className="h-[32px] w-full object-contain" />
       )}

@@ -21,7 +21,8 @@
 // import { EmailHeading } from '../components/heading';
 // import { EmailWrapper } from '../components/wrapper';
 import { initializeEmailI18n } from '../lib/i18n';
-
+import { getEmailTranslations } from '../../../mailers/src';
+import { getLanguageFromCookie } from '../../../../apps/web/lib/i18n/i18n.server';
 
 interface Props {
   teamName: string;
@@ -52,7 +53,8 @@ function getTextColorBasedOnBackground(backgroundColor: string) {
 
 export async function renderInviteEmail(props: Props) {
   const namespace = 'invite-email';
-
+  const lang = getLanguageFromCookie() as 'en' | 'es';
+  const { t: inviteEmailT } = getEmailTranslations('inviteEmail', lang);
   try {
     const { t } = await initializeEmailI18n({
       language: props.language,
@@ -74,12 +76,11 @@ export async function renderInviteEmail(props: Props) {
     const mainText = t(`${namespace}:mainText`, {
       inviter: props.inviter,
       teamName: props.teamName,
-      productName: props.productName,
     });
 
-    const joinTeam = t(`${namespace}:joinTeam`, {
-      teamName: props.teamName,
-    });
+    // const joinTeam = t(`${namespace}:joinTeam`, {
+    //   teamName: props.teamName,
+    // });
 
     const html = `
       <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><!DOCTYPE html>
@@ -106,7 +107,7 @@ export async function renderInviteEmail(props: Props) {
             </style>
           </head>
             <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0">
-              Confirma tu correo - Suuper
+              ${inviteEmailT('confirmEmail')} 
             </div>
             <body>
               <table align="left" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;background-color:#fff;margin:auto;font-family:sans-serif;color:#484848">
@@ -178,7 +179,7 @@ export async function renderInviteEmail(props: Props) {
                                             <td>
                                               <a href="${props.link}" class="cta-button"
                                               style="background-color:${props.primaryColor ? props.primaryColor : '#1A38D7'}; color: ${getTextColorBasedOnBackground(props.primaryColor ? props.primaryColor : '#1A38D7')}; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                                              Accept the invite
+                                              ${inviteEmailT('acceptInvitation')}
                                               </a>
                                           
                                             </td>
@@ -202,10 +203,7 @@ export async function renderInviteEmail(props: Props) {
                                   <tr style="width:100%">
                                     <td style="text-align: left;">
                                       <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        This email was sent to ${props.invitedUserEmail}. If you prefer not to receive these emails, you can unsubscribe or manage your preferences.
-                                      </p>
-                                      <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
-                                        © 2024 Suuper, soporte@suuper.co
+                                        ${inviteEmailT('footer', { toEmail: props.invitedUserEmail })}
                                       </p>
                                     </td>
                                   </tr>
@@ -226,9 +224,14 @@ export async function renderInviteEmail(props: Props) {
     return {
       html,
       subject,
+      t: inviteEmailT,
     };
   } catch (error) {
     console.error('Error al renderizar el correo:', error);
     throw error; // Re-lanza el error para que pueda ser manejado por el llamador si es necesario
   }
 }
+
+{/* <p style="color: var(--Gray-600, #475467); font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px; margin: 16px 0;">
+        © 2024 Suuper, soporte@suuper.co
+</p> */}

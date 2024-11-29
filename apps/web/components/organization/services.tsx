@@ -56,7 +56,7 @@ function ServiceSection({
 
   // Slice the services data for the current page
   const paginatedServices = services?.slice(startIndex, endIndex) ?? [];
-  const role = 'agency_owner';
+
   return (
     <div className="flex h-full flex-col gap-8">
       {isLoading ? (
@@ -67,10 +67,10 @@ function ServiceSection({
         <EmptyState
           imageSrc="/images/illustrations/Illustration-box.svg"
           title={t(
-            `${role === 'agency_owner' || role === 'agency_project_manager' ? 'empty.agency.title' : 'empty.client.title'}`,
+            `${currentUserRole === 'agency_owner' || currentUserRole === 'agency_project_manager' ? 'empty.agency.title' : 'empty.client.title'}`,
           )}
           description={t(
-            `${role === 'agency_owner' || role === 'agency_project_manager' ? 'empty.agency.description' : 'empty.client.description'}`,
+            `${currentUserRole === 'agency_owner' || currentUserRole === 'agency_project_manager' ? 'empty.agency.description' : 'empty.client.description'}`,
           )}
         />
       ) : (

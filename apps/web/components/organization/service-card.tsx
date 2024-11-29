@@ -3,7 +3,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ban, MoreVertical } from 'lucide-react';
 import { deleteClientService } from 'node_modules/@kit/team-accounts/src/server/actions/services/delete/delete-service-server';
-import { toast } from 'sonner';
 
 import { Button } from '@kit/ui/button';
 import { Trans } from '@kit/ui/trans';
@@ -11,6 +10,8 @@ import { Trans } from '@kit/ui/trans';
 import { Service } from '~/lib/services.types';
 
 import Dropdown from '../ui/dropdown';
+import { handleResponse } from '~/lib/response/handle-response';
+import { useTranslation } from 'react-i18next';
 
 type ServiceCardProps = {
   service: Service.Relationships.Client.Response;
@@ -23,29 +24,22 @@ export default function ServiceCard({
   currentUserRole,
 }: ServiceCardProps) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation('services');
 
   const cancelClientService = useMutation({
-    mutationFn: async () =>
-      await deleteClientService(
+    mutationFn: async () => {
+
+      const res = await deleteClientService(
         clientOrganizationId,
         service.id,
         service.subscription_id,
-      ),
-
-    onSuccess: async () => {
-      toast.success('Success', {
-        description: 'Service canceled successfully!',
-      });
+      );
+      await handleResponse(res, 'services', t);
       await queryClient.invalidateQueries({
         queryKey: ['services', clientOrganizationId],
       });
-    },
-
-    onError: () => {
-      toast.error('Error', {
-        description: 'Service could not be canceled!',
-      });
-    },
+    }, 
+    onError: () => console.error('Error cancelling service'),
   });
 
   const serviceOptions = [
@@ -56,7 +50,7 @@ export default function ServiceCard({
           <Trans i18nKey={'service:cancel'} />
         </span>
       ),
-      actionFn: async () => void (await cancelClientService.mutateAsync()),
+      actionFn: async () => void (await cancelClientService.mutateAsync().catch(() => null)),
     },
   ];
 
@@ -79,7 +73,7 @@ export default function ServiceCard({
           {service.service_description}
         </p>
       </div>
-      {(currentUserRole === 'agency_owner' ??
+      {(currentUserRole === 'agency_owner' ||
         currentUserRole === 'agency_project_manager') && (
         <Dropdown options={serviceOptions}>
           <Button

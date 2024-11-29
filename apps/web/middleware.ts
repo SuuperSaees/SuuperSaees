@@ -1,42 +1,56 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse, URLPattern } from 'next/server';
 
-import { CsrfError, createCsrfProtect } from '@edge-csrf/nextjs';
 
-import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
+
+import { SupabaseClient } from '@supabase/supabase-js';
+
+
+
+// import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
-import appConfig from '~/config/app.config';
+
+
 import pathsConfig from '~/config/paths.config';
+import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
+import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
+import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
-const CSRF_SECRET_COOKIE = 'csrfSecret';
-const NEXT_ACTION_HEADER = 'next-action';
 
-const CLIENT_ID = 'suuper-client-id';
-const CLIENT_SECRET = 'suuper-client-secret';
+
+import { handleApiAuth } from './handlers/api-auth-handler';
+import { handleCors } from './handlers/cors-handler';
+import { handleCsrf } from './handlers/csrf-handler';
+import { Database } from './lib/database.types';
+
+
+// import { handleDomainCheck } from './handlers/domain-check-handler';
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|images|locales|assets|api).*)', 
-    '/api/v1/:path*'
+    '/((?!_next/static|_next/image|images|locales|assets|api/v1/webhook|api).*)',
+    '/api/v1/:path*',
   ],
 };
 
-// function to verify the basic auth credentials to api use. 
-function isValidBasicAuth(request: NextRequest): boolean {
-  const authorizationHeader = request.headers.get('authorization');
+function getCachedDomain(request: NextRequest, userId: string): string | null {
+  const domainCookie = request.cookies.get(`domain_${userId}`);
+  return domainCookie ? domainCookie.value : null;
+}
 
-  if (!authorizationHeader?.startsWith('Basic ')) {
-    return false;
-  }
-
-  const base64Credentials = authorizationHeader.split(' ')[1];
-  const credentials = atob(base64Credentials!).split(':');
-
-  const clientId = credentials[0];
-  const clientSecret = credentials[1];
-
-  return clientId === CLIENT_ID && clientSecret === CLIENT_SECRET;
+function setCachedDomain(
+  response: NextResponse,
+  userId: string,
+  domain: string,
+  isProd: boolean,
+) {
+  // Cache the domain for 1 hour (you can adjust this time as needed)
+  response.cookies.set(`domain_${userId}`, domain, {
+    maxAge: 60 * 60,
+    secure: isProd,
+  });
 }
 
 const getUser = (request: NextRequest, response: NextResponse) => {
@@ -46,86 +60,103 @@ const getUser = (request: NextRequest, response: NextResponse) => {
 };
 
 export async function middleware(request: NextRequest) {
+  if (request.method === 'OPTIONS') {
+    return handleCORSPreflight();
+  }
   const response = NextResponse.next();
-  // Verify route /api/v1
-  if (request.nextUrl.pathname.startsWith('/api/v1')) {
-    // Verify route authentication
-    if (!isValidBasicAuth(request)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // API Authentication
+  const apiAuthResult = handleApiAuth(request);
+  if (apiAuthResult) return apiAuthResult;
+
+  // Domain Check
+  // const domainCheckResult = await handleDomainCheck(request, response);
+  // if (domainCheckResult) return domainCheckResult;
+
+  const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+  const ignorePath = new Set([
+    'auth',
+    '/auth/confirm',
+    '/auth/onboarding',
+    'set-password',
+    'add-organization',
+    'api',
+    'join',
+    'join?invite_token=',
+    '/join?invite_token=',
+    '/join',
+    'home',
+    'checkout',
+    'buy-success',
+    '/__nextjs_original-stack-frame',
+  ]);
+  const shouldIgnorePath = (pathname: string) =>
+    Array.from(ignorePath).some((path) => pathname.includes(path));
+
+  if (
+    IS_PROD &&
+    !shouldIgnorePath(request.nextUrl.pathname) &&
+    new URL(request.nextUrl.origin).host !== process.env.HOST_C4C7US
+  ) {
+    try {
+      const supabase = createMiddlewareClient(request, response);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const userId = user?.id ?? '';
+      // Try to get the domain from cache (cookie)
+      let domain = getCachedDomain(request, userId) ?? '';
+
+      if (!domain) {
+        // If not in cache, fetch the domain
+        try {
+          const { domain: domainByUserId } = await getDomainByUserId(
+            userId,
+            false,
+          );
+          domain = domainByUserId;
+        } catch (error) {
+          console.error('Error in middleware', error);
+        }
+        // Cache the domain in a cookie
+        setCachedDomain(response, userId, domain, IS_PROD);
+      }
+
+      const corsResult = handleCors(request, response, domain);
+      if (corsResult) return corsResult;
+
+      if (new URL(request.nextUrl.origin).host !== domain) {
+        throw new Error('Unauthorized: Invalid Origin');
+      }
+    } catch (error) {
+      console.error('Error in middleware', error);
+      const landingPage = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
+      const supabase = createMiddlewareClient(request, response);
+      await supabase.auth.signOut();
+      return NextResponse.redirect(
+        new URL(landingPage, request.nextUrl.origin).href,
+      );
     }
-    return NextResponse.next();
   }
 
-
-
-  // set a unique request ID for each request
-  // this helps us log and trace requests
+  response.headers.set('x-current-path', request.nextUrl.pathname);
   setRequestId(request);
 
-  // apply CSRF protection for mutating requests
-  const csrfResponse = await withCsrfMiddleware(request, response);
+  const csrfResponse = await handleCsrf(request, response);
 
-  // handle patterns for specific routes
   const handlePattern = matchUrlPattern(request.url);
-
-  // if a pattern handler exists, call it
   if (handlePattern) {
     const patternHandlerResponse = await handlePattern(request, csrfResponse);
-
-    // if a pattern handler returns a response, return it
-    if (patternHandlerResponse) {
-      return patternHandlerResponse;
-    }
+    if (patternHandlerResponse) return patternHandlerResponse;
   }
 
-  // append the action path to the request headers
-  // which is useful for knowing the action path in server actions
-  if (isServerAction(request)) {
+  if (request.headers.has('next-action')) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
+  
+  setCORSHeaders(csrfResponse);
 
-  // if no pattern handler returned a response,
-  // return the session response
   return csrfResponse;
-}
-
-async function withCsrfMiddleware(
-  request: NextRequest,
-  response = new NextResponse(),
-) {
-  // set up CSRF protection
-  const csrfProtect = createCsrfProtect({
-    cookie: {
-      secure: appConfig.production,
-      name: CSRF_SECRET_COOKIE,
-    },
-    // ignore CSRF errors for server actions since protection is built-in
-    ignoreMethods: isServerAction(request)
-      ? ['POST']
-      : // always ignore GET, HEAD, and OPTIONS requests
-        ['GET', 'HEAD', 'OPTIONS'],
-  });
-
-  try {
-    await csrfProtect(request, response);
-
-    return response;
-  } catch (error) {
-    // if there is a CSRF error, return a 403 response
-    if (error instanceof CsrfError) {
-      return NextResponse.json('Invalid CSRF token', {
-        status: 401,
-      });
-    }
-
-    throw error;
-  }
-}
-
-function isServerAction(request: NextRequest) {
-  const headers = new Headers(request.headers);
-
-  return headers.has(NEXT_ACTION_HEADER);
 }
 
 async function adminMiddleware(request: NextRequest, response: NextResponse) {
@@ -167,8 +198,37 @@ function getPatterns() {
     {
       // partially removing accesss to '/', since landing page is on construction.
       pattern: new URLPattern({ pathname: '/' }),
-      handler:  (req: NextRequest) => {
-        return NextResponse.redirect(new URL(pathsConfig.app.home, req.nextUrl.origin).href);
+      handler: (req: NextRequest) => {
+        return NextResponse.redirect(
+          new URL(pathsConfig.app.orders, req.nextUrl.origin).href,
+        );
+      },
+    },
+    {
+      pattern: new URLPattern({ pathname: '/add-organization' }),
+      handler: async (req: NextRequest, res: NextResponse) => {
+        const {
+          data: { user },
+        } = await getUser(req, res);
+        if (!user) {
+          return;
+        }
+
+        const {id: organizationId} = await getOrganizationByUserId(
+          user.id,
+          true,
+        ).catch((error) => {
+          console.error('Error fetching organization from middleware:', error);
+          return {
+            id: '',
+          };
+        });
+        if (organizationId) {
+          return NextResponse.redirect(
+            new URL(pathsConfig.app.orders, req.url).href,
+          );
+        }
+        return;
       },
     },
     {
@@ -182,14 +242,44 @@ function getPatterns() {
           data: { user },
         } = await getUser(req, res);
 
+        // If the user is not logged in and the request is for the onboarding page, redirect to the sign-up page
+        if (!user && req.nextUrl.pathname === '/auth/onboarding') {
+          return NextResponse.redirect(
+            new URL(pathsConfig.auth.signUp, req.nextUrl.origin).href,
+          );
+        }
+
         // the user is logged out, so we don't need to do anything
         if (!user) {
           return;
         }
 
-        // check if we need to verify MFA (user is authenticated but needs to verify MFA)
+        // Check URL parameters
+        const searchParams = req.nextUrl.searchParams;
+        const hasInviteToken = searchParams.has('invite_token');
+        const hasEmail = searchParams.has('email');
+        const hasTokenHashSession = searchParams.has('token_hash_session');
+
+        if (hasInviteToken && hasEmail) {
+          return;
+        }
+
+        if (hasTokenHashSession && hasEmail) {
+          return;
+        }
+
+        // Check if this request is for the activation link (e.g., /auth/confirm)
+        const isActivationLink =
+          req.nextUrl.pathname.startsWith('/auth/confirm');
+        const isOnboarding = req.nextUrl.pathname.startsWith('/auth/onboarding');
+
+        // Check if we need to verify MFA (user is authenticated but needs to verify MFA)
         const isVerifyMfa = req.nextUrl.pathname === pathsConfig.auth.verifyMfa;
 
+        // If it's an activation link, do not redirect to home, continue with the request
+        if (isActivationLink || isOnboarding) {
+          return; // Allow the process to continue for the activation flow => auth-callback.service.ts
+        }
         // If user is logged in and does not need to verify MFA,
         // redirect to home page.
         if (!isVerifyMfa) {
@@ -200,7 +290,7 @@ function getPatterns() {
       },
     },
     {
-      pattern: new URLPattern({ pathname: '/home/*?' }),
+      pattern: new URLPattern({ pathname: '/*?' }),
       handler: async (req: NextRequest, res: NextResponse) => {
         const {
           data: { user },
@@ -209,32 +299,81 @@ function getPatterns() {
         const origin = req.nextUrl.origin;
         const next = req.nextUrl.pathname;
 
+        // Check if this is an invitation URL
+        const isInvitationUrl = req.nextUrl.pathname === '/join' && 
+        req.nextUrl.searchParams.has('invite_token');
+
+        // Check if this is a checkout URL
+        const isCheckoutUrl = req.nextUrl.pathname === '/checkout' && 
+        req.nextUrl.searchParams.has('tokenId');
+
+        // Skip authentication check for invitation URLs
+        if (isInvitationUrl || isCheckoutUrl) {
+          return;
+        }
+
         // If user is not logged in, redirect to sign in page.
         if (!user) {
-          // const signIn = pathsConfig.auth.signIn;
-          // const redirectPath = `${signIn}?next=${next}`;
-          const signUp = pathsConfig.auth.signUp;
-          const redirectPath = `${signUp}?next=${next}`;
-
+          const signIn = pathsConfig.auth.signIn;
+          const redirectPath = `${signIn}?next=${next}`;
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
 
         const supabase = createMiddlewareClient(req, res);
 
-        const requiresMultiFactorAuthentication =
-          await checkRequiresMultiFactorAuthentication(supabase);
-
-        // If user requires multi-factor authentication, redirect to MFA page.
-        if (requiresMultiFactorAuthentication) {
-          return NextResponse.redirect(
-            new URL(pathsConfig.auth.verifyMfa, origin).href,
-          );
+        // Obtain the user role
+        const userRole = await getUserRoleById(user.id);
+        if (userRole === 'agency_owner') {
+          const hasPhoneNumber = await checkPhoneNumber(supabase, user.id);
+          if (!hasPhoneNumber && !req.nextUrl.pathname.includes('auth/onboarding')) {
+            return NextResponse.redirect(
+              new URL('/auth/onboarding', origin).href,
+            );
+          }
         }
-
       },
     },
     {
-      pattern: new URLPattern({pathname: '/api/v1'})
+      pattern: new URLPattern({ pathname: '/api/v1' }),
+    },
+    {
+      // Verify if the client is eliminated from the agency
+      pattern: new URLPattern({ pathname: '/*' }),
+      handler: async (req: NextRequest, res: NextResponse) => {
+        const supabase = createMiddlewareClient(req, res);
+        const {
+          data: { user },
+        } = await getUser(req, res);
+        if (req.nextUrl.pathname === '/add-organization') {
+          return;
+        }
+        // the user is logged out, so we don't need to do anything
+        if (!user) {
+          return;
+        }
+        const userId = user.id;
+
+        // Step 2: Get the organization id fetching the domain/subdomain data
+        const { organizationId } = await getDomainByUserId(userId, true);
+
+        // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
+        const clientDeleted = await fetchDeletedClients(
+          supabase,
+          organizationId,
+          userId,
+        ).catch((error) =>
+          console.error('Error fetching deleted from middleware:', error),
+        );
+
+        // Step 4: If the client is deleted, sign out the user
+        if (clientDeleted) {
+          await supabase.auth.signOut();
+          return NextResponse.redirect(
+            new URL(pathsConfig.auth.signIn, req.url).href,
+          );
+        }
+        return;
+      },
     },
   ];
 }
@@ -261,4 +400,39 @@ function matchUrlPattern(url: string) {
  */
 function setRequestId(request: Request) {
   request.headers.set('x-correlation-id', crypto.randomUUID());
+}
+
+function handleCORSPreflight() {
+  const response = new NextResponse(null, { status: 204 });
+  setCORSHeaders(response);
+  return response;
+}
+
+function setCORSHeaders(response: NextResponse) {
+  response.headers.append('Access-Control-Allow-Credentials', 'true');
+  response.headers.append('Access-Control-Allow-Origin', '*'); // replace this your actual origin
+  response.headers.append(
+    'Access-Control-Allow-Methods',
+    'GET,DELETE,PATCH,POST,PUT',
+  );
+  response.headers.append(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+  );
+}
+
+// This function is to verify the phone number
+async function checkPhoneNumber(supabase: SupabaseClient<Database>, userId: string) {
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('phone_number')
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error checking phone number:', error);
+    return false;
+  }
+
+  return data?.phone_number !== null;
 }

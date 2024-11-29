@@ -3,44 +3,40 @@
 import React, { useState } from 'react';
 
 
-
-import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
+import { FormattedDate } from './formatted-date';
 
-
-
-import { ChevronDownIcon } from '@radix-ui/react-icons';
-import { useMutation } from '@tanstack/react-query';
+// import { ChevronDownIcon } from '@radix-ui/react-icons';
+// import { useMutation } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 import { updateOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
+import { AgencyStatusesProvider } from './context/agency-statuses-context';
 
 
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 import { Card, CardContent, CardFooter } from '@kit/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
+// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
 import { Separator } from '@kit/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@kit/ui/table';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
-
-
 import { Order } from '~/lib/order.types';
-import { statuses } from '~/lib/orders-data';
-
-
+// import { statuses } from '~/lib/orders-data';
 
 import { ThemedButton } from '../../../../../packages/features/accounts/src/components/ui/button-themed-with-settings';
 import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../../../packages/ui/src/shadcn/pagination';
-import { statusColors } from '../[id]/utils/get-color-class-styles';
+// import { statusColors } from '../[id]/utils/get-color-class-styles';
 import { Trans } from '@kit/ui/trans';
-
+import EmptyState from '~/components/ui/empty-state';
+import StatusCombobox from '../[id]/components/status-combobox';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { Dispatch, SetStateAction } from 'react';
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -51,23 +47,31 @@ type ExtendedOrderType = Order.Type & {
 type OrdersTableProps = {
   orders: ExtendedOrderType[];
   role: string;
+  agencyStatuses?: AgencyStatus.Type[];
 };
 
 type OrdersCardTableProps = {
   orders: ExtendedOrderType[];
   role: string;
   updateOrderDate: (dueDate: string, orderId: number) => Promise<void>;
+  setOrdersData: Dispatch<SetStateAction<ExtendedOrderType[]>>;
+  changeTabFilteredOrders: (tab: 'open' | 'completed' | 'all') => void;
+  activeTab: 'open' | 'completed' | 'all';
 };
 
 const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   orders,
   role,
   updateOrderDate,
+  setOrdersData,
+  changeTabFilteredOrders,
+  activeTab,
 }) => {
-  const { t } = useTranslation('orders');
+  const { t } = useTranslation(['orders', 'responses']);
 
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
+
 
   // Calculate the data for the current page
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -75,219 +79,155 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   const currentOrders = orders.slice(startIndex, endIndex);
 
   const totalPages = Math.ceil(orders.length / rowsPerPage);
-  const router = useRouter();
-  const changeStatus = useMutation({
-    mutationFn: async ({
-      orderId,
-      status,
-    }: {
-      orderId: Order.Type['id'];
-      status: Order.Type['status'];
-    }) => {
-      await updateOrder(orderId, { status });
-      return router.push(`/orders`);
-    },
-    onSuccess: () => {
-      toast.success('Success', {
-        description: 'Status updated successfully!',
-      });
-    },
-    onError: () => {
-      toast.error('Error', {
-        description: 'The status could not be updated.',
-      });
-    },
+  // const router = useRouter();
+
+  Object.keys(localStorage).forEach((key) => { // ¡IMPORTANT!: we must remove this code when we have a better solution for the statuses cache
+    if (key.startsWith('agencyStatuses')) {
+      localStorage.removeItem(key);
+    }
   });
 
   return (
-    <Card x-chunk="dashboard-06-chunk-0">
+    <Card x-chunk="dashboard-06-chunk-0" className='bg-transparent'>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('titleLabel')}</TableHead>
-              <TableHead>{t('idLabel')}</TableHead>
-              <TableHead>{t('clientLabel')}</TableHead>
-              <TableHead className="hidden md:table-cell">
-                {t('statusLabel')}
-              </TableHead>
-              <TableHead className="hidden md:table-cell">
-                {t('assignedToLabel')}
-              </TableHead>
-              <TableHead className="hidden md:table-cell">
-                {t('dueDateLabel')}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentOrders.length > 0 ? (
-              currentOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="flex-1">
-                    <Link href={`/orders/${order.id}`}>
-                      <span className="block max-w-[200px] truncate font-medium">
-                        {order.title}
-                      </span>
-                    </Link>
-                    <span className="block max-w-[150px] truncate text-sm">
-                      {order.customer_organization ?? 'Sin descripción'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="flex-1">
-                    <span className="block text-sm">#{order.id}</span>
-                  </TableCell>
-                  <TableCell className="flex-1">
+       {
+        orders.length > 0  ?
+        <Table className='bg-transparent'>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t('titleLabel')}</TableHead>
+            <TableHead>{t('idLabel')}</TableHead>
+            <TableHead>{t('clientLabel')}</TableHead>
+            <TableHead className="hidden md:table-cell">
+              {t('statusLabel')}
+            </TableHead>
+            <TableHead className="hidden md:table-cell">
+              {t('assignedToLabel')}
+            </TableHead>
+            <TableHead className="hidden md:table-cell">
+              {t('dueDateLabel')}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+       {
+            currentOrders?.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="flex-1">
+                  <Link href={`/orders/${order.id}`}>
                     <span className="block max-w-[200px] truncate font-medium">
-                      {order.customer_name ?? 'Sin nombre'}
+                      {order.title}
                     </span>
-                    <span className="block text-sm">
-                      {order.customer_organization ?? 'Sin organización'}
+                  <span className="block max-w-[150px] truncate text-sm">
+                    {order.customer_organization ?? 'Sin descripción'}
+                  </span>
+                  </Link>
+                </TableCell>
+                <TableCell className="flex-1">
+                  <span className="block text-sm">#{order.id}</span>
+                </TableCell>
+                <TableCell className="flex-1">
+                  <span className="block max-w-[200px] truncate font-medium">
+                    {order.customer_name ?? 'Sin nombre'}
+                  </span>
+                  <span className="block text-sm">
+                    {order.customer_organization ?? 'Sin organización'}
+                  </span>
+                </TableCell>
+                <TableCell className="hidden flex-1 md:table-cell">
+                  {[
+                    'agency_member',
+                    'agency_owner',
+                    'agency_project_manager',
+                  ].includes(role) ? (
+                    <StatusCombobox order={order} agency_id={order.agency_id} mode='order' setOrdersData={setOrdersData} changeTabFilteredOrders={changeTabFilteredOrders} activeTab={activeTab} />
+                  ) : (
+                    // Display the status or an empty space if there is no status
+                    <span className="pl-2 pr-2">
+                      {order.status
+                        ?.replace(/_/g, ' ')
+                        .replace(/^\w/, (c) => c.toUpperCase())}
                     </span>
-                  </TableCell>
-                  <TableCell className="hidden flex-1 md:table-cell">
-                    {[
-                      'agency_member',
-                      'agency_owner',
-                      'agency_project_manager',
-                    ].includes(role) ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          className={`m-2 inline-flex items-center rounded-lg p-2 ${
-                            order.status === 'in_progress'
-                              ? 'bg-[#F4EBFF] text-[#6941C6]'
-                              : order.status
-                                ? statusColors[order.status]
-                                : ''
-                          }`}
-                        >
-                          <span className="pl-2 pr-2">
-                            {t(
-                              `details.statuses.${order.status?.replace(/_./g, (match) => match.charAt(1).toUpperCase())}`,
-                            )
-                              .replace(/_/g, ' ')
-                              .replace(/^\w/, (c) => c.toUpperCase())}
-                          </span>
-                          <ChevronDownIcon className="flex items-center"></ChevronDownIcon>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {statuses.map((status, statusIndex) => {
-                            const camelCaseStatus = status?.replace(
-                              /_./g,
-                              (match) => match.charAt(1).toUpperCase(),
-                            );
-                            if (!status) return null;
-                            return (
-                              <DropdownMenuItem
-                                className={`m-2 rounded-lg p-2 ${statusColors[status]} cursor-pointer`}
-                                key={status + statusIndex}
-                                onClick={() => {
-                                  changeStatus.mutate({
-                                    orderId: order.id,
-                                    status,
-                                  });
-                                }}
-                              >
-                                {t(`details.statuses.${camelCaseStatus}`)
-                                  .replace(/_/g, ' ')
-                                  .replace(/^\w/, (c) => c.toUpperCase())}
-                              </DropdownMenuItem>
-                            );
-                          })}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : (
-                      // Display the status or an empty space if there is no status
-                      <span className="pl-2 pr-2">
-                        {order.status
-                          ?.replace(/_/g, ' ')
-                          .replace(/^\w/, (c) => c.toUpperCase())}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="hidden flex-1 md:table-cell">
-                    <div className="flex -space-x-1">
-                      {order.assigned_to?.map((assignee) => (
-                        <Avatar
-                          key={assignee.agency_member.email}
-                          className="h-6 max-h-6 w-6 max-w-6 border-2 border-white"
-                        >
-                          <AvatarImage
-                            src={assignee.agency_member.picture_url ?? ''}
-                          />
-                          <AvatarFallback>
-                            {assignee.agency_member.name
-                              .charAt(0)
-                              .toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden flex-1 md:table-cell">
-                    {[
-                      'agency_member',
-                      'agency_owner',
-                      'agency_project_manager',
-                    ].includes(role) ? (
-                      <DatePicker
-                        updateFn={(dueDate: string) =>
-                          updateOrderDate(dueDate, order.id)
-                        }
-                        defaultDate={order.due_date}
-                      />
-                    ) : (
-                      // Display the date or an empty space if there is no date
-                      <span className="pl-2 pr-2">
-                        {order.due_date ?? <Trans i18nKey="orders:details.deadlineNotSet" />}
-                      </span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="flex-1 py-10 text-center">
-                  <div className="flex h-[493px] flex-col place-content-center items-center">
-                    <Image
-                      src="/images/illustrations/Illustration-files.svg"
-                      alt="Illustration Card"
-                      width={220}
-                      height={160}
-                    />
-                    <h3 className="mb-[20px] w-[352px] text-center text-[20px] font-semibold leading-[30px] text-[#101828]">
-                      {t('startFirstOrderTitle')}
-                    </h3>
-                    <p className="mb-[16px] w-[352px] text-center text-[16px] leading-[24px] text-[#475467]">
-                      {t('startFirstOrderDescription')}
-                    </p>
-
-                    <Link href="/orders/create">
-                      <ThemedButton className="po">
-                        {t('creation.title')}
-                      </ThemedButton>
-                    </Link>
+                  )}
+                </TableCell>
+                <TableCell className="hidden flex-1 md:table-cell">
+                  <div className="flex -space-x-1">
+                    {order.assigned_to?.map((assignee) => (
+                      <Avatar
+                        key={assignee.agency_member.email}
+                        className="h-6 max-h-6 w-6 max-w-6 border-2 border-white"
+                      >
+                        <AvatarImage
+                          src={assignee.agency_member.picture_url ?? ''}
+                        />
+                        <AvatarFallback>
+                          {assignee.agency_member.name
+                            .charAt(0)
+                            .toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
                   </div>
                 </TableCell>
+                <TableCell className="hidden flex-1 md:table-cell">
+                {['agency_member', 'agency_owner', 'agency_project_manager'].includes(role) ? (
+                  <DatePicker
+                    updateFn={(dueDate: string) => updateOrderDate(dueDate, order.id)}
+                    defaultDate={order.due_date}
+                  /> 
+                ) : (
+                  <span className="pl-2 pr-2">
+                    {order.due_date ? (
+                      <FormattedDate date={order.due_date} />
+                    ) : (
+                      <Trans i18nKey="orders:details.deadlineNotSet" />
+                    )}
+                  </span>
+                )}
+              </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            ))
+
+          }
+          
+        </TableBody>
+      </Table>:
+      <EmptyState
+          imageSrc="/images/illustrations/Illustration-files.svg"
+          title={t('startFirstOrderTitle')}
+          description={t('startFirstOrderDescription')}
+          button={
+            <Link href="/orders/create">
+              <ThemedButton>{t('creation.title')}</ThemedButton>
+            </Link>
+          }
+          />
+      }
       </CardContent>
       <CardFooter>
-        {totalPages > 1 && (
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  className="cursor-pointer"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                >
-                  Anterior
-                </PaginationPrevious>
+        {totalPages > 0 && (
+          <Pagination className="border-t p-4">
+            <PaginationContent className="flex w-full items-center justify-between">
+        
+                {
+                  currentPage > 1 &&
+                  <PaginationItem>
+                  <PaginationPrevious
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                  >
+                    <Trans i18nKey={'common:pagination.previous'} />
+                  </PaginationPrevious>
+                           
               </PaginationItem>
-              {Array.from({ length: totalPages }, (_, index) => (
+                }
+               
+               
+              
+               <div className="flex flex-1 justify-center">
+               {Array.from({ length: totalPages }, (_, index) => (
                 <PaginationItem key={index}>
                   {index + 1 === currentPage ? (
                     <PaginationLink className="cursor-pointer" isActive>
@@ -303,16 +243,21 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
                   )}
                 </PaginationItem>
               ))}
-              <PaginationItem>
+               </div>
+              {
+                currentPage < totalPages &&
+                <PaginationItem>
                 <PaginationNext
                   className="cursor-pointer"
                   onClick={() =>
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                 >
-                  Siguiente
+                  <Trans i18nKey={'common:pagination.next'} />
                 </PaginationNext>
               </PaginationItem>
+              }
+              
             </PaginationContent>
           </Pagination>
         )}
@@ -321,59 +266,68 @@ const OrdersCardTable: React.FC<OrdersCardTableProps> = ({
   );
 };
 
-export function OrderList({ orders, role }: OrdersTableProps) {
+export function OrderList({ orders, role, agencyStatuses }: OrdersTableProps) {
   const { t } = useTranslation('orders');
   const [searchTerm, setSearchTerm] = useState('');
+ 
   const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
     'open',
   );
-  // Filtra las órdenes basadas en el término de búsqueda
-  const filteredOrders = orders.filter((order) =>
-    order.title.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
 
+  const [ordersData, setOrdersData] = useState<ExtendedOrderType[]>(orders);
+  // Filter orders by search term
+  
+  
   // Filter orders by active tab
   const getTabFilteredOrders = (tab: string) => {
+    const filteredOrders = ordersData.filter((order) =>
+      order.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
     switch (tab) {
       case 'completed':
         return filteredOrders.filter((order) => order.status === 'completed');
-      case 'open':
-        return filteredOrders.filter(
-          (order) =>
-            order.status !== 'completed' && order.status !== 'annulled',
-        );
-      case 'all':
-      default:
-        return filteredOrders;
-    }
-  };
-
-  const tabFilteredOrders = getTabFilteredOrders(activeTab);
+        case 'open':
+          return filteredOrders.filter(
+            (order) =>
+              order.status !== 'completed' && order.status !== 'anulled',
+          );
+          case 'all':
+            default:
+              return filteredOrders;
+            }
+          };
+          
+    const [tabFilteredOrders, setTabFilteredOrders] = useState<ExtendedOrderType[]>(getTabFilteredOrders(activeTab));
+    // const tabFilteredOrders = getTabFilteredOrders(activeTab);
+    const changeTabFilteredOrders = (tab: 'open' | 'completed' | 'all') => {
+      setActiveTab(tab);
+      setTabFilteredOrders(getTabFilteredOrders(tab));
+    };
 
   const updateOrderDate = async (due_date: string, orderId: number) => {
     try {
       await updateOrder(orderId, { due_date });
       toast('Success!', {
-        description: 'The date has been updated.',
+        description: t('success.orders.orderDateUpdated'),
       });
     } catch (error) {
       toast('Error', {
-        description: 'The date could not be updated.',
+        description: t('error.orders.failedToUpdateOrderDate'),
       });
     }
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <div className="flex flex-col py-4">
+    <div className="flex w-full flex-col">
+      <div className="flex flex-col">
         <main className="grid flex-1 items-start gap-4 md:gap-8">
           <Tabs
             defaultValue={activeTab}
             onValueChange={(value: string) => {
-              setActiveTab(value as 'open' | 'completed' | 'all');
+              changeTabFilteredOrders(value as 'open' | 'completed' | 'all');
             }}
           >
-            <div className="mb-4 flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4 mb-[24px] items-baseline">
               <TabsList className='gap-2 bg-transparent'>
                 <ThemedTabTrigger value="open" activeTab={activeTab} option={'open'}>
                   {t('openOrders')}
@@ -386,17 +340,18 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                 </ThemedTabTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
-                <div className="relative ml-auto flex-1 md:grow-0">
+                <div className="flex relative ml-auto flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <ThemedInput
                     type="search"
                     placeholder={t('searchPlaceholderTasks')}
-                    className="focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
+                    className="bg-white rounded-xl focus-visible:ring-none w-full rounded-lg pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
                     value={searchTerm}
                     onChange={(e: {
                       target: { value: React.SetStateAction<string> };
                     }) => setSearchTerm(e.target.value)}
                   />
+
                 </div>
                 {orders.length > 0 ? (
                   <Link href="/orders/create">
@@ -406,29 +361,40 @@ export function OrderList({ orders, role }: OrdersTableProps) {
               </div>
             </div>
             <Separator />
+            <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []}>
             <div className="mt-4">
-              <TabsContent value="open">
+              <TabsContent className='bg-white rounded-xl' value="open">
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
+                  setOrdersData={setOrdersData}
+                  changeTabFilteredOrders={changeTabFilteredOrders}
+                  activeTab={activeTab}
                 />
               </TabsContent>
-              <TabsContent value="completed">
+              <TabsContent value="completed" className='bg-white'>
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
+                  setOrdersData={setOrdersData}
+                  changeTabFilteredOrders={changeTabFilteredOrders}
+                  activeTab={activeTab}
                 />
               </TabsContent>
-              <TabsContent value="all">
+              <TabsContent value="all" className='bg-white'>
                 <OrdersCardTable
                   orders={tabFilteredOrders}
                   role={role}
                   updateOrderDate={updateOrderDate}
+                  setOrdersData={setOrdersData}
+                  changeTabFilteredOrders={changeTabFilteredOrders}
+                  activeTab={activeTab}
                 />
               </TabsContent>
             </div>
+            </AgencyStatusesProvider>
           </Tabs>
         </main>
       </div>

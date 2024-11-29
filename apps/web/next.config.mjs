@@ -1,6 +1,5 @@
 import withBundleAnalyzer from '@next/bundle-analyzer';
 import { withSentryConfig } from '@sentry/nextjs';
- 
 
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -19,6 +18,7 @@ const INTERNAL_PACKAGES = [
   '@kit/billing-gateway',
   '@kit/email-templates',
   '@kit/database-webhooks',
+  '@kit/webhooks',
   '@kit/cms',
   '@kit/monitoring',
   '@kit/next',
@@ -28,6 +28,7 @@ const INTERNAL_PACKAGES = [
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  output: 'standalone',
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: INTERNAL_PACKAGES,
   images: {
@@ -68,28 +69,22 @@ const config = {
   typescript: { ignoreBuildErrors: true },
 };
 
+// const sentryOptions = {
+//   org: 'grayola',
+//   project: process.env.SENTRY_PROJECT_NAME,
+//   authToken: process.env.SENTRY_AUTH_TOKEN,
+//   silent: !IS_PRODUCTION,
+//   autoInstrumentServerFunctions: false,
+//   widenClientFileUpload: true,
+// };
 
-
-const sentryOptions = {
-  org: 'grayola',
-  project: process.env.SENTRY_PROJECT_NAME,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  silent: !IS_PRODUCTION,
-  autoInstrumentServerFunctions: false,
-  widenClientFileUpload: true,
-};
-
-// Exporta la configuración de Sentry envuelta en la configuración de Analyzer
+// Export the Sentry configuration wrapped in the Analyzer configuration
 export default withSentryConfig(
   withBundleAnalyzer({
     enabled: process.env.ANALYZE === 'true',
   })(config),
-  sentryOptions
+  // sentryOptions
 );
-
-
-
-
 
 function getRemotePatterns() {
   /** @type {import('next').NextConfig['remotePatterns']} */

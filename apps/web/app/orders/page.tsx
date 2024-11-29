@@ -1,6 +1,6 @@
 import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
-
+import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
@@ -18,6 +18,8 @@ export const generateMetadata = async () => {
 
 async function OrdersPage() {
   const ordersData = await getOrders().catch((err) => console.error(err));
+  const agencyId = ordersData?.[0]?.agency_id;
+  const agencyStatuses = await getAgencyStatuses(agencyId).catch((err) => console.error(err)).catch(() => []);
   const processedOrders =
     ordersData?.map((order) => ({
       ...order,
@@ -25,7 +27,10 @@ async function OrdersPage() {
       customer_name: order.customer.name ?? '',
     })) ?? [];
 
-  const role = await getUserRole();
+  const role = await getUserRole().catch((err) => {
+    console.error(`Error client, getting user role: ${err}`)
+    return ''
+  });
 
   return (
     <>
@@ -34,7 +39,7 @@ async function OrdersPage() {
           <div className="mb-[32px] flex items-center justify-between">
             <div className="flex-grow">
               <span>
-                <div className="font-inter text-[36px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
+                <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
                   <h1>
                     <Trans i18nKey={'orders:title'} />
                   </h1>
@@ -43,7 +48,7 @@ async function OrdersPage() {
             </div>
           </div>
           <div>
-            <OrderList orders={processedOrders ?? []} role={role}></OrderList>
+            <OrderList orders={processedOrders ?? []} role={role} agencyStatuses={agencyStatuses ?? []}></OrderList>
           </div>
         </div>
       </PageBody>

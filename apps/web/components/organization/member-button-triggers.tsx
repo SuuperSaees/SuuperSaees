@@ -7,6 +7,7 @@ import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/butto
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 
 import { InviteClientMembersDialogContainer } from './invite-client-members-dialog';
+import { useTranslation } from 'react-i18next';
 
 interface MemberButtonTriggersProps {
   clientOrganizationId: string;
@@ -20,6 +21,7 @@ export default function MemberButtonTriggers({
   search,
   setSearch,
 }: MemberButtonTriggersProps) {
+  const {t} = useTranslation('organizations')
   return (
     <>
       <div className="relative w-fit flex-1 md:grow-0">
@@ -31,17 +33,17 @@ export default function MemberButtonTriggers({
               | React.ChangeEvent<HTMLInputElement>
               | React.FormEvent<HTMLFormElement>,
           ) => setSearch((e.target as HTMLInputElement).value)}
-          placeholder={'Search...'}
+          placeholder={t('members.search')}
           className="w-full rounded-lg bg-background pr-8 md:w-[200px] lg:w-[320px]"
         />
       </div>
-      {(currentUserRole === 'agency_owner' ||
+      {(currentUserRole === 'agency_owner' || currentUserRole === 'agency_project_manager' ||
         currentUserRole === 'client_owner') && (
         <InviteClientMembersDialogContainer
           clientOrganizationId={clientOrganizationId}
           userRoleHierarchy={2}
         >
-          <ThemedButton>Add member</ThemedButton>
+          <ThemedButton>{t('members.addButton')}</ThemedButton>
         </InviteClientMembersDialogContainer>
       )}
     </>

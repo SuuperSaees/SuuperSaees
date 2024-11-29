@@ -1,166 +1,89 @@
 'use server';
 
-import { redirect } from 'next/navigation';
-
-
-
+import {
+  CustomError,
+  CustomResponse,
+  ErrorOrderOperations,
+} from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
 
+import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
-import { hasPermissionToCreateOrder } from '../../permissions/orders';
+import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
 
 
-type OrderInsert = Omit<Order.Insert, 'customer_id'> & {
+type OrderInsert = Omit<
+  Order.Insert,
+  | 'customer_id'
+  | 'client_organization_id'
+  | 'agency_id'
+  | 'propietary_organization_id'
+> & {
   fileIds?: string[];
 };
 
-export const createOrders = async (orders: OrderInsert[]) => {
+export const createOrder = async (
+  order: OrderInsert,
+  briefResponses?: Brief.Relationships.FormFieldResponses[],
+  orderFollowers?: string[],
+) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw new Error(userError.message);
-    const userId = userData.user.id;
 
-    const { data: accountData, error: accountError } = await client
-      .from('accounts')
-      .select()
-      .eq('id', userId)
-      .single();
-    if (accountError) throw new Error(accountError.message);
+    // Step 1: Prepare the orders for insertion
+    const briefIds = briefResponses?.map((response) => response.brief_id) ?? [];
 
-    const { data: clientData, error: clientError } = await client
-      .from('clients')
-      .select('*')
-      .eq('user_client_id', userId)
-      .single();
-    if (clientError && clientError.code !== 'PGRST116') {
-      console.error('clientError', clientError);
-      throw new Error(clientError.message);
-    }
+    const orderToInsert = {
+      ...order,
+      brief_ids: briefIds,
+    };
+    delete orderToInsert.fileIds;
 
-    const agencyClientId =
-      clientData?.agency_id ?? accountData.organization_id ?? '';
-    const clientOrganizationId =
-      clientData?.organization_client_id ?? accountData.organization_id;
-
-    const { data: agencyOrganizationData, error: agencyOrganizationError } =
-      await client
-        .from('accounts')
-        .select('id, primary_owner_user_id, name')
-        .eq('id', agencyClientId)
-        .single();
-    if (agencyOrganizationError)
-      throw new Error(agencyOrganizationError.message);
-
-    const { data: emailData, error: emailError } = await client
-      .from('accounts')
-      .select('id, email')
-      .eq('id', agencyOrganizationData.primary_owner_user_id)
-      .single();
-    if (emailError) throw new Error(emailError.message);
-
-    const { data: roleData, error: roleError } = await client
-      .from('accounts_memberships')
-      .select('account_role')
-      .eq('user_id', userId)
-      .single();
-    if (roleError) throw new Error(roleError.message);
-
-    // Step 1: Check if the user has permission to create orders
-    const hasPermission = await hasPermissionToCreateOrder(
-      agencyClientId,
-      clientOrganizationId ?? '',
-    );
-    if (!hasPermission) {
-      throw new Error('You do not have permission to create orders.');
-    }
-
-    // Step 2: Prepare the orders for insertion
-    const ordersToInsert = orders.map(
-      ({ fileIds, ...orderWithoutFileIds }) => ({
-        ...orderWithoutFileIds,
-        customer_id: userId,
-        client_organization_id: clientOrganizationId,
-        propietary_organization_id:
-          agencyOrganizationData.primary_owner_user_id,
-        agency_id: agencyOrganizationData.id,
-      }),
+    // Step 2: Insert order into the database as a transaction procedure
+    // The rpc proccess includes: create order, create order files, create order followers and assign agency members
+    const { data: orderData, error: orderError } = await client.rpc(
+      'create_order',
+      {
+        _order: orderToInsert,
+        _brief_responses: briefResponses ?? [],
+        _order_followers: orderFollowers ?? [],
+        _order_file_ids: order.fileIds ?? [],
+      },
     );
 
-    // Step 3: Insert orders into the database
-    const { data: orderData, error: orderError } = await client
-      .from('orders_v2')
-      .insert(ordersToInsert)
-      .select()
-      .single();
-    if (orderError) throw new Error(orderError.message);
-
-    // Step 4: Send email notification
-    if (emailData.email) {
-      await sendOrderCreationEmail(
-        emailData.email,
-        orderData.id.toString(),
-        orderData,
-        agencyOrganizationData.name ?? '',
-      );
-    }
-
-    // Step 5: Insert order files if present
-    for (const order of orders) {
-      if (order.fileIds && order.fileIds.length > 0) {
-        for (const fileId of order.fileIds) {
-          const orderFileToInsert = {
-            order_id: orderData.uuid,
-            file_id: fileId,
-          };
-
-          const { error: orderFilesError } = await client
-            .from('order_files')
-            .insert(orderFileToInsert);
-
-          if (orderFilesError) throw new Error(orderFilesError.message);
-        }
+    if (orderError) {
+      console.error('Error in the order transaction:', orderError);
+      if (orderError.code === '42501') {
+        throw new CustomError(
+          HttpStatus.Error.Unauthorized,
+          orderError.message,
+          ErrorOrderOperations.INSUFFICIENT_PERMISSIONS,
+        );
+      } else {
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          orderError.message,
+          ErrorOrderOperations.FAILED_TO_CREATE_ORDER,
+        );
       }
     }
 
-    // Step 6: Assign agency members to the order
-    const agencyRoles = new Set([
-      'agency_owner',
-      'agency_member',
-      'agency_project_manager',
-    ]);
+    // Step 3: Send email notification
+    await sendOrderCreationEmail(orderData.id.toString(), orderData).catch(
+      (error) => {
+        console.error('Error sending order creation email:', error);
+      },
+    );
 
-    if (agencyRoles.has(roleData.account_role)) {
-      const assignationData = {
-        agency_member_id: userId,
-        order_id: orderData.id,
-      };
-      const { error: assignedOrdersError } = await client
-        .from('order_assignations')
-        .insert(assignationData);
-      if (assignedOrdersError) throw new Error(assignedOrdersError.message);
-    }
-
-    // Step 7: Add order follow-up for client owners/members
-    if (['client_owner', 'client_member'].includes(roleData.account_role)) {
-      const followUpData = {
-        order_id: orderData.id,
-        client_member_id: userId,
-      };
-
-      const { error: followUpError } = await client
-        .from('order_followers')
-        .insert(followUpData);
-      if (followUpError) throw new Error(followUpError.message);
-    }
-
-    // Step 8: Redirect to orders page after successful order creation
-    redirect('/orders');
+    return CustomResponse.success(orderData, 'orderCreated').toJSON();
   } catch (error) {
-    console.error(error);
-    throw error;
+    console.error('Error creating order:', error);
+    // Remove files (files table) from the database and storage. Is the only thing that not works with transactions.
+    // Files are uploaded independently
+
+    return CustomResponse.error(error).toJSON();
   }
 };

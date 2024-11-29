@@ -34,12 +34,14 @@ export enum ActivityType {
   DESCRIPTION = 'description',
   TITLE = 'title',
   ASSIGNED_TO = 'assigned_to',
+  TASK = 'task',
 }
 
 export enum ActionType {
   CREATE = 'create',
   UPDATE = 'update',
   DELETE = 'delete',
+  COMPLETE = 'complete',
 }
 
 export type Activity = ServerActivity.Type & {

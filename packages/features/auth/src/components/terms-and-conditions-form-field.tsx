@@ -16,18 +16,18 @@ export function TermsAndConditionsFormField(
         return (
           <FormItem>
             <FormControl>
-              <label className={'flex items-start space-x-2 py-2'}>
-                <Checkbox required name={field.name} />
+              <label className={'flex items-center space-x-2 py-2'}>
+                <Checkbox required name={field.name} className='border-2'/>
 
-                <div className={'text-xs'}>
+                <div className={'text-sm not-italic font-normal leading-[18.72px] tracking-[-0.18px];'}>
                   <Trans
                     i18nKey={'auth:acceptTermsAndConditions'}
                     components={{
                       TermsOfServiceLink: (
                         <Link
                           target={'_blank'}
-                          className={'underline'}
-                          href={'/terms-of-service'}
+                          className={'text-brand'}
+                          href={'https://suuper.co/terms-of-service'}
                         >
                           <Trans i18nKey={'auth:termsOfService'} />
                         </Link>
@@ -35,8 +35,8 @@ export function TermsAndConditionsFormField(
                       PrivacyPolicyLink: (
                         <Link
                           target={'_blank'}
-                          className={'underline'}
-                          href={'/privacy-policy'}
+                          className={'text-brand'}
+                          href={'https://suuper.co/privacy-policy'}
                         >
                           <Trans i18nKey={'auth:privacyPolicy'} />
                         </Link>

@@ -1,3 +1,4 @@
+'use server'; 
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -11,11 +12,10 @@ import { AcceptInvitationContainer } from '@kit/team-accounts/components';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
 import { Trans } from '@kit/ui/trans';
-
 import { AppLogo } from '~/components/app-logo';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
-import { withI18n } from '~/lib/i18n/with-i18n';
+// import { withI18n } from '~/lib/i18n/with-i18n';
 
 interface Context {
   searchParams: {
@@ -23,6 +23,7 @@ interface Context {
     email?: string;
   };
 }
+
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -32,21 +33,35 @@ export const generateMetadata = async () => {
   };
 };
 
-async function JoinTeamAccountPage({ searchParams }: Context) {
+export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const token = searchParams.invite_token;
+  const client = getSupabaseServerComponentClient({
+    admin: true,
+  });
+  const emailParam = searchParams.email ?? '';
 
+  const emailSearch = decodeURIComponent(emailParam).replace(/ /g, '+');
+  const { data: verifyAccountData } = await client
+    .from('accounts')
+    .select("email")
+    .eq('email', emailSearch)
+    .single();
+
+    if (!verifyAccountData) {
+      await client.auth.signOut();
+    }
   // no token, redirect to 404
   if (!token) {
     notFound();
   }
 
-  const client = getSupabaseServerComponentClient();
-  const auth = await requireUser(client);
+  // const auth = await requireUser(client);
+  const auth = await client.auth.getUser();
 
   // if the user is not logged in or there is an error
   // redirect to the sign up page with the invite token
   // so that they will get back to this page after signing up
-  if (auth.error ?? !auth.data) {
+  if (!auth.data.user && !verifyAccountData) {
     const urlParams = new URLSearchParams({
       invite_token: token,
       email: searchParams.email ?? '',
@@ -55,8 +70,7 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
     const signUpPath = `${pathsConfig.auth.signUp}?${urlParams.toString()}`;
 
     // redirect to the sign up page with the invite token
-    redirect(signUpPath);
-    return;
+    return redirect(signUpPath);
   } 
 
 
@@ -66,6 +80,7 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
 
   // the user is logged in, we can now check if the token is valid
   const invitation = await api.getInvitation(adminClient, token);
+
 
   // the invitation is not found or expired
   if (!invitation) {
@@ -115,8 +130,7 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
   // once the user accepts the invitation, we redirect them to home page
 
   const accountHome = pathsConfig.app.orders;
-  const email = auth.data.email ?? '';
-
+  const email = auth.data?.email ?? '';
   return (
     <AuthLayoutShell Logo={AppLogo}>
       <AcceptInvitationContainer
@@ -132,11 +146,11 @@ async function JoinTeamAccountPage({ searchParams }: Context) {
   );
 }
 
-export default withI18n(JoinTeamAccountPage);
+// export default withI18n(JoinTeamAccountPage);
 
 function InviteNotFoundOrExpired() {
   return (
-    <div className={'flex flex-col space-y-4'}>
+    <div className={'flex flex-col items-center justify-center space-y-4 text-center'}>
       <Heading level={6}>
         <Trans i18nKey={'team:inviteNotFoundOrExpired'} />
       </Heading>
@@ -145,7 +159,7 @@ function InviteNotFoundOrExpired() {
         <Trans i18nKey={'team:inviteNotFoundOrExpiredDescription'} />
       </p>
 
-      <Button asChild className={'w-full'} variant={'outline'}>
+      <Button asChild className={'w-full max-w-xs'} variant={'outline'}>
         <Link href={pathsConfig.app.home}>
           <ArrowLeft className={'mr-2 w-4'} />
           <Trans i18nKey={'team:backToHome'} />

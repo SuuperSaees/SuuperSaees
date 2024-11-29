@@ -1,9 +1,7 @@
 'use client';
 
 import React from 'react';
-
 import { Sidebar } from '@kit/ui/sidebar';
-
 import { useOrganizationSettings } from '../../context/organization-settings-context';
 import withOrganizationSettings from '../../hoc/with-organization-settings';
 
@@ -22,6 +20,7 @@ function getTextColorBasedOnBackground(backgroundColor: string) {
   // Return 'black' for lighter backgrounds and 'white' for darker backgrounds
   return luminance > 186 ? 'black' : 'white'; // 186 is a common threshold for readability
 }
+
 // Example component that uses organization settings and accepts children for customization
 export const ThemedSidebar: React.FC<{
   children: React.ReactNode;
@@ -29,25 +28,25 @@ export const ThemedSidebar: React.FC<{
   [key: string]: unknown;
 }> = ({ children, className, ...rest }) => {
   const { sidebar_background_color, theme_color } = useOrganizationSettings();
-  const textColor = getTextColorBasedOnBackground(
-    sidebar_background_color ?? '#ffffff',
-  );
+  const defaultBackgroundColor = '#f2f2f2';
+
+  // Provide a default value to prevent undefined
+  const effectiveBackgroundColor = sidebar_background_color || defaultBackgroundColor;
+  const textColor = getTextColorBasedOnBackground(effectiveBackgroundColor);
+
   return (
     <Sidebar
-      className={` ${className}`}
-      style={
-        sidebar_background_color
-          ? { backgroundColor: sidebar_background_color, color: textColor }
-          : undefined
-      }
-      itemActiveStyle={
-        sidebar_background_color
-          ? {
-              backgroundColor: theme_color,
-              color: getTextColorBasedOnBackground(theme_color ?? ''),
-            }
-          : undefined
-      }
+      className={` ${className} border-none`}
+      style={{
+        backgroundColor: effectiveBackgroundColor, // Color de fondo por defecto
+        color: textColor || '#fff', // Color de texto por defecto
+        border: 'none', // Sin borde
+        boxShadow: 'none', // Sin sombras
+      }}
+      itemActiveStyle={{
+        backgroundColor: theme_color || '#e0e0e0', // Color de fondo activo por defecto
+        color: theme_color ? getTextColorBasedOnBackground(theme_color) : '#000', // Color negro por defecto
+      }}
       {...rest}
     >
       {children}

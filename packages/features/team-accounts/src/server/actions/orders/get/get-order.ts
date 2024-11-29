@@ -2,8 +2,6 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
@@ -48,7 +46,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
         .eq('id', orderData.client_organization_id)
         .single();
 
-    if (clientOrganizationError) throw clientOrganizationError;
+    if (clientOrganizationError) throw clientOrganizationError.message;
 
     const proccesedData = {
       ...orderData,
@@ -108,6 +106,8 @@ export async function getOrderAgencyMembers(
     if (orderError) throw orderError;
 
     if (
+      accountMembershipsData.account_role &&
+      accountMembershipsData.account_role !== 'agency_project_manager' &&
       accountMembershipsData.account_role !== 'agency_owner' &&
       accountMembershipsData.account_role !== 'agency_member'
     ) {
@@ -118,7 +118,7 @@ export async function getOrderAgencyMembers(
       const { data: agencyMembersData, error: agencyMembersError } =
         await client
           .from('accounts')
-          .select('id, name, email, picture_url')
+          .select('id, name, email, picture_url, calendar')
           .eq('organization_id', agencyId ?? accountData.organization_id);
 
       if (agencyMembersError) throw agencyMembersError;
@@ -127,7 +127,18 @@ export async function getOrderAgencyMembers(
 
     const { data: agencyMembersData, error: agencyMembersError } = await client
       .from('accounts')
-      .select('id, name, email, picture_url')
+      .select(
+        `
+        id, 
+        name, 
+        email,
+        user_settings (
+          phone_number,
+          picture_url,
+          calendar
+        )
+      `,
+      )
       .eq('organization_id', agencyId ?? accountData.primary_owner_user_id);
 
     if (agencyMembersError) throw agencyMembersError;
@@ -182,7 +193,7 @@ export async function getAgencyClients(
 
     const userRoles = new Set([
       'agency_owner',
-      'agency_member',
+      'agency_project_manager',
       'client_owner',
     ]);
 
@@ -233,5 +244,24 @@ export async function getAgencyClients(
   } catch (error) {
     console.error('Error fetching agency clients:', error);
     throw error;
+  }
+}
+
+export async function getPropietaryOrganizationIdOfOrder(orderId: string) {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    const { data: clientOrganizationData, error: clientOrganizationDataError } =
+      await client
+        .from('orders_v2')
+        .select('client_organization_id')
+        .eq('id', orderId)
+        .single();
+
+    if (clientOrganizationDataError) throw clientOrganizationDataError;
+
+    return clientOrganizationData;
+  } catch (error) {
+    console.error('Error fetching Agency Owner User Id:', error);
   }
 }

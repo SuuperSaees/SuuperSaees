@@ -27,6 +27,7 @@ const ORGANIZATION_BUCKET = 'organization';
 
 export default function UpdateAccountOrganizationLogo(props: {
   organizationId: string;
+  className?: string;
 }) {
   const { logo_url, updateOrganizationSetting } = useOrganizationSettings();
   const client = useSupabase();
@@ -44,30 +45,32 @@ export default function UpdateAccountOrganizationLogo(props: {
 
   const onValueChange = useCallback(
     (file: File | null) => {
+      
       const removeExistingStorageFile = () => {
         if (logo_url) {
           return deleteLogoImage(client, logo_url) ?? Promise.resolve();
         }
-
         return Promise.resolve();
       };
 
       if (file) {
         const promise = () =>
-          removeExistingStorageFile().then(
-            () =>
-              uploadOrganizationLogo(client, file, props.organizationId).then(
-                (value) => {
-                  updateOrganizationSetting.mutate({
-                    key: 'logo_url',
-                    value,
-                  });
-                },
-              ),
-            // .then(() => {
-            //   props.onLogoUpdated();
-            // }),
-          );
+          removeExistingStorageFile()
+            .then(() => {
+              return uploadOrganizationLogo(client, file, props.organizationId);
+            })
+            .then(
+              (value) => {
+                updateOrganizationSetting.mutate({
+                  key: 'logo_url',
+                  value,
+                });
+              },
+            )
+            .catch((error) => {
+              console.error('[Logo Upload] Error during upload process', error);
+              throw error;
+            });
 
         createToaster(promise);
       } else {
@@ -87,9 +90,8 @@ export default function UpdateAccountOrganizationLogo(props: {
     },
     [client, createToaster, logo_url, props, updateOrganizationSetting],
   );
-  // console.log('logo_url', logo_url);
   return (
-    <ImageUploader value={logo_url} onValueChange={onValueChange}>
+    <ImageUploader value={logo_url} onValueChange={onValueChange} className={props.className}>
       <div className={'flex flex-col space-y-1'}>
         <span className={'text-sm'}>
           <Trans i18nKey={'account:brandLogoSelectLabel'} />
@@ -119,18 +121,25 @@ async function uploadOrganizationLogo(
   photoFile: File,
   organizationId: string,
 ) {
-  const bytes = await photoFile.arrayBuffer();
-  const bucket = client.storage.from(ORGANIZATION_BUCKET);
-  const extension = photoFile.name.split('.').pop();
-  const fileName = await getAvatarFileName(organizationId, extension);
+  try {
+    const bytes = await photoFile.arrayBuffer();
+    const bucket = client.storage.from(ORGANIZATION_BUCKET);
+    const extension = photoFile.name.split('.').pop();
+    const fileName = await getAvatarFileName(organizationId, extension);
 
-  const result = await bucket.upload(fileName, bytes);
+    const result = await bucket.upload(fileName, bytes);
 
-  if (!result.error) {
-    return bucket.getPublicUrl(fileName).data.publicUrl;
+    if (!result.error) {
+      const publicUrl = bucket.getPublicUrl(fileName).data.publicUrl;
+      return publicUrl;
+    }
+
+    console.error('[Logo Upload] Upload failed', result.error);
+    throw result.error;
+  } catch (error) {
+    console.error('[Logo Upload] Unexpected error during upload', error);
+    throw error;
   }
-
-  throw result.error;
 }
 
 async function getAvatarFileName(
@@ -143,5 +152,5 @@ async function getAvatarFileName(
   // the browser always fetches the latest image
   const uniqueId = nanoid(16);
 
-  return `${organizationId}.${extension}?v=${uniqueId}`;
+  return `${organizationId}.light.${extension}?v=${uniqueId}`;
 }

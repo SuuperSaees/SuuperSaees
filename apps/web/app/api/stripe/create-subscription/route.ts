@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
-    const { searchParams } = new URL(req.url);
+  const { searchParams } = new URL(req.url);
   const customer = searchParams.get('customerId');
   const price = searchParams.get('priceId');
     try {
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(subscription);
     } catch (error) {
         return NextResponse.json(
-            {error: {message: "Internal Server Error"}},
+            {error: {message: "Internal Server Error "}},
             {status: 500}
         )
     }

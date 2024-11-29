@@ -10,7 +10,8 @@ import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.
 import { Activity, ActivityType } from '../context/activity-context';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
-
+import { convertToTitleCase } from '../utils/format-agency-names';
+import { formatDisplayDate } from '@kit/shared/utils';
 const translateActivity = (
   activity: Activity,
   t: TFunction<'logs', undefined>,
@@ -75,7 +76,7 @@ export const ActivityCustomSpan = ({
   const matchedWord = wordsToMark.find((word) => value.includes(word));
 
   if (!matchedWord) {
-    return <span>{value}</span>;
+    return <span className='font-semibold'>{convertToTitleCase(value)}</span>;
   }
 
   // Split the message into two parts based on the matched word
@@ -129,21 +130,24 @@ export const StatusActivity = ({
   activity,
   formattedActivity,
 }: ActivityActionProps) => {
+  const { i18n } = useTranslation();
+  const language = i18n.language;
   if (
     activity.type === ActivityType.STATUS ||
     activity.type === ActivityType.PRIORITY ||
-    activity.type === ActivityType.DUE_DATE
+    activity.type === ActivityType.DUE_DATE ||
+    activity.type === ActivityType.TASK
   ) {
     return (
-      <div className="flex h-fit w-full justify-between gap-4 text-gray-400">
+      <div className="flex h-fit w-full justify-between gap-4 ">
         <div className="flex gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
             {activity.type === ActivityType.PRIORITY ? (
-              <BarChart className="h-5 w-5 text-gray-400" />
+              <BarChart className="h-5 w-5 " />
             ) : activity.type === ActivityType.DUE_DATE ? (
-              <Calendar className="h-5 w-5 text-gray-400" />
+              <Calendar className="h-5 w-5 " />
             ) : activity.type === ActivityType.STATUS ? (
-              <LineChart className="h-5 w-5 text-gray-400" />
+              <LineChart className="h-5 w-5 " />
             ) : null}
           </div>
           <span className="inline-flex flex-wrap gap-1">
@@ -153,7 +157,7 @@ export const StatusActivity = ({
             <span>{formattedActivity.preposition}</span>
             <span>
               {activity.type === 'due_date' &&
-                format(new Date(formattedActivity.value ?? ''), '	Pp')}
+                formatDisplayDate(new Date(formattedActivity.value ?? ''), language, true)}
             </span>
             {(activity.type === 'priority' || activity.type === 'status') && (
               <ActivityCustomSpan
@@ -163,7 +167,7 @@ export const StatusActivity = ({
             )}
           </span>
         </div>
-        <small className="w-full max-w-[100px] text-right">
+        <small className="">
           {format(new Date(formattedActivity.created_at), 'MMM dd, p')}
         </small>
       </div>
@@ -176,8 +180,10 @@ export const DefaultAction = ({
   activity,
   formattedActivity,
 }: ActivityActionProps) => {
+  const { i18n } = useTranslation();
+  const language = i18n.language;
   return (
-    <div className="flex h-fit w-full justify-between gap-4 text-gray-400">
+    <div className="flex h-fit w-full justify-between gap-4">
       <div className="flex gap-4">
         <AvatarDisplayer
           displayName={formattedActivity.user.picture_url ? null : formattedActivity.user.name}
@@ -190,12 +196,12 @@ export const DefaultAction = ({
           <span>{formattedActivity.preposition}</span>
           <span>
             {activity.type === 'due_date'
-              ? format(new Date(formattedActivity.value ?? ''), '	Pp')
+              ? formatDisplayDate(new Date(formattedActivity.value ?? ''), language)
               : formattedActivity.value}
           </span>
         </span>
       </div>
-      <small className="w-full max-w-[100px] text-right">
+      <small className="">
         {format(new Date(activity.created_at), 'MMM dd, p')}
       </small>
     </div>

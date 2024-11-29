@@ -1,20 +1,22 @@
 import { cache } from 'react';
 
+
+
 import { cookies, headers } from 'next/headers';
 
-import {
-  initializeServerI18n,
-  parseAcceptLanguageHeader,
-} from '@kit/i18n/server';
+
+
+import { initializeServerI18n, parseAcceptLanguageHeader } from '@kit/i18n/server';
+
+
 
 import featuresFlagConfig from '~/config/feature-flags.config';
-import {
-  I18N_COOKIE_NAME,
-  getI18nSettings,
-  languages,
-} from '~/lib/i18n/i18n.settings';
+import { I18N_COOKIE_NAME, getI18nSettings, languages } from '~/lib/i18n/i18n.settings';
+
+
 
 import { i18nResolver } from './i18n.resolver';
+
 
 /**
  * @name priority
@@ -77,4 +79,10 @@ function getLanguageOrFallback(language: string | undefined) {
   }
 
   return selectedLanguage;
+}
+
+export function getLanguageFromCookie() {
+  const cookie = cookies().get(I18N_COOKIE_NAME)?.value;
+
+  return getLanguageOrFallback(cookie);
 }

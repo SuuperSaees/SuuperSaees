@@ -42,10 +42,12 @@ export const updateOrder = async (
     const { error: userError, data: userData } = await client.auth.getUser();
     if (userError) throw userError.message;
 
-    const { error: orderError } = await client
+    const {data: updatedData, error: orderError } = await client
       .from('orders_v2')
       .update(order)
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .select()
+      .single()
 
     if (orderError) throw orderError.message;
     // console.log('updatedOrder:', orderData);
@@ -55,10 +57,11 @@ export const updateOrder = async (
 
     // Call the abstracted activity logging function
     await logOrderActivities(orderId, order, userData.user.id, userNameOrEmail);
+    return updatedData;
 
   } catch (error) {
     console.error('Error updating order:', error);
-    throw error;
+    throw error
   }
 };
 
@@ -136,11 +139,9 @@ const handleFieldUpdate = async (
   } else if (field === 'priority') {
     translatedValue =
       priorityTranslations[value as keyof typeof priorityTranslations] || value;
-  } else if (field === 'due_date'){
+  } else if (field === 'due_date') {
     translatedValue = new Date(value).toLocaleDateString();
   }
-
-  
 
   const emailsData = await getEmails(orderId.toString());
   const actualName = await getUserById(userData.user.id);
@@ -159,6 +160,7 @@ const handleFieldUpdate = async (
         orderInfo?.title ?? '',
         field === 'status' ? `${translatedValue}` : `${translatedValue}`,
         agencyName,
+        userData?.user.id ?? '',
       );
     } else {
       console.warn('Email is null or undefined, skipping...');
@@ -257,7 +259,7 @@ export const addOrderMessage = async (
       .select()
       .single();
 
-      if (messageError) throw messageError.message;
+    if (messageError) throw messageError.message;
 
     for (const email of emailsData) {
       if (email) {
@@ -270,6 +272,7 @@ export const addOrderMessage = async (
           messageContent,
           agencyName,
           new Date().toLocaleDateString(),
+          userData?.user.id,
         );
       } else {
         console.warn('Email is null or undefined, skipping...');

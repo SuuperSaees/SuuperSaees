@@ -104,8 +104,9 @@ export function AccountMembersTable({
         onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
         placeholder={t(`searchMembersPlaceholder`)}
       /> */}
-
+      <div className='bg-white rounded-lg'>
       <DataTable columns={columns} data={filteredMembers} />
+      </div>
     </div>
   );
 }

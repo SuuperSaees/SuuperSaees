@@ -1,3 +1,42 @@
 {
-    "title": "Invoices"
+  "title": "Invoices",
+  "plan": {
+    "title": "Plan",
+    "nextInvoice": "Next invoice issue date "
+  },
+  "total": {
+    "title": "Invoice total",
+    "usersEquivalent": "equivalent to {{currentUsers}}",
+    "users": "users",
+    "user": "user",
+    "upgrade": "Upgrade your plan"
+  },
+  "history": {
+    "title": "Billing history",
+    "invoice": "Invoice",
+    "amount": "Amount",
+    "date": "Date",
+    "status": "Status"
+  },
+  "manage": {
+    "title": "Manage subscription",
+    "description": "Update subscription status",
+    "cancel": "Cancel subscription",
+    "modal": {
+      "cancel": {
+        "title": "Cancel subscription",
+        "description": {
+          "paragraph1": "Are you sure you want to cancel your subscription?",
+          "paragraph2": {
+            "text1": "Type",
+            "text2": "to confirm."
+          }
+        },
+        "submit": "Cancel subscription",
+        "placeholder": "Type 'cancel_subscription'",
+        "cancelButton": "Cancel",
+        "backButton": "Back"
+      }
+    }
+  }
 }
