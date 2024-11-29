@@ -143,6 +143,7 @@ function useSetSession(tokens: { accessToken: string; refreshToken: string }) {
         //Push to /home page and then use refresh to reload the page with updated user data
         router.push('/home');
         router.refresh()
+        return tokenId
 
         // This one below is no longer used to prevent useContext errors
         // window.location.replace('/home');
