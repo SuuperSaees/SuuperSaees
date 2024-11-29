@@ -25,7 +25,7 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOption
   const {t} = useTranslation('clients');
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
   const [openImpersonateUserDialog, setOpenImpersonateUserDialog] = useState(false);
-  const [openSwitchOrganizationDialog, setOpenSwitchOrganizationDialog] = useState(false);
+  // const [openSwitchOrganizationDialog, setOpenSwitchOrganizationDialog] = useState(false);
   const [openResetPasswordDialog, setOpenResetPasswordDialog] = useState(false)
 
   return (
@@ -51,12 +51,12 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOption
               {t('editUser.supplant')}
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setOpenSwitchOrganizationDialog(true)}>
+          {/* <DropdownMenuItem onSelect={() => setOpenSwitchOrganizationDialog(true)}>
             <div className='flex gap-2 items-center w-full h-full cursor-pointer'>
               <ArrowLeftRight className="h-4 w-4" />
               {t('editUser.switchOrganization')}
             </div>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuItem className='flex gap-2 items-center w-full h-full cursor-pointer' onSelect={() => setOpenResetPasswordDialog(true)}>
             <LockKeyhole className='w-4 h-4' /> 
             {t('editUser.resetPassword')}
@@ -74,7 +74,7 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOption
       <AdminImpersonateUserDialog userId={userId} isOpen = {openImpersonateUserDialog} setIsOpen={setOpenImpersonateUserDialog}>
         <></>
       </AdminImpersonateUserDialog>
-      <SwitchOrganizationDialog userId={userId} isOpen={openSwitchOrganizationDialog} setIsOpen={setOpenSwitchOrganizationDialog} organizationOptions = {organizationOptions} />
+      {/* <SwitchOrganizationDialog userId={userId} isOpen={openSwitchOrganizationDialog} setIsOpen={setOpenSwitchOrganizationDialog} organizationOptions = {organizationOptions} /> */}
       <ResetPasswordDialog userId={userId} isOpen={openResetPasswordDialog} setIsOpen={setOpenResetPasswordDialog} />
     </>
   );
