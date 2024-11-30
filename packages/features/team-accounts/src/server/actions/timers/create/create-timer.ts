@@ -30,7 +30,7 @@ export async function createTimer(timer: Timer) {
         name: timer.elementName,
         end_time: timer.endTime ? timer.endTime : null,
         status: timer.timestamp ?  'finished' : 'active',
-        timestamp: timer.timestamp ? timer.timestamp : null,
+        timestamp: timer.timestamp ? timer.timestamp : '00:00',
       })
       .select('id')
       .single();
