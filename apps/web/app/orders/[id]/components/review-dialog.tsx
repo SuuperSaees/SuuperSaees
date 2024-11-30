@@ -80,10 +80,7 @@ export function ReviewDialog({
       <form className={`flex flex-col gap-4 ${className}`}>
         <Dialog>
           <DialogTrigger asChild>
-            <ThemedButton
-              variant="outline"
-              className="w-full bg-primary text-white hover:bg-primary/90 hover:text-white"
-            >
+            <ThemedButton>
               {t('details.dialog.button')}
             </ThemedButton>
           </DialogTrigger>

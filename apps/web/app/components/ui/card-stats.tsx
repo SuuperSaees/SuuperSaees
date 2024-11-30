@@ -51,7 +51,7 @@ export default function CardStats({ title, value }: CardStatsProps) {
   }
 
   return (
-    <div className="flex w-full max-w-sm flex-1 flex-col gap-4 rounded-md border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:bg-gray-50">
+    <div className="flex w-full max-w-sm flex-1 flex-col gap-4 rounded-md border border-gray-200 bg-white p-5 shadow-sm transition-shadow">
       <div className="flex max-w-full shrink-0 flex-col gap-2">
         <span className="text-xs font-medium text-gray-600">{title}</span>
         <span className="flex justify-between gap-4">
@@ -102,10 +102,14 @@ function formatNumber(value: number): string {
 function compareValues(
   current: number | null,
   previous: number | null,
+  returnAsPercentage = true
 ): number | null {
-  if (current === null || previous === null) return null; // Avoid division by zero
+  if (current === null || previous === null) return null; // No data to compare
   if (current === 0 || previous === 0) return 0; // Avoid division by zero
+
   const difference = current - previous;
 
-  return (difference / previous) * 100;
+  return returnAsPercentage
+    ? (difference / previous) * 100 // Return as percentage
+    : difference; // Return raw difference
 }
