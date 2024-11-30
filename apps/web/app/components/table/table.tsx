@@ -22,9 +22,10 @@ interface TableProps<T> {
 
     }
   }
+  emptyStateComponent?: React.ReactNode
 }
 
-export default function Table<T>({data, columns, controllers, filterKey, withSearch}: TableProps<T>) {
+export default function Table<T>({data, columns, controllers, filterKey, withSearch, emptyStateComponent}: TableProps<T>) {
   const [search, setSearch] = useState(controllers?.search?.value ?? '');
 
   const filteredData = data.filter((obj) => {
@@ -59,7 +60,7 @@ export default function Table<T>({data, columns, controllers, filterKey, withSea
         </ThemedButton>
       )}
     </div>
-    <DataTable columns={columns} data={filteredData} className="bg-white rounded-xl" />
+    <DataTable columns={columns} data={filteredData} className="bg-white rounded-xl" emptyStateComponent={emptyStateComponent} />
   </div>
   )
 }

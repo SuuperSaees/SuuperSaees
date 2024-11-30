@@ -10,6 +10,7 @@ import CardReview from '../../../components/ui/card-review';
 import Pagination from '../../../components/ui/pagination';
 import ReviewRating from '../../../components/ui/review-rating';
 import SkeletonReviewsSection from './skeleton';
+import EmptyState from '~/components/ui/empty-state';
 
 interface ReviewsSectionProps {
   userId: string;
@@ -59,14 +60,11 @@ export default function ReviewsSection({
   return (
     <div className="flex h-full max-h-full w-full flex-wrap gap-16 lg:flex-nowrap p-8">
       {!paginatedReviews.length ? (
-        <div className="mx-auto mt-8 flex max-w-md flex-col gap-1 text-center">
-          <span className="text-4xl font-bold text-gray-300">
-            {t('empty.title')}
-          </span>
-          <p className="mx-auto text-sm text-gray-400">
-            {t('empty.description')}
-          </p>
-        </div>
+        <EmptyState 
+          imageSrc='/images/illustrations/Illustration-cloud.svg'
+          title={t('empty.title')}
+          description={t('empty.description')}
+        />
       ) : (
         <>
           <ReviewRating

@@ -3,6 +3,7 @@
 import { isAfter, isBefore, subDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 
+import EmptyState from '~/components/ui/empty-state';
 import { useColumns } from '~/hooks/use-columns';
 import { Order } from '~/lib/order.types';
 
@@ -98,7 +99,18 @@ export default function HomeSection({ memberOrders }: HomeSectionProps) {
           }}
         />
       </div>
-      <Table data={memberOrders} columns={columns} filterKey={'title'} />
+      <Table
+        data={memberOrders}
+        columns={columns}
+        filterKey={'title'}
+        emptyStateComponent={
+          <EmptyState
+            title={t('orders:empty.member.title')}
+            description={t('orders:empty.member.description')}
+            imageSrc="/images/illustrations/Illustration-box.svg"
+          />
+        }
+      />
     </div>
   );
 }

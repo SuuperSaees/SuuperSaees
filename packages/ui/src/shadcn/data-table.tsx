@@ -32,13 +32,15 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   options?: TableOptions<TData>;
   className?: string;
+  emptyStateComponent?: React.ReactNode
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   options,
-  className
+  className,
+  emptyStateComponent
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     ...options,
@@ -93,7 +95,9 @@ export function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                <Trans i18nKey={'common:noData'} />
+                {
+                  emptyStateComponent ? emptyStateComponent : <Trans i18nKey={'common:noData'} />
+                }
               </TableCell>
             </TableRow>
           )}

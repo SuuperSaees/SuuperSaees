@@ -137,5 +137,11 @@
     "addManualTime": "Add manual time",
     "deleteTimer": "Delete timer",
     "editTimer": "Edit timer"
+  },
+  "empty": {
+    "member": {
+      "title": "No orders assigned to you yet.",
+      "description": "Hang tight! Your assigned orders will appear here soon."
+    }
   }
 }
