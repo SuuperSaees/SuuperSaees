@@ -14,6 +14,7 @@ import { updateUserSettings } from '~/team-accounts/src/server/actions/members/u
 // import Header from '../../../components/accounts/header';
 import HomeSection from './home-section';
 import ReviewsSection from './reviews-section';
+import { useRouter } from 'next/navigation';
 
 export default function Member({
   id,
@@ -38,13 +39,14 @@ export default function Member({
 }) {
   const { t } = useTranslation();
   // const [activeTab, setActiveTab] = useState('home');
-
+  const router = useRouter();
   const updateMemberImage = async (value: string) => {
     try {
       await updateUserSettings(id, { picture_url: value });
       toast.success('Success', {
         description: t('account:updateProfileSuccess'),
       });
+      router.refresh();
     } catch (error) {
       toast.error('Error', {
         description: t('account:updateProfileError'),
@@ -79,10 +81,10 @@ export default function Member({
   };
 
   const views: ViewsMap = new Map([
-    ['home', <HomeSection key={'home'} memberOrders={orders} />],
+    [t('team:member.tabs.home'), <HomeSection key={t('team:member.tabs.home')} memberOrders={orders} />],
     [
-      'reviews',
-      <ReviewsSection key={'reviews'} userId={id} userRole={userRole} />,
+      t('team:member:tabs.reviews'),
+      <ReviewsSection key={t('team:member:tabs.reviews')} userId={id} userRole={userRole} />,
     ],
   ]);
 
@@ -107,7 +109,7 @@ export default function Member({
           }}
           rolesThatCanEdit={rolesThatCanEdit}
         />
-        <Section.Tabs defaultActiveTab={'home'} />
+        <Section.Tabs defaultActiveTab={t('team:member.tabs.home')} />
       </Section>
     </AgencyStatusesProvider>
   );

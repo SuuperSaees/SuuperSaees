@@ -168,5 +168,11 @@
   "plan": {
     "upgradeButton": "Upgrade plan",
     "message": "You have reached the membership limit"
+  },
+  "member": {
+    "tabs": {
+      "home": "Home",
+      "reviews": "Reviews"
+    }
   }
 }

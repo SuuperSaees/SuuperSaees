@@ -168,5 +168,11 @@
   "plan": {
     "upgradeButton": "Mejorar plan",
     "message": "Haz alcanzado el límite de miembros"
+  },
+  "member": {
+    "tabs": {
+      "home": "Inicio",
+      "reviews": "Reseñas"
+    }
   }
 }
