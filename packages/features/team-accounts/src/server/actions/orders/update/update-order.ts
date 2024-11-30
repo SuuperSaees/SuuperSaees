@@ -44,7 +44,10 @@ export const updateOrder = async (
 
     const {data: updatedData, error: orderError } = await client
       .from('orders_v2')
-      .update(order)
+      .update({
+        ...order,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', orderId)
       .select()
       .single()
