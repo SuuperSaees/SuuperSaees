@@ -310,6 +310,64 @@ export type Database = {
           },
         ]
       }
+      billing_accounts: {
+        Row: {
+          account_id: string
+          created_at: string
+          credentials: Json | null
+          deleted_on: string | null
+          id: string
+          namespace: string
+          provider: Database["public"]["Enums"]["billing_provider"]
+          provider_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          namespace?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          namespace?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_customers: {
         Row: {
           account_id: string
@@ -352,6 +410,44 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_services: {
+        Row: {
+          created_at: string
+          deleted_on: string | null
+          id: string
+          provider_id: string
+          service_id: number
+          status: Database["public"]["Enums"]["service_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          provider_id: string
+          service_id: number
+          status?: Database["public"]["Enums"]["service_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          provider_id?: string
+          service_id?: number
+          status?: Database["public"]["Enums"]["service_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -1296,19 +1392,19 @@ export type Database = {
       }
       order_followers: {
         Row: {
-          client_member_id: string | null
+          client_member_id: string
           created_at: string | null
-          order_id: number | null
+          order_id: number
         }
         Insert: {
-          client_member_id?: string | null
+          client_member_id?: string
           created_at?: string | null
-          order_id?: number | null
+          order_id: number
         }
         Update: {
-          client_member_id?: string | null
+          client_member_id?: string
           created_at?: string | null
-          order_id?: number | null
+          order_id?: number
         }
         Relationships: [
           {
@@ -1464,6 +1560,7 @@ export type Database = {
           status_id: number | null
           stripe_account_id: string | null
           title: string
+          updated_at: string | null
           uuid: string
         }
         Insert: {
@@ -1482,6 +1579,7 @@ export type Database = {
           status_id?: number | null
           stripe_account_id?: string | null
           title: string
+          updated_at?: string | null
           uuid: string
         }
         Update: {
@@ -1500,6 +1598,7 @@ export type Database = {
           status_id?: number | null
           stripe_account_id?: string | null
           title?: string
+          updated_at?: string | null
           uuid?: string
         }
         Relationships: [
@@ -1853,6 +1952,7 @@ export type Database = {
           created_at: string
           credit_based: boolean | null
           credits: number | null
+          deleted_on: string | null
           hours: number | null
           id: number
           max_number_of_monthly_orders: number | null
@@ -1869,18 +1969,20 @@ export type Database = {
           service_image: string | null
           single_sale: boolean | null
           standard: boolean
-          status: string | null
+          status: Database["public"]["Enums"]["service_status"]
           test_period: boolean | null
           test_period_duration: number | null
           test_period_duration_unit_of_measurement: string | null
           test_period_price: number | null
           time_based: boolean | null
+          visibility: Database["public"]["Enums"]["visibility"]
         }
         Insert: {
           allowed_orders?: number | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
+          deleted_on?: string | null
           hours?: number | null
           id?: number
           max_number_of_monthly_orders?: number | null
@@ -1897,18 +1999,20 @@ export type Database = {
           service_image?: string | null
           single_sale?: boolean | null
           standard: boolean
-          status?: string | null
+          status?: Database["public"]["Enums"]["service_status"]
           test_period?: boolean | null
           test_period_duration?: number | null
           test_period_duration_unit_of_measurement?: string | null
           test_period_price?: number | null
           time_based?: boolean | null
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Update: {
           allowed_orders?: number | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
+          deleted_on?: string | null
           hours?: number | null
           id?: number
           max_number_of_monthly_orders?: number | null
@@ -1925,12 +2029,13 @@ export type Database = {
           service_image?: string | null
           single_sale?: boolean | null
           standard?: boolean
-          status?: string | null
+          status?: Database["public"]["Enums"]["service_status"]
           test_period?: boolean | null
           test_period_duration?: number | null
           test_period_duration_unit_of_measurement?: string | null
           test_period_price?: number | null
           time_based?: boolean | null
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Relationships: []
       }
@@ -2241,6 +2346,36 @@ export type Database = {
           },
         ]
       }
+      subtask_timers: {
+        Row: {
+          subtask_id: string
+          timer_id: string
+        }
+        Insert: {
+          subtask_id: string
+          timer_id: string
+        }
+        Update: {
+          subtask_id?: string
+          timer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtask_timers_subtask_id_fkey"
+            columns: ["subtask_id"]
+            isOneToOne: false
+            referencedRelation: "subtasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_timers_timer_id_fkey"
+            columns: ["timer_id"]
+            isOneToOne: false
+            referencedRelation: "timers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subtasks: {
         Row: {
           completed: boolean | null
@@ -2338,6 +2473,70 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timers: {
+        Row: {
+          created_at: string | null
+          deleted_on: string | null
+          elapsed_time: number | null
+          end_time: number | null
+          id: string
+          name: string | null
+          start_time: number | null
+          status: string | null
+          timestamp: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_on?: string | null
+          elapsed_time?: number | null
+          end_time?: number | null
+          id?: string
+          name?: string | null
+          start_time?: number | null
+          status?: string | null
+          timestamp?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_on?: string | null
+          elapsed_time?: number | null
+          end_time?: number | null
+          id?: string
+          name?: string | null
+          start_time?: number | null
+          status?: string | null
+          timestamp?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_timers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "active_timers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "active_timers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -2519,6 +2718,7 @@ export type Database = {
           status_id: number | null
           stripe_account_id: string | null
           title: string
+          updated_at: string | null
           uuid: string
         }
       }
@@ -2593,6 +2793,30 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_organization_id: {
+        Args: {
+          user_id: string
+        }
+        Returns: string
+      }
+      handle_account_name_changes: {
+        Args: {
+          p_account_id: string
+          p_name: string
+          p_is_personal_accounts: boolean
+          p_old_name: string
+        }
+        Returns: number
+      }
+      handle_organization_settings_portal_name_changes: {
+        Args: {
+          p_account_id: string
+          p_key: Database["public"]["Enums"]["organization_setting_key"]
+          p_value: string
+          p_old_value: string
+        }
+        Returns: number
+      }
       has_active_subscription: {
         Args: {
           target_account_id: string
@@ -2618,6 +2842,14 @@ export type Database = {
           user_id: string
           account_id: string
           permission_name: Database["public"]["Enums"]["app_permissions"]
+        }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _user_id: string
+          _org_id: string
+          _role_name: string
         }
         Returns: boolean
       }
@@ -2668,6 +2900,12 @@ export type Database = {
       is_account_team_member: {
         Args: {
           target_account_id: string
+        }
+        Returns: boolean
+      }
+      is_agency_client: {
+        Args: {
+          _agency_id: string
         }
         Returns: boolean
       }
@@ -2808,7 +3046,23 @@ export type Database = {
         | "orders.read"
         | "orders.manage"
         | "orders.delete"
-      billing_provider: "stripe" | "lemon-squeezy" | "paddle"
+        | "services.write"
+        | "services.read"
+        | "services.manage"
+        | "services.delete"
+        | "billing.write"
+        | "billing.read"
+        | "billing.delete"
+        | "timers.write"
+        | "timers.read"
+        | "timers.manage"
+        | "timers.delete"
+      billing_provider:
+        | "stripe"
+        | "lemon-squeezy"
+        | "paddle"
+        | "treli"
+        | "suuper"
       chat_role: "user" | "assistant"
       field_types:
         | "date"
@@ -2856,6 +3110,16 @@ export type Database = {
       payment_status: "pending" | "succeeded" | "failed"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"
+      service_status:
+        | "active"
+        | "inactive"
+        | "draft"
+        | "expired"
+        | "paused"
+        | "blocked"
+        | "scheduled"
+        | "pending"
+        | "deleted"
       subscription_item_type: "flat" | "per_seat" | "metered"
       subscription_status:
         | "active"
@@ -2866,6 +3130,7 @@ export type Database = {
         | "incomplete"
         | "incomplete_expired"
         | "paused"
+      visibility: "public" | "private"
     }
     CompositeTypes: {
       invitation: {

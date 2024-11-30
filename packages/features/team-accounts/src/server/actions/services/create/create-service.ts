@@ -2,27 +2,24 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
-import {
-  CustomError,
-  CustomResponse,
-  ErrorServiceOperations,
-} from '../../../../../../../shared/src/response';
+import { CustomError, CustomResponse, ErrorServiceOperations } from '../../../../../../../shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { fetchClientByOrgId } from '../../clients/get/get-clients';
-import {
-  fetchCurrentUser,
-  getPrimaryOwnerId,
-  getStripeAccountID,
-} from '../../members/get/get-member-account';
+import { fetchCurrentUser, getPrimaryOwnerId, getStripeAccountID } from '../../members/get/get-member-account';
 import { hasPermissionToAddClientServices } from '../../permissions/services';
 import { updateTeamAccountStripeId } from '../../team-details-server-actions';
+
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -65,7 +62,7 @@ export const createService = async (clientData: ServiceData) => {
     let stripeId = stripeAccountId;
     const newService = {
       created_at: new Date().toISOString(),
-      status: 'active',
+      status: 'active' as Service.Type['status'],
       propietary_organization_id: primary_owner_user_id,
       number_of_clients: 0,
       single_sale: clientData.step_type_of_service.single_sale,
@@ -92,6 +89,7 @@ export const createService = async (clientData: ServiceData) => {
         clientData.step_service_price.max_number_of_simultaneous_orders,
       max_number_of_monthly_orders:
         clientData.step_service_price.max_number_of_monthly_orders,
+      visibility: 'public' as Service.Type['visibility'],
     };
 
     const { error, data: dataResponseCreateService } = await client
@@ -109,7 +107,7 @@ export const createService = async (clientData: ServiceData) => {
 
     if (!stripeId) {
       const user = await fetchUserAccount(client);
-      const stripeAccount = await createStripeAccount('', user.id);
+      const stripeAccount = await createStripeAccount('', user?.id ?? '');
       await updateTeamAccountStripeId({
         stripe_id: stripeAccount.accountId,
         id: user?.id as string,
@@ -148,7 +146,7 @@ export const createService = async (clientData: ServiceData) => {
   }
 };
 
-async function fetchUserAccount(client) {
+async function fetchUserAccount(client: SupabaseClient<Database>) {
   const {
     data: { user },
     error,
@@ -176,6 +174,7 @@ async function createStripeProduct(
 ) {
   const { domain: baseUrl } = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service`, {
+    // Important: This endpoint is not used anymore.
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -197,6 +196,7 @@ async function createStripePrice(
 ) {
   const { domain: baseUrl } = await getDomainByUserId(userId, true);
   const response = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
+    // Important: This endpoint is not used anymore.
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -278,7 +278,6 @@ export async function insertServiceToClient(
   userId: Account.Type['id'],
   agencyId: string,
 ) {
-
   try {
     const { data: serviceAddedData, error: serviceAddedError } = await client
       .from('client_services')
@@ -305,4 +304,3 @@ export async function insertServiceToClient(
     throw error;
   }
 }
-

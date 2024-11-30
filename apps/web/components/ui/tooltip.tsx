@@ -10,12 +10,13 @@ import {
 interface TooltipProps {
   content: ReactNode;
   children: ReactNode;
+  delayDuration?: number;
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
+const Tooltip: React.FC<TooltipProps> = ({ content, delayDuration, children }) => {
   return (
     <TooltipProvider>
-      <TooltipUI>
+      <TooltipUI delayDuration={delayDuration ?? 300}>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
 
         <TooltipContent>{content}</TooltipContent>

@@ -50,6 +50,7 @@
         "enterprise_name": "Nombre de la empresa",
         "tax_code": "Código fiscal",
         "discount_coupon": "Cupón de descuento",
+        "invalid_coupon": "Cupón de descuento inválido",
         "apply": "Aplicar",
         "subtotal": "Subtotal",
         "total": "Total (USD)",
@@ -93,7 +94,8 @@
             "stateProvinceRegionRequired": "Se requiere el estado/provincia/región",
             "postalCodeRequired": "Se requiere el código postal",
             "cardNameRequired": "Se requiere el nombre de la tarjeta"
-        }
+        },
+        "quantity": "Cantidad"
     },
     "step_connect_briefs": "Conectar briefs",
     "single_sale": "Venta única",

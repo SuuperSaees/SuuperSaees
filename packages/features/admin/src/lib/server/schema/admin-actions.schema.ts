@@ -4,7 +4,7 @@ const ConfirmationSchema = z.object({
   confirmation: z.custom<string>((value) => value === 'CONFIRM'),
 });
 
-const UserIdSchema = ConfirmationSchema.extend({
+const UserIdSchema = z.object({
   userId: z.string().uuid(),
 });
 

@@ -2,12 +2,13 @@ import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/
 import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 import { PageBody } from '@kit/ui/page';
-import { Trans } from '@kit/ui/trans';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { OrderList } from './components/orders-list';
+import { PageHeader } from '../components/page-header';
+import { TimerContainer } from '../components/timer-container';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -36,17 +37,12 @@ async function OrdersPage() {
     <>
       <PageBody>
         <div className="p-[35px]">
-          <div className="mb-[32px] flex items-center justify-between">
-            <div className="flex-grow">
-              <span>
-                <div className="font-inter text-[30px] font-semibold leading-[44px] tracking-[-0.72px] text-primary-900">
-                  <h1>
-                    <Trans i18nKey={'orders:title'} />
-                  </h1>
-                </div>
-              </span>
-            </div>
-          </div>
+          <PageHeader 
+            title='orders:title'
+            rightContent={
+              <TimerContainer />
+            }
+          />
           <div>
             <OrderList orders={processedOrders ?? []} role={role} agencyStatuses={agencyStatuses ?? []}></OrderList>
           </div>

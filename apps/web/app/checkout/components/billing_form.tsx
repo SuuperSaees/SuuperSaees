@@ -53,6 +53,7 @@ const BillingForm: React.FC<{
   const [errorMessage, setErrorMessage] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [validSuccess, setValidSuccess] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   const formSchema = z.object({
     fullName: z.string().min(1, t('checkout.validation.fullNameRequired')),
@@ -141,6 +142,7 @@ const BillingForm: React.FC<{
         organizationId,
         paymentMethodId: paymentMethod.id,
         coupon: values.discount_coupon,
+        quantity: quantity,
       });
 
       if (!success) {
@@ -252,6 +254,8 @@ const BillingForm: React.FC<{
                   errorMessage={errorMessage ?? ''}
                   accountId={stripeId}
                   validSuccess={validSuccess}
+                  quantity={quantity}
+                  setQuantity={setQuantity}
                 />
                 <div className="flex flex-col items-center justify-center mt-6 lg:mt-0">
                   <div className="mb-10">

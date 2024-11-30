@@ -42,13 +42,13 @@ function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderPr
           initialName={name}
           id={id}
           userRole={currentUserRole}
-          updateFunction={async (id, data) => {
-            const res = await updateOrganization(id as string, ownerUserId, data);
+          updateFunction={async (value: string) => {
+            const res = await updateOrganization(id, ownerUserId, {
+              name: value,
+            });
             await handleResponse(res, 'organizations', t).catch(() => null);
           }}
           rolesThatCanEdit={rolesThatCanEdit}
-          label="Organization name"
-          fieldName="name"
         />
         <p className="text-sm text-gray-600">
           <Trans i18nKey={'clients:organizations.members.owner'} />

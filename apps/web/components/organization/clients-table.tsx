@@ -21,6 +21,7 @@ import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
 
 import { Account } from '~/lib/account.types';
+import AgencyClientCrudMenu from '~/team-accounts/src/components/clients/agency-client-crud-menu';
 
 
 type Members = Pick<
@@ -41,18 +42,6 @@ interface Permissions {
   queryKey?: string;
 }
 
-type AccountMembersTableProps = {
-  members: Members[];
-  userRole: string;
-  searchController?: {
-    search: string;
-    setSearch: Dispatch<SetStateAction<string>>;
-  };
-  addRowController?: {
-    onAddRow: () => void;
-  };
-  queryKey?: string;
-};
 function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
   const { t } = useTranslation('clients');
 
@@ -112,10 +101,11 @@ function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
             permissions.canRemoveFromAccount(row.original.id) && (
               <div className="h-18 flex items-center gap-4 self-stretch p-4">
                 {/* <UpdateClientDialog {...client} /> */}
-                <DeleteUserDialog
+                {/* <DeleteUserDialog
                   userId={client.id}
                   queryKey={permissions.queryKey}
-                />
+                /> */}
+                <AgencyClientCrudMenu userId={client.id} name={client.name} email={client.email ?? ''} queryKey={permissions.queryKey} />
               </div>
             )
           );
@@ -125,6 +115,19 @@ function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
     [t],
   );
 }
+
+type AccountMembersTableProps = {
+  members: Members[];
+  userRole: string;
+  searchController?: {
+    search: string;
+    setSearch: Dispatch<SetStateAction<string>>;
+  };
+  addRowController?: {
+    onAddRow: () => void;
+  };
+  queryKey?: string;
+};
 
 export function ClientsTable({
   members,

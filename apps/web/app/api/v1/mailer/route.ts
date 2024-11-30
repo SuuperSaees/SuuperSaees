@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   if (!to) missingFields.push('to');
   if (!subject) missingFields.push('subject');
   if (missingFields.length > 0) {
-    // Respuesta de error por campos faltantes
+    // Response for missing fields
     const errorResponse = {
       code: 400, // Bad Request
       message: 'Missing required fields',

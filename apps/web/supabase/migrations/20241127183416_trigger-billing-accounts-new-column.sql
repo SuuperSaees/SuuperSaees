@@ -1,0 +1,1 @@
+alter table "public"."billing_accounts" add column "namespace" text not null default 'production'::text;
