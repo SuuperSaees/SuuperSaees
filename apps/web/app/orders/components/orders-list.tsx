@@ -48,7 +48,11 @@ export function OrderList({ orders, role }: OrdersTableProps) {
     'open',
   );
 
-  const orderColumns = useColumns('orders');
+  // hasPermission based on role
+  const hasPermission = () => {
+    return agencyRoles.has(role);
+  };
+  const orderColumns = useColumns('orders', hasPermission);
 
   const filteredOrders = useMemo(() => {
     const currentTab = tabsConfig.find((tab) => tab.key === activeTab);
@@ -136,7 +140,6 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                   },
                 }}
                 emptyStateComponent={renderEmptyState()}
-                disableInteractions={!agencyRoles.has(role)}
               />
             </TabsContent>
           ))}

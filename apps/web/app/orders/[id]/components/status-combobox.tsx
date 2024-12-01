@@ -49,6 +49,7 @@ interface StatusComboboxProps {
   setOrdersData?: Dispatch<SetStateAction<ExtendedOrderType[]>>;
   changeTabFilteredOrders?: (tab: 'open' | 'completed' | 'all') => void;
   activeTab?: 'open' | 'completed' | 'all';
+  [key: string]: unknown;
 }
 
 const defaultStatusColor = '#8fd6fc'
@@ -61,6 +62,7 @@ function StatusCombobox({
   setOrdersData,
   changeTabFilteredOrders,
   activeTab,
+  ...rest
 }: StatusComboboxProps) {
   const [open, setOpen] = useState<boolean>(false);
   const { statuses, setStatuses } = useAgencyStatuses();
@@ -285,6 +287,7 @@ function StatusCombobox({
               0.60
             ),
           }}
+          {...rest}
         >
           <span className="pl-2 pr-2">{defaultStatuses.has(statuses?.find(status => status.id === currentStatusData?.id)?.status_name ?? '') ? t(`details.statuses.${convertToCamelCase(statuses?.find(status => status.id === currentStatusData?.id)?.status_name ?? '')}`, {ns:'orders'}) : convertToTitleCase(statuses?.find(status => status.id === currentStatusData?.id)?.status_name ?? '')}</span>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
