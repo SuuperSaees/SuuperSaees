@@ -1,27 +1,35 @@
 import { Account } from './account.types';
 import { Activity } from './activity.types';
+import { AgencyStatus } from './agency-statuses.types';
 import { Brief } from './brief.types';
 import { Database } from './database.types';
 import { File } from './file.types';
 import { Message } from './message.types';
 import { Review } from './review.types';
 import { Task } from './tasks.types';
+import { UserSettings } from './user-settings.types';
 import { User } from './user.types';
 
+type UserResponse = Pick<
+  User.Type,
+  'email' | 'id' | 'name' | 'picture_url' > & {
+    settings: Pick<UserSettings.Type, 'name' | 'picture_url'> | null;
+  }
 export namespace Order {
   export type Type = Database['public']['Tables']['orders_v2']['Row'];
 
   export type Response = Order.Type & {
-    customer: Account.Type;
+    customer: UserResponse[];
     assigned_to: {
-      agency_member: User.Response;
-    }[];
-    followers: {
+      agency_member: UserResponse | null;
+    }[] | null;
+    client_organization: Pick<Account.Type, 'name' | 'id'>[] | null;
+    followers?: {
       client_follower: User.Response;
-    }[];
-    client_organization: Pick<Account.Type, 'name' | 'slug' | 'id'>;
-    brief?: Pick<Brief.Response, 'name'>;
+    }[] | null;
+    brief?: Partial<Pick<Brief.Response, 'name'>>;
     review?: Review.Response;
+    statusData?: AgencyStatus.Type | null;
   };
   export type Relational = Order.Relationships.All & {
     messages: (Message.Type & { user: User.Response; files: File.Type[] })[];
