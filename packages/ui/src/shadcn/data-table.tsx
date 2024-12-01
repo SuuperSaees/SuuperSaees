@@ -32,7 +32,8 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   options?: TableOptions<TData>;
   className?: string;
-  emptyStateComponent?: React.ReactNode
+  emptyStateComponent?: React.ReactNode;
+  disableInteractions?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -40,7 +41,8 @@ export function DataTable<TData, TValue>({
   data,
   options,
   className,
-  emptyStateComponent
+  emptyStateComponent,
+  disableInteractions,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     ...options,
@@ -55,14 +57,17 @@ export function DataTable<TData, TValue>({
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
   return (
-    <div className={"rounded-lg border border-gray-100 " + className} >
+    <div className={'rounded-lg border border-gray-100 ' + className}>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className='px-6 py-3 text-black '>
+                  <TableHead
+                    key={header.id}
+                    className="text-nowrap px-6 py-3 align-top text-black"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -76,17 +81,17 @@ export function DataTable<TData, TValue>({
           ))}
         </TableHeader>
 
-        <TableBody>
+        <TableBody className={disableInteractions ? 'pointer-events-none' : ''}>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
                 data-row-id={row.id}
                 data-state={row.getIsSelected() && 'selected'}
-                className='odd:bg-gray-50 even:bg-transparent'
+                className="odd:bg-gray-50 even:bg-transparent"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className='px-6 py-3'>
+                  <TableCell key={cell.id} className="px-6 py-3">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -95,9 +100,11 @@ export function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                {
-                  emptyStateComponent ? emptyStateComponent : <Trans i18nKey={'common:noData'} />
-                }
+                {emptyStateComponent ? (
+                  emptyStateComponent
+                ) : (
+                  <Trans i18nKey={'common:noData'} />
+                )}
               </TableCell>
             </TableRow>
           )}
