@@ -35,9 +35,9 @@ export const ordersColumns = (
         return (
           <Link
             href={`/orders/${row.original.id}`}
-            className="flex w-fit gap-2"
+            className="flex w-full min-w-[100px] gap-2"
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col w-full">
               <span className="font-semibold">{row.original.title}</span>
               <span className="text-sm text-gray-600">
                 {row.original?.brief?.name}

@@ -5,15 +5,26 @@ import { cn } from '../utils/cn';
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
->(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto">
-    <table
-      ref={ref}
-      className={cn('w-full caption-bottom text-sm', className)}
-      {...props}
-    />
-  </div>
-));
+>(({ className, ...props }, ref) => {
+    const divRef = React.useRef<HTMLDivElement>(null);
+    // Function to handle horizontal scroll
+    const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+      if (divRef.current) {
+        event.preventDefault(); // Prevent the default vertical scroll
+        divRef.current.scrollLeft += event.deltaY; // Adjust horizontal scroll based on vertical scroll amount
+      }
+      return
+    };
+  return (
+    <div className="relative w-full overflow-auto" ref={divRef} onWheel={handleWheel}>
+      <table
+        ref={ref}
+        className={cn('w-full caption-bottom text-sm', className)}
+        {...props}
+      />
+    </div>
+  )
+});
 Table.displayName = 'Table';
 
 const TableHeader = React.forwardRef<
