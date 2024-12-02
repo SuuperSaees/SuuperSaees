@@ -2,7 +2,7 @@ import { cache } from 'react';
 
 
 
-import { cookies, headers } from 'next/headers';
+import { cookies, headers, type UnsafeUnwrappedCookies, type UnsafeUnwrappedHeaders } from 'next/headers';
 
 
 
@@ -33,7 +33,7 @@ const priority = featuresFlagConfig.languagePriority;
  * Initialize the i18n instance for every RSC server request (eg. each page/layout)
  */
 function createInstance() {
-  const cookie = cookies().get(I18N_COOKIE_NAME)?.value;
+  const cookie = (cookies() as unknown as UnsafeUnwrappedCookies).get(I18N_COOKIE_NAME)?.value;
 
   let selectedLanguage: string | undefined = undefined;
 
@@ -58,7 +58,7 @@ function createInstance() {
 export const createI18nServerInstance = cache(createInstance);
 
 function getPreferredLanguageFromBrowser() {
-  const acceptLanguage = headers().get('accept-language');
+  const acceptLanguage = (headers() as unknown as UnsafeUnwrappedHeaders).get('accept-language');
 
   if (!acceptLanguage) {
     return;
@@ -82,7 +82,7 @@ function getLanguageOrFallback(language: string | undefined) {
 }
 
 export function getLanguageFromCookie() {
-  const cookie = cookies().get(I18N_COOKIE_NAME)?.value;
+  const cookie = (cookies() as unknown as UnsafeUnwrappedCookies).get(I18N_COOKIE_NAME)?.value;
 
   return getLanguageOrFallback(cookie);
 }

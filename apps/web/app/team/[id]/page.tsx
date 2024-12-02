@@ -9,11 +9,12 @@ import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/g
 
 import Member from './components/member';
 
-export default async function MemberPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function MemberPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const id = params.id;
   const userRole = await getUserRole().catch((error) => {
     console.error('Error fetching user role in team member page:', error);
@@ -37,7 +38,7 @@ export default async function MemberPage({
       console.error(err);
       return [];
     })) ?? [];
-    
+
   return (
     <PageBody className="flex h-full flex-col gap-8 p-8 py-8 lg:px-8">
       <Member

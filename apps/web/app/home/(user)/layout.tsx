@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers';
+import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
 import { Page, PageLayoutStyle, PageMobileNavigation, PageNavigation } from '@kit/ui/page';
@@ -53,10 +53,7 @@ export default withI18n(UserHomeLayout);
 
 
 function getLayoutStyle() {
-  return (
-    (cookies().get('layout-style')?.value as PageLayoutStyle) ??
-    personalAccountNavigationConfig.style
-  );
+  return (((cookies() as unknown as UnsafeUnwrappedCookies).get('layout-style')?.value as PageLayoutStyle) ?? personalAccountNavigationConfig.style);
 }
 
 async function loadOrganizationSettings() {
@@ -69,5 +66,5 @@ async function loadOrganizationSettings() {
 }
 
 function getTheme() {
-  return cookies().get('theme')?.value;
+  return (cookies() as unknown as UnsafeUnwrappedCookies).get('theme')?.value;
 }

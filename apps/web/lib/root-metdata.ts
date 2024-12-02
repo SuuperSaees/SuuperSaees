@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 
-import { headers } from 'next/headers';
+import { headers, type UnsafeUnwrappedHeaders } from 'next/headers';
 
 import appConfig from '~/config/app.config';
 
@@ -9,8 +9,8 @@ import appConfig from '~/config/app.config';
  * @description Generates the root metadata for the application
  */
 export const generateRootMetadata = (): Metadata => {
-  const csrfToken = headers().get('x-csrf-token') ?? '';
-  const host = headers().get('host') ?? '';
+  const csrfToken = (headers() as unknown as UnsafeUnwrappedHeaders).get('x-csrf-token') ?? '';
+  const host = (headers() as unknown as UnsafeUnwrappedHeaders).get('host') ?? '';
   
   // Get the favicon URL from cookies
   // const cookies = headers().get('cookie') ?? '';
