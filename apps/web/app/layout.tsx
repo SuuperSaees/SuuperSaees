@@ -1,5 +1,5 @@
 import { Inter } from 'next/font/google';
-import { cookies } from 'next/headers';
+import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 
 import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 
@@ -65,7 +65,7 @@ function getClassName(theme?: string) {
 }
 
 function getTheme() {
-  return cookies().get('theme')?.value;
+  return (cookies() as unknown as UnsafeUnwrappedCookies).get('theme')?.value;
 }
 
 export const generateMetadata = generateRootMetadata;

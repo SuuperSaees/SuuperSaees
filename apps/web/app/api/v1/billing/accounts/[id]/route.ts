@@ -8,10 +8,8 @@ export async function GET({ params }: { params: { id: string } }) {
   return accountController.get(undefined, { params });
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   return accountController.update(req, { params });
 }
 
