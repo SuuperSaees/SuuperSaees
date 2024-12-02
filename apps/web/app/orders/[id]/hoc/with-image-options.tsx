@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ComponentType, useEffect, useRef, useState, type JSX } from 'react';
+import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
 import { Check, Copy, Download, Eye, MoreVertical } from 'lucide-react';
 

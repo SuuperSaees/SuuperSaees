@@ -1,4 +1,4 @@
-import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
+import { cookies } from 'next/headers';
 
 import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 
@@ -61,7 +61,10 @@ async function OrganizationsLayout({ children }: React.PropsWithChildren) {
 export default withI18n(OrganizationsLayout);
 
 function getLayoutStyle() {
-  return (((cookies() as unknown as UnsafeUnwrappedCookies).get('layout-style')?.value as PageLayoutStyle) ?? personalAccountNavigationConfig.style);
+  return (
+    (cookies().get('layout-style')?.value as PageLayoutStyle) ??
+    personalAccountNavigationConfig.style
+  );
 }
 
 async function loadOrganizationSettings() {
@@ -74,5 +77,5 @@ async function loadOrganizationSettings() {
 }
 
 function getTheme() {
-  return (cookies() as unknown as UnsafeUnwrappedCookies).get('theme')?.value;
+  return cookies().get('theme')?.value;
 }

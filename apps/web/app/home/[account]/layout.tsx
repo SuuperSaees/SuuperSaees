@@ -1,6 +1,6 @@
 import { use } from 'react';
 
-import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
+import { cookies } from 'next/headers';
 
 import { TeamAccountWorkspaceContextProvider } from '@kit/team-accounts/components';
 import { If } from '@kit/ui/if';
@@ -78,7 +78,10 @@ function TeamWorkspaceLayout({
 }
 
 function getLayoutStyle(account: string) {
-  return (((cookies() as unknown as UnsafeUnwrappedCookies).get('layout-style')?.value as PageLayoutStyle) ?? getTeamAccountSidebarConfig(account).style);
+  return (
+    (cookies().get('layout-style')?.value as PageLayoutStyle) ??
+    getTeamAccountSidebarConfig(account).style
+  );
 }
 
 export default withI18n(TeamWorkspaceLayout);

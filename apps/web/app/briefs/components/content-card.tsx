@@ -1,5 +1,4 @@
-'use client';;
-import type { JSX } from "react";
+'use client';
 
 interface ContentCardProps {
   name: string;

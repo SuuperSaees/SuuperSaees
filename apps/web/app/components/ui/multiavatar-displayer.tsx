@@ -9,8 +9,6 @@ import { withDropdown } from '~/hocs/with-dropdown';
 import AvatarDisplayer from './avatar-displayer';
 import { z } from 'zod';
 
-import type { JSX } from "react";
-
 export type Avatar = {
   name: string;
   email: string;

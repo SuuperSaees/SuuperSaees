@@ -18,10 +18,10 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 // import { withI18n } from '~/lib/i18n/with-i18n';
 
 interface Context {
-  searchParams: Promise<{
+  searchParams: {
     invite_token?: string;
     email?: string;
-  }>;
+  };
 }
 
 
@@ -33,8 +33,7 @@ export const generateMetadata = async () => {
   };
 };
 
-export default async function JoinTeamAccountPage(props: Context) {
-  const searchParams = await props.searchParams;
+export default async function JoinTeamAccountPage({ searchParams }: Context) {
   const token = searchParams.invite_token;
   const client = getSupabaseServerComponentClient({
     admin: true,
@@ -48,9 +47,9 @@ export default async function JoinTeamAccountPage(props: Context) {
     .eq('email', emailSearch)
     .single();
 
-  if (!verifyAccountData) {
-    await client.auth.signOut();
-  }
+    if (!verifyAccountData) {
+      await client.auth.signOut();
+    }
   // no token, redirect to 404
   if (!token) {
     notFound();
@@ -72,7 +71,7 @@ export default async function JoinTeamAccountPage(props: Context) {
 
     // redirect to the sign up page with the invite token
     return redirect(signUpPath);
-  }
+  } 
 
 
   // get api to interact with team accounts
@@ -127,7 +126,7 @@ export default async function JoinTeamAccountPage(props: Context) {
   //   invitation.account.slug,
   // );
 
-
+  
   // once the user accepts the invitation, we redirect them to home page
 
   const accountHome = pathsConfig.app.orders;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type JSX } from 'react';
+import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DefaultValues, Path, SubmitHandler, useForm } from 'react-hook-form';
