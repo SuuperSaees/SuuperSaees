@@ -15,9 +15,10 @@ interface DatePickerProps {
   updateFn: (date: string) => void | Promise<void>;
   defaultDate?: string | undefined | null;
   showIcon?: boolean;
+  [key: string]: unknown;
 }
 
-const DatePicker = ({ updateFn, defaultDate, showIcon }: DatePickerProps) => {
+const DatePicker = ({ updateFn, defaultDate, showIcon, ...rest }: DatePickerProps) => {
   const { t, i18n } = useTranslation('orders');
 
   const [date, setDate] = React.useState<Date | undefined>(
@@ -63,6 +64,7 @@ const DatePicker = ({ updateFn, defaultDate, showIcon }: DatePickerProps) => {
               'w-fit justify-start bg-gray-50 shadow-none border-none text-left font-normal text-gray-600 flex gap-2 items-center',
               !date && 'text-muted-foreground',
             )}
+            {...rest}
           >
             {
               showIcon 

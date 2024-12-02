@@ -7,10 +7,11 @@ import { ordersColumns } from './orders';
 export const columnFactory = <K extends keyof EntityData>(
   type: K,
   t: TFunction,
+  hasPermission?: (row?: EntityData[K][number]) => boolean,
 ): ColumnDef<EntityData[K][number]>[] => {
   switch (type) {
     case 'orders':
-      return ordersColumns(t);
+      return ordersColumns(t, hasPermission);
     default:
       return [];
   }
