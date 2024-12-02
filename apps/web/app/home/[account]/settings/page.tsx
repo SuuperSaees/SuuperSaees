@@ -20,9 +20,9 @@ export const generateMetadata = async () => {
 };
 
 interface Props {
-  params: {
+  params: Promise<{
     account: string;
-  };
+  }>;
 }
 
 const paths = {
@@ -31,7 +31,7 @@ const paths = {
 
 async function TeamAccountSettingsPage(props: Props) {
   const api = createTeamAccountsApi(getSupabaseServerComponentClient());
-  const data = await api.getTeamAccount(props.params.account);
+  const data = await api.getTeamAccount((await props.params).account);
 
   const account = {
     id: data.id,
