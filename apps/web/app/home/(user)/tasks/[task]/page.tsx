@@ -13,8 +13,7 @@ interface Params {
   task: string;
 }
 
-async function TaskPage(props: { params: Promise<Params> }) {
-  const params = await props.params;
+async function TaskPage({ params }: { params: Params }) {
   const taskId = params.task;
   const client = getSupabaseServerComponentClient();
 

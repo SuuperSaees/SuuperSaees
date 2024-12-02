@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type JSX } from 'react';
+import { useState, useEffect } from 'react';
 
 import {
   Select,

@@ -2,8 +2,6 @@ import { ContentTypes } from '../types/brief.types';
 import { ContentCard } from './content-card';
 import Draggable from './draggable';
 
-import type { JSX } from "react";
-
 type Content = {
   name: string;
   icon: JSX.Element;

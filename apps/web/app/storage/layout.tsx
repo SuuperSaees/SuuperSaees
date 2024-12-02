@@ -1,5 +1,5 @@
 
-import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
+import { cookies } from 'next/headers';
 
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
@@ -62,7 +62,10 @@ async function StorageLayout({ children }: React.PropsWithChildren) {
 export default withI18n(StorageLayout);
 
 function getLayoutStyle() {
-  return (((cookies() as unknown as UnsafeUnwrappedCookies).get('layout-style')?.value as PageLayoutStyle) ?? personalAccountNavigationConfig.style);
+  return (
+    (cookies().get('layout-style')?.value as PageLayoutStyle) ??
+    personalAccountNavigationConfig.style
+  );
 }
 
 async function loadOrganizationSettings() {
@@ -75,5 +78,5 @@ async function loadOrganizationSettings() {
 }
 
 function getTheme() {
-  return (cookies() as unknown as UnsafeUnwrappedCookies).get('theme')?.value;
+  return cookies().get('theme')?.value;
 }

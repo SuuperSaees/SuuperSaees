@@ -18,12 +18,11 @@ async function postLoader(slug: string) {
   return client.getContentItemBySlug({ slug, collection: 'posts' });
 }
 
-export async function generateMetadata(
-  props: {
-    params: Promise<{ slug: string }>;
-  }
-): Promise<Metadata | undefined> {
-  const params = await props.params;
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata | undefined> {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {

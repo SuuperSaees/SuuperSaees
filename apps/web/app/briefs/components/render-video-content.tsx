@@ -10,7 +10,7 @@ interface RenderVideoContentProps {
   videoUrl: string | null;
   isVideoValid: boolean;
   isDragging: boolean;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  fileInputRef: React.RefObject<HTMLInputElement>;
   isYouTubeVideo: boolean;
   selectedFileName: string;
   t: (key: string) => string;

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, type JSX } from "react";
+import { Dispatch, SetStateAction } from "react";
 
 export type TriggersMap = Map<string, JSX.Element | null>;
 

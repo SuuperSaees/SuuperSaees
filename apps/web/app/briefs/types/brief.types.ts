@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, type JSX } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 
 import { UseMutationResult } from '@tanstack/react-query';
 import { UseFormReturn } from 'react-hook-form';
