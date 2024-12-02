@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -7,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Avatar, AvatarFallback, AvatarImage} from '@kit/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 import {
   Dialog,
   DialogContent,
@@ -30,13 +32,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@kit/ui/select';
+import { Spinner } from '@kit/ui/spinner';
 
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
-import { updateUserAccount, updateUserEmail, updateUserRole } from '../../server/actions/members/update/update-account';
 import { getAccountSettings } from '../../server/actions/accounts/get/get-account';
 import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
-import { Spinner } from '@kit/ui/spinner';
-import { useRouter } from 'next/navigation';
+import {
+  updateUserAccount,
+  updateUserEmail,
+  updateUserRole,
+} from '../../server/actions/members/update/update-account';
 
 interface EditUserDialogProps {
   userId: string;
@@ -46,29 +51,54 @@ interface EditUserDialogProps {
   email: string;
 }
 
-function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDialogProps) {
-
+function EditUserDialog({
+  userId,
+  name,
+  email,
+  isOpen,
+  setIsOpen,
+}: EditUserDialogProps) {
   const { t } = useTranslation('clients');
   const router = useRouter();
   // const [localOpen, setLocalOpen] = useState<boolean>(false);
+  const [roles, setRoles] = useState<
+    {
+      value: string;
+      label: string;
+    }[]
+  >([]);
 
-  const roles = [
-    {value : 'client_member', label : t('clientMember') },
-    {value : 'client_owner', label : t('clientOwner') },
-  ];
-  const { data: userRole, isLoading, isPending} = useQuery({
+  const clientRoles = useMemo(
+    () => [
+      { value: 'client_member', label: t('clientMember') },
+      { value: 'client_owner', label: t('clientOwner') },
+    ],
+    [t],
+  );
+  const agencyRoles = useMemo(
+    () => [
+      { value: 'agency_member', label: t('agencyMember') },
+      { value: 'agency_owner', label: t('agencyOwner') },
+      { value: 'agency_project_manager', label: t('agencyProjectManager') },
+    ],
+    [t],
+  );
+  const {
+    data: userRole,
+    isLoading,
+    isPending,
+  } = useQuery({
     queryKey: ['userRole', userId],
-    queryFn: async() => await getUserRoleById(userId, true),
+    queryFn: async () => await getUserRoleById(userId, true),
   });
 
-  const { data: userSettings} = useQuery({
+  const { data: userSettings } = useQuery({
     queryKey: ['userSettings', userId],
-    queryFn: async() => await getAccountSettings(userId),
+    queryFn: async () => await getAccountSettings(userId),
     staleTime: 0,
     enabled: isOpen,
     // retry: 1,
   });
-
 
   const formSchema = z.object({
     fullName: z.string().min(3, {
@@ -77,9 +107,11 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     // email: z.string().email({
     //   message: t('editUser.badInputEmail'),
     // }),
-    role: z.string().refine((value) => roles.some((role) => role.value === value), {
-      message: t('editUser.badInputRole'),
-    }),
+    role: z
+      .string()
+      .refine((value) => roles.some((role) => role.value === value), {
+        message: t('editUser.badInputRole'),
+      }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -91,11 +123,10 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     },
   });
 
-
   const mutateUser = useMutation({
     mutationFn: async () => {
       // await updateUserEmail(userId, form.getValues('email'), undefined, true);
-      if(name !== form.getValues('fullName')){
+      if (name !== form.getValues('fullName')) {
         await updateUserAccount(
           {
             name: form.getValues('fullName'),
@@ -106,7 +137,7 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
           true,
         );
       }
-      if(userRole !== form.getValues('role')){
+      if (userRole !== form.getValues('role')) {
         await updateUserRole(userId, form.getValues('role'), undefined, true);
       }
       router.refresh();
@@ -124,7 +155,6 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
     },
   });
 
-
   const onSubmit = useCallback((values: z.infer<typeof formSchema>) => {
     mutateUser.mutate();
     setIsOpen(false);
@@ -141,13 +171,18 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
   );
 
   useEffect(() => {
+    if (userRole === 'agency_owner' || userRole === 'agency_project_manager' || userRole === 'agency_member') {
+      setRoles(agencyRoles);
+    } else {
+      setRoles(clientRoles);
+    }
     if (isOpen) {
       form.setValue('fullName', name);
-      if(userRole){
+      if (userRole) {
         form.setValue('role', userRole);
       }
     }
-  }, [isOpen, form, name, userRole]);
+  }, [isOpen, form, name, userRole, agencyRoles, clientRoles]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -167,23 +202,25 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
               render={({ field }) => (
                 <FormItem className="flex w-full items-center gap-7">
                   <Avatar className="mt-[12px] scale-150 p-0">
-                    <AvatarImage className='object-contain' src={userSettings?.picture_url ?? ''} />
+                    <AvatarImage
+                      className="object-contain"
+                      src={userSettings?.picture_url ?? ''}
+                    />
                     <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <div className='w-full'>
+                  <div className="w-full">
                     <FormControl className="mt-0 w-full">
                       <div>
                         <FormLabel>{t('editUser.fullName')}</FormLabel>
                         <Input
                           placeholder="Enter full name"
-                          type='text'
+                          type="text"
                           {...field}
-                          className='mt-2'
-
+                          className="mt-2"
                         />
                       </div>
                     </FormControl>
-                    <FormMessage className='mt-4' />
+                    <FormMessage className="mt-4" />
                   </div>
                 </FormItem>
               )}
@@ -217,12 +254,15 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('editUser.role')}</FormLabel>
-                  {
-                    isLoading || isPending ? <Spinner className='h-5' /> : 
+                  {isLoading || isPending ? (
+                    <Spinner className="h-5" />
+                  ) : (
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={t('editUser.badInputRole')} />
+                          <SelectValue
+                            placeholder={t('editUser.badInputRole')}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -233,8 +273,8 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
                         ))}
                       </SelectContent>
                     </Select>
-                  }
-                  
+                  )}
+
                   <FormMessage />
                 </FormItem>
               )}

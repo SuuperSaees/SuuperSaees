@@ -1,31 +1,34 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import {
+  useMemo, //  useState
+} from 'react';
+
+// import { TransferOwnershipDialog } from './transfer-ownership-dialog';
+// import { UpdateMemberRoleDialog } from './update-member-role-dialog';
+import Link from 'next/link';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Ellipsis } from 'lucide-react';
+// import { Ellipsis } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Database } from '@kit/supabase/database';
 import { Badge } from '@kit/ui/badge';
-import { Button } from '@kit/ui/button';
+// import { Button } from '@kit/ui/button';
 import { DataTable } from '@kit/ui/data-table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@kit/ui/dropdown-menu';
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from '@kit/ui/dropdown-menu';
 import { If } from '@kit/ui/if';
-import { Input } from '@kit/ui/input';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
-import { Trans } from '@kit/ui/trans';
 
-import { RemoveMemberDialog } from './remove-member-dialog';
+import AgencyClientCrudMenu from '../clients/agency-client-crud-menu';
+// import { Trans } from '@kit/ui/trans';
+// import { RemoveMemberDialog } from './remove-member-dialog';
 import { RoleBadge } from './role-badge';
-import { TransferOwnershipDialog } from './transfer-ownership-dialog';
-import { UpdateMemberRoleDialog } from './update-member-role-dialog';
-import Link from 'next/link';
 
 type Members =
   Database['public']['Functions']['get_account_members']['Returns'];
@@ -53,8 +56,7 @@ export function AccountMembersTable({
   userRoleHierarchy,
   canManageRoles,
 }: AccountMembersTableProps) {
-  const [search, setSearch] = useState('');
-  const { t } = useTranslation('team');
+  const search = '';
 
   const permissions = {
     canUpdateRole: (targetRole: number) => {
@@ -105,8 +107,8 @@ export function AccountMembersTable({
         onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
         placeholder={t(`searchMembersPlaceholder`)}
       /> */}
-      <div className='bg-white rounded-lg'>
-      <DataTable columns={columns} data={filteredMembers} />
+      <div className="rounded-lg bg-white">
+        <DataTable columns={columns} data={filteredMembers} />
       </div>
     </div>
   );
@@ -131,9 +133,12 @@ function useGetColumns(
           const member = row.original;
           const displayName = member.name ?? member.email.split('@')[0];
           const isSelf = member.user_id === params.currentUserId;
-          
+
           return (
-            <Link className={'flex items-center space-x-4 text-left'} href={`/team/${member.id}`}>
+            <Link
+              className={'flex items-center space-x-4 text-left'}
+              href={`/team/${member.id}`}
+            >
               <span>
                 <ProfileAvatar
                   displayName={displayName}
@@ -208,8 +213,8 @@ function ActionsDropdown({
   permissions,
   member,
   currentUserId,
-  currentTeamAccountId,
-  currentRoleHierarchy,
+  // currentTeamAccountId,
+  // currentRoleHierarchy,
 }: {
   permissions: Permissions;
   member: Members[0];
@@ -217,9 +222,9 @@ function ActionsDropdown({
   currentTeamAccountId: string;
   currentRoleHierarchy: number;
 }) {
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [isTransferring, setIsTransferring] = useState(false);
-  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  // const [isRemoving, setIsRemoving] = useState(false);
+  // const [isTransferring, setIsTransferring] = useState(false);
+  // const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
   const isCurrentUser = member.user_id === currentUserId;
   const isPrimaryOwner = member.primary_owner_user_id === member.user_id;
@@ -246,7 +251,13 @@ function ActionsDropdown({
 
   return (
     <>
-      <DropdownMenu>
+      <AgencyClientCrudMenu
+        userId={member.id}
+        name={member.name}
+        email={member.email ?? ''}
+        queryKey={permissions.queryKey}
+      />
+      {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant={'ghost'} size={'icon'}>
             <Ellipsis className={'h-5 w-5'} />
@@ -258,23 +269,23 @@ function ActionsDropdown({
             <DropdownMenuItem onClick={() => setIsUpdatingRole(true)}>
               <Trans i18nKey={'team:updateRole'} />
             </DropdownMenuItem>
-          </If>
+          </If> */}
 
-          {/* <If condition={permissions.canTransferOwnership}>
+      {/* <If condition={permissions.canTransferOwnership}>
             <DropdownMenuItem onClick={() => setIsTransferring(true)}>
               <Trans i18nKey={'team:transferOwnership'} />
             </DropdownMenuItem>
           </If> */}
-
+      {/* 
           <If condition={canRemoveFromAccount}>
             <DropdownMenuItem onClick={() => setIsRemoving(true)}>
               <Trans i18nKey={'team:removeMember'} />
             </DropdownMenuItem>
           </If>
         </DropdownMenuContent>
-      </DropdownMenu>
+      </DropdownMenu> */}
 
-      <If condition={isRemoving}>
+      {/* <If condition={isRemoving}>
         <RemoveMemberDialog
           isOpen
           setIsOpen={setIsRemoving}
@@ -302,7 +313,7 @@ function ActionsDropdown({
           accountId={member.account_id}
           userId={member.user_id}
         />
-      </If>
+      </If> */}
     </>
   );
 }
