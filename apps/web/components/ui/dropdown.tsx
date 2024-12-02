@@ -1,4 +1,4 @@
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, type JSX } from 'react';
 
 import {
   DropdownMenu,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
