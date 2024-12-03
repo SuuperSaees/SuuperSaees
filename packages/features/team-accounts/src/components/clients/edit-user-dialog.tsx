@@ -49,6 +49,10 @@ interface EditUserDialogProps {
   setIsOpen: (open: boolean) => void;
   name: string;
   email: string;
+  currentUserRole?: string;
+  userRole?: string;
+  isLoading: boolean;
+  isPending: boolean;
 }
 
 function EditUserDialog({
@@ -57,6 +61,10 @@ function EditUserDialog({
   email,
   isOpen,
   setIsOpen,
+  currentUserRole,
+  userRole,
+  isLoading,
+  isPending
 }: EditUserDialogProps) {
   const { t } = useTranslation('clients');
   const router = useRouter();
@@ -75,22 +83,13 @@ function EditUserDialog({
     ],
     [t],
   );
-  const agencyRoles = useMemo(
-    () => [
-      { value: 'agency_member', label: t('agencyMember') },
-      { value: 'agency_owner', label: t('agencyOwner') },
-      { value: 'agency_project_manager', label: t('agencyProjectManager') },
-    ],
-    [t],
-  );
-  const {
-    data: userRole,
-    isLoading,
-    isPending,
-  } = useQuery({
-    queryKey: ['userRole', userId],
-    queryFn: async () => await getUserRoleById(userId, true),
-  });
+
+  const agencyRoles = useMemo(() => {
+    return [
+        { value: 'agency_member', label: t('agencyMember') },
+        { value: 'agency_project_manager', label: t('agencyProjectManager') },
+      ];
+  }, [currentUserRole, t]);
 
   const { data: userSettings } = useQuery({
     queryKey: ['userSettings', userId],
@@ -140,7 +139,6 @@ function EditUserDialog({
       if (userRole !== form.getValues('role')) {
         await updateUserRole(userId, form.getValues('role'), undefined, true);
       }
-      router.refresh();
     },
     onSuccess: () => {
       toast.success(t('success'), {
@@ -158,6 +156,8 @@ function EditUserDialog({
   const onSubmit = useCallback((values: z.infer<typeof formSchema>) => {
     mutateUser.mutate();
     setIsOpen(false);
+    router.refresh();
+
   }, []);
 
   const handleOpenChange = useCallback(
@@ -248,37 +248,43 @@ function EditUserDialog({
                 </FormItem>
               )}
             /> */}
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
+            {
+              //If my role is not agency_owner and the user's role is agency_owner, I cannot change his role
+              //If my role is agency_owner and the user's role is agency_owner, I cannot change his role either. This is used to disable role switching for owners and prevent errors where the organization might end up without an owner
+              (currentUserRole !== 'agency_owner' && userRole ==='agency_owner') || (currentUserRole === 'agency_owner' && userRole ==='agency_owner') ? null : 
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('editUser.role')}</FormLabel>
                   {isLoading || isPending ? (
                     <Spinner className="h-5" />
-                  ) : (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={t('editUser.badInputRole')}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {roles.map((role) => (
-                          <SelectItem key={role.value} value={role.value}>
-                            {role.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
+                      ) : (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={t('editUser.badInputRole')}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {roles.map((role) => (
+                            <SelectItem key={role.value} value={role.value}>
+                              {role.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            }
+            
             <ThemedButton className="w-full" type="submit">
               {t('editUser.saveChanges')}
             </ThemedButton>

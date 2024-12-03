@@ -138,7 +138,7 @@ export function ClientsTable({
 }: AccountMembersTableProps) {
   const [search, setSearch] = useState(searchController?.search ?? '');
   const { t } = useTranslation('clients');
-  const validRoles = ['agency_owner', 'client_owner'];
+  const validRoles = ['agency_owner', 'client_owner', 'agency_project_manager'];
   const permissions = {
     canRemoveFromAccount: () => {
       return validRoles.includes(userRole);

@@ -29,13 +29,16 @@ import AgencyClientCrudMenu from '../clients/agency-client-crud-menu';
 // import { Trans } from '@kit/ui/trans';
 // import { RemoveMemberDialog } from './remove-member-dialog';
 import { RoleBadge } from './role-badge';
+import { useQuery } from '@tanstack/react-query';
+import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
+import { Spinner } from '@kit/ui/spinner';
 
 type Members =
   Database['public']['Functions']['get_account_members']['Returns'];
 
 interface Permissions {
-  canUpdateRole: (roleHierarchy: number) => boolean;
-  canRemoveFromAccount: (roleHierarchy: number) => boolean;
+  canUpdateRole: () => boolean;
+  canRemoveFromAccount: () => boolean;
   canTransferOwnership: boolean;
 }
 
@@ -58,25 +61,36 @@ export function AccountMembersTable({
 }: AccountMembersTableProps) {
   const search = '';
 
+  const {
+    data: userRole,
+    isLoading,
+  } = useQuery({
+    queryKey: ['userRole', currentUserId],
+    queryFn: async () => await getUserRoleById(currentUserId, true),
+  });
+
   const permissions = {
-    canUpdateRole: (targetRole: number) => {
+    canUpdateRole: () => {
       return (
-        isPrimaryOwner || (canManageRoles && userRoleHierarchy < targetRole)
+        userRole === 'agency_project_manager' || userRole === 'agency_owner'
       );
     },
-    canRemoveFromAccount: (targetRole: number) => {
+    canRemoveFromAccount: () => {
       return (
-        isPrimaryOwner || (canManageRoles && userRoleHierarchy < targetRole)
+        userRole === 'agency_project_manager' || userRole === 'agency_owner'
       );
     },
-    canTransferOwnership: isPrimaryOwner,
+    canTransferOwnership: userRole === 'agency_project_manager' || userRole === 'agency_owner',
   };
 
   const columns = useGetColumns(permissions, {
-    currentUserId,
-    currentAccountId,
-    currentRoleHierarchy: userRoleHierarchy,
-  });
+      currentUserId,
+      currentAccountId,
+      currentRoleHierarchy: userRoleHierarchy,
+    },
+    isLoading,
+    userRole ?? ''
+  );
 
   const filteredMembers = members
     .filter((member) => {
@@ -121,6 +135,8 @@ function useGetColumns(
     currentAccountId: string;
     currentRoleHierarchy: number;
   },
+  isLoading: boolean,
+  userRole: string
 ): ColumnDef<Members[0]>[] {
   const { t } = useTranslation('team');
 
@@ -194,15 +210,17 @@ function useGetColumns(
       {
         header: '',
         id: 'actions',
-        cell: ({ row }) => (
+        cell: ({ row }) => {
+          return isLoading ? <Spinner className="h-4" /> : 
           <ActionsDropdown
-            permissions={permissions}
-            member={row.original}
-            currentUserId={params.currentUserId}
-            currentTeamAccountId={params.currentAccountId}
-            currentRoleHierarchy={params.currentRoleHierarchy}
-          />
-        ),
+          permissions={permissions}
+          member={row.original}
+          currentUserId={params.currentUserId}
+          currentTeamAccountId={params.currentAccountId}
+          currentRoleHierarchy={params.currentRoleHierarchy}
+          currentUserRole = {userRole}
+        />
+        },
       },
     ],
     [t, params, permissions],
@@ -213,6 +231,7 @@ function ActionsDropdown({
   permissions,
   member,
   currentUserId,
+  currentUserRole,
   // currentTeamAccountId,
   // currentRoleHierarchy,
 }: {
@@ -221,26 +240,21 @@ function ActionsDropdown({
   currentUserId: string;
   currentTeamAccountId: string;
   currentRoleHierarchy: number;
+  currentUserRole: string
 }) {
   // const [isRemoving, setIsRemoving] = useState(false);
   // const [isTransferring, setIsTransferring] = useState(false);
   // const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
-  const isCurrentUser = member.user_id === currentUserId;
-  const isPrimaryOwner = member.primary_owner_user_id === member.user_id;
-
-  if (isCurrentUser || isPrimaryOwner) {
-    return null;
-  }
-
   const memberRoleHierarchy = member.role_hierarchy_level;
-  const canUpdateRole = permissions.canUpdateRole(memberRoleHierarchy);
+  const canUpdateRole = permissions.canUpdateRole();
 
   const canRemoveFromAccount =
-    permissions.canRemoveFromAccount(memberRoleHierarchy);
+    permissions.canRemoveFromAccount();
 
   // if has no permission to update role, transfer ownership or remove from account
   // do not render the dropdown menu
+
   if (
     !canUpdateRole &&
     !permissions.canTransferOwnership &&
@@ -256,6 +270,8 @@ function ActionsDropdown({
         name={member.name}
         email={member.email ?? ''}
         queryKey={permissions.queryKey}
+        currentUserRole={currentUserRole}
+        currentUserId = {currentUserId}
       />
       {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>
