@@ -2,12 +2,12 @@
 
 import { SignInMethodsContainer } from '@kit/auth/sign-in';
 
+import { AppLogo } from '~/components/app-logo';
 import authConfig from '~/config/auth.config';
 import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
 
 // import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
 import { useAuthDetails } from '../../../../../../packages/features/auth/src/hooks/use-auth-details';
-import { AppLogo } from '~/components/app-logo';
 
 const SignIn = ({
   inviteToken,
@@ -30,9 +30,8 @@ const SignIn = ({
   //   );
   return (
     <>
-    {!isLoading && (
       <div
-        className={`from-gray-['#f2f2f2'] to-gray-['#f2f2f2'] relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-r`}
+        className={`from-gray-['#f2f2f2'] to-gray-['#f2f2f2'] relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-r transition pointer-events-none opacity-0 ${!isLoading && 'pointer-events-auto opacity-100'}`}
         style={{
           background: `linear-gradient(to right, ${authDetails?.auth_section_background_color ? authDetails.auth_section_background_color : authDetails?.background_color}, ${authDetails?.auth_section_background_color ? authDetails.auth_section_background_color : authDetails?.background_color})`,
         }}
@@ -58,7 +57,7 @@ const SignIn = ({
           }}
         >
           <div className="flex w-full items-start justify-center pb-[32px]">
-            <div className="flex justify-center items-center h-full">
+            <div className="flex h-full items-center justify-center">
               <AppLogo logoUrl={authDetails?.logo_url} />
             </div>
           </div>
@@ -72,7 +71,6 @@ const SignIn = ({
           </div>
         </div>
       </div>
-    )}
     </>
   );
 };

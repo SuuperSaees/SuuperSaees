@@ -36,8 +36,6 @@ export function PasswordSignInForm({
     },
   });
 
-  console.log(themeColor);
-
   return (
     <Form {...form}>
       <form
