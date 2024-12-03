@@ -26,7 +26,7 @@ const CheckoutPage = ({ amount, priceId, billingCustomerId }: { amount: number, 
       },
       body: JSON.stringify({ priceId, customer: billingCustomerId }),
     })
-      .then((res) => res.json())
+      .then((res) => res.clone().json())
       .then((data) => {
         setClientSecret(data.sessionUrl);
       });

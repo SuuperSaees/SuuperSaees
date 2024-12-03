@@ -443,7 +443,7 @@ export class StripeBillingStrategyService
       };
     }
 
-    const productCreated = await responseProductCreated.json();
+    const productCreated = await responseProductCreated.clone().json();
     const responsePriceCreated = await fetch(
       `${baseUrl}/api/stripe/create-service-price`,
       {
