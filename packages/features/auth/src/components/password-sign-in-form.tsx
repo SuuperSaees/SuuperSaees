@@ -9,32 +9,25 @@ import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 // import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
-import { useState, useEffect } from 'react';
 
-import { SkeletonPasswordSignInForm } from './skeleton-password-sign-in-form';
 import { Button } from '@kit/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
-import { useAuthDetails } from '../hooks/use-auth-details';
 import { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
 import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
 
 
 export function PasswordSignInForm({
   onSubmit,
+  themeColor,
   loading,
 }: {
   onSubmit: (params: z.infer<typeof PasswordSignInSchema>) => unknown;
+  themeColor: string | undefined;
   loading: boolean;
 }) {
-  // const { t } = useTranslation('auth');
-  let host = '';
-  if (typeof window !== 'undefined') {
-    host = window.location.host;
-  }
-  const {authDetails, isLoading } = useAuthDetails(host);
   const form = useForm<z.infer<typeof PasswordSignInSchema>>({
     resolver: zodResolver(PasswordSignInSchema),
     defaultValues: {
@@ -42,10 +35,6 @@ export function PasswordSignInForm({
       password: '',
     },
   });
-
- if (isLoading && !authDetails?.theme_color && !authDetails?.logo_url) {
-   return <SkeletonPasswordSignInForm/>;
- }
 
   return (
     <Form {...form}>
@@ -126,7 +115,7 @@ export function PasswordSignInForm({
                   type={'button'}
                   size={'sm'}
                   variant={'link'}
-                  className={`font-inter block flex items-center space-y-3 text-xs font-semibold leading-[20px] tracking-normal ${authDetails?.theme_color}`}
+                  className={`font-inter flex items-center space-y-3 text-xs font-semibold leading-[20px] tracking-normal ${themeColor}`}
                   
                 >
                   <Link href={'/auth/password-reset'}>
@@ -143,7 +132,7 @@ export function PasswordSignInForm({
           className="w-full"
           type="submit"
           disabled={loading}
-          themeColor={authDetails?.theme_color}
+          themeColor={themeColor}
         >
           <If
             condition={loading}

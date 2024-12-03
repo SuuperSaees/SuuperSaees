@@ -1,8 +1,8 @@
 'use client';
 
-import { SignInLogo } from '@kit/auth/sign-in';
 import { SignInMethodsContainer } from '@kit/auth/sign-in';
 
+import { AppLogo } from '~/components/app-logo';
 import authConfig from '~/config/auth.config';
 import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
 
@@ -24,7 +24,7 @@ const SignIn = ({
   if (typeof window !== 'undefined') {
     host = window.location.host;
   }
-  const { authDetails } = useAuthDetails(host);
+  const { authDetails, isLoading } = useAuthDetails(host);
   //   const textcolor = getTextColorBasedOnBackground(
   //     authDetails?.background_color ?? '#ffffff',
   //   );
@@ -43,7 +43,7 @@ const SignIn = ({
         <div className="absolute hidden md:left-8 md:top-8 md:block md:h-auto md:w-[142px] md:object-contain"></div>
 
         <div
-          className={`align-center relative z-10 w-[90%] max-w-[360px] rounded-lg bg-white text-black shadow-lg backdrop-blur-[95%] md:px-[32px] md:py-[48px]`}
+          className={`align-center relative z-10 w-[90%] max-w-[360px] rounded-lg bg-white text-black shadow-lg backdrop-blur-[95%] md:px-[32px] md:py-[48px] transition pointer-events-none opacity-0 ${!isLoading && 'pointer-events-auto opacity-100'}`}
           style={{
             color: getTextColorBasedOnBackground(
               authDetails?.auth_card_background_color
@@ -57,13 +57,16 @@ const SignIn = ({
           }}
         >
           <div className="flex w-full items-start justify-center pb-[32px]">
-            <SignInLogo />
+            <div className="flex h-full items-center justify-center">
+              <AppLogo logoUrl={authDetails?.logo_url} />
+            </div>
           </div>
           <div className="h-auto">
             <SignInMethodsContainer
               providers={authConfig.providers}
               inviteToken={inviteToken}
               paths={paths}
+              themeColor={authDetails?.theme_color}
             />
           </div>
         </div>
