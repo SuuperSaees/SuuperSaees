@@ -34,7 +34,7 @@ export function PasswordSignInForm({
   if (typeof window !== 'undefined') {
     host = window.location.host;
   }
-  const {authDetails} = useAuthDetails(host);
+  const {authDetails, isLoading } = useAuthDetails(host);
   const form = useForm<z.infer<typeof PasswordSignInSchema>>({
     resolver: zodResolver(PasswordSignInSchema),
     defaultValues: {
@@ -42,16 +42,8 @@ export function PasswordSignInForm({
       password: '',
     },
   });
- // manage the skeleton with max time of 3000ms
- const [isLoading, setIsLoading] = useState(true);
- useEffect(() => {
-   const timer = setTimeout(() => {
-     setIsLoading(false);
-   }, 2000);
-   return () => clearTimeout(timer);
- }, []);
 
- if (!authDetails?.theme_color && !authDetails?.logo_url && isLoading) {
+ if (isLoading && !authDetails?.theme_color && !authDetails?.logo_url) {
    return <SkeletonPasswordSignInForm/>;
  }
 
