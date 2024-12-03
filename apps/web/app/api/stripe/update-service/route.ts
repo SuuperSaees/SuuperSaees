@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -13,9 +12,7 @@ interface ProductRequest {
 
 export async function POST(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    const { accountId, name, description, imageUrl }: ProductRequest = await req
-      .clone()
-      .json();
+    const { accountId, name, description, imageUrl }: ProductRequest = await req.json();
     const productId = searchParams.get('productId')
 
     if (!productId) {

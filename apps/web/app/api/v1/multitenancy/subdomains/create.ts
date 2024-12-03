@@ -8,7 +8,7 @@ import { createIngress } from '~/multitenancy/aws-cluster-ingress/src';
 
 export async function createIngressAndSubdomain(req: NextRequest) {  
   // Step 1: Obtain and validate the subdomain data
-  const subdomainDataBody = (await req.clone().json()) as Subdomain.Api.Create;
+  const subdomainDataBody = (await req.json()) as Subdomain.Api.Create;
 
   if (!subdomainDataBody.namespace || !subdomainDataBody.service_name) {
     return NextResponse.json(

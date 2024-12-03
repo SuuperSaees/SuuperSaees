@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Definición de tipos para los datos entrantes
@@ -12,9 +11,7 @@ interface ProductRequest {
 }
 
 export async function POST(req: NextRequest) {
-    const { accountId, name, description, imageUrl }: ProductRequest = await req
-      .clone()
-      .json();
+    const { accountId, name, description, imageUrl }: ProductRequest = await req.json();
 
     try {
         // Crear producto en la cuenta conectada de Stripe

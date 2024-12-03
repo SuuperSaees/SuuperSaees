@@ -45,7 +45,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ discountCode, accountId, servicePrice: service.price }),
       });
-      const data = await response.clone().json();
+      const data = await response.json();
 
       if (response.ok && data.discountAmount) {
         setDiscountAmount(data.discountAmount);

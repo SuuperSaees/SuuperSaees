@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    const { discountCode, accountId, servicePrice } = await request
-      .clone()
-      .json();
+    const { discountCode, accountId, servicePrice } = await request.json();
 
     let discountAmount = 0;
     let discountDetails;

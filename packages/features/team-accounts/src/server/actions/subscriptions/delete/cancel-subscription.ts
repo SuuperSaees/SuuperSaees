@@ -87,7 +87,7 @@ export const cancelSubscription = async (subscriptionId: string) => {
       throw new Error('Failed to create subscription');
     }
 
-    const subscriptionData = await subscriptionResponse.clone().json();
+    const subscriptionData = await subscriptionResponse.json();
     const newDate = new Date().toISOString();
     // Create subscription in db
     const createNewSubscription: Subscription.Type = {

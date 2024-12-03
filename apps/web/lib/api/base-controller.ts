@@ -1,18 +1,11 @@
 import { NextRequest } from 'next/server';
 
-
-
 import { z } from 'zod';
-
-
 
 import { getLogger } from '@kit/shared/logger';
 import { HttpStatus, statusCodeMap } from '@kit/shared/response';
 
-
-
 import { ApiError } from './api-error';
-
 
 type ApiResponse<T = unknown> = {
   success: boolean;
@@ -58,7 +51,7 @@ export abstract class BaseController {
   }
 
   protected async parseBody<T>(req: NextRequest): Promise<T> {
-    const body = await req.clone().json();
+    const body = await req.json();
     return body as T;
   }
 

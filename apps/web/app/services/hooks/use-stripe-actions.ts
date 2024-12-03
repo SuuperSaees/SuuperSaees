@@ -8,8 +8,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-
-
 import { Database } from '~/lib/database.types';
 import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
@@ -17,7 +15,6 @@ import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/g
 import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 // import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
-
 
 interface UseStripeActions {
   userRole: Database['public']['Tables']['accounts_memberships']['Row']['account_role'];
@@ -65,7 +62,7 @@ export function useStripeActions({ userRole }: UseStripeActions) {
       if (!response.ok) {
         console.error('Failed to fetch account data from Stripe');
       }
-      const data: { email: string | null } = await response.clone().json();
+      const data: { email: string | null } = await response.json();
       setHasTheEmailAssociatedWithStripe(!!data.email);
     }
   }, [userRole]);

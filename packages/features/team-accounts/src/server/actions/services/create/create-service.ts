@@ -162,7 +162,7 @@ export const createService = async (clientData: ServiceData) => {
 //     body: JSON.stringify({ email }),
 //   });
 //   if (!response.ok) throw new Error('Failed to create Stripe account');
-//   return response.clone().json();
+//   return response.json();
 // }
 
 // async function createStripeProduct(
@@ -183,7 +183,7 @@ export const createService = async (clientData: ServiceData) => {
 //     }),
 //   });
 //   if (!response.ok) throw new Error('Failed to create Stripe product');
-//   return response.clone().json();
+//   return response.json();
 // }
 
 // async function createStripePrice(
@@ -207,7 +207,7 @@ export const createService = async (clientData: ServiceData) => {
 //     }),
 //   });
 //   if (!response.ok) throw new Error('Failed to create Stripe price');
-//   return response.clone().json();
+//   return response.json();
 // }
 
 // async function updateServiceWithPriceId(

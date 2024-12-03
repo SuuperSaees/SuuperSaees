@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
-    const { email } = await req.clone().json();
+    const { email } = await req.json();
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
            const customer = await stripe.customers.create({

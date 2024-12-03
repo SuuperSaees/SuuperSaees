@@ -51,7 +51,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
       if (!response.ok) {
         throw new Error('Failed to fetch invoices');
       }
-      const data = await response.clone().json();
+      const data = await response.json();
       setInvoices(data); 
     } catch (error) {
       console.error("Error fetching invoices:", error);
@@ -75,7 +75,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
       if (!response.ok) {
         throw new Error('Failed to fetch upcoming invoice');
       }
-      const data = await response.clone().json();
+      const data = await response.json();
       setUpcomingInvoice(data);
     } catch (error) {
       console.error("Error fetching upcoming invoice:", error);
@@ -101,7 +101,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
       if (!responseSubscription.ok) {
         throw new Error('Failed to fetch subscription');
       }
-      const dataSubscription = await responseSubscription.clone().json();
+      const dataSubscription = await responseSubscription.json();
       setSubscriptionFetchedStripe(dataSubscription); 
       //////////////////////////////////////
       const responseProduct = await fetch(`/api/stripe/get-product?productId=${encodeURIComponent(dataSubscription?.plan?.product ?? "")}`, {
@@ -113,7 +113,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
       if (!responseProduct.ok) {
         throw new Error('Failed to fetch product');
       }
-      const dataProduct = await responseProduct.clone().json();
+      const dataProduct = await responseProduct.json();
       setProductSubscription(dataProduct)
       fetchInvoices(result?.billing_customer_id ?? "");
       fetchUpcomingInvoice(result?.billing_customer_id ?? "")
@@ -142,7 +142,7 @@ export const BillingContextProvider: React.FC<BillingContextProviderProps> = ({ 
         throw new Error('Failed to upgrade subscription');
       }
 
-      const dataSubscriptionsByCustomer = await responseSubscriptionsByCustomer.clone().json();
+      const dataSubscriptionsByCustomer = await responseSubscriptionsByCustomer.json();
       
       if (dataSubscriptionsByCustomer.length > 1) {
         let newSubscriptionId = ""; 

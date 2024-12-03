@@ -42,7 +42,7 @@ export const deleteService = async (priceId: string) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.clone().json();
+      const errorData = await response.json();
       throw new CustomError(
         HttpStatus.Error.InternalServerError,
         `Error deleting price and product in Stripe: ${errorData.error?.message}`,

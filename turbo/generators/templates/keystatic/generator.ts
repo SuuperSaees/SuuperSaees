@@ -1,7 +1,6 @@
 import type { PlopTypes } from '@turbo/gen';
 import { execSync } from 'node:child_process';
 
-
 export function createKeystaticAdminGenerator(plop: PlopTypes.NodePlopAPI) {
   return plop.setGenerator('keystatic', {
     description: 'Generate a the admin for Keystatic',
@@ -32,7 +31,7 @@ export function createKeystaticAdminGenerator(plop: PlopTypes.NodePlopAPI) {
           const version = await fetch(
             `https://registry.npmjs.org/-/package/${dep}/dist-tags`,
           )
-            .then((res) => res.clone().json())
+            .then((res) => res.json())
             .then((json) => json.latest);
 
           pkg.dependencies![dep] = `^${version}`;

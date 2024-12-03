@@ -18,7 +18,7 @@ export const createIngress = async (
     if (!response.ok) {
       throw new Error('Error creating ingress');
     }
-    return response.clone().json() as Promise<SubdomainResponse>;
+    return response.json() as Promise<SubdomainResponse>;
   } catch (error) {
     console.error(`Error creating ingress: ${error}`);
     throw new Error(`Error creating ingress: ${error}`);

@@ -16,7 +16,7 @@ import { fetchCurrentUser } from '../../../../../../packages/features/team-accou
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
-  const { accountId } = await req.clone().json();
+  const { accountId } = await req.json();
   const supabase = getSupabaseServerComponentClient();
   const userData = await fetchCurrentUser(supabase);
   const userId = userData.id;

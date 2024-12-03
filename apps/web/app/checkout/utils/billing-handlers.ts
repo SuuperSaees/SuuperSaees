@@ -3,7 +3,6 @@ import convertToSubcurrency from '~/select-plan/components/convertToSubcurrency'
 import { getUserByEmail } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { createSession } from '~/team-accounts/src/server/actions/sessions/create/create-sessions';
 
-
 type ValuesProps = {
   fullName: string;
   email: string;
@@ -66,7 +65,7 @@ export const handleRecurringPayment = async ({
     }),
   });
 
-  const data = await res.clone().json();
+  const data = await res.json();
 
   if (data.error) {
     console.error(data.error.message);
@@ -103,7 +102,7 @@ export const handleOneTimePayment = async ({
     }),
   });
 
-  const data = await res.clone().json();
+  const data = await res.json();
 
   if (data.error) {
     throw new Error(data.error.message);

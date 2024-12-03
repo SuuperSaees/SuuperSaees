@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -28,7 +27,7 @@ export async function POST(req: NextRequest) {
     currency,
     isRecurring,
     interval,
-  }: PriceRequest = await req.clone().json();
+  }: PriceRequest = await req.json();
 
   try {
     const priceData: {

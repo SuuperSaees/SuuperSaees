@@ -211,7 +211,7 @@ const handleStripeServiceUpdate = async (
     { method: 'GET', headers: { 'Content-Type': 'application/json' } },
   );
 
-  const getPriceData: PriceData = await getPriceResponse.clone().json();
+  const getPriceData: PriceData = await getPriceResponse.json();
   if (!getPriceResponse.ok) {
     throw new Error(`Stripe error: ${getPriceData.error}`);
   }
@@ -253,7 +253,7 @@ const updateStripeProduct = async (
     },
   );
 
-  const stripeData = await stripeResponse.clone().json();
+  const stripeData = await stripeResponse.json();
   if (!stripeResponse.ok) {
     throw new Error(`Stripe error: ${stripeData.error}`);
   }
@@ -286,7 +286,7 @@ const createStripeServicePrice = async (
     },
   );
 
-  const stripePriceData = await stripePriceResponse.clone().json();
+  const stripePriceData = await stripePriceResponse.json();
   if (!stripePriceResponse.ok) {
     throw new Error(`Stripe error: ${stripePriceData.error.message}`);
   }

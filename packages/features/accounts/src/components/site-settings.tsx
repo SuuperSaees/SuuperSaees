@@ -80,7 +80,7 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
               if (!response.ok) {
                 throw new Error('Failed to fetch account data from Stripe');
               }
-              const data: AccountStripe = await response.clone().json();
+              const data: AccountStripe = await response.json();
               setAccountStripe(data);
             } catch (error) {
               console.error('Error fetching account data:', error);
