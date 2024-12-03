@@ -36,10 +36,8 @@ import { Spinner } from '@kit/ui/spinner';
 
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { getAccountSettings } from '../../server/actions/accounts/get/get-account';
-import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
 import {
   updateUserAccount,
-  updateUserEmail,
   updateUserRole,
 } from '../../server/actions/members/update/update-account';
 

@@ -8,7 +8,6 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Search } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
-import DeleteUserDialog from 'node_modules/@kit/team-accounts/src/server/actions/clients/delete/delete-client';
 import { useTranslation } from 'react-i18next';
 
 
