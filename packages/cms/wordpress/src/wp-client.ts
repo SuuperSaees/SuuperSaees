@@ -103,7 +103,7 @@ class WordpressClient implements CmsClient {
     const totalHeader = response.headers.get('X-WP-Total');
 
     const total = totalHeader ? Number(totalHeader) : 0;
-    const results = (await response.json()) as WP_REST_API_Post[];
+    const results = (await response.clone().json()) as WP_REST_API_Post[];
 
     const status = options.status ?? 'published';
 
@@ -181,7 +181,7 @@ class WordpressClient implements CmsClient {
     const endpoint = collection === 'posts' ? endpoints[0] : endpoints[1];
 
     const responses = await fetch(this.apiUrl + endpoint).then(
-      (res) => res.json() as Promise<WP_REST_API_Post[]>,
+      (res) => res.clone().json() as Promise<WP_REST_API_Post[]>,
     );
 
     const item = responses[0];
@@ -224,7 +224,7 @@ class WordpressClient implements CmsClient {
   async getCategoryBySlug(slug: string) {
     const url = `${this.apiUrl}/wp-json/wp/v2/categories?slug=${slug}`;
     const response = await fetch(url);
-    const data = await response.json();
+    const data = await response.clone().json();
 
     if (data.length === 0) {
       return;
@@ -242,7 +242,7 @@ class WordpressClient implements CmsClient {
   async getTagBySlug(slug: string) {
     const url = `${this.apiUrl}/wp-json/wp/v2/tags?slug=${slug}`;
     const response = await fetch(url);
-    const data = await response.json();
+    const data = await response.clone().json();
 
     if (data.length === 0) {
       return;
@@ -279,12 +279,12 @@ class WordpressClient implements CmsClient {
     );
 
     if (!response.ok) {
-      console.error('Failed to fetch categories', await response.json());
+      console.error('Failed to fetch categories', await response.clone().json());
 
       throw new Error('Failed to fetch categories');
     }
 
-    const data = (await response.json()) as WP_REST_API_Category[];
+    const data = (await response.clone().json()) as WP_REST_API_Category[];
 
     return data.map((item) => ({
       id: item.id.toString(),
@@ -314,12 +314,12 @@ class WordpressClient implements CmsClient {
     );
 
     if (!response.ok) {
-      console.error('Failed to fetch tags', await response.json());
+      console.error('Failed to fetch tags', await response.clone().json());
 
       throw new Error('Failed to fetch tags');
     }
 
-    const data = (await response.json()) as WP_REST_API_Tag[];
+    const data = (await response.clone().json()) as WP_REST_API_Tag[];
 
     return data.map((item) => ({
       id: item.id.toString(),
@@ -336,7 +336,7 @@ class WordpressClient implements CmsClient {
     const responses = await Promise.all(promises);
 
     const data = (await Promise.all(
-      responses.map((response) => response.json()),
+      responses.map((response) => response.clone().json()),
     )) as WP_REST_API_Tag[];
 
     return data.map((item) => ({
@@ -354,7 +354,7 @@ class WordpressClient implements CmsClient {
     const responses = await Promise.all(promises);
 
     const data = (await Promise.all(
-      responses.map((response) => response.json()),
+      responses.map((response) => response.clone().json()),
     )) as WP_REST_API_Category[];
 
     return data.map((item) => ({

@@ -208,8 +208,8 @@ class AccountInvitationsWebhookService {
           html,
         }),
       });
-      const data = await res.json();
-      
+      const data = await res.clone().json();
+
       if (!res.ok) {
         console.error('Failed to send invitation email', data);
       }
@@ -273,7 +273,7 @@ class AccountInvitationsWebhookService {
       if (!responseGetSubscription.ok) {
         throw new Error('Failed to fetch subscription');
       }
-      const dataSubscription = await responseGetSubscription.json();
+      const dataSubscription = await responseGetSubscription.clone().json();
       // update subscription in stripe
       const responseUpdateSubscription = await fetch(
         `${siteURL}/api/stripe/update-subscription?subscriptionId=${encodeURIComponent(subscriptionData?.id ?? '')}`,
