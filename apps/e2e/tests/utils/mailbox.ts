@@ -54,7 +54,7 @@ export class Mailbox {
       throw new Error(`Failed to fetch emails: ${response.statusText}`);
     }
 
-    const json = (await response.json()) as Array<{ id: string }>;
+    const json = (await response.clone().json()) as Array<{ id: string }>;
 
     if (!json || !json.length) {
       return;
@@ -82,6 +82,6 @@ export class Mailbox {
       }
     }
 
-    return await messageResponse.json();
+    return await messageResponse.clone().json();
   }
 }

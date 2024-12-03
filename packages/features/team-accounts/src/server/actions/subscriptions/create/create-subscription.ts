@@ -55,7 +55,7 @@ export const createSubscription = async (): Promise<{
       throw new Error('Failed to create customer');
     }
 
-    const customerData = await customerResponse.json();
+    const customerData = await customerResponse.clone().json();
 
     const priceId = process.env.PLAN_FREE_ID as string;
 
@@ -70,11 +70,14 @@ export const createSubscription = async (): Promise<{
     );
 
     if (!subscriptionResponse.ok) {
-      console.error('Failed to create subscription. Status:', subscriptionResponse.status);
+      console.error(
+        'Failed to create subscription. Status:',
+        subscriptionResponse.status,
+      );
       throw new Error('Failed to create subscription');
     }
 
-    const subscriptionData = await subscriptionResponse.json();
+    const subscriptionData = await subscriptionResponse.clone().json();
 
     const primary_owner_user_id = await getPrimaryOwnerId();
 

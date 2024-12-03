@@ -36,7 +36,7 @@ const RegisterStripePage = ({ email, stripeId, id}: AccountSchema) => {
           },
           body: JSON.stringify({ email }),
         })
-        .then((res) => res.json())
+        .then((res) => res.clone().json())
         .then(async (data) => {
           // SAVE OR UPDATE ACCOUNT ID
           setAccountId(data.accountId);
@@ -52,7 +52,7 @@ const RegisterStripePage = ({ email, stripeId, id}: AccountSchema) => {
             },
             body: JSON.stringify({ accountId: data.accountId }),
           })
-            .then((res) => res.json())
+            .then((res) => res.clone().json())
             .then((linkData) => {
                 setLinkData(linkData.url);
             })
@@ -72,7 +72,7 @@ const RegisterStripePage = ({ email, stripeId, id}: AccountSchema) => {
           },
           body: JSON.stringify({ accountId }),
         })
-          .then((res) => res.json())
+          .then((res) => res.clone().json())
           .then((linkData) => {
               setLinkData(linkData.url);
           })
