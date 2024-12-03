@@ -1,6 +1,5 @@
 'use client';
 
-import { SignInLogo } from '@kit/auth/sign-in';
 import { SignInMethodsContainer } from '@kit/auth/sign-in';
 
 import authConfig from '~/config/auth.config';
@@ -8,6 +7,7 @@ import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
 
 // import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
 import { useAuthDetails } from '../../../../../../packages/features/auth/src/hooks/use-auth-details';
+import { AppLogo } from '~/components/app-logo';
 
 const SignIn = ({
   inviteToken,
@@ -24,12 +24,13 @@ const SignIn = ({
   if (typeof window !== 'undefined') {
     host = window.location.host;
   }
-  const { authDetails } = useAuthDetails(host);
+  const { authDetails, isLoading } = useAuthDetails(host);
   //   const textcolor = getTextColorBasedOnBackground(
   //     authDetails?.background_color ?? '#ffffff',
   //   );
   return (
     <>
+    {!isLoading && (
       <div
         className={`from-gray-['#f2f2f2'] to-gray-['#f2f2f2'] relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-r`}
         style={{
@@ -57,17 +58,21 @@ const SignIn = ({
           }}
         >
           <div className="flex w-full items-start justify-center pb-[32px]">
-            <SignInLogo />
+            <div className="flex justify-center items-center h-full">
+              <AppLogo logoUrl={authDetails?.logo_url} />
+            </div>
           </div>
           <div className="h-auto">
             <SignInMethodsContainer
               providers={authConfig.providers}
               inviteToken={inviteToken}
               paths={paths}
+              themeColor={authDetails?.theme_color}
             />
           </div>
         </div>
       </div>
+    )}
     </>
   );
 };
