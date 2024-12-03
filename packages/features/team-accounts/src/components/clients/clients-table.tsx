@@ -401,7 +401,7 @@ const useClientColumns = (
         cell: ({ row }) => {
           const client = row.original;
           const organizationOptions = uniqueOrganizations.map((org) => ({ id: org.id, name: org.name, slug: org.slug ?? '' }));
-          return userRole === 'agency_owner' &&(
+          return (userRole === 'agency_owner' || userRole === 'agency_project_manager') &&(
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <UpdateClientDialog {...client} /> */}
               {/* <DeleteUserDialog userId={client.id} /> */}

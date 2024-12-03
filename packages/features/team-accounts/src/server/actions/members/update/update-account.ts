@@ -83,8 +83,6 @@ export const updateUserRole = async(
     });
   try {
 
-    const {id: organizationId} = await getOrganizationByUserId(userId, true);
-
     const { data: userRoleData, error: errorUpdateUserRole } =
       await databaseClient
         .from('accounts_memberships')
@@ -97,39 +95,109 @@ export const updateUserRole = async(
         `Error updating the user role: ${errorUpdateUserRole.message}`,
       );
     
-    if(role == 'client_owner') {
-      // Update the previous owner roles
-      const { data: updateRolesData, error: updateRolesError } =
-      await databaseClient
-        .from('accounts_memberships')
-        .update({account_role: 'client_member'})
-        .eq('account_role', 'client_owner')
-        .eq('account_id', organizationId)
-        .neq('user_id', userId);
-      if (updateRolesError)
-        throw new Error(
-          `Error updating the previous owner roles: ${updateRolesError.message}`,
-        );
-      
-      // Update the organization primary owner
-      const { data: updatePrimaryOwnerData, error: updatePrimaryOwnerError } =
-      await databaseClient
-        .from('accounts')
-        .update({primary_owner_user_id: userId})
-        .eq('id', organizationId);
-      
-      if (updatePrimaryOwnerError)
-        throw new Error(
-          `Error updating the organization primary owner: ${updatePrimaryOwnerError.message}`,
-        );
-    }
+    await handleHierarchyChange(userId, role, databaseClient);
 
     revalidatePath('/clients')
+    revalidatePath('/team')
 
     return userRoleData;
   } catch (error) {
     console.error('Error updating the user role', error);
     throw error;
+  }
+}
+
+
+const handleHierarchyChange = async(
+  userId: Account.Type['id'], //id of the new agency_owner / client_owner
+  role: string, //selected role for the newly updated user
+  databaseClient: SupabaseClient<Database>,
+) => {
+  if(role !== 'agency_owner' && role !== 'client_owner') {
+    //No hierarchy change
+    return;
+  }
+  const defaultRole = role === 'agency_owner' ? 'agency_member' : 'client_member';
+  const {id: organizationId} = await getOrganizationByUserId(userId, true);
+
+  //Get the previous owner
+  const { data: previousOwner, error: errorGetPreviousOwner } =
+    await databaseClient
+      .from('accounts')
+      .select('primary_owner_user_id')
+      .eq('id', organizationId)
+      .single();
+  
+  const previousOwnerId = previousOwner?.primary_owner_user_id;
+  
+  if (errorGetPreviousOwner)
+    throw new Error(
+      `Error getting the previous owner: ${errorGetPreviousOwner.message}`,
+    );
+  
+  // Update the previous owner roles
+  const { error: updateRolesError } =
+    await databaseClient
+      .from('accounts_memberships')
+      .update({account_role: defaultRole})
+      .eq('account_role', role)
+      .eq('account_id', organizationId)
+      .neq('user_id', userId);
+
+  if (updateRolesError)
+    throw new Error(
+      `Error updating the previous owner roles: ${updateRolesError.message}`,
+    );
+  
+  // Update the organization primary owner
+  const { error: updatePrimaryOwnerError } =
+  await databaseClient
+    .from('accounts')
+    .update({primary_owner_user_id: userId})
+    .eq('id', organizationId);
+  
+  if (updatePrimaryOwnerError)
+    throw new Error(
+      `Error updating the organization primary owner: ${updatePrimaryOwnerError.message}`,
+    );
+  
+  //Specific case where the hierarchy change is on agency level
+  if(role === 'agency_owner') {
+    //Update propietary id on subscriptions table
+    const { error: errorUpdateOnSubscriptions } =
+      await databaseClient
+        .from('subscriptions')
+        .update({propietary_organization_id: userId})
+        .eq('propietary_organization_id', previousOwnerId ?? '')
+      
+    if (errorUpdateOnSubscriptions)
+      throw new Error(
+        `Error updating the previous owner on subscriptions: ${errorUpdateOnSubscriptions.message}`,
+      );
+    
+    //Update propietary id on services table
+    const { error: errorUpdateOnServices } =
+    await databaseClient
+      .from('services')
+      .update({propietary_organization_id: userId})
+      .eq('propietary_organization_id', previousOwnerId ?? '')
+    
+    if (errorUpdateOnServices)
+      throw new Error(
+        `Error updating the previous owner on services: ${errorUpdateOnServices.message}`,
+      );
+    
+    //Update propietary id on briefs table
+    const { error: errorUpdateOnBriefs } =
+    await databaseClient
+      .from('briefs')
+      .update({propietary_organization_id: userId})
+      .eq('propietary_organization_id', previousOwnerId ?? '')
+    
+    if (errorUpdateOnBriefs)
+      throw new Error(
+        `Error updating the previous owner on briefs: ${errorUpdateOnBriefs.message}`,
+      );
   }
 }
 
