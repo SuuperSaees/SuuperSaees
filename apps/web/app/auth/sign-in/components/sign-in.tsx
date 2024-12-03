@@ -31,7 +31,7 @@ const SignIn = ({
   return (
     <>
       <div
-        className={`from-gray-['#f2f2f2'] to-gray-['#f2f2f2'] relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-r transition pointer-events-none opacity-0 ${!isLoading && 'pointer-events-auto opacity-100'}`}
+        className={`from-gray-['#f2f2f2'] to-gray-['#f2f2f2'] relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-r`}
         style={{
           background: `linear-gradient(to right, ${authDetails?.auth_section_background_color ? authDetails.auth_section_background_color : authDetails?.background_color}, ${authDetails?.auth_section_background_color ? authDetails.auth_section_background_color : authDetails?.background_color})`,
         }}
@@ -43,7 +43,7 @@ const SignIn = ({
         <div className="absolute hidden md:left-8 md:top-8 md:block md:h-auto md:w-[142px] md:object-contain"></div>
 
         <div
-          className={`align-center relative z-10 w-[90%] max-w-[360px] rounded-lg bg-white text-black shadow-lg backdrop-blur-[95%] md:px-[32px] md:py-[48px]`}
+          className={`align-center relative z-10 w-[90%] max-w-[360px] rounded-lg bg-white text-black shadow-lg backdrop-blur-[95%] md:px-[32px] md:py-[48px] transition pointer-events-none opacity-0 ${!isLoading && 'pointer-events-auto opacity-100'}`}
           style={{
             color: getTextColorBasedOnBackground(
               authDetails?.auth_card_background_color
