@@ -58,7 +58,7 @@ const ActivityPage = () => {
   return (
     <div className="flex w-full flex-col gap-4 max-h-full h-full">
       <Interactions />
-      <div className="mb-2 flex flex-col justify-end gap-4 ">
+      <div className="mb-2 flex flex-col justify-end gap-4 border p-2 rounded-lg">
         {showFileUploader && (
           <UploadFileComponent
             bucketName="orders"

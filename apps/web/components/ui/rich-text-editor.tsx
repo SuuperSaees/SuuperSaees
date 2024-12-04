@@ -18,16 +18,9 @@ import {
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import {
-  Bold,
-  // Heading1,
-  // Heading2,
-  Image,
-  Italic,
-  List,
-  ListOrdered,
-  Quote,
   SendHorizontalIcon,
-  Strikethrough,
+  Upload,
+  Video,
 } from 'lucide-react';
 
 import { Switch } from '@kit/ui/switch';
@@ -416,87 +409,7 @@ export const Toolbar = ({
   }
   return (
     <div className={"flex items-center gap-2 bg-transparent"}>
- {/* <button
-        type='button'
-        className={
-          editor.isActive('heading', { level: 1 })
-            ? 'text-gray-700'
-            : 'text-gray-400'
-        }
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-      >
-        <Heading1 className="h-5 w-5" />
-      </button>
 
-      <button
-        type='button'
-        className={
-          editor.isActive('heading', { level: 2 })
-            ? 'text-gray-700'
-            : 'text-gray-400'
-        }
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-      >
-        <Heading2 className="h-5 w-5" />
-      </button> */}
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'text-gray-700' : 'text-gray-400'}
-      >
-        <Bold className="h-4 w-4" />
-      </button>
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={
-          editor.isActive('strike') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <Strikethrough className="h-4 w-4" />
-      </button>
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={
-          editor.isActive('italic') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <Italic className="h-4 w-4" />
-      </button>
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={
-          editor.isActive('bulletList') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <List className="h-5 w-5" />
-      </button>
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={
-          editor.isActive('orderedList') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <ListOrdered className="h-5 w-5" />
-      </button>
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={
-          editor.isActive('blockquote') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <Quote className="h-4 w-4" />
-      </button>
-      
       {!onChange && (
         <>
         <button
@@ -506,9 +419,15 @@ export const Toolbar = ({
               ? () => toggleExternalUpload()
               : undefined
           }
-          className={editor.isActive('image') ? 'text-gray-700' : 'text-gray-400'}
+          className={editor.isActive('image') ? 'text-gray-700 w-8 h-8 items-center flex' : 'text-gray-400 w-8 h-8 items-center flex'}
         >
-          <Image className="h-4 w-4" />
+          <Upload className="w-5 h-5" />
+        </button>
+        <button
+          type='button'
+          className='text-gray-400 w-8 h-8 items-center flex'
+        >
+          <Video className="w-5 h-5" />
         </button>
         {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
           userRole,
@@ -516,10 +435,10 @@ export const Toolbar = ({
           <button
             onClick={handleSwitchChange}
             className={
-              isInternalMessagingEnabled ? 'text-gray-700' : 'text-gray-400'
+              isInternalMessagingEnabled ? 'text-gray-700 w-8 h-8 items-center flex' : 'text-gray-400 w-8 h-8 items-center flex'
             }
           >
-            <Switch checked={isInternalMessagingEnabled} />
+            <Switch checked={isInternalMessagingEnabled}/>
           </button>
         )}
         {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
