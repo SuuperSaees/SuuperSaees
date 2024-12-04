@@ -1,5 +1,7 @@
 import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 
+import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
+
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
 import {
@@ -18,12 +20,8 @@ import { HomeSidebar } from '~/home/(user)/_components/home-sidebar';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { getOrganizationSettings } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
-import Panel from './components/panel';
-import { BriefsProvider } from './contexts/briefs-context';
-
-async function BriefsLayout({ children }: React.PropsWithChildren) {
+async function OrganizationsLayout({ children }: React.PropsWithChildren) {
   const workspace = await loadUserWorkspace();
   const style = getLayoutStyle();
   const organizationSettings = await loadOrganizationSettings();
@@ -36,10 +34,7 @@ async function BriefsLayout({ children }: React.PropsWithChildren) {
       lang={language}
       organizationSettings={organizationSettings}
     >
-      <Page
-        style={style}
-        contentContainerClassName="mx-auto flex h-screen w-full flex-col overflow-y-hidden px-4 lg:px-0"
-      >
+      <Page style={style}>
         <PageNavigation>
           <If condition={style === 'header'}>
             <HomeMenuNavigation workspace={workspace} />
@@ -56,20 +51,14 @@ async function BriefsLayout({ children }: React.PropsWithChildren) {
         </PageMobileNavigation>
 
         <UserWorkspaceContextProvider value={workspace}>
-          <BriefsProvider>
-            <div className="flex h-full max-h-full gap-8">
-              {children}
-
-              <Panel />
-            </div>
-          </BriefsProvider>
+          {children}
         </UserWorkspaceContextProvider>
       </Page>
     </RootProviders>
   );
 }
 
-export default withI18n(BriefsLayout);
+export default withI18n(OrganizationsLayout);
 
 function getLayoutStyle() {
   return (((cookies() as unknown as UnsafeUnwrappedCookies).get('layout-style')?.value as PageLayoutStyle) ?? personalAccountNavigationConfig.style);

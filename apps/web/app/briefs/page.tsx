@@ -20,6 +20,7 @@ async function BriefsPage() {
   const briefs = await getBriefs();
   return (
     <PageBody>
+      <div className="p-[35px]">
         <div className="flex items-center justify-between">
           <div className="flex-grow">
             <span>
@@ -34,6 +35,7 @@ async function BriefsPage() {
         ) : (
           <p>No briefs available</p>
         )}
+      </div>
     </PageBody>
   );
 }
