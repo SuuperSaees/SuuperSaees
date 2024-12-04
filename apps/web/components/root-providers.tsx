@@ -2,13 +2,16 @@
 
 import { useMemo } from 'react';
 
+
+
 import dynamic from 'next/dynamic';
+
+
 
 import { ReactQueryStreamedHydration } from '@tanstack/react-query-next-experimental';
 import { ThemeProvider } from 'next-themes';
 import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
-import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 // import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { CaptchaProvider } from '@kit/auth/captcha/client';
 import { I18nProvider } from '@kit/i18n/provider';
@@ -16,6 +19,8 @@ import { MonitoringProvider } from '@kit/monitoring/components';
 import { AppEventsProvider } from '@kit/shared/events';
 import { If } from '@kit/ui/if';
 import { VersionUpdater } from '@kit/ui/version-updater';
+
+
 
 import { AnalyticsProvider } from '~/components/analytics-provider';
 import { AuthProvider } from '~/components/auth-provider';
@@ -25,10 +30,11 @@ import featuresFlagConfig from '~/config/feature-flags.config';
 import { Database } from '~/lib/database.types';
 import { i18nResolver } from '~/lib/i18n/i18n.resolver';
 import { getI18nSettings } from '~/lib/i18n/i18n.settings';
-import { TimeTrackerProvider } from '~/orders/[id]/context/time-tracker-context';
+
+
 
 import { ReactQueryProvider } from './react-query-provider';
-import { UserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+
 
 const captchaSiteKey = authConfig.captchaTokenSiteKey;
 
@@ -49,7 +55,6 @@ export function RootProviders({
   theme = appConfig.theme,
   children,
   organizationSettings,
-  workspace
 }: React.PropsWithChildren<{
   lang: string;
   theme?: string;
@@ -61,7 +66,6 @@ export function RootProviders({
     updated_at: string | null;
     value: string;
   }[];
-  workspace: UserWorkspace
 }>) {
   const i18nSettings = useMemo(() => getI18nSettings(lang), [lang]);
 
@@ -79,19 +83,15 @@ export function RootProviders({
                     <OrganizationSettingsProvider
                       initialSettings={organizationSettings}
                     >
-                      <TimeTrackerProvider>
-                        <UserWorkspaceContextProvider value={workspace}>
-                          <ThemeProvider
-                            attribute="class"
-                            enableSystem
-                            disableTransitionOnChange
-                            defaultTheme={theme}
-                            enableColorScheme={false}
-                          >
-                            {children}
-                          </ThemeProvider>
-                        </UserWorkspaceContextProvider>
-                      </TimeTrackerProvider>
+                      <ThemeProvider
+                        attribute="class"
+                        enableSystem
+                        disableTransitionOnChange
+                        defaultTheme={theme}
+                        enableColorScheme={false}
+                      >
+                        {children}
+                      </ThemeProvider>
                     </OrganizationSettingsProvider>
                   </AuthProvider>
                 </CaptchaProvider>

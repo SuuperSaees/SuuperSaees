@@ -60,6 +60,7 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
     >
       <Elements stripe={stripePromise}>
         <PageBody>
+          <div className="p-[35px]">
             <PageHeader
               title='services:title'
               rightContent={
@@ -83,6 +84,7 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
             <TabsContent className="bg-transparent" value="briefs">
               <BriefsTable activeTab={activeTab} briefs={briefs} accountRole={accountRole} isLoading={briefsAreLoading} />
             </TabsContent>
+          </div>
         </PageBody>
       </Elements>
     </Tabs>

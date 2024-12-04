@@ -35,6 +35,7 @@ function PersonalAccountSettingsPage() {
 
   return (
     <PageBody>
+      <div className="p-[35px]">
         <PageHeader
           title='account:settingsTab'
           rightContent={
@@ -47,6 +48,7 @@ function PersonalAccountSettingsPage() {
           features={features}
           paths={paths}
         />
+      </div>
     </PageBody>
   );
 }

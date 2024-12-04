@@ -47,7 +47,7 @@ async function OrderDetailsPage({
   });
 
   return (
-    <PageBody className="h-full max-h-full min-h-0 flex-grow gap-4 lg:py-0 lg:px-8 max-h-lvh h-full overflow-y-hidden flex flex-col">
+    <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
       <ActivityProvider
         messages={order?.messages ?? []}
         files={order?.files ?? []}
