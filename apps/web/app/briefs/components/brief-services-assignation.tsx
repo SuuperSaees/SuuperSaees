@@ -37,15 +37,15 @@ export default function BriefServicesAssignation({
 
   const serviceOptions = useMemo(() => {
     return (
-      servicesQuery.data?.map((service) => ({
+      servicesQuery?.data?.map((service) => ({
         value: String(service.id),
         label: service.name,
       })) ?? []
     );
-  }, [servicesQuery.data]);
+  }, [servicesQuery?.data]);
 
   const handleSelect = (value: string) => {
-    const newService = servicesQuery.data?.find(
+    const newService = servicesQuery?.data?.find(
       (service) => String(service.id) === value,
     );
     if (!newService) return;
