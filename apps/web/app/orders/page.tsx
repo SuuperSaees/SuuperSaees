@@ -36,7 +36,6 @@ async function OrdersPage() {
     <>
       <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []}>
         <PageBody>
-          <div className="p-[35px]">
             <PageHeader
               title="orders:title"
               rightContent={<TimerContainer />}
@@ -46,8 +45,7 @@ async function OrdersPage() {
               orders={ordersData ?? []}
               role={role}
               agencyStatuses={agencyStatuses ?? []}
-            ></OrderList>
-          </div>
+            />
         </PageBody>
       </AgencyStatusesProvider>
     </>

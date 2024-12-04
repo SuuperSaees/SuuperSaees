@@ -24,7 +24,6 @@ async function ClientsMembersPage() {
   });
   return (
     <PageBody>
-      <div className="p-[35px]">
         <PageHeader
             title="clients:client" 
             rightContent={
@@ -37,7 +36,6 @@ async function ClientsMembersPage() {
           // accountIds={accountIds}
           // accountNames={accountNames}
         />
-      </div>
     </PageBody>
   );
 }

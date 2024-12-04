@@ -38,7 +38,7 @@ async function UpdateBriefsPage({
   // Get the form fields associated with the brief and the brief information
 
   return (
-    <PageBody className="mx-auto flex w-full max-w-7xl p-8 lg:px-16">
+    <PageBody className="mx-auto flex w-full max-w-7xl">
       <div className="mb-[32px] flex w-full items-center justify-between">
         <h2
           className={

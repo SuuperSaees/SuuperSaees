@@ -86,7 +86,6 @@ const ClientsMembersPagePresentation = ({
 
   return (
     <PageBody>
-      <div className="p-[35px]">
         <PageHeader 
           title='team:team'
           rightContent={
@@ -184,7 +183,6 @@ const ClientsMembersPagePresentation = ({
             invitations={invitations}
           />
         </div>
-      </div>
     </PageBody>
   );
 };
