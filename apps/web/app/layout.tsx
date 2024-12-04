@@ -27,7 +27,7 @@ import { HomeMenuNavigation } from './home/(user)/_components/home-menu-navigati
 import { HomeMobileNavigation } from './home/(user)/_components/home-mobile-navigation';
 import { HomeSidebar } from './home/(user)/_components/home-sidebar';
 import { loadUserWorkspace } from './home/(user)/_lib/server/load-user-workspace';
-import { TimeTrackerProvider } from './orders/[id]/context/time-tracker-context';
+
 // import { TimeTrackerProvider } from './orders/[id]/context/time-tracker-context';
 
 const inter = Inter({ subsets: ['latin'] }); // Cambiado a 'Inter'
@@ -38,27 +38,36 @@ export default async function RootLayout({
 }) {
   // Access the custom `x-current-path` header
   const currentPath = headers().get('x-current-path') ?? '/';
-// Use a pattern to match authentication-related or excluded pages
-const excludedPatterns = [/^\/auth\//, /^\/set-password$/, /^\/join$/, /^\/update-password$/, /^\/checkout$/, /^\/buy-success$/];
+  // Use a pattern to match authentication-related or excluded pages
+  const excludedPatterns = [
+    /^\/auth\//,
+    /^\/set-password$/,
+    /^\/join$/,
+    /^\/update-password$/,
+    /^\/checkout$/,
+    /^\/buy-success$/,
+  ];
 
-const isExcludedPage = excludedPatterns.some((pattern) => pattern.test(currentPath));
+  const isExcludedPage = excludedPatterns.some((pattern) =>
+    pattern.test(currentPath),
+  );
 
-const { language } = await createI18nServerInstance();
-const theme = getTheme();
-const style = getLayoutStyle();
-const className = getClassName(theme);
+  const { language } = await createI18nServerInstance();
+  const theme = getTheme();
+  const style = getLayoutStyle();
+  const className = getClassName(theme);
 
-let workspace = null;
+  let workspace = null;
 
-if (!isExcludedPage) {
-  console.log('Loading workspace data...');
-  workspace = await loadUserWorkspace();
-}
+  if (!isExcludedPage) {
+    console.log('Loading workspace data...');
+    workspace = await loadUserWorkspace();
+  }
 
-const organizationSettings = await getOrganizationSettings().catch(() => {
-  console.error(`Error on layout, failed to load organization settings`);
-  return [];
-});
+  const organizationSettings = await getOrganizationSettings().catch(() => {
+    console.error(`Error on layout, failed to load organization settings`);
+    return [];
+  });
 
   return (
     <html lang={language} className={`${className} ${inter.className}`}>
@@ -69,6 +78,7 @@ const organizationSettings = await getOrganizationSettings().catch(() => {
               theme={theme}
               lang={language}
               organizationSettings={organizationSettings}
+              workspace={workspace}
             >
               {children}
             </RootProviders>
@@ -78,6 +88,7 @@ const organizationSettings = await getOrganizationSettings().catch(() => {
             theme={theme}
             lang={language}
             organizationSettings={organizationSettings}
+            workspace={workspace}
           >
             <Page style={'sidebar'}>
               <PageNavigation>
@@ -96,14 +107,8 @@ const organizationSettings = await getOrganizationSettings().catch(() => {
                 <AppLogo />
                 <HomeMobileNavigation workspace={workspace} />
               </PageMobileNavigation>
-              <UserWorkspaceContextProvider value={workspace}>
-                <TimeTrackerProvider>
-                  {/* <Page style={style}> */}
-                  {children}
-                  {/* <TimerPortal /> */}
-                  {/* </Page> */}
-                </TimeTrackerProvider>
-              </UserWorkspaceContextProvider>
+
+              {children}
             </Page>
           </RootProviders>
         )}
