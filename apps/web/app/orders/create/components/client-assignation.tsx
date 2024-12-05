@@ -17,7 +17,6 @@ import CheckboxCombobox, {
 import SelectAction from '~/components/ui/select';
 import { Account } from '~/lib/account.types';
 import AvatarDisplayer from '~/orders/[id]/components/ui/avatar-displayer';
-import deduceNameFromEmail from '~/orders/[id]/utils/deduce-name-from-email';
 import {
   getClientMembersForOrganization,
   getClientsOrganizations,
@@ -234,7 +233,7 @@ const CustomTrigger = ({
                 </AvatarFallback>
               </Avatar>
               <span className="text-xs font-semibold text-gray-600">
-                {deduceNameFromEmail(member?.name)}
+                {member?.name}
               </span>
               <button
                 type="button"
@@ -262,8 +261,8 @@ const CustomUserItem: React.FC<
     <AvatarDisplayer
       className="font-normal"
       pictureUrl={option?.picture_url ?? null}
-      displayName={deduceNameFromEmail(option.label) ?? option.label}
+      displayName={option.label}
     />
-    <span>{deduceNameFromEmail(option.label)}</span>
+    <span>{option.label}</span>
   </div>
 );
