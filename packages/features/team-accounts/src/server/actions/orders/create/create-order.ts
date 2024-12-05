@@ -7,13 +7,15 @@ import {
 } from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
+import {
+  fetchCurrentUserAccount,
+  getUserAccountById,
+} from '../../members/get/get-member-account';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
-
+import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -71,12 +73,29 @@ export const createOrder = async (
       }
     }
 
-    // Step 3: Send email notification
-    await sendOrderCreationEmail(orderData.id.toString(), orderData).catch(
-      (error) => {
-        console.error('Error sending order creation email:', error);
-      },
-    );
+    // Step 3: Send email notification (Replace all this by receiving all data needed directly from props)
+    const supabase = getSupabaseServerComponentClient();
+    const userData = await fetchCurrentUserAccount(supabase);
+    const clientData = orderFollowers?.length
+      ? await getUserAccountById(supabase, orderFollowers?.[0] ?? '')
+      : userData;
+
+      // Samuel Santa at Suuper
+    const userId = userData?.id ?? '';
+    const clientName = clientData?.settings?.name ?? clientData?.name ?? '';
+
+    const clientOrg = await getOrganizationByUserId( orderFollowers?.[0] ?? userId ?? '');
+    const clientOrgName = clientOrg?.name ?? '';
+
+    await sendOrderCreationEmail(
+      orderData.id.toString(),
+      orderData,
+      userId,
+      clientName,
+      clientOrgName
+    ).catch((error) => {
+      console.error('Error sending order creation email:', error);
+    });
 
     return CustomResponse.success(orderData, 'orderCreated').toJSON();
   } catch (error) {

@@ -65,9 +65,9 @@ const EditableHeader = ({
   const canEdit = rolesThatCanEdit.has(userRole);
 
   return (
-    <div className="flex inline-flex max-h-[60px] w-full items-center justify-between">
+    <div className="flex inline-flex max-h-[60px] w-full items-center justify-between relative w-full">
       {canEdit && isEditing ? (
-        <>
+        <div className='w-full relative justify-between flex'>
           <input
             type="text"
             ref={inputRef}
@@ -88,18 +88,19 @@ const EditableHeader = ({
           >
             <Check className="h-[20px] w-[20px]" />
           </Button>
-        </>
+          <TimerContainer />
+        </div>
       ) : (
-        <>
-          <span className="min-w-[80%] max-w-[80%] overflow-hidden whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900">
+        <div className='w-full relative justify-between flex'>
+          <div className='flex gap-2'>
+
+          <span className="max-w-[100%] overflow-hidden whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900 w-full">
             {name.slice(0, 70).trim()}
             {name.length > 70 && '...'}
-          </span>
-          <TimerContainer />
-          {canEdit && (
+            {canEdit && (
             <Button
               variant="ghost"
-              className="m-0 mr-2 h-10 px-1 text-slate-500"
+              className="m-0 h-10 px-1 text-slate-500 "
               onClick={() => {
                 setIsEditing(true);
                 updateInputWidth();
@@ -108,7 +109,11 @@ const EditableHeader = ({
               <PenLine className="h-[20px] w-[20px]" />
             </Button>
           )}
-        </>
+          </span>
+          </div>
+          <TimerContainer />
+       
+        </div>
       )}
     </div>
   );

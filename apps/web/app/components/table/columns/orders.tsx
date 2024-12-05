@@ -61,9 +61,13 @@ export const ordersColumns = (
       accessorKey: 'client',
       header: t('orders.client'),
       cell: ({ row }) => {
+        const agencyLink = `/clients/organizations/${row.original.client_organization?.id}`
+        const clientLink = '/organization'
+        const isClient = withPermissionsActive && !hasPermission(row.original)
+        const link = isClient ? clientLink : agencyLink
         return (
           <Link
-            href={`/clients/organizations/${row.original.client_organization?.id}`}
+            href={link}
             className="flex flex-col"
           >
             <span className="font-semibold">{row.original.customer?.name}</span>
@@ -83,7 +87,7 @@ export const ordersColumns = (
             order={row.original}
             agency_id={row.original.agency_id}
             mode="order"
-            disabled={withPermissionsActive && !hasPermission(row.original)}
+            blocked={withPermissionsActive && !hasPermission(row.original)}
           />
         );
       },
@@ -92,13 +96,13 @@ export const ordersColumns = (
       accessorKey: 'priority',
       header: t('orders.priority'),
       cell: ({ row }) => {
-        return <PriorityCombobox mode="order" order={row.original} disabled={withPermissionsActive && !hasPermission(row.original)} />;
+        return <PriorityCombobox mode="order" order={row.original} blocked={withPermissionsActive && !hasPermission(row.original)} />;
       },
     },
     {
       accessorKey: 'assigned_to',
       header: t('orders.assignedTo'),
-      cell: ({ row }) => <RowAssignedTo row={row.original} disabled={(withPermissionsActive && !hasPermission(row.original) )?? false} />,
+      cell: ({ row }) => <RowAssignedTo row={row.original} blocked={(withPermissionsActive && !hasPermission(row.original) )?? false} />,
     },
     {
       accessorKey: 'created_at',
@@ -147,7 +151,7 @@ export const ordersColumns = (
             }
             defaultDate={row?.original?.due_date}
             showIcon
-            disabled={withPermissionsActive && !hasPermission(row.original)}
+            blocked={withPermissionsActive && !hasPermission(row.original)}
           />
         );
       },
@@ -155,7 +159,7 @@ export const ordersColumns = (
   ];
 };
 
-const RowAssignedTo = ({ row, disabled }: { row: EntityData['orders'][number], disabled: boolean }) => {
+const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], blocked: boolean }) => {
   const { t } = useTranslation('orders');
 
   const membersAssignedSchema = z.object({
@@ -248,7 +252,7 @@ const RowAssignedTo = ({ row, disabled }: { row: EntityData['orders'][number], d
         customItem={CustomUserItem}
         isLoading={isLoading || isPending}
         customItemTrigger={CustomItemTrigger}
-        disabled={disabled}
+        blocked={blocked}
       />
     </div>
   );

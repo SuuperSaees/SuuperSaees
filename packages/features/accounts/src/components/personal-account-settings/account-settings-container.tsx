@@ -113,7 +113,7 @@ export function PersonalAccountSettingsContainer(
               if (!response.ok) {
                 throw new Error('Failed to fetch account data from Stripe');
               }
-              const data: AccountStripe = await response.json();
+              const data: AccountStripe = await response.clone().json();
               setAccountStripe(data);
             } catch (error) {
               console.error('Error fetching account data:', error);
@@ -207,7 +207,7 @@ export function PersonalAccountSettingsContainer(
         }
         
         <TabsContent value="profile">
-          <ProfileSettings user={user} userSettings={userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} />
+          <ProfileSettings user={user} userSettings={userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} userRole={role} />
         </TabsContent>
         <TabsContent value="subscription">
           <BillingContainerConfig tab={tab ?? ''} />

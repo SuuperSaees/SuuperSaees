@@ -42,7 +42,7 @@ export const deleteService = async (priceId: string) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.clone().json();
       throw new CustomError(
         HttpStatus.Error.InternalServerError,
         `Error deleting price and product in Stripe: ${errorData.error?.message}`,
@@ -53,18 +53,35 @@ export const deleteService = async (priceId: string) => {
     const client = getSupabaseServerComponentClient();
 
     // Delete the service from the database
-    const { error } = await client
+    const { data: deletedService, error: deleteServiceError } = await client
       .from('services')
-      .delete()
-      .eq('price_id', priceId);
+      .update({ deleted_on: new Date().toISOString(), status: 'inactive' })
+      .eq('price_id', priceId)
+      .select('id')
+      .single();
 
-    if (error) {
-      throw new CustomError(
-        HttpStatus.Error.InternalServerError,
-        `Error deleting the service: ${error.message}`,
-        ErrorServiceOperations.FAILED_TO_DELETE_SERVICE,
-      );
-    }
+      if (deleteServiceError) {
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          `Error deleting the service: ${deleteServiceError.message}`,
+          ErrorServiceOperations.FAILED_TO_DELETE_SERVICE,
+        );
+      }
+
+    // Unlink the briefs related to the service
+    const { error: unlinkBriefsError } = await client
+      .from('service_briefs')
+      .delete()
+      .eq('service_id', deletedService.id ?? '');
+
+      if (unlinkBriefsError) {
+        throw new CustomError(
+          HttpStatus.Error.InternalServerError,
+          `Error unlinking briefs: ${unlinkBriefsError.message}`,
+          ErrorServiceOperations.FAILED_TO_DELETE_SERVICE,
+        );
+      }
+
     return CustomResponse.success(null, 'serviceDeleted').toJSON();
   } catch (error) {
     console.error('Error deleting the service:', error);
