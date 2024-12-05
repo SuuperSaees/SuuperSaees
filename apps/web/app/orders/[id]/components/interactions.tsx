@@ -20,9 +20,6 @@ import UserFirstMessage from './user-first-message';
 const Interactions = () => {
   const { messages, files, activities, reviews, userRole, order } = useActivityContext();
 
-  console.log('messages', messages);
-  console.log('order', order);
-
   const briefsWithResponsesQuery = useQuery({
     queryKey: ['briefsWithResponses', order.brief_ids],
     queryFn: async () => await fetchFormfieldsWithResponses(order.uuid),
@@ -151,9 +148,9 @@ const Interactions = () => {
                 key={interaction.id}
               />
             ) 
-            : interaction.class === 'file' ? (
-              <UserFile file={interaction as File} key={interaction.id} />
-            ) 
+            // : interaction.class === 'file' ? (
+            //   <UserFile file={interaction as File} key={interaction.id} />
+            // ) 
             : null;
           })}
         </div>

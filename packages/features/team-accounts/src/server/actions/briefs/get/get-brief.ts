@@ -102,8 +102,6 @@ export const fetchFormfieldsWithResponses = async (
       throw new Error(errorBriefFormFields.message);
     }
 
-    console.log('briefFormFields', briefFormFields);
-
     const customerId = briefFormFields?.[0]?.order_data?.customer_id;
 
     if (!customerId) {
@@ -119,9 +117,6 @@ export const fetchFormfieldsWithResponses = async (
     if (errorUserSettings) {
       throw new Error(errorUserSettings.message);
     }
-
-    console.log('briefFormFields', briefFormFields);
-    console.log('userSettings', userSettings);
 
     return briefFormFields.map((field) => ({
       ...field,

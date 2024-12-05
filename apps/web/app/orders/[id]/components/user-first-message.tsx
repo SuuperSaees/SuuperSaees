@@ -6,7 +6,6 @@ import { useState } from 'react';
 
 
 const UserFirstMessage = ({ interaction }) => {
-  console.log('interaction', interaction);
   const { t } = useTranslation('orders');
   const [hoveredFile, setHoveredFile] = useState<string | null>(null);
   const convertLinks = (text: string) => {
@@ -106,9 +105,7 @@ const UserFirstMessage = ({ interaction }) => {
                           <StickyNote className="text-white w-8" />
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 whitespace-normal break-words w-24">
-                        {getFileName(fileUrl)}
-                      </p>
+                      <p className="text-sm text-gray-600 truncate w-24">{getFileName(fileUrl)}</p>
                       {hoveredFile === fileUrl && (
                         <div className="absolute top-[-8px] right-[-8px]">
                           <Download
