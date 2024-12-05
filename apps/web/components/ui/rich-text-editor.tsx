@@ -318,16 +318,16 @@ const RichTextEditor = ({
       onBlur?.();
     }
   }, );
+  const [isSending, setIsSending] = useState(false);
   const sendContent = useCallback(() => {
 
     void (async () => {
+      setIsSending(true);
       
       try {
         cleanupImages();
         const content = editor ? editor.getHTML() : '';
         // <p></p> is the default content of the editor
-        console.log('content', content.trim());
-        console.log('fileIdsList', fileIdsList);
 
         if (content.trim() !== '<p></p>' || fileIdsList.length > 0) {
           // return;
@@ -337,13 +337,15 @@ const RichTextEditor = ({
             onChange(content); 
           }
           insertedImages.current = new Set<string>();
+          setFileIdsList([]);
         } else {
           return;
         }
         
       } finally {
-        editor?.commands.clearContent();
+        setIsSending(false);
         setFileIdsList([]);
+        editor?.commands.clearContent();
       }
     })();
    }, [editor, onComplete, onChange, fileIdsList]); 
@@ -370,10 +372,8 @@ const RichTextEditor = ({
     fileUploaderRef.current?.click();
   };
   const handleFileIdsChangeToSentMessage = (fileIds: string[]) => {
-    console.log('fileIds', fileIds);
     setFileIdsList(prevFileIds => {
         const updatedFileIds = [...prevFileIds, ...fileIds];
-        console.log('Updated fileIdsList', updatedFileIds);
         return updatedFileIds;
     });
   };
@@ -395,7 +395,7 @@ const RichTextEditor = ({
   };
 
   return (
-    <div className={"relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 " + (className ?? '')} {...rest}>
+    <div className={"relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 border " + (className ?? '')} {...rest}>
       <div
         onClick={() => editor?.commands.focus()}
         className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
@@ -407,7 +407,7 @@ const RichTextEditor = ({
         ) : null}
         <EditorContent
           editor={editor}
-          className={`${styles['scrollbar-thin']} flex h-fit max-h-96 w-full whitespace-normal flex-col-reverse overflow-y-auto placeholder:text-gray-400`}
+          className={`${styles['scrollbar-thin']} flex h-full max-h-60 w-full whitespace-normal flex-col-reverse overflow-y-auto placeholder:text-gray-400`}
         />
       </div>
       <div className='flex justify-between items-center '>
@@ -434,16 +434,11 @@ const RichTextEditor = ({
         </div>
           {!hideSubmitButton && ( 
             <ThemedButton
-              className="absolute bottom-6 right-4 h-fit w-fit rounded-xl p-2 shadow-sm items-center flex"
+              className="flex w-9 h-9 p-[var(--spacing-lg,12px)] justify-center items-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))]  bg-[#155EEF] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
               onClick={sendContent}
-              disabled={(!areAllFilesUploaded() && thereAreFilesUploaded) || (editor?.getHTML().trim() !== '<p></p>'  && !areAllFilesUploaded() && thereAreFilesUploaded)}
+              disabled={(!areAllFilesUploaded() && thereAreFilesUploaded) || (editor?.getHTML().trim() !== '<p></p>'  && !areAllFilesUploaded() && thereAreFilesUploaded) || isSending}
             >
-              {/* <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" /> */}
-              {(!areAllFilesUploaded() && thereAreFilesUploaded) || (editor?.getHTML().trim() !== '<p></p>'  && !areAllFilesUploaded() && thereAreFilesUploaded) ? (
-                <Spinner className='h-4 w-4'/>
-              ): (
-                <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
-              )}
+              <SendHorizontalIcon className="w-5 h-5 flex-shrink-0 -rotate-45 text-white" />
             </ThemedButton>
           )}
         </div>
@@ -479,15 +474,15 @@ export const Toolbar = ({
         <button
           type="button"
           onClick={handleUploadClick}
-          className="text-gray-400 w-8 h-8 items-center flex"
+          className="flex w-9 h-9 p-4 justify-center items-center gap-2 flex-shrink-0"
         >
-          <Upload className="w-5 h-5" />
+          <Upload className="w-5 h-5 flex-shrink-0 text-gray-400" />
         </button>
         <button
           type='button'
-          className='text-gray-400 w-8 h-8 items-center flex'
+          className="flex w-9 h-9 p-4 justify-center items-center gap-2 flex-shrink-0 mr-1"
         >
-          <Video className="w-5 h-5" />
+          <Video className="w-5 h-5 flex-shrink-0 text-gray-400" />
         </button>
         {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
           userRole,
@@ -495,7 +490,7 @@ export const Toolbar = ({
           <button
             onClick={handleSwitchChange}
             className={
-              isInternalMessagingEnabled ? 'text-gray-700 w-8 h-8 items-center flex' : 'text-gray-400 w-8 h-8 items-center flex'
+              isInternalMessagingEnabled ? 'text-gray-700 flex w-12 h-12 p-4 justify-center items-center gap-2 flex-shrink-0' : 'text-gray-400 flex w-9 h-9 p-4 justify-center items-center gap-2 flex-shrink-0'
             }
           >
             <Switch checked={isInternalMessagingEnabled}/>

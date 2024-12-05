@@ -4,18 +4,17 @@ import { format } from 'date-fns';
 
 import {
   Activity,
-  File,
   Message,
   Review,
   useActivityContext,
 } from '../context/activity-context';
 import ActivityAction from './activity-actions';
-import UserFile from './user-file';
 import UserMessage from './user-message';
 import UserReviewMessage from './user-review-message';
 import { fetchFormfieldsWithResponses } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { useQuery } from '@tanstack/react-query';
 import UserFirstMessage from './user-first-message';
+import { Check } from 'lucide-react';
 
 const Interactions = () => {
   const { messages, files, activities, reviews, userRole, order } = useActivityContext();
@@ -120,7 +119,7 @@ const Interactions = () => {
 
   return (
     <div
-      className="no-scrollbar max-h-full ml-2 mr-10 flex h-full w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto border-b-0 border-l-0 border-r-0 border-t border-gray-200 p-0"
+      className="no-scrollbar max-h-[calc(100vh-300px)] ml-2 mr-10 flex h-full w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto p-0 pr-[2rem] px-8"
       ref={interactionsContainerRef}
     >
       {Object.entries(groupedInteractions).map(([date, interactions]) => (
@@ -132,7 +131,12 @@ const Interactions = () => {
           </div>
           {interactions.map((interaction) => {
             return interaction.class === 'brief-field' ? (
-              <UserFirstMessage interaction={interaction} key={interaction.id} />
+              <div className="flex w-full">
+                <div className="flex items-center justify-center w-7 h-7 rounded-full bg-green-200 p-1 mr-2">
+                  <Check className="text-green-700" />
+                </div>
+                <UserFirstMessage interaction={interaction} key={interaction.id} />
+              </div>
             ) : interaction.class === 'message' ? (
               <div className="flex w-full" key={interaction.id}>
                 <UserMessage message={interaction as Message} />
@@ -148,9 +152,6 @@ const Interactions = () => {
                 key={interaction.id}
               />
             ) 
-            // : interaction.class === 'file' ? (
-            //   <UserFile file={interaction as File} key={interaction.id} />
-            // ) 
             : null;
           })}
         </div>

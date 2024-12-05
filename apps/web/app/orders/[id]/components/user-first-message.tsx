@@ -1,13 +1,11 @@
 import { Brief } from '~/lib/brief.types';
-import { Check, Download, StickyNote } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import UserFile from './user-file';
 
 
 const UserFirstMessage = ({ interaction }) => {
   const { t } = useTranslation('orders');
-  const [hoveredFile, setHoveredFile] = useState<string | null>(null);
   const convertLinks = (text: string) => {
     const urlRegex =
       /\b(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*))/gi;
@@ -16,24 +14,6 @@ const UserFirstMessage = ({ interaction }) => {
       (url) =>
         `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">${url}</a>`,
     );
-  };
-
-  const handleDownload = async ({src}) => {
-    try {
-      const response = await fetch(src);
-      if (!response.ok) throw new Error('Failed to fetch image');
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'image.jpg'; // Set the filename for the downloaded file
-      link.click();
-
-      window.URL.revokeObjectURL(url); // Clean up the object URL
-    } catch (error) {
-      console.error('Download error:', error);
-    }
   };
 
   const getFileName = (fileUrl: string) => {
@@ -59,62 +39,36 @@ const UserFirstMessage = ({ interaction }) => {
 
   const date = format(new Date(interaction.created_at), 'MMM dd, p');
 
-  const isImageOrVideo = (fileUrl: string) => {
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'];
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.avi', '.mov'];
-
+  const getExtension = (fileUrl: string) => {
     const extension = fileUrl.split('.').pop()?.toLowerCase();
-
-    return imageExtensions.includes(`.${extension}`) || videoExtensions.includes(`.${extension}`);
+    if(extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif' || extension === 'bmp' || extension === 'svg' || extension === 'webp' || extension === 'avif') {
+      return 'image/' + extension;
+    } else if(extension === 'mp4' || extension === 'webm' || extension === 'ogg' || extension === 'avi' || extension === 'mov') {
+      return 'video/' + extension;
+    }
+    return extension;
   };
 
   return (
-    <div className="flex items-start gap-4 w-full">
-      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-green-200 p-1">
-        <Check className="text-green-700" />
+    <div className={`flex flex-col gap-2 w-full p-0 max-w-full min-w-0`}>
+    <div className="flex justify-between w-full">
+      <div className="flex gap-2">
+        <span className="font-semibold">{interaction?.userSettings.name} {t("createdNewProject")}</span>
       </div>
-      <div className="flex flex-col w-full">
-        <div className="flex justify-between w-full">
-          <span>
-            {interaction?.userSettings.name} {t("createdNewProject")}
-          </span>
-          <small>{`${date}`}</small>
-        </div>
-        <div className="flex w-full p-2.5 flex-col items-start gap-2.5 rounded-tr-lg rounded-br-lg rounded-bl-lg bg-gray-100">
-          {interaction.fields.map((field) => (
+      <small className="">{`${date}`}</small>
+    </div>
+
+    <div className="flex w-full p-2.5 flex-col items-start gap-2.5 rounded-tr-lg rounded-br-lg rounded-bl-lg bg-gray-100">
+      {interaction.fields.map((field) => (
             <div key={field.id} className="flex w-full flex-col gap-2.5 rounded-lg">
               {field.field?.type === "file" ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
                   {formatResponse(field).map((fileUrl, index) => (
-                    <div
-                      key={index}
-                      className="relative flex flex-col items-center justify-start w-24 mt-4 m-2"
-                      onMouseEnter={() => setHoveredFile(fileUrl)}
-                      onMouseLeave={() => setHoveredFile(null)}
-                    >
-                      <div className="flex items-center justify-center w-24 h-16 bg-gray-200 rounded-lg">
-                        {isImageOrVideo(fileUrl) ? (
-                          isImageOrVideo(fileUrl) && fileUrl.includes('.mp4') ? (
-                            <video className="w-full h-full object-cover rounded-lg" controls>
-                              <source src={fileUrl} />
-                            </video>
-                          ) : (
-                            <img src={fileUrl} alt="preview" className="w-full h-full object-cover rounded-lg" />
-                          )
-                        ) : (
-                          <StickyNote className="text-white w-8" />
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 truncate w-24">{getFileName(fileUrl)}</p>
-                      {hoveredFile === fileUrl && (
-                        <div className="absolute top-[-8px] right-[-8px]">
-                          <Download
-                            className="cursor-pointer w-4 h-4 bg-white rounded-full shadow"
-                            onClick={() => handleDownload({ src: fileUrl })}
-                          />
-                        </div>
-                      )}
-                    </div>
+                    <UserFile key={index} file={{
+                      url: fileUrl,
+                      name: getFileName(fileUrl),
+                      type: getExtension(fileUrl),
+                    }} />
                   ))}
                 </div>
               ) : (
@@ -133,8 +87,7 @@ const UserFirstMessage = ({ interaction }) => {
             </div>
           ))}
         </div>
-      </div>
-    </div>
+  </div>
   );
 };
 

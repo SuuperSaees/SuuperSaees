@@ -41,19 +41,40 @@ const ActivityPage = () => {
 
   const handleOnCompleteMessageSend = async (messageContent: string, fileIdsList?: string[]) => {
     try {
-      if (fileIdsList) {
-        const messageData = await writeMessage(messageContent);
+      if (fileIdsList?.length > 0) {
+        const idsListFromServer = [];
         for (const fileId of fileIdsList) {
-          const { error: Err } = await client
+          const { data: fileData, error: Err } = await client
             .from('files')
-            .update({
-              message_id: messageData.id,
-            })
-            .eq('id', fileId);
+            .select('id')
+            .eq('id', fileId)
+            .single();
           if (Err) {
-            console.error('Error inserting file:', Err);
+            console.error('Error getting file:', Err);
+          }
+
+          if (fileData?.id !== undefined) {
+            idsListFromServer.push(fileData?.id);
           }
         }
+
+        if(idsListFromServer.length > 0) {
+          const messageData = await writeMessage(messageContent);
+          for (const fileId of idsListFromServer) {
+            const { error: Err } = await client
+              .from('files')
+              .update({
+                message_id: messageData.id,
+              })
+              .eq('id', fileId);
+            if (Err) {
+              console.error('Error inserting file:', Err);
+            }
+          } 
+        } else if (messageContent !== '<p></p>' && idsListFromServer.length === 0) {
+          await writeMessage(messageContent);
+        }
+        
       } else {
         await writeMessage(messageContent);
       }
@@ -64,20 +85,22 @@ const ActivityPage = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 max-h-full h-full">
+    <div className="flex w-full flex-col gap-4 h-auto">
+      <Separator className='w-full'/>
       <Interactions />
       <Separator className='w-full'/>
-      <div className="mb-2 flex flex-col justify-end gap-4 border p-2 rounded-lg"> 
+      <div className="mb-10 flex flex-col justify-end px-8"> 
         <RichTextEditor
+          className=" w-full overflow-auto"
           onComplete={handleOnCompleteMessageSend}
           uploadFileIsExternal
           toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
           userRole={userRole}
-          className='pb-8'
           handleFileIdsChange={handleFileIdsChange}
         />
       </div>
-    </div>
+  </div>
+    
   );
 };
 
