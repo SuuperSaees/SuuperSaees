@@ -1202,6 +1202,7 @@ export type Database = {
           created_at: string
           id: string
           order_id: number
+          temp_id: string | null
           updated_at: string
           user_id: string
           visibility: Database["public"]["Enums"]["messages_types"] | null
@@ -1211,6 +1212,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id: number
+          temp_id?: string | null
           updated_at?: string
           user_id: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null
@@ -1220,6 +1222,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id?: number
+          temp_id?: string | null
           updated_at?: string
           user_id?: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null

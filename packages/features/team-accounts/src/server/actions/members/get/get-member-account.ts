@@ -150,7 +150,7 @@ export async function getUserById(userId: string) {
 
     const { data: userData, error: userError } = await client
       .from('accounts')
-      .select('name, email, id, settings:user_settings(picture_url, name)') // add more fields to the user settings when needed
+      .select('name, email, id, picture_url, settings:user_settings(picture_url, name)') // add more fields to the user settings when needed
       .eq('id', userId)
       .single();
 

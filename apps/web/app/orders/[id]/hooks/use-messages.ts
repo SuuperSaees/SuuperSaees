@@ -60,7 +60,11 @@ const useInternalMessaging = () => {
   }, []);
 
   if(!isBrowser()) {
-    return null
+    return {
+      isInternalMessagingEnabled: false,
+      handleSwitchChange: () => false,
+      getInternalMessagingEnabled: () => false,
+    };
   }
   return {
     isInternalMessagingEnabled,

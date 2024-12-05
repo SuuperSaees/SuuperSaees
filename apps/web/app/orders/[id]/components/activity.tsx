@@ -45,11 +45,11 @@ const ActivityPage = () => {
     }
   };
 
-  const { writeMessage, userRole } = useActivityContext();
+  const { addMessageMutation, userRole } = useActivityContext();
 
   const handleOnCompleteMessageSend = async (messageContent: string) => {
     try {
-      await writeMessage(messageContent);
+      await addMessageMutation(messageContent);
     } catch (error) {
       console.error('Failed to send message or upload files:', error);
     }

@@ -264,23 +264,23 @@ export const addOrderMessage = async (
 
     if (messageError) throw messageError.message;
 
-    for (const email of emailsData) {
-      if (email) {
-        const messageContent = messageData.content ?? 'No message content';
-        await sendOrderMessageEmail(
-          email,
-          clientName,
-          orderId.toString(),
-          orderInfo?.title ?? '',
-          messageContent,
-          agencyName,
-          new Date().toLocaleDateString(),
-          userData?.user.id,
-        );
-      } else {
-        console.warn('Email is null or undefined, skipping...');
-      }
-    }
+    // for (const email of emailsData) {
+    //   if (email) {
+    //     const messageContent = messageData.content ?? 'No message content';
+    //     await sendOrderMessageEmail(
+    //       email,
+    //       clientName,
+    //       orderId.toString(),
+    //       orderInfo?.title ?? '',
+    //       messageContent,
+    //       agencyName,
+    //       new Date().toLocaleDateString(),
+    //       userData?.user.id,
+    //     );
+    //   } else {
+    //     console.warn('Email is null or undefined, skipping...');
+    //   }
+    // }
 
     // revalidatePath(`/orders/${orderId}`);
     return messageData;
