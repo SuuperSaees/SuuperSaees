@@ -4,38 +4,34 @@ import { getMailer } from '@kit/mailers';
 import { getEmailTranslations } from '@kit/mailers';
 import { getLogger } from '@kit/shared/logger';
 
-
-
 import { getLanguageFromCookie } from '../../../../../../../../apps/web/lib/i18n/i18n.server';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { getFormSendIdentity } from '../utils/get-form-send-identity';
-import { fetchCurrentUser } from '../../members/get/get-member-account';
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
-const emailSender = process.env.EMAIL_SENDER ?? '';
 
 export async function sendOrderCreationEmail(
   orderId: string,
   orderData: Order.Type,
+  userId: string,
+  clientName: string,
+  clientOrgName: string
 ) {
-  const client = getSupabaseServerComponentClient();
   const logger = await getLogger();
   const mailer = await getMailer();
-  const {id: userId} = await fetchCurrentUser(client);
- 
+
+
   if (!userId) {
     throw new Error('User id not found');
   }
-  
-  const { domain: siteURL, organizationId, ownerEmail, organization } = await getDomainByUserId(
-    userId,
-    true,
-    true,
-  );
 
-  if(!organization || !ownerEmail) {
+  const {
+    domain: siteURL,
+    organizationId,
+    ownerEmail,
+    organization,
+  } = await getDomainByUserId(userId, true, true);
+
+  if (!organization || !ownerEmail) {
     throw new Error('Domain - organization not found');
   }
 
@@ -45,11 +41,11 @@ export async function sendOrderCreationEmail(
   const lang = getLanguageFromCookie() as 'en' | 'es';
   const { t } = getEmailTranslations('orderCreation', lang);
 
-  const { fromSenderIdentity, logoUrl, themeColor, buttonTextColor } = await getFormSendIdentity(
-    organizationId,
-    t('at'),
-  );
-
+  const { fromSenderIdentity, logoUrl, themeColor, buttonTextColor } =
+    await getFormSendIdentity(organizationId ?? '', t('at'));
+      // Samuel Santa at Suuper
+  const emailSender = `${clientName} ${t('at')} ${clientOrgName}`;
+  
   await mailer
     .sendEmail({
       to: ownerEmail,

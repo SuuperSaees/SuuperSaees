@@ -10,6 +10,7 @@ import {
 import { CustomError } from '../../../../../../../../packages/shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
+import { Account } from '../../../../../../../../apps/web/lib/account.types';
 
 // Hex color validation regex
 const isValidHexColor = (color: string) => /^#([0-9A-F]{3}){1,2}$/i.test(color);
@@ -128,8 +129,7 @@ export const upsertOrganizationSettings = async (
 
 export const updateOrganization = async (
   id: string,
-  ownerUserId: string,
-  data: { name?: string },
+  data: Account.Update,
 ) => {
   const client = getSupabaseServerComponentClient();
 
@@ -155,7 +155,7 @@ export const updateOrganization = async (
       );
     }
 
-    return CustomResponse.success(updatedOrganizationData, 'organizationNameUpdated').toJSON();
+    return CustomResponse.success(updatedOrganizationData, 'organizationUpdated').toJSON();
   } catch (error) {
     console.error('Error updating organization:', error);
     return CustomResponse.error(error).toJSON();

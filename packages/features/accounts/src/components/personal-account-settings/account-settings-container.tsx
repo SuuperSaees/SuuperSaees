@@ -197,7 +197,7 @@ export function PersonalAccountSettingsContainer(
         }
         
         <TabsContent value="profile">
-          <ProfileSettings user={user} userSettings = {userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} />
+          <ProfileSettings user={user} userSettings = {userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} userRole={role} />
         </TabsContent>
         <TabsContent value="subscription">
           <BillingContainerConfig tab={tab ?? ''} />
