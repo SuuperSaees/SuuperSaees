@@ -38,7 +38,7 @@ export const OrderHeader = ({ order, agencyStatuses }: { order: Order.Relational
   };
   const completedStatusId = agencyStatuses.find((s) => s.status_name === 'completed' )?.id ?? null;
   return (
-    <>
+    <div className='px-8'>
       <div className="flex flex-wrap lg:flex-nowrap items-center">
         <EditableHeader
           initialName={order.title}
@@ -57,7 +57,7 @@ export const OrderHeader = ({ order, agencyStatuses }: { order: Order.Relational
           <Trans i18nKey="details.orderId" /> {order?.id}
         </h3>
       </div>
-    </>
+    </div>
   );
 };
 
