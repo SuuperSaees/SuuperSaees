@@ -1,7 +1,7 @@
 'use client';
 
 // import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Heading from '@tiptap/extension-heading';
 import { Image as ImageInsert } from '@tiptap/extension-image';
@@ -28,6 +28,8 @@ import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
 import { Trans } from '@kit/ui/trans';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import FileUploader from './files-input-chat';
+import { Spinner } from '@kit/ui/spinner';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -130,7 +132,7 @@ const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
 };
 
 interface RichTextEditorProps {
-  onComplete?: (richText: string) => void | Promise<void>;
+  onComplete?: (richText: string, fileIds?: string[]) => void | Promise<void>;
   content?: string;
   onChange?: (richText: string) => void;
   onBlur?: () => void;
@@ -142,6 +144,7 @@ interface RichTextEditorProps {
   showToolbar? : boolean;
   isEditable? : boolean;
   className?: string;
+  handleFileIdsChange?: (fileIds: string[]) => void;
   [key: string]: unknown;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
@@ -162,11 +165,19 @@ const RichTextEditor = ({
   hideSubmitButton = false,
   showToolbar = true,
   isEditable = true,
+  handleFileIdsChange,
   className,
   ...rest
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
+  const [fileIdsList, setFileIdsList] = useState<string[]>([]);
+  const [messageSended, setMessageSended] = useState(false);
+  const [fileUploadStatus, setFileUploadStatus] = useState<{
+    [key: string]: { status: 'uploading' | 'completed' | 'error', id?: string }
+  }>({});
+  const [thereAreFilesUploaded, setThereAreFilesUploaded] = useState(false);
+
   const cleanupImages = () => {
     // Select all image wrappers
     const imageWrappers = document.querySelectorAll('.cloned-image-wrapper');
@@ -315,20 +326,27 @@ const RichTextEditor = ({
         cleanupImages();
         const content = editor ? editor.getHTML() : '';
         // <p></p> is the default content of the editor
-        if (content.trim() === '<p></p>') {
+        console.log('content', content.trim());
+        console.log('fileIdsList', fileIdsList);
+
+        if (content.trim() !== '<p></p>' || fileIdsList.length > 0) {
+          // return;
+          onComplete && (await onComplete(content, fileIdsList));
+          setMessageSended(true);
+          if (onChange){
+            onChange(content); 
+          }
+          insertedImages.current = new Set<string>();
+        } else {
           return;
         }
-        editor?.commands.clearContent();
-        onComplete && (await onComplete(content));
-        if (onChange){
-          onChange(content); 
-        }
-        insertedImages.current = new Set<string>();
+        
       } finally {
-        // cleanupImages();
+        editor?.commands.clearContent();
+        setFileIdsList([]);
       }
     })();
-   }, [editor, onComplete, onChange]); 
+   }, [editor, onComplete, onChange, fileIdsList]); 
 
   // Implement sanitizer to ensure the content to be nested is secure before sending to server
 
@@ -346,6 +364,36 @@ const RichTextEditor = ({
     }
 
   }, [content, editor]);
+
+  const fileUploaderRef = useRef<HTMLInputElement>(null);
+  const handleUploadClick = () => {
+    fileUploaderRef.current?.click();
+  };
+  const handleFileIdsChangeToSentMessage = (fileIds: string[]) => {
+    console.log('fileIds', fileIds);
+    setFileIdsList(prevFileIds => {
+        const updatedFileIds = [...prevFileIds, ...fileIds];
+        console.log('Updated fileIdsList', updatedFileIds);
+        return updatedFileIds;
+    });
+  };
+
+  // New method to track file upload status
+  const updateFileUploadStatus = (file: File, status: 'uploading' | 'completed' | 'error', serverId?: string) => {
+    setFileUploadStatus(prev => ({
+      ...prev,
+      [file.name]: { 
+        status, 
+        id: serverId 
+      }
+    }));
+  };
+
+  // Check if all files are uploaded
+  const areAllFilesUploaded = () => {
+    return Object.values(fileUploadStatus).every(file => file.status === 'completed');
+  };
+
   return (
     <div className={"relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 " + (className ?? '')} {...rest}>
       <div
@@ -362,23 +410,40 @@ const RichTextEditor = ({
           className={`${styles['scrollbar-thin']} flex h-fit max-h-96 w-full whitespace-normal flex-col-reverse overflow-y-auto placeholder:text-gray-400`}
         />
       </div>
-      <div>
-        { showToolbar && (
-            <Toolbar
-              editor={editor}
-              toggleExternalUpload={toggleExternalUpload}
-              uploadFileIsExternal={uploadFileIsExternal}
-              userRole={userRole}
-              onChange={onChange}
-            />
-          )
-        }
+      <div className='flex justify-between items-center '>
+        <div className='flex flex-col'>
+          <FileUploader
+            ref={fileUploaderRef}
+            onFileSelect={handleFileIdsChange}
+            onFileIdsChange={handleFileIdsChangeToSentMessage}
+            onMessageSend={messageSended}
+            onFileUploadStatusUpdate={updateFileUploadStatus}
+            thereAreFilesUploaded={setThereAreFilesUploaded}
+          />
+          { showToolbar && (
+              <Toolbar
+                editor={editor}
+                toggleExternalUpload={toggleExternalUpload}
+                uploadFileIsExternal={uploadFileIsExternal}
+                userRole={userRole}
+                onChange={onChange}
+                handleUploadClick={handleUploadClick}
+              />
+            )
+          }
+        </div>
           {!hideSubmitButton && ( 
             <ThemedButton
-              className="absolute bottom-6 right-0 h-fit w-fit rounded-xl p-2 shadow-sm"
+              className="absolute bottom-6 right-4 h-fit w-fit rounded-xl p-2 shadow-sm items-center flex"
               onClick={sendContent}
+              disabled={(!areAllFilesUploaded() && thereAreFilesUploaded) || (editor?.getHTML().trim() !== '<p></p>'  && !areAllFilesUploaded() && thereAreFilesUploaded)}
             >
-              <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
+              {/* <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" /> */}
+              {(!areAllFilesUploaded() && thereAreFilesUploaded) || (editor?.getHTML().trim() !== '<p></p>'  && !areAllFilesUploaded() && thereAreFilesUploaded) ? (
+                <Spinner className='h-4 w-4'/>
+              ): (
+                <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
+              )}
             </ThemedButton>
           )}
         </div>
@@ -391,35 +456,30 @@ interface ToolbarProps {
   uploadFileIsExternal?: boolean;
   toggleExternalUpload?: () => void;
   onChange?: (richText: string) => void;
+  handleUploadClick?: () => void;
 }
 
 export const Toolbar = ({
   userRole,
   editor,
-  uploadFileIsExternal,
-  toggleExternalUpload,
   onChange,
+  handleUploadClick,
 }: ToolbarProps) => {
   const { isInternalMessagingEnabled, handleSwitchChange } =
     useInternalMessaging();
-
 
   if (!editor) {
     return null;
   }
   return (
-    <div className={"flex items-center gap-2 bg-transparent"}>
+    <div className={"flex items-center gap-2 bg-transparent mt-4"}>
 
       {!onChange && (
         <>
         <button
-          type='button'
-          onClick={
-            uploadFileIsExternal && toggleExternalUpload
-              ? () => toggleExternalUpload()
-              : undefined
-          }
-          className={editor.isActive('image') ? 'text-gray-700 w-8 h-8 items-center flex' : 'text-gray-400 w-8 h-8 items-center flex'}
+          type="button"
+          onClick={handleUploadClick}
+          className="text-gray-400 w-8 h-8 items-center flex"
         >
           <Upload className="w-5 h-5" />
         </button>
