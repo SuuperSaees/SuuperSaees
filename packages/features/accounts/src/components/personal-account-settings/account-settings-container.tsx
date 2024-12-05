@@ -16,20 +16,14 @@ import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { useOrganizationSettings } from '../../context/organization-settings-context'
-import PlansContainer from '../../../../../../apps/web/app/select-plan/components/plans-container';
 import { Separator } from '@kit/ui/separator';
 import ProfileSettings from '../profile-settings';
 import SiteSettings from '../site-settings';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { UserSettings } from '../../../../../../apps/web/lib/user-settings.types';
+import { useQuery } from '@tanstack/react-query';
 import { getAccountSettings } from '../../../../team-accounts/src/server/actions/accounts/get/get-account';
 
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-
-interface UserDataProps extends Account.Type {
-  settings : UserSettings.Type;
-}
 
 type AccountStripe = {
   id: string;
