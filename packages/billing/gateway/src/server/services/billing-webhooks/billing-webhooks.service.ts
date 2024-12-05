@@ -84,4 +84,41 @@ class BillingWebhooksService {
 
     return true;
   }
+
+  async handleServiceUpdatedWebhook(service: Service.Type) {
+    // verify if account has treli enabled
+    const [accountsResult] = await Promise.all([
+      this.adminClient
+        .from('billing_accounts')
+        .select('*')
+        .eq('account_id', service.propietary_organization_id ?? '')
+        .is('deleted_on', null),
+    ]);
+    if (accountsResult.error) throw new Error(accountsResult.error.message);
+
+    const promises = accountsResult.data.map(async (account) => {
+      const gateway = createBillingGatewayService(
+        account.provider,
+        this.baseUrl,
+      );
+      const { error: billingServicesError, data: billingServicesData } =
+        await this.adminClient
+          .from('billing_services')
+          .select('provider_id')
+          .eq('service_id', service.id)
+          .single();
+      if (billingServicesError) throw new Error(billingServicesError.message);
+
+      return gateway.updateService(
+        service,
+        account,
+        billingServicesData?.provider_id,
+      );
+    });
+    if (promises.length > 0) {
+      await Promise.all(promises);
+    }
+
+    return true;
+  }
 }

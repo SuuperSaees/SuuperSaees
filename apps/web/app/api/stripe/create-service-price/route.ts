@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -16,6 +17,7 @@ interface PriceRequest {
   currency: string;
   isRecurring: boolean;
   interval?: 'day' | 'week' | 'month' | 'year';
+  type: 'create' | 'update';
 }
 
 export async function POST(req: NextRequest) {
@@ -27,6 +29,7 @@ export async function POST(req: NextRequest) {
     currency,
     isRecurring,
     interval,
+    type,
   }: PriceRequest = await req.json();
 
   try {
@@ -54,11 +57,9 @@ export async function POST(req: NextRequest) {
       stripeAccount: accountId,
     });
 
-    const supabaseClient = getSupabaseServerComponentClient(
-      {
-        admin: true,
-      },
-    );
+    const supabaseClient = getSupabaseServerComponentClient({
+      admin: true,
+    });
     const { error } = await supabaseClient
       .from('services')
       .update({ price_id: price.id })
@@ -68,20 +69,35 @@ export async function POST(req: NextRequest) {
       console.error('Error updating service:', error);
     }
 
-    const { error: errorCreateBillingService } = await supabaseClient
-      .from('billing_services')
-      .insert({
-        service_id: serviceId,
-        provider: 'stripe',
-        provider_id: price.id,
-        status: 'active',
-      });
+    if (type === 'create') {
+      const { error: errorCreateBillingService } = await supabaseClient
+        .from('billing_services')
+        .insert({
+          service_id: serviceId,
+          provider: 'stripe',
+          provider_id: price.id,
+          status: 'active',
+        });
+      if (errorCreateBillingService) {
+        console.error(
+          'Error creating billing service:',
+          errorCreateBillingService,
+        );
+      }
+    } else {
+      const { error: errorUpdateBillingService } = await supabaseClient
+        .from('billing_services')
+        .update({
+          provider_id: price.id,
+        })
+        .eq('service_id', serviceId);
 
-    if (errorCreateBillingService) {
-      console.error(
-        'Error creating billing service:',
-        errorCreateBillingService,
-      );
+      if (errorUpdateBillingService) {
+        console.error(
+          'Error updating billing service:',
+          errorUpdateBillingService,
+        );
+      }
     }
 
     return NextResponse.json({ priceId: price.id });

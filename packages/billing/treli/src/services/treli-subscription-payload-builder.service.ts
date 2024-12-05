@@ -1,7 +1,7 @@
-import Stripe from 'stripe';
-
 import { BillingConfig, getLineItemTypeById } from '@kit/billing';
 import { UpsertSubscriptionParams } from '@kit/billing/types';
+import { Json } from '@kit/supabase/database';
+import type { Database } from '@kit/supabase/database';
 
 /**
  * @name createStripeSubscriptionPayloadBuilderService
@@ -38,14 +38,22 @@ class StripeSubscriptionPayloadBuilderService {
     LineItem extends {
       id: string;
       quantity?: number;
-      price?: Stripe.Price;
+      price?: {
+        id: string;
+        product: string;
+        unit_amount: number;
+        recurring?: {
+          interval: string;
+          interval_count: number;
+        };
+      };
     },
   >(params: {
     id: string;
     accountId: string;
     customerId: string;
     lineItems: LineItem[];
-    status: Stripe.Subscription.Status;
+    status: Database['public']['Enums']['subscription_status'];
     currency: string;
     cancelAtPeriodEnd: boolean;
     periodStartsAt: number;
@@ -83,7 +91,7 @@ class StripeSubscriptionPayloadBuilderService {
       target_customer_id: params.customerId,
       billing_provider: 'stripe',
       status: params.status,
-      line_items: lineItems,
+      line_items: lineItems as unknown as Json[],
       active,
       currency: params.currency,
       cancel_at_period_end: params.cancelAtPeriodEnd ?? false,

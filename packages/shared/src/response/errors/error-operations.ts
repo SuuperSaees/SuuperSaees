@@ -95,5 +95,8 @@ export enum ErrorBillingOperations {
   FAILED_TO_CREATE_TRELI_ACCOUNT = 'failedToCreateTreliAccount',
   FAILED_TO_DELETE_STRIPE_ACCOUNT = 'failedToDeleteStripeAccount',
   FAILED_TO_DELETE_TRELI_ACCOUNT = 'failedToDeleteTreliAccount',
+  FAILED_TO_CREATE_STRIPE_SERVICE = 'failedToCreateStripeService',
+  FAILED_TO_CREATE_SERVICE = 'failedToCreateService',
+  FAILED_TO_DELETE_SERVICE = 'failedToDeleteService',
 }
 

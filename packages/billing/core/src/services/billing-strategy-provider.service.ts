@@ -1,10 +1,17 @@
 import { z } from 'zod';
+
 import { Database } from '@kit/supabase/database';
 
-
-import { CancelSubscriptionParamsSchema, CreateBillingCheckoutSchema, CreateBillingPortalSessionSchema, QueryBillingUsageSchema, ReportBillingUsageSchema, RetrieveCheckoutSessionSchema, UpdateSubscriptionParamsSchema } from '../schema';
+import {
+  CancelSubscriptionParamsSchema,
+  CreateBillingCheckoutSchema,
+  CreateBillingPortalSessionSchema,
+  QueryBillingUsageSchema,
+  ReportBillingUsageSchema,
+  RetrieveCheckoutSessionSchema,
+  UpdateSubscriptionParamsSchema,
+} from '../schema';
 import { UpsertSubscriptionParams } from '../types';
-
 
 type ServiceType = Database['public']['Tables']['services']['Row'];
 type BillingAccountType =
@@ -77,6 +84,15 @@ export abstract class BillingStrategyProviderService {
     service: ServiceType,
     billingAccount: BillingAccountType,
     baseUrl: string,
+  ): Promise<{
+    success: boolean;
+  }>;
+
+  abstract updateService(
+    service: ServiceType,
+    billingAccount: BillingAccountType,
+    baseUrl: string,
+    serviceProviderId?: string,
   ): Promise<{
     success: boolean;
   }>;

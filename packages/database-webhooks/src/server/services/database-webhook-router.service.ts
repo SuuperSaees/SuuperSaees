@@ -62,16 +62,25 @@ class DatabaseWebhookRouterService {
 
   private async handleServicesWebhook(body: RecordChange<'services'>) {
     const logger = await getLogger();
-    if (body.type === 'INSERT' && body.record) {
-      const { createBillingWebhooksService } = await import(
-        '@kit/billing-gateway'
+    const { createBillingWebhooksService } = await import(
+      '@kit/billing-gateway'
     );
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''; // if this baseUrl fail, use getDomainByUserId function
 
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''; // if this baseUrl fail, use getDomainByUserId function
-
+    if (body.type === 'INSERT' && body.record) {
       const service = createBillingWebhooksService(this.adminClient, baseUrl);
       logger.info(body, 'Handling services webhook');
       return service.handleServiceCreatedWebhook(body.record);
+    }
+
+    if (body.type === 'UPDATE' && body.record) {
+      const service = createBillingWebhooksService(this.adminClient, baseUrl);
+      logger.info(body, 'Handling services webhook');
+      return service.handleServiceUpdatedWebhook(body.record);
+    }
+
+    if (body.type === 'DELETE' && body.old_record) {
+      logger.info(body, 'This logic should be implemented');
     }
   }
 
