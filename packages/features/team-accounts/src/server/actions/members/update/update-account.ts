@@ -13,6 +13,7 @@ import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
 import { revalidatePath } from 'next/cache';
 import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
+import { updateClient } from '../../clients/update/update-client';
 
 export const updateUserAccount = async (
   userData: Account.Update,
@@ -38,16 +39,36 @@ export const updateUserAccount = async (
         `Error updating the user account: ${errorUpdateUserAccount.message}`,
       );
     
-      revalidatePath('/clients');
-      revalidatePath(`/clients/organizations/*`);
+      // revalidatePath('/clients');
+      // revalidatePath(`/clients/organizations/*`);
 
       
-    return userAccountData;
+    return userId;
   } catch (error) {
     console.error('Error updating the user account', error);
     throw error;
   }
 };
+
+export const switchUserOrganization = async (
+  organizationId: Account.Type['organization_id'],
+  userId: Account.Type['id'],
+) => {
+  try {
+    await updateUserAccount(
+      {
+        organization_id: organizationId,
+      },
+      userId,
+    );
+
+    await updateClient({organization_client_id: organizationId ?? ''}, userId,undefined, true);
+
+  } catch (error) {
+    console.error('Error switching the user organization', error);
+    throw error;
+  }
+}
 
 export const updateUserRole = async(
   userId: Account.Type['id'],

@@ -1,6 +1,6 @@
 import { use } from 'react';
 
-import { cookies } from 'next/headers';
+import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
@@ -52,8 +52,5 @@ function UserHomeLayout({ children }: React.PropsWithChildren) {
 export default withI18n(UserHomeLayout);
 
 function getLayoutStyle() {
-  return (
-    (cookies().get('layout-style')?.value as PageLayoutStyle) ??
-    personalAccountNavigationConfig.style
-  );
+  return (((cookies() as unknown as UnsafeUnwrappedCookies).get('layout-style')?.value as PageLayoutStyle) ?? personalAccountNavigationConfig.style);
 }

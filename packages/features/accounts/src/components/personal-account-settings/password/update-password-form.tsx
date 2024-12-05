@@ -178,35 +178,19 @@
 'use client';
 
 import { useState } from 'react';
-
-
-
 import Link from 'next/link';
-
-
-
 import type { User } from '@supabase/supabase-js';
-
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Check } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
-
-
 import { useUpdateUser } from '@kit/supabase/hooks/use-update-user-mutation';
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
-import { Label } from '@kit/ui/label';
 import { Trans } from '@kit/ui/trans';
-
-
-
 import { PasswordUpdateSchema } from '../../../schema/update-password.schema';
 import { ThemedButton } from '../../ui/button-themed-with-settings';
 import { ThemedInput } from '../../ui/input-themed-with-settings';
@@ -1317,6 +1301,7 @@ import { ThemedInput } from '../../ui/input-themed-with-settings';
 //   );
 // }
 
+
 export const UpdatePasswordForm = ({
   user,
   callbackPath,
@@ -1381,7 +1366,7 @@ export const UpdatePasswordForm = ({
         className='bg-brand'
 
         >
-          Continuar
+          {t('continue')}
         </ThemedButton>
       </Link>
     );

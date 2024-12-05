@@ -69,7 +69,9 @@ export default function UpdateImage({
       }
       
       const bucket = client.storage.from(bucketStorage.name);
-      const result = await bucket.upload(fileName, bytes);
+      const result = await bucket.upload(fileName, bytes, {
+        upsert: true,
+      });
 
       if (!result.error) {
         const finalUrl = bucket.getPublicUrl(fileName).data.publicUrl;
@@ -85,10 +87,7 @@ export default function UpdateImage({
     }
   };
 
-  const handleUpdate = () => {
-    fileInputRef.current?.click();
-  };
-
+  
   const handleDelete = async () => {
     setImage('');
     if (image) {
@@ -102,6 +101,9 @@ export default function UpdateImage({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+  const handleUpdate = () => {
+    fileInputRef.current?.click();
   };
 
   function deleteImageFromBucket(

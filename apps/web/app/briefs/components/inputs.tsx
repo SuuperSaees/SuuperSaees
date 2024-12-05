@@ -2,6 +2,8 @@ import { InputTypes } from '../types/brief.types';
 import Draggable from './draggable';
 import InputCard from './input-card';
 
+import type { JSX } from "react";
+
 type Input = {
   name: string;
   icon: JSX.Element;

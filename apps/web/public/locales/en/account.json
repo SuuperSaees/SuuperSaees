@@ -203,5 +203,6 @@
   "brandSenderEmailAndDomainSubmit": "Update Email and Domain",
   "brandSenderEmailSubmit": "Update Email",
   "brandSenderDomainSubmit": "Sender Domain",
-  "brandSenderEmail": "Sender Email"
+  "brandSenderEmail": "Sender Email",
+  "continue": "Continue"
 }

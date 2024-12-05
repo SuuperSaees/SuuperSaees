@@ -6,12 +6,13 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { PageBody } from '@kit/ui/page';
 
 interface Params {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export const generateMetadata = async ({ params }: Params) => {
+export const generateMetadata = async (props: Params) => {
+  const params = await props.params;
   const account = await loadAccount(params.id);
 
   return {

@@ -1,0 +1,17 @@
+{
+  "significantIncrease": "aumento significativo (sin período anterior)",
+  "noData": "no hay datos disponibles",
+  "increase": "aumento vs último mes",
+  "decrease": "disminución vs último mes",  
+  "notChanged": "no ha cambiado",
+  "projects": {
+    "active": "Proyectos Activos",
+    "completed": "Proyectos Completados",
+    "month": {
+      "last": "Proyectos del Último Mes"
+    },
+    "rating": {
+      "average": "Calificación Promedio"
+    }
+  }
+}

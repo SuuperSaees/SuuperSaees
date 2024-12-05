@@ -94,7 +94,8 @@
             "stateProvinceRegionRequired": "Se requiere el estado/provincia/región",
             "postalCodeRequired": "Se requiere el código postal",
             "cardNameRequired": "Se requiere el nombre de la tarjeta"
-        }
+        },
+        "quantity": "Cantidad"
     },
     "step_connect_briefs": "Conectar briefs",
     "single_sale": "Venta única",

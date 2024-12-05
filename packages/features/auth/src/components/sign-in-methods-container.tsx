@@ -26,6 +26,8 @@ export function SignInMethodsContainer(props: {
     magicLink: boolean;
     oAuth: Provider[];
   };
+
+  themeColor: string | undefined;
 }) {
   const router = useRouter();
   const nextPath = useSearchParams().get('next') ?? props.paths.home;
@@ -51,7 +53,7 @@ export function SignInMethodsContainer(props: {
   return (
     <>
       <If condition={props.providers.password}>
-        <PasswordSignInContainer onSignIn={onSignIn} />
+        <PasswordSignInContainer onSignIn={onSignIn} themeColor={props.themeColor} />
       </If>
 
       <If condition={props.providers.magicLink}>

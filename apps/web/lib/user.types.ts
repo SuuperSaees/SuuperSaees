@@ -1,4 +1,5 @@
 import { Database } from './database.types';
+import { UserSettings } from './user-settings.types';
 
 
 export namespace User {
@@ -8,5 +9,7 @@ export namespace User {
   export type Response = Pick<
     Type,
     'email' | 'id' | 'name' | 'picture_url' | 'organization_id'
-  >;
+  > & {
+    settings: UserSettings.Type;
+  } ;
 }

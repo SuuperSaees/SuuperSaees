@@ -1395,19 +1395,19 @@ export type Database = {
       }
       order_followers: {
         Row: {
-          client_member_id: string | null
+          client_member_id: string
           created_at: string | null
-          order_id: number | null
+          order_id: number
         }
         Insert: {
-          client_member_id?: string | null
+          client_member_id?: string
           created_at?: string | null
-          order_id?: number | null
+          order_id: number
         }
         Update: {
-          client_member_id?: string | null
+          client_member_id?: string
           created_at?: string | null
-          order_id?: number | null
+          order_id?: number
         }
         Relationships: [
           {
@@ -1563,6 +1563,7 @@ export type Database = {
           status_id: number | null
           stripe_account_id: string | null
           title: string
+          updated_at: string | null
           uuid: string
         }
         Insert: {
@@ -1581,6 +1582,7 @@ export type Database = {
           status_id?: number | null
           stripe_account_id?: string | null
           title: string
+          updated_at?: string | null
           uuid: string
         }
         Update: {
@@ -1599,6 +1601,7 @@ export type Database = {
           status_id?: number | null
           stripe_account_id?: string | null
           title?: string
+          updated_at?: string | null
           uuid?: string
         }
         Relationships: [
@@ -2346,6 +2349,36 @@ export type Database = {
           },
         ]
       }
+      subtask_timers: {
+        Row: {
+          subtask_id: string
+          timer_id: string
+        }
+        Insert: {
+          subtask_id: string
+          timer_id: string
+        }
+        Update: {
+          subtask_id?: string
+          timer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtask_timers_subtask_id_fkey"
+            columns: ["subtask_id"]
+            isOneToOne: false
+            referencedRelation: "subtasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtask_timers_timer_id_fkey"
+            columns: ["timer_id"]
+            isOneToOne: false
+            referencedRelation: "timers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subtasks: {
         Row: {
           completed: boolean | null
@@ -2443,6 +2476,70 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timers: {
+        Row: {
+          created_at: string | null
+          deleted_on: string | null
+          elapsed_time: number | null
+          end_time: number | null
+          id: string
+          name: string | null
+          start_time: number | null
+          status: string | null
+          timestamp: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_on?: string | null
+          elapsed_time?: number | null
+          end_time?: number | null
+          id?: string
+          name?: string | null
+          start_time?: number | null
+          status?: string | null
+          timestamp?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_on?: string | null
+          elapsed_time?: number | null
+          end_time?: number | null
+          id?: string
+          name?: string | null
+          start_time?: number | null
+          status?: string | null
+          timestamp?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_timers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "active_timers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "active_timers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -2624,6 +2721,7 @@ export type Database = {
           status_id: number | null
           stripe_account_id: string | null
           title: string
+          updated_at: string | null
           uuid: string
         }
       }
@@ -2750,6 +2848,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _user_id: string
+          _org_id: string
+          _role_name: string
+        }
+        Returns: boolean
+      }
       has_role_on_account: {
         Args: {
           account_id: string
@@ -2797,6 +2903,12 @@ export type Database = {
       is_account_team_member: {
         Args: {
           target_account_id: string
+        }
+        Returns: boolean
+      }
+      is_agency_client: {
+        Args: {
+          _agency_id: string
         }
         Returns: boolean
       }
@@ -2944,6 +3056,10 @@ export type Database = {
         | "billing.write"
         | "billing.read"
         | "billing.delete"
+        | "timers.write"
+        | "timers.read"
+        | "timers.manage"
+        | "timers.delete"
       billing_provider:
         | "stripe"
         | "lemon-squeezy"

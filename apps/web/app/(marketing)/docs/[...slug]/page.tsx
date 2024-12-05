@@ -21,12 +21,13 @@ async function pageLoader(slug: string) {
 }
 
 interface PageParams {
-  params: {
+  params: Promise<{
     slug: string[];
-  };
+  }>;
 }
 
-export const generateMetadata = async ({ params }: PageParams) => {
+export const generateMetadata = async (props: PageParams) => {
+  const params = await props.params;
   const page = await getPageBySlug(params.slug.join('/'));
 
   if (!page) {

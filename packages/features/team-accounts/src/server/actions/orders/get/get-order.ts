@@ -1,11 +1,30 @@
 'use server';
 
+import { SupabaseClient } from '@supabase/supabase-js';
+
+import {
+  CustomError,
+  CustomResponse,
+  ErrorOrderOperations,
+} from '@kit/shared/response';
+import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+import { AgencyStatus } from '../../../../../../../../apps/web/lib/agency-statuses.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
+import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
+import {
+  fetchBriefs,
+  fetchBriefsResponsesforOrders,
+} from '../../briefs/get/get-brief';
+import {
+  fetchCurrentUser,
+  fetchCurrentUserAccount,
+  getUserRole,
+} from '../../members/get/get-member-account';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
-import { hasPermissionToReadOrders } from '../../permissions/permissions';
+import { getOrdersReviewsForUser } from '../../review/get/get-review';
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
@@ -118,7 +137,9 @@ export async function getOrderAgencyMembers(
       const { data: agencyMembersData, error: agencyMembersError } =
         await client
           .from('accounts')
-          .select('id, name, email, picture_url, calendar')
+          .select(
+            'id, name, email, picture_url, user_settings(name, picture_url, calendar)',
+          )
           .eq('organization_id', agencyId ?? accountData.organization_id);
 
       if (agencyMembersError) throw agencyMembersError;
@@ -132,7 +153,9 @@ export async function getOrderAgencyMembers(
         id, 
         name, 
         email,
+        picture_url,
         user_settings (
+          name,
           phone_number,
           picture_url,
           calendar
@@ -150,9 +173,144 @@ export async function getOrderAgencyMembers(
   }
 }
 
-export const getOrders = async () => {
+export const getOrders = async (
+  includeBrief?: boolean,
+): Promise<Order.Response[]> => {
   try {
-    const orders = await hasPermissionToReadOrders();
+    const client = getSupabaseServerComponentClient();
+    const userData = await fetchCurrentUser(client);
+    const userAccount = await fetchCurrentUserAccount(client, userData.id);
+    const userId = userData.id;
+
+    if (!userAccount.organization_id)
+      throw new Error('User account not found (no organization_id)');
+
+    // Step 1: Get and define the user's role
+    const role = await getUserRole();
+    const clientRoles = new Set(['client_owner', 'client_member']);
+    const agencyRoles = new Set([
+      'agency_owner',
+      'agency_project_manager',
+      'agency_member',
+    ]);
+
+    const isClient = clientRoles.has(role);
+    const isAgency = agencyRoles.has(role);
+    const isAgencyMember = isAgency && role === 'agency_member';
+
+    const isAgencyOwnerOrProjectManager =
+      (isAgency && role === 'agency_project_manager') ||
+      role === 'agency_owner';
+    // Step 2: Prerpare the query
+    let query = client
+      .from('orders_v2')
+      .select(
+        `*, client_organization:accounts!client_organization_id(id, name),
+        customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
+        assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+        `,
+        { count: 'exact' },
+      )
+      .is('deleted_on', null)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    let orders: Order.Response[] = [];
+
+    if (isClient) {
+      const ordersAssignedToClient = await fetchAssignedOrdersForClient(
+        client,
+        userId,
+      );
+
+      const ordersIdsClientBelongsTo = ordersAssignedToClient.map(
+        (order) => order.order_id,
+      );
+      query = query.in('id', ordersIdsClientBelongsTo);
+    } else if (isAgencyMember) {
+      const ordersAssignedToAgencyMember =
+        await fetchAssignedOrdersForAgencyMember(client, userId);
+
+      const ordersIdsAgencyMemberBelongsTo = ordersAssignedToAgencyMember.map(
+        (order) => order.order_id,
+      );
+      query = query.in('id', ordersIdsAgencyMemberBelongsTo);
+    } else if (isAgencyOwnerOrProjectManager) {
+      query = query.eq('agency_id', userAccount.organization_id);
+    } else {
+      throw new Error('Invalid user role');
+    }
+
+    // Step 3: Fetch orders
+    const { data: ordersData, error: ordersError } = await query;
+
+    if (ordersError) {
+      console.error(ordersError.message);
+      throw new Error(`Error fetching orders, ${ordersError.message}`);
+    }
+
+    orders = ordersData;
+
+    // Step 3: Collect all status_ids from orders
+    const statusIds = Array.from(
+      new Set(
+        orders
+          .map((order: Order.Type) => order.status_id as number)
+          .filter(Boolean),
+      ),
+    );
+
+    // Step 4: Fetch all relevant statuses in one query
+    const { data: statuses, error: statusesError } = await client
+      .from('agency_statuses')
+      .select('*')
+      .in('id', statusIds);
+
+    if (statusesError) {
+      console.error(statusesError.message);
+      throw new Error('Error fetching statuses');
+    }
+
+    // Step 5: Create a map of statuses for quick access
+    const statusMap = new Map<number, AgencyStatus.Type>();
+    statuses?.forEach((status) => {
+      statusMap.set(status.id, status);
+    });
+
+    // Step 6: Assign the status to each order
+    orders.forEach((order) => {
+      if (!order.status_id) return;
+      order.statusData = statusMap.get(order.status_id) ?? null;
+    });
+
+    // Step 7: Assign optional data
+    if (includeBrief) {
+      const orderIds = orders.map((order) => order.uuid) ?? [];
+      const briefResponseData = await fetchBriefsResponsesforOrders(
+        client,
+        orderIds,
+      );
+
+      const briefIds =
+        briefResponseData?.map((response) => response?.brief_id) ?? [];
+
+      const briefData = await fetchBriefs(client, briefIds, ['name', 'id']);
+
+      // Insert the brief names into the orders
+      // Map briefs to orders => each order has a brief_ids => take the first brief
+      orders = orders?.map((order) => {
+        const brief = briefData?.find(
+          (brief) => brief.id === order.brief_ids?.[0],
+        );
+        return {
+          ...order,
+          brief: {
+            name: brief?.name,
+          },
+        };
+      });
+    }
+
     return orders;
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -263,5 +421,185 @@ export async function getPropietaryOrganizationIdOfOrder(orderId: string) {
     return clientOrganizationData;
   } catch (error) {
     console.error('Error fetching Agency Owner User Id:', error);
+  }
+}
+
+export async function getOrdersByUserId(
+  userId: string,
+  includeBrief?: boolean,
+  timeInterval?: number,
+  includeReviews?: boolean,
+) {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    // Step 1: Fetch the user's account
+    const currentUserAccount = await fetchCurrentUserAccount(client, userId);
+    const userRole = await getUserRole();
+
+    const agencyRoles = new Set([
+      'agency_owner',
+      'agency_project_manager',
+      'agency_member',
+    ]);
+
+    const clientRoles = new Set(['client_owner', 'client_member']);
+
+    // Step 2: Fetch the orders (iD's) that the user belongs to
+    let ordersIdsUserBelongsTo: number[] = [];
+
+    if (agencyRoles.has(userRole)) {
+      const ordersAssignedToAgencyMember =
+        await fetchAssignedOrdersForAgencyMember(client, userId);
+
+      ordersIdsUserBelongsTo = ordersAssignedToAgencyMember.map(
+        (order) => order.order_id,
+      );
+    } else if (clientRoles.has(userRole)) {
+      const ordersAssignedToClient = await fetchAssignedOrdersForClient(
+        client,
+        userId,
+      );
+      ordersIdsUserBelongsTo = ordersAssignedToClient.map(
+        (order) => order.order_id,
+      );
+    }
+
+    let orders;
+
+    // Step 3: Prepare the query
+    let query = client
+      .from('orders_v2')
+      .select(
+        `*, client_organization:accounts!client_organization_id(id, name),
+      customer:accounts!customer_id(id, name),
+      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+      `,
+      )
+      .order('created_at', { ascending: false })
+      .or(
+        `client_organization_id.eq.${currentUserAccount.organization_id},agency_id.eq.${currentUserAccount.organization_id}`,
+      )
+      .in('id', ordersIdsUserBelongsTo)
+      .is('deleted_on', null);
+
+    let startDate = new Date().toISOString();
+
+    if (timeInterval) {
+      const startDateTime = new Date(startDate);
+      startDateTime.setDate(startDateTime.getDate() - timeInterval);
+      startDate = startDateTime.toISOString();
+
+      query = query.gt('created_at', startDate);
+    }
+
+    // Step 4: Fetch the order where the currentUserAccount is the client_organization_id or the agency_id
+    const { error: orderError, data: orderData } = await query;
+
+    orders = orderData;
+
+    const orderIds = orderData?.map((order) => order.uuid) ?? [];
+
+    // Step 5: Fetch the briefs for the orders and add them to the orders (if needed)
+    if (includeBrief) {
+      const briefResponseData = await fetchBriefsResponsesforOrders(
+        client,
+        orderIds,
+      );
+
+      const briefIds =
+        briefResponseData?.map((response) => response?.brief_id) ?? [];
+
+      const briefData = await fetchBriefs(client, briefIds, ['name', 'id']);
+
+      // Insert the brief names into the orders
+      // Map briefs to orders => each order has a brief_ids => take the first brief
+      orders = orders?.map((order) => {
+        const brief = briefData?.find(
+          (brief) => brief.id === order.brief_ids?.[0],
+        );
+        return {
+          ...order,
+          brief: {
+            name: brief?.name,
+          },
+        };
+      });
+    }
+
+    if (includeReviews) {
+      const reviews = await getOrdersReviewsForUser(userId);
+      orders = orders?.map((order) => {
+        const review = reviews.find((review) => review.order_id === order.id);
+        return {
+          ...order,
+          review: review,
+        };
+      });
+    }
+
+    if (orderError)
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        `Error fetching orders for user, ${orderError.message}`,
+        ErrorOrderOperations.ORDER_NOT_FOUND,
+      );
+
+    return CustomResponse.success(orders).toJSON();
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    return CustomResponse.error(error).toJSON();
+  }
+}
+
+export async function fetchAssignedOrdersForAgencyMember(
+  client: SupabaseClient<Database>,
+  userId: string,
+) {
+  try {
+    const {
+      data: ordersAssignedToAgencyMember,
+      error: agencyOrderAssignationsError,
+    } = await client
+      .from('order_assignations')
+      .select('order_id, agency_member_id')
+      .eq('agency_member_id', userId);
+
+    if (agencyOrderAssignationsError) {
+      throw new Error(
+        `Error fetching agency order assignations: ${agencyOrderAssignationsError.message}`,
+      );
+    }
+
+    return ordersAssignedToAgencyMember;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function fetchAssignedOrdersForClient(
+  client: SupabaseClient<Database>,
+  userId: string,
+) {
+  try {
+    const {
+      data: ordersAssignedToClient,
+      error: clientOrdersAssignationsError,
+    } = await client
+      .from('order_followers')
+      .select('order_id, client_member_id')
+      .eq('client_member_id', userId);
+
+    if (clientOrdersAssignationsError) {
+      throw new Error(
+        `Error fetching client order assignations: ${clientOrdersAssignationsError.message}`,
+      );
+    }
+
+    return ordersAssignedToClient;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 }

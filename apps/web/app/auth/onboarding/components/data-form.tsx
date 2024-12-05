@@ -26,6 +26,7 @@ export function UserDataForm(
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL;
   const formSchema = z.object({
     portalUrl: userRole === 'agency_owner' 
       ? z.string().min(2, {message: t('userData.formErrors.portalUrl')}).max(50, {message: t('userData.formErrors.portalUrl')})
@@ -63,13 +64,18 @@ export function UserDataForm(
             setError(t('userData.errors.configurationAirtable'));
             return;
           }
+
           
-          await addUserToAirtable({
-            name: userData?.userData?.name ?? '',
-            email: userData?.accountData?.email ?? '',
-            organizationName: organizationData.name,
-            phoneNumber: userData?.userData?.phone_number ?? '',
-          });
+          if (BASE_URL === 'https://app.suuper.co/') {
+            await addUserToAirtable({
+              name: userData?.userData?.name ?? '',
+              email: userData?.accountData?.email ?? '',
+              organizationName: organizationData.name,
+              phoneNumber: userData?.userData?.phone_number ?? '',
+            });
+          } 
+          
+          
         } catch (error) {
           console.error(`❌ ${t('userData.errors.configurationAirtable')}:`, {
             message: error instanceof Error ? error.message : 'Unknown error',
@@ -85,7 +91,6 @@ export function UserDataForm(
           const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
           const cleanedDomain = data.portalUrl?.replace(/[^a-zA-Z0-9]/g, '') ?? '';
           const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
-          const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL;
           const subscriptionResult = await createSubscription();
           if ('error' in subscriptionResult) {
             setError(t('userData.errors.subscriptionFailed'));

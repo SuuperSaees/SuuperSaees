@@ -36,6 +36,7 @@ import { updateUserAccount, updateUserEmail, updateUserRole } from '../../server
 import { getAccountSettings } from '../../server/actions/accounts/get/get-account';
 import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
 import { Spinner } from '@kit/ui/spinner';
+import { useRouter } from 'next/navigation';
 
 interface EditUserDialogProps {
   userId: string;
@@ -48,6 +49,8 @@ interface EditUserDialogProps {
 function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDialogProps) {
 
   const { t } = useTranslation('clients');
+  const router = useRouter();
+  // const [localOpen, setLocalOpen] = useState<boolean>(false);
 
   const roles = [
     {value : 'client_member', label : t('clientMember') },
@@ -61,9 +64,9 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
   const { data: userSettings} = useQuery({
     queryKey: ['userSettings', userId],
     queryFn: async() => await getAccountSettings(userId),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
     enabled: isOpen,
-    retry: 1,
+    // retry: 1,
   });
 
 
@@ -82,12 +85,11 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: name,
+      fullName: '',
       // email: email,
-      role: userRole,
+      role: '',
     },
   });
-
 
 
   const mutateUser = useMutation({
@@ -107,6 +109,7 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
       if(userRole !== form.getValues('role')){
         await updateUserRole(userId, form.getValues('role'), undefined, true);
       }
+      router.refresh();
     },
     onSuccess: () => {
       toast.success(t('success'), {
@@ -138,10 +141,14 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
   );
 
   useEffect(() => {
-    if(userRole) {
-      form.setValue('role', userRole);
+    if (isOpen) {
+      form.setValue('fullName', name);
+      if(userRole){
+        form.setValue('role', userRole);
+      }
     }
-  }, [userRole, form]);
+  }, [isOpen, form, name, userRole]);
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -168,7 +175,6 @@ function EditUserDialog({ userId, name, email, isOpen, setIsOpen }: EditUserDial
                       <div>
                         <FormLabel>{t('editUser.fullName')}</FormLabel>
                         <Input
-                          required={true}
                           placeholder="Enter full name"
                           type='text'
                           {...field}

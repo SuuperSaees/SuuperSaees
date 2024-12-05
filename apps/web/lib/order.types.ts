@@ -1,21 +1,35 @@
+import { Account } from './account.types';
 import { Activity } from './activity.types';
+import { AgencyStatus } from './agency-statuses.types';
+import { Brief } from './brief.types';
 import { Database } from './database.types';
 import { File } from './file.types';
-import { Task } from './tasks.types';
 import { Message } from './message.types';
 import { Review } from './review.types';
+import { Task } from './tasks.types';
+import { UserSettings } from './user-settings.types';
 import { User } from './user.types';
 
-
+type UserResponse = Pick<
+  User.Type,
+  'email' | 'id' | 'name' | 'picture_url' > & {
+    settings: Pick<UserSettings.Type, 'name' | 'picture_url'> | null;
+  }
 export namespace Order {
-  export type Type = Database['public']['Tables']['orders_v2']['Row'] & {
-    client?: Database['public']['Tables']['clients']['Update'] | null;
-    user?: User.Type;
-    messages?: Message.Type[];
-    files?: File.Type[];
-    tasks?: Task.Type[];
-    assigned_to?: { agency_member: User.Type }[];
-    followers?: { client_follower: User.Type }[];
+  export type Type = Database['public']['Tables']['orders_v2']['Row'];
+
+  export type Response = Order.Type & {
+    customer: UserResponse[];
+    assigned_to: {
+      agency_member: UserResponse | null;
+    }[] | null;
+    client_organization: Pick<Account.Type, 'name' | 'id'>[] | null;
+    followers?: {
+      client_follower: User.Response;
+    }[] | null;
+    brief?: Partial<Pick<Brief.Response, 'name'>>;
+    review?: Review.Response;
+    statusData?: AgencyStatus.Type | null;
   };
   export type Relational = Order.Relationships.All & {
     messages: (Message.Type & { user: User.Response; files: File.Type[] })[];

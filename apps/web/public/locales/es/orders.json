@@ -137,5 +137,11 @@
     "addManualTime": "Agregar tiempo manual",
     "deleteTimer": "Eliminar temporizador",
     "editTimer": "Editar temporizador"
+  },
+  "empty": {
+    "member": {
+      "title": "Aún no has asignado ningún proyecto a ti.",
+      "description": "¡Espera! Tus proyectos asignados aparecerán aquí pronto."
+    }
   }
 }
