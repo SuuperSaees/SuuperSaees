@@ -65,7 +65,7 @@ export function PersonalAccountDropdown({
   className?: string;
   showProfileName?: boolean;
 }) {
-  const { userData: personalAccountData } = usePersonalAccountData(
+  const { data: personalAccountData } = usePersonalAccountData(
     user.id,
     account,
   );
@@ -138,7 +138,7 @@ export function PersonalAccountDropdown({
       >
         <ProfileAvatar
           displayName={displayName ?? user?.email ?? ''}
-          pictureUrl={personalAccountData?.settings?.picture_url}
+          pictureUrl={personalAccountData?.picture_url}
         />
 
         <If condition={showProfileName}>
