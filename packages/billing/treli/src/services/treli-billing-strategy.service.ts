@@ -692,6 +692,8 @@ export class TreliBillingStrategyService
       // update plan
       const updatedPlan = {
         ...currentPlanToUpdate,
+        name: service.name,
+        description: service.service_description ?? '',
         subscription_plan_id: 0, // if you need to update the plans take de id of the plan to update
         // description: service.service_description ?? '',
         subs_plan: {
