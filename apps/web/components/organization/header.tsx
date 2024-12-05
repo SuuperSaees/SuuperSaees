@@ -37,7 +37,7 @@ function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderPr
         className="aspect-square h-16 w-16"
       />
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-full">
         <EditableHeader
           initialName={name}
           id={id}
