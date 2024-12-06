@@ -8,17 +8,15 @@ import {
   useState,
 } from 'react';
 
-import {
-  UseMutationResult,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getUserById } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { addOrderMessage } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import { toast } from 'sonner';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+
 import { Activity as ServerActivity } from '~/lib/activity.types';
-import { Database } from '~/lib/database.types';
+import { Database, Tables } from '~/lib/database.types';
 import { File as ServerFile } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
 import { Message as ServerMessage } from '~/lib/message.types';
@@ -98,7 +96,14 @@ interface ActivityContextType {
   order: Order.Type;
   userRole: string;
   // writeMessage: (message: string) => Promise<ServerMessage.Type>;
-  addMessageMutation: UseMutationResult<Message.Type, Error, string, unknown>;
+  addMessage: (message: string) => Promise<ServerMessage.Type>;
+  userWorkspace: {
+    id: string | null;
+    name: string | null;
+    picture_url: string | null;
+    subscription_status: Tables<"subscriptions">["status"] | null;
+  }
+  loadingMessages: boolean;
 }
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -135,7 +140,8 @@ export const ActivityProvider = ({
   const [files, setFiles] = useState<File[]>(serverFiles);
   const { getInternalMessagingEnabled } = useInternalMessaging();
   const queryClient = useQueryClient();
-  // e06d49a5-939a-4b7a-b135-81f7e6e7c5cb
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const { workspace: currentUser } = useUserWorkspace();
   const writeMessage = async (message: string, tempId: string) => {
     try {
       const messageToSend = {
@@ -147,6 +153,7 @@ export const ActivityProvider = ({
         temp_id: tempId,
       };
       const newMessage = await addOrderMessage(
+        currentUser.id ?? '',
         Number(order.id),
         messageToSend,
         messageToSend.visibility as Message.Type['visibility'],
@@ -160,17 +167,9 @@ export const ActivityProvider = ({
         description: 'The message could not be sent.',
       });
       throw error;
+    } finally {
+      setLoadingMessages(false)
     }
-  };
-
-  const removeOptimisticResponses = (messages: Message[], tempId?: string) => {
-    if (!tempId) {
-      return messages;
-    }
-    console.log('removeOptimisticResponses', messages, tempId);
-    return messages.filter(
-      (msg) => msg.temp_id !== tempId && !msg.id.startsWith('temp-'),
-    );
   };
 
   const addMessageMutation = useMutation({
@@ -178,13 +177,13 @@ export const ActivityProvider = ({
       writeMessage(message, tempId),
     onMutate: async ({ message, tempId }) => {
       // Cancel outgoing refetches (so they don't overwrite our optimistic update)
-      console.log('message', message);
+      setLoadingMessages(true);
       await queryClient.cancelQueries({
         queryKey: ['messages'],
       });
 
       const optimisticMessage: Message = {
-        id: 'temp-' + Date.now().toString(), // Temporary ID
+        id: 'temp-' + tempId, // Temporary ID
         content: message,
         order_id: Number(order.id),
         visibility: getInternalMessagingEnabled()
@@ -192,15 +191,16 @@ export const ActivityProvider = ({
           : 'public',
         created_at: new Date().toISOString(),
         user: {
-          id: 'e06d49a5-939a-4b7a-b135-81f7e6e7c5cb', // Replace with the actual user's ID
-          name: 'Juan', // Replace with the current user's name
-          email: 'juan.garzon+softlink@suuper.co', // Replace with the current user's email
-          picture_url: '', // Optionally, use the current user's picture
+          id: currentUser.id ?? '',
+          name: currentUser.name ?? '',
+          email: currentUser?.email ?? '',
+          picture_url: currentUser.picture_url ?? '',
         },
-        user_id: 'e06d49a5-939a-4b7a-b135-81f7e6e7c5cb',
+        user_id: currentUser.id ?? '',
         files: [], // Default to an empty array if not provided
         reactions: [], // Default to an empty array if not provided,
         temp_id: tempId,
+        pending: true,
       };
 
       setMessages((oldMessages) => [...oldMessages, optimisticMessage]);
@@ -219,20 +219,48 @@ export const ActivityProvider = ({
       });
     },
     onSuccess: (newMessage, _variables, context) => {
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.id === context?.optimisticMessage.id && msg.temp_id === context?.optimisticMessage.temp_id
-            ? {
-                ...newMessage,
-                user: context.optimisticMessage.user,
-                files: [],
-                reactions: [],
-              }
-            : msg
-        )
-      );
+      const realMessage = {
+        ...newMessage,
+        user: context.optimisticMessage.user,
+        files: [],
+        reactions: [],
+      };
+      setMessages((prevMessages) => {
+        return reconcileState(prevMessages, realMessage) as Message[];
+      });
     },
+    onSettled: () => {
+      setLoadingMessages(false);
+    }
   });
+
+  const reconcileState = (items: ActivityData[], newItem: ActivityData) => {
+    const itemsMatch = (tempItem: ActivityData, newItem: ActivityData) => {
+      return tempItem?.temp_id === newItem?.temp_id;
+    };
+    // avoid duplicate items
+    if (
+      !items.some(
+        (msg) => msg.id === newItem.id ,
+      )
+    ) {
+      const existingIndex = items.findIndex((item) =>
+        itemsMatch(item, newItem),
+      );
+
+      if (existingIndex !== -1) {
+        // Replace the existing item
+        return items.map((item, index) =>
+          index === existingIndex ? newItem : item,
+        );
+      } else {
+        // Append the new item if it doesn't already exist
+        return [...items, newItem];
+      }
+    } else {
+      return items;
+    }
+  };
 
   const reconcileData = useCallback(
     async (
@@ -253,7 +281,7 @@ export const ActivityProvider = ({
         }
       }
 
-      let nestedFiles = [];
+      let nestedFiles = undefined;
 
       if (tableName === TableName.MESSAGES) {
         const hasRelatedFiles = () => {
@@ -282,43 +310,25 @@ export const ActivityProvider = ({
       payload: SubscriptionPayload,
       currentDataStore: T[],
       stateSetter: React.Dispatch<React.SetStateAction<T[]>>,
-      tableName: TableName
+      tableName: TableName,
     ) => {
       try {
         const newData = (await reconcileData(
           payload,
           currentDataStore,
-          tableName
+          tableName,
         )) as T;
 
-        if (tableName === TableName.MESSAGES) {
-          const newMessage = await reconcileData(payload, currentDataStore, tableName);
-
-          stateSetter((prevMessages) => {
-            const existingOptimistic = prevMessages.find(
-              (msg) => msg.temp_id === newMessage.temp_id
-            );
-    
-            if (existingOptimistic) {
-              // Replace the optimistic message with the server message
-              return prevMessages.map((msg) =>
-                msg.temp_id === newMessage.temp_id ? newMessage : msg
-              );
-            }
-    
-            // If not an optimistic message, simply add the new one
-            return [...prevMessages, newMessage];
-          });
-        } else {
-          stateSetter((prev) => [...prev, newData]);
-        }
+        stateSetter((prevState) => {
+          return reconcileState(prevState, newData) as T[];
+        });
       } catch (error) {
         console.error('Error handling subscription:', error);
       }
     },
-    [reconcileData]
+    [reconcileData],
   );
-  console.log('messages', messages);
+
   useOrderSubscriptions(
     order.id,
     handleSubscription,
@@ -342,11 +352,13 @@ export const ActivityProvider = ({
         files: files.filter((svFile) => !svFile.message_id),
         order,
         userRole,
-        addMessageMutation: async (message: string) =>
+        addMessage: async (message: string) =>
           await addMessageMutation.mutateAsync({
             message,
             tempId: generateUUID(),
           }),
+        userWorkspace: currentUser,
+        loadingMessages
       }}
     >
       {children}
