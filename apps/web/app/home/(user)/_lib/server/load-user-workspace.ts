@@ -28,7 +28,7 @@ async function workspaceLoader() {
 
   const workspacePromise = api.getAccountWorkspace();
 
-  const [accounts, workspace, user] = await Promise.all([
+  const [organization, workspace, user] = await Promise.all([
     accountsPromise(),
     workspacePromise,
     requireUserInServerComponent(),
