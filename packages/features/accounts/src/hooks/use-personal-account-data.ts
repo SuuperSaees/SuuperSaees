@@ -11,7 +11,7 @@ export function usePersonalAccountData(
         id: string | null;
         name: string | null;
         picture_url: string | null;
-        stripe_id: string | null 
+        stripe_id: string | null;
       }
     | undefined,
 ) {
@@ -29,18 +29,27 @@ export function usePersonalAccountData(
         id,
         name,
         picture_url,
-        stripe_id
+        stripe_id,
+        settings:user_settings(name,picture_url)
     `,
       )
       .eq('primary_owner_user_id', userId)
       .eq('is_personal_account', true)
       .single();
 
-      
-      if (response.error) {
-        throw response.error;
-      }
-    return response.data;
+    const transformerResponse = {
+      id: response.data?.id,
+      name: response.data?.settings?.name ?? response.data?.name,
+      picture_url:
+        response.data?.settings?.picture_url ?? response.data?.picture_url,
+      stripe_id: response.data?.stripe_id,
+    };
+
+    if (response.error) {
+      throw response.error;
+    }
+
+    return transformerResponse;
   };
 
   return useQuery({
@@ -51,10 +60,10 @@ export function usePersonalAccountData(
     refetchOnMount: false,
     initialData: partialAccount?.id
       ? {
-          id: partialAccount.id,
-          name: partialAccount.name,
-          picture_url: partialAccount.picture_url,
-          stripe_id: partialAccount.stripe_id
+          id: partialAccount.id ?? undefined,
+          name: partialAccount.name ?? undefined,
+          picture_url: partialAccount.picture_url ?? undefined,
+          stripe_id: partialAccount.stripe_id ?? undefined,
         }
       : undefined,
   });
