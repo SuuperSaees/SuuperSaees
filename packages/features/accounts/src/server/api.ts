@@ -53,7 +53,7 @@ class AccountsApi {
   async loadUserAccounts() {
     const { data: accounts, error } = await this.client
       .from('user_accounts')
-      .select(`name, slug, picture_url`);
+      .select(`name, slug, picture_url`)
 
     if (error) {
       throw error;
