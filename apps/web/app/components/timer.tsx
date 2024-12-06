@@ -23,9 +23,10 @@ import { handleEndTimeChange, handlePauseConfirm, handleStartTimeChange } from '
 
 interface TimerProps {
   onUpdate: (timerId: string, timer: TimerUpdate) => Promise<void>;
+  className?: string;
 }
 
-export const Timer = ({ onUpdate }: TimerProps) => {
+export const Timer = ({ onUpdate, className }: TimerProps) => {
   const { t } = useTranslation('common');
   const { workspace, user } = useUserWorkspace();
   const { activeTimer, setActiveTimer, clearTimer } = useTimeTracker();
@@ -144,7 +145,7 @@ export const Timer = ({ onUpdate }: TimerProps) => {
 
   return (
     <>
-      <div className="flex items-center gap-4 text-gray-600">
+      <div className={`flex items-center gap-4 text-gray-600 ${className}`}>
         <span className="text-gray-600 text-right text-base font-normal">{formatTime(time)}</span>
         <CirclePause className="h-4 w-4 cursor-pointer" onClick={handlePause} />
       </div>

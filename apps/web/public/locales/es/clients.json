@@ -106,7 +106,10 @@
     "badInputRole": "Por favor, selecciona un rol"
   },
   "success": "¡Todo listo!",
-  "clientOwner": "Cliente Líder",
-  "clientMember": "Cliente Miembro"
+  "clientOwner": "Líder",
+  "clientMember": "Miembro",
+  "agencyMember": "Miembro",
+  "agencyOwner": "Propietario",
+  "agencyProjectManager": "Gestor de proyecto"
 }
 

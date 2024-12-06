@@ -208,7 +208,7 @@ const AsideOrderInformation = ({
 
   const searchUserOptionsFollowers =
     orderAgencyClientsFollowers?.map((user) => ({
-      picture_url: user?.settings?.name ?? user.name ?? '',
+      picture_url: user?.settings?.picture_url?? user?.picture_url ?? '',
       value: user.id,
       label: user?.settings?.name ?? user.name ?? '',
     })) ?? [];
@@ -232,21 +232,15 @@ const AsideOrderInformation = ({
           <div className="flex gap-3">
             <AvatarDisplayer
               displayName={
-                order.client?.name
-                  ? order.client?.name
-                  : deduceNameFromEmail(order.client?.email ?? '')
+                order.client?.settings?.name ?? order.client?.name
               }
               pictureUrl={
-                order.client
-                  ? order.client?.picture_url && order.client?.picture_url
-                  : undefined
+                order.client?.settings?.picture_url ?? order.client?.picture_url
               }
             />
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-600">
-                {order.client?.email
-                  ? deduceNameFromEmail(order.client?.email ?? '')
-                  : ''}
+                {order.client?.settings?.name ?? order.client?.name ?? ''}
               </span>
               <span className="text-sm text-gray-600">
                 {order.client_organization?.name

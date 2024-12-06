@@ -6,7 +6,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
     
-    const { email } = await req.json();
+    const { email } = await req.clone().json();
 
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
