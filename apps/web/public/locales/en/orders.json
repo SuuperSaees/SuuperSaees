@@ -88,7 +88,6 @@
       "placeholder": "What did you think of this project?"
     }
   },
-  "createdNewProject": "has created a new project",
   "selectFile": "Please select at least one file",
   "uploadError": "Error uploading file {{fileName}}",
   "uploadURLError": "Error getting upload URL: {{error}}",
