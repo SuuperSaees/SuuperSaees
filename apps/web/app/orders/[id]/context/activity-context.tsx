@@ -145,7 +145,6 @@ export const ActivityProvider = ({
   const writeMessage = async ({message, fileIdsList}: {message: string, fileIdsList?: string[]}, tempId: string) => {
     const messageId = crypto.randomUUID()
     try {
-
       const messageToSend = {
         id: messageId,
         content: message,
