@@ -300,8 +300,8 @@ export function OptionFiles({
       {showDropdown && (
         <>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <ThemedButton >
+            <DropdownMenuTrigger>
+              <ThemedButton>
                 <div className="flex items-center">
                   <Plus className="mr-[4px] h-[20px] w-[20px]" />
                   {t('files.new.title')}
