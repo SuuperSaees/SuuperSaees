@@ -204,5 +204,18 @@
   "brandSenderEmailSubmit": "Update Email",
   "brandSenderDomainSubmit": "Sender Domain",
   "brandSenderEmail": "Sender Email",
-  "continue": "Continue"
+  "continue": "Continue",
+  "connect": "Connect",
+  "treli": {
+    "connectTitle": "Connect to Treli",
+    "connectDescription": "Connect your account with Treli to enable payments by this method.",
+    "continue": "Continue",
+    "insertData": "Enter your Treli data",
+    "username": "Username",
+    "usernameDescription": "This is your treli API username.",
+    "password": "Password",
+    "passwordDescription": "This is your treli API password.",
+    "cancel": "Cancel",
+    "success": "Treli account configured successfully"
+  }
 }

@@ -204,5 +204,18 @@
   "brandSenderEmailSubmit": "Actualizar correo",
   "brandSenderDomainSubmit": "Dominio del remitente",
   "brandSenderEmail": "Correo electrónico del remitente",
-  "continue": "Continuar"
+  "continue": "Continuar",
+  "connect": "Conectar",
+  "treli": {
+    "connectTitle": "Conectar con Treli",
+    "connectDescription": "Conecta tu cuenta con Treli para habilitar los pagos por este método.",
+    "continue": "Continuar",
+    "insertData": "Ingresa tus datos de Treli",
+    "username": "Nombre de usuario",
+    "usernameDescription": "Este es tu nombre de usuario de la API de Treli.",
+    "password": "Contraseña",
+    "passwordDescription": "Esta es tu contraseña de la API de Treli.",
+    "cancel": "Cancelar",
+    "success": "La cuenta de Treli se ha configurado correctamente"
+  }
 }

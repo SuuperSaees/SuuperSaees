@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react';
-
-import Link from 'next/link';
-
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { Separator } from '@kit/ui/separator';
-import { Trans } from '@kit/ui/trans';
-
 import { Account } from '../../../../../apps/web/lib/account.types';
 import { getDomainByUserId } from '../../../../multitenancy/utils/get/get-domain';
 import UpdateAccountColorBrand from './personal-account-settings/update-account-color-brand';
@@ -17,6 +12,8 @@ import UpdateAccountOrganizationSidebar from './personal-account-settings/update
 import { ThemedButton } from './ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 import UpdateImage from './personal-account-settings/update-image';
+import { TreliDialog } from './personal-account-settings/treli/treli-dialog';
+import { useRouter } from 'next/navigation';
 
 interface SiteSettingsProps {
   role: string;
@@ -31,6 +28,7 @@ type AccountStripe = {
 
 function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
   const {t} = useTranslation('account');
+  const router = useRouter();
 
   const [accountStripe, setAccountStripe] = useState<AccountStripe>({
     id: '',
@@ -49,6 +47,7 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
       .single();
 
     if (userAccountError) console.error(userAccountError.message);
+    setUserData(userData);
     return userData;
   };
 
@@ -173,35 +172,40 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {!accountStripe?.id ? (
-                  <Trans i18nKey={'account:connectToStripe'} />
+                  t('connectToStripe')
                 ) : accountStripe.charges_enabled ? (
-                  <Trans i18nKey={'account:stripeConnected'} />
+                  t('stripeConnected')
                 ) : (
-                  <Trans i18nKey={'account:continueWithOnboardingStripe'} />
+                  t('continueWithOnboardingStripe')
                 )}
               </p>
               <p className="text-wrap">
                 {!accountStripe?.id ? (
-                  <Trans
-                    i18nKey={'account:connectToStripeDescription'}
-                    key={'s'}
-                  />
+                  t('connectToStripeDescription')
                 ) : accountStripe.charges_enabled ? (
-                  <Trans i18nKey={'account:stripeConnectedDescription'} />
+                  t('stripeConnectedDescription')
                 ) : (
-                  <Trans
-                    i18nKey={'account:continueWithOnboardingStripeDescription'}
-                  />
+                  t('continueWithOnboardingStripeDescription')
                 )}
               </p>
             </div>
             {(!accountStripe?.id || !accountStripe.charges_enabled) && (
-              <ThemedButton className="w-full">
-                <Link href={'/stripe'} className='w-full h-full'>
-                  {accountStripe?.id ? 'Connect' : 'Continue'}
-                </Link>
-              </ThemedButton>
+                <ThemedButton className="w-full" onClick={() => router.push('/stripe')}>
+                  {accountStripe?.id ? t('connect') : t('continue')}
+                </ThemedButton>
             )}
+          </div>
+          <Separator />
+          <div className="flex justify-between items-center">
+            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+              <p className="font-bold">
+                {t('treli.connectTitle')}
+              </p>
+              <p className="text-wrap">
+              {t('treli.connectDescription')}
+              </p>
+            </div>
+            {userData && <TreliDialog userId={userData?.id} />}
           </div>
         </div>
       )}
