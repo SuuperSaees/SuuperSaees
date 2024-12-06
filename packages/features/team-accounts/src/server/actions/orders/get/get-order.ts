@@ -35,13 +35,13 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
       .select(
-        `*, client:accounts!customer_id(id, name, email, picture_url, organization_id, created_at), 
+        `*, client:accounts!customer_id(id, name, email, picture_url, organization_id, created_at, settings:user_settings(name, picture_url)), 
         messages(*, user:accounts(id, name, email, picture_url), files(*)), 
         activities(*, user:accounts(id, name, email, picture_url)),
           reviews(*, user:accounts(id, name, email, picture_url)), 
           files(*, user:accounts(id, name, email, picture_url)),
-         assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url)),
-         followers:order_followers(client_follower:accounts(id, name, email, picture_url))
+         assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
+         followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
         `,
       )
       .eq('id', orderId)

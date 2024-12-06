@@ -56,6 +56,7 @@ class AccountsApi {
       .select(`name, slug, picture_url`)
       .single();
 
+
     if (error) {
       throw error;
     }
