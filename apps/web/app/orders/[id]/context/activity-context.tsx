@@ -144,7 +144,7 @@ export const ActivityProvider = ({
   const { workspace: currentUser } = useUserWorkspace();
   const writeMessage = async (message: string, tempId: string) => {
     try {
-      const timer1 = performance.now();
+
       const messageToSend = {
         content: message,
         order_id: Number(order.id),
@@ -162,8 +162,7 @@ export const ActivityProvider = ({
       toast.success('Success', {
         description: 'The message has been sent.',
       });
-      const timer2 = performance.now();
-      console.log('Time to send message:', timer2 - timer1);
+
       return newMessage;
     } catch (error) {
       toast.error('Error', {
@@ -194,12 +193,12 @@ export const ActivityProvider = ({
           : 'public',
         created_at: new Date().toISOString(),
         user: {
-          id: currentUser.id ?? '',
-          name: currentUser.name ?? '',
+          id: currentUser?.id ?? '',
+          name: currentUser?.name ?? '',
           email: currentUser?.email ?? '',
           picture_url: currentUser.picture_url ?? '',
         },
-        user_id: currentUser.id ?? '',
+        user_id: currentUser?.id ?? '',
         files: [], // Default to an empty array if not provided
         reactions: [], // Default to an empty array if not provided,
         temp_id: tempId,
