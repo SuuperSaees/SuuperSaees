@@ -61,20 +61,22 @@ export const ordersColumns = (
       accessorKey: 'client',
       header: t('orders.client'),
       cell: ({ row }) => {
-        const agencyLink = `/clients/organizations/${row.original.client_organization?.id}`
-        const clientLink = '/organization'
-        const isClient = withPermissionsActive && !hasPermission(row.original)
-        const link = isClient ? clientLink : agencyLink
+        // const agencyLink = `/clients/organizations/${row.original.client_organization?.id}`
+        // const clientLink = '/organization'
+        // const isClient = withPermissionsActive && !hasPermission(row.original)
+        // const isSelf = row.original.client_organization?.id === row.original.agency_id
+        // const validAgencyRoles = ['agency_owner', 'agency_project_manager']
+        // const link = isClient ? clientLink : isSelf ? '': agencyLink
         return (
-          <Link
-            href={link}
+          <span
+            // href={link}
             className="flex flex-col"
           >
             <span className="font-semibold">{row.original.customer?.name}</span>
             <span className="text-sm text-gray-600">
               {row.original.client_organization?.name}
             </span>
-          </Link>
+          </span>
         );
       },
     },
