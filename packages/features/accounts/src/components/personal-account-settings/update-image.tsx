@@ -9,7 +9,6 @@ import { generateUUID } from '../../../../../../apps/web/app/utils/generate-uuid
 import { Database } from '../../../../../../apps/web/lib/database.types';
 import { updateUserSettings } from '../../../../team-accounts/src/server/actions/members/update/update-account';
 import { useOrganizationSettings } from '../../context/organization-settings-context';
-import { useRevalidatePersonalAccountDataQuery } from '../../hooks/use-personal-account-data';
 
 interface UpdateImageProps {
   organizationId?: string;
@@ -54,8 +53,6 @@ export default function UpdateImage({
   const client = useSupabase();
   const { t } = useTranslation('account');
 
-  const revalidateAccount = useRevalidatePersonalAccountDataQuery();
-
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -96,7 +93,6 @@ export default function UpdateImage({
             toast.success(t('updateSuccess'), {
               description: t('updateProfileSuccess'),
             });
-            await revalidateAccount(user?.id ?? '')
           } catch (error) {
             toast.error('Error', {
               description: t('updateProfileError'),
@@ -141,8 +137,6 @@ export default function UpdateImage({
       fileInputRef.current.value = '';
     }
   };
-
-
 
   function deleteImageFromBucket(
     client: SupabaseClient<Database>,
