@@ -434,11 +434,16 @@ const RichTextEditor = ({
         </div>
           {!hideSubmitButton && ( 
             <ThemedButton
-              className="flex w-9 h-9 p-[var(--spacing-lg,12px)] justify-center items-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))]  bg-[#155EEF] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
+              className="flex w-9 h-9 absolute right-5 bottom-5  p-[var(--spacing-lg,12px)] justify-center items-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))]  bg-[#155EEF] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
               onClick={sendContent}
               disabled={(!areAllFilesUploaded() && thereAreFilesUploaded) || (editor?.getHTML().trim() !== '<p></p>'  && !areAllFilesUploaded() && thereAreFilesUploaded) || isSending}
             >
-              <SendHorizontalIcon className="w-5 h-5 flex-shrink-0 -rotate-45 text-white" />
+              {/* <SendHorizontalIcon className="w-5 h-5 flex-shrink-0 -rotate-45 text-white" /> */}
+              {isSending ? (
+                <Spinner className="w-5 h-5" />
+              ) : (
+                <SendHorizontalIcon className="w-5 h-5 flex-shrink-0 -rotate-45 text-white" />
+              )}
             </ThemedButton>
           )}
         </div>
