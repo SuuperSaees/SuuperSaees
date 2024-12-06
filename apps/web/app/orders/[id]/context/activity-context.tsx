@@ -130,10 +130,6 @@ export const ActivityProvider = ({
   const { getInternalMessagingEnabled } = useInternalMessaging();
   const writeMessage = async ({message, fileIdsList}: {message: string, fileIdsList?: string[]}) => {
     try {
-      console.log('[writeMessage] Sending message', {
-        message,
-        fileIdsList,
-      });
       const messageToSend = {
         content: message,
         order_id: Number(order.id),
@@ -146,10 +142,6 @@ export const ActivityProvider = ({
       );
       // If there are file IDs, update the files with the new message ID
       if (fileIdsList && fileIdsList.length > 0) {
-        console.log('[writeMessage] Updating files with new message ID', {
-          fileIdsList,
-          newMessageId: newMessage.id,
-        });
         for (const fileId of fileIdsList) {
           await updateFile(fileId, newMessage.id); // Update the file with the new message ID
         }
