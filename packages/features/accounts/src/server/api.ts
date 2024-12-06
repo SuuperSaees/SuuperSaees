@@ -1,6 +1,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { Database } from '@kit/supabase/database';
+
 
 /**
  * Class representing an API for interacting with user accounts.
@@ -53,17 +56,17 @@ class AccountsApi {
   async loadUserAccounts() {
     const { data: accounts, error } = await this.client
       .from('user_accounts')
-      .select(`name, slug, picture_url`)
-      .single();
+      .select(`name, slug, picture_url`);
+
 
     if (error) {
       throw error;
     }
 
     return {
-      name: accounts.name,
-      slug: accounts.slug,
-      picture_url: accounts.picture_url,
+      name: accounts[0]?.name,
+      slug: accounts[0]?.slug,
+      picture_url: accounts[0]?.picture_url,
     };
   }
 

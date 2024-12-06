@@ -40,13 +40,10 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
     'activity',
   );
 
-  const [loadingCalendars, setLoadingCalendars] = useState(true);
-  const { data: orderAgencyMembers } = useQuery<UserWithSettings[]>({
+  const { data: orderAgencyMembers, isLoading } = useQuery<UserWithSettings[]>({
     queryKey: ['order-agency-members', orderId],
     queryFn: async () => {
-      setLoadingCalendars(true);
       const data = await getOrderAgencyMembers(orderAgencyId, Number(orderId));
-      setLoadingCalendars(false);
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -138,7 +135,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         <div className="w-full">
           <CalendarSection 
             orderAgencyMembers={orderAgencyMembers ?? []}
-            loading={loadingCalendars}
+            loading={isLoading}
           />
         </div>
       </TabsContent>
