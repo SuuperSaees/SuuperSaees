@@ -9,12 +9,13 @@ export async function deleteFile(file_id: string, file_url: string) {
     .from('files')
     .delete()
     .eq('id', file_id)
-    .select();
+    .select('url')
+    .single();
 
   if (fileError) throw fileError;
 
   // Get bucket and file path from URL
-  const url = file_url;
+  const url = fileData.url ? fileData.url : file_url;
   const urlParts = url.split('/');
 
   const bucket = urlParts[7];

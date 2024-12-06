@@ -3,6 +3,9 @@ import { StickyNote, X } from 'lucide-react';
 import { createFile, createUploadBucketURL } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { useTranslation } from 'react-i18next';
 import { generateUUID } from '~/utils/generate-uuid';
+import { deleteFile } from '~/team-accounts/src/server/actions/files/delete/delete-file';
+import { Spinner } from '@kit/ui/spinner';
+import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon } from '~/orders/[id]/components/fileIcons';
 
 interface FileUploaderProps {
   onFileSelect?: (fileIds: string[]) => void;
@@ -20,13 +23,33 @@ interface FileWithServerId {
   error?: string;
 }
 
-const fileTypeColors: Record<string, string> = {
-  pdf: 'fill-pdf',
-  png: 'fill-png',
-  jpg: 'fill-jpg',
-  jpeg: 'fill-jpeg',
-  doc: 'fill-doc',
-  docx: 'fill-docx',
+const fileTypeIcons: Record<string, JSX.Element> = {
+  pdf: <PDFIcon />,
+  doc: <DOCIcon />,
+  docx: <DOCXIcon />,
+  txt: <TXTIcon />,
+  csv: <CSVIcon />,
+  xls: <XLSIcon />,
+  xlsx: <XLSXIcon />,
+  ppt: <PPTIcon />,
+  pptx: <PPTXIcon />,
+  fig: <FIGIcon />,
+  ai: <AIIcon />,
+  psd: <PSDIcon />,
+  indd: <INDDIcon />,
+  aep: <AEPIcon />,
+  html: <HTMLIcon />,
+  css: <CSSIcon />,
+  rss: <RSSIcon />,
+  sql: <SQLIcon />,
+  js: <JSIcon />,
+  json: <JSONIcon />,
+  java: <JAVAIcon />,
+  xml: <XMLIcon />,
+  exe: <EXEIcon />,
+  dmg: <DMGIcon />,
+  zip: <ZIPIcon />,
+  rar: <RARIcon />,
 };
 
 const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
@@ -36,6 +59,7 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
     const [fileUrls, setFileUrls] = useState<File[]>([]); 
     const inputRef = useRef<HTMLInputElement>(null);
     const [hoveredFileId, setHoveredFileId] = useState<number | null>(null);
+    const [globalFileList, setGlobalFileList] = useState<FileWithServerId[]>([]);
     const uuid = generateUUID();
 
     useImperativeHandle(ref, () => inputRef.current!);
@@ -44,8 +68,16 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
       return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
     };
 
-    const uploadFile = async (id: string, file: File) => {
+    const uploadFile = async (file: File) => {
       onFileUploadStatusUpdate?.(file, 'uploading');
+
+      setGlobalFileList(prevList => [
+        ...prevList, 
+        {
+          file, 
+          progress: 0,
+        }
+      ]);
 
       const bucketName = 'orders';
       const sanitizedFileName = sanitizeFileName(file.name);
@@ -58,6 +90,11 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
           setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
             prevFile === file ? { ...prevFile, progress } : prevFile
           ));
+          if(progress < 90){
+            setGlobalFileList((prevList) => prevList.map((prevFile) =>
+              prevFile.file === file ? { ...prevFile, progress } : prevFile
+            ));
+          }
         }
       });
   
@@ -71,6 +108,9 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
       xhr.upload.addEventListener('load', () => {
         setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
           prevFile === file ? { ...prevFile, progress: 100 } : prevFile
+        ));
+        setGlobalFileList((prevList) => prevList.map((prevFile) =>
+          prevFile.file === file ? { ...prevFile, progress: 99 } : prevFile
         ));
       });
   
@@ -115,12 +155,6 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
         };
 
         const createdFiles = await createFile([newFileData]);
-        setFileUrls((prevFiles) => [
-          ...prevFiles,
-          { ...file, serverId: createdFiles[0]?.id, url: createdFiles[0]?.url }
-        ]);
-
-        onFileUploadStatusUpdate?.(file, 'completed', createdFiles[0]?.id);
         
         if (onFileSelect) {
           const allServerIds = createdFiles.map((file) => file.id);
@@ -129,6 +163,24 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
             onFileIdsChange(allServerIds);
           }
         }
+
+        setFileUrls((prevFiles) => [
+          ...prevFiles,
+          { ...file, serverId: createdFiles[0]?.id, url: createdFiles[0]?.url }
+        ]);
+
+        onFileUploadStatusUpdate?.(file, 'completed', createdFiles[0]?.id);
+
+
+        setGlobalFileList((prevList) => prevList.map((prevFile) =>
+          prevFile.file === file ? { 
+            ...prevFile, 
+            serverId: 
+            createdFiles[0]?.id, 
+            url: createdFiles[0]?.url,
+            progress: 100, } : prevFile
+        ));
+
       } catch (error) {
         onFileUploadStatusUpdate?.(file, 'error');
         setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
@@ -144,11 +196,10 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
         setSelectedFiles((prevFiles) => [...prevFiles, ...newFiles]);
         setFileUrls((prevFiles) => [...prevFiles, ...newFiles]);
         
-    
-        // Llama a uploadFile para cada archivo seleccionado
         newFiles.forEach((file) => {
-          const uniqueId = `${Date.now()}_${file.name}`;
-          uploadFile(uniqueId, file);
+          uploadFile(file).catch((error) => {
+            console.error('Error uploading file', error);
+          });
         });
       }
       if (thereAreFilesUploaded){
@@ -156,47 +207,22 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
       }
     };
 
-    const removeFile = (fileToRemove: FileWithServerId) => {
-      // Remove the file from selectedFiles
+    const removeFile = async (fileToRemove: File) => {
       setSelectedFiles((prevFiles) => 
-        prevFiles.filter((item) => item !== fileToRemove.file)
+        prevFiles.filter((item) => item !== fileToRemove)
       );
 
-      // Collect remaining server IDs
-      const remainingServerIds = selectedFiles
-        .filter((item) => item !== fileToRemove.file)
-        .map((item) => item.serverId)
-        .filter(Boolean) as string[];
-
-      // Call file select/change callbacks
-      if (onFileSelect) {
-        onFileSelect(remainingServerIds);
-      }
-
-      if (onFileIdsChange) {
-        onFileIdsChange(remainingServerIds);
-      }
-
-      // Check if no files remain
-      if (remainingServerIds.length === 0 && thereAreFilesUploaded) {
-        thereAreFilesUploaded(false);
-      }
-
-      // Revoke object URL to free up memory
-      if (fileToRemove.file.type.startsWith('image/') || fileToRemove.file.type.startsWith('video/')) {
-        URL.revokeObjectURL(URL.createObjectURL(fileToRemove.file));
+      if (globalFileList.find((item) => item.file === fileToRemove)) {
+        setGlobalFileList((prevList) =>
+          prevList.filter((item) => item.file !== fileToRemove)
+        );
+        await deleteFile(globalFileList.find((item) => item.file === fileToRemove)?.serverId ?? '', globalFileList.find((item) => item.file === fileToRemove)?.url ?? '');
       }
     };
 
-    const getFileTypeClass = (fileName: string) => {
+    const getFileTypeIcon = (fileName: string) => {
       const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
-      return fileTypeColors[extension] ?? 'fill-unknown';
-    };
-  
-    const formatFileSize = (size: number) => {
-      if (size < 1024) return `${size} B`;
-      if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB`;
-      return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+      return fileTypeIcons[extension] ?? <StickyNote className="text-gray-500 h-[56px] w-[40px]" />;
     };
 
     useEffect(() => {
@@ -233,17 +259,36 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
                 <video
                   src={URL.createObjectURL(file)}
                   className="object-cover w-full h-full"
-                  muted // Desactiva el sonido por defecto
+                  controls
+                  muted 
                 />
               ) : (
-                <StickyNote className={`text-white ${getFileTypeClass(file.name ?? 'fileName')} w-8`} />
+                <div className='w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                  {getFileTypeIcon(file.name)} 
+                </div>
               )}
+              {
+                globalFileList.find((item) => item.file === file)?.progress < 100 &&(
+                  <div className='items-center flex justify-center absolute w-full h-full'>
+                    <Spinner  className='w-5 h-5'/>
+                  </div>
+                )
+              }
             </div>
+            {
+              globalFileList.find((item) => item.file === file)?.progress > 0 && globalFileList.find((item) => item.file === file)?.progress < 100 &&(
+                <div className="w-full h-1 bg-gray-200 rounded-full mt-1">
+                  <div
+                    className="h-full bg-blue-500 rounded-full"
+                    style={{ width: `${globalFileList.find((item) => item.file === file)?.progress}%` }}
+                  />
+                </div>
+              )
+            }
             <div>
               <p className="text-sm text-gray-600 truncate w-24">{file.name ?? 'fileName'}</p>
-              <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
             </div>
-            {hoveredFileId === id && (
+            {hoveredFileId === id && globalFileList.find((item) => item.file === file)?.progress > 0 &&(
               <div className="absolute top-[-8px] right-[-8px]">
                 <X
                   className="cursor-pointer w-4 h-4 bg-white rounded-full shadow"

@@ -47,7 +47,6 @@ async function OrderDetailsPage({
   });
 
   return (
-    <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
       <ActivityProvider
         messages={order?.messages ?? []}
         files={order?.files ?? []}
@@ -58,10 +57,10 @@ async function OrderDetailsPage({
       >
         
 
-    <div className="flex h-full max-h-full w-full flex-col text-gray-700">
+        <div className="flex h-full max-h-full w-full flex-col text-gray-700 overflow-y-auto">
       <div className="flex max-h-full h-full w-full justify-between">
     
-        <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem] pt-2">
+        <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pt-2">
           <OrderHeader order={order} agencyStatuses={agencyStatuses ?? []} />
           <OrderTabs
             organizationId={
@@ -81,7 +80,6 @@ async function OrderDetailsPage({
       </div>
     </div>
       </ActivityProvider>
-    </PageBody>
   );
 }
 
