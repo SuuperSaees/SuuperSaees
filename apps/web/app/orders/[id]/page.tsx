@@ -57,7 +57,7 @@ async function OrderDetailsPage({
       >
         
 
-        <div className="flex h-full max-h-full w-full flex-col text-gray-700 overflow-y-auto">
+        <div className="flex h-full max-h-full w-full flex-col text-gray-700 overflow-y-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
       <div className="flex max-h-full h-full w-full justify-between">
     
         <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pt-2">

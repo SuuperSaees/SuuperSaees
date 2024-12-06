@@ -23,6 +23,7 @@ import { User as ServerUser } from '~/lib/user.types';
 
 import useInternalMessaging from '../hooks/use-messages';
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
+import { updateFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/update/update-file';
 
 export enum ActivityType {
   MESSAGE = 'message',
@@ -91,7 +92,7 @@ interface ActivityContextType {
   files: File[];
   order: Order.Type;
   userRole: string;
-  writeMessage: (message: string) => Promise<ServerMessage.Type>;
+  writeMessage: ({message, fileIdsList}: {message: string, fileIdsList?: string[]}) => Promise<ServerMessage.Type>;
 }
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -127,7 +128,7 @@ export const ActivityProvider = ({
   const [reviews, setReviews] = useState<Review[]>(serverReviews);
   const [files, setFiles] = useState<File[]>(serverFiles);
   const { getInternalMessagingEnabled } = useInternalMessaging();
-  const writeMessage = async (message: string) => {
+  const writeMessage = async ({message, fileIdsList}: {message: string, fileIdsList?: string[]}) => {
     try {
       const messageToSend = {
         content: message,
@@ -139,6 +140,13 @@ export const ActivityProvider = ({
         messageToSend,
         messageToSend.visibility as Message.Type['visibility'],
       );
+      // If there are file IDs, update the files with the new message ID
+      if (fileIdsList && fileIdsList.length > 0) {
+        for (const fileId of fileIdsList) {
+          await updateFile(fileId, newMessage.id); // Update the file with the new message ID
+        }
+      }
+
       toast.success('Success', {
         description: 'The message has been sent.',
       });

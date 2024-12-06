@@ -59,24 +59,13 @@ const ActivityPage = () => {
         }
 
         if(idsListFromServer.length > 0) {
-          const messageData = await writeMessage(messageContent);
-          for (const fileId of idsListFromServer) {
-            const { error: Err } = await client
-              .from('files')
-              .update({
-                message_id: messageData.id,
-              })
-              .eq('id', fileId);
-            if (Err) {
-              console.error('Error inserting file:', Err);
-            }
-          } 
+          await writeMessage({message: messageContent, fileIdsList: idsListFromServer});
         } else if (messageContent !== '<p></p>' && idsListFromServer.length === 0) {
-          await writeMessage(messageContent);
+          await writeMessage({message: messageContent});
         }
         
       } else {
-        await writeMessage(messageContent);
+        await writeMessage({message: messageContent});
       }
       
     } catch (error) {
@@ -85,11 +74,11 @@ const ActivityPage = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 h-auto">
+    <div className="flex w-full flex-col gap-4 h-auto ">
       <Separator className='w-full'/>
       <Interactions />
       <Separator className='w-full'/>
-      <div className="mb-10 flex flex-col justify-end px-8"> 
+      <div className="flex flex-col justify-end px-8 mb-4"> 
         <RichTextEditor
           className=" w-full overflow-auto"
           onComplete={handleOnCompleteMessageSend}
