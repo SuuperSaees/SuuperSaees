@@ -88,7 +88,6 @@
       "placeholder": "¿Qué te pareció este proyecto?"
     }
   },
-  "createdNewProject": "ha creado un nuevo proyecto",
   "selectFile": "Debes seleccionar al menos un archivo",
   "uploadError": "Error al subir el archivo {{fileName}}",
   "uploadURLError": "Error al obtener la URL de carga: {{error}}",

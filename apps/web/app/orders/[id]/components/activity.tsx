@@ -4,12 +4,20 @@ import { useState } from 'react';
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
+import UploadFileComponent from '~/components/ui/files-input';
 import RichTextEditor from '~/components/ui/rich-text-editor';
 import { sendEmailsOfOrderMessages } from '~/team-accounts/src/server/actions/orders/update/update-order';
 
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
-import { Separator } from '@kit/ui/separator';
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 const ActivityPage = () => {
   const { order } = useActivityContext();
@@ -40,9 +48,9 @@ const ActivityPage = () => {
 
   const { addMessage, userRole, userWorkspace } = useActivityContext();
 
-  const handleOnCompleteMessageSend = async (messageContent: string, fileIdsList?: string[]) => {
+  const handleOnCompleteMessageSend = async (messageContent: string) => {
     try {
-      if (fileIdsList) {
+
         await addMessage(messageContent);
         await sendEmailsOfOrderMessages(
           order.id,
@@ -55,32 +63,7 @@ const ActivityPage = () => {
           new Date().toLocaleDateString(),
           userWorkspace.id ?? '',
         );
-        for (const fileId of fileIdsList) {
-          const { error: Err } = await client
-            .from('files')
-            .update({
-              message_id: messageData.id,
-            })
-            .eq('id', fileId);
-          if (Err) {
-            console.error('Error inserting file:', Err);
-          }
-        }
-      } else {
-        await addMessage(messageContent);
-        await sendEmailsOfOrderMessages(
-          order.id,
-          order.title,
-          messageContent,
-          userWorkspace.name ?? '',
-          order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
-            [],
-           '',
-          new Date().toLocaleDateString(),
-          userWorkspace.id ?? '',
-        );
-      }
-      
+ 
     } catch (error) {
       console.error('Failed to send message or upload files:', error);
     }
@@ -89,15 +72,23 @@ const ActivityPage = () => {
   return (
     <div className="flex h-full max-h-full w-full flex-col gap-4">
       <Interactions />
-      <Separator className='w-full'/>
-      <div className="mb-2 flex flex-col justify-end gap-4 border p-2 rounded-lg"> 
+      <div className="mb-2 flex flex-col justify-end gap-4 ">
+        {showFileUploader && (
+          <UploadFileComponent
+            bucketName="orders"
+            onFileIdsChange={handleFileIdsChange}
+            uuid={generateUUID()}
+            removeResults
+            toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
+          />
+        )}
+ 
         <RichTextEditor
           onComplete={handleOnCompleteMessageSend}
           uploadFileIsExternal
           toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
           userRole={userRole}
           className='pb-8'
-          handleFileIdsChange={handleFileIdsChange}
         />
       </div>
     </div>
