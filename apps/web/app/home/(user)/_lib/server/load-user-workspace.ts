@@ -1,10 +1,15 @@
 import { cache } from 'react';
 
+
+
 import { createAccountsApi } from '@kit/accounts/api';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import featureFlagsConfig from '~/config/feature-flags.config';
 import { requireUserInServerComponent } from '~/lib/server/require-user-in-server-component';
+
 
 const shouldLoadAccounts = featureFlagsConfig.enableTeamAccounts;
 
@@ -34,8 +39,11 @@ async function workspaceLoader() {
     requireUserInServerComponent(),
   ]);
 
+  const organization = accounts?.[0] ?? null;
+
   return {
     accounts,
+    organization,
     workspace,
     user,
   };

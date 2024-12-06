@@ -24,7 +24,7 @@ type AccountGet = Pick<
   | 'id'
   | 'picture_url'
   | 'primary_owner_user_id'
-> & { settings: { name: string } };
+> & { settings: { name: string | null } | null };
 // Helper function to fetch the current user's account details
 export async function fetchCurrentUserAccount(
   client: SupabaseClient<Database>,

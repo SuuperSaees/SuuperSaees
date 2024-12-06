@@ -1,9 +1,9 @@
 import { format } from 'date-fns';
 import { Message } from '../context/activity-context';
-import ImageContainer from './ui/image-container';
 import { useActivityContext } from '../context/activity-context';
 import { ClockIcon, KeyIcon } from 'lucide-react';
 import { Trans } from '@kit/ui/trans';
+import UserFile from './user-file';
 
 interface ChatMessageProps {
   message: Message;
@@ -39,13 +39,14 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         {message.files && message.files.length > 0 && (
           <div className="flex flex-wrap max-w-prose gap-4 ">
             {message.files.map((file) => (
-              <ImageContainer
-              key={file.id}
-              name={file.name}
-              url={file.url}
-              alt={`${file.name} image`}
-              size={file.size}
-              />
+              // <ImageContainer
+              //   key={file.id}
+              //   name={file.name}
+              //   url={file.url}
+              //   alt={`${file.name} image`}
+              //   size={file.size}
+              // />
+              <UserFile key={file.id} file={file} />
             ))}
           </div>
         )}
