@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { format } from 'date-fns';
 
@@ -13,15 +13,68 @@ import ActivityAction from './activity-actions';
 import UserFile from './user-file';
 import UserMessage from './user-message';
 import UserReviewMessage from './user-review-message';
+import { fetchFormfieldsWithResponses } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
+import { useQuery } from '@tanstack/react-query';
+import UserFirstMessage from './user-first-message';
 
 const Interactions = () => {
-  const { messages, files, activities, reviews, userRole } =
-    useActivityContext();
+  const { messages, files, activities, reviews, userRole, order } = useActivityContext();
+
+  const briefsWithResponsesQuery = useQuery({
+    queryKey: ['briefsWithResponses', order.brief_ids],
+    queryFn: async () => await fetchFormfieldsWithResponses(order.uuid),
+  });
+
+  const notValidFormTypes = new Set([
+    'h1', 'h2', 'h3', 'h4', 'rich-text', 'image', 'video'
+  ]);
+
+  const filteredFiles = useMemo(() => {
+    if (briefsWithResponsesQuery.isLoading || !briefsWithResponsesQuery.data) {
+      return []; 
+    }
+  
+    const fileFields = briefsWithResponsesQuery.data.filter(
+      (formField) =>
+        formField.field?.type === "file" && formField.response?.trim()
+    );
+  
+    const fileUrlsFromForm = fileFields
+      .flatMap((formField) => formField.response.split(","))
+      .map((url) => url.trim());
+  
+    return files.filter((file) => !fileUrlsFromForm.includes(file.url));
+  }, [briefsWithResponsesQuery, files]);
+  
+
   const interactionsContainerRef = useRef<HTMLDivElement>(null);
 
   // Combine all items into a single array with filtering based on user role
 
+  const briefFieldsInteraction = useMemo(() => {
+    if (!briefsWithResponsesQuery.data) return null;
+  
+    const briefFields = briefsWithResponsesQuery.data
+      .filter((a) => a?.field?.position !== undefined)
+      .sort((a, b) => (a.field?.position ?? 0) - (b.field?.position ?? 0))
+      .filter(
+        (formField) =>
+          !notValidFormTypes.has(formField.field?.type ?? '')
+      );
+  
+    const combinedBriefs = {
+      class: 'brief-field',
+      created_at: order.created_at || new Date().toISOString(),
+      userSettings: briefsWithResponsesQuery.data[0]?.userSettings || {}, 
+      fields: briefFields, 
+    };
+  
+    return { briefs: [combinedBriefs] };
+  }, [briefsWithResponsesQuery.data, order]);
+  
+
   const combinedInteractions = [
+    ...briefFieldsInteraction?.briefs ?? [],
     ...messages
       .filter((message) =>
         !['agency_owner', 'agency_member', 'agency_project_manager'].includes(
@@ -31,7 +84,7 @@ const Interactions = () => {
           : true,
       )
       .map((message) => ({ ...message, class: 'message' })),
-    ...files.map((file) => ({ ...file, class: 'file' })),
+      ...filteredFiles.map((file) => ({ ...file, class: "file" })),
     ...activities.map((activity) => ({ ...activity, class: 'activity' })),
     ...reviews.map((review) => ({ ...review, class: 'review' })),
   ];
@@ -78,7 +131,9 @@ const Interactions = () => {
             </h3>
           </div>
           {interactions.map((interaction) => {
-            return interaction.class === 'message' ? (
+            return interaction.class === 'brief-field' ? (
+              <UserFirstMessage interaction={interaction} key={interaction.id} />
+            ) : interaction.class === 'message' ? (
               <div className="flex w-full" key={interaction.id}>
                 <UserMessage message={interaction as Message} />
               </div>
@@ -92,9 +147,11 @@ const Interactions = () => {
                 review={interaction as Review}
                 key={interaction.id}
               />
-            ) : interaction.class === 'file' ? (
-              <UserFile file={interaction as File} key={interaction.id} />
-            ) : null;
+            ) 
+            // : interaction.class === 'file' ? (
+            //   <UserFile file={interaction as File} key={interaction.id} />
+            // ) 
+            : null;
           })}
         </div>
       ))}

@@ -270,7 +270,8 @@ export const OrderBriefs = ({
                                     formField.field as FormFieldType.Type,
                                     responseValue as never,
                                     newFileIds
-                                  );
+                                    );
+                                    form.setValue(`${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`, responseValue as never);
                                 }}
                               />
                             ) : formField.field?.type === 'date' ? (
