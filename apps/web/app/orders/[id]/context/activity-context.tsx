@@ -27,6 +27,7 @@ import { generateUUID } from '~/utils/generate-uuid';
 
 import useInternalMessaging from '../hooks/use-messages';
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
+import { updateFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/update/update-file';
 
 export enum ActivityType {
   MESSAGE = 'message',
@@ -95,8 +96,7 @@ interface ActivityContextType {
   files: File[];
   order: Order.Type;
   userRole: string;
-  // writeMessage: (message: string) => Promise<ServerMessage.Type>;
-  addMessage: (message: string) => Promise<ServerMessage.Type>;
+  addMessage: ({message, fileIdsList}: {message: string, fileIdsList?: string[]}) => Promise<ServerMessage.Type>;
   userWorkspace: {
     id: string | null;
     name: string | null;
@@ -142,10 +142,12 @@ export const ActivityProvider = ({
   const queryClient = useQueryClient();
   const [loadingMessages, setLoadingMessages] = useState(false);
   const { workspace: currentUser } = useUserWorkspace();
-  const writeMessage = async (message: string, tempId: string) => {
+  const writeMessage = async ({message, fileIdsList}: {message: string, fileIdsList?: string[]}, tempId: string) => {
+    const messageId = crypto.randomUUID()
     try {
 
       const messageToSend = {
+        id: messageId,
         content: message,
         order_id: Number(order.id),
         visibility: getInternalMessagingEnabled()
@@ -159,6 +161,13 @@ export const ActivityProvider = ({
         messageToSend,
         messageToSend.visibility as Message.Type['visibility'],
       );
+      // If there are file IDs, update the files with the new message ID
+      if (fileIdsList && fileIdsList.length > 0) {
+        for (const fileId of fileIdsList) {
+          await updateFile(fileId, messageId);
+        }
+      }
+
       toast.success('Success', {
         description: 'The message has been sent.',
       });
@@ -175,8 +184,8 @@ export const ActivityProvider = ({
   };
 
   const addMessageMutation = useMutation({
-    mutationFn: ({ message, tempId }: { message: string; tempId: string }) =>
-      writeMessage(message, tempId),
+    mutationFn: ({ message, fileIdsList, tempId }: { message: string; fileIdsList?: string[], tempId: string }) =>
+      writeMessage({message, fileIdsList}, tempId),
     onMutate: async ({ message, tempId }) => {
       // Cancel outgoing refetches (so they don't overwrite our optimistic update)
       setLoadingMessages(true);
@@ -295,6 +304,21 @@ export const ActivityProvider = ({
             (file) => file.message_id === pureDataSource.id,
           );
         }
+      } else if (tableName === TableName.FILES) {
+        const fileData = pureDataSource as ServerFile.Type;
+        if (fileData.message_id) {
+          setMessages((prevMessages) => {
+            return prevMessages.map((msg) => {
+              if (msg.id === fileData.message_id) {
+                return {
+                  ...msg,
+                  files: [...(msg.files ?? []), { ...fileData, user: newDataUser }],
+                };
+              }
+              return msg;
+            });
+          });
+        }
       }
 
       const reconciledData = {
@@ -302,6 +326,7 @@ export const ActivityProvider = ({
         user: newDataUser,
         files: nestedFiles,
       };
+
       return reconciledData;
     },
     [files], // Dependency array to ensure that `files` is up-to-date
@@ -358,9 +383,10 @@ export const ActivityProvider = ({
         files: files.filter((svFile) => !svFile.message_id),
         order,
         userRole,
-        addMessage: async (message: string) =>
+        addMessage: async ({message, fileIdsList}: {message: string, fileIdsList?: string[]}) =>
           await addMessageMutation.mutateAsync({
             message,
+            fileIdsList,
             tempId: generateUUID(),
           }),
         userWorkspace: currentUser,

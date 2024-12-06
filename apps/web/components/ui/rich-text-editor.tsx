@@ -17,7 +17,7 @@ import {
 } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { SendHorizontalIcon, Upload } from 'lucide-react';
+import { SendHorizontalIcon, Upload, Video } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 import { Spinner } from '@kit/ui/spinner';
