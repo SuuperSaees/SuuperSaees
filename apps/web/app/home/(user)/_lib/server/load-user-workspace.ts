@@ -34,11 +34,8 @@ async function workspaceLoader() {
     requireUserInServerComponent(),
   ]);
 
-  const organization = accounts?.[0] ?? null;
-
   return {
     accounts,
-    organization,
     workspace,
     user,
   };

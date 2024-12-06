@@ -56,13 +56,15 @@ class AccountsApi {
       .select(`name, slug, picture_url`)
       .single();
 
-
     if (error) {
       throw error;
     }
 
-    return { name: accounts.name, slug: accounts.slug, picture_url: accounts.picture_url };
-
+    return {
+      name: accounts.name,
+      slug: accounts.slug,
+      picture_url: accounts.picture_url,
+    };
   }
 
   /**

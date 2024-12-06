@@ -16,10 +16,12 @@ import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { useOrganizationSettings } from '../../context/organization-settings-context'
+import PlansContainer from '../../../../../../apps/web/app/select-plan/components/plans-container';
 import { Separator } from '@kit/ui/separator';
 import ProfileSettings from '../profile-settings';
 import SiteSettings from '../site-settings';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { UserSettings } from '../../../../../../apps/web/lib/user-settings.types';
 import { getAccountSettings } from '../../../../team-accounts/src/server/actions/accounts/get/get-account';
 
 
@@ -51,7 +53,6 @@ export function PersonalAccountSettingsContainer(
   const [role, setRole] =
     useState<Database['public']['Tables']['roles']['Row']['name']>();
   const client = useSupabase();
-  
   const fetchUserAccount = async () => {
     const { data: user, error: userAccountError } = await client
       .from('accounts')
@@ -63,31 +64,21 @@ export function PersonalAccountSettingsContainer(
     return user;
   };
 
-  // const {data: userSettings} = useQuery<UserSettings.Type>({
-  //   queryKey: ['user-settings', props.userId],
-  //   queryFn: async () => {
-  //     const data = await getAccountSettings(props.userId);
-  //     return data;
-  //   },
-  //   staleTime: 1000 * 60 * 5,
-  // }) as UseQueryResult<UserSettings.Type, unknown>;
-
-  const fetchSettings = async () => {
-    const response = await getAccountSettings(props.userId);
-    return response;
-  }
-
-  const { data: userSettings } = useQuery({
-    queryKey: ['user-settings', props.userId], 
-    queryFn: fetchSettings,
+  const {data: userSettings} = useQuery<UserSettings.Type>({
+    queryKey: ['user-settings', props.userId],
+    queryFn: async () => {
+      const data = await getAccountSettings(props.userId);
+      return data;
+    },
     staleTime: 1000 * 60 * 5,
-  });
+  }) as UseQueryResult<UserSettings.Type, unknown>;
+
+
 
   const [accountStripe, setAccountStripe] = useState<AccountStripe>({
     id: '',
     charges_enabled: false,
   });
-
   useEffect(() => {
     let user: Account.Type | null;
     void fetchUserAccount()
@@ -160,7 +151,6 @@ export function PersonalAccountSettingsContainer(
   if (!user || !role) {
     return <LoadingOverlay fullPage />;
   }
-
   return (
     <div className="w-full h-full">
       <Tabs defaultValue={"site"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
@@ -207,7 +197,7 @@ export function PersonalAccountSettingsContainer(
         }
         
         <TabsContent value="profile">
-          <ProfileSettings user={user} userSettings={userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} userRole={role} />
+          <ProfileSettings user={user} userSettings = {userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} userRole={role} />
         </TabsContent>
         <TabsContent value="subscription">
           <BillingContainerConfig tab={tab ?? ''} />
