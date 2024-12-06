@@ -272,7 +272,6 @@ export const sendEmailsOfOrderMessages = async (
 ) => {
   try {
     // Send email to assignees
-    console.log('assigneesEmails', assigneesEmails);
     const emailPromises = assigneesEmails.map((assigneeEmail) => {
       if (assigneeEmail) {
         return sendOrderMessageEmail(

@@ -19,7 +19,7 @@ function generateUUID() {
   });
 }
 
-const ActivityPage = () => {
+const ActivityPage = ({ agencyName }: { agencyName: string }) => {
   const { order } = useActivityContext();
   const client = useSupabase();
   const [showFileUploader, setShowFileUploader] = useState(false);
@@ -59,7 +59,7 @@ const ActivityPage = () => {
           userWorkspace.name ?? '',
           order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
             [],
-           '',
+          agencyName,
           new Date().toLocaleDateString(),
           userWorkspace.id ?? '',
         );

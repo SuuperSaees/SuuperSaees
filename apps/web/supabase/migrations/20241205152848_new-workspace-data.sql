@@ -1,6 +1,6 @@
 drop view if exists "public"."user_account_workspace";
-
-alter table "public"."subscriptions" alter column "account_id" set data type uuid using "account_id"::uuid;
+ALTER TABLE "public"."subscriptions" DROP COLUMN "account_id";
+ALTER TABLE "public"."subscriptions" ADD COLUMN "account_id" UUID;
 
 create or replace view "public"."user_account_workspace" as  SELECT user_settings.user_id AS id,
     (COALESCE(user_settings.name, (accounts.name)::text))::character varying(255) AS name,

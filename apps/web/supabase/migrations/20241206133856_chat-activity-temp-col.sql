@@ -1,4 +1,3 @@
-drop view if exists "public"."user_account_workspace";
 
 alter table "public"."activities" add column "temp_id" uuid;
 
@@ -10,4 +9,3 @@ alter table "public"."orders_v2" add column "updated_at" timestamp with time zon
 
 alter table "public"."reviews" add column "temp_id" uuid;
 
-alter table "public"."subscriptions" alter column "account_id" set data type uuid using "account_id"::uuid;
