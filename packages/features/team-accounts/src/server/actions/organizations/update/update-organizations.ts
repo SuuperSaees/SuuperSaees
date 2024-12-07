@@ -129,7 +129,7 @@ export const upsertOrganizationSettings = async (
 export const updateOrganization = async (
   id: string,
   ownerUserId: string,
-  data: { name?: string },
+  data: { name?: string, loom_app_id?: string },
 ) => {
   const client = getSupabaseServerComponentClient();
 
