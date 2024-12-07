@@ -2,22 +2,19 @@
 
 import { revalidatePath } from 'next/cache';
 
-
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
+import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Activity } from '../../../../../../../../apps/web/lib/activity.types';
 import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
+import { User } from '../../../../../../../../apps/web/lib/user.types';
 import { addActivityAction } from '../../activity/create/create-activity';
 import { getUserById } from '../../members/get/get-member-account';
 import { getOrganization } from '../../organizations/get/get-organizations';
 import { getEmails, getOrderInfo } from '../get/get-mail-info';
 import { sendOrderMessageEmail } from '../send-mail/send-order-message-email';
 import { sendOrderStatusPriorityEmail } from '../send-mail/send-order-status-priority';
-
 
 const statusTranslations = {
   pending: 'Pending',
@@ -42,7 +39,7 @@ export const updateOrder = async (
     const { error: userError, data: userData } = await client.auth.getUser();
     if (userError) throw userError.message;
 
-    const {data: updatedData, error: orderError } = await client
+    const { data: updatedData, error: orderError } = await client
       .from('orders_v2')
       .update({
         ...order,
@@ -50,7 +47,7 @@ export const updateOrder = async (
       })
       .eq('id', orderId)
       .select()
-      .single()
+      .single();
 
     if (orderError) throw orderError.message;
     // console.log('updatedOrder:', orderData);
@@ -61,10 +58,9 @@ export const updateOrder = async (
     // Call the abstracted activity logging function
     await logOrderActivities(orderId, order, userData.user.id, userNameOrEmail);
     return updatedData;
-
   } catch (error) {
     console.error('Error updating order:', error);
-    throw error
+    throw error;
   }
 };
 
@@ -235,52 +231,26 @@ const logOrderActivities = async (
 };
 
 export const addOrderMessage = async (
+  userId: User.Response['id'],
   orderId: Order.Type['id'],
   message: Omit<Message.Insert, Message.Insert['user_id']>,
   visibility: Message.Type['visibility'],
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError.message;
-
-    const clientData = await getUserById(userData.user.id);
-    const emailsData = await getEmails(orderId.toString());
-    const orderInfo = await getOrderInfo(orderId.toString());
-    const agency = await getOrganization();
-    const agencyName = agency?.name ?? '';
-    const clientName = clientData?.name ?? '';
-
     const { data: messageData, error: messageError } = await client
       .from('messages')
       .insert({
         ...message,
-        user_id: userData.user.id,
+        user_id: userId,
         order_id: orderId,
         visibility,
       })
       .select()
       .single();
 
-    if (messageError) throw messageError.message;
-
-    for (const email of emailsData) {
-      if (email) {
-        const messageContent = messageData.content ?? 'No message content';
-        await sendOrderMessageEmail(
-          email,
-          clientName,
-          orderId.toString(),
-          orderInfo?.title ?? '',
-          messageContent,
-          agencyName,
-          new Date().toLocaleDateString(),
-          userData?.user.id,
-        );
-      } else {
-        console.warn('Email is null or undefined, skipping...');
-      }
-    }
+    if (messageError)
+      throw new Error(`Error adding message, ${messageError.message}`);
 
     // revalidatePath(`/orders/${orderId}`);
     return messageData;
@@ -290,13 +260,48 @@ export const addOrderMessage = async (
   }
 };
 
+export const sendEmailsOfOrderMessages = async (
+  orderId: number,
+  title: Order.Response['title'],
+  content: string,
+  sender: User.Response['name'],
+  assigneesEmails: User.Response['email'][],
+  agencyName: Account.Type['name'],
+  date = new Date().toLocaleDateString(),
+  userId: User.Response['id'],
+) => {
+  try {
+    // Send email to assignees
+    const emailPromises = assigneesEmails.map((assigneeEmail) => {
+      if (assigneeEmail) {
+        return sendOrderMessageEmail(
+          assigneeEmail,
+          sender,
+          orderId.toString(),
+          title,
+          content,
+          agencyName,
+          date,
+          userId,
+        );
+      } else {
+        console.warn('Email is null or undefined, skipping...');
+        return Promise.resolve(); // or alternatively, Promise.reject() if you want to handle rejections
+      }
+    });
+    await Promise.all(emailPromises);
+  } catch (error) {
+    console.warn('Error sending email of order messages, skipping:', error);
+  }
+};
+
 export const updateOrderFollowers = async (
   orderId: Order.Type['id'],
   followerIds: string[],
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    
+
     // 1. Fetch existing followers to determine if you need to delete any
     const { data: existingFollowers, error: fetchError } = await client
       .from('order_followers')
@@ -306,11 +311,14 @@ export const updateOrderFollowers = async (
     if (fetchError) throw fetchError;
 
     // Extract existing IDs
-    const existingIds = existingFollowers?.map((follower) => follower.client_member_id as string) || [];
+    const existingIds =
+      existingFollowers?.map(
+        (follower) => follower.client_member_id as string,
+      ) || [];
 
     // Determine IDs to add and remove
     const idsToAdd = followerIds.filter((id) => !existingIds.includes(id));
-    const idsToRemove = existingIds.filter((id) => !followerIds.includes(id))
+    const idsToRemove = existingIds.filter((id) => !followerIds.includes(id));
 
     // Remove old followers
     if (idsToRemove.length > 0) {
@@ -340,4 +348,4 @@ export const updateOrderFollowers = async (
     console.error('Error updating order followers:', error);
     throw error;
   }
-}
+};
