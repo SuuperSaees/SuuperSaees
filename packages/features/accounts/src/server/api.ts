@@ -1,6 +1,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { Database } from '@kit/supabase/database';
+
 
 /**
  * Class representing an API for interacting with user accounts.
@@ -55,17 +58,16 @@ class AccountsApi {
       .from('user_accounts')
       .select(`name, slug, picture_url`);
 
+
     if (error) {
       throw error;
     }
 
-    return accounts.map(({ name, slug, picture_url }) => {
-      return {
-        label: name,
-        value: slug,
-        image: picture_url,
-      };
-    });
+    return {
+      name: accounts[0]?.name,
+      slug: accounts[0]?.slug,
+      picture_url: accounts[0]?.picture_url,
+    };
   }
 
   /**

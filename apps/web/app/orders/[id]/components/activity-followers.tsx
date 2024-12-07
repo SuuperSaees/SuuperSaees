@@ -11,7 +11,6 @@ import { Order } from '~/lib/order.types';
 
 
 
-import deduceNameFromEmail from '../utils/deduce-name-from-email';
 import AvatarDisplayer from './ui/avatar-displayer';
 
 
@@ -28,7 +27,7 @@ const CustomUserItem: React.FC<
       pictureUrl={option?.picture_url ?? null}
       displayName={option.label}
     />
-    <span>{deduceNameFromEmail(option.label)}</span>
+    <span>{option.label}</span>
   </div>
 );
 interface ActivityAssignationProps {
@@ -66,7 +65,7 @@ const ActivityFollowers = ({
       ? followers.map((option) => option.client_follower.id)
       : [],
   };
-  // console.log('assignedTo', assignedTo);
+  
   return (
     <div className="flex flex-col gap-2 mt-[22.5px]">
       <span className="font-medium">{t('details.followedBy')}</span>
@@ -75,10 +74,10 @@ const ActivityFollowers = ({
           return (
             <AvatarDisplayer
               displayName={
-                deduceNameFromEmail(avatar?.email ?? '') ?? avatar?.name
+                avatar?.settings?.name ?? avatar?.name ?? ''
               }
               isAssignedOrFollower={true}
-              pictureUrl={avatar?.picture_url}
+              pictureUrl={avatar?.settings?.picture_url ?? avatar?.picture_url}
               key={index + avatar?.name}
               status={avatar?.status}
               className={'h-8 w-8 border-2 border-white'}

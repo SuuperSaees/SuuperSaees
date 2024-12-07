@@ -1,13 +1,24 @@
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { NextRequest, NextResponse } from 'next/server';
+
+
+
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, serviceId, priceId, accountId, paymentMethodId, couponId, sessionId } =
-      await request.json();
+    const {
+      email,
+      serviceId,
+      priceId,
+      accountId,
+      paymentMethodId,
+      couponId,
+      sessionId,
+    } = await request.clone().json();
     
     const supabase = getSupabaseServerComponentClient(
       { admin: true },

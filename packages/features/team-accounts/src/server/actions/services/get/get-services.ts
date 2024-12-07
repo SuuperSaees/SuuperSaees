@@ -32,6 +32,7 @@ export const getServiceById = async (
         )`,
         )
         .eq('id', serviceId)
+        .is('deleted_on', null)
         .single();
 
       if (serviceError) throw serviceError.message;
@@ -47,6 +48,7 @@ export const getServiceById = async (
       .from('services')
       .select('*')
       .eq('id', serviceId)
+      .is('deleted_on', null)
       .single();
 
     if (orderError) throw orderError.message;
@@ -72,7 +74,8 @@ export const getServices = async (): Promise<Service.Response[]> => {
       .select(
         'id, name, created_at, price, number_of_clients, status, propietary_organization_id, service_image, service_description',
       )
-      .eq('propietary_organization_id', primary_owner_user_id ?? '');
+      .eq('propietary_organization_id', primary_owner_user_id ?? '')
+      .is('deleted_on', null);
 
     if (error) throw new Error(error.message);
 
