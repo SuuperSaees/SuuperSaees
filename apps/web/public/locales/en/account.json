@@ -33,6 +33,9 @@
   "updateCalendarSuccess": "Calendar updated successfully!",
   "updateCalendarError": "Could not update calendar",
   "updateSuccess": "All set!",
+  "error": "Error",
+  "updateSuccessOrganization": "Organization preference updated successfully.",
+  "updateErrorOrganization": "Could not update organization preference",
   "emailLabel": "Email Address",
   "accountImage": "Profile picture",
   "accountImageDescription": "This will be shown in your profile.",
@@ -204,5 +207,9 @@
   "brandSenderEmailSubmit": "Update Email",
   "brandSenderDomainSubmit": "Sender Domain",
   "brandSenderEmail": "Sender Email",
-  "continue": "Continue"
+  "continue": "Continue",
+  "loomAppIdTitle": "Loom App ID",
+  "loomAppIdDescription": "Enter your Loom App ID to enable Loom integration. Copy your organization subdomain in your developer Loom app",
+  "clipboardCopied": "Content copied to clipboard",
+  "clipboardError": "Error copying content to clipboard"
 }

@@ -53,7 +53,8 @@ export const hasPermissionToViewOrganization = async (
       const clientOrganizationIds = agencyClients.map(
         (client) => client.organization_client_id,
       );
-      if (clientOrganizationIds.includes(organizationId)) {
+
+      if (clientOrganizationIds.includes(organizationId) || clientOrganizationIds.length === 0) {
         return true; // Agency owners can view client organizations
       } else {
         console.error(

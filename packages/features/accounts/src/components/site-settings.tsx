@@ -17,6 +17,7 @@ import UpdateAccountOrganizationSidebar from './personal-account-settings/update
 import { ThemedButton } from './ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 import UpdateImage from './personal-account-settings/update-image';
+import LoomPublicIdContainer from './personal-account-settings/loom-public-id-container';
 
 interface SiteSettingsProps {
   role: string;
@@ -31,7 +32,6 @@ type AccountStripe = {
 
 function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
   const {t} = useTranslation('account');
-
   const [accountStripe, setAccountStripe] = useState<AccountStripe>({
     id: '',
     charges_enabled: false,
@@ -153,6 +153,14 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
             <div className='w-full'>
             <UpdateImage organizationId={user?.organization_id ?? ''} mode='favicon' />
             </div>
+          </div>
+          <Separator />
+          <div className="flex justify-between">
+            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+              <p className="font-bold">{t('loomAppIdTitle')}</p>
+              <p className='text-wrap'>{t('loomAppIdDescription')}</p>
+            </div>
+            <LoomPublicIdContainer organizationId = {user?.organization_id ?? ''} userId={user?.id ?? ''}/>
           </div>
           <Separator />
           <div className="flex justify-between">
