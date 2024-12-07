@@ -320,10 +320,14 @@ export const ActivityProvider = ({
           currentDataStore,
           tableName,
         )) as T;
+        if(tableName === TableName.MESSAGES) {
 
-        stateSetter((prevState) => {
-          return reconcileState(prevState, newData) as T[];
-        });
+          stateSetter((prevState) => {
+            return reconcileState(prevState, newData) as T[];
+          });
+        } else { 
+          stateSetter((prevState) => [...prevState, newData]);
+        }
       } catch (error) {
         console.error('Error handling subscription:', error);
       }
