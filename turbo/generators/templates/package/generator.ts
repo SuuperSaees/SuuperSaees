@@ -1,6 +1,7 @@
 import type { PlopTypes } from '@turbo/gen';
 import { execSync } from 'node:child_process';
 
+
 export function createPackageGenerator(plop: PlopTypes.NodePlopAPI) {
   plop.setGenerator('package', {
     description: 'Generate a new package for the Monorepo',
@@ -57,7 +58,7 @@ export function createPackageGenerator(plop: PlopTypes.NodePlopAPI) {
             const version = await fetch(
               `https://registry.npmjs.org/-/package/${dep}/dist-tags`,
             )
-              .then((res) => res.json())
+              .then((res) => res.clone().json())
               .then((json) => json.latest);
 
             pkg.dependencies![dep] = `^${version}`;

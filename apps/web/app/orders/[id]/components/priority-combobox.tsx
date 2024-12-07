@@ -34,6 +34,7 @@ interface PriorityComboboxProps {
   order?: Order.Type;
   mode: 'order' | 'subtask';
   subtask?: Subtask.Type;
+  blocked?: boolean;
   [key: string]: unknown;
 }
 
@@ -41,6 +42,7 @@ export function PriorityCombobox({
   order,
   mode,
   subtask,
+  blocked,
   ...rest
 }: PriorityComboboxProps) {
   const { t } = useTranslation('orders');
@@ -113,10 +115,10 @@ export function PriorityCombobox({
               {t(`details.priorities.${priorityValue}`)}
             </p>
           </div>
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          {!blocked && <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[130px] p-0">
+      <PopoverContent className="w-[130px] p-0" hidden={blocked}>
         <Command>
           <CommandList>
             <CommandGroup>

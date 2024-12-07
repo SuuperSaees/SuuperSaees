@@ -35,6 +35,7 @@ import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
 import { Trans } from '@kit/ui/trans';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import LoomRecordButton from '~/orders/[id]/components/loom-record-button';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -353,6 +354,11 @@ const RichTextEditor = ({
     }
 
   }, [content, editor]);
+
+  const setCustomEditorText = (text: string) => {
+    editor?.commands.setContent(text);
+  };
+
   return (
     <div className={"relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 " + (className ?? '')} {...rest}>
       <div
@@ -377,6 +383,7 @@ const RichTextEditor = ({
               uploadFileIsExternal={uploadFileIsExternal}
               userRole={userRole}
               onChange={onChange}
+              setCustomEditorText = {setCustomEditorText}
             />
           )
         }
@@ -398,6 +405,7 @@ interface ToolbarProps {
   uploadFileIsExternal?: boolean;
   toggleExternalUpload?: () => void;
   onChange?: (richText: string) => void;
+  setCustomEditorText?: (text: string) => void;
 }
 
 export const Toolbar = ({
@@ -406,6 +414,7 @@ export const Toolbar = ({
   uploadFileIsExternal,
   toggleExternalUpload,
   onChange,
+  setCustomEditorText,
 }: ToolbarProps) => {
   const { isInternalMessagingEnabled, handleSwitchChange } =
     useInternalMessaging();
@@ -496,6 +505,7 @@ export const Toolbar = ({
       >
         <Quote className="h-4 w-4" />
       </button>
+      <LoomRecordButton setCustomEditorText={setCustomEditorText ?? undefined} />
       
       {!onChange && (
         <>

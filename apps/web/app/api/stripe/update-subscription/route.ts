@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -11,7 +12,9 @@ interface SubscriptionRequest {
 
 export async function POST(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    const { itemQuantity, itemId}: SubscriptionRequest = await req.json();
+    const { itemQuantity, itemId }: SubscriptionRequest = await req
+      .clone()
+      .json();
     const subscriptionId = searchParams.get('subscriptionId')
 
     if (!subscriptionId) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -9,7 +10,7 @@ interface ProductRequest {
 
 export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    const { accountId }: ProductRequest = await req.json();
+    const { accountId }: ProductRequest = await req.clone().json();
     const priceId = searchParams.get('priceId');
 
     if (!priceId) {
@@ -50,4 +51,3 @@ export async function DELETE(req: NextRequest) {
         );
     }
 }
-
