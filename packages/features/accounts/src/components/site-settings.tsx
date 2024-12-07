@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import UpdateImage from './personal-account-settings/update-image';
 import { TreliDialog } from './personal-account-settings/treli/treli-dialog';
 import { useRouter } from 'next/navigation';
+import LoomPublicIdContainer from './personal-account-settings/loom-public-id-container';
 
 interface SiteSettingsProps {
   role: string;
@@ -79,7 +80,7 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
               if (!response.ok) {
                 throw new Error('Failed to fetch account data from Stripe');
               }
-              const data: AccountStripe = await response.json();
+              const data: AccountStripe = await response.clone().json();
               setAccountStripe(data);
             } catch (error) {
               console.error('Error fetching account data:', error);
@@ -152,6 +153,14 @@ function SiteSettings({ role, handleChangeLanguage, user }: SiteSettingsProps) {
             <div className='w-full'>
             <UpdateImage organizationId={user?.organization_id ?? ''} mode='favicon' />
             </div>
+          </div>
+          <Separator />
+          <div className="flex justify-between">
+            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+              <p className="font-bold">{t('loomAppIdTitle')}</p>
+              <p className='text-wrap'>{t('loomAppIdDescription')}</p>
+            </div>
+            <LoomPublicIdContainer organizationId = {user?.organization_id ?? ''} userId={user?.id ?? ''}/>
           </div>
           <Separator />
           <div className="flex justify-between">

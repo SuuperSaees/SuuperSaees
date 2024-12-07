@@ -5,7 +5,7 @@ import { TimerUpdate } from '~/lib/timer.types';
 import { updateActiveTimer } from '~/team-accounts/src/server/actions/timers/update/update-timer';
 import { useQueryClient } from '@tanstack/react-query';
 
-export function TimerContainer() {
+export function TimerContainer({className}: {className?: string}) {
   const queryClient = useQueryClient();
 
   const handleUpdate = async (timerId: string, timer: TimerUpdate) => {
@@ -16,5 +16,5 @@ export function TimerContainer() {
     });
   };
 
-  return <Timer onUpdate={handleUpdate}/>;
+  return <Timer onUpdate={handleUpdate} className={className} />;
 }

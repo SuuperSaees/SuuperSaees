@@ -49,6 +49,7 @@ interface StatusComboboxProps {
   setOrdersData?: Dispatch<SetStateAction<ExtendedOrderType[]>>;
   changeTabFilteredOrders?: (tab: 'open' | 'completed' | 'all') => void;
   activeTab?: 'open' | 'completed' | 'all';
+  blocked?: boolean;
   [key: string]: unknown;
 }
 
@@ -62,6 +63,7 @@ function StatusCombobox({
   setOrdersData,
   changeTabFilteredOrders,
   activeTab,
+  blocked,
   ...rest
 }: StatusComboboxProps) {
   const [open, setOpen] = useState<boolean>(false);
@@ -290,10 +292,10 @@ function StatusCombobox({
           {...rest}
         >
           <span className="pl-2 pr-2">{defaultStatuses.has(statuses?.find(status => status.id === currentStatusData?.id)?.status_name ?? '') ? t(`details.statuses.${convertToCamelCase(statuses?.find(status => status.id === currentStatusData?.id)?.status_name ?? '')}`, {ns:'orders'}) : convertToTitleCase(statuses?.find(status => status.id === currentStatusData?.id)?.status_name ?? '')}</span>
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          {!blocked && <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="h-64 w-[290px] p-0">
+      <PopoverContent className="h-64 w-[290px] p-0" hidden={blocked}>
         <Command>
           <CommandInput
             placeholder=""

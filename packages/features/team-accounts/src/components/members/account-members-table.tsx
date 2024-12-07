@@ -1,38 +1,44 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import {
+  useMemo, //  useState
+} from 'react';
+
+// import { TransferOwnershipDialog } from './transfer-ownership-dialog';
+// import { UpdateMemberRoleDialog } from './update-member-role-dialog';
+import Link from 'next/link';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Ellipsis } from 'lucide-react';
+// import { Ellipsis } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Database } from '@kit/supabase/database';
 import { Badge } from '@kit/ui/badge';
-import { Button } from '@kit/ui/button';
+// import { Button } from '@kit/ui/button';
 import { DataTable } from '@kit/ui/data-table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@kit/ui/dropdown-menu';
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from '@kit/ui/dropdown-menu';
 import { If } from '@kit/ui/if';
-import { Input } from '@kit/ui/input';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
-import { Trans } from '@kit/ui/trans';
 
-import { RemoveMemberDialog } from './remove-member-dialog';
+import AgencyClientCrudMenu from '../clients/agency-client-crud-menu';
+// import { Trans } from '@kit/ui/trans';
+// import { RemoveMemberDialog } from './remove-member-dialog';
 import { RoleBadge } from './role-badge';
-import { TransferOwnershipDialog } from './transfer-ownership-dialog';
-import { UpdateMemberRoleDialog } from './update-member-role-dialog';
-import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
+import { Spinner } from '@kit/ui/spinner';
 
 type Members =
   Database['public']['Functions']['get_account_members']['Returns'];
 
 interface Permissions {
-  canUpdateRole: (roleHierarchy: number) => boolean;
-  canRemoveFromAccount: (roleHierarchy: number) => boolean;
+  canUpdateRole: () => boolean;
+  canRemoveFromAccount: () => boolean;
   canTransferOwnership: boolean;
 }
 
@@ -53,28 +59,38 @@ export function AccountMembersTable({
   userRoleHierarchy,
   canManageRoles,
 }: AccountMembersTableProps) {
-  const [search, setSearch] = useState('');
-  const { t } = useTranslation('team');
+  const search = '';
+
+  const {
+    data: userRole,
+    isLoading,
+  } = useQuery({
+    queryKey: ['userRole', currentUserId],
+    queryFn: async () => await getUserRoleById(currentUserId, true),
+  });
 
   const permissions = {
-    canUpdateRole: (targetRole: number) => {
+    canUpdateRole: () => {
       return (
-        isPrimaryOwner || (canManageRoles && userRoleHierarchy < targetRole)
+        userRole === 'agency_project_manager' || userRole === 'agency_owner'
       );
     },
-    canRemoveFromAccount: (targetRole: number) => {
+    canRemoveFromAccount: () => {
       return (
-        isPrimaryOwner || (canManageRoles && userRoleHierarchy < targetRole)
+        userRole === 'agency_project_manager' || userRole === 'agency_owner'
       );
     },
-    canTransferOwnership: isPrimaryOwner,
+    canTransferOwnership: userRole === 'agency_project_manager' || userRole === 'agency_owner',
   };
 
   const columns = useGetColumns(permissions, {
-    currentUserId,
-    currentAccountId,
-    currentRoleHierarchy: userRoleHierarchy,
-  });
+      currentUserId,
+      currentAccountId,
+      currentRoleHierarchy: userRoleHierarchy,
+    },
+    isLoading,
+    userRole ?? ''
+  );
 
   const filteredMembers = members
     .filter((member) => {
@@ -105,8 +121,8 @@ export function AccountMembersTable({
         onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
         placeholder={t(`searchMembersPlaceholder`)}
       /> */}
-      <div className='bg-white rounded-lg'>
-      <DataTable columns={columns} data={filteredMembers} />
+      <div className="rounded-lg bg-white">
+        <DataTable columns={columns} data={filteredMembers} />
       </div>
     </div>
   );
@@ -119,6 +135,8 @@ function useGetColumns(
     currentAccountId: string;
     currentRoleHierarchy: number;
   },
+  isLoading: boolean,
+  userRole: string
 ): ColumnDef<Members[0]>[] {
   const { t } = useTranslation('team');
 
@@ -131,9 +149,12 @@ function useGetColumns(
           const member = row.original;
           const displayName = member.name ?? member.email.split('@')[0];
           const isSelf = member.user_id === params.currentUserId;
-          
+
           return (
-            <Link className={'flex items-center space-x-4 text-left'} href={`/team/${member.id}`}>
+            <Link
+              className={'flex items-center space-x-4 text-left'}
+              href={`/team/${member.id}`}
+            >
               <span>
                 <ProfileAvatar
                   displayName={displayName}
@@ -189,15 +210,17 @@ function useGetColumns(
       {
         header: '',
         id: 'actions',
-        cell: ({ row }) => (
+        cell: ({ row }) => {
+          return isLoading ? <Spinner className="h-4" /> : 
           <ActionsDropdown
-            permissions={permissions}
-            member={row.original}
-            currentUserId={params.currentUserId}
-            currentTeamAccountId={params.currentAccountId}
-            currentRoleHierarchy={params.currentRoleHierarchy}
-          />
-        ),
+          permissions={permissions}
+          member={row.original}
+          currentUserId={params.currentUserId}
+          currentTeamAccountId={params.currentAccountId}
+          currentRoleHierarchy={params.currentRoleHierarchy}
+          currentUserRole = {userRole}
+        />
+        },
       },
     ],
     [t, params, permissions],
@@ -208,34 +231,30 @@ function ActionsDropdown({
   permissions,
   member,
   currentUserId,
-  currentTeamAccountId,
-  currentRoleHierarchy,
+  currentUserRole,
+  // currentTeamAccountId,
+  // currentRoleHierarchy,
 }: {
   permissions: Permissions;
   member: Members[0];
   currentUserId: string;
   currentTeamAccountId: string;
   currentRoleHierarchy: number;
+  currentUserRole: string
 }) {
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [isTransferring, setIsTransferring] = useState(false);
-  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
-
-  const isCurrentUser = member.user_id === currentUserId;
-  const isPrimaryOwner = member.primary_owner_user_id === member.user_id;
-
-  if (isCurrentUser || isPrimaryOwner) {
-    return null;
-  }
+  // const [isRemoving, setIsRemoving] = useState(false);
+  // const [isTransferring, setIsTransferring] = useState(false);
+  // const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
   const memberRoleHierarchy = member.role_hierarchy_level;
-  const canUpdateRole = permissions.canUpdateRole(memberRoleHierarchy);
+  const canUpdateRole = permissions.canUpdateRole();
 
   const canRemoveFromAccount =
-    permissions.canRemoveFromAccount(memberRoleHierarchy);
+    permissions.canRemoveFromAccount();
 
   // if has no permission to update role, transfer ownership or remove from account
   // do not render the dropdown menu
+
   if (
     !canUpdateRole &&
     !permissions.canTransferOwnership &&
@@ -246,7 +265,15 @@ function ActionsDropdown({
 
   return (
     <>
-      <DropdownMenu>
+      <AgencyClientCrudMenu
+        userId={member.id}
+        name={member.name}
+        email={member.email ?? ''}
+        queryKey={permissions.queryKey}
+        currentUserRole={currentUserRole}
+        currentUserId = {currentUserId}
+      />
+      {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant={'ghost'} size={'icon'}>
             <Ellipsis className={'h-5 w-5'} />
@@ -258,23 +285,23 @@ function ActionsDropdown({
             <DropdownMenuItem onClick={() => setIsUpdatingRole(true)}>
               <Trans i18nKey={'team:updateRole'} />
             </DropdownMenuItem>
-          </If>
+          </If> */}
 
-          {/* <If condition={permissions.canTransferOwnership}>
+      {/* <If condition={permissions.canTransferOwnership}>
             <DropdownMenuItem onClick={() => setIsTransferring(true)}>
               <Trans i18nKey={'team:transferOwnership'} />
             </DropdownMenuItem>
           </If> */}
-
+      {/* 
           <If condition={canRemoveFromAccount}>
             <DropdownMenuItem onClick={() => setIsRemoving(true)}>
               <Trans i18nKey={'team:removeMember'} />
             </DropdownMenuItem>
           </If>
         </DropdownMenuContent>
-      </DropdownMenu>
+      </DropdownMenu> */}
 
-      <If condition={isRemoving}>
+      {/* <If condition={isRemoving}>
         <RemoveMemberDialog
           isOpen
           setIsOpen={setIsRemoving}
@@ -302,7 +329,7 @@ function ActionsDropdown({
           accountId={member.account_id}
           userId={member.user_id}
         />
-      </If>
+      </If> */}
     </>
   );
 }

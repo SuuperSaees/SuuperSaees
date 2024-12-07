@@ -20,13 +20,14 @@ interface ProfileSettingsProps {
   userSettings : UserSettings.Type;
   callback: string;
   handleChangeLanguage: (locale: string) => void;
+  userRole: string;
 }
 
 function ProfileSettings({
   user,
   callback,
-  handleChangeLanguage,
   userSettings,
+  userRole,
 }: ProfileSettingsProps) {
   const { t } = useTranslation('account');
   const [calendarValue, setCalendarValue] =
@@ -82,6 +83,8 @@ function ProfileSettings({
     },
     [validateUrl],
   );
+  const clientRoles = new Set(['client_owner', 'client_member']);
+
   return (
     <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap text-sm'>
       <div className="flex w-full flex-col space-y-6">
@@ -112,33 +115,38 @@ function ProfileSettings({
         </div>
 
         <Separator />
-
-        <div className="flex justify-between">
-          <div className="mr-7 flex w-[45%] flex-col text-gray-700">
-            <p className="whitespace-nowrap font-bold">{t('calendar')}</p>
-            <p>{t('calendarDescription')}</p>
-          </div>
-          <div className="flex w-full flex-col gap-4">
-            <Input
-              placeholder={t('pasteCalendar')}
-              rows={8}
-              value={calendarValue}
-              onChange={handleCalendarChange}
-              className={
-                !isValidUrl && calendarValue !== '' ? 'border-red-500' : ''
-              }
-              onBlur={() => {
-                if (isValidUrl) {
-                  updateAccountCalendar.mutate(calendarValue)
+        {
+          !clientRoles.has(userRole) &&
+          <>
+          <div className="flex justify-between">
+            <div className="mr-7 flex w-[45%] flex-col text-gray-700">
+              <p className="whitespace-nowrap font-bold">{t('calendar')}</p>
+              <p>{t('calendarDescription')}</p>
+            </div>
+            <div className="flex w-full flex-col gap-4">
+              <Input
+                placeholder={t('pasteCalendar')}
+                rows={8}
+                value={calendarValue}
+                onChange={handleCalendarChange}
+                className={
+                  !isValidUrl && calendarValue !== '' ? 'border-red-500' : ''
                 }
-              }}
-            />
-            {!isValidUrl && calendarValue !== '' && (
-              <p className="text-sm text-red-500">Please enter a valid URL</p>
-            )}
+                onBlur={() => {
+                  if (isValidUrl) {
+                    updateAccountCalendar.mutate(calendarValue)
+                  }
+                }}
+              />
+              {!isValidUrl && calendarValue !== '' && (
+                <p className="text-sm text-red-500">Please enter a valid URL</p>
+              )}
+            </div>
           </div>
-        </div>
-        <Separator />
+                  <Separator />
+                  </>
+        }
+
         <div className="flex justify-between">
           <div className="mr-7 flex w-[45%] flex-col text-gray-700">
             <p className="whitespace-nowrap font-bold">
