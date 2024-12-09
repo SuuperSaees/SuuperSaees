@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CheckSquare, CloudUpload, StickyNote, Trash2, XIcon } from 'lucide-react';
+import { CloudUpload, StickyNote, X, XIcon } from 'lucide-react';
 import { createFile, createUploadBucketURL } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +41,7 @@ export default function UploadFileComponent({
   const [files, setFiles] = useState<Record<string, FileInfo>>({});
   const [isDragging, setIsDragging] = useState(false);
   const [dragMessage, setDragMessage] = useState(t('dragAndDrop'));
+  const [hoveredFileId, setHoveredFileId] = useState<string | null>(null);
   
   const handleFileInputClick = () => {
     const fileInput = document.getElementById('file-input');
@@ -262,60 +263,33 @@ export default function UploadFileComponent({
           onChange={handleFileChange}
         />
       </div>
-      <div ref={containerRef} className="overflow-y-auto flex flex-col gap-2 max-h-[240px] thin-scrollbar">
+      <div ref={containerRef} className="overflow-y-auto flex gap-2 max-h-[240px] thin-scrollbar">
         {Object.entries(files).map(([id, fileInfo]) => (
           <div
             key={id}
-            className={`relative flex items-start gap-1.5 self-stretch rounded-xl border bg-white p-4 ${fileInfo.error ? 'border-error' : 'border-gray-200'}`}
+            className="relative flex flex-col items-center justify-start w-24 mt-4 m-2"
+            onMouseEnter={() => setHoveredFileId(id)}
+            onMouseLeave={() => setHoveredFileId(null)}
           >
-            <div className="relative flex items-center justify-center">
-              <StickyNote
-                className={`text-white ${getFileTypeClass(fileInfo.file.name)} h-[56px] w-[40px]`}
-              />
-              <span className="absolute inset-0 flex items-end justify-center py-4 text-[9px] font-semibold text-white">
-                {fileInfo.file.name.split('.').pop()?.toUpperCase()}
-              </span>
+            <div className="flex items-center justify-center w-24 h-16 bg-gray-200 rounded-lg">
+              <StickyNote className={`text-white ${getFileTypeClass(fileInfo.file.name ?? 'fileName')} w-8`} />
             </div>
-            <div className="flex flex-1 flex-col">
-              <span className="font-inter text-sm font-medium leading-5 text-gray-700">
-                {fileInfo.file.name}
-              </span>
-              <span className="font-inter truncate text-sm font-normal leading-5 text-gray-600">
-                {formatFileSize(fileInfo.file.size)}
-              </span>
-              <div className="mt-2 flex items-center gap-2">
-                {fileInfo.error ? (
-                  <>
-                    <div className='flex flex-col'>
-                      <div className="flex-1 text-red-500">
-                        Try again
-                      </div>
-                      <div className='text-red-500 text-sm'>
-                        {fileInfo.error}
-                      </div>
-                    </div>
-                    <div className="absolute right-4 top-4">
-                      <Trash2 className="text-red-500 cursor-pointer" onClick={() => handleDelete(id)} />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex-1">
-                      <Progress value={fileInfo.progress ?? 0} className="w-full" />
-                    </div>
-                    <span className="font-inter text-sm font-normal leading-5 text-gray-600">
-                      {Math.round(fileInfo.progress ?? 0)}%
-                    </span>
-                    {fileInfo.progress === 100 && (
-                      <div className="absolute right-4 top-4 flex gap-4">
-                        <CheckSquare className="text-primary" />
-                        <Trash2 className="text-red-500 cursor-pointer" onClick={() => handleDelete(id)} />
-                      </div>
-                    )}
-                  </>
-                )}
+            <div>
+              <p className="text-sm text-gray-600 whitespace-normal break-words w-24">{fileInfo.file.name ?? 'fileName'}</p>
+              <p className="text-xs text-gray-400">{formatFileSize(fileInfo.file.size)}</p>
+              {fileInfo.error && <p className="text-xs text-red-500">{fileInfo.error}</p>}
+              {fileInfo.progress > 0 && (
+                <Progress value={fileInfo.progress ?? 0} className="w-full" />
+              )}
+            </div>
+            {hoveredFileId === id && (
+              <div className="absolute top-[-8px] right-[-8px]">
+                <X
+                  className="cursor-pointer w-4 h-4 bg-white rounded-full shadow"
+                  onClick={() => handleDelete(id)}
+                />
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
