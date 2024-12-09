@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import {AdminImpersonateUserDialog} from '../../../../../features/admin/src/components/admin-impersonate-user-dialog';
 import ResetPasswordDialog from './reset-password-dialog';
+import { useQuery } from '@tanstack/react-query';
+import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
 
 interface AgencyClientCrudMenuProps {
   userId: string;
@@ -19,14 +21,31 @@ interface AgencyClientCrudMenuProps {
   email: string;
   queryKey?: string;
   organizationOptions? : {id:string, name:string, slug:string}[];
+  currentUserRole?: string
+  currentUserId?: string
 }
 
-function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOptions}: AgencyClientCrudMenuProps) {
+function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOptions, currentUserRole, currentUserId}: AgencyClientCrudMenuProps) {
   const {t} = useTranslation('clients');
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
   const [openImpersonateUserDialog, setOpenImpersonateUserDialog] = useState(false);
   // const [openSwitchOrganizationDialog, setOpenSwitchOrganizationDialog] = useState(false);
   const [openResetPasswordDialog, setOpenResetPasswordDialog] = useState(false)
+
+  const {
+    data: userRole,
+    isLoading,
+    isPending,
+  } = useQuery({
+    queryKey: ['userRole', userId],
+    queryFn: async () => await getUserRoleById(userId, true),
+  });
+
+  //If my role is not agency_owner and the user's role is agency_owner, I cannot impersonate him
+  const cannotImpersonate = currentUserRole !== 'agency_owner' && userRole === 'agency_owner'
+
+  //Condition to check if the user would try to impersonate himself
+  const selfImpersonate = userId === currentUserId
 
   return (
     <>
@@ -43,14 +62,19 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOption
               {t('editUser.edit')}
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => {
-            setOpenImpersonateUserDialog(true);
-          }}>
-            <div className='flex gap-2 items-center w-full h-full cursor-pointer'>
-              <Users className='w-4 h-4' />
-              {t('editUser.supplant')}
-            </div>
-          </DropdownMenuItem>
+          {!isLoading && !isPending && !cannotImpersonate && !selfImpersonate && (
+            <DropdownMenuItem
+              onSelect={() => {
+                setOpenImpersonateUserDialog(true);
+              }}
+            >
+              <div className="flex gap-2 items-center w-full h-full cursor-pointer">
+                <Users className="w-4 h-4" />
+                {t('editUser.supplant')}
+              </div>
+            </DropdownMenuItem>
+          )}
+          
           {/* <DropdownMenuItem onSelect={() => setOpenSwitchOrganizationDialog(true)}>
             <div className='flex gap-2 items-center w-full h-full cursor-pointer'>
               <ArrowLeftRight className="h-4 w-4" />
@@ -61,16 +85,21 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOption
             <LockKeyhole className='w-4 h-4' /> 
             {t('editUser.resetPassword')}
           </DropdownMenuItem>
-          <DropdownMenuItem className='cursor-pointer' onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}>
-            <DeleteUserDialog userId={userId} showLabel = {true} queryKey={queryKey ?? undefined} />
-          </DropdownMenuItem>
+          {
+            //Prevent someone else from deleting the agency_owner and prevent users from deleting themselves by mistake
+            !isLoading && !isPending && !cannotImpersonate && !selfImpersonate && (
+            <DropdownMenuItem className='cursor-pointer' onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}>
+              <DeleteUserDialog userId={userId} showLabel = {true} queryKey={queryKey ?? undefined} />
+            </DropdownMenuItem>
+          )}
+          
         </DropdownMenuContent>
       </DropdownMenu>
       
-      <EditUserDialog userId={userId} name={name} email={email} isOpen={openEditUserDialog} setIsOpen={setOpenEditUserDialog} />
+      <EditUserDialog userId={userId} name={name} email={email} isOpen={openEditUserDialog} setIsOpen={setOpenEditUserDialog} currentUserRole={currentUserRole} userRole={userRole} isLoading={isLoading} isPending={isPending}/>
       <AdminImpersonateUserDialog userId={userId} isOpen = {openImpersonateUserDialog} setIsOpen={setOpenImpersonateUserDialog}>
         <></>
       </AdminImpersonateUserDialog>

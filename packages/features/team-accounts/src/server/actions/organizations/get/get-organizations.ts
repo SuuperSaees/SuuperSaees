@@ -129,6 +129,7 @@ export async function getOrganization(): Promise<{
   slug: string | null;
   email: string | null;
   picture_url: string | null;
+  loom_app_id: string | null;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
@@ -155,7 +156,7 @@ export async function getOrganization(): Promise<{
 
     const { data: organizationsData, error: organizationError } = await client
       .from('accounts')
-      .select('id, name, primary_owner_user_id, slug, email, picture_url')
+      .select('id, name, primary_owner_user_id, slug, email, picture_url, loom_app_id')
       .eq('id', organizationId)
       .single();
 

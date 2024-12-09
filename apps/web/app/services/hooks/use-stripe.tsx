@@ -78,7 +78,7 @@ async function fetchStripeProducts(accountId: string) {
         throw new Error('Failed to fetch products from Stripe');
     }
 
-    const data: StripeProductResponse = await response.json();
+    const data: StripeProductResponse = await response.clone().json();
     return data;
 }
 
@@ -94,7 +94,7 @@ async function fetchStripePrices(accountId: string) {
         throw new Error('Failed to fetch prices from Stripe');
     }
 
-    const data: StripePriceResponse = await response.json();
+    const data: StripePriceResponse = await response.clone().json();
     return data;
 }
 

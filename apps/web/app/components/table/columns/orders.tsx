@@ -26,7 +26,9 @@ import { EntityData } from '../types';
 
 export const ordersColumns = (
   t: TFunction,
+  hasPermission?: (row?: EntityData['orders'][number]) => boolean,
 ): ColumnDef<EntityData['orders'][number]>[] => {
+  const withPermissionsActive = hasPermission && hasPermission;
   return [
     {
       accessorKey: 'title',
@@ -34,8 +36,9 @@ export const ordersColumns = (
       cell: ({ row }) => {
         return (
           <Link
+          
             href={`/orders/${row.original.id}`}
-            className="flex w-full min-w-[100px] gap-2"
+            className='flex w-full min-w-[100px] gap-2'
           >
             <div className="flex flex-col w-full">
               <span className="font-semibold">{row.original.title}</span>
@@ -58,16 +61,22 @@ export const ordersColumns = (
       accessorKey: 'client',
       header: t('orders.client'),
       cell: ({ row }) => {
+        // const agencyLink = `/clients/organizations/${row.original.client_organization?.id}`
+        // const clientLink = '/organization'
+        // const isClient = withPermissionsActive && !hasPermission(row.original)
+        // const isSelf = row.original.client_organization?.id === row.original.agency_id
+        // const validAgencyRoles = ['agency_owner', 'agency_project_manager']
+        // const link = isClient ? clientLink : isSelf ? '': agencyLink
         return (
-          <Link
-            href={`/clients/organizations/${row.original.client_organization?.id}`}
+          <span
+            // href={link}
             className="flex flex-col"
           >
             <span className="font-semibold">{row.original.customer?.name}</span>
             <span className="text-sm text-gray-600">
               {row.original.client_organization?.name}
             </span>
-          </Link>
+          </span>
         );
       },
     },
@@ -80,6 +89,7 @@ export const ordersColumns = (
             order={row.original}
             agency_id={row.original.agency_id}
             mode="order"
+            blocked={withPermissionsActive && !hasPermission(row.original)}
           />
         );
       },
@@ -88,13 +98,13 @@ export const ordersColumns = (
       accessorKey: 'priority',
       header: t('orders.priority'),
       cell: ({ row }) => {
-        return <PriorityCombobox mode="order" order={row.original} />;
+        return <PriorityCombobox mode="order" order={row.original} blocked={withPermissionsActive && !hasPermission(row.original)} />;
       },
     },
     {
       accessorKey: 'assigned_to',
       header: t('orders.assignedTo'),
-      cell: ({ row }) => <RowAssignedTo row={row.original} />,
+      cell: ({ row }) => <RowAssignedTo row={row.original} blocked={(withPermissionsActive && !hasPermission(row.original) )?? false} />,
     },
     {
       accessorKey: 'created_at',
@@ -143,6 +153,7 @@ export const ordersColumns = (
             }
             defaultDate={row?.original?.due_date}
             showIcon
+            blocked={withPermissionsActive && !hasPermission(row.original)}
           />
         );
       },
@@ -150,7 +161,7 @@ export const ordersColumns = (
   ];
 };
 
-const RowAssignedTo = ({ row }: { row: EntityData['orders'][number] }) => {
+const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], blocked: boolean }) => {
   const { t } = useTranslation('orders');
 
   const membersAssignedSchema = z.object({
@@ -159,7 +170,7 @@ const RowAssignedTo = ({ row }: { row: EntityData['orders'][number] }) => {
 
   const defaultValues = {
     members: row?.assigned_to
-      ? row?.assigned_to.map((option) => option.agency_member.id)
+      ? row?.assigned_to.map((option) => option?.agency_member?.id)
       : [],
   };
 
@@ -202,7 +213,7 @@ const RowAssignedTo = ({ row }: { row: EntityData['orders'][number] }) => {
 
   const avatars =
     row?.assigned_to?.map((assignee) => ({
-      name: assignee.agency_member?.settings?.name ?? assignee?.agency_member.name ?? '',
+      name: assignee.agency_member?.settings?.name ?? assignee?.agency_member?.name ?? '',
       email: assignee.agency_member?.email ?? '',
       picture_url: assignee.agency_member?.settings?.picture_url ?? assignee?.agency_member?.picture_url ?? '',
     })) ?? [];
@@ -243,6 +254,7 @@ const RowAssignedTo = ({ row }: { row: EntityData['orders'][number] }) => {
         customItem={CustomUserItem}
         isLoading={isLoading || isPending}
         customItemTrigger={CustomItemTrigger}
+        blocked={blocked}
       />
     </div>
   );

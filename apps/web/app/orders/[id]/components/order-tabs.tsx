@@ -32,21 +32,19 @@ type OrderTabsProps = {
   orderId: string;
   orderAgencyId: string;
   agencyStatuses: AgencyStatus.Type[];  
+  agencyName: string;
 };
 
 
-export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId, agencyStatuses }: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId, agencyStatuses, agencyName }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
 
-  const [loadingCalendars, setLoadingCalendars] = useState(true);
-  const { data: orderAgencyMembers } = useQuery<UserWithSettings[]>({
+  const { data: orderAgencyMembers, isLoading } = useQuery<UserWithSettings[]>({
     queryKey: ['order-agency-members', orderId],
     queryFn: async () => {
-      setLoadingCalendars(true);
       const data = await getOrderAgencyMembers(orderAgencyId, Number(orderId));
-      setLoadingCalendars(false);
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -113,7 +111,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         <DetailsPage />
       </TabsContent>
       <TabsContent value="activity" className="h-full max-h-full min-h-0">
-        <ActivityPage />
+        <ActivityPage agencyName={agencyName} />
       </TabsContent>
       <TabsContent value="tasks">
         <div className="w-full px-8">
@@ -138,7 +136,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         <div className="w-full px-8">
           <CalendarSection 
             orderAgencyMembers={orderAgencyMembers ?? []}
-            loading={loadingCalendars}
+            loading={isLoading}
           />
         </div>
       </TabsContent>

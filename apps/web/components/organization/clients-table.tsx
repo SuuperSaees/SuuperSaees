@@ -8,7 +8,6 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Search } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
-import DeleteUserDialog from 'node_modules/@kit/team-accounts/src/server/actions/clients/delete/delete-client';
 import { useTranslation } from 'react-i18next';
 
 
@@ -138,7 +137,7 @@ export function ClientsTable({
 }: AccountMembersTableProps) {
   const [search, setSearch] = useState(searchController?.search ?? '');
   const { t } = useTranslation('clients');
-  const validRoles = ['agency_owner', 'client_owner'];
+  const validRoles = ['agency_owner', 'client_owner', 'agency_project_manager'];
   const permissions = {
     canRemoveFromAccount: () => {
       return validRoles.includes(userRole);

@@ -13,7 +13,7 @@ import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: NextRequest) {
-  const { priceId, stripeId, serviceId } = await req.json();
+  const { priceId, stripeId, serviceId } = await req.clone().json();
   const supabase = getSupabaseServerComponentClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError) throw userError.message;

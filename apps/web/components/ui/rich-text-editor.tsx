@@ -319,36 +319,43 @@ const RichTextEditor = ({
     }
   }, );
   const [isSending, setIsSending] = useState(false);
-  const sendContent = useCallback(() => {
-
+   const sendContent = useCallback(() => {
     void (async () => {
       setIsSending(true);
-      
-      try {
+      const content = editor ? editor.getHTML() : '';
+      if (!fileIdsList.length && content.trim() !== '<p></p>') {
         cleanupImages();
-        const content = editor ? editor.getHTML() : '';
-        // <p></p> is the default content of the editor
-
-        if (content.trim() !== '<p></p>' || fileIdsList.length > 0) {
-          // return;
-          onComplete && (await onComplete(content, fileIdsList));
-          setMessageSended(true);
-          if (onChange){
-            onChange(content); 
-          }
-          insertedImages.current = new Set<string>();
-          setFileIdsList([]);
-        } else {
-          return;
-        }
-        
-      } finally {
-        setIsSending(false);
-        setFileIdsList([]);
         editor?.commands.clearContent();
+        setIsSending(false);
+        onComplete && (await onComplete(content ?? ''));
+        if (onChange) {
+          onChange(content);
+        }
+      } else {
+        try {
+          cleanupImages();
+          const content = editor ? editor.getHTML() : '';
+          // <p></p> is the default content of the editor
+          if (content.trim() !== '<p></p>' || fileIdsList.length > 0) {
+            // return;
+            onComplete && (await onComplete(content, fileIdsList));
+            setMessageSended(true);
+            if (onChange) {
+              onChange(content);
+            }
+            insertedImages.current = new Set<string>();
+            setFileIdsList([]);
+          } else {
+            return;
+          }
+        } finally {
+          setIsSending(false);
+          setFileIdsList([]);
+          editor?.commands.clearContent();
+        }
       }
     })();
-   }, [editor, onComplete, onChange, fileIdsList]); 
+  }, [editor, onComplete, onChange, fileIdsList]);
 
   // Implement sanitizer to ensure the content to be nested is secure before sending to server
 

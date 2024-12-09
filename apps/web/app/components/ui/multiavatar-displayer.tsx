@@ -9,6 +9,8 @@ import { withDropdown } from '~/hocs/with-dropdown';
 import AvatarDisplayer from './avatar-displayer';
 import { z } from 'zod';
 
+import type { JSX } from "react";
+
 export type Avatar = {
   name: string;
   email: string;
@@ -21,7 +23,7 @@ interface MultiAvatarDisplayerProps {
   className?: string;
   avatarClassName?: string;
   overlap?: number;
-  onHoverAdd?: () => void;
+  blocked?: boolean;
   [key: string]: unknown;
 }
 
@@ -31,7 +33,7 @@ export default function MultiAvatarDisplayer({
   className,
   avatarClassName,
   customItemTrigger,
-  onHoverAdd,
+  blocked,
   ...rest
 }: MultiAvatarDisplayerProps & {
   customItemTrigger?: JSX.Element;
@@ -53,7 +55,7 @@ export default function MultiAvatarDisplayer({
         />
       ))}
 
-      { customItemTrigger ? (
+      { (customItemTrigger && !blocked) ? (
         <div
           className="relative flex items-center justify-center"
           style={{ marginLeft: `${overlap / 2}px`, zIndex: 1 }}
@@ -63,7 +65,6 @@ export default function MultiAvatarDisplayer({
       ) : (
         avatars.length > maxAvatars && (
           <div
-            onMouseEnter={onHoverAdd}
             className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 font-bold text-sm text-gray-600"
             style={{
               marginLeft: `${overlap / 2}px`,

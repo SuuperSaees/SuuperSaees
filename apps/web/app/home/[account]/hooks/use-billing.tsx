@@ -45,7 +45,7 @@ export const useBilling = () => {
       if (!response.ok) {
         throw new Error('Failed to fetch invoices');
       }
-      const data = await response.json();
+      const data = await response.clone().json();
       setInvoices(data);
     } catch (error) {
       console.error("Error fetching invoices:", error);
@@ -68,7 +68,7 @@ export const useBilling = () => {
       if (!response.ok) {
         throw new Error('Failed to fetch upcoming invoice');
       }
-      const data = await response.json();
+      const data = await response.clone().json();
       setUpcomingInvoice(data)
     } catch (error) {
       console.error("Error fetching upcoming invoice:", error);
@@ -99,7 +99,7 @@ export const useBilling = () => {
       throw new Error("Error fetching products");
     }
   
-    const data = await response.json() as { name: string; id: string; default_price: string; }[];
+    const data = await response.clone().json() as { name: string; id: string; default_price: string; }[];
 
     const newCachedData = data.map((product) => ({
       id: product.id,
@@ -216,7 +216,7 @@ export const useBilling = () => {
       if (!responseSubscription.ok) {
         throw new Error('Failed to fetch subscription');
       }
-      const dataSubscription = await responseSubscription.json();
+      const dataSubscription = await responseSubscription.clone().json();
       setSubscriptionFetchedStripe(dataSubscription);
 
       const responseProduct = await fetch(`/api/stripe/get-product?productId=${encodeURIComponent(dataSubscription?.plan?.product ?? "")}`, {
@@ -228,7 +228,7 @@ export const useBilling = () => {
       if (!responseProduct.ok) {
         throw new Error('Failed to fetch product');
       }
-      const dataProduct = await responseProduct.json();
+      const dataProduct = await responseProduct.clone().json();
       setProductSubscription(dataProduct);
 
       void fetchInvoices(result?.billing_customer_id ?? "");
@@ -257,7 +257,7 @@ export const useBilling = () => {
         throw new Error('Failed to upgrade subscription');
       }
   
-      const dataSubscriptionsByCustomer = await responseSubscriptionsByCustomer.json() as {
+      const dataSubscriptionsByCustomer = await responseSubscriptionsByCustomer.clone().json() as {
         id?: string;
         billing_customer_id?: string;
         status?: "active" | "trialing" | "past_due" | "canceled" | "unpaid" | "incomplete" | "incomplete_expired" | "paused";

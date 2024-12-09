@@ -5,12 +5,13 @@ import { useState } from 'react';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import RichTextEditor from '~/components/ui/rich-text-editor';
+import { sendEmailsOfOrderMessages } from '~/team-accounts/src/server/actions/orders/update/update-order';
 
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
 import { Separator } from '@kit/ui/separator';
 
-const ActivityPage = () => {
+const ActivityPage = ({ agencyName }: { agencyName: string }) => {
   const { order } = useActivityContext();
   const client = useSupabase();
   const [showFileUploader, setShowFileUploader] = useState(false);
@@ -37,7 +38,7 @@ const ActivityPage = () => {
     }
   };
 
-  const { writeMessage, userRole } = useActivityContext();
+  const { addMessage, userRole, userWorkspace } = useActivityContext();
 
   const handleOnCompleteMessageSend = async (messageContent: string, fileIdsList?: string[]) => {
     try {
@@ -59,15 +60,49 @@ const ActivityPage = () => {
         }
 
         if(idsListFromServer.length > 0) {
-          await writeMessage({message: messageContent, fileIdsList: idsListFromServer});
+          // await writeMessage({message: messageContent, fileIdsList: idsListFromServer});
+          await addMessage({message: messageContent, fileIdsList: idsListFromServer});
+          await sendEmailsOfOrderMessages(
+            order.id,
+            order.title,
+            messageContent,
+            userWorkspace.name ?? '',
+            order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
+              [],
+            agencyName,
+            new Date().toLocaleDateString(),
+            userWorkspace.id ?? '',
+          );
         } else if (messageContent !== '<p></p>' && idsListFromServer.length === 0) {
-          await writeMessage({message: messageContent});
+          await addMessage({message: messageContent});
+          await sendEmailsOfOrderMessages(
+            order.id,
+            order.title,
+            messageContent,
+            userWorkspace.name ?? '',
+            order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
+              [],
+            agencyName,
+            new Date().toLocaleDateString(),
+            userWorkspace.id ?? '',
+          );
         }
         
       } else {
-        await writeMessage({message: messageContent});
+        await addMessage({message: messageContent});
+        await sendEmailsOfOrderMessages(
+          order.id,
+          order.title,
+          messageContent,
+          userWorkspace.name ?? '',
+          order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
+            [],
+          agencyName,
+          new Date().toLocaleDateString(),
+          userWorkspace.id ?? '',
+        );
       }
-      
+ 
     } catch (error) {
       console.error('Failed to send message or upload files:', error);
     }

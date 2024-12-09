@@ -33,6 +33,9 @@
   "updateCalendarSuccess": "Calendario actualizado con éxito",
   "updateCalendarError": "Error al actualizar el calendario",
   "updateSuccess": "¡Todo listo!",
+  "error": "Error",
+  "updateSuccessOrganization": "Organización actualizada con éxito",
+  "updateErrorOrganization": "Error al actualizar la organización",
   "emailLabel": "Correo electrónico",
   "accountImage": "Foto de perfil",
   "accountImageDescription": "Esta será mostrada en tu perfil.",
@@ -204,5 +207,9 @@
   "brandSenderEmailSubmit": "Actualizar correo",
   "brandSenderDomainSubmit": "Dominio del remitente",
   "brandSenderEmail": "Correo electrónico del remitente",
-  "continue": "Continuar"
+  "continue": "Continuar",
+  "loomAppIdTitle": "ID de la aplicación de Loom",
+  "loomAppIdDescription": "Introduce el ID de la aplicación de Loom para habilitar la integración de Loom. Copia el subdominio de tu organización en tu aplicación de desarrolladores de Loom",
+  "clipboardCopied": "Contenido copiado al portapapeles",
+  "clipboardError": "Error al copiar al portapapeles"
 }

@@ -24,17 +24,21 @@ type AccountGet = Pick<
   | 'id'
   | 'picture_url'
   | 'primary_owner_user_id'
->;
+> & { settings: { name: string | null } | null };
 // Helper function to fetch the current user's account details
 export async function fetchCurrentUserAccount(
   client: SupabaseClient<Database>,
-  userId: string,
+  userId?: string,
 ) {
   try {
+    let userIdToFound = userId;
+    if (!userId) {
+      userIdToFound = (await fetchCurrentUser(client)).id;
+    }
     const { data: currentUserAccount, error: currentUserError } = await client
       .from('accounts')
-      .select('organization_id')
-      .eq('id', userId)
+      .select('organization_id, email, id, name, settings:user_settings(name)')
+      .eq('id', userIdToFound ?? '')
       .eq('is_personal_account', true)
       .single();
 
@@ -54,19 +58,26 @@ export async function fetchCurrentUserAccount(
   }
 }
 
-export async function fetchUsersAccounts(client: SupabaseClient<Database>, ids: Account.Type['id'][]) {
+export async function fetchUsersAccounts(
+  client: SupabaseClient<Database>,
+  ids: Account.Type['id'][],
+) {
   try {
     // Fetch users accounts using their passed ids
     // The ids can match either id or organization_id
     const { data: usersAccounts, error: usersAccountsError } = await client
       .from('accounts')
-      .select('id, name, email, picture_url, settings:user_settings(name, picture_url)')
+      .select(
+        'id, name, email, picture_url, settings:user_settings(name, picture_url)',
+      )
       .or(`id.in.(${ids.join(',')}),organization_id.in.(${ids.join(',')})`)
       .eq('is_personal_account', true);
-      
+
     if (usersAccountsError) {
       console.error('Error fetching users accounts:', usersAccountsError);
-      throw new Error(`Error fetching users accounts: ${usersAccountsError.message}`);
+      throw new Error(
+        `Error fetching users accounts: ${usersAccountsError.message}`,
+      );
     }
 
     return usersAccounts;
@@ -150,7 +161,7 @@ export async function getUserById(userId: string) {
 
     const { data: userData, error: userError } = await client
       .from('accounts')
-      .select('name, email, id, settings:user_settings(picture_url, name)') // add more fields to the user settings when needed
+      .select('name, email, id, picture_url, settings:user_settings(picture_url, name)') // add more fields to the user settings when needed
       .eq('id', userId)
       .single();
 
@@ -184,18 +195,16 @@ export async function getUserRole() {
   }
 }
 
-export async function getUserRoleById(userId: string,
-  adminActivated = false) {
+export async function getUserRoleById(userId: string, adminActivated = false) {
   try {
-    const client = getSupabaseServerComponentClient({admin: adminActivated});
+    const client = getSupabaseServerComponentClient({ admin: adminActivated });
 
     const { error: userAccountError, data: userAccountData } = await client
       .from('accounts_memberships')
       .select()
       .eq('user_id', userId)
       .maybeSingle();
-    
-    
+
     if (userAccountError) {
       throw new Error(
         `Error fetching the user role for ${userId}, ${userAccountError.message}`,
@@ -250,7 +259,7 @@ export async function getUserAccountById(
     const { data: userAccount, error: userAccountError } = await databaseClient
       .from('accounts')
       .select(
-        'organization_id, name, email, id, picture_url, primary_owner_user_id',
+        'organization_id, name, email, id, picture_url, primary_owner_user_id, settings:user_settings(name)',
       )
       .eq('id', userId)
       .eq('is_personal_account', true)

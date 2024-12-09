@@ -29,6 +29,6 @@ export async function createIngress({
   if (!response.ok) {
     throw new Error('Failed to create ingress');
   }
-  const data = await response.json();
+  const data = await response.clone().json();
   return data;
 }

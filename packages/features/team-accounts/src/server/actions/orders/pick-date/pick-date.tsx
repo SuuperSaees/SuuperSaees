@@ -15,9 +15,11 @@ interface DatePickerProps {
   updateFn: (date: string) => void | Promise<void>;
   defaultDate?: string | undefined | null;
   showIcon?: boolean;
+  blocked?: boolean;
+  [key: string]: unknown;
 }
 
-const DatePicker = ({ updateFn, defaultDate, showIcon }: DatePickerProps) => {
+const DatePicker = ({ updateFn, defaultDate, showIcon, blocked, ...rest }: DatePickerProps) => {
   const { t, i18n } = useTranslation('orders');
 
   const [date, setDate] = React.useState<Date | undefined>(
@@ -61,17 +63,18 @@ const DatePicker = ({ updateFn, defaultDate, showIcon }: DatePickerProps) => {
             variant={'outline'}
             className={cn(
               'w-fit justify-start bg-gray-50 shadow-none border-none text-left font-normal text-gray-600 flex gap-2 items-center',
-              !date && 'text-muted-foreground',
+              !date && 'text-muted-foreground', blocked && 'hover:bg-transparent hover:text-gray-600 bg-transparent',
             )}
+            {...rest}
           >
             {
               showIcon 
               && <CalendarIcon className="ml-2 h-5 w-5" />
             }
-            {date ? formatDisplayDate(date, language) : t('selectDateLabel')}
+            {blocked ? t('details.deadlineNotSet'): date ? formatDisplayDate(date, language) : t('selectDateLabel')}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0" align="start" hidden={blocked}>
           <Calendar
             mode="single"
             selected={date}
