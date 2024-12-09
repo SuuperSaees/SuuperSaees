@@ -6,6 +6,7 @@ import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import UploadFileComponent from '~/components/ui/files-input';
 import RichTextEditor from '~/components/ui/rich-text-editor';
+import { sendEmailsOfOrderMessages } from '~/team-accounts/src/server/actions/orders/update/update-order';
 
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
@@ -18,7 +19,7 @@ function generateUUID() {
   });
 }
 
-const ActivityPage = () => {
+const ActivityPage = ({ agencyName }: { agencyName: string }) => {
   const { order } = useActivityContext();
   const client = useSupabase();
   const [showFileUploader, setShowFileUploader] = useState(false);
@@ -45,18 +46,31 @@ const ActivityPage = () => {
     }
   };
 
-  const { writeMessage, userRole } = useActivityContext();
+  const { addMessage, userRole, userWorkspace } = useActivityContext();
 
   const handleOnCompleteMessageSend = async (messageContent: string) => {
     try {
-      await writeMessage(messageContent);
+
+        await addMessage(messageContent);
+        await sendEmailsOfOrderMessages(
+          order.id,
+          order.title,
+          messageContent,
+          userWorkspace.name ?? '',
+          order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
+            [],
+          agencyName,
+          new Date().toLocaleDateString(),
+          userWorkspace.id ?? '',
+        );
+ 
     } catch (error) {
       console.error('Failed to send message or upload files:', error);
     }
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 max-h-full h-full">
+    <div className="flex h-full max-h-full w-full flex-col gap-4">
       <Interactions />
       <div className="mb-2 flex flex-col justify-end gap-4 ">
         {showFileUploader && (
