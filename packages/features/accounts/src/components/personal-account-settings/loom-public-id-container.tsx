@@ -61,7 +61,7 @@ function LoomPublicIdContainer({
 
   const updateOrganizationMutation = useMutation({
     mutationFn: async () => {
-      await updateOrganization(organizationId, userId, {
+      await updateOrganization(organizationId, {
         loom_app_id: loomAppId,
       });
     },
