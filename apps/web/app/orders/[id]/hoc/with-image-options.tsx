@@ -109,7 +109,7 @@ const ImageComponent: React.FC<ImageProps> = ({ src, alt, className }) => (
   <img
     src={src}
     alt={alt}
-    className={`aspect-square h-[150px]  w-[150px] object-contain ${className}`}
+    className={`aspect-square object-contain ${className}`}
   />
 );
 
