@@ -37,6 +37,7 @@ export const hasPermissionToViewOrganization = async (
       }
     }
 
+
     // Step 4: If the user is an agency owner, check if the organization belongs to their client
     if (userAccountRole === 'agency_owner' || userAccountRole === 'agency_project_manager') {
       // Check if the requested organization is managed by the user's agency
@@ -50,18 +51,22 @@ export const hasPermissionToViewOrganization = async (
         return false;
       }
 
+      
       const clientOrganizationIds = agencyClients.map(
         (client) => client.organization_client_id,
       );
 
-      if (clientOrganizationIds.includes(organizationId) || clientOrganizationIds.length === 0) {
+      if (clientOrganizationIds.includes(organizationId)) {
         return true; // Agency owners can view client organizations
+      } else if(currentUserAccount.organization_id === organizationId){
+        return true; // Agency owners can view their own organization
       } else {
         console.error(
           'Agency owner is not authorized to view this organization',
         );
         return false;
       }
+
     }
 
     // If the user doesn't have a valid role, deny access
