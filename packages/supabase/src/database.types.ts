@@ -41,6 +41,7 @@ export type Database = {
           email: string | null
           id: string
           is_personal_account: boolean
+          loom_app_id: string | null
           name: string
           organization_id: string | null
           picture_url: string | null
@@ -57,6 +58,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_personal_account?: boolean
+          loom_app_id?: string | null
           name: string
           organization_id?: string | null
           picture_url?: string | null
@@ -73,6 +75,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_personal_account?: boolean
+          loom_app_id?: string | null
           name?: string
           organization_id?: string | null
           picture_url?: string | null
@@ -2732,6 +2735,7 @@ export type Database = {
           email: string | null
           id: string
           is_personal_account: boolean
+          loom_app_id: string | null
           name: string
           organization_id: string | null
           picture_url: string | null
