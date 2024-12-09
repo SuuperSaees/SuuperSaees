@@ -60,7 +60,6 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
         }
 
         if(idsListFromServer.length > 0) {
-          // await writeMessage({message: messageContent, fileIdsList: idsListFromServer});
           await addMessage({message: messageContent, fileIdsList: idsListFromServer});
           await sendEmailsOfOrderMessages(
             order.id,

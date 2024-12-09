@@ -21,7 +21,8 @@ export const updateFile = async (
       .from('files')
       .update(fileToUpdate)
       .eq('id', fileId) // Add the WHERE clause here to target the specific file
-      .select();
+      .select()
+      .single();
 
     if (fileError) throw fileError;
     return fileData;

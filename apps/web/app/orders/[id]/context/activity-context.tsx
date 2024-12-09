@@ -143,9 +143,11 @@ export const ActivityProvider = ({
   const [loadingMessages, setLoadingMessages] = useState(false);
   const { workspace: currentUser } = useUserWorkspace();
   const writeMessage = async ({message, fileIdsList}: {message: string, fileIdsList?: string[]}, tempId: string) => {
+    const messageId = crypto.randomUUID()
     try {
 
       const messageToSend = {
+        id: messageId,
         content: message,
         order_id: Number(order.id),
         visibility: getInternalMessagingEnabled()
@@ -162,7 +164,7 @@ export const ActivityProvider = ({
       // If there are file IDs, update the files with the new message ID
       if (fileIdsList && fileIdsList.length > 0) {
         for (const fileId of fileIdsList) {
-          await updateFile(fileId, newMessage.id); // Update the file with the new message ID
+          await updateFile(fileId, messageId);
         }
       }
 
@@ -182,8 +184,8 @@ export const ActivityProvider = ({
   };
 
   const addMessageMutation = useMutation({
-    mutationFn: ({ message, tempId }: { message: string; tempId: string }) =>
-      writeMessage({message: message}, tempId),
+    mutationFn: ({ message, fileIdsList, tempId }: { message: string; fileIdsList?: string[], tempId: string }) =>
+      writeMessage({message, fileIdsList}, tempId),
     onMutate: async ({ message, tempId }) => {
       // Cancel outgoing refetches (so they don't overwrite our optimistic update)
       setLoadingMessages(true);
@@ -302,6 +304,21 @@ export const ActivityProvider = ({
             (file) => file.message_id === pureDataSource.id,
           );
         }
+      } else if (tableName === TableName.FILES) {
+        const fileData = pureDataSource as ServerFile.Type;
+        if (fileData.message_id) {
+          setMessages((prevMessages) => {
+            return prevMessages.map((msg) => {
+              if (msg.id === fileData.message_id) {
+                return {
+                  ...msg,
+                  files: [...(msg.files ?? []), { ...fileData, user: newDataUser }],
+                };
+              }
+              return msg;
+            });
+          });
+        }
       }
 
       const reconciledData = {
@@ -309,6 +326,7 @@ export const ActivityProvider = ({
         user: newDataUser,
         files: nestedFiles,
       };
+
       return reconciledData;
     },
     [files], // Dependency array to ensure that `files` is up-to-date
@@ -365,9 +383,10 @@ export const ActivityProvider = ({
         files: files.filter((svFile) => !svFile.message_id),
         order,
         userRole,
-        addMessage: async ({message}: {message: string}) =>
+        addMessage: async ({message, fileIdsList}: {message: string, fileIdsList?: string[]}) =>
           await addMessageMutation.mutateAsync({
             message,
+            fileIdsList,
             tempId: generateUUID(),
           }),
         userWorkspace: currentUser,
