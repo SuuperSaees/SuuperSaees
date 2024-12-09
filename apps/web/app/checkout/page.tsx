@@ -21,6 +21,8 @@ async function ServiceCheckoutPage({
 
   const tokendecoded = await decodeTokenData(tokenId);
 
+  console.log('tokendecoded', tokendecoded);
+
   const organizationSettings = await getOrganizationSettingsByOrganizationId(tokendecoded.organization_id, true);
   const logoUrl = organizationSettings.find(setting => setting.key === 'logo_url')?.value;
   const sidebarBackgroundColor = organizationSettings.find(setting => setting.key === 'sidebar_background_color')?.value;

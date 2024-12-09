@@ -11,6 +11,7 @@ export namespace Service {
   >;
 
   export type ServiceData = {
+    id: number;
     step_type_of_service: {
       single_sale: boolean;
       recurring_subscription: boolean;
@@ -48,6 +49,14 @@ export namespace Service {
       export type Response = Service.Response & {
         created_at: Database['public']['Tables']['client_services']['Row']['created_at'];
         subscription_id: Database['public']['Tables']['client_services']['Row']['id'];
+      };
+    }
+    export namespace Billing {
+      export type BillingService = Service.Type & {
+        billing_services: {
+          provider_id: Database['public']['Tables']['billing_services']['Row']['provider_id'];
+          provider: Database['public']['Tables']['billing_services']['Row']['provider'];
+        }[];
       };
     }
   }

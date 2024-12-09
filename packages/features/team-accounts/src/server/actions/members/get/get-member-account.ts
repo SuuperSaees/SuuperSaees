@@ -2,10 +2,15 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
+
 
 // Helper function to fetch current user data
 export async function fetchCurrentUser(client: SupabaseClient<Database>) {
@@ -228,14 +233,15 @@ export async function getStripeAccountID(): Promise<{
     if (userError) throw userError;
 
     const { data: userAccountData, error: accountsError } = await client
-      .from('accounts')
-      .select()
-      .eq('id', userData.user.id)
+      .from('billing_accounts')
+      .select('provider_id')
+      .eq('account_id', userData.user.id)
+      .eq('provider', 'stripe')
       .single();
 
     if (accountsError) throw accountsError;
 
-    const stripeId = userAccountData?.stripe_id;
+    const stripeId = userAccountData?.provider_id;
 
     return {
       stripeId: stripeId ?? '',

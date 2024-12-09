@@ -1,5 +1,6 @@
 'use server';
 
+import { BillingAccounts } from '../../../../../../../../apps/web/lib/billing-accounts.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { getDomainByOrganizationId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { createToken } from '../../../../../../../tokens/src/create-token';
@@ -9,19 +10,20 @@ export const createUrlForCheckout = async ({
   priceId,
   service,
   organizationId,
+  paymentMethod,
 }: {
-  stripeId: string;
+  stripeId?: string;
   priceId: string;
-  service: Service.Type;
+  service: Service.Relationships.Billing.BillingService;
   organizationId: string;
+  paymentMethod?: BillingAccounts.PaymentMethod;
 }) => {
   try {
     // Validate input parameters
-    if (!stripeId || !priceId || !service || !organizationId) {
+    if (!priceId || !service || !organizationId) {
       throw new Error(
         'Missing required parameters: ' +
           JSON.stringify({
-            hasStripeId: !!stripeId,
             hasPriceId: !!priceId,
             hasService: !!service,
             hasOrgId: !!organizationId,
@@ -33,11 +35,17 @@ export const createUrlForCheckout = async ({
 
     try {
       token = await createToken({
-        account_id: stripeId,
+        account_id: stripeId ?? '',
         price_id: priceId,
         service: service,
         expires_at: new Date(),
         organization_id: organizationId,
+        payment_method: paymentMethod ?? {
+          id: '',
+          name: '',
+          icon: '',
+          description: '',
+        },
       });
     } catch (tokenError) {
       console.error('Token creation failed:', {
@@ -65,7 +73,6 @@ export const createUrlForCheckout = async ({
         `Invalid baseUrl returned for organizationId: ${organizationId}`,
       );
     }
-    
 
     const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
 
@@ -79,7 +86,6 @@ export const createUrlForCheckout = async ({
       errorStack: error.stack,
       errorType: Object.prototype.toString.call(error),
       params: {
-        hasStripeId: !!stripeId,
         hasPriceId: !!priceId,
         hasService: !!service,
         hasOrgId: !!organizationId,

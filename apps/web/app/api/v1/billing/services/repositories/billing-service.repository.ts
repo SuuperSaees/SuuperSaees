@@ -1,6 +1,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { Database } from '~/lib/database.types';
+
 
 export interface IBillingServiceRepository {
   create(
@@ -10,7 +13,7 @@ export interface IBillingServiceRepository {
     id: string,
   ): Promise<Database['public']['Tables']['billing_services']['Row']>;
   findByServiceId(
-    serviceId: string,
+    serviceId: number,
   ): Promise<Database['public']['Tables']['billing_services']['Row']>;
   softDelete(id: string): Promise<void>;
   softDeleteByServiceId(serviceId: string): Promise<void>;
@@ -62,7 +65,7 @@ export class BillingServiceRepository implements IBillingServiceRepository {
   }
 
   async findByServiceId(
-    serviceId: string,
+    serviceId: number,
   ): Promise<Database['public']['Tables']['billing_services']['Row']> {
     const { data, error } = await this.client
       .from('billing_services')
@@ -115,7 +118,7 @@ export class BillingServiceRepository implements IBillingServiceRepository {
     const { data: updatedData, error } = await this.client
       .from('billing_services')
       .update(updateData)
-      .eq('id', id)
+      .eq('provider_id', id)
       .select()
       .single();
 

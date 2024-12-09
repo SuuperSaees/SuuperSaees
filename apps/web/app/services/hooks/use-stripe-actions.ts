@@ -10,14 +10,15 @@ import { toast } from 'sonner';
 
 
 
+import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Database } from '~/lib/database.types';
 import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import { getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 // import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
-
 
 interface UseStripeActions {
   userRole: Database['public']['Tables']['accounts_memberships']['Row']['account_role'];
@@ -90,28 +91,60 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     },
   });
 
-  const handleCheckout = (
-    priceId: string,
-    stripeId: string,
-    service: Service.Type,
-    organizationId: string,
+  const handleCheckout = async (
+    service: Service.Relationships.Billing.BillingService,
+    paymentMethod: BillingAccounts.PaymentMethod,
   ) => {
-    if (!priceId || !stripeId || !service || !organizationId) {
-      console.error('Missing required parameters:', {
-        hasPriceId: !!priceId,
-        hasStripeId: !!stripeId,
-        hasService: !!service,
-        hasOrgId: !!organizationId,
-      });
-      throw new Error('Missing required parameters');
-    }
+    if (paymentMethod.name === BillingAccounts.BillingProviderKeys.STRIPE) {
+      const { stripeId } = await getStripeAccountID();
+      const organizationData = await getOrganization();
+      const organizationId = organizationData.id;
+      if (
+        !service.billing_services ||
+        !stripeId ||
+        !service ||
+        !organizationId
+      ) {
+        console.error('Missing required parameters:', {
+          hasPriceId: !!service.price_id,
+          hasStripeId: !!stripeId,
+          hasService: !!service,
+          hasOrgId: !!organizationId,
+        });
+        throw new Error('Missing required parameters');
+      }
 
-    createCheckoutMutation.mutate({
-      stripeId,
-      priceId,
-      service,
-      organizationId,
-    });
+      createCheckoutMutation.mutate({
+        stripeId,
+        priceId:
+          service.billing_services.find(
+            (billingService) => billingService.provider === 'stripe',
+          )?.provider_id ?? '',
+        service,
+        organizationId,
+      });
+    } else {
+      const organizationData = await getOrganization();
+      const organizationId = organizationData.id;
+      if (!service.billing_services || !service || !organizationId) {
+        console.error('Missing required parameters:', {
+          hasPriceId: !!service.price_id,
+          hasService: !!service,
+          hasOrgId: !!organizationId,
+        });
+        throw new Error('Missing required parameters');
+      }
+
+      createCheckoutMutation.mutate({
+        priceId:
+          service.billing_services.find(
+            (billingService) => billingService.provider === 'treli',
+          )?.provider_id ?? '',
+        service,
+        organizationId,
+        paymentMethod,
+      });
+    }
   };
 
   useEffect(() => {

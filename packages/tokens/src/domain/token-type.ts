@@ -1,3 +1,4 @@
+import { BillingAccounts } from '../../../../apps/web/lib/billing-accounts.types';
 import { Service } from '../../../../apps/web/lib/services.types';
 
 export interface Token {
@@ -14,6 +15,7 @@ export interface PayToken {
   service: Service.Type;
   expires_at: Date;
   organization_id: string;
+  // payment_method: BillingAccounts.PaymentMethod;
 }
 export interface TokenRecoveryType {
   email: string;

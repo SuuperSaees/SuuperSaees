@@ -50,9 +50,15 @@ export class CredentialsCrypto {
   }
 }
 
-interface EncryptedCredentials {
+export interface EncryptedCredentials {
   data: string;
   iv: string;
   version: number;
   tag: string;
+}
+
+export interface Credentials {
+  username: string;
+  password: string;
+  created_at: string;
 }
