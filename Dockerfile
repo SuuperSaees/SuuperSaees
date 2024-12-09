@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build
+FROM node:18-alpine AS build
 
 RUN apk add --no-cache libc6-compat
 RUN npm install -g pnpm@9.5.0 dotenv-cli
@@ -11,7 +11,7 @@ RUN pnpm i
 
 RUN dotenv -- pnpm run build
 
-FROM node:20-alpine
+FROM node:18-alpine
 
 ENV NODE_ENV production
 ENV PORT 3000
