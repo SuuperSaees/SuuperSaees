@@ -3,6 +3,7 @@ import { Message } from '../context/activity-context';
 import { useActivityContext } from '../context/activity-context';
 import { ClockIcon, KeyIcon } from 'lucide-react';
 import { Trans } from '@kit/ui/trans';
+import ImageContainer from './ui/image-container';
 
 interface ChatMessageProps {
   message: Message;
