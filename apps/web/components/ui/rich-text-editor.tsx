@@ -174,6 +174,9 @@ const RichTextEditor = ({
     [key: string]: { status: 'uploading' | 'completed' | 'error'; id?: string };
   }>({});
   const [thereAreFilesUploaded, setThereAreFilesUploaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorContent, setErrorContent] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
   const cleanupImages = () => {
     // Select all image wrappers
@@ -246,7 +249,7 @@ const RichTextEditor = ({
         blockquote: {
           HTMLAttributes: {
             class: `relative border-l-2 pl-4 italic mx-4 my-2 
-              before:content-['“'] before:text-2xl before:font-bold before:absolute 
+              before:content-['"'] before:text-2xl before:font-bold before:absolute 
               before:left-0 before:transform before:-translate-x-0
               inline-block
             `,
@@ -313,45 +316,38 @@ const RichTextEditor = ({
       onBlur?.();
     },
   });
-  const [isSending, setIsSending] = useState(false);
   const sendContent = useCallback(() => {
     void (async () => {
       setIsSending(true);
+      setIsLoading(true);
+      const currentContent = editor ? editor.getHTML() : '';
 
-      if (!fileIdsList.length) {
+      try {
         cleanupImages();
-        const content = editor ? editor.getHTML() : '';
-        editor?.commands.clearContent();
-        setIsSending(false);
-        onComplete && (await onComplete(content ?? ''));
-        if (onChange) {
-          onChange(content);
-        }
-      } else {
-        try {
-          cleanupImages();
-          const content = editor ? editor.getHTML() : '';
-          // <p></p> is the default content of the editor
-          if (content.trim() !== '<p></p>' || fileIdsList.length > 0) {
-            // return;
-            onComplete && (await onComplete(content, fileIdsList));
-            setMessageSended(true);
-            if (onChange) {
-              onChange(content);
-            }
-            insertedImages.current = new Set<string>();
-            setFileIdsList([]);
-          } else {
-            return;
-          }
-        } finally {
-          setIsSending(false);
+        if (currentContent.trim() !== '<p></p>' || fileIdsList.length > 0) {
+          await onComplete?.(currentContent, fileIdsList);
+          
+          insertedImages.current = new Set<string>();
           setFileIdsList([]);
+          setFileUploadStatus({});
+          setThereAreFilesUploaded(false);
           editor?.commands.clearContent();
+          setMessageSended(true);
+          setErrorContent(null);
+          
+          setTimeout(() => {
+            setMessageSended(false);
+          }, 100);
         }
+      } catch (error) {
+        setErrorContent(currentContent);
+        console.error('Error sending content:', error);
+      } finally {
+        setIsSending(false);
+        setIsLoading(false);
       }
     })();
-  }, [editor, onComplete, onChange, fileIdsList]);
+  }, [editor, onComplete, fileIdsList]);
 
   // Implement sanitizer to ensure the content to be nested is secure before sending to server
 
@@ -402,6 +398,12 @@ const RichTextEditor = ({
     );
   };
 
+  useEffect(() => {
+    if (errorContent && editor) {
+      editor.commands.setContent(errorContent);
+    }
+  }, [errorContent, editor]);
+
   return (
     <div
       className={
@@ -410,61 +412,73 @@ const RichTextEditor = ({
       }
       {...rest}
     >
-      <div
-        onClick={() => editor?.commands.focus()}
-        className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
-      >
-        {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
-          <span className="absolute h-[40px] min-h-[40px] transform text-gray-400">
-            <Trans i18nKey="placeholder" />
-          </span>
-        ) : null}
-        <EditorContent
-          editor={editor}
-          className={`${styles['scrollbar-thin']} flex h-full max-h-60 w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
-        />
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-          <FileUploader
-            ref={fileUploaderRef}
-            onFileSelect={handleFileIdsChange}
-            onFileIdsChange={handleFileIdsChangeToSentMessage}
-            onMessageSend={messageSended}
-            onFileUploadStatusUpdate={updateFileUploadStatus}
-            thereAreFilesUploaded={setThereAreFilesUploaded}
+      <div className="relative">
+        {isLoading && (
+          <div className="absolute inset-0 z-50 bg-white/50 dark:bg-gray-900/50" />
+        )}
+        <div
+          onClick={() => !isLoading && editor?.commands.focus()}
+          className={`${
+            styles['scrollbar-thin']
+          } relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400 ${
+            isLoading ? 'pointer-events-none opacity-50' : ''
+          }`}
+        >
+          {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
+            <span className="absolute h-[40px] min-h-[40px] transform text-gray-400">
+              <Trans i18nKey="placeholder" />
+            </span>
+          ) : null}
+          <EditorContent
+            editor={editor}
+            className={`${styles['scrollbar-thin']} flex h-full max-h-60 w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
           />
-          {showToolbar && (
-            <Toolbar
-              editor={editor}
-              toggleExternalUpload={toggleExternalUpload}
-              uploadFileIsExternal={uploadFileIsExternal}
-              userRole={userRole}
-              onChange={onChange}
-              handleUploadClick={handleUploadClick}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <FileUploader
+              ref={fileUploaderRef}
+              onFileSelect={handleFileIdsChange}
+              onFileIdsChange={handleFileIdsChangeToSentMessage}
+              onMessageSend={messageSended}
+              onFileUploadStatusUpdate={updateFileUploadStatus}
+              thereAreFilesUploaded={setThereAreFilesUploaded}
+              disabled={isLoading}
             />
+            {showToolbar && (
+              <Toolbar
+                editor={editor}
+                toggleExternalUpload={toggleExternalUpload}
+                uploadFileIsExternal={uploadFileIsExternal}
+                userRole={userRole}
+                onChange={onChange}
+                handleUploadClick={handleUploadClick}
+                disabled={isLoading}
+              />
+            )}
+          </div>
+          {!hideSubmitButton && (
+            <ThemedButton
+              className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))] bg-[#155EEF] p-[var(--spacing-lg,12px)] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
+              onClick={sendContent}
+              disabled={
+                isLoading ||
+                (!areAllFilesUploaded() && thereAreFilesUploaded) ||
+                (editor?.getHTML().trim() !== '<p></p>' &&
+                  !areAllFilesUploaded() &&
+                  thereAreFilesUploaded) ||
+                isSending
+              }
+            >
+              {isSending ? (
+                <Spinner className="h-5 w-5" />
+              ) : (
+                <SendHorizontalIcon className="h-5 w-5 flex-shrink-0 -rotate-45 text-white" />
+              )}
+            </ThemedButton>
           )}
         </div>
-        {!hideSubmitButton && (
-          <ThemedButton
-            className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))] bg-[#155EEF] p-[var(--spacing-lg,12px)] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
-            onClick={sendContent}
-            disabled={
-              (!areAllFilesUploaded() && thereAreFilesUploaded) ||
-              (editor?.getHTML().trim() !== '<p></p>' &&
-                !areAllFilesUploaded() &&
-                thereAreFilesUploaded) ||
-              isSending
-            }
-          >
-            {/* <SendHorizontalIcon className="w-5 h-5 flex-shrink-0 -rotate-45 text-white" /> */}
-            {isSending ? (
-              <Spinner className="h-5 w-5" />
-            ) : (
-              <SendHorizontalIcon className="h-5 w-5 flex-shrink-0 -rotate-45 text-white" />
-            )}
-          </ThemedButton>
-        )}
       </div>
     </div>
   );
@@ -476,6 +490,7 @@ interface ToolbarProps {
   toggleExternalUpload?: () => void;
   onChange?: (richText: string) => void;
   handleUploadClick?: () => void;
+  disabled?: boolean;
 }
 
 export const Toolbar = ({
@@ -483,6 +498,7 @@ export const Toolbar = ({
   editor,
   onChange,
   handleUploadClick,
+  disabled,
 }: ToolbarProps) => {
   const { isInternalMessagingEnabled, handleSwitchChange } =
     useInternalMessaging();
@@ -491,7 +507,7 @@ export const Toolbar = ({
     return null;
   }
   return (
-    <div className={'mt-4 flex items-center gap-2 bg-transparent'}>
+    <div className={`mt-4 flex items-center gap-2 bg-transparent ${disabled ? 'pointer-events-none opacity-50' : ''}`}>
       {!onChange && (
         <>
           <button

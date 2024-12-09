@@ -53,7 +53,7 @@ const fileTypeIcons: Record<string, JSX.Element> = {
 };
 
 const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
-  ({ onFileSelect, onFileIdsChange, onMessageSend, onFileUploadStatusUpdate, thereAreFilesUploaded  }, ref) => {
+  ({ onFileSelect, onFileIdsChange, onMessageSend = false, onFileUploadStatusUpdate, thereAreFilesUploaded  }, ref) => {
     const { t } = useTranslation();
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]); 
     const [fileUrls, setFileUrls] = useState<File[]>([]); 
@@ -229,8 +229,12 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
       if (onMessageSend) {
         setSelectedFiles([]);
         setFileUrls([]);
+        setGlobalFileList([]);
+        if (thereAreFilesUploaded) {
+          thereAreFilesUploaded(false);
+        }
       }
-    }, [onMessageSend]);
+    }, [onMessageSend, thereAreFilesUploaded]);
     
     return (
       <div className="overflow-y-auto overflow-x-hidden flex flex-wrap gap-2 max-h-[240px] w-full">
