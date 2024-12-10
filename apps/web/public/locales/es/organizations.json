@@ -20,7 +20,9 @@
         },
         "orders": "Proyectos",
         "delete": "Eliminar archivo",
-        "deleteSuccess": "Archivo eliminado"
+        "deleteSuccess": "Archivo eliminado",
+        "noFiles": "No hay archivos en esta carpeta",
+        "emptyFolder": "La carpeta está vacía"
     },
     "folders": {
         "title": "Carpetas",

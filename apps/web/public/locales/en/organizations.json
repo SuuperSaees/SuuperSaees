@@ -20,7 +20,9 @@
         },
         "orders": "Projects",
         "delete": "Delete file",
-        "deleteSuccess": "File deleted"
+        "deleteSuccess": "File deleted",
+        "noFiles": "No files in this folder",
+        "emptyFolder": "The folder is empty"
     },
     "folders": {
         "title": "Folders",
