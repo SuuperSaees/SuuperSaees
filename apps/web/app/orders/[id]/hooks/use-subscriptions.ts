@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 
-
-
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { Order } from '~/lib/order.types';
@@ -49,12 +47,14 @@ export const useOrderSubscriptions = (
           filter: `order_id=eq.${orderId}`,
         },
         (payload) => {
-          void handleSubscription<Message>(
-            payload.new as SubscriptionPayload,
-            messages,
-            setMessages,
-            TableName.MESSAGES,
-          );
+          if (payload.table === 'messages') {
+            void handleSubscription<Message>(
+              payload.new as SubscriptionPayload,
+              messages,
+              setMessages,
+              TableName.MESSAGES,
+            );
+          }
         },
       )
       .on(
@@ -66,37 +66,41 @@ export const useOrderSubscriptions = (
           filter: `order_id=eq.${orderId}`,
         },
         (payload) => {
-          void handleSubscription<Review>(
-            payload.new as SubscriptionPayload,
-            reviews,
-            setReviews,
-            TableName.REVIEWS,
-          );
+          if (payload.table === 'reviews') {
+            void handleSubscription<Review>(
+              payload.new as SubscriptionPayload,
+              reviews,
+              setReviews,
+              TableName.REVIEWS,
+            );
+          }
         },
       )
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'order_files' },
         (payload) => {
-          void (async () => {
-            const { file_id } = payload.new as ServerOrderFile;
+          if (payload.table === 'order_files') {
+            void (async () => {
+              const { file_id } = payload.new as ServerOrderFile;
 
-            // Fetch the associated file data if needed
-            const { data: file, error } = await supabase
-              .from('files')
-              .select('*')
-              .eq('id', file_id)
-              .single();
+              // Fetch the associated file data if needed
+              const { data: file, error } = await supabase
+                .from('files')
+                .select('*')
+                .eq('id', file_id)
+                .single();
 
-            if (!error && file) {
-              void handleSubscription<File>(
-                file as SubscriptionPayload,
-                files,
-                setFiles,
-                TableName.FILES,
-              );
-            }
-          })();
+              if (!error && file) {
+                void handleSubscription<File>(
+                  file as SubscriptionPayload,
+                  files,
+                  setFiles,
+                  TableName.FILES,
+                );
+              }
+            })();
+          }
         },
       )
       .on(
@@ -108,12 +112,14 @@ export const useOrderSubscriptions = (
           filter: `order_id=eq.${orderId}`,
         },
         (payload) => {
-          void handleSubscription<Activity>(
-            payload.new as SubscriptionPayload,
-            activities,
-            setActivities,
-            TableName.ACTIVITIES,
-          );
+          if (payload.table === 'activities') {
+            void handleSubscription<Activity>(
+              payload.new as SubscriptionPayload,
+              activities,
+              setActivities,
+              TableName.ACTIVITIES,
+            );
+          }
         },
       )
       .on(
@@ -125,7 +131,9 @@ export const useOrderSubscriptions = (
           filter: `id=eq.${orderId}`,
         },
         (payload) => {
-          setOrder(payload.new as Order.Type);
+          if (payload.table === 'orders_v2') {
+            setOrder(payload.new as Order.Type);
+          }
         },
       )
       .subscribe();

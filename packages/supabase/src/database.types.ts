@@ -36,53 +36,56 @@ export type Database = {
     Tables: {
       accounts: {
         Row: {
-          created_at: string | null;
-          created_by: string | null;
-          email: string | null;
-          id: string;
-          is_personal_account: boolean;
-          name: string;
-          organization_id: string | null;
-          picture_url: string | null;
-          primary_owner_user_id: string;
-          public_data: Json;
-          slug: string | null;
-          stripe_id: string | null;
-          updated_at: string | null;
-          updated_by: string | null;
-        };
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          id: string
+          is_personal_account: boolean
+          loom_app_id: string | null
+          name: string
+          organization_id: string | null
+          picture_url: string | null
+          primary_owner_user_id: string
+          public_data: Json
+          slug: string | null
+          stripe_id: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
         Insert: {
-          created_at?: string | null;
-          created_by?: string | null;
-          email?: string | null;
-          id?: string;
-          is_personal_account?: boolean;
-          name: string;
-          organization_id?: string | null;
-          picture_url?: string | null;
-          primary_owner_user_id?: string;
-          public_data?: Json;
-          slug?: string | null;
-          stripe_id?: string | null;
-          updated_at?: string | null;
-          updated_by?: string | null;
-        };
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_personal_account?: boolean
+          loom_app_id?: string | null
+          name: string
+          organization_id?: string | null
+          picture_url?: string | null
+          primary_owner_user_id?: string
+          public_data?: Json
+          slug?: string | null
+          stripe_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
         Update: {
-          created_at?: string | null;
-          created_by?: string | null;
-          email?: string | null;
-          id?: string;
-          is_personal_account?: boolean;
-          name?: string;
-          organization_id?: string | null;
-          picture_url?: string | null;
-          primary_owner_user_id?: string;
-          public_data?: Json;
-          slug?: string | null;
-          stripe_id?: string | null;
-          updated_at?: string | null;
-          updated_by?: string | null;
-        };
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_personal_account?: boolean
+          loom_app_id?: string | null
+          name?: string
+          organization_id?: string | null
+          picture_url?: string | null
+          primary_owner_user_id?: string
+          public_data?: Json
+          slug?: string | null
+          stripe_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
         Relationships: [
           {
             foreignKeyName: 'accounts_created_by_fkey';
@@ -144,18 +147,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'accounts_memberships_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'accounts_memberships_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "accounts_memberships_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'accounts_memberships_account_role_fkey';
@@ -189,44 +185,47 @@ export type Database = {
       };
       activities: {
         Row: {
-          action: Database['public']['Enums']['action_type'];
-          actor: string;
-          created_at: string;
-          id: number;
-          message: string;
-          order_id: number;
-          preposition: string;
-          previous_value: string | null;
-          type: Database['public']['Enums']['activity_type'];
-          user_id: string;
-          value: string;
-        };
+          action: Database["public"]["Enums"]["action_type"]
+          actor: string
+          created_at: string
+          id: number
+          message: string
+          order_id: number
+          preposition: string
+          previous_value: string | null
+          temp_id: string | null
+          type: Database["public"]["Enums"]["activity_type"]
+          user_id: string
+          value: string
+        }
         Insert: {
-          action: Database['public']['Enums']['action_type'];
-          actor: string;
-          created_at?: string;
-          id?: number;
-          message: string;
-          order_id: number;
-          preposition: string;
-          previous_value?: string | null;
-          type: Database['public']['Enums']['activity_type'];
-          user_id: string;
-          value: string;
-        };
+          action: Database["public"]["Enums"]["action_type"]
+          actor: string
+          created_at?: string
+          id?: number
+          message: string
+          order_id: number
+          preposition: string
+          previous_value?: string | null
+          temp_id?: string | null
+          type: Database["public"]["Enums"]["activity_type"]
+          user_id: string
+          value: string
+        }
         Update: {
-          action?: Database['public']['Enums']['action_type'];
-          actor?: string;
-          created_at?: string;
-          id?: number;
-          message?: string;
-          order_id?: number;
-          preposition?: string;
-          previous_value?: string | null;
-          type?: Database['public']['Enums']['activity_type'];
-          user_id?: string;
-          value?: string;
-        };
+          action?: Database["public"]["Enums"]["action_type"]
+          actor?: string
+          created_at?: string
+          id?: number
+          message?: string
+          order_id?: number
+          preposition?: string
+          previous_value?: string | null
+          temp_id?: string | null
+          type?: Database["public"]["Enums"]["activity_type"]
+          user_id?: string
+          value?: string
+        }
         Relationships: [
           {
             foreignKeyName: 'activities_order_id_fkey';
@@ -243,18 +242,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'activities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'activities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -295,18 +287,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'agency_statuses_agency_id_fkey';
-            columns: ['agency_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'agency_statuses_agency_id_fkey';
-            columns: ['agency_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "agency_statuses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -353,18 +338,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'billing_accounts_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'billing_accounts_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "billing_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -399,18 +377,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'billing_customers_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'billing_customers_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "billing_customers_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -576,18 +547,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'briefs_propietary_organization_id_fkey';
-            columns: ['propietary_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'briefs_propietary_organization_id_fkey';
-            columns: ['propietary_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "briefs_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -625,18 +589,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'chat_messages_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'chat_messages_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "chat_messages_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'chat_messages_chat_id_fkey';
@@ -681,18 +638,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'chats_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'chats_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "chats_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -790,18 +740,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'client_services_agency_id_fkey';
-            columns: ['agency_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'client_services_agency_id_fkey';
-            columns: ['agency_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "client_services_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'client_services_client_id_fkey';
@@ -818,18 +761,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'client_services_client_organization_id_fkey';
-            columns: ['client_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'client_services_client_organization_id_fkey';
-            columns: ['client_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "client_services_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'client_services_created_by_fkey';
@@ -839,18 +775,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'client_services_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'client_services_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "client_services_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'client_services_service_id_fkey';
@@ -931,52 +860,48 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'credits_usage_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'credits_usage_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "credits_usage_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
       files: {
         Row: {
-          created_at: string;
-          id: string;
-          message_id: string | null;
-          name: string;
-          size: number;
-          type: string;
-          url: string;
-          user_id: string;
-        };
+          created_at: string
+          id: string
+          message_id: string | null
+          name: string
+          size: number
+          temp_id: string | null
+          type: string
+          url: string
+          user_id: string
+        }
         Insert: {
-          created_at?: string;
-          id?: string;
-          message_id?: string | null;
-          name: string;
-          size: number;
-          type: string;
-          url: string;
-          user_id: string;
-        };
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          name: string
+          size: number
+          temp_id?: string | null
+          type: string
+          url: string
+          user_id: string
+        }
         Update: {
-          created_at?: string;
-          id?: string;
-          message_id?: string | null;
-          name?: string;
-          size?: number;
-          type?: string;
-          url?: string;
-          user_id?: string;
-        };
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          name?: string
+          size?: number
+          temp_id?: string | null
+          type?: string
+          url?: string
+          user_id?: string
+        }
         Relationships: [
           {
             foreignKeyName: 'files_message_id_fkey';
@@ -993,18 +918,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'files_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'files_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "files_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -1170,18 +1088,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'invitations_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'invitations_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "invitations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'invitations_invited_by_fkey';
@@ -1201,32 +1112,35 @@ export type Database = {
       };
       messages: {
         Row: {
-          content: string | null;
-          created_at: string;
-          id: string;
-          order_id: number;
-          updated_at: string;
-          user_id: string;
-          visibility: Database['public']['Enums']['messages_types'] | null;
-        };
+          content: string | null
+          created_at: string
+          id: string
+          order_id: number
+          temp_id: string | null
+          updated_at: string
+          user_id: string
+          visibility: Database["public"]["Enums"]["messages_types"] | null
+        }
         Insert: {
-          content?: string | null;
-          created_at?: string;
-          id?: string;
-          order_id: number;
-          updated_at?: string;
-          user_id: string;
-          visibility?: Database['public']['Enums']['messages_types'] | null;
-        };
+          content?: string | null
+          created_at?: string
+          id?: string
+          order_id: number
+          temp_id?: string | null
+          updated_at?: string
+          user_id: string
+          visibility?: Database["public"]["Enums"]["messages_types"] | null
+        }
         Update: {
-          content?: string | null;
-          created_at?: string;
-          id?: string;
-          order_id?: number;
-          updated_at?: string;
-          user_id?: string;
-          visibility?: Database['public']['Enums']['messages_types'] | null;
-        };
+          content?: string | null
+          created_at?: string
+          id?: string
+          order_id?: number
+          temp_id?: string | null
+          updated_at?: string
+          user_id?: string
+          visibility?: Database["public"]["Enums"]["messages_types"] | null
+        }
         Relationships: [
           {
             foreignKeyName: 'messages_order_id_fkey';
@@ -1243,18 +1157,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'messages_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'messages_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -1301,18 +1208,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'notifications_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'notifications_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "notifications_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -1338,18 +1238,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'order_assignations_agency_member_id_fkey';
-            columns: ['agency_member_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'order_assignations_agency_member_id_fkey';
-            columns: ['agency_member_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "order_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'order_assignations_order_id_fkey';
@@ -1418,18 +1311,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'order_followers_client_member_id_fkey';
-            columns: ['client_member_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'order_followers_client_member_id_fkey';
-            columns: ['client_member_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "order_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'order_followers_order_id_fkey';
@@ -1524,18 +1410,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'orders_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'orders_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "orders_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'orders_billing_customer_id_fkey';
@@ -1613,18 +1492,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'orders_v2_client_organization_id_fkey';
-            columns: ['client_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'orders_v2_client_organization_id_fkey';
-            columns: ['client_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "orders_v2_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'orders_v2_customer_id_fkey';
@@ -1634,18 +1506,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'orders_v2_customer_id_fkey';
-            columns: ['customer_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'orders_v2_customer_id_fkey';
-            columns: ['customer_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "orders_v2_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'orders_v2_status_id_fkey';
@@ -1690,18 +1555,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'organization_settings_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'organization_settings_account_id_fkey';
-            columns: ['account_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "organization_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -1730,18 +1588,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'organization_subdomains_organization_id_fkey';
-            columns: ['organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'organization_subdomains_organization_id_fkey';
-            columns: ['organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "organization_subdomains_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'organization_subdomains_subdomain_id_fkey';
@@ -1801,49 +1652,45 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'reactions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'reactions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
       reviews: {
         Row: {
-          content: string;
-          created_at: string;
-          id: string;
-          order_id: number;
-          rating: number | null;
-          updated_at: string;
-          user_id: string;
-        };
+          content: string
+          created_at: string
+          id: string
+          order_id: number
+          rating: number | null
+          temp_id: string | null
+          updated_at: string
+          user_id: string
+        }
         Insert: {
-          content: string;
-          created_at?: string;
-          id?: string;
-          order_id: number;
-          rating?: number | null;
-          updated_at?: string;
-          user_id: string;
-        };
+          content: string
+          created_at?: string
+          id?: string
+          order_id: number
+          rating?: number | null
+          temp_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
         Update: {
-          content?: string;
-          created_at?: string;
-          id?: string;
-          order_id?: number;
-          rating?: number | null;
-          updated_at?: string;
-          user_id?: string;
-        };
+          content?: string
+          created_at?: string
+          id?: string
+          order_id?: number
+          rating?: number | null
+          temp_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
         Relationships: [
           {
             foreignKeyName: 'reviews_order_id_fkey';
@@ -1860,18 +1707,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'reviews_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'reviews_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -2178,62 +2018,62 @@ export type Database = {
       };
       subscriptions: {
         Row: {
-          account_id: number | null;
-          active: boolean;
-          billing_customer_id: string;
-          billing_provider: Database['public']['Enums']['billing_provider'];
-          cancel_at_period_end: boolean;
-          created_at: string | null;
-          currency: string;
-          days_used: number;
-          id: string;
-          period_ends_at: string | null;
-          period_starts_at: string | null;
-          propietary_organization_id: string | null;
-          status: Database['public']['Enums']['subscription_status'];
-          token_id: string;
-          trial_ends_at: string | null;
-          trial_starts_at: string | null;
-          updated_at: string | null;
-        };
+          account_id: string | null
+          active: boolean
+          billing_customer_id: string
+          billing_provider: Database["public"]["Enums"]["billing_provider"]
+          cancel_at_period_end: boolean
+          created_at: string | null
+          currency: string
+          days_used: number
+          id: string
+          period_ends_at: string | null
+          period_starts_at: string | null
+          propietary_organization_id: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          token_id: string
+          trial_ends_at: string | null
+          trial_starts_at: string | null
+          updated_at: string | null
+        }
         Insert: {
-          account_id?: number | null;
-          active: boolean;
-          billing_customer_id: string;
-          billing_provider: Database['public']['Enums']['billing_provider'];
-          cancel_at_period_end: boolean;
-          created_at?: string | null;
-          currency: string;
-          days_used?: number;
-          id: string;
-          period_ends_at?: string | null;
-          period_starts_at?: string | null;
-          propietary_organization_id?: string | null;
-          status: Database['public']['Enums']['subscription_status'];
-          token_id?: string;
-          trial_ends_at?: string | null;
-          trial_starts_at?: string | null;
-          updated_at?: string | null;
-        };
+          account_id?: string | null
+          active: boolean
+          billing_customer_id: string
+          billing_provider: Database["public"]["Enums"]["billing_provider"]
+          cancel_at_period_end: boolean
+          created_at?: string | null
+          currency: string
+          days_used?: number
+          id: string
+          period_ends_at?: string | null
+          period_starts_at?: string | null
+          propietary_organization_id?: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          token_id?: string
+          trial_ends_at?: string | null
+          trial_starts_at?: string | null
+          updated_at?: string | null
+        }
         Update: {
-          account_id?: number | null;
-          active?: boolean;
-          billing_customer_id?: string;
-          billing_provider?: Database['public']['Enums']['billing_provider'];
-          cancel_at_period_end?: boolean;
-          created_at?: string | null;
-          currency?: string;
-          days_used?: number;
-          id?: string;
-          period_ends_at?: string | null;
-          period_starts_at?: string | null;
-          propietary_organization_id?: string | null;
-          status?: Database['public']['Enums']['subscription_status'];
-          token_id?: string;
-          trial_ends_at?: string | null;
-          trial_starts_at?: string | null;
-          updated_at?: string | null;
-        };
+          account_id?: string | null
+          active?: boolean
+          billing_customer_id?: string
+          billing_provider?: Database["public"]["Enums"]["billing_provider"]
+          cancel_at_period_end?: boolean
+          created_at?: string | null
+          currency?: string
+          days_used?: number
+          id?: string
+          period_ends_at?: string | null
+          period_starts_at?: string | null
+          propietary_organization_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          token_id?: string
+          trial_ends_at?: string | null
+          trial_starts_at?: string | null
+          updated_at?: string | null
+        }
         Relationships: [
           {
             foreignKeyName: 'subscriptions_propietary_organization_id_fkey';
@@ -2243,18 +2083,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'subscriptions_propietary_organization_id_fkey';
-            columns: ['propietary_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'subscriptions_propietary_organization_id_fkey';
-            columns: ['propietary_organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
+            columns: ["propietary_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -2280,18 +2113,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'subtask_assignations_agency_member_id_fkey';
-            columns: ['agency_member_id'];
-            isOneToOne: true;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'subtask_assignations_agency_member_id_fkey';
-            columns: ['agency_member_id'];
-            isOneToOne: true;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
+            columns: ["agency_member_id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'subtask_assignations_subtask_id_fkey';
@@ -2327,18 +2153,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'subtask_followers_client_member_id_fkey';
-            columns: ['client_member_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'subtask_followers_client_member_id_fkey';
-            columns: ['client_member_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "subtask_followers_client_member_id_fkey"
+            columns: ["client_member_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: 'subtask_followers_subtask_id_fkey';
@@ -2529,18 +2348,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'active_timers_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'active_timers_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "active_timers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -2611,18 +2423,11 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'user_settings_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: true;
-            referencedRelation: 'user_account_workspace';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_settings_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: true;
-            referencedRelation: 'user_accounts';
-            referencedColumns: ['id'];
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ];
       };
@@ -2630,15 +2435,38 @@ export type Database = {
     Views: {
       user_account_workspace: {
         Row: {
-          id: string | null;
-          name: string | null;
-          picture_url: string | null;
+          id: string | null
+          name: string | null
+          picture_url: string | null
+          role: string | null
           subscription_status:
-            | Database['public']['Enums']['subscription_status']
-            | null;
-        };
-        Relationships: [];
-      };
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_memberships_account_role_fkey"
+            columns: ["role"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_accounts: {
         Row: {
           id: string | null;
@@ -2730,22 +2558,23 @@ export type Database = {
           account_name: string;
         };
         Returns: {
-          created_at: string | null;
-          created_by: string | null;
-          email: string | null;
-          id: string;
-          is_personal_account: boolean;
-          name: string;
-          organization_id: string | null;
-          picture_url: string | null;
-          primary_owner_user_id: string;
-          public_data: Json;
-          slug: string | null;
-          stripe_id: string | null;
-          updated_at: string | null;
-          updated_by: string | null;
-        };
-      };
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          id: string
+          is_personal_account: boolean
+          loom_app_id: string | null
+          name: string
+          organization_id: string | null
+          picture_url: string | null
+          primary_owner_user_id: string
+          public_data: Json
+          slug: string | null
+          stripe_id: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+      }
       deduct_credits: {
         Args: {
           account_id: string;
@@ -3002,26 +2831,26 @@ export type Database = {
           trial_ends_at?: string;
         };
         Returns: {
-          account_id: number | null;
-          active: boolean;
-          billing_customer_id: string;
-          billing_provider: Database['public']['Enums']['billing_provider'];
-          cancel_at_period_end: boolean;
-          created_at: string | null;
-          currency: string;
-          days_used: number;
-          id: string;
-          period_ends_at: string | null;
-          period_starts_at: string | null;
-          propietary_organization_id: string | null;
-          status: Database['public']['Enums']['subscription_status'];
-          token_id: string;
-          trial_ends_at: string | null;
-          trial_starts_at: string | null;
-          updated_at: string | null;
-        };
-      };
-    };
+          account_id: string | null
+          active: boolean
+          billing_customer_id: string
+          billing_provider: Database["public"]["Enums"]["billing_provider"]
+          cancel_at_period_end: boolean
+          created_at: string | null
+          currency: string
+          days_used: number
+          id: string
+          period_ends_at: string | null
+          period_starts_at: string | null
+          propietary_organization_id: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          token_id: string
+          trial_ends_at: string | null
+          trial_starts_at: string | null
+          updated_at: string | null
+        }
+      }
+    }
     Enums: {
       action_type: 'create' | 'update' | 'delete' | 'complete';
       activity_type:

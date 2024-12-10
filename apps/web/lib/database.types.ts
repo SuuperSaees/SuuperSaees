@@ -41,6 +41,7 @@ export type Database = {
           email: string | null
           id: string
           is_personal_account: boolean
+          loom_app_id: string | null
           name: string
           organization_id: string | null
           picture_url: string | null
@@ -57,6 +58,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_personal_account?: boolean
+          loom_app_id?: string | null
           name: string
           organization_id?: string | null
           picture_url?: string | null
@@ -73,6 +75,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_personal_account?: boolean
+          loom_app_id?: string | null
           name?: string
           organization_id?: string | null
           picture_url?: string | null
@@ -147,13 +150,6 @@ export type Database = {
             foreignKeyName: "accounts_memberships_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "accounts_memberships_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -197,6 +193,7 @@ export type Database = {
           order_id: number
           preposition: string
           previous_value: string | null
+          temp_id: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
           value: string
@@ -210,6 +207,7 @@ export type Database = {
           order_id: number
           preposition: string
           previous_value?: string | null
+          temp_id?: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
           value: string
@@ -223,6 +221,7 @@ export type Database = {
           order_id?: number
           preposition?: string
           previous_value?: string | null
+          temp_id?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
           value?: string
@@ -240,13 +239,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activities_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -292,13 +284,6 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agency_statuses_agency_id_fkey"
-            columns: ["agency_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -356,13 +341,6 @@ export type Database = {
             foreignKeyName: "billing_accounts_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "billing_accounts_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -396,13 +374,6 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "billing_customers_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -579,13 +550,6 @@ export type Database = {
             foreignKeyName: "briefs_propietary_organization_id_fkey"
             columns: ["propietary_organization_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "briefs_propietary_organization_id_fkey"
-            columns: ["propietary_organization_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -622,13 +586,6 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -678,13 +635,6 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -793,13 +743,6 @@ export type Database = {
             foreignKeyName: "client_services_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_services_agency_id_fkey"
-            columns: ["agency_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -821,13 +764,6 @@ export type Database = {
             foreignKeyName: "client_services_client_organization_id_fkey"
             columns: ["client_organization_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_services_client_organization_id_fkey"
-            columns: ["client_organization_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -836,13 +772,6 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_services_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -934,13 +863,6 @@ export type Database = {
             foreignKeyName: "credits_usage_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "credits_usage_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -953,6 +875,7 @@ export type Database = {
           message_id: string | null
           name: string
           size: number
+          temp_id: string | null
           type: string
           url: string
           user_id: string
@@ -963,6 +886,7 @@ export type Database = {
           message_id?: string | null
           name: string
           size: number
+          temp_id?: string | null
           type: string
           url: string
           user_id: string
@@ -973,6 +897,7 @@ export type Database = {
           message_id?: string | null
           name?: string
           size?: number
+          temp_id?: string | null
           type?: string
           url?: string
           user_id?: string
@@ -990,13 +915,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "files_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -1173,13 +1091,6 @@ export type Database = {
             foreignKeyName: "invitations_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invitations_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -1205,6 +1116,7 @@ export type Database = {
           created_at: string
           id: string
           order_id: number
+          temp_id: string | null
           updated_at: string
           user_id: string
           visibility: Database["public"]["Enums"]["messages_types"] | null
@@ -1214,6 +1126,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id: number
+          temp_id?: string | null
           updated_at?: string
           user_id: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null
@@ -1223,6 +1136,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id?: number
+          temp_id?: string | null
           updated_at?: string
           user_id?: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null
@@ -1240,13 +1154,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -1304,13 +1211,6 @@ export type Database = {
             foreignKeyName: "notifications_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -1335,13 +1235,6 @@ export type Database = {
             columns: ["agency_member_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_assignations_agency_member_id_fkey"
-            columns: ["agency_member_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -1415,13 +1308,6 @@ export type Database = {
             columns: ["client_member_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_followers_client_member_id_fkey"
-            columns: ["client_member_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -1527,13 +1413,6 @@ export type Database = {
             foreignKeyName: "orders_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "orders_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -1616,13 +1495,6 @@ export type Database = {
             foreignKeyName: "orders_v2_client_organization_id_fkey"
             columns: ["client_organization_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "orders_v2_client_organization_id_fkey"
-            columns: ["client_organization_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -1631,13 +1503,6 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "orders_v2_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -1693,13 +1558,6 @@ export type Database = {
             foreignKeyName: "organization_settings_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_settings_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -1727,13 +1585,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_subdomains_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -1804,13 +1655,6 @@ export type Database = {
             foreignKeyName: "reactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -1823,6 +1667,7 @@ export type Database = {
           id: string
           order_id: number
           rating: number | null
+          temp_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1832,6 +1677,7 @@ export type Database = {
           id?: string
           order_id: number
           rating?: number | null
+          temp_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1841,6 +1687,7 @@ export type Database = {
           id?: string
           order_id?: number
           rating?: number | null
+          temp_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1857,13 +1704,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -2178,7 +2018,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
-          account_id: number | null
+          account_id: string | null
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
@@ -2197,7 +2037,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          account_id?: number | null
+          account_id?: string | null
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]
@@ -2216,7 +2056,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          account_id?: number | null
+          account_id?: string | null
           active?: boolean
           billing_customer_id?: string
           billing_provider?: Database["public"]["Enums"]["billing_provider"]
@@ -2240,13 +2080,6 @@ export type Database = {
             columns: ["propietary_organization_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_propietary_organization_id_fkey"
-            columns: ["propietary_organization_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -2277,13 +2110,6 @@ export type Database = {
             columns: ["agency_member_id"]
             isOneToOne: true
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subtask_assignations_agency_member_id_fkey"
-            columns: ["agency_member_id"]
-            isOneToOne: true
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -2324,13 +2150,6 @@ export type Database = {
             columns: ["client_member_id"]
             isOneToOne: false
             referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subtask_followers_client_member_id_fkey"
-            columns: ["client_member_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
@@ -2532,13 +2351,6 @@ export type Database = {
             foreignKeyName: "active_timers_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "active_timers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -2614,13 +2426,6 @@ export type Database = {
             foreignKeyName: "user_settings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
@@ -2633,11 +2438,34 @@ export type Database = {
           id: string | null
           name: string | null
           picture_url: string | null
+          role: string | null
           subscription_status:
             | Database["public"]["Enums"]["subscription_status"]
             | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "accounts_memberships_account_role_fkey"
+            columns: ["role"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_accounts: {
         Row: {
@@ -2735,6 +2563,7 @@ export type Database = {
           email: string | null
           id: string
           is_personal_account: boolean
+          loom_app_id: string | null
           name: string
           organization_id: string | null
           picture_url: string | null
@@ -3002,7 +2831,7 @@ export type Database = {
           trial_ends_at?: string
         }
         Returns: {
-          account_id: number | null
+          account_id: string | null
           active: boolean
           billing_customer_id: string
           billing_provider: Database["public"]["Enums"]["billing_provider"]

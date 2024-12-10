@@ -13,6 +13,8 @@ import { OrderTabs } from './components/order-tabs';
 import { ActivityProvider } from './context/activity-context';
 import { Order } from '~/lib/order.types';
 import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
+import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -34,7 +36,15 @@ async function OrderDetailsPage({
   const agencyStatuses = await getAgencyStatuses(order?.agency_id).catch((err) =>
     console.error(err),
   ) 
-  const organizationId = await getPropietaryOrganizationIdOfOrder(id);
+  const organizationId = await getPropietaryOrganizationIdOfOrder(id).catch((err) => {
+    console.error(`Error getting propietary organization id of order: ${err}`)
+    return { organization: '' }
+  });;
+  const { user } = await loadUserWorkspace();
+  const { organization: agency } = await getDomainByUserId(user.id ?? '').catch((err) => {
+    console.error(`Error client, getting domain by user id: ${err}`)
+    return { organization: null }
+  });
   const i18n = await createI18nServerInstance();
   const ordersTitle = i18n.t('orders:title');
   const currentPath = [
@@ -66,7 +76,7 @@ async function OrderDetailsPage({
           <OrderTabs
             organizationId={
               organizationId
-                ? { account_id: organizationId.client_organization_id }
+                ? { account_id: organizationId?.client_organization_id }
                 : undefined
             }
             currentPath={currentPath}
@@ -74,6 +84,7 @@ async function OrderDetailsPage({
             orderId={id}
             orderAgencyId={order?.agency_id ?? ''}
             agencyStatuses={agencyStatuses ?? []}
+            agencyName={agency?.name ?? ''}
           />
         </div>
         <AsideOrderInformation order={order} className="hidden lg:flex " agencyStatuses={agencyStatuses ?? []}/>
