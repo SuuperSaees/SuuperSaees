@@ -16,12 +16,13 @@ export const updateFile = async (
     const fileToUpdate = {
       message_id: messageId ?? null,
     };
-
+    console.log('fileToUpdate', messageId, fileId);
     const { data: fileData, error: fileError } = await client
       .from('files')
       .update(fileToUpdate)
       .eq('id', fileId) // Add the WHERE clause here to target the specific file
-      .select();
+      .select()
+      .single();
 
     if (fileError) throw fileError;
     return fileData;
