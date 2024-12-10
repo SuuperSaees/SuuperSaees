@@ -5,26 +5,26 @@ import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { getDomainByOrganizationId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { createToken } from '../../../../../../../tokens/src/create-token';
 
+
 export const createUrlForCheckout = async ({
   stripeId,
   priceId,
   service,
   organizationId,
-  paymentMethod,
+  paymentMethods,
 }: {
   stripeId?: string;
   priceId: string;
   service: Service.Relationships.Billing.BillingService;
   organizationId: string;
-  paymentMethod?: BillingAccounts.PaymentMethod;
+  paymentMethods: BillingAccounts.PaymentMethod[];
 }) => {
   try {
     // Validate input parameters
-    if (!priceId || !service || !organizationId) {
+    if (!service || !organizationId) {
       throw new Error(
         'Missing required parameters: ' +
           JSON.stringify({
-            hasPriceId: !!priceId,
             hasService: !!service,
             hasOrgId: !!organizationId,
           }),
@@ -40,7 +40,7 @@ export const createUrlForCheckout = async ({
         service: service,
         expires_at: new Date(),
         organization_id: organizationId,
-        payment_method: paymentMethod ?? {
+        payment_methods: paymentMethods ?? {
           id: '',
           name: '',
           icon: '',

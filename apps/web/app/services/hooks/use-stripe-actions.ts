@@ -20,6 +20,7 @@ import { createUrlForCheckout } from '~/team-accounts/src/server/actions/service
 // import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
 
+
 interface UseStripeActions {
   userRole: Database['public']['Tables']['accounts_memberships']['Row']['account_role'];
   // view: 'briefs' | 'services'; // activate to improve performance => this will make the query only when the view is active // one call per view
@@ -93,58 +94,29 @@ export function useStripeActions({ userRole }: UseStripeActions) {
 
   const handleCheckout = async (
     service: Service.Relationships.Billing.BillingService,
-    paymentMethod: BillingAccounts.PaymentMethod,
+    paymentMethods: BillingAccounts.PaymentMethod[],
   ) => {
-    if (paymentMethod.name === BillingAccounts.BillingProviderKeys.STRIPE) {
-      const { stripeId } = await getStripeAccountID();
-      const organizationData = await getOrganization();
-      const organizationId = organizationData.id;
-      if (
-        !service.billing_services ||
-        !stripeId ||
-        !service ||
-        !organizationId
-      ) {
-        console.error('Missing required parameters:', {
-          hasPriceId: !!service.price_id,
-          hasStripeId: !!stripeId,
-          hasService: !!service,
-          hasOrgId: !!organizationId,
-        });
-        throw new Error('Missing required parameters');
-      }
-
-      createCheckoutMutation.mutate({
-        stripeId,
-        priceId:
-          service.billing_services.find(
-            (billingService) => billingService.provider === 'stripe',
-          )?.provider_id ?? '',
-        service,
-        organizationId,
+    const { stripeId } = await getStripeAccountID();
+    const organizationData = await getOrganization();
+    const organizationId = organizationData.id;
+    if (!service.billing_services || !service || !organizationId) {
+      console.error('Missing required parameters:', {
+        hasService: !!service,
+        hasOrgId: !!organizationId,
       });
-    } else {
-      const organizationData = await getOrganization();
-      const organizationId = organizationData.id;
-      if (!service.billing_services || !service || !organizationId) {
-        console.error('Missing required parameters:', {
-          hasPriceId: !!service.price_id,
-          hasService: !!service,
-          hasOrgId: !!organizationId,
-        });
-        throw new Error('Missing required parameters');
-      }
-
-      createCheckoutMutation.mutate({
-        priceId:
-          service.billing_services.find(
-            (billingService) => billingService.provider === 'treli',
-          )?.provider_id ?? '',
-        service,
-        organizationId,
-        paymentMethod,
-      });
+      throw new Error('Missing required parameters');
     }
+
+    createCheckoutMutation.mutate({
+      stripeId,
+      priceId:
+        service.billing_services.find(
+          (billingService) => billingService.provider === 'stripe',
+        )?.provider_id ?? '',
+      service,
+      organizationId,
+      paymentMethods,
+    });
   };
 
   useEffect(() => {

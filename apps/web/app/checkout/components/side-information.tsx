@@ -26,9 +26,10 @@ interface SideDataFieldsProps {
   validSuccess: boolean;
   quantity: number;
   setQuantity: React.Dispatch<React.SetStateAction<number>>;
+  selectedPaymentMethod: string;
 }
 
-export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading, errorMessage, accountId, validSuccess, quantity, setQuantity }) => {
+export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading, errorMessage, accountId, validSuccess, quantity, setQuantity, selectedPaymentMethod }) => {
   const defaultServiceImage = process.env.NEXT_PUBLIC_SERVICE_DEFAULT_IMAGE;
   const { t } = useTranslation('services');
   const [discountAmount, setDiscountAmount] = useState<number | null>(null);
@@ -36,6 +37,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
   
 
   const handleApplyDiscount = async () => {
+    if (selectedPaymentMethod !== 'stripe') return;
     const discountCode = form.getValues("discount_coupon");
     setIsApplyingDiscount(true);
 
@@ -93,7 +95,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
         </div>
       </div>
       {
-        !service.recurring_subscription &&
+        !service.recurring_subscription && selectedPaymentMethod !== 'stripe' &&
         <div className='justify-between flex items-center mb-[18px]'>
           <div className="text-sm font-medium leading-5 text-gray-700">
             {t('checkout.quantity')}
@@ -108,32 +110,37 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
           </div>
         </div>
       }
-      <FormField
-        name="discount_coupon"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem className="mb-[18px] w-full">
-            <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-              {t('checkout.discount_coupon')}
-            </FormLabel>
-            <FormControl>
-              <div className="flex gap-4">
-                <Input {...field} />
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="border border-gray-300"
-                  onClick={handleApplyDiscount}
-                  disabled={isApplyingDiscount}
-                >
-                  {isApplyingDiscount ? <Spinner className='h-4 w-4'/> : t('checkout.apply')}
-                </Button>
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {
+        selectedPaymentMethod === 'stripe' && (
+          <FormField
+          name="discount_coupon"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem className="mb-[18px] w-full">
+              <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
+                {t('checkout.discount_coupon')}
+              </FormLabel>
+              <FormControl>
+                <div className="flex gap-4">
+                  <Input {...field} />
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    className="border border-gray-300"
+                    onClick={handleApplyDiscount}
+                    disabled={isApplyingDiscount}
+                  >
+                    {isApplyingDiscount ? <Spinner className='h-4 w-4'/> : t('checkout.apply')}
+                  </Button>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        )
+      }
+
       <div className="mb-[18px] flex justify-between">
         <div className="text-sm font-medium leading-5 text-gray-700">
           {t('checkout.subtotal')}
@@ -154,7 +161,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({ form, service, loading
       )}
       <div className="mb-[18px] flex justify-between">
         <div className="text-sm font-medium leading-5 text-gray-700">
-          {t('checkout.total')}
+          {t('checkout.total')} {`(${service.currency.toUpperCase()})`}
         </div>
         <div className="text-sm font-medium leading-5 text-gray-700">
           ${discountedTotal?.toFixed(2)}

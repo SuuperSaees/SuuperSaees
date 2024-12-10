@@ -15,8 +15,8 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from '@tanstack/react-table';
-import { ArrowUp, Pen, Search } from 'lucide-react';
-import { CheckoutSelector } from './checkout-selector';
+import { ArrowUp, Pen, Search, Link2 } from 'lucide-react';
+// import { CheckoutSelector } from './checkout-selector';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
@@ -177,7 +177,7 @@ const useGetColumns = (
   t: TFunction<'services', undefined>,
   accountRole: string,
   paymentsMethods: BillingAccounts.PaymentMethod[],
-  handleCheckout: (service: Service.Relationships.Billing.BillingService, paymentMethod: BillingAccounts.PaymentMethod) => Promise<void>,
+  handleCheckout: (service: Service.Relationships.Billing.BillingService, paymentMethods: BillingAccounts.PaymentMethod[]) => Promise<void>,
 ): ColumnDef<Service.Relationships.Billing.BillingService>[] => {
   return useMemo(
     () => [
@@ -278,25 +278,25 @@ const useGetColumns = (
           return (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {accountRole === 'agency_owner' && service.billing_services.length > 0 && (
-                // <div>
-
-                //     <Button
-                //       variant="ghost"
-                //       onClick={async () => {
-                //           await handleCheckout(priceId, stripeId, service, organizationId);
-                //       }}
-                //     >
-                //       <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />
-                //     </Button>
-                // </div>
-
                 <div>
-                <CheckoutSelector
-                  service={service}
-                  paymentsMethods={paymentsMethods}
-                  onAction={handleCheckout}
-                />
-              </div>
+
+                    <Button
+                      variant="ghost"
+                      onClick={async () => {
+                          await handleCheckout(service, paymentsMethods);
+                      }}
+                    >
+                      <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />
+                    </Button>
+                </div>
+
+              //   <div>
+              //   <CheckoutSelector
+              //     service={service}
+              //     paymentsMethods={paymentsMethods}
+              //     onAction={handleCheckout}
+              //   />
+              // </div>
 
               )}
               {/* {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />} */}
