@@ -78,28 +78,19 @@ export const useOrderSubscriptions = (
       )
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'order_files' },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'files',
+        },
         (payload) => {
-          if (payload.table === 'order_files') {
-            void (async () => {
-              const { file_id } = payload.new as ServerOrderFile;
-
-              // Fetch the associated file data if needed
-              const { data: file, error } = await supabase
-                .from('files')
-                .select('*')
-                .eq('id', file_id)
-                .single();
-
-              if (!error && file) {
-                void handleSubscription<File>(
-                  file as SubscriptionPayload,
-                  files,
-                  setFiles,
-                  TableName.FILES,
-                );
-              }
-            })();
+          if (payload.table === 'files') {
+            void handleSubscription<File>(
+              payload.new as SubscriptionPayload,
+              files,
+              setFiles,
+              TableName.FILES,
+            );
           }
         },
       )
@@ -137,22 +128,6 @@ export const useOrderSubscriptions = (
         },
       )
       .subscribe();
-
-    // (state) => {
-    //   console.log('channel', state);
-    //   // if the connection is lost due to innactivity or any other state
-    //   // a retry connection should be trigger
-    //   // if (state === 'TIMED_OUT' || state === 'CLOSED') {
-    //   //   console.log('trying to resubscribe...');
-    //   //   messagesChannel.subscribe();
-    //   // }
-    // }
-    // reviewsChannel.subscribe();
-    // filesChannel.subscribe();
-    // activitiesChannel.subscribe();
-    // orderChannel.subscribe();
-
-    // unsubscribe when component unmounts
     return () => {
       //eslint-disable-next-line @typescript-eslint/no-floating-promises
       supabase.removeChannel(channel);

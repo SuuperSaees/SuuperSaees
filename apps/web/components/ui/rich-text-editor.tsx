@@ -1,7 +1,7 @@
 'use client';
 
 // import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Heading from '@tiptap/extension-heading';
 import { Image as ImageInsert } from '@tiptap/extension-image';
@@ -17,25 +17,16 @@ import {
 } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import {
-  Bold,
-  // Heading1,
-  // Heading2,
-  Image,
-  Italic,
-  List,
-  ListOrdered,
-  Quote,
-  SendHorizontalIcon,
-  Strikethrough,
-} from 'lucide-react';
-
-import { Switch } from '@kit/ui/switch';
-import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
-import styles from './styles.module.css';
-import { Trans } from '@kit/ui/trans';
+import { SendHorizontalIcon, Upload, Video } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import LoomRecordButton from '~/orders/[id]/components/loom-record-button';
+
+import { Spinner } from '@kit/ui/spinner';
+import { Switch } from '@kit/ui/switch';
+import { Trans } from '@kit/ui/trans';
+
+import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
+import FileUploader from './files-input-chat';
+import styles from './styles.module.css';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -138,7 +129,7 @@ const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
 };
 
 interface RichTextEditorProps {
-  onComplete?: (richText: string) => void | Promise<void>;
+  onComplete?: (richText: string, fileIds?: string[]) => void | Promise<void>;
   content?: string;
   onChange?: (richText: string) => void;
   onBlur?: () => void;
@@ -147,9 +138,10 @@ interface RichTextEditorProps {
   userRole: string;
   hideSubmitButton?: boolean;
   useInForm?: boolean;
-  showToolbar? : boolean;
-  isEditable? : boolean;
+  showToolbar?: boolean;
+  isEditable?: boolean;
   className?: string;
+  handleFileIdsChange?: (fileIds: string[]) => void;
   [key: string]: unknown;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
@@ -170,11 +162,22 @@ const RichTextEditor = ({
   hideSubmitButton = false,
   showToolbar = true,
   isEditable = true,
+  handleFileIdsChange,
   className,
   ...rest
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
+  const [fileIdsList, setFileIdsList] = useState<string[]>([]);
+  const [messageSended, setMessageSended] = useState(false);
+  const [fileUploadStatus, setFileUploadStatus] = useState<{
+    [key: string]: { status: 'uploading' | 'completed' | 'error'; id?: string };
+  }>({});
+  const [thereAreFilesUploaded, setThereAreFilesUploaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorContent, setErrorContent] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
+
   const cleanupImages = () => {
     // Select all image wrappers
     const imageWrappers = document.querySelectorAll('.cloned-image-wrapper');
@@ -246,7 +249,7 @@ const RichTextEditor = ({
         blockquote: {
           HTMLAttributes: {
             class: `relative border-l-2 pl-4 italic mx-4 my-2 
-              before:content-['“'] before:text-2xl before:font-bold before:absolute 
+              before:content-['"'] before:text-2xl before:font-bold before:absolute 
               before:left-0 before:transform before:-translate-x-0
               inline-block
             `,
@@ -300,49 +303,57 @@ const RichTextEditor = ({
         class:
           'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none',
       },
-
-      
     },
     onUpdate({ editor }) {
       const text = editor.getText();
       const imagesInText = extractImageUrls(text);
       imagesInText && debounceHandleImageUrl(editor)(text);
-      if (onChange){
-        onChange(editor.getHTML()); 
+      if (onChange) {
+        onChange(editor.getHTML());
       }
     },
     onBlur: () => {
       onBlur?.();
-    }
-  }, );
+    },
+  });
   const sendContent = useCallback(() => {
-
     void (async () => {
-      
+      setIsSending(true);
+      setIsLoading(true);
+      const currentContent = editor ? editor.getHTML() : '';
+
       try {
         cleanupImages();
-        const content = editor ? editor.getHTML() : '';
-        // <p></p> is the default content of the editor
-        if (content.trim() === '<p></p>') {
-          return;
+        if (currentContent.trim() !== '<p></p>' || fileIdsList.length > 0) {
+          await onComplete?.(currentContent, fileIdsList);
+          
+          insertedImages.current = new Set<string>();
+          setFileIdsList([]);
+          setFileUploadStatus({});
+          setThereAreFilesUploaded(false);
+          editor?.commands.clearContent();
+          setMessageSended(true);
+          setErrorContent(null);
+          
+          setTimeout(() => {
+            setMessageSended(false);
+          }, 100);
         }
-        editor?.commands.clearContent();
-        onComplete && (await onComplete(content));
-        if (onChange){
-          onChange(content); 
-        }
-        insertedImages.current = new Set<string>();
+      } catch (error) {
+        setErrorContent(currentContent);
+        console.error('Error sending content:', error);
       } finally {
-        // cleanupImages();
+        setIsSending(false);
+        setIsLoading(false);
       }
     })();
-   }, [editor, onComplete, onChange]); 
+  }, [editor, onComplete, fileIdsList]);
 
   // Implement sanitizer to ensure the content to be nested is secure before sending to server
 
   useEffect(() => {
     if (editor) {
-      editor.setEditable(isEditable)
+      editor.setEditable(isEditable);
       editor.commands.focus();
     }
   }, [editor]);
@@ -352,50 +363,123 @@ const RichTextEditor = ({
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content ?? '');
     }
-
   }, [content, editor]);
 
-  const setCustomEditorText = (text: string) => {
-    editor?.commands.setContent(text);
+  const fileUploaderRef = useRef<HTMLInputElement>(null);
+  const handleUploadClick = () => {
+    fileUploaderRef.current?.click();
+  };
+  const handleFileIdsChangeToSentMessage = (fileIds: string[]) => {
+    setFileIdsList((prevFileIds) => {
+      const updatedFileIds = [...prevFileIds, ...fileIds];
+      return updatedFileIds;
+    });
   };
 
+  // New method to track file upload status
+  const updateFileUploadStatus = (
+    file: File,
+    status: 'uploading' | 'completed' | 'error',
+    serverId?: string,
+  ) => {
+    setFileUploadStatus((prev) => ({
+      ...prev,
+      [file.name]: {
+        status,
+        id: serverId,
+      },
+    }));
+  };
+
+  // Check if all files are uploaded
+  const areAllFilesUploaded = () => {
+    return Object.values(fileUploadStatus).every(
+      (file) => file.status === 'completed',
+    );
+  };
+
+  useEffect(() => {
+    if (errorContent && editor) {
+      editor.commands.setContent(errorContent);
+    }
+  }, [errorContent, editor]);
+
   return (
-    <div className={"relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 " + (className ?? '')} {...rest}>
-      <div
-        onClick={() => editor?.commands.focus()}
-        className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
-      >
-        {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
-          <span className="absolute min-h-[40px] h-[40px] transform text-gray-400">
-            <Trans i18nKey="placeholder" />
-          </span>
-        ) : null}
-        <EditorContent
-          editor={editor}
-          className={`${styles['scrollbar-thin']} flex h-fit max-h-96 w-full whitespace-normal flex-col-reverse overflow-y-auto placeholder:text-gray-400`}
-        />
-      </div>
-      <div>
-        { showToolbar && (
-            <Toolbar
-              editor={editor}
-              toggleExternalUpload={toggleExternalUpload}
-              uploadFileIsExternal={uploadFileIsExternal}
-              userRole={userRole}
-              onChange={onChange}
-              setCustomEditorText = {setCustomEditorText}
+    <div
+      className={
+        'relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl border p-4 ' +
+        (className ?? '')
+      }
+      {...rest}
+    >
+      <div className="relative">
+        {isLoading && (
+          <div className="absolute inset-0 z-50 bg-white/50 dark:bg-gray-900/50" />
+        )}
+        <div
+          onClick={() => !isLoading && editor?.commands.focus()}
+          className={`${
+            styles['scrollbar-thin']
+          } relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400 ${
+            isLoading ? 'pointer-events-none opacity-50' : ''
+          }`}
+        >
+          {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused ? (
+            <span className="absolute h-[40px] min-h-[40px] transform text-gray-400">
+              <Trans i18nKey="placeholder" />
+            </span>
+          ) : null}
+          <EditorContent
+            editor={editor}
+            className={`${styles['scrollbar-thin']} flex h-full max-h-60 w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <FileUploader
+              ref={fileUploaderRef}
+              onFileSelect={handleFileIdsChange}
+              onFileIdsChange={handleFileIdsChangeToSentMessage}
+              onMessageSend={messageSended}
+              onFileUploadStatusUpdate={updateFileUploadStatus}
+              thereAreFilesUploaded={setThereAreFilesUploaded}
+              disabled={isLoading}
             />
-          )
-        }
-          {!hideSubmitButton && ( 
+            {showToolbar && (
+              <Toolbar
+                editor={editor}
+                toggleExternalUpload={toggleExternalUpload}
+                uploadFileIsExternal={uploadFileIsExternal}
+                userRole={userRole}
+                onChange={onChange}
+                handleUploadClick={handleUploadClick}
+                disabled={isLoading}
+              />
+            )}
+          </div>
+          {!hideSubmitButton && (
             <ThemedButton
-              className="absolute bottom-6 right-0 h-fit w-fit rounded-xl p-2 shadow-sm"
+              className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))] bg-[#155EEF] p-[var(--spacing-lg,12px)] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
               onClick={sendContent}
+              disabled={
+                isLoading ||
+                (!areAllFilesUploaded() && thereAreFilesUploaded) ||
+                (editor?.getHTML().trim() !== '<p></p>' &&
+                  !areAllFilesUploaded() &&
+                  thereAreFilesUploaded) ||
+                isSending
+              }
             >
-              <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
+              {isSending ? (
+                <Spinner className="h-5 w-5" />
+              ) : (
+                <SendHorizontalIcon className="h-5 w-5 flex-shrink-0 -rotate-45 text-white" />
+              )}
             </ThemedButton>
           )}
         </div>
+      </div>
     </div>
   );
 };
@@ -405,146 +489,64 @@ interface ToolbarProps {
   uploadFileIsExternal?: boolean;
   toggleExternalUpload?: () => void;
   onChange?: (richText: string) => void;
-  setCustomEditorText?: (text: string) => void;
+  handleUploadClick?: () => void;
+  disabled?: boolean;
 }
 
 export const Toolbar = ({
   userRole,
   editor,
-  uploadFileIsExternal,
-  toggleExternalUpload,
   onChange,
-  setCustomEditorText,
+  handleUploadClick,
+  disabled,
 }: ToolbarProps) => {
   const { isInternalMessagingEnabled, handleSwitchChange } =
     useInternalMessaging();
-
 
   if (!editor) {
     return null;
   }
   return (
-    <div className={"flex items-center gap-2 bg-transparent"}>
- {/* <button
-        type='button'
-        className={
-          editor.isActive('heading', { level: 1 })
-            ? 'text-gray-700'
-            : 'text-gray-400'
-        }
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-      >
-        <Heading1 className="h-5 w-5" />
-      </button>
-
-      <button
-        type='button'
-        className={
-          editor.isActive('heading', { level: 2 })
-            ? 'text-gray-700'
-            : 'text-gray-400'
-        }
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-      >
-        <Heading2 className="h-5 w-5" />
-      </button> */}
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'text-gray-700' : 'text-gray-400'}
-      >
-        <Bold className="h-4 w-4" />
-      </button>
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={
-          editor.isActive('strike') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <Strikethrough className="h-4 w-4" />
-      </button>
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={
-          editor.isActive('italic') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <Italic className="h-4 w-4" />
-      </button>
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={
-          editor.isActive('bulletList') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <List className="h-5 w-5" />
-      </button>
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={
-          editor.isActive('orderedList') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <ListOrdered className="h-5 w-5" />
-      </button>
-
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={
-          editor.isActive('blockquote') ? 'text-gray-700' : 'text-gray-400'
-        }
-      >
-        <Quote className="h-4 w-4" />
-      </button>
-      <LoomRecordButton setCustomEditorText={setCustomEditorText ?? undefined} />
-      
+    <div className={`mt-4 flex items-center gap-2 bg-transparent ${disabled ? 'pointer-events-none opacity-50' : ''}`}>
       {!onChange && (
         <>
-        <button
-          type='button'
-          onClick={
-            uploadFileIsExternal && toggleExternalUpload
-              ? () => toggleExternalUpload()
-              : undefined
-          }
-          className={editor.isActive('image') ? 'text-gray-700' : 'text-gray-400'}
-        >
-          <Image className="h-4 w-4" />
-        </button>
-        {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
-          userRole,
-        ) && (
           <button
-            onClick={handleSwitchChange}
-            className={
-              isInternalMessagingEnabled ? 'text-gray-700' : 'text-gray-400'
-            }
+            type="button"
+            onClick={handleUploadClick}
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center gap-2 p-4"
           >
-            <Switch checked={isInternalMessagingEnabled} />
+            <Upload className="h-5 w-5 flex-shrink-0 text-gray-400" />
           </button>
-        )}
-        {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
-          userRole,
-        ) &&
-          isInternalMessagingEnabled && (
-            <span className="text-gray-400">
-              <Trans i18nKey="internalMessagingEnabled" />
-            </span>
-        )}
+          <button
+            type="button"
+            className="mr-1 flex h-9 w-9 flex-shrink-0 items-center justify-center gap-2 p-4"
+          >
+            <Video className="h-5 w-5 flex-shrink-0 text-gray-400" />
+          </button>
+          {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
+            userRole,
+          ) && (
+            <button
+              onClick={handleSwitchChange}
+              className={
+                isInternalMessagingEnabled
+                  ? 'flex h-12 w-12 flex-shrink-0 items-center justify-center gap-2 p-4 text-gray-700'
+                  : 'flex h-9 w-9 flex-shrink-0 items-center justify-center gap-2 p-4 text-gray-400'
+              }
+            >
+              <Switch checked={isInternalMessagingEnabled} />
+            </button>
+          )}
+          {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
+            userRole,
+          ) &&
+            isInternalMessagingEnabled && (
+              <span className="text-gray-400">
+                <Trans i18nKey="internalMessagingEnabled" />
+              </span>
+            )}
         </>
-        
       )}
-
-      
     </div>
   );
 };

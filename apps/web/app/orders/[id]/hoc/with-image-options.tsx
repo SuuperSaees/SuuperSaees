@@ -41,7 +41,7 @@ export const withImageOptions = <P extends ImageProps>(
     });
 
     return (
-      <div className="group relative inline-block h-full max-h-[2000px] w-full min-w-[200px] overflow-hidden">
+      <div className="group relative inline-block h-full max-h-[2000px] w-[150px] min-w-[150px] overflow-hidden">
         <WrappedComponent {...props} />
         <div className="absolute right-0 top-0 flex items-center">
           <button
@@ -58,13 +58,13 @@ export const withImageOptions = <P extends ImageProps>(
           >
             <Tooltip content={'Copy link'}>
               <button
-                className="flex h-[35px] w-[35px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
+                className="flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
                 onClick={handleCopyLink}
               >
                 {isLinkCopied ? (
-                  <Check className="h-[20px] w-[20px] text-green-500" />
+                  <Check className="h-[15px] w-[15px] text-green-500" />
                 ) : (
-                  <Copy className="h-[20px] w-[20px]" />
+                  <Copy className="h-[15px] w-[15px]" />
                 )}
               </button>
             </Tooltip>
@@ -72,8 +72,8 @@ export const withImageOptions = <P extends ImageProps>(
             <ImageDialogView
               triggerComponent={
                 <Tooltip content="View">
-                  <button className="flex h-[35px] w-[35px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm">
-                    <Eye className="h-[20px] w-[20px]" />
+                  <button className="flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm">
+                    <Eye className="h-[15px] w-[15px]" />
                   </button>
                 </Tooltip>
               }
@@ -90,10 +90,10 @@ export const withImageOptions = <P extends ImageProps>(
 
             <Tooltip content="Download">
               <button
-                className="flex h-[35px] w-[35px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
+                className="flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
                 onClick={handleDownload}
               >
-                <Download className="h-[20px] w-[20px]" />
+                <Download className="h-[15px] w-[15px]" />
               </button>
             </Tooltip>
           </div>
@@ -109,7 +109,7 @@ const ImageComponent: React.FC<ImageProps> = ({ src, alt, className }) => (
   <img
     src={src}
     alt={alt}
-    className={`aspect-square h-full max-h-[70vh] w-full object-contain ${className}`}
+    className={`aspect-square object-contain ${className}`}
   />
 );
 

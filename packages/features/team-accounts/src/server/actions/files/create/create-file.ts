@@ -139,3 +139,25 @@ export const createUploadBucketURL = async (
     return { error: 'Error creating signed upload URL' };
   }
 };
+
+
+export const insertOrderFiles = async (
+  orderId: string,
+  fileId: string,
+) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    const { data: orderFileData, error: orderFileError } = await client
+      .from('order_files')
+      .insert({
+        order_id: orderId,
+        file_id: fileId,
+      });
+    if (orderFileError) throw orderFileError.message;
+
+    return orderFileData;
+  } catch (error) {
+    return { error: 'Error inserting order files' };
+  }
+};
