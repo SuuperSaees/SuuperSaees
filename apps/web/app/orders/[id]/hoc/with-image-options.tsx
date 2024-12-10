@@ -41,7 +41,7 @@ export const withImageOptions = <P extends ImageProps>(
     });
 
     return (
-      <div className="group relative inline-block h-full max-h-[2000px] w-[150px] min-w-[150px] overflow-hidden flex justify-center items-center">
+      <div className="group relative inline-block h-full max-h-[2000px] w-[150px] min-w-[150px] overflow-hidden justify-center items-center flex">
         <WrappedComponent {...props} />
         <div className="absolute right-0 top-0 flex items-center">
           <button
@@ -109,7 +109,7 @@ const ImageComponent: React.FC<ImageProps> = ({ src, alt, className }) => (
   <img
     src={src}
     alt={alt}
-    className={`aspect-square h-[150px]  w-[150px] object-contain ${className}`}
+    className={`aspect-square object-contain ${className}`}
   />
 );
 

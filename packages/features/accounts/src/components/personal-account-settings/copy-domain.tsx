@@ -6,6 +6,7 @@ import { Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
+import { Label } from '@kit/ui/label';
 import { useTranslation } from 'react-i18next';
 
 interface CopyInputProps {
