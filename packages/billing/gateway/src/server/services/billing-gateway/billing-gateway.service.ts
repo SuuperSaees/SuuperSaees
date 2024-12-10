@@ -11,12 +11,15 @@ import {
   UpdateSubscriptionParamsSchema,
 } from '@kit/billing/schema';
 
+import { BillingAccounts } from '../../../../../../../apps/web/lib/billing-accounts.types';
+import { Service } from '../../../../../../../apps/web/lib/services.types';
 import { BillingGatewayFactoryService } from './billing-gateway-factory.service';
 
 export function createBillingGatewayService(
   provider: z.infer<typeof BillingProviderSchema>,
+  baseUrl: string,
 ) {
-  return new BillingGatewayService(provider);
+  return new BillingGatewayService(provider, baseUrl);
 }
 
 /**
@@ -31,6 +34,7 @@ export function createBillingGatewayService(
 class BillingGatewayService {
   constructor(
     private readonly provider: z.infer<typeof BillingProviderSchema>,
+    private readonly baseUrl: string,
   ) {}
 
   /**
@@ -135,6 +139,38 @@ class BillingGatewayService {
     const strategy = await this.getStrategy();
 
     return strategy.getSubscription(subscriptionId);
+  }
+
+  /**
+   * Creates a service in the provider.
+   * @param serviceId
+   */
+  async createService(
+    service: Service.Type,
+    billingAccount: BillingAccounts.Type,
+  ) {
+    const strategy = await this.getStrategy();
+
+    return strategy.createService(service, billingAccount, this.baseUrl);
+  }
+
+  /**
+   * Updates a service in the provider.
+   * @param service
+   */
+  async updateService(
+    service: Service.Type,
+    billingAccount: BillingAccounts.Type,
+    serviceProviderId?: string,
+  ) {
+    const strategy = await this.getStrategy();
+
+    return strategy.updateService(
+      service,
+      billingAccount,
+      this.baseUrl,
+      serviceProviderId,
+    );
   }
 
   private getStrategy() {

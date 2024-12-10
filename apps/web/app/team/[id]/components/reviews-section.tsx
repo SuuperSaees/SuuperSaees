@@ -32,8 +32,8 @@ export default function ReviewsSection({
       userRole === 'agency_project_manager',
   });
 
-  const reviews = reviewsQuery.data ?? [];
-
+  const reviews = reviewsQuery?.data ?? [];
+  reviewsQuery.error && console.error('Error in client. Reviews Query error is:',reviewsQuery.error);
   const {
     startIndex,
     endIndex,
@@ -43,15 +43,15 @@ export default function ReviewsSection({
     nextPage,
     totalPages,
   } = usePagination({
-    totalItems: reviews.length,
+    totalItems: reviews?.length,
     pageSize: 4, // Define the number of items per page
   });
   const paginatedReviews = reviews?.slice(startIndex, endIndex) ?? [];
 
-  const reviewWithRating = reviews.filter((rev) => rev.rating !== null);
+  const reviewWithRating = reviews?.filter((rev) => rev.rating !== null);
   const rating =
-    reviewWithRating.reduce((acc, review) => acc + (review?.rating ?? 0), 0) /
-    reviewWithRating.length;
+    reviewWithRating?.reduce((acc, review) => acc + (review?.rating ?? 0), 0) /
+    reviewWithRating?.length;
 
   if (reviewsQuery.isLoading || reviewsQuery.isPending) {
     return <SkeletonReviewsSection />;
@@ -59,7 +59,7 @@ export default function ReviewsSection({
 
   return (
     <div className="flex h-full max-h-full w-full flex-wrap gap-16 lg:flex-nowrap p-8">
-      {!paginatedReviews.length ? (
+      {!paginatedReviews?.length ? (
         <EmptyState 
           imageSrc='/images/illustrations/Illustration-cloud.svg'
           title={t('empty.title')}
@@ -69,17 +69,17 @@ export default function ReviewsSection({
         <>
           <ReviewRating
             rating={rating}
-            total={reviews.length}
+            total={reviews?.length}
             className="shrink-0 p-8"
           />
           <div className="flex h-full w-full flex-col gap-4">
-            {!paginatedReviews.length ? (
+            {!paginatedReviews?.length ? (
               <span className="mx-auto text-sm text-gray-400">
                 {t('empty')}
               </span>
             ) : (
               <div className="flex h-full w-full flex-col gap-4">
-                {paginatedReviews.map((review, index) => (
+                {paginatedReviews?.map((review, index) => (
                   <CardReview
                     key={index}
                     title={review.order?.title ?? ''}

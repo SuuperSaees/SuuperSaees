@@ -36,7 +36,10 @@ async function OrderDetailsPage({
   const agencyStatuses = await getAgencyStatuses(order?.agency_id).catch((err) =>
     console.error(err),
   ) 
-  const organizationId = await getPropietaryOrganizationIdOfOrder(id);
+  const organizationId = await getPropietaryOrganizationIdOfOrder(id).catch((err) => {
+    console.error(`Error getting propietary organization id of order: ${err}`)
+    return { organization: '' }
+  });;
   const { user } = await loadUserWorkspace();
   const { organization: agency } = await getDomainByUserId(user.id ?? '').catch((err) => {
     console.error(`Error client, getting domain by user id: ${err}`)
@@ -72,7 +75,7 @@ async function OrderDetailsPage({
           <OrderTabs
             organizationId={
               organizationId
-                ? { account_id: organizationId.client_organization_id }
+                ? { account_id: organizationId?.client_organization_id }
                 : undefined
             }
             currentPath={currentPath}
