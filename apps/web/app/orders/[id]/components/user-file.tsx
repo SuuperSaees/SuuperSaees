@@ -73,7 +73,7 @@ const UserFile = ({ file }: UserFileProps) => {
               src={file?.url}
               alt="image"
               bucketName="orders"
-              className="object-contain rounded-lg object-center items-center border" 
+              className="object-cover rounded-lg object-center items-center border" 
               dialogClassName="object-contain" 
             />
           </div>
