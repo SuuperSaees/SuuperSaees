@@ -25,13 +25,13 @@ export default function HomeSection({ memberOrders }: HomeSectionProps) {
   const last60Days = subDays(now, 60);
 
   // Split Orders into Periods
-  const ordersCurrentPeriod = memberOrders.filter(
+  const ordersCurrentPeriod = memberOrders?.filter(
     (order) =>
       isAfter(new Date(order.created_at), last30Days) &&
       isBefore(new Date(order.created_at), now),
   );
 
-  const ordersPreviousPeriod = memberOrders.filter(
+  const ordersPreviousPeriod = memberOrders?.filter(
     (order) =>
       isAfter(new Date(order.created_at), last60Days) &&
       isBefore(new Date(order.created_at), last30Days),
@@ -43,19 +43,19 @@ export default function HomeSection({ memberOrders }: HomeSectionProps) {
 
     return {
       active: ordersExists
-        ? orders.filter(
+        ? orders?.filter(
             (order) =>
               order.status !== 'completed' && order.status !== 'annulled',
           ).length
         : null,
       completed: ordersExists
-        ? orders.filter((order) => order.status === 'completed').length
+        ? orders?.filter((order) => order.status === 'completed').length
         : null,
-      total: ordersExists ? orders.length : null,
+      total: ordersExists ? orders?.length : null,
       // Calculate the average rating of the reviews
       averageRating: ordersExists
-        ? orders.reduce((acc, order) => acc + (order.review?.rating ?? 0), 0) /
-            orders.filter((order) => order.review?.rating).length || 0
+        ? orders?.reduce((acc, order) => acc + (order.review?.rating ?? 0), 0) /
+            orders?.filter((order) => order.review?.rating).length || 0
         : null,
     };
   };
