@@ -32,10 +32,11 @@ type OrderTabsProps = {
   orderId: string;
   orderAgencyId: string;
   agencyStatuses: AgencyStatus.Type[];  
+  agencyName: string;
 };
 
 
-export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId, agencyStatuses }: OrderTabsProps) => {
+export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orderAgencyId, agencyStatuses, agencyName }: OrderTabsProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'details'>(
     'activity',
   );
@@ -110,7 +111,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         <DetailsPage />
       </TabsContent>
       <TabsContent value="activity" className="h-full max-h-full min-h-0">
-        <ActivityPage />
+        <ActivityPage agencyName={agencyName} />
       </TabsContent>
       <TabsContent value="tasks">
         <div className="w-full">

@@ -193,6 +193,7 @@ export type Database = {
           order_id: number
           preposition: string
           previous_value: string | null
+          temp_id: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
           value: string
@@ -206,6 +207,7 @@ export type Database = {
           order_id: number
           preposition: string
           previous_value?: string | null
+          temp_id?: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
           value: string
@@ -219,6 +221,7 @@ export type Database = {
           order_id?: number
           preposition?: string
           previous_value?: string | null
+          temp_id?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
           value?: string
@@ -872,6 +875,7 @@ export type Database = {
           message_id: string | null
           name: string
           size: number
+          temp_id: string | null
           type: string
           url: string
           user_id: string
@@ -882,6 +886,7 @@ export type Database = {
           message_id?: string | null
           name: string
           size: number
+          temp_id?: string | null
           type: string
           url: string
           user_id: string
@@ -892,6 +897,7 @@ export type Database = {
           message_id?: string | null
           name?: string
           size?: number
+          temp_id?: string | null
           type?: string
           url?: string
           user_id?: string
@@ -1110,6 +1116,7 @@ export type Database = {
           created_at: string
           id: string
           order_id: number
+          temp_id: string | null
           updated_at: string
           user_id: string
           visibility: Database["public"]["Enums"]["messages_types"] | null
@@ -1119,6 +1126,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id: number
+          temp_id?: string | null
           updated_at?: string
           user_id: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null
@@ -1128,6 +1136,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id?: number
+          temp_id?: string | null
           updated_at?: string
           user_id?: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null
@@ -1655,6 +1664,7 @@ export type Database = {
           id: string
           order_id: number
           rating: number | null
+          temp_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1664,6 +1674,7 @@ export type Database = {
           id?: string
           order_id: number
           rating?: number | null
+          temp_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1673,6 +1684,7 @@ export type Database = {
           id?: string
           order_id?: number
           rating?: number | null
+          temp_id?: string | null
           updated_at?: string
           user_id?: string
         }

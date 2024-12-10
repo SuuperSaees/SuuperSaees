@@ -154,13 +154,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "accounts_memberships_account_role_fkey"
-            columns: ["account_role"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["name"]
-          },
-          {
             foreignKeyName: "accounts_memberships_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -193,6 +186,7 @@ export type Database = {
           order_id: number
           preposition: string
           previous_value: string | null
+          temp_id: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
           value: string
@@ -206,6 +200,7 @@ export type Database = {
           order_id: number
           preposition: string
           previous_value?: string | null
+          temp_id?: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
           value: string
@@ -219,6 +214,7 @@ export type Database = {
           order_id?: number
           preposition?: string
           previous_value?: string | null
+          temp_id?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
           value?: string
@@ -245,8 +241,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       agency_statuses: {
         Row: {
           agency_id: string | null
@@ -290,8 +286,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       billing_accounts: {
         Row: {
           account_id: string
@@ -341,8 +337,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       billing_customers: {
         Row: {
           account_id: string
@@ -380,8 +376,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       billing_services: {
         Row: {
           created_at: string
@@ -550,8 +546,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       chat_messages: {
         Row: {
           account_id: string
@@ -590,13 +586,6 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_messages_chat_id_fkey"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "chats"
             referencedColumns: ["id"]
           },
         ]
@@ -641,8 +630,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       checkout_services: {
         Row: {
           checkout_id: string | null
@@ -744,13 +733,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "client_services_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "client_services_client_organization_id_fkey"
             columns: ["client_organization_id"]
             isOneToOne: false
@@ -765,15 +747,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "client_services_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_services_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "client_services_client_organization_id_fkey"
+            columns: ["client_organization_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
@@ -785,8 +760,22 @@ export type Database = {
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
-        ]
-      }
+          {
+            foreignKeyName: "client_services_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: 'client_services_service_id_fkey';
+            columns: ['service_id'];
+            isOneToOne: false;
+            referencedRelation: 'services';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       clients: {
         Row: {
           agency_id: string
@@ -863,8 +852,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       files: {
         Row: {
           created_at: string
@@ -872,6 +861,7 @@ export type Database = {
           message_id: string | null
           name: string
           size: number
+          temp_id: string | null
           type: string
           url: string
           user_id: string
@@ -882,6 +872,7 @@ export type Database = {
           message_id?: string | null
           name: string
           size: number
+          temp_id?: string | null
           type: string
           url: string
           user_id: string
@@ -892,6 +883,7 @@ export type Database = {
           message_id?: string | null
           name?: string
           size?: number
+          temp_id?: string | null
           type?: string
           url?: string
           user_id?: string
@@ -918,8 +910,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       folder_files: {
         Row: {
           agency_id: string | null
@@ -1089,13 +1081,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "invitations_invited_by_fkey"
-            columns: ["invited_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "invitations_role_fkey"
             columns: ["role"]
             isOneToOne: false
@@ -1110,6 +1095,7 @@ export type Database = {
           created_at: string
           id: string
           order_id: number
+          temp_id: string | null
           updated_at: string
           user_id: string
           visibility: Database["public"]["Enums"]["messages_types"] | null
@@ -1119,6 +1105,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id: number
+          temp_id?: string | null
           updated_at?: string
           user_id: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null
@@ -1128,6 +1115,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id?: number
+          temp_id?: string | null
           updated_at?: string
           user_id?: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null
@@ -1154,8 +1142,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       notifications: {
         Row: {
           account_id: string
@@ -1205,8 +1193,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       order_assignations: {
         Row: {
           agency_member_id: string
@@ -1233,13 +1221,6 @@ export type Database = {
             columns: ["agency_member_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_assignations_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders_v2"
             referencedColumns: ["id"]
           },
         ]
@@ -1306,13 +1287,6 @@ export type Database = {
             columns: ["client_member_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_followers_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders_v2"
             referencedColumns: ["id"]
           },
         ]
@@ -1407,13 +1381,6 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "orders_billing_customer_id_fkey"
-            columns: ["billing_customer_id"]
-            isOneToOne: false
-            referencedRelation: "billing_customers"
-            referencedColumns: ["id"]
-          },
         ]
       }
       orders_v2: {
@@ -1490,7 +1457,7 @@ export type Database = {
             foreignKeyName: "orders_v2_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "accounts"
+            referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
           {
@@ -1501,14 +1468,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "orders_v2_status_id_fkey"
-            columns: ["status_id"]
-            isOneToOne: false
-            referencedRelation: "agency_statuses"
-            referencedColumns: ["id"]
+            foreignKeyName: 'orders_v2_status_id_fkey';
+            columns: ['status_id'];
+            isOneToOne: false;
+            referencedRelation: 'agency_statuses';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       organization_settings: {
         Row: {
           account_id: string
@@ -1549,8 +1516,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       organization_subdomains: {
         Row: {
           id: string
@@ -1580,13 +1547,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_subdomains_subdomain_id_fkey"
-            columns: ["subdomain_id"]
-            isOneToOne: false
-            referencedRelation: "subdomains"
             referencedColumns: ["id"]
           },
         ]
@@ -1646,8 +1606,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       reviews: {
         Row: {
           content: string
@@ -1655,6 +1615,7 @@ export type Database = {
           id: string
           order_id: number
           rating: number | null
+          temp_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1664,6 +1625,7 @@ export type Database = {
           id?: string
           order_id: number
           rating?: number | null
+          temp_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1673,6 +1635,7 @@ export type Database = {
           id?: string
           order_id?: number
           rating?: number | null
+          temp_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1698,8 +1661,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       role_permissions: {
         Row: {
           id: number
@@ -2077,8 +2040,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       subtask_assignations: {
         Row: {
           agency_member_id: string
@@ -2105,13 +2068,6 @@ export type Database = {
             columns: ["agency_member_id"]
             isOneToOne: true
             referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subtask_assignations_subtask_id_fkey"
-            columns: ["subtask_id"]
-            isOneToOne: false
-            referencedRelation: "subtasks"
             referencedColumns: ["id"]
           },
         ]
@@ -2145,13 +2101,6 @@ export type Database = {
             columns: ["client_member_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subtask_followers_subtask_id_fkey"
-            columns: ["subtask_id"]
-            isOneToOne: false
-            referencedRelation: "subtasks"
             referencedColumns: ["id"]
           },
         ]
@@ -2342,8 +2291,8 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
+        ];
+      };
       tokens: {
         Row: {
           access_token: string
@@ -2417,9 +2366,9 @@ export type Database = {
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
-        ]
-      }
-    }
+        ];
+      };
+    };
     Views: {
       user_account_workspace: {
         Row: {
@@ -2430,7 +2379,7 @@ export type Database = {
           subscription_status:
             | Database["public"]["Enums"]["subscription_status"]
             | null
-        }
+        },
         Relationships: [
           {
             foreignKeyName: "accounts_memberships_account_role_fkey"
@@ -2457,12 +2406,12 @@ export type Database = {
       }
       user_accounts: {
         Row: {
-          id: string | null
-          name: string | null
-          picture_url: string | null
-          role: string | null
-          slug: string | null
-        }
+          id: string | null;
+          name: string | null;
+          picture_url: string | null;
+          role: string | null;
+          slug: string | null;
+        };
         Relationships: [
           {
             foreignKeyName: "accounts_memberships_account_role_fkey"
@@ -2470,6 +2419,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "roles"
             referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
           },
         ]
       }
