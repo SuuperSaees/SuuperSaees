@@ -92,8 +92,8 @@ export const fetchFormfieldsWithResponses = async (
       .from('brief_responses')
       .select(
         `field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required),
-        response
-        
+        response,
+        order_data:orders_v2(id, customer_id)
         `,
       )
       .eq('order_id', orderId);
@@ -102,7 +102,26 @@ export const fetchFormfieldsWithResponses = async (
       throw new Error(errorBriefFormFields.message);
     }
 
-    return briefFormFields;
+    const customerId = briefFormFields?.[0]?.order_data?.customer_id;
+
+    if (!customerId) {
+      throw new Error('Customer ID not found.');
+    }
+
+    const { data: userSettings, error: errorUserSettings } = await client
+      .from('user_settings')
+      .select('name')
+      .eq('user_id', customerId)
+      .single();
+
+    if (errorUserSettings) {
+      throw new Error(errorUserSettings.message);
+    }
+
+    return briefFormFields.map((field) => ({
+      ...field,
+      userSettings,
+    }));
   } catch (error) {
     console.error('Error obtaining brief fields', error);
     throw error;
@@ -256,5 +275,4 @@ export const fetchBriefsResponsesforOrders = async (
     throw error;
   }
 };
-
 

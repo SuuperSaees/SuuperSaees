@@ -62,7 +62,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         setActiveTab(value as 'activity' | 'details');
       }}
     >
-      <TabsList className="flex w-fit gap-2 bg-transparent">
+      <TabsList className="flex w-fit gap-2 bg-transparent px-8">
         <ThemedTabTrigger
           value="activity"
           activeTab={activeTab}
@@ -106,7 +106,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
 
       <TabsContent
         value="details"
-        className="no-scrollbar h-full max-h-full min-h-0 overflow-y-auto"
+        className="no-scrollbar h-full max-h-full min-h-0 overflow-y-auto px-8"
       >
         <DetailsPage />
       </TabsContent>
@@ -114,7 +114,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         <ActivityPage agencyName={agencyName} />
       </TabsContent>
       <TabsContent value="tasks">
-        <div className="w-full">
+        <div className="w-full px-8">
           <TasksSection 
             userRole={userRole}
             orderId={orderId}
@@ -124,7 +124,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         </div>
       </TabsContent>
       <TabsContent value="files">
-        <div className="w-full">
+        <div className="w-full px-8">
           <FileSection
             key={'files'}
             clientOrganizationId={organizationId?.account_id ?? ''}
@@ -133,7 +133,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         </div>
       </TabsContent>
       <TabsContent value="calendar">
-        <div className="w-full">
+        <div className="w-full px-8">
           <CalendarSection 
             orderAgencyMembers={orderAgencyMembers ?? []}
             loading={isLoading}

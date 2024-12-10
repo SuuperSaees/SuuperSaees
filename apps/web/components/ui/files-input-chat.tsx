@@ -107,40 +107,35 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
                 </div>
               )}
               {
-                (globalFileList?.find((item) => item.file === file)?.progress ?? 100) < 100 && (
-                    <div className='items-center flex justify-center absolute w-full h-full'>
-                      <Spinner className='w-5 h-5'/>
-                    </div>
+                globalFileList.find((item) => item.file === file)?.progress < 100 && (
+                  <div className='items-center flex justify-center absolute w-full h-full'>
+                    <Spinner className='w-5 h-5'/>
+                  </div>
                 )
               }
             </div>
             {
-            // Progress bar section
-            ((globalFileList?.find((item) => item.file === file)?.progress ?? 0) > 0) && 
-            ((globalFileList?.find((item) => item.file === file)?.progress ?? 100) < 100) && (
+              globalFileList.find((item) => item.file === file)?.progress > 0 && 
+              globalFileList.find((item) => item.file === file)?.progress < 100 && (
                 <div className="w-full h-1 bg-gray-200 rounded-full mt-1">
-                <div
+                  <div
                     className="h-full bg-blue-500 rounded-full"
-                    style={{ width: `${globalFileList?.find((item) => item.file === file)?.progress ?? 0}%` }}
-                />
+                    style={{ width: `${globalFileList.find((item) => item.file === file)?.progress}%` }}
+                  />
                 </div>
-            )
+              )
             }
             <div>
               <p className="text-sm text-gray-600 truncate w-24">{file.name}</p>
             </div>
-            {
-            // X button section
-            hoveredFileId === id && 
-            ((globalFileList?.find((item) => item.file === file)?.progress ?? 0) > 0) && (
-                <div className="absolute top-[-8px] right-[-8px]">
+            {hoveredFileId === id && globalFileList.find((item) => item.file === file)?.progress > 0 && (
+              <div className="absolute top-[-8px] right-[-8px]">
                 <X
-                    className="cursor-pointer w-4 h-4 bg-white rounded-full shadow"
-                    onClick={() => removeFile(file)}
+                  className="cursor-pointer w-4 h-4 bg-white rounded-full shadow"
+                  onClick={() => removeFile(file)}
                 />
-                </div>
-            )
-            }
+              </div>
+            )}
           </div>
         ))}
       </div>

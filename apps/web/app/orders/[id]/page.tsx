@@ -1,7 +1,6 @@
 import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getPropietaryOrganizationIdOfOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 
-import { PageBody } from '@kit/ui/page';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
@@ -57,7 +56,6 @@ async function OrderDetailsPage({
   });
 
   return (
-    <PageBody className="h-full max-h-full min-h-0 flex-grow lg:px-0">
       <ActivityProvider
         messages={order?.messages ?? []}
         files={order?.files ?? []}
@@ -68,10 +66,10 @@ async function OrderDetailsPage({
       >
         
 
-    <div className="flex h-full max-h-full w-full flex-col text-gray-700">
+        <div className="flex h-full max-h-full w-full flex-col text-gray-700 overflow-y-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
       <div className="flex max-h-full h-full w-full justify-between">
     
-        <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pr-[2rem] pt-2">
+        <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pt-2">
           <OrderHeader order={order} agencyStatuses={agencyStatuses ?? []} />
           <OrderTabs
             organizationId={
@@ -92,7 +90,6 @@ async function OrderDetailsPage({
       </div>
     </div>
       </ActivityProvider>
-    </PageBody>
   );
 }
 

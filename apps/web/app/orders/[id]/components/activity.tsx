@@ -2,26 +2,17 @@
 
 import { useState } from 'react';
 
-import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-
-import UploadFileComponent from '~/components/ui/files-input';
 import RichTextEditor from '~/components/ui/rich-text-editor';
 import { sendEmailsOfOrderMessages } from '~/team-accounts/src/server/actions/orders/update/update-order';
 
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
-
-function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0,
-      v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
+import { Separator } from '@kit/ui/separator';
+import { getUrlFile } from '~/team-accounts/src/server/actions/files/get/get-files';
+import { insertOrderFiles } from '~/team-accounts/src/server/actions/files/create/create-file';
 
 const ActivityPage = ({ agencyName }: { agencyName: string }) => {
   const { order } = useActivityContext();
-  const client = useSupabase();
   const [showFileUploader, setShowFileUploader] = useState(false);
 
   const handleFileIdsChange = async (fileIds: string[]) => {
@@ -34,12 +25,12 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
 
     for (const orderFile of orderFilesToInsert) {
       try {
-        const { error: Err } = await client
-          .from('order_files')
-          .insert(orderFile);
-        if (Err) {
-          console.error('Error inserting order FILE:', Err);
+        const orderFileInserted = await insertOrderFiles(orderFile.order_id, orderFile.file_id);
+        if (orderFileInserted?.error) {
+          console.error('Error inserting order FILE:', orderFileInserted.error);
         }
+
+
       } catch (error) {
         console.error('Unexpected error inserting order FILE:', error);
       }
@@ -48,10 +39,49 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
 
   const { addMessage, userRole, userWorkspace } = useActivityContext();
 
-  const handleOnCompleteMessageSend = async (messageContent: string) => {
+  const handleOnCompleteMessageSend = async (messageContent: string, fileIdsList?: string[]) => {
     try {
+      if (fileIdsList && fileIdsList?.length > 0) {
+        const idsListFromServer = [];
+        for (const fileId of fileIdsList) {
+          const fileData = await getUrlFile(fileId);
+          if (fileData === null) {
+            console.error('Error getting file:', fileData);
+          } else {
+            idsListFromServer.push(fileData.id);
+          }
+        }
 
-        await addMessage(messageContent);
+        if(idsListFromServer.length > 0) {
+          await addMessage({message: messageContent, fileIdsList: idsListFromServer});
+          await sendEmailsOfOrderMessages(
+            order.id,
+            order.title,
+            messageContent,
+            userWorkspace.name ?? '',
+            order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
+              [],
+            agencyName,
+            new Date().toLocaleDateString(),
+            userWorkspace.id ?? '',
+          );
+        } else if (messageContent !== '<p></p>' && idsListFromServer.length === 0) {
+          await addMessage({message: messageContent});
+          await sendEmailsOfOrderMessages(
+            order.id,
+            order.title,
+            messageContent,
+            userWorkspace.name ?? '',
+            order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
+              [],
+            agencyName,
+            new Date().toLocaleDateString(),
+            userWorkspace.id ?? '',
+          );
+        }
+        
+      } else {
+        await addMessage({message: messageContent});
         await sendEmailsOfOrderMessages(
           order.id,
           order.title,
@@ -63,6 +93,7 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
           new Date().toLocaleDateString(),
           userWorkspace.id ?? '',
         );
+      }
  
     } catch (error) {
       console.error('Failed to send message or upload files:', error);
@@ -70,28 +101,22 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
   };
 
   return (
-    <div className="flex h-full max-h-full w-full flex-col gap-4">
+    <div className="flex w-full flex-col gap-4 h-auto min-h-full">
+      <Separator className='w-full'/>
       <Interactions />
-      <div className="mb-2 flex flex-col justify-end gap-4 ">
-        {showFileUploader && (
-          <UploadFileComponent
-            bucketName="orders"
-            onFileIdsChange={handleFileIdsChange}
-            uuid={generateUUID()}
-            removeResults
-            toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
-          />
-        )}
- 
+      <Separator className='w-full'/>
+      <div className="flex flex-col justify-end pt-3 px-8"> 
         <RichTextEditor
+          className=" w-full overflow-auto"
           onComplete={handleOnCompleteMessageSend}
           uploadFileIsExternal
           toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
           userRole={userRole}
-          className='pb-8'
+          handleFileIdsChange={handleFileIdsChange}
         />
       </div>
-    </div>
+  </div>
+    
   );
 };
 
