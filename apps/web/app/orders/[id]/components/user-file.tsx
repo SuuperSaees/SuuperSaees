@@ -1,4 +1,5 @@
-import { Download, StickyNote } from 'lucide-react';
+import { Download, StickyNote, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 import { File } from '../context/activity-context';
 import ImageWithOptions from '../hoc/with-image-options';
@@ -61,6 +62,8 @@ const handleDownload = async ({src, type}) => {
 };
 
 const UserFile = ({ file }: UserFileProps) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const renderFilePreview = (file: File) => {
     if (file.type.startsWith('image/')) {
       return (
@@ -100,12 +103,21 @@ const UserFile = ({ file }: UserFileProps) => {
           </div>
           <button
             className="absolute h-[30px] w-[30px] top-2 right-2 p-2 hidden group-hover:block bg-white rounded-full shadow-lg"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              handleDownload({ src: file.url, type: file.type }).catch(console.error);
+              setIsDownloading(true);
+              try {
+                await handleDownload({ src: file.url, type: file.type });
+              } finally {
+                setIsDownloading(false);
+              }
             }}
           >
-            <Download className="h-[15px] w-[15px]" />
+            {isDownloading ? (
+              <Loader2 className="h-[15px] w-[15px] animate-spin" />
+            ) : (
+              <Download className="h-[15px] w-[15px]" />
+            )}
           </button>
         </div>
       );

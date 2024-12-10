@@ -2,18 +2,17 @@
 
 import { useState } from 'react';
 
-import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-
 import RichTextEditor from '~/components/ui/rich-text-editor';
 import { sendEmailsOfOrderMessages } from '~/team-accounts/src/server/actions/orders/update/update-order';
 
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
 import { Separator } from '@kit/ui/separator';
+import { getUrlFile } from '~/team-accounts/src/server/actions/files/get/get-files';
+import { insertOrderFiles } from '~/team-accounts/src/server/actions/files/create/create-file';
 
 const ActivityPage = ({ agencyName }: { agencyName: string }) => {
   const { order } = useActivityContext();
-  const client = useSupabase();
   const [showFileUploader, setShowFileUploader] = useState(false);
 
   const handleFileIdsChange = async (fileIds: string[]) => {
@@ -26,12 +25,12 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
 
     for (const orderFile of orderFilesToInsert) {
       try {
-        const { error: Err } = await client
-          .from('order_files')
-          .insert(orderFile);
-        if (Err) {
-          console.error('Error inserting order FILE:', Err);
+        const orderFileInserted = await insertOrderFiles(orderFile.order_id, orderFile.file_id);
+        if (orderFileInserted?.error) {
+          console.error('Error inserting order FILE:', orderFileInserted.error);
         }
+
+
       } catch (error) {
         console.error('Unexpected error inserting order FILE:', error);
       }
@@ -42,20 +41,14 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
 
   const handleOnCompleteMessageSend = async (messageContent: string, fileIdsList?: string[]) => {
     try {
-      if (fileIdsList?.length > 0) {
+      if (fileIdsList && fileIdsList?.length > 0) {
         const idsListFromServer = [];
         for (const fileId of fileIdsList) {
-          const { data: fileData, error: Err } = await client
-            .from('files')
-            .select('id')
-            .eq('id', fileId)
-            .single();
-          if (Err) {
-            console.error('Error getting file:', Err);
-          }
-
-          if (fileData?.id !== undefined) {
-            idsListFromServer.push(fileData?.id);
+          const fileData = await getUrlFile(fileId);
+          if (fileData === null) {
+            console.error('Error getting file:', fileData);
+          } else {
+            idsListFromServer.push(fileData.id);
           }
         }
 

@@ -1,27 +1,8 @@
-import React, { forwardRef, useState, useImperativeHandle, useRef, useEffect } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState } from 'react';
 import { StickyNote, X } from 'lucide-react';
-import { createFile, createUploadBucketURL } from '~/team-accounts/src/server/actions/files/create/create-file';
-import { useTranslation } from 'react-i18next';
-import { generateUUID } from '~/utils/generate-uuid';
-import { deleteFile } from '~/team-accounts/src/server/actions/files/delete/delete-file';
 import { Spinner } from '@kit/ui/spinner';
+import { useFileUpload } from '~/team-accounts/src/server/actions/files/upload/file-chat-uploads';
 import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon } from '~/orders/[id]/components/fileIcons';
-
-interface FileUploaderProps {
-  onFileSelect?: (fileIds: string[]) => void;
-  onFileIdsChange?: (fileIds: string[]) => void;
-  onMessageSend?: boolean;
-  onFileUploadStatusUpdate?: (file: File, status: 'uploading' | 'completed' | 'error', serverId?: string) => void;
-  thereAreFilesUploaded?: (value: boolean) => void;
-}
-
-interface FileWithServerId {
-  file: File;
-  serverId?: string;
-  url?: string;
-  progress?: number;
-  error?: string;
-}
 
 const fileTypeIcons: Record<string, JSX.Element> = {
   pdf: <PDFIcon />,
@@ -52,173 +33,33 @@ const fileTypeIcons: Record<string, JSX.Element> = {
   rar: <RARIcon />,
 };
 
+interface FileUploaderProps {
+  onFileSelect?: (fileIds: string[]) => void;
+  onFileIdsChange?: (fileIds: string[]) => void;
+  onMessageSend?: boolean;
+  onFileUploadStatusUpdate?: (file: File, status: 'uploading' | 'completed' | 'error', serverId?: string) => void;
+  thereAreFilesUploaded?: (value: boolean) => void;
+}
+
 const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
-  ({ onFileSelect, onFileIdsChange, onMessageSend = false, onFileUploadStatusUpdate, thereAreFilesUploaded  }, ref) => {
-    const { t } = useTranslation();
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]); 
-    const [fileUrls, setFileUrls] = useState<File[]>([]); 
+  ({ onFileSelect, onFileIdsChange, onMessageSend = false, onFileUploadStatusUpdate, thereAreFilesUploaded }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [hoveredFileId, setHoveredFileId] = useState<number | null>(null);
-    const [globalFileList, setGlobalFileList] = useState<FileWithServerId[]>([]);
-    const uuid = generateUUID();
+
+    const {
+      selectedFiles,
+      globalFileList,
+      handleFileChange,
+      removeFile,
+      resetFiles
+    } = useFileUpload({
+      onFileSelect,
+      onFileIdsChange,
+      onFileUploadStatusUpdate,
+      thereAreFilesUploaded
+    });
 
     useImperativeHandle(ref, () => inputRef.current!);
-
-    const sanitizeFileName = (fileName: string) => {
-      return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-    };
-
-    const uploadFile = async (file: File) => {
-      onFileUploadStatusUpdate?.(file, 'uploading');
-
-      setGlobalFileList(prevList => [
-        ...prevList, 
-        {
-          file, 
-          progress: 0,
-        }
-      ]);
-
-      const bucketName = 'orders';
-      const sanitizedFileName = sanitizeFileName(file.name);
-      const filePath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
-      const xhr = new XMLHttpRequest();
-  
-      xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-          const progress = (event.loaded / event.total) * 100;
-          setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
-            prevFile === file ? { ...prevFile, progress } : prevFile
-          ));
-          if(progress < 90){
-            setGlobalFileList((prevList) => prevList.map((prevFile) =>
-              prevFile.file === file ? { ...prevFile, progress } : prevFile
-            ));
-          }
-        }
-      });
-  
-      xhr.upload.addEventListener('error', () => {
-        onFileUploadStatusUpdate?.(file, 'error');
-        setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
-          prevFile === file ? { ...prevFile, error: t('orders:uploadError', { fileName: file.name }) } : prevFile
-        ));
-      });
-  
-      xhr.upload.addEventListener('load', () => {
-        setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
-          prevFile === file ? { ...prevFile, progress: 100 } : prevFile
-        ));
-        setGlobalFileList((prevList) => prevList.map((prevFile) =>
-          prevFile.file === file ? { ...prevFile, progress: 99 } : prevFile
-        ));
-      });
-  
-      xhr.onreadystatechange = () => {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-          if (xhr.status !== 200) {
-            onFileUploadStatusUpdate?.(file, 'error');
-            try {
-              const response = JSON.parse(xhr.responseText);
-              const errorMessage = response.message || 'Unknown error';
-              setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
-                prevFile === file ? { ...prevFile, error: t('orders:uploadError', { fileName: file.name }) + `: ${errorMessage}` } : prevFile
-              ));
-            } catch (e) {
-              setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
-                prevFile === file ? { ...prevFile, error: t('orders:uploadError', { fileName: file.name }) + `: ${xhr.statusText}` } : prevFile
-              ));
-            }
-          }
-        }
-      };
-  
-      try {
-        const data = await createUploadBucketURL(bucketName, filePath);
-        if ('error' in data) {
-          onFileUploadStatusUpdate?.(file, 'error');
-          setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
-            prevFile === file ? { ...prevFile, error: `Error to obtain the URL: ${data.error}` } : prevFile
-          ));
-          return;
-        }
-        xhr.open('PUT', data.signedUrl, true);
-        xhr.setRequestHeader('Content-Type', file.type);
-        xhr.send(file);
-        const fileUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/orders/' + filePath;
-        
-        const newFileData = {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: fileUrl,
-        };
-
-        const createdFiles = await createFile([newFileData]);
-        
-        if (onFileSelect) {
-          const allServerIds = createdFiles.map((file) => file.id);
-          onFileSelect(allServerIds);
-          if (onFileIdsChange){
-            onFileIdsChange(allServerIds);
-          }
-        }
-
-        setFileUrls((prevFiles) => [
-          ...prevFiles,
-          { ...file, serverId: createdFiles[0]?.id, url: createdFiles[0]?.url }
-        ]);
-
-        onFileUploadStatusUpdate?.(file, 'completed', createdFiles[0]?.id);
-
-
-        setGlobalFileList((prevList) => prevList.map((prevFile) =>
-          prevFile.file === file ? { 
-            ...prevFile, 
-            serverId: 
-            createdFiles[0]?.id, 
-            url: createdFiles[0]?.url,
-            progress: 100, } : prevFile
-        ));
-
-      } catch (error) {
-        onFileUploadStatusUpdate?.(file, 'error');
-        setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
-          prevFile === file ? { ...prevFile, error: t('orders:uploadURLError', { error: error.message }) } : prevFile
-        ));
-      }
-    };
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const files = event.target.files;
-      if (files) {
-        const newFiles = Array.from(files);
-        setSelectedFiles((prevFiles) => [...prevFiles, ...newFiles]);
-        setFileUrls((prevFiles) => [...prevFiles, ...newFiles]);
-        
-        newFiles.forEach((file) => {
-          uploadFile(file).catch((error) => {
-            console.error('Error uploading file', error);
-          });
-        });
-      }
-      if (thereAreFilesUploaded){
-        thereAreFilesUploaded(true);
-      }
-    };
-
-    const removeFile = async (fileToRemove: File) => {
-      setSelectedFiles((prevFiles) => 
-        prevFiles.filter((item) => item !== fileToRemove)
-      );
-
-      if (globalFileList.find((item) => item.file === fileToRemove)) {
-        setGlobalFileList((prevList) =>
-          prevList.filter((item) => item.file !== fileToRemove)
-        );
-        await deleteFile(globalFileList.find((item) => item.file === fileToRemove)?.serverId ?? '', globalFileList.find((item) => item.file === fileToRemove)?.url ?? '');
-      }
-    };
 
     const getFileTypeIcon = (fileName: string) => {
       const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
@@ -227,15 +68,10 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
 
     useEffect(() => {
       if (onMessageSend) {
-        setSelectedFiles([]);
-        setFileUrls([]);
-        setGlobalFileList([]);
-        if (thereAreFilesUploaded) {
-          thereAreFilesUploaded(false);
-        }
+        resetFiles();
       }
-    }, [onMessageSend, thereAreFilesUploaded]);
-    
+    }, [onMessageSend, resetFiles]);
+
     return (
       <div className="overflow-y-auto overflow-x-hidden flex flex-wrap gap-2 max-h-[240px] w-full">
         <input
@@ -263,7 +99,6 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
                 <video
                   src={URL.createObjectURL(file)}
                   className="object-cover w-full h-full"
-                  controls
                   muted 
                 />
               ) : (
@@ -272,15 +107,16 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
                 </div>
               )}
               {
-                globalFileList.find((item) => item.file === file)?.progress < 100 &&(
+                globalFileList.find((item) => item.file === file)?.progress < 100 && (
                   <div className='items-center flex justify-center absolute w-full h-full'>
-                    <Spinner  className='w-5 h-5'/>
+                    <Spinner className='w-5 h-5'/>
                   </div>
                 )
               }
             </div>
             {
-              globalFileList.find((item) => item.file === file)?.progress > 0 && globalFileList.find((item) => item.file === file)?.progress < 100 &&(
+              globalFileList.find((item) => item.file === file)?.progress > 0 && 
+              globalFileList.find((item) => item.file === file)?.progress < 100 && (
                 <div className="w-full h-1 bg-gray-200 rounded-full mt-1">
                   <div
                     className="h-full bg-blue-500 rounded-full"
@@ -290,9 +126,9 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
               )
             }
             <div>
-              <p className="text-sm text-gray-600 truncate w-24">{file.name ?? 'fileName'}</p>
+              <p className="text-sm text-gray-600 truncate w-24">{file.name}</p>
             </div>
-            {hoveredFileId === id && globalFileList.find((item) => item.file === file)?.progress > 0 &&(
+            {hoveredFileId === id && globalFileList.find((item) => item.file === file)?.progress > 0 && (
               <div className="absolute top-[-8px] right-[-8px]">
                 <X
                   className="cursor-pointer w-4 h-4 bg-white rounded-full shadow"

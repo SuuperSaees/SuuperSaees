@@ -1,19 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CloudUpload, StickyNote, X, XIcon } from 'lucide-react';
-import { createFile, createUploadBucketURL } from '../../../../packages/features/team-accounts/src/server/actions/files/create/create-file';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { useTranslation } from 'react-i18next';
-import { deleteOrderBriefFile } from '~/team-accounts/src/server/actions/files/delete/delete-file';
-import { toast } from 'sonner';
-
-const fileTypeColors: Record<string, string> = {
-  pdf: 'fill-pdf',
-  png: 'fill-png',
-  jpg: 'fill-jpg',
-  jpeg: 'fill-jpeg',
-  doc: 'fill-doc',
-  docx: 'fill-docx',
-};
+import { useFileUpload } from '~/team-accounts/src/server/actions/files/upload/file-uploads';
+import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon } from '~/orders/[id]/components/fileIcons';
 
 interface FileInfo {
   file: File;
@@ -30,6 +20,35 @@ interface UploadFileComponentProps {
   toggleExternalUpload?: () => void;
 }
 
+const fileTypeIcons: Record<string, JSX.Element> = {
+  pdf: <PDFIcon />,
+  doc: <DOCIcon />,
+  docx: <DOCXIcon />,
+  txt: <TXTIcon />,
+  csv: <CSVIcon />,
+  xls: <XLSIcon />,
+  xlsx: <XLSXIcon />,
+  ppt: <PPTIcon />,
+  pptx: <PPTXIcon />,
+  fig: <FIGIcon />,
+  ai: <AIIcon />,
+  psd: <PSDIcon />,
+  indd: <INDDIcon />,
+  aep: <AEPIcon />,
+  html: <HTMLIcon />,
+  css: <CSSIcon />,
+  rss: <RSSIcon />,
+  sql: <SQLIcon />,
+  js: <JSIcon />,
+  json: <JSONIcon />,
+  java: <JAVAIcon />,
+  xml: <XMLIcon />,
+  exe: <EXEIcon />,
+  dmg: <DMGIcon />,
+  zip: <ZIPIcon />,
+  rar: <RARIcon />,
+};
+
 export default function UploadFileComponent({
   bucketName,
   uuid,
@@ -38,11 +57,11 @@ export default function UploadFileComponent({
   toggleExternalUpload,
 }: UploadFileComponentProps) {
   const { t } = useTranslation();
-  const [files, setFiles] = useState<Record<string, FileInfo>>({});
+  const { files, setFiles, uploadFile, handleDelete, generateFileId } = useFileUpload(bucketName, uuid, onFileIdsChange, removeResults);
   const [isDragging, setIsDragging] = useState(false);
   const [dragMessage, setDragMessage] = useState(t('dragAndDrop'));
   const [hoveredFileId, setHoveredFileId] = useState<string | null>(null);
-  
+
   const handleFileInputClick = () => {
     const fileInput = document.getElementById('file-input');
     if (fileInput) {
@@ -97,132 +116,9 @@ export default function UploadFileComponent({
     setDragMessage(t('orders:dragAndDrop'));
   };
 
-  const generateFileId = () => Date.now() + Math.random().toString(36).substr(2, 9);
-
-  const sanitizeFileName = (fileName: string) => {
-    return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-  };
-
-  const uploadFile = async (id: string, file: File) => {
-    const sanitizedFileName = sanitizeFileName(file.name);
-    const filePath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
-    const xhr = new XMLHttpRequest();
-
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable) {
-        const progress = (event.loaded / event.total) * 100;
-        setFiles((prevFiles) => ({
-          ...prevFiles,
-          [id]: { ...prevFiles[id], progress },
-        }));
-      }
-    });
-
-    xhr.upload.addEventListener('error', () => {
-      setFiles((prevFiles) => ({
-        ...prevFiles,
-        [id]: { ...prevFiles[id], error: t('orders:uploadError', { fileName: file.name }) },
-      }));
-    });
-
-    xhr.upload.addEventListener('load', () => {
-      setFiles((prevFiles) => ({
-        ...prevFiles,
-        [id]: { ...prevFiles[id], progress: 100 },
-      }));
-      if (removeResults) {
-        setTimeout(() => {
-          setFiles((prevFiles) => {
-            const { [id]: _, ...rest } = prevFiles;
-            return rest;
-          });
-        }, 1000);
-      }
-    });
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === XMLHttpRequest.DONE) {
-        if (xhr.status !== 200) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            const errorMessage = response.message || 'Unknown error';
-            setFiles((prevFiles) => ({
-              ...prevFiles,
-              [id]: { ...prevFiles[id], error: t('orders:uploadError', { fileName: file.name }) + `: ${errorMessage}` },
-            }));
-          } catch (e) {
-            setFiles((prevFiles) => ({
-              ...prevFiles,
-              [id]: { ...prevFiles[id], error: t('orders:uploadError', { fileName: file.name }) + `: ${xhr.statusText}` },
-            }));
-          }
-        }
-      }
-    };
-
-    try {
-      const data = await createUploadBucketURL(bucketName, filePath);
-      if ('error' in data) {
-        setFiles((prevFiles) => ({
-          ...prevFiles,
-          [id]: { ...prevFiles[id], error: `Error to obtain the URL: ${data.error}` },
-        }));
-        return;
-      }
-      xhr.open('PUT', data.signedUrl, true);
-      xhr.setRequestHeader('Content-Type', file.type);
-      xhr.send(file);
-      const fileUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/orders/' + filePath;
-      const newFileData = {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        url: fileUrl,
-      };
-
-      const createdFiles = await createFile([newFileData]);
-      setFiles((prevFiles) => {
-        const updatedFiles = {
-          ...prevFiles,
-          [id]: { ...prevFiles[id], serverId: createdFiles[0]?.id, url: createdFiles[0]?.url },
-        };
-        // Llamar a onFileIdsChange con todos los IDs de servidor actualizados
-        const allServerIds = Object.values(updatedFiles)
-          .map(file => file.serverId)
-          .filter(Boolean);
-          const allFileUrls = Object.values(updatedFiles)
-          .map(file => file.url)
-          .filter(Boolean);
-        onFileIdsChange(allServerIds, allFileUrls);
-        return updatedFiles;
-      });
-    } catch (error) {
-      setFiles((prevFiles) => ({
-        ...prevFiles,
-        [id]: { ...prevFiles[id], error: t('orders:uploadURLError', { error: error.message }) },
-      }));
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    setFiles((prevFiles) => {
-      const { [id]: _, ...rest } = prevFiles;
-      onFileIdsChange(Object.values(rest).map(file => file.serverId).filter(Boolean), Object.values(rest).map(file => file?.url).filter(Boolean));
-      return rest;
-    });
-    if (files[id]?.serverId) {
-      const deletedFile = await deleteOrderBriefFile(files[id].serverId);
-      if (deletedFile) {
-        toast(t('orders:deletedFile'), {
-          description: t('orders:deletedFileDescription'),
-        });
-      }
-    }
-  };
-
-  const getFileTypeClass = (fileName: string) => {
+  const getFileTypeIcon = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
-    return fileTypeColors[extension] ?? 'fill-unknown';
+    return fileTypeIcons[extension] ?? <StickyNote className="text-gray-500 h-[56px] w-[40px]" />;
   };
 
   const formatFileSize = (size: number) => {
@@ -263,7 +159,7 @@ export default function UploadFileComponent({
           onChange={handleFileChange}
         />
       </div>
-      <div ref={containerRef} className="overflow-y-auto flex gap-2 max-h-[240px] thin-scrollbar">
+      <div className="overflow-y-auto overflow-x-hidden flex flex-wrap gap-1 max-h-[240px] w-full">
         {Object.entries(files).map(([id, fileInfo]) => (
           <div
             key={id}
@@ -271,11 +167,27 @@ export default function UploadFileComponent({
             onMouseEnter={() => setHoveredFileId(id)}
             onMouseLeave={() => setHoveredFileId(null)}
           >
-            <div className="flex items-center justify-center w-24 h-16 bg-gray-200 rounded-lg">
-              <StickyNote className={`text-white ${getFileTypeClass(fileInfo.file.name ?? 'fileName')} w-8`} />
+            <div className="flex items-center justify-center w-24 h-16 bg-gray-200 rounded-lg overflow-hidden">
+              {fileInfo.file.type.startsWith('image/') ? (
+                <img
+                  src={URL.createObjectURL(fileInfo.file)}
+                  alt={fileInfo.file.name}
+                  className="object-cover w-full h-full"
+                />
+              ) : fileInfo.file.type.startsWith('video/') ? (
+                <video
+                  src={URL.createObjectURL(fileInfo.file)}
+                  className="object-cover w-full h-full"
+                  muted 
+                />
+              ) : (
+                <div className='w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                  {getFileTypeIcon(fileInfo.file.name ?? 'fileName')} 
+                </div>
+              )}
             </div>
             <div>
-              <p className="text-sm text-gray-600 whitespace-normal break-words w-24">{fileInfo.file.name ?? 'fileName'}</p>
+              <p className="text-sm text-gray-600 truncate w-24">{fileInfo.file.name ?? 'fileName'}</p>
               <p className="text-xs text-gray-400">{formatFileSize(fileInfo.file.size)}</p>
               {fileInfo.error && <p className="text-xs text-red-500">{fileInfo.error}</p>}
               {fileInfo.progress > 0 && (

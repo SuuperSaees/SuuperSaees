@@ -291,16 +291,21 @@ export async function getClientFiles(clientOrganizationId: string) {
 }
 
 export async function getUrlFile(fileId: string) {
-  const client = getSupabaseServerComponentClient();
+  try {
+    const client = getSupabaseServerComponentClient();
 
-  // Fetch the file details
-  const { data: fileData, error: fileDataError } = await client
-    .from('files')
-    .select('url')
-    .eq('id', fileId)
-    .single();
+    // Fetch the file details
+    const { data: fileData, error: fileDataError } = await client
+      .from('files')
+      .select('id, url')
+      .eq('id', fileId)
+      .single();
 
-  if (fileDataError) throw fileDataError;
+    if (fileDataError) throw fileDataError;
 
-  return fileData.url;
+    return fileData;
+  } catch (error) {
+    console.error('Error getting file:', error);
+    return null;
+  }
 }
