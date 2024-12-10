@@ -83,7 +83,7 @@ function LoomPublicIdContainer({
         <Spinner className="h-5" />
       ) : (
         <div className='w-full'>
-          <CopyDomain value={domain} className='mb-3' label={''} />
+          <CopyDomain value={domain} className='mb-3' />
           <ThemedInput
             data-test={'account-display-name'}
             minLength={2}
