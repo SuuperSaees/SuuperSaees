@@ -129,6 +129,7 @@ export async function getOrganization(): Promise<{
   slug: string | null;
   email: string | null;
   picture_url: string | null;
+  loom_app_id: string | null;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
@@ -155,7 +156,9 @@ export async function getOrganization(): Promise<{
 
     const { data: organizationsData, error: organizationError } = await client
       .from('accounts')
-      .select('id, name, primary_owner_user_id, slug, email, picture_url')
+      .select(
+        'id, name, primary_owner_user_id, slug, email, picture_url, loom_app_id',
+      )
       .eq('id', organizationId)
       .single();
 
@@ -327,6 +330,7 @@ export async function getAgencyForClientByUserId(userId: string): Promise<{
   id: string;
   name: string;
   primary_owner_user_id: string;
+  loom_app_id: string | null;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
@@ -342,7 +346,8 @@ export async function getAgencyForClientByUserId(userId: string): Promise<{
 
     const { data: agencyData, error: agencyError } = await client
       .from('accounts')
-      .select('id, name, primary_owner_user_id') // if we need more data we can add it here, but for now we only need the id.
+      //Temporarily added loom_app_id to the query
+      .select('id, name, primary_owner_user_id, loom_app_id') // if we need more data we can add it here, but for now we only need the id.
       //IMPORTANT: ask to the team for more params on the future
       .eq('id', clientData.agency_id)
       .eq('is_personal_account', false)
