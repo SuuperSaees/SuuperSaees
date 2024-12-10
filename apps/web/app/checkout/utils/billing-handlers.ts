@@ -2,16 +2,17 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/select-plan/components/convertToSubcurrency';
 import { getUserByEmail } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { createSession } from '~/team-accounts/src/server/actions/sessions/create/create-sessions';
 
-import {
-  Credentials,
-  CredentialsCrypto,
-  EncryptedCredentials,
-} from '../../../../../apps/web/app/utils/credentials-crypto';
+
+
+import { Credentials, CredentialsCrypto, EncryptedCredentials } from '../../../../../apps/web/app/utils/credentials-crypto';
+
 
 type ValuesProps = {
   fullName: string;
@@ -32,7 +33,7 @@ type ValuesProps = {
 };
 
 type HandlePaymentProps = {
-  service: Service.Type;
+  service: Service.Relationships.Billing.BillingService;
   values: ValuesProps;
   stripeId: string;
   organizationId: string;
@@ -43,7 +44,7 @@ type HandlePaymentProps = {
 };
 
 type HandlePaymentStripeProps = {
-  service: Service.Type;
+  service: Service.Relationships.Billing.BillingService;
   values: ValuesProps;
   stripeId: string;
   organizationId: string;
@@ -93,7 +94,9 @@ export const handleRecurringPayment = async ({
     return data.clientSecret;
   } else {
     // here manage payment method treli
-    const client = getSupabaseServerComponentClient();
+    const client = getSupabaseServerComponentClient({
+      admin: true,
+    });
     const { data: billingAccount, error: billingAccountError } = await client
       .from('billing_accounts')
       .select('credentials')
@@ -144,12 +147,15 @@ export const handleRecurringPayment = async ({
         company: values.buying_for_organization
           ? values.enterprise_name
           : undefined,
-        phone: undefined, // Need to add phone to ValuesProps if required
+        phone: 1, // Need to add phone to ValuesProps if required
         id_type: 'CC', // Default to CC, might need to be configurable
       },
       products: [
         {
-          id: service.id,
+          id:
+            service.billing_services.find(
+              (billingService) => billingService.provider === 'treli',
+            )?.provider_id ?? '',
           quantity: 1,
           subscription_period_interval: 1,
           subscription_period: service.recurrence ? 'month' : 'one-time', // Adjust based on your service configuration
@@ -166,12 +172,12 @@ export const handleRecurringPayment = async ({
       // Only include card details if not using Mercado Pago
       ...(selectedPaymentMethod !== 'mercadopago' && {
         cardNumber: values.card_number,
-        month: values.card_expiration_date.split('/')[0],
-        year: values.card_expiration_date.split('/')[1],
+        month: values.card_expiration_date?.split('/')[0],
+        year: values.card_expiration_date?.split('/')[1],
         cardCvc: values.card_cvv,
       }),
       requires_shipping: false,
-      manual_payment: false,
+      manual_payment: selectedPaymentMethod === 'mercadopago',
       block_billing_change: true,
     };
 
@@ -193,9 +199,16 @@ export const handleRecurringPayment = async ({
       throw new Error(errorData.message);
     }
 
-    const dataSubscriptionPlan = await responseSubscriptionPlan.clone().json();
+    const dataSubscriptionPlan = (await responseSubscriptionPlan
+      .clone()
+      .json()) as {
+      response_code: number;
+      payment_id: number;
+      subscription_ids: number[];
+      payment_url: string;
+      message: string;
+    };
 
-    console.log(dataSubscriptionPlan);
     return dataSubscriptionPlan;
   }
 };
@@ -238,7 +251,9 @@ export const handleOneTimePayment = async ({
     return data.clientSecret;
   } else {
     // here manage payment method treli
-    const client = getSupabaseServerComponentClient();
+    const client = getSupabaseServerComponentClient({
+      admin: true,
+    });
     const { data: billingAccount, error: billingAccountError } = await client
       .from('billing_accounts')
       .select('credentials')
@@ -368,7 +383,7 @@ export const handleSubmitPayment = async ({
       provider_id: null,
     });
 
-    service.recurrence
+    const responseRecurringOrOneTimePayment = service.recurrence
       ? await handleRecurringPayment({
           service,
           values,
@@ -398,7 +413,14 @@ export const handleSubmitPayment = async ({
       accountAlreadyExists = true;
     }
 
-    return { success: true, error: null, accountAlreadyExists };
+    return {
+      success: true,
+      error: null,
+      accountAlreadyExists,
+      data: {
+        paymentUrl: responseRecurringOrOneTimePayment?.payment_url,
+      },
+    };
   } catch (error) {
     return {
       success: false,

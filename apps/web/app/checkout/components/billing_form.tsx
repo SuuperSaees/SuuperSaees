@@ -44,7 +44,7 @@ import { Input } from '@kit/ui/input';
 import { Label } from '@kit/ui/label';
 import { Separator } from '@kit/ui/separator';
 
-import { ServiceType } from '../types/billing-form-types';
+import { Service } from '~/lib/services.types';
 import { handleSubmitPayment } from '../utils/billing-handlers';
 import { ServiceTypeSection } from './service-type-section';
 import { SideInfo } from './side-information';
@@ -102,7 +102,7 @@ const paymentMethodsIcons = {
 
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 const BillingForm: React.FC<{
-  service: ServiceType;
+  service: Service.Relationships.Billing.BillingService;
   stripeId: string;
   organizationId: string;
   logoUrl: string;
@@ -202,20 +202,15 @@ const BillingForm: React.FC<{
     setLoading(true);
     setValidSuccess(false);
     try {
-      const paymentMethod = await handleCreateCard().catch(
-        (error) => {
-          console.log(error);
-          return {
-            id: '',
-          }
-        }
-      );
+      const paymentMethod = await handleCreateCard() ?? {
+        id: 'none',
+      };
 
       if (!paymentMethod?.id) {
         throw new Error(t('checkout.error.paymentFailed'));
       }
 
-      const { success, error, accountAlreadyExists } = await handleSubmitPayment({
+      const { success, error, accountAlreadyExists, data } = await handleSubmitPayment({
         service,
         values: values,
         stripeId,
@@ -242,7 +237,11 @@ const BillingForm: React.FC<{
       }
 
       setValidSuccess(true);
-      router.push('/success?accountAlreadyExists=' + accountAlreadyExists);
+      if(data?.paymentUrl){
+        router.push(data.paymentUrl);
+      } else {
+        router.push('/success?accountAlreadyExists=' + accountAlreadyExists);
+      }
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : t('checkout.error.paymentFailed'),
