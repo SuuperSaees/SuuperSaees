@@ -327,6 +327,7 @@ export async function getAgencyForClientByUserId(userId: string): Promise<{
   id: string;
   name: string;
   primary_owner_user_id: string;
+  loom_app_id: string | null;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
