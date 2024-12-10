@@ -27,6 +27,7 @@ import { Trans } from '@kit/ui/trans';
 import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import FileUploader from './files-input-chat';
 import styles from './styles.module.css';
+import LoomRecordButton from '~/orders/[id]/components/loom-record-button';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -404,6 +405,10 @@ const RichTextEditor = ({
     }
   }, [errorContent, editor]);
 
+  const setCustomEditorText = (text: string) => {
+    editor?.commands.setContent(text);
+  };
+
   return (
     <div
       className={
@@ -455,6 +460,7 @@ const RichTextEditor = ({
                 onChange={onChange}
                 handleUploadClick={handleUploadClick}
                 disabled={isLoading}
+                setCustomEditorText={setCustomEditorText}
               />
             )}
           </div>
@@ -491,6 +497,7 @@ interface ToolbarProps {
   onChange?: (richText: string) => void;
   handleUploadClick?: () => void;
   disabled?: boolean;
+  setCustomEditorText?: (text: string) => void;
 }
 
 export const Toolbar = ({
@@ -499,6 +506,7 @@ export const Toolbar = ({
   onChange,
   handleUploadClick,
   disabled,
+  setCustomEditorText,
 }: ToolbarProps) => {
   const { isInternalMessagingEnabled, handleSwitchChange } =
     useInternalMessaging();
@@ -517,12 +525,7 @@ export const Toolbar = ({
           >
             <Upload className="h-5 w-5 flex-shrink-0 text-gray-400" />
           </button>
-          <button
-            type="button"
-            className="mr-1 flex h-9 w-9 flex-shrink-0 items-center justify-center gap-2 p-4"
-          >
-            <Video className="h-5 w-5 flex-shrink-0 text-gray-400" />
-          </button>
+          <LoomRecordButton setCustomEditorText={setCustomEditorText} />
           {['agency_member', 'agency_project_manager', 'agency_owner'].includes(
             userRole,
           ) && (
