@@ -27,13 +27,18 @@ const UserFile = ({ file }: UserFileProps) => {
   const renderFilePreview = (file: File) => {
     if (file.type.startsWith('image/')) {
       return (
-        <ImageWithOptions
-          src={file?.url}
-          alt="image"
-          bucketName="orders"
-          className="object-cover" // For the thumbnail
-          dialogClassName="object-contain" // For the dialog
-        />
+        <div className='flex flex-col'>
+          <div className='h-[150px] w-[150px] flex item-center justify-center rounded-lg'>
+            <ImageWithOptions
+              src={file?.url}
+              alt="image"
+              bucketName="orders"
+              className="object-cover rounded-lg object-center items-center border" 
+              dialogClassName="object-contain" 
+            />
+          </div>
+          <p className="text-sm font-medium text-gray-400 truncate w-[150px]">{file.name ?? 'fileName'}</p>
+        </div>
       );
     } else if (file.type.startsWith('video/')) {
       return (
