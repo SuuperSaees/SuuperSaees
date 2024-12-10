@@ -71,7 +71,7 @@ const UserFile = ({ file }: UserFileProps) => {
           <div className='h-[150px] w-[150px] flex item-center justify-center rounded-lg'>
             <ImageWithOptions
               src={file?.url}
-              alt="image"
+              alt={file.name}
               bucketName="orders"
               className="object-cover rounded-lg object-center items-center border" 
               dialogClassName="object-contain" 
