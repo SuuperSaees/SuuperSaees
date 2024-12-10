@@ -312,9 +312,7 @@ export const updateOrderFollowers = async (
 
     // Extract existing IDs
     const existingIds =
-      existingFollowers?.map(
-        (follower) => follower.client_member_id as string,
-      ) || [];
+      existingFollowers?.map((follower) => follower.client_member_id) || [];
 
     // Determine IDs to add and remove
     const idsToAdd = followerIds.filter((id) => !existingIds.includes(id));

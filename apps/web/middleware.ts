@@ -359,7 +359,7 @@ function getPatterns() {
         // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
         const clientDeleted = await fetchDeletedClients(
           supabase,
-          organizationId,
+          organizationId ?? '',
           userId,
         ).catch((error) =>
           console.error('Error fetching deleted from middleware:', error),

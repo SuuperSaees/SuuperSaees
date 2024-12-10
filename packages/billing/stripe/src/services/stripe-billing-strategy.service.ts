@@ -1,25 +1,29 @@
 import 'server-only';
 
+
+
 import type { Stripe } from 'stripe';
 import { z } from 'zod';
 
+
+
 import { BillingStrategyProviderService } from '@kit/billing';
-import {
-  CancelSubscriptionParamsSchema,
-  CreateBillingCheckoutSchema,
-  CreateBillingPortalSessionSchema,
-  QueryBillingUsageSchema,
-  ReportBillingUsageSchema,
-  RetrieveCheckoutSessionSchema,
-  UpdateSubscriptionParamsSchema,
-} from '@kit/billing/schema';
+import { CancelSubscriptionParamsSchema, CreateBillingCheckoutSchema, CreateBillingPortalSessionSchema, QueryBillingUsageSchema, ReportBillingUsageSchema, RetrieveCheckoutSessionSchema, UpdateSubscriptionParamsSchema } from '@kit/billing/schema';
 import { getLogger } from '@kit/shared/logger';
+import { RetryOperationService } from '@kit/shared/utils';
+import { Database } from '@kit/supabase/database';
 
 import { createStripeBillingPortalSession } from './create-stripe-billing-portal-session';
 import { createStripeCheckout } from './create-stripe-checkout';
 import { createStripeClient } from './stripe-sdk';
 import { createStripeSubscriptionPayloadBuilderService } from './stripe-subscription-payload-builder.service';
 
+interface ServiceOperationResult {
+  success: boolean;
+}
+type ServiceType = Database['public']['Tables']['services']['Row'];
+type BillingAccountType =
+  Database['public']['Tables']['billing_accounts']['Row'];
 /**
  * @name StripeBillingStrategyService
  * @description The Stripe billing strategy service
@@ -399,6 +403,181 @@ export class StripeBillingStrategyService
       logger.error({ ...ctx, error }, 'Failed to retrieve subscription');
 
       throw new Error('Failed to retrieve subscription');
+    }
+  }
+
+  async createService(
+    service: ServiceType,
+    billingAccount: BillingAccountType,
+    baseUrl: string,
+  ): Promise<ServiceOperationResult> {
+    const logger = await getLogger();
+    const ctx = {
+      name: this.namespace,
+      service,
+      billingAccount,
+      baseUrl,
+    };
+
+    logger.info(ctx, 'Creating service in Stripe...');
+
+    // Especificamos el tipo genérico ServiceOperationResult
+    const retryOperation = new RetryOperationService<ServiceOperationResult>(
+      async () => {
+        // Create a service in Stripe
+        const responseProductCreated = await fetch(
+          `${baseUrl}/api/stripe/create-service`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accountId: billingAccount.provider_id,
+              name: service.name,
+              description: service.service_description,
+              imageUrl: service.service_image,
+            }),
+          },
+        );
+
+        if (!responseProductCreated.ok) {
+          throw new Error('Failed to create service');
+        }
+
+        const productCreated = (await responseProductCreated.json()) as {
+          productId: string;
+        };
+        const responsePriceCreated = await fetch(
+          `${baseUrl}/api/stripe/create-service-price`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accountId: billingAccount.provider_id,
+              productId: productCreated.productId,
+              serviceId: service.id,
+              unitAmount: (service.price ?? 0) * 100,
+              currency: 'usd',
+              isRecurring: service.recurring_subscription,
+              interval: service.recurrence,
+            }),
+          },
+        );
+
+        if (!responsePriceCreated.ok) {
+          throw new Error('Failed to create price');
+        }
+
+        return {
+          success: true,
+        };
+      },
+      {
+        maxAttempts: 3,
+        delayMs: 1000,
+        backoffFactor: 2,
+      },
+    );
+
+    try {
+      return await retryOperation.execute();
+    } catch (error) {
+      logger.error(
+        { ...ctx, error },
+        'Service creation failed after all retries',
+      );
+      return { success: false };
+    }
+  }
+
+  async updateService(
+    service: ServiceType,
+    billingAccount: BillingAccountType,
+    baseUrl: string,
+    serviceProviderId?: string,
+  ): Promise<ServiceOperationResult> {
+    // get price
+    const logger = await getLogger();
+    const ctx = {
+      name: this.namespace,
+      serviceProviderId,
+    };
+    const retryOperation = new RetryOperationService<ServiceOperationResult>(
+      async () => {
+        const getPriceResponse = await fetch(
+          `${baseUrl}/api/stripe/get-price?accountId=${encodeURIComponent(billingAccount.provider_id)}&priceId=${encodeURIComponent(serviceProviderId ?? '')}`,
+          { method: 'GET', headers: { 'Content-Type': 'application/json' } },
+        );
+    
+        const getPriceData = (await getPriceResponse.json()) as {
+          price: {
+            product: string;
+          };
+        };
+        if (!getPriceResponse.ok) {
+          logger.error(ctx, `Stripe error getting price`);
+          return { success: false };
+        }
+    
+        // update product
+        const stripeResponse = await fetch(
+          `${baseUrl}/api/stripe/update-service?productId=${encodeURIComponent(getPriceData?.price?.product)}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accountId: billingAccount.provider_id,
+              name: service.name,
+              imageUrl: service.service_image,
+            }),
+          },
+        );
+    
+        if (!stripeResponse.ok) {
+          logger.error(ctx, `Stripe error updating service`);
+          return { success: false };
+        }
+    
+        // create price
+        const unitAmount = (service.price ?? 0) * 100;
+    
+        const stripePriceResponse = await fetch(
+          // Important: This endpoint is not used anymore.
+          `${baseUrl}/api/stripe/create-service-price`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accountId: billingAccount.provider_id,
+              productId: getPriceData?.price?.product,
+              unitAmount,
+              serviceId: service.id,
+              currency: 'usd',
+              isRecurring: service.recurring_subscription,
+              interval: service.recurrence,
+              type: 'update',
+            }),
+          },
+        );
+    
+        if (!stripePriceResponse.ok) {
+          logger.error(ctx, `Stripe error creating price`);
+          return { success: false };
+        }
+    
+        return { success: true };
+      },
+      {
+        maxAttempts: 3,
+        delayMs: 1000,
+        backoffFactor: 2,
+      },
+    );
+
+    try {
+      return await retryOperation.execute();
+    } catch (error) {
+      logger.error(ctx, 'Service update failed after all retries');
+      return { success: false };
     }
   }
 

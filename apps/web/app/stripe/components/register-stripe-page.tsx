@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { useElements, useStripe } from '@stripe/react-stripe-js';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
-
 import { updateTeamAccountStripeId } from '../../../../../packages/features/team-accounts/src/server/actions/team-details-server-actions';
 
 
@@ -56,13 +55,13 @@ const RegisterStripePage = ({ email, stripeId, id}: AccountSchema) => {
             .then((linkData) => {
                 setLinkData(linkData.url);
             })
-            .catch((error) => {
-              setErrorMessage(error.message);
+            .catch(() => {
+              setErrorMessage(t('errorToCreateAccount'));
             });
 
 
-            }).catch((error) => {
-                setErrorMessage(error.message);
+            }).catch(() => {
+                setErrorMessage(t('errorToCreateAccount'));
             });
       } else {
         fetch("/api/stripe/account-onboarding", {
@@ -76,8 +75,8 @@ const RegisterStripePage = ({ email, stripeId, id}: AccountSchema) => {
           .then((linkData) => {
               setLinkData(linkData.url);
           })
-          .catch((error) => {
-            setErrorMessage(error.message);
+          .catch(() => {
+            setErrorMessage(t('errorToCreateAccount'));
           });
       }
     }, [stripe, elements, t]);
