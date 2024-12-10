@@ -10,7 +10,6 @@ import {
 import { CustomError } from '../../../../../../../../packages/shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
-import { Account } from '../../../../../../../../apps/web/lib/account.types';
 
 // Hex color validation regex
 const isValidHexColor = (color: string) => /^#([0-9A-F]{3}){1,2}$/i.test(color);

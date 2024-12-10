@@ -390,6 +390,7 @@ export type Database = {
           created_at: string
           deleted_on: string | null
           id: string
+          provider: Database["public"]["Enums"]["billing_provider"]
           provider_id: string
           service_id: number
           status: Database["public"]["Enums"]["service_status"]
@@ -399,6 +400,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
           provider_id: string
           service_id: number
           status?: Database["public"]["Enums"]["service_status"]
@@ -408,6 +410,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
           provider_id?: string
           service_id?: number
           status?: Database["public"]["Enums"]["service_status"]
@@ -3366,4 +3369,3 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
-
