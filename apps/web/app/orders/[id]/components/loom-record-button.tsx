@@ -73,7 +73,7 @@ function LoomRecordButton({setCustomEditorText}: LoomRecordButtonProps) {
 
   return (
     <button id={buttonName}>
-      <Video className='h-5 text-gray-400' strokeWidth={1.5} />
+      <Video className='h-6 w-6 text-gray-400' strokeWidth={1.5} />
     </button>
   );
 }
