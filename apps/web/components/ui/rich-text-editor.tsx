@@ -407,7 +407,7 @@ const RichTextEditor = ({
   return (
     <div
       className={
-        'relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl border p-4 ' +
+        'relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl border p-4 bg-gray-50' +
         (className ?? '')
       }
       {...rest}
@@ -434,8 +434,6 @@ const RichTextEditor = ({
             className={`${styles['scrollbar-thin']} flex h-full max-h-60 w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
           />
         </div>
-
-        <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <FileUploader
               ref={fileUploaderRef}
@@ -446,39 +444,40 @@ const RichTextEditor = ({
               thereAreFilesUploaded={setThereAreFilesUploaded}
               disabled={isLoading}
             />
-            {showToolbar && (
-              <Toolbar
-                editor={editor}
-                toggleExternalUpload={toggleExternalUpload}
-                uploadFileIsExternal={uploadFileIsExternal}
-                userRole={userRole}
-                onChange={onChange}
-                handleUploadClick={handleUploadClick}
-                disabled={isLoading}
-              />
-            )}
-          </div>
-          {!hideSubmitButton && (
-            <ThemedButton
-              className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))] bg-[#155EEF] p-[var(--spacing-lg,12px)] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
-              onClick={sendContent}
-              disabled={
-                isLoading ||
-                (!areAllFilesUploaded() && thereAreFilesUploaded) ||
-                (editor?.getHTML().trim() !== '<p></p>' &&
-                  !areAllFilesUploaded() &&
-                  thereAreFilesUploaded) ||
-                isSending
-              }
-            >
-              {isSending ? (
-                <Spinner className="h-5 w-5" />
-              ) : (
-                <SendHorizontalIcon className="h-5 w-5 flex-shrink-0 -rotate-45 text-white" />
+            <div className='flex justify-between'>
+              {showToolbar && (
+                <Toolbar
+                  editor={editor}
+                  toggleExternalUpload={toggleExternalUpload}
+                  uploadFileIsExternal={uploadFileIsExternal}
+                  userRole={userRole}
+                  onChange={onChange}
+                  handleUploadClick={handleUploadClick}
+                  disabled={isLoading}
+                />
               )}
-            </ThemedButton>
-          )}
-        </div>
+              {!hideSubmitButton && (
+                <ThemedButton
+                  className="mt-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))] bg-[#155EEF] p-[var(--spacing-lg,12px)] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
+                  onClick={sendContent}
+                  disabled={
+                    isLoading ||
+                    (!areAllFilesUploaded() && thereAreFilesUploaded) ||
+                    (editor?.getHTML().trim() !== '<p></p>' &&
+                      !areAllFilesUploaded() &&
+                      thereAreFilesUploaded) ||
+                    isSending
+                  }
+                >
+                  {isSending ? (
+                    <Spinner className="h-5 w-5" />
+                  ) : (
+                    <SendHorizontalIcon className="h-[20px] w-[20px] flex-shrink-0 -rotate-45" />
+                  )}
+                </ThemedButton>
+              )}
+            </div>
+          </div>
       </div>
     </div>
   );
@@ -530,7 +529,7 @@ export const Toolbar = ({
               onClick={handleSwitchChange}
               className={
                 isInternalMessagingEnabled
-                  ? 'flex h-12 w-12 flex-shrink-0 items-center justify-center gap-2 p-4 text-gray-700'
+                  ? 'flex h-9 w-9 flex-shrink-0 items-center justify-center gap-2 p-4 text-gray-700'
                   : 'flex h-9 w-9 flex-shrink-0 items-center justify-center gap-2 p-4 text-gray-400'
               }
             >

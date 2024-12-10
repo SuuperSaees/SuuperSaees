@@ -60,8 +60,10 @@ const UserFirstMessage = ({ interaction }) => {
 
     <div className="flex w-full p-2.5 flex-col items-start gap-2.5 rounded-tr-lg rounded-br-lg rounded-bl-lg bg-gray-100">
       {interaction.fields.map((field) => (
-            <div key={field.id} className="flex w-full flex-col gap-2.5 rounded-lg">
-              {field.field?.type === "file" ? (
+        field.response && (
+          <div key={field.id} className="flex w-full flex-col gap-2.5 rounded-lg">
+            {field.field?.type === "file" ? (
+              field.response !== "" && (
                 <div className="flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
                   {formatResponse(field).map((fileUrl, index) => (
                     <UserFile key={index} file={{
@@ -71,7 +73,9 @@ const UserFirstMessage = ({ interaction }) => {
                     }} />
                   ))}
                 </div>
-              ) : (
+              )
+            ) : (
+              field.response !== "" && (
                 <>
                   <span className="text-gray-900 text-4 font-semibold">
                     {field.field?.label}
@@ -83,10 +87,12 @@ const UserFirstMessage = ({ interaction }) => {
                     }}
                   />
                 </>
-              )}
-            </div>
-          ))}
-        </div>
+              )
+            )}
+          </div>
+        )
+      ))}
+    </div>
   </div>
   );
 };

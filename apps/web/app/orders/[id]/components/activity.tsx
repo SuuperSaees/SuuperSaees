@@ -101,11 +101,11 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 h-auto ">
+    <div className="flex w-full flex-col gap-4 h-auto min-h-full">
       <Separator className='w-full'/>
       <Interactions />
       <Separator className='w-full'/>
-      <div className="flex flex-col justify-end px-8 mb-4"> 
+      <div className="flex flex-col justify-end pt-3 px-8"> 
         <RichTextEditor
           className=" w-full overflow-auto"
           onComplete={handleOnCompleteMessageSend}
