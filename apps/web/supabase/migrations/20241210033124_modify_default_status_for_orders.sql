@@ -187,15 +187,4 @@ BEGIN
 END;$function$
 ;
 
-create or replace view "public"."user_account_workspace" as  SELECT accounts.id,
-    accounts.name,
-    accounts.picture_url,
-    ( SELECT subscriptions.status
-           FROM subscriptions
-          WHERE (subscriptions.propietary_organization_id = accounts.id)
-         LIMIT 1) AS subscription_status
-   FROM accounts
-  WHERE ((accounts.primary_owner_user_id = ( SELECT auth.uid() AS uid)) AND (accounts.is_personal_account = true))
- LIMIT 1;
-
 
