@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { setup } from "@loomhq/record-sdk";
 import { isSupported } from "@loomhq/record-sdk/is-supported";
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
-import { getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { getAgencyForClientByUserId, getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { Spinner } from '@kit/ui/spinner';
 
 interface LoomRecordButtonProps {
   setCustomEditorText?: (text: string) => void;
@@ -13,13 +14,16 @@ interface LoomRecordButtonProps {
 function LoomRecordButton({setCustomEditorText}: LoomRecordButtonProps) {
   const [loomAppId, setLoomAppId] = useState<string>('');
   const [buttonName, setButtonName] = useState<string>('');
-  const {user} = useUserWorkspace();
+  const {user, workspace} = useUserWorkspace();
   const currentUserId = user?.id;
+  const currentRole = workspace?.role;
 
 
-  const { data: getOrganizationData, error: getOrganizationError } = useQuery({
+  const { data: getOrganizationData, error: getOrganizationError, isLoading, isPending } = useQuery({
     queryKey: ['account-settings', currentUserId],
-    queryFn: async () => await getOrganization(),
+    queryFn: currentRole === 'client_member' || currentRole === 'client_owner' ? 
+      async () => await getAgencyForClientByUserId(currentUserId) : 
+      async () => await getOrganization(),
     enabled: !!currentUserId,
   });
 
@@ -67,6 +71,10 @@ function LoomRecordButton({setCustomEditorText}: LoomRecordButtonProps) {
     }
   }, [loomAppId, buttonName, setupLoom]);
 
+  if (isLoading || isPending || !getOrganizationData) {
+    return <Spinner className='h-5 text-gray-400' />;
+  }
+
   if (!loomAppId) {
     return null;
   }
@@ -79,4 +87,3 @@ function LoomRecordButton({setCustomEditorText}: LoomRecordButtonProps) {
 }
 
 export default LoomRecordButton;
-
