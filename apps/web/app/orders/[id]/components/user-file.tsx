@@ -68,12 +68,12 @@ const UserFile = ({ file }: UserFileProps) => {
     if (file.type.startsWith('image/')) {
       return (
         <div className='flex flex-col'>
-          <div className='h-[150px] w-[150px] flex item-center justify-center border rounded-lg'>
+          <div className='h-[150px] w-[150px] flex item-center justify-center rounded-lg'>
             <ImageWithOptions
               src={file?.url}
               alt="image"
               bucketName="orders"
-              className="object-cover rounded-lg" 
+              className="object-cover rounded-lg object-center items-center border" 
               dialogClassName="object-contain" 
             />
           </div>

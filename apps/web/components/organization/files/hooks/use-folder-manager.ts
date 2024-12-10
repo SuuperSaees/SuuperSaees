@@ -12,6 +12,7 @@ import {
   getFoldersByFolder,
   getOrdersFolders,
 } from 'node_modules/@kit/team-accounts/src/server/actions/folders/get/get-folders';
+import { useTranslation } from 'react-i18next';
 
 interface FileManagementHook {
   selectedOption: string;
@@ -47,6 +48,7 @@ export const useFileManagement = (
   >,
   initialPath?: Array<{ title: string; uuid?: string }>,
 ): FileManagementHook => {
+  const { t } = useTranslation('organizations');
   const [selectedOption, setSelectedOption] = useState('all');
   const [path, setPath] = useState<Array<{ title: string; uuid?: string }>>(
     initialPath ?? [],
@@ -143,7 +145,7 @@ export const useFileManagement = (
   ) => {
     if (path.length === 0) {
       // Clicking a main folder
-      if (folderTitle === 'Orders' || isOrderFolder) {
+      if (folderTitle === t('organizations:files.orders') || isOrderFolder) {
         setCurrentFolderType('orders');
         setShowFolders(true);
         setShowSubFolders(false);
@@ -173,7 +175,7 @@ export const useFileManagement = (
       // Update folder type based on level
       if (newPath.length === 0) {
         setCurrentFolderType('main');
-      } else if (newPath[0]!.title === 'Orders') {
+      } else if (newPath[0]!.title === t('organizations:files.orders')) {
         setCurrentFolderType('orders');
       } else {
         setCurrentFolderType('sub');
