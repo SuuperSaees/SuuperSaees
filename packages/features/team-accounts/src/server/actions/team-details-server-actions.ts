@@ -2,16 +2,11 @@
 
 import { redirect } from 'next/navigation';
 
-
-
 import { enhanceAction } from '@kit/next/actions';
 import { getLogger } from '@kit/shared/logger';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
-
-
-import { UpdateTeamNameSchema, UpdateTeamStripeIdSchema } from '../../schema/update-team-name.schema';
-
+import { UpdateTeamStripeIdSchema, UpdateTeamNameSchema } from '../../schema/update-team-name.schema';
 
 export const updateTeamAccountName = enhanceAction(
   async (params) => {
@@ -81,26 +76,6 @@ export const updateTeamAccountStripeId = enhanceAction(
       logger.error({ error }, `Failed to update stripe id`);
 
       throw error;
-    }
-
-    const { error: errorCreateBillingAccount } = await client
-      .from('billing_accounts')
-      .insert({
-        account_id: id,
-        provider: 'stripe',
-        provider_id: stripe_id,
-        credentials: {
-          stripe_id,
-        },
-      });
-
-    if (errorCreateBillingAccount) {
-      logger.error(
-        { error: errorCreateBillingAccount },
-        `Failed to create billing account`,
-      );
-
-      throw errorCreateBillingAccount;
     }
 
     logger.info(`Team name updated`);

@@ -11,7 +11,7 @@ import {
 } from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-// import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { getStripeAccountID } from '../../members/get/get-member-account';
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -24,14 +24,14 @@ export const updateService = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { stripeId } = await getStripeAccountID();
+    const { userId, stripeId } = await getStripeAccountID();
     if (!stripeId)
       throw new CustomError(
         400,
         'No stripe account found',
         ErrorServiceOperations.FAILED_TO_FIND_STRIPE_ACCOUNT,
       );
-    // const { domain: baseUrl } = await getDomainByUserId(userId, true);
+    const { domain: baseUrl } = await getDomainByUserId(userId, true);
 
     // Update service details in Supabase
     const serviceId = await updateSupabaseService(
@@ -49,7 +49,7 @@ export const updateService = async (
     );
 
     // Update Stripe product and price
-    // await handleStripeServiceUpdate(baseUrl, stripeId, priceId, clientData);
+    await handleStripeServiceUpdate(baseUrl, stripeId, priceId, clientData);
 
     // Revalidate services page
     revalidatePath('/services');
@@ -167,144 +167,144 @@ const manageServiceBriefs = async (
   }
 };
 
-// interface PriceData {
-//   price: {
-//     id: string;
-//     object: 'price';
-//     active: boolean;
-//     billing_scheme: string;
-//     created: number;
-//     currency: string;
-//     custom_unit_amount: number | null;
-//     livemode: boolean;
-//     lookup_key: string | null;
-//     metadata: Record<string, string>;
-//     nickname: string | null;
-//     product: string;
-//     recurring: null | {
-//       interval: string;
-//       interval_count: number;
-//     };
-//     tax_behavior: string;
-//     tiers_mode: string | null;
-//     transform_quantity: null | {
-//       divide_by: number;
-//       round: 'up' | 'down';
-//     };
-//     type: string;
-//     unit_amount: number;
-//     unit_amount_decimal: string;
-//     error?: string;
-//   };
-//   error?: string;
-// }
+interface PriceData {
+  price: {
+    id: string;
+    object: 'price';
+    active: boolean;
+    billing_scheme: string;
+    created: number;
+    currency: string;
+    custom_unit_amount: number | null;
+    livemode: boolean;
+    lookup_key: string | null;
+    metadata: Record<string, string>;
+    nickname: string | null;
+    product: string;
+    recurring: null | {
+      interval: string;
+      interval_count: number;
+    };
+    tax_behavior: string;
+    tiers_mode: string | null;
+    transform_quantity: null | {
+      divide_by: number;
+      round: 'up' | 'down';
+    };
+    type: string;
+    unit_amount: number;
+    unit_amount_decimal: string;
+    error?: string;
+  };
+  error?: string;
+}
 
 // Function to handle Stripe service update and price creation
-// const handleStripeServiceUpdate = async (
-//   baseUrl: string,
-//   stripeAccountID: string,
-//   priceId: string,
-//   clientData: Service.ServiceData,
-// ) => {
-//   const getPriceResponse = await fetch(
-//     `${baseUrl}/api/stripe/get-price?accountId=${encodeURIComponent(stripeAccountID)}&priceId=${encodeURIComponent(priceId)}`,
-//     { method: 'GET', headers: { 'Content-Type': 'application/json' } },
-//   );
+const handleStripeServiceUpdate = async (
+  baseUrl: string,
+  stripeAccountID: string,
+  priceId: string,
+  clientData: Service.ServiceData,
+) => {
+  const getPriceResponse = await fetch(
+    `${baseUrl}/api/stripe/get-price?accountId=${encodeURIComponent(stripeAccountID)}&priceId=${encodeURIComponent(priceId)}`,
+    { method: 'GET', headers: { 'Content-Type': 'application/json' } },
+  );
 
-//   const getPriceData: PriceData = await getPriceResponse.json();
-//   if (!getPriceResponse.ok) {
-//     throw new Error(`Stripe error: ${getPriceData.error}`);
-//   }
+  const getPriceData: PriceData = await getPriceResponse.clone().json();
+  if (!getPriceResponse.ok) {
+    throw new Error(`Stripe error: ${getPriceData.error}`);
+  }
 
-//   await updateStripeProduct(
-//     baseUrl,
-//     stripeAccountID,
-//     getPriceData?.price?.product,
-//     clientData,
-//   );
+  await updateStripeProduct(
+    baseUrl,
+    stripeAccountID,
+    getPriceData?.price?.product,
+    clientData,
+  );
 
-//   await createStripeServicePrice(
-//     baseUrl,
-//     stripeAccountID,
-//     getPriceData?.price?.product,
-//     clientData.step_service_price,
-//     clientData.step_type_of_service?.recurring_subscription,
-//     clientData.step_service_price?.recurrence,
-//   );
-// };
+  await createStripeServicePrice(
+    baseUrl,
+    stripeAccountID,
+    getPriceData?.price?.product,
+    clientData.step_service_price,
+    clientData.step_type_of_service?.recurring_subscription,
+    clientData.step_service_price?.recurrence,
+  );
+};
 
 // Function to update Stripe product
-// const updateStripeProduct = async (
-//   baseUrl: string,
-//   accountId: string,
-//   productId: string,
-//   clientData: Service.ServiceData,
-// ) => {
-//   const stripeResponse = await fetch(
-//     `${baseUrl}/api/stripe/update-service?productId=${encodeURIComponent(productId)}`,
-//     {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({
-//         accountId,
-//         name: clientData.step_service_details?.service_name,
-//         imageUrl: clientData.step_service_details?.service_image,
-//       }),
-//     },
-//   );
+const updateStripeProduct = async (
+  baseUrl: string,
+  accountId: string,
+  productId: string,
+  clientData: Service.ServiceData,
+) => {
+  const stripeResponse = await fetch(
+    `${baseUrl}/api/stripe/update-service?productId=${encodeURIComponent(productId)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accountId,
+        name: clientData.step_service_details?.service_name,
+        imageUrl: clientData.step_service_details?.service_image,
+      }),
+    },
+  );
 
-//   const stripeData = await stripeResponse.json();
-//   if (!stripeResponse.ok) {
-//     throw new Error(`Stripe error: ${stripeData.error}`);
-//   }
-// };
+  const stripeData = await stripeResponse.clone().json();
+  if (!stripeResponse.ok) {
+    throw new Error(`Stripe error: ${stripeData.error}`);
+  }
+};
 
 // Function to create Stripe service price
-// const createStripeServicePrice = async (
-//   baseUrl: string,
-//   accountId: string,
-//   productId: string,
-//   priceData: Service.ServiceData['step_service_price'],
-//   isRecurring: boolean,
-//   interval?: string,
-// ) => {
-//   const unitAmount = (priceData?.price ?? 0) * 100;
+const createStripeServicePrice = async (
+  baseUrl: string,
+  accountId: string,
+  productId: string,
+  priceData: Service.ServiceData['step_service_price'],
+  isRecurring: boolean,
+  interval?: string,
+) => {
+  const unitAmount = (priceData?.price ?? 0) * 100;
 
-//   const stripePriceResponse = await fetch( // Important: This endpoint is not used anymore.
-//     `${baseUrl}/api/stripe/create-service-price`,
-//     {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({
-//         accountId,
-//         productId,
-//         unitAmount,
-//         currency: 'usd',
-//         isRecurring,
-//         interval,
-//       }),
-//     },
-//   );
+  const stripePriceResponse = await fetch( // Important: This endpoint is not used anymore.
+    `${baseUrl}/api/stripe/create-service-price`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accountId,
+        productId,
+        unitAmount,
+        currency: 'usd',
+        isRecurring,
+        interval,
+      }),
+    },
+  );
 
-//   const stripePriceData = await stripePriceResponse.json();
-//   if (!stripePriceResponse.ok) {
-//     throw new Error(`Stripe error: ${stripePriceData.error.message}`);
-//   }
+  const stripePriceData = await stripePriceResponse.clone().json();
+  if (!stripePriceResponse.ok) {
+    throw new Error(`Stripe error: ${stripePriceData.error.message}`);
+  }
 
-//   await updatePriceId(
-//     getSupabaseServerComponentClient(),
-//     stripePriceData?.priceId,
-//   );
-// };
+  await updatePriceId(
+    getSupabaseServerComponentClient(),
+    stripePriceData?.priceId,
+  );
+};
 
 // Update price_id in services table
-// const updatePriceId = async (client: SupabaseClient, priceId: string) => {
-//   const { error: errorResponseUpdateService } = await client
-//     .from('services')
-//     .update({ price_id: priceId })
-//     .eq('price_id', priceId);
+const updatePriceId = async (client: SupabaseClient, priceId: string) => {
+  const { error: errorResponseUpdateService } = await client
+    .from('services')
+    .update({ price_id: priceId })
+    .eq('price_id', priceId);
 
-//   if (errorResponseUpdateService) {
-//     throw new Error(errorResponseUpdateService.message);
-//   }
-// };
+  if (errorResponseUpdateService) {
+    throw new Error(errorResponseUpdateService.message);
+  }
+};

@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         const account = await stripe.accounts.retrieve(accountId)
-        
         return NextResponse.json(account);
     } catch (error) {
         return NextResponse.json(

@@ -14,8 +14,6 @@ export const BillingProviderSchema = z.enum([
   'stripe',
   'paddle',
   'lemon-squeezy',
-  'treli',
-  'suuper',
 ]);
 
 export const PaymentTypeSchema = z.enum(['one-time', 'recurring']);

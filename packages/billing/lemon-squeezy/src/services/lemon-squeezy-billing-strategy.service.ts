@@ -1,26 +1,32 @@
 import 'server-only';
 
-
-
-import { cancelSubscription, createUsageRecord, getCheckout, getSubscription, getVariant, listUsageRecords, updateSubscriptionItem } from '@lemonsqueezy/lemonsqueezy.js';
+import {
+  cancelSubscription,
+  createUsageRecord,
+  getCheckout,
+  getSubscription,
+  getVariant,
+  listUsageRecords,
+  updateSubscriptionItem,
+} from '@lemonsqueezy/lemonsqueezy.js';
 import { z } from 'zod';
 
-
-
 import { BillingStrategyProviderService } from '@kit/billing';
-import { CancelSubscriptionParamsSchema, CreateBillingCheckoutSchema, CreateBillingPortalSessionSchema, QueryBillingUsageSchema, ReportBillingUsageSchema, RetrieveCheckoutSessionSchema, UpdateSubscriptionParamsSchema } from '@kit/billing/schema';
+import {
+  CancelSubscriptionParamsSchema,
+  CreateBillingCheckoutSchema,
+  CreateBillingPortalSessionSchema,
+  QueryBillingUsageSchema,
+  ReportBillingUsageSchema,
+  RetrieveCheckoutSessionSchema,
+  UpdateSubscriptionParamsSchema,
+} from '@kit/billing/schema';
 import { getLogger } from '@kit/shared/logger';
-import { Database } from '@kit/supabase/database';
-
-
 
 import { createLemonSqueezyBillingPortalSession } from './create-lemon-squeezy-billing-portal-session';
 import { createLemonSqueezyCheckout } from './create-lemon-squeezy-checkout';
 import { createLemonSqueezySubscriptionPayloadBuilderService } from './lemon-squeezy-subscription-payload-builder.service';
 
-
-type ServiceType = Database['public']['Tables']['services']['Row'];
-type BillingAccountType = Database['public']['Tables']['billing_accounts']['Row'];
 export class LemonSqueezyBillingStrategyService
   implements BillingStrategyProviderService
 {
@@ -31,15 +37,6 @@ export class LemonSqueezyBillingStrategyService
    * @description Creates a checkout session for a customer
    * @param params
    */
-
-  async createService(service: ServiceType, billingAccount: BillingAccountType) {
-    // if you need, add logic here
-    await Promise.resolve();
-    return {
-      success: true,
-    };
-  }
-
   async createCheckoutSession(
     params: z.infer<typeof CreateBillingCheckoutSchema>,
   ) {

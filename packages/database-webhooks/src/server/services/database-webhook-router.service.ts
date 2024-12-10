@@ -1,14 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-
-
-import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
-
-
 import { RecordChange, Tables } from '../record-change.type';
-
 
 export function createDatabaseWebhookRouterService(
   adminClient: SupabaseClient<Database>,
@@ -36,12 +30,6 @@ class DatabaseWebhookRouterService {
         return this.handleInvitationsWebhook(payload);
       }
 
-      case 'services': {
-        const payload = body as RecordChange<typeof body.table>;
-
-        return this.handleServicesWebhook(payload);
-      }
-
       // case 'subscriptions': {
       //   const payload = body as RecordChange<typeof body.table>;
 
@@ -57,30 +45,6 @@ class DatabaseWebhookRouterService {
       default: {
         return;
       }
-    }
-  }
-
-  private async handleServicesWebhook(body: RecordChange<'services'>) {
-    const logger = await getLogger();
-    const { createBillingWebhooksService } = await import(
-      '@kit/billing-gateway'
-    );
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''; // if this baseUrl fail, use getDomainByUserId function
-
-    if (body.type === 'INSERT' && body.record) {
-      const service = createBillingWebhooksService(this.adminClient, baseUrl);
-      logger.info(body, 'Handling services webhook');
-      return service.handleServiceCreatedWebhook(body.record);
-    }
-
-    if (body.type === 'UPDATE' && body.record) {
-      const service = createBillingWebhooksService(this.adminClient, baseUrl);
-      logger.info(body, 'Handling services webhook');
-      return service.handleServiceUpdatedWebhook(body.record);
-    }
-
-    if (body.type === 'DELETE' && body.old_record) {
-      logger.info(body, 'This logic should be implemented');
     }
   }
 
@@ -122,4 +86,4 @@ class DatabaseWebhookRouterService {
 }
 
 
-// Here manage the cancel subscription and update subscription of upgrade
+// Here manage the cancel subscription and update subscription of upgrade 
