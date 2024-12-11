@@ -104,7 +104,7 @@ export async function getDomainByOrganizationId(
 
   const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
 
-  const domain = domainData?.subdomains?.domain;
+  const domain = domainData?.subdomains?.[0]?.domain;
 
   return parsedUrl
     ? `${IS_PROD ? 'https' : 'http'}://${domain}/`
