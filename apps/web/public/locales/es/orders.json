@@ -149,6 +149,12 @@
     "deleteMessage": "Eliminar mensaje",
     "deleteMessageDescription": "¿Estás seguro de que deseas eliminar este mensaje? Esta acción no se puede deshacer.",
     "cancel": "Cancelar",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "success": "Mensaje enviado",
+    "error": "Error",
+    "messageSent": "El mensaje ha sido enviado.",
+    "messageSentError": "El mensaje no se pudo enviar.",
+    "messageDeleted": "El mensaje ha sido eliminado.",
+    "messageDeletedError": "El mensaje no se pudo eliminar."
   }
 }

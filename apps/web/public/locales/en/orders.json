@@ -149,6 +149,12 @@
     "deleteMessage": "Delete message",
     "deleteMessageDescription": "Are you sure you want to delete this message? This action cannot be undone.",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "success": "Message sent",
+    "error": "Error",
+    "messageSent": "The message has been sent.",
+    "messageSentError": "The message could not be sent.",
+    "messageDeleted": "The message has been deleted.",
+    "messageDeletedError": "The message could not be deleted."
   }
 }

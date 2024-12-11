@@ -29,6 +29,7 @@ import useInternalMessaging from '../hooks/use-messages';
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
 import { updateFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/update/update-file';
 import { deleteMessage } from '~/team-accounts/src/server/actions/messages/delete/delete-messages';
+import { useTranslation } from 'react-i18next';
 
 export enum ActivityType {
   MESSAGE = 'message',
@@ -135,6 +136,7 @@ export const ActivityProvider = ({
   order: Order.Type;
   userRole: string;
 }) => {
+  const { t } = useTranslation('orders');
   const [order, setOrder] = useState<Order.Type>(serverOrder);
   const [messages, setMessages] = useState<Message[]>(serverMessages);
   const [activities, setActivities] = useState<Activity[]>(serverActivities);
@@ -169,14 +171,14 @@ export const ActivityProvider = ({
         }
       }
 
-      toast.success('Success', {
-        description: 'The message has been sent.',
+      toast.success(t('message.success'), {
+        description: t('message.messageSent'),
       });
 
       return newMessage;
     } catch (error) {
-      toast.error('Error', {
-        description: 'The message could not be sent.',
+      toast.error(t('message.error'), {
+        description: t('message.messageSentError'),
       });
       throw error;
     } finally {
@@ -270,13 +272,13 @@ export const ActivityProvider = ({
       if (context?.previousMessages) {
         setMessages(context.previousMessages);
       }
-      toast.error('Error', {
-        description: 'The message could not be deleted.',
+      toast.error(t('message.error'), {
+        description: t('message.messageDeletedError'),
       });
     },
     onSuccess: () => {
-      toast.success('Success', {
-        description: 'The message has been deleted.',
+      toast.success(t('message.success'), {
+        description: t('message.messageDeleted'),
       });
     },
   });
