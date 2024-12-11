@@ -228,7 +228,7 @@ function SiteSettings({
             {(!accountStripe?.id || !accountStripe.charges_enabled) && (
               <ThemedButton className="w-full">
                 <Link href={'/stripe'} className="h-full w-full">
-                  {accountStripe?.id ? 'Continue' : 'Connect'}
+                  {accountStripe?.id ? <Trans i18nKey={'account:connect'} /> : <Trans i18nKey={'account:continue'} />}
                 </Link>
               </ThemedButton>
             )}
