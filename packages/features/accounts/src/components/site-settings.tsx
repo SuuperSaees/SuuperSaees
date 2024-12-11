@@ -38,7 +38,7 @@ function SiteSettings({
 
   const bucketStorage = {
     id: user?.organization_id ?? '',
-    name: 'organization',
+    name: 'organization_images',
     identifier: '',
   };
 
