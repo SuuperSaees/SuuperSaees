@@ -155,6 +155,7 @@
     "messageSent": "The message has been sent.",
     "messageSentError": "The message could not be sent.",
     "messageDeleted": "Message deleted",
-    "messageDeletedError": "The message could not be deleted."
+    "messageDeletedError": "The message could not be deleted.",
+    "messageDeletedSuccess": "Message deleted successfully"
   }
 }
