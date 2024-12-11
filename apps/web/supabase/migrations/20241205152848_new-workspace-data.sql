@@ -1,6 +1,6 @@
 drop view if exists "public"."user_account_workspace";
-ALTER TABLE "public"."subscriptions" DROP COLUMN "account_id";
-ALTER TABLE "public"."subscriptions" ADD COLUMN "account_id" UUID;
+alter table "public"."subscriptions" alter column "account_id" set data type text using "account_id"::text;
+alter table "public"."subscriptions" alter column "account_id" set data type uuid using "account_id"::uuid;
 
 create or replace view "public"."user_account_workspace" as  SELECT accounts.id AS id,
     (COALESCE(user_settings.name, (accounts.name)::text))::character varying(255) AS name,
@@ -15,7 +15,3 @@ create or replace view "public"."user_account_workspace" as  SELECT accounts.id 
      LEFT JOIN accounts_memberships ON ((accounts_memberships.user_id = accounts.id)))
   WHERE ((accounts.id = ( SELECT auth.uid() AS uid)) AND (accounts.is_personal_account = true))
  LIMIT 1;
-
-
-
-
