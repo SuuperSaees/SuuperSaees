@@ -17,6 +17,8 @@ import {
 } from '@kit/ui/dropdown-menu';
 
 import ImageWithOptions from '~/orders/[id]/hoc/with-image-options';
+import { FileActionButtons } from './file-action-buttons';
+
 
 interface File {
   id: string | undefined;
@@ -28,6 +30,21 @@ interface FileItemProps {
   file: File;
   currentPath: Array<{ title: string; uuid?: string }>;
 }
+
+
+const FileContentWrapper: React.FC<{ url: string; children: React.ReactNode }> = ({
+  url,
+  children,
+}) => (
+  <>
+    {children}
+    <FileActionButtons url={url}>
+      {React.cloneElement(children as React.ReactElement<{ className: string }>, {
+        className: 'max-h-full max-w-full object-contain',
+      })}
+    </FileActionButtons>
+  </>
+);
 
 const FileItem = ({ file, currentPath }: FileItemProps) => {
   const { t } = useTranslation('organizations');
@@ -53,16 +70,20 @@ const FileItem = ({ file, currentPath }: FileItemProps) => {
     },
   });
 
-  return (
-    <div>
-      <div className="flex h-[132.9px] w-[184.317px] items-center justify-center rounded-[8.86px] bg-[#E1E2E4]">
-        {file.type?.startsWith('image/') ? (
-          <ImageWithOptions
-            src={file.url ?? ''}
-            alt="image"
-            bucketName="agency_files"
-          />
-        ) : file.type?.startsWith('video/') ? (
+  const renderFileContent = () => {
+    if (file.type?.startsWith('image/')) {
+      return (
+        <ImageWithOptions
+          src={file.url ?? ''}
+          alt="image"
+          bucketName="agency_files"
+        />
+      );
+    }
+
+    if (file.type?.startsWith('video/')) {
+      return (
+        <FileContentWrapper url={file.url ?? ''}>
           <video
             className="h-full w-full rounded-[8.86px] object-contain px-2"
             controls
@@ -70,15 +91,33 @@ const FileItem = ({ file, currentPath }: FileItemProps) => {
             <source src={file.url} type={file.type} />
             Your browser does not support the video tag.
           </video>
-        ) : file.type === 'application/pdf' ? (
+        </FileContentWrapper>
+      );
+    }
+
+    if (file.type === 'application/pdf') {
+      return (
+        <FileContentWrapper url={file.url ?? ''}>
           <embed
             src={file.url}
             type="application/pdf"
             className="h-full w-full rounded-[8.86px] object-contain px-2"
           />
-        ) : (
-          <FileIcon size={100} className="rounded-[8.86px] px-2" />
-        )}
+        </FileContentWrapper>
+      );
+    }
+
+    return (
+      <FileContentWrapper url={file.url ?? ''}>
+        <FileIcon size={100} className="rounded-[8.86px] px-2" />
+      </FileContentWrapper>
+    );
+  };
+
+  return (
+    <div>
+      <div className="group relative flex h-[132.9px] w-[184.317px] items-center justify-center rounded-[8.86px] bg-[#E1E2E4]">
+        {renderFileContent()}
       </div>
 
       <div className="flex w-[184.317px] items-center justify-between leading-[38.55px]">
