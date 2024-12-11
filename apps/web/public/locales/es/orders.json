@@ -154,7 +154,9 @@
     "error": "Error",
     "messageSent": "El mensaje ha sido enviado.",
     "messageSentError": "El mensaje no se pudo enviar.",
-    "messageDeleted": "El mensaje ha sido eliminado.",
+    "messageDeleted": "Mensaje eliminado",
+    "messageDeletedSuccess": "El mensaje ha sido eliminado.",
     "messageDeletedError": "El mensaje no se pudo eliminar."
   }
 }
+

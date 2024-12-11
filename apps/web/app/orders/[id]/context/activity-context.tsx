@@ -277,8 +277,8 @@ export const ActivityProvider = ({
       });
     },
     onSuccess: () => {
-      toast.success(t('message.success'), {
-        description: t('message.messageDeleted'),
+      toast.success(t('message.messageDeleted'), {
+        description: t('message.messageDeletedSuccess'),
       });
     },
   });
