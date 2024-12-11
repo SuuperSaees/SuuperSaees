@@ -3,6 +3,10 @@ ALTER TABLE "public"."subscriptions" DROP COLUMN "account_id";
 ALTER TABLE "public"."subscriptions" ADD COLUMN "account_id" UUID;
 
 create or replace view "public"."user_account_workspace" as  SELECT accounts.id AS id,
+alter table "public"."subscriptions" alter column "account_id" set data type text using "account_id"::text;
+alter table "public"."subscriptions" alter column "account_id" set data type uuid using "account_id"::uuid;
+
+create or replace view "public"."user_account_workspace" as  SELECT user_settings.user_id AS id,
     (COALESCE(user_settings.name, (accounts.name)::text))::character varying(255) AS name,
     (COALESCE(user_settings.picture_url, (accounts.picture_url)::text))::character varying(1000) AS picture_url,
     ( SELECT subscriptions.status
