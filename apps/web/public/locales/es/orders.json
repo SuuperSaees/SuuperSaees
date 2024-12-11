@@ -144,5 +144,17 @@
       "title": "Aún no has asignado ningún proyecto a ti.",
       "description": "¡Espera! Tus proyectos asignados aparecerán aquí pronto."
     }
+  },
+  "message": {
+    "deleteMessage": "Eliminar mensaje",
+    "deleteMessageDescription": "¿Estás seguro de que deseas eliminar este mensaje? Esta acción no se puede deshacer.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "success": "Mensaje enviado",
+    "error": "Error",
+    "messageSent": "El mensaje ha sido enviado.",
+    "messageSentError": "El mensaje no se pudo enviar.",
+    "messageDeleted": "Mensaje eliminado",
+    "messageDeletedError": "El mensaje no se pudo eliminar."
   }
 }
