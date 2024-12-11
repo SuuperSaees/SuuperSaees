@@ -145,5 +145,18 @@
       "title": "No orders assigned to you yet.",
       "description": "Hang tight! Your assigned orders will appear here soon."
     }
+  },
+  "message": {
+    "deleteMessage": "Delete message",
+    "deleteMessageDescription": "Are you sure you want to delete this message? This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "success": "Message sent",
+    "error": "Error",
+    "messageSent": "The message has been sent.",
+    "messageSentError": "The message could not be sent.",
+    "messageDeleted": "Message deleted",
+    "messageDeletedError": "The message could not be deleted.",
+    "messageDeletedSuccess": "Message deleted successfully"
   }
 }
