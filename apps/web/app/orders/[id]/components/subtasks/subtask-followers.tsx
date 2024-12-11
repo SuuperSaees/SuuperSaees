@@ -58,14 +58,11 @@ const SubtaskFollowers = ({
   userRole,
 }: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
+  const allowedRoles = ['agency_owner', 'agency_member', 'agency_project_manager'];
 
   const { data: followers, isLoading } = useQuery({
     queryKey: ['subtask_followers', subtaskId],
     queryFn: () => getSubtaskFollowers(subtaskId),
-    enabled:
-      userRole === 'agency_owner' ||
-      userRole === 'agency_member' ||
-      userRole === 'agency_project_manager',
   });
 
   const [selectedUsers, setSelectedUsers] = useState<string[]>(
@@ -126,13 +123,18 @@ const SubtaskFollowers = ({
                 />
               );
             })}
-            <CheckboxCombobox
-              options={searchUserOptions ?? []}
-              onSubmit={handleFormSubmit}
-              schema={membersAssignedSchema}
-              defaultValues={defaultValues}
-              customItem={CustomUserItem}
-            />
+            {
+              allowedRoles.includes(userRole) && (
+                <CheckboxCombobox
+                  options={searchUserOptions ?? []}
+                  onSubmit={handleFormSubmit}
+                  schema={membersAssignedSchema}
+                  defaultValues={defaultValues}
+                  customItem={CustomUserItem}
+                />
+              )
+            }
+
             </>
           )}
         </div>

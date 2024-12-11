@@ -17,6 +17,7 @@
   "assignedToLabel": "Assigned to",
   "dueDateLabel": "Due date",
   "select_date_range": "Select date range",
+  "empty_date_range": "No date selected",
   "delete": "Delete project",
   "deleteConfirmation": "Do you really want to delete this project?",
   "deleteSuccess": "Project deleted successfully",
