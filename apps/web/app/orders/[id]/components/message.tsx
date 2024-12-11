@@ -52,12 +52,12 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
       </div>
         <div className="flex gap-2">
           <small className="">{`${date}`}</small>
-          {isHovered && currentUser?.id === message.user_id && <Trash2 className="w-4 h-4 hover:text-red-500 cursor-pointer" onClick={() => setIsOpen(true)} />}
+          <div className='w-4 h-4'>{isHovered && currentUser?.id === message.user_id && <Trash2 className="w-4 h-4 hover:text-red-500 transition duration-300 cursor-pointer text-gray-600" onClick={() => setIsOpen(true)} />}</div>
         </div>
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg rounded-ss-none w-full bg-slate-0 overflow-hidden leading-relaxed">
-        <div className={` break-words rounded-r-md rounded-b-md p-4 whitespace-normal ${message.visibility === "internal_agency" ? "bg-yellow-50 rounded-lg" : "bg-grayTrue-100"}`} dangerouslySetInnerHTML={{ __html: content }} />
+        <div className={` break-words rounded-r-md rounded-b-md whitespace-normal ${message.visibility === "internal_agency" ? "bg-yellow-50 rounded-lg" : "bg-transparent"}`} dangerouslySetInnerHTML={{ __html: content }} />
         {message.files && message.files.length > 0 && (
           <div className="pl-4 flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
             {message.files.map((file) => (
@@ -66,28 +66,28 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
           </div>
         )}
       </div>
-      <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader >
-          <div className="flex justify-between">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-error-100">
-              <Trash2 className="w-6 h-6 text-error-600"  />
-            </div>
-            <X className="w-6 h-6 cursor-pointer text-gray-400" onClick={() => setIsOpen(false)} />
-          </div>
-        </AlertDialogHeader>
-          <AlertDialogTitle>{t('message.deleteMessage')}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t('message.deleteMessageDescription')}
-          </AlertDialogDescription>
-        <AlertDialogFooter>
-          <div className="flex justify-between w-full gap-3">
-            <AlertDialogCancel className="w-full h-11 font-inter text-[16px] font-semibold leading-[24px]">{t('message.cancel')}</AlertDialogCancel>
-            <Button variant="destructive" className="w-full h-11 text-white font-inter text-[16px] font-semibold leading-[24px]" onClick={handleDeleteMessage}>{t('message.delete')}</Button>
-          </div>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen} contentClassName="w-[400px]">
+          <AlertDialogContent>
+            <AlertDialogHeader >
+              <div className="flex justify-between">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-error-100">
+                  <Trash2 className="w-6 h-6 text-error-600"  />
+                </div>
+                <X className="w-6 h-6 cursor-pointer text-gray-400" onClick={() => setIsOpen(false)} />
+              </div>
+            </AlertDialogHeader>
+              <AlertDialogTitle>{t('message.deleteMessage')}</AlertDialogTitle>
+              <AlertDialogDescription className="text-[#535862] font-inter text-[14px] font-normal leading-[20px]">
+                {t('message.deleteMessageDescription')}
+              </AlertDialogDescription>
+            <AlertDialogFooter>
+              <div className="flex justify-between w-full gap-3">
+                <AlertDialogCancel className="w-full h-11 font-inter text-[16px] font-semibold leading-[24px]">{t('message.cancel')}</AlertDialogCancel>
+                <Button variant="destructive" className="w-full h-11 text-white font-inter text-[16px] font-semibold leading-[24px]" onClick={handleDeleteMessage}>{t('message.delete')}</Button>
+              </div>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 };
