@@ -28,6 +28,8 @@ import { generateUUID } from '~/utils/generate-uuid';
 import useInternalMessaging from '../hooks/use-messages';
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
 import { updateFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/update/update-file';
+import { deleteMessage } from '~/team-accounts/src/server/actions/messages/delete/delete-messages';
+import { useTranslation } from 'react-i18next';
 
 export enum ActivityType {
   MESSAGE = 'message',
@@ -104,6 +106,7 @@ interface ActivityContextType {
     subscription_status: Tables<"subscriptions">["status"] | null;
   }
   loadingMessages: boolean;
+  deleteMessage: (messageId: string) => Promise<void>;
 }
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -133,6 +136,7 @@ export const ActivityProvider = ({
   order: Order.Type;
   userRole: string;
 }) => {
+  const { t } = useTranslation('orders');
   const [order, setOrder] = useState<Order.Type>(serverOrder);
   const [messages, setMessages] = useState<Message[]>(serverMessages);
   const [activities, setActivities] = useState<Activity[]>(serverActivities);
@@ -167,14 +171,14 @@ export const ActivityProvider = ({
         }
       }
 
-      toast.success('Success', {
-        description: 'The message has been sent.',
+      toast.success(t('message.success'), {
+        description: t('message.messageSent'),
       });
 
       return newMessage;
     } catch (error) {
-      toast.error('Error', {
-        description: 'The message could not be sent.',
+      toast.error(t('message.error'), {
+        description: t('message.messageSentError'),
       });
       throw error;
     } finally {
@@ -242,6 +246,41 @@ export const ActivityProvider = ({
     onSettled: () => {
       setLoadingMessages(false);
     }
+  });
+
+  const deleteMessageMutation = useMutation({
+    mutationFn: (messageId: string) => deleteMessage(messageId),
+    onMutate: async (messageId) => {
+      await queryClient.cancelQueries({ queryKey: ['messages'] });
+
+      // Store the previous messages state
+      const previousMessages = messages;
+
+      // Optimistically update the UI
+      setMessages((oldMessages) =>
+        oldMessages.map((message) =>
+          message.id === messageId
+            ? { ...message, deleted_on: new Date().toISOString() }
+            : message
+        )
+      );
+
+      return { previousMessages };
+    },
+    onError: (_error, _variables, context) => {
+      // Rollback on error
+      if (context?.previousMessages) {
+        setMessages(context.previousMessages);
+      }
+      toast.error(t('message.error'), {
+        description: t('message.messageDeletedError'),
+      });
+    },
+    onSuccess: () => {
+      toast.success(t('message.messageDeleted'), {
+        description: t('message.messageDeletedSuccess'),
+      });
+    },
   });
 
   const reconcileState = (items: ActivityData[], newItem: ActivityData) => {
@@ -377,7 +416,7 @@ export const ActivityProvider = ({
     <ActivityContext.Provider
       value={{
         activities: activities,
-        messages: messages,
+        messages: messages.filter((msg) => !msg.deleted_on),
         reviews: reviews,
         files: files.filter((svFile) => !svFile.message_id),
         order,
@@ -389,7 +428,10 @@ export const ActivityProvider = ({
             tempId: generateUUID(),
           }),
         userWorkspace: currentUser,
-        loadingMessages
+        loadingMessages,
+        deleteMessage: async (messageId: string) => {
+          await deleteMessageMutation.mutateAsync(messageId);
+        },
       }}
     >
       {children}

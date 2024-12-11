@@ -7,7 +7,22 @@ import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 import { cn } from '../utils/cn';
 import { buttonVariants } from './button';
 
-const AlertDialog = AlertDialogPrimitive.Root;
+interface AlertDialogProps extends AlertDialogPrimitive.AlertDialogProps {
+  contentClassName?: string;
+}
+
+const AlertDialog = ({ children, contentClassName, ...props }: AlertDialogProps) => (
+  <AlertDialogPrimitive.Root {...props}>
+    {React.Children.map(children, child => {
+      if (React.isValidElement(child) && child.type === AlertDialogContent) {
+        return React.cloneElement(child, {
+          className: cn(child.props.className, contentClassName)
+        });
+      }
+      return child;
+    })}
+  </AlertDialogPrimitive.Root>
+);
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
 
