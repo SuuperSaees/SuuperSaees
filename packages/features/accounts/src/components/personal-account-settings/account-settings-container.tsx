@@ -201,7 +201,7 @@ export function PersonalAccountSettingsContainer(
         {
           role === 'agency_owner' && (
             <TabsContent value="site">
-              <SiteSettings role = {role} handleChangeLanguage = {handleChangeLanguage} user={user}/>
+              <SiteSettings role = {role} handleChangeLanguage = {handleChangeLanguage} user={user} accountStripe={accountStripe}/>
             </TabsContent>
           )
         }
