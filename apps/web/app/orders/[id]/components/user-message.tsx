@@ -10,7 +10,7 @@ interface UserMessageProps {
 const UserMessage = ({ message }: UserMessageProps) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
-    <div className="flex items-start gap-4 w-full hover:bg-grayTrue-100 rounded-lg p-2 transition-colors duration-200" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}> 
+    <div className="flex items-start gap-4 w-full hover:bg-grayTrue-100 rounded-lg p-2 transition duration-300" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}> 
       <AvatarDisplayer
         displayName={message?.user.picture_url ? null : message?.user.name}
         pictureUrl={message?.user.picture_url}
