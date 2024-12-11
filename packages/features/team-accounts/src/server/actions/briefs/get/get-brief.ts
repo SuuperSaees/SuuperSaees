@@ -71,7 +71,7 @@ export const getBriefs = async (): Promise<
       const briefIds = serviceBriefs?.map((brief) => brief.brief_id);
 
       // Step 4.5: get the briefs for the client
-      const briefs = await fetchClientBriefs(client, briefIds);
+      const briefs = await fetchClientBriefs(client, briefIds, serviceIds);
 
       return briefs;
     }
@@ -153,16 +153,23 @@ export const fetchServiceBriefs = async (
 export const fetchClientBriefs = async (
   client: SupabaseClient<Database>,
   briefIds: Brief.Type['id'][],
+  serviceIds?: Service.Type['id'][],
 ): Promise<Brief.Relationships.Services.Response[]> => {
+
+  let query = client
+  .from('briefs')
+  .select(
+    `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
+    form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
+    services!inner( id, name )`,
+  )
+  .in('id', briefIds)
+
+  if (serviceIds && serviceIds.length > 0) {
+    query = query.in('services.id', serviceIds)
+  }
   try {
-    const { data: briefsData, error: briefsError } = await client
-      .from('briefs')
-      .select(
-        `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
-        form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
-        services ( name )`,
-      )
-      .in('id', briefIds);
+    const { data: briefsData, error: briefsError } = await query;
 
     if (briefsError)
       throw new Error(`Error fetching the briefs, ${briefsError.message}`);
