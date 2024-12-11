@@ -1,3 +1,6 @@
+import { formatDisplayDate } from "@kit/shared/utils";
+import { DateRange } from "@kit/ui/calendar";
+
 export const formatDateToString = (
   dateToUpdate: Date,
   type: 'short' | 'long',
@@ -27,4 +30,18 @@ export const formatDateToString = (
   } else {
     return `${date} ${time}`;
   }
+};
+
+export const getFormattedDateRange = (
+  dateRange: DateRange | undefined,
+  language: string,
+  shortFormat = false
+): string => {
+  if (!dateRange?.from || !dateRange?.to) {
+    return '';
+  }
+
+  return shortFormat
+    ? formatDisplayDate(dateRange.to, language)
+    : `${formatDisplayDate(dateRange.from, language)} - ${formatDisplayDate(dateRange.to, language)}`;
 };
