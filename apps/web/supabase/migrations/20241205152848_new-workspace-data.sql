@@ -1,5 +1,5 @@
 drop view if exists "public"."user_account_workspace";
-
+alter table "public"."subscriptions" alter column "account_id" set data type text using "account_id"::text;
 alter table "public"."subscriptions" alter column "account_id" set data type uuid using "account_id"::uuid;
 
 create or replace view "public"."user_account_workspace" as  SELECT user_settings.user_id AS id,
