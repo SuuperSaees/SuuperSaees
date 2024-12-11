@@ -90,8 +90,6 @@ const FileSection: React.FC<FileSectionProps> = ({
     }
 
     if (path.length === 0) {
-      const hasContent = mainFolders.length > 0 || mainFiles.length > 0;
-      
       return (
         <div className="mt-4 flex flex-wrap gap-8">
           <FolderItem
@@ -114,11 +112,6 @@ const FileSection: React.FC<FileSectionProps> = ({
           {mainFiles.map((file) => (
             <FileItem key={file.id} file={file} currentPath={path} />
           ))}
-          {!hasContent && (
-            <div className="w-full text-center text-gray-500 flex justify-center items-center">
-              {t('organizations:files.noFiles')}
-            </div>
-          )}
         </div>
       );
     }
@@ -161,7 +154,7 @@ const FileSection: React.FC<FileSectionProps> = ({
           <FileItem key={file.id} file={file} currentPath={path} />
         ))}
         {!hasContent && (
-          <div className="w-full text-center text-gray-500 flex justify-center items-center">
+          <div className="w-full h-[200px] text-center text-gray-500 flex justify-center items-center">
             {t('organizations:files.emptyFolder')}
           </div>
         )}
@@ -188,7 +181,7 @@ const FileSection: React.FC<FileSectionProps> = ({
           <FileItem key={file.id} file={file} currentPath={path} />
         ))}
         {mainFiles.length === 0 && (
-          <div className="w-full text-center text-gray-500 flex justify-center items-center">
+          <div className="w-full h-[200px] text-center text-gray-500 flex justify-center items-center">
             {t('organizations:files.noFiles')}
           </div>
         )}
