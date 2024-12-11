@@ -2,17 +2,17 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import {
-  CustomError,
+  // CustomError,
   CustomResponse,
-  ErrorServiceOperations,
+  // ErrorServiceOperations,
 } from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 // import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
-import { getStripeAccountID } from '../../members/get/get-member-account';
+// import { getStripeAccountID } from '../../members/get/get-member-account';
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -24,17 +24,17 @@ export const updateService = async (
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { stripeId } = await getStripeAccountID();
-    if (!stripeId)
-      throw new CustomError(
-        400,
-        'No stripe account found',
-        ErrorServiceOperations.FAILED_TO_FIND_STRIPE_ACCOUNT,
-      );
+    // const { stripeId } = await getStripeAccountID();
+    // if (!stripeId)
+    //   throw new CustomError(
+    //     400,
+    //     'No stripe account found',
+    //     ErrorServiceOperations.FAILED_TO_FIND_STRIPE_ACCOUNT,
+    //   );
     // const { domain: baseUrl } = await getDomainByUserId(userId, true);
 
     // Update service details in Supabase
-    const serviceId = await updateSupabaseService(
+    await updateSupabaseService(
       client,
       clientData,
       priceId,
@@ -44,7 +44,7 @@ export const updateService = async (
     // Manage briefs in Supabase
     await manageServiceBriefs(
       client,
-      serviceId,
+      clientData.id,
       clientData.step_connect_briefs,
     );
 
@@ -60,18 +60,15 @@ export const updateService = async (
   }
 };
 
-type UpdatedServiceResult = {
-  id: string;
-}[];
-
 // Function to update service in Supabase
 const updateSupabaseService = async (
   client: SupabaseClient,
   clientData: Service.ServiceData,
   priceId: string,
   status?: Service.Type['status'],
-): Promise<string> => {
+): Promise<void> => {
   const serviceUpdated = {
+    id: clientData.id,
     status,
     name: clientData.step_service_details?.service_name,
     price: clientData.step_service_price?.price,
@@ -99,26 +96,21 @@ const updateSupabaseService = async (
       clientData.step_type_of_service?.recurring_subscription,
   };
 
-  const { data: updatedService, error: updateError } = (await client
+  const { error: updateError } = await client
     .from('services')
     .update(serviceUpdated)
-    .eq('price_id', priceId)
-    .select('id')) as {
-    data: UpdatedServiceResult | null;
-    error: PostgrestError | null;
-  };
+    .eq('id', clientData.id)
 
   if (updateError) {
     throw new Error(updateError.message);
   }
-
-  return updatedService?.[0]?.id ?? priceId;
+  return;
 };
 
 // Function to manage briefs in Supabase
 const manageServiceBriefs = async (
   client: SupabaseClient,
-  serviceId: string,
+  serviceId: number,
   newBriefs: Service.ServiceData['step_connect_briefs'],
 ) => {
   const { data: existingBriefs, error: getBriefsError } = await client

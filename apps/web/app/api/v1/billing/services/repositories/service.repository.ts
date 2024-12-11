@@ -1,9 +1,14 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { Database } from '~/lib/database.types';
+
+
 
 import { ServiceBuilder } from '../builders/service.builder';
 import { CreateServiceDTO, UpdateServiceDTO } from '../dtos/service.dto';
+
 
 export interface IServiceRepository {
   create(
@@ -17,7 +22,7 @@ export interface IServiceRepository {
   ): Promise<Database['public']['Tables']['services']['Row'][]>;
   softDelete(id: string): Promise<void>;
   update(
-    id: string,
+    id: number,
     data: UpdateServiceDTO,
   ): Promise<Database['public']['Tables']['services']['Row']>;
 }
@@ -87,7 +92,7 @@ export class ServiceRepository implements IServiceRepository {
   }
 
   async update(
-    id: string,
+    id: number,
     data: UpdateServiceDTO,
   ): Promise<Database['public']['Tables']['services']['Row']> {
     const serviceToUpdate = ServiceBuilder.fromDTO(data);

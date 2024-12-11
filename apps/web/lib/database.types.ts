@@ -1442,7 +1442,6 @@ export type Database = {
           status_id: number | null
           stripe_account_id: string | null
           title: string
-          updated_at: string | null
           uuid: string
         }
         Insert: {
@@ -1461,7 +1460,6 @@ export type Database = {
           status_id?: number | null
           stripe_account_id?: string | null
           title: string
-          updated_at?: string | null
           uuid: string
         }
         Update: {
@@ -1480,7 +1478,6 @@ export type Database = {
           status_id?: number | null
           stripe_account_id?: string | null
           title?: string
-          updated_at?: string | null
           uuid?: string
         }
         Relationships: [
@@ -1795,6 +1792,7 @@ export type Database = {
           created_at: string
           credit_based: boolean | null
           credits: number | null
+          currency: string
           deleted_on: string | null
           hours: number | null
           id: number
@@ -1825,6 +1823,7 @@ export type Database = {
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
+          currency?: string
           deleted_on?: string | null
           hours?: number | null
           id?: number
@@ -1855,6 +1854,7 @@ export type Database = {
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
+          currency?: string
           deleted_on?: string | null
           hours?: number | null
           id?: number
@@ -2549,7 +2549,6 @@ export type Database = {
           status_id: number | null
           stripe_account_id: string | null
           title: string
-          updated_at: string | null
           uuid: string
         }
       }

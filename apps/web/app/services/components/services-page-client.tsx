@@ -4,8 +4,8 @@ import { useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { Elements } from '@stripe/react-stripe-js';
-import { Stripe } from '@stripe/stripe-js';
+// import { Elements } from '@stripe/react-stripe-js';
+// import { Stripe } from '@stripe/stripe-js';
 
 import { PageBody } from '@kit/ui/page';
 import { Tabs, TabsContent } from '@kit/ui/tabs';
@@ -17,18 +17,16 @@ import { useStripeActions } from '../hooks/use-stripe-actions';
 import { PageHeader } from '../../components/page-header';
 import { TimerContainer } from '../../components/timer-container';
 
+import { BillingAccounts } from '~/lib/billing-accounts.types';
+
 interface ServicesPageClientProps {
-  stripePromise: Promise<Stripe | null>;
   accountRole: string;
-  stripeId: string;
-  organizationId: string;
+  paymentsMethods: BillingAccounts.PaymentMethod[];
 }
 
 const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
-  stripePromise,
   accountRole,
-  stripeId,
-  organizationId,
+  paymentsMethods,
 }) => {
   const searchParams = useSearchParams();
   const briefsView = searchParams.get('briefs');
@@ -38,7 +36,7 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
     briefsView === 'true' ? 'briefs' : 'services',
   );
 
-  const { services, briefs, hasTheEmailAssociatedWithStripe, handleCheckout, briefsAreLoading, servicesAreLoading } =
+  const { services, briefs, briefsAreLoading, servicesAreLoading } =
     useStripeActions({
       userRole: accountRole,
     });
@@ -58,7 +56,6 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
         handleTabClick(value as 'services' | 'briefs');
       }}
     >
-      <Elements stripe={stripePromise}>
         <PageBody>
           <div className="p-[35px]">
             <PageHeader
@@ -72,13 +69,8 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
                 activeTab={activeTab}
                 services={services}
                 accountRole={accountRole}
-                hasTheEmailAssociatedWithStripe={
-                  hasTheEmailAssociatedWithStripe
-                }
-                handleCheckout={handleCheckout}
+                paymentsMethods={paymentsMethods}
                 isLoading={servicesAreLoading}
-                stripeId={stripeId}
-                organizationId={organizationId}
               />
             </TabsContent>
             <TabsContent className="bg-transparent" value="briefs">
@@ -86,7 +78,6 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
             </TabsContent>
           </div>
         </PageBody>
-      </Elements>
     </Tabs>
   );
 };

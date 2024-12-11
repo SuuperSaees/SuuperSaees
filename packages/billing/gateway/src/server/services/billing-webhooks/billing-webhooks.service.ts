@@ -87,6 +87,7 @@ class BillingWebhooksService {
 
   async handleServiceUpdatedWebhook(service: Service.Type) {
     // verify if account has treli enabled
+
     const [accountsResult] = await Promise.all([
       this.adminClient
         .from('billing_accounts')
@@ -95,7 +96,6 @@ class BillingWebhooksService {
         .is('deleted_on', null),
     ]);
     if (accountsResult.error) throw new Error(accountsResult.error.message);
-
     const promises = accountsResult.data.map(async (account) => {
       const gateway = createBillingGatewayService(
         account.provider,
@@ -108,7 +108,6 @@ class BillingWebhooksService {
           .eq('service_id', service.id)
           .single();
       if (billingServicesError) throw new Error(billingServicesError.message);
-
       return gateway.updateService(
         service,
         account,

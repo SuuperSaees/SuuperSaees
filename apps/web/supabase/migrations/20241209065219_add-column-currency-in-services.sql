@@ -1,0 +1,1 @@
+alter table "public"."services" add column "currency" text not null default 'usd'::text;

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { ApiError } from '~/lib/api/api-error';
+// import { ApiError } from '~/lib/api/api-error';
 import { BaseController } from '~/lib/api/base-controller';
 import { Services as ServiceApi } from '~/lib/api/services.types';
 
@@ -16,7 +16,9 @@ export class ServiceController extends BaseController {
       const body = await this.parseBody<ServiceApi>(req);
       body.organizationId = this.getOrganizationId(req);
 
-      const client = getSupabaseServerComponentClient();
+      const client = getSupabaseServerComponentClient({
+        admin: true,
+      });
       const serviceService = await createServiceService(client);
       const service = await serviceService.createService(body);
 
@@ -64,7 +66,9 @@ export class ServiceController extends BaseController {
     const body = await this.parseBody<ServiceApi>(req);
 
     try {
-      const client = getSupabaseServerComponentClient();
+      const client = getSupabaseServerComponentClient({
+        admin: true,
+      });
       const serviceService = await createServiceService(client);
       const service = await serviceService.updateService(params.id, body);
       return this.ok(service, requestId);
@@ -79,7 +83,9 @@ export class ServiceController extends BaseController {
   ): Promise<Response> {
     const requestId = crypto.randomUUID();
     try {
-      const client = getSupabaseServerComponentClient();
+      const client = getSupabaseServerComponentClient({
+        admin: true,
+      });
       const serviceService = await createServiceService(client);
       await serviceService.deleteService(params.id);
       return this.ok({}, requestId);
@@ -89,10 +95,7 @@ export class ServiceController extends BaseController {
   }
 
   private getOrganizationId(req: NextRequest): string {
-    const organizationId = req.nextUrl.searchParams.get('organizationId');
-    if (!organizationId) {
-      throw ApiError.badRequest('Organization ID is required');
-    }
+    const organizationId = req.nextUrl.searchParams.get('organizationId') ?? '';
     return organizationId;
   }
 }

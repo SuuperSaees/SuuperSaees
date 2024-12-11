@@ -32,6 +32,7 @@ interface ServiceData {
     service_description: string;
   };
   step_service_price: {
+    currency: string;
     standard: boolean;
     purchase_limit: number;
     allowed_orders: number;
@@ -68,6 +69,7 @@ export const createService = async (clientData: ServiceData) => {
         clientData.step_type_of_service.recurring_subscription,
       service_image: clientData.step_service_details.service_image,
       name: clientData.step_service_details.service_name,
+      currency: clientData.step_service_price.currency.toLowerCase(),
       service_description: clientData.step_service_details.service_description,
       standard: clientData.step_service_price.standard,
       purchase_limit: clientData.step_service_price.purchase_limit,

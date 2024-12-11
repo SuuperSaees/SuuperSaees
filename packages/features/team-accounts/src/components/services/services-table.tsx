@@ -15,7 +15,8 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from '@tanstack/react-table';
-import { ArrowUp, Link2, Pen, Search } from 'lucide-react';
+import { ArrowUp, Pen, Search, Link2 } from 'lucide-react';
+// import { CheckoutSelector } from './checkout-selector';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
@@ -31,16 +32,15 @@ import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings';
+import { BillingAccounts } from '../../../../../../apps/web/lib/billing-accounts.types';
+import { useStripeActions } from '../../../../../../apps/web/app/services/hooks/use-stripe-actions';
 
 type ServicesTableProps = {
-  services: Service.Type[];
+  services: Service.Relationships.Billing.BillingService[];
   activeTab: string;
   accountRole: string;
-  hasTheEmailAssociatedWithStripe: boolean;
-  handleCheckout: (priceId: string, stripeId: string, service: Service.Type, organizationId: string) => Promise<void>;
+  paymentsMethods: BillingAccounts.PaymentMethod[];
   isLoading: boolean;
-  stripeId: string;
-  organizationId: string;
 };
 
 // SERVICES TABLE
@@ -48,11 +48,8 @@ export function ServicesTable({
   activeTab,
   services,
   accountRole,
-  hasTheEmailAssociatedWithStripe,
-  handleCheckout,
   isLoading,
-  stripeId,
-  organizationId,
+  paymentsMethods,
 }: ServicesTableProps) {
   const { t } = useTranslation(['services', 'briefs']);
 
@@ -68,13 +65,12 @@ export function ServicesTable({
 
   const [rowSelection, setRowSelection] = React.useState({});
 
+  const { handleCheckout } = useStripeActions({ userRole: accountRole });
   const columns = useGetColumns(
     t,
     accountRole,
-    hasTheEmailAssociatedWithStripe,
+    paymentsMethods,
     handleCheckout,
-    stripeId,
-    organizationId,
   );
 
   const filteredServices = services.filter((service) => {
@@ -83,6 +79,7 @@ export function ServicesTable({
 
     return displayName.includes(searchString);
   });
+
 
   const options = {
     data: filteredServices,
@@ -179,11 +176,9 @@ export function ServicesTable({
 const useGetColumns = (
   t: TFunction<'services', undefined>,
   accountRole: string,
-  hasTheEmailAssociatedWithStripe: boolean,
-  handleCheckout: (priceId: string, stripeId: string, service: Service.Type, organizationId:string) => Promise<void>,
-  stripeId: string,
-  organizationId: string,
-): ColumnDef<Service.Type>[] => {
+  paymentsMethods: BillingAccounts.PaymentMethod[],
+  handleCheckout: (service: Service.Relationships.Billing.BillingService, paymentMethods: BillingAccounts.PaymentMethod[]) => Promise<void>,
+): ColumnDef<Service.Relationships.Billing.BillingService>[] => {
   return useMemo(
     () => [
       {
@@ -198,23 +193,24 @@ const useGetColumns = (
         header: t('price'),
         cell: ({ row }) => {
           const price = row.getValue('price');
+          const currency = row.original.currency.toUpperCase();
           const recurrence = row.original.recurrence;
           return (
             <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
-              ${price as number} USD {recurrence ? ` / ${recurrence}` : ''}
+              ${price as number} {currency} {recurrence ? ` / ${recurrence}` : ''}
             </div>
           );
         },
       },
-      {
-        accessorKey: 'price_id',
-        header: 'Price ID',
-        cell: ({ row }) => (
-          <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
-            {row.getValue('price_id')}
-          </div>
-        ),
-      },
+      // {
+      //   accessorKey: 'price_id',
+      //   header: 'Price ID',
+      //   cell: ({ row }) => (
+      //     <div className="font-sans text-sm font-normal leading-[1.42857] text-gray-600">
+      //       {row.getValue('price_id')}
+      //     </div>
+      //   ),
+      // },
       {
         accessorKey: 'number_of_clients',
         header: t('clients'),
@@ -279,25 +275,29 @@ const useGetColumns = (
         enableHiding: false,
         cell: ({ row }) => {
           const service = row.original;
-          const priceId = service.price_id as string;
-
           return (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
-              {accountRole === 'agency_owner' && (
+              {accountRole === 'agency_owner' && service.billing_services.length > 0 && (
                 <div>
-                  {hasTheEmailAssociatedWithStripe && (
+
                     <Button
                       variant="ghost"
                       onClick={async () => {
-                        if (service.price_id) {
-                          await handleCheckout(priceId, stripeId, service, organizationId);
-                        }
+                          await handleCheckout(service, paymentsMethods);
                       }}
                     >
                       <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />
                     </Button>
-                  )}
                 </div>
+
+              //   <div>
+              //   <CheckoutSelector
+              //     service={service}
+              //     paymentsMethods={paymentsMethods}
+              //     onAction={handleCheckout}
+              //   />
+              // </div>
+
               )}
               {/* {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />} */}
               {(accountRole === 'agency_owner' || accountRole === 'agency_project_manager') && (
@@ -306,13 +306,13 @@ const useGetColumns = (
                 </Link>
               )}
               {(accountRole === 'agency_owner' || accountRole === 'agency_project_manager') && (
-                <DeleteServiceDialog priceId={priceId} />
+                <DeleteServiceDialog serviceId={service.id} />
               )}
             </div>
           );
         },
       },
     ],
-    [t, accountRole, handleCheckout, hasTheEmailAssociatedWithStripe],
+    [t, accountRole, paymentsMethods],
   );
 };

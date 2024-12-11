@@ -1,14 +1,21 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { Logger as LoggerInstance, createLogger } from '@kit/shared/logger';
+
+
 
 import { ApiError } from '~/lib/api/api-error';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Database } from '~/lib/database.types';
 
+
+
 import { CreateServiceDTO, UpdateServiceDTO } from '../dtos/service.dto';
 import { BillingServiceRepository } from '../repositories/billing-service.repository';
 import { ServiceRepository } from '../repositories/service.repository';
+
 
 export class ServiceService {
   constructor(
@@ -78,13 +85,17 @@ export class ServiceService {
 
   async updateService(id: string, data: UpdateServiceDTO) {
     try {
-      const service = await this.serviceRepository.update(id, data);
-      const billingService =
-        await this.billingServiceRepository.findByServiceId(id);
-      if (billingService) {
-        await this.billingServiceRepository.update(billingService.id, {
+      let service;
+      if (data.provider !== BillingAccounts.BillingProviderKeys.SUUPER) {
+        await this.billingServiceRepository.update(id, {
           status: data.status,
         });
+
+        service = await this.billingServiceRepository.findByServiceId(
+          data.id ?? 0,
+        );
+      } else {
+        service = await this.serviceRepository.update(data.id ?? 0, data);
       }
       return service;
     } catch (error) {

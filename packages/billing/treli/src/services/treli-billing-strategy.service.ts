@@ -4,6 +4,8 @@ import 'server-only';
 
 import { z } from 'zod';
 
+
+
 import { BillingStrategyProviderService } from '@kit/billing';
 import {
   CancelSubscriptionParamsSchema,
@@ -16,6 +18,7 @@ import {
 } from '@kit/billing/schema';
 import { UpsertSubscriptionParams } from '@kit/billing/types';
 import { getLogger } from '@kit/shared/logger';
+import { RetryOperationService } from '@kit/shared/utils';
 import { Database } from '@kit/supabase/database';
 
 import { CredentialsCrypto } from '../../../../../apps/web/app/utils/credentials-crypto';
@@ -24,7 +27,9 @@ import { CredentialsCrypto } from '../../../../../apps/web/app/utils/credentials
  * A class representing a mailer using the Suuper HTTP API.
  * @implements {Mailer}
  */
-
+interface ServiceOperationResult {
+  success: boolean;
+}
 type ServiceType = Database['public']['Tables']['services']['Row'];
 type BillingAccountType =
   Database['public']['Tables']['billing_accounts']['Row'];
@@ -497,111 +502,121 @@ export class TreliBillingStrategyService
       baseUrl,
     };
 
+    const retryOperation = new RetryOperationService<ServiceOperationResult>(
+      async () => {
+        const parsedCredentials: EncryptedCredentials = JSON.parse(
+          billingAccount.credentials as string,
+        );
+        if (
+          !parsedCredentials.data ||
+          !parsedCredentials.iv ||
+          !parsedCredentials.version ||
+          !parsedCredentials.tag
+        ) {
+          logger.error(ctx, 'Invalid encrypted credentials');
+          return { success: false };
+        }
+
+        // Decrypt credentials
+        const credentials =
+          this.credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+
+        // Create Basic Auth token
+        const authToken = Buffer.from(
+          `${credentials.username}:${credentials.password}`,
+        ).toString('base64');
+
+        // Prepare subscription plans
+        const subscriptionPlan = {
+          interval: 1, // Default to 1 if not specified
+          period: service.recurrence ?? 'month',
+          subsprice: service.price ?? 0,
+          trial_length: service.test_period_duration ?? undefined,
+          trial_period:
+            service.test_period_duration_unit_of_measurement ?? undefined,
+          has_trial: service.test_period ?? false,
+        };
+
+        // Encode SKU in base64
+        const skuRaw = `${this.sufix}_${service.id}`;
+        const skuBase64 = Buffer.from(skuRaw).toString('base64');
+
+        // Prepare service data for Treli
+        const treliServiceData = {
+          name: service.name,
+          description: service.service_description ?? '',
+          sku: skuBase64,
+          trackqty: false,
+          inventory: 0,
+          stockstatus: 'instock',
+          image_url: service.service_image ?? '',
+          productstatus: service.status === 'active' ? 'active' : 'draft',
+          product_type: service.recurring_subscription
+            ? 'service'
+            : 'subsproduct',
+          subs_plans: service.recurring_subscription ? [subscriptionPlan] : [],
+        };
+
+        // Make request to Treli API
+        const response = await fetch(
+          'https://treli.co/wp-json/api/plans/create',
+          {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Authorization: `Basic ${authToken}`,
+            },
+            body: JSON.stringify(treliServiceData),
+          },
+        );
+
+        if (!response.ok) {
+          const errorData = await response.clone().json();
+          logger.error(
+            { ...ctx, error: errorData },
+            'Failed to create service in Treli',
+          );
+          return { success: false };
+        }
+
+        const responseData = await response.clone().json();
+        logger.info(
+          { ...ctx, treliResponse: responseData },
+          'Service created successfully in Treli',
+        );
+
+        const res = await fetch(`${baseUrl}/api/v1/billing/services`, {
+          method: 'POST',
+          headers: new Headers({
+            Authorization: `Basic ${btoa(`${this.suuperClientId}:${this.suuperClientSecret}`)}`,
+          }),
+          body: JSON.stringify({
+            id: service.id,
+            provider: 'treli',
+            provider_id: `${responseData.id}`,
+            status: service.status ?? 'active',
+          }),
+        });
+
+        if (!res.ok) {
+          logger.error(ctx, 'Failed to create service in Suuper');
+          return { success: false };
+        }
+
+        return {
+          success: true,
+        };
+      },
+      {
+        maxAttempts: 3,
+        delayMs: 1000,
+        backoffFactor: 2,
+      },
+    );
     try {
       // Parse and validate credentials
-      const parsedCredentials: EncryptedCredentials = JSON.parse(
-        billingAccount.credentials as string,
-      );
-      if (
-        !parsedCredentials.data ||
-        !parsedCredentials.iv ||
-        !parsedCredentials.version ||
-        !parsedCredentials.tag
-      ) {
-        logger.error(ctx, 'Invalid encrypted credentials');
-        return { success: false };
-      }
-
-      // Decrypt credentials
-      const credentials =
-        this.credentialsCrypto.decrypt<Credentials>(parsedCredentials);
-
-      // Create Basic Auth token
-      const authToken = Buffer.from(
-        `${credentials.username}:${credentials.password}`,
-      ).toString('base64');
-
-      // Prepare subscription plans
-      const subscriptionPlan = {
-        interval: 1, // Default to 1 if not specified
-        period: service.recurrence ?? 'month',
-        subsprice: service.price ?? 0,
-        trial_length: service.test_period_duration ?? undefined,
-        trial_period:
-          service.test_period_duration_unit_of_measurement ?? undefined,
-        has_trial: service.test_period ?? false,
-      };
-
-      // Encode SKU in base64
-      const skuRaw = `${this.sufix}_${service.id}`;
-      const skuBase64 = Buffer.from(skuRaw).toString('base64');
-
-      // Prepare service data for Treli
-      const treliServiceData = {
-        name: service.name,
-        description: service.service_description ?? '',
-        sku: skuBase64,
-        trackqty: false,
-        inventory: 0,
-        stockstatus: 'instock',
-        image_url: service.service_image ?? '',
-        productstatus: service.status === 'active' ? 'active' : 'draft',
-        product_type: service.recurring_subscription
-          ? 'service'
-          : 'subsproduct',
-        subs_plans: service.recurring_subscription ? [subscriptionPlan] : [],
-      };
-
-      // Make request to Treli API
-      const response = await fetch(
-        'https://treli.co/wp-json/api/plans/create',
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Basic ${authToken}`,
-          },
-          body: JSON.stringify(treliServiceData),
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        logger.error(
-          { ...ctx, error: errorData },
-          'Failed to create service in Treli',
-        );
-        return { success: false };
-      }
-
-      const responseData = await response.clone().json();
-      logger.info(
-        { ...ctx, treliResponse: responseData },
-        'Service created successfully in Treli',
-      );
-
-      const res = await fetch(`${baseUrl}/api/v1/services`, {
-        method: 'POST',
-        headers: new Headers({
-          Authorization: `Basic ${btoa(`${this.suuperClientId}:${this.suuperClientSecret}`)}`,
-        }),
-        body: JSON.stringify({
-          id: service.id,
-          provider: 'treli',
-          provider_id: `${responseData.id}`,
-          status: service.status ?? 'active',
-        }),
-      });
-
-      if (!res.ok) {
-        logger.error(ctx, 'Failed to create service in Suuper');
-        return { success: false };
-      }
-
-      return {
-        success: true,
-      };
+      return await retryOperation.execute();
     } catch (error) {
       logger.error({ ...ctx, error }, 'Error creating service in Treli');
       return { success: false };
@@ -622,133 +637,143 @@ export class TreliBillingStrategyService
       billingAccountId: billingAccount.id,
       baseUrl,
     };
+    const retryOperation = new RetryOperationService<ServiceOperationResult>(
+      async () => {
+        // Parse and validate credentials
+        const parsedCredentials: EncryptedCredentials = JSON.parse(
+          billingAccount.credentials as string,
+        );
+        if (
+          !parsedCredentials.data ||
+          !parsedCredentials.iv ||
+          !parsedCredentials.version ||
+          !parsedCredentials.tag
+        ) {
+          logger.error(ctx, 'Invalid encrypted credentials');
+          return { success: false };
+        }
 
+        // Decrypt credentials
+        const credentials =
+          this.credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+
+        // Create Basic Auth token
+        const authToken = Buffer.from(
+          `${credentials.username}:${credentials.password}`,
+        ).toString('base64');
+
+        // list plans
+        const responsePlans = await fetch(
+          `https://treli.co/wp-json/api/plans/get?id=${Number(serviceProviderId)}`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Basic ${authToken}`,
+            },
+          },
+        );
+
+        if (!responsePlans.ok) {
+          logger.error(ctx, 'Failed to get plans from Treli');
+          return { success: false };
+        }
+
+        const plansData = (await responsePlans.clone().json()) as {
+          results: {
+            id: number;
+            // name: string;
+            // description: string;
+            // status: string;
+            // type: string;
+            plans: {
+              // interval: number;
+              // period: string;
+              price: number;
+              // trial: string;
+              // sign_up_fee: string;
+              // commitment_period: string;
+              //   multi_currency_prices: string;
+              //   multi_currency_signup_fees: string;
+            }[]; // if you need to update the plans
+          }[];
+        };
+        const currentPlanToUpdate = plansData.results.find(
+          (plan: { id: number }) => plan.id === Number(serviceProviderId),
+        );
+
+        // update plan
+        const updatedPlan = {
+          id: currentPlanToUpdate?.id,
+          name: service.name,
+          description: service.service_description ?? '',
+          subscription_plan_id: 0, // if you need to update the plans take de id of the plan to update
+          // description: service.service_description ?? '',
+          subs_plan: {
+            interval: 1,
+            period: service.recurrence ?? 'month',
+            subsprice: service.price ?? 0,
+            // commitment_periods: 0,
+            // has_signup_fee: false,
+            // signup_fee: 0,
+            // length: undefined,
+            // trial_length: service.test_period_duration ?? undefined,
+            has_trial: service.test_period ?? false,
+            trial_period: service.test_period_duration_unit_of_measurement,
+            trial_length: service.test_period_duration,
+          },
+        };
+
+        const responseUpdatePlan = await fetch(
+          `https://treli.co/wp-json/api/plans/update`,
+          {
+            method: 'POST',
+            headers: {
+              authorization: `Basic ${authToken}`,
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify(updatedPlan),
+          },
+        );
+
+        if (!responseUpdatePlan.ok) {
+          logger.error(ctx, 'Failed to update plan in Treli');
+          return { success: false };
+        }
+
+        const responseUpdateService = await fetch(
+          `${baseUrl}/api/v1/billing/services/${serviceProviderId}`,
+          {
+            method: 'PATCH',
+            headers: new Headers({
+              Authorization: `Basic ${btoa(`${this.suuperClientId}:${this.suuperClientSecret}`)}`,
+            }),
+            body: JSON.stringify({
+              id: service.id,
+              provider: 'treli',
+              provider_id: `${serviceProviderId}`,
+              status: service.status ?? 'active',
+            }),
+          },
+        );
+
+        if (!responseUpdateService.ok) {
+          logger.error(ctx, 'Failed to update service in Suuper');
+          return { success: false };
+        }
+
+        logger.info(ctx, 'Updating service...');
+        return {
+          success: true,
+        };
+      },
+      {
+        maxAttempts: 3,
+        delayMs: 1000,
+        backoffFactor: 2,
+      },
+    );
     try {
-      // Parse and validate credentials
-      const parsedCredentials: EncryptedCredentials = JSON.parse(
-        billingAccount.credentials as string,
-      );
-      if (
-        !parsedCredentials.data ||
-        !parsedCredentials.iv ||
-        !parsedCredentials.version ||
-        !parsedCredentials.tag
-      ) {
-        logger.error(ctx, 'Invalid encrypted credentials');
-        return { success: false };
-      }
-
-      // Decrypt credentials
-      const credentials =
-        this.credentialsCrypto.decrypt<Credentials>(parsedCredentials);
-
-      // Create Basic Auth token
-      const authToken = Buffer.from(
-        `${credentials.username}:${credentials.password}`,
-      ).toString('base64');
-
-
-      // list plans
-      const responsePlans = await fetch(
-        `https://treli.co/wp-json/api/plans/get?id=${Number(serviceProviderId)}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Basic ${authToken}`,
-          },
-        },
-      );
-
-      if (!responsePlans.ok) {
-        logger.error(ctx, 'Failed to get plans from Treli');
-        return { success: false };
-      }
-
-      const plansData = (await responsePlans.clone().json()) as {
-        results: {
-          id: number;
-          // name: string;
-          // description: string;
-          // status: string;
-          // type: string;
-          plans: {
-            // interval: number;
-            // period: string;
-            price: number;
-            // trial: string;
-            // sign_up_fee: string;
-            // commitment_period: string;
-          //   multi_currency_prices: string;
-          //   multi_currency_signup_fees: string;
-          }[]; // if you need to update the plans
-        }[];
-      };
-      const currentPlanToUpdate = plansData.results.find(
-        (plan: {
-          id: number;
-        }) => plan.id === Number(serviceProviderId),
-      );
-
-      // update plan
-      const updatedPlan = {
-        ...currentPlanToUpdate,
-        name: service.name,
-        description: service.service_description ?? '',
-        subscription_plan_id: 0, // if you need to update the plans take de id of the plan to update
-        // description: service.service_description ?? '',
-        subs_plan: {
-          interval: 1,
-          period: service.recurrence ?? 'month',
-          subsprice: service.price ?? 0,
-          // commitment_periods: 0,
-          // has_signup_fee: false,
-          // signup_fee: 0,
-          // length: undefined,
-          // trial_length: service.test_period_duration ?? undefined,
-          has_trial: service.test_period ?? false,
-          trial_period: service.test_period_duration_unit_of_measurement,
-          trial_length: service.test_period_duration,
-        },
-      };
-
-      const responseUpdatePlan = await fetch(
-        `https://treli.co/wp-json/api/plans/update`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Basic ${authToken}`,
-          },
-          body: JSON.stringify(updatedPlan),
-        },
-      );
-
-      if (!responseUpdatePlan.ok) {
-        logger.error(ctx, 'Failed to update plan in Treli');
-        return { success: false };
-      }
-
-      const responseUpdateService = await fetch(`${baseUrl}/api/v1/services/${serviceProviderId}`, {
-        method: 'PUT',
-        headers: new Headers({
-          Authorization: `Basic ${btoa(`${this.suuperClientId}:${this.suuperClientSecret}`)}`,
-        }),
-        body: JSON.stringify({
-          id: service.id,
-          provider: 'treli',
-          provider_id: `${serviceProviderId}`,
-          status: service.status ?? 'active',
-        }),
-      });
-
-      if (!responseUpdateService.ok) {
-        logger.error(ctx, 'Failed to update service in Suuper');
-        return { success: false };
-      }
-
-      logger.info(ctx, 'Updating service...');
-      return {
-        success: true,
-      };
+      return await retryOperation.execute();
     } catch (error) {
       logger.error({ ...ctx, error }, 'Error updating service in Treli');
       return { success: false };
