@@ -30,9 +30,10 @@ import SubtaskTimers from './subtask-timers';
 import { createTimer } from '~/team-accounts/src/server/actions/timers/create/create-timer';
 import { TimerUpdate } from '~/lib/timer.types';
 import { updateActiveTimer } from '~/team-accounts/src/server/actions/timers/update/update-timer';
+import { getFormattedDateRange } from '../../utils/get-formatted-dates';
+import { useTranslation } from 'react-i18next';
 
 const SubtaskItem = ({
-  t,
   subtask,
   isEditing,
   isHovered,
@@ -55,9 +56,9 @@ const SubtaskItem = ({
   userRole,
   orderAgencyId,
   updateSubtask,
+  currentUserId,
   ...props
 }: {
-  t: any;
   subtask: Subtask.Type;
   isEditing: boolean;
   isHovered: boolean;
@@ -113,7 +114,10 @@ const SubtaskItem = ({
     },
     unknown
   >;
+  currentUserId: string;
 }) => {
+  const { t, i18n } = useTranslation(['tasks','orders']);
+  const language = i18n.language;
   const [content, setContent] = useState(subtask.content);
   const enabledUserRole = new Set(['agency_owner', 'agency_member', 'agency_project_manager'])
   const queryClient = useQueryClient();
@@ -121,9 +125,24 @@ const SubtaskItem = ({
     await updateActiveTimer(timerId, timer);
 
     queryClient.invalidateQueries({
-      queryKey: ['subtask_timers', timer.elementId]
+      queryKey: ['subtask_timers', timer.id]
+    }).catch((error) => {
+      console.error('Error invalidating subtask timers:', error);
     });
   };
+  const canEditSubtask = (userRole: string, subtask: Subtask.Type) => {
+    if (['agency_owner', 'agency_member', 'agency_project_manager'].includes(userRole)) {
+      return true;
+    }
+    
+    if (['client_member', 'client_owner'].includes(userRole)) {
+      return subtask.followers?.some(follower => follower.client_member_id === currentUserId);
+    }
+    
+    return false;
+  };
+  const isEditable = canEditSubtask(userRole, subtask);
+  
   return (
     <div
       className="flex items-center justify-between py-3 overflow-x-auto"
@@ -145,6 +164,7 @@ const SubtaskItem = ({
             }
             className="w-full rounded-md border-none bg-transparent font-semibold text-gray-900 focus:outline-none"
             autoFocus
+            disabled={!isEditable}
           />
           <X
             className="ml-2 h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-700"
@@ -153,8 +173,10 @@ const SubtaskItem = ({
         </div>
       ) : (
         <p
-          className="mr-4 max-w-[calc(100%-40px)] overflow-hidden truncate text-ellipsis font-semibold text-gray-900"
-          onClick={onEdit}
+          className={`mr-4 max-w-[calc(100%-40px)] overflow-hidden truncate font-semibold text-gray-900 ${
+            isEditable ? 'cursor-pointer' : 'cursor-default'
+          }`}
+          onClick={isEditable ? onEdit : undefined}
         >
           {subtask.name}
         </p>
@@ -190,7 +212,7 @@ const SubtaskItem = ({
                     <div className="mr-2 flex w-full items-center justify-between">
                       <p
                         className="flex-grow text-xl font-semibold text-gray-900"
-                        onClick={onEdit}
+                        onClick={isEditable ? onEdit : undefined}
                       >
                         {subtask.name}
                       </p>
@@ -222,8 +244,10 @@ const SubtaskItem = ({
                     <span className="flex text-sm font-semibold">
                       <CalendarIcon className="mr-2 h-4 w-4" /> {t('details.deadline')}
                     </span>
-                    <DatePickerWithRange
-                      initialPeriod={
+                    {isEditable ? (
+                      <DatePickerWithRange
+                        shortFormat={true}
+                        initialPeriod={
                         subtask.start_date && subtask.end_date
                           ? {
                               from: new Date(subtask.start_date),
@@ -234,7 +258,19 @@ const SubtaskItem = ({
                       handlePeriod={handleDateRangeChange}
                       subtask={subtask}
                       subtaskId={subtask.id}
-                    />
+                      />
+                    ) : (
+                      <p 
+                        className='whitespace-nowrap select-none px-3 text-gray-900 font-medium text-sm'
+                      >
+                        {getFormattedDateRange(subtask.start_date && subtask.end_date
+                          ? {
+                              from: new Date(subtask.start_date),
+                              to: new Date(subtask.end_date),
+                            }
+                          : undefined, language, true) || t('empty_date_range',{ns: 'orders'})}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="flex text-sm font-semibold">
@@ -245,6 +281,7 @@ const SubtaskItem = ({
                       subtask={subtask}
                       agency_id={orderAgencyId}
                       mode="subtask"
+                      blocked={!isEditable} 
                     />
                   </div>
                   <div className="flex items-center justify-between text-sm">
@@ -252,7 +289,11 @@ const SubtaskItem = ({
                       <FlagIcon className="mr-2 h-4 w-4" />
                       <p>{t('details.priority')}</p>
                     </span>
-                    <PriorityCombobox mode={'subtask'} subtask={subtask} />
+                    <PriorityCombobox 
+                      mode={'subtask'} 
+                      subtask={subtask} 
+                      blocked={!isEditable} 
+                    />
                   </div>
                   <SubtaskAssignations
                     onUserSelectionChange={(selectedUsers) =>
@@ -298,13 +339,15 @@ const SubtaskItem = ({
           subtask={subtask}
           agency_id={orderAgencyId}
           mode="subtask"
+          blocked={!isEditable}
         />
 
-        <PriorityCombobox mode={'subtask'} subtask={subtask} />
+        <PriorityCombobox mode={'subtask'} subtask={subtask} blocked={!isEditable} />
 
-        <DatePickerWithRange
-          shortFormat={true}
-          initialPeriod={
+        {isEditable ? (
+          <DatePickerWithRange
+            shortFormat={true}
+            initialPeriod={
             subtask.start_date && subtask.end_date
               ? {
                   from: new Date(subtask.start_date),
@@ -315,7 +358,19 @@ const SubtaskItem = ({
           handlePeriod={handleDateRangeChange}
           subtask={subtask}
           subtaskId={subtask.id}
-        />
+          />
+        ) : (
+          <p 
+            className='whitespace-nowrap select-none px-3 text-gray-900 font-medium text-sm'
+          >
+            {getFormattedDateRange(subtask.start_date && subtask.end_date
+              ? {
+                  from: new Date(subtask.start_date),
+                  to: new Date(subtask.end_date),
+                }
+              : undefined, language, true) || t('empty_date_range',{ns: 'orders'})}
+          </p>
+        )}
         <div className="flex items-center">
           {
             enabledUserRole.has(userRole)  && (
@@ -327,18 +382,20 @@ const SubtaskItem = ({
               />
             )
           }
-          <TrashIcon
-            className={`h-4 w-4 cursor-pointer ${isHovered ? 'text-gray-500 hover:text-red-500' : 'text-transparent'}`}
-            onClick={async () =>
-              await updateSubtask.mutateAsync({
-                subtaskId: subtask.id,
-                subtask: {
-                  ...subtask,
-                  deleted_on: new Date().toISOString(),
-                },
-              })
-            }
-          />
+          {isEditable && (
+            <TrashIcon
+              className={`h-4 w-4 cursor-pointer ${isHovered ? 'text-gray-500 hover:text-red-500' : 'text-transparent'}`}
+              onClick={async () =>
+                await updateSubtask.mutateAsync({
+                  subtaskId: subtask.id,
+                  subtask: {
+                    ...subtask,
+                    deleted_on: new Date().toISOString(),
+                  },
+                })
+              }
+            />
+          )}
         </div>
       </div>
     </div>

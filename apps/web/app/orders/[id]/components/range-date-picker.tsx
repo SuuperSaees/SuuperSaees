@@ -8,11 +8,10 @@ import {
 import { Calendar } from '@kit/ui/calendar';
 import { cn } from '@kit/ui/utils';
 import { DateRange } from '@kit/ui/calendar';
-// import { format } from 'date-fns';
-import { formatDisplayDate } from '@kit/shared/utils';
 import { useTranslation } from 'react-i18next';
 import { Subtask } from '~/lib/tasks.types';
 import { useState } from 'react';
+import { getFormattedDateRange } from '../utils/get-formatted-dates';
 
 
 interface DatePickerWithRangeProps {
@@ -42,11 +41,8 @@ export function DatePickerWithRange({
   const [selectedPeriod, setSelectedPeriod] = useState<DateRange | undefined>(initialPeriod)
   const [open, setOpen] = useState(false);
 
-  const formattedDateRange = selectedPeriod?.from && selectedPeriod?.to
-    ? shortFormat 
-        ? `${formatDisplayDate(selectedPeriod.to, language)}` 
-        : `${formatDisplayDate(selectedPeriod.from, language)} - ${formatDisplayDate(selectedPeriod.to, language)}`
-    : t('select_date_range',{ns: 'orders'});
+  const formattedDateRange = getFormattedDateRange(selectedPeriod, language, shortFormat) 
+    || t('select_date_range',{ns: 'orders'});
   
 
   const handleDateSelect = (newPeriod: DateRange | undefined) => {
