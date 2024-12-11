@@ -244,19 +244,6 @@ const SubtaskItem = ({
                     <span className="flex text-sm font-semibold">
                       <CalendarIcon className="mr-2 h-4 w-4" /> {t('details.deadline')}
                     </span>
-                    {/* <DatePickerWithRange
-                      initialPeriod={
-                        subtask.start_date && subtask.end_date
-                          ? {
-                              from: new Date(subtask.start_date),
-                              to: new Date(subtask.end_date),
-                            }
-                          : undefined
-                      }
-                      handlePeriod={handleDateRangeChange}
-                      subtask={subtask}
-                      subtaskId={subtask.id}
-                    /> */}
                     {isEditable ? (
                       <DatePickerWithRange
                         shortFormat={true}

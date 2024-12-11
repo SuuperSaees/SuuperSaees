@@ -12,7 +12,6 @@ import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/order
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { formatDisplayDate } from '@kit/shared/utils';
 import { Trans } from '@kit/ui/trans';
 
 import { AgencyStatus } from '~/lib/agency-statuses.types';
@@ -25,17 +24,13 @@ import {
 } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { AgencyStatusesProvider } from '../../components/context/agency-statuses-context';
 import { useActivityContext } from '../context/activity-context';
-import deduceNameFromEmail from '../utils/deduce-name-from-email';
-import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import ActivityAssignations from './activity-assignations';
 import ActivityFollowers from './activity-followers';
-// import SelectAction from './ui/select-action';
 import StatusCombobox from './status-combobox';
-// import { ReviewDialog } from './review-dialog';
 import AvatarDisplayer from './ui/avatar-displayer';
-// import SelectAction from './ui/select-action';
 import { PriorityCombobox } from './priority-combobox';
 import { getClientMembersForOrganization } from '~/team-accounts/src/server/actions/clients/get/get-clients';
+import { getFormattedDateRange } from '../utils/get-formatted-dates';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -303,11 +298,11 @@ const AsideOrderInformation = ({
                 <CalendarIcon className="mr-2 h-4 w-4" />{' '}
                 {t('details.deadline')}{' '}
               </span>
-              <span className="pl-2 pr-2">
+              <span className="pl-2 pr-2 text-sm items-center flex justify-center">
                 {order.due_date ? (
-                  formatDisplayDate(new Date(order.due_date), language)
+                  getFormattedDateRange({from: new Date(order.due_date), to: new Date(order.due_date)}, language, true)
                 ) : (
-                  <Trans i18nKey="orders:details.deadlineNotSet" />
+                  t('details.deadlineNotSet',{ns: 'orders'})
                 )}
               </span>
             </div>
@@ -318,13 +313,12 @@ const AsideOrderInformation = ({
                   {t('details.status')}
                 </span>
               </div>
-              <span
-                className={`rounded-full px-2 py-1 ${order.status ? statusColors[order.status] : undefined}`}
-              >
-                {order.status
-                  ?.replace(/_/g, ' ')
-                  .replace(/^\w/, (c) => c.toUpperCase())}
-              </span>
+              <StatusCombobox
+                order={order}
+                agency_id={order.agency_id}
+                mode="order"
+                blocked={true} 
+              />
             </div>
 
             <div className="mb-4 flex items-center justify-between">
@@ -334,14 +328,11 @@ const AsideOrderInformation = ({
                   {t('details.priority')}
                 </span>
               </div>
-              <span
-                className={`flex items-center rounded-full px-2 py-1 ${order.priority ? priorityColors[order.priority] : undefined}`}
-              >
-                <div className="mr-2 h-2 w-2 rounded-full bg-current"></div>
-                {order.priority
-                  ?.replace(/_/g, ' ')
-                  .replace(/^\w/, (c) => c.toUpperCase())}
-              </span>
+              <PriorityCombobox 
+                mode={'order'} 
+                order={order} 
+                blocked={true} 
+              />
             </div>
 
             <ActivityAssignations
