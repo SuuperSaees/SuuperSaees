@@ -168,7 +168,7 @@ const BillingForm: React.FC<{
     }
 
     const cardNumberElement = elements.getElement(CardNumberElement);
-    if (!cardNumberElement) {
+    if (!cardNumberElement && selectedPaymentMethod !== 'mercadopago') {
       setErrorMessage(t('checkout.error.cardNumberElement'));
       return;
     }
