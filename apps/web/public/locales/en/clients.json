@@ -74,7 +74,9 @@
   "searchOrganizations": "Search",
   "deletion": {
     "title": "Delete client",
+    "titleInTeamMembers": "Delete team member",
     "description": "Are you sure you want to delete this client?",
+    "descriptionInTeamMembers": "Are you sure you want to delete this team member?",
     "cancel": "Cancel",
     "delete": "Delete"
   },

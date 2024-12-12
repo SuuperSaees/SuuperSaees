@@ -92,7 +92,7 @@
     "confirm": "Guardar",
     "errorCreating": "Error al crear el temporizador",
     "addTime": "Añadir tiempo",
-    "whatDidYouSpendTimeOn": "En qué invertiste este tiempo?*",
+    "whatDidYouSpendTimeOn": "¿Cómo invertiste este tiempo?*",
     "writeHere": "Escribe aquí..."
   },
   "organizationName": "Organización",
