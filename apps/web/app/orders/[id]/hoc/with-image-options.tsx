@@ -16,6 +16,7 @@ import {
 import Tooltip from '~/components/ui/tooltip';
 
 import { useImageActions } from '../hooks/use-image-actions';
+import Image from 'next/image';
 
 interface ImageProps {
   src: string;
@@ -23,6 +24,7 @@ interface ImageProps {
   className?: string;
   dialogClassName?: string; // New prop for dialog-specific class
   bucketName?: string;
+  isDialog?: boolean;
 }
 
 export const withImageOptions = <P extends ImageProps>(
@@ -105,13 +107,28 @@ export const withImageOptions = <P extends ImageProps>(
   return WithImageOptions;
 };
 
-const ImageComponent: React.FC<ImageProps> = ({ src, alt, className }) => (
-  <img
-    src={src}
-    alt={alt}
-    className={`aspect-square object-contain ${className}`}
-  />
-);
+const ImageComponent: React.FC<ImageProps> = ({ src, alt, className, isDialog }) => {
+  if (isDialog) {
+    return (
+      <img
+        src={src}
+        alt={alt}
+        className={`aspect-square object-contain ${className}`}
+      />
+    )
+  }
+  return (
+    <Image 
+      src={src}
+      alt={alt ?? 'image'}
+      className={`aspect-square object-contain ${className}`}
+      width={150}
+      height={150}
+      quality={100}
+      priority
+    />
+  )
+};
 
 const ImageWithOptions = withImageOptions(ImageComponent);
 
@@ -139,16 +156,21 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
   const imageRef = useRef<HTMLDivElement | null>(null);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (containerRef.current && imageRef.current) {
-      const { left, top, width, height } =
-        containerRef.current.getBoundingClientRect();
-      const x = ((event.clientX - left) / width) * 100;
-      const y = ((event.clientY - top) / height) * 100;
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
       setMousePosition({ x, y });
     }
   };
 
-  const handleImageClick = () => {
+  const handleImageClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      setMousePosition({ x, y });
+    }
     setIsZoomedIn((prev) => !prev);
   };
 
@@ -173,25 +195,28 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
       }}
     >
       <DialogTrigger>{triggerComponent}</DialogTrigger>
-      <DialogContent className="h-[80vh] max-h-[90vh] max-w-[90vw] p-8">
+      <DialogContent className="max-h-[90vh] max-w-[90vw] p-8">
         <div
-          className="relative flex h-full w-full items-center justify-center overflow-hidden"
+          className="relative flex aspect-auto max-h-[calc(90vh-10rem)] w-full items-center justify-center overflow-hidden"
           ref={containerRef}
           onMouseMove={handleMouseMove}
         >
           <div
-            className="relative"
+            className="relative max-h-full max-w-full transition-transform duration-200"
             onClick={handleImageClick}
             ref={imageRef}
             style={{
               transform: isZoomedIn
-                ? `scale(2) translate(-${mousePosition.x}%, -${mousePosition.y}%)`
+                ? `scale(2)`
                 : 'scale(1)',
-              transformOrigin: '0 0',
+              transformOrigin: isZoomedIn ? `${mousePosition.x}% ${mousePosition.y}%` : 'center',
               cursor: isZoomedIn ? 'zoom-out' : 'zoom-in',
             }}
           >
-            {imageContentComponent}
+            {React.cloneElement(imageContentComponent, {
+              className: "max-h-[calc(90vh-12rem)] w-auto object-contain",
+              isDialog: true,
+            })}
           </div>
         </div>
         <DialogFooter className="mt-auto flex w-full flex-row sm:justify-start sm:justify-between">
