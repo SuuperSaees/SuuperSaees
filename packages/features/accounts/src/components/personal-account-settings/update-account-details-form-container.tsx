@@ -9,13 +9,17 @@ export function UpdateAccountDetailsFormContainer({
   user: {
     name: string | null;
     id: string;
+    settings?: {
+      name: string | null;
+      picture_url: string | null;
+    }
   };
 }) {
   const revalidateUserDataQuery = useRevalidatePersonalAccountDataQuery();
 
   return (
     <UpdateAccountDetailsForm
-      displayName={user.name ?? ''}
+      displayName={user?.settings?.name ?? user?.name ?? ''}
       userId={user.id}
       onUpdate={() => revalidateUserDataQuery(user.id)}
     />
