@@ -57,6 +57,8 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
     generateOrderCreationSchema(briefs.length > 0, t, formFields),
   );
 
+  const userRoleValidation = new Set(['agency_owner', 'agency_project_manager', 'agency_member'])
+
   const formSchema = createStepSchema({
     briefSelection: z.object({
       selectedBriefId: z.string().min(1),
@@ -181,10 +183,10 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
         <EmptyState
             imageSrc="/images/illustrations/Illustration-cloud.svg"
             title={t(
-              `${userRole === 'agency_owner' || userRole === 'agency_project_manager' || userRole === 'agency_member' ? 'briefs:empty.agency.title' : 'briefs:empty.client.title'}`,
+              userRoleValidation.has(userRole) ? 'briefs:empty.agency.title' : 'briefs:empty.client.title'
             )}
             description={t(
-              `${userRole === 'agency_owner' || userRole === 'agency_project_manager' || userRole === 'agency_member' ? 'briefs:empty.agency.description' : 'briefs:empty.client.description'}`,
+              userRoleValidation.has(userRole) ? 'briefs:empty.agency.description' : 'briefs:empty.client.description'
             )}
             button={
               <ThemedButton
@@ -213,10 +215,10 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
           <EmptyState
             imageSrc="/images/illustrations/Illustration-cloud.svg"
             title={t(
-              `${userRole === 'agency_owner' || userRole === 'agency_project_manager' || userRole === 'agency_member' ? 'briefs:empty.agency.title' : 'briefs:empty.client.title'}`,
+              userRoleValidation.has(userRole) ? 'briefs:empty.agency.title' : 'briefs:empty.client.title'
             )}
             description={t(
-              `${userRole === 'agency_owner' || userRole === 'agency_project_manager' || userRole === 'agency_member' ? 'briefs:empty.agency.description' : 'briefs:empty.client.description'}`,
+              userRoleValidation.has(userRole) ? 'briefs:empty.agency.description' : 'briefs:empty.client.description'
             )}
             button={
               userRole === 'agency_owner' ||
