@@ -28,11 +28,13 @@ const DeleteUserDialog = ({
   queryKey,
   organizationId,
   showLabel = false,
+  inTeamMembers = false
 }: {
   userId: string;
   queryKey?: string;
   organizationId?: string;
   showLabel?: boolean;
+  inTeamMembers?: boolean;
 }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -75,7 +77,7 @@ const DeleteUserDialog = ({
             {
               showLabel && 
               <p>
-                <Trans i18nKey={'clients:deletion:delete'} />
+                {inTeamMembers ? <Trans i18nKey={'clients:deletion:titleInTeamMembers'} /> : <Trans i18nKey={'clients:deletion:title'} />}
               </p>
             }
           </div>
@@ -83,9 +85,11 @@ const DeleteUserDialog = ({
         <AlertDialogContent>
           <div className="flex">
             <AlertDialogHeader>
-              <AlertDialogTitle><Trans i18nKey={'clients:deletion:title'} /> </AlertDialogTitle>
+              <AlertDialogTitle>
+                {inTeamMembers ? <Trans i18nKey={'clients:deletion:titleInTeamMembers'} /> : <Trans i18nKey={'clients:deletion:title'} />}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-              <Trans i18nKey={'clients:deletion:description'} />
+                {inTeamMembers ? <Trans i18nKey={'clients:deletion:descriptionInTeamMembers'} /> : <Trans i18nKey={'clients:deletion:description'} />}
               </AlertDialogDescription>
             </AlertDialogHeader>
           </div>
