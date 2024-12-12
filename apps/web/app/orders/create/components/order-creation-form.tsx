@@ -27,6 +27,9 @@ import { generateUUID } from '~/utils/generate-uuid';
 import { generateOrderCreationSchema } from '../schemas/order-creation-schema';
 import BriefCompletionForm from './brief-completion-form';
 import BriefSelectionForm from './brief-selection-form';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { createBrief } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
+import { Spinner } from '@kit/ui/spinner';
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -46,13 +49,15 @@ interface OrderCreationFormProps {
 
 const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
   const uniqueId = generateUUID();
-  const { t } = useTranslation(['orders', 'responses']);
+  const { t } = useTranslation(['orders', 'responses', 'briefs']);
   const router = useRouter();
 
   const [formFields, setFormFields] = useState<FormField.Type[]>([]);
   const [orderCreationFormSchema, setOrderCreationFormSchema] = useState(
     generateOrderCreationSchema(briefs.length > 0, t, formFields),
   );
+
+  const userRoleValidation = new Set(['agency_owner', 'agency_project_manager', 'agency_member'])
 
   const formSchema = createStepSchema({
     briefSelection: z.object({
@@ -154,6 +159,50 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
     }
   }, [selectedBrief, t, briefs.length]);
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const briefMutation = useMutation({
+    mutationFn: async () => {
+      setIsLoading(true);
+      const res = await createBrief({});
+      await handleResponse(res, 'briefs', t);
+
+      if (res.ok && res?.success?.data) {
+        window.location.href = `/briefs/${res?.success?.data?.id}`;
+      }
+    },
+    onError: () => {
+      setIsLoading(false);
+      console.error('Error creating the brief from the table');
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="h-full [&>*]:h-full">
+        <EmptyState
+            imageSrc="/images/illustrations/Illustration-cloud.svg"
+            title={t(
+              userRoleValidation.has(userRole) ? 'briefs:empty.agency.title' : 'briefs:empty.client.title'
+            )}
+            description={t(
+              userRoleValidation.has(userRole) ? 'briefs:empty.agency.description' : 'briefs:empty.client.description'
+            )}
+            button={
+              <ThemedButton
+                  onClick={async () => await briefMutation.mutateAsync()}
+                  disabled={briefMutation.isPending}
+                  className="flex items-center gap-2"
+                >
+                  <span>{t('briefs:createBrief')}</span>
+                  <Spinner className="h-4 w-4" />
+                </ThemedButton>
+            }
+          />
+      </div>
+    );
+  }
+
   return (
     <MultiStepForm
       schema={formSchema}
@@ -166,11 +215,30 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
           <EmptyState
             imageSrc="/images/illustrations/Illustration-cloud.svg"
             title={t(
-              `${userRole === 'agency_owner' || userRole === 'agency_project_manager' || userRole === 'agency_member' ? 'briefs:empty.agency.title' : 'briefs:empty.client.title'}`,
+              userRoleValidation.has(userRole) ? 'briefs:empty.agency.title' : 'briefs:empty.client.title'
             )}
             description={t(
-              `${userRole === 'agency_owner' || userRole === 'agency_project_manager' || userRole === 'agency_member' ? 'briefs:empty.agency.description' : 'briefs:empty.client.description'}`,
+              userRoleValidation.has(userRole) ? 'briefs:empty.agency.description' : 'briefs:empty.client.description'
             )}
+            button={
+              userRole === 'agency_owner' ||
+              userRole === 'agency_project_manager' ? (
+                <ThemedButton
+                  onClick={async () => await briefMutation.mutateAsync()}
+                  disabled={briefMutation.isPending}
+                  className="flex items-center gap-2"
+                >
+                  {briefMutation.isPending ? (
+                    <>
+                      <span>{t('briefs:createBrief')}</span>
+                      <Spinner className="h-4 w-4" />
+                    </>
+                  ) : (
+                    <span>{t('briefs:createBrief')}</span>
+                  )}
+                </ThemedButton>
+              ) : undefined
+            }
           />
         ) : (
           <BriefSelectionForm briefs={briefs} />
