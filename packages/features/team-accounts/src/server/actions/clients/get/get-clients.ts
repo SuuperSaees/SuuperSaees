@@ -35,7 +35,12 @@ type UserAccount = Pick<
   | 'organization_id'
   | 'picture_url'
   | 'primary_owner_user_id'
->;
+> & {
+  settings?: {
+    name: string | null;
+    picture_url: string | null;
+  } | null;
+}
 
 export type ClientsWithOrganization = {
   organization: Organization;
@@ -180,7 +185,7 @@ async function fetchClientOwners(
   const { data: clientOrganizationOwners, error: clientOwnersError } = await client
     .from('accounts')
     .select(
-      'name, email, id, picture_url, organization_id, created_at, primary_owner_user_id, is_personal_account',
+      'name, email, id, picture_url, organization_id, created_at, primary_owner_user_id, is_personal_account, settings:user_settings(name, picture_url)',
     )
     .in('id', primaryOwnerIds)
     .eq('is_personal_account', true);
@@ -194,7 +199,7 @@ async function fetchClientOwners(
   const { data: clientUsers, error: clientUsersError } = await client 
     .from('accounts')
     .select(
-      'name, email, id, picture_url, organization_id, created_at, primary_owner_user_id, is_personal_account',
+      'name, email, id, picture_url, organization_id, created_at, primary_owner_user_id, is_personal_account, settings:user_settings(name, picture_url)',
     ).in('id', clientUserIds)
     .eq('is_personal_account', true);
 
@@ -268,6 +273,7 @@ function combineClientData(
             email: primaryOwner.email,
             picture_url: primaryOwner.picture_url,
             created_at: primaryOwner.created_at,
+            settings: primaryOwner.settings,
           }
         : null,
       users: users.map((user) => ({
@@ -277,6 +283,7 @@ function combineClientData(
         picture_url: user.picture_url,
         created_at: user.created_at,
         primary_owner_user_id: user.primary_owner_user_id,
+        settings: user.settings,
       })),
     };
   });
