@@ -10,6 +10,7 @@ import { createClient } from '../../../../features/team-accounts/src/server/acti
 import { insertServiceToClient } from '../../../../features/team-accounts/src/server/actions/services/create/create-service';
 import { getSessionById } from '../../../../features/team-accounts/src/server/actions/sessions/get/get-sessions';
 
+
 export function createWebhookRouterService(
   adminClient: SupabaseClient<Database>,
 ) {
@@ -386,7 +387,7 @@ class WebhookRouterService {
           await this.adminClient
             .from('services')
             .select('propietary_organization_id')
-            .eq('provider_id', billingServiceData?.service_id)
+            .eq('id', billingServiceData?.service_id)
             .single();
 
         if (serviceError) {
