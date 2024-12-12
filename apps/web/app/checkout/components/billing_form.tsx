@@ -173,6 +173,7 @@ const BillingForm: React.FC<{
       return;
     }
 
+    if(selectedPaymentMethod === 'stripe'){
     const { error: createError, paymentMethod } =
       await stripe.createPaymentMethod({
         type: 'card',
@@ -196,6 +197,9 @@ const BillingForm: React.FC<{
     setErrorMessage('');
 
     return paymentMethod;
+    }
+
+    return null;
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
