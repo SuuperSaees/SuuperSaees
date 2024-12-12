@@ -9,7 +9,7 @@ import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { Button } from '@kit/ui/button';
 
 import { Database } from '~/lib/database.types';
-// import { generateUUID } from '~/utils/generate-uuid';
+import { generateUUID } from '~/utils/generate-uuid';
 import { toast } from 'sonner';
 
 export type ImageFloatingButtons = {
@@ -54,17 +54,18 @@ export default function UpdateImage({
       await handleDelete();
       const bytes = await file.arrayBuffer();
       const fileExtension = file.name.split('.').pop();
-      // const fileUuid = generateUUID();
+      const fileUuid = generateUUID();
 
       let fileName = '';
       if (bucketStorage.identifier.includes('favicon')) {
         const host = window.location.host;
-        fileName = `${host}_favicon_url`;
+        fileName = `${host}_favicon_url?v=${fileUuid}`;
       } else {
         if (bucketStorage.identifier && bucketStorage.name !== 'account_image') { // restriction of account_image due to policy in the supabase storage
-          fileName = `${bucketStorage.id}.${bucketStorage.identifier}.${fileExtension}`;
+          // fileName = `${bucketStorage.id}.${bucketStorage.identifier}.${fileExtension}?v=${fileUuid}`;
+          fileName = `${bucketStorage.id}.${fileExtension}?v=${fileUuid}`;
         } else {
-          fileName = `${bucketStorage.id}.${fileExtension}`;
+          fileName = `${bucketStorage.id}.${fileExtension}?v=${fileUuid}`;
         }
       }
       
