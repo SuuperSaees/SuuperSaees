@@ -43,16 +43,26 @@ const getFileTypeIcon = (fileName: string) => {
   return fileTypeIcons[extension] ?? <StickyNote className="text-gray-500 h-[56px] w-[40px]" />;
 };
 
-const handleDownload = async ({src, type}) => {
+const getFileExtensionFromType = (url: string): string => {
+  const urlParts = url.split('/').pop()?.split('.') ?? [];
+  return urlParts[urlParts.length - 1] ?? '';
+};
+
+const deleteFileExtension = (fileName: string): string => {
+  const urlParts = fileName.split('/').pop()?.split('.') ?? [];
+  return urlParts.slice(0, -1).join('.') ?? '';
+};
+
+const handleDownload = async ({src, fileName}: {src: string, fileName: string}) => {
   try {
     const response = await fetch(src);
-    if (!response.ok) throw new Error('Failed to fetch image');
+    if (!response.ok) throw new Error('Failed to fetch file');
 
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `download.${type}`; 
+    link.download = `${deleteFileExtension(fileName)}.${getFileExtensionFromType(src)}`; 
     link.click();
 
     window.URL.revokeObjectURL(url);
@@ -101,24 +111,26 @@ const UserFile = ({ file }: UserFileProps) => {
             </div>
             <p className="text-sm font-medium text-gray-400 truncate w-[150px]">{file.name ?? 'fileName'}</p>
           </div>
-          <button
-            className="absolute h-[30px] w-[30px] top-2 right-2 p-2 hidden group-hover:block bg-white rounded-full shadow-lg"
-            onClick={async (e) => {
-              e.preventDefault();
-              setIsDownloading(true);
-              try {
-                await handleDownload({ src: file.url, type: file.type });
-              } finally {
-                setIsDownloading(false);
-              }
-            }}
-          >
-            {isDownloading ? (
+          {isDownloading ? (
+            <div className="absolute h-[30px] w-[30px] top-2 right-2 p-2 bg-white rounded-full shadow-lg">
               <Loader2 className="h-[15px] w-[15px] animate-spin" />
-            ) : (
+            </div>
+          ) : (
+            <button
+              className="absolute h-[30px] w-[30px] top-2 right-2 p-2 hidden group-hover:block bg-white rounded-full shadow-lg"
+              onClick={async (e) => {
+                e.preventDefault();
+                setIsDownloading(true);
+                try {
+                  await handleDownload({ src: file.url, fileName: file.name });
+                } finally {
+                  setIsDownloading(false);
+                }
+              }}
+            >
               <Download className="h-[15px] w-[15px]" />
-            )}
-          </button>
+            </button>
+          )}
         </div>
       );
     }
