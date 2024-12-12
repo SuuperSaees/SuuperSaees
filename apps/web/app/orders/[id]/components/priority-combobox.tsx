@@ -29,6 +29,7 @@ import {
   generateDropdownOptions,
   getPriorityClassName,
 } from '../utils/generate-options-and-classnames';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface PriorityComboboxProps {
   order?: Order.Type;
@@ -53,7 +54,7 @@ export function PriorityCombobox({
   const priorities = ['low', 'medium', 'high'];
   const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
   const router = useRouter();
-
+  const { workspace: userWorkspace } = useUserWorkspace();
   const changeSubtaskPriority = useMutation({
     mutationFn: async (priority: Order.Type['priority']) => {
       if (subtask?.id) {
@@ -78,7 +79,7 @@ export function PriorityCombobox({
   const changeOrderPriority = useMutation({
     mutationFn: async (priority: Order.Type['priority']) => {
       if (order?.id) {
-        await updateOrder(order.id, { priority });
+        await updateOrder(order.id, { priority }, userWorkspace.name ?? undefined);
         return router.push(`/orders/${order?.id}`);
       } else {
         throw new Error('Order ID is undefined');
