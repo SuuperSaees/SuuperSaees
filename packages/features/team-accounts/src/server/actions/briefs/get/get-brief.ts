@@ -114,14 +114,16 @@ export const fetchFormfieldsWithResponses = async (
       .eq('user_id', customerId)
       .single();
 
-    if (errorUserSettings) {
-      throw new Error(errorUserSettings.message);
+    if (errorUserSettings && errorUserSettings.code !== 'PGRST116') {
+      // 'PGRST116' indicates no rows were found; any other error should be thrown
+      throw new Error(`Error obtaining user settings at briefs: ${errorUserSettings.message}`);
     }
 
     return briefFormFields.map((field) => ({
       ...field,
-      userSettings,
+      userSettings: userSettings ?? null,
     }));
+    
   } catch (error) {
     console.error('Error obtaining brief fields', error);
     throw error;
