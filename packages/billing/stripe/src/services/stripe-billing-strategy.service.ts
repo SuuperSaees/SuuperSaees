@@ -459,6 +459,7 @@ export class StripeBillingStrategyService
               currency: 'usd',
               isRecurring: service.recurring_subscription,
               interval: service.recurrence,
+              type: 'create',
             }),
           },
         );
