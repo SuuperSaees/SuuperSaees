@@ -113,7 +113,7 @@ const BillingForm: React.FC<{
   const poweredByStripeImage = process.env.NEXT_PUBLIC_POWERED_BY_STRIPE_IMAGE; 
   const { t } = useTranslation('services');
   const router = useRouter();
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>(paymentMethods?.[0]?.id ?? '');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>(paymentMethods?.[0]?.name ?? '');
 
   const stripe = useStripe();
   const elements = useElements();
@@ -281,16 +281,16 @@ const BillingForm: React.FC<{
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {paymentMethods?.map((paymentMethod) => (
                       <div
-                        key={paymentMethod.id}
+                        key={paymentMethod.name}
                         className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all ${
-                          selectedPaymentMethod === paymentMethod.id
+                          selectedPaymentMethod === paymentMethod.name
                             ? 'border-blue-500 bg-blue-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
-                        onClick={() => setSelectedPaymentMethod(paymentMethod.id)}
+                        onClick={() => setSelectedPaymentMethod(paymentMethod.name)}
                       >
                         <div className="flex flex-col items-center gap-2">
-                          {paymentMethodsIcons[paymentMethod.id as keyof typeof paymentMethodsIcons]}
+                          {paymentMethodsIcons[paymentMethod.icon as keyof typeof paymentMethodsIcons]}
                         </div>
                       </div>
                     ))}
