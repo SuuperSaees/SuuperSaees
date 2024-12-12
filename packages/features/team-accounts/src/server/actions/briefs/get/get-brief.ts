@@ -221,8 +221,7 @@ export const fetchBriefsByOrgOwnerId = async (
       .from('briefs')
       .select(
         `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
-        form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
-        services ( name )`,
+        form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))`,
       )
       .eq('propietary_organization_id', ownerId);
 
