@@ -75,7 +75,9 @@
   "searchOrganizations": "Buscar",
   "deletion": {
     "title": "Eliminar cliente",
+    "titleInTeamMembers": "Eliminar miembro del equipo",
     "description": "¿Estás seguro de que deseas eliminar este cliente?",
+    "descriptionInTeamMembers": "¿Estás seguro de que deseas eliminar este miembro del equipo?",
     "cancel": "Cancelar",
     "delete": "Eliminar"
   },

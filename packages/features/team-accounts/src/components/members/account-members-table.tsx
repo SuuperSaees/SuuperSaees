@@ -272,6 +272,7 @@ function ActionsDropdown({
         queryKey={permissions.queryKey}
         currentUserRole={currentUserRole}
         currentUserId = {currentUserId}
+        inTeamMembers={true}
       />
       {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>

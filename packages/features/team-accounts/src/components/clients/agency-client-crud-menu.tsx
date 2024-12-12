@@ -23,9 +23,10 @@ interface AgencyClientCrudMenuProps {
   organizationOptions? : {id:string, name:string, slug:string}[];
   currentUserRole?: string
   currentUserId?: string
+  inTeamMembers?: boolean
 }
 
-function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOptions, currentUserRole, currentUserId}: AgencyClientCrudMenuProps) {
+function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOptions, currentUserRole, currentUserId, inTeamMembers=false}: AgencyClientCrudMenuProps) {
   const {t} = useTranslation('clients');
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
   const [openImpersonateUserDialog, setOpenImpersonateUserDialog] = useState(false);
@@ -92,14 +93,14 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOption
               e.preventDefault();
               e.stopPropagation();
             }}>
-              <DeleteUserDialog userId={userId} showLabel = {true} queryKey={queryKey ?? undefined} />
+              <DeleteUserDialog userId={userId} showLabel = {true} queryKey={queryKey ?? undefined}  inTeamMembers={inTeamMembers}/>
             </DropdownMenuItem>
           )}
           
         </DropdownMenuContent>
       </DropdownMenu>
       
-      <EditUserDialog userId={userId} name={name} email={email} isOpen={openEditUserDialog} setIsOpen={setOpenEditUserDialog} currentUserRole={currentUserRole} userRole={userRole} isLoading={isLoading} isPending={isPending}/>
+      <EditUserDialog userId={userId} name={name} email={email} isOpen={openEditUserDialog} setIsOpen={setOpenEditUserDialog} currentUserRole={currentUserRole} userRole={userRole} isLoading={isLoading} isPending={isPending} />
       <AdminImpersonateUserDialog userId={userId} isOpen = {openImpersonateUserDialog} setIsOpen={setOpenImpersonateUserDialog}>
         <></>
       </AdminImpersonateUserDialog>
