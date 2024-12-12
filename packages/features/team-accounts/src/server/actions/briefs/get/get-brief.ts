@@ -99,7 +99,7 @@ export const fetchFormfieldsWithResponses = async (
       .eq('order_id', orderId);
 
     if (errorBriefFormFields) {
-      throw new Error(errorBriefFormFields.message);
+      throw new Error(`Failed to get brief responses for order (${orderId}), ${errorBriefFormFields.message}`);
     }
 
     const customerId = briefFormFields?.[0]?.order_data?.customer_id;
