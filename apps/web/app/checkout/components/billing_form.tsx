@@ -168,11 +168,12 @@ const BillingForm: React.FC<{
     }
 
     const cardNumberElement = elements.getElement(CardNumberElement);
-    if (!cardNumberElement) {
+    if (!cardNumberElement && selectedPaymentMethod !== 'mercadopago') {
       setErrorMessage(t('checkout.error.cardNumberElement'));
       return;
     }
 
+    if(selectedPaymentMethod === 'stripe'){
     const { error: createError, paymentMethod } =
       await stripe.createPaymentMethod({
         type: 'card',
@@ -196,6 +197,9 @@ const BillingForm: React.FC<{
     setErrorMessage('');
 
     return paymentMethod;
+    }
+
+    return null;
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
