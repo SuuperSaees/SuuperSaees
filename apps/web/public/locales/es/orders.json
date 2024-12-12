@@ -18,7 +18,7 @@
   "dueDateLabel": "Fecha de vencimiento",
   "select_date_range": "Seleccionar rango de fechas",
   "empty_date_range": "Sin fecha seleccionada",
-  "delete": "Eliminar orden",
+  "delete": "Eliminar proyecto",
   "deleteConfirmation": "¿Estás seguro de que deseas eliminar este proyecto?",
   "deleteSuccess": "Proyecto eliminado con éxito",
   "deleteError": "Error al eliminar el proyecto",
