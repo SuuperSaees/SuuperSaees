@@ -39,7 +39,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
     <div className={`flex flex-col gap-2 w-full p-0 max-w-full min-w-0`}>
       <div className="flex justify-between w-full">
       <div className="flex gap-2">
-      <span className="font-semibold">{message.user.name}</span> 
+      <span className="font-semibold">{message.user?.settings?.name ?? message.user.name}</span> 
       {
         message?.pending &&
       <ClockIcon className="h-3 w-3 text-muted-foreground self-center" />
