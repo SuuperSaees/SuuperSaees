@@ -158,7 +158,7 @@ function useGetColumns(
               <span>
                 <ProfileAvatar
                   displayName={displayName}
-                  pictureUrl={member.picture_url}
+                  pictureUrl={member.settings?.picture_url ?? member?.picture_url ?? ''}
                 />
               </span>
 
