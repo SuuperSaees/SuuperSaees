@@ -92,9 +92,9 @@ export async function fetchUsersAccounts(
   }
 }
 
-export async function getPrimaryOwnerId(): Promise<string | undefined> {
+export async function getPrimaryOwnerId(client?: SupabaseClient<Database>): Promise<string | undefined> {
   try {
-    const client = getSupabaseServerComponentClient();
+    client = client ?? getSupabaseServerComponentClient();
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError) throw userError;
 

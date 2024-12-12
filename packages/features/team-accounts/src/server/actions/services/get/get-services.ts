@@ -178,9 +178,13 @@ export async function getPaymentsMethods(): Promise<
   BillingAccounts.PaymentMethod[]
 > {
   const client = getSupabaseServerComponentClient();
+  const primaryOwnerId = (await getPrimaryOwnerId(client)) ?? '';
   const paymentMethods: BillingAccounts.PaymentMethod[] = [];
   const { data: billingAccountsData, error: billingAccountsError } =
-    await client.from('billing_accounts').select('*');
+    await client
+      .from('billing_accounts')
+      .select('*')
+      .eq('account_id', primaryOwnerId);
 
   if (billingAccountsError) throw new Error(billingAccountsError.message);
 

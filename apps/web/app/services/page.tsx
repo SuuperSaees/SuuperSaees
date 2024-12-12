@@ -19,7 +19,10 @@ export const generateMetadata = async () => {
 };
 
 async function ServicesPage(){
-  const paymentsMethods = await getPaymentsMethods();
+  const paymentsMethods = await getPaymentsMethods().catch(() => {
+    console.error(`Error getting payments methods`)
+    return []
+  });
   const accountRole = await getUserRole().catch((err) => {
     console.error(`Error client, getting user role: ${err}`)
     return ''
