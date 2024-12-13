@@ -22,14 +22,14 @@ import { handleResponse } from '~/lib/response/handle-response';
 
 import { deleteService } from '../../../../../packages/features/team-accounts/src/server/actions/services/delete/delete-service-server';
 
-const DeleteServiceDialog = ({ priceId }: { priceId: string }) => {
+const DeleteServiceDialog = ({ serviceId }: { serviceId: number }) => {
   const { t } = useTranslation(['services', 'responses']);
 
   const queryClient = useQueryClient();
 
   const handleDelete = useMutation({
     mutationFn: async () => {
-      const res = await deleteService(priceId);
+      const res = await deleteService(serviceId);
       await handleResponse(res, 'services', t);
     },
     onSuccess: async () => {

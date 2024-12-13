@@ -1,3 +1,3 @@
-alter table "public"."subscriptions" add column "account_id" integer;
+alter table "public"."subscriptions" add column "account_id" uuid;
 
 

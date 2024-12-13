@@ -30,6 +30,12 @@ export class BillingGatewayFactoryService {
         throw new Error('Paddle is not supported yet');
       }
 
+      case 'treli': {
+        const { TreliBillingStrategyService } = await import('@kit/treli');
+
+        return new TreliBillingStrategyService();
+      }
+
       default:
         throw new Error(`Unsupported billing provider: ${provider as string}`);
     }

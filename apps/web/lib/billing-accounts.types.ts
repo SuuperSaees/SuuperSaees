@@ -1,5 +1,6 @@
 import { Database } from './database.types';
 
+
 export namespace BillingAccounts {
   export type Type = Database['public']['Tables']['billing_accounts']['Row'];
   export type Insert =
@@ -14,4 +15,10 @@ export namespace BillingAccounts {
     TRELI: 'treli',
     SUUPER: 'suuper',
   } as const satisfies Record<string, BillingProvider>;
+  export type PaymentMethod = {
+    id: string;
+    name: string;
+    icon: React.ReactNode;
+    description: string;
+  };
 }

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-
 import { Message } from '../context/activity-context';
 import ChatMessage from './message';
 import AvatarDisplayer from './ui/avatar-displayer';

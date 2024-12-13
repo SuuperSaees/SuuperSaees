@@ -172,6 +172,7 @@ export default function BriefConnectionStep(
   const updateServiceMutation = useMutation({
     mutationFn: async () => {
       const values = form.getValues() as Service.ServiceData;
+      values.id = previousService?.id ?? 0;
       const res = await updateService(values, previousService?.price_id ?? '');
       await handleResponse(res, 'services', t);
     },

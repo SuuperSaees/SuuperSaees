@@ -14,6 +14,9 @@ import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './personal-
 import { UpdateAccountOrganizationSenderName } from './personal-account-settings/update-account-organization-sender-name';
 import UpdateAccountOrganizationSidebar from './personal-account-settings/update-account-organization-sidebar';
 import { ThemedButton } from './ui/button-themed-with-settings';
+import { useTranslation } from 'react-i18next';
+import { TreliDialog } from './personal-account-settings/treli/treli-dialog';
+
 
 interface SiteSettingsProps {
   role: string;
@@ -33,6 +36,7 @@ function SiteSettings({
   user,
   accountStripe,
 }: SiteSettingsProps) {
+  const { t } = useTranslation('account');
   const { logo_url, logo_dark_url, updateOrganizationSetting, favicon_url } =
     useOrganizationSettings();
 
@@ -203,25 +207,20 @@ function SiteSettings({
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {!accountStripe?.id ? (
-                  <Trans i18nKey={'account:connectToStripe'} />
+                  t('connectToStripe')
                 ) : accountStripe.charges_enabled ? (
-                  <Trans i18nKey={'account:stripeConnected'} />
+                  t('stripeConnected')
                 ) : (
-                  <Trans i18nKey={'account:continueWithOnboardingStripe'} />
+                  t('continueWithOnboardingStripe')
                 )}
               </p>
               <p className="text-wrap">
                 {!accountStripe?.id ? (
-                  <Trans
-                    i18nKey={'account:connectToStripeDescription'}
-                    key={'s'}
-                  />
+                  t('connectToStripeDescription')
                 ) : accountStripe.charges_enabled ? (
-                  <Trans i18nKey={'account:stripeConnectedDescription'} />
+                  t('stripeConnectedDescription')
                 ) : (
-                  <Trans
-                    i18nKey={'account:continueWithOnboardingStripeDescription'}
-                  />
+                  t('continueWithOnboardingStripeDescription')
                 )}
               </p>
             </div>
@@ -232,6 +231,18 @@ function SiteSettings({
                 </Link>
               </ThemedButton>
             )}
+          </div>
+          <Separator />
+          <div className="flex justify-between items-center">
+            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+              <p className="font-bold">
+                {t('treli.connectTitle')}
+              </p>
+              <p className="text-wrap">
+              {t('treli.connectDescription')}
+              </p>
+            </div>
+            {user && <TreliDialog userId={user?.id} />}
           </div>
         </div>
       )}

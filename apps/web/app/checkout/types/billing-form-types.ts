@@ -1,4 +1,7 @@
 import { z } from 'zod';
+
+
+
 import { Service } from '~/lib/services.types';
 
 export const formSchema = z.object({
@@ -13,7 +16,13 @@ export const formSchema = z.object({
   enterprise_name: z.string(),
   tax_code: z.string(),
   discount_coupon: z.string(),
-  card_name: z.string().min(1, 'Card name is required'),
+  card_name: z.string().min(0, 'Card name is required').optional(),
+  card_number: z.string().min(0, 'Card number is required').optional(),
+  card_expiration_date: z
+    .string()
+    .min(0, 'Card expiration date is required')
+    .optional(),
+  card_cvv: z.string().min(0, 'Card CVV is required').optional(),
 });
 
 export type FormData = z.infer<typeof formSchema>;

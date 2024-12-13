@@ -6,7 +6,7 @@ import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
 export const getServicesByOrganizationId = async (): Promise<{
-  products: Service.Type[];
+  products: Service.Relationships.Billing.BillingService[];
 }> => {
   const client = getSupabaseServerComponentClient();
   const primary_owner_user_id = await getPrimaryOwnerId();
@@ -15,12 +15,12 @@ export const getServicesByOrganizationId = async (): Promise<{
   try {
     const { data: fetchedProducts, error } = await client
       .from('services')
-      .select('*')
+      .select('*, billing_services!left(provider_id, provider).service_id(id)')
       .eq('propietary_organization_id', primary_owner_user_id ?? '')
       .is('deleted_on', null)
+      .returns<Service.Relationships.Billing.BillingService[]>();
 
     if (error) throw new Error(error.message);
-
     return {
       products: [...fetchedProducts],
     };

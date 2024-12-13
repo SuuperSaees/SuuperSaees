@@ -1,11 +1,16 @@
 import 'server-only';
 
+
+
 import { getLogger } from '@kit/shared/logger';
 import { getSupabaseRouteHandlerClient } from '@kit/supabase/route-handler-client';
+
+
 
 import { RecordChange, Tables } from '../record-change.type';
 import { createDatabaseWebhookRouterService } from './database-webhook-router.service';
 import { getDatabaseWebhookVerifier } from './verifier';
+
 
 /**
  * @name DatabaseChangePayload
@@ -52,7 +57,7 @@ class DatabaseWebhookHandlerService {
       type,
     };
 
-    logger.info(ctx, 'Received webhook from DB. Processing...');
+    logger.info(ctx, 'Received webhook from DB. Processing...', table, type);
 
     // check if the signature is valid
     const verifier = await getDatabaseWebhookVerifier();
@@ -60,6 +65,7 @@ class DatabaseWebhookHandlerService {
     await verifier.verifySignatureOrThrow(request);
 
     // all good, handle the webhook
+
 
     // create a client with admin access since we are handling webhooks
     // and no user is authenticated

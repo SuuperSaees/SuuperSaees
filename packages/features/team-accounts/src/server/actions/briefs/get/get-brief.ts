@@ -2,19 +2,19 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import {
-  fetchCurrentUser,
-  fetchCurrentUserAccount,
-  getPrimaryOwnerId,
-  getUserRole,
-} from '../../members/get/get-member-account';
+import { fetchCurrentUser, fetchCurrentUserAccount, getPrimaryOwnerId, getUserRole } from '../../members/get/get-member-account';
 import { fetchClientServices } from '../../services/get/get-services';
+
 
 export const getBriefs = async (): Promise<
   Brief.Relationships.Services.Response[]
@@ -283,4 +283,3 @@ export const fetchBriefsResponsesforOrders = async (
     throw error;
   }
 };
-
