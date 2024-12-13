@@ -6,7 +6,6 @@ import { Spinner } from '@kit/ui/spinner';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 import { UserWithSettings } from '~/lib/account.types';
-import deduceNameFromEmail from '../utils/deduce-name-from-email';
 import { useTranslation } from 'react-i18next';
 
 interface CalendarSectionProps {
@@ -59,7 +58,7 @@ function CalendarSection({
                     </AvatarFallback>
                   </Avatar>
                   <p className="mr-3">
-                    {deduceNameFromEmail(member.email ?? '')}
+                    {member.user_settings?.name ?? member.name ?? member.email ?? ''}
                   </p>
                 </ThemedTabTrigger>
               ) : null,

@@ -23,12 +23,12 @@ const UserReviewMessage = ({ review }: UserReviewMessageProps) => {
         </div>
         <div className="flex gap-2 rounded-lg rounded-ss-none bg-gray-50 p-3">
         <AvatarDisplayer
-        displayName={review?.user.picture_url ? null : review?.user.name}
-        pictureUrl={review?.user.picture_url}
-        text={review?.user.name ? review.user.name : undefined}
+        displayName={review?.user?.settings?.picture_url ?? review?.user.picture_url ? null : review?.user.name}
+        pictureUrl={review?.user.settings?.picture_url ?? review?.user.picture_url}
+        text={review?.user?.settings?.name ?? review?.user.name ? review?.user?.settings?.name ?? review?.user.name : undefined}
       />
           <div className="flex flex-col gap-1">
-            <span className="font-semibold">{review?.user?.name}</span>
+            <span className="font-semibold">{review?.user?.settings?.name ?? review?.user?.name}</span>
             <p>{review?.content}</p>
             <div className="flex gap-1">
               {Array.from({ length: review?.rating ?? 0 }, (_, i) => (

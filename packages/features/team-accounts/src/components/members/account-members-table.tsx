@@ -147,7 +147,7 @@ function useGetColumns(
         size: 200,
         cell: ({ row }) => {
           const member = row.original;
-          const displayName = member.name ?? member.email.split('@')[0];
+          const displayName = member?.settings?.name ?? member.name ?? member.email.split('@')[0];
           const isSelf = member.user_id === params.currentUserId;
 
           return (
@@ -158,7 +158,7 @@ function useGetColumns(
               <span>
                 <ProfileAvatar
                   displayName={displayName}
-                  pictureUrl={member.picture_url}
+                  pictureUrl={member.settings?.picture_url ?? member?.picture_url ?? ''}
                 />
               </span>
 

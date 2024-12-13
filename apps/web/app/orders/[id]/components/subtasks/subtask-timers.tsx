@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { ArrowRight, Clock, Plus, X } from 'lucide-react';
 import { Spinner } from '@kit/ui/spinner';
 import AvatarDisplayer from '../ui/avatar-displayer';
-import deduceNameFromEmail from '../../utils/deduce-name-from-email';
 import { getTimersBySubtaskId } from '~/team-accounts/src/server/actions/timers/get/get-timers';
 import { formatTimeToAMPM, formatTime, formatTimeInHours } from '~/utils/format-time';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
@@ -33,7 +32,7 @@ interface SubtaskTimersProps {
 
 const SubtaskTimers = ({ subtaskId, userRole, onCreate, onUpdate }: SubtaskTimersProps) => {
   const { t } = useTranslation('orders');
-  const { workspace, user } = useUserWorkspace();
+  const { workspace } = useUserWorkspace();
   const enabledUserRole = new Set(['agency_owner', 'agency_member', 'agency_project_manager'])
   const [showManualTimerDialog, setShowManualTimerDialog] = useState(false);
 
@@ -58,7 +57,6 @@ const SubtaskTimers = ({ subtaskId, userRole, onCreate, onUpdate }: SubtaskTimer
   //User information
   const userName = workspace.name;
   const userPictureUrl = workspace.picture_url;
-  const userEmail = user.email;
 
   const queryClient = useQueryClient();
 
@@ -221,7 +219,7 @@ const SubtaskTimers = ({ subtaskId, userRole, onCreate, onUpdate }: SubtaskTimer
 
           <div className="flex items-center gap-4 mt-4">
             <AvatarDisplayer
-              displayName={userName ? userName : deduceNameFromEmail(userEmail ?? '')}
+              displayName={userName}
               pictureUrl={userPictureUrl ? userPictureUrl : undefined}
             />
             <div className="flex-1">

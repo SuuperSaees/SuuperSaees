@@ -33,6 +33,7 @@ const priorityTranslations = {
 export const updateOrder = async (
   orderId: Order.Type['id'],
   order: Order.Update,
+  userName?: string,
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -52,8 +53,8 @@ export const updateOrder = async (
     if (orderError) throw orderError.message;
     // console.log('updatedOrder:', orderData);
 
-    const userNameOrEmail =
-      userData?.user.user_metadata?.name || userData?.user.user_metadata?.email;
+    const userNameOrEmail = userName ??
+      (userData?.user.user_metadata?.name || userData?.user.user_metadata?.email);
 
     // Call the abstracted activity logging function
     await logOrderActivities(orderId, order, userData.user.id, userNameOrEmail);

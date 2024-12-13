@@ -34,6 +34,7 @@ import { updateCache } from '~/utils/handle-caching';
 import { useAgencyStatuses } from '../../components/context/agency-statuses-context'
 import { Dispatch, SetStateAction } from 'react';
 import { Order } from '~/lib/order.types';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 type ExtendedOrderType = Order.Type & {
   customer_name: string | null;
@@ -85,7 +86,7 @@ function StatusCombobox({
   const { t } = useTranslation(['orders', 'responses']);
   const router = useRouter();
   const queryClient = useQueryClient();
-
+  const { workspace: userWorkspace } = useUserWorkspace();
   const createStatus = useMutation({
     mutationFn: createNewStatus as MutationFunction<AgencyStatus.Type>,
     onSuccess: (newStatus: AgencyStatus.Type) => {
@@ -134,7 +135,7 @@ function StatusCombobox({
     if(changeTabFilteredOrders && activeTab) {
       changeTabFilteredOrders(activeTab);
     } 
-      await updateOrder(orderId, { status, status_id });
+      await updateOrder(orderId, { status, status_id }, userWorkspace.name ?? undefined);
       return { status, status_id, orderId };
     },
     onMutate: ({ status_id, orderId, status }) => {

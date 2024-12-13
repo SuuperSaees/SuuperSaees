@@ -16,16 +16,16 @@ export const useRealTimeSubtasks = (orderId: string, orderAgencyId: string, user
 
   const searchUserOptions =
     orderAgencyMembers?.map((user) => ({
-      picture_url: user.picture_url,
+      picture_url: user.user_settings?.picture_url ??user.picture_url,
       value: user.id,
-      label: user.name,
+      label: user.user_settings?.name ?? user.name,
   })) ?? [];
 
   const searchUserOptionsFollowers =
     orderAgencyClientsFollowers?.map((user) => ({
-      picture_url: user.picture_url,
+      picture_url: user?.settings?.picture_url ?? user.picture_url,
       value: user.id,
-      label: user.name,
+      label: user?.settings?.name ?? user.name,
   })) ?? [];
 
   // Drag and drop states
