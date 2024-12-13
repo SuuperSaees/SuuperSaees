@@ -272,6 +272,40 @@ export const insertClient = async (
 export const createClient = async (clientData: CreateClient) => {
   // Refactor this function to use the new client data structure
   try {
+
+    // Step 0: Check if user was previously deleted and reactivate if needed
+    const supabase = getSupabaseServerComponentClient({ admin: clientData.adminActivated ?? false });
+    
+    // First get the account id for this email
+    const { data: accountData } = await supabase
+      .from('accounts')
+      .select('id')
+      .eq('email', clientData.client.email)
+      .single();
+
+    if (accountData?.id) {
+      // Now check if this account was a deleted client
+      const { data: existingClient } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_client_id', accountData.id)
+        .not('deleted_on', 'is', null)
+        .single();
+
+      if (existingClient) {
+        // Reactivate the client by setting deleted_on to null
+        const { error: reactivateError } = await supabase
+          .from('clients')
+          .update({ deleted_on: null })
+          .eq('user_client_id', accountData.id);
+
+        if (reactivateError) {
+          throw new Error(`Error reactivating client: ${reactivateError.message}`);
+        }
+        return CustomResponse.success(existingClient, 'clientCreated').toJSON();
+      }
+    }
+
     // Step 1: Fetch primary owner ID and organization
     let primaryOwnerId;
     if (!clientData.adminActivated) {
