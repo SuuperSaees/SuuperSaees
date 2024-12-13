@@ -170,7 +170,7 @@ const BillingForm: React.FC<{
     }
 
     const cardNumberElement = elements.getElement(CardNumberElement);
-    if (!cardNumberElement && selectedPaymentMethod !== 'mercadopago') {
+    if (!cardNumberElement && selectedPaymentMethod === 'stripe') {
       setErrorMessage(t('checkout.error.cardNumberElement'));
       return;
     }
