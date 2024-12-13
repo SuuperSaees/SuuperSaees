@@ -3,6 +3,7 @@ import { StickyNote, X } from 'lucide-react';
 import { Spinner } from '@kit/ui/spinner';
 import { useFileUpload } from '~/team-accounts/src/server/actions/files/upload/file-chat-uploads';
 import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon } from '~/orders/[id]/components/fileIcons';
+import Image from 'next/image';
 
 const fileTypeIcons: Record<string, JSX.Element> = {
   pdf: <PDFIcon />,
@@ -89,28 +90,37 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
             onMouseLeave={() => setHoveredFileId(null)}
           >
             <div className="flex items-center justify-center w-24 h-16 bg-gray-200 rounded-lg overflow-hidden">
-              {file.type.startsWith('image/') ? (
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                  className="object-cover w-full h-full"
-                />
-              ) : file.type.startsWith('video/') ? (
-                <video
-                  src={URL.createObjectURL(file)}
-                  className="object-cover w-full h-full"
-                  muted 
-                />
-              ) : (
-                <div className='w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
-                  {getFileTypeIcon(file.name)} 
-                </div>
-              )}
+              
               {
-                globalFileList.find((item) => item.file === file)?.progress < 100 && (
+                globalFileList.find((item) => item.file === file)?.progress < 100 ? (
                   <div className='items-center flex justify-center absolute w-full h-full'>
                     <Spinner className='w-5 h-5'/>
                   </div>
+                ) : (
+                  <>
+                    {file.type.startsWith('image/') ? (
+  
+                      <Image 
+                        src={globalFileList.find((item) => item.file === file)?.url ?? URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="object-cover w-full h-full"
+                        width={100}
+                        height={100}
+                        quality={60}
+                        priority
+                      />
+                    ) : file.type.startsWith('video/') ? (
+                      <video
+                        src={URL.createObjectURL(file)}
+                        className="object-cover w-full h-full"
+                        muted 
+                      />
+                    ) : (
+                      <div className='w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                        {getFileTypeIcon(file.name)} 
+                      </div>
+                    )}
+                  </>
                 )
               }
             </div>

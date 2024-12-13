@@ -156,7 +156,8 @@
     "messageSent": "El mensaje ha sido enviado.",
     "messageSentError": "El mensaje no se pudo enviar.",
     "messageDeleted": "Mensaje eliminado",
-    "messageDeletedError": "El mensaje no se pudo eliminar.",
-    "messageDeletedSuccess": "Mensaje eliminado con éxito"
+    "messageDeletedSuccess": "El mensaje ha sido eliminado.",
+    "messageDeletedError": "El mensaje no se pudo eliminar."
   }
 }
+

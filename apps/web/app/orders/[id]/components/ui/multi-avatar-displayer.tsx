@@ -1,6 +1,5 @@
 'use client';
 
-import deduceNameFromEmail from '../../utils/deduce-name-from-email';
 import AvatarDisplayer from './avatar-displayer';
 
 export type Avatar = {
@@ -38,7 +37,7 @@ const MultiAvatarDisplayer = ({
     >
       {avatars.slice(0, maxAvatars).map((avatar, index) => (
         <AvatarDisplayer
-          displayName={deduceNameFromEmail(avatar?.email) ?? avatar?.name}
+          displayName={avatar?.name}
           isAssignedOrFollower={!displayNormal ? true : false}
           pictureUrl={avatar?.picture_url}
           key={index + avatar?.name}

@@ -22,7 +22,7 @@ import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/orga
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
-import { handleCsrf } from './handlers/csrf-handler';
+// import { handleCsrf } from './handlers/csrf-handler';
 import { Database } from './lib/database.types';
 
 
@@ -142,7 +142,7 @@ export async function middleware(request: NextRequest) {
   response.headers.set('x-current-path', request.nextUrl.pathname);
   setRequestId(request);
 
-  const csrfResponse = await handleCsrf(request, response);
+  const csrfResponse = response;
 
   const handlePattern = matchUrlPattern(request.url);
   if (handlePattern) {
@@ -417,7 +417,8 @@ function setCORSHeaders(response: NextResponse) {
   );
   response.headers.append(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+    'X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+    // X-CSRF-Token, // put it back later
   );
 }
 

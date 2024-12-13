@@ -14,8 +14,6 @@ import CheckboxCombobox, {
 } from '~/components/ui/checkbox-combobox';
 import { getSubtaskAssigns } from '~/team-accounts/src/server/actions/tasks/get/get-tasks';
 
-import deduceNameFromEmail from '../../utils/deduce-name-from-email';
-import { isValidName } from '../../utils/is-valid-name';
 import AvatarDisplayer from '../ui/avatar-displayer';
 import { UserCheck } from 'lucide-react';
 
@@ -30,12 +28,10 @@ const CustomUserItem: React.FC<
     <AvatarDisplayer
       className="font-normal"
       pictureUrl={option?.picture_url ?? null}
-      displayName={deduceNameFromEmail(option.label) ?? option.label}
+      displayName={option?.label ?? ''}
     />
     <span>
-      {isValidName(option.label)
-        ? option.label
-        : deduceNameFromEmail(option.label)}
+      {option?.label}
     </span>
   </div>
 );
@@ -108,9 +104,8 @@ const SubtaskAssignations = ({
           {!loading && (
             <>
             {avatarsWithStatus.map((avatar, index) => {
-              const displayName = isValidName(avatar?.name ?? '')
-              ? avatar.name
-              : deduceNameFromEmail(avatar?.email ?? '');
+              const displayName = avatar?.name
+        
               return (
                 <AvatarDisplayer
                   isTask={true}

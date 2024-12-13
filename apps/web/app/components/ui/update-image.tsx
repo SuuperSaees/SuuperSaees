@@ -62,7 +62,8 @@ export default function UpdateImage({
         fileName = `${host}_favicon_url?v=${fileUuid}`;
       } else {
         if (bucketStorage.identifier && bucketStorage.name !== 'account_image') { // restriction of account_image due to policy in the supabase storage
-          fileName = `${bucketStorage.id}.${bucketStorage.identifier}.${fileExtension}?v=${fileUuid}`;
+          // fileName = `${bucketStorage.id}.${bucketStorage.identifier}.${fileExtension}?v=${fileUuid}`;
+          fileName = `${bucketStorage.id}.${fileExtension}?v=${fileUuid}`;
         } else {
           fileName = `${bucketStorage.id}.${fileExtension}?v=${fileUuid}`;
         }

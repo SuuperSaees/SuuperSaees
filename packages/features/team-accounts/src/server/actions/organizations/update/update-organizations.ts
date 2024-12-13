@@ -2,15 +2,14 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-import {
-  CustomResponse,
-  ErrorOrganizationOperations,
-} from '../../../../../../../../packages/shared/src/response';
+import { CustomResponse, ErrorOrganizationOperations } from '../../../../../../../../packages/shared/src/response';
 import { CustomError } from '../../../../../../../../packages/shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
-import { Account } from '../../../../../../../../apps/web/lib/account.types';
+
 
 // Hex color validation regex
 const isValidHexColor = (color: string) => /^#([0-9A-F]{3}){1,2}$/i.test(color);

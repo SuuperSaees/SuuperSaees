@@ -99,7 +99,7 @@ export const fetchFormfieldsWithResponses = async (
       .eq('order_id', orderId);
 
     if (errorBriefFormFields) {
-      throw new Error(errorBriefFormFields.message);
+      throw new Error(`Failed to get brief responses for order (${orderId}), ${errorBriefFormFields.message}`);
     }
 
     const customerId = briefFormFields?.[0]?.order_data?.customer_id;
@@ -114,14 +114,16 @@ export const fetchFormfieldsWithResponses = async (
       .eq('user_id', customerId)
       .single();
 
-    if (errorUserSettings) {
-      throw new Error(errorUserSettings.message);
+    if (errorUserSettings && errorUserSettings.code !== 'PGRST116') {
+      // 'PGRST116' indicates no rows were found; any other error should be thrown
+      throw new Error(`Error obtaining user settings at briefs: ${errorUserSettings.message}`);
     }
 
     return briefFormFields.map((field) => ({
       ...field,
-      userSettings,
+      userSettings: userSettings ?? null,
     }));
+    
   } catch (error) {
     console.error('Error obtaining brief fields', error);
     throw error;
@@ -221,8 +223,7 @@ export const fetchBriefsByOrgOwnerId = async (
       .from('briefs')
       .select(
         `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
-        form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
-        services ( name )`,
+        form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))`,
       )
       .eq('propietary_organization_id', ownerId);
 

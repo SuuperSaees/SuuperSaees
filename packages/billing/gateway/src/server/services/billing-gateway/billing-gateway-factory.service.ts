@@ -1,13 +1,11 @@
 import 'server-only';
 
-
-
 import { z } from 'zod';
 
-
-
-import { BillingProviderSchema, BillingStrategyProviderService } from '@kit/billing';
-
+import {
+  BillingProviderSchema,
+  BillingStrategyProviderService,
+} from '@kit/billing';
 
 export class BillingGatewayFactoryService {
   static async GetProviderStrategy(

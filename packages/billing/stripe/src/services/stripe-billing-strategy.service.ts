@@ -1,29 +1,25 @@
 import 'server-only';
 
-
-
 import type { Stripe } from 'stripe';
 import { z } from 'zod';
 
-
-
 import { BillingStrategyProviderService } from '@kit/billing';
-import { CancelSubscriptionParamsSchema, CreateBillingCheckoutSchema, CreateBillingPortalSessionSchema, QueryBillingUsageSchema, ReportBillingUsageSchema, RetrieveCheckoutSessionSchema, UpdateSubscriptionParamsSchema } from '@kit/billing/schema';
+import {
+  CancelSubscriptionParamsSchema,
+  CreateBillingCheckoutSchema,
+  CreateBillingPortalSessionSchema,
+  QueryBillingUsageSchema,
+  ReportBillingUsageSchema,
+  RetrieveCheckoutSessionSchema,
+  UpdateSubscriptionParamsSchema,
+} from '@kit/billing/schema';
 import { getLogger } from '@kit/shared/logger';
-import { RetryOperationService } from '@kit/shared/utils';
-import { Database } from '@kit/supabase/database';
 
 import { createStripeBillingPortalSession } from './create-stripe-billing-portal-session';
 import { createStripeCheckout } from './create-stripe-checkout';
 import { createStripeClient } from './stripe-sdk';
 import { createStripeSubscriptionPayloadBuilderService } from './stripe-subscription-payload-builder.service';
 
-interface ServiceOperationResult {
-  success: boolean;
-}
-type ServiceType = Database['public']['Tables']['services']['Row'];
-type BillingAccountType =
-  Database['public']['Tables']['billing_accounts']['Row'];
 /**
  * @name StripeBillingStrategyService
  * @description The Stripe billing strategy service
