@@ -49,7 +49,9 @@ export class AccountController extends BaseController {
     const requestId = crypto.randomUUID(); // Implement requestId in BaseController in the future
     const accountId = this.getAccountId(req);
     try {
-      const client = getSupabaseServerComponentClient();
+      const client = getSupabaseServerComponentClient({
+        admin: true,
+      });
       const accountService = await createAccountService(client);
       const accounts = await accountService.listByAccountId(accountId);
       return this.ok(accounts, requestId);
@@ -66,7 +68,9 @@ export class AccountController extends BaseController {
     const requestId = crypto.randomUUID(); // Implement requestId in BaseController in the future
     const billingAccountId = params.id;
     try {
-      const client = getSupabaseServerComponentClient();
+      const client = getSupabaseServerComponentClient({
+        admin: true,
+      });
       const accountService = await createAccountService(client);
       await accountService.deleteAccount(billingAccountId);
       return this.ok({}, requestId);
@@ -84,7 +88,9 @@ export class AccountController extends BaseController {
     const body = await this.parseBody<BillingAccountApi>(req);
     const billingAccountId = params.id;
     try {
-      const client = getSupabaseServerComponentClient();
+      const client = getSupabaseServerComponentClient({
+        admin: true,
+      });
       const accountService = await createAccountService(client);
       const account = await accountService.updateAccount(
         billingAccountId,
@@ -104,7 +110,9 @@ export class AccountController extends BaseController {
     const requestId = crypto.randomUUID(); // Implement requestId in BaseController in the future
     const billingAccountId = params.id;
     try {
-      const client = getSupabaseServerComponentClient();
+      const client = getSupabaseServerComponentClient({
+        admin: true,
+      });
       const accountService = await createAccountService(client);
       const account = await accountService.findById(billingAccountId);
       return this.ok(account, requestId);
