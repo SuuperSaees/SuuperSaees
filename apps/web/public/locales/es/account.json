@@ -208,7 +208,6 @@
   "brandSenderDomainSubmit": "Dominio del remitente",
   "brandSenderEmail": "Correo electrónico del remitente",
   "continue": "Continuar",
-  "connect": "Conectar",
   "treli": {
     "connectTitle": "Conectar con Treli",
     "connectDescription": "Conecta tu cuenta con Treli para habilitar los pagos por este método.",
@@ -229,5 +228,6 @@
   "loomAppIdTitle": "ID de la aplicación de Loom",
   "loomAppIdDescription": "Introduce el ID de la aplicación de Loom para habilitar la integración de Loom. Copia el subdominio de tu organización en tu aplicación de desarrolladores de Loom",
   "clipboardCopied": "Contenido copiado al portapapeles",
-  "clipboardError": "Error al copiar al portapapeles"
+  "clipboardError": "Error al copiar al portapapeles",
+  "connect": "Conectar"
 }

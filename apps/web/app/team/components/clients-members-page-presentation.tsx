@@ -44,6 +44,10 @@ const ClientsMembersPagePresentation = ({
         picture_url: string;
         created_at: string;
         updated_at: string;
+        settings?: {
+            name: string | null;
+            picture_url: string | null;
+        }
     }[];
     invitations: {
         id: number;

@@ -85,6 +85,10 @@ type Client = Pick<
     id: string;
     name: string;
   };
+  settings?: {
+    name: string | null;
+    picture_url: string | null;
+  } | null;
 };
 
 type ClientsTableProps = {
@@ -286,13 +290,13 @@ const useClientColumns = (
           >
             <span>
               <ProfileAvatar
-                displayName={row.original.name}
-                pictureUrl={row.original.picture_url}
+                displayName={row.original?.settings?.name ?? row.original?.name ?? ''}
+                pictureUrl={row.original?.settings?.picture_url ?? row.original?.picture_url ?? ''}
               />
             </span>
             <div className="flex flex-col">
               <span className="text-sm font-medium leading-[1.42857] text-gray-900">
-                {row.original.name}
+                {row.original.settings?.name ?? row.original.name}
               </span>
               <span className="text-sm font-normal leading-[1.42857] text-gray-600">
                 {row.original.email}

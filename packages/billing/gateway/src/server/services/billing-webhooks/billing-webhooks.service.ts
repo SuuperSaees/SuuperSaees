@@ -1,10 +1,6 @@
 import 'server-only';
 
-
-
 import { SupabaseClient } from '@supabase/supabase-js';
-
-
 
 import { BillingAccounts } from '../../../../../../../apps/web/lib/billing-accounts.types';
 import { Database } from '../../../../../../../apps/web/lib/database.types';

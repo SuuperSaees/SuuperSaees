@@ -4,20 +4,21 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
 
+import UpdateImage from '../../../../../apps/web/app/components/ui/update-image';
 import { Account } from '../../../../../apps/web/lib/account.types';
+import { UserSettings } from '../../../../../apps/web/lib/user-settings.types';
 import { updateUserSettings } from '../../../../../packages/features/team-accounts/src/server/actions/members/update/update-account';
+import { useRevalidatePersonalAccountDataQuery } from '../hooks/use-personal-account-data';
 import { UpdateEmailFormContainer } from './personal-account-settings/email/update-email-form-container';
 import { UpdatePasswordFormContainer } from './personal-account-settings/password/update-password-container';
 import { UpdateAccountDetailsFormContainer } from './personal-account-settings/update-account-details-form-container';
-import { Input } from '@kit/ui/input';
-import { UserSettings } from '../../../../../apps/web/lib/user-settings.types';
-import UpdateImage from './personal-account-settings/update-image';
 
 interface ProfileSettingsProps {
   user: Account.Type;
-  userSettings : UserSettings.Type;
+  userSettings: UserSettings.Type;
   callback: string;
   handleChangeLanguage: (locale: string) => void;
   userRole: string;
@@ -30,10 +31,11 @@ function ProfileSettings({
   userRole,
 }: ProfileSettingsProps) {
   const { t } = useTranslation('account');
-  const [calendarValue, setCalendarValue] =
-    useState<UserSettings.Type['calendar']>(userSettings?.calendar ?? '');
+  const [calendarValue, setCalendarValue] = useState<
+    UserSettings.Type['calendar']
+  >(userSettings?.calendar ?? '');
   const [isValidUrl, setIsValidUrl] = useState(true);
-
+  const revalidateAccount = useRevalidatePersonalAccountDataQuery();
 
   const validateUrl = useCallback((url: string) => {
     if (url === '') return true;
@@ -46,10 +48,12 @@ function ProfileSettings({
         'google.com',
         'outlook.com',
         'outlook.office.com',
-        'tidycal.com'
+        'tidycal.com',
       ];
       const domain = parsedUrl.hostname.replace('www.', '');
-      return allowedDomains.some(allowedDomain => domain.endsWith(allowedDomain));
+      return allowedDomains.some((allowedDomain) =>
+        domain.endsWith(allowedDomain),
+      );
     } catch (e) {
       return false;
     }
@@ -58,7 +62,7 @@ function ProfileSettings({
   const updateAccountCalendar = useMutation({
     mutationFn: async (calendar: UserSettings.Type['calendar']) => {
       if (user?.id) {
-        await updateUserSettings(user.id, { calendar: calendar ?? ''});
+        await updateUserSettings(user.id, { calendar: calendar ?? '' });
       } else {
         throw new Error('User ID is undefined');
       }
@@ -85,21 +89,43 @@ function ProfileSettings({
   );
   const clientRoles = new Set(['client_owner', 'client_member']);
 
+  const bucketStorage = {
+    id: user?.id ?? '',
+    name: 'account_image',
+    identifier: 'profilePicture',
+  };
+
+  const updateProfileImage = async (value: string) => {
+    try {
+      await updateUserSettings(user?.id ?? '', { picture_url: value });
+      toast.success(t('updateSuccess'), {
+        description: t('updateProfileSuccess'),
+      });
+      await revalidateAccount(user?.id ?? '');
+    } catch (error) {
+      toast.error('Error', {
+        description: t('updateProfileError'),
+      });
+      console.error(error);
+    }
+  };
+
   return (
-    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 lg:flex-nowrap text-sm'>
+    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 text-sm lg:flex-nowrap'>
       <div className="flex w-full flex-col space-y-6">
         <div className="flex justify-between">
           <div className="mr-24 flex flex-col whitespace-nowrap text-gray-700">
             <p className="font-bold">{t('accountImage')}</p>
             <p>{t('accountImageDescription')}</p>
           </div>
-          <div className='w-full'>
-            <UpdateImage 
-              user={{
-                pictureUrl: userSettings?.picture_url,
-                id: user.id,
-              }} 
-              mode='profilePicture'
+          <div className="w-full">
+            <UpdateImage
+              bucketStorage={bucketStorage}
+              defaultImageURL={
+                userSettings?.picture_url ?? user?.picture_url ?? ''
+              }
+              className="aspect-square h-20 w-20"
+              onUpdate={updateProfileImage}
             />
           </div>
         </div>
@@ -108,44 +134,45 @@ function ProfileSettings({
         <div className="flex justify-between">
           <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
             <p className="font-bold">{t('name')}</p>
-            <p className='text-wrap'>{t('nameDescription')}</p>
+            <p className="text-wrap">{t('nameDescription')}</p>
           </div>
 
           <UpdateAccountDetailsFormContainer user={user} />
         </div>
 
         <Separator />
-        {
-          !clientRoles.has(userRole) &&
+        {!clientRoles.has(userRole) && (
           <>
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col text-gray-700">
-              <p className="whitespace-nowrap font-bold">{t('calendar')}</p>
-              <p>{t('calendarDescription')}</p>
-            </div>
-            <div className="flex w-full flex-col gap-4">
-              <Input
-                placeholder={t('pasteCalendar')}
-                rows={8}
-                value={calendarValue}
-                onChange={handleCalendarChange}
-                className={
-                  !isValidUrl && calendarValue !== '' ? 'border-red-500' : ''
-                }
-                onBlur={() => {
-                  if (isValidUrl) {
-                    updateAccountCalendar.mutate(calendarValue)
+            <div className="flex justify-between">
+              <div className="mr-7 flex w-[45%] flex-col text-gray-700">
+                <p className="whitespace-nowrap font-bold">{t('calendar')}</p>
+                <p>{t('calendarDescription')}</p>
+              </div>
+              <div className="flex w-full flex-col gap-4">
+                <Input
+                  placeholder={t('pasteCalendar')}
+                  rows={8}
+                  value={calendarValue}
+                  onChange={handleCalendarChange}
+                  className={
+                    !isValidUrl && calendarValue !== '' ? 'border-red-500' : ''
                   }
-                }}
-              />
-              {!isValidUrl && calendarValue !== '' && (
-                <p className="text-sm text-red-500">Please enter a valid URL</p>
-              )}
+                  onBlur={() => {
+                    if (isValidUrl) {
+                      updateAccountCalendar.mutate(calendarValue);
+                    }
+                  }}
+                />
+                {!isValidUrl && calendarValue !== '' && (
+                  <p className="text-sm text-red-500">
+                    Please enter a valid URL
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-                  <Separator />
-                  </>
-        }
+            <Separator />
+          </>
+        )}
 
         <div className="flex justify-between">
           <div className="mr-7 flex w-[45%] flex-col text-gray-700">

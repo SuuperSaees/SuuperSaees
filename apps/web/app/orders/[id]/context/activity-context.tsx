@@ -64,8 +64,13 @@ export type Reaction = {
 
 export type User = Pick<
   ServerUser.Type,
-  'id' | 'name' | 'email' | 'picture_url'
->;
+  'id' | 'name' | 'email' | 'picture_url' 
+> & {
+  settings?: {
+    name: string | null;
+    picture_url: string | null;
+  } | null
+}
 
 export type File = ServerFile.Type & {
   user: User;
@@ -75,6 +80,7 @@ export type Message = ServerMessage.Type & {
   user: User;
   files?: ServerFile.Type[];
   reactions?: Reaction[];
+  pending?: boolean;
 };
 
 export type Review = ServerReview.Type & {

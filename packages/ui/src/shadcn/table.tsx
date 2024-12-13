@@ -8,15 +8,15 @@ const Table = React.forwardRef<
 >(({ className, ...props }, ref) => {
     const divRef = React.useRef<HTMLDivElement>(null);
     // Function to handle horizontal scroll
-    const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-      if (divRef.current) {
-        event.preventDefault(); // Prevent the default vertical scroll
-        divRef.current.scrollLeft += event.deltaY; // Adjust horizontal scroll based on vertical scroll amount
-      }
-      return
-    };
+    // const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    //   if (divRef.current) {
+    //     event.preventDefault(); // Prevent the default vertical scroll
+    //     divRef.current.scrollLeft += event.deltaY; // Adjust horizontal scroll based on vertical scroll amount
+    //   }
+    //   return
+    // };
   return (
-    <div className="relative w-full overflow-auto" ref={divRef} onWheel={handleWheel}>
+    <div className="relative w-full overflow-auto" ref={divRef} >
       <table
         ref={ref}
         className={cn('w-full caption-bottom text-sm', className)}

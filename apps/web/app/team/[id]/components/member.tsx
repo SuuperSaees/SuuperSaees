@@ -15,6 +15,7 @@ import { updateUserSettings } from '~/team-accounts/src/server/actions/members/u
 import HomeSection from './home-section';
 import ReviewsSection from './reviews-section';
 import { useRouter } from 'next/navigation';
+import { useRevalidatePersonalAccountDataQuery } from '@kit/accounts/hooks/use-personal-account-data';
 
 export default function Member({
   id,
@@ -39,6 +40,7 @@ export default function Member({
 }) {
   const { t } = useTranslation();
   // const [activeTab, setActiveTab] = useState('home');
+  const revalidateAccount = useRevalidatePersonalAccountDataQuery();
   const router = useRouter();
   const updateMemberImage = async (value: string) => {
     try {
@@ -46,6 +48,7 @@ export default function Member({
       toast.success('Success', {
         description: t('account:updateProfileSuccess'),
       });
+      await revalidateAccount(id)
       router.refresh();
     } catch (error) {
       toast.error('Error', {

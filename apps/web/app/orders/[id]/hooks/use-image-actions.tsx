@@ -9,6 +9,12 @@ export const useImageActions = ({ src }: UseImageActionsProps) => {
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const getFileName = (src: string) => {
+    const urlParts = src.split('/').pop()?.split('.') ?? [];
+    const fileName = urlParts.slice(0, -1).join('.') ?? '';
+    return fileName;
+  };
+
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(src);
     setIsLinkCopied(true);
@@ -24,7 +30,7 @@ export const useImageActions = ({ src }: UseImageActionsProps) => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'image.jpg'; // Set the filename for the downloaded file
+      link.download = `${getFileName(src)}`; // Set the filename for the downloaded file
       link.click();
 
       window.URL.revokeObjectURL(url); // Clean up the object URL

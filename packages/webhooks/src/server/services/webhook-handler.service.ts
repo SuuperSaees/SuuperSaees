@@ -1,13 +1,8 @@
 import 'server-only';
 
-
-
 import { getSupabaseRouteHandlerClient } from '@kit/supabase/route-handler-client';
 
-
-
 import { createWebhookRouterService } from './webhook-router.service';
-
 
 /**
  * @name DatabaseChangePayload

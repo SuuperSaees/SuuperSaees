@@ -4,11 +4,9 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
 
-
-
 import { createClient } from '../../../../features/team-accounts/src/server/actions/clients/create/create-clients';
-import { insertServiceToClient } from '../../../../features/team-accounts/src/server/actions/services/create/create-service';
 import { getSessionById } from '../../../../features/team-accounts/src/server/actions/sessions/get/get-sessions';
+import { insertServiceToClient } from '../../../../features/team-accounts/src/server/actions/services/create/create-service';
 
 
 export function createWebhookRouterService(
@@ -36,12 +34,6 @@ class WebhookRouterService {
     if (stripeSignature) {
       const body = await request.text();
       await this.handleStripeWebhook(body, stripeSignature);
-    }
-
-    const treliSignature = request.headers.get('treli-signature')!;
-    if (treliSignature) {
-      const body = await request.json();
-      await this.handleTreliWebhook(body, treliSignature);
     }
   }
 
@@ -149,10 +141,8 @@ class WebhookRouterService {
               if (clientDataWithChecker) {
                 clientId = clientDataWithChecker.id;
               } else {
-                const {
-                  data: createClientDataWithChecker,
-                  error: clientError,
-                } = await this.adminClient
+                const { data: createClientDataWithChecker, error: clientError } =
+                await this.adminClient
                   .from('clients')
                   .insert({
                     agency_id: accountDataAgencyOwnerData.organization_id ?? '',
@@ -235,6 +225,7 @@ class WebhookRouterService {
 
             const customer = await getSessionById(data.metadata.sessionId);
 
+
             const newClient = {
               email: customer?.client_email ?? '', // TODO: Check if this is the correct field
               slug: `${customer?.client_name}'s Organization`,
@@ -264,6 +255,7 @@ class WebhookRouterService {
                 adminActivated: true,
               });
             }
+
 
             // After assign a service to the client, we need to create the subscription
             // Search in the database, by checkout session id
@@ -302,10 +294,8 @@ class WebhookRouterService {
               if (clientDataWithChecker) {
                 clientId = clientDataWithChecker.id;
               } else {
-                const {
-                  data: createClientDataWithChecker,
-                  error: clientError,
-                } = await this.adminClient
+                const { data: createClientDataWithChecker, error: clientError } =
+                await this.adminClient
                   .from('clients')
                   .insert({
                     agency_id: accountDataAgencyOwnerData.organization_id ?? '',
@@ -321,6 +311,7 @@ class WebhookRouterService {
 
                 clientId = createClientDataWithChecker?.id;
               }
+
             } else {
               clientId = client?.success?.data?.id;
             }
@@ -339,6 +330,8 @@ class WebhookRouterService {
                 deleted_on: new Date().toISOString(),
               })
               .eq('id', checkoutServiceData?.id);
+
+
           } else {
             // TODO: Implement logic to handle checkout session completed
             console.log('Account ID not found in the event');

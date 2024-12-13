@@ -2,7 +2,10 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
 import { Message } from '../../../../../../../../apps/web/lib/message.types';
+
 
 export const updateFile = async (
   fileId: string, // Add fileId as a parameter
@@ -16,7 +19,6 @@ export const updateFile = async (
     const fileToUpdate = {
       message_id: messageId ?? null,
     };
-
     const { data: fileData, error: fileError } = await client
       .from('files')
       .update(fileToUpdate)

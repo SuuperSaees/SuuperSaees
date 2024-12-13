@@ -16,7 +16,6 @@ import { TimerUpdate } from '~/lib/timer.types';
 import { formatTimeToAMPM, formatTime, formatTimeInHours } from '~/utils/format-time';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import AvatarDisplayer from '~/orders/[id]/components/ui/avatar-displayer';
-import deduceNameFromEmail from '~/orders/[id]/utils/deduce-name-from-email';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Spinner } from '@kit/ui/spinner';
 import { handleEndTimeChange, handlePauseConfirm, handleStartTimeChange } from '~/utils/timer-utils';
@@ -172,7 +171,7 @@ export const Timer = ({ onUpdate, className }: TimerProps) => {
               displayName={
                 userName
                   ? userName
-                  : deduceNameFromEmail(userEmail ?? '')
+                  : userEmail ?? ''
               }
               pictureUrl={
                 userPictureUrl

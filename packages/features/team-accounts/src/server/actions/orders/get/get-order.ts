@@ -36,10 +36,10 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       .from('orders_v2')
       .select(
         `*, client:accounts!customer_id(id, name, email, picture_url, organization_id, created_at, settings:user_settings(name, picture_url)), 
-        messages(*, user:accounts(id, name, email, picture_url), files(*)), 
-        activities(*, user:accounts(id, name, email, picture_url)),
-          reviews(*, user:accounts(id, name, email, picture_url)), 
-          files(*, user:accounts(id, name, email, picture_url)),
+        messages(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)), files(*)), 
+        activities(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
+          reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))), 
+          files(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
          assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
          followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
         `,
@@ -386,7 +386,7 @@ export async function getAgencyClients(
     const clientDetailsPromises = clientsData.map(async (clientCurrent) => {
       const { data: accountData, error: accountError } = await client
         .from('accounts')
-        .select('id, name, email, picture_url')
+        .select('id, name, email, picture_url, settings:user_settings(name, picture_url)')
         .eq('id', clientCurrent.user_client_id)
         .eq('is_personal_account', true)
         .single();

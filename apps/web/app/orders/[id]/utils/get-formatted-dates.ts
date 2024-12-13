@@ -45,3 +45,5 @@ export const getFormattedDateRange = (
     ? formatDisplayDate(dateRange.to, language)
     : `${formatDisplayDate(dateRange.from, language)} - ${formatDisplayDate(dateRange.to, language)}`;
 };
+
+
