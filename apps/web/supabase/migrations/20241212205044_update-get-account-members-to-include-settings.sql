@@ -1,4 +1,4 @@
--- DROP FUNCTION IF EXISTS public.get_account_members(text);
+DROP FUNCTION IF EXISTS public.get_account_members(text);
 
 CREATE OR REPLACE FUNCTION public.get_account_members(account_slug text)
  RETURNS TABLE(id uuid, user_id uuid, account_id uuid, role character varying, role_hierarchy_level integer, primary_owner_user_id uuid, name character varying, email character varying, picture_url character varying, created_at timestamp with time zone, updated_at timestamp with time zone, settings jsonb)
