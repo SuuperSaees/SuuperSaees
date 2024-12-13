@@ -276,7 +276,14 @@ return (
                 {loadingDelete ? <Spinner className="w-4 h-4" /> : t('treli.delete')}
               </ThemedButton>
                 )}
-                <AlertDialogCancel onClick={() => {form.reset(); setError('')}}>
+                <AlertDialogCancel onClick={() => {
+                  if (!existingAccount) {
+                    form.reset();
+                    setError('');
+                  } else {
+                    setOpen(false);
+                  }
+                }}>
                   {t('treli.cancel')}
                 </AlertDialogCancel>
                 <ThemedButton type="submit">
