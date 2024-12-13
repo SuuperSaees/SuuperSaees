@@ -12,6 +12,7 @@ import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 import { PageHeader } from '../../components/page-header';
 import { TimerContainer } from '../../components/timer-container';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -87,6 +88,8 @@ const ClientsMembersPagePresentation = ({
         //   }
         // }
     // }, [members, subscriptionFetchedStripe]);
+  const {workspace} = useUserWorkspace()
+  const currentRole = workspace?.role
 
   return (
     <PageBody>
@@ -100,7 +103,8 @@ const ClientsMembersPagePresentation = ({
 
         <div className="w-full">
           <div className="flex items-center justify-between pb-[28px]">
-            <If condition={canManageInvitations && canAddMember}>
+            {/* Temporary fix with user roles while error 500 issue is solved */}
+            <If condition={currentRole === 'agency_owner' || currentRole === 'agency_project_manager' || currentRole === 'super_admin'}>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold">
                   <Trans i18nKey={'common:membersTabLabel'} />
