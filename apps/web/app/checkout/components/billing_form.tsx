@@ -249,7 +249,7 @@ const BillingForm: React.FC<{
       if(data?.paymentUrl){
         router.push(data.paymentUrl);
       } else {
-        router.push('/success?accountAlreadyExists=' + accountAlreadyExists);
+        router.push(`${baseUrl}/success?accountAlreadyExists=${accountAlreadyExists}`);
       }
     } catch (error) {
       setErrorMessage(

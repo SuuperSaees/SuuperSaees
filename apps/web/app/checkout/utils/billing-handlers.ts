@@ -412,17 +412,9 @@ export const handleSubmitPayment = async ({
           baseUrl,
         });
 
-    console.log(
-      'responseRecurringOrOneTimePayment',
-      responseRecurringOrOneTimePayment,
-    );
-
     const userAlreadyExists = await getUserByEmail(values.email, true);
 
-    let accountAlreadyExists = false;
-    if (userAlreadyExists?.userData?.id) {
-      accountAlreadyExists = true;
-    }
+    const accountAlreadyExists = userAlreadyExists?.userData?.id ? true : false;
 
     return {
       success: true,
