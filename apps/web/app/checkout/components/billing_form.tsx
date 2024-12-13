@@ -123,6 +123,8 @@ const BillingForm: React.FC<{
   const [validSuccess, setValidSuccess] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+
   const formSchema = z.object({
     fullName: z.string().min(1, t('checkout.validation.fullNameRequired')),
     email: z.string().email(t('checkout.validation.invalidEmail')),
@@ -223,6 +225,7 @@ const BillingForm: React.FC<{
         coupon: values.discount_coupon,
         quantity: quantity,
         selectedPaymentMethod: selectedPaymentMethod,
+        baseUrl
       });
 
       if (!success) {

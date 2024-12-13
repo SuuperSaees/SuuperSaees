@@ -41,6 +41,7 @@ type HandlePaymentProps = {
   coupon: string;
   quantity?: number;
   selectedPaymentMethod: string;
+  baseUrl: string;
 };
 
 type HandlePaymentStripeProps = {
@@ -53,6 +54,7 @@ type HandlePaymentStripeProps = {
   sessionId: string;
   quantity?: number;
   selectedPaymentMethod: string;
+  baseUrl: string;
 };
 
 export const handleRecurringPayment = async ({
@@ -63,10 +65,11 @@ export const handleRecurringPayment = async ({
   coupon,
   sessionId,
   selectedPaymentMethod,
+  baseUrl,
 }: HandlePaymentStripeProps) => {
   // heree manage payment method
   if (selectedPaymentMethod === 'stripe') {
-    const res = await fetch('/api/stripe/subscription-payment', {
+    const res = await fetch(`${baseUrl}/api/stripe/subscription-payment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -222,9 +225,10 @@ export const handleOneTimePayment = async ({
   sessionId,
   quantity,
   selectedPaymentMethod,
+  baseUrl,
 }: HandlePaymentStripeProps) => {
   if (selectedPaymentMethod === 'stripe') {
-    const res = await fetch('/api/stripe/unique-payment', {
+    const res = await fetch(`${baseUrl}/api/stripe/unique-payment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -369,6 +373,7 @@ export const handleSubmitPayment = async ({
   coupon,
   quantity,
   selectedPaymentMethod,
+  baseUrl,
 }: HandlePaymentProps) => {
   try {
     const sessionCreated = await createSession({
@@ -393,6 +398,7 @@ export const handleSubmitPayment = async ({
           coupon,
           sessionId: sessionCreated?.id ?? '',
           selectedPaymentMethod,
+          baseUrl,
         })
       : await handleOneTimePayment({
           service,
@@ -404,6 +410,7 @@ export const handleSubmitPayment = async ({
           sessionId: sessionCreated?.id ?? '',
           quantity,
           selectedPaymentMethod,
+          baseUrl,
         });
 
     const userAlreadyExists = await getUserByEmail(values.email, true);

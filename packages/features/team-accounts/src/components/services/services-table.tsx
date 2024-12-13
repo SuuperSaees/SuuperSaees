@@ -277,28 +277,33 @@ const useGetColumns = (
           const service = row.original;
           return (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
-              {accountRole === 'agency_owner' && service.billing_services.length > 0 && (
-                <div>
-
+               
+                {
+                  
+                    accountRole === 'agency_owner' && (
+                    <div>
                     <Button
                       variant="ghost"
+                      disabled={service.billing_services.length === 0}
+                      className={`${service.billing_services.length === 0 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                       onClick={async () => {
                           await handleCheckout(service, paymentsMethods);
                       }}
                     >
                       <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />
                     </Button>
-                </div>
+                  </div>
+                    )
+                  //   <div>
+                  //   <CheckoutSelector
+                  //     service={service}
+                  //     paymentsMethods={paymentsMethods}
+                  //     onAction={handleCheckout}
+                  //   />
+                  // </div>
+                }
 
-              //   <div>
-              //   <CheckoutSelector
-              //     service={service}
-              //     paymentsMethods={paymentsMethods}
-              //     onAction={handleCheckout}
-              //   />
-              // </div>
-
-              )}
+              
               {/* {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />} */}
               {(accountRole === 'agency_owner' || accountRole === 'agency_project_manager') && (
                 <Link href={`/services/update?id=${service.id}`}>
