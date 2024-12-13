@@ -4,9 +4,13 @@ import 'server-only';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
+import { BillingAccounts } from '../../../../../../../apps/web/lib/billing-accounts.types';
 import { Database } from '../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../apps/web/lib/services.types';
 import { Subscription } from '../../../../../../../apps/web/lib/subscriptions.types';
+import { getPrimaryOwnerId } from '../../../../../../features/team-accounts/src/server/actions/members/get/get-member-account';
 import { createBillingGatewayService } from '../billing-gateway/billing-gateway.service';
 
 export function createBillingWebhooksService(
@@ -46,6 +50,39 @@ class BillingWebhooksService {
     return gateway.cancelSubscription({
       subscriptionId: subscription.id,
     });
+  }
+
+  async handleBillingAccountCreatedWebhook(account: BillingAccounts.Type) {
+    // get primary owner user id from account
+    const primaryOwnerId = await getPrimaryOwnerId(
+      this.adminClient,
+      account.account_id,
+    );
+
+    const { data: servicesResult, error: servicesError } =
+      await this.adminClient
+        .from('services')
+        .select('*, billing_services(provider)')
+        .eq('propietary_organization_id', primaryOwnerId ?? '');
+
+    if (servicesError) throw new Error(servicesError.message);
+
+    const gateway = createBillingGatewayService(account.provider, this.baseUrl);
+    const promises: Promise<unknown>[] = [];
+    servicesResult.forEach((service) => {
+      const hasBillingService = Array.isArray(service.billing_services)
+        ? service.billing_services.find(
+            (billingService) => billingService.provider === account.provider,
+          )
+        : (service.billing_services as unknown as { provider: string })
+            .provider;
+      if (!hasBillingService) {
+        promises.push(gateway.createService(service, account));
+      }
+    });
+    if (promises.length > 0) {
+      await Promise.all(promises);
+    }
   }
 
   async handleServiceCreatedWebhook(service: Service.Type) {

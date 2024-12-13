@@ -92,17 +92,24 @@ export async function fetchUsersAccounts(
   }
 }
 
-export async function getPrimaryOwnerId(client?: SupabaseClient<Database>): Promise<string | undefined> {
+export async function getPrimaryOwnerId(
+  client?: SupabaseClient<Database>,
+  accountId?: string,
+): Promise<string | undefined> {
   try {
     client = client ?? getSupabaseServerComponentClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
+    let userId = accountId;
+    if (!userId) {
+      const { data: userData, error: userError } = await client.auth.getUser();
+      if (userError) throw userError;
+      userId = userData.user?.id;
+    }
 
     // first we get the user account
     const { data: userAccountData, error: userAccountError } = await client
       .from('accounts')
       .select('organization_id')
-      .eq('id', userData.user?.id)
+      .eq('id', userId)
       .single();
 
     if (userAccountError)
