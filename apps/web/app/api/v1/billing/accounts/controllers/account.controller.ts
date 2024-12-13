@@ -65,7 +65,6 @@ export class AccountController extends BaseController {
     _: undefined,
     { params }: { params: { id: string } },
   ): Promise<Response> {
-    console.log('delete');
     const requestId = crypto.randomUUID(); // Implement requestId in BaseController in the future
     const billingAccountId = params.id;
     try {
