@@ -387,7 +387,7 @@ export const handleSubmitPayment = async ({
       provider_id: null,
     });
 
-    const responseRecurringOrOneTimePayment = service.recurrence
+    const responseRecurringOrOneTimePayment = service.recurring_subscription
       ? await handleRecurringPayment({
           service,
           values,
@@ -411,6 +411,11 @@ export const handleSubmitPayment = async ({
           selectedPaymentMethod,
           baseUrl,
         });
+
+    console.log(
+      'responseRecurringOrOneTimePayment',
+      responseRecurringOrOneTimePayment,
+    );
 
     const userAlreadyExists = await getUserByEmail(values.email, true);
 
