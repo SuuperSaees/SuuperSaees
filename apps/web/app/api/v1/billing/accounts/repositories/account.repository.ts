@@ -50,18 +50,45 @@ export class BillingAccountRepository implements IAccountRepository {
   }
 
   async create(data: CreateAccountDTO): Promise<BillingAccounts.Type> {
-    const accountToInsert = BillingAccountBuilder.fromDTO(data);
-    const { data: createdData, error } = await this.client
+    // upsert account if exists
+    const { data: existingAccount } = await this.client
       .from('billing_accounts')
-      .insert(accountToInsert)
-      .select()
+      .select('*')
+      .eq('account_id', data.accountId)
+      .eq('provider', data.provider)
       .single();
+    let account: BillingAccounts.Type;
+    if (existingAccount) {
+      const accountToUpdate = BillingAccountBuilder.fromDTO(data);
+      const { data: updatedData, error } = await this.client
+        .from('billing_accounts')
+        .update(accountToUpdate)
+        .eq('id', existingAccount.id)
+        .select()
+        .single();
 
-    if (error) {
-      throw new Error(`Error creating billing account: ${error.message}`);
+      if (error) {
+        throw new Error(`Error updating billing account: ${error.message}`);
+      }
+
+      account = updatedData as BillingAccounts.Type;
+    } else {
+
+      const accountToInsert = BillingAccountBuilder.fromDTO(data);
+      const { data: createdData, error } = await this.client
+        .from('billing_accounts')
+        .insert(accountToInsert)
+        .select()
+        .single();
+  
+      if (error) {
+        throw new Error(`Error creating billing account: ${error.message}`);
+      }
+
+      account = createdData as BillingAccounts.Type;
     }
 
-    return createdData as BillingAccounts.Type;
+    return account;
   }
 
   async softDelete(id: string): Promise<void> {

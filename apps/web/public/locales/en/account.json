@@ -219,7 +219,9 @@
     "password": "Password",
     "passwordDescription": "This is your treli API password.",
     "cancel": "Cancel",
-    "success": "Treli account configured successfully"
+    "success": "Treli account configured successfully",
+    "update": "Update",
+    "updateData": "Update your Treli data"
   },
   "loomAppIdTitle": "Loom App ID",
   "loomAppIdDescription": "Enter your Loom App ID to enable Loom integration. Copy your organization subdomain in your developer Loom app",
