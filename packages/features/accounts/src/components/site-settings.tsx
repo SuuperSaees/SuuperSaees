@@ -14,6 +14,9 @@ import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './personal-
 import { UpdateAccountOrganizationSenderName } from './personal-account-settings/update-account-organization-sender-name';
 import UpdateAccountOrganizationSidebar from './personal-account-settings/update-account-organization-sidebar';
 import { ThemedButton } from './ui/button-themed-with-settings';
+import { useTranslation } from 'react-i18next';
+import { TreliDialog } from './personal-account-settings/treli/treli-dialog';
+
 
 interface SiteSettingsProps {
   role: string;
@@ -33,6 +36,7 @@ function SiteSettings({
   user,
   accountStripe,
 }: SiteSettingsProps) {
+  const { t } = useTranslation('account');
   const { logo_url, logo_dark_url, updateOrganizationSetting, favicon_url } =
     useOrganizationSettings();
 
@@ -238,7 +242,7 @@ function SiteSettings({
               {t('treli.connectDescription')}
               </p>
             </div>
-            {userData && <TreliDialog userId={userData?.id} />}
+            {user && <TreliDialog userId={user?.id} />}
           </div>
         </div>
       )}
