@@ -359,7 +359,6 @@ export const handleOneTimePayment = async ({
 
     const dataSubscriptionPlan = await responseSubscriptionPlan.clone().json();
 
-    console.log(dataSubscriptionPlan);
     return dataSubscriptionPlan;
   }
 };
