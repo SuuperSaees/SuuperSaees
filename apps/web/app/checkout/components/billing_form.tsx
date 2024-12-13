@@ -60,7 +60,7 @@ const paymentMethodsIcons = {
     <StripeIcon /></div>,
   wompidirect: <div >
     <span className="text-sm font-medium leading-[20px] text-gray-700">Wompi</span>
-    <WompiIcon /></div>,
+    <WompiIcon className='w-28 h-28'/></div>,
   epaycodirect: <div >
     <span className="text-sm font-medium leading-[20px] text-gray-700">Epayco</span>
     <DollarSignIcon /></div>,
@@ -228,8 +228,6 @@ const BillingForm: React.FC<{
         baseUrl
       });
 
-      console.log(data, success, error, accountAlreadyExists);
-
       if (!success) {
         if(error === 'User already registered'){
           toast.error(
@@ -306,9 +304,34 @@ const BillingForm: React.FC<{
                   </div>
                 </div>
                  {
-                  selectedPaymentMethod !== 'mercadopago' && (
+                  selectedPaymentMethod === 'stripe' && (
                     <div className="flex flex-col sm:flex-row w-full gap-4">
-                    <FormField
+                      <div className="w-full flex-col gap-1.5">
+                    <Label className="text-sm font-medium leading-[20px] text-gray-700">
+                        {t('checkout.cardNumber')}
+                      </Label>
+                    <CardNumberElement
+                        id="card_number"
+                        className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                      />
+                    </div>
+                    <div className="w-full flex-col gap-1.5">
+                      <Label className="mb-1.5 text-sm font-medium leading-[20px] text-gray-700">
+                        {t('checkout.expirationDate')}
+                      </Label>
+                      <CardExpiryElement
+                        id="card_expiry"
+                        className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                      />
+                    </div>
+                  </div>
+                  )
+                } 
+                 {
+                  selectedPaymentMethod === 'stripe' && (
+                    <div className="flex flex-col sm:flex-row w-full gap-4">
+                    <div className="w-full flex-col gap-1.5">
+                      <FormField
                       name="card_name"
                       control={form.control}
                       render={({ field }) => (
@@ -326,29 +349,6 @@ const BillingForm: React.FC<{
                         </FormItem>
                       )}
                     />
-                    <div className="w-full flex-col gap-1.5">
-                      <Label className="mb-1.5 text-sm font-medium leading-[20px] text-gray-700">
-                        {t('checkout.expirationDate')}
-                      </Label>
-                      <CardExpiryElement
-                        id="card_expiry"
-                        className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                      />
-                    </div>
-                  </div>
-                  )
-                } 
-                 {
-                  selectedPaymentMethod !== 'mercadopago' && (
-                    <div className="mt-4 flex flex-col sm:flex-row w-full gap-4">
-                    <div className="w-full flex-col gap-1.5">
-                      <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                        {t('checkout.cardNumber')}
-                      </Label>
-                      <CardNumberElement
-                        id="card_number"
-                        className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                      />
                     </div>
                     <div className="w-full flex-col gap-1.5">
                       <Label className="text-sm font-medium leading-[20px] text-gray-700">
@@ -362,6 +362,92 @@ const BillingForm: React.FC<{
                   </div>
                   )
                  }
+
+{
+                          selectedPaymentMethod !== 'stripe' && selectedPaymentMethod !== 'mercadopago' && (
+                            <div className="flex flex-col sm:flex-row w-full gap-4">
+                              <div>
+                                <FormField
+                                  name="card_number"
+                                  control={form.control}
+                                  render={({ field }) => (
+                                    <FormItem className="w-full">
+                                      <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
+                                        {t('checkout.cardNumber')}
+                                      </FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                          {...field}
+                                          placeholder="4242 4242 4242 4242"
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              <FormField
+                                name="card_name"
+                                control={form.control}
+                                render={({ field }) => (
+                                  <FormItem className="w-full">
+                                    <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
+                                      {t('checkout.cardName')}
+                                    </FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              </div>
+                              <div>
+                              <FormField
+                                name="card_expiration_date"
+                                control={form.control}
+                                render={({ field }) => (
+                                  <FormItem className="w-full">
+                                    <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
+                                      {t('checkout.expirationDate')}
+                                    </FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                        {...field}
+                                        placeholder="11/28"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                name="card_cvv"
+                                control={form.control}
+                                render={({ field }) => (
+                                  <FormItem className="w-full">
+                                    <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
+                                      {t('checkout.securityCode')}
+                                    </FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                        {...field}
+                                        placeholder="123"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              </div>
+                            </div>
+                          )
+                        }
                 </>
               </div> 
               <div className="w-full lg:w-[40%] flex flex-col justify-between">

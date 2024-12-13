@@ -171,14 +171,15 @@ export const handleRecurringPayment = async ({
         coupon_code: coupon || undefined,
         payment_collection: 'false',
         payment_invoicing: 'create',
+        // Only include card details if not using Mercado Pago
+        ...(selectedPaymentMethod !== 'mercadopago' && {
+          cardNumber: values.card_number,
+          month: values.card_expiration_date?.split('/')[0],
+          year: values.card_expiration_date?.split('/')[1],
+          cardCvc: values.card_cvv,
+        }),
       },
-      // Only include card details if not using Mercado Pago
-      ...(selectedPaymentMethod !== 'mercadopago' && {
-        cardNumber: values.card_number,
-        month: values.card_expiration_date?.split('/')[0],
-        year: values.card_expiration_date?.split('/')[1],
-        cardCvc: values.card_cvv,
-      }),
+      payment_method: selectedPaymentMethod,
       requires_shipping: false,
       manual_payment: selectedPaymentMethod === 'mercadopago',
       block_billing_change: true,
@@ -314,7 +315,10 @@ export const handleOneTimePayment = async ({
       },
       products: [
         {
-          id: service.id,
+          id:
+            service.billing_services.find(
+              (billingService) => billingService.provider === 'treli',
+            )?.provider_id ?? '',
           quantity: 1,
           subscription_period_interval: 1,
           subscription_period: service.recurrence ? 'month' : 'one-time', // Adjust based on your service configuration
@@ -326,14 +330,14 @@ export const handleOneTimePayment = async ({
         coupon_code: coupon || undefined,
         payment_collection: 'false',
         payment_invoicing: 'create',
+        // Only include card details if not using Mercado Pago
+        ...(selectedPaymentMethod !== 'mercadopago' && {
+          cardNumber: values.card_number,
+          month: values.card_expiration_date.split('/')[0],
+          year: values.card_expiration_date.split('/')[1],
+          cardCvc: values.card_cvv,
+        }),
       },
-      // Only include card details if not using Mercado Pago
-      ...(selectedPaymentMethod !== 'mercadopago' && {
-        cardNumber: values.card_number,
-        month: values.card_expiration_date.split('/')[0],
-        year: values.card_expiration_date.split('/')[1],
-        cardCvc: values.card_cvv,
-      }),
       requires_shipping: false,
       manual_payment: false,
       block_billing_change: true,
