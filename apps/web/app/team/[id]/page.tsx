@@ -2,12 +2,14 @@ import { PageBody } from '@kit/ui/page';
 
 import {
   getUserById,
-  getUserRole,
+  // getUserRole,
 } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import {  getOrdersByUserId } from '~/team-accounts/src/server/actions/orders/get/get-order';
 import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 
 import Member from './components/member';
+
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 
 export default async function MemberPage(
   props: {
@@ -16,10 +18,14 @@ export default async function MemberPage(
 ) {
   const params = await props.params;
   const id = params.id;
-  const userRole = await getUserRole().catch((error) => {
-    console.error('Error fetching user role in team member page:', error);
-    return '';
-  });
+  // const userRole = await getUserRole().catch((error) => {
+  //   console.error('Error fetching user role in team member page:', error);
+  //   return '';
+  // });
+
+  const {workspace} = await loadUserWorkspace()
+  const userRole = workspace?.role
+
 
   const user = await getUserById(id).catch((error) => {
     console.error('Error fetching user in team member page:', error);
