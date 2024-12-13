@@ -221,7 +221,10 @@
     "cancel": "Cancel",
     "success": "Treli account configured successfully",
     "update": "Update",
-    "updateData": "Update your Treli data"
+    "updateData": "Update your Treli data",
+    "delete": "Delete",
+    "deleteSuccess": "Treli account deleted successfully",
+    "deleteError": "Error deleting Treli account"
   },
   "loomAppIdTitle": "Loom App ID",
   "loomAppIdDescription": "Enter your Loom App ID to enable Loom integration. Copy your organization subdomain in your developer Loom app",

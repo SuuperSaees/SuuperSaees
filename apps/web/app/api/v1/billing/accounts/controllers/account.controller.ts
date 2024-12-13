@@ -1,14 +1,21 @@
 import { NextRequest } from 'next/server';
 
+
+
 import { ErrorBillingOperations } from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { ApiError } from '~/lib/api/api-error';
 import { BaseController } from '~/lib/api/base-controller';
 import { BillingAccount as BillingAccountApi } from '~/lib/api/billing-accounts.types';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 
+
+
 import { createAccountService } from '../services/account.service';
+
 
 export class AccountController extends BaseController {
   // CREATE
@@ -26,11 +33,9 @@ export class AccountController extends BaseController {
         );
       }
 
-      const client = getSupabaseServerComponentClient(
-        {
-          admin: true,
-        },
-      );
+      const client = getSupabaseServerComponentClient({
+        admin: true,
+      });
       const accountService = await createAccountService(client);
       const account = await accountService.createAccount(body);
       return this.created(account, requestId);
@@ -60,6 +65,7 @@ export class AccountController extends BaseController {
     _: undefined,
     { params }: { params: { id: string } },
   ): Promise<Response> {
+    console.log('delete');
     const requestId = crypto.randomUUID(); // Implement requestId in BaseController in the future
     const billingAccountId = params.id;
     try {

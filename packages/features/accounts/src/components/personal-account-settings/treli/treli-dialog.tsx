@@ -15,7 +15,6 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@kit/ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Button } from "@kit/ui/button";
 import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { ThemedButton } from "../../ui/button-themed-with-settings";
@@ -55,6 +54,7 @@ credentials: {
 export function TreliDialog({userId}: TreliDialogProps) {
 const { t } = useTranslation('account');
 const [loading, setLoading] = useState(false);
+const [loadingDelete, setLoadingDelete] = useState(false);
 const [showPassword, setShowPassword] = useState(false);
 const [error, setError] = useState<string | null>(null);
 const [open, setOpen] = useState(false);
@@ -74,7 +74,7 @@ useEffect(() => {
       const response = await fetch(`/api/v1/billing/accounts?accountId=${userId}`);
       const data = await response.clone().json() as {
         success: boolean;
-        data: BillingAccounts.Type[];
+        data?: BillingAccounts.Type[];
       }
       
       if (data.success && data.data) {
@@ -160,6 +160,40 @@ const handleAddTreliAccount = async ({username, password}: HandleAddTreliProps) 
   }
 };
 
+const handleDeleteTreliAccount = async () => {
+  if (!existingAccount) return;
+  
+  setLoadingDelete(true);
+  try {
+    const res = await fetch(`/api/v1/billing/accounts/${existingAccount.id}?accountId=${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      toast.error(data.error.message);
+      setError(data.error.message);
+      throw new Error(data.error.message);
+    }
+
+    if (data.success) {
+      toast.success(t('treli.deleteSuccess'));
+      setExistingAccount(null);
+      form.reset();
+      setOpen(false);
+    }
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    toast.error(t('treli.deleteError'));
+  } finally {
+    setLoadingDelete(false);
+  }
+};
+
 return (
   <AlertDialog open={open} onOpenChange={setOpen}>
     <AlertDialogTrigger asChild onClick={() => setOpen(true)}>
@@ -231,13 +265,24 @@ return (
                 )}
               />
               <div className="flex items-center justify-end gap-2">
+              {existingAccount && (
+              <ThemedButton 
+                variant="danger" 
+                type="button"
+                className="bg-red-500 hover:bg-red-600 text-white"
+                disabled={loadingDelete}
+                onClick={handleDeleteTreliAccount}
+              >
+                {loadingDelete ? <Spinner className="w-4 h-4" /> : t('treli.delete')}
+              </ThemedButton>
+                )}
                 <AlertDialogCancel onClick={() => {form.reset(); setError('')}}>
                   {t('treli.cancel')}
                 </AlertDialogCancel>
-                <Button type="submit">
+                <ThemedButton type="submit">
                   {loading ? <Spinner className="w-4 h-4" /> : 
                     existingAccount ? t('treli.update') : t('treli.continue')}
-                </Button>
+                </ThemedButton>
               </div>
               {error && <p className="text-red-500">{error}</p>}
             </form>

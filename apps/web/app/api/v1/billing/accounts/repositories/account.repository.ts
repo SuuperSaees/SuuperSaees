@@ -38,7 +38,8 @@ export class BillingAccountRepository implements IAccountRepository {
     const { data, error } = await this.client
       .from('billing_accounts')
       .select('*')
-      .eq('account_id', accountId);
+      .eq('account_id', accountId)
+      .is('deleted_on', null);
 
     if (error) {
       throw new Error(
@@ -95,6 +96,17 @@ export class BillingAccountRepository implements IAccountRepository {
     const { error } = await this.client
       .from('billing_accounts')
       .update({ deleted_on: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Error deleting billing account: ${error.message}`);
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    const { error } = await this.client
+      .from('billing_accounts')
+      .delete()
       .eq('id', id);
 
     if (error) {
