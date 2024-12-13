@@ -228,6 +228,8 @@ const BillingForm: React.FC<{
         baseUrl
       });
 
+      console.log(data, success, error, accountAlreadyExists);
+
       if (!success) {
         if(error === 'User already registered'){
           toast.error(
