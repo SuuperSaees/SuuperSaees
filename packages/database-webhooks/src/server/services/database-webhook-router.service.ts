@@ -98,7 +98,6 @@ class DatabaseWebhookRouterService {
       '@kit/billing-gateway'
     );
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''; // if this baseUrl fail, use getDomainByUserId function
-    logger.info(body.record, 'Handling billing accounts webhook');
     const service = createBillingWebhooksService(this.adminClient, baseUrl);
     logger.info(body, 'Handling billing accounts webhook');
     return service.handleBillingAccountCreatedWebhook(body.record);
