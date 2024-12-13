@@ -14,6 +14,7 @@ import PreviewPDF from './file-types/preview-pdf';
 import PreviewVideo from './file-types/preview-video';
 import { SkeletonBox } from '~/components/ui/skeleton';
 import ImageWithOptions from '../hoc/with-image-options';
+import { FileActionButtons } from '~/components/organization/files/file-action-buttons';
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -32,14 +33,35 @@ const getFilePreviewComponent = (file: ServerFile.Type) => {
     return <ImageWithOptions src={url} alt={name} bucketName="orders" />;
   }
   if (type.startsWith('video/')) {
-    return <PreviewVideo url={url} />;
+    return (
+      <div className="group relative">
+        <PreviewVideo url={url} />
+        <FileActionButtons url={url}>
+          <PreviewVideo url={url} />
+        </FileActionButtons>
+      </div>
+    );
   }
   if (type === 'application/pdf') {
-    return <PreviewPDF url={url} />;
+    return (
+      <div className="group relative">
+        <PreviewPDF url={url} />
+        <FileActionButtons url={url}>
+          <PreviewPDF url={url} />
+        </FileActionButtons>
+      </div>
+    );
   }
   return (
-    <div className="flex h-[137px] w-[192px] items-center justify-center rounded-lg bg-gray-200">
-      No preview
+    <div className="group relative">
+      <div className="flex h-[137px] w-[192px] items-center justify-center rounded-lg bg-gray-200">
+        No preview
+      </div>
+      <FileActionButtons url={url}>
+        <div className="flex h-[137px] w-[192px] items-center justify-center rounded-lg bg-gray-200">
+          No preview
+        </div>
+      </FileActionButtons>
     </div>
   );
 };
