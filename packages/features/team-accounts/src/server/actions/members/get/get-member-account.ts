@@ -213,7 +213,7 @@ export async function getUserRoleById(userId: string, adminActivated = false) {
 
     return userAccountData?.account_role;
   } catch (error) {
-    console.error('Error fetching user role:', error);
+    console.error('Error fetching user role by id:', error);
     throw error;
   }
 }
