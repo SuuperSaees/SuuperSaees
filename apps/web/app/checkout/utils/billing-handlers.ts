@@ -138,6 +138,7 @@ export const handleRecurringPayment = async ({
 
     const subscriptionPlan = {
       email: values.email,
+      currency: service.currency,
       billing_address: {
         first_name: values.fullName.split(' ')[0],
         last_name: values.fullName.split(' ').slice(1).join(' '),
@@ -167,7 +168,6 @@ export const handleRecurringPayment = async ({
         },
       ],
       payment: {
-        currency: 'COP', // Or get from service configuration
         coupon_code: coupon || undefined,
         payment_collection: 'false',
         payment_invoicing: 'create',
@@ -236,7 +236,7 @@ export const handleOneTimePayment = async ({
       body: JSON.stringify({
         amount: convertToSubcurrency(service.price ?? 0),
         email: values.email,
-        currency: 'usd',
+        currency: service.currency,
         accountId: stripeId,
         paymentMethodId,
         couponId: coupon,
@@ -296,6 +296,7 @@ export const handleOneTimePayment = async ({
 
     const subscriptionPlan = {
       email: values.email,
+      currency: service.currency,
       billing_address: {
         first_name: values.fullName.split(' ')[0],
         last_name: values.fullName.split(' ').slice(1).join(' '),
@@ -322,7 +323,6 @@ export const handleOneTimePayment = async ({
         },
       ],
       payment: {
-        currency: 'COP', // Or get from service configuration
         coupon_code: coupon || undefined,
         payment_collection: 'false',
         payment_invoicing: 'create',
