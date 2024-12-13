@@ -1,10 +1,15 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Database } from '~/lib/database.types';
 
+
+
 import { BillingAccountBuilder } from '../builders/account.builder';
 import { CreateAccountDTO, UpdateAccountDTO } from '../dtos/account.dto';
+
 
 export interface IAccountRepository {
   create(data: CreateAccountDTO): Promise<BillingAccounts.Type>;
@@ -63,7 +68,10 @@ export class BillingAccountRepository implements IAccountRepository {
       const accountToUpdate = BillingAccountBuilder.fromDTO(data);
       const { data: updatedData, error } = await this.client
         .from('billing_accounts')
-        .update(accountToUpdate)
+        .update({
+          ...accountToUpdate,
+          deleted_on: null,
+        })
         .eq('id', existingAccount.id)
         .select()
         .single();
