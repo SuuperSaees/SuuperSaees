@@ -8,6 +8,6 @@ export async function POST(req: NextRequest) {
   return accountController.create(req);
 }
 
-export async function LIST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   return accountController.list(req);
 }
