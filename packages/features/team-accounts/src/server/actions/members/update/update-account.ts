@@ -14,6 +14,7 @@ import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings
 import { revalidatePath } from 'next/cache';
 import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
 import { updateClient } from '../../clients/update/update-client';
+import { formatToTimestamptz } from '../../../../../../../../apps/web/app/utils/format-to-timestamptz';
 
 export const updateUserAccount = async (
   userData: Account.Update,
@@ -328,3 +329,21 @@ export const generateMagicLinkRecoveryPassword = async (
     throw error;
   }
 };
+
+export const partialDeleteUserAccount = async(
+  userId: Account.Type['id'],
+) => {
+  const client = getSupabaseServerComponentClient();
+  const { error: errorUpdateUserAccount } =
+    await client
+      .from('accounts')
+      .update({deleted_on: formatToTimestamptz(new Date())})
+      .eq('id', userId);
+  
+  revalidatePath('/team');
+
+  if (errorUpdateUserAccount)
+    throw new Error(
+      `Error updating the user account: ${errorUpdateUserAccount.message}`,
+    );
+}
