@@ -195,7 +195,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
       }}
     >
       <DialogTrigger>{triggerComponent}</DialogTrigger>
-      <DialogContent className="max-h-[90vh] max-w-[90vw] p-8">
+      <DialogContent className="p-8 h-[90vh] w-[90vw]">
         <div
           className="relative flex aspect-auto max-h-[calc(90vh-10rem)] w-full items-center justify-center overflow-hidden"
           ref={containerRef}
