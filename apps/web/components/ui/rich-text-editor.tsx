@@ -1,6 +1,5 @@
 'use client';
 
-// import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Heading from '@tiptap/extension-heading';
@@ -17,7 +16,7 @@ import {
 } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { SendHorizontalIcon, Upload, Video } from 'lucide-react';
+import { SendHorizontalIcon, Upload } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 import { Spinner } from '@kit/ui/spinner';
@@ -28,6 +27,8 @@ import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import FileUploader from './files-input-chat';
 import styles from './styles.module.css';
 import LoomRecordButton from '~/orders/[id]/components/loom-record-button';
+import { useTranslation } from 'react-i18next';
+import { ThemedDragDrop } from 'node_modules/@kit/accounts/src/components/ui/drag-and-drop-themed-with-settings';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -49,7 +50,6 @@ const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
 
     const originalImage = wrapperRef.current.querySelector('img');
 
-    // If the image is already cloned, do nothing
     if (originalImage && originalImage.dataset.cloned === 'true') {
       return;
     }
@@ -62,7 +62,7 @@ const GroupedImageNodeView = ({ node, editor }: GroupedImageNodeViewProps) => {
     clonedImage.classList.add('cloned-img');
 
     // Assign a unique ID to the cloned image
-    const imageId = `img-${Math.random().toString(36).substring(2, 9)}`;
+    const imageId = `img-${crypto.randomUUID()}`;
     clonedImage.id = imageId;
 
     // Create a wrapper div to hold the image and delete button
@@ -143,6 +143,8 @@ interface RichTextEditorProps {
   isEditable?: boolean;
   className?: string;
   handleFileIdsChange?: (fileIds: string[]) => void;
+  isDragging?: boolean;
+  setIsDragging?: (value: boolean) => void;
   [key: string]: unknown;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
@@ -165,9 +167,12 @@ const RichTextEditor = ({
   isEditable = true,
   handleFileIdsChange,
   className,
+  isDragging,
+  setIsDragging,
   ...rest
   // useInForm = false,
 }: RichTextEditorProps) => {
+  const { t } = useTranslation('orders');
   const insertedImages = useRef(new Set<string>());
   const [fileIdsList, setFileIdsList] = useState<string[]>([]);
   const [messageSended, setMessageSended] = useState(false);
@@ -409,23 +414,62 @@ const RichTextEditor = ({
     editor?.commands.setContent(text);
   };
 
+  // Add new drag and drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0 && fileUploaderRef.current) {
+      const dataTransfer = new DataTransfer();
+      files.forEach(file => dataTransfer.items.add(file));
+      fileUploaderRef.current.files = dataTransfer.files;
+      const event = new Event('change', { bubbles: true });
+      fileUploaderRef.current.dispatchEvent(event);
+    }
+  };
+
   return (
     <div
       className={
-        'relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl border p-4 bg-gray-50' +
-        (className ?? '')
+        'relative grid h-fit w-full grid-rows-[1fr_auto] gap-1 rounded-2xl p-4 bg-gray-50 border border-gray-200' +
+        (className ?? '') 
       }
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
       {...rest}
     >
       <div className="relative">
         {isLoading && (
           <div className="absolute inset-0 z-50 bg-white/50 dark:bg-gray-900/50" />
         )}
+        
+        {isDragging && (
+          <div className="absolute inset-0 z-50 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-center p-4">
+            <ThemedDragDrop
+              title={t('dragAndDropDictionary.dropHere')}
+              description={t('dragAndDropDictionary.dropHereDescription')}
+            />
+          </div>
+        )}
+        
         <div
           onClick={() => !isLoading && editor?.commands.focus()}
-          className={`${
-            styles['scrollbar-thin']
-          } relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400 ${
+          className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400 ${
             isLoading ? 'pointer-events-none opacity-50' : ''
           }`}
         >
@@ -439,51 +483,52 @@ const RichTextEditor = ({
             className={`${styles['scrollbar-thin']} flex h-full max-h-60 w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
           />
         </div>
-          <div className="flex flex-col">
-            <FileUploader
-              ref={fileUploaderRef}
-              onFileSelect={handleFileIdsChange}
-              onFileIdsChange={handleFileIdsChangeToSentMessage}
-              onMessageSend={messageSended}
-              onFileUploadStatusUpdate={updateFileUploadStatus}
-              thereAreFilesUploaded={setThereAreFilesUploaded}
-              disabled={isLoading}
-            />
-            <div className='flex justify-between'>
-              {showToolbar && (
-                <Toolbar
-                  editor={editor}
-                  toggleExternalUpload={toggleExternalUpload}
-                  uploadFileIsExternal={uploadFileIsExternal}
-                  userRole={userRole}
-                  onChange={onChange}
-                  handleUploadClick={handleUploadClick}
-                  disabled={isLoading}
-                  setCustomEditorText={setCustomEditorText}
-                />
-              )}
-              {!hideSubmitButton && (
-                <ThemedButton
-                  className="mt-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))] bg-[#155EEF] p-[var(--spacing-lg,12px)] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
-                  onClick={sendContent}
-                  disabled={
-                    isLoading ||
-                    (!areAllFilesUploaded() && thereAreFilesUploaded) ||
-                    (editor?.getHTML().trim() !== '<p></p>' &&
-                      !areAllFilesUploaded() &&
-                      thereAreFilesUploaded) ||
-                    isSending
-                  }
-                >
-                  {isSending ? (
-                    <Spinner className="h-5 w-5" />
-                  ) : (
-                    <SendHorizontalIcon className="h-[20px] w-[20px] flex-shrink-0 -rotate-45" />
-                  )}
-                </ThemedButton>
-              )}
-            </div>
+        
+        <div className="flex flex-col">
+          <FileUploader
+            ref={fileUploaderRef}
+            onFileSelect={handleFileIdsChange}
+            onFileIdsChange={handleFileIdsChangeToSentMessage}
+            onMessageSend={messageSended}
+            onFileUploadStatusUpdate={updateFileUploadStatus}
+            thereAreFilesUploaded={setThereAreFilesUploaded}
+            disabled={isLoading}
+          />
+          <div className='flex justify-between'>
+            {showToolbar && (
+              <Toolbar
+                editor={editor}
+                toggleExternalUpload={toggleExternalUpload}
+                uploadFileIsExternal={uploadFileIsExternal}
+                userRole={userRole}
+                onChange={onChange}
+                handleUploadClick={handleUploadClick}
+                disabled={isLoading}
+                setCustomEditorText={setCustomEditorText}
+              />
+            )}
+            {!hideSubmitButton && (
+              <ThemedButton
+                className="mt-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))] bg-[#155EEF] p-[var(--spacing-lg,12px)] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
+                onClick={sendContent}
+                disabled={
+                  isLoading ||
+                  (!areAllFilesUploaded() && thereAreFilesUploaded) ||
+                  (editor?.getHTML().trim() !== '<p></p>' &&
+                    !areAllFilesUploaded() &&
+                    thereAreFilesUploaded) ||
+                  isSending
+                }
+              >
+                {isSending ? (
+                  <Spinner className="h-5 w-5" />
+                ) : (
+                  <SendHorizontalIcon className="h-[20px] w-[20px] flex-shrink-0 -rotate-45" />
+                )}
+              </ThemedButton>
+            )}
           </div>
+        </div>
       </div>
     </div>
   );

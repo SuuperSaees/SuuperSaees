@@ -158,6 +158,10 @@
     "messageDeleted": "Mensaje eliminado",
     "messageDeletedSuccess": "El mensaje ha sido eliminado.",
     "messageDeletedError": "El mensaje no se pudo eliminar."
+  },
+  "dragAndDropDictionary": {
+    "dropHere": "Suelta aquí para subir archivos",
+    "dropHereDescription": "SVG, PNG, JPG o GIF (max. 800x400px)"
   }
 }
 
