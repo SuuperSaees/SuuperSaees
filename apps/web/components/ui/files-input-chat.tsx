@@ -109,7 +109,6 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
                             <Spinner className='w-5 h-5 text-white'/>
                             <p className='text-white text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
                           </div>
-                          {/* <Spinner className='w-5 h-5 text-white'/> */}
                         </div>
                       )}
                     </div>
@@ -125,7 +124,6 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
                         disableRemotePlayback
                         controlsList="nodownload noplaybackrate"
                         onLoadedMetadata={(e) => {
-                          // Establecer el tiempo en 0 para mostrar el primer frame
                           e.currentTarget.currentTime = 0;
                         }}
                         style={{ pointerEvents: 'none' }}
