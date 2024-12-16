@@ -24,6 +24,11 @@ import AvatarDisplayer from '../../../components/ui/avatar-displayer';
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
 import { EntityData } from '../types';
 
+const truncateText = (text: string, maxLength: number = 40) => {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + '...';
+};
+
 export const ordersColumns = (
   t: TFunction,
   hasPermission?: (row?: EntityData['orders'][number]) => boolean,
@@ -40,10 +45,10 @@ export const ordersColumns = (
             href={`/orders/${row.original.id}`}
             className='flex w-full min-w-[100px] gap-2'
           >
-            <div className="flex flex-col w-full">
-              <span className="font-semibold">{row.original.title}</span>
-              <span className="text-sm text-gray-600">
-                {row.original?.brief?.name}
+            <div className="flex flex-col w-fit ">
+              <span className="font-semibold line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">{truncateText(row.original.title)}</span>
+              <span className="text-sm text-gray-600 line-clamp-1  line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">
+                {truncateText(row.original?.brief?.name)}
               </span>
             </div>
           </Link>
@@ -72,9 +77,9 @@ export const ordersColumns = (
             // href={link}
             className="flex flex-col"
           >
-            <span className="font-semibold">{row.original.customer?.name}</span>
-            <span className="text-sm text-gray-600">
-              {row.original.client_organization?.name}
+            <span className="font-semibold  line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">{truncateText(row.original.customer?.name)}</span>
+            <span className="text-sm text-gray-600  line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">
+              {truncateText(row.original.client_organization?.name)}
             </span>
           </span>
         );
@@ -111,7 +116,7 @@ export const ordersColumns = (
       header: t('orders.createdAt'),
       cell: ({ row }) => {
         return (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 line-clamp-1 text-nowrap">
             {formatDate(row.original?.created_at, 'PP')}
           </span>
         );
@@ -122,7 +127,7 @@ export const ordersColumns = (
       header: t('orders.updatedAt'),
       cell: ({ row }) => {
         return (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 line-clamp-1 text-nowrap">
             {row.original?.updated_at &&
               formatDate(row.original?.updated_at, 'PP')}
           </span>
@@ -223,7 +228,7 @@ const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], bl
   }: {
     option: Option & { picture_url?: string | null };
   }) => (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-1">
       <AvatarDisplayer
         className="font-normal"
         pictureUrl={option?.picture_url ?? ''}
