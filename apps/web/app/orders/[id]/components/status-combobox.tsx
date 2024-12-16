@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   SortableContext,
@@ -265,8 +265,16 @@ function StatusCombobox({
   const handleDeleteStatus = (statusId: number) => {
     deleteStatus.mutate(statusId);
   };
+  
   const defaultStatuses = new Set(['pending', 'completed', 'in_review', 'annulled', 'anulled', 'in_progress']);
 
+  useEffect(() => {
+    if (mode === 'order') { 
+      setCurrentStatusData(statuses.find(status => status.id === order?.status_id));
+    } else {
+      setCurrentStatusData(statuses.find(status => status.id === subtask?.state_id));
+    }
+  }, [mode, order?.status_id, subtask?.state_id, statuses])
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger

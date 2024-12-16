@@ -39,7 +39,7 @@ interface AsideOrderInformationProps {
   agencyStatuses: AgencyStatus.Type[];
 }
 const AsideOrderInformation = ({
-  order,
+  // order,
   className,
   agencyStatuses,
   ...rest
@@ -49,8 +49,7 @@ const AsideOrderInformation = ({
   // const [selectedPriority, setSelectedPriority] = useState(order.priority);
   const language = i18n.language;
   const router = useRouter();
-  const { userRole } = useActivityContext();
-
+  const { userRole, order } = useActivityContext();
   // const changeStatus = useMutation({
   //   mutationFn: async (status: Order.Type['status']) => {
   //     setSelectedStatus(status);

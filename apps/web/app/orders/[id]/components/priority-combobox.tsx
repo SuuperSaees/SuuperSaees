@@ -51,6 +51,7 @@ export function PriorityCombobox({
   const [priorityValue, setPriorityValue] = useState(
     mode == 'order' ? order?.priority : subtask?.priority,
   );
+
   const priorities = ['low', 'medium', 'high'];
   const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
   const router = useRouter();
@@ -96,6 +97,14 @@ export function PriorityCombobox({
       });
     },
   });
+
+  React.useEffect(() => {
+    if (mode === 'order') {
+      setPriorityValue(order?.priority);
+    } else {
+      setPriorityValue(subtask?.priority);
+    }
+  }, [order, subtask, mode]);   
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
