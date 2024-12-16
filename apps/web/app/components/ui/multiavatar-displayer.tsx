@@ -58,7 +58,7 @@ export default function MultiAvatarDisplayer({
       { (customItemTrigger && !blocked) ? (
         <div
           className="relative flex items-center justify-center"
-          style={{ marginLeft: `${overlap / 2}px`, zIndex: 1 }}
+          style={{ marginLeft: `2px`, zIndex: 1 }}
         >
           {customItemTrigger}
         </div>
