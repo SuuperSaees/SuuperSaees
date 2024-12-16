@@ -115,7 +115,7 @@ const Interactions = () => {
         behavior: 'smooth',
       });
     }
-  }, [sortedInteractions]);
+  }, []);
 
   return (
     <div
