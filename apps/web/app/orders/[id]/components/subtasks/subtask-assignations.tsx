@@ -54,7 +54,7 @@ const SubtaskAssignations = ({
 }: SubtaskAssignationProps) => {
   const { t } = useTranslation('orders');
 
-  const allowedRoles = ['agency_owner', 'agency_member', 'agency_project_manager'];
+  const allowedRoles = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
 
   const { data: assignedTo, isLoading } = useQuery({
     queryKey: ['subtask_assignations', subtaskId],
@@ -123,7 +123,7 @@ const SubtaskAssignations = ({
               );
             })}
             {
-              allowedRoles.includes(userRole) && (
+              allowedRoles.has(userRole) && (
                 <CheckboxCombobox
                   options={searchUserOptions ?? []}
                   onSubmit={handleFormSubmit}
