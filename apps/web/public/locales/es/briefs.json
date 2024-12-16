@@ -10,6 +10,7 @@
     "briefName": "Nombre",
     "deleteBrief": "Eliminar brief",
     "deleteDescription": "¿Estás seguro de que deseas eliminar este brief?",
+    "duplicateBrief": "Duplicar brief",
     "delete": "Eliminar",
     "cancel": "Cancelar",
     "updateBrief": "Actualizar brief",
