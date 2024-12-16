@@ -13,52 +13,45 @@ import {
   getStripeAccountID,
 } from '../../members/get/get-member-account';
 import { hasPermissionToDeleteClientService } from '../../permissions/services';
-import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+// import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { CustomError, CustomResponse, ErrorServiceOperations } from '../../../../../../../shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
-export const deleteService = async (priceId: string) => {
+export const deleteService = async (serviceId: number) => {
   try {
-    const { userId, stripeId } = await getStripeAccountID();
-    if (!stripeId) throw new CustomError(
-      HttpStatus.Error.InternalServerError,
-      `No stripe account found`,
-      ErrorServiceOperations.FAILED_TO_FIND_STRIPE_ACCOUNT,
-    );
+    const { userId } = await getStripeAccountID();
     if (!userId) throw new Error('No user found');
 
     // API call to disable product and price in Stripe
-    const {domain: baseUrl} = await getDomainByUserId(userId, true);
-    const response = await fetch(`${baseUrl}/api/stripe/delete-service?priceId=${encodeURIComponent(priceId)}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        priceId: priceId,
-        accountId: stripeId,
-      }),
-    });
+    // const {domain: baseUrl} = await getDomainByUserId(userId, true);
+    // const response = await fetch(`${baseUrl}/api/stripe/delete-service?priceId=${encodeURIComponent(priceId)}`, {
+    //   method: 'DELETE',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     priceId: priceId,
+    //     accountId: stripeId,
+    //   }),
+    // });
 
-    if (!response.ok) {
-      const errorData = await response.clone().json();
-      throw new CustomError(
-        HttpStatus.Error.InternalServerError,
-        `Error deleting price and product in Stripe: ${errorData.error?.message}`,
-        ErrorServiceOperations.FAILED_TO_DELETE_SERVICE_FROM_STRIPE,
-      );
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.clone().json();
+    //   throw new CustomError(
+    //     HttpStatus.Error.InternalServerError,
+    //     `Error deleting price and product in Stripe: ${errorData.error?.message}`,
+    //     ErrorServiceOperations.FAILED_TO_DELETE_SERVICE_FROM_STRIPE,
+    //   );
+    // }
 
     const client = getSupabaseServerComponentClient();
 
     // Delete the service from the database
-    const { data: deletedService, error: deleteServiceError } = await client
+    const { error: deleteServiceError } = await client
       .from('services')
       .update({ deleted_on: new Date().toISOString(), status: 'inactive' })
-      .eq('price_id', priceId)
-      .select('id')
-      .single();
+      .eq('id', serviceId)
 
       if (deleteServiceError) {
         throw new CustomError(
@@ -72,7 +65,7 @@ export const deleteService = async (priceId: string) => {
     const { error: unlinkBriefsError } = await client
       .from('service_briefs')
       .delete()
-      .eq('service_id', deletedService.id ?? '');
+      .eq('service_id', serviceId);
 
       if (unlinkBriefsError) {
         throw new CustomError(

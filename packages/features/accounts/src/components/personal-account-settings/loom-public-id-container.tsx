@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { get, set } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -84,7 +83,7 @@ function LoomPublicIdContainer({
         <Spinner className="h-5" />
       ) : (
         <div className='w-full'>
-          <CopyDomain value={domain} className='mb-3' />
+          <CopyDomain value={domain} className='mb-3' label={t('loomAppIdTitle')} />
           <ThemedInput
             data-test={'account-display-name'}
             minLength={2}

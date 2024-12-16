@@ -1,14 +1,21 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { Logger as LoggerInstance, createLogger } from '@kit/shared/logger';
+
+
 
 import { ApiError } from '~/lib/api/api-error';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Database } from '~/lib/database.types';
 
+
+
 import { CreateAccountDTO, UpdateAccountDTO } from '../dtos/account.dto';
 import { BillingAccountRepository } from '../repositories/account.repository';
 import { IAccountRepository } from '../repositories/account.repository';
+
 
 export class AccountService {
   constructor(
@@ -24,7 +31,7 @@ export class AccountService {
       if (data.provider !== BillingAccounts.BillingProviderKeys.TRELI) {
         throw ApiError.badRequest('Only Treli provider is supported');
       }
-
+      
       const account = await this.accountRepository.create(data);
       this.logger.info(
         { username: data.username },

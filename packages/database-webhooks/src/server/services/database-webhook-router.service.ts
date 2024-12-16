@@ -1,8 +1,14 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
+import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
 
+
+
 import { RecordChange, Tables } from '../record-change.type';
+
 
 export function createDatabaseWebhookRouterService(
   adminClient: SupabaseClient<Database>,
@@ -30,6 +36,18 @@ class DatabaseWebhookRouterService {
         return this.handleInvitationsWebhook(payload);
       }
 
+      case 'services': {
+        const payload = body as RecordChange<typeof body.table>;
+
+        return this.handleServicesWebhook(payload);
+      }
+
+      case 'billing_accounts': {
+        const payload = body as RecordChange<typeof body.table>;
+
+        return this.handleBillingAccountsWebhook(payload);
+      }
+
       // case 'subscriptions': {
       //   const payload = body as RecordChange<typeof body.table>;
 
@@ -48,6 +66,43 @@ class DatabaseWebhookRouterService {
     }
   }
 
+  private async handleServicesWebhook(body: RecordChange<'services'>) {
+    const logger = await getLogger();
+    const { createBillingWebhooksService } = await import(
+      '@kit/billing-gateway'
+    );
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''; // if this baseUrl fail, use getDomainByUserId function
+
+    if (body.type === 'INSERT' && body.record) {
+      const service = createBillingWebhooksService(this.adminClient, baseUrl);
+      logger.info(body, 'Handling services webhook');
+      return service.handleServiceCreatedWebhook(body.record);
+    }
+
+    if (body.type === 'UPDATE' && body.record) {
+      const service = createBillingWebhooksService(this.adminClient, baseUrl);
+      logger.info(body, 'Handling services webhook');
+      return service.handleServiceUpdatedWebhook(body.record);
+    }
+
+    if (body.type === 'DELETE' && body.old_record) {
+      logger.info(body, 'This logic should be implemented');
+    }
+  }
+
+  private async handleBillingAccountsWebhook(
+    body: RecordChange<'billing_accounts'>,
+  ) {
+    const logger = await getLogger();
+    const { createBillingWebhooksService } = await import(
+      '@kit/billing-gateway'
+    );
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''; // if this baseUrl fail, use getDomainByUserId function
+    const service = createBillingWebhooksService(this.adminClient, baseUrl);
+    logger.info(body, 'Handling billing accounts webhook');
+    return service.handleBillingAccountCreatedWebhook(body.record);
+  }
+
   private async handleInvitationsWebhook(body: RecordChange<'invitations'>) {
     const { createAccountInvitationsWebhookService } = await import(
       '@kit/team-accounts/webhooks'
@@ -58,19 +113,19 @@ class DatabaseWebhookRouterService {
     return service.handleInvitationWebhook(body.record);
   }
 
-  private async handleSubscriptionsWebhook(
-    body: RecordChange<'subscriptions'>,
-  ) {
-    if (body.type === 'DELETE' && body.old_record) {
-      const { createBillingWebhooksService } = await import(
-        '@kit/billing-gateway'
-      );
+  // private async handleSubscriptionsWebhook(
+  //   body: RecordChange<'subscriptions'>,
+  // ) {
+  //   if (body.type === 'DELETE' && body.old_record) {
+  //     const { createBillingWebhooksService } = await import(
+  //       '@kit/billing-gateway'
+  //     );
 
-      const service = createBillingWebhooksService();
+  //     const service = createBillingWebhooksService();
 
-      return service.handleSubscriptionDeletedWebhook(body.old_record);
-    }
-  }
+  //     return service.handleSubscriptionDeletedWebhook(body.old_record);
+  //   }
+  // }
 
   private async handleAccountsWebhook(body: RecordChange<'accounts'>) {
     if (body.type === 'DELETE' && body.old_record) {
@@ -86,4 +141,4 @@ class DatabaseWebhookRouterService {
 }
 
 
-// Here manage the cancel subscription and update subscription of upgrade 
+// Here manage the cancel subscription and update subscription of upgrade

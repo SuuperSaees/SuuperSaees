@@ -10,10 +10,12 @@ import { toast } from 'sonner';
 
 
 
+import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Database } from '~/lib/database.types';
 import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import { getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 // import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
@@ -90,16 +92,15 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     },
   });
 
-  const handleCheckout = (
-    priceId: string,
-    stripeId: string,
-    service: Service.Type,
-    organizationId: string,
+  const handleCheckout = async (
+    service: Service.Relationships.Billing.BillingService,
+    paymentMethods: BillingAccounts.PaymentMethod[],
   ) => {
-    if (!priceId || !stripeId || !service || !organizationId) {
+    const { stripeId } = await getStripeAccountID();
+    const organizationData = await getOrganization();
+    const organizationId = organizationData.id;
+    if (!service.billing_services || !service || !organizationId) {
       console.error('Missing required parameters:', {
-        hasPriceId: !!priceId,
-        hasStripeId: !!stripeId,
         hasService: !!service,
         hasOrgId: !!organizationId,
       });
@@ -108,9 +109,13 @@ export function useStripeActions({ userRole }: UseStripeActions) {
 
     createCheckoutMutation.mutate({
       stripeId,
-      priceId,
+      priceId:
+        service.billing_services.find(
+          (billingService) => billingService.provider === 'stripe',
+        )?.provider_id ?? '',
       service,
       organizationId,
+      paymentMethods,
     });
   };
 
