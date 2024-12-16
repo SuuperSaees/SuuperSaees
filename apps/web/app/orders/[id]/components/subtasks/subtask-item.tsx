@@ -130,18 +130,14 @@ const SubtaskItem = ({
       console.error('Error invalidating subtask timers:', error);
     });
   };
-  const canEditSubtask = (userRole: string, subtask: Subtask.Type) => {
+  const canEditSubtask = (userRole: string) => {
     if (['agency_owner', 'agency_member', 'agency_project_manager'].includes(userRole)) {
       return true;
     }
     
-    if (['client_member', 'client_owner'].includes(userRole)) {
-      return subtask.followers?.some(follower => follower.client_member_id === currentUserId);
-    }
-    
     return false;
   };
-  const isEditable = canEditSubtask(userRole, subtask);
+  const isEditable = canEditSubtask(userRole);
   
   return (
     <div

@@ -54,6 +54,8 @@ const SubtaskAssignations = ({
 }: SubtaskAssignationProps) => {
   const { t } = useTranslation('orders');
 
+  const allowedRoles = ['agency_owner', 'agency_member', 'agency_project_manager'];
+
   const { data: assignedTo, isLoading } = useQuery({
     queryKey: ['subtask_assignations', subtaskId],
     queryFn: () => getSubtaskAssigns(subtaskId),
@@ -120,13 +122,17 @@ const SubtaskAssignations = ({
                 />
               );
             })}
-            <CheckboxCombobox
-              options={searchUserOptions ?? []}
-              onSubmit={handleFormSubmit}
-              schema={membersAssignedSchema}
-              defaultValues={defaultValues}
-              customItem={CustomUserItem}
-            />
+            {
+              allowedRoles.includes(userRole) && (
+                <CheckboxCombobox
+                  options={searchUserOptions ?? []}
+                  onSubmit={handleFormSubmit}
+                  schema={membersAssignedSchema}
+                  defaultValues={defaultValues}
+                  customItem={CustomUserItem}
+                />
+              )
+            }
             </>
           )}
       </div>
