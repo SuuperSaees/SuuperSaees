@@ -50,7 +50,7 @@ export default function MultiAvatarDisplayer({
           className={`h-8 w-8 border-2 border-white ${avatarClassName}`}
           style={{
             marginLeft: index === 0 ? 0 : `${-overlap}px`,
-            zIndex: maxAvatars - index,
+            zIndex: maxAvatars + index,
           }}
         />
       ))}
