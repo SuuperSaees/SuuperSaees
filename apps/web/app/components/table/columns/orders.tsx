@@ -22,11 +22,11 @@ import {
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import AvatarDisplayer from '../../../components/ui/avatar-displayer';
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
-import { EntityData } from '../types';
+import { EntityData, ColumnConfigs } from '../types';
 
 export const ordersColumns = (
   t: TFunction,
-  hasPermission?: (row?: EntityData['orders'][number]) => boolean,
+  hasPermission?: ColumnConfigs['orders']['hasPermission'],
 ): ColumnDef<EntityData['orders'][number]>[] => {
   const withPermissionsActive = hasPermission && hasPermission;
   return [
@@ -89,7 +89,7 @@ export const ordersColumns = (
             order={row.original}
             agency_id={row.original.agency_id}
             mode="order"
-            blocked={withPermissionsActive && !hasPermission(row.original)}
+            blocked={withPermissionsActive && !hasPermission()}
           />
         );
       },
@@ -98,13 +98,13 @@ export const ordersColumns = (
       accessorKey: 'priority',
       header: t('orders.priority'),
       cell: ({ row }) => {
-        return <PriorityCombobox mode="order" order={row.original} blocked={withPermissionsActive && !hasPermission(row.original)} />;
+        return <PriorityCombobox mode="order" order={row.original} blocked={withPermissionsActive && !hasPermission()} />;
       },
     },
     {
       accessorKey: 'assigned_to',
       header: t('orders.assignedTo'),
-      cell: ({ row }) => <RowAssignedTo row={row.original} blocked={(withPermissionsActive && !hasPermission(row.original) )?? false} />,
+      cell: ({ row }) => <RowAssignedTo row={row.original} blocked={(withPermissionsActive && !hasPermission() )?? false} />,
     },
     {
       accessorKey: 'created_at',
@@ -153,7 +153,7 @@ export const ordersColumns = (
             }
             defaultDate={row?.original?.due_date}
             showIcon
-            blocked={withPermissionsActive && !hasPermission(row.original)}
+            blocked={withPermissionsActive && !hasPermission()}
           />
         );
       },
