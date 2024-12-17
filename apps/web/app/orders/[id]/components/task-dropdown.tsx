@@ -297,17 +297,25 @@ function TaskDropdown({
 
   if (!loading && tasks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center">
+      <>
+      {isEditable ? (
+        <div className="flex flex-col items-center justify-center">
         <p className="text-gray-500">{t('tasks.emptyTasks')}</p>
-        <Button
-          variant="secondary"
-          className="mt-4 py-0 text-gray-600"
-          onClick={handleAddTask}
-        >
-          <Plus className="mr-1 h-4 w-4" />
-          <p className="text-sm">{t('tasks.addTask')}</p>
-        </Button>
-      </div>
+          <Button
+            variant="secondary"
+            className="mt-4 py-0 text-gray-600"
+            onClick={handleAddTask}
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            <p className="text-sm">{t('tasks.addTask')}</p>
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center">
+          <p className="text-gray-500">{t('tasks.emptyTasks')}</p>
+        </div>
+      )}
+      </>
     );
   }
 
