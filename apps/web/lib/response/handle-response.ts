@@ -60,9 +60,19 @@ function handleNotification(
       ? t(`${type}.default`)
       : t(`${type}.${entity}.${operationName}`);
   // const statusText = result.statusText;
-
+  
   // Display notification using the appropriate toast method (error or success)
-  toast[type](type === 'error' ? t('common:error') : t('common:success'), { description });
+  // For fields update in briefs, only show error toasts
+  if (entity === 'briefs' && operationName === 'fieldsUpdated') {
+    if (type === 'error') {
+      toast.error(t('common:error'), { description });
+    }
+    return;
+  }
+
+  // For all other cases, show both error and success toasts
+  const title = type === 'error' ? t('common:error') : t('common:success');
+  toast[type](title, { description });
 }
 
 /**
