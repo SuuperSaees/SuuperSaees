@@ -9,6 +9,7 @@ import { useFileManagement } from './files/hooks/use-folder-manager';
 import { OptionFiles } from './files/option-files';
 import RadioOptions from './files/radio-options';
 import { SkeletonCardFile } from './skeleton-card-file';
+import EmptyState from '../ui/empty-state';
 
 interface FileSectionProps {
   clientOrganizationId: string;
@@ -154,9 +155,11 @@ const FileSection: React.FC<FileSectionProps> = ({
           <FileItem key={file.id} file={file} currentPath={path} />
         ))}
         {!hasContent && (
-          <div className="w-full h-[200px] text-center text-gray-500 flex justify-center items-center">
-            {t('organizations:files.emptyFolder')}
-          </div>
+          <EmptyState
+            title={t('organizations:files.emptyFolder')}
+            description={t('organizations:files.emptyFolderDescription')}
+            imageSrc="/images/illustrations/Illustration-files.svg"
+          />
         )}
       </div>
     );
@@ -181,9 +184,11 @@ const FileSection: React.FC<FileSectionProps> = ({
           <FileItem key={file.id} file={file} currentPath={path} />
         ))}
         {mainFiles.length === 0 && (
-          <div className="w-full h-[200px] text-center text-gray-500 flex justify-center items-center">
-            {t('organizations:files.noFiles')}
-          </div>
+          <EmptyState
+            title={t('organizations:files.noFiles')}
+            description={t('organizations:files.emptyFolderDescriptionInTeam')}
+            imageSrc="/images/illustrations/Illustration-files.svg"
+          />
         )}
       </div>
     );
@@ -198,10 +203,12 @@ const FileSection: React.FC<FileSectionProps> = ({
           onChange={handleOptionChange}
         />
         {selectedOption === 'all' && (
-          <OptionFiles
-            clientOrganizationId={clientOrganizationId}
-            currentPath={path ?? []}
-          />
+          <div className="flex-shrink-0">
+            <OptionFiles
+              clientOrganizationId={clientOrganizationId}
+              currentPath={path ?? []}
+            />
+          </div>
         )}
       </div>
 
