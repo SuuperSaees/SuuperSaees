@@ -24,7 +24,7 @@ import AvatarDisplayer from '../../../components/ui/avatar-displayer';
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
 import { EntityData } from '../types';
 
-const truncateText = (text: string, maxLength: number = 40) => {
+const truncateText = (text: string, maxLength: number = 50) => {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + '...';
 };
