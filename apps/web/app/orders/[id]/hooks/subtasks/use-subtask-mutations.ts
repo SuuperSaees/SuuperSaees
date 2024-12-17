@@ -38,7 +38,8 @@ export const useSubtaskMutations = (
     enabled:
       userRole === 'agency_owner' ||
       userRole === 'agency_member' ||
-      userRole === 'agency_project_manager',
+      userRole === 'agency_project_manager' ||
+      userRole === 'client_owner', 
   });
 
   // Mutations
