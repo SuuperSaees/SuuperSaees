@@ -2,10 +2,15 @@
 
 import { revalidatePath } from 'next/cache';
 
+
+
+import { SupabaseClient } from '@supabase/supabase-js';
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Activity } from '../../../../../../../../apps/web/lib/activity.types';
+import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Message } from '../../../../../../../../apps/web/lib/message.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { User } from '../../../../../../../../apps/web/lib/user.types';
@@ -33,38 +38,39 @@ const priorityTranslations = {
 export const updateOrder = async (
   orderId: Order.Type['id'],
   order: Order.Update,
+  userId?: string,
   userName?: string,
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { error: userError, data: userData } = await client.auth.getUser();
-    if (userError) throw userError.message;
+    // Execute all operations in parallel
+    const userData = userId ? await client.auth.getUser() : null;
+    userId = userId ?? userData?.data.user?.id ?? '';
+    userName = userName ?? userData?.data.user?.user_metadata?.name ?? '';
 
-    const { data: updatedData, error: orderError } = await client
-      .from('orders_v2')
-      .update({
-        ...order,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId)
-      .select()
-      .single();
+    const [orderUpdate] = await Promise.all([
+      client
+        .from('orders_v2')
+        .update({
+          ...order,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', orderId)
+        .select()
+        .single(),
+      logOrderActivities(orderId, order, userId, userName ?? '', client),
+    ]);
 
-    if (orderError) throw orderError.message;
-    // console.log('updatedOrder:', orderData);
+    if (orderUpdate.error) throw orderUpdate.error.message;
 
-    const userNameOrEmail = userName ??
-      (userData?.user.user_metadata?.name || userData?.user.user_metadata?.email);
+    // Start activity logging without waiting
 
-    // Call the abstracted activity logging function
-    await logOrderActivities(orderId, order, userData.user.id, userNameOrEmail);
-    return updatedData;
+    return orderUpdate.data;
   } catch (error) {
     console.error('Error updating order:', error);
     throw error;
   }
 };
-
 export const updateOrderAssigns = async (
   orderId: Order.Type['id'],
   agencyMemberIds: string[],
@@ -126,8 +132,9 @@ const handleFieldUpdate = async (
   value: string,
   orderId: Order.Type['id'],
   type: Activity.Enums.ActivityType,
+  client?: SupabaseClient<Database>,
 ) => {
-  const client = getSupabaseServerComponentClient();
+  client = client ?? getSupabaseServerComponentClient();
   const { data: userData, error: userError } = await client.auth.getUser();
   if (userError) throw userError.message;
 
@@ -152,7 +159,7 @@ const handleFieldUpdate = async (
 
   for (const email of emailsData) {
     if (email) {
-      await sendOrderStatusPriorityEmail(
+      sendOrderStatusPriorityEmail(
         email,
         `${actualName?.name ?? ''}`,
         `${type}`,
@@ -161,7 +168,9 @@ const handleFieldUpdate = async (
         field === 'status' ? `${translatedValue}` : `${translatedValue}`,
         agencyName,
         userData?.user.id ?? '',
-      );
+      ).catch((error) => {
+        console.error('Error sending email:', error);
+      });
     } else {
       console.warn('Email is null or undefined, skipping...');
     }
@@ -173,7 +182,9 @@ const logOrderActivities = async (
   order: Order.Update,
   userId: string,
   userNameOrEmail: string,
+  client?: SupabaseClient<Database>,
 ) => {
+  client = client ?? getSupabaseServerComponentClient();
   try {
     const logActivity = async (
       type: Activity.Enums.ActivityType,
@@ -193,44 +204,46 @@ const logOrderActivities = async (
           user_id: userId,
         };
         await addActivityAction(activity);
-        // console.log('addedActivity:', message, userNameOrEmail);
-
-        await handleFieldUpdate(field, value, orderId, type);
+        await handleFieldUpdate(field, value, orderId, type, client);
       }
     };
 
-    // Log activities for the updated fields
-    await logActivity(
-      Activity.Enums.ActivityType.STATUS,
-      'status',
-      order.status ?? '',
-    );
-    await logActivity(
-      Activity.Enums.ActivityType.PRIORITY,
-      'priority',
-      order.priority ?? '',
-    );
-    await logActivity(
-      Activity.Enums.ActivityType.DUE_DATE,
-      'due_date',
-      order.due_date ?? '',
-    );
-    await logActivity(
-      Activity.Enums.ActivityType.DESCRIPTION,
-      'description',
-      order.description ?? '',
-    );
-    await logActivity(
-      Activity.Enums.ActivityType.TITLE,
-      'title',
-      order.title ?? '',
-    );
+    // Create an array of promises for all activities
+    const activityPromises = [
+      logActivity(
+        Activity.Enums.ActivityType.STATUS,
+        'status',
+        order.status ?? '',
+      ),
+      logActivity(
+        Activity.Enums.ActivityType.PRIORITY,
+        'priority',
+        order.priority ?? '',
+      ),
+      logActivity(
+        Activity.Enums.ActivityType.DUE_DATE,
+        'due_date',
+        order.due_date ?? '',
+      ),
+      logActivity(
+        Activity.Enums.ActivityType.DESCRIPTION,
+        'description',
+        order.description ?? '',
+      ),
+      logActivity(
+        Activity.Enums.ActivityType.TITLE,
+        'title',
+        order.title ?? '',
+      ),
+    ];
+
+    // Execute all promises in parallel
+    await Promise.all(activityPromises);
   } catch (error) {
     console.error('Error logging order activities:', error);
     throw error;
   }
 };
-
 export const addOrderMessage = async (
   userId: User.Response['id'],
   orderId: Order.Type['id'],
@@ -314,7 +327,7 @@ export const updateOrderFollowers = async (
     // Extract existing IDs
     const existingIds =
       existingFollowers?.map(
-        (follower) => follower.client_member_id as string,
+        (follower: { client_member_id: string }) => follower.client_member_id,
       ) || [];
 
     // Determine IDs to add and remove

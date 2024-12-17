@@ -135,7 +135,7 @@ function StatusCombobox({
     if(changeTabFilteredOrders && activeTab) {
       changeTabFilteredOrders(activeTab);
     } 
-      await updateOrder(orderId, { status, status_id }, userWorkspace.name ?? undefined);
+      await updateOrder(orderId, { status, status_id }, userWorkspace.id ?? '', userWorkspace.name ?? '');
       return { status, status_id, orderId };
     },
     onMutate: ({ status_id, orderId, status }) => {
