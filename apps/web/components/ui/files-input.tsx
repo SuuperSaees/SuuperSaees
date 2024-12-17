@@ -62,8 +62,10 @@ export default function UploadFileComponent({
   const [dragMessage, setDragMessage] = useState(t('dragAndDrop'));
   const [hoveredFileId, setHoveredFileId] = useState<string | null>(null);
 
+  const inputId = `file-input-${uuid}`;
+
   const handleFileInputClick = () => {
-    const fileInput = document.getElementById('file-input');
+    const fileInput = document.getElementById(inputId);
     if (fileInput) {
       fileInput.click();
     }
@@ -153,7 +155,7 @@ export default function UploadFileComponent({
         <p className="text-sm text-gray-600">{dragMessage}</p>
         <input
           type="file"
-          id="file-input"
+          id={inputId}
           className="hidden"
           multiple
           onChange={handleFileChange}
