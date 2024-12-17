@@ -62,6 +62,12 @@ const UserFirstMessage = ({ interaction }) => {
       {interaction.fields.map((field) => (
         field.response && (
           <div key={field.id} className="flex w-full flex-col gap-2.5 rounded-lg">
+            {field.response !== "" && (
+              <span className="text-gray-900 text-4 font-semibold">
+                {field.field?.label}
+              </span>
+            )}
+            
             {field.field?.type === "file" ? (
               field.response !== "" && (
                 <div className="flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
@@ -76,17 +82,12 @@ const UserFirstMessage = ({ interaction }) => {
               )
             ) : (
               field.response !== "" && (
-                <>
-                  <span className="text-gray-900 text-4 font-semibold">
-                    {field.field?.label}
-                  </span>
-                  <span
-                    className="text-gray-900 text-4 font-normal"
-                    dangerouslySetInnerHTML={{
-                      __html: formatResponse(field),
-                    }}
-                  />
-                </>
+                <span
+                  className="text-gray-900 text-4 font-normal"
+                  dangerouslySetInnerHTML={{
+                    __html: formatResponse(field),
+                  }}
+                />
               )
             )}
           </div>

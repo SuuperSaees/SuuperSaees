@@ -68,7 +68,6 @@ export const OrderBriefs = ({
   ]);
 
   const [_uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
-  const uniqueId = generateUUID();
 
   const handleFileIdsChange = (fileIds: string[], fileUrls?: string[]) => {
     setUploadedFileIds(fileIds);
@@ -261,7 +260,7 @@ export const OrderBriefs = ({
                             ) : formField.field?.type === 'file' ? (
                               <UploadFileComponent
                                 bucketName="orders"
-                                uuid={uniqueId}
+                                uuid={crypto.randomUUID()}
                                 onFileIdsChange={(fileIds, fileUrls) => {
                                   const { responseValue, fileIds: newFileIds} =
                                     handleFileIdsChange(fileIds, fileUrls);
