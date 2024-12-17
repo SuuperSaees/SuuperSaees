@@ -1,6 +1,5 @@
 'use client';
 
-// import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
@@ -44,17 +43,14 @@ interface ActivityAssignationProps {
     value: string;
     label: string;
   }[];
-  userRole: string;
 }
 
 const SubtaskFollowers = ({
   subtaskId,
   onUserSelectionChange,
   searchUserOptions,
-  userRole,
 }: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
-  const allowedRoles = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
 
   const { data: followers, isLoading } = useQuery({
     queryKey: ['subtask_followers', subtaskId],
@@ -118,18 +114,13 @@ const SubtaskFollowers = ({
                 />
               );
             })}
-            {
-              allowedRoles.has(userRole) && (
-                <CheckboxCombobox
-                  options={searchUserOptions ?? []}
-                  onSubmit={handleFormSubmit}
-                  schema={membersAssignedSchema}
-                  defaultValues={defaultValues}
-                  customItem={CustomUserItem}
-                />
-              )
-            }
-
+            <CheckboxCombobox
+              options={searchUserOptions ?? []}
+              onSubmit={handleFormSubmit}
+              schema={membersAssignedSchema}
+              defaultValues={defaultValues}
+              customItem={CustomUserItem}
+            />
             </>
           )}
         </div>

@@ -116,6 +116,7 @@ const SubtaskItem = ({
   >;
   currentUserId: string;
 }) => {
+  const [activeTab, setActiveTab] = useState<'notes' | 'details' | 'time'>('notes');
   const { t, i18n } = useTranslation(['tasks','orders']);
   const language = i18n.language;
   const [content, setContent] = useState(subtask.content);
@@ -221,15 +222,21 @@ const SubtaskItem = ({
               </div>
             </SheetHeader>
 
-            <Tabs defaultValue="notes" className="mt-6">
+            <Tabs 
+              defaultValue={activeTab} 
+              className="mt-6"
+              onValueChange={(value: string) => {
+                setActiveTab(value as 'notes' | 'details' | 'time');
+              }}
+            >
               <TabsList className="flex w-fit gap-2 bg-transparent mb-7">
-                <ThemedTabTrigger value="notes" activeTab="notes" option="notes">
+                <ThemedTabTrigger value="notes" activeTab={activeTab} option="notes">
                   {t('notesTitle')}
                 </ThemedTabTrigger>
-                <ThemedTabTrigger value="details" activeTab="details" option="details">
+                <ThemedTabTrigger value="details" activeTab={activeTab} option="details">
                   {t('detailsTitle')}
                 </ThemedTabTrigger>
-                <ThemedTabTrigger value="time" activeTab="time" option="time">
+                <ThemedTabTrigger value="time" activeTab={activeTab} option="time">
                   {t('timeTitle')}
                 </ThemedTabTrigger>
               </TabsList>
@@ -305,7 +312,6 @@ const SubtaskItem = ({
                     }
                     searchUserOptions={searchUserOptionsFollowers}
                     subtaskId={subtask.id}
-                    userRole={userRole}
                   />
                 </div>
               </TabsContent>
@@ -319,7 +325,7 @@ const SubtaskItem = ({
                     userRole={userRole}
                     hideSubmitButton={true}
                     showToolbar={true}
-                    isEditable={true}
+                    isEditable={isEditable}
                   />
                 </div>
               </TabsContent>
