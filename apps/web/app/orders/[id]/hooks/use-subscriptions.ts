@@ -2,36 +2,26 @@ import { useEffect } from 'react';
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
-import { Order } from '~/lib/order.types';
-
-import {
-  Activity,
-  ActivityData,
-  File,
-  Message,
-  Review,
-  ServerOrderFile,
-  SubscriptionPayload,
-  TableName,
-} from '../context/activity-context';
+import { DataResult, SubscriptionPayload, TableName } from '../context/activity.types';
 
 export const useOrderSubscriptions = (
   orderId: number,
-  handleSubscription: <T extends ActivityData>(
+  handleSubscription: <T extends DataResult.All>(
     payload: SubscriptionPayload,
-    currentDataStore: T[],
-    stateSetter: React.Dispatch<React.SetStateAction<T[]>>,
+    currentDataStore: T | T[],
+    stateSetter: React.Dispatch<React.SetStateAction<T | T[]>>,
     tableName: TableName,
   ) => Promise<void>,
-  setOrder: React.Dispatch<React.SetStateAction<Order.Type>>,
-  activities: Activity[],
-  setActivities: React.Dispatch<React.SetStateAction<Activity[]>>,
-  messages: Message[],
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
-  reviews: Review[],
-  setReviews: React.Dispatch<React.SetStateAction<Review[]>>,
-  files: File[],
-  setFiles: React.Dispatch<React.SetStateAction<File[]>>,
+  order: DataResult.Order,
+  setOrder: React.Dispatch<React.SetStateAction<DataResult.Order>>,
+  activities: DataResult.Activity[],
+  setActivities: React.Dispatch<React.SetStateAction<DataResult.Activity[]>>,
+  messages: DataResult.Message[],
+  setMessages: React.Dispatch<React.SetStateAction<DataResult.Message[]>>,
+  reviews: DataResult.Review[],
+  setReviews: React.Dispatch<React.SetStateAction<DataResult.Review[]>>,
+  files: DataResult.File[],
+  setFiles: React.Dispatch<React.SetStateAction<DataResult.File[]>>,
 ) => {
   const supabase = useSupabase();
 
@@ -48,10 +38,12 @@ export const useOrderSubscriptions = (
         },
         (payload) => {
           if (payload.table === 'messages') {
-            void handleSubscription<Message>(
+            void handleSubscription<DataResult.Message>(
               payload.new as SubscriptionPayload,
               messages,
-              setMessages,
+              setMessages as React.Dispatch<
+                React.SetStateAction<DataResult.Message | DataResult.Message[]>
+              >,
               TableName.MESSAGES,
             );
           }
@@ -67,10 +59,12 @@ export const useOrderSubscriptions = (
         },
         (payload) => {
           if (payload.table === 'reviews') {
-            void handleSubscription<Review>(
+            void handleSubscription<DataResult.Review>(
               payload.new as SubscriptionPayload,
               reviews,
-              setReviews,
+              setReviews as React.Dispatch<
+                React.SetStateAction<DataResult.Review | DataResult.Review[]>
+              >,
               TableName.REVIEWS,
             );
           }
@@ -85,10 +79,10 @@ export const useOrderSubscriptions = (
         },
         (payload) => {
           if (payload.table === 'files') {
-            void handleSubscription<File>(
+            void handleSubscription<DataResult.File>(
               payload.new as SubscriptionPayload,
               files,
-              setFiles,
+              setFiles as React.Dispatch<React.SetStateAction<DataResult.File | DataResult.File[]>>,
               TableName.FILES,
             );
           }
@@ -104,10 +98,12 @@ export const useOrderSubscriptions = (
         },
         (payload) => {
           if (payload.table === 'activities') {
-            void handleSubscription<Activity>(
+            void handleSubscription<DataResult.Activity>(
               payload.new as SubscriptionPayload,
               activities,
-              setActivities,
+              setActivities as React.Dispatch<
+                React.SetStateAction<DataResult.Activity | DataResult.Activity[]>
+              >,
               TableName.ACTIVITIES,
             );
           }
@@ -123,11 +119,17 @@ export const useOrderSubscriptions = (
         },
         (payload) => {
           if (payload.table === 'orders_v2') {
-            setOrder(payload.new as Order.Type);
+            void handleSubscription<DataResult.Order>(
+              payload.new as SubscriptionPayload,
+              order,
+              setOrder as React.Dispatch<React.SetStateAction<DataResult.Order | DataResult.Order[]>>,
+              TableName.ORDER,
+            );
           }
         },
       )
       .subscribe();
+
     return () => {
       //eslint-disable-next-line @typescript-eslint/no-floating-promises
       supabase.removeChannel(channel);
@@ -136,6 +138,7 @@ export const useOrderSubscriptions = (
     supabase,
     orderId,
     handleSubscription,
+    order,
     setOrder,
     activities,
     setActivities,

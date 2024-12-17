@@ -7,13 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { Order } from '~/lib/order.types';
 
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
-import { Activity, ActivityType } from '../context/activity-context';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
 import { convertToTitleCase } from '../utils/format-agency-names';
 import { formatDisplayDate } from '@kit/shared/utils';
+import { ActivityType, DataResult } from '../context/activity.types';
 const translateActivity = (
-  activity: Activity,
+  activity: DataResult.Activity,
   t: TFunction<'logs', undefined>,
 ) => {
   const availableTranslates = ['status', 'priority'];
@@ -38,8 +38,8 @@ const translateActivity = (
   return newActivity;
 };
 interface ActivityActionProps {
-  activity: Activity;
-  formattedActivity: Activity;
+  activity: DataResult.Activity;
+  formattedActivity: DataResult.Activity;
 }
 interface ActivityCustomSpan {
   value: string;
