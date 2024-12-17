@@ -17,8 +17,9 @@ import {
   AlertDialogTrigger,
 } from '@kit/ui/alert-dialog';
 
-import { deleteBrief } from './delete-brief';
+import Tooltip from '../../../../../../../../apps/web/components/ui/tooltip';
 import { handleResponse } from '../../../../../../../../apps/web/lib/response/handle-response';
+import { deleteBrief } from './delete-brief';
 
 const DeleteBriefDialog = ({ briefId }: { briefId: string }) => {
   const { t } = useTranslation(['briefs', 'responses']);
@@ -40,32 +41,32 @@ const DeleteBriefDialog = ({ briefId }: { briefId: string }) => {
   });
 
   return (
-    <>
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Trash2 className="h-4 w-4 cursor-pointer text-gray-600" />
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <div className="flex">
-            <Trash2 className="text-error-600 h-4 w-4" />
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('deleteBrief')}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t('deleteDescription')}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => await deleteMutation.mutateAsync()}
-            >
-              {t('delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <AlertDialog>
+      <AlertDialogTrigger >
+        <Tooltip content={t('briefs:eliminateBrief')}>
+          <Trash2 className=" h-8 w-8 cursor-pointer rounded-md p-2 text-gray-600 hover:bg-accent" />
+        </Tooltip>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <div className="flex">
+          <Trash2 className="text-error-600 h-4 w-4" />
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteBrief')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('deleteDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async () => await deleteMutation.mutateAsync()}
+          >
+            {t('delete')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 
