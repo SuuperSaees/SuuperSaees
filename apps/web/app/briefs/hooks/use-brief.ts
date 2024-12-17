@@ -76,6 +76,7 @@ export const useBrief = (
           await updateFormFieldsById(formattedFormFields, brief.id ?? ''),
           'briefs',
           t,
+          {showSuccessToast: false}
         );
       } catch (error) {
         console.error('Error updating brief form fields from client');
