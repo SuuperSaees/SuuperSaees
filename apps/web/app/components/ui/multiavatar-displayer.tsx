@@ -50,15 +50,16 @@ export default function MultiAvatarDisplayer({
           className={`h-8 w-8 border-2 border-white ${avatarClassName}`}
           style={{
             marginLeft: index === 0 ? 0 : `${-overlap}px`,
-            zIndex: maxAvatars - index,
+            zIndex: maxAvatars + index,
           }}
         />
       ))}
+      
 
       { (customItemTrigger && !blocked) ? (
         <div
           className="relative flex items-center justify-center"
-          style={{ marginLeft: `${overlap / 2}px`, zIndex: 1 }}
+          style={{ marginLeft: `${overlap / 8}px`, zIndex: 1 }}
         >
           {customItemTrigger}
         </div>

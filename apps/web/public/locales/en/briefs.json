@@ -9,6 +9,7 @@
     "briefNameLabel": "Enter the brief name",
     "briefName": "Name",
     "deleteBrief": "Delete Brief",
+    "duplicateBrief": "Duplicate brief",
     "deleteDescription": "Are you sure you want to delete this brief?",
     "delete": "Delete",
     "cancel": "Cancel",

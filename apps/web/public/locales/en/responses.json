@@ -33,7 +33,8 @@
       "failedToUpdateFields": "Couldn't update the fields. Please try again later.",
       "failedToDeleteFormFields": "Couldn't delete the form fields. Please try again later.",
       "failedToGetFormFields": "Couldn't retrieve the form fields. Please try again later.",
-      "failedToCreateFormFields": "Couldn't create the form fields. Please try again later."
+      "failedToCreateFormFields": "Couldn't create the form fields. Please try again later.",
+      "failedToDuplicateBrief": "Couldn't duplicate the brief. Please try again later."
     },
     "orders": {
       "failedToCreateOrder": "Couldn't create the order. Please try again.",
@@ -88,7 +89,8 @@
       "briefUpdated": "Brief updated successfully.",
       "serviceConnected": "Service connected to the brief successfully.",
       "fieldsUpdated": "Fields updated successfully.",
-      "formFieldsDeleted": "Form fields deleted successfully."
+      "formFieldsDeleted": "Form fields deleted successfully.",
+      "briefDuplicated": "Brief duplicated successfully."
     },
     "orders": {
       "orderCreated": "Order created successfully.",

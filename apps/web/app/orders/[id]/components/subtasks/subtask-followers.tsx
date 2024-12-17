@@ -54,7 +54,7 @@ const SubtaskFollowers = ({
   userRole,
 }: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
-  const allowedRoles = ['agency_owner', 'agency_member', 'agency_project_manager'];
+  const allowedRoles = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
 
   const { data: followers, isLoading } = useQuery({
     queryKey: ['subtask_followers', subtaskId],
@@ -119,7 +119,7 @@ const SubtaskFollowers = ({
               );
             })}
             {
-              allowedRoles.includes(userRole) && (
+              allowedRoles.has(userRole) && (
                 <CheckboxCombobox
                   options={searchUserOptions ?? []}
                   onSubmit={handleFormSubmit}
