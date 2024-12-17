@@ -23,7 +23,9 @@
         "delete": "Eliminar archivo",
         "deleteSuccess": "Archivo eliminado",
         "noFiles": "No hay archivos en esta carpeta",
-        "emptyFolder": "La carpeta está vacía"
+        "emptyFolder": "La carpeta está vacía",
+        "emptyFolderDescription": "Agrega archivos o carpetas para comenzar.",
+        "emptyFolderDescriptionInTeam": "Agrega archivos para comenzar."
     },
     "folders": {
         "title": "Carpetas",
