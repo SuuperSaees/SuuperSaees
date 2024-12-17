@@ -885,7 +885,7 @@ function PricingStep() {
         {form.watch('step_service_price.standard') &&
           form.watch('step_type_of_service.single_sale') && (
             <>
-              {/* <Standard /> */}
+              <Standard />
             </>
           )}
 
