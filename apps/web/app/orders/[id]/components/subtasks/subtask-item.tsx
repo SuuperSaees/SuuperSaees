@@ -116,6 +116,7 @@ const SubtaskItem = ({
   >;
   currentUserId: string;
 }) => {
+  const [activeTab, setActiveTab] = useState<'notes' | 'details' | 'time'>('notes');
   const { t, i18n } = useTranslation(['tasks','orders']);
   const language = i18n.language;
   const [content, setContent] = useState(subtask.content);
@@ -130,18 +131,14 @@ const SubtaskItem = ({
       console.error('Error invalidating subtask timers:', error);
     });
   };
-  const canEditSubtask = (userRole: string, subtask: Subtask.Type) => {
+  const canEditSubtask = (userRole: string) => {
     if (['agency_owner', 'agency_member', 'agency_project_manager'].includes(userRole)) {
       return true;
     }
     
-    if (['client_member', 'client_owner'].includes(userRole)) {
-      return subtask.followers?.some(follower => follower.client_member_id === currentUserId);
-    }
-    
     return false;
   };
-  const isEditable = canEditSubtask(userRole, subtask);
+  const isEditable = canEditSubtask(userRole);
   
   return (
     <div
@@ -225,15 +222,21 @@ const SubtaskItem = ({
               </div>
             </SheetHeader>
 
-            <Tabs defaultValue="notes" className="mt-6">
+            <Tabs 
+              defaultValue={activeTab} 
+              className="mt-6"
+              onValueChange={(value: string) => {
+                setActiveTab(value as 'notes' | 'details' | 'time');
+              }}
+            >
               <TabsList className="flex w-fit gap-2 bg-transparent mb-7">
-                <ThemedTabTrigger value="notes" activeTab="notes" option="notes">
+                <ThemedTabTrigger value="notes" activeTab={activeTab} option="notes">
                   {t('notesTitle')}
                 </ThemedTabTrigger>
-                <ThemedTabTrigger value="details" activeTab="details" option="details">
+                <ThemedTabTrigger value="details" activeTab={activeTab} option="details">
                   {t('detailsTitle')}
                 </ThemedTabTrigger>
-                <ThemedTabTrigger value="time" activeTab="time" option="time">
+                <ThemedTabTrigger value="time" activeTab={activeTab} option="time">
                   {t('timeTitle')}
                 </ThemedTabTrigger>
               </TabsList>
@@ -309,7 +312,6 @@ const SubtaskItem = ({
                     }
                     searchUserOptions={searchUserOptionsFollowers}
                     subtaskId={subtask.id}
-                    userRole={userRole}
                   />
                 </div>
               </TabsContent>
@@ -323,7 +325,7 @@ const SubtaskItem = ({
                     userRole={userRole}
                     hideSubmitButton={true}
                     showToolbar={true}
-                    isEditable={true}
+                    isEditable={isEditable}
                   />
                 </div>
               </TabsContent>

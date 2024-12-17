@@ -1,4 +1,5 @@
 {
+    "organizationTitle": "Organizations",
     "organizationName": "Your agency name",
     "organizationLabel": "Enter your agency name",
     "continue": "Continue",
@@ -22,7 +23,9 @@
         "delete": "Delete file",
         "deleteSuccess": "File deleted",
         "noFiles": "No files in this folder",
-        "emptyFolder": "The folder is empty"
+        "emptyFolder": "The folder is empty",
+        "emptyFolderDescription": "Add files or folders to get started.",
+        "emptyFolderDescriptionInTeam": "Add files to get started."
     },
     "folders": {
         "title": "Folders",

@@ -11,7 +11,7 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   return {
-    title: i18n.t('organization:title'),
+    title: i18n.t('organizations:organizationTitle'),
   };
 };
 

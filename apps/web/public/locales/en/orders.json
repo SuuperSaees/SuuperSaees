@@ -44,6 +44,9 @@
   },
   "tasks": {
     "emptyTasks": "No tasks found",
+    "emptySubtasks": "No subtasks found",
+    "emptyTasksDescription": "Add a task to get started.",
+    "emptyTasksDescriptionToClient": "",
     "addTask": "Add task",
     "addSubtask": "Add subtask",
     "newTask": "New task",
