@@ -67,7 +67,7 @@ function handleNotification(
       ? t(`${type}.default`)
       : t(`${type}.${entity}.${operationName}`);
   // const statusText = result.statusText;
-
+  
   // Display notification using the appropriate toast method (error or success)
   if(type === 'success' && configuration?.showSuccessToast){
     toast[type](t('common:success'), { description });
