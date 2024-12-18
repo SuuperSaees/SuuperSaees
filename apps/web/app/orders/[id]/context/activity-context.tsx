@@ -9,121 +9,31 @@ import {
 } from 'react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/update/update-file';
 import { getUserById } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { addOrderMessage } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
-import { Activity as ServerActivity } from '~/lib/activity.types';
-import { Database, Tables } from '~/lib/database.types';
-import { File as ServerFile } from '~/lib/file.types';
-import { Message } from '~/lib/message.types';
-import { Message as ServerMessage } from '~/lib/message.types';
-import { Order } from '~/lib/order.types';
-import { Review as ServerReview } from '~/lib/review.types';
-import { User as ServerUser } from '~/lib/user.types';
+import { deleteMessage } from '~/team-accounts/src/server/actions/messages/delete/delete-messages';
 import { generateUUID } from '~/utils/generate-uuid';
 
 import useInternalMessaging from '../hooks/use-messages';
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
-import { updateFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/update/update-file';
-import { deleteMessage } from '~/team-accounts/src/server/actions/messages/delete/delete-messages';
-import { useTranslation } from 'react-i18next';
+import {
+  ActivityContextType,
+  DataResult,
+  DataSource,
+  SubscriptionPayload,
+  TableName,
+  UserExtended,
+} from './activity.types';
 
-export enum ActivityType {
-  MESSAGE = 'message',
-  REVIEW = 'review',
-  STATUS = 'status',
-  PRIORITY = 'priority',
-  ASSIGN = 'assign',
-  DUE_DATE = 'due_date',
-  DESCRIPTION = 'description',
-  TITLE = 'title',
-  ASSIGNED_TO = 'assigned_to',
-  TASK = 'task',
-}
-
-export enum ActionType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  COMPLETE = 'complete',
-}
-
-export type Activity = ServerActivity.Type & {
-  user: User;
-};
-
-export type Reaction = {
-  id: string;
-  emoji: string;
-  user: User;
-  type: string;
-};
-
-export type User = Pick<
-  ServerUser.Type,
-  'id' | 'name' | 'email' | 'picture_url' 
-> & {
-  settings?: {
-    name: string | null;
-    picture_url: string | null;
-  } | null
-}
-
-export type File = ServerFile.Type & {
-  user: User;
-};
-
-export type Message = ServerMessage.Type & {
-  user: User;
-  files?: ServerFile.Type[];
-  reactions?: Reaction[];
-  pending?: boolean;
-};
-
-export type Review = ServerReview.Type & {
-  user: User;
-};
-
-export type ServerOrderFile =
-  Database['public']['Tables']['order_files']['Row'];
-export type SubscriptionPayload =
-  | ServerReview.Type
-  | ServerMessage.Type
-  | ServerActivity.Type
-  | ServerFile.Type;
-
-export type ActivityData = Review | File | Message | Activity;
-
-interface ActivityContextType {
-  activities: Activity[];
-  messages: Message[];
-  reviews: Review[];
-  files: File[];
-  order: Order.Type;
-  userRole: string;
-  addMessage: ({message, fileIdsList}: {message: string, fileIdsList?: string[]}) => Promise<ServerMessage.Type>;
-  userWorkspace: {
-    id: string | null;
-    name: string | null;
-    picture_url: string | null;
-    subscription_status: Tables<"subscriptions">["status"] | null;
-  }
-  loadingMessages: boolean;
-  deleteMessage: (messageId: string) => Promise<void>;
-}
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
 );
-
-export enum TableName {
-  REVIEWS = 'reviews',
-  MESSAGES = 'messages',
-  ACTIVITIES = 'activities',
-  FILES = 'files',
-}
 
 export const ActivityProvider = ({
   children,
@@ -135,25 +45,31 @@ export const ActivityProvider = ({
   userRole,
 }: {
   children: ReactNode;
-  activities: Activity[];
-  messages: Message[];
-  reviews: Review[];
-  files: File[];
-  order: Order.Type;
+  activities: DataResult.Activity[];
+  messages: DataResult.Message[];
+  reviews: DataResult.Review[];
+  files: DataResult.File[];
+  order: DataResult.Order;
   userRole: string;
 }) => {
   const { t } = useTranslation('orders');
-  const [order, setOrder] = useState<Order.Type>(serverOrder);
-  const [messages, setMessages] = useState<Message[]>(serverMessages);
-  const [activities, setActivities] = useState<Activity[]>(serverActivities);
-  const [reviews, setReviews] = useState<Review[]>(serverReviews);
-  const [files, setFiles] = useState<File[]>(serverFiles);
+  const [order, setOrder] = useState<DataResult.Order>(serverOrder);
+  const [messages, setMessages] =
+    useState<DataResult.Message[]>(serverMessages);
+  const [activities, setActivities] =
+    useState<DataResult.Activity[]>(serverActivities);
+  const [reviews, setReviews] = useState<DataResult.Review[]>(serverReviews);
+  const [files, setFiles] = useState<DataResult.File[]>(serverFiles);
   const { getInternalMessagingEnabled } = useInternalMessaging();
   const queryClient = useQueryClient();
   const [loadingMessages, setLoadingMessages] = useState(false);
-  const { workspace: currentUser } = useUserWorkspace();
-  const writeMessage = async ({message, fileIdsList}: {message: string, fileIdsList?: string[]}, tempId: string) => {
-    const messageId = crypto.randomUUID()
+  const { workspace: currentUser, user } = useUserWorkspace();
+
+  const writeMessage = async (
+    { message, fileIdsList }: { message: string; fileIdsList?: string[] },
+    tempId: string,
+  ) => {
+    const messageId = crypto.randomUUID();
     try {
       const messageToSend = {
         id: messageId,
@@ -168,7 +84,7 @@ export const ActivityProvider = ({
         currentUser.id ?? '',
         Number(order.id),
         messageToSend,
-        messageToSend.visibility as Message.Type['visibility'],
+        messageToSend.visibility as DataResult.Message['visibility'],
       );
       // If there are file IDs, update the files with the new message ID
       if (fileIdsList && fileIdsList.length > 0) {
@@ -188,13 +104,20 @@ export const ActivityProvider = ({
       });
       throw error;
     } finally {
-      setLoadingMessages(false)
+      setLoadingMessages(false);
     }
   };
 
   const addMessageMutation = useMutation({
-    mutationFn: ({ message, fileIdsList, tempId }: { message: string; fileIdsList?: string[], tempId: string }) =>
-      writeMessage({message, fileIdsList}, tempId),
+    mutationFn: ({
+      message,
+      fileIdsList,
+      tempId,
+    }: {
+      message: string;
+      fileIdsList?: string[];
+      tempId: string;
+    }) => writeMessage({ message, fileIdsList }, tempId),
     onMutate: async ({ message, tempId }) => {
       // Cancel outgoing refetches (so they don't overwrite our optimistic update)
       setLoadingMessages(true);
@@ -202,7 +125,7 @@ export const ActivityProvider = ({
         queryKey: ['messages'],
       });
 
-      const optimisticMessage: Message = {
+      const optimisticMessage: DataResult.Message = {
         id: 'temp-' + tempId, // Temporary ID
         content: message,
         order_id: Number(order.id),
@@ -213,7 +136,7 @@ export const ActivityProvider = ({
         user: {
           id: currentUser?.id ?? '',
           name: currentUser?.name ?? '',
-          email: currentUser?.email ?? '',
+          email: user?.email ?? '',
           picture_url: currentUser.picture_url ?? '',
         },
         user_id: currentUser?.id ?? '',
@@ -221,6 +144,7 @@ export const ActivityProvider = ({
         reactions: [], // Default to an empty array if not provided,
         temp_id: tempId,
         pending: true,
+        updated_at: new Date().toISOString(),
       };
 
       setMessages((oldMessages) => [...oldMessages, optimisticMessage]);
@@ -246,12 +170,15 @@ export const ActivityProvider = ({
         reactions: [],
       };
       setMessages((prevMessages) => {
-        return reconcileState(prevMessages, realMessage) as Message[];
+        return reconcileState(
+          prevMessages,
+          realMessage,
+        ) as DataResult.Message[];
       });
     },
     onSettled: () => {
       setLoadingMessages(false);
-    }
+    },
   });
 
   const deleteMessageMutation = useMutation({
@@ -267,8 +194,8 @@ export const ActivityProvider = ({
         oldMessages.map((message) =>
           message.id === messageId
             ? { ...message, deleted_on: new Date().toISOString() }
-            : message
-        )
+            : message,
+        ),
       );
 
       return { previousMessages };
@@ -289,16 +216,18 @@ export const ActivityProvider = ({
     },
   });
 
-  const reconcileState = (items: ActivityData[], newItem: ActivityData) => {
-    const itemsMatch = (tempItem: ActivityData, newItem: ActivityData) => {
+  const reconcileState = (
+    items: DataResult.ArrayTarget[],
+    newItem: DataResult.ArrayTarget,
+  ) => {
+    const itemsMatch = (
+      tempItem: DataResult.ArrayTarget,
+      newItem: DataResult.ArrayTarget,
+    ) => {
       return tempItem?.temp_id === newItem?.temp_id;
     };
     // avoid duplicate items
-    if (
-      !items.some(
-        (msg) => msg.id === newItem.id ,
-      )
-    ) {
+    if (!items.some((msg) => msg.id === newItem.id)) {
       const existingIndex = items.findIndex((item) =>
         itemsMatch(item, newItem),
       );
@@ -319,83 +248,143 @@ export const ActivityProvider = ({
 
   const reconcileData = useCallback(
     async (
-      pureDataSource: SubscriptionPayload,
-      dataTarget: ActivityData[],
+      pureDataSource: DataSource.All,
+      dataTarget: DataResult.All,
       tableName: TableName,
     ) => {
-      let newDataUser = dataTarget.find(
-        (data) => data?.user?.id === pureDataSource?.user_id,
-      )?.user as User;
+      if (Array.isArray(dataTarget)) {
+        let newDataUser = dataTarget.find(
+          (data) =>
+            data?.user?.id ===
+            (pureDataSource as DataSource.ArrayTarget)?.user_id,
+        )?.user as UserExtended;
 
-      if (!newDataUser) {
-        try {
-          newDataUser = await getUserById(pureDataSource.user_id);
-        } catch (err) {
-          console.error('Error fetching user:', err);
-          throw err; // Rethrow the error if you want the caller to handle it
+        if (!newDataUser) {
+          try {
+            newDataUser = await getUserById(
+              (pureDataSource as DataSource.ArrayTarget).user_id,
+            );
+          } catch (err) {
+            console.error('Error fetching user:', err);
+            throw err; // Rethrow the error if you want the caller to handle it
+          }
         }
-      }
 
-      let nestedFiles = undefined;
+        let nestedFiles = undefined;
 
-      if (tableName === TableName.MESSAGES) {
-        const hasRelatedFiles = () => {
-          return files.some((file) => file.message_id === pureDataSource.id);
+        if (tableName === TableName.MESSAGES) {
+          const hasRelatedFiles = () => {
+            return files.some((file) => file.message_id === pureDataSource.id);
+          };
+
+          if (hasRelatedFiles()) {
+            nestedFiles = files.filter(
+              (file) => file.message_id === pureDataSource.id,
+            );
+          }
+        } else if (tableName === TableName.FILES) {
+          const fileData = pureDataSource as DataSource.File;
+          if (fileData.message_id) {
+            setMessages((prevMessages) => {
+              return prevMessages.map((msg) => {
+                if (msg.id === fileData.message_id) {
+                  return {
+                    ...msg,
+                    files: [
+                      ...(msg.files ?? []),
+                      { ...fileData, user: newDataUser },
+                    ] as DataResult.File[],
+                  };
+                }
+                return msg;
+              });
+            });
+          }
+        }
+
+        const reconciledData = {
+          ...pureDataSource,
+          user: newDataUser,
+          files: nestedFiles,
         };
 
-        if (hasRelatedFiles()) {
-          nestedFiles = files.filter(
-            (file) => file.message_id === pureDataSource.id,
-          );
+        return reconciledData;
+      } else {
+        let reconciledData = dataTarget;
+        if (tableName === TableName.ORDER) {
+          if (
+            'status' in pureDataSource &&
+            'status' in dataTarget &&
+            pureDataSource.status !== dataTarget.status &&
+            'status_id' in pureDataSource &&
+            'status_id' in dataTarget &&
+            pureDataSource.status_id !== dataTarget.status_id
+          ) {
+            reconciledData = {
+              ...(reconciledData as DataResult.Order),
+              status: pureDataSource.status,
+              status_id: pureDataSource.status_id,
+            };
+          } else if (
+            'priority' in pureDataSource &&
+            'priority' in dataTarget &&
+            pureDataSource.priority !== dataTarget.priority
+          ) {
+            reconciledData = {
+              ...(reconciledData as DataResult.Order),
+              priority: pureDataSource.priority,
+            };
+          } else if (
+            'due_date' in pureDataSource &&
+            'due_date' in dataTarget &&
+            pureDataSource.due_date !== dataTarget.due_date
+          ) {
+            reconciledData = {
+              ...(reconciledData as DataResult.Order),
+              due_date: pureDataSource.due_date,
+            };
+          }
+
+          return reconciledData;
         }
-      } else if (tableName === TableName.FILES) {
-        const fileData = pureDataSource as ServerFile.Type;
-        if (fileData.message_id) {
-          setMessages((prevMessages) => {
-            return prevMessages.map((msg) => {
-              if (msg.id === fileData.message_id) {
-                return {
-                  ...msg,
-                  files: [...(msg.files ?? []), { ...fileData, user: newDataUser }],
-                };
-              }
-              return msg;
-            });
-          });
-        }
+
+        return reconciledData;
       }
-
-      const reconciledData = {
-        ...pureDataSource,
-        user: newDataUser,
-        files: nestedFiles,
-      };
-
-      return reconciledData;
     },
     [files], // Dependency array to ensure that `files` is up-to-date
   );
 
   const handleSubscription = useCallback(
-    async <T extends ActivityData>(
+    async <T extends DataResult.All>(
       payload: SubscriptionPayload,
-      currentDataStore: T[],
-      stateSetter: React.Dispatch<React.SetStateAction<T[]>>,
+      currentDataStore: T[] | T,
+      stateSetter: React.Dispatch<React.SetStateAction<T[] | T>>,
       tableName: TableName,
     ) => {
       try {
         const newData = (await reconcileData(
           payload,
-          currentDataStore,
+          currentDataStore as DataResult.All,
           tableName,
         )) as T;
-        if(tableName === TableName.MESSAGES) {
-
+        if (tableName === TableName.MESSAGES) {
           stateSetter((prevState) => {
-            return reconcileState(prevState, newData) as T[];
+            if (Array.isArray(prevState)) {
+              return reconcileState(
+                prevState as DataResult.Message[],
+                newData as DataResult.Message,
+              ) as T[];
+            }
+            return prevState;
           });
-        } else { 
-          stateSetter((prevState) => [...prevState, newData]);
+        } else {
+          stateSetter((prevState) => {
+            if (Array.isArray(prevState)) {
+              return [...prevState, newData] as T[];
+            } else {
+              return newData;
+            }
+          });
         }
       } catch (error) {
         console.error('Error handling subscription:', error);
@@ -407,6 +396,7 @@ export const ActivityProvider = ({
   useOrderSubscriptions(
     order.id,
     handleSubscription,
+    order,
     setOrder,
     activities,
     setActivities,
@@ -427,7 +417,13 @@ export const ActivityProvider = ({
         files: files.filter((svFile) => !svFile.message_id),
         order,
         userRole,
-        addMessage: async ({message, fileIdsList}: {message: string, fileIdsList?: string[]}) =>
+        addMessage: async ({
+          message,
+          fileIdsList,
+        }: {
+          message: string;
+          fileIdsList?: string[];
+        }) =>
           await addMessageMutation.mutateAsync({
             message,
             fileIdsList,

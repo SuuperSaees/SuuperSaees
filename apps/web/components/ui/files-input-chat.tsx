@@ -90,16 +90,10 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
             onMouseLeave={() => setHoveredFileId(null)}
           >
             <div className="flex items-center justify-center w-24 h-16 bg-gray-200 rounded-lg overflow-hidden">
-              
               {
-                globalFileList.find((item) => item.file === file)?.progress < 100 ? (
-                  <div className='items-center flex justify-center absolute w-full h-full'>
-                    <Spinner className='w-5 h-5'/>
-                  </div>
-                ) : (
-                  <>
-                    {file.type.startsWith('image/') ? (
-  
+                <>
+                  {file.type.startsWith('image/') ? (
+                    <div className="relative w-full h-full">
                       <Image 
                         src={globalFileList.find((item) => item.file === file)?.url ?? URL.createObjectURL(file)}
                         alt={file.name}
@@ -109,19 +103,50 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
                         quality={60}
                         priority
                       />
-                    ) : file.type.startsWith('video/') ? (
+                      {globalFileList.find((item) => item.file === file)?.progress < 100 && (
+                        <div className='absolute inset-0 flex items-center justify-center bg-black/30'>
+                          <div className='flex flex-col items-center justify-center'>
+                            <Spinner className='w-5 h-5 text-white'/>
+                            <p className='text-white text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : file.type.startsWith('video/') ? (
+                    <div className="relative w-full h-full">
                       <video
                         src={URL.createObjectURL(file)}
                         className="object-cover w-full h-full"
-                        muted 
+                        muted
+                        controls={false}
+                        preload="metadata"
+                        disablePictureInPicture
+                        disableRemotePlayback
+                        controlsList="nodownload noplaybackrate"
+                        onLoadedMetadata={(e) => {
+                          e.currentTarget.currentTime = 0;
+                        }}
+                        style={{ pointerEvents: 'none' }}
                       />
-                    ) : (
-                      <div className='w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
-                        {getFileTypeIcon(file.name)} 
-                      </div>
-                    )}
-                  </>
-                )
+                      {globalFileList.find((item) => item.file === file)?.progress < 100 && (
+                        <div className='flex flex-col items-center justify-center'>
+                          <Spinner className='w-5 h-5 text-white'/>
+                          <p className='text-white text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className='relative w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                      {getFileTypeIcon(file.name)}
+                      {globalFileList.find((item) => item.file === file)?.progress < 100 && (
+                        <div className='flex flex-col items-center justify-center'>
+                          <Spinner className='w-5 h-5 text-white'/>
+                          <p className='text-white text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
               }
             </div>
             {

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -17,14 +18,16 @@ import DatePicker from '~/team-accounts/src/server/actions/orders/pick-date/pick
 import {
   updateOrder,
   updateOrderAssigns,
+  logOrderActivities,
 } from '~/team-accounts/src/server/actions/orders/update/update-order';
-
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import AvatarDisplayer from '../../../components/ui/avatar-displayer';
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
 import { EntityData, ColumnConfigs } from '../types';
+import { Order } from '~/lib/order.types';
 
-const truncateText = (text: string, maxLength: number = 40) => {
+const truncateText = (text: string, maxLength = 50) => {
+  if (!text) return '';
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + '...';
 };
@@ -34,7 +37,8 @@ export const ordersColumns = (
   hasPermission?: ColumnConfigs['orders']['hasPermission'],
 ): ColumnDef<EntityData['orders'][number]>[] => {
   const withPermissionsActive = hasPermission && hasPermission;
-  return [
+  
+  return React.useMemo(() => [
     {
       accessorKey: 'title',
       header: t('orders.title'),
@@ -141,10 +145,12 @@ export const ordersColumns = (
       cell: ({ row }) => {
         const updateOrderDate = async (due_date: string, orderId: number) => {
           try {
-            await updateOrder(orderId, { due_date });
+           const {order, user} = await updateOrder(orderId, { due_date });
             toast('Success!', {
               description: t('success.orders.orderDateUpdated'),
             });
+            const fields: (keyof Order.Update)[] = ['due_date'];
+            await logOrderActivities(orderId, order, user?.id ?? '', user?.user_metadata?.name ?? user?.user_metadata?.email ?? '', undefined, fields);
           } catch (error) {
             toast('Error', {
               description: t('error.orders.failedToUpdateOrderDate'),
@@ -163,10 +169,10 @@ export const ordersColumns = (
         );
       },
     },
-  ];
+  ], [t, hasPermission]);
 };
 
-const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], blocked: boolean }) => {
+const RowAssignedTo = React.memo(({ row, blocked }: { row: EntityData['orders'][number], blocked: boolean }) => {
   const { t } = useTranslation('orders');
 
   const membersAssignedSchema = z.object({
@@ -187,6 +193,8 @@ const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], bl
     queryKey: ['order-agency-members', row.id],
     queryFn: () => getOrderAgencyMembers(row.agency_id, row.id),
     retry: 5,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
   });
 
   const changeAgencyMembersAssigned = useMutation({
@@ -209,21 +217,23 @@ const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], bl
     return changeAgencyMembersAssigned.mutate(data.members);
   }
 
-  const searchUserOptions =
+  const searchUserOptions = React.useMemo(() => 
     orderAgencyMembers?.map((user) => ({
       picture_url: user.user_settings?.picture_url ?? user?.picture_url ?? '',
       value: user?.id,
-      label: user?.user_settings?.name ?? user?.name ?? '', // Default to empty string if null
-    })) ?? [];
+      label: user?.user_settings?.name ?? user?.name ?? '',
+    })) ?? [],
+  [orderAgencyMembers]);
 
-  const avatars =
+  const avatars = React.useMemo(() => 
     row?.assigned_to?.map((assignee) => ({
       name: assignee.agency_member?.settings?.name ?? assignee?.agency_member?.name ?? '',
       email: assignee.agency_member?.email ?? '',
       picture_url: assignee.agency_member?.settings?.picture_url ?? assignee?.agency_member?.picture_url ?? '',
-    })) ?? [];
+    })) ?? [],
+  [row?.assigned_to]);
 
-  const CustomUserItem = ({
+  const CustomUserItem = React.memo(({
     option,
   }: {
     option: Option & { picture_url?: string | null };
@@ -236,7 +246,7 @@ const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], bl
       />
       <span>{option?.label}</span>
     </div>
-  );
+  ));
   const maxAvatars = 3;
 
   const CustomItemTrigger = (
@@ -263,4 +273,6 @@ const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], bl
       />
     </div>
   );
-};
+});
+
+RowAssignedTo.displayName = 'RowAssignedTo';

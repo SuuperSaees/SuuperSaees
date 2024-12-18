@@ -2,7 +2,7 @@
 
 import { useContext } from 'react';
 
-import { UserWorkspaceContext } from '../components';
+import { UserWorkspace, UserWorkspaceContext } from '../components';
 
 export function useUserWorkspace() {
   const ctx = useContext(UserWorkspaceContext);
@@ -15,3 +15,5 @@ export function useUserWorkspace() {
 
   return ctx;
 }
+
+export type { UserWorkspace };

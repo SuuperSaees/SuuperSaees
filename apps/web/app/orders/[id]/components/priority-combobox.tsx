@@ -22,7 +22,7 @@ import { cn } from '@kit/ui/utils';
 
 import { Order } from '~/lib/order.types';
 import { Subtask } from '~/lib/tasks.types';
-import { updateOrder } from '~/team-accounts/src/server/actions/orders/update/update-order';
+import { updateOrder, logOrderActivities } from '~/team-accounts/src/server/actions/orders/update/update-order';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 
 import {
@@ -51,6 +51,7 @@ export function PriorityCombobox({
   const [priorityValue, setPriorityValue] = useState(
     mode == 'order' ? order?.priority : subtask?.priority,
   );
+
   const priorities = ['low', 'medium', 'high'];
   const priorityOptions = generateDropdownOptions(priorities, t, 'priorities');
   const router = useRouter();
@@ -75,20 +76,22 @@ export function PriorityCombobox({
       });
     },
   });
-
   const changeOrderPriority = useMutation({
     mutationFn: async (priority: Order.Type['priority']) => {
       if (order?.id) {
-        await updateOrder(order.id, { priority }, userWorkspace.name ?? undefined);
-        return router.push(`/orders/${order?.id}`);
+        const {order: updatedOrder} = await updateOrder(order.id, { priority }, userWorkspace.name ?? undefined);
+        router.push(`/orders/${order?.id}`);
+        return { updatedOrder };
       } else {
         throw new Error('Order ID is undefined');
       }
     },
-    onSuccess: () => {
+    onSuccess: async ({ updatedOrder }: { updatedOrder: Order.Type | null }) => {
       toast.success('Success', {
         description: t('success.orders.orderPriorityUpdated'),
       });
+      const fields: (keyof Order.Update)[] = ['priority'];
+      await logOrderActivities(updatedOrder?.id ?? 0, updatedOrder ?? {}, userWorkspace?.id ?? '', userWorkspace?.name ?? '', undefined, fields);
     },
     onError: () => {
       toast.error('Error', {
@@ -96,6 +99,14 @@ export function PriorityCombobox({
       });
     },
   });
+
+  React.useEffect(() => {
+    if (mode === 'order') {
+      setPriorityValue(order?.priority);
+    } else {
+      setPriorityValue(subtask?.priority);
+    }
+  }, [order, subtask, mode]);   
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
