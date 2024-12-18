@@ -7,14 +7,15 @@ import { Trans } from '@kit/ui/trans';
 
 import { Order } from '~/lib/order.types';
 
-import { updateOrder } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
+import { updateOrder, logOrderActivities } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import EditableHeader from '../../../../components/editable-header';
 import { useActivityContext } from '../context/activity-context';
 import DeleteOrderDropdown from './delete-order-dropdown';
 import { ReviewDialog } from './review-dialog';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
+import type { User } from '@supabase/supabase-js';
 
-export const OrderHeader = ({ order, agencyStatuses }: { order: Order.Relational, agencyStatuses: AgencyStatus.Type[] }) => {
+export const OrderHeader = ({ order, agencyStatuses, user }: { order: Order.Relational, agencyStatuses: AgencyStatus.Type[], user: User }) => {
   const { t } = useTranslation('responses');
 
   const { userRole } = useActivityContext();
@@ -26,10 +27,12 @@ export const OrderHeader = ({ order, agencyStatuses }: { order: Order.Relational
 
   const handleUpdate = async (value: string) => {
     try {
-      await updateOrder(order.id, { title: value });
+      const {order: updatedOrder} = await updateOrder(order.id, { title: value });
       toast.success('Success', {
         description: t('success.orders.orderNameUpdated'),
       });
+      const fields: (keyof Order.Update)[] = ['title'];
+      await logOrderActivities(updatedOrder.id, updatedOrder, user?.id ?? '', user?.user_metadata?.name ?? user?.user_metadata?.email ?? '', undefined, fields);
     } catch (error) {
       toast.error('Error', {
         description: t('error.orders.failedToUpdateOrderName'),
