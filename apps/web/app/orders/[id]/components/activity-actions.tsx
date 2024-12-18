@@ -1,6 +1,6 @@
 'use client';
 
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { BarChart, Calendar, LineChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -157,7 +157,7 @@ export const StatusActivity = ({
             <span>{formattedActivity.preposition}</span>
             <span>
               {activity.type === 'due_date' &&
-                formatDisplayDate(new Date(formattedActivity.value ?? ''), language, true)}
+                formatDisplayDate(parseISO(formattedActivity.value ?? ''), language, true)}
             </span>
             {(activity.type === 'priority' || activity.type === 'status') && (
               <ActivityCustomSpan
@@ -196,7 +196,7 @@ export const DefaultAction = ({
           <span>{formattedActivity.preposition}</span>
           <span>
             {activity.type === 'due_date'
-              ? formatDisplayDate(new Date(formattedActivity.value ?? ''), language)
+              ? formatDisplayDate(parseISO(formattedActivity.value ?? ''), language)
               : formattedActivity.value}
           </span>
         </span>

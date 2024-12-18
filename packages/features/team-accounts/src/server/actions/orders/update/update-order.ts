@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
@@ -39,14 +41,14 @@ export const updateOrder = async (
   orderId: Order.Type['id'],
   order: Order.Update,
   userId?: string,
-  userName?: string,
+  // userName?: string,
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
     // Execute all operations in parallel
-    const userData = userId ? await client.auth.getUser() : null;
+    const userData = !userId ? await client.auth.getUser() : null;
     userId = userId ?? userData?.data.user?.id ?? '';
-    userName = userName ?? userData?.data.user?.user_metadata?.name ?? '';
+    // userName = userName ?? userData?.data.user?.user_metadata?.name ?? '';
 
     const [orderUpdate] = await Promise.all([
       client
@@ -58,14 +60,16 @@ export const updateOrder = async (
         .eq('id', orderId)
         .select()
         .single(),
-      logOrderActivities(orderId, order, userId, userName ?? '', client),
     ]);
 
     if (orderUpdate.error) throw orderUpdate.error.message;
 
     // Start activity logging without waiting
 
-    return orderUpdate.data;
+    return {
+      order: orderUpdate.data,
+      user: userData?.data.user,
+    };
   } catch (error) {
     console.error('Error updating order:', error);
     throw error;
@@ -177,12 +181,13 @@ const handleFieldUpdate = async (
   }
 };
 
-const logOrderActivities = async (
+export const logOrderActivities = async (
   orderId: Order.Type['id'],
   order: Order.Update,
   userId: string,
   userNameOrEmail: string,
   client?: SupabaseClient<Database>,
+  fields?: (keyof Order.Update)[],
 ) => {
   client = client ?? getSupabaseServerComponentClient();
   try {
@@ -207,6 +212,25 @@ const logOrderActivities = async (
         await handleFieldUpdate(field, value, orderId, type, client);
       }
     };
+    const activityTypeMap = {
+      status: Activity.Enums.ActivityType.STATUS,
+      priority: Activity.Enums.ActivityType.PRIORITY,
+      due_date: Activity.Enums.ActivityType.DUE_DATE,
+      description: Activity.Enums.ActivityType.DESCRIPTION,
+      title: Activity.Enums.ActivityType.TITLE,
+    } as const;
+
+    if (fields && fields.length > 0) {
+      const activityPromises = fields.map((field) =>
+        logActivity(
+          activityTypeMap[field as keyof typeof activityTypeMap],
+          field,
+          order[field]?.toString() ?? '',
+        ),
+      );
+      await Promise.all(activityPromises);
+      return;
+    }
 
     // Create an array of promises for all activities
     const activityPromises = [
