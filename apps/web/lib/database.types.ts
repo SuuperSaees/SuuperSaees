@@ -1302,7 +1302,7 @@ export type Database = {
           created_at: string
           deleted_on: string | null
           id: string
-          order_id: number
+          order_id: number | null
           parent_id: string | null
           temp_id: string | null
           type: Database["public"]["Enums"]["message_category"]
@@ -1315,7 +1315,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
-          order_id: number
+          order_id?: number | null
           parent_id?: string | null
           temp_id?: string | null
           type?: Database["public"]["Enums"]["message_category"]
@@ -1328,7 +1328,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
-          order_id?: number
+          order_id?: number | null
           parent_id?: string | null
           temp_id?: string | null
           type?: Database["public"]["Enums"]["message_category"]
@@ -2768,20 +2768,6 @@ export type Database = {
             referencedRelation: "roles"
             referencedColumns: ["name"]
           },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_accounts: {
@@ -3365,7 +3351,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -3379,7 +3364,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -3393,7 +3377,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -3415,7 +3398,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -3426,7 +3408,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -3437,7 +3418,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -3573,10 +3553,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {

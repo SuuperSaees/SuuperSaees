@@ -109,3 +109,14 @@ export enum ErrorBillingOperations {
   FAILED_TO_CREATE_SERVICE = 'failedToCreateService',
   FAILED_TO_DELETE_SERVICE = 'failedToDeleteService',
 }
+
+export enum ErrorAnnotationOperations {
+  ANNOTATION_NOT_FOUND = 'annotationNotFound',
+  FAILED_TO_FIND_ANNOTATION= 'failedToFindAnnotation',
+  FAILED_TO_LIST_MESSAGES = 'failedToListMessages',
+  FAILED_TO_ADD_MESSAGE= 'failedToAddMessage',
+  FAILED_TO_CREATE_ANNOTATION = 'failedToCreateAnnotation',
+  FAILED_TO_UPDATE_ANNOTATION = 'failedToUpdateAnnotation',
+  FAILED_TO_DELETE_ANNOTATION = 'failedToDeleteAnnotation',
+  FAILED_TO_LIST_ANNOTATIONS = 'failedToListAnnotations',
+}
