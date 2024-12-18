@@ -41,7 +41,8 @@ export function useStripeActions() {
   const briefsQueryData = useQuery({
     queryKey: ['briefs'],
     queryFn: async () => await getBriefs(),
-    // enabled: view === 'briefs',
+    // only enable if services are loaded
+    enabled: !!servicesQueryData.data,
   });
 
   const services = servicesQueryData.data?.products ?? [];
