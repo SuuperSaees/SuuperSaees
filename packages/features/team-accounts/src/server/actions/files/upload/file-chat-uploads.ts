@@ -52,7 +52,7 @@ export const useFileUpload = ({
 
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable) {
-        const progress = (event.loaded / event.total) * 100;
+        const progress = Math.round((event.loaded / event.total) * 100);
         setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
           prevFile === file ? { ...prevFile, progress } : prevFile
         ));
