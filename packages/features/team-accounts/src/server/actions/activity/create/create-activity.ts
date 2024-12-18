@@ -11,8 +11,7 @@ export const addActivityAction = async (activity: Activity.Insert) => {
     const client = getSupabaseServerComponentClient();
     const { error: userError } = await client.auth.getUser();
     if (userError) throw userError.message;
-
-    const { error: activityError, data: activityData } = await client
+    const { error: activityError } = await client
       .from('activities')
       .insert(activity)
       .select('*')

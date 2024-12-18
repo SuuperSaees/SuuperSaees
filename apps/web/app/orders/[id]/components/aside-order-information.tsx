@@ -21,6 +21,7 @@ import {
   updateOrder,
   updateOrderAssigns,
   updateOrderFollowers,
+  logOrderActivities,
 } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { AgencyStatusesProvider } from '../../components/context/agency-statuses-context';
 import { useActivityContext } from '../context/activity-context';
@@ -31,6 +32,7 @@ import AvatarDisplayer from './ui/avatar-displayer';
 import { PriorityCombobox } from './priority-combobox';
 import { getClientMembersForOrganization } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getFormattedDateRange } from '../utils/get-formatted-dates';
+import { User } from '@supabase/supabase-js';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -90,13 +92,16 @@ const AsideOrderInformation = ({
 
   const changeDate = useMutation({
     mutationFn: async (due_date: Order.Type['due_date']) => {
-      await updateOrder(order.id, { due_date });
-      return router.push(`/orders/${order.id}`);
+      const { order: updatedOrder, user } = await updateOrder(order.id, { due_date });
+      return { updatedOrder, user };
     },
-    onSuccess: () => {
+    onSuccess: async ({ updatedOrder, user }: { updatedOrder: Order.Type, user: User | null | undefined }) => {
       toast.success('Success', {
         description: t('success.orders.orderDateUpdated'),
       });
+      const fields: (keyof Order.Update)[] = ['due_date'];
+      await logOrderActivities(updatedOrder.id, updatedOrder, user?.id ?? '', user?.user_metadata?.name ?? user?.user_metadata?.email ?? '', undefined, fields);
+      router.push(`/orders/${order.id}`);
     },
     onError: () => {
       toast.error('Error', {

@@ -18,7 +18,7 @@ import {
 } from '@kit/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Subtask } from '~/lib/tasks.types';
-import { updateOrder } from '~/team-accounts/src/server/actions/orders/update/update-order';
+import { updateOrder, logOrderActivities } from '~/team-accounts/src/server/actions/orders/update/update-order';
 import { createNewStatus } from '~/team-accounts/src/server/actions/statuses/create/create-status';
 import { deleteStatusById } from '~/team-accounts/src/server/actions/statuses/delete/delete-status';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
@@ -123,6 +123,7 @@ function StatusCombobox({
       // setCurrentStatusData(statuses?.find(status => status.id === status_id))
       // setOrdersData(prevOrders => prevOrders.map(order => order.id === orderId ? { ...order, status: status, status_id: status_id } : order));
       setCurrentStatusData(statuses?.find(status => status.id === status_id));
+      const { order: updatedOrder} = await updateOrder(orderId, { status, status_id }, userWorkspace.id ?? '');
       if(setOrdersData) {
         setOrdersData(prevOrders => 
           prevOrders.map(order => 
@@ -135,8 +136,7 @@ function StatusCombobox({
     if(changeTabFilteredOrders && activeTab) {
       changeTabFilteredOrders(activeTab);
     } 
-      await updateOrder(orderId, { status, status_id }, userWorkspace.id ?? '', userWorkspace.name ?? '');
-      return { status, status_id, orderId };
+      return { status, status_id, orderId, updatedOrder };
     },
     onMutate: ({ status_id, orderId, status }) => {
       const newStatusData = statuses?.find(status => status.id === status_id);
@@ -164,7 +164,7 @@ function StatusCombobox({
 
       return { previousStatusData, previousOrders };
     },
-    onSuccess: () => {
+    onSuccess: async ({orderId, updatedOrder}: {orderId: Order.Type['id'], updatedOrder: Order.Type}) => {
       setPopoverValue(currentStatusData?.status_name ?? '');
       queryClient.invalidateQueries({ queryKey: ['orders'] }).catch((error) => {
         console.error('Error invalidating orders query:', error);
@@ -173,6 +173,8 @@ function StatusCombobox({
       toast.success('Success', {
         description: t('success.orders.orderStatusUpdated'),
       });
+      const fields: (keyof Order.Update)[] = ['status'];
+      await logOrderActivities(orderId, updatedOrder, userWorkspace.id ?? '', userWorkspace.name ?? '', undefined, fields);
     },
     onError: (error, variables, context) => {
       if (context) {

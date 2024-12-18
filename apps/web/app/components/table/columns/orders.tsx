@@ -18,14 +18,15 @@ import DatePicker from '~/team-accounts/src/server/actions/orders/pick-date/pick
 import {
   updateOrder,
   updateOrderAssigns,
+  logOrderActivities,
 } from '~/team-accounts/src/server/actions/orders/update/update-order';
-
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import AvatarDisplayer from '../../../components/ui/avatar-displayer';
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
 import { EntityData } from '../types';
+import { Order } from '~/lib/order.types';
 
-const truncateText = (text: string, maxLength: number = 50) => {
+const truncateText = (text: string, maxLength = 50) => {
   if (!text) return '';
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + '...';
@@ -144,10 +145,12 @@ export const ordersColumns = (
       cell: ({ row }) => {
         const updateOrderDate = async (due_date: string, orderId: number) => {
           try {
-            await updateOrder(orderId, { due_date });
+           const {order, user} = await updateOrder(orderId, { due_date });
             toast('Success!', {
               description: t('success.orders.orderDateUpdated'),
             });
+            const fields: (keyof Order.Update)[] = ['due_date'];
+            await logOrderActivities(orderId, order, user?.id ?? '', user?.user_metadata?.name ?? user?.user_metadata?.email ?? '', undefined, fields);
           } catch (error) {
             toast('Error', {
               description: t('error.orders.failedToUpdateOrderDate'),

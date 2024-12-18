@@ -14,7 +14,7 @@ import { Input } from '@kit/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Spinner } from '@kit/ui/spinner';
 
-import { updateOrder } from '~/team-accounts/src/server/actions/orders/update/update-order';
+import { updateOrder, logOrderActivities } from '~/team-accounts/src/server/actions/orders/update/update-order';
 import { updateStatusById } from '~/team-accounts/src/server/actions/statuses/update/update-agency-status';
 import { updateSubtaskById } from '~/team-accounts/src/server/actions/tasks/update/update-task';
 import { convertToCamelCase, convertToSnakeCase, convertToTitleCase } from '../utils/format-agency-names';
@@ -23,6 +23,7 @@ import { updateCache } from '~/utils/handle-caching';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { useAgencyStatuses } from '../../components/context/agency-statuses-context';
 import { Dispatch, SetStateAction } from 'react';
+import { Order } from '~/lib/order.types';
 interface EditStatusPopoverProps {
   status_id: number;
   status_name: string;
@@ -113,9 +114,14 @@ function EditStatusPopover({
   });
 
   const updateOrderMutation = useMutation({
-    mutationFn: () => updateOrder(order_id as number, { status: convertToSnakeCase(name) }),
-    onSuccess: async () => {
+    mutationFn: async () => {
+      const {order, user} = await updateOrder(order_id as number, { status: convertToSnakeCase(name) });
+      return {order, user}
+    },
+    onSuccess: async ({order, user}) => {
       await queryClient.invalidateQueries({ queryKey: ['orders'] })
+      const fields: (keyof Order.Update)[] = ['status'];
+      await logOrderActivities(order_id as number, order, user?.id ?? '', user?.user_metadata?.name ?? user?.user_metadata?.email ?? '', undefined, fields);
       router.refresh()
     },
     onError: () => {

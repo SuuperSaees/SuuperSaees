@@ -36,8 +36,8 @@ const EditableHeader = ({
     }
     if (name !== initialName) {
       try {
-        await updateFunction(name);
         setIsEditing(false);
+        await updateFunction(name);
       } catch (error) {
         console.error(`Error updating the name/title:`, error);
       }
