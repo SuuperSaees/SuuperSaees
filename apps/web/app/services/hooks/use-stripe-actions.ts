@@ -37,7 +37,7 @@ export function useStripeActions({ userRole }: UseStripeActions) {
 
   const briefsQueryData = useQuery({
     queryKey: ['briefs'],
-    queryFn: async () => await getBriefs(),
+    queryFn: async () => await getBriefs({ includes: ['services'] }),
     // enabled: view === 'briefs',
   });
 
