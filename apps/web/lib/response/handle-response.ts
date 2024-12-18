@@ -10,6 +10,11 @@ import {
   isCustomSuccess,
 } from './is-custom-response';
 
+interface ResponseConfiguration {
+  showSuccessToast?: boolean
+  showErrorToast?: boolean
+}
+
 /**
  * Handles the response based on whether it contains an error or success object,
  * triggering the appropriate notification.
@@ -21,15 +26,16 @@ import {
 export function handleResponse<T>(
   response: T,
   entity: Entity,
-  t: TFunction
+  t: TFunction,
+  configuration: ResponseConfiguration = { showSuccessToast: true, showErrorToast: true }
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     if (isCustomResponse(response)) {
       if (response.error && isCustomError(response.error)) {
-        handleNotification(response.error, 'error', entity, t);
+        handleNotification(response.error, 'error', entity, t, configuration);
         reject(response.error); // Reject the promise on error
       } else if (response.success && isCustomSuccess(response.success)) {
-        handleNotification(response.success, 'success', entity, t);
+        handleNotification(response.success, 'success', entity, t, configuration);
         resolve(response.success as T); // Resolve the promise on success
       } else {
         reject(new Error('Unexpected response format')); // Reject for any other case
@@ -53,6 +59,7 @@ function handleNotification(
   type: 'error' | 'success',
   entity: Entity,
   t: TFunction,
+  configuration?: ResponseConfiguration
 ) {
   const operationName = extractOperationName(result);
   const description =
@@ -60,9 +67,13 @@ function handleNotification(
       ? t(`${type}.default`)
       : t(`${type}.${entity}.${operationName}`);
   // const statusText = result.statusText;
-
+  
   // Display notification using the appropriate toast method (error or success)
-  toast[type](type === 'error' ? t('common:error') : t('common:success'), { description });
+  if(type === 'success' && configuration?.showSuccessToast){
+    toast[type](t('common:success'), { description });
+  }else if(type === 'error' && configuration?.showErrorToast){
+    toast[type](t('common:error'), { description });
+  }
 }
 
 /**
