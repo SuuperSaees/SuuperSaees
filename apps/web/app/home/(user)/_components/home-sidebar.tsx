@@ -53,7 +53,7 @@ export async function HomeSidebar(props: { workspace: UserWorkspace }) {
         ? clientAccountNavigationConfig
         : personalAccountNavigationConfig;
   return (
-    <ThemedSidebar>
+    <ThemedSidebar className='text-sm'>
       <div className="padding-24">
         <AppLogo />
       </div>

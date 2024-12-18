@@ -3,7 +3,7 @@ import { CloudUpload, StickyNote, X, XIcon } from 'lucide-react';
 import { Progress } from '../../../../packages/ui/src/shadcn/progress';
 import { useTranslation } from 'react-i18next';
 import { useFileUpload } from '~/team-accounts/src/server/actions/files/upload/file-uploads';
-import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon } from '~/orders/[id]/components/fileIcons';
+import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon } from '~/orders/[id]/components/file-icons';
 
 interface FileInfo {
   file: File;
@@ -62,8 +62,10 @@ export default function UploadFileComponent({
   const [dragMessage, setDragMessage] = useState(t('dragAndDrop'));
   const [hoveredFileId, setHoveredFileId] = useState<string | null>(null);
 
+  const inputId = `file-input-${uuid}`;
+
   const handleFileInputClick = () => {
-    const fileInput = document.getElementById('file-input');
+    const fileInput = document.getElementById(inputId);
     if (fileInput) {
       fileInput.click();
     }
@@ -153,7 +155,7 @@ export default function UploadFileComponent({
         <p className="text-sm text-gray-600">{dragMessage}</p>
         <input
           type="file"
-          id="file-input"
+          id={inputId}
           className="hidden"
           multiple
           onChange={handleFileChange}

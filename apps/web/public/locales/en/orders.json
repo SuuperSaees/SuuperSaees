@@ -44,6 +44,9 @@
   },
   "tasks": {
     "emptyTasks": "No tasks found",
+    "emptySubtasks": "No subtasks found",
+    "emptyTasksDescription": "Add a task to get started.",
+    "emptyTasksDescriptionToClient": "",
     "addTask": "Add task",
     "addSubtask": "Add subtask",
     "newTask": "New task",
@@ -158,6 +161,10 @@
     "messageDeleted": "Message deleted",
     "messageDeletedSuccess": "The message has been deleted.",
     "messageDeletedError": "The message could not be deleted."
+  },
+  "dragAndDropDictionary": {
+    "dropHere": "Drop your files here",
+    "dropHereDescription": "SVG, PNG, JPG or GIF (max. 800x400px)"
   }
 }
 

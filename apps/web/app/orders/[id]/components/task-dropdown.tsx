@@ -28,6 +28,7 @@ import { AgencyStatusesProvider } from '../../components/context/agency-statuses
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Task } from '~/lib/tasks.types';
+import EmptyState from '~/components/ui/empty-state';
 function TaskDropdown({
   userRole,
   orderId,
@@ -192,91 +193,97 @@ function TaskDropdown({
               />
             </AccordionTrigger>
             <AccordionContent className='ml-10'>
-              {isEditable ? (
-                <DndContext
-                  onDragEnd={handleDragEndSubtask}
-                  onDragStart={handleDragStartSubtask}
-                  sensors={sensorsSubtask}
-                  collisionDetection={closestCorners}
-                >
-                  <SortableContext items={filteredSubtasks}>
-                    {filteredSubtasks.map((subtask) => (
-                      <SortableItem key={subtask.id} id={subtask.id} className="items-center">
-                        <SubtaskItem
-                          subtask={subtask}
-                          isEditing={editingSubtaskId === subtask.id}
-                          isHovered={hoveredSubtaskId === subtask.id}
-                          onHover={setHoveredSubtaskId}
-                          onEdit={() => handlers.handleStartEditing(subtask.id, subtask.name ?? '')}
-                          newSubtaskName={newSubtaskName}
-                          setNewSubtaskName={setNewSubtaskName}
-                          handleDateRangeChange={handlers.handleDateRangeChange}
-                          handlePriorityChange={(value) =>
-                            handlers.handlePriorityChange(subtask.id, subtask, value).catch(console.error)
-                          }
-                          handleAssignedToChange={(selectedUsers) =>
-                            handlers.handleUpdateAssignedTo(subtask.id, selectedUsers)
-                          }
-                          handleFollowersChange={(selectedUsers) =>
-                            handlers.handleUpdateFollowers(subtask.id, selectedUsers)
-                          }
-                          handleContentChange={(value) =>
-                            handlers.handleContentChange(subtask.id, subtask, value)
-                          }
-                          handleSaveTaskName={() => handlers.handleSaveTaskName(subtask.id, subtask, newSubtaskName)}
-                          handleKeyDown={(e) => handlers.handleKeyDown(e, subtask.id, subtask, newSubtaskName)}
-                          searchUserOptions={searchUserOptions}
-                          searchUserOptionsFollowers={searchUserOptionsFollowers}
-                          priorityOptions={priorityOptions}
-                          getPriorityClassName={getPriorityClassName}
-                          priorityColors={priorityColors}
-                          userRole={userRole}
-                          orderAgencyId={orderAgencyId}
-                          updateSubtask={updateSubtask}
-                          currentUserId={user.id}
-                        />
-                      </SortableItem>
-                    ))}
-                  </SortableContext>
-                </DndContext>
+              {filteredSubtasks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-4">
+                  <p className="text-sm text-gray-500">{t('tasks.emptySubtasks')}</p>
+                </div>
               ) : (
-                filteredSubtasks.map((subtask) => (
-                  <div key={subtask.id}>
-                    <SubtaskItem
-                      subtask={subtask}
-                      isEditing={editingSubtaskId === subtask.id}
-                      isHovered={hoveredSubtaskId === subtask.id}
-                      onHover={setHoveredSubtaskId}
-                      onEdit={() => handlers.handleStartEditing(subtask.id, subtask.name ?? '')}
-                      newSubtaskName={newSubtaskName}
-                      setNewSubtaskName={setNewSubtaskName}
-                      handleDateRangeChange={handlers.handleDateRangeChange}
-                      handlePriorityChange={(value) =>
-                        handlers.handlePriorityChange(subtask.id, subtask, value).catch(console.error)
-                      }
-                      handleAssignedToChange={(selectedUsers) =>
-                        handlers.handleUpdateAssignedTo(subtask.id, selectedUsers)
-                      }
-                      handleFollowersChange={(selectedUsers) =>
-                        handlers.handleUpdateFollowers(subtask.id, selectedUsers)
-                      }
-                      handleContentChange={(value) =>
-                        handlers.handleContentChange(subtask.id, subtask, value)
-                      }
-                      handleSaveTaskName={() => handlers.handleSaveTaskName(subtask.id, subtask, newSubtaskName)}
-                      handleKeyDown={(e) => handlers.handleKeyDown(e, subtask.id, subtask, newSubtaskName)}
-                      searchUserOptions={searchUserOptions}
-                      searchUserOptionsFollowers={searchUserOptionsFollowers}
-                      priorityOptions={priorityOptions}
-                      getPriorityClassName={getPriorityClassName}
-                      priorityColors={priorityColors}
-                      userRole={userRole}
-                      orderAgencyId={orderAgencyId}
-                      updateSubtask={updateSubtask}
-                      currentUserId={user.id}
-                    />
-                  </div>
-                ))
+                isEditable ? (
+                  <DndContext
+                    onDragEnd={handleDragEndSubtask}
+                    onDragStart={handleDragStartSubtask}
+                    sensors={sensorsSubtask}
+                    collisionDetection={closestCorners}
+                  >
+                    <SortableContext items={filteredSubtasks}>
+                      {filteredSubtasks.map((subtask) => (
+                        <SortableItem key={subtask.id} id={subtask.id} className="items-center">
+                          <SubtaskItem
+                            subtask={subtask}
+                            isEditing={editingSubtaskId === subtask.id}
+                            isHovered={hoveredSubtaskId === subtask.id}
+                            onHover={setHoveredSubtaskId}
+                            onEdit={() => handlers.handleStartEditing(subtask.id, subtask.name ?? '')}
+                            newSubtaskName={newSubtaskName}
+                            setNewSubtaskName={setNewSubtaskName}
+                            handleDateRangeChange={handlers.handleDateRangeChange}
+                            handlePriorityChange={(value) =>
+                              handlers.handlePriorityChange(subtask.id, subtask, value).catch(console.error)
+                            }
+                            handleAssignedToChange={(selectedUsers) =>
+                              handlers.handleUpdateAssignedTo(subtask.id, selectedUsers)
+                            }
+                            handleFollowersChange={(selectedUsers) =>
+                              handlers.handleUpdateFollowers(subtask.id, selectedUsers)
+                            }
+                            handleContentChange={(value) =>
+                              handlers.handleContentChange(subtask.id, subtask, value)
+                            }
+                            handleSaveTaskName={() => handlers.handleSaveTaskName(subtask.id, subtask, newSubtaskName)}
+                            handleKeyDown={(e) => handlers.handleKeyDown(e, subtask.id, subtask, newSubtaskName)}
+                            searchUserOptions={searchUserOptions}
+                            searchUserOptionsFollowers={searchUserOptionsFollowers}
+                            priorityOptions={priorityOptions}
+                            getPriorityClassName={getPriorityClassName}
+                            priorityColors={priorityColors}
+                            userRole={userRole}
+                            orderAgencyId={orderAgencyId}
+                            updateSubtask={updateSubtask}
+                            currentUserId={user.id}
+                          />
+                        </SortableItem>
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                ) : (
+                  filteredSubtasks.map((subtask) => (
+                    <div key={subtask.id}>
+                      <SubtaskItem
+                        subtask={subtask}
+                        isEditing={editingSubtaskId === subtask.id}
+                        isHovered={hoveredSubtaskId === subtask.id}
+                        onHover={setHoveredSubtaskId}
+                        onEdit={() => handlers.handleStartEditing(subtask.id, subtask.name ?? '')}
+                        newSubtaskName={newSubtaskName}
+                        setNewSubtaskName={setNewSubtaskName}
+                        handleDateRangeChange={handlers.handleDateRangeChange}
+                        handlePriorityChange={(value) =>
+                          handlers.handlePriorityChange(subtask.id, subtask, value).catch(console.error)
+                        }
+                        handleAssignedToChange={(selectedUsers) =>
+                          handlers.handleUpdateAssignedTo(subtask.id, selectedUsers)
+                        }
+                        handleFollowersChange={(selectedUsers) =>
+                          handlers.handleUpdateFollowers(subtask.id, selectedUsers)
+                        }
+                        handleContentChange={(value) =>
+                          handlers.handleContentChange(subtask.id, subtask, value)
+                        }
+                        handleSaveTaskName={() => handlers.handleSaveTaskName(subtask.id, subtask, newSubtaskName)}
+                        handleKeyDown={(e) => handlers.handleKeyDown(e, subtask.id, subtask, newSubtaskName)}
+                        searchUserOptions={searchUserOptions}
+                        searchUserOptionsFollowers={searchUserOptionsFollowers}
+                        priorityOptions={priorityOptions}
+                        getPriorityClassName={getPriorityClassName}
+                        priorityColors={priorityColors}
+                        userRole={userRole}
+                        orderAgencyId={orderAgencyId}
+                        updateSubtask={updateSubtask}
+                        currentUserId={user.id}
+                      />
+                    </div>
+                  ))
+                )
               )}
               {isEditable && (
                 <Button
@@ -298,15 +305,21 @@ function TaskDropdown({
   if (!loading && tasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center">
-        <p className="text-gray-500">{t('tasks.emptyTasks')}</p>
-        <Button
-          variant="secondary"
-          className="mt-4 py-0 text-gray-600"
-          onClick={handleAddTask}
-        >
-          <Plus className="mr-1 h-4 w-4" />
-          <p className="text-sm">{t('tasks.addTask')}</p>
-        </Button>
+        <EmptyState
+          title={t('tasks.emptyTasks')}
+          description={
+            isEditable ? t('tasks.emptyTasksDescription') : t('tasks.emptyTasksDescriptionToClient')
+          }
+          imageSrc="/images/illustrations/Illustration-files.svg"
+          button={
+            isEditable ? (
+              <Button variant="secondary" className="mt-4 py-0 text-gray-600" onClick={handleAddTask}>
+                <Plus className="mr-1 h-4 w-4" />
+                <p className="text-sm">{t('tasks.addTask')}</p>
+              </Button>
+            ) : undefined
+          }
+        />
       </div>
     );
   }

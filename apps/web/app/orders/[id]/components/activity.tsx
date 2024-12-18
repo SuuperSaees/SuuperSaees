@@ -14,6 +14,7 @@ import { insertOrderFiles } from '~/team-accounts/src/server/actions/files/creat
 const ActivityPage = ({ agencyName }: { agencyName: string }) => {
   const { order } = useActivityContext();
   const [showFileUploader, setShowFileUploader] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleFileIdsChange = async (fileIds: string[]) => {
     const orderFilesToInsert = fileIds.map((fileId) => {
@@ -105,14 +106,38 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
       <Separator className='w-full'/>
       <Interactions />
       <Separator className='w-full'/>
-      <div className="flex flex-col justify-end pt-3 px-8"> 
+      <div 
+        className={`flex flex-col justify-end pt-3 px-8 mb-4`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragging(true);
+        }}
+        onDragEnter={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragging(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragging(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragging(false);
+        }}
+      > 
         <RichTextEditor
-          className=" w-full overflow-auto"
+          className="w-full overflow-auto"
           onComplete={handleOnCompleteMessageSend}
           uploadFileIsExternal
           toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
           userRole={userRole}
           handleFileIdsChange={handleFileIdsChange}
+          isDragging={isDragging}
+          setIsDragging={setIsDragging}
         />
       </div>
   </div>

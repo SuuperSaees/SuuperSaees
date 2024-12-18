@@ -44,62 +44,73 @@ export const withImageOptions = <P extends ImageProps>(
 
     return (
       <div className="group relative inline-block h-full max-h-[2000px] w-[150px] min-w-[150px] overflow-hidden justify-center items-center flex">
-        <WrappedComponent {...props} />
-        <div className="absolute right-0 top-0 flex items-center">
-          <button
-            onClick={handleToggleMenu}
-            className="p-2 text-black sm:hidden"
-          >
-            <MoreVertical className="h-6 w-6" />
-          </button>
+        <ImageDialogView
+          triggerComponent={
+            <>
+              <WrappedComponent {...props} />
+              <div className="absolute right-0 top-0 flex items-center">
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleToggleMenu();
+                  }}
+                  className="p-2 text-black sm:hidden"
+                >
+                  <MoreVertical className="h-6 w-6" />
+                </button>
 
-          <div
-            className={`${
-              isMenuOpen ? 'flex' : 'hidden'
-            } absolute right-0 top-8 z-10 flex-col items-start gap-2 rounded-md bg-transparent p-2 text-gray-700 sm:right-0 sm:top-0 sm:flex-row sm:items-center sm:group-hover:flex`}
-          >
-            <Tooltip content={'Copy link'}>
-              <button
-                className="flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
-                onClick={handleCopyLink}
-              >
-                {isLinkCopied ? (
-                  <Check className="h-[15px] w-[15px] text-green-500" />
-                ) : (
-                  <Copy className="h-[15px] w-[15px]" />
-                )}
-              </button>
-            </Tooltip>
+                <div
+                  className={`${
+                    isMenuOpen ? 'flex' : 'hidden'
+                  } absolute right-0 top-8 z-10 flex-col items-start gap-2 rounded-md bg-transparent p-2 text-gray-700 sm:right-0 sm:top-0 sm:flex-row sm:items-center sm:group-hover:flex`}
+                >
+                  <Tooltip content={'Copy link'}>
+                    <button
+                      className="flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleCopyLink().catch(console.error);
+                      }}
+                    >
+                      {isLinkCopied ? (
+                        <Check className="h-[15px] w-[15px] text-green-500" />
+                      ) : (
+                        <Copy className="h-[15px] w-[15px]" />
+                      )}
+                    </button>
+                  </Tooltip>
 
-            <ImageDialogView
-              triggerComponent={
-                <Tooltip content="View">
-                  <button className="flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm">
-                    <Eye className="h-[15px] w-[15px]" />
-                  </button>
-                </Tooltip>
-              }
-              imageContentComponent={
-                <WrappedComponent
-                  {...props}
-                  className={props.dialogClassName}
-                />
-              }
-              handleCopyLink={handleCopyLink}
-              handleDownload={handleDownload}
-              isLinkCopied={isLinkCopied}
+                  <Tooltip content="View">
+                    <button className="flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm">
+                      <Eye className="h-[15px] w-[15px]" />
+                    </button>
+                  </Tooltip>
+
+                  <Tooltip content="Download">
+                    <button
+                      className="flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDownload().catch(console.error);
+                      }}
+                    >
+                      <Download className="h-[15px] w-[15px]" />
+                    </button>
+                  </Tooltip>
+                </div>
+              </div>
+            </>
+          }
+          imageContentComponent={
+            <WrappedComponent
+              {...props}
+              className={props.dialogClassName}
             />
-
-            <Tooltip content="Download">
-              <button
-                className="flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
-                onClick={handleDownload}
-              >
-                <Download className="h-[15px] w-[15px]" />
-              </button>
-            </Tooltip>
-          </div>
-        </div>
+          }
+          handleCopyLink={handleCopyLink}
+          handleDownload={handleDownload}
+          isLinkCopied={isLinkCopied}
+        />
       </div>
     );
   };
@@ -195,7 +206,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
       }}
     >
       <DialogTrigger>{triggerComponent}</DialogTrigger>
-      <DialogContent className="max-h-[90vh] max-w-[90vw] p-8">
+      <DialogContent className="p-8 h-[90vh] w-[90vw]">
         <div
           className="relative flex aspect-auto max-h-[calc(90vh-10rem)] w-full items-center justify-center overflow-hidden"
           ref={containerRef}

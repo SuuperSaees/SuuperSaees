@@ -2,16 +2,20 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
+
+
+import { Credentials, CredentialsCrypto, EncryptedCredentials } from '../../../../../../../../apps/web/app/utils/credentials-crypto';
+import { BillingAccounts } from '../../../../../../../../apps/web/lib/billing-accounts.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import {
-  fetchCurrentUser,
-  getPrimaryOwnerId,
-} from '../../members/get/get-member-account';
+import { fetchCurrentUser, getPrimaryOwnerId } from '../../members/get/get-member-account';
 import { getAgencyForClient } from '../../organizations/get/get-organizations';
 import { hasPermissionToReadClientServices } from '../../permissions/services';
+
 
 export const getServiceById = async (
   serviceId: Service.Type['id'],
@@ -91,15 +95,15 @@ export async function fetchClientServices(
   clientOrganizationId: string,
 ) {
   try {
-    
     const { data: clientServicesData, error: clientServicesError } =
       await client
         .from('client_services')
-        .select('id, created_at, info:services(id, name, price, service_description, service_image)')
+        .select(
+          'id, created_at, info:services(id, name, price, service_description, service_image)',
+        )
         .eq('client_organization_id', clientOrganizationId);
 
     if (clientServicesError) {
-
       throw new Error(
         `Error getting client services, ${clientServicesError.message}`,
       );
@@ -122,7 +126,10 @@ export async function getClientServices(
     if (!user) throw new Error('No user found');
 
     // Step 2: Get the client's service
-    const clientServiceData= await fetchClientServices(client, clientOrganizationId)
+    const clientServiceData = await fetchClientServices(
+      client,
+      clientOrganizationId,
+    );
 
     // Step 3: Get the client's agency
     const agencyData = await getAgencyForClient(clientOrganizationId);
@@ -165,4 +172,122 @@ export async function getClientServices(
     console.error('Error while getting client services:', error);
     throw error;
   }
+}
+
+export async function getPaymentsMethods(): Promise<
+  BillingAccounts.PaymentMethod[]
+> {
+  const client = getSupabaseServerComponentClient();
+  const primaryOwnerId = (await getPrimaryOwnerId(client)) ?? '';
+  const paymentMethods: BillingAccounts.PaymentMethod[] = [];
+  const { data: billingAccountsData, error: billingAccountsError } =
+    await client
+      .from('billing_accounts')
+      .select('*')
+      .eq('account_id', primaryOwnerId);
+
+  if (billingAccountsError) throw new Error(billingAccountsError.message);
+
+  for (const billingAccount of billingAccountsData) {
+    if (
+      billingAccount.provider === BillingAccounts.BillingProviderKeys.STRIPE
+    ) {
+      paymentMethods.push({
+        id: billingAccount.id,
+        name: billingAccount.provider,
+        icon: billingAccount.provider,
+        description: billingAccount.provider,
+      });
+    }
+
+    if (billingAccount.provider === BillingAccounts.BillingProviderKeys.TRELI) {
+      const secretKey = Buffer.from(
+        process.env.CREDENTIALS_SECRET_KEY ?? '',
+        'hex',
+      );
+      const credentialsCrypto = new CredentialsCrypto(secretKey);
+      const parsedCredentials: EncryptedCredentials = JSON.parse(
+        billingAccount.credentials as string,
+      );
+
+      const credentials =
+        credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+      const authToken = Buffer.from(
+        `${credentials.username}:${credentials.password}`,
+      ).toString('base64');
+
+      const responsePlans = await fetch(
+        `https://treli.co/wp-json/api/gateways/list`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Basic ${authToken}`,
+          },
+        },
+      );
+
+      if (!responsePlans.ok) {
+        console.error('Failed to get plans from Treli');
+        throw new Error('Failed to get plans from Treli');
+      }
+
+      const paymentMethodsTreli = (await responsePlans.json()) as {
+        mercadopago: {
+          id: string;
+        };
+        stripedirect: {
+          id: string;
+        };
+        wompidirect: {
+          id: string;
+        };
+        epaycodirect: {
+          id: string;
+        };
+        payudirect: {
+          id: string;
+        };
+        placetopay: {
+          id: string;
+        };
+        openpaydirect: {
+          id: string;
+        };
+        payucodirect: {
+          id: string;
+        };
+        placetopaydirect: {
+          id: string;
+        };
+        paymentswaydirect: {
+          id: string;
+        };
+        dlocalgodirect: {
+          id: string;
+        };
+        palommadirect: {
+          id: string;
+        };
+        coinkdirect: {
+          id: string;
+        };
+        payzendirect: {
+          id: string;
+        };
+      };
+
+      Object.values(paymentMethodsTreli).forEach((paymentMethod) => {
+        if (paymentMethod.id !== 'stripedirect') {
+          paymentMethods.push({
+            id: paymentMethod.id,
+            name: paymentMethod.id,
+            icon: paymentMethod.id,
+            description: paymentMethod.id,
+          });
+        }
+      });
+    }
+  }
+
+  return paymentMethods;
 }

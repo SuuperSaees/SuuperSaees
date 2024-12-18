@@ -319,6 +319,87 @@ export type Database = {
           },
         ]
       }
+      annotations: {
+        Row: {
+          created_at: string | null
+          deleted_on: string | null
+          file_id: string
+          id: string
+          message_id: string | null
+          number: number | null
+          page_number: number | null
+          position_x: number | null
+          position_y: number | null
+          status: Database["public"]["Enums"]["annotations_status"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_on?: string | null
+          file_id: string
+          id?: string
+          message_id?: string | null
+          number?: number | null
+          page_number?: number | null
+          position_x?: number | null
+          position_y?: number | null
+          status?: Database["public"]["Enums"]["annotations_status"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_on?: string | null
+          file_id?: string
+          id?: string
+          message_id?: string | null
+          number?: number | null
+          page_number?: number | null
+          position_x?: number | null
+          position_y?: number | null
+          status?: Database["public"]["Enums"]["annotations_status"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "annotations_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annotations_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annotations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annotations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annotations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_accounts: {
         Row: {
           account_id: string
@@ -1219,9 +1300,12 @@ export type Database = {
         Row: {
           content: string | null
           created_at: string
+          deleted_on: string | null
           id: string
           order_id: number
+          parent_id: string | null
           temp_id: string | null
+          type: Database["public"]["Enums"]["message_category"]
           updated_at: string
           user_id: string
           visibility: Database["public"]["Enums"]["messages_types"] | null
@@ -1229,9 +1313,12 @@ export type Database = {
         Insert: {
           content?: string | null
           created_at?: string
+          deleted_on?: string | null
           id?: string
           order_id: number
+          parent_id?: string | null
           temp_id?: string | null
+          type?: Database["public"]["Enums"]["message_category"]
           updated_at?: string
           user_id: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null
@@ -1239,9 +1326,12 @@ export type Database = {
         Update: {
           content?: string | null
           created_at?: string
+          deleted_on?: string | null
           id?: string
           order_id?: number
+          parent_id?: string | null
           temp_id?: string | null
+          type?: Database["public"]["Enums"]["message_category"]
           updated_at?: string
           user_id?: string
           visibility?: Database["public"]["Enums"]["messages_types"] | null
@@ -1252,6 +1342,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
           {
@@ -1977,6 +2074,7 @@ export type Database = {
           created_at: string
           credit_based: boolean | null
           credits: number | null
+          currency: string
           deleted_on: string | null
           hours: number | null
           id: number
@@ -2007,6 +2105,7 @@ export type Database = {
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
+          currency?: string
           deleted_on?: string | null
           hours?: number | null
           id?: number
@@ -2037,6 +2136,7 @@ export type Database = {
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
+          currency?: string
           deleted_on?: string | null
           hours?: number | null
           id?: number
@@ -2820,6 +2920,7 @@ export type Database = {
           created_at: string
           updated_at: string
           deleted_on: string
+          settings: Json
         }[]
       }
       get_config: {
@@ -3069,6 +3170,7 @@ export type Database = {
         | "title"
         | "assigned_to"
         | "task"
+      annotations_status: "active" | "completed" | "draft"
       app_permissions:
         | "roles.manage"
         | "billing.manage"
@@ -3119,6 +3221,7 @@ export type Database = {
         | "image"
         | "video"
       file_types: "image" | "video" | "pdf" | "fig"
+      message_category: "chat_message" | "annotation"
       messages_types: "public" | "internal_agency"
       notification_channel: "in_app" | "email"
       notification_type: "info" | "warning" | "error"

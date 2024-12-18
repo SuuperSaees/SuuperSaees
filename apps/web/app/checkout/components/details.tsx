@@ -6,7 +6,7 @@ import { loadStripe } from '@stripe/stripe-js';
 
 import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/select-plan/components/convertToSubcurrency';
-
+import { BillingAccounts } from '~/lib/billing-accounts.types';
 import BillingForm from './billing_form';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
@@ -21,6 +21,7 @@ type DetailsSideProps = {
   organizationId: string;
   logoUrl: string;
   sidebarBackgroundColor: string;
+  paymentMethods?: BillingAccounts.PaymentMethod[];
 };
 
 const DetailsSide: React.FC<DetailsSideProps> = ({
@@ -29,8 +30,9 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
   organizationId,
   logoUrl,
   sidebarBackgroundColor,
+  paymentMethods,
 }) => {
-  const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY, {
+  const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? '', {
     stripeAccount: stripeId,
   });
 
@@ -40,7 +42,7 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
       options={{
         mode: service.recurrence ? 'subscription' : 'payment',
         amount: convertToSubcurrency(service.price ?? 0),
-        currency: 'usd',
+        currency: service.currency,
       }}
     >
       <BillingForm
@@ -49,6 +51,7 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
         organizationId={organizationId}
         logoUrl={logoUrl}
         sidebarBackgroundColor={sidebarBackgroundColor}
+        paymentMethods={paymentMethods ?? []}
       />
     </Elements>
   );

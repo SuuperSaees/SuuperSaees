@@ -1,19 +1,19 @@
 'use client';
 
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { BarChart, Calendar, LineChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Order } from '~/lib/order.types';
 
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
-import { Activity, ActivityType } from '../context/activity-context';
 import { priorityColors, statusColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
 import { convertToTitleCase } from '../utils/format-agency-names';
 import { formatDisplayDate } from '@kit/shared/utils';
+import { ActivityType, DataResult } from '../context/activity.types';
 const translateActivity = (
-  activity: Activity,
+  activity: DataResult.Activity,
   t: TFunction<'logs', undefined>,
 ) => {
   const availableTranslates = ['status', 'priority'];
@@ -38,8 +38,8 @@ const translateActivity = (
   return newActivity;
 };
 interface ActivityActionProps {
-  activity: Activity;
-  formattedActivity: Activity;
+  activity: DataResult.Activity;
+  formattedActivity: DataResult.Activity;
 }
 interface ActivityCustomSpan {
   value: string;
@@ -157,7 +157,7 @@ export const StatusActivity = ({
             <span>{formattedActivity.preposition}</span>
             <span>
               {activity.type === 'due_date' &&
-                formatDisplayDate(new Date(formattedActivity.value ?? ''), language, true)}
+                formatDisplayDate(parseISO(formattedActivity.value ?? ''), language, true)}
             </span>
             {(activity.type === 'priority' || activity.type === 'status') && (
               <ActivityCustomSpan
@@ -196,7 +196,7 @@ export const DefaultAction = ({
           <span>{formattedActivity.preposition}</span>
           <span>
             {activity.type === 'due_date'
-              ? formatDisplayDate(new Date(formattedActivity.value ?? ''), language)
+              ? formatDisplayDate(parseISO(formattedActivity.value ?? ''), language)
               : formattedActivity.value}
           </span>
         </span>

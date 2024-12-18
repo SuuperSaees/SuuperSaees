@@ -2,21 +2,26 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import {
-  fetchCurrentUser,
-  fetchCurrentUserAccount,
-  getPrimaryOwnerId,
-  getUserRole,
-} from '../../members/get/get-member-account';
+import { fetchCurrentUser, fetchCurrentUserAccount, getPrimaryOwnerId, getUserRole } from '../../members/get/get-member-account';
 import { fetchClientServices } from '../../services/get/get-services';
 
-export const getBriefs = async (): Promise<
+interface Configurations {
+  includes?: Array<string>;
+}
+
+export const getBriefs = async (
+  configurations: Configurations = {},
+): Promise<
   Brief.Relationships.Services.Response[]
 > => {
   try {
@@ -40,11 +45,12 @@ export const getBriefs = async (): Promise<
     if (validAgencyRoles.has(accountRole)) {
       // Step 4.1: get the propitary_organization_id
       const organizationOwnerId = await getPrimaryOwnerId();
-
+      
       // Step 4.2: get the briefs for the organization
       const briefs = await fetchBriefsByOrgOwnerId(
         client,
         organizationOwnerId ?? '',
+        configurations,
       );
 
       return briefs;
@@ -216,6 +222,7 @@ export const fetchBriefs = async (
 export const fetchBriefsByOrgOwnerId = async (
   client: SupabaseClient<Database>,
   ownerId: Brief.Type['propietary_organization_id'],
+  configurations: Configurations = {},
 ): Promise<Brief.Relationships.Services.Response[]> => {
   try {
     // *, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message)), services ( name )
@@ -223,7 +230,8 @@ export const fetchBriefsByOrgOwnerId = async (
       .from('briefs')
       .select(
         `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
-        form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))`,
+        form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))
+        ${configurations.includes?.includes('services') ? ',services ( id,name )' : ''}`,
       )
       .eq('propietary_organization_id', ownerId);
 
@@ -283,4 +291,3 @@ export const fetchBriefsResponsesforOrders = async (
     throw error;
   }
 };
-

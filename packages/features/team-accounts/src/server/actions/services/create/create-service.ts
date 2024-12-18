@@ -12,16 +12,14 @@ import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Client } from '../../../../../../../../apps/web/lib/client.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { CustomError, CustomResponse, ErrorServiceOperations } from '../../../../../../../shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { fetchClientByOrgId } from '../../clients/get/get-clients';
-import { fetchCurrentUser, getPrimaryOwnerId, getStripeAccountID } from '../../members/get/get-member-account';
+import { fetchCurrentUser, getPrimaryOwnerId } from '../../members/get/get-member-account';
 import { hasPermissionToAddClientServices } from '../../permissions/services';
-import { updateTeamAccountStripeId } from '../../team-details-server-actions';
 
 
-// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+// import { updateTeamAccountStripeId } from '../../team-details-server-actions';
 
 interface ServiceData {
   step_type_of_service: {
@@ -34,6 +32,7 @@ interface ServiceData {
     service_description: string;
   };
   step_service_price: {
+    currency: string;
     standard: boolean;
     purchase_limit: number;
     allowed_orders: number;
@@ -58,8 +57,8 @@ export const createService = async (clientData: ServiceData) => {
   try {
     const primary_owner_user_id = await getPrimaryOwnerId();
     if (!primary_owner_user_id) throw new Error('No primary owner found');
-    const { userId, stripeId: stripeAccountId } = await getStripeAccountID();
-    let stripeId = stripeAccountId;
+    // const { userId, stripeId: stripeAccountId } = await getStripeAccountID();
+    // let stripeId = stripeAccountId;
     const newService = {
       created_at: new Date().toISOString(),
       status: 'active' as Service.Type['status'],
@@ -70,6 +69,7 @@ export const createService = async (clientData: ServiceData) => {
         clientData.step_type_of_service.recurring_subscription,
       service_image: clientData.step_service_details.service_image,
       name: clientData.step_service_details.service_name,
+      currency: clientData.step_service_price.currency.toLowerCase(),
       service_description: clientData.step_service_details.service_description,
       standard: clientData.step_service_price.standard,
       purchase_limit: clientData.step_service_price.purchase_limit,
@@ -105,124 +105,124 @@ export const createService = async (clientData: ServiceData) => {
         ErrorServiceOperations.FAILED_TO_CREATE_SERVICE,
       );
 
-    if (!stripeId) {
-      const user = await fetchUserAccount(client);
-      const stripeAccount = await createStripeAccount('', user?.id ?? '');
-      await updateTeamAccountStripeId({
-        stripe_id: stripeAccount.accountId,
-        id: user?.id as string,
-      });
-      stripeId = stripeAccount.accountId;
-    }
-    const stripeProduct = await createStripeProduct(
-      stripeId,
-      clientData,
-      userId,
-    );
-    const stripePrice = await createStripePrice(
-      stripeId,
-      stripeProduct.productId,
-      clientData,
-      userId,
-    );
+    // if (!stripeId) {
+    //   const user = await fetchUserAccount(client);
+    //   const stripeAccount = await createStripeAccount('', user?.id ?? '');
+    //   await updateTeamAccountStripeId({
+    //     stripe_id: stripeAccount.accountId,
+    //     id: user?.id as string,
+    //   });
+    //   stripeId = stripeAccount.accountId;
+    // }
+    // const stripeProduct = await createStripeProduct(
+    //   stripeId,
+    //   clientData,
+    //   userId,
+    // );
+    // const stripePrice = await createStripePrice(
+    //   stripeId,
+    //   stripeProduct.productId,
+    //   clientData,
+    //   userId,
+    // );
 
-    await updateServiceWithPriceId(
-      client,
-      dataResponseCreateService.id,
-      stripePrice.priceId,
-    );
+    // await updateServiceWithPriceId(
+    //   client,
+    //   dataResponseCreateService.id,
+    //   stripePrice.priceId,
+    // );
 
     return CustomResponse.success(
       {
         supabase: dataResponseCreateService,
-        stripeProduct,
-        stripePrice,
+        // stripeProduct,
+        // stripePrice,
       },
       'serviceCreated',
     ).toJSON();
   } catch (error) {
-    console.error('Error al crear el servicio:', error);
+    console.error('Error to create service:', error);
     return CustomResponse.error(error).toJSON();
   }
 };
 
-async function fetchUserAccount(client: SupabaseClient<Database>) {
-  const {
-    data: { user },
-    error,
-  } = await client.auth.getUser();
-  if (error) throw error;
-  return user;
-}
+// async function fetchUserAccount(client: SupabaseClient<Database>) {
+//   const {
+//     data: { user },
+//     error,
+//   } = await client.auth.getUser();
+//   if (error) throw error;
+//   return user;
+// }
 
-async function createStripeAccount(email: string, userId: string) {
-  const { domain: baseUrl } = await getDomainByUserId(userId, true);
+// async function createStripeAccount(email: string, userId: string) {
+//   const { domain: baseUrl } = await getDomainByUserId(userId, true);
 
-  const response = await fetch(`${baseUrl}/api/stripe/create-account`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  });
-  if (!response.ok) throw new Error('Failed to create Stripe account');
-  return response.json();
-}
+//   const response = await fetch(`${baseUrl}/api/stripe/create-account`, {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({ email }),
+//   });
+//   if (!response.ok) throw new Error('Failed to create Stripe account');
+//   return response.json();
+// }
 
-async function createStripeProduct(
-  accountId: string,
-  clientData: ServiceData,
-  userId: string,
-) {
-  const { domain: baseUrl } = await getDomainByUserId(userId, true);
-  const response = await fetch(`${baseUrl}/api/stripe/create-service`, {
-    // Important: This endpoint is not used anymore.
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      accountId,
-      name: clientData.step_service_details.service_name,
-      description: clientData.step_service_details.service_description,
-      imageUrl: clientData.step_service_details.service_image,
-    }),
-  });
-  if (!response.ok) throw new Error('Failed to create Stripe product');
-  return response.json();
-}
+// async function createStripeProduct(
+//   accountId: string,
+//   clientData: ServiceData,
+//   userId: string,
+// ) {
+//   const { domain: baseUrl } = await getDomainByUserId(userId, true);
+//   const response = await fetch(`${baseUrl}/api/stripe/create-service`, {
+//     // Important: This endpoint is not used anymore.
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({
+//       accountId,
+//       name: clientData.step_service_details.service_name,
+//       description: clientData.step_service_details.service_description,
+//       imageUrl: clientData.step_service_details.service_image,
+//     }),
+//   });
+//   if (!response.ok) throw new Error('Failed to create Stripe product');
+//   return response.json();
+// }
 
-async function createStripePrice(
-  accountId: string,
-  productId: string,
-  clientData: ServiceData,
-  userId: string,
-) {
-  const { domain: baseUrl } = await getDomainByUserId(userId, true);
-  const response = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
-    // Important: This endpoint is not used anymore.
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      accountId,
-      productId,
-      unitAmount: clientData.step_service_price.price * 100,
-      currency: 'usd',
-      isRecurring: clientData.step_type_of_service.recurring_subscription,
-      interval: clientData.step_service_price.recurrence,
-    }),
-  });
-  if (!response.ok) throw new Error('Failed to create Stripe price');
-  return response.json();
-}
+// async function createStripePrice(
+//   accountId: string,
+//   productId: string,
+//   clientData: ServiceData,
+//   userId: string,
+// ) {
+//   const { domain: baseUrl } = await getDomainByUserId(userId, true);
+//   const response = await fetch(`${baseUrl}/api/stripe/create-service-price`, {
+//     // Important: This endpoint is not used anymore.
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({
+//       accountId,
+//       productId,
+//       unitAmount: clientData.step_service_price.price * 100,
+//       currency: 'usd',
+//       isRecurring: clientData.step_type_of_service.recurring_subscription,
+//       interval: clientData.step_service_price.recurrence,
+//     }),
+//   });
+//   if (!response.ok) throw new Error('Failed to create Stripe price');
+//   return response.json();
+// }
 
-async function updateServiceWithPriceId(
-  client: SupabaseClient<Database>,
-  serviceId: number,
-  priceId: string,
-) {
-  const { error } = await client
-    .from('services')
-    .update({ price_id: priceId })
-    .eq('id', serviceId);
-  if (error) throw new Error(error.message);
-}
+// async function updateServiceWithPriceId(
+//   client: SupabaseClient<Database>,
+//   serviceId: number,
+//   priceId: string,
+// ) {
+  // const { error } = await client
+  //   .from('services')
+  //   .update({ price_id: priceId })
+  //   .eq('id', serviceId);
+  // if (error) throw new Error(error.message);
+// }
 
 export async function addServiceToClient(
   clientOrganizationId: string,

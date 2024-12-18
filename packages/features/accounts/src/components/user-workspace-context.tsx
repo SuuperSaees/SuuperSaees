@@ -6,7 +6,7 @@ import { User } from '@supabase/supabase-js';
 
 import { Tables } from '@kit/supabase/database';
 
-interface UserWorkspace {
+export interface UserWorkspace {
   accounts: Array<{
     label: string | null;
     value: string | null;

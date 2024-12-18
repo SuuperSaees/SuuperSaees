@@ -80,6 +80,7 @@ export const FormSchema = createStepSchema({
     credit_based: z.boolean().default(false),
     credits: z.number(),
     price: z.number(),
+    currency: z.string().default('USD'),
     recurrence: z.string(),
     test_period: z.boolean().default(false),
     test_period_duration: z.number(),
@@ -112,6 +113,7 @@ interface Service {
   created_at: string;
   name: string;
   price: number;
+  currency: string;
   number_of_clients: number;
   status: string;
   propietary_organization_id: string;
@@ -165,6 +167,7 @@ export function MultiStepFormDemo({
         credit_based: previousService?.credit_based ?? false,
         credits: previousService?.credits ?? 0,
         price: previousService?.price ?? 0,
+        currency: previousService?.currency ?? 'USD',
         recurrence: previousService?.recurrence ?? '',
         test_period: previousService?.test_period ?? false,
         test_period_duration: previousService?.test_period_duration ?? 0,

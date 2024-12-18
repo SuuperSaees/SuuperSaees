@@ -2,10 +2,15 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
+
 
 // Helper function to fetch current user data
 export async function fetchCurrentUser(client: SupabaseClient<Database>) {
@@ -87,17 +92,24 @@ export async function fetchUsersAccounts(
   }
 }
 
-export async function getPrimaryOwnerId(): Promise<string | undefined> {
+export async function getPrimaryOwnerId(
+  client?: SupabaseClient<Database>,
+  accountId?: string,
+): Promise<string | undefined> {
   try {
-    const client = getSupabaseServerComponentClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
+    client = client ?? getSupabaseServerComponentClient();
+    let userId = accountId;
+    if (!userId) {
+      const { data: userData, error: userError } = await client.auth.getUser();
+      if (userError) throw userError;
+      userId = userData.user?.id;
+    }
 
     // first we get the user account
     const { data: userAccountData, error: userAccountError } = await client
       .from('accounts')
       .select('organization_id')
-      .eq('id', userData.user?.id)
+      .eq('id', userId)
       .single();
 
     if (userAccountError)
@@ -213,7 +225,7 @@ export async function getUserRoleById(userId: string, adminActivated = false) {
 
     return userAccountData?.account_role;
   } catch (error) {
-    console.error('Error fetching user role:', error);
+    console.error('Error fetching user role by id:', error);
     throw error;
   }
 }
@@ -228,14 +240,15 @@ export async function getStripeAccountID(): Promise<{
     if (userError) throw userError;
 
     const { data: userAccountData, error: accountsError } = await client
-      .from('accounts')
-      .select()
-      .eq('id', userData.user.id)
+      .from('billing_accounts')
+      .select('provider_id')
+      .eq('account_id', userData.user.id)
+      .eq('provider', 'stripe')
       .single();
 
     if (accountsError) throw accountsError;
 
-    const stripeId = userAccountData?.stripe_id;
+    const stripeId = userAccountData?.provider_id;
 
     return {
       stripeId: stripeId ?? '',

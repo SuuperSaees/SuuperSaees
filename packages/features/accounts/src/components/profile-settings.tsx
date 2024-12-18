@@ -49,6 +49,7 @@ function ProfileSettings({
         'outlook.com',
         'outlook.office.com',
         'tidycal.com',
+        'calendar.app.google'
       ];
       const domain = parsedUrl.hostname.replace('www.', '');
       return allowedDomains.some((allowedDomain) =>

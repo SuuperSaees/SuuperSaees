@@ -6,7 +6,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -17,7 +17,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from '@tanstack/react-table';
-import { ArrowUp, Pen, Search } from 'lucide-react';
+import { ArrowUp, Copy, Pen, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
@@ -28,13 +28,17 @@ import { TabsList } from '@kit/ui/tabs';
 
 import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
 import { SkeletonTable } from '../../../../../../apps/web/components/ui/skeleton';
+import Tooltip  from  "../../../../../../apps/web/components/ui/tooltip";
 import { Brief } from '../../../../../../apps/web/lib/brief.types';
 import { handleResponse } from '../../../../../../apps/web/lib/response/handle-response';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { ThemedTabTrigger } from '../../../../accounts/src/components/ui/tab-themed-with-settings';
-import { createBrief } from '../../server/actions/briefs/create/create-briefs';
+import {
+  createBrief,
+  duplicateBrief,
+} from '../../server/actions/briefs/create/create-briefs';
 // import CreateBriefDialog from '../../server/actions/briefs/create/create-brief-ui';
 import DeleteBriefDialog from '../../server/actions/briefs/delete/delete-brief-ui';
 
@@ -209,6 +213,18 @@ export function BriefsTable({
 const useGetColumns = (
   t: TFunction<'briefs', undefined>,
 ): ColumnDef<Brief.Relationships.Services.Response>[] => {
+  const queryClient = useQueryClient();
+
+  const duplicateBriefMutation = useMutation({
+    mutationFn: async (briefId: string) => {
+      const res = await duplicateBrief(briefId);
+      await handleResponse(res, 'briefs', t);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['briefs'] });
+    },
+  });
+
   return useMemo(
     () => [
       {
@@ -322,19 +338,27 @@ const useGetColumns = (
         enableHiding: false,
         cell: ({ row }) => {
           const brief = row.original;
-
           return (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
-              {/* <UpdateBriefDialog {...brief} /> */}
               <Link href={`/briefs/${brief.id}`}>
                 <Pen className="h-4 w-4 cursor-pointer text-gray-600" />
               </Link>
+              <Tooltip content={t('duplicateBrief')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => duplicateBriefMutation.mutate(brief.id)}
+                  disabled={duplicateBriefMutation.isPending}
+                >
+                  <Copy className="h-4 w-4 cursor-pointer text-gray-600" />
+                </Button>
+              </Tooltip>
               <DeleteBriefDialog briefId={brief.id} />
             </div>
           );
         },
       },
     ],
-    [t],
+    [t, duplicateBriefMutation],
   );
 };

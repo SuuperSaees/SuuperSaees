@@ -1,5 +1,9 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
+
+
 import { SupabaseClient } from '@supabase/supabase-js';
 
 
@@ -11,10 +15,10 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
-import { revalidatePath } from 'next/cache';
-import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
 import { updateClient } from '../../clients/update/update-client';
 import { formatToTimestamptz } from '../../../../../../../../apps/web/app/utils/format-to-timestamptz';
+import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
+
 
 export const updateUserAccount = async (
   userData: Account.Update,
@@ -28,7 +32,7 @@ export const updateUserAccount = async (
       admin: adminActivated,
     });
   try {
-    const { data: userAccountData, error: errorUpdateUserAccount } =
+    const { error: errorUpdateUserAccount } =
       await databaseClient
         .from('accounts')
         .update(userData)

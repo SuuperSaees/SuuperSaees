@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState } f
 import { StickyNote, X } from 'lucide-react';
 import { Spinner } from '@kit/ui/spinner';
 import { useFileUpload } from '~/team-accounts/src/server/actions/files/upload/file-chat-uploads';
-import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon } from '~/orders/[id]/components/fileIcons';
+import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon, MPEGIcon, MKVIcon, AVIIcon, MP3Icon, MP4Icon, CLIPIcon, WAVIcon } from '~/orders/[id]/components/file-icons';
 import Image from 'next/image';
 
 const fileTypeIcons: Record<string, JSX.Element> = {
@@ -32,6 +32,12 @@ const fileTypeIcons: Record<string, JSX.Element> = {
   dmg: <DMGIcon />,
   zip: <ZIPIcon />,
   rar: <RARIcon />,
+  mp3: <MP3Icon />,
+  mp4: <MP4Icon />,
+  wav: <WAVIcon />,
+  avi: <AVIIcon />,
+  mkv: <MKVIcon />,
+  mpeg: <MPEGIcon />,
 };
 
 interface FileUploaderProps {
@@ -46,6 +52,7 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
   ({ onFileSelect, onFileIdsChange, onMessageSend = false, onFileUploadStatusUpdate, thereAreFilesUploaded }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [hoveredFileId, setHoveredFileId] = useState<number | null>(null);
+    const videoRefs = useRef<{ [key: number]: HTMLVideoElement }>({});
 
     const {
       selectedFiles,
@@ -73,6 +80,16 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
       }
     }, [onMessageSend, resetFiles]);
 
+    useEffect(() => {
+      return () => {
+        Object.values(videoRefs.current).forEach(video => {
+          if (video.src) {
+            URL.revokeObjectURL(video.src);
+          }
+        });
+      };
+    }, []);
+
     return (
       <div className="overflow-y-auto overflow-x-hidden flex flex-wrap gap-2 max-h-[240px] w-full">
         <input
@@ -90,51 +107,78 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
             onMouseLeave={() => setHoveredFileId(null)}
           >
             <div className="flex items-center justify-center w-24 h-16 bg-gray-200 rounded-lg overflow-hidden">
-              
               {
-                globalFileList.find((item) => item.file === file)?.progress < 100 ? (
-                  <div className='items-center flex justify-center absolute w-full h-full'>
-                    <Spinner className='w-5 h-5'/>
-                  </div>
-                ) : (
-                  <>
-                    {file.type.startsWith('image/') ? (
-  
-                      <Image 
-                        src={globalFileList.find((item) => item.file === file)?.url ?? URL.createObjectURL(file)}
-                        alt={file.name}
-                        className="object-cover w-full h-full"
-                        width={100}
-                        height={100}
-                        quality={60}
-                        priority
-                      />
-                    ) : file.type.startsWith('video/') ? (
-                      <video
-                        src={URL.createObjectURL(file)}
-                        className="object-cover w-full h-full"
-                        muted 
-                      />
-                    ) : (
-                      <div className='w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
-                        {getFileTypeIcon(file.name)} 
-                      </div>
-                    )}
-                  </>
-                )
+                <>
+                  {file.type.startsWith('image/') ? (
+                    <div className="relative w-full h-full">
+                      {globalFileList.find((item) => item.file === file)?.progress === 100 ? (
+                        <Image 
+                          src={globalFileList.find((item) => item.file === file)?.url ?? URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="object-cover w-full h-full"
+                          width={100}
+                          height={100}
+                          quality={60}
+                          priority
+                        />
+                      ) : (
+                        <div className='relative w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                          <CLIPIcon />
+                          <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-300/50'>
+                            <Spinner className='w-5 h-5 text-black'/>
+                            <p className='text-black text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : file.type.startsWith('video/') ? (
+                    <div className="relative w-full h-full">
+                      {globalFileList.find((item) => item.file === file)?.progress === 100 ? (
+                        <video
+                          ref={el => {
+                            if (el) {
+                              videoRefs.current[id] = el;
+                              if (!el.src) {
+                                el.src = URL.createObjectURL(file);
+                              }
+                            }
+                          }}
+                          className="object-cover w-full h-full"
+                          muted
+                          controls={false}
+                          preload="metadata"
+                          disablePictureInPicture
+                          disableRemotePlayback
+                          controlsList="nodownload noplaybackrate"
+                          onLoadedMetadata={(e) => {
+                            e.currentTarget.currentTime = 0;
+                          }}
+                          style={{ pointerEvents: 'none' }}
+                        />
+                      ) : (
+                        <div className='relative w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                          {getFileTypeIcon(file.name)}
+                          <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-300/50'>
+                            <Spinner className='w-5 h-5 text-black'/>
+                            <p className='text-black text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className='relative w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                      {getFileTypeIcon(file.name)}
+                      {globalFileList.find((item) => item.file === file)?.progress < 100 && (
+                        <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-300/50'>
+                          <Spinner className='w-5 h-5 text-black'/>
+                          <p className='text-black text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
               }
             </div>
-            {
-              globalFileList.find((item) => item.file === file)?.progress > 0 && 
-              globalFileList.find((item) => item.file === file)?.progress < 100 && (
-                <div className="w-full h-1 bg-gray-200 rounded-full mt-1">
-                  <div
-                    className="h-full bg-blue-500 rounded-full"
-                    style={{ width: `${globalFileList.find((item) => item.file === file)?.progress}%` }}
-                  />
-                </div>
-              )
-            }
             <div>
               <p className="text-sm text-gray-600 truncate w-24">{file.name}</p>
             </div>

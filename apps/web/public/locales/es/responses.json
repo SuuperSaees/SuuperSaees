@@ -33,7 +33,8 @@
       "failedToUpdateFields": "No se pudieron actualizar los campos. Reinténtalo más tarde.",
       "failedToDeleteFormFields": "No se pudieron eliminar los campos del formulario. Inténtalo de nuevo.",
       "failedToGetFormFields": "No se pudieron recuperar los campos del formulario. Inténtalo de nuevo.",
-      "failedToCreateFormFields": "No se pudieron crear los campos del formulario. Inténtalo de nuevo."
+      "failedToCreateFormFields": "No se pudieron crear los campos del formulario. Inténtalo de nuevo.",
+      "failedToDuplicateBrief": "No se pudo duplicar el brief. Inténtalo de nuevo."
     },
     "orders": {
       "faildeToCreateOrder": "No se pudo crear el pedido. Verifica la información e inténtalo nuevamente.",
@@ -88,10 +89,11 @@
       "briefUpdated": "El brief se actualizó correctamente.",
       "serviceConnected": "El servicio se conectó al brief con éxito.",
       "fieldsUpdated": "Los campos se actualizaron correctamente.",
-      "formFieldsDeleted": "Los campos del formulario se eliminaron correctamente."
+      "formFieldsDeleted": "Los campos del formulario se eliminaron correctamente.",
+      "briefDuplicated": "El brief se duplicó correctamente."
     },
     "orders": {
-      "orderCreated": "El pedido fue creado con éxito.",
+      "orderCreated": "El proyecto fue creado con éxito.",
       "orderDateUpdated": "La fecha de la orden se actualizó correctamente.",
       "orderStatusUpdated": "El estado de la orden se actualizó correctamente.",
       "orderPriorityUpdated": "La prioridad de la orden se actualizó con éxito.",

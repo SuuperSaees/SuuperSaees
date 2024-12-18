@@ -29,6 +29,7 @@ class WebhookHandlerService {
   async handleWebhook(request: Request) {
     // create a client with admin access since we are handling webhooks
     // and no user is authenticated
+
     const client = getSupabaseRouteHandlerClient({
       admin: true,
     });

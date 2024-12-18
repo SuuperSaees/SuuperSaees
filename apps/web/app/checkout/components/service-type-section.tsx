@@ -38,7 +38,7 @@ export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
             }
           </span>
           <span className="text-sm font-normal leading-[1.42857] text-gray-600 md:text-base">
-            ${service.price} USD
+            ${service.price} {service.currency.toUpperCase()}
           </span>
           {service.recurrence && (
              <span className="text-sm font-normal leading-[1.42857] text-gray-600 md:text-base">

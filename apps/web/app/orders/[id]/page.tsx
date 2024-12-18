@@ -1,4 +1,4 @@
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
+// import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getPropietaryOrganizationIdOfOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 
 
@@ -14,6 +14,7 @@ import { Order } from '~/lib/order.types';
 import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+// import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -39,7 +40,7 @@ async function OrderDetailsPage({
     console.error(`Error getting propietary organization id of order: ${err}`)
     return { organization: '' }
   });;
-  const { user } = await loadUserWorkspace();
+  const { user, workspace } = await loadUserWorkspace();
   const { organization: agency } = await getDomainByUserId(user.id ?? '').catch((err) => {
     console.error(`Error client, getting domain by user id: ${err}`)
     return { organization: null }
@@ -50,10 +51,12 @@ async function OrderDetailsPage({
     { title: ordersTitle },
     { title: order?.title ?? '', uuid: order?.uuid ?? '' },
   ];
-  const role = await getUserRole().catch((err) => {
-    console.error(`Error client, getting user role: ${err}`)
-    return ''
-  });
+  // const role = await getUserRole().catch((err) => {
+  //   console.error(`Error client, getting user role: ${err}`)
+  //   return ''
+  // });
+  
+  const role = workspace?.role
 
   return (
       <ActivityProvider
@@ -62,7 +65,7 @@ async function OrderDetailsPage({
         activities={order?.activities ?? []}
         reviews={order?.reviews ?? []}
         order={order}
-        userRole={role}
+        userRole={role ?? ''}
       >
         
 
@@ -70,7 +73,7 @@ async function OrderDetailsPage({
       <div className="flex max-h-full h-full w-full justify-between">
     
         <div className="flex w-full min-w-0 flex-grow flex-col max-h-full h-full pt-2">
-          <OrderHeader order={order} agencyStatuses={agencyStatuses ?? []} />
+          <OrderHeader order={order} agencyStatuses={agencyStatuses ?? []} user={user} />
           <OrderTabs
             organizationId={
               organizationId
@@ -85,7 +88,7 @@ async function OrderDetailsPage({
             agencyName={agency?.name ?? ''}
           />
         </div>
-        <AsideOrderInformation order={order} className="hidden lg:flex " agencyStatuses={agencyStatuses ?? []}/>
+        <AsideOrderInformation className="hidden lg:flex " agencyStatuses={agencyStatuses ?? []}/>
     
       </div>
     </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -17,19 +18,27 @@ import DatePicker from '~/team-accounts/src/server/actions/orders/pick-date/pick
 import {
   updateOrder,
   updateOrderAssigns,
+  logOrderActivities,
 } from '~/team-accounts/src/server/actions/orders/update/update-order';
-
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import AvatarDisplayer from '../../../components/ui/avatar-displayer';
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
 import { EntityData } from '../types';
+import { Order } from '~/lib/order.types';
+
+const truncateText = (text: string, maxLength = 50) => {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + '...';
+};
 
 export const ordersColumns = (
   t: TFunction,
   hasPermission?: (row?: EntityData['orders'][number]) => boolean,
 ): ColumnDef<EntityData['orders'][number]>[] => {
   const withPermissionsActive = hasPermission && hasPermission;
-  return [
+  
+  return React.useMemo(() => [
     {
       accessorKey: 'title',
       header: t('orders.title'),
@@ -40,10 +49,10 @@ export const ordersColumns = (
             href={`/orders/${row.original.id}`}
             className='flex w-full min-w-[100px] gap-2'
           >
-            <div className="flex flex-col w-full">
-              <span className="font-semibold">{row.original.title}</span>
-              <span className="text-sm text-gray-600">
-                {row.original?.brief?.name}
+            <div className="flex flex-col w-fit ">
+              <span className="font-semibold line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">{truncateText(row.original.title)}</span>
+              <span className="text-sm text-gray-600 line-clamp-1  line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">
+                {truncateText(row.original?.brief?.name)}
               </span>
             </div>
           </Link>
@@ -72,9 +81,9 @@ export const ordersColumns = (
             // href={link}
             className="flex flex-col"
           >
-            <span className="font-semibold">{row.original.customer?.name}</span>
-            <span className="text-sm text-gray-600">
-              {row.original.client_organization?.name}
+            <span className="font-semibold  line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">{truncateText(row.original.customer?.name)}</span>
+            <span className="text-sm text-gray-600  line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">
+              {truncateText(row.original.client_organization?.name)}
             </span>
           </span>
         );
@@ -111,7 +120,7 @@ export const ordersColumns = (
       header: t('orders.createdAt'),
       cell: ({ row }) => {
         return (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 line-clamp-1 text-nowrap">
             {formatDate(row.original?.created_at, 'PP')}
           </span>
         );
@@ -122,7 +131,7 @@ export const ordersColumns = (
       header: t('orders.updatedAt'),
       cell: ({ row }) => {
         return (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 line-clamp-1 text-nowrap">
             {row.original?.updated_at &&
               formatDate(row.original?.updated_at, 'PP')}
           </span>
@@ -136,10 +145,12 @@ export const ordersColumns = (
       cell: ({ row }) => {
         const updateOrderDate = async (due_date: string, orderId: number) => {
           try {
-            await updateOrder(orderId, { due_date });
+           const {order, user} = await updateOrder(orderId, { due_date });
             toast('Success!', {
               description: t('success.orders.orderDateUpdated'),
             });
+            const fields: (keyof Order.Update)[] = ['due_date'];
+            await logOrderActivities(orderId, order, user?.id ?? '', user?.user_metadata?.name ?? user?.user_metadata?.email ?? '', undefined, fields);
           } catch (error) {
             toast('Error', {
               description: t('error.orders.failedToUpdateOrderDate'),
@@ -158,10 +169,10 @@ export const ordersColumns = (
         );
       },
     },
-  ];
+  ], [t, hasPermission]);
 };
 
-const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], blocked: boolean }) => {
+const RowAssignedTo = React.memo(({ row, blocked }: { row: EntityData['orders'][number], blocked: boolean }) => {
   const { t } = useTranslation('orders');
 
   const membersAssignedSchema = z.object({
@@ -182,6 +193,8 @@ const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], bl
     queryKey: ['order-agency-members', row.id],
     queryFn: () => getOrderAgencyMembers(row.agency_id, row.id),
     retry: 5,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
   });
 
   const changeAgencyMembersAssigned = useMutation({
@@ -204,26 +217,28 @@ const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], bl
     return changeAgencyMembersAssigned.mutate(data.members);
   }
 
-  const searchUserOptions =
+  const searchUserOptions = React.useMemo(() => 
     orderAgencyMembers?.map((user) => ({
       picture_url: user.user_settings?.picture_url ?? user?.picture_url ?? '',
       value: user?.id,
-      label: user?.user_settings?.name ?? user?.name ?? '', // Default to empty string if null
-    })) ?? [];
+      label: user?.user_settings?.name ?? user?.name ?? '',
+    })) ?? [],
+  [orderAgencyMembers]);
 
-  const avatars =
+  const avatars = React.useMemo(() => 
     row?.assigned_to?.map((assignee) => ({
       name: assignee.agency_member?.settings?.name ?? assignee?.agency_member?.name ?? '',
       email: assignee.agency_member?.email ?? '',
       picture_url: assignee.agency_member?.settings?.picture_url ?? assignee?.agency_member?.picture_url ?? '',
-    })) ?? [];
+    })) ?? [],
+  [row?.assigned_to]);
 
-  const CustomUserItem = ({
+  const CustomUserItem = React.memo(({
     option,
   }: {
     option: Option & { picture_url?: string | null };
   }) => (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-1">
       <AvatarDisplayer
         className="font-normal"
         pictureUrl={option?.picture_url ?? ''}
@@ -231,7 +246,7 @@ const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], bl
       />
       <span>{option?.label}</span>
     </div>
-  );
+  ));
   const maxAvatars = 3;
 
   const CustomItemTrigger = (
@@ -258,4 +273,6 @@ const RowAssignedTo = ({ row, blocked }: { row: EntityData['orders'][number], bl
       />
     </div>
   );
-};
+});
+
+RowAssignedTo.displayName = 'RowAssignedTo';

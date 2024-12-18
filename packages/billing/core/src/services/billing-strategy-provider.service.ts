@@ -1,16 +1,18 @@
 import { z } from 'zod';
 
-import {
-  CancelSubscriptionParamsSchema,
-  CreateBillingCheckoutSchema,
-  CreateBillingPortalSessionSchema,
-  QueryBillingUsageSchema,
-  ReportBillingUsageSchema,
-  RetrieveCheckoutSessionSchema,
-  UpdateSubscriptionParamsSchema,
-} from '../schema';
+
+
+import { Database } from '@kit/supabase/database';
+
+
+
+import { CancelSubscriptionParamsSchema, CreateBillingCheckoutSchema, CreateBillingPortalSessionSchema, QueryBillingUsageSchema, ReportBillingUsageSchema, RetrieveCheckoutSessionSchema, UpdateSubscriptionParamsSchema } from '../schema';
 import { UpsertSubscriptionParams } from '../types';
 
+
+type ServiceType = Database['public']['Tables']['services']['Row'];
+type BillingAccountType =
+  Database['public']['Tables']['billing_accounts']['Row'];
 export abstract class BillingStrategyProviderService {
   abstract createBillingPortalSession(
     params: z.infer<typeof CreateBillingPortalSessionSchema>,
@@ -74,4 +76,21 @@ export abstract class BillingStrategyProviderService {
       target_account_id: string | undefined;
     }
   >;
+
+  abstract createService(
+    service: ServiceType,
+    billingAccount: BillingAccountType,
+    baseUrl: string,
+  ): Promise<{
+    success: boolean;
+  }>;
+
+  abstract updateService(
+    service: ServiceType,
+    billingAccount: BillingAccountType,
+    baseUrl: string,
+    serviceProviderId?: string,
+  ): Promise<{
+    success: boolean;
+  }>;
 }

@@ -89,26 +89,37 @@ export const addServiceBriefs = async (
   }
 };
 
-export const createFormFields = async (formFields: FormField.Insert[]) => {
+const normalizeSelectOptions = (formFields: FormField.Insert[]): FormField.Insert[] => {
+  return formFields.map(field => {
+    if (field.type === 'select' && field.options) {
+      return {
+        ...field,
+        options: field.options.map(option => ({
+          label: option?.label ?? '',
+          value: option?.label ?? ''
+        }))
+      };
+    }
+    return field;
+  });
+};
+
+export const createFormFields = async (formFields: FormField.Insert[]): Promise<FormField.Type[]> => {
   try {
     const client = getSupabaseServerComponentClient();
+    const modifiedFormFields = normalizeSelectOptions(formFields);
 
-    // Create a new list of formFields without the 'id' field
-    const formFieldsWithoutId = formFields.map(({ id: _id, ...rest }) => rest);
-    const { error: formFieldError, data: formFieldData } = await client
+    const formFieldsWithoutId = modifiedFormFields.map(({ id: _id, ...rest }) => rest);
+    const { data: formFieldData, error: formFieldError } = await client
       .from('form_fields')
       .insert(formFieldsWithoutId)
       .select();
 
-    if (formFieldError) {
-      throw new Error(formFieldError.message);
-    }
+    if (formFieldError) throw new Error(formFieldError.message);
+    return formFieldData as FormField.Type[];
 
-    return formFieldData;
-
-    // revalidatePath('/briefs');
   } catch (error) {
-    console.error('Error al crear el field', error);
+    console.error('Error creating field:', error);
     throw error;
   }
 };
@@ -160,5 +171,96 @@ export const addResponsesToBriefFormField = async (
   } catch (error) {
     console.error('Error al añadir las respuestas al brief', error);
     throw error;
+  }
+};
+
+export const duplicateBrief = async (briefId: string) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    // Get the original brief with its relationships
+    const { data: originalBrief, error: briefError } = await client
+      .from('briefs')
+      .select(`
+        *,
+        services:service_briefs(service_id),
+        form_fields:brief_form_fields(
+          form_field:form_fields(*)
+        )
+      `)
+      .eq('id', briefId)
+      .single();
+
+    if (briefError ?? !originalBrief) {
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        `Error getting original brief: ${briefError?.message}`,
+        ErrorBriefOperations.FAILED_TO_CREATE_BRIEF,
+      );
+    }
+
+    // Get the last brief number
+    const { data: briefsData, error: briefsDataError } = await client
+      .from('briefs')
+      .select('number')
+      .order('number', { ascending: false })
+      .limit(1)
+      .eq('propietary_organization_id', originalBrief.propietary_organization_id);
+
+    if (briefsDataError) {
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        `Error getting briefs: ${briefsDataError.message}`,
+        ErrorBriefOperations.FAILED_TO_CREATE_BRIEF,
+      );
+    }
+
+    const lastBriefNumber = briefsData?.[0]?.number ?? 0;
+
+    // Create the new brief
+    const { data: newBrief, error: newBriefError } = await client
+      .from('briefs')
+      .insert({
+        name: `${originalBrief.name} (Copy)`,
+        description: originalBrief.description,
+        image_url: originalBrief.image_url,
+        propietary_organization_id: originalBrief.propietary_organization_id,
+        number: lastBriefNumber + 1,
+        isDraft: originalBrief.isDraft,
+      })
+      .select()
+      .single();
+
+    if (newBriefError ?? !newBrief) {
+      throw new CustomError(
+        HttpStatus.Error.InternalServerError,
+        `Failed to create duplicate brief: ${newBriefError?.message}`,
+        ErrorBriefOperations.FAILED_TO_CREATE_BRIEF,
+      );
+    }
+
+    // Duplicate service connections
+    if (originalBrief.services && originalBrief.services.length > 0) {
+      const serviceBriefs = originalBrief.services.map((service) => ({
+        brief_id: newBrief.id,
+        service_id: service.service_id,
+      }));
+
+      await addServiceBriefs(serviceBriefs);
+    }
+
+    // Duplicate form fields
+    if (originalBrief.form_fields && originalBrief.form_fields.length > 0) {
+      const formFields = originalBrief.form_fields.map(
+        ({ form_field }) => form_field,
+      );
+      await addFormFieldsToBriefs(formFields, newBrief.id);
+    }
+
+    revalidatePath('/briefs');
+    return CustomResponse.success(newBrief, 'briefDuplicated').toJSON();
+  } catch (error) {
+    console.error('Error duplicating brief:', error);
+    return CustomResponse.error(error).toJSON();
   }
 };
