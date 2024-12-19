@@ -140,7 +140,7 @@ export function WidgetEditForm() {
 
   const handleBlur = async () => {
     const currentFormState = form.getValues();
-    const updatedFields = formFields.map((field) =>
+    const updatedFields = formFields?.map((field) =>
       field.id === currentFormField?.id
         ? { ...field, ...currentFormField }
         : field,
@@ -180,7 +180,7 @@ export function WidgetEditForm() {
 
   const renderOptionFields = (type: string, options: Option[]) => (
     <React.Fragment>
-      {options.map((_, index) => (
+      {options?.map((_, index) => (
         <div
           key={'opt-' + index}
           className="group relative flex flex-col gap-2"
