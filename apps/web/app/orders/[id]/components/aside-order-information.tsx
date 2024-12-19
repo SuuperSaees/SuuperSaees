@@ -219,7 +219,7 @@ const AsideOrderInformation = ({
   ]);
 
 
-  const canAddAssignesOrFollowers = userRoles.has(userRole);
+  const canAddAssignes = userRoles.has(userRole);
 
   return (
     <AgencyStatusesProvider initialStatuses={agencyStatuses}>
@@ -255,7 +255,7 @@ const AsideOrderInformation = ({
 
         <h3 className="font-medium">{t('details.summary')}</h3>
 
-        {canAddAssignesOrFollowers ? (
+        {canAddAssignes ? (
           <>
             <div className="flex items-center justify-between">
               <span className="flex text-sm font-semibold">
@@ -290,14 +290,13 @@ const AsideOrderInformation = ({
               searchUserOptions={searchUserOptions}
               assignedTo={order.assigned_to}
               updateFunction={changeAgencyMembersAssigned.mutate}
-              canAddAssignesOrFollowers={canAddAssignesOrFollowers}
+              canAddAssignes={canAddAssignes}
             />
 
             <ActivityFollowers
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
-              canAddAssignesOrFollowers={canAddAssignesOrFollowers}
             />
           </>
         ) : (
@@ -348,14 +347,13 @@ const AsideOrderInformation = ({
               searchUserOptions={searchUserOptions}
               assignedTo={order.assigned_to}
               updateFunction={changeAgencyMembersAssigned.mutate}
-              canAddAssignesOrFollowers={canAddAssignesOrFollowers}
+              canAddAssignes={canAddAssignes}
             />
 
             <ActivityFollowers
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
-              canAddAssignesOrFollowers={canAddAssignesOrFollowers}
             />
           </div>
         )}
