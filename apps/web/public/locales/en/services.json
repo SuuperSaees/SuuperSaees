@@ -172,5 +172,6 @@
       "title": "Let’s start by adding a service",
       "description": "You have not yet added any services for this client, add one by clicking the 'Add service' button."
     }
-  }
+  },
+  "selectImage": "Select an image"
 }
