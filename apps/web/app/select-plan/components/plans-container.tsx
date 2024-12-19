@@ -17,14 +17,14 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 
-export default function PlansContainer() {
+export default function PlansContainer({seats}: {seats: number}) {
     
     return (
         <div className="w-full h-full">
             <Elements 
                 stripe={stripePromise}
             >
-                <PlansPage />
+                <PlansPage seats={seats} />
             </Elements>
 
         </div>
