@@ -38,12 +38,14 @@ interface ActivityAssignationProps {
     value: string;
     label: string;
   }[];
+  canAddFollowers?: boolean;
 }
 
 const ActivityFollowers = ({
   followers,
   updateFunction,
   searchUserOptions,
+  canAddFollowers = true,
 }: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
 
@@ -85,6 +87,7 @@ const ActivityFollowers = ({
           );
         })}
       </div>
+        {canAddFollowers && (
       <CheckboxCombobox
         options={searchUserOptions ?? []}
         onSubmit={handleFormSubmit}
@@ -92,6 +95,7 @@ const ActivityFollowers = ({
         defaultValues={defaultValues}
         customItem={CustomUserItem}
       />
+      )}
     </div>
   );
 };

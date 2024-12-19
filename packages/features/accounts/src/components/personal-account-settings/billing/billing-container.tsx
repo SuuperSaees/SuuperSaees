@@ -47,14 +47,11 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
     const handleUpgradeClick = () => {
         setShowUpgradeComponent(true);
     };
-    
-    interface Invoice {
-        total: number;
-    }
 
-    const calculateTotalAmountPaid = (invoices: Invoice[]): number => {
-        return invoices?.reduce((total, invoice) => total + invoice.total, 0)/100;
+    const calculateTotalAmountPaid = (total: number): number => {
+        return total / 100;
     };
+
 
     //   const getPlanValue = (plan: string): number => {
     //     const planValues: Record<string, number> = {
@@ -98,7 +95,7 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
         
         <div className="flex flex-col">
             {showUpgradeComponent ? (
-                <PlansContainer />
+                <PlansContainer seats={subscriptionFetchedStripe?.quantity}/>
             ) : (
                 <>
                     <div className="flex gap-4 mb-[24px]">
@@ -115,7 +112,7 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
                     <Card className="w-[619px] h-[225px] p-[24px] flex flex-col">
                     
                         <div className="text-gray-900 font-inter text-lg font-semibold leading-7">{t('total.title')}</div>
-                        <div className="text-gray-900 font-inter text-5xl font-semibold leading-[60px] tracking-[-0.96px] mb-[24px]">{calculateTotalAmountPaid(invoices)} US$</div>
+                        <div className="text-gray-900 font-inter text-5xl font-semibold leading-[60px] tracking-[-0.96px] mb-[24px]">{calculateTotalAmountPaid(upcomingInvoice?.total ?? 0)} US$</div>
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
                                 <div className="text-gray-900 font-inter text-sm font-medium leading-5">{t('total.usersEquivalent', { currentUsers: subscriptionFetchedStripe?.quantity ?? 0}) + ' ' + `${subscriptionFetchedStripe?.quantity === 1 ? t('total.user') : t('total.users')}`}</div>

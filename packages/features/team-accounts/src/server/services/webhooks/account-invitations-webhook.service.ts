@@ -215,82 +215,82 @@ class AccountInvitationsWebhookService {
       }
 
       // obtain subscription id
-      const { data: subscriptionData, error: subscriptionError } =
-        await this.adminClient
-          .from('subscriptions')
-          .select('id')
-          .eq('propietary_organization_id', invitation.invited_by)
-          .single();
+      // const { data: subscriptionData, error: subscriptionError } =
+      //   await this.adminClient
+      //     .from('subscriptions')
+      //     .select('id')
+      //     .eq('propietary_organization_id', invitation.invited_by)
+      //     .single();
 
-      if (subscriptionError) {
-        logger.error(
-          {
-            error: subscriptionError,
-            name: this.namespace,
-          },
-          'Failed to update team subscription',
-        );
+      // if (subscriptionError) {
+      //   logger.error(
+      //     {
+      //       error: subscriptionError,
+      //       name: this.namespace,
+      //     },
+      //     'Failed to update team subscription',
+      //   );
 
-        throw subscriptionError;
-      }
+      //   throw subscriptionError;
+      // }
 
       // obtain members count with that organization
-      let membersCount = 0;
-      const { count, error: membersCountError } = await this.adminClient
-        .from('accounts_memberships')
-        .select('*', { count: 'exact' })
-        .eq('account_id', invitation.invited_by)
-        .or(
-          'account_role.eq.agency_member,account_role.eq.agency_project_manager',
-        );
+      // let membersCount = 0;
+      // const { count, error: membersCountError } = await this.adminClient
+      //   .from('accounts_memberships')
+      //   .select('*', { count: 'exact' })
+      //   .eq('account_id', invitation.invited_by)
+      //   .or(
+      //     'account_role.eq.agency_member,account_role.eq.agency_project_manager',
+      //   );
 
-      if (membersCountError) {
-        logger.error(
-          {
-            error: membersCountError,
-            name: this.namespace,
-          },
-          'Failed to update team subscription, obtaining members count',
-        );
-        throw membersCountError;
-      }
-      membersCount = count ?? 0;
+      // if (membersCountError) {
+      //   logger.error(
+      //     {
+      //       error: membersCountError,
+      //       name: this.namespace,
+      //     },
+      //     'Failed to update team subscription, obtaining members count',
+      //   );
+      //   throw membersCountError;
+      // }
+      // membersCount = count ?? 0;
 
-      if (membersCount) {
-        membersCount += 1;
-      }
+      // if (membersCount) {
+      //   membersCount += 1;
+      // }
 
       // get stripe subscription
-      const responseGetSubscription = await fetch(
-        `${siteURL}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(subscriptionData?.id ?? '')}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-      if (!responseGetSubscription.ok) {
-        throw new Error('Failed to fetch subscription');
-      }
-      const dataSubscription = await responseGetSubscription.clone().json();
+      // const responseGetSubscription = await fetch(
+      //   `${siteURL}/api/stripe/get-subscription?subscriptionId=${encodeURIComponent(subscriptionData?.id ?? '')}`,
+      //   {
+      //     method: 'GET',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //   },
+      // );
+      // if (!responseGetSubscription.ok) {
+      //   throw new Error('Failed to fetch subscription');
+      // }
+      // const dataSubscription = await responseGetSubscription.clone().json();
       // update subscription in stripe
-      const responseUpdateSubscription = await fetch(
-        `${siteURL}/api/stripe/update-subscription?subscriptionId=${encodeURIComponent(subscriptionData?.id ?? '')}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            itemQuantity: membersCount ?? 0,
-            itemId: dataSubscription?.items[0]?.id,
-          }),
-        },
-      );
-      if (!responseUpdateSubscription.ok) {
-        throw new Error('Failed to update subscription');
-      }
+      // const responseUpdateSubscription = await fetch(
+      //   `${siteURL}/api/stripe/update-subscription?subscriptionId=${encodeURIComponent(subscriptionData?.id ?? '')}`,
+      //   {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: JSON.stringify({
+      //       itemQuantity: membersCount ?? 0,
+      //       itemId: dataSubscription?.items[0]?.id,
+      //     }),
+      //   },
+      // );
+      // if (!responseUpdateSubscription.ok) {
+      //   throw new Error('Failed to update subscription');
+      // }
       return {
         success: true,
       };

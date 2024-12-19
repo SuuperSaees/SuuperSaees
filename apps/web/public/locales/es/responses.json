@@ -93,7 +93,7 @@
       "briefDuplicated": "El brief se duplicó correctamente."
     },
     "orders": {
-      "orderCreated": "El pedido fue creado con éxito.",
+      "orderCreated": "El proyecto fue creado con éxito.",
       "orderDateUpdated": "La fecha de la orden se actualizó correctamente.",
       "orderStatusUpdated": "El estado de la orden se actualizó correctamente.",
       "orderPriorityUpdated": "La prioridad de la orden se actualizó con éxito.",
