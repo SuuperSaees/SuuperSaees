@@ -18,6 +18,7 @@ export interface UserWorkspace {
     name: string | null;
     picture_url: string | null;
     subscription_status: Tables<'subscriptions'>['status'] | null;
+    role: string | null;
   };
 
   user: User;
