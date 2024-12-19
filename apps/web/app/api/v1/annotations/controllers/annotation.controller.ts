@@ -3,31 +3,46 @@ import { NextRequest } from 'next/server';
 import { ErrorAnnotationOperations } from '@kit/shared/response';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { Annotations } from '~/lib/annotations.types';
 import { ApiError } from '~/lib/api/api-error';
+import { BaseController } from '~/lib/api/base-controller';
 
 import { CreateAnnotationDTO } from '../dtos/annotation.dto';
 import { createAnnotationService } from '../services/annotation.service';
 
-export class AnnotationController {
+export class AnnotationController extends BaseController {
   async create(req: NextRequest): Promise<Response> {
     const requestId = crypto.randomUUID();
 
     try {
-      const body = await this.parseBody<CreateAnnotationDTO>(req);
-
-      if (!body.content || !body.file_id || !body.user_id) {
-        throw ApiError.badRequest(
-          'Content, File ID, and User ID are required',
-          ErrorAnnotationOperations.FAILED_TO_CREATE_ANNOTATION,
-        );
-      }
+      const body = await this.parseBody<
+        CreateAnnotationDTO & { parent_id?: string }
+      >(req);
 
       const client = getSupabaseServerComponentClient({ admin: true });
       const annotationService = await createAnnotationService(client);
 
-      const annotation = await annotationService.createAnnotation(body);
+      if (body.parent_id) {
+        const message = await annotationService.addMessageToAnnotation(
+          body.parent_id,
+          body.content,
+          body.user_id,
+        );
+        return this.created(message, requestId);
+      }
 
+      if (
+        !body.file_id ||
+        !body.user_id ||
+        body.position_x === undefined ||
+        body.position_y === undefined
+      ) {
+        throw ApiError.badRequest(
+          'File ID, User ID, Position X, and Position Y are required',
+          ErrorAnnotationOperations.FAILED_TO_CREATE_ANNOTATION,
+        );
+      }
+
+      const annotation = await annotationService.createAnnotation(body);
       return this.created(annotation, requestId);
     } catch (error) {
       return this.handleError(error, requestId);
@@ -52,69 +67,63 @@ export class AnnotationController {
       const annotationService = await createAnnotationService(client);
 
       const annotations = await annotationService.listAnnotations(fileId);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          data: annotations,
-          requestId,
-          timestamp: new Date().toISOString(),
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      return this.ok(
+        {
+          current_file: annotations.currentFile || [],
+          other_files: annotations.otherFiles || [],
+        },
+        requestId,
       );
     } catch (error) {
       return this.handleError(error, requestId);
     }
   }
 
-  async getMessages(req: NextRequest): Promise<Response> {
+  async get(
+    req: NextRequest,
+    { params }: { params: { id: string } },
+  ): Promise<Response> {
     const requestId = crypto.randomUUID();
 
     try {
-      const { searchParams } = new URL(req.url);
-      const annotationId = searchParams.get('annotation_id');
+      const parentId = params.id;
 
-      if (!annotationId) {
+      if (!parentId) {
         throw ApiError.badRequest(
-          'The annotation_id query parameter is required',
-          ErrorAnnotationOperations.FAILED_TO_FIND_ANNOTATION,
+          'The id parameter is required',
+          ErrorAnnotationOperations.FAILED_TO_FIND_MESSAGES,
         );
       }
 
       const client = getSupabaseServerComponentClient({ admin: true });
       const annotationService = await createAnnotationService(client);
 
-      const messages = await annotationService.getMessages(annotationId);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          data: messages,
-          requestId,
-          timestamp: new Date().toISOString(),
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
-      );
+      const messages = await annotationService.getMessages(parentId);
+      return this.ok(messages || [], requestId);
     } catch (error) {
       return this.handleError(error, requestId);
     }
   }
 
-  async updateStatus(req: NextRequest): Promise<Response> {
+  async update(
+    req: NextRequest,
+    { params }: { params: { id: string } },
+  ): Promise<Response> {
     const requestId = crypto.randomUUID();
 
     try {
-      const { searchParams } = new URL(req.url);
-      const annotationId = searchParams.get('annotation_id');
+      const annotationId = params.id;
 
       if (!annotationId) {
         throw ApiError.badRequest(
-          'The annotation_id query parameter is required',
+          'The id parameter is required',
           ErrorAnnotationOperations.FAILED_TO_UPDATE_ANNOTATION,
         );
       }
 
-      const body = await this.parseBody<{ status: string }>(req);
+      const body = await this.parseBody<{
+        status: 'active' | 'completed' | 'draft';
+      }>(req);
 
       if (!body.status) {
         throw ApiError.badRequest(
@@ -128,7 +137,7 @@ export class AnnotationController {
 
       const updatedAnnotation = await annotationService.updateAnnotationStatus(
         annotationId,
-        body.status as Annotations.AnnotationStatus,
+        body.status,
       );
 
       return this.ok(updatedAnnotation, requestId);
@@ -137,88 +146,28 @@ export class AnnotationController {
     }
   }
 
-  private ok<T>(data: T, requestId: string): Response {
-    return new Response(
-      JSON.stringify({
-        success: true,
-        data,
-        requestId,
-        timestamp: new Date().toISOString(),
-      }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    );
-  }
-
-  private async parseBody<T>(req: NextRequest): Promise<T> {
-    const body = await req.clone().json();
-    return body as T;
-  }
-
-  private created<T>(data: T, requestId: string): Response {
-    return new Response(
-      JSON.stringify({
-        success: true,
-        data,
-        requestId,
-        timestamp: new Date().toISOString(),
-      }),
-      { status: 201, headers: { 'Content-Type': 'application/json' } },
-    );
-  }
-
-  private handleError(error: unknown, requestId: string): Response {
-    if (error instanceof ApiError) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: error.toJSON(),
-          requestId,
-          timestamp: new Date().toISOString(),
-        }),
-        { status: error.status },
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: {
-          message: 'Internal server error',
-          requestId,
-          timestamp: new Date().toISOString(),
-        },
-      }),
-      { status: 500 },
-    );
-  }
-
-  async addMessage(req: NextRequest): Promise<Response> {
+  async delete(
+    _: undefined,
+    { params }: { params: { id: string } },
+  ): Promise<Response> {
     const requestId = crypto.randomUUID();
 
     try {
-      const body = await this.parseBody<{
-        annotation_id: string;
-        content: string;
-        user_id: string;
-      }>(req);
+      const annotationId = params.id;
 
-      if (!body.annotation_id || !body.content || !body.user_id) {
+      if (!annotationId) {
         throw ApiError.badRequest(
-          'Annotation ID, content, and user ID are required',
-          ErrorAnnotationOperations.FAILED_TO_ADD_MESSAGE,
+          'The id parameter is required',
+          ErrorAnnotationOperations.FAILED_TO_DELETE_ANNOTATION,
         );
       }
 
       const client = getSupabaseServerComponentClient({ admin: true });
       const annotationService = await createAnnotationService(client);
 
-      const message = await annotationService.addMessageToAnnotation(
-        body.annotation_id,
-        body.content,
-        body.user_id,
-      );
+      await annotationService.softDeleteAnnotation(annotationId);
 
-      return this.created(message, requestId);
+      return this.ok({ message: 'Annotation deleted successfully' }, requestId);
     } catch (error) {
       return this.handleError(error, requestId);
     }

@@ -1,5 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+import { randomUUID } from 'crypto';
+
 import { Annotations } from '~/lib/annotations.types';
 import { Database } from '~/lib/database.types';
 
@@ -7,16 +9,10 @@ export interface IAnnotationRepository {
   createMessage(
     content: string,
     userId: string,
-    fileId: string,
+    parentId: string,
   ): Promise<{ id: string }>;
   createAnnotation(data: Annotations.Insert): Promise<Annotations.Type>;
   getAnnotationsByFile(fileId: string): Promise<Annotations.Type[]>;
-  getParentMessage(annotationId: string): Promise<{
-    id: string;
-    content: string;
-    user_id: string;
-    created_at: string;
-  }>;
   getChildMessages(parentMessageId: string): Promise<
     {
       id: string;
@@ -29,6 +25,7 @@ export interface IAnnotationRepository {
     annotationId: string,
     status: Annotations.AnnotationStatus,
   ): Promise<Annotations.Type>;
+  softDelete(annotationId: string): Promise<void>;
 }
 
 export class AnnotationRepository implements IAnnotationRepository {
@@ -37,6 +34,7 @@ export class AnnotationRepository implements IAnnotationRepository {
   async createMessage(
     content: string,
     userId: string,
+    parentId: string,
   ): Promise<{ id: string }> {
     const { data: message, error } = await this.client
       .from('messages')
@@ -44,12 +42,12 @@ export class AnnotationRepository implements IAnnotationRepository {
         content,
         user_id: userId,
         type: 'annotation',
-        order_id: 1,
+        parent_id: parentId || null,
       })
       .select('id')
       .single();
 
-    if (error != null || !message) {
+    if (error ?? !message) {
       throw new Error(
         `Error creating message: ${error?.message || 'Unknown error'}`,
       );
@@ -59,10 +57,20 @@ export class AnnotationRepository implements IAnnotationRepository {
   }
 
   async createAnnotation(data: Annotations.Insert): Promise<Annotations.Type> {
+    const {
+      file_id,
+      user_id,
+      position_x,
+      position_y,
+      page_number = null,
+      status = 'active',
+      message_id = null,
+    } = data;
+
     const { data: lastAnnotation, error: lastError } = await this.client
       .from('annotations')
       .select('number')
-      .eq('file_id', data.file_id)
+      .eq('file_id', file_id)
       .order('number', { ascending: false })
       .limit(1)
       .single();
@@ -74,15 +82,29 @@ export class AnnotationRepository implements IAnnotationRepository {
     }
 
     const nextNumber = lastAnnotation?.number ? lastAnnotation.number + 1 : 1;
-    data.number = nextNumber;
+
+    const annotationData: Annotations.Insert = {
+      id: randomUUID(),
+      file_id,
+      user_id,
+      position_x,
+      position_y,
+      page_number,
+      status,
+      number: nextNumber,
+      message_id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_on: null,
+    };
 
     const { data: createdAnnotation, error } = await this.client
       .from('annotations')
-      .insert(data)
+      .insert(annotationData)
       .select()
       .single();
 
-    if (error != null || !createdAnnotation) {
+    if (error ?? !createdAnnotation) {
       throw new Error(
         `Error creating annotation: ${error?.message || 'Unknown error'}`,
       );
@@ -107,47 +129,17 @@ export class AnnotationRepository implements IAnnotationRepository {
           deleted_on,
           page_number,
           number,
-          message_id,
-          messages:messages!inner(
-            id,
-            content,
-            created_at
-          )
+          message_id
         `,
       )
-      .eq('file_id', fileId);
+      .eq('file_id', fileId)
+      .is('deleted_on', null);
 
     if (error) {
       throw new Error(`Error fetching annotations: ${error.message}`);
     }
 
     return annotations as Annotations.Type[];
-  }
-
-  async getParentMessage(annotationId: string): Promise<{
-    id: string;
-    content: string;
-    user_id: string;
-    created_at: string;
-  }> {
-    const { data: parentMessage, error } = await this.client
-      .from('messages')
-      .select('id, content, user_id, created_at')
-      .eq('annotations.id', annotationId)
-      .single();
-
-    if (error) {
-      throw new Error(`Error fetching parent message: ${error.message}`);
-    }
-
-    if (!parentMessage) {
-      throw new Error('Parent message not found');
-    }
-
-    return {
-      ...parentMessage,
-      content: parentMessage.content ?? '',
-    };
   }
 
   async getChildMessages(parentMessageId: string): Promise<
@@ -173,6 +165,32 @@ export class AnnotationRepository implements IAnnotationRepository {
     }));
   }
 
+  async getParentMessage(annotationId: string): Promise<{
+    id: string;
+    content: string;
+    user_id: string;
+    created_at: string;
+  }> {
+    const { data: parentMessage, error } = await this.client
+      .from('messages')
+      .select('id, content, user_id, created_at')
+      .eq('id', annotationId)
+      .single();
+
+    if (error) {
+      throw new Error(`Error fetching parent message: ${error.message}`);
+    }
+
+    if (!parentMessage) {
+      throw new Error('Parent message not found');
+    }
+
+    return {
+      ...parentMessage,
+      content: parentMessage.content ?? '', 
+    };
+  }
+
   async updateStatus(
     annotationId: string,
     status: Annotations.AnnotationStatus,
@@ -184,39 +202,23 @@ export class AnnotationRepository implements IAnnotationRepository {
       .select()
       .single();
 
-    if (error) {
-      throw new Error(`Error updating annotation status: ${error.message}`);
-    }
-
-    if (!updatedAnnotation) {
-      throw new Error('Annotation not found');
+    if (error ?? !updatedAnnotation) {
+      throw new Error(
+        `Error updating annotation status: ${error?.message || 'Annotation not found'}`,
+      );
     }
 
     return updatedAnnotation as Annotations.Type;
   }
 
-  async addMessageToAnnotation(
-    parentId: string,
-    content: string,
-    userId: string,
-  ): Promise<{ id: string }> {
-    const { data: message, error } = await this.client
-      .from('messages')
-      .insert({
-        content,
-        user_id: userId,
-        type: 'annotation',
-        parent_id: parentId,
-      })
-      .select('id')
-      .single();
+  async softDelete(annotationId: string): Promise<void> {
+    const { error } = await this.client
+      .from('annotations')
+      .update({ deleted_on: new Date().toISOString() })
+      .eq('id', annotationId);
 
-    if (error != null || !message) {
-      throw new Error(
-        `Error adding message to annotation: ${error?.message || 'Unknown error'}`,
-      );
+    if (error) {
+      throw new Error(`Error deleting annotation: ${error.message}`);
     }
-
-    return message;
   }
 }

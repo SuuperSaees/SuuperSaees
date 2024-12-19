@@ -13,6 +13,7 @@ export class AnnotationBuilder {
     position_x: 0,
     position_y: 0,
     page_number: null,
+    number: null,
     message_id: '',
     deleted_on: null,
     created_at: new Date().toISOString(),
@@ -65,6 +66,11 @@ export class AnnotationBuilder {
     };
   }
 
+  setUpdateData(updateData: Partial<Annotations.Update>) {
+    this.updateData = { ...this.updateData, ...updateData };
+    return this;
+  }
+
   buildUpdate(): Partial<Annotations.Update> {
     return {
       ...this.updateData,
@@ -87,5 +93,15 @@ export class AnnotationBuilder {
       .setMessageId(messageId)
       .setNumber(number)
       .buildAnnotationInsert();
+  }
+
+  static buildDeletedAnnotation(
+    annotationId: string,
+  ): Partial<Annotations.Update> {
+    const builder = new AnnotationBuilder();
+    return builder
+      .setUpdateData({ deleted_on: new Date().toISOString() })
+      .setUpdateData({ id: annotationId })
+      .buildUpdate();
   }
 }

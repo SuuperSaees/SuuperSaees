@@ -23,10 +23,16 @@ export class AnnotationService {
       const message = await this.annotationRepository.createMessage(
         data.content,
         data.user_id,
+        '',
       );
 
       const annotationData = {
-        ...data,
+        file_id: data.file_id,
+        user_id: data.user_id,
+        position_x: data.position_x,
+        position_y: data.position_y,
+        page_number: data.page_number ?? null,
+        status: data.status ?? 'active',
         message_id: message.id,
       };
 
@@ -54,26 +60,18 @@ export class AnnotationService {
     otherFiles: Annotations.Type[];
   }> {
     try {
-      this.logger.info({ fileId }, 'Fetching annotations');
-
       const annotations =
         await this.annotationRepository.getAnnotationsByFile(fileId);
 
-      const currentFileAnnotations = annotations.filter(
-        (annotation) => annotation.file_id === fileId,
-      );
-      const otherFileAnnotations = annotations.filter(
-        (annotation) => annotation.file_id !== fileId,
-      );
-
-      this.logger.info({ fileId }, 'Annotations fetched successfully');
-
       return {
-        currentFile: currentFileAnnotations,
-        otherFiles: otherFileAnnotations,
+        currentFile: annotations.filter(
+          (annotation) => annotation.file_id === fileId,
+        ),
+        otherFiles: annotations.filter(
+          (annotation) => annotation.file_id !== fileId,
+        ),
       };
     } catch (error) {
-      this.logger.error({ error, fileId }, 'Failed to fetch annotations');
       throw ApiError.internalError(
         ErrorAnnotationOperations.FAILED_TO_LIST_ANNOTATIONS,
       );
@@ -99,6 +97,7 @@ export class AnnotationService {
 
       const parentMessage =
         await this.annotationRepository.getParentMessage(annotationId);
+
       if (!parentMessage) {
         throw ApiError.notFound(
           `Parent message for annotation ${annotationId} not found`,
@@ -157,20 +156,17 @@ export class AnnotationService {
   }
 
   async addMessageToAnnotation(
-    annotationId: string,
+    parentId: string,
     content: string,
     userId: string,
   ): Promise<{ id: string }> {
     try {
-      this.logger.info(
-        { annotationId, userId },
-        'Adding message to annotation',
-      );
+      this.logger.info({ parentId, userId }, 'Adding message to annotation');
 
-      const message = await this.annotationRepository.addMessageToAnnotation(
-        annotationId,
+      const message = await this.annotationRepository.createMessage(
         content,
         userId,
+        parentId,
       );
 
       this.logger.info(
@@ -181,7 +177,7 @@ export class AnnotationService {
       return message;
     } catch (error) {
       this.logger.error(
-        { error, annotationId, userId },
+        { error, parentId, userId },
         'Failed to add message to annotation',
       );
 
@@ -190,6 +186,28 @@ export class AnnotationService {
         : ApiError.internalError(
             ErrorAnnotationOperations.FAILED_TO_ADD_MESSAGE,
           );
+    }
+  }
+
+  async softDeleteAnnotation(annotationId: string): Promise<void> {
+    try {
+      this.logger.info({ annotationId }, 'Soft deleting annotation');
+
+      await this.annotationRepository.softDelete(annotationId);
+
+      this.logger.info(
+        { annotationId },
+        'Annotation soft deleted successfully',
+      );
+    } catch (error) {
+      this.logger.error(
+        { error, annotationId },
+        'Failed to soft delete annotation',
+      );
+
+      throw ApiError.internalError(
+        ErrorAnnotationOperations.FAILED_TO_DELETE_ANNOTATION,
+      );
     }
   }
 }

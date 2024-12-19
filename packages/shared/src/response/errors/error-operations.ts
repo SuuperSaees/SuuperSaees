@@ -114,6 +114,7 @@ export enum ErrorAnnotationOperations {
   ANNOTATION_NOT_FOUND = 'annotationNotFound',
   FAILED_TO_FIND_ANNOTATION= 'failedToFindAnnotation',
   FAILED_TO_LIST_MESSAGES = 'failedToListMessages',
+  FAILED_TO_FIND_MESSAGES = 'failedToFindMessages',
   FAILED_TO_ADD_MESSAGE= 'failedToAddMessage',
   FAILED_TO_CREATE_ANNOTATION = 'failedToCreateAnnotation',
   FAILED_TO_UPDATE_ANNOTATION = 'failedToUpdateAnnotation',
