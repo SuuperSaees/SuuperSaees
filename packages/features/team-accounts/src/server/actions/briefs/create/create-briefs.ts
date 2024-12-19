@@ -91,7 +91,7 @@ export const addServiceBriefs = async (
 
 const normalizeSelectOptions = (formFields: FormField.Insert[]): FormField.Insert[] => {
   return formFields.map(field => {
-    if (field.type === 'select' && field.options) {
+    if ((field.type === 'select' || field.type === 'multiple_choice' || field.type === 'dropdown')  && field.options) {
       return {
         ...field,
         options: field.options.map(option => ({
