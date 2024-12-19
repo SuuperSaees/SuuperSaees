@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -10,49 +10,52 @@ import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Separator } from '@kit/ui/separator';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 import EmptyState from '~/components/ui/empty-state';
 import { useColumns } from '~/hooks/use-columns';
+import { UserWithSettings } from '~/lib/account.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Order } from '~/lib/order.types';
 
 import Table from '../../components/table/table';
+import { useUserOrderActions } from '../hooks/user-order-actions';
 
 type OrdersTableProps = {
   orders: Order.Response[];
-  role: string;
+  agencyMembers: UserWithSettings[];
   agencyStatuses?: AgencyStatus.Type[];
 };
 
-const tabsConfig = [
-  {
-    key: 'open',
-    label: 'openOrders',
-    filter: (order: Order.Response) =>
-      order.status !== 'completed' && order.status !== 'anulled',
-  },
-  {
-    key: 'completed',
-    label: 'completedOrders',
-    filter: (order: Order.Response) => order.status === 'completed',
-  },
-  { key: 'all', label: 'allOrders', filter: () => true },
-];
-
-export function OrderList({ orders, role }: OrdersTableProps) {
+export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
   const { t } = useTranslation('orders');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
     'open',
   );
-
+  const { workspace } = useUserWorkspace();
+  const role = workspace?.role ?? '';
   // hasPermission based on role
   const hasPermission = () => {
     return agencyRoles.has(role);
   };
-  const orderColumns = useColumns('orders', hasPermission);
+
+  const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
+
+  const actions = {
+    updateOrderDate: orderDateMutation,
+    updateOrderAssigns: orderAssignsMutation,
+  };
+  const columnsAdditionalData = {
+    orderAgencyMembers: agencyMembers,
+  };
+  const orderColumns = useColumns('orders', {
+    data: columnsAdditionalData,
+    actions,
+    hasPermission: hasPermission,
+  });
 
   const filteredOrders = useMemo(() => {
     const currentTab = tabsConfig.find((tab) => tab.key === activeTab);
@@ -62,12 +65,6 @@ export function OrderList({ orders, role }: OrdersTableProps) {
         currentTab?.filter(order),
     );
   }, [orders, activeTab, searchTerm]);
-
-  const agencyRoles = new Set([
-    'agency_owner',
-    'agency_project_manager',
-    'agency_member',
-  ]);
 
   const renderEmptyState = () => (
     <EmptyState
@@ -81,6 +78,19 @@ export function OrderList({ orders, role }: OrdersTableProps) {
       }
     />
   );
+
+  const controller = {
+    search: {
+      value: searchTerm,
+      setValue: setSearchTerm,
+    },
+  };
+
+  const agencyRoles = new Set([
+    'agency_owner',
+    'agency_project_manager',
+    'agency_member',
+  ]);
 
   return (
     <main>
@@ -133,12 +143,7 @@ export function OrderList({ orders, role }: OrdersTableProps) {
                 data={filteredOrders}
                 columns={orderColumns}
                 filterKey={'title'}
-                controllers={{
-                  search: {
-                    value: searchTerm,
-                    setValue: setSearchTerm,
-                  },
-                }}
+                controllers={controller}
                 emptyStateComponent={renderEmptyState()}
               />
             </TabsContent>
@@ -148,3 +153,18 @@ export function OrderList({ orders, role }: OrdersTableProps) {
     </main>
   );
 }
+
+const tabsConfig = [
+  {
+    key: 'open',
+    label: 'openOrders',
+    filter: (order: Order.Response) =>
+      order.status !== 'completed' && order.status !== 'anulled',
+  },
+  {
+    key: 'completed',
+    label: 'completedOrders',
+    filter: (order: Order.Response) => order.status === 'completed',
+  },
+  { key: 'all', label: 'allOrders', filter: () => true },
+];

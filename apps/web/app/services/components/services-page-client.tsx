@@ -1,89 +1,274 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// import { Elements } from '@stripe/react-stripe-js';
-// import { Stripe } from '@stripe/stripe-js';
+import { useMutation } from '@tanstack/react-query';
+import { Search } from 'lucide-react';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
+import { useTranslation } from 'react-i18next';
 
 import { PageBody } from '@kit/ui/page';
-import { Tabs, TabsContent } from '@kit/ui/tabs';
+import { Spinner } from '@kit/ui/spinner';
+import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
-import { BriefsTable } from '~/team-accounts/src/components/briefs/briefs-table';
-
-import { ServicesTable } from '../../../../../packages/features/team-accounts/src/components/services/services-table';
-import { useStripeActions } from '../hooks/use-stripe-actions';
-import { PageHeader } from '../../components/page-header';
-import { TimerContainer } from '../../components/timer-container';
-
+import EmptyState from '~/components/ui/empty-state';
+import { SkeletonTable } from '~/components/ui/skeleton';
+import { useColumns } from '~/hooks/use-columns';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
+import { Brief } from '~/lib/brief.types';
+import { handleResponse } from '~/lib/response/handle-response';
+import { createBrief } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
+
+import { PageHeader } from '../../components/page-header';
+import Table from '../../components/table/table';
+import { TimerContainer } from '../../components/timer-container';
+import { useStripeActions } from '../hooks/use-stripe-actions';
 
 interface ServicesPageClientProps {
   accountRole: string;
   paymentsMethods: BillingAccounts.PaymentMethod[];
 }
 
-const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
+const TABS = [
+  { key: 'services', label: 'services:serviceTitle' },
+  { key: 'briefs', label: 'briefs:briefs' },
+] as const;
+
+type TabType = (typeof TABS)[number]['key'];
+
+export function ServicesPageClient({
   accountRole,
   paymentsMethods,
-}) => {
+}: ServicesPageClientProps) {
+  const router = useRouter();
+  const { t } = useTranslation(['briefs', 'services']);
   const searchParams = useSearchParams();
   const briefsView = searchParams.get('briefs');
-  const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<'services' | 'briefs'>(
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<TabType>(
     briefsView === 'true' ? 'briefs' : 'services',
   );
 
   const { services, briefs, briefsAreLoading, servicesAreLoading } =
-    useStripeActions({
-      userRole: accountRole,
-    });
+    useStripeActions();
 
-  const handleTabClick = (value: 'services' | 'briefs') => {
-    setActiveTab(value);
+  const hasPermissionToActionServices = (type?: string) => {
+    switch (type) {
+      case 'edit':
+        return ['agency_owner', 'agency_project_manager'].includes(accountRole);
+      case 'delete':
+        return ['agency_owner', 'agency_project_manager'].includes(accountRole);
+      case 'checkout':
+        return ['agency_owner'].includes(accountRole);
+      default:
+        return false;
+    }
+  };
+  const hasPermissionToActionBriefs = () => {
+    return ['agency_owner', 'agency_project_manager'].includes(accountRole);
   };
 
+  const briefColumns = useColumns('briefs', {
+    hasPermission: hasPermissionToActionBriefs,
+  });
+  const servicesColumns = useColumns('services', {
+    hasPermission: hasPermissionToActionServices,
+    paymentsMethods,
+  });
+
+  const briefMutation = useMutation({
+    mutationFn: async () => {
+      const res = await createBrief({});
+      await handleResponse(res, 'briefs', t);
+      if (res.ok && res?.success?.data) {
+        router.push(`briefs/${res.success.data.id}`);
+      }
+    },
+  });
+
+  const filteredData = useMemo(() => {
+    const items = activeTab === 'briefs' ? briefs : services;
+    return items.filter((item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [activeTab, briefs, services, searchTerm]);
+
+  const handleTabChange = (value: string) => {
+    const newTab = value as TabType;
+    setSearchTerm('');
+    setActiveTab(newTab);
+    if (newTab === 'services' && briefsView === 'true') {
+      router.push('/services');
+    }
+  };
+
+  const renderEmptyState = (accountRole: string) => (
+    <EmptyState
+      imageSrc="/images/illustrations/Illustration-cloud.svg"
+      title={t(
+        activeTab === 'services'
+          ? 'startFirstService'
+          : 'briefs:empty.agency.title',
+      )}
+      description={t(
+        activeTab === 'services'
+          ? 'noServicesMessage'
+          : 'briefs:empty.agency.description',
+      )}
+      button={
+        activeTab === 'services' &&
+        (accountRole === 'agency_owner' ||
+          accountRole === 'agency_project_manager') ? (
+          <Link href="/services/create">
+            <ThemedButton>{t('createService')}</ThemedButton>
+          </Link>
+        ) : (
+          <CreateButton
+            onClick={() => briefMutation.mutateAsync()}
+            isLoading={briefMutation.isPending}
+            label={t('createBrief')}
+          />
+        )
+      }
+    />
+  );
+
   return (
-    <Tabs
-      defaultValue={activeTab}
-      onValueChange={(value: string) => {
-        if (value === 'services' && briefsView === 'true') {
-          handleTabClick(value);
-          router.push('/services');
-        }
-        handleTabClick(value as 'services' | 'briefs');
-      }}
-    >
-        <PageBody>
-          <div className="p-[35px]">
-            <PageHeader
-              title='services:title'
-              rightContent={
-                <TimerContainer />
-              }
-            />
-            <TabsContent className="bg-transparent" value="services">
-              <ServicesTable
-                activeTab={activeTab}
-                services={services}
-                accountRole={accountRole}
-                paymentsMethods={paymentsMethods}
-                isLoading={servicesAreLoading}
+    <Tabs defaultValue={activeTab} onValueChange={handleTabChange}>
+      <PageBody>
+        <div className="p-[35px]">
+          <PageHeader
+            title="services:title"
+            rightContent={<TimerContainer />}
+          />
+
+          <div className="flex justify-between">
+            <TabsList className="gap-2 bg-transparent">
+              {TABS.map(({ key, label }) => (
+                <ThemedTabTrigger
+                  key={key}
+                  value={key}
+                  activeTab={activeTab}
+                  option={key}
+                  className="font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
+                >
+                  {t(label)}
+                </ThemedTabTrigger>
+              ))}
+            </TabsList>
+
+            <div className="ml-auto flex items-center gap-2">
+              <SearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder={t(
+                  activeTab === 'services' ? 'searchServices' : 'search',
+                )}
               />
-            </TabsContent>
-            <TabsContent className="bg-transparent" value="briefs">
-              <BriefsTable activeTab={activeTab} briefs={briefs} accountRole={accountRole} isLoading={briefsAreLoading} />
-            </TabsContent>
+              {filteredData.length > 0 &&
+                (accountRole === 'agency_owner' ||
+                  accountRole === 'agency_project_manager') &&
+                (activeTab === 'services' ? (
+                  <Link href="/services/create">
+                    <ThemedButton>{t('createService')}</ThemedButton>
+                  </Link>
+                ) : (
+                  <CreateButton
+                    onClick={() => briefMutation.mutateAsync()}
+                    isLoading={briefMutation.isPending}
+                    label={t('createBrief')}
+                  />
+                ))}
+            </div>
           </div>
-        </PageBody>
+
+          <TabsContent className="bg-transparent" value="services">
+            {servicesAreLoading && activeTab === 'services' ? (
+              <SkeletonTable columns={4} rows={7} className="mt-4" />
+            ) : (
+              <Table
+                data={activeTab === 'services' ? filteredData : []}
+                columns={
+                  servicesColumns as Brief.Relationships.Services.Response[]
+                }
+                filterKey="name"
+                controllers={{
+                  search: { value: searchTerm, setValue: setSearchTerm },
+                }}
+                emptyStateComponent={renderEmptyState(accountRole)}
+              />
+            )}
+          </TabsContent>
+          <TabsContent className="bg-transparent" value="briefs">
+            {briefsAreLoading && activeTab === 'briefs' ? (
+              <SkeletonTable columns={4} rows={7} className="mt-4" />
+            ) : (
+              <Table
+                data={activeTab === 'briefs' ? filteredData : []}
+                columns={
+                  briefColumns as Brief.Relationships.Services.Response[]
+                }
+                filterKey="name"
+                controllers={{
+                  search: { value: searchTerm, setValue: setSearchTerm },
+                }}
+                emptyStateComponent={renderEmptyState(accountRole)}
+              />
+            )}
+          </TabsContent>
+        </div>
+      </PageBody>
     </Tabs>
   );
-};
+}
+const SearchBar = ({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) => (
+  <div className="relative flex flex-1 md:grow-0">
+    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+    <ThemedInput
+      type="search"
+      value={value}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="focus-visible:ring-none w-full rounded-xl bg-white pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
+    />
+  </div>
+);
 
-const ServicesPageClient: React.FC<ServicesPageClientProps> = (props) => {
-  return <ServicesPageClientContent {...props} />;
-};
-
-export { ServicesPageClient };
+const CreateButton = ({
+  onClick,
+  isLoading,
+  label,
+}: {
+  onClick: () => Promise<void>;
+  isLoading: boolean;
+  label: string;
+}) => (
+  <ThemedButton
+    onClick={onClick}
+    disabled={isLoading}
+    className="flex items-center gap-2"
+  >
+    {isLoading ? (
+      <>
+        <span>{label}</span>
+        <Spinner className="h-4 w-4" />
+      </>
+    ) : (
+      <span>{label}</span>
+    )}
+  </ThemedButton>
+);

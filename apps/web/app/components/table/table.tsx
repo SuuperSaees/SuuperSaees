@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Search } from 'lucide-react';
@@ -41,12 +41,12 @@ export default function Table<T>({
 }: TableProps<T>) {
   const [search, setSearch] = useState(controllers?.search?.value ?? '');
 
-  const filteredData = data.filter((obj) => {
+  const filteredData = useMemo(() => data.filter((obj) => {
     const searchString = search?.toLowerCase();
 
     const displayValue = String(obj[filterKey] ?? '').toLowerCase(); // Safely access and convert to string
     return displayValue.includes(searchString);
-  });
+  }), [data, filterKey, search]);
 
   return (
     <div className={`flex flex-col gap-4 ${className}`}>

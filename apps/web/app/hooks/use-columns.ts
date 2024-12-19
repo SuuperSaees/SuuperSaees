@@ -1,10 +1,12 @@
-
 import { useTranslation } from 'react-i18next';
-
-import { columnFactory } from '../components/table/columns';
+import { columnFactory, ColumnConfigs } from '../components/table/columns';
 import { EntityData } from '../components/table/types';
+import { useMemo } from 'react';
 
-export const useColumns = (type: keyof EntityData, hasPermission?: (row?: EntityData[keyof EntityData][number]) => boolean) => {
+export const useColumns = <K extends keyof EntityData>(
+  type: K,
+  config: ColumnConfigs[K]
+) => {
   const { t } = useTranslation('tables');
-  return columnFactory(type, t, hasPermission);
+  return useMemo(() => columnFactory(type, t, config), [type, t, config]);
 };
