@@ -246,7 +246,7 @@ function ActionsDropdown({
   // const [isTransferring, setIsTransferring] = useState(false);
   // const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
-  const memberRoleHierarchy = member.role_hierarchy_level;
+  // const memberRoleHierarchy = member.role_hierarchy_level;
   const canUpdateRole = permissions.canUpdateRole();
 
   const canRemoveFromAccount =

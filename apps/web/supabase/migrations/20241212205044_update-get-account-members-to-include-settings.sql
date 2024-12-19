@@ -30,7 +30,9 @@ begin
         join public.roles r on r.name = am.account_role
         left join public.user_settings us on us.user_id = am.user_id -- Join with user_settings
     where
-        a.slug = account_slug;
+        a.slug = account_slug
+        and a.deleted_on is null
+        and acc.deleted_on is null;
 end;
 $function$
 ;
