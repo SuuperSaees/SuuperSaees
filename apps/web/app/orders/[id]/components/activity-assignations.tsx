@@ -38,12 +38,14 @@ interface ActivityAssignationProps {
     value: string;
     label: string;
   }[];
+  canAddAssignesOrFollowers: boolean;
 }
 
 const ActivityAssignations = ({
   assignedTo,
   updateFunction,
   searchUserOptions,
+  canAddAssignesOrFollowers = false,
 }: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
 
@@ -84,13 +86,15 @@ const ActivityAssignations = ({
             />
           );
         })}
-        <CheckboxCombobox
-          options={searchUserOptions ?? []}
-          onSubmit={handleFormSubmit}
-          schema={membersAssignedSchema}
-          defaultValues={defaultValues}
-          customItem={CustomUserItem}
+        {canAddAssignesOrFollowers && (
+          <CheckboxCombobox
+            options={searchUserOptions ?? []}
+            onSubmit={handleFormSubmit}
+            schema={membersAssignedSchema}
+            defaultValues={defaultValues}
+            customItem={CustomUserItem}
         />
+        )}
       </div>
     </div>
   );
