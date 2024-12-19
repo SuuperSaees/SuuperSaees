@@ -100,5 +100,7 @@
   "success": "¡Todo Listo!",
   "error": "¡Algo salió mal!",
   "stopImpersonating": "Dejar de suplantar",
-  "stopImpersonatingDescription": "Regresarás a tu sesión en unos segundos"
+  "stopImpersonatingDescription": "Regresarás a tu sesión en unos segundos",
+  "rowsPerPage": "Filas por página",
+  "rowNumber": "{{number}} filas"
 }

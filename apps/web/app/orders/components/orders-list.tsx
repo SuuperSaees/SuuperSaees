@@ -145,6 +145,9 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
                 filterKey={'title'}
                 controllers={controller}
                 emptyStateComponent={renderEmptyState()}
+                presetFilters={{
+                  filterableColumns: ['title', 'status', 'priority'],
+                }}
               />
             </TabsContent>
           ))}

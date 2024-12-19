@@ -27,6 +27,9 @@ interface TableProps<T> {
   emptyStateComponent?: React.ReactNode;
   disableInteractions?: boolean;
   className?: string;
+  presetFilters?: {
+    filterableColumns: string[];
+  };
 }
 
 export default function Table<T>({
@@ -38,6 +41,7 @@ export default function Table<T>({
   emptyStateComponent,
   disableInteractions,
   className,
+  presetFilters,
 }: TableProps<T>) {
   const [search, setSearch] = useState(controllers?.search?.value ?? '');
 
@@ -79,6 +83,7 @@ export default function Table<T>({
         className="rounded-xl bg-white"
         emptyStateComponent={emptyStateComponent}
         disableInteractions={disableInteractions}
+        presetFilters={presetFilters}
       />
     </div>
   );
