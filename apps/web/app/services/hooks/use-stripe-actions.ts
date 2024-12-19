@@ -75,6 +75,9 @@ export function useStripeActions({ userRole }: UseStripeActions) {
   const createCheckoutMutation = useMutation({
     mutationFn: createUrlForCheckout,
     onSuccess: (sessionUrl: string) => {
+      if (!document.hasFocus()) {
+        window.focus();
+      }
       navigator.clipboard.writeText(sessionUrl).catch((error) => {
         console.error('Error copying checkout URL to clipboard:', error);
       });
