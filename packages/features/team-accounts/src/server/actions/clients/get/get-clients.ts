@@ -40,6 +40,7 @@ type UserAccount = Pick<
     name: string | null;
     picture_url: string | null;
   } | null;
+  role: string | null;
 }
 
 export type ClientsWithOrganization = {
@@ -202,6 +203,26 @@ async function fetchClientOwners(
       'name, email, id, picture_url, organization_id, created_at, primary_owner_user_id, is_personal_account, settings:user_settings(name, picture_url)',
     ).in('id', clientUserIds)
     .eq('is_personal_account', true);
+  
+    // Get the roles
+    const adminClient = getSupabaseServerComponentClient({  
+      admin: true,
+    })
+    const { data: clientUsersRoles, error: clientUsersRolesError } = await adminClient
+    .from('accounts_memberships')
+    .select('account_role, user_id')
+    .in('user_id', clientUserIds)
+
+    if (clientUsersRolesError) {
+      throw new Error(
+        `Error fetching client users roles: ${clientUsersRolesError.message}`,
+      );
+    }
+
+    const transformedClientUsers: UserAccount[] = (clientUsers ?? []).map((user) => ({
+      ...user,
+      role: clientUsersRoles?.find((role) => role.user_id === user.id)?.account_role ?? null,
+    }));
 
     if (clientUsersError) {
       throw new Error(
@@ -209,7 +230,7 @@ async function fetchClientOwners(
       );
     }
 
-    const clientOrganizationWithOwners = combineClientData(clientOrganizationOwners, clientOrganizations, clientUsers);
+    const clientOrganizationWithOwners = combineClientData(clientOrganizationOwners, clientOrganizations, transformedClientUsers);
   
 
   return clientOrganizationWithOwners ?? [];
@@ -284,6 +305,7 @@ function combineClientData(
         created_at: user.created_at,
         primary_owner_user_id: user.primary_owner_user_id,
         settings: user.settings,
+        role: user.role,
       })),
     };
   });
