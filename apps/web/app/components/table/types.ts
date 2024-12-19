@@ -1,3 +1,6 @@
+import { User } from '@supabase/supabase-js';
+import { UseMutationResult } from '@tanstack/react-query';
+import { UserWithSettings } from '~/lib/account.types';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Brief } from '~/lib/brief.types';
 import { Order } from '~/lib/order.types';
@@ -19,7 +22,14 @@ type ServicePermissions = {
 
 export type ColumnConfigs = {
   orders: {
-    hasPermission?: (row?: string) => boolean;
+    data: {
+      orderAgencyMembers: UserWithSettings[];
+    };
+    actions: {
+      updateOrderDate: UseMutationResult<{ order: Order.Type; user: User | undefined }, Error, { due_date: string; orderId: number }, unknown>;
+      updateOrderAssigns: UseMutationResult<void, Error, { agencyMemberIds: string[]; orderId: number }, unknown>;
+    };
+    hasPermission: () => boolean;
   };
   briefs: {
     hasPermission?: (row?: string) => boolean;

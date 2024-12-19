@@ -17,9 +17,12 @@ export const columnFactory = <K extends keyof EntityData>(
 
   switch (type) {
     case 'orders':
-      return ordersColumns(t, ordersConfig.hasPermission) as ColumnDef<
-        EntityData[K][number]
-      >[];
+      return ordersColumns(
+        t,
+        ordersConfig.data,
+        ordersConfig.actions,
+        ordersConfig.hasPermission,
+      ) as ColumnDef<EntityData[K][number]>[];
     case 'briefs':
       return briefsColumns(t, briefsConfig.hasPermission) as ColumnDef<
         EntityData[K][number]
