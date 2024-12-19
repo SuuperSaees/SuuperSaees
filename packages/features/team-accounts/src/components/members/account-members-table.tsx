@@ -55,19 +55,13 @@ export function AccountMembersTable({
   members,
   currentUserId,
   currentAccountId,
-  isPrimaryOwner,
+  // isPrimaryOwner,
   userRoleHierarchy,
-  canManageRoles,
+  // canManageRoles,
 }: AccountMembersTableProps) {
   const search = '';
 
-  const {
-    data: userRole,
-    isLoading,
-  } = useQuery({
-    queryKey: ['userRole', currentUserId],
-    queryFn: async () => await getUserRoleById(currentUserId, true),
-  });
+  const userRole = members.find((member) => member.id=== currentUserId)?.role ?? '';
 
   const permissions = {
     canUpdateRole: () => {
@@ -88,11 +82,11 @@ export function AccountMembersTable({
       currentAccountId,
       currentRoleHierarchy: userRoleHierarchy,
     },
-    isLoading,
+    false,
     userRole ?? ''
   );
 
-  const filteredMembers = members
+  const filteredMembers = useMemo(() => members
     .filter((member) => {
       const searchString = search.toLowerCase();
       const displayName = member.name ?? member.email.split('@')[0];
@@ -112,7 +106,8 @@ export function AccountMembersTable({
       }
 
       return 1;
-    });
+    }),
+  [members, search]);
 
   return (
     <div className={'flex flex-col space-y-2'}>
@@ -152,7 +147,7 @@ function useGetColumns(
 
           return (
             <Link
-              className={'flex items-center space-x-4 text-left'}
+              className={'flex items-center space-x-4 text-left font-semibold'}
               href={`/team/${member.id}`}
             >
               <span>
@@ -184,7 +179,7 @@ function useGetColumns(
               <If condition={isPrimaryOwner}>
                 <span
                   className={
-                    'rounded-md bg-yellow-400 px-2.5 py-1 text-xs font-medium dark:text-black'
+                    'rounded-md bg-yellow-400 px-2.5 py-1 text-xs font-medium dark:text-gray-600 text-gray-600'
                   }
                 >
                   {t('primaryOwnerLabel')}
@@ -198,13 +193,13 @@ function useGetColumns(
         header: t('emailLabel'),
         accessorKey: 'email',
         cell: ({ row }) => {
-          return row.original.email ?? '-';
+          return <span className='text-gray-600'>{row.original.email ?? '-'}</span>;
         },
       },
       {
         header: t('joinedAtLabel'),
         cell: ({ row }) => {
-          return new Date(row.original.created_at).toLocaleDateString();
+          return <span className='text-gray-600'>{new Date(row.original.created_at).toLocaleDateString()}</span>;
         },
       },
       {
@@ -273,6 +268,7 @@ function ActionsDropdown({
         currentUserRole={currentUserRole}
         currentUserId = {currentUserId}
         inTeamMembers={true}
+        targetRole={member.role}
       />
       {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>
