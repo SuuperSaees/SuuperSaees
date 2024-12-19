@@ -10,7 +10,7 @@ export interface IAnnotationRepository {
     content: string,
     userId: string,
     parentId: string,
-  ): Promise<{ id: string }>;
+  ): Promise<{ id: string; content: string }>;
   createAnnotation(data: Annotations.Insert): Promise<Annotations.Type>;
   getAnnotationsByFile(fileId: string): Promise<Annotations.Type[]>;
   getChildMessages(parentMessageId: string): Promise<
@@ -35,7 +35,7 @@ export class AnnotationRepository implements IAnnotationRepository {
     content: string,
     userId: string,
     parentId: string,
-  ): Promise<{ id: string }> {
+  ): Promise<{ id: string; content: string }> {
     const { data: message, error } = await this.client
       .from('messages')
       .insert({
@@ -44,7 +44,7 @@ export class AnnotationRepository implements IAnnotationRepository {
         type: 'annotation',
         parent_id: parentId || null,
       })
-      .select('id')
+      .select('id, content')
       .single();
 
     if (error ?? !message) {
@@ -53,7 +53,11 @@ export class AnnotationRepository implements IAnnotationRepository {
       );
     }
 
-    return message;
+    if (!message.content) {
+      throw new Error('Message content cannot be null'); 
+    }
+
+    return { id: message.id, content: message.content }; 
   }
 
   async createAnnotation(data: Annotations.Insert): Promise<Annotations.Type> {
@@ -187,7 +191,7 @@ export class AnnotationRepository implements IAnnotationRepository {
 
     return {
       ...parentMessage,
-      content: parentMessage.content ?? '', 
+      content: parentMessage.content ?? '',
     };
   }
 

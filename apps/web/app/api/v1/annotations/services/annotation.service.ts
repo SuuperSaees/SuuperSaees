@@ -16,16 +16,16 @@ export class AnnotationService {
     private readonly annotationRepository: AnnotationRepository,
   ) {}
 
-  async createAnnotation(data: CreateAnnotationDTO): Promise<Annotations.Type> {
+  async createAnnotation(data: CreateAnnotationDTO): Promise<Annotations.Type & { message: string }> {
     try {
       this.logger.info({ fileId: data.file_id }, 'Creating annotation');
-
+  
       const message = await this.annotationRepository.createMessage(
         data.content,
         data.user_id,
         '',
       );
-
+  
       const annotationData = {
         file_id: data.file_id,
         user_id: data.user_id,
@@ -35,16 +35,16 @@ export class AnnotationService {
         status: data.status ?? 'active',
         message_id: message.id,
       };
-
+  
       const annotation =
         await this.annotationRepository.createAnnotation(annotationData);
-
+  
       this.logger.info(
         { id: annotation.id },
         'Annotation created successfully',
       );
-
-      return annotation;
+  
+      return { ...annotation, message: message.content };
     } catch (error) {
       this.logger.error({ error, data }, 'Failed to create annotation');
       throw error instanceof ApiError
@@ -159,28 +159,28 @@ export class AnnotationService {
     parentId: string,
     content: string,
     userId: string,
-  ): Promise<{ id: string }> {
+  ): Promise<{ id: string; message: string }> {
     try {
       this.logger.info({ parentId, userId }, 'Adding message to annotation');
-
+  
       const message = await this.annotationRepository.createMessage(
         content,
         userId,
         parentId,
       );
-
+  
       this.logger.info(
         { messageId: message.id },
         'Message added to annotation successfully',
       );
-
-      return message;
+  
+      return { id: message.id, message: message.content };
     } catch (error) {
       this.logger.error(
         { error, parentId, userId },
         'Failed to add message to annotation',
       );
-
+  
       throw error instanceof ApiError
         ? error
         : ApiError.internalError(

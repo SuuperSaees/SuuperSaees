@@ -112,12 +112,14 @@ export enum ErrorBillingOperations {
 
 export enum ErrorAnnotationOperations {
   ANNOTATION_NOT_FOUND = 'annotationNotFound',
-  FAILED_TO_FIND_ANNOTATION= 'failedToFindAnnotation',
-  FAILED_TO_LIST_MESSAGES = 'failedToListMessages',
-  FAILED_TO_FIND_MESSAGES = 'failedToFindMessages',
-  FAILED_TO_ADD_MESSAGE= 'failedToAddMessage',
+  FAILED_TO_FIND_ANNOTATION = 'failedToFindAnnotation',
   FAILED_TO_CREATE_ANNOTATION = 'failedToCreateAnnotation',
   FAILED_TO_UPDATE_ANNOTATION = 'failedToUpdateAnnotation',
   FAILED_TO_DELETE_ANNOTATION = 'failedToDeleteAnnotation',
   FAILED_TO_LIST_ANNOTATIONS = 'failedToListAnnotations',
+
+  MESSAGE_NOT_FOUND = 'messageNotFound',
+  FAILED_TO_FIND_MESSAGES = 'failedToFindMessages',
+  FAILED_TO_LIST_MESSAGES = 'failedToListMessages',
+  FAILED_TO_ADD_MESSAGE = 'failedToAddMessage',
 }

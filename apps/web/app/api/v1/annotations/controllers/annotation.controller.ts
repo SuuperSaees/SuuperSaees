@@ -12,24 +12,24 @@ import { createAnnotationService } from '../services/annotation.service';
 export class AnnotationController extends BaseController {
   async create(req: NextRequest): Promise<Response> {
     const requestId = crypto.randomUUID();
-
+  
     try {
       const body = await this.parseBody<
         CreateAnnotationDTO & { parent_id?: string }
       >(req);
-
+  
       const client = getSupabaseServerComponentClient({ admin: true });
       const annotationService = await createAnnotationService(client);
-
+  
       if (body.parent_id) {
         const message = await annotationService.addMessageToAnnotation(
           body.parent_id,
           body.content,
           body.user_id,
         );
-        return this.created(message, requestId);
+        return this.created({ id: message.id, message: message.message }, requestId);
       }
-
+  
       if (
         !body.file_id ||
         !body.user_id ||
@@ -41,7 +41,7 @@ export class AnnotationController extends BaseController {
           ErrorAnnotationOperations.FAILED_TO_CREATE_ANNOTATION,
         );
       }
-
+  
       const annotation = await annotationService.createAnnotation(body);
       return this.created(annotation, requestId);
     } catch (error) {
