@@ -509,6 +509,7 @@ export type Database = {
           created_at: string
           deleted_on: string | null
           id: string
+          provider: Database["public"]["Enums"]["billing_provider"]
           provider_id: string
           service_id: number
           status: Database["public"]["Enums"]["service_status"]
@@ -518,6 +519,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
           provider_id: string
           service_id: number
           status?: Database["public"]["Enums"]["service_status"]
@@ -527,6 +529,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
           provider_id?: string
           service_id?: number
           status?: Database["public"]["Enums"]["service_status"]
@@ -2919,7 +2922,6 @@ export type Database = {
           picture_url: string
           created_at: string
           updated_at: string
-          deleted_on: string
           settings: Json
         }[]
       }
