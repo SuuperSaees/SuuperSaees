@@ -84,22 +84,26 @@ export class AnnotationController extends BaseController {
     { params }: { params: { id: string } },
   ): Promise<Response> {
     const requestId = crypto.randomUUID();
-
+  
     try {
       const parentId = params.id;
-
+  
       if (!parentId) {
         throw ApiError.badRequest(
           'The id parameter is required',
           ErrorAnnotationOperations.FAILED_TO_FIND_MESSAGES,
         );
       }
-
+  
+      const { searchParams } = new URL(req.url);
+      const limit = parseInt(searchParams.get('limit') ?? '10', 10);
+      const offset = parseInt(searchParams.get('offset') ?? '0', 10);
+  
       const client = getSupabaseServerComponentClient({ admin: true });
       const annotationService = await createAnnotationService(client);
-
-      const messages = await annotationService.getMessages(parentId);
-      return this.ok(messages || [], requestId);
+  
+      const result = await annotationService.getMessages(parentId, limit, offset);
+      return this.ok(result, requestId);
     } catch (error) {
       return this.handleError(error, requestId);
     }

@@ -78,7 +78,11 @@ export class AnnotationService {
     }
   }
 
-  async getMessages(annotationId: string): Promise<{
+  async getMessages(
+    annotationId: string,
+    limit: number,
+    offset: number,
+  ): Promise<{
     parent: {
       id: string;
       content: string;
@@ -91,36 +95,34 @@ export class AnnotationService {
       user_id: string;
       created_at: string;
     }[];
+    total: number;
+    limit: number;
+    offset: number;
   }> {
-    try {
-      this.logger.info({ annotationId }, 'Fetching messages for annotation');
-
-      const parentMessage =
-        await this.annotationRepository.getParentMessage(annotationId);
-
-      if (!parentMessage) {
-        throw ApiError.notFound(
-          `Parent message for annotation ${annotationId} not found`,
-          ErrorAnnotationOperations.ANNOTATION_NOT_FOUND,
-        );
-      }
-
-      const childMessages = await this.annotationRepository.getChildMessages(
-        parentMessage.id,
-      );
-
-      this.logger.info({ annotationId }, 'Messages fetched successfully');
-
-      return {
-        parent: parentMessage,
-        children: childMessages,
-      };
-    } catch (error) {
-      this.logger.error({ error, annotationId }, 'Failed to fetch messages');
-      throw ApiError.internalError(
-        ErrorAnnotationOperations.FAILED_TO_LIST_MESSAGES,
+    const parentMessage = await this.annotationRepository.getParentMessage(annotationId);
+  
+    if (!parentMessage) {
+      throw ApiError.notFound(
+        `Parent message for annotation ${annotationId} not found`,
+        ErrorAnnotationOperations.ANNOTATION_NOT_FOUND,
       );
     }
+  
+    const childMessages = await this.annotationRepository.getChildMessages(
+      parentMessage.id,
+      limit,
+      offset,
+    );
+  
+    const total = await this.annotationRepository.countChildMessages(parentMessage.id);
+  
+    return {
+      parent: parentMessage,
+      children: childMessages,
+      total,
+      limit,
+      offset,
+    };
   }
 
   async updateAnnotationStatus(

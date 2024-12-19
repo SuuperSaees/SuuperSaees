@@ -13,7 +13,11 @@ export interface IAnnotationRepository {
   ): Promise<{ id: string; content: string }>;
   createAnnotation(data: Annotations.Insert): Promise<Annotations.Type>;
   getAnnotationsByFile(fileId: string): Promise<Annotations.Type[]>;
-  getChildMessages(parentMessageId: string): Promise<
+  getChildMessages(
+    parentMessageId: string,
+    limit: number,
+    offset: number,
+  ): Promise<
     {
       id: string;
       content: string;
@@ -146,7 +150,11 @@ export class AnnotationRepository implements IAnnotationRepository {
     return annotations as Annotations.Type[];
   }
 
-  async getChildMessages(parentMessageId: string): Promise<
+  async getChildMessages(
+    parentMessageId: string,
+    limit: number,
+    offset: number,
+  ): Promise<
     {
       id: string;
       content: string;
@@ -157,16 +165,30 @@ export class AnnotationRepository implements IAnnotationRepository {
     const { data: childMessages, error } = await this.client
       .from('messages')
       .select('id, content, user_id, created_at')
-      .eq('parent_id', parentMessageId);
-
+      .eq('parent_id', parentMessageId)
+      .range(offset, offset + limit - 1);
+  
     if (error) {
       throw new Error(`Error fetching child messages: ${error.message}`);
     }
-
+  
     return childMessages.map((message) => ({
       ...message,
       content: message.content ?? '',
     }));
+  }
+
+  async countChildMessages(parentMessageId: string): Promise<number> {
+    const { count, error } = await this.client
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('parent_id', parentMessageId);
+  
+    if (error) {
+      throw new Error(`Error counting child messages: ${error.message}`);
+    }
+  
+    return count ?? 0;
   }
 
   async getParentMessage(annotationId: string): Promise<{
