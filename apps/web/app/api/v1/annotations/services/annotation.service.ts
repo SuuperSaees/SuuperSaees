@@ -62,7 +62,7 @@ export class AnnotationService {
     try {
       const annotations =
         await this.annotationRepository.getAnnotationsByFile(fileId);
-
+  
       return {
         currentFile: annotations.filter(
           (annotation) => annotation.file_id === fileId,

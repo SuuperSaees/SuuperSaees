@@ -58,10 +58,10 @@ export class AnnotationRepository implements IAnnotationRepository {
     }
 
     if (!message.content) {
-      throw new Error('Message content cannot be null'); 
+      throw new Error('Message content cannot be null');
     }
 
-    return { id: message.id, content: message.content }; 
+    return { id: message.id, content: message.content };
   }
 
   async createAnnotation(data: Annotations.Insert): Promise<Annotations.Type> {
@@ -126,19 +126,20 @@ export class AnnotationRepository implements IAnnotationRepository {
       .from('annotations')
       .select(
         `
-          id,
-          file_id,
-          user_id,
-          position_x,
-          position_y,
-          status,
-          created_at,
-          updated_at,
-          deleted_on,
-          page_number,
-          number,
-          message_id
-        `,
+        id,
+        file_id,
+        user_id,
+        position_x,
+        position_y,
+        status,
+        created_at,
+        updated_at,
+        deleted_on,
+        page_number,
+        number,
+        message_id,
+        messages(content)
+      `,
       )
       .eq('file_id', fileId)
       .is('deleted_on', null);
@@ -147,7 +148,11 @@ export class AnnotationRepository implements IAnnotationRepository {
       throw new Error(`Error fetching annotations: ${error.message}`);
     }
 
-    return annotations as Annotations.Type[];
+    return annotations.map((annotation) => ({
+      ...annotation,
+      message_content: annotation.messages?.content ?? null,
+      messages: undefined,
+    })) as Annotations.Type[];
   }
 
   async getChildMessages(
@@ -167,11 +172,11 @@ export class AnnotationRepository implements IAnnotationRepository {
       .select('id, content, user_id, created_at')
       .eq('parent_id', parentMessageId)
       .range(offset, offset + limit - 1);
-  
+
     if (error) {
       throw new Error(`Error fetching child messages: ${error.message}`);
     }
-  
+
     return childMessages.map((message) => ({
       ...message,
       content: message.content ?? '',
@@ -183,11 +188,11 @@ export class AnnotationRepository implements IAnnotationRepository {
       .from('messages')
       .select('*', { count: 'exact', head: true })
       .eq('parent_id', parentMessageId);
-  
+
     if (error) {
       throw new Error(`Error counting child messages: ${error.message}`);
     }
-  
+
     return count ?? 0;
   }
 
