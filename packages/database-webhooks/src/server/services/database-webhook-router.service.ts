@@ -138,7 +138,6 @@ class DatabaseWebhookRouterService {
       return service.handleAccountDeletedWebhook(body.old_record);
     }
 
-
     if (body.type === 'UPDATE' && body.record) {
       const { createAccountWebhooksService } = await import(
         '@kit/team-accounts/webhooks'
@@ -146,11 +145,12 @@ class DatabaseWebhookRouterService {
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''; // if this baseUrl fail, use getDomainByUserId function
       const service = createAccountWebhooksService(this.adminClient, baseUrl);
 
-      return service.handleSubscriptionUpdatedWebhook(body.record);
+      return service.handleSubscriptionUpdatedWebhook(
+        body.old_record,
+        body.record,
+      );
     }
   }
-
 }
-
 
 // Here manage the cancel subscription and update subscription of upgrade

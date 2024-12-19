@@ -1,6 +1,8 @@
 // 'use server';
 import { SupabaseClient } from '@supabase/supabase-js';
 
+
+
 import { z } from 'zod';
 
 import { getLogger } from '@kit/shared/logger';
@@ -48,28 +50,42 @@ class AccountWebhooksService {
     }
   }
 
-  async handleSubscriptionUpdatedWebhook(account: Account) {
+  async handleSubscriptionUpdatedWebhook(
+    oldAccount: Account | null,
+    newAccount: Account,
+  ) {
     // validate if is personal account
     const logger = await getLogger();
     const ctx = {
-      accountId: account.id,
+      accountId: newAccount.id,
       namespace: this.namespace,
     };
 
-    if (!account.is_personal_account) {
+    if (!newAccount.is_personal_account) {
       logger.info(ctx, `Account is not personal. We do nothing.`);
       return;
     }
 
-    if (!account.deleted_on) {
-      logger.info(ctx, `Account is not deleted. We do nothing.`);
+    if (!newAccount.organization_id) {
+      logger.info(ctx, `Account no have organization. We do nothing.`);
+      return;
+    }
+
+    const isNewOrganizationAssignment =
+      !oldAccount?.organization_id && newAccount.organization_id;
+
+    if (!newAccount.deleted_on && !isNewOrganizationAssignment) {
+      logger.info(
+        ctx,
+        `Account is not deleted and is not a new organization assignment. We do nothing.`,
+      );
       return;
     }
 
     // get role of the user
     const rolesToEdit = new Set(['agency_member', 'agency_project_manager']);
     const role =
-      (await getUserRoleById(account.id, true, this.adminClient)) ?? '';
+      (await getUserRoleById(newAccount.id, true, this.adminClient)) ?? '';
 
     if (!rolesToEdit.has(role)) {
       logger.info(
@@ -82,8 +98,8 @@ class AccountWebhooksService {
     // get primary owner user id from account
     const primaryOwnerId = await getPrimaryOwnerId(
       this.adminClient,
-      account.id,
-      account.organization_id ?? '',
+      newAccount.id,
+      newAccount.organization_id ?? '',
     );
 
     if (!primaryOwnerId) {
@@ -107,7 +123,7 @@ class AccountWebhooksService {
     const { data: members, error: membersError } = await this.adminClient
       .from('accounts')
       .select('id')
-      .eq('organization_id', account.organization_id ?? '')
+      .eq('organization_id', newAccount.organization_id ?? '')
       .is('deleted_on', null);
 
     if (membersError) {
