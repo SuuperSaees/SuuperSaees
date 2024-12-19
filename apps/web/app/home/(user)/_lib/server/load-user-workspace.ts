@@ -39,7 +39,7 @@ async function workspaceLoader() {
     requireUserInServerComponent(),
   ]);
 
-  const organization = accounts?.[0] ?? null;
+  const organization = accounts;
 
   return {
     accounts,

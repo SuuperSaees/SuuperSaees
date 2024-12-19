@@ -1,11 +1,16 @@
 'use client';
 
 // import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useRevalidatePersonalAccountDataQuery } from '@kit/accounts/hooks/use-personal-account-data';
+
 import { Section } from '~/contexts/section';
 import { ViewsMap } from '~/contexts/types/section.types';
+import { UserWithSettings } from '~/lib/account.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Order } from '~/lib/order.types';
 import { AgencyStatusesProvider } from '~/orders/components/context/agency-statuses-context';
@@ -14,8 +19,6 @@ import { updateUserSettings } from '~/team-accounts/src/server/actions/members/u
 // import Header from '../../../components/accounts/header';
 import HomeSection from './home-section';
 import ReviewsSection from './reviews-section';
-import { useRouter } from 'next/navigation';
-import { useRevalidatePersonalAccountDataQuery } from '@kit/accounts/hooks/use-personal-account-data';
 
 export default function Member({
   id,
@@ -23,6 +26,7 @@ export default function Member({
   user,
   orders,
   agencyStatuses,
+  agencyMembers,
 }: {
   id: string;
   userRole: string;
@@ -37,6 +41,7 @@ export default function Member({
   };
   orders: Order.Type[];
   agencyStatuses: AgencyStatus.Type[];
+  agencyMembers: UserWithSettings[];
 }) {
   const { t } = useTranslation();
   // const [activeTab, setActiveTab] = useState('home');
@@ -48,7 +53,7 @@ export default function Member({
       toast.success('Success', {
         description: t('account:updateProfileSuccess'),
       });
-      await revalidateAccount(id)
+      await revalidateAccount(id);
       router.refresh();
     } catch (error) {
       toast.error('Error', {
@@ -84,10 +89,21 @@ export default function Member({
   };
 
   const views: ViewsMap = new Map([
-    [t('team:member.tabs.home'), <HomeSection key={t('team:member.tabs.home')} memberOrders={orders} />],
+    [
+      t('team:member.tabs.home'),
+      <HomeSection
+        key={t('team:member.tabs.home')}
+        memberOrders={orders}
+        agencyMembers={agencyMembers}
+      />,
+    ],
     [
       t('team:member:tabs.reviews'),
-      <ReviewsSection key={t('team:member:tabs.reviews')} userId={id} userRole={userRole} />,
+      <ReviewsSection
+        key={t('team:member:tabs.reviews')}
+        userId={id}
+        userRole={userRole}
+      />,
     ],
   ]);
 

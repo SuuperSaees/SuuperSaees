@@ -5,17 +5,34 @@ import { useTranslation } from 'react-i18next';
 
 import EmptyState from '~/components/ui/empty-state';
 import { useColumns } from '~/hooks/use-columns';
+import { UserWithSettings } from '~/lib/account.types';
 import { Order } from '~/lib/order.types';
+import { useUserOrderActions } from '~/orders/hooks/user-order-actions';
 
 import Table from '../../../components/table/table';
 import CardStats from '../../../components/ui/card-stats';
 
 interface HomeSectionProps {
   memberOrders: Order.Response[];
+  agencyMembers: UserWithSettings[];
 }
-export default function HomeSection({ memberOrders }: HomeSectionProps) {
+export default function HomeSection({
+  memberOrders,
+  agencyMembers,
+}: HomeSectionProps) {
   // console.log('memberOrders', memberOrders);
-  const columns = useColumns('orders');
+  const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
+  const actions = {
+    orderDateMutation: orderDateMutation,
+    updateOrderAssigns: orderAssignsMutation,
+  };
+  const additionalData = {
+    orderAgencyMembers: agencyMembers,
+  };
+  const columns = useColumns('orders', {
+    data: additionalData,
+    actions: actions,
+  });
   const { t } = useTranslation('statistics');
   // Current Date
   const now = new Date();
