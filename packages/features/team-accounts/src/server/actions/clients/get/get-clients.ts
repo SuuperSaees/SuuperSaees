@@ -90,13 +90,33 @@ async function fetchClientMembers(
     )
     .in('id', clientsIds);
 
+    // Get the roles
+    const adminClient = getSupabaseServerComponentClient({  
+      admin: true,
+    })
+    const { data: clientUsersRoles, error: clientUsersRolesError } = await adminClient
+    .from('accounts_memberships')
+    .select('account_role, user_id')
+    .in('user_id', clientsIds)
+
+    if (clientUsersRolesError) {
+      throw new Error(
+        `Error fetching client users roles: ${clientUsersRolesError.message}`,
+      );
+    }
+
+    const transformedClientAccounts = clientAccounts?.map((client) => ({
+      ...client,
+      role: clientUsersRoles?.find((role) => role.user_id === client.id)?.account_role ?? null,
+    }));
+
   if (clientAccountsError) {
     throw new Error(
       `Error fetching client accounts: ${clientAccountsError.message}`,
     );
   }
 
-  return clientAccounts;
+  return transformedClientAccounts;
 }
 
 // Main function that uses the helper functions
