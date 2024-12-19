@@ -38,6 +38,7 @@ export type Database = {
         Row: {
           created_at: string | null
           created_by: string | null
+          deleted_on: string | null
           email: string | null
           id: string
           is_personal_account: boolean
@@ -55,6 +56,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           created_by?: string | null
+          deleted_on?: string | null
           email?: string | null
           id?: string
           is_personal_account?: boolean
@@ -72,6 +74,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           created_by?: string | null
+          deleted_on?: string | null
           email?: string | null
           id?: string
           is_personal_account?: boolean
@@ -2768,20 +2771,6 @@ export type Database = {
             referencedRelation: "roles"
             referencedColumns: ["name"]
           },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_accounts: {
@@ -2877,6 +2866,7 @@ export type Database = {
         Returns: {
           created_at: string | null
           created_by: string | null
+          deleted_on: string | null
           email: string | null
           id: string
           is_personal_account: boolean

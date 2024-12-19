@@ -22,6 +22,7 @@ import { deleteClient } from './delete-client-server';
 import { handleResponse } from '../../../../../../../../apps/web/lib/response/handle-response';
 import { useTranslation } from 'react-i18next';
 import { Trans } from '@kit/ui/trans';
+import { partialDeleteUserAccount } from '../../members/update/update-account';
 
 const DeleteUserDialog = ({
   userId,
@@ -52,19 +53,41 @@ const DeleteUserDialog = ({
       });
     },
     onError: () => null,
-
   });
 
-  // Server version, when not querykey is present due
-  // to the data was fetched directly from the server
-  const handleDelete = async () => {
-    try {
-      const res = await deleteClient(userId, organizationId);
-      await handleResponse(res, 'clients', t);
-      
-      router.refresh();
-    } catch (error) {
-      console.error('Error deleting client:', error);
+  const deleteTeamMember = useMutation({
+    mutationFn: async (userId: string) => await partialDeleteUserAccount(userId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [queryKey ?? 'clients'],
+      });
+    },
+    onError: () => null,
+  });
+
+  const handleClick = async () => {
+    if (!queryKey) {
+      // Server version
+      try {
+        if (inTeamMembers) {
+          const res = await partialDeleteUserAccount(userId);
+          await handleResponse(res, 'clients', t);
+        } else {
+          const res = await deleteClient(userId, organizationId);
+          await handleResponse(res, 'clients', t);
+        }
+        router.refresh();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      }
+      return;
+    }
+
+    // Client version
+    if (inTeamMembers) {
+      await deleteTeamMember.mutateAsync(userId);
+    } else {
+      await deleteClientFn.mutateAsync(userId);
     }
   };
 
@@ -95,13 +118,7 @@ const DeleteUserDialog = ({
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel><Trans i18nKey={'clients:deletion:cancel'} /></AlertDialogCancel>
-            <AlertDialogAction
-              onClick={
-                queryKey
-                  ? async () => await deleteClientFn.mutateAsync(userId)
-                  : handleDelete
-              }
-            >
+            <AlertDialogAction onClick={handleClick}>
               <Trans i18nKey={'clients:deletion:delete'} />
             </AlertDialogAction>
           </AlertDialogFooter>

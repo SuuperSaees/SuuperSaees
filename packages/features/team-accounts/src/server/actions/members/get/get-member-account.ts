@@ -95,6 +95,7 @@ export async function fetchUsersAccounts(
 export async function getPrimaryOwnerId(
   client?: SupabaseClient<Database>,
   accountId?: string,
+  organizationId?: string,
 ): Promise<string | undefined> {
   try {
     client = client ?? getSupabaseServerComponentClient();
@@ -106,7 +107,9 @@ export async function getPrimaryOwnerId(
     }
 
     // first we get the user account
-    const { data: userAccountData, error: userAccountError } = await client
+    let organizationIdFromUser = organizationId;
+    if (!organizationIdFromUser) {
+      const { data: userAccountData, error: userAccountError } = await client
       .from('accounts')
       .select('organization_id')
       .eq('id', userId)
@@ -114,15 +117,17 @@ export async function getPrimaryOwnerId(
 
     if (userAccountError)
       throw new Error(
-        `Couldn't get the user account: ${userAccountError.message}`,
-      );
+          `Couldn't get the user account: ${userAccountError.message}`,
+        );
+      organizationIdFromUser = userAccountData?.organization_id ?? "";
+    }
 
     // we get the organization account in order to obtain the propietary
     const { data: orgnaizationAccountData, error: orgnaizationAccountError } =
       await client
         .from('accounts')
         .select('primary_owner_user_id')
-        .eq('id', userAccountData?.organization_id ?? '')
+        .eq('id', organizationIdFromUser)
         .single();
 
     if (orgnaizationAccountError)
@@ -207,9 +212,9 @@ export async function getUserRole() {
   }
 }
 
-export async function getUserRoleById(userId: string, adminActivated = false) {
+export async function getUserRoleById(userId: string, adminActivated = false, client?: SupabaseClient<Database>) {
   try {
-    const client = getSupabaseServerComponentClient({ admin: adminActivated });
+    client = client ?? getSupabaseServerComponentClient({ admin: adminActivated });
 
     const { error: userAccountError, data: userAccountData } = await client
       .from('accounts_memberships')
