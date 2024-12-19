@@ -13,7 +13,7 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
-const PlansPage = () => {
+const PlansPage = ({seats}: {seats: number}) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { loading, errorMessage, productsDataConfig, subscription } = useBilling()
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null); 
@@ -51,7 +51,7 @@ const PlansPage = () => {
               currency: "usd",
             }}
           >
-            <CheckoutPage amount={selectedAmount} priceId={selectedPriceId} billingCustomerId={billingCustomerId!} />
+            <CheckoutPage amount={selectedAmount} priceId={selectedPriceId} billingCustomerId={billingCustomerId!} seats={seats}/>
           </Elements>
         </div>
       ) :

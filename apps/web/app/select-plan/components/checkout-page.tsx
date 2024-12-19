@@ -9,7 +9,7 @@ import {
 import { Button } from "@kit/ui/button";
 import { useRouter } from 'next/navigation';
 
-const CheckoutPage = ({ amount, priceId, billingCustomerId }: { amount: number, priceId: string, billingCustomerId: string }) => {
+const CheckoutPage = ({ amount, priceId, billingCustomerId, seats }: { amount: number, priceId: string, billingCustomerId: string, seats: number }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -24,7 +24,7 @@ const CheckoutPage = ({ amount, priceId, billingCustomerId }: { amount: number, 
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ priceId, customer: billingCustomerId }),
+      body: JSON.stringify({ priceId, customer: billingCustomerId, seats }),
     })
       .then((res) => res.clone().json())
       .then((data) => {
