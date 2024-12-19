@@ -32,6 +32,7 @@ import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed
 import { ClientsWithOrganization } from '../../server/actions/clients/get/get-clients';
 import { Account } from '../../../../../../apps/web/lib/account.types';
 import AgencyClientCrudMenu from './agency-client-crud-menu';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 // import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 
@@ -89,6 +90,7 @@ type Client = Pick<
     name: string | null;
     picture_url: string | null;
   } | null;
+  role: string | null;
 };
 
 type ClientsTableProps = {
@@ -96,16 +98,18 @@ type ClientsTableProps = {
   // accountIds: string[];
   // accountNames: string[];
   view?: 'clients' | 'organizations';
-  userRole: string;
 };
 
 // CLIENTS TABLE 
 // accountIds, accountNames
-export function ClientsTable({ clients, view, userRole }: ClientsTableProps) {
+export function ClientsTable({ clients, view }: ClientsTableProps) {
   const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clients' | 'organizations'>(
     'clients',
   );
+  const {workspace} = useUserWorkspace()
+  const userRole = workspace.role ?? ''
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -394,7 +398,7 @@ const useClientColumns = (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <UpdateClientDialog {...client} /> */}
               {/* <DeleteUserDialog userId={client.id} /> */}
-              <AgencyClientCrudMenu organizationOptions = {organizationOptions} userId = {client.id} name = {client.name} email = {client.email ?? ''} />
+              <AgencyClientCrudMenu organizationOptions = {organizationOptions} userId = {client.id} name = {client.name} email = {client.email ?? ''} targetRole={client.role ?? undefined}/>
             </div>
           );
         },
