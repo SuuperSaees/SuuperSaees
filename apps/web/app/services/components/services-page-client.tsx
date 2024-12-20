@@ -219,9 +219,6 @@ export function ServicesPageClient({
                   search: { value: searchTerm, setValue: setSearchTerm },
                 }}
                 emptyStateComponent={renderEmptyState(accountRole)}
-                presetFilters={{
-                  filterableColumns: ['status'],
-                }}
               />
             )}
           </TabsContent>
