@@ -67,22 +67,26 @@ function SiteSettings({
             <LanguageSelector onChange={handleChangeLanguage} />
           </div>
           <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+          <div className="flex gap-20">
+            <div className="mr-7 flex w-[30%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {' '}
                 <Trans i18nKey={'accounts:brandColor'} />
               </p>
             </div>
-            <UpdateAccountColorBrand />
+            <div className='flex w-full flex-col gap-2'>
+              <UpdateAccountColorBrand />
+            </div>
           </div>
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+          <div className="flex gap-20">
+            <div className="mr-7 flex w-[30%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 <Trans i18nKey={'accounts:brandSidebar'} />
               </p>
             </div>
-            <UpdateAccountOrganizationSidebar />
+            <div className='flex w-full flex-col gap-2'>
+              <UpdateAccountOrganizationSidebar />
+            </div>
           </div>
           <Separator />
           <div className="flex gap-20">

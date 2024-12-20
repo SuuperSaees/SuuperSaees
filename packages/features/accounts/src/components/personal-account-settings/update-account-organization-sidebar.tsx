@@ -57,7 +57,7 @@ export default function UpdateAccountOrganizationSidebar() {
           control={form.control}
           name="value"
           render={({ field }) => (
-            <FormItem className="ml-20 w-fit">
+            <FormItem className="w-fit">
               <FormControl>
                 <div className="relative w-20 h-20 rounded-full overflow-hidden border">
                   <Input
@@ -77,7 +77,7 @@ export default function UpdateAccountOrganizationSidebar() {
         />
         <div className="flex gap-4 w-full justify-end">
           <Button variant='static' className={`bg-none flex p-0`}>
-            <span className='text-brand font-semibold'>{t('account:brandSidebarSubmit')}</span>
+            <span className='text-blue-600'>{t('account:brandSidebarSubmit')}</span>
             {/* {updateOrganizationSetting.isPending &&
               updateOrganizationSetting.variables.key ===
                 'sidebar_background_color' && (
@@ -90,7 +90,7 @@ export default function UpdateAccountOrganizationSidebar() {
             onClick={onReset}
             className="flex p-0 bg-none"
           >
-            <span className='text-gray-600 font-semibold'>{t('account:brandColorReset')}</span>
+            <span className='text-gray-600'>{t('account:brandColorReset')}</span>
           </Button>
         </div>
       </form>
