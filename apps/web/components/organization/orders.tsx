@@ -17,6 +17,7 @@ import Table from '../../app/components/table/table';
 import CardStats from '../../app/components/ui/card-stats';
 import EmptyState from '../ui/empty-state';
 import { useOrderStats } from '~/orders/hooks/use-order-stats';
+import { SkeletonOrdersSection } from './skeleton-orders-section';
 
 interface OrdersSectionProps {
   organizationId: string;
@@ -92,7 +93,7 @@ export default function OrdersSection({ organizationId }: OrdersSectionProps) {
     agencyStatusesQuery.isLoading ||
     organizationOrdersQuery.isLoading
   )
-    return <div>Loading...</div>;
+    return <SkeletonOrdersSection />;
   return (
     <AgencyStatusesProvider initialStatuses={agencyStatuses}>
       <div className="flex flex-col gap-4">
