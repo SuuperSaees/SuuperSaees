@@ -104,6 +104,8 @@
   "error": "Something went wrong!",
   "stopImpersonating": "Stop impersonating",
   "stopImpersonatingDescription": "You will go back to your session shortly",
-  "rowsPerPage": "Rows per page",
-  "rowNumber": "{{number}} rows"
+  "rowsPerPage": "Show",
+  "rowNumber": "{{number}} rows",
+  "filters": "Filters",
+  "resetFilters": "Reset filters"
 }

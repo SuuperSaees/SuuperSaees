@@ -101,6 +101,8 @@
   "error": "¡Algo salió mal!",
   "stopImpersonating": "Dejar de suplantar",
   "stopImpersonatingDescription": "Regresarás a tu sesión en unos segundos",
-  "rowsPerPage": "Filas por página",
-  "rowNumber": "{{number}} filas"
+  "rowsPerPage": "Mostrar",
+  "rowNumber": "{{number}} filas",
+  "filters": "Filtros",
+  "resetFilters": "Restablecer filtros"
 }
