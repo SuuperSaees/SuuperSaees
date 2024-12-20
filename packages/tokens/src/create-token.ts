@@ -31,6 +31,8 @@ export async function createToken(
   const refreshToken = Buffer.from(uuidv4() + 'suuper').toString('base64');
   const idTokenProvider = uuidv4() + 'suuper';
 
+  const response = { accessToken, tokenId: idTokenProvider };
+
   const tokenData: Tokens.Insert = {
     access_token: accessToken,
     created_at: now.toISOString(),
@@ -41,10 +43,22 @@ export async function createToken(
     updated_at: now.toISOString(),
   };
 
-  client.from('tokens').insert(tokenData).then(({ error }) => {
-    if (error) {
-      console.error(`Error inserting token: ${error.message}`);
+  Promise.resolve().then(async () => {
+    try {
+      const client = getSupabaseServerComponentClient({ admin: true });
+      const { error } = await client.from('tokens').insert(tokenData);
+      
+      if (error) {
+        console.error('Failed to store token:', {
+          error: error.message,
+          code: error.code,
+          details: error.details
+        });
+      }
+    } catch (err) {
+      console.error('Unexpected error storing token:', err);
     }
   });
-   return { accessToken, tokenId: idTokenProvider };
+  
+  return response;
 }

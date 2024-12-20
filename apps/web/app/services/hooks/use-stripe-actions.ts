@@ -15,7 +15,6 @@ import { Database } from '~/lib/database.types';
 import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
-import { getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 // import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
@@ -95,34 +94,41 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     },
   });
 
-  const handleCheckout = async (
+  const handleCheckout = useCallback( (
     service: Service.Relationships.Billing.BillingService,
     paymentMethods: BillingAccounts.PaymentMethod[],
     stripeId: string,
     organizationId?: string,
   ) => {
-    const { stripeId: stripeIdBillingAccount } = stripeId ? { stripeId } : await getStripeAccountID();
-    organizationId = organizationId ? organizationId : (await getOrganization()).id;
-    if (!service.billing_services || !service || !organizationId) {
-      console.error('Missing required parameters:', {
-        hasService: !!service,
-        hasOrgId: !!organizationId,
-      });
-      throw new Error('Missing required parameters');
+    try {
+      if (!service.billing_services?.length) {
+        throw new Error('No billing services available');
+      }
+    const effectiveStripeId = stripeId;
+    const effectiveOrgId = organizationId;
+     if (!effectiveStripeId || !effectiveOrgId) {
+      throw new Error('Missing required IDs');
     }
 
-    createCheckoutMutation.mutate({
-      stripeId: stripeIdBillingAccount,
-      priceId:
-        service.billing_services.find(
-          (billingService) => billingService.provider === 'stripe',
-        )?.provider_id ?? '',
+    const priceId = service.billing_services.find(
+      (billingService) => billingService.provider === 'stripe',
+    )?.provider_id;
+     if (!priceId) {
+      throw new Error('No Stripe price ID found');
+    }
+     createCheckoutMutation.mutate({
+      stripeId: effectiveStripeId,
+      priceId,
       service,
-      organizationId,
+      organizationId: effectiveOrgId,
       paymentMethods,
-      baseUrl: typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL ?? ''),
+      baseUrl: window.location.origin,
     });
-  };
+  } catch (error) {
+    console.error('Checkout error:', error);
+    toast.error('Error creating checkout URL');
+  }
+  },  [createCheckoutMutation]);
 
   useEffect(() => {
     void fetchAccountStripeConnect();

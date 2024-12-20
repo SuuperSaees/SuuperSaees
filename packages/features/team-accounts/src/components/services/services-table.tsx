@@ -183,7 +183,7 @@ const useGetColumns = (
   t: TFunction<'services', undefined>,
   accountRole: string,
   paymentsMethods: BillingAccounts.PaymentMethod[],
-  handleCheckout: (service: Service.Relationships.Billing.BillingService, paymentMethods: BillingAccounts.PaymentMethod[], stripeId: string, organizationId?: string) => Promise<void>,
+  handleCheckout: (service: Service.Relationships.Billing.BillingService, paymentMethods: BillingAccounts.PaymentMethod[], stripeId: string, organizationId?: string) => void,
   stripeId: string,
   organizationId: string,
 ): ColumnDef<Service.Relationships.Billing.BillingService>[] => {
@@ -294,8 +294,8 @@ const useGetColumns = (
                       variant="ghost"
                       disabled={service.billing_services.length === 0}
                       className={`${service.billing_services.length === 0 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                      onClick={async () => {
-                          await handleCheckout(service, paymentsMethods, stripeId, organizationId);
+                      onClick={() => {
+                          handleCheckout(service, paymentsMethods, stripeId, organizationId);
                       }}
                     >
                       <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />
