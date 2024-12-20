@@ -41,11 +41,10 @@ export async function createToken(
     updated_at: now.toISOString(),
   };
 
-  const { error } = await client.from('tokens').insert(tokenData);
-
-  if (error) {
-    throw new Error(`Error inserting token: ${error.message}`);
-  }
-
-  return { accessToken, tokenId: idTokenProvider };
+  client.from('tokens').insert(tokenData).then(({ error }) => {
+    if (error) {
+      console.error(`Error inserting token: ${error.message}`);
+    }
+  });
+   return { accessToken, tokenId: idTokenProvider };
 }

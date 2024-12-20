@@ -98,10 +98,11 @@ export function useStripeActions({ userRole }: UseStripeActions) {
   const handleCheckout = async (
     service: Service.Relationships.Billing.BillingService,
     paymentMethods: BillingAccounts.PaymentMethod[],
+    stripeId: string,
+    organizationId?: string,
   ) => {
-    const { stripeId } = await getStripeAccountID();
-    const organizationData = await getOrganization();
-    const organizationId = organizationData.id;
+    const { stripeId: stripeIdBillingAccount } = stripeId ? { stripeId } : await getStripeAccountID();
+    organizationId = organizationId ? organizationId : (await getOrganization()).id;
     if (!service.billing_services || !service || !organizationId) {
       console.error('Missing required parameters:', {
         hasService: !!service,
@@ -111,7 +112,7 @@ export function useStripeActions({ userRole }: UseStripeActions) {
     }
 
     createCheckoutMutation.mutate({
-      stripeId,
+      stripeId: stripeIdBillingAccount,
       priceId:
         service.billing_services.find(
           (billingService) => billingService.provider === 'stripe',
@@ -119,6 +120,7 @@ export function useStripeActions({ userRole }: UseStripeActions) {
       service,
       organizationId,
       paymentMethods,
+      baseUrl: typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL ?? ''),
     });
   };
 
