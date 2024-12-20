@@ -61,7 +61,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
         {message.files && message.files.length > 0 && (
           <div className="pl-4 flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
             {message.files.map((file) => (
-              <UserFile key={file.id} file={file} />
+              <UserFile key={file.id} file={file} files={message.files}/>
             ))}
           </div>
         )}
