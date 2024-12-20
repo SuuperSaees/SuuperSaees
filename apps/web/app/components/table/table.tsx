@@ -239,7 +239,7 @@ export function ControllerBar<T>({
 
   return (
     <>
-      <div className="flex h-fit w-full items-center justify-end gap-4">
+      <div className="flex flex-wrap h-fit w-full items-center justify-end gap-4">
         {/* Render ordered components */}
         {positionedComponents.map((item, index) => (
           <Fragment key={index}>{item.component}</Fragment>
