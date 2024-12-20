@@ -16,7 +16,7 @@ import { Trans } from '@kit/ui/trans';
 
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Order } from '~/lib/order.types';
-
+import { parseISO } from 'date-fns';
 import {
   updateOrder,
   updateOrderAssigns,
@@ -308,7 +308,7 @@ const AsideOrderInformation = ({
               </span>
               <span className="pl-2 pr-2 text-sm items-center flex justify-center">
                 {order.due_date ? (
-                  getFormattedDateRange({from: new Date(order.due_date), to: new Date(order.due_date)}, language, true)
+                  getFormattedDateRange({from: parseISO(order.due_date), to: parseISO(order.due_date)}, language, true)
                 ) : (
                   t('details.deadlineNotSet',{ns: 'orders'})
                 )}
