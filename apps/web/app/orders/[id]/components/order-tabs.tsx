@@ -111,7 +111,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         <DetailsPage />
       </TabsContent>
       <TabsContent value="activity" className="h-full max-h-full min-h-0">
-        <ActivityPage agencyName={agencyName} />
+        <ActivityPage agencyName={agencyName} agencyStatuses={agencyStatuses}/>
       </TabsContent>
       <TabsContent value="tasks">
         <div className="w-full px-8">

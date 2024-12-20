@@ -82,6 +82,7 @@
       "completed": "Completed",
       "pending": "Pending Response",
       "annulled": "Annulled",
+      "anulled": "Annulled",
       "in_review": "In Review"
     }
   }

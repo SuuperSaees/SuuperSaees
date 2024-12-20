@@ -3,25 +3,30 @@
 import { format, parseISO } from 'date-fns';
 import { BarChart, Calendar, LineChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
+import { darkenColor } from '~/utils/generate-colors'
 import { Order } from '~/lib/order.types';
 
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
-import { priorityColors, statusColors } from '../utils/get-color-class-styles';
+import { priorityColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
 import { convertToTitleCase } from '../utils/format-agency-names';
 import { formatDisplayDate } from '@kit/shared/utils';
 import { ActivityType, DataResult } from '../context/activity.types';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
 const translateActivity = (
   activity: DataResult.Activity,
   t: TFunction<'logs', undefined>,
 ) => {
   const availableTranslates = ['status', 'priority'];
+  const availableTranslatesStatus = ['pending', 'in_progress', 'completed', 'annulled', 'anulled', 'in_review'];
+  const availableTranslatesPriority = ['low', 'medium', 'high'];
   const newActivity = { ...activity, class: 'activity' };
   newActivity.type = t(`types.${activity.type}`);
 
-  if (availableTranslates.includes(activity.type)) {
+  if (availableTranslates.includes(activity.type) && availableTranslatesStatus.includes(activity.value) || availableTranslatesPriority.includes(activity.value)) {
     newActivity.value = t(`values.${activity.value}`);
+  } else {
+    newActivity.value = convertToTitleCase(activity.value);
   }
   let article = '';
   if (activity.type === 'title') {
@@ -40,10 +45,12 @@ const translateActivity = (
 interface ActivityActionProps {
   activity: DataResult.Activity;
   formattedActivity: DataResult.Activity;
+  agencyStatuses?: AgencyStatus.Type[];
 }
 interface ActivityCustomSpan {
   value: string;
   translatedValue: string;
+  agencyStatuses?: AgencyStatus.Type[];
 }
 
 function formatTarget(target: string) {
@@ -56,24 +63,19 @@ function formatTarget(target: string) {
 export const ActivityCustomSpan = ({
   value,
   translatedValue,
+  agencyStatuses,
 }: ActivityCustomSpan) => {
-  const statuses = [
-    Order.Enums.Status.PENDING,
-    Order.Enums.Status.IN_PROGRESS,
-    Order.Enums.Status.COMPLETED,
-    Order.Enums.Status.ANNULLED,
-    Order.Enums.Status.IN_REVIEW,
-  ];
   const priorities = [
     Order.Enums.Priority.LOW,
     Order.Enums.Priority.MEDIUM,
     Order.Enums.Priority.HIGH,
   ];
 
-  const wordsToMark = [...statuses, ...priorities];
+  const statusNames = agencyStatuses?.map(status => status.status_name) ?? [];
+  const wordsToMark = [...statusNames, ...priorities];
 
   // Find the first occurrence of any marked word
-  const matchedWord = wordsToMark.find((word) => value.includes(word));
+  const matchedWord = wordsToMark.find((word) => value.includes(word ?? ''));
 
   if (!matchedWord) {
     return <span className='font-semibold'>{convertToTitleCase(value)}</span>;
@@ -81,18 +83,21 @@ export const ActivityCustomSpan = ({
 
   // Split the message into two parts based on the matched word
   const [before, after] = value.split(matchedWord);
-
+  const statusColor = agencyStatuses?.find(
+    status => status.status_name?.toLowerCase() === value.toLowerCase()
+  )?.status_color;
   return (
     <span>
       {before}
       <span
-        className={`rounded-md ${
-          statuses.includes(matchedWord as Order.Enums.Status)
-            ? statusColors[matchedWord as Order.Enums.Status]
-            : priorities.includes(matchedWord as Order.Enums.Priority)
+        className={`rounded-md ${ priorities.includes(matchedWord as Order.Enums.Priority)
               ? priorityColors[matchedWord as Order.Enums.Priority]
               : ''
         } px-2 py-1 font-semibold`}
+        style={{
+          color: statusColor ? darkenColor(statusColor, 0.55) : undefined,
+          backgroundColor: statusColor ?? undefined,
+        }}
       >
         {translatedValue}
       </span>
@@ -103,6 +108,7 @@ export const ActivityCustomSpan = ({
 
 const ActivityAction = ({
   activity,
+  agencyStatuses,
 }: Omit<ActivityActionProps, 'formattedActivity'>) => {
   const { t } = useTranslation('logs');
   const formattedActivity = translateActivity(activity, t);
@@ -115,6 +121,7 @@ const ActivityAction = ({
       <StatusActivity
         activity={activity}
         formattedActivity={formattedActivity}
+        agencyStatuses={agencyStatuses}
       />
     );
   else
@@ -129,6 +136,7 @@ const ActivityAction = ({
 export const StatusActivity = ({
   activity,
   formattedActivity,
+  agencyStatuses,
 }: ActivityActionProps) => {
   const { i18n } = useTranslation();
   const language = i18n.language;
@@ -163,6 +171,7 @@ export const StatusActivity = ({
               <ActivityCustomSpan
                 value={activity.value}
                 translatedValue={formattedActivity.value}
+                agencyStatuses={agencyStatuses}
               />
             )}
           </span>

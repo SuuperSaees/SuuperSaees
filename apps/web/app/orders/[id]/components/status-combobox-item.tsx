@@ -41,7 +41,6 @@ export default function StatusComboboxItem({
   const [open, setOpen] = useState<boolean>(false);
   const defaultStatuses = new Set(['pending', 'completed', 'in_review', 'annulled', 'anulled', 'in_progress']); 
   const preventEditName = defaultStatuses.has(status?.status_name ?? '');
-
   return (
     <CommandItem
       value={status.status_name ?? ''}
@@ -55,7 +54,7 @@ export default function StatusComboboxItem({
       <p
         className="m-2 cursor-pointer rounded-lg p-1 px-3 font-medium"
         style={{
-          color: status.status_color ? darkenColor(status.status_color, 0.55) : undefined,
+          color: darkenColor(status.status_color ?? '', 0.55),
           backgroundColor: status.status_color ?? undefined,
         }}
       >
