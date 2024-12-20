@@ -22,11 +22,15 @@ import { BillingAccounts } from '~/lib/billing-accounts.types';
 interface ServicesPageClientProps {
   accountRole: string;
   paymentsMethods: BillingAccounts.PaymentMethod[];
+  stripeId: string;
+  organizationId: string;
 }
 
 const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
   accountRole,
   paymentsMethods,
+  stripeId,
+  organizationId,
 }) => {
   const searchParams = useSearchParams();
   const briefsView = searchParams.get('briefs');
@@ -71,6 +75,8 @@ const ServicesPageClientContent: React.FC<ServicesPageClientProps> = ({
                 accountRole={accountRole}
                 paymentsMethods={paymentsMethods}
                 isLoading={servicesAreLoading}
+                stripeId={stripeId}
+                organizationId={organizationId}
               />
             </TabsContent>
             <TabsContent className="bg-transparent" value="briefs">

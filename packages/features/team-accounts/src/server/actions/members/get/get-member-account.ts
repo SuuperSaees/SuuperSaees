@@ -235,7 +235,7 @@ export async function getUserRoleById(userId: string, adminActivated = false, cl
   }
 }
 
-export async function getStripeAccountID(): Promise<{
+export async function getStripeAccountID(primaryOwnerId?: string): Promise<{
   userId: string;
   stripeId: string;
 }> {
@@ -247,7 +247,7 @@ export async function getStripeAccountID(): Promise<{
     const { data: userAccountData, error: accountsError } = await client
       .from('billing_accounts')
       .select('provider_id')
-      .eq('account_id', userData.user.id)
+      .eq('account_id', primaryOwnerId ?? userData.user.id)
       .eq('provider', 'stripe')
       .single();
 
