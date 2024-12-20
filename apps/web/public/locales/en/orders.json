@@ -165,6 +165,17 @@
   "dragAndDropDictionary": {
     "dropHere": "Drop your files here",
     "dropHereDescription": "SVG, PNG, JPG or GIF (max. 800x400px)"
+  },
+  "annotations": {
+    "chat": {
+      "title": "Annotation chat",
+      "placeholder": "Write a message...",
+      "send": "Send",
+      "noChats": "Leave your opinion, ask a question or just leave a thank you note. Click anywhere in the file to leave a comment.",
+      "active": "Active",
+      "resolved": "Resolved"
+    },
+    "add": "Add annotation"
   }
 }
 

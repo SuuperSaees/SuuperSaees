@@ -39,7 +39,7 @@ export class AnnotationRepository implements IAnnotationRepository {
     content: string,
     userId: string,
     parentId: string,
-  ): Promise<{ id: string; content: string }> {
+  ): Promise<{ id: string; content: string; created_at: string }> {
     const { data: message, error } = await this.client
       .from('messages')
       .insert({
@@ -48,7 +48,7 @@ export class AnnotationRepository implements IAnnotationRepository {
         type: 'annotation',
         parent_id: parentId || null,
       })
-      .select('id, content')
+      .select('id, content, created_at')
       .single();
 
     if (error ?? !message) {
@@ -61,7 +61,7 @@ export class AnnotationRepository implements IAnnotationRepository {
       throw new Error('Message content cannot be null');
     }
 
-    return { id: message.id, content: message.content };
+    return { id: message.id, content: message.content, created_at: message.created_at };
   }
 
   async createAnnotation(data: Annotations.Insert): Promise<Annotations.Type> {
@@ -75,21 +75,24 @@ export class AnnotationRepository implements IAnnotationRepository {
       message_id = null,
     } = data;
 
-    const { data: lastAnnotation, error: lastError } = await this.client
+    const { data: activeAnnotations, error: activeError } = await this.client
       .from('annotations')
       .select('number')
       .eq('file_id', file_id)
-      .order('number', { ascending: false })
-      .limit(1)
-      .single();
+      .is('deleted_on', null)
+      .order('number', { ascending: true });
 
-    if (lastError && lastError.code !== 'PGRST116') {
+    if (activeError) {
       throw new Error(
-        `Error fetching last annotation number: ${lastError.message}`,
+        `Error fetching annotations: ${activeError.message}`,
       );
     }
 
-    const nextNumber = lastAnnotation?.number ? lastAnnotation.number + 1 : 1;
+    let nextNumber = 1;
+    const usedNumbers = activeAnnotations.map(a => a.number);
+    while (usedNumbers.includes(nextNumber)) {
+      nextNumber++;
+    }
 
     const annotationData: Annotations.Insert = {
       id: randomUUID(),
@@ -138,7 +141,8 @@ export class AnnotationRepository implements IAnnotationRepository {
         page_number,
         number,
         message_id,
-        messages(content)
+        messages(content, created_at),
+        accounts(name, user_settings(picture_url))
       `,
       )
       .eq('file_id', fileId)
@@ -148,9 +152,12 @@ export class AnnotationRepository implements IAnnotationRepository {
       throw new Error(`Error fetching annotations: ${error.message}`);
     }
 
+    // console.log('annotations', annotations);
+
     return annotations.map((annotation) => ({
       ...annotation,
       message_content: annotation.messages?.content ?? null,
+      message_created_at: annotation.messages?.created_at ?? null,
       messages: undefined,
     })) as Annotations.Type[];
   }
@@ -165,11 +172,17 @@ export class AnnotationRepository implements IAnnotationRepository {
       content: string;
       user_id: string;
       created_at: string;
+      accounts: {
+        name: string;
+        user_settings: {
+          picture_url: string;
+        };
+      };
     }[]
   > {
     const { data: childMessages, error } = await this.client
       .from('messages')
-      .select('id, content, user_id, created_at')
+      .select('id, content, user_id, created_at, accounts(name, user_settings(picture_url))')
       .eq('parent_id', parentMessageId)
       .range(offset, offset + limit - 1);
 
@@ -180,6 +193,7 @@ export class AnnotationRepository implements IAnnotationRepository {
     return childMessages.map((message) => ({
       ...message,
       content: message.content ?? '',
+      accounts: message.accounts ?? null,
     }));
   }
 
@@ -202,10 +216,24 @@ export class AnnotationRepository implements IAnnotationRepository {
     user_id: string;
     created_at: string;
   }> {
+    const { data: annotation, error: annotationError } = await this.client
+      .from('annotations')
+      .select('message_id')
+      .eq('id', annotationId)
+      .single();
+
+    if (annotationError) {
+      throw new Error(`Error fetching annotation: ${annotationError.message}`);
+    }
+
+    if (!annotation.message_id) {
+      throw new Error('Annotation message_id not found');
+    }
+
     const { data: parentMessage, error } = await this.client
       .from('messages')
       .select('id, content, user_id, created_at')
-      .eq('id', annotationId)
+      .eq('id', annotation.message_id)
       .single();
 
     if (error) {
