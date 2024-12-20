@@ -147,6 +147,10 @@
     "member": {
       "title": "Aún no has asignado ningún proyecto a ti.",
       "description": "¡Espera! Tus proyectos asignados aparecerán aquí pronto."
+    },
+    "organization": {
+      "title": "Aún no se han asignado proyectos a tu organización.",
+      "description": "¡Espera! Los proyectos asignados aparecerán aquí pronto."
     }
   },
   "message": {

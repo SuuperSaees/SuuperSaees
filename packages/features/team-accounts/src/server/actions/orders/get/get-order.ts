@@ -24,7 +24,7 @@ import {
   getUserRole,
 } from '../../members/get/get-member-account';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
-import { getOrdersReviewsForUser } from '../../review/get/get-review';
+import { getOrdersReviewsForUser, getOrdersReviewsById } from '../../review/get/get-review';
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
@@ -601,5 +601,96 @@ export async function fetchAssignedOrdersForClient(
   } catch (error) {
     console.error(error);
     throw error;
+  }
+}
+
+export async function getOrdersByOrganizationId(
+  organizationId: string,
+  includeBrief?: boolean,
+  timeInterval?: number,
+  includeReviews?: boolean,
+) {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    // Step 1: Prepare the query
+    let query = client
+      .from('orders_v2')
+      .select(
+        `*, client_organization:accounts!client_organization_id(id, name),
+      customer:accounts!customer_id(id, name),
+      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+      `,
+      )
+      .order('created_at', { ascending: false })
+      .or(
+        `client_organization_id.eq.${organizationId},agency_id.eq.${organizationId}`,
+      )
+      .is('deleted_on', null);
+
+    let startDate = new Date().toISOString();
+
+    if (timeInterval) {
+      const startDateTime = new Date(startDate);
+      startDateTime.setDate(startDateTime.getDate() - timeInterval);
+      startDate = startDateTime.toISOString();
+
+      query = query.gt('created_at', startDate);
+    }
+
+    // Step 2: Fetch the orders
+    const { error: orderError, data: orderData } = await query;
+
+    if (orderError) {
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        `Error fetching orders for organization, ${orderError.message}`,
+        ErrorOrderOperations.ORDER_NOT_FOUND,
+      );
+    }
+
+    let orders = orderData;
+
+    // Step 3: Fetch the briefs for the orders and add them to the orders (if needed)
+    if (includeBrief) {
+      const orderIds = orders.map((order) => order.uuid) ?? [];
+      const briefResponseData = await fetchBriefsResponsesforOrders(
+        client,
+        orderIds,
+      );
+
+      const briefIds =
+        briefResponseData?.map((response) => response?.brief_id) ?? [];
+
+      const briefData = await fetchBriefs(client, briefIds, ['name', 'id']);
+
+      // Insert the brief names into the orders
+      orders = orders?.map((order) => {
+        const brief = briefData?.find(
+          (brief) => brief.id === order.brief_ids?.[0],
+        );
+        return {
+          ...order,
+          brief: {
+            name: brief?.name,
+          },
+        };
+      });
+    }
+
+    // Step 4: Fetch the reviews for the orders and add them to the orders (if needed)
+    if (includeReviews) {
+      const orderIds = orders.map((order) => order.id);
+      const reviews = await getOrdersReviewsById(orderIds);
+      orders = orders?.map((order) => {
+        const review = reviews.find((review) => review.order_id === order.id);
+        return { ...order, review };
+      });
+    }
+
+    return CustomResponse.success(orders).toJSON();
+  } catch (error) {
+    console.error('Error fetching orders by organization:', error);
+    return CustomResponse.error(error).toJSON();
   }
 }

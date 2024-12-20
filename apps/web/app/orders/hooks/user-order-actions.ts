@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateOrderAssigns } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
 import {
   logOrderActivities,
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 export function useUserOrderActions() {
   const { t } = useTranslation('orders');
-
+  const queryClient = useQueryClient();
   const orderDateMutation = useMutation({
     mutationFn: async ({
       due_date,
@@ -36,6 +36,7 @@ export function useUserOrderActions() {
         undefined,
         ['due_date'],
       );
+      await queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: () => {
       toast.error('Error', {
@@ -54,10 +55,11 @@ export function useUserOrderActions() {
     }) => {
       return updateOrderAssigns(orderId, agencyMemberIds);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Success', {
         description: t('success.orders.orderAssigneesUpdated'),
       });
+      await queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: () => {
       toast.error('Error', {

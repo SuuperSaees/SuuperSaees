@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type JSX } from 'react';
+import { type JSX, useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
@@ -13,6 +13,7 @@ import FileSection from './files';
 import MemberButtonTriggers from './member-button-triggers';
 // import InvoiceSection from './invoices';
 import MemberSection from './members';
+import OrdersSection from './orders';
 import { ServiceButtonTriggers } from './service-button-triggers';
 // import ReviewSection from './reviews';
 import ServiceSection from './services';
@@ -29,7 +30,7 @@ function SectionView({
 }) {
   const { t } = useTranslation('clients');
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState('members');
+  const [activeTab, setActiveTab] = useState('orders');
 
   const services =
     useQuery({
@@ -46,6 +47,7 @@ function SectionView({
   // const [currentPath, setCurrentPath] = useState<{ title: string; uuid?: string }[]>([]); It's not used in the code for now
 
   const buttonControllersMap = new Map<string, JSX.Element | null>([
+    ['orders', null],
     [
       'members',
       <MemberButtonTriggers
@@ -70,14 +72,21 @@ function SectionView({
     ['reviews', null],
     ['invoices', null],
   ]);
-  
-  const availableTabsBasedOnRole = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
-  const availableTabs =
-    availableTabsBasedOnRole.has(currentUserRole)
-      ? ['members', 'services', 'files']
-      : ['members', 'services'];
+
+  const availableTabsBasedOnRole = new Set([
+    'agency_owner',
+    'agency_member',
+    'agency_project_manager',
+  ]);
+  const availableTabs = availableTabsBasedOnRole.has(currentUserRole)
+    ? ['orders', 'members', 'services', 'files' ]
+    : ['members', 'services', 'orders'];
 
   const navigationOptionsMap = new Map<string, JSX.Element>([
+    [
+      'orders',
+      <OrdersSection key={'orders'} organizationId={clientOrganizationId} />,
+    ],
     [
       'members',
       <MemberSection
@@ -104,11 +113,14 @@ function SectionView({
         currentUserRole={currentUserRole}
       />,
     ],
+
     // ['reviews', <ReviewSection key={'reviews'} />],
     // ['invoices', <InvoiceSection key={'invoices'} />],
   ]);
 
-  const navigationOptionKeys = Array.from(navigationOptionsMap.keys()).filter(key => availableTabs.includes(key));
+  const navigationOptionKeys = Array.from(navigationOptionsMap.keys()).filter(
+    (key) => availableTabs.includes(key),
+  );
 
   return (
     <Tabs

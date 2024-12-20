@@ -147,6 +147,10 @@
     "member": {
       "title": "No orders assigned to you yet.",
       "description": "Hang tight! Your assigned orders will appear here soon."
+    },
+    "organization": {
+      "title": "No orders assigned to your organization yet.",
+      "description": "Hang tight! The orders assigned to your organization will appear here soon."
     }
   },
   "message": {
