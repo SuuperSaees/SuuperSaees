@@ -26,6 +26,7 @@ interface ComboboxProps {
   title?: string;
   className?: string;
   resetOnSelect?: boolean;
+  defaultValue?: string;
 }
 
 export function Combobox({
@@ -33,13 +34,15 @@ export function Combobox({
   title,
   resetOnSelect,
   className,
+  defaultValue = '', // Default to an empty string if not provided
 }: ComboboxProps) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(defaultValue); // Initialize with defaultValue
 
   const isValueMatching = (value: string, option: string) => {
     return value.trim().toLowerCase() === option.trim().toLowerCase();
   };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -76,8 +79,9 @@ export function Combobox({
                   key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
-                    !resetOnSelect &&
+                    if (!resetOnSelect) {
                       setValue(currentValue === value ? '' : currentValue);
+                    }
                     setOpen(false);
                     option.actionFn();
                   }}
@@ -85,7 +89,6 @@ export function Combobox({
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
-
                       isValueMatching(value, option.value)
                         ? 'opacity-100'
                         : 'opacity-0',

@@ -103,5 +103,9 @@
   "success": "All set!",
   "error": "Something went wrong!",
   "stopImpersonating": "Stop impersonating",
-  "stopImpersonatingDescription": "You will go back to your session shortly"
+  "stopImpersonatingDescription": "You will go back to your session shortly",
+  "rowsPerPage": "Show",
+  "rowNumber": "{{number}} rows",
+  "filters": "Filters",
+  "resetFilters": "Reset filters"
 }
