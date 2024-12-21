@@ -10,7 +10,7 @@ const ResolvedChat = ({ chat }: ResolvedChatProps) => {
         <div className="flex items-start justify-between w-full">
           <div className="w-10 h-10 rounded-full overflow-hidden">
             <Avatar>
-              <AvatarImage src={chat.accounts.user_settings.picture_url} alt={chat.accounts.name} />
+              <AvatarImage src={chat.accounts.settings.picture_url} alt={chat.accounts.name} />
               <AvatarFallback>{chat.accounts.name.charAt(0)}</AvatarFallback>
             </Avatar>
           </div>

@@ -175,7 +175,9 @@
       "active": "Activos",
       "resolved": "Resueltos"
     },
-    "add": "Añadir anotación"
+    "add": "Añadir anotación",
+    "addSuccess": "Anotación añadida con éxito",
+    "addError": "Error al añadir anotación"
   }
 }
 

@@ -69,6 +69,7 @@ export const useFileHandlers = (initialZoomLevel = 1) => {
     setZoomLevel(1);
     setPosition({ x: 0, y: 0 });
   };
+  
 
   return {
     isZoomedIn,

@@ -9,13 +9,14 @@ interface ActiveChatsProps {
 
 
 const ActiveChats = ({ chat, onUpdate }: ActiveChatsProps) => {
+  console.log('chat', chat)
   return (
     <>
       <div className="flex flex-col items-start gap-3.5 self-stretch hover:bg-gray-50">
         <div className="flex items-start justify-between w-full">
           <div className="w-10 h-10 rounded-full overflow-hidden">
             <Avatar>
-              <AvatarImage src={chat.accounts.user_settings.picture_url} alt={chat.accounts.name} />
+              <AvatarImage src={chat.accounts.settings.picture_url} alt={chat.accounts.name} />
               <AvatarFallback>{chat.accounts.name.charAt(0)}</AvatarFallback>
             </Avatar>
           </div>

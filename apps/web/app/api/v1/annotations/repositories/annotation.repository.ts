@@ -142,7 +142,7 @@ export class AnnotationRepository implements IAnnotationRepository {
         number,
         message_id,
         messages(content, created_at),
-        accounts(name, user_settings(picture_url))
+        accounts(name, settings:user_settings(picture_url))
       `,
       )
       .eq('file_id', fileId)
@@ -174,7 +174,7 @@ export class AnnotationRepository implements IAnnotationRepository {
       created_at: string;
       accounts: {
         name: string;
-        user_settings: {
+        settings: {
           picture_url: string;
         };
       };
@@ -182,7 +182,7 @@ export class AnnotationRepository implements IAnnotationRepository {
   > {
     const { data: childMessages, error } = await this.client
       .from('messages')
-      .select('id, content, user_id, created_at, accounts(name, user_settings(picture_url))')
+      .select('id, content, user_id, created_at, accounts(name, settings:user_settings(picture_url))')
       .eq('parent_id', parentMessageId)
       .range(offset, offset + limit - 1);
 

@@ -175,7 +175,9 @@
       "active": "Active",
       "resolved": "Resolved"
     },
-    "add": "Add annotation"
+    "add": "Add annotation",
+    "addSuccess": "Annotation added successfully",
+    "addError": "Error adding annotation"
   }
 }
 
