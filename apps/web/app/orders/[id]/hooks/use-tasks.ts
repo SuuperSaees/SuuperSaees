@@ -57,13 +57,19 @@ export const useRealTimeTasks = (orderId: string) => {
           if (!oldTasks) return [];
           switch (eventType) {
             case insert:
-              return [...oldTasks, { ...newTask, subtasks: [] }];
+              if(newTask.order_id === Number(orderId)) {
+                return [...oldTasks, { ...newTask, subtasks: [] }];
+              }
+              return oldTasks;
             case update:
               return oldTasks
                 .map((task) =>
                   task.id === newTask.id ? { ...task, ...newTask } : task,
                 )
-                .filter((task) => task.deleted_on === null);
+                .filter(
+                  (task) =>
+                    task.deleted_on === null && task.order_id === Number(orderId),
+                );
             case del:
               return oldTasks.filter((task) => task.id !== oldTask.id);
             default:
