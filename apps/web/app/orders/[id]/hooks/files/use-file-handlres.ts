@@ -13,15 +13,6 @@ export const useFileHandlers = (initialZoomLevel = 1) => {
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState<Position>({ x: 0, y: 0 });
 
-  const handleImageClick = (isZoomable: boolean) => {
-    if (!isZoomable || zoomLevel !== 1) return;
-    
-    const newZoomLevel = 2;
-    setIsZoomedIn(true);
-    setZoomLevel(newZoomLevel);
-    return newZoomLevel;
-  };
-
   const handleDialogDownload = async (selectedFile: File | null, originalHandleDownload: () => void) => {
     try {
       if (selectedFile) {
@@ -78,13 +69,13 @@ export const useFileHandlers = (initialZoomLevel = 1) => {
     setZoomLevel(1);
     setPosition({ x: 0, y: 0 });
   };
+  
 
   return {
     isZoomedIn,
     zoomLevel,
     isDragging,
     position,
-    handleImageClick,
     handleDialogDownload,
     handleZoomChange,
     handleMouseDown,

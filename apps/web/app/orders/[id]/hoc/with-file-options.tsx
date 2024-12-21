@@ -1,19 +1,22 @@
 import React, { useState, useRef, ComponentType, useEffect } from 'react';
-import { Check, Copy, Download, Eye, MoreVertical, ArrowDownToLine, ChevronDown, MessageCircle } from 'lucide-react';
+import { Check, Copy, Download, Eye, MoreVertical, MessageCircle, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@kit/ui/dialog';
 import { Separator } from '@kit/ui/separator';
-import { Button } from '@kit/ui/button';
 import Tooltip from '~/components/ui/tooltip';
-import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@kit/ui/command';
-import { cn } from '@kit/ui/utils';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from 'node_modules/@kit/ui/src/shadcn/pagination';
 import { FilePreview } from '../components/files/file-preview';
-import { handleCopyLink, handleFileDownload, scales } from '../utils/file-utils';
+import { handleCopyLink, handleFileDownload } from '../utils/file-utils';
 import { useFileHandlers } from '../hooks/files/use-file-handlres';
 import { useTranslation } from 'react-i18next';
 import ActiveChats from '../components/files/active-chats';
 import ResolvedChat from '../components/files/resolved-chat';
+import { useAnnotations } from '../hooks/use-annotations';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { Spinner } from '@kit/ui/spinner';
+import { FilePagination } from '../components/files/file-pagination';
+import AnnotationNameDialog from '../components/files/annotation-name-dialog';
+import { FileToolbar } from '../components/files/file-toolbar';
+import { toast } from 'sonner';
+import FileViewer from '../components/files/file-viewer';
 
 interface FileProps {
   src: string;
@@ -26,6 +29,7 @@ interface FileProps {
   onLoadPDF?: (total: number) => void;
   zoomLevel?: number;
   files?: File[];
+  triggerComponent?: React.ReactNode;
 }
 
 export const withFileOptions = <P extends FileProps>(
@@ -119,7 +123,6 @@ export const withFileOptions = <P extends FileProps>(
 
 export const FileDialogView: React.FC<FileProps> = ({
   triggerComponent,
-  handleDownload: originalHandleDownload,
   fileName,
   fileType,
   files,
@@ -133,22 +136,40 @@ export const FileDialogView: React.FC<FileProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [activeTab, setActiveTab] = useState('active');
-  const [activeChats, setActiveChats] = useState([]);
-  const [resolvedChats, setResolvedChats] = useState([]);
   const { t } = useTranslation('orders');
+  const { user } = useUserWorkspace();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isAnnotationNameOpen, setIsAnnotationNameOpen] = useState(false);
+  const [annotationName, setAnnotationName] = useState('');
+  const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null);
 
   const {
     zoomLevel,
     isDragging,
     position,
-    handleImageClick,
-    handleDialogDownload,
     handleZoomChange: handleZoomChangeHook,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
     resetZoomAndPosition,
   } = useFileHandlers();
+
+
+  const { 
+    annotations, 
+    isLoadingAnnotations,
+    messages, 
+    isLoadingMessages,
+    createAnnotation, 
+    addMessage, 
+    isCreatingAnnotation, 
+    setIsCreatingAnnotation, 
+    selectedAnnotation, 
+    setSelectedAnnotation,
+    deleteAnnotation,
+    updateAnnotation
+  } = useAnnotations(selectedFile?.id ?? '', isDialogOpen);
   
   useEffect(() => {
     if (files?.length) {
@@ -165,8 +186,137 @@ export const FileDialogView: React.FC<FileProps> = ({
     setValue(value);
   };
 
+  const handleImageClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isCreatingAnnotation || !imageRef.current || !user) return;
+
+    const rect = imageRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    setClickPosition({ x, y });
+    setIsAnnotationNameOpen(true);
+  };
+
+  const handleAnnotationNameSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!annotationName.trim() || !clickPosition || !selectedFile || !user) return;
+
+    try {
+      createAnnotation({
+        file_id: selectedFile.id,
+        position_x: clickPosition.x,
+        position_y: clickPosition.y,
+        content: annotationName,
+        user_id: user.id,
+        page_number: currentPage
+      });
+
+      setIsCreatingAnnotation(false);
+      setIsAnnotationNameOpen(false);
+      setAnnotationName('');
+      setClickPosition(null);
+      toast.success(t('annotations.addSuccess'));
+    } catch (error) {
+      console.error('Error creating annotation:', error);
+      setIsCreatingAnnotation(false);
+      toast.error(t('annotations.addError'));
+    }
+  };
+
+  const handleAnnotationClick = (annotation: any) => {
+    setSelectedAnnotation(annotation);
+    setIsChatOpen(true);
+  };
+
+  const handleChatClose = () => {
+    setIsChatOpen(false);
+    setSelectedAnnotation(null);
+  };
+
+  const handleMessageSubmit = async (content: string) => {
+    if (!selectedAnnotation || !user) return;
+
+    try {
+      if (selectedAnnotation.message_id) {
+        addMessage({
+          parent_id: selectedAnnotation.message_id ,
+          content,
+          user_id: user.id
+        });
+        toast.success(t('message.messageSent'));
+      } else {
+        console.error('No message_id found for the selected annotation');
+      }
+    } catch (error) {
+      console.error('Error adding message:', error);
+      toast.error(t('message.messageSentError'));
+    }
+  };
+
+  const handleDeleteAnnotation = async (annotationId: string) => {
+    if (!selectedFile) return;
+    deleteAnnotation(annotationId);
+  };
+
+  const handleUpdateAnnotation = async (annotationId: string, status: 'completed' | 'draft' | 'active' ) => {
+    if (!selectedFile) return;
+    updateAnnotation({ annotationId, status });
+  };
+
+  const renderAnnotationsList = (filteredAnnotations: any[]) => {
+    if (filteredAnnotations.length === 0) {
+      return (
+        <div className="flex p-4 items-start gap-5 self-stretch">
+          <div className="w-4 h-4">
+            <MessageCircle className="w-4 h-4 text-gray-900" />
+          </div>
+          <p className="text-gray-900 font-inter text-xs font-normal leading-none">
+            {t('annotations.chat.noChats')}
+          </p>
+        </div>
+      );
+    }
+
+    return filteredAnnotations.map((annotation) => (
+      <div key={annotation.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg group relative">
+        {activeTab === 'active' ? (
+          <ActiveChats chat={annotation} onUpdate={handleUpdateAnnotation} />
+        ) : (
+          <ResolvedChat chat={annotation} />
+        )}
+        <button
+          onClick={(e) => handleDeleteAnnotation(annotation.id, e)}
+          className="absolute right-2 p-1 bg-white rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+        >
+          <Trash2 className="w-4 h-4 text-red-500" />
+        </button>
+      </div>
+    ));
+  };
+
+  const renderAnnotationsContent = () => {
+    if (isLoadingAnnotations) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <Spinner className="w-6 h-6" />
+        </div>
+      );
+    }
+
+    const filteredAnnotations = annotations.filter(
+      (annotation) => annotation.status === (activeTab === 'active' ? 'active' : 'completed')
+    );
+
+    return (
+      <div className="space-y-4">
+        {renderAnnotationsList(filteredAnnotations)}
+      </div>
+    );
+  };
+
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       {triggerComponent}
       <DialogContent className="p-0 h-[90vh] w-[90vw] max-w-[90vw] flex flex-col">
         <div className="p-4">
@@ -204,258 +354,104 @@ export const FileDialogView: React.FC<FileProps> = ({
             ))}
           </div>
 
-          <div className="w-[50%] flex flex-col gap-4 items-center">
-            <div className='flex items-center justify-between w-full h-10'>
-              {
-                currentFileType.startsWith('image/') || currentFileType.startsWith('application/pdf') ? (
-                  <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={open}
-                      className="w-auto justify-between"
-                    >
-                      {value || "100%"}
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[200px] p-0">
-                    <Command>
-                      <CommandList>
-                        <CommandEmpty>No zoom level found.</CommandEmpty>
-                        <CommandGroup>
-                          {scales.map((scale) => (
-                            <CommandItem
-                              key={scale.value}
-                              value={scale.value}
-                              onSelect={handleZoomChange}
-                            >
-                              {scale.label}
-                              <Check
-                                className={cn(
-                                  "ml-auto",
-                                  value === scale.value ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+          <div className={`flex flex-col gap-4 items-center ${currentFileType.startsWith('image/') ? 'w-[50%]' : 'w-[80%]'}`}>
+            <FileToolbar
+              currentFileType={currentFileType}
+              value={value}
+              open={open}
+              setOpen={setOpen}
+              isCreatingAnnotation={isCreatingAnnotation}
+              setIsCreatingAnnotation={setIsCreatingAnnotation}
+              handleZoomChange={handleZoomChange}
+              handleFileDownload={handleFileDownload}
+              selectedFile={selectedFile}
+              t={t}
+            />
+            <FileViewer
+              currentFileType={currentFileType}
+              containerRef={containerRef}
+              handleMouseUp={handleMouseUp}
+              handleMouseMove={handleMouseMove}
+              imageRef={imageRef}
+              handleImageClick={handleImageClick}
+              handleMouseDown={handleMouseDown}
+              zoomLevel={zoomLevel}
+              position={position}
+              isDragging={isDragging}
+              isCreatingAnnotation={isCreatingAnnotation}
+              selectedFile={selectedFile}
+              currentPage={currentPage}
+              setTotalPages={setTotalPages}
+              isLoadingAnnotations={isLoadingAnnotations}
+              annotations={annotations}
+              selectedAnnotation={selectedAnnotation}
+              isChatOpen={isChatOpen}
+              setIsChatOpen={setIsChatOpen}
+              setSelectedAnnotation={setSelectedAnnotation}
+              handleAnnotationClick={handleAnnotationClick}
+              handleChatClose={handleChatClose}
+              handleMessageSubmit={handleMessageSubmit}
+              isLoadingMessages={isLoadingMessages}
+              messages={messages}
+            />
+            <div className='flex items-center justify-center w-full h-10'>
+              {currentFileType.startsWith('application/pdf') ? (
+                <div>
+                  <FilePagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
               ) : (
                 <div></div>
               )}
-              <ArrowDownToLine className="w-4 h-4 cursor-pointer text-gray-900" onClick={() => handleFileDownload(selectedFile?.url, selectedFile?.name)} />
-            </div>
-            <div className={`w-full ${currentFileType.startsWith('image/') ? 'h-full' : 'h-[60vh]'}`}>
-              <div
-                ref={containerRef}
-                className="w-full h-full"
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onMouseMove={handleMouseMove}
-              >
-                <div className="w-full h-full bg-gray-100 p-4 overflow-hidden">
-                  <div
-                    ref={imageRef}
-                    onClick={currentFileType.startsWith('image/') ? handleImageClick : undefined}
-                    onMouseDown={currentFileType.startsWith('image/') ? handleMouseDown : undefined}
-                    onDragStart={(e) => e.preventDefault()}
-                    style={{
-                      transform: currentFileType.startsWith('image/') 
-                        ? `scale(${zoomLevel}) translate(${position.x / zoomLevel}px, ${position.y / zoomLevel}px)`
-                        : 'none',
-                      transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                      cursor: currentFileType.startsWith('image/') 
-                        ? zoomLevel === 1 
-                          ? 'zoom-in'
-                          : isDragging 
-                            ? 'grabbing' 
-                            : 'grab'
-                        : 'default',
-                      userSelect: 'none',
-                      height: '100%',
-                      width: '100%',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    {selectedFile && (
-                      <FilePreview
-                        src={selectedFile.url}
-                        fileName={selectedFile.name}
-                        fileType={selectedFile.type}
-                        className="max-w-full max-h-full"
-                        isDialog={true}
-                        actualPage={currentPage}
-                        onLoadPDF={(total) => setTotalPages(total)}
-                        zoomLevel={zoomLevel}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className='flex items-center justify-center w-full h-10'>
-              {
-                currentFileType.startsWith('application/pdf') ? (
-                  <div>
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationPrevious 
-                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                          className="cursor-pointer"
-                        />
-                        
-                        {totalPages <= 4 ? (
-                          Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                            <PaginationItem key={pageNum}>
-                              <PaginationLink 
-                                onClick={() => setCurrentPage(pageNum)}
-                                isActive={currentPage === pageNum}
-                                className={cn(
-                                  "cursor-pointer",
-                                  currentPage === pageNum ? "text-gray-900" : "text-gray-400"
-                                )}
-                              >
-                                {pageNum}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))
-                        ) : (
-                          <>
-                            {currentPage > 2 && (
-                              <>
-                                <PaginationItem>
-                                  <PaginationLink onClick={() => setCurrentPage(1)}>1</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                  <PaginationEllipsis />
-                                </PaginationItem>
-                              </>
-                            )}
-                            
-                            {Array.from(
-                              { length: 3 },
-                              (_, i) => Math.max(1, Math.min(currentPage - 1 + i, totalPages))
-                            )
-                            .filter((pageNum, index, arr) => arr.indexOf(pageNum) === index)
-                            .map((pageNum) => (
-                              <PaginationItem key={pageNum}>
-                                <PaginationLink 
-                                  onClick={() => setCurrentPage(pageNum)}
-                                  isActive={currentPage === pageNum}
-                                  className={cn(
-                                    "cursor-pointer",
-                                    currentPage === pageNum ? "text-gray-900" : "text-gray-400"
-                                  )}
-                                >
-                                  {pageNum}
-                                </PaginationLink>
-                              </PaginationItem>
-                            ))}
-                            
-                            {currentPage < totalPages - 1 && (
-                              <>
-                                <PaginationItem>
-                                  <PaginationEllipsis />
-                                </PaginationItem>
-                                <PaginationItem>
-                                  <PaginationLink onClick={() => setCurrentPage(totalPages)}>
-                                    {totalPages}
-                                  </PaginationLink>
-                                </PaginationItem>
-                              </>
-                            )}
-                          </>
-                        )}
-                        
-                        <PaginationNext 
-                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                          className="cursor-pointer"
-                        />
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                ) : (
-                  <div></div>
-                )}
             </div>
           </div>
 
-          <div className="w-[30%] flex flex-col">
-            <div className="flex border-b h-10">
-              <button
-                className={`flex-1 px-4 py-2 text-sm font-medium ${
-                  activeTab === 'active' 
-                    ? 'border-b-2 border-brand text-brand' 
-                    : 'text-gray-500'
-                }`}
-                onClick={() => setActiveTab('active')}
-              >
-                {t('filesView.active')}
-              </button>
-              <button
-                className={`flex-1 px-4 py-2 text-sm font-medium ${
-                  activeTab === 'resolved' 
-                    ? 'border-b-2 border-brand text-brand' 
-                    : 'text-gray-500'
-                }`}
-                onClick={() => setActiveTab('resolved')}
-              >
-                {t('filesView.resolved')}
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              {activeTab === 'active' ? (
-                <div className="space-y-4">
-                  {activeChats.length > 0 ? (
-                    <>
-                      {activeChats.map((chat) => (
-                        <div key={chat.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg">
-                          <ActiveChats chat={chat} />
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <div className="flex items-start h-full justify-start gap-4 text-center">
-                      <MessageCircle className="w-10 h-10 text-gray-900" />
-                      <p className="text-sm text-gray-900 text-start">
-                        {t('filesView.noActiveChats')}
-                      </p>
-                    </div>
-                  )}
+          {
+            currentFileType.startsWith('image/') ? (
+              <div className="w-[30%] flex flex-col">
+                <div className="flex border-b h-10">
+                  <button
+                    className={`flex-1 px-4 py-2 text-sm font-medium ${
+                      activeTab === 'active' 
+                        ? 'border-b-2 border-brand text-brand' 
+                        : 'text-gray-500'
+                    }`}
+                    onClick={() => setActiveTab('active')}
+                  >
+                    {t('annotations.chat.active')} ({annotations.filter((a) => a.status === 'active').length})
+                  </button>
+                  <button
+                    className={`flex-1 px-4 py-2 text-sm font-medium ${
+                      activeTab === 'resolved' 
+                        ? 'border-b-2 border-brand text-brand' 
+                        : 'text-gray-500'
+                    }`}
+                    onClick={() => setActiveTab('resolved')}
+                  >
+                    {t('annotations.chat.resolved')} ({annotations.filter((a) => a.status === 'completed').length})
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="space-y-4">
-                  {resolvedChats.length > 0 ? (
-                    <>
-                      {resolvedChats.map((chat) => (
-                        <div key={chat.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg">
-                          <ResolvedChat chat={chat} />
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <div className="flex items-start h-full justify-start gap-4 text-center">
-                      <MessageCircle className="w-10 h-10 text-gray-900" />
-                      <p className="text-sm text-gray-900 text-start">
-                        {t('filesView.noActiveChats')}
-                      </p>
-                    </div>
-                  )}
+                <div className="flex-1 overflow-y-auto p-4">
+                  {renderAnnotationsContent()}
                 </div>
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
+            ):(
+              <div></div>
+            )
+          }
         </div>
       </DialogContent>
+      <AnnotationNameDialog
+        isOpen={isAnnotationNameOpen}
+        onClose={setIsAnnotationNameOpen}
+        onSubmit={handleAnnotationNameSubmit}
+        annotationName={annotationName}
+        setAnnotationName={setAnnotationName}
+        t={t}
+      />
     </Dialog>
   );
 };

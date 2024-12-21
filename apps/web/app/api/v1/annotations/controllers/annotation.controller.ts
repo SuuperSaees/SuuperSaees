@@ -27,7 +27,7 @@ export class AnnotationController extends BaseController {
           body.content,
           body.user_id,
         );
-        return this.created({ id: message.id, message: message.message }, requestId);
+        return this.created({ id: message.id, message: message.message, created_at: message.created_at }, requestId);
       }
   
       if (

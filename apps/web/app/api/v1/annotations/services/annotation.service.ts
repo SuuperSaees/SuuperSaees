@@ -94,6 +94,12 @@ export class AnnotationService {
       content: string;
       user_id: string;
       created_at: string;
+      accounts: {
+        name: string;
+        user_settings: {
+          picture_url: string;
+        };
+      };
     }[];
     total: number;
     limit: number;
@@ -161,7 +167,7 @@ export class AnnotationService {
     parentId: string,
     content: string,
     userId: string,
-  ): Promise<{ id: string; message: string }> {
+  ): Promise<{ id: string; message: string; created_at: string }> {
     try {
       this.logger.info({ parentId, userId }, 'Adding message to annotation');
   
@@ -176,7 +182,7 @@ export class AnnotationService {
         'Message added to annotation successfully',
       );
   
-      return { id: message.id, message: message.content };
+      return { id: message.id, message: message.content, created_at: message.created_at };
     } catch (error) {
       this.logger.error(
         { error, parentId, userId },
