@@ -9,7 +9,6 @@ interface ActiveChatsProps {
 
 
 const ActiveChats = ({ chat, onUpdate }: ActiveChatsProps) => {
-  console.log('chat', chat)
   return (
     <>
       <div className="flex flex-col items-start gap-3.5 self-stretch hover:bg-gray-50">
