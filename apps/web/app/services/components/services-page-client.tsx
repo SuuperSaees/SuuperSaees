@@ -32,6 +32,8 @@ import { useStripeActions } from '../hooks/use-stripe-actions';
 interface ServicesPageClientProps {
   accountRole: string;
   paymentsMethods: BillingAccounts.PaymentMethod[];
+  stripeId: string;
+  organizationId: string;
 }
 
 const TABS = [
@@ -44,6 +46,8 @@ type TabType = (typeof TABS)[number]['key'];
 export function ServicesPageClient({
   accountRole,
   paymentsMethods,
+  stripeId,
+  organizationId,
 }: ServicesPageClientProps) {
   const router = useRouter();
   const { t } = useTranslation(['briefs', 'services']);
@@ -80,6 +84,8 @@ export function ServicesPageClient({
   const servicesColumns = useColumns('services', {
     hasPermission: hasPermissionToActionServices,
     paymentsMethods,
+    stripeId,
+    organizationId,
   });
 
   const briefMutation = useMutation({

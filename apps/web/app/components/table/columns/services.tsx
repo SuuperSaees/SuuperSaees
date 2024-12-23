@@ -20,6 +20,8 @@ export const servicesColumns = (
   t: TFunction,
   paymentsMethods: ColumnConfigs['services']['paymentsMethods'],
   hasPermission?: ColumnConfigs['services']['hasPermission'],
+  stripeId?: string,
+  organizationId?: string,
 ): ColumnDef<Service.Relationships.Billing.BillingService>[] => {
   return [
     {
@@ -73,6 +75,8 @@ export const servicesColumns = (
             service={row.original}
             hasPermission={hasPermission}
             paymentsMethods={paymentsMethods}
+            stripeId={stripeId}
+            organizationId={organizationId}
           />
         );
       },
@@ -141,12 +145,16 @@ interface ServiceActionsProps {
   service: Service.Relationships.Billing.BillingService;
   paymentsMethods: ColumnConfigs['services']['paymentsMethods'];
   hasPermission?: ColumnConfigs['services']['hasPermission'];
+  stripeId?: string;
+  organizationId?: string;
 }
 
 function ServiceActions({
   service,
   paymentsMethods,
   hasPermission,
+  stripeId,
+  organizationId,
 }: ServiceActionsProps) {
   const { t } = useTranslation();
 
@@ -161,8 +169,8 @@ function ServiceActions({
               variant="ghost"
               disabled={service.billing_services.length === 0}
               className={`${service.billing_services.length === 0 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-              onClick={async () => {
-                await handleCheckout(service, paymentsMethods);
+              onClick={() => {
+                handleCheckout(service, paymentsMethods, stripeId ?? '', organizationId ?? '');
               }}
             >
               <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />

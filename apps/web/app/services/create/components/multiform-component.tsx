@@ -46,6 +46,9 @@ import CreditBased from './single_sale/credit_based';
 import Standard from './single_sale/standard';
 import TimeBased from './single_sale/time_based';
 import BriefConnectionStep from './step-brief-connection';
+import { Button } from '@kit/ui/button';
+import { Trash } from 'lucide-react';
+import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error('Stripe public key is not defined in environment variables');
@@ -439,33 +442,72 @@ function TypeOfServiceStep() {
 }
 
 function DetailsStep() {
+  const supabase = useSupabase();
   const { t } = useTranslation('services');
   const { form, nextStep, prevStep, isStepValid } = useMultiStepFormContext();
   const [selectedImage, setSelectedImage] = useState<
     string | ArrayBuffer | null
   >(form.getValues('step_service_details.service_image') || null);
+  const [selectedImageFilepath, setSelectedImageFilepath] = useState<string>('')
 
-  const handleImageUpload = (imageUrl: string) => {
+  const [fileName, setFileName] = useState<string>(
+    t('selectImage'),
+  );
+
+  const handleImageUpload = (imageUrl: string, filePath: string) => {
     setSelectedImage(imageUrl);
+    setSelectedImageFilepath(filePath);
     form.setValue('step_service_details.service_image', imageUrl);
   };
+  
+  const handleRemoveImage = async() => {
+    setSelectedImage(null);
+    const { error: deleteError } = await supabase.storage
+      .from('services')
+      .remove([selectedImageFilepath]);
+
+    if (deleteError) {
+      console.error('Error deleting image from bucket:', deleteError);
+    }
+
+    setSelectedImageFilepath('');
+    setFileName(t('selectImage'));
+    form.setValue('step_service_details.service_image', undefined);
+    const fileInput = document.getElementById('file-input-services') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
 
   return (
     <Form {...form}>
       <div className={'flex gap-[36px]'}>
         <div className="h-[190px] w-[390px] rounded-md bg-gray-300">
           {selectedImage && (
-            <Image
-              src={selectedImage as string}
-              alt="Selected"
-              width={390}
-              height={190}
-              className="h-[190px] w-[390px] rounded-md bg-gray-300 object-cover"
-            />
+            <div className='relative'>
+              <Image
+                src={selectedImage as string}
+                alt="Selected"
+                width={390}
+                height={190}
+                className="h-[190px] w-[390px] rounded-md bg-gray-300 object-cover"
+              />
+              <div className="absolute right-2 top-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleRemoveImage}
+                  className="h-8 w-8 rounded-full p-2"
+                >
+                  <Trash strokeWidth={1.7} className="w-full" />
+                </Button>
+              </div>
+            </div>
           )}
         </div>
         <div className="w-1/2 p-[36px]">
-          <UploadImageComponent onImageUpload={handleImageUpload} />
+          <UploadImageComponent onImageUpload={handleImageUpload} fileName={fileName} setFileName = {setFileName}/>
         </div>
       </div>
       <FormField

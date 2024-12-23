@@ -54,6 +54,8 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
       userRole === 'agency_project_manager',
   }) as UseQueryResult<UserWithSettings[], unknown>;
 
+  const showCalendar = (!isLoading && orderAgencyMembers?.some((member) => member.user_settings?.calendar)) ?? false;
+
   return (
     <Tabs
       className="flex max-h-full h-full flex-col gap-6 min-h-0"
@@ -95,13 +97,18 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         >
           <Trans i18nKey={'orders:details.navigation.files'} />
         </ThemedTabTrigger>
-        <ThemedTabTrigger 
-          value="calendar" 
-          activeTab={activeTab} 
-          option={'calendar'}
-        >
-          <Trans i18nKey={'account:calendar'} />
-        </ThemedTabTrigger>
+        {
+          showCalendar ? (
+            <ThemedTabTrigger 
+              value="calendar" 
+              activeTab={activeTab} 
+              option={'calendar'}
+            >
+              <Trans i18nKey={'account:calendar'} />
+            </ThemedTabTrigger>
+          ) : null
+        }
+
       </TabsList>
 
       <TabsContent
@@ -111,7 +118,7 @@ export const OrderTabs = ({ organizationId, currentPath, userRole, orderId, orde
         <DetailsPage />
       </TabsContent>
       <TabsContent value="activity" className="h-full max-h-full min-h-0">
-        <ActivityPage agencyName={agencyName} />
+        <ActivityPage agencyName={agencyName} agencyStatuses={agencyStatuses}/>
       </TabsContent>
       <TabsContent value="tasks">
         <div className="w-full px-8">

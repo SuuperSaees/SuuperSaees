@@ -174,9 +174,10 @@ export async function getClientServices(
   }
 }
 
-export async function getPaymentsMethods(): Promise<
-  BillingAccounts.PaymentMethod[]
-> {
+export async function getPaymentsMethods(): Promise<{
+  paymentMethods: BillingAccounts.PaymentMethod[],
+  primaryOwnerId: string,
+}> {
   const client = getSupabaseServerComponentClient();
   const primaryOwnerId = (await getPrimaryOwnerId(client)) ?? '';
   const paymentMethods: BillingAccounts.PaymentMethod[] = [];
@@ -289,5 +290,5 @@ export async function getPaymentsMethods(): Promise<
     }
   }
 
-  return paymentMethods;
+  return {paymentMethods, primaryOwnerId};
 }

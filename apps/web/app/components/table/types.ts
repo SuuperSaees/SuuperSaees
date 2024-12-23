@@ -39,5 +39,7 @@ export type ColumnConfigs = {
     hasPermission: (
       row?: keyof (EntityData['services'][0] & ServicePermissions),
     ) => boolean;
+    stripeId?: string;
+    organizationId?: string;
   };
 };
