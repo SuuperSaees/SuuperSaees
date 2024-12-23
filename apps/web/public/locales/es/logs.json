@@ -82,6 +82,7 @@
       "completed": "Completado",
       "pending": "Esperando respuesta",
       "annulled": "Anulado",
+      "anulled": "Anulado",
       "in_review": "En revisión"
     }
 }

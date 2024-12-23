@@ -2,7 +2,6 @@
 
 import { BillingAccounts } from '../../../../../../../../apps/web/lib/billing-accounts.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import { getDomainByOrganizationId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { createToken } from '../../../../../../../tokens/src/create-token';
 
 
@@ -12,12 +11,14 @@ export const createUrlForCheckout = async ({
   service,
   organizationId,
   paymentMethods,
+  baseUrl,
 }: {
   stripeId?: string;
   priceId: string;
   service: Service.Relationships.Billing.BillingService;
   organizationId: string;
   paymentMethods: BillingAccounts.PaymentMethod[];
+  baseUrl: string;
 }) => {
   try {
     // Validate input parameters
@@ -47,31 +48,13 @@ export const createUrlForCheckout = async ({
           description: '',
         },
       });
-    } catch (tokenError) {
+    } catch (tokenError: unknown) {
       console.error('Token creation failed:', {
-        error: tokenError.message,
-        code: tokenError.code,
-        stack: tokenError.stack,
+        error: tokenError instanceof Error ? tokenError.message : String(tokenError),
+        code: tokenError instanceof Error && 'code' in tokenError ? (tokenError as {code: unknown}).code : undefined,
+        stack: tokenError instanceof Error ? tokenError.stack : undefined,
       });
       throw tokenError;
-    }
-
-    let baseUrl: string | undefined;
-    try {
-      baseUrl = await getDomainByOrganizationId(organizationId, true, true);
-    } catch (domainError) {
-      console.error('Domain retrieval failed:', {
-        error: domainError.message,
-        code: domainError.code,
-        stack: domainError.stack,
-      });
-      throw domainError;
-    }
-
-    if (!baseUrl) {
-      throw new Error(
-        `Invalid baseUrl returned for organizationId: ${organizationId}`,
-      );
     }
 
     const url = `${baseUrl}/checkout?tokenId=${token.tokenId}`;
@@ -80,10 +63,10 @@ export const createUrlForCheckout = async ({
   } catch (error) {
     // Enhanced error logging
     console.error('createUrlForCheckout failed:', {
-      errorName: error.name,
-      errorMessage: error.message,
-      errorCode: error.code,
-      errorStack: error.stack,
+      errorName: error instanceof Error ? error.name : String(error),
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorCode: error instanceof Error && 'code' in error ? (error as {code: unknown}).code : undefined,
+      errorStack: error instanceof Error ? error.stack : undefined,
       errorType: Object.prototype.toString.call(error),
       params: {
         hasPriceId: !!priceId,

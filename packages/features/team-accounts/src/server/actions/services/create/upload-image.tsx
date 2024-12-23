@@ -14,22 +14,24 @@ import { Label } from '@kit/ui/label';
 import { ThemedButton } from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
 
 interface UploadImageComponentProps {
-  onImageUpload: (imageUrl: string) => void;
+  onImageUpload: (imageUrl: string, filePath: string) => void;
+  fileName: string;
+  setFileName: (fileName: string) => void;
 }
 
 export default function UploadImageComponent({
   onImageUpload,
+  fileName,
+  setFileName,
 }: UploadImageComponentProps) {
   const { t } = useTranslation('services');
   const supabase = useSupabase();
   const [error, setError] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string>(
-    'Seleccionar una imagen',
-  );
+
 
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    const fileInput = document.getElementById('file-input');
+    const fileInput = document.getElementById('file-input-services');
     if (fileInput) {
       fileInput.click();
     }
@@ -65,8 +67,8 @@ export default function UploadImageComponent({
       if (!publicURL) {
         throw new Error('Error to get public URL');
       }
+      onImageUpload(publicURL.publicUrl, filePath);
 
-      onImageUpload(publicURL.publicUrl);
     } catch (error) {
       console.error('Error to upload image:', error);
       setError('There was an error uploading the image. Try again.');
@@ -89,7 +91,7 @@ export default function UploadImageComponent({
         <Input
           type="file"
           accept="image/*"
-          id="file-input"
+          id="file-input-services"
           onChange={handleImageChange}
           style={{ display: 'none' }}
         />

@@ -122,7 +122,7 @@ export const getOrganizationSettingsByOrganizationId = async (
   return organizationSettings;
 };
 
-export async function getOrganization(): Promise<{
+export async function getOrganization(primaryOwnerId?: string): Promise<{
   id: string;
   name: string;
   primary_owner_user_id: string;
@@ -133,13 +133,17 @@ export async function getOrganization(): Promise<{
 }> {
   try {
     const client = getSupabaseServerComponentClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
+    let userId = primaryOwnerId;
+    if (!userId) {
+      const { data: userData, error: userError } = await client.auth.getUser();
+      if (userError) throw userError;
+      userId = userData.user.id;
+    }
 
     const { data: userAccountData, error: accountsError } = await client
       .from('accounts')
       .select('organization_id')
-      .eq('id', userData.user.id)
+      .eq('id', userId)
       .single();
 
     if (accountsError) {

@@ -15,8 +15,9 @@ import { fetchFormfieldsWithResponses } from '~/team-accounts/src/server/actions
 import { useQuery } from '@tanstack/react-query';
 import UserFirstMessage from './user-first-message';
 import { Check } from 'lucide-react';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
 
-const Interactions = () => {
+const Interactions = ({ agencyStatuses }: { agencyStatuses: AgencyStatus.Type[] }) => {
   const { messages, files, activities, reviews, userRole, order } = useActivityContext();
 
   const briefsWithResponsesQuery = useQuery({
@@ -145,6 +146,7 @@ const Interactions = () => {
               <ActivityAction
                 activity={interaction as Activity}
                 key={interaction.id}
+                agencyStatuses={agencyStatuses}
               />
             ) : interaction.class === 'review' ? (
               <UserReviewMessage

@@ -10,8 +10,9 @@ import Interactions from './interactions';
 import { Separator } from '@kit/ui/separator';
 import { getUrlFile } from '~/team-accounts/src/server/actions/files/get/get-files';
 import { insertOrderFiles } from '~/team-accounts/src/server/actions/files/create/create-file';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
 
-const ActivityPage = ({ agencyName }: { agencyName: string }) => {
+const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agencyStatuses: AgencyStatus.Type[] }) => {
   const { order } = useActivityContext();
   const [showFileUploader, setShowFileUploader] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -104,7 +105,7 @@ const ActivityPage = ({ agencyName }: { agencyName: string }) => {
   return (
     <div className="flex w-full flex-col gap-4 h-auto min-h-full">
       <Separator className='w-full'/>
-      <Interactions />
+      <Interactions agencyStatuses={agencyStatuses}/>
       <Separator className='w-full'/>
       <div 
         className={`flex flex-col justify-end pt-3 px-8 mb-4`}
