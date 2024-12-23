@@ -175,9 +175,9 @@ export class AnnotationRepository implements IAnnotationRepository {
       accounts: {
         name: string;
         settings: {
-          picture_url: string;
-        };
-      };
+          picture_url: string | null;
+        } | null;
+      } | null;
     }[]
   > {
     const { data: childMessages, error } = await this.client

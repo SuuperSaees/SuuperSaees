@@ -120,11 +120,21 @@ export class AnnotationService {
       offset,
     );
   
+    const transformedChildren = childMessages.map((child) => ({
+      ...child,
+      accounts: {
+        name: child.accounts?.name ?? 'Unknown',
+        user_settings: {
+          picture_url: child.accounts?.settings?.picture_url ?? '', 
+        },
+      },
+    }));
+  
     const total = await this.annotationRepository.countChildMessages(parentMessage.id);
   
     return {
       parent: parentMessage,
-      children: childMessages,
+      children: transformedChildren,
       total,
       limit,
       offset,
