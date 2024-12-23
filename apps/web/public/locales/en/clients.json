@@ -65,6 +65,9 @@
   },
   "invoices": {
     "title": "Invoices"
+  },
+  "orders": {
+    "title": "Projects"
   }
 },
   "startWithFirstClientTitle": "Let's start with your first client",

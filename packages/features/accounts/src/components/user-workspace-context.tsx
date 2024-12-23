@@ -20,6 +20,11 @@ export interface UserWorkspace {
     subscription_status: Tables<'subscriptions'>['status'] | null;
     role: string | null;
   };
+  organization: {
+    name: string | null;
+    slug: string | null;
+    picture_url: string | null;
+  };
 
   user: User;
 }
