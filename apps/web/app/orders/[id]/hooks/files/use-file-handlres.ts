@@ -28,11 +28,11 @@ export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) =
    };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    return () => {
-     window.removeEventListener('keydown', handleKeyDown);
-     window.removeEventListener('keyup', handleKeyUp);
-   };
- }, []);
+     return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
   const handleWheel = (e: WheelEvent) => {
     const isScrollableElement = (e.target as HTMLElement)?.closest('.overflow-y-auto, .overflow-auto');
     if (isScrollableElement ?? currentFileType.startsWith('application/pdf')) return;
