@@ -207,7 +207,7 @@ export const FileDialogView: React.FC<FileProps> = ({
         page_number: currentFileType.startsWith('application/pdf') ? currentPage : 1
       });
 
-      setSelectedAnnotation(annotation);
+      setSelectedAnnotation(annotation.data);
       setIsChatOpen(true);
     } catch (error) {
       console.error('Error creating annotation:', error);

@@ -151,6 +151,7 @@ const FileViewer = ({
                             sideOffset={5}
                             side="right"
                             align="start"
+                            isDraggable={true}
                           >
                             <AnnotationChat
                               isOpen={isChatOpen}

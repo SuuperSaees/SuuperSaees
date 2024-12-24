@@ -117,7 +117,7 @@ export class AnnotationRepository implements IAnnotationRepository {
     const { data: createdAnnotation, error } = await this.client
       .from('annotations')
       .insert(annotationData)
-      .select()
+      .select('*, accounts(name, settings:user_settings(picture_url))')
       .single();
 
     if (error ?? !createdAnnotation) {

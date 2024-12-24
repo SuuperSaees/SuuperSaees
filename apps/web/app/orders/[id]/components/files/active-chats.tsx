@@ -27,8 +27,8 @@ const ActiveChats = ({ chat, onUpdate, onDelete }: ActiveChatsProps) => {
           <div className="flex items-center w-[75%]">
             <div className="mr-[12px]">
               <Avatar className="w-[45px] h-[45px]">
-                <AvatarImage src={chat.accounts.settings.picture_url} alt={chat.accounts.name} />
-                <AvatarFallback>{chat.accounts.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={chat.accounts.settings.picture_url ?? ''} alt={chat.accounts.name ?? 'User'} />
+                <AvatarFallback>{chat.accounts.name.charAt(0) ?? 'U'  }</AvatarFallback>
               </Avatar>
             </div>
             <p className="overflow-hidden text-gray-900 truncate text-[16px] font-bold leading-6">{chat.accounts.name}</p>
