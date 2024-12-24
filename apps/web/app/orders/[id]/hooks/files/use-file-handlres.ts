@@ -13,19 +13,27 @@ export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) =
   const [dragStart, setDragStart] = useState<Position>({ x: 0, y: 0 });
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   useEffect(() => {
-   const handleKeyDown = (e: KeyboardEvent) => {
-     if (e.code === 'Space' && 
-         !(e.target instanceof HTMLInputElement) && 
-         !(e.target instanceof HTMLTextAreaElement)) {
-       e.preventDefault();
-       setIsSpacePressed(true);
-     }
-   };
-    const handleKeyUp = (e: KeyboardEvent) => {
-     if (e.code === 'Space') {
-       setIsSpacePressed(false);
-     }
-   };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isEditable = 
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.isContentEditable;
+       if (e.code === 'Space' && !isEditable) {
+        e.preventDefault();
+        setIsSpacePressed(true);
+      }
+    };
+     const handleKeyUp = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isEditable = 
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.isContentEditable;
+       if (e.code === 'Space' && !isEditable) {
+        setIsSpacePressed(false);
+      }
+    };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
      return () => {

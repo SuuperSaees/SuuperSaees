@@ -27,11 +27,13 @@ const ActiveChats = ({ chat, onUpdate, onDelete }: ActiveChatsProps) => {
           <div className="flex items-center w-[75%]">
             <div className="mr-[12px]">
               <Avatar className="w-[45px] h-[45px]">
-                <AvatarImage src={chat.accounts.settings.picture_url ?? ''} alt={chat.accounts.name ?? 'User'} />
-                <AvatarFallback>{chat.accounts.name.charAt(0) ?? 'U'  }</AvatarFallback>
+                <AvatarImage src={chat.accounts?.settings?.picture_url ?? ''} alt={chat.accounts?.name ?? 'User'} />
+                <AvatarFallback>{chat.accounts?.name?.charAt(0) ?? 'U'}</AvatarFallback>
               </Avatar>
             </div>
-            <p className="overflow-hidden text-gray-900 truncate text-[16px] font-bold leading-6">{chat.accounts.name}</p>
+            <p className="overflow-hidden text-gray-900 truncate text-[16px] font-bold leading-6">
+              {chat.accounts?.name ?? 'Unknown User'}
+            </p>
           </div>
           <p className="text-gray-600 overflow-hidden truncate font-inter text-[14px] font-normal leading-5 w-[25%] text-end">
            {new Date(chat.message_created_at).toLocaleDateString('en-US', {
