@@ -47,7 +47,7 @@ export default function PluginCard({ provider }: AppCardProps) {
         <div className="flex items-center gap-2 self-center">
           <Switch className="data-[state=checked]:bg-BlueDark-700" />
           <Button variant="ghost" size="icon" onClick={() => {
-            router.push(`/plugins/settings?provider=${provider}`);
+            router.push(`/apps/settings?provider=${provider}`);
           }}>
             <Settings className="h-4 w-4" />
           </Button>

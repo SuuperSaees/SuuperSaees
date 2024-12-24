@@ -12,7 +12,7 @@ function ButtonsHeader() {
   const router = useRouter();
   return (
     <div className="flex items-center justify-between">
-      <Button variant="outline" className="gap-2" onClick={() => router.push('/plugins')}>
+      <Button variant="outline" className="gap-2" onClick={() => router.push('/apps')}>
         <ArrowLeft className="h-4 w-4" />
         {t('goBack')}
       </Button>

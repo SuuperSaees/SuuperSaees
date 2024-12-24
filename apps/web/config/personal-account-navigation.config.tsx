@@ -60,7 +60,7 @@ const routes = [
   // },
   {
     label: 'common:pluginsName',
-    path: pathsConfig.app.plugins,
+    path: pathsConfig.app.apps,
     Icon: <Sparkles className={iconClasses} />,
   },
   {
