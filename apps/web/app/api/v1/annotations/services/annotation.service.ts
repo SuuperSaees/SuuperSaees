@@ -16,16 +16,18 @@ export class AnnotationService {
     private readonly annotationRepository: AnnotationRepository,
   ) {}
 
-  async createAnnotation(data: CreateAnnotationDTO): Promise<Annotations.Type & { message: string }> {
+  async createAnnotation(
+    data: CreateAnnotationDTO,
+  ): Promise<Annotations.Type & { message: string }> {
     try {
       this.logger.info({ fileId: data.file_id }, 'Creating annotation');
-  
+
       const message = await this.annotationRepository.createMessage(
         data.content,
         data.user_id,
         '',
       );
-  
+
       const annotationData = {
         file_id: data.file_id,
         user_id: data.user_id,
@@ -35,15 +37,15 @@ export class AnnotationService {
         status: data.status ?? 'active',
         message_id: message.id,
       };
-  
+
       const annotation =
         await this.annotationRepository.createAnnotation(annotationData);
-  
+
       this.logger.info(
         { id: annotation.id },
         'Annotation created successfully',
       );
-  
+
       return { ...annotation, message: message.content };
     } catch (error) {
       this.logger.error({ error, data }, 'Failed to create annotation');
@@ -62,14 +64,10 @@ export class AnnotationService {
     try {
       const annotations =
         await this.annotationRepository.getAnnotationsByFile(fileId);
-  
+
       return {
-        currentFile: annotations.filter(
-          (annotation) => annotation.file_id === fileId,
-        ),
-        otherFiles: annotations.filter(
-          (annotation) => annotation.file_id !== fileId,
-        ),
+        currentFile: annotations.currentFile,
+        otherFiles: annotations.otherFiles,
       };
     } catch (error) {
       throw ApiError.internalError(
@@ -105,33 +103,36 @@ export class AnnotationService {
     limit: number;
     offset: number;
   }> {
-    const parentMessage = await this.annotationRepository.getParentMessage(annotationId);
-  
+    const parentMessage =
+      await this.annotationRepository.getParentMessage(annotationId);
+
     if (!parentMessage) {
       throw ApiError.notFound(
         `Parent message for annotation ${annotationId} not found`,
         ErrorAnnotationOperations.ANNOTATION_NOT_FOUND,
       );
     }
-  
+
     const childMessages = await this.annotationRepository.getChildMessages(
       parentMessage.id,
       limit,
       offset,
     );
-  
+
     const transformedChildren = childMessages.map((child) => ({
       ...child,
       accounts: {
         name: child.accounts?.name ?? 'Unknown',
         user_settings: {
-          picture_url: child.accounts?.settings?.picture_url ?? '', 
+          picture_url: child.accounts?.settings?.picture_url ?? '',
         },
       },
     }));
-  
-    const total = await this.annotationRepository.countChildMessages(parentMessage.id);
-  
+
+    const total = await this.annotationRepository.countChildMessages(
+      parentMessage.id,
+    );
+
     return {
       parent: parentMessage,
       children: transformedChildren,
@@ -144,8 +145,6 @@ export class AnnotationService {
   async updateAnnotationStatus(
     annotationId: string,
     status: Annotations.AnnotationStatus,
-    first_message?: string,
-    message_id?: string,
   ): Promise<Annotations.Type> {
     try {
       this.logger.info({ annotationId, status }, 'Updating annotation status');
@@ -153,8 +152,6 @@ export class AnnotationService {
       const updatedAnnotation = await this.annotationRepository.updateStatus(
         annotationId,
         status,
-        first_message,
-        message_id,
       );
 
       this.logger.info(
@@ -184,25 +181,29 @@ export class AnnotationService {
   ): Promise<{ id: string; message: string; created_at: string }> {
     try {
       this.logger.info({ parentId, userId }, 'Adding message to annotation');
-  
+
       const message = await this.annotationRepository.createMessage(
         content,
         userId,
         parentId,
       );
-  
+
       this.logger.info(
         { messageId: message.id },
         'Message added to annotation successfully',
       );
-  
-      return { id: message.id, message: message.content, created_at: message.created_at };
+
+      return {
+        id: message.id,
+        message: message.content,
+        created_at: message.created_at,
+      };
     } catch (error) {
       this.logger.error(
         { error, parentId, userId },
         'Failed to add message to annotation',
       );
-  
+
       throw error instanceof ApiError
         ? error
         : ApiError.internalError(
