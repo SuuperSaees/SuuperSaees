@@ -144,6 +144,8 @@ export class AnnotationService {
   async updateAnnotationStatus(
     annotationId: string,
     status: Annotations.AnnotationStatus,
+    first_message?: string,
+    message_id?: string,
   ): Promise<Annotations.Type> {
     try {
       this.logger.info({ annotationId, status }, 'Updating annotation status');
@@ -151,6 +153,8 @@ export class AnnotationService {
       const updatedAnnotation = await this.annotationRepository.updateStatus(
         annotationId,
         status,
+        first_message,
+        message_id,
       );
 
       this.logger.info(

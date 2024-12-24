@@ -415,6 +415,7 @@ export const ActivityProvider = ({
         messages: messages.filter((msg) => !msg.deleted_on),
         reviews: reviews,
         files: files.filter((svFile) => !svFile.message_id),
+        allFiles: files,
         order,
         userRole,
         addMessage: async ({

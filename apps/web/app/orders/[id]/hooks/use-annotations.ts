@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface Annotation {
   id: string;
@@ -25,9 +27,10 @@ interface Message {
 }
 
 export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
+  const { t } = useTranslation('orders');
   const supabase = useSupabase();
   const queryClient = useQueryClient();
-  const [isCreatingAnnotation, setIsCreatingAnnotation] = useState(false);
+  const [isCreatingAnnotation, setIsCreatingAnnotation] = useState(true);
   const [selectedAnnotation, setSelectedAnnotation] = useState<Annotation | null>(null);
 
   const { data: annotations = [], isLoading: isLoadingAnnotations } = useQuery({
@@ -85,6 +88,10 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+      toast.success(t('annotations.addSuccess'));
+    },
+    onError: () => {
+      toast.error(t('annotations.addError'));
     },
   });
 
@@ -93,7 +100,7 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
     mutationFn: async ({
       parent_id,
       content,
-      user_id
+      user_id,
     }: {
       parent_id: string;
       content: string;
@@ -128,22 +135,32 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
   const updateAnnotationMutation = useMutation({
     mutationFn: async ({
       annotationId,
-      status
+      status,
+      first_message,
+      message_id
     }: {
       annotationId: string;
       status: 'completed' | 'draft' | 'active';
+      first_message?: string;
+      message_id?: string;
     }) => {
       const response = await fetch(`/api/v1/annotations/${annotationId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           status,
+          first_message,
+          message_id
         }),
       });
       return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages', selectedAnnotation?.id] });
       queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+    },
+    onError: () => {
+      console.error('Error updating annotation');
     },
   });
 
@@ -205,7 +222,6 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
     [queryClient, fileId, selectedAnnotation?.id]
   );
 
-  // Actualizar el useEffect para escuchar ambas tablas
   useEffect(() => {
     const channel = supabase
       .channel('database_changes')
@@ -231,10 +247,10 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
     messages,
     isLoadingAnnotations,
     isLoadingMessages,
-    createAnnotation: createAnnotationMutation.mutate,
-    addMessage: addMessageMutation.mutate,
-    deleteAnnotation: deleteAnnotationMutation.mutate,
-    updateAnnotation: updateAnnotationMutation.mutate,
+    createAnnotation: createAnnotationMutation.mutateAsync,
+    addMessage: addMessageMutation.mutateAsync,
+    deleteAnnotation: deleteAnnotationMutation.mutateAsync,
+    updateAnnotation: updateAnnotationMutation.mutateAsync,
     isCreatingAnnotation,
     setIsCreatingAnnotation,
     selectedAnnotation,

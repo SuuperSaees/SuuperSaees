@@ -152,8 +152,6 @@ export class AnnotationRepository implements IAnnotationRepository {
       throw new Error(`Error fetching annotations: ${error.message}`);
     }
 
-    // console.log('annotations', annotations);
-
     return annotations.map((annotation) => ({
       ...annotation,
       message_content: annotation.messages?.content ?? null,
@@ -253,21 +251,43 @@ export class AnnotationRepository implements IAnnotationRepository {
   async updateStatus(
     annotationId: string,
     status: Annotations.AnnotationStatus,
-  ): Promise<Annotations.Type> {
-    const { data: updatedAnnotation, error } = await this.client
-      .from('annotations')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', annotationId)
-      .select()
-      .single();
+    first_message?: string,
+    message_id?: string,
+  ){
+    if (first_message !== undefined && message_id !== undefined) {
+      const { data: updatedMessage, error } = await this.client
+        .from('messages')
+        .update({ 
+          content: first_message ?? null
+        })
+        .eq('id', message_id)
+        .select()
+        .single();
 
-    if (error ?? !updatedAnnotation) {
-      throw new Error(
-        `Error updating annotation status: ${error?.message || 'Annotation not found'}`,
-      );
+      if (error ?? !updatedMessage) {
+        throw new Error(
+          `Error updating message: ${error?.message || 'Message not found'}`,
+        );
+      }
+      return { id: updatedMessage.id, content: updatedMessage.content, created_at: updatedMessage.created_at };
+    } else {
+      const { data: updatedAnnotation, error } = await this.client
+        .from('annotations')
+        .update({ 
+          status, 
+          updated_at: new Date().toISOString(), 
+        })
+        .eq('id', annotationId)
+        .select()
+        .single();
+
+      if (error ?? !updatedAnnotation) {
+        throw new Error(
+          `Error updating annotation status: ${error?.message || 'Annotation not found'}`,
+        );
+      }
+      return updatedAnnotation as Annotations.Type;
     }
-
-    return updatedAnnotation as Annotations.Type;
   }
 
   async softDelete(annotationId: string): Promise<void> {
