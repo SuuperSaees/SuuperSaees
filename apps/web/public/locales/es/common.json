@@ -100,5 +100,9 @@
   "success": "¡Todo Listo!",
   "error": "¡Algo salió mal!",
   "stopImpersonating": "Dejar de suplantar",
-  "stopImpersonatingDescription": "Regresarás a tu sesión en unos segundos"
+  "stopImpersonatingDescription": "Regresarás a tu sesión en unos segundos",
+  "rowsPerPage": "Mostrar",
+  "rowNumber": "{{number}} filas",
+  "filters": "Filtros",
+  "resetFilters": "Restablecer filtros"
 }

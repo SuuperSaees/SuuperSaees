@@ -11,23 +11,26 @@ import { toast } from 'sonner';
 
 
 import { BillingAccounts } from '~/lib/billing-accounts.types';
-import { Database } from '~/lib/database.types';
+// import { Database } from '~/lib/database.types';
 import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 // import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 
-interface UseStripeActions {
-  userRole: Database['public']['Tables']['accounts_memberships']['Row']['account_role'];
-  // view: 'briefs' | 'services'; // activate to improve performance => this will make the query only when the view is active // one call per view
-}
+// interface UseStripeActions {
+//   // userRole: Database['public']['Tables']['accounts_memberships']['Row']['account_role'];
+//   // view: 'briefs' | 'services'; // activate to improve performance => this will make the query only when the view is active // one call per view
+// }
 
-export function useStripeActions({ userRole }: UseStripeActions) {
+export function useStripeActions() {
   const [hasTheEmailAssociatedWithStripe, setHasTheEmailAssociatedWithStripe] =
     useState<boolean>(false);
+  const { workspace } = useUserWorkspace();
+  const userRole = workspace?.role ?? '';
 
   const servicesQueryData = useQuery({
     queryKey: ['services'],
@@ -36,8 +39,9 @@ export function useStripeActions({ userRole }: UseStripeActions) {
 
   const briefsQueryData = useQuery({
     queryKey: ['briefs'],
-    queryFn: async () => await getBriefs({ includes: ['services'] }),
-    // enabled: view === 'briefs',
+    queryFn: async () => await getBriefs(),
+    // only enable if services are loaded
+    enabled: !!servicesQueryData.data,
   });
 
   const services = servicesQueryData.data?.products ?? [];

@@ -13,7 +13,7 @@ import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
 
 import pathsConfig from '~/config/paths.config';
-import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
+import { getDomainByUserId, getFullDomainBySubdomain } from '~/multitenancy/utils/get/get-domain';
 import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
@@ -50,6 +50,19 @@ function setCachedDomain(
   response.cookies.set(`domain_${userId}`, domain, {
     maxAge: 60 * 60,
     secure: isProd,
+  });
+}
+function getCachedLanguage(request: NextRequest): string | null {
+  const langCookie = request.cookies.get('i18next');
+  return langCookie ? langCookie.value : null;
+}
+
+function setCachedLanguage(
+  response: NextResponse,
+  language: string,
+) {
+  response.cookies.set('i18next', language, {
+    maxAge: 60 * 60 * 24 * 30, // 30 days
   });
 }
 
@@ -124,8 +137,8 @@ export async function middleware(request: NextRequest) {
 
       const corsResult = handleCors(request, response, domain);
       if (corsResult) return corsResult;
-
-      if (new URL(request.nextUrl.origin).host !== domain) {
+      const host = new URL(request.nextUrl.origin).host;
+      if (host !== domain) {
         throw new Error('Unauthorized: Invalid Origin');
       }
     } catch (error) {
@@ -142,6 +155,7 @@ export async function middleware(request: NextRequest) {
   response.headers.set('x-current-path', request.nextUrl.pathname);
   setRequestId(request);
 
+  
   const csrfResponse = response;
 
   const handlePattern = matchUrlPattern(request.url);
@@ -155,6 +169,27 @@ export async function middleware(request: NextRequest) {
   }
   
   setCORSHeaders(csrfResponse);
+
+  try {
+    const supabase = createMiddlewareClient(request, response);
+    const { data: { user } } = await supabase.auth.getUser();
+    const host = new URL(request.nextUrl.origin).host;
+    if (user) {
+      const cachedLang = getCachedLanguage(request);
+      if (!cachedLang) {
+        const values = ['language'];
+        const domainData = await getFullDomainBySubdomain(host, true, values);
+        const language = domainData?.settings?.find(
+          (setting) => setting.key === 'language'
+        )?.value ?? 'en';
+ 
+        setCachedLanguage(csrfResponse, language);
+      }
+    }
+  } catch (error) {
+    console.error('Error setting language in middleware:', error);
+  }
+  
 
   return csrfResponse;
 }

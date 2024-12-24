@@ -24,24 +24,30 @@ interface AgencyClientCrudMenuProps {
   currentUserRole?: string
   currentUserId?: string
   inTeamMembers?: boolean
+  targetRole?: string
 }
 
-function AgencyClientCrudMenu({userId, name, email, queryKey, organizationOptions, currentUserRole, currentUserId, inTeamMembers=false}: AgencyClientCrudMenuProps) {
+function AgencyClientCrudMenu({userId, name, email, queryKey, currentUserRole, currentUserId, inTeamMembers=false, targetRole}: AgencyClientCrudMenuProps) {
   const {t} = useTranslation('clients');
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
   const [openImpersonateUserDialog, setOpenImpersonateUserDialog] = useState(false);
   // const [openSwitchOrganizationDialog, setOpenSwitchOrganizationDialog] = useState(false);
   const [openResetPasswordDialog, setOpenResetPasswordDialog] = useState(false)
 
-  const {
+  let {
     data: userRole,
     isLoading,
     isPending,
   } = useQuery({
     queryKey: ['userRole', userId],
     queryFn: async () => await getUserRoleById(userId, true),
+    enabled: !targetRole,
   });
 
+
+  userRole = targetRole ?? userRole;
+  isLoading = targetRole ? false : isLoading;
+  isPending = targetRole ? false : isPending;
   //If my role is not agency_owner and the user's role is agency_owner, I cannot impersonate him
   const cannotImpersonate = currentUserRole !== 'agency_owner' && userRole === 'agency_owner'
 

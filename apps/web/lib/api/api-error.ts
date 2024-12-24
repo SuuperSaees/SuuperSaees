@@ -1,4 +1,5 @@
 import {
+  ErrorAnnotationOperations,
   ErrorBillingOperations,
   ErrorBriefOperations,
   ErrorClientOperations,
@@ -43,7 +44,8 @@ export class ApiError extends Error {
       | ErrorOrganizationOperations
       | ErrorBriefOperations
       | ErrorOrderOperations
-      | ErrorServiceOperations,
+      | ErrorServiceOperations
+      | ErrorAnnotationOperations,
   ) {
     return new ApiError(HttpStatus.Error.NotFound, message, operationName);
   }

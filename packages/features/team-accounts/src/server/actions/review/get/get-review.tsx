@@ -48,9 +48,30 @@ export const getOrdersReviewsForUser = async (
 
     if (reviewsError) throw reviewsError.message;
 
-    return reviewsData;
+    return reviewsData as Review.Response[];
   } catch (error) {
     console.error(error);
+    throw error;
+  }
+};
+
+export const getOrdersReviewsById = async (
+  orderIds: number[],
+): Promise<Review.Response[]> => {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    // Fetch the reviews associated with the given order IDs
+    const { data: reviewsData, error: reviewsError } = await client
+      .from('reviews')
+      .select('*, order:orders_v2(id, title), user:accounts(id, name, email, picture_url, organization_id, settings:user_settings(name, picture_url))')
+      .in('order_id', orderIds);
+
+    if (reviewsError) throw reviewsError.message;
+
+    return reviewsData as Review.Response[];
+  } catch (error) {
+    console.error('Error fetching reviews by order IDs:', error);
     throw error;
   }
 };

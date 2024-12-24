@@ -19,7 +19,7 @@ import {
 } from '@kit/ui/alert-dialog';
 
 import { handleResponse } from '~/lib/response/handle-response';
-
+import Tooltip from '~/components/ui/tooltip';
 import { deleteService } from '../../../../../packages/features/team-accounts/src/server/actions/services/delete/delete-service-server';
 
 const DeleteServiceDialog = ({ serviceId }: { serviceId: number }) => {
@@ -46,8 +46,10 @@ const DeleteServiceDialog = ({ serviceId }: { serviceId: number }) => {
   return (
     <>
       <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Trash2 className="h-4 w-4 cursor-pointer text-gray-600" />
+        <AlertDialogTrigger >
+          <Tooltip content={t('services:eliminate')}>
+            <Trash2 className="h-8 w-8 cursor-pointer text-gray-600 rounded-md p-2 hover:bg-accent" />
+          </Tooltip>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <div className="flex">

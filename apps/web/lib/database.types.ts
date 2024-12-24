@@ -1305,7 +1305,7 @@ export type Database = {
           created_at: string
           deleted_on: string | null
           id: string
-          order_id: number
+          order_id: number | null
           parent_id: string | null
           temp_id: string | null
           type: Database["public"]["Enums"]["message_category"]
@@ -1318,7 +1318,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
-          order_id: number
+          order_id?: number | null
           parent_id?: string | null
           temp_id?: string | null
           type?: Database["public"]["Enums"]["message_category"]
@@ -1331,7 +1331,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
-          order_id?: number
+          order_id?: number | null
           parent_id?: string | null
           temp_id?: string | null
           type?: Database["public"]["Enums"]["message_category"]

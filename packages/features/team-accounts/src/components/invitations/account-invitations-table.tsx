@@ -47,7 +47,7 @@ export function AccountInvitationsTable({
   const [search, setSearch] = useState('');
   const columns = useGetColumns(permissions);
 
-  const filteredInvitations = invitations.filter((member) => {
+  const filteredInvitations = useMemo(() => invitations.filter((member) => {
     const searchString = search.toLowerCase();
     const email = member.email.split('@')[0]?.toLowerCase() ?? '';
 
@@ -55,7 +55,7 @@ export function AccountInvitationsTable({
       email.includes(searchString) ||
       member.role.toLowerCase().includes(searchString)
     );
-  });
+  }), [invitations, search]);
 
   return (
     <div className={'flex flex-col space-y-4'}>

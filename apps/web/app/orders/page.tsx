@@ -1,11 +1,12 @@
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+import { getOrganizationById } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 import { PageHeader } from '../components/page-header';
 import { TimerContainer } from '../components/timer-container';
@@ -20,18 +21,36 @@ export const generateMetadata = async () => {
 };
 
 async function OrdersPage() {
+  const client = getSupabaseServerComponentClient({ 
+    admin: false,
+  });
   const ordersData = await getOrders(true).catch((err) => console.error(err));
   const agencyId = ordersData?.[0]?.agency_id;
+
   const agencyStatuses = await getAgencyStatuses(agencyId ?? '')
     .catch((err) => console.error(err))
     .catch(() => []);
 
+  const agency = await getOrganizationById(agencyId ?? '').catch((err) => console.error(`Error fetching agency: ${err}`));  
 
-  const role = await getUserRole().catch((err) => {
-    console.error(`Error client, getting user role: ${err}`);
-    return '';
-  });
+  const { data, error: membersError } = await client.rpc('get_account_members', {
+    account_slug: agency?.slug ?? '',
+  })
+  let agencyMembers = [];
+  if (membersError) {
+    console.error('Error fetching agency members:', membersError);
+    agencyMembers = [];
+  }
+  agencyMembers = data?.map((member) => ({
+    ...member,
+    role: member.role.toLowerCase(),
+    user_settings:  {
+      picture_url: member.picture_url,
+      name: member.name,
+    }
+  })) ?? [];
 
+  
   return (
     <>
       <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []}>
@@ -44,7 +63,7 @@ async function OrdersPage() {
 
             <OrderList
               orders={ordersData ?? []}
-              role={role}
+              agencyMembers={agencyMembers ?? []}
               agencyStatuses={agencyStatuses ?? []}
             ></OrderList>
           </div>

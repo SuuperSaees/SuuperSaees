@@ -1,67 +1,41 @@
 'use client';
 
-import { isAfter, isBefore, subDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 
 import EmptyState from '~/components/ui/empty-state';
 import { useColumns } from '~/hooks/use-columns';
+import { UserWithSettings } from '~/lib/account.types';
 import { Order } from '~/lib/order.types';
+import { useUserOrderActions } from '~/orders/hooks/user-order-actions';
 
 import Table from '../../../components/table/table';
 import CardStats from '../../../components/ui/card-stats';
+import { useOrderStats } from '~/orders/hooks/use-order-stats';
 
 interface HomeSectionProps {
   memberOrders: Order.Response[];
+  agencyMembers: UserWithSettings[];
 }
-export default function HomeSection({ memberOrders }: HomeSectionProps) {
+export default function HomeSection({
+  memberOrders,
+  agencyMembers,
+}: HomeSectionProps) {
   // console.log('memberOrders', memberOrders);
-  const columns = useColumns('orders');
+  const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
+  const actions = {
+    orderDateMutation: orderDateMutation,
+    updateOrderAssigns: orderAssignsMutation,
+  };
+  const additionalData = {
+    orderAgencyMembers: agencyMembers,
+  };
+  const columns = useColumns('orders', {
+    data: additionalData,
+    actions: actions,
+  });
   const { t } = useTranslation('statistics');
   // Current Date
-  const now = new Date();
-
-  // Define Time Ranges
-  const last30Days = subDays(now, 30);
-  const last60Days = subDays(now, 60);
-
-  // Split Orders into Periods
-  const ordersCurrentPeriod = memberOrders?.filter(
-    (order) =>
-      isAfter(new Date(order.created_at), last30Days) &&
-      isBefore(new Date(order.created_at), now),
-  );
-
-  const ordersPreviousPeriod = memberOrders?.filter(
-    (order) =>
-      isAfter(new Date(order.created_at), last60Days) &&
-      isBefore(new Date(order.created_at), last30Days),
-  );
-
-  // Calculate Stats
-  const calculateStats = (orders: Order.Response[]) => {
-    const ordersExists = orders && orders.length > 0;
-
-    return {
-      active: ordersExists
-        ? orders?.filter(
-            (order) =>
-              order.status !== 'completed' && order.status !== 'annulled',
-          ).length
-        : null,
-      completed: ordersExists
-        ? orders?.filter((order) => order.status === 'completed').length
-        : null,
-      total: ordersExists ? orders?.length : null,
-      // Calculate the average rating of the reviews
-      averageRating: ordersExists
-        ? orders?.reduce((acc, order) => acc + (order.review?.rating ?? 0), 0) /
-            orders?.filter((order) => order.review?.rating).length || 0
-        : null,
-    };
-  };
-
-  const currentStats = calculateStats(ordersCurrentPeriod);
-  const previousStats = calculateStats(ordersPreviousPeriod);
+  const { currentStats, previousStats } = useOrderStats(memberOrders);
 
   return (
     <div className="flex flex-col gap-4">

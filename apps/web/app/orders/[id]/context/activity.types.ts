@@ -132,6 +132,7 @@ export interface ActivityContextType {
   messages: DataResult.Message[];
   reviews: DataResult.Review[];
   files: DataResult.File[];
+  allFiles: DataResult.File[];
   order: DataResult.Order;
   userRole: string;
   addMessage: ({
