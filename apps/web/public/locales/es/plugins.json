@@ -1,0 +1,22 @@
+{
+  "title": "Aplicaciones",
+  "freeInstall": "Instalación gratuita",
+  "loomTitle": "Loom",
+  "loomDescription": "Graba, inserta y comparte videos de Loom directamente en los proyectos de Suuper",
+  "stripeTitle": "Stripe",
+  "stripeDescription": "Conéctate a múltiples pasarelas de pago en todo el mundo y vende tus servicios como suscripción",
+  "treliTitle": "Treli",
+  "treliDescription": "Conéctate a múltiples pasarelas de pago en LATAM y vende tus servicios como suscripción",
+  "settingsTitle": "Configuración",
+  "headerTitle": "Impulsa tu negocio",
+  "headerDescription": "Añade nuevas funcionalidades desde la tienda de aplicaciones",
+  "goBack": "Volver",
+  "save": "Guardar",
+  "uninstall": "Desinstalar",
+  "loomSettingsTitle": "Configura Loom en tu negocio",
+  "loomSettingsDescription": "Integra Loom a tu portal de Suuper obteneniendo una aplicación SDK Standard configurando tu cuenta de desarrollador",
+  "stripeSettingsTitle": "Configura Stripe en tu negocio",
+  "stripeSettingsDescription": "Configura el acceso a tu cuenta de Stripe para que los usuarios puedan pagar en tu proyecto",
+  "treliSettingsTitle": "Configura Treli en tu negocio",
+  "treliSettingsDescription": "Configura el acceso a tu cuenta de Treli para que los usuarios puedan pagar en tu proyecto"
+}

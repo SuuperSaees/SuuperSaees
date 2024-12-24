@@ -5,6 +5,7 @@ import {
   Settings,
   SquareCheck,
   Users,
+  Sparkles
   // Wallet,
 } from 'lucide-react';
 
@@ -57,6 +58,11 @@ const routes = [
   //   path: pathsConfig.app.invoices,
   //   Icon: <Wallet className={iconClasses} />,
   // },
+  {
+    label: 'common:pluginsName',
+    path: pathsConfig.app.plugins,
+    Icon: <Sparkles className={iconClasses} />,
+  },
   {
     label: 'common:settingsName',
     path: pathsConfig.app.personalAccountSettings,

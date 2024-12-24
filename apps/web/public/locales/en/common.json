@@ -107,5 +107,6 @@
   "rowsPerPage": "Show",
   "rowNumber": "{{number}} rows",
   "filters": "Filters",
-  "resetFilters": "Reset filters"
+  "resetFilters": "Reset filters",
+  "pluginsName": "Plugins"
 }
