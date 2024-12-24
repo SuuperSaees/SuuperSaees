@@ -12,7 +12,10 @@ export interface IAnnotationRepository {
     parentId: string,
   ): Promise<{ id: string; content: string }>;
   createAnnotation(data: Annotations.Insert): Promise<Annotations.Type>;
-  getAnnotationsByFile(fileId: string): Promise<Annotations.Type[]>;
+  getAnnotationsByFile(fileId: string): Promise<{
+    currentFile: Annotations.Type[];
+    otherFiles: Annotations.Type[];
+  }>;
   getChildMessages(
     parentMessageId: string,
     limit: number,
@@ -61,7 +64,11 @@ export class AnnotationRepository implements IAnnotationRepository {
       throw new Error('Message content cannot be null');
     }
 
-    return { id: message.id, content: message.content, created_at: message.created_at };
+    return {
+      id: message.id,
+      content: message.content,
+      created_at: message.created_at,
+    };
   }
 
   async createAnnotation(data: Annotations.Insert): Promise<Annotations.Type> {
@@ -83,13 +90,11 @@ export class AnnotationRepository implements IAnnotationRepository {
       .order('number', { ascending: true });
 
     if (activeError) {
-      throw new Error(
-        `Error fetching annotations: ${activeError.message}`,
-      );
+      throw new Error(`Error fetching annotations: ${activeError.message}`);
     }
 
     let nextNumber = 1;
-    const usedNumbers = activeAnnotations.map(a => a.number);
+    const usedNumbers = activeAnnotations.map((a) => a.number);
     while (usedNumbers.includes(nextNumber)) {
       nextNumber++;
     }
@@ -124,8 +129,42 @@ export class AnnotationRepository implements IAnnotationRepository {
     return createdAnnotation as Annotations.Type;
   }
 
-  async getAnnotationsByFile(fileId: string): Promise<Annotations.Type[]> {
-    const { data: annotations, error } = await this.client
+  async getAnnotationsByFile(fileId: string): Promise<{
+    currentFile: Annotations.Type[];
+    otherFiles: Annotations.Type[];
+  }> {
+    const { data: orderFile, error: orderFileError } = await this.client
+      .from('order_files')
+      .select('order_id')
+      .eq('file_id', fileId)
+      .single();
+
+    if (orderFileError ?? !orderFile?.order_id) {
+      throw new Error(
+        `Error fetching order_id for file_id ${fileId}: ${
+          orderFileError?.message ?? 'Order not found'
+        }`,
+      );
+    }
+
+    const orderId = orderFile.order_id;
+
+    const { data: relatedFiles, error: relatedFilesError } = await this.client
+      .from('order_files')
+      .select('file_id')
+      .eq('order_id', orderId);
+
+    if (relatedFilesError ?? !relatedFiles) {
+      throw new Error(
+        `Error fetching files for order_id ${orderId}: ${
+          relatedFilesError?.message || 'No files found'
+        }`,
+      );
+    }
+
+    const relatedFileIds = relatedFiles.map((file) => file.file_id);
+
+    const { data: annotations, error: annotationsError } = await this.client
       .from('annotations')
       .select(
         `
@@ -145,19 +184,44 @@ export class AnnotationRepository implements IAnnotationRepository {
         accounts(name, settings:user_settings(picture_url))
       `,
       )
-      .eq('file_id', fileId)
+      .in('file_id', relatedFileIds)
       .is('deleted_on', null);
 
-    if (error) {
-      throw new Error(`Error fetching annotations: ${error.message}`);
+    if (annotationsError) {
+      throw new Error(
+        `Error fetching annotations: ${annotationsError.message}`,
+      );
     }
 
-    return annotations.map((annotation) => ({
-      ...annotation,
-      message_content: annotation.messages?.content ?? null,
-      message_created_at: annotation.messages?.created_at ?? null,
-      messages: undefined,
-    })) as Annotations.Type[];
+    const currentFileAnnotations = annotations.filter(
+      (annotation) => annotation.file_id === fileId,
+    );
+    const otherFileAnnotations = annotations.filter(
+      (annotation) => annotation.file_id !== fileId,
+    );
+
+    const formattedCurrentFileAnnotations = currentFileAnnotations.map(
+      (annotation) => ({
+        ...annotation,
+        message_content: annotation.messages?.content ?? null,
+        message_created_at: annotation.messages?.created_at ?? null,
+        messages: undefined, 
+      }),
+    );
+
+    const formattedOtherFileAnnotations = otherFileAnnotations.map(
+      (annotation) => ({
+        ...annotation,
+        message_content: annotation.messages?.content ?? null,
+        message_created_at: annotation.messages?.created_at ?? null,
+        messages: undefined, 
+      }),
+    );
+
+    return {
+      currentFile: formattedCurrentFileAnnotations as Annotations.Type[],
+      otherFiles: formattedOtherFileAnnotations as Annotations.Type[],
+    };
   }
 
   async getChildMessages(
@@ -180,7 +244,9 @@ export class AnnotationRepository implements IAnnotationRepository {
   > {
     const { data: childMessages, error } = await this.client
       .from('messages')
-      .select('id, content, user_id, created_at, accounts(name, settings:user_settings(picture_url))')
+      .select(
+        'id, content, user_id, created_at, accounts(name, settings:user_settings(picture_url))',
+      )
       .eq('parent_id', parentMessageId)
       .range(offset, offset + limit - 1);
 
@@ -251,43 +317,21 @@ export class AnnotationRepository implements IAnnotationRepository {
   async updateStatus(
     annotationId: string,
     status: Annotations.AnnotationStatus,
-    first_message?: string,
-    message_id?: string,
-  ){
-    if (first_message !== undefined && message_id !== undefined) {
-      const { data: updatedMessage, error } = await this.client
-        .from('messages')
-        .update({ 
-          content: first_message ?? null
-        })
-        .eq('id', message_id)
-        .select()
-        .single();
+  ): Promise<Annotations.Type> {
+    const { data: updatedAnnotation, error } = await this.client
+      .from('annotations')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', annotationId)
+      .select()
+      .single();
 
-      if (error ?? !updatedMessage) {
-        throw new Error(
-          `Error updating message: ${error?.message || 'Message not found'}`,
-        );
-      }
-      return { id: updatedMessage.id, content: updatedMessage.content, created_at: updatedMessage.created_at };
-    } else {
-      const { data: updatedAnnotation, error } = await this.client
-        .from('annotations')
-        .update({ 
-          status, 
-          updated_at: new Date().toISOString(), 
-        })
-        .eq('id', annotationId)
-        .select()
-        .single();
-
-      if (error ?? !updatedAnnotation) {
-        throw new Error(
-          `Error updating annotation status: ${error?.message || 'Annotation not found'}`,
-        );
-      }
-      return updatedAnnotation as Annotations.Type;
+    if (error ?? !updatedAnnotation) {
+      throw new Error(
+        `Error updating annotation status: ${error?.message || 'Annotation not found'}`,
+      );
     }
+
+    return updatedAnnotation as Annotations.Type;
   }
 
   async softDelete(annotationId: string): Promise<void> {
