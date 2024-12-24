@@ -1,18 +1,20 @@
 'use client';
 
-import { Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+import { Download, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
 import { Card } from '@kit/ui/card';
 import { Switch } from '@kit/ui/switch';
-import { useRouter } from 'next/navigation';
 
 interface AppCardProps {
   provider: string;
+  mode: 'install' | 'settings';
 }
 
-export default function PluginCard({ provider }: AppCardProps) {
+export default function PluginCard({ provider, mode }: AppCardProps) {
   const { t } = useTranslation('plugins');
   const router = useRouter();
   return (
@@ -37,23 +39,31 @@ export default function PluginCard({ provider }: AppCardProps) {
           <p className="mt-0.5 text-sm text-muted-foreground">
             {t('freeInstall')}
           </p>
-          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t(`${provider}Description`)}
           </p>
         </div>
 
         {/* Controls */}
 
-        <div className="flex items-center gap-2 self-center">
-          <Switch className="data-[state=checked]:bg-BlueDark-700" />
-          <Button variant="ghost" size="icon" onClick={() => {
-            router.push(`/apps/settings?provider=${provider}`);
-          }}>
-            <Settings className="h-4 w-4" />
+        {mode == 'settings' ? (
+          <div className="flex items-center gap-2 self-center">
+            <Switch className="data-[state=checked]:bg-BlueDark-700" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                router.push(`/apps/settings?provider=${provider}`);
+              }}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Button variant='ghost' size='icon'>
+            <Download className="h-6 w-6 text-gray-600" />
           </Button>
-        </div>
-
- 
+        )}
       </div>
     </Card>
   );
