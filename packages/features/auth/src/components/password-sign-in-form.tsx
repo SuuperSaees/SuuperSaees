@@ -90,7 +90,7 @@ export function PasswordSignInForm({
                   type="password"
                   placeholder={''}
                   {...field}
-                  className="text-black focus-visible:ring-brand"
+                  className="focus-visible:ring-brand"
                   
                 />
               </FormControl>
@@ -102,7 +102,7 @@ export function PasswordSignInForm({
                   <input
                     type="checkbox"
                     id="rememberMe"
-                    className="text-black form-checkbox"
+                    className="form-checkbox"
                     
                   />
                   <label htmlFor="rememberMe" className="text-xs" >
