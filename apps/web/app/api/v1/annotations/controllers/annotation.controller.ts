@@ -127,6 +127,8 @@ export class AnnotationController extends BaseController {
 
       const body = await this.parseBody<{
         status: 'active' | 'completed' | 'draft';
+        first_message?: string;
+        message_id?: string;
       }>(req);
 
       if (!body.status) {
@@ -142,6 +144,8 @@ export class AnnotationController extends BaseController {
       const updatedAnnotation = await annotationService.updateAnnotationStatus(
         annotationId,
         body.status,
+        body.first_message,
+        body.message_id,
       );
 
       return this.ok(updatedAnnotation, requestId);

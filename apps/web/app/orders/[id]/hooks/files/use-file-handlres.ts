@@ -1,86 +1,78 @@
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
 
 interface Position {
   x: number;
   y: number;
 }
 
-export const useFileHandlers = (initialZoomLevel = 1) => {
+export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) => {
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(initialZoomLevel);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState<Position>({ x: 0, y: 0 });
-
-  const handleDialogDownload = async (selectedFile: File | null, originalHandleDownload: () => void) => {
-    try {
-      if (selectedFile) {
-        const response = await fetch(selectedFile.url);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = selectedFile.name;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        originalHandleDownload();
-      }
-    } catch (error) {
-      console.error('Error al descargar el archivo:', error);
-      toast.error('Error al descargar el archivo');
-    }
-  };
-
-  const handleZoomChange = (value: string) => {
-    const zoomValue = parseFloat(value.replace('x', ''));
-    setZoomLevel(zoomValue);
-    setIsZoomedIn(zoomValue > 1);
-    return zoomValue;
-  };
-
-  const handleMouseDown = (e: React.MouseEvent, currentZoomLevel: number) => {
-    e.preventDefault();
-    if (currentZoomLevel <= 1) return;
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
-    });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent, currentZoomLevel: number) => {
-    if (!isDragging || currentZoomLevel <= 1) return;
-    setPosition({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y
-    });
-  };
-
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
+  useEffect(() => {
+   const handleKeyDown = (e: KeyboardEvent) => {
+     if (e.code === 'Space') {
+       e.preventDefault();
+       setIsSpacePressed(true);
+     }
+   };
+    const handleKeyUp = (e: KeyboardEvent) => {
+     if (e.code === 'Space') {
+       setIsSpacePressed(false);
+     }
+   };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+     window.removeEventListener('keydown', handleKeyDown);
+     window.removeEventListener('keyup', handleKeyUp);
+   };
+ }, []);
+  const handleWheel = (e: WheelEvent) => {
+  if (currentFileType.startsWith('application/pdf')) return;
+   e.preventDefault();
+   const delta = -e.deltaY;
+   const zoomFactor = 0.1;
+   const newZoomLevel = zoomLevel + (delta > 0 ? zoomFactor : -zoomFactor);
+   
+   // Limit zoom between 0.1 and 5
+   const clampedZoom = Math.min(Math.max(newZoomLevel, 0.1), 5);
+   setZoomLevel(clampedZoom);
+   setIsZoomedIn(clampedZoom > 1);
+ };
+  const handleMouseDown = (e: React.MouseEvent) => {
+   e.preventDefault();
+   if (!isSpacePressed) return;
+   
+   setIsDragging(true);
+   setDragStart({
+     x: e.clientX - position.x,
+     y: e.clientY - position.y
+   });
+ };
+  const handleMouseMove = (e: React.MouseEvent) => {
+   if (!isDragging) return;
+   setPosition({
+     x: e.clientX - dragStart.x,
+     y: e.clientY - dragStart.y
+   });
+ };
   const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const resetZoomAndPosition = () => {
-    setIsZoomedIn(false);
-    setZoomLevel(1);
-    setPosition({ x: 0, y: 0 });
-  };
-  
-
+   setIsDragging(false);
+ };
   return {
-    isZoomedIn,
-    zoomLevel,
-    isDragging,
-    position,
-    handleDialogDownload,
-    handleZoomChange,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    resetZoomAndPosition,
-  };
+   isZoomedIn,
+   zoomLevel,
+   isDragging,
+   position,
+   isSpacePressed,
+   handleWheel,
+   handleMouseDown,
+   handleMouseMove,
+   handleMouseUp,
+   resetZoom: () => setZoomLevel(1)
+ };
 };
