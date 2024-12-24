@@ -34,19 +34,6 @@ export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) =
         setIsSpacePressed(false);
       }
     };
-  //  const handleKeyDown = (e: KeyboardEvent) => {
-  //    if (e.code === 'Space' && 
-  //        !(e.target instanceof HTMLInputElement) && 
-  //        !(e.target instanceof HTMLTextAreaElement)) {
-  //      e.preventDefault();
-  //      setIsSpacePressed(true);
-  //    }
-  //  };
-  //   const handleKeyUp = (e: KeyboardEvent) => {
-  //    if (e.code === 'Space') {
-  //      setIsSpacePressed(false);
-  //    }
-  //  };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
      return () => {
