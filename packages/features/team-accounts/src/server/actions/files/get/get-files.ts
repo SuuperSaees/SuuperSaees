@@ -1,6 +1,201 @@
 'use server';
 
+import { PostgrestError } from '@supabase/supabase-js';
+
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
+import { getOrdersFolders } from '../../folders/get/get-folders';
+import { fetchUsersAccounts } from '../../members/get/get-member-account';
+
+// getClientFiles,
+// getFilesByFolder,
+// getFilesWithoutFolder,
+// getMemberFiles,
+
+// Those are the functions that are used in the files section of the organization
+// and used directly in the custom hook useFileManagement
+// The idea is to have a single source of truth for the files
+// This way we reduce network requests and improve performance
+// By having a single source of truth, we can also improve the code readability and maintainability
+// Also, we can nest files and folder of a specific path folder (main, orders, sub)
+
+// helper functions:
+
+export async function getFiles(fileIds: Array<string>) {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const query = client
+      .from('files')
+      .select('url, id, name, type, size')
+      .in('id', fileIds);
+
+    const { data: files, error: filesError } = await query;
+    if (filesError)
+      throw new Error(`Error getting files, ${filesError.message}`);
+    return files;
+  } catch (error) {
+    console.error('Error getting files:', error);
+    throw error;
+  }
+}
+
+/**
+ * Retrieves files and folders for a specific folder.
+ * In case **isProjectFolder** is true, the **folderId** will be used to get the files and folders for the project folder.
+ * @param {string} [folderId] - The ID of the folder.
+ * @param { 'project' | 'client' | 'team' } [target] - The target of the folder.
+ * @param { 'subfolder' | 'mainfolder' } [type] - The type of the folder.
+ * @returns {Promise<Array<{url: string, id: string, name: string, type: string}>>}
+ */
+// todo: possibility to include the entity/target: 'subfolder' | 'project' | 'client' | 'team'
+export async function getFoldersAndFiles(
+  folderId: string,
+  clientOrganizationId: string,
+  agencyId: string,
+  target: 'project' | 'client' | 'team' | 'all' | null,
+  type: 'subfolder' | 'mainfolder' | null,
+) {
+  if (!target || !type) {
+    return {
+      folders: [],
+      files: [],
+    };
+  }
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    const handleError = (error: Error | PostgrestError, message: string) => {
+      console.error(`${message}: ${error.message}`);
+      return {
+        folders: [],
+        files: [],
+      };
+    };
+
+    // Handle main project folder case
+    if (target === 'project' && type === 'mainfolder') {
+      console.log('folderId', folderId);
+      // Treat folderId as client_organization_id
+      const folders = await getOrdersFolders(folderId);
+      return { folders, files: [] };
+    }
+
+    // Handle project folder case
+    else if (target === 'project' && type === 'subfolder') {
+      const { data: files, error } = await client
+        .from('files')
+        .select('url, id, name, type, size, order_files!inner(order_id)')
+        .in('order_files.order_id', [folderId]);
+
+      if (error) {
+        return handleError(error, 'Error getting files');
+      }
+
+      return { folders: [], files: files || [] };
+    } else if (target === 'all' && type === 'mainfolder') {
+      // Here for the files, bring all those that are not in the folder_files table
+
+      const { data: filesData, error: filesError } = await client
+        .from('files')
+        .select(
+          'url, id, name, type, size, folder_files!left(folder_id, client_organization_id)',
+        )
+        .is('folder_files.folder_id', null) // Check for files without a folder_files relationship
+        .eq('folder_files.client_organization_id', folderId); // Ens
+
+      if (filesError) {
+        console.error('Error getting files:', filesError);
+      }
+
+      // Here for the folders, bring all those that doesn't have a parent_folder_id
+      const { data: foldersData, error: foldersError } = await client
+        .from('folders')
+        .select('id, name, parent_folder_id')
+        .is('parent_folder_id', null)
+        // treat folder_id as client_organization_id
+        .eq('client_organization_id', folderId);
+
+      if (foldersError) {
+        console.error('Error getting folders:', foldersError);
+      }
+
+      // Combine the files and folders
+      return {
+        folders:
+          foldersData?.map((folder) => ({
+            uuid: folder.id,
+            title: folder.name,
+          })) ?? [],
+        files: filesData ?? [],
+      };
+    } else if (target === 'all' && type === 'subfolder') {
+      // Handle regular folder case
+      const { data, error } = await client
+        .from('folders')
+        .select(
+          `
+          id,
+          name,
+          files(id, url, name, type, size),
+          folders(id, name)
+        `,
+        )
+        .eq('id', folderId)
+        .single();
+
+      // Handle error
+      if (error) {
+        console.error('Error getting folders and files:', error);
+        return { folders: [], files: [] };
+      }
+
+      console.log('data', JSON.stringify(data, null, 2));
+
+      // Map and filter to construct folders array
+      const folders = Array.isArray(data?.folders)
+        ? data.folders.map((folder) => ({
+            uuid: folder?.id,
+            title: folder?.name,
+          }))
+        : [];
+
+      // Extract files array
+      const files = data?.files ?? [];
+
+      return { folders, files };
+    } else if (target === 'client') {
+      const clientMembers = await fetchUsersAccounts(client, [clientOrganizationId]);
+      const clientMembersIds = clientMembers.map((member) => member.id);
+
+      const { data: files, error: filesError } = await client
+        .from('files')
+        .select('url, id, name, type, size')
+        .in('user_id', clientMembersIds);
+
+      if (filesError) throw filesError;
+
+      return { folders: [], files };
+
+    } else if (target === 'team') {
+      const agencyMembers = await fetchUsersAccounts(client, [agencyId]);
+      const agencyMembersIds = agencyMembers.map((member) => member.id);
+
+      const { data: files, error: filesError } = await client
+        .from('files')
+        .select('url, id, name, type, size')
+        .in('user_id', agencyMembersIds);
+
+      if (filesError) throw filesError;
+
+      return { folders: [], files };
+    }
+
+    return { folders: [], files: [] };
+  } catch (error) {
+    console.error('Error getting folders and files:', error);
+    throw error;
+  }
+}
 
 export async function getFilesWithoutFolder(clientOrganizationId: string) {
   const client = getSupabaseServerComponentClient();

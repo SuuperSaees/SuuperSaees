@@ -23,9 +23,11 @@ import ServiceSection from './services';
 function SectionView({
   clientOrganizationId,
   currentUserRole,
+  agencyId,
 }: {
   clientOrganizationId: string;
   currentUserRole: string;
+  agencyId: string;
 }) {
   const { t } = useTranslation('clients');
   const [search, setSearch] = useState('');
@@ -93,6 +95,7 @@ function SectionView({
       <FileSection
         key={'files'}
         clientOrganizationId={clientOrganizationId}
+        agencyId={agencyId}
         // setCurrentPath={setCurrentPath}  it's not used in the code for now
       />,
     ],

@@ -13,36 +13,44 @@ import EmptyState from '../ui/empty-state';
 
 interface FileSectionProps {
   clientOrganizationId: string;
+  agencyId: string;
   setCurrentPath?: React.Dispatch<
     React.SetStateAction<Array<{ title: string; uuid?: string }>>
   >;
   currentPath?: Array<{ title: string; uuid?: string }>;
 }
 
-const FileSection: React.FC<FileSectionProps> = ({
-  clientOrganizationId,
-  setCurrentPath,
-  currentPath,
-}) => {
-  const { t } = useTranslation();
+export default function FileSection({ clientOrganizationId, agencyId, setCurrentPath, currentPath }: FileSectionProps) {
+  const { t } = useTranslation('organizations')
   const {
     selectedOption,
     setSelectedOption,
-    mainFolders,
-    mainFiles,
-    folders,
-    subFolders,
-    files,
+    currentFolders,
+    currentFiles,
     path,
     loading,
     handleFolderClick,
     handlePathClick,
     currentFolderType,
-  } = useFileManagement(clientOrganizationId, setCurrentPath, currentPath);
+  } = useFileManagement(clientOrganizationId, agencyId, setCurrentPath, currentPath)
 
-  const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedOption(event.target.value);
-  };
+  const options = [
+    { value: 'all', label: t('organizations:files.all') },
+    { value: 'team_uploaded', label: t('organizations:files.team_uploaded') },
+    { value: 'client_uploaded', label: t('organizations:files.client_uploaded') },
+  ]
+
+  if (loading) {
+    return (
+      <SkeletonCards count={7} className="mt-4 flex flex-wrap gap-8">
+        <SkeletonCardFile
+          className="h-[170px] w-[184px]"
+          classNameBox="h-[132px] w-[184px]"
+          classNameLineText="h-[16px] w-14"
+        />
+      </SkeletonCards>
+    )
+  }
 
   const renderBreadcrumbs = () => (
     <div className="mb-2 text-[14px] text-gray-700">
@@ -67,91 +75,58 @@ const FileSection: React.FC<FileSectionProps> = ({
     </div>
   );
 
-  const options = [
-    { value: 'all', label: t('organizations:files.all') },
-    { value: 'team_uploaded', label: t('organizations:files.team_uploaded') },
-    {
-      value: 'client_uploaded',
-      label: t('organizations:files.client_uploaded'),
-    },
-  ];
-
-
   const renderContent = () => {
-    if (loading) {
-      return (
-        <SkeletonCards count={7} className="mt-4 flex flex-wrap gap-8">
-          <SkeletonCardFile
-            className="h-[170px] w-[184px]"
-            classNameBox="h-[132px] w-[184px]"
-            classNameLineText="h-[16px] w-14"
-          />
-        </SkeletonCards>
-      );
-    }
-
-    if (path.length === 0) {
+    // Root level - show orders folder and main folders/files
+    if (path.length === 0 && selectedOption === 'all') {
       return (
         <div className="mt-4 flex flex-wrap gap-8">
           <FolderItem
             folder={{ title: t('organizations:files.orders'), id: '' }}
-            onClick={() =>
-              handleFolderClick('', t('organizations:files.orders'), true)
-            }
-            isOrderFolder={true}
+            onClick={() => handleFolderClick('', t('organizations:files.orders'), true)}
+            isOrderFolder
           />
-          {mainFolders.map((folder) => (
+          {currentFolders.map((folder) => (
             <FolderItem
               key={folder.uuid}
               folder={{ title: folder.title ?? '', id: folder.uuid }}
-              onClick={() =>
-                handleFolderClick(folder.uuid, folder.title ?? '', false)
-              }
-              isOrderFolder={false}
+              onClick={() => handleFolderClick(folder.uuid, folder.title ?? '')}
             />
           ))}
-          {mainFiles.map((file) => (
+          {currentFiles.map((file) => (
             <FileItem key={file.id} file={file} currentPath={path} />
           ))}
         </div>
-      );
+      )
     }
 
-    if (currentFolderType === 'orders' && folders.length > 0) {
+    // Orders folder - show project folders
+    if (currentFolderType === 'orders' && currentFolders.length > 0) {
       return (
         <div className="mt-4 flex flex-wrap gap-8">
-          {folders.map((folder) => (
+          {currentFolders.map((folder) => (
             <FolderItem
               key={folder.uuid}
               folder={{ title: folder.title ?? '', id: folder.uuid }}
-              onClick={() =>
-                handleFolderClick(folder.uuid, folder.title ?? '', true)
-              }
-              isOrderFolder={true}
+              onClick={() => handleFolderClick(folder.uuid, folder.title ?? '', true)}
+              isOrderFolder
             />
           ))}
         </div>
-      );
+      )
     }
 
-    const hasContent = subFolders.length > 0 || files.length > 0;
-    
+    // Subfolder or empty folder
+    const hasContent = currentFolders.length > 0 || currentFiles.length > 0
     return (
       <div className="mt-4 flex flex-wrap gap-8">
-        {subFolders.map((folder) => (
+        {currentFolders.map((folder) => (
           <FolderItem
             key={folder.uuid}
             folder={{ title: folder.title ?? '', id: folder.uuid }}
-            onClick={() =>
-              handleFolderClick(
-                folder.uuid,
-                folder.title ?? '',
-                currentFolderType === 'orders',
-              )
-            }
+            onClick={() => handleFolderClick(folder.uuid, folder.title ?? '')}
           />
         ))}
-        {files.map((file) => (
+        {currentFiles.map((file) => (
           <FileItem key={file.id} file={file} currentPath={path} />
         ))}
         {!hasContent && (
@@ -162,37 +137,8 @@ const FileSection: React.FC<FileSectionProps> = ({
           />
         )}
       </div>
-    );
-  };
-
-  const renderClientAndTeamMemberContent = () => {
-    if (loading) {
-      return (
-        <SkeletonCards count={7} className="mt-4 flex flex-wrap gap-8">
-          <SkeletonCardFile
-            className="h-[170px] w-[184px]"
-            classNameBox="h-[132px] w-[184px]"
-            classNameLineText="h-[16px] w-14"
-          />
-        </SkeletonCards>
-      );
-    }
-
-    return (
-      <div className="mt-4 flex flex-wrap gap-8">
-        {mainFiles.map((file) => (
-          <FileItem key={file.id} file={file} currentPath={path} />
-        ))}
-        {mainFiles.length === 0 && (
-          <EmptyState
-            title={t('organizations:files.noFiles')}
-            description={t('organizations:files.emptyFolderDescriptionInTeam')}
-            imageSrc="/images/illustrations/Illustration-files.svg"
-          />
-        )}
-      </div>
-    );
-  };
+    )
+  }
 
   return (
     <div>
@@ -200,27 +146,17 @@ const FileSection: React.FC<FileSectionProps> = ({
         <RadioOptions
           options={options}
           selectedOption={selectedOption}
-          onChange={handleOptionChange}
+          onChange={(e) => setSelectedOption(e.target.value)}
         />
         {selectedOption === 'all' && (
           <div className="flex-shrink-0">
-            <OptionFiles
-              clientOrganizationId={clientOrganizationId}
-              currentPath={path ?? []}
-            />
+            <OptionFiles clientOrganizationId={clientOrganizationId} currentPath={path} />
           </div>
         )}
       </div>
 
       {path.length > 0 && selectedOption === 'all' && renderBreadcrumbs()}
-
-      {selectedOption === 'all' && renderContent()}
-
-      {(selectedOption === 'team_uploaded' ||
-        selectedOption === 'client_uploaded') &&
-        renderClientAndTeamMemberContent()}
+      {renderContent()}
     </div>
-  );
-};
-
-export default FileSection;
+  )
+}
