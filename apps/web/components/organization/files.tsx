@@ -32,6 +32,7 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
     handleFolderClick,
     handlePathClick,
     currentFolderType,
+    queryKey,
   } = useFileManagement(clientOrganizationId, agencyId, setCurrentPath, currentPath)
 
   const options = [
@@ -84,12 +85,14 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
             folder={{ title: t('organizations:files.orders'), id: '' }}
             onClick={() => handleFolderClick('', t('organizations:files.orders'), true)}
             isOrderFolder
+            queryKey={queryKey}
           />
           {currentFolders.map((folder) => (
             <FolderItem
               key={folder.uuid}
               folder={{ title: folder.title ?? '', id: folder.uuid }}
               onClick={() => handleFolderClick(folder.uuid, folder.title ?? '')}
+              queryKey={queryKey}
             />
           ))}
           {currentFiles.map((file) => (
@@ -109,6 +112,7 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
               folder={{ title: folder.title ?? '', id: folder.uuid }}
               onClick={() => handleFolderClick(folder.uuid, folder.title ?? '', true)}
               isOrderFolder
+              queryKey={queryKey}
             />
           ))}
         </div>
@@ -124,6 +128,7 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
             key={folder.uuid}
             folder={{ title: folder.title ?? '', id: folder.uuid }}
             onClick={() => handleFolderClick(folder.uuid, folder.title ?? '')}
+            queryKey={queryKey}
           />
         ))}
         {currentFiles.map((file) => (
@@ -150,7 +155,7 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
         />
         {selectedOption === 'all' && (
           <div className="flex-shrink-0">
-            <OptionFiles clientOrganizationId={clientOrganizationId} currentPath={path} />
+            <OptionFiles clientOrganizationId={clientOrganizationId} currentPath={path} queryKey={queryKey}/>
           </div>
         )}
       </div>

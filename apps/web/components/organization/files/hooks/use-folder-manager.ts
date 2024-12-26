@@ -25,6 +25,7 @@ interface FileManagementHook {
   handlePathClick: (index: number) => Promise<void>;
   initializeWithPath: (path: Array<{ title: string; uuid?: string }>) => void;
   currentFolderType: 'main' | 'orders' | 'sub';
+  queryKey: string[];
 }
 
 export function useFileManagement(
@@ -78,12 +79,13 @@ export function useFileManagement(
       : (lastPath?.uuid ?? clientOrganizationId);
 
   // Fetch data using React Query
+  const queryKey = ['filesAndFolders', folderId, target, type];
   const {
     data,
     refetch,
     isLoading: loading,
   } = useQuery({
-    queryKey: ['files', folderId, target, type],
+    queryKey: queryKey,
     queryFn: () =>
       getFoldersAndFiles(
         folderId,
@@ -175,5 +177,6 @@ export function useFileManagement(
     handlePathClick,
     initializeWithPath,
     currentFolderType,
+    queryKey,
   };
 }
