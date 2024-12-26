@@ -17,6 +17,7 @@ export enum ActivityType {
   TITLE = 'title',
   ASSIGNED_TO = 'assigned_to',
   TASK = 'task',
+  ANNOTATION = 'annotation',
 }
 
 export enum ActionType {

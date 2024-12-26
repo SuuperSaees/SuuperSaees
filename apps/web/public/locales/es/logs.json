@@ -57,7 +57,8 @@
       "description": "Descripción",
       "title": "Título",
       "assign": "Asignar",
-      "task": "Tarea"
+      "task": "Tarea",
+      "annotation": "Anotación"
     },
     "prepositions": {
       "in": "en",
@@ -72,7 +73,8 @@
       "into": "en",
       "during": "durante",
       "until": "hasta",
-      "named": "llamada"
+      "named": "llamada",
+      "in_file": "en el archivo"
     },
     "values": {
       "low": "Bajo",

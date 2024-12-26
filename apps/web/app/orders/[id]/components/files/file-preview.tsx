@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { getFileTypeIcon } from '../../components/files/file-types';
 import { FileIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface FilePreviewProps {
   src: string;
@@ -28,6 +29,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [pdfDoc, setPdfDoc] = useState<any>(null);
+  const { t } = useTranslation('orders');
 
   useEffect(() => {
     if (fileType.startsWith('application/pdf') && isDialog) {
@@ -145,8 +147,21 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
     }
 
     return (
-      <div className={`flex flex-col items-center justify-center ${className}`}>
-        <FileIcon className="w-12 h-12" />
+      <div className={`w-full h-[60vh] flex flex-col items-center justify-center ${className}`}>
+        <FileIcon className="w-12 h-12 text-gray-400" />
+        {isDialog ? (
+          <>
+            <p className="text-gray-400">{fileName}</p>
+            <div className="flex flex-col items-center justify-center my-4">
+              <p className="text-gray-400">{t('files.noPreview')}</p>
+              <p className="text-gray-400">{t('files.download')}</p>
+            </div>
+          </>
+        ) : (
+          <div>
+          </div>
+
+        )}
       </div>
     );
   };

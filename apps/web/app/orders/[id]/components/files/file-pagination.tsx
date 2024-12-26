@@ -20,6 +20,7 @@ export const FilePagination: React.FC<FilePaginationProps> = ({
   totalPages,
   onPageChange,
 }) => {
+  if (totalPages <= 1) return null;
   return (
     <Pagination>
       <PaginationContent>
