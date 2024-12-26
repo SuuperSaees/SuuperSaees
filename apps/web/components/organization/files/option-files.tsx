@@ -5,7 +5,6 @@ import { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Download, Plus } from 'lucide-react';
 import {
-  createFile,
   createUploadBucketURL,
 } from 'node_modules/@kit/team-accounts/src/server/actions/files/create/create-file';
 import { downloadFiles } from 'node_modules/@kit/team-accounts/src/server/actions/files/download/download-files';
@@ -32,6 +31,7 @@ import {
 
 import { generateUUID } from '~/utils/generate-uuid';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { createFilesAction } from '~/server/actions/files/files';
 
 export function OptionFiles({
   clientOrganizationId,
@@ -45,6 +45,7 @@ export function OptionFiles({
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
   const showDropdown = !(currentPath.length > 0 && (!currentPath[0]?.uuid || currentPath[0]?.uuid === ''));
+  const filesAction = createFilesAction("");
 
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -135,7 +136,11 @@ export function OptionFiles({
       files: Array<{ name: string; size: number; type: string; url: string }>;
       clientOrganizationId: string;
       currentPath: Array<{ title: string; uuid?: string }>;
-    }) => createFile(files, clientOrganizationId, currentPath),
+    }) => filesAction.createFile({
+      files,
+      client_organization_id: clientOrganizationId,
+      currentPath
+    }),
 
     onSuccess: async () => {
       toast.success(t('files.new.uploadSuccess'));

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { createFile, createUploadBucketURL } from '../create/create-file';
+import { createUploadBucketURL } from '../create/create-file';
 import { useTranslation } from 'react-i18next';
 import { deleteFile } from '../delete/delete-file';
+import { createFilesAction } from '../../../../../../../../apps/web/app/server/actions/files/files';
 
 interface FileWithServerId {
   file: File;
@@ -28,6 +29,7 @@ export const useFileUpload = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileUrls, setFileUrls] = useState<File[]>([]);
   const [globalFileList, setGlobalFileList] = useState<FileWithServerId[]>([]);
+  const filesAction = createFilesAction("");
 
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -122,10 +124,12 @@ export const useFileUpload = ({
         url: fileUrl,
       };
 
-      const createdFiles = await createFile([newFileData]);
+      const createdFiles = await filesAction.createFile({
+        files: [newFileData]
+      });
       
       if (onFileSelect) {
-        const allServerIds = createdFiles.map((file) => file.id);
+        const allServerIds = createdFiles.map((file: { id: string }) => file.id);
         onFileSelect(allServerIds);
         if (onFileIdsChange) {
           onFileIdsChange(allServerIds);
@@ -151,7 +155,7 @@ export const useFileUpload = ({
     } catch (error) {
       onFileUploadStatusUpdate?.(file, 'error');
       setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
-        prevFile === file ? { ...prevFile, error: t('orders:uploadURLError', { error: error.message }) } : prevFile
+        prevFile === file ? { ...prevFile, error: t('orders:uploadURLError', { error: (error as Error).message }) } : prevFile
       ));
     }
   };

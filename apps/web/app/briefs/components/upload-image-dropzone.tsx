@@ -5,9 +5,9 @@ import Image from 'next/image';
 import { CloudUpload } from 'lucide-react';
 import { Trash } from 'lucide-react';
 import {
-  createFile,
   createUploadBucketURL,
 } from 'node_modules/@kit/team-accounts/src/server/actions/files/create/create-file';
+import { createFilesAction } from '~/server/actions/files/files';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -53,6 +53,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string>(defaultValue ?? '');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const filesAction = createFilesAction("");
 
   async function uploadImageToBucket(file: File) {
     if (!file) return;
@@ -84,14 +85,16 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
 
       const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/create_brief/${newFilepath}`;
 
-      const fileData = await createFile([
-        {
-          name: sanitizedFileName,
-          size: file.size,
-          type: file.type,
-          url: fileUrl,
-        },
-      ]);
+      const fileData = await filesAction.createFile({
+        files: [
+          {
+            name: sanitizedFileName,
+            size: file.size,
+            type: file.type,
+            url: fileUrl,
+          },
+        ]
+      });
 
       if (!fileData) {
         throw new Error(t('uploadImage.databaseEntryError'));
