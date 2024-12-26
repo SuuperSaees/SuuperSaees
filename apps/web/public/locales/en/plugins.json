@@ -18,5 +18,7 @@
   "stripeSettingsTitle": "Set up Stripe in your business",
   "stripeSettingsDescription": "Configure access to your Stripe account so users can pay in your project",
   "treliSettingsTitle": "Set up Treli in your business",
-  "treliSettingsDescription": "Configure access to your Treli account so users can pay in your project"
+  "treliSettingsDescription": "Configure access to your Treli account so users can pay in your project",
+  "recommendedAppsForYou": "Recommended apps for you",
+  "getRecommendations": "Get more recommendations in the Suuper App Store"
 }

@@ -22,7 +22,7 @@ function PluginsPage() {
         <Separator className="my-4" />
         <div className='flex flex-col gap-3'>
           {plugins.map((plugin) => (
-            <PluginCard key={plugin} provider={plugin} />
+            <PluginCard key={plugin} provider={plugin} mode={'settings'} />
           ))}
         </div>
       </div>
