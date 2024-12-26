@@ -99,24 +99,7 @@ export function useFileManagement(
   const files = data?.files ?? [];
 
   // Handler functions
-  console.log(
-    'type',
-    type,
-    'target',
-    target,
-    'folderId',
-    folderId,
-    'result',
-    data,
-    'currentFolderType',
-    currentFolderType,
-    'lastPath',
-    lastPath,
-    'path',
-    path,
-    'selectedOption',
-    selectedOption,
-  );
+
   const handleFolderClick = (
     folderUuid: string,
     folderTitle: string,
@@ -124,7 +107,6 @@ export function useFileManagement(
     noUpdatePath?: boolean,
   ) => {
     if (path.length === 0) {
-      console.log('path 0', path, folderTitle);
       if (folderTitle === t('organizations:files.orders') || isOrderFolder) {
         setCurrentFolderType('orders');
         setShowFolders(true);
