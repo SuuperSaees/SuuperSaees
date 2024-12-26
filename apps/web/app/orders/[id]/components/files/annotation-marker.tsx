@@ -30,16 +30,20 @@ export const AnnotationMarker: React.FC<AnnotationMarkerProps> = ({
       }`}
     >
       <MarkerIcon />
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full">
+      {
+        annotation.accounts && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full">
           <Avatar className="w-6 h-6">
             <AvatarImage src={annotation.accounts?.settings?.picture_url ?? ''} />
             <AvatarFallback>
               {annotation.accounts?.name?.charAt(0).toUpperCase() ?? 'U'}
             </AvatarFallback>
           </Avatar>
-        </div>
-      </div>
+            </div>
+          </div>
+        )
+      }
     </div>
   );
 };

@@ -55,7 +55,6 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
       const allAnnotations = data.data.other_files.filter((annotation: Annotation) => annotation.deleted_on === null);
       return [...currentAnnotations, ...allAnnotations] ?? [];
     },
-    enabled: isDialogOpen,
   });
 
 

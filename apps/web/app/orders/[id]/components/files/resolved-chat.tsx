@@ -4,9 +4,10 @@ import { useState } from "react";
 interface ResolvedChatProps {
   chat: any;    
   onDelete: (annotationId: string) => void;
+  onChatClick: (fileId: string) => void;
 }
 
-const ResolvedChat = ({ chat, onDelete }: ResolvedChatProps) => {
+const ResolvedChat = ({ chat, onDelete, onChatClick }: ResolvedChatProps) => {
   const [isHovering, setIsHovering] = useState(false);
 
   const renderMessage = (message: string) => {
@@ -17,7 +18,12 @@ const ResolvedChat = ({ chat, onDelete }: ResolvedChatProps) => {
   }
   return (
     <>
-      <div className="flex flex-col items-start gap-3.5 hover:bg-gray-50 px-[16px] py-[12px]" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+      <div 
+        className="flex flex-col items-start gap-3.5 hover:bg-gray-50 px-[16px] py-[12px] cursor-pointer"
+        onMouseEnter={() => setIsHovering(true)} 
+        onMouseLeave={() => setIsHovering(false)}
+        onClick={() => onChatClick(chat.file_id)}
+      >
         <div className="flex items-center w-full justify-between">
           <div className="flex items-center w-[75%]">
             <div className="mr-[12px]">

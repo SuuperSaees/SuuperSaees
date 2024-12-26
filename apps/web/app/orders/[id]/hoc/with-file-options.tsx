@@ -308,6 +308,17 @@ export const FileDialogView: React.FC<FileProps> = ({
     await updateAnnotation({ annotationId, status });
   };
 
+  const handleChatClick = (fileId: string) => {
+    const fileToShow = files?.find(f => f.id === fileId);
+    if (fileToShow) {
+      setSelectedFile(fileToShow);
+      setCurrentFileType(fileToShow.type);
+      setValue("1x");
+      resetZoom();
+      setCurrentPage(1);
+    }
+  };
+
   const renderAnnotationsList = (filteredAnnotations: any[]) => {
     if (filteredAnnotations.length === 0) {
       return (
@@ -326,7 +337,12 @@ export const FileDialogView: React.FC<FileProps> = ({
       <div key={annotation.id} className="">
         {activeTab === 'active' ? (
           <>
-            <ActiveChats chat={annotation} onUpdate={handleUpdateAnnotation} onDelete={handleDeleteAnnotation}/>
+            <ActiveChats 
+              chat={annotation} 
+              onUpdate={handleUpdateAnnotation} 
+              onDelete={handleDeleteAnnotation}
+              onChatClick={handleChatClick}
+            />
             {currentFileType.startsWith('application/pdf') && annotation.page_number && (
               <span className="text-xs text-gray-500">
                 {t('annotations.page')} {annotation.page_number}
@@ -335,7 +351,11 @@ export const FileDialogView: React.FC<FileProps> = ({
           </>
         ) : (
           <>
-            <ResolvedChat chat={annotation} onDelete={handleDeleteAnnotation}/>
+            <ResolvedChat 
+              chat={annotation} 
+              onDelete={handleDeleteAnnotation}
+              onChatClick={handleChatClick}
+            />
             {currentFileType.startsWith('application/pdf') && annotation.page_number && (
               <span className="text-xs text-gray-500">
                 {t('annotations.page')} {annotation.page_number}
