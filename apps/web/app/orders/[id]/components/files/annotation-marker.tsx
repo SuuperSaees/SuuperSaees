@@ -88,7 +88,7 @@ export const AnnotationChat: React.FC<AnnotationChatProps> = ({
           </h3>
           <XIcon className="w-4 h-4 cursor-pointer" onClick={onClose}/>
         </div>
-        <div className="flex flex-col gap-4 h-[200px] overflow-y-auto p-4 relative">
+        <div className="flex flex-col gap-4 h-[300px] overflow-y-auto p-4 relative">
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-white/80">
               <Spinner className="w-6 h-6" />
@@ -100,9 +100,9 @@ export const AnnotationChat: React.FC<AnnotationChatProps> = ({
                   <div className="flex items-start justify-between w-full">
                     <div className="w-10 h-10 rounded-full overflow-hidden">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={annotation.accounts?.settings?.picture_url} />
+                        <AvatarImage src={annotation.accounts?.settings?.picture_url ?? ''} />
                         <AvatarFallback>
-                          {annotation.accounts?.name?.charAt(0).toUpperCase()}
+                          {annotation.accounts?.name?.charAt(0).toUpperCase() ?? 'U'}
                         </AvatarFallback>
                       </Avatar>
                     </div>
@@ -146,7 +146,7 @@ export const AnnotationChat: React.FC<AnnotationChatProps> = ({
             </>
           )}
         </div>
-        <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t">
+        <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t mt-auto">
           <Input
             type="text"
             value={newMessage}

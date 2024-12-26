@@ -34,7 +34,7 @@ export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) =
         setIsSpacePressed(false);
       }
     };
-     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
      return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -42,16 +42,18 @@ export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) =
     };
   }, []);
   const handleWheel = (e: WheelEvent) => {
-  if (currentFileType.startsWith('application/pdf')) return;
-   e.preventDefault();
-   const delta = -e.deltaY;
-   const zoomFactor = 0.1;
-   const newZoomLevel = zoomLevel + (delta > 0 ? zoomFactor : -zoomFactor);
-   
-   // Limit zoom between 0.1 and 5
-   const clampedZoom = Math.min(Math.max(newZoomLevel, 0.1), 5);
-   setZoomLevel(clampedZoom);
-   setIsZoomedIn(clampedZoom > 1);
+    const isScrollableElement = (e.target as HTMLElement)?.closest('.overflow-y-auto, .overflow-auto');
+    if (isScrollableElement ?? currentFileType.startsWith('application/pdf')) return;
+
+    e.preventDefault();
+    const delta = -e.deltaY;
+    const zoomFactor = 0.1;
+    const newZoomLevel = zoomLevel + (delta > 0 ? zoomFactor : -zoomFactor);
+    
+    // Limit zoom between 0.1 and 5
+    const clampedZoom = Math.min(Math.max(newZoomLevel, 0.1), 5);
+    setZoomLevel(clampedZoom);
+    setIsZoomedIn(clampedZoom > 1);
  };
   const handleMouseDown = (e: React.MouseEvent) => {
    e.preventDefault();
