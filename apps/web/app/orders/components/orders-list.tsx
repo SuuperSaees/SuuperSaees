@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -10,20 +10,213 @@ import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 
-import { Separator } from '@kit/ui/separator';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 import EmptyState from '~/components/ui/empty-state';
 import { useColumns } from '~/hooks/use-columns';
+import { UserWithSettings } from '~/lib/account.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Order } from '~/lib/order.types';
 
 import Table from '../../components/table/table';
+import { useUserOrderActions } from '../hooks/user-order-actions';
 
 type OrdersTableProps = {
   orders: Order.Response[];
-  role: string;
+  agencyMembers: UserWithSettings[];
   agencyStatuses?: AgencyStatus.Type[];
+};
+
+export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
+  const { t } = useTranslation('orders');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
+    'open',
+  );
+  const { workspace } = useUserWorkspace();
+  const role = workspace?.role ?? '';
+  // hasPermission based on role
+  const hasPermission = () => {
+    return agencyRoles.has(role);
+  };
+
+  const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
+
+  const actions = {
+    updateOrderDate: orderDateMutation,
+    updateOrderAssigns: orderAssignsMutation,
+  };
+  const columnsAdditionalData = {
+    orderAgencyMembers: agencyMembers,
+  };
+  const orderColumns = useColumns('orders', {
+    data: columnsAdditionalData,
+    actions,
+    hasPermission: hasPermission,
+  });
+
+  const filteredOrders = useMemo(() => {
+    const currentTab = tabsConfig.find((tab) => tab.key === activeTab);
+    return orders.filter(
+      (order) =>
+        order.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        currentTab?.filter(order),
+    );
+  }, [orders, activeTab, searchTerm]);
+
+  const renderEmptyState = () => (
+    <EmptyState
+      title={t('startFirstOrderTitle')}
+      description={t('startFirstOrderDescription')}
+      imageSrc="/images/illustrations/Illustration-box.svg"
+      button={
+        <Link href="/orders/create">
+          <ThemedButton>{t('creation.title')}</ThemedButton>
+        </Link>
+      }
+    />
+  );
+
+  const controller = {
+    search: {
+      value: searchTerm,
+      setValue: setSearchTerm,
+    },
+  };
+
+  const agencyRoles = new Set([
+    'agency_owner',
+    'agency_project_manager',
+    'agency_member',
+  ]);
+  return (
+    <main>
+      <Tabs
+        defaultValue={activeTab}
+        onValueChange={(value: string) =>
+          setActiveTab(value as 'open' | 'completed' | 'all')
+        }
+        className="bg-transparent"
+      > 
+      <div className="mt-4">
+          {tabsConfig.map((tab) => (
+            <TabsContent key={tab.key} value={tab.key}>
+              <Table
+                data={filteredOrders}
+                columns={orderColumns}
+                filterKey={'title'}
+                controllers={controller}
+                emptyStateComponent={renderEmptyState()}
+                presetFilters={{
+                  filterableColumns: ['status', 'priority'],
+                }}
+                controllerBarComponents={{
+                  search: (
+                    <SearchComponent
+                      searchTerm={searchTerm}
+                      setSearchTerm={setSearchTerm}
+                      t={t}
+                    />
+                  ),
+                  add: <AddButton t={t} hasOrders={orders.length > 0} />,
+                  other: (
+                    <OtherComponents
+                      activeTab={activeTab}
+                      setActiveTab={setActiveTab}
+                      t={t}
+                    />
+                  ),
+                  config: {
+                    filters: {
+                      position: 3,
+                    },
+                    add: {
+                      position: 4,
+                    },
+                    other: {
+                      position: 1,
+                    },
+                    search: {
+                      position: 2,
+                    },
+                  },
+                }}
+              />
+            </TabsContent>
+          ))}
+        </div>
+      </Tabs>
+    </main>
+  );
+}
+
+const SearchComponent = ({
+  searchTerm,
+  setSearchTerm,
+  t,
+}: {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  t: (key: string) => string;
+}) => {
+  return (
+    <div className="relative flex flex-1 md:grow-0">
+      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <ThemedInput
+        type="search"
+        placeholder={t('searchPlaceholderTasks')}
+        className="focus-visible:ring-none w-full rounded-xl bg-white pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
+        value={searchTerm}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setSearchTerm(e.target.value)
+        }
+      />
+    </div>
+  );
+};
+
+const AddButton = ({
+  t,
+  hasOrders,
+}: {
+  t: (key: string) => string;
+  hasOrders: boolean;
+}) => {
+  return (
+    <>
+      {hasOrders && (
+        <Link href="/orders/create">
+          <ThemedButton>{t('creation.title')}</ThemedButton>
+        </Link>
+      )}
+    </>
+  );
+};
+
+const OtherComponents = ({
+  activeTab,
+  t,
+}: {
+  activeTab: 'open' | 'completed' | 'all';
+  setActiveTab: (tab: 'open' | 'completed' | 'all') => void;
+  t: (key: string) => string;
+}) => {
+  return (
+    <TabsList className="gap-2 bg-transparent mr-auto">
+      {tabsConfig.map((tab) => (
+        <ThemedTabTrigger
+          key={tab.key}
+          value={tab.key}
+          activeTab={activeTab}
+          option={tab.key}
+          className="font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
+        >
+          {t(tab.label)}
+        </ThemedTabTrigger>
+      ))}
+    </TabsList>
+  );
 };
 
 const tabsConfig = [
@@ -40,111 +233,3 @@ const tabsConfig = [
   },
   { key: 'all', label: 'allOrders', filter: () => true },
 ];
-
-export function OrderList({ orders, role }: OrdersTableProps) {
-  const { t } = useTranslation('orders');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
-    'open',
-  );
-
-  // hasPermission based on role
-  const hasPermission = () => {
-    return agencyRoles.has(role);
-  };
-  const orderColumns = useColumns('orders', hasPermission);
-
-  const filteredOrders = useMemo(() => {
-    const currentTab = tabsConfig.find((tab) => tab.key === activeTab);
-    return orders.filter(
-      (order) =>
-        order.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        currentTab?.filter(order),
-    );
-  }, [orders, activeTab, searchTerm]);
-
-  const agencyRoles = new Set([
-    'agency_owner',
-    'agency_project_manager',
-    'agency_member',
-  ]);
-
-  const renderEmptyState = () => (
-    <EmptyState
-      title={t('startFirstOrderTitle')}
-      description={t('startFirstOrderDescription')}
-      imageSrc="/images/illustrations/Illustration-box.svg"
-      button={
-        <Link href="/orders/create">
-          <ThemedButton>{t('creation.title')}</ThemedButton>
-        </Link>
-      }
-    />
-  );
-
-  return (
-    <main>
-      <Tabs
-        defaultValue={activeTab}
-        onValueChange={(value: string) =>
-          setActiveTab(value as 'open' | 'completed' | 'all')
-        }
-        className="bg-transparent"
-      >
-        <div className="mb-[24px] flex flex-wrap items-center gap-4">
-          <TabsList className="gap-2 bg-transparent">
-            {tabsConfig.map((tab) => (
-              <ThemedTabTrigger
-                key={tab.key}
-                value={tab.key}
-                activeTab={activeTab}
-                option={tab.key}
-                className="font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
-              >
-                {t(tab.label)}
-              </ThemedTabTrigger>
-            ))}
-          </TabsList>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="relative flex flex-1 md:grow-0">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <ThemedInput
-                type="search"
-                placeholder={t('searchPlaceholderTasks')}
-                className="focus-visible:ring-none w-full rounded-xl bg-white pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
-                value={searchTerm}
-                onChange={(e: {
-                  target: { value: React.SetStateAction<string> };
-                }) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            {orders.length > 0 && (
-              <Link href="/orders/create">
-                <ThemedButton>{t('creation.title')}</ThemedButton>
-              </Link>
-            )}
-          </div>
-        </div>
-        <Separator />
-        <div className="mt-4">
-          {tabsConfig.map((tab) => (
-            <TabsContent key={tab.key} value={tab.key}>
-              <Table
-                data={filteredOrders}
-                columns={orderColumns}
-                filterKey={'title'}
-                controllers={{
-                  search: {
-                    value: searchTerm,
-                    setValue: setSearchTerm,
-                  },
-                }}
-                emptyStateComponent={renderEmptyState()}
-              />
-            </TabsContent>
-          ))}
-        </div>
-      </Tabs>
-    </main>
-  );
-}

@@ -1305,7 +1305,7 @@ export type Database = {
           created_at: string
           deleted_on: string | null
           id: string
-          order_id: number
+          order_id: number | null
           parent_id: string | null
           temp_id: string | null
           type: Database["public"]["Enums"]["message_category"]
@@ -1318,7 +1318,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
-          order_id: number
+          order_id?: number | null
           parent_id?: string | null
           temp_id?: string | null
           type?: Database["public"]["Enums"]["message_category"]
@@ -1331,7 +1331,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
-          order_id?: number
+          order_id?: number | null
           parent_id?: string | null
           temp_id?: string | null
           type?: Database["public"]["Enums"]["message_category"]
@@ -1888,6 +1888,67 @@ export type Database = {
           variant_id?: string
         }
         Relationships: []
+      }
+      plugins: {
+        Row: {
+          account_id: string
+          created_at: string
+          credentials: Json
+          deleted_on: string | null
+          id: string
+          provider: string
+          provider_id: string
+          status: Database["public"]["Enums"]["plugin_status"]
+          type: Database["public"]["Enums"]["plugin_type"]
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credentials: Json
+          deleted_on?: string | null
+          id?: string
+          provider: string
+          provider_id: string
+          status?: Database["public"]["Enums"]["plugin_status"]
+          type?: Database["public"]["Enums"]["plugin_type"]
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credentials?: Json
+          deleted_on?: string | null
+          id?: string
+          provider?: string
+          provider_id?: string
+          status?: Database["public"]["Enums"]["plugin_status"]
+          type?: Database["public"]["Enums"]["plugin_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reactions: {
         Row: {
@@ -3250,6 +3311,8 @@ export type Database = {
         | "auth_card_background_color"
         | "auth_section_background_color"
       payment_status: "pending" | "succeeded" | "failed"
+      plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
+      plugin_type: "tool" | "internal" | "external" | "integration"
       priority_types: "high" | "medium" | "low"
       reaction_types: "like" | "favorite"
       service_status:

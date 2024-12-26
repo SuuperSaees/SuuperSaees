@@ -32,6 +32,7 @@ import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed
 import { ClientsWithOrganization } from '../../server/actions/clients/get/get-clients';
 import { Account } from '../../../../../../apps/web/lib/account.types';
 import AgencyClientCrudMenu from './agency-client-crud-menu';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 // import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 
@@ -89,6 +90,7 @@ type Client = Pick<
     name: string | null;
     picture_url: string | null;
   } | null;
+  role: string | null;
 };
 
 type ClientsTableProps = {
@@ -96,16 +98,18 @@ type ClientsTableProps = {
   // accountIds: string[];
   // accountNames: string[];
   view?: 'clients' | 'organizations';
-  userRole: string;
 };
 
 // CLIENTS TABLE 
 // accountIds, accountNames
-export function ClientsTable({ clients, view, userRole }: ClientsTableProps) {
+export function ClientsTable({ clients, view }: ClientsTableProps) {
   const { t } = useTranslation();
   const [activeButton, setActiveButton] = useState<'clients' | 'organizations'>(
     'clients',
   );
+  const {workspace} = useUserWorkspace()
+  const userRole = workspace.role ?? ''
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -248,7 +252,7 @@ export function ClientsTable({ clients, view, userRole }: ClientsTableProps) {
         </div>
         {!view && <Separator />}
       </div>
-      <div className='bg-white border mt-4 rounded-xl'>
+      <div className='bg-white mt-4 rounded-xl'>
       {(activeButton === 'organizations' && !uniqueClients.length) ||
       !clients.length ? (
         <EmptyState
@@ -258,7 +262,7 @@ export function ClientsTable({ clients, view, userRole }: ClientsTableProps) {
           button={<CreateClientDialog />}
         />
       ) : (
-        <DataTable className=''
+        <DataTable
           data={
             (activeButton === 'organizations'
               ? filteredOrganizations
@@ -295,7 +299,7 @@ const useClientColumns = (
               />
             </span>
             <div className="flex flex-col">
-              <span className="text-sm font-medium leading-[1.42857] text-gray-900">
+              <span className="text-sm font-semibold leading-[1.42857]">
                 {row.original.settings?.name ?? row.original.name}
               </span>
               <span className="text-sm font-normal leading-[1.42857] text-gray-600">
@@ -324,63 +328,48 @@ const useClientColumns = (
         cell: ({ row }) => (
           <Link
             href={`clients/organizations/${row.original.organization.id}`}
-            className="capitalize"
+            className="capitalize text-gray-600"
           >
             {row.original.organization.name}
           </Link>
         ),
       },
-      {
-        accessorKey: 'last_login',
-        header: ({ column }) => {
-          return (
-            <div>
-              <Button
-                variant="ghost"
-                onClick={() =>
-                  column.toggleSorting(column.getIsSorted() === 'asc')
-                }
-              >
-                <div className="flex items-center justify-between">
-                  <span>{t('lastLogin')}</span>
-                  <ArrowDown className="ml-2 h-4 w-4" />
-                </div>
-              </Button>
-            </div>
-          );
-        },
-        cell: ({ row }) => {
-          const date = new Date(row.original.created_at ?? '');
-          const day = date.getDate().toString().padStart(2, '0');
-          const month = (date.getMonth() + 1).toString().padStart(2, '0');
-          const year = date.getFullYear();
+      // {
+      //   accessorKey: 'last_login',
+      //   header: () => {
+      //     return (
+       
+            
+           
+      //             <span className='text-gray-600'>{t('lastLogin')}</span>
+             
+         
+  
+      //     );
+      //   },
+      //   cell: ({ row }) => {
+      //     const date = new Date(row.original.created_at ?? '');
+      //     const day = date.getDate().toString().padStart(2, '0');
+      //     const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      //     const year = date.getFullYear();
 
-          const formattedDate = `${day}-${month}-${year}`;
+      //     const formattedDate = `${day}-${month}-${year}`;
 
-          return (
-            <span className="text-sm font-medium text-gray-900">
-              {formattedDate}
-            </span>
-          );
-        },
-      },
+      //     return (
+      //       <span className="text-sm font-medium text-gray-900">
+      //         {formattedDate}
+      //       </span>
+      //     );
+      //   },
+      // },
       {
         accessorKey: 'created_at_column',
-        header: ({ column }) => {
+        header: () => {
           return (
-            <div>
-              <Button
-                variant="ghost"
-                onClick={() =>
-                  column.toggleSorting(column.getIsSorted() === 'asc')
-                }
-              >
-                <div className="flex items-center justify-between">
-                  <span>{t('createdAt')}</span>
-                  <ArrowUp className="ml-2 h-4 w-4" />
-                </div>
-              </Button>
-            </div>
+     
+                  <span >{t('createdAt')}</span>
+        
+       
           );
         },
         cell: ({ row }) => {
@@ -392,7 +381,7 @@ const useClientColumns = (
           const formattedDate = `${day}-${month}-${year}`;
 
           return (
-            <span className="text-sm font-medium text-gray-900">
+            <span className="text-sm text-gray-600">
               {formattedDate}
             </span>
           );
@@ -409,7 +398,7 @@ const useClientColumns = (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <UpdateClientDialog {...client} /> */}
               {/* <DeleteUserDialog userId={client.id} /> */}
-              <AgencyClientCrudMenu organizationOptions = {organizationOptions} userId = {client.id} name = {client.name} email = {client.email ?? ''} />
+              <AgencyClientCrudMenu organizationOptions = {organizationOptions} userId = {client.id} name = {client.name} email = {client.email ?? ''} targetRole={client.role ?? undefined}/>
             </div>
           );
         },
@@ -440,7 +429,7 @@ const useOrganizationColumns = (
               />
             </span>
             <div className="flex flex-col">
-              <span className="text-sm font-medium leading-[1.42857] text-gray-900">
+              <span className="text-sm font-medium leading-[1.42857] font-semibold">
                 {row.original.name}
               </span>
               <span className="text-sm font-normal leading-[1.42857] text-gray-600">
@@ -458,26 +447,17 @@ const useOrganizationColumns = (
             <ProfileAvatar
               displayName={row.original.name}
               pictureUrl={row.original.picture_url}
+              className='mx-0'
             />
           </div>
         ),
       },
       {
         accessorKey: 'created_at_organization',
-        header: ({ column }) => (
-          <div>
-            <Button
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === 'asc')
-              }
-            >
-              <div className="flex items-center justify-between">
+        header: () => (
+
                 <span>{t('createdAt')}</span>
-                <ArrowUp className="ml-2 h-4 w-4" />
-              </div>
-            </Button>
-          </div>
+      
         ),
         cell: ({ row }) => {
           const date = new Date(row.original.created_at ?? '');
@@ -488,7 +468,7 @@ const useOrganizationColumns = (
           const formattedDate = `${day}-${month}-${year}`;
 
           return (
-            <span className="text-sm font-medium text-gray-900">
+            <span className="text-sm font-medium text-gray-600">
               {formattedDate}
             </span>
           );

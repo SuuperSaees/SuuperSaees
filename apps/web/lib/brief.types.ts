@@ -46,6 +46,7 @@ export namespace Brief {
     export namespace Services {
       export type Response = Brief.Response & {
         services: {
+          id: ServiceType.Type['id'];
           name: ServiceType.Type['name'];
         }[];
         form_fields?: {

@@ -147,6 +147,10 @@
     "member": {
       "title": "No orders assigned to you yet.",
       "description": "Hang tight! Your assigned orders will appear here soon."
+    },
+    "organization": {
+      "title": "No orders assigned to your organization yet.",
+      "description": "Hang tight! The orders assigned to your organization will appear here soon."
     }
   },
   "message": {
@@ -165,6 +169,27 @@
   "dragAndDropDictionary": {
     "dropHere": "Drop your files here",
     "dropHereDescription": "SVG, PNG, JPG or GIF (max. 800x400px)"
+  },
+  "annotations": {
+    "help": {
+      "title": "Need help?",
+      "move": "Move around the image:",
+      "zoom": "Zoom in/out:",
+      "spacebar": "Hold Spacebar and click while dragging.",
+      "mouseWheel": "Use the mouse wheel to zoom."
+    },
+    "page": "Page",
+    "chat": {
+      "title": "Comments",
+      "placeholder": "Write a message...",
+      "send": "Send",
+      "noChats": "Leave your opinion, ask a question or just leave a thank you note. Click anywhere in the file to leave a comment.",
+      "active": "Active",
+      "resolved": "Resolved"
+    },
+    "add": "Add annotation",
+    "addSuccess": "Annotation added successfully",
+    "addError": "Error adding annotation"
   }
 }
 

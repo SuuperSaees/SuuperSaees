@@ -3,8 +3,7 @@
 import type { InitOptions, i18n } from 'i18next';
 
 import { initializeI18nClient } from './i18n.client';
-import { getFullDomainBySubdomain } from '../../multitenancy/utils/get/get-domain';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 let i18nInstance: i18n;
 
 type Resolver = (
@@ -40,47 +39,21 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
     throw loadI18nInstance(settings, resolver);
   }
 
-  const LANGUAGE_KEY = 'language';
-  const values = [LANGUAGE_KEY];
+  // Use the cookie value directly instead of making an API call
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cookieLang = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('i18next='))
+        ?.split('=')[1];
 
-  const queryGetFullDomainBySubdomain = useQuery({
-    queryKey: ['getFullDomainBySubdomain'],
-    queryFn: async () => {
-      const domainFullData = await getFullDomainBySubdomain(window.location.host, true, values).catch(err => console.error(`
-        Error in i18n, fetching domain data: ${err}`));
-      if(domainFullData){
-        const databaseLanguage = domainFullData.settings.find(
-          (setting) => setting.key === 'language'
-        )?.value ?? 'en';
-        
-        i18nInstance.changeLanguage(databaseLanguage).catch((error) => {
+      if (cookieLang && i18nInstance.language !== cookieLang) {
+        i18nInstance.changeLanguage(cookieLang).catch((error) => {
           console.error('Error changing language:', error);
         });
       }
-      return ''
-    },
-    enabled: typeof window !== 'undefined',
-  });
-
-  queryGetFullDomainBySubdomain
-
-  // if (typeof window !== 'undefined') {
-  //   getFullDomainBySubdomain(window.location.host, true, values)  
-  //     .then((domainFullData) => {
-  //       if (domainFullData) {
-  //         const databaseLanguage = domainFullData.settings.find(
-  //           (setting) => setting.key === 'language'
-  //         )?.value ?? 'en';
-          
-  //         i18nInstance.changeLanguage(databaseLanguage).catch((error) => {
-  //           console.error('Error changing language:', error);
-  //         });
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error fetching domain data:', error);
-  //     });
-  // }
+    }
+  }, []);
 
   return i18nInstance;
 }

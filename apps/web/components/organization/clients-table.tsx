@@ -34,6 +34,11 @@ type Members = Pick<
   | 'picture_url'
 > & {
   client_organization?: string;
+  role: string | null;
+  settings?: {
+    name?: string;
+    picture_url?: string;
+  };
 };
 
 interface Permissions {
@@ -53,7 +58,7 @@ function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
           const member = row.original;
 
           const displayName =
-            member.name ?? (member.email ? member?.email.split('@')[0] : '');
+            member.settings?.name ?? member.name ?? (member.email ? member?.email.split('@')[0] : '');
           // const isSelf = member.user_id === params.currentUserId;
 
           return (
@@ -61,11 +66,11 @@ function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
               <span>
                 <ProfileAvatar
                   displayName={displayName}
-                  pictureUrl={member.picture_url}
+                  pictureUrl={member.settings?.picture_url ?? member.picture_url}
                 />
               </span>
 
-              <span>{displayName}</span>
+              <span className="font-semibold">{displayName}</span>
               {/* 
               <If condition={isSelf}>
                 <Badge variant={'outline'}>{t('youLabel')}</Badge>
@@ -79,14 +84,14 @@ function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
         header: t('emailLabel'),
         accessorKey: 'email',
         cell: ({ row }) => {
-          return row.original.email ?? '-';
+          return <span className="text-gray-600">{row.original.email ?? '-'}</span> ;
         },
       },
       {
         header: t('joinedAtLabel'),
         cell: ({ row }) => {
           const { created_at } = row.original;
-          return created_at ? new Date(created_at).toLocaleDateString() : null;
+          return <span className="text-gray-600">{created_at ? new Date(created_at).toLocaleDateString() : null}</span>;
         },
       },
       {
@@ -95,7 +100,6 @@ function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
         enableHiding: false,
         cell: ({ row }) => {
           const client = row.original;
-
           return (
             permissions.canRemoveFromAccount(row.original.id) && (
               <div className="h-18 flex items-center gap-4 self-stretch p-4">
@@ -104,14 +108,14 @@ function useGetColumns(permissions: Permissions): ColumnDef<Members[][0]>[] {
                   userId={client.id}
                   queryKey={permissions.queryKey}
                 /> */}
-                <AgencyClientCrudMenu userId={client.id} name={client.name} email={client.email ?? ''} queryKey={permissions.queryKey} />
+                <AgencyClientCrudMenu userId={client.id} name={client.name} email={client.email ?? ''} queryKey={permissions.queryKey} targetRole={client?.role ?? undefined}/>
               </div>
             )
           );
         },
       },
     ],
-    [t],
+    [t, permissions],
   );
 }
 
@@ -145,12 +149,12 @@ export function ClientsTable({
     queryKey: queryKey,
   };
 
-  const filteredMembers = members.filter((member) => {
+  const filteredMembers = useMemo(() => members.filter((member) => {
     const searchString = search?.toLowerCase();
     const displayName = member?.name ?? member?.email?.split('@')[0] ?? '';
 
     return displayName.includes(searchString);
-  });
+  }), [members, search]);
 
   useEffect(() => {
     if (searchController) {
@@ -183,7 +187,7 @@ export function ClientsTable({
           </ThemedButton>
         )}
       </div>
-      <DataTable columns={columns} data={filteredMembers} />
+      <DataTable columns={columns} data={filteredMembers} className="bg-white" />
     </div>
   );
 }

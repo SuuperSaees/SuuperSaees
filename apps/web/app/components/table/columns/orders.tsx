@@ -1,30 +1,22 @@
 'use client';
 
-import React from 'react';
+import { useMemo } from 'react';
+
 import Link from 'next/link';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { formatDate } from 'date-fns';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Option } from '~/components/ui/checkbox-combobox';
 import { PriorityCombobox } from '~/orders/[id]/components/priority-combobox';
 import StatusCombobox from '~/orders/[id]/components/status-combobox';
-import { getOrderAgencyMembers } from '~/team-accounts/src/server/actions/orders/get/get-order';
 import DatePicker from '~/team-accounts/src/server/actions/orders/pick-date/pick-date';
-import {
-  updateOrder,
-  updateOrderAssigns,
-  logOrderActivities,
-} from '~/team-accounts/src/server/actions/orders/update/update-order';
+
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
-import AvatarDisplayer from '../../../components/ui/avatar-displayer';
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
-import { EntityData } from '../types';
-import { Order } from '~/lib/order.types';
+import { ColumnConfigs, EntityData } from '../types';
+import Avatar from '../../../components/ui/avatar';
 
 const truncateText = (text: string, maxLength = 50) => {
   if (!text) return '';
@@ -34,25 +26,28 @@ const truncateText = (text: string, maxLength = 50) => {
 
 export const ordersColumns = (
   t: TFunction,
-  hasPermission?: (row?: EntityData['orders'][number]) => boolean,
+  data: ColumnConfigs['orders']['data'],
+  actions: ColumnConfigs['orders']['actions'],
+  hasPermission?: ColumnConfigs['orders']['hasPermission'],
 ): ColumnDef<EntityData['orders'][number]>[] => {
   const withPermissionsActive = hasPermission && hasPermission;
-  
-  return React.useMemo(() => [
+
+  return [
     {
       accessorKey: 'title',
       header: t('orders.title'),
       cell: ({ row }) => {
         return (
           <Link
-          
             href={`/orders/${row.original.id}`}
-            className='flex w-full min-w-[100px] gap-2'
+            className="flex w-full min-w-[100px] gap-2"
           >
-            <div className="flex flex-col w-fit ">
-              <span className="font-semibold line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">{truncateText(row.original.title)}</span>
-              <span className="text-sm text-gray-600 line-clamp-1  line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">
-                {truncateText(row.original?.brief?.name)}
+            <div className="flex w-fit flex-col">
+              <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words font-semibold">
+                {truncateText(row.original.title)}
+              </span>
+              <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words text-sm text-gray-600">
+                {truncateText(row.original?.brief?.name ?? '')}
               </span>
             </div>
           </Link>
@@ -81,8 +76,10 @@ export const ordersColumns = (
             // href={link}
             className="flex flex-col"
           >
-            <span className="font-semibold  line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">{truncateText(row.original.customer?.name)}</span>
-            <span className="text-sm text-gray-600  line-clamp-1 overflow-hidden text-ellipsis break-words whitespace-normal truncate">
+            <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words font-semibold">
+              {truncateText(row.original.customer?.name)}
+            </span>
+            <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words text-sm text-gray-600">
               {truncateText(row.original.client_organization?.name)}
             </span>
           </span>
@@ -98,7 +95,7 @@ export const ordersColumns = (
             order={row.original}
             agency_id={row.original.agency_id}
             mode="order"
-            blocked={withPermissionsActive && !hasPermission(row.original)}
+            blocked={withPermissionsActive && !hasPermission()}
           />
         );
       },
@@ -107,20 +104,33 @@ export const ordersColumns = (
       accessorKey: 'priority',
       header: t('orders.priority'),
       cell: ({ row }) => {
-        return <PriorityCombobox mode="order" order={row.original} blocked={withPermissionsActive && !hasPermission(row.original)} />;
+        return (
+          <PriorityCombobox
+            mode="order"
+            order={row.original}
+            blocked={withPermissionsActive && !hasPermission()}
+          />
+        );
       },
     },
     {
       accessorKey: 'assigned_to',
       header: t('orders.assignedTo'),
-      cell: ({ row }) => <RowAssignedTo row={row.original} blocked={(withPermissionsActive && !hasPermission(row.original) )?? false} />,
+      cell: ({ row }) => (
+        <RowAssignedTo
+          row={row.original}
+          blocked={(withPermissionsActive && !hasPermission()) ?? false}
+          orderAgencyMembers={data.orderAgencyMembers}
+          updateOrderAssigns={actions.updateOrderAssigns}
+        />
+      ),
     },
     {
       accessorKey: 'created_at',
       header: t('orders.createdAt'),
       cell: ({ row }) => {
         return (
-          <span className="text-sm text-gray-500 line-clamp-1 text-nowrap">
+          <span className="line-clamp-1 text-nowrap text-sm text-gray-500">
             {formatDate(row.original?.created_at, 'PP')}
           </span>
         );
@@ -131,7 +141,7 @@ export const ordersColumns = (
       header: t('orders.updatedAt'),
       cell: ({ row }) => {
         return (
-          <span className="text-sm text-gray-500 line-clamp-1 text-nowrap">
+          <span className="line-clamp-1 text-nowrap text-sm text-gray-500">
             {row.original?.updated_at &&
               formatDate(row.original?.updated_at, 'PP')}
           </span>
@@ -143,38 +153,35 @@ export const ordersColumns = (
       accessorKey: 'due_date',
       header: t('orders.dueDate'),
       cell: ({ row }) => {
-        const updateOrderDate = async (due_date: string, orderId: number) => {
-          try {
-           const {order, user} = await updateOrder(orderId, { due_date });
-            toast('Success!', {
-              description: t('success.orders.orderDateUpdated'),
-            });
-            const fields: (keyof Order.Update)[] = ['due_date'];
-            await logOrderActivities(orderId, order, user?.id ?? '', user?.user_metadata?.name ?? user?.user_metadata?.email ?? '', undefined, fields);
-          } catch (error) {
-            toast('Error', {
-              description: t('error.orders.failedToUpdateOrderDate'),
-            });
-          }
-        };
         return (
           <DatePicker
-            updateFn={(dueDate: string) =>
-              updateOrderDate(dueDate, row.original.id)
-            }
+            updateFn={async (dueDate: string) => {
+              await actions.updateOrderDate.mutateAsync({
+                due_date: dueDate,
+                orderId: row.original.id,
+              });
+            }}
             defaultDate={row?.original?.due_date}
             showIcon
-            blocked={withPermissionsActive && !hasPermission(row.original)}
+            blocked={withPermissionsActive && !hasPermission()}
           />
         );
       },
     },
-  ], [t, hasPermission]);
+  ];
 };
 
-const RowAssignedTo = React.memo(({ row, blocked }: { row: EntityData['orders'][number], blocked: boolean }) => {
-  const { t } = useTranslation('orders');
-
+const RowAssignedTo = ({
+  row,
+  blocked,
+  orderAgencyMembers,
+  updateOrderAssigns,
+}: {
+  row: EntityData['orders'][number];
+  blocked: boolean;
+  orderAgencyMembers: ColumnConfigs['orders']['data']['orderAgencyMembers'];
+  updateOrderAssigns: ColumnConfigs['orders']['actions']['updateOrderAssigns'];
+}) => {
   const membersAssignedSchema = z.object({
     members: z.array(z.string()),
   });
@@ -185,73 +192,59 @@ const RowAssignedTo = React.memo(({ row, blocked }: { row: EntityData['orders'][
       : [],
   };
 
-  const {
-    data: orderAgencyMembers,
-    isLoading,
-    isPending,
-  } = useQuery({
-    queryKey: ['order-agency-members', row.id],
-    queryFn: () => getOrderAgencyMembers(row.agency_id, row.id),
-    retry: 5,
-    staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
-  });
-
-  const changeAgencyMembersAssigned = useMutation({
-    mutationFn: (agencyMemberIds: string[]) => {
-      return updateOrderAssigns(row.id, agencyMemberIds);
-    },
-    onSuccess: () => {
-      toast.success('Success', {
-        description: t('success.orders.orderAssigneesUpdated'),
-      });
-    },
-    onError: () => {
-      toast.error('Error', {
-        description: t('error.orders.failedToUpdateOrderAssigneees'),
-      });
-    },
-  });
-
-  function handleFormSubmit(data: z.infer<typeof membersAssignedSchema>) {
-    return changeAgencyMembersAssigned.mutate(data.members);
+  async function handleFormSubmit(data: z.infer<typeof membersAssignedSchema>) {
+    return await updateOrderAssigns.mutateAsync({
+      agencyMemberIds: data.members,
+      orderId: row.id,
+    });
   }
 
-  const searchUserOptions = React.useMemo(() => 
-    orderAgencyMembers?.map((user) => ({
-      picture_url: user.user_settings?.picture_url ?? user?.picture_url ?? '',
-      value: user?.id,
-      label: user?.user_settings?.name ?? user?.name ?? '',
-    })) ?? [],
-  [orderAgencyMembers]);
+  const searchUserOptions = useMemo(
+    () =>
+      orderAgencyMembers?.map((user) => ({
+        picture_url: user.settings?.picture_url ?? user?.picture_url ?? '',
+        value: user?.id,
+        label: user?.settings?.name ?? user?.name ?? '',
+      })) ?? [],
+    [orderAgencyMembers],
+  );
 
-  const avatars = React.useMemo(() => 
-    row?.assigned_to?.map((assignee) => ({
-      name: assignee.agency_member?.settings?.name ?? assignee?.agency_member?.name ?? '',
-      email: assignee.agency_member?.email ?? '',
-      picture_url: assignee.agency_member?.settings?.picture_url ?? assignee?.agency_member?.picture_url ?? '',
-    })) ?? [],
-  [row?.assigned_to]);
+  const avatars = useMemo(
+    () =>
+      row?.assigned_to?.map((assignee) => ({
+        name:
+          assignee.agency_member?.settings?.name ??
+          assignee?.agency_member?.name ??
+          '',
+        email: assignee.agency_member?.email ?? '',
+        picture_url:
+          assignee.agency_member?.settings?.picture_url ??
+          assignee?.agency_member?.picture_url ??
+          '',
+      })) ?? [],
+    [row?.assigned_to],
+  );
 
-  const CustomUserItem = React.memo(({
+  const CustomUserItem = ({
     option,
   }: {
     option: Option & { picture_url?: string | null };
   }) => (
     <div className="flex items-center space-x-1">
-      <AvatarDisplayer
+      <Avatar
         className="font-normal"
-        pictureUrl={option?.picture_url ?? ''}
-        displayName={option?.label ?? ''}
+        src={option?.picture_url ?? ''}
+        username={option?.label ?? ''}
+        alt={option?.label ?? ''}
       />
       <span>{option?.label}</span>
     </div>
-  ));
+  );
   const maxAvatars = 3;
 
   const CustomItemTrigger = (
     <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-sm font-bold text-gray-600">
-      +{((maxAvatars >= avatars.length)) ? '': (avatars.length - maxAvatars)}
+      +{maxAvatars >= avatars.length ? '' : avatars.length - maxAvatars}
     </div>
   );
 
@@ -267,12 +260,11 @@ const RowAssignedTo = React.memo(({ row, blocked }: { row: EntityData['orders'][
         schema={membersAssignedSchema}
         defaultValues={defaultValues}
         customItem={CustomUserItem}
-        isLoading={isLoading || isPending}
         customItemTrigger={CustomItemTrigger}
         blocked={blocked}
       />
     </div>
   );
-});
+};
 
 RowAssignedTo.displayName = 'RowAssignedTo';

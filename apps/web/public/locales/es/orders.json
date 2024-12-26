@@ -147,6 +147,10 @@
     "member": {
       "title": "Aún no has asignado ningún proyecto a ti.",
       "description": "¡Espera! Tus proyectos asignados aparecerán aquí pronto."
+    },
+    "organization": {
+      "title": "Aún no se han asignado proyectos a tu organización.",
+      "description": "¡Espera! Los proyectos asignados aparecerán aquí pronto."
     }
   },
   "message": {
@@ -165,6 +169,27 @@
   "dragAndDropDictionary": {
     "dropHere": "Suelta aquí para subir archivos",
     "dropHereDescription": "SVG, PNG, JPG o GIF (max. 800x400px)"
+  },
+  "annotations": {
+    "help": {
+      "title": "¿Necesitas ayuda?",
+      "move": "Moverte sobre la imagen:",
+      "zoom": "Hacer zoom:",
+      "spacebar": "Mantén presionada la tecla Espacio y haz clic mientras arrastras.",
+      "mouseWheel": "Usa la rueda del ratón para acercar o alejar."
+    },
+    "page": "Página",
+    "chat": {
+      "title": "Comentarios",
+      "placeholder": "Escribe un mensaje...",
+      "send": "Enviar",
+      "noChats": "Deja tu opinión, haz una pregunta o simplemente deja una nota de agradecimiento. Haz click en cualquier parte del archivo para dejar un comentario.",
+      "active": "Activos",
+      "resolved": "Resueltos"
+    },
+    "add": "Añadir anotación",
+    "addSuccess": "Anotación añadida con éxito",
+    "addError": "Error al añadir anotación"
   }
 }
 

@@ -120,7 +120,7 @@ export default function UploadFileComponent({
 
   const getFileTypeIcon = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
-    return fileTypeIcons[extension] ?? <StickyNote className="text-gray-500 h-[56px] w-[40px]" />;
+    return fileTypeIcons[extension] ?? <StickyNote className="text-gray-500" />;
   };
 
   const formatFileSize = (size: number) => {

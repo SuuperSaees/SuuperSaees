@@ -6,19 +6,19 @@
  */
 // if avatars length is greater than maxAvatars props, show a circle with bg gray with the remaining avatars (eg. +5)
 import { withDropdown } from '~/hocs/with-dropdown';
-import AvatarDisplayer from './avatar-displayer';
 import { z } from 'zod';
 
 import type { JSX } from "react";
+import Avatar from './avatar';
 
-export type Avatar = {
+export type AvatarType = {
   name: string;
   email: string;
   picture_url?: string | null;
 };
 
 interface MultiAvatarDisplayerProps {
-  avatars: Avatar[];
+  avatars: AvatarType[];
   maxAvatars?: number;
   className?: string;
   avatarClassName?: string;
@@ -43,10 +43,11 @@ export default function MultiAvatarDisplayer({
   return (
     <div className={`relative flex items-center ${className}`} {...rest}>
       {avatars.slice(0, maxAvatars).map((avatar, index) => (
-        <AvatarDisplayer
-          pictureUrl={avatar?.picture_url ?? ''}
-          displayName={avatar?.name}
+        <Avatar
+          src={avatar?.picture_url ?? ''}
+          username={avatar?.name}
           key={index + avatar?.name}
+          alt={avatar?.name}
           className={`h-8 w-8 border-2 border-white ${avatarClassName}`}
           style={{
             marginLeft: index === 0 ? 0 : `${-overlap}px`,
