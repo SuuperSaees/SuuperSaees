@@ -110,7 +110,7 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
         action: Activity.Enums.ActionType.CREATE,
         type: Activity.Enums.ActivityType.ANNOTATION,
         message,
-        value: fileName,
+        value: [fileName, fileId],
         preposition: 'in_file',
         order_id: Number(order.id),
         user_id: user?.id,
