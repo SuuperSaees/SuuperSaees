@@ -5,7 +5,11 @@ import { PostgrestError } from '@supabase/supabase-js';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { getOrdersFolders, getMainFolders, getFolderContents } from '../../folders/get/get-folders';
+import {
+  getFolderContents,
+  getMainFolders,
+  getOrdersFolders,
+} from '../../folders/get/get-folders';
 import { fetchUsersAccounts } from '../../members/get/get-member-account';
 
 // Types
@@ -95,16 +99,30 @@ async function getAllFolderContents(
   client: SupabaseClient,
   folderId: string,
   type: FolderType,
+  clientOrganizationId: string,
+  agencyId: string,
 ): Promise<FileSystemResponse> {
+  console.log('getAllFolderContents', folderId, type);
   if (type === 'mainfolder') {
+    // This group all files where the user_id of the file belongs the client_organization_id or agency_id
+    const clientAndAgencyMembers = await fetchUsersAccounts(client, [
+      clientOrganizationId,
+      agencyId,
+    ]);
+    const clientAndAgencyMembersIds = clientAndAgencyMembers.map(
+      (member) => member.id,
+    );
     const [filesResult, folders] = await Promise.all([
       client
         .from('files')
         .select(
-          'url, id, name, type, size, folder_files!left(folder_id, client_organization_id)',
+          `url, id, name, type, size, folder_files(folder_id, client_organization_id),
+          order_files!inner(orders:orders_v2!inner(client_organization_id, agency_id))`,
         )
         .is('folder_files.folder_id', null)
-        .eq('folder_files.client_organization_id', folderId),
+        .in('user_id', clientAndAgencyMembersIds)
+        .eq('order_files.orders.client_organization_id', clientOrganizationId)
+        .eq('order_files.orders.agency_id', agencyId),
       getMainFolders(client, folderId),
     ]);
 
@@ -133,15 +151,23 @@ async function getAllFolderContents(
 
 async function getMemberFolderContents(
   client: SupabaseClient,
-  organizationId: string,
+  clientOrganizationId: string,
+  agencyId: string,
+  type: 'client' | 'agency',
 ): Promise<FileSystemResponse> {
-  const members = await fetchUsersAccounts(client, [organizationId]);
+  const members = await fetchUsersAccounts(client, [type === 'client' ? clientOrganizationId : agencyId]);
   const memberIds = members.map((member) => member.id);
 
-  const { data: files, error: filesError } = await createFileQuery(client).in(
-    'user_id',
-    memberIds,
-  );
+  // Get all files where a client member of the organization or agency has uploaded a file (order_files)
+  const { data: files, error: filesError } = await client
+  .from('files')
+  .select(`
+    url, id, name, type, size, 
+    order_files!inner(orders:orders_v2!inner(client_organization_id, agency_id))
+  `)
+  .in('user_id', memberIds)
+  .eq('order_files.orders.client_organization_id', clientOrganizationId)
+  .eq('order_files.orders.agency_id', agencyId);
 
   if (filesError) {
     throw filesError;
@@ -178,13 +204,19 @@ export async function getFoldersAndFiles(
         return await getProjectFolderContents(client, folderId, type);
 
       case 'all':
-        return await getAllFolderContents(client, folderId, type);
+        return await getAllFolderContents(
+          client,
+          folderId,
+          type,
+          clientOrganizationId,
+          agencyId,
+        );
 
       case 'client':
-        return await getMemberFolderContents(client, clientOrganizationId);
+        return await getMemberFolderContents(client, clientOrganizationId, agencyId, 'client');
 
       case 'team':
-        return await getMemberFolderContents(client, agencyId);
+        return await getMemberFolderContents(client, clientOrganizationId, agencyId, 'agency');
 
       default:
         return { folders: [], files: [] };
