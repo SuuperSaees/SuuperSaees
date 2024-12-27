@@ -156,7 +156,7 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
     },
   });
 
@@ -185,7 +185,7 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', selectedAnnotation?.id] });
-      queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
     },
     onError: () => {
       console.error('Error updating annotation');
