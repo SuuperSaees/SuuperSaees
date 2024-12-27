@@ -333,7 +333,9 @@ export const FileDialogView: React.FC<FileProps> = ({
       );
     }
 
-    return filteredAnnotations.map((annotation) => (
+    return filteredAnnotations
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+      .map((annotation) => (
       <div key={annotation.id} className="">
         {activeTab === 'active' ? (
           <>
