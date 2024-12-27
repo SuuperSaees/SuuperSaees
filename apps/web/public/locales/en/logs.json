@@ -57,7 +57,8 @@
       "description": "Description",
       "title": "Title",
       "assign": "Assign",
-      "task": "Task"
+      "task": "Task",
+      "annotation": "Annotation"
     },
     "prepositions": {
       "in": "in",
@@ -72,7 +73,8 @@
       "into": "into",
       "during": "during",
       "until": "until",
-      "named": "named"
+      "named": "named",
+      "in_file": "in file"
     },
     "values": {
       "low": "Low",

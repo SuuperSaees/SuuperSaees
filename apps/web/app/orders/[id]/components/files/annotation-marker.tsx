@@ -21,6 +21,7 @@ export const AnnotationMarker: React.FC<AnnotationMarkerProps> = ({
   number,
   onClick,
   isActive = false,
+  annotation,
 }) => {
   return (
     <div
@@ -29,13 +30,20 @@ export const AnnotationMarker: React.FC<AnnotationMarkerProps> = ({
       }`}
     >
       <MarkerIcon />
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full">
-          <span className="text-brand font-bold text-sm">
-            {number}
-          </span>
-        </div>
-      </div>
+      {
+        annotation.accounts && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full">
+          <Avatar className="w-6 h-6">
+            <AvatarImage src={annotation.accounts?.settings?.picture_url ?? ''} />
+            <AvatarFallback>
+              {annotation.accounts?.name?.charAt(0).toUpperCase() ?? 'U'}
+            </AvatarFallback>
+          </Avatar>
+            </div>
+          </div>
+        )
+      }
     </div>
   );
 };
@@ -52,6 +60,7 @@ interface AnnotationChatProps {
   }>;
   isLoading?: boolean;
   annotation: any;
+  isInitialMessageOpen: boolean;
 }
 
 export const AnnotationChat: React.FC<AnnotationChatProps> = ({
@@ -61,6 +70,7 @@ export const AnnotationChat: React.FC<AnnotationChatProps> = ({
   messages,
   isLoading = false,
   annotation,
+  isInitialMessageOpen,
 }) => {
   const [newMessage, setNewMessage] = React.useState('');
   const { t } = useTranslation('orders');
@@ -95,7 +105,7 @@ export const AnnotationChat: React.FC<AnnotationChatProps> = ({
             </div>
           ) : (
             <>
-              {annotation.message_content !== 'Annotation' && (
+              {annotation.message_content !== 'Annotation' && !isInitialMessageOpen && (
                 <div className="flex flex-col items-start gap-3.5 self-stretch bg-gray-50 p-4">
                   <div className="flex items-start justify-between w-full">
                     <div className="w-10 h-10 rounded-full overflow-hidden">

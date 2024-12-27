@@ -12,24 +12,31 @@ import { createAnnotationService } from '../services/annotation.service';
 export class AnnotationController extends BaseController {
   async create(req: NextRequest): Promise<Response> {
     const requestId = crypto.randomUUID();
-  
+
     try {
       const body = await this.parseBody<
         CreateAnnotationDTO & { parent_id?: string }
       >(req);
-  
+
       const client = getSupabaseServerComponentClient({ admin: true });
       const annotationService = await createAnnotationService(client);
-  
+
       if (body.parent_id) {
         const message = await annotationService.addMessageToAnnotation(
           body.parent_id,
           body.content,
           body.user_id,
         );
-        return this.created({ id: message.id, message: message.message, created_at: message.created_at }, requestId);
+        return this.created(
+          {
+            id: message.id,
+            message: message.message,
+            created_at: message.created_at,
+          },
+          requestId,
+        );
       }
-  
+
       if (
         !body.file_id ||
         !body.user_id ||
@@ -41,7 +48,7 @@ export class AnnotationController extends BaseController {
           ErrorAnnotationOperations.FAILED_TO_CREATE_ANNOTATION,
         );
       }
-  
+
       const annotation = await annotationService.createAnnotation(body);
       return this.created(annotation, requestId);
     } catch (error) {
@@ -84,25 +91,29 @@ export class AnnotationController extends BaseController {
     { params }: { params: { id: string } },
   ): Promise<Response> {
     const requestId = crypto.randomUUID();
-  
+
     try {
       const parentId = params.id;
-  
+
       if (!parentId) {
         throw ApiError.badRequest(
           'The id parameter is required',
           ErrorAnnotationOperations.FAILED_TO_FIND_MESSAGES,
         );
       }
-  
+
       const { searchParams } = new URL(req.url);
       const limit = parseInt(searchParams.get('limit') ?? '10', 10);
       const offset = parseInt(searchParams.get('offset') ?? '0', 10);
-  
+
       const client = getSupabaseServerComponentClient({ admin: true });
       const annotationService = await createAnnotationService(client);
-  
-      const result = await annotationService.getMessages(parentId, limit, offset);
+
+      const result = await annotationService.getMessages(
+        parentId,
+        limit,
+        offset,
+      );
       return this.ok(result, requestId);
     } catch (error) {
       return this.handleError(error, requestId);
@@ -144,8 +155,6 @@ export class AnnotationController extends BaseController {
       const updatedAnnotation = await annotationService.updateAnnotationStatus(
         annotationId,
         body.status,
-        body.first_message,
-        body.message_id,
       );
 
       return this.ok(updatedAnnotation, requestId);

@@ -17,6 +17,7 @@ interface FileViewerProps {
   isCreatingAnnotation: boolean;
   selectedFile: any;
   currentPage: number;
+  totalPages: number;
   setTotalPages: (total: number) => void;
   isLoadingAnnotations: boolean;
   annotations: any[];
@@ -31,6 +32,9 @@ interface FileViewerProps {
   messages: any[];
   handleWheel: (e: React.WheelEvent<HTMLDivElement>) => void;
   isSpacePressed: boolean; 
+  isInitialMessageOpen: boolean;
+  setIsInitialMessageOpen: (isInitialMessageOpen: boolean) => void;
+  className?: string;
 }
 
 const FileViewer = ({ 
@@ -44,9 +48,9 @@ const FileViewer = ({
   zoomLevel, 
   position, 
   isDragging, 
-  isCreatingAnnotation, 
   selectedFile,
   currentPage,
+  totalPages,
   setTotalPages,
   isLoadingAnnotations,
   annotations,
@@ -60,10 +64,13 @@ const FileViewer = ({
   isLoadingMessages,
   messages,
   handleWheel,
-  isSpacePressed
+  isSpacePressed,
+  isInitialMessageOpen,
+  setIsInitialMessageOpen,
+  className
 }: FileViewerProps) => {
   return (
-    <div className={`w-full ${currentFileType.startsWith('image/') ? 'h-full' : 'h-[60vh]'}`}>
+    <div className={`w-full ${className}`}>
     <div
       ref={containerRef}
       className="w-full h-full"
@@ -72,7 +79,7 @@ const FileViewer = ({
       onMouseMove={handleMouseMove}
       onWheel={handleWheel}
     >
-      <div className="w-full h-full bg-gray-100 p-4 overflow-hidden">
+      <div className="w-full h-full bg-gray-100 p-4 overflow-hidden items-center justify-center flex">
         <div
           ref={imageRef}
           onClick={!isSpacePressed ? handleImageClick : undefined}
@@ -80,7 +87,11 @@ const FileViewer = ({
           style={{
             transform: `scale(${zoomLevel}) translate(${position.x / zoomLevel}px, ${position.y / zoomLevel}px)`,
             transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-            cursor: isSpacePressed ? (isDragging ? 'grabbing' : 'grab') : (currentFileType.startsWith('application/pdf') ? 'default' : 'crosshair'), 
+            cursor: isSpacePressed 
+              ? (isDragging ? 'grabbing' : 'grab') 
+              : (currentFileType.startsWith('video/') || isChatOpen 
+                  ? 'default' 
+                  : 'crosshair'),
             userSelect: 'none',
           }}
         >
@@ -90,7 +101,7 @@ const FileViewer = ({
                 src={selectedFile.url}
                 fileName={selectedFile.name}
                 fileType={selectedFile.type}
-                className="max-w-full max-h-full"
+                className={`${currentFileType.startsWith('application/pdf') && totalPages > 2 ? 'h-[60vh]' : 'h-[70vh]'}`}
                 isDialog={true}
                 actualPage={currentPage}
                 onLoadPDF={(total) => setTotalPages(total)}
@@ -127,6 +138,7 @@ const FileViewer = ({
                             setIsChatOpen(open);
                             if (!open) {
                               setSelectedAnnotation(null);
+                              setIsInitialMessageOpen(false);
                             }
                           }}
                         >
@@ -135,15 +147,20 @@ const FileViewer = ({
                               className="bg-transparent border-none p-0 cursor-pointer"
                               onClick={() => {
                                 handleAnnotationClick(annotation);
-                                setIsChatOpen(true);
+                                setIsChatOpen(!isChatOpen);
                               }}
                             >
-                              <AnnotationMarker
-                                x={0}
-                                y={0}
-                                number={annotation.number}
-                                isActive={selectedAnnotation?.id === annotation.id}
-                              />
+                              {
+                                selectedFile.id === annotation.file_id && annotation.status === 'active' ? (
+                                  <AnnotationMarker
+                                    x={0}
+                                    y={0}
+                                    number={annotation.number}
+                                    isActive={selectedAnnotation?.id === annotation.id}
+                                    annotation={annotation}
+                                  />
+                                ) : null
+                              }
                             </button>
                           </PopoverTrigger>
                           <PopoverContent 
@@ -160,6 +177,7 @@ const FileViewer = ({
                               messages={messages}
                               isLoading={isLoadingMessages}
                               annotation={annotation}
+                              isInitialMessageOpen={isInitialMessageOpen}
                             />
                           </PopoverContent>
                         </Popover>
