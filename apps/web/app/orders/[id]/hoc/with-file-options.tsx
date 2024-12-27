@@ -34,6 +34,7 @@ interface FileProps {
   zoomLevel?: number;
   files?: File[];
   triggerComponent?: React.ReactNode;
+  noPreview?: boolean;
 }
 
 export const withFileOptions = <P extends FileProps>(
@@ -46,6 +47,21 @@ export const withFileOptions = <P extends FileProps>(
     const handleToggleMenu = () => {
       setIsMenuOpen(!isMenuOpen);
     };
+
+    if (props.noPreview) {
+      return (
+        <FileDialogView
+          triggerComponent={
+            <DialogTrigger asChild>
+              <button className="text-blue-500 hover:underline">
+                {props.fileName}
+              </button>
+            </DialogTrigger>
+          }
+          {...props}
+        />
+      );
+    }
 
     return (
       <div className="group relative inline-block h-full max-h-[150px] w-[150px] min-w-[150px] overflow-hidden justify-center items-center flex border bg-gray-100">
