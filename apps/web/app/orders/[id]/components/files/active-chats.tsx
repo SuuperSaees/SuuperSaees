@@ -8,9 +8,10 @@ interface ActiveChatsProps {
   onUpdate: (annotationId: string, status: 'completed' | 'draft' | 'active') => void;
   onDelete: (annotationId: string) => void;
   onChatClick: (fileId: string) => void;
+  t: any;
 }
 
-const ActiveChats = ({ chat, onUpdate, onDelete, onChatClick }: ActiveChatsProps) => {
+const ActiveChats = ({ chat, onUpdate, onDelete, onChatClick, t}: ActiveChatsProps) => {
   const [isHovering, setIsHovering] = useState(false);
 
   const renderMessage = (message: string) => {
@@ -48,7 +49,14 @@ const ActiveChats = ({ chat, onUpdate, onDelete, onChatClick }: ActiveChatsProps
          </p>
         </div>
         <p className="py-[13.52px] text-gray-900 font-inter text-sm font-normal break-words w-[98%]">
-          {renderMessage(chat.message_content)}
+          {renderMessage(chat.message_content)} 
+          {
+            chat.page_number > 0 && (
+              <span className="text-xs text-gray-500 ml-2">
+                {t('annotations.page')} {chat.page_number}
+              </span>
+            )
+          }
         </p>
         <div className="flex justify-between w-full">
           <Button variant="outline" onClick={() => onUpdate(chat.id, 'completed')} className="flex h-10 px-3 py-2 items-center gap-1 rounded-md bg-blue-500/10">  

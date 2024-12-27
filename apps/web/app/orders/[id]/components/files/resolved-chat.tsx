@@ -4,9 +4,10 @@ import { useState } from "react";
 interface ResolvedChatProps {
   chat: any;    
   onDelete: (annotationId: string) => void;
+  t: any;
 }
 
-const ResolvedChat = ({ chat, onDelete }: ResolvedChatProps) => {
+const ResolvedChat = ({ chat, onDelete, t }: ResolvedChatProps) => {
   const [isHovering, setIsHovering] = useState(false);
 
   const renderMessage = (message: string) => {
@@ -40,7 +41,11 @@ const ResolvedChat = ({ chat, onDelete }: ResolvedChatProps) => {
          </p>
         </div>
         <p className="py-[13.52px] text-gray-900 font-inter text-sm font-normal break-words w-[98%]">
-          {renderMessage(chat.message_content)} ({chat.number})
+          {renderMessage(chat.message_content)} {chat.page_number > 0 && (
+            <span className="text-xs text-gray-500 ml-2">
+              {t('annotations.page')} {chat.page_number}
+            </span>
+          )}
         </p>
         <div className="flex justify-end w-full">
           {isHovering ? (

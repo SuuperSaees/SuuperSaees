@@ -27,8 +27,8 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   onLoadPDF,
   zoomLevel = 1
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [pdfDoc, setPdfDoc] = useState<any>(null);
+  const [pageImage, setPageImage] = useState<string | null>(null);
   const { t } = useTranslation('orders');
 
   useEffect(() => {
@@ -70,10 +70,10 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   const renderPage = async (pageNum: number, pdf: any) => {
     try {
       const page = await pdf.getPage(pageNum);
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
       const viewport = page.getViewport({ scale: 1.5 * zoomLevel });
+      
+      // Create an off-screen canvas
+      const canvas = document.createElement('canvas');
       canvas.height = viewport.height;
       canvas.width = viewport.width;
 
@@ -83,29 +83,43 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       };
 
       await page.render(renderContext).promise;
+
+      // Convert canvas to image data URL
+      const imageUrl = canvas.toDataURL('image/png');
+      setPageImage(imageUrl);
     } catch (error) {
       console.error('Error rendering page:', error);
     }
   };
 
   const renderPreview = () => {
-    if (fileType.startsWith('image/')) {
+    if (fileType.startsWith('image/') || (fileType.startsWith('application/pdf') && pageImage)) {
       return isDialog ? (
         <img
-          src={src}
+          src={fileType.startsWith('application/pdf') ? pageImage! : src}
           alt={alt}
           className={`w-full h-[60vh] object-contain ${className}`}
         />
       ) : (
-        <Image 
-          src={src}
-          alt={alt ?? 'image'}
-          className={`aspect-square object-contain ${className}`}
-          width={150}
-          height={150}
-          quality={100}
-          priority
-        />
+        <>
+         {
+          fileType.startsWith('application/pdf') ? (
+            <div className="w-full h-full flex items-center justify-center">
+              {getFileTypeIcon(fileName)}
+            </div>
+          ) : (
+            <Image 
+              src={src}
+              alt={alt ?? 'image'}
+              className={`aspect-square object-contain ${className}`}
+              width={150}
+              height={150}
+              quality={100}
+              priority
+            />
+          )
+         }
+        </>
       );
     }
     
@@ -116,7 +130,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             <video 
               src={src}
               controls
-              className="w-full h-[60vh]"
+              className="w-full h-[70vh]"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -131,11 +145,8 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       return (
         <div className={`w-full h-[60vh] ${className}`}>
           {isDialog ? (
-            <div className="w-full h-full overflow-auto">
-              <canvas
-                ref={canvasRef}
-                className="max-w-none mx-auto"
-              />
+            <div className="w-full h-full flex items-center justify-center">
+              {getFileTypeIcon(fileName)}                      
             </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
