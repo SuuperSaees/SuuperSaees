@@ -171,8 +171,16 @@
     "dropHereDescription": "SVG, PNG, JPG or GIF (max. 800x400px)"
   },
   "annotations": {
+    "help": {
+      "title": "Need help?",
+      "move": "Move around the image:",
+      "zoom": "Zoom in/out:",
+      "spacebar": "Hold Spacebar and click while dragging.",
+      "mouseWheel": "Use the mouse wheel to zoom."
+    },
+    "page": "Page",
     "chat": {
-      "title": "Annotation chat",
+      "title": "Comments",
       "placeholder": "Write a message...",
       "send": "Send",
       "noChats": "Leave your opinion, ask a question or just leave a thank you note. Click anywhere in the file to leave a comment.",
@@ -182,6 +190,10 @@
     "add": "Add annotation",
     "addSuccess": "Annotation added successfully",
     "addError": "Error adding annotation"
+  },
+  "files": {
+    "noPreview": "No preview available",
+    "download": "Please download the file to view it"
   }
 }
 

@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { Activity } from '~/lib/activity.types';
+import { addActivityAction } from '~/team-accounts/src/server/actions/activity/create/create-activity';
+import { useActivityContext } from '../context/activity-context';
 
 interface Annotation {
   id: string;
@@ -24,10 +30,20 @@ interface Message {
   parent_id?: string;
 }
 
-export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
+interface useAnnotationsProps {
+  fileId: string;
+  fileName: string;
+  isDialogOpen: boolean;
+  isInitialMessageOpen?: boolean;
+}
+
+export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessageOpen=false }: useAnnotationsProps) => {
+  const { t } = useTranslation('orders');
   const supabase = useSupabase();
+  const { user, workspace } = useUserWorkspace();
+  const { order } = useActivityContext();
   const queryClient = useQueryClient();
-  const [isCreatingAnnotation, setIsCreatingAnnotation] = useState(false);
+  const [isCreatingAnnotation, setIsCreatingAnnotation] = useState(true);
   const [selectedAnnotation, setSelectedAnnotation] = useState<Annotation | null>(null);
 
   const { data: annotations = [], isLoading: isLoadingAnnotations } = useQuery({
@@ -35,10 +51,11 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
     queryFn: async () => {
       const response = await fetch(`/api/v1/annotations?file_id=${fileId}`);
       const data = await response.json();
-      const annotations = data.data.current_file.filter((annotation: Annotation) => annotation.deleted_on === null);
-      return annotations ?? [];
+      const currentAnnotations = data.data.current_file.filter((annotation: Annotation) => annotation.deleted_on === null);
+      const allAnnotations = data.data.other_files.filter((annotation: Annotation) => annotation.deleted_on === null);
+      return [...currentAnnotations, ...allAnnotations] ?? [];
     },
-    enabled: isDialogOpen && Boolean(fileId),
+    enabled: isDialogOpen,
   });
 
 
@@ -49,7 +66,7 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
       const data = await response.json();
       return data.data.children ?? [];
     },
-    enabled: isDialogOpen && Boolean(selectedAnnotation?.id),
+    enabled: isDialogOpen && Boolean(selectedAnnotation?.id) && !isInitialMessageOpen,
   });
 
   // Replace createAnnotation with mutation
@@ -83,8 +100,26 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
       });
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
+      const actualName = workspace?.name;
+
+      const message = `has added a new annotation`;
+      const activity = {
+        actor: actualName,
+        action: Activity.Enums.ActionType.CREATE,
+        type: Activity.Enums.ActivityType.ANNOTATION,
+        message,
+        value: [fileName, fileId],
+        preposition: 'in_file',
+        order_id: Number(order.id),
+        user_id: user?.id,
+      };
+      await addActivityAction(activity);
+      toast.success(t('annotations.addSuccess'));
+    },
+    onError: () => {
+      toast.error(t('annotations.addError'));
     },
   });
 
@@ -93,7 +128,7 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
     mutationFn: async ({
       parent_id,
       content,
-      user_id
+      user_id,
     }: {
       parent_id: string;
       content: string;
@@ -121,29 +156,39 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
     },
   });
 
   const updateAnnotationMutation = useMutation({
     mutationFn: async ({
       annotationId,
-      status
+      status,
+      first_message,
+      message_id
     }: {
       annotationId: string;
       status: 'completed' | 'draft' | 'active';
+      first_message?: string;
+      message_id?: string;
     }) => {
       const response = await fetch(`/api/v1/annotations/${annotationId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           status,
+          first_message,
+          message_id
         }),
       });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+      queryClient.invalidateQueries({ queryKey: ['messages', selectedAnnotation?.id] });
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
+    },
+    onError: () => {
+      console.error('Error updating annotation');
     },
   });
 
@@ -205,7 +250,6 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
     [queryClient, fileId, selectedAnnotation?.id]
   );
 
-  // Actualizar el useEffect para escuchar ambas tablas
   useEffect(() => {
     const channel = supabase
       .channel('database_changes')
@@ -231,10 +275,10 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
     messages,
     isLoadingAnnotations,
     isLoadingMessages,
-    createAnnotation: createAnnotationMutation.mutate,
-    addMessage: addMessageMutation.mutate,
-    deleteAnnotation: deleteAnnotationMutation.mutate,
-    updateAnnotation: updateAnnotationMutation.mutate,
+    createAnnotation: createAnnotationMutation.mutateAsync,
+    addMessage: addMessageMutation.mutateAsync,
+    deleteAnnotation: deleteAnnotationMutation.mutateAsync,
+    updateAnnotation: updateAnnotationMutation.mutateAsync,
     isCreatingAnnotation,
     setIsCreatingAnnotation,
     selectedAnnotation,

@@ -1,5 +1,5 @@
 import React, { useState, useRef, ComponentType, useEffect } from 'react';
-import { Check, Copy, Download, Eye, MoreVertical, MessageCircle, Trash2 } from 'lucide-react';
+import { Check, Copy, Download, Eye, MoreVertical, MessageCircle, ArrowDownToLine } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@kit/ui/dialog';
 import { Separator } from '@kit/ui/separator';
 import Tooltip from '~/components/ui/tooltip';
@@ -13,10 +13,14 @@ import { useAnnotations } from '../hooks/use-annotations';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Spinner } from '@kit/ui/spinner';
 import { FilePagination } from '../components/files/file-pagination';
-import AnnotationNameDialog from '../components/files/annotation-name-dialog';
-import { FileToolbar } from '../components/files/file-toolbar';
 import { toast } from 'sonner';
 import FileViewer from '../components/files/file-viewer';
+import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from 'node_modules/@kit/ui/src/shadcn/hover-card';
 
 interface FileProps {
   src: string;
@@ -30,6 +34,7 @@ interface FileProps {
   zoomLevel?: number;
   files?: File[];
   triggerComponent?: React.ReactNode;
+  noPreview?: boolean;
 }
 
 export const withFileOptions = <P extends FileProps>(
@@ -42,6 +47,21 @@ export const withFileOptions = <P extends FileProps>(
     const handleToggleMenu = () => {
       setIsMenuOpen(!isMenuOpen);
     };
+
+    if (props.noPreview) {
+      return (
+        <FileDialogView
+          triggerComponent={
+            <DialogTrigger asChild>
+              <button className="text-blue-500 hover:underline">
+                {props.fileName}
+              </button>
+            </DialogTrigger>
+          }
+          {...props}
+        />
+      );
+    }
 
     return (
       <div className="group relative inline-block h-full max-h-[150px] w-[150px] min-w-[150px] overflow-hidden justify-center items-center flex border bg-gray-100">
@@ -131,7 +151,6 @@ export const FileDialogView: React.FC<FileProps> = ({
   const [currentFileType, setCurrentFileType] = useState(fileType);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("")
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -140,20 +159,21 @@ export const FileDialogView: React.FC<FileProps> = ({
   const { user } = useUserWorkspace();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isAnnotationNameOpen, setIsAnnotationNameOpen] = useState(false);
-  const [annotationName, setAnnotationName] = useState('');
-  const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isInitialMessageOpen, setIsInitialMessageOpen] = useState(false);
+  const filesContainerRef = useRef<HTMLDivElement>(null);
+  const [isDialogMounted, setIsDialogMounted] = useState(false);
 
   const {
     zoomLevel,
     isDragging,
     position,
-    handleZoomChange: handleZoomChangeHook,
+    handleWheel,
+    isSpacePressed,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    resetZoomAndPosition,
-  } = useFileHandlers();
+    resetZoom,
+  } = useFileHandlers(1, currentFileType);
 
 
   const { 
@@ -169,58 +189,118 @@ export const FileDialogView: React.FC<FileProps> = ({
     setSelectedAnnotation,
     deleteAnnotation,
     updateAnnotation
-  } = useAnnotations(selectedFile?.id ?? '', isDialogOpen);
+  } = useAnnotations({ fileId: selectedFile?.id ?? '', fileName: selectedFile?.name ?? '', isDialogOpen, isInitialMessageOpen });
   
   useEffect(() => {
     if (files?.length) {
       const currentFile = files.find(f => f.name === fileName);
       setSelectedFile(currentFile ?? null);
       setCurrentFileType(currentFile?.type ?? fileType);
-      resetZoomAndPosition();
+      resetZoom();
       setValue("1x");
     }
   }, [files, fileName, fileType]);
 
-  const handleZoomChange = (value: string) => {
-    handleZoomChangeHook(value);
-    setValue(value);
-  };
+  useEffect(() => {
+    if (isLoadingAnnotations) {
+      setIsCreatingAnnotation(false);
+    } else {
+      setIsCreatingAnnotation(true);
+    }
+  }, [isCreatingAnnotation, isLoadingAnnotations, setIsCreatingAnnotation]);
+
+  useEffect(() => {
+    if (!isChatOpen) {
+      // Remove all annotations with empty content
+      const updatedAnnotations = annotations.filter(a => a.content !== '');
+      annotations.length = 0;
+      annotations.push(...updatedAnnotations);
+      
+      setSelectedAnnotation(null);
+      setIsInitialMessageOpen(false);
+    }
+  }, [isChatOpen, annotations, setIsInitialMessageOpen, setSelectedAnnotation]);
+
+  useEffect(() => {
+    if (isDialogOpen) {
+      // Set initial file when dialog opens
+      const currentFile = files?.find(f => f.name === fileName);
+      setSelectedFile(currentFile ?? null);
+      setCurrentFileType(currentFile?.type ?? fileType);
+      
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        setIsDialogMounted(true);
+      }, 100);
+
+      return () => clearTimeout(timer);
+    } else {
+      setIsDialogMounted(false);
+    }
+  }, [isDialogOpen, files, fileName, fileType]);
+
+  useEffect(() => {
+    if (selectedFile && filesContainerRef.current && isDialogMounted) {
+      const container = filesContainerRef.current;
+      const selectedElement = container.querySelector(`[data-file-name="${selectedFile.name}"]`);
+      
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    }
+  }, [selectedFile, isDialogMounted]);
 
   const handleImageClick = async (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isCreatingAnnotation || !imageRef.current || !user) return;
+    if (!isCreatingAnnotation || !imageRef.current || !user || isSpacePressed || currentFileType.startsWith('video/') || isChatOpen) return;
 
     const rect = imageRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-    setClickPosition({ x, y });
-    setIsAnnotationNameOpen(true);
-  };
-
-  const handleAnnotationNameSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!annotationName.trim() || !clickPosition || !selectedFile || !user) return;
-
     try {
-      createAnnotation({
-        file_id: selectedFile.id,
-        position_x: clickPosition.x,
-        position_y: clickPosition.y,
-        content: annotationName,
+      const annotation = {
+        id: crypto.randomUUID(),
+        file_id: selectedFile?.id ?? '',
+        position_x: x,
+        position_y: y,
+        content: '',
         user_id: user.id,
-        page_number: currentPage
-      });
+        page_number: currentFileType.startsWith('application/pdf') ? currentPage : 0,
+        status: 'active' as 'active' | 'completed' | 'draft',
+        number: annotations.length + 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
 
-      setIsCreatingAnnotation(false);
-      setIsAnnotationNameOpen(false);
-      setAnnotationName('');
-      setClickPosition(null);
-      toast.success(t('annotations.addSuccess'));
+      setIsInitialMessageOpen(true);
+      setSelectedAnnotation(annotation);
+      annotations.push(annotation);
+      setIsChatOpen(true);
     } catch (error) {
       console.error('Error creating annotation:', error);
-      setIsCreatingAnnotation(false);
       toast.error(t('annotations.addError'));
+    }
+  };
+
+  const handleSendMessage = async (content: string) => {
+    if (!selectedAnnotation || !user) return;
+    if (isInitialMessageOpen) {
+      const annotation = await createAnnotation({
+        file_id: selectedFile?.id,
+        position_x: selectedAnnotation.position_x,
+        position_y: selectedAnnotation.position_y,
+        content: content,
+        user_id: user.id,
+        page_number: currentFileType.startsWith('application/pdf') ? currentPage : 0
+      });
+      setIsChatOpen(false);
+      setSelectedAnnotation(annotation);
+      setIsInitialMessageOpen(false);
+    } else {
+      await addMessage({ parent_id: selectedAnnotation.message_id, content, user_id: user.id });
     }
   };
 
@@ -234,40 +314,31 @@ export const FileDialogView: React.FC<FileProps> = ({
     setSelectedAnnotation(null);
   };
 
-  const handleMessageSubmit = async (content: string) => {
-    if (!selectedAnnotation || !user) return;
-
-    try {
-      if (selectedAnnotation.message_id) {
-        addMessage({
-          parent_id: selectedAnnotation.message_id ,
-          content,
-          user_id: user.id
-        });
-        toast.success(t('message.messageSent'));
-      } else {
-        console.error('No message_id found for the selected annotation');
-      }
-    } catch (error) {
-      console.error('Error adding message:', error);
-      toast.error(t('message.messageSentError'));
-    }
-  };
-
   const handleDeleteAnnotation = async (annotationId: string) => {
     if (!selectedFile) return;
-    deleteAnnotation(annotationId);
+    await deleteAnnotation(annotationId);
   };
 
   const handleUpdateAnnotation = async (annotationId: string, status: 'completed' | 'draft' | 'active' ) => {
     if (!selectedFile) return;
-    updateAnnotation({ annotationId, status });
+    await updateAnnotation({ annotationId, status });
+  };
+
+  const handleChatClick = (fileId: string) => {
+    const fileToShow = files?.find(f => f.id === fileId);
+    if (fileToShow) {
+      setSelectedFile(fileToShow);
+      setCurrentFileType(fileToShow.type);
+      setValue("1x");
+      resetZoom();
+      setCurrentPage(1);
+    }
   };
 
   const renderAnnotationsList = (filteredAnnotations: any[]) => {
     if (filteredAnnotations.length === 0) {
       return (
-        <div className="flex p-4 items-start gap-5 self-stretch">
+        <div className="flex p-4 items-start gap-5">
           <div className="w-4 h-4">
             <MessageCircle className="w-4 h-4 text-gray-900" />
           </div>
@@ -278,19 +349,29 @@ export const FileDialogView: React.FC<FileProps> = ({
       );
     }
 
-    return filteredAnnotations.map((annotation) => (
-      <div key={annotation.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg group relative">
+    return filteredAnnotations
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+      .map((annotation) => (
+      <div key={annotation.id} className="">
         {activeTab === 'active' ? (
-          <ActiveChats chat={annotation} onUpdate={handleUpdateAnnotation} />
+          <>
+            <ActiveChats 
+              chat={annotation} 
+              onUpdate={handleUpdateAnnotation} 
+              onDelete={handleDeleteAnnotation}
+              onChatClick={handleChatClick}
+              t={t}
+            />
+          </>
         ) : (
-          <ResolvedChat chat={annotation} />
+          <>
+            <ResolvedChat 
+              chat={annotation} 
+              onDelete={handleDeleteAnnotation}
+              t={t}
+            />
+          </>
         )}
-        <button
-          onClick={(e) => handleDeleteAnnotation(annotation.id, e)}
-          className="absolute right-2 p-1 bg-white rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
-        >
-          <Trash2 className="w-4 h-4 text-red-500" />
-        </button>
       </div>
     ));
   };
@@ -309,7 +390,7 @@ export const FileDialogView: React.FC<FileProps> = ({
     );
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 ">
         {renderAnnotationsList(filteredAnnotations)}
       </div>
     );
@@ -321,21 +402,48 @@ export const FileDialogView: React.FC<FileProps> = ({
       <DialogContent className="p-0 h-[90vh] w-[90vw] max-w-[90vw] flex flex-col">
         <div className="p-4">
           <DialogHeader>
-            <DialogTitle>{selectedFile?.name ?? fileName}</DialogTitle>
+            <div className="flex justify-between">
+              <DialogTitle>{selectedFile?.name ?? fileName}</DialogTitle> 
+              <div className="flex">
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <QuestionMarkCircledIcon className="w-4 h-4 text-gray-600 mr-4" />
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                  <div>
+                    <p className="font-bold">{t('annotations.help.title')}</p>
+                    <ul className="list-disc pl-4 text-sm text-gray-700">
+                      <li>
+                        <strong>{t('annotations.help.move')}</strong> {t('annotations.help.spacebar')}
+                      </li>
+                      <li>
+                        <strong>{t('annotations.help.zoom')}</strong> {t('annotations.help.mouseWheel')}
+                      </li>
+                    </ul>
+                  </div>
+                  </HoverCardContent>
+                </HoverCard>
+                <ArrowDownToLine className="w-4 h-4 cursor-pointer text-gray-600 mr-8" onClick={() => handleFileDownload(selectedFile?.url, selectedFile?.name)} />
+              </div>
+            </div>
           </DialogHeader>
         </div>
         <Separator />
-        <div className="flex flex-1 gap-4 min-h-0 overflow-hidden px-4 py-0">
-          <div className="w-[20%]  overflow-y-auto flex flex-col gap-4 items-center">
+        <div className="flex flex-1 min-h-0 overflow-hidden">
+          <div 
+            ref={filesContainerRef} 
+            className="w-52 overflow-y-auto flex flex-col gap-4 items-center"
+          >
             {files?.map((file, index) => (
               <div 
+                data-file-name={file.name}
                 className='flex flex-col cursor-pointer hover:opacity-80' 
                 key={index}
                 onClick={() => {
                   setSelectedFile(file);
                   setCurrentFileType(file.type);
                   setValue("1x");
-                  resetZoomAndPosition();
+                  resetZoom();
                   setCurrentPage(1);
                 }}
               >
@@ -354,33 +462,22 @@ export const FileDialogView: React.FC<FileProps> = ({
             ))}
           </div>
 
-          <div className={`flex flex-col gap-4 items-center ${currentFileType.startsWith('image/') ? 'w-[50%]' : 'w-[80%]'}`}>
-            <FileToolbar
-              currentFileType={currentFileType}
-              value={value}
-              open={open}
-              setOpen={setOpen}
-              isCreatingAnnotation={isCreatingAnnotation}
-              setIsCreatingAnnotation={setIsCreatingAnnotation}
-              handleZoomChange={handleZoomChange}
-              handleFileDownload={handleFileDownload}
-              selectedFile={selectedFile}
-              t={t}
-            />
+          <div className={`flex flex-col justify-between items-center ${currentFileType.startsWith('image/') || currentFileType.startsWith('application/pdf') ? 'w-[70%] pl-4' : 'w-[90%] px-4 '}`}>
             <FileViewer
               currentFileType={currentFileType}
               containerRef={containerRef}
               handleMouseUp={handleMouseUp}
               handleMouseMove={handleMouseMove}
+              handleWheel={handleWheel}
               imageRef={imageRef}
               handleImageClick={handleImageClick}
               handleMouseDown={handleMouseDown}
               zoomLevel={zoomLevel}
               position={position}
               isDragging={isDragging}
-              isCreatingAnnotation={isCreatingAnnotation}
               selectedFile={selectedFile}
               currentPage={currentPage}
+              totalPages={totalPages}
               setTotalPages={setTotalPages}
               isLoadingAnnotations={isLoadingAnnotations}
               annotations={annotations}
@@ -390,13 +487,16 @@ export const FileDialogView: React.FC<FileProps> = ({
               setSelectedAnnotation={setSelectedAnnotation}
               handleAnnotationClick={handleAnnotationClick}
               handleChatClose={handleChatClose}
-              handleMessageSubmit={handleMessageSubmit}
+              handleMessageSubmit={handleSendMessage}
               isLoadingMessages={isLoadingMessages}
               messages={messages}
+              isSpacePressed={isSpacePressed}
+              isInitialMessageOpen={isInitialMessageOpen}
+              setIsInitialMessageOpen={setIsInitialMessageOpen}
+              className={currentFileType.startsWith('application/pdf') && totalPages > 2 ? '' : 'h-[78vh]'}
             />
-            <div className='flex items-center justify-center w-full h-10'>
-              {currentFileType.startsWith('application/pdf') ? (
-                <div>
+            {currentFileType.startsWith('application/pdf') && totalPages > 2 ? (
+                <div className='flex justify-center items-center pb-4'>
                   <FilePagination
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -404,17 +504,16 @@ export const FileDialogView: React.FC<FileProps> = ({
                   />
                 </div>
               ) : (
-                <div></div>
+                <></>
               )}
-            </div>
           </div>
 
           {
-            currentFileType.startsWith('image/') ? (
-              <div className="w-[30%] flex flex-col">
+            !currentFileType.startsWith('video/') ?  (
+              <div className="w-80 flex flex-col">
                 <div className="flex border-b h-10">
                   <button
-                    className={`flex-1 px-4 py-2 text-sm font-medium ${
+                    className={`flex-1 py-2 text-sm font-medium ${
                       activeTab === 'active' 
                         ? 'border-b-2 border-brand text-brand' 
                         : 'text-gray-500'
@@ -424,7 +523,7 @@ export const FileDialogView: React.FC<FileProps> = ({
                     {t('annotations.chat.active')} ({annotations.filter((a) => a.status === 'active').length})
                   </button>
                   <button
-                    className={`flex-1 px-4 py-2 text-sm font-medium ${
+                    className={`flex-1 py-2 text-sm font-medium ${
                       activeTab === 'resolved' 
                         ? 'border-b-2 border-brand text-brand' 
                         : 'text-gray-500'
@@ -434,7 +533,7 @@ export const FileDialogView: React.FC<FileProps> = ({
                     {t('annotations.chat.resolved')} ({annotations.filter((a) => a.status === 'completed').length})
                   </button>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto w-80">
                   {renderAnnotationsContent()}
                 </div>
               </div>
@@ -444,14 +543,6 @@ export const FileDialogView: React.FC<FileProps> = ({
           }
         </div>
       </DialogContent>
-      <AnnotationNameDialog
-        isOpen={isAnnotationNameOpen}
-        onClose={setIsAnnotationNameOpen}
-        onSubmit={handleAnnotationNameSubmit}
-        annotationName={annotationName}
-        setAnnotationName={setAnnotationName}
-        t={t}
-      />
     </Dialog>
   );
 };

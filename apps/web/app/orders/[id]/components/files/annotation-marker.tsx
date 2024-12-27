@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@kit/ui/button';
 import { useTranslation } from 'react-i18next';
 import { Spinner } from '@kit/ui/spinner';
@@ -21,23 +21,29 @@ export const AnnotationMarker: React.FC<AnnotationMarkerProps> = ({
   number,
   onClick,
   isActive = false,
+  annotation,
 }) => {
   return (
     <div
-      className={`absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110 ${
+      className={`transform -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110 ${
         isActive ? 'z-50' : 'z-40'
       }`}
-      style={{ left: `${x}%`, top: `${y}%` }}
-      onClick={onClick}
     >
       <MarkerIcon />
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full">
-          <span className="text-brand font-bold text-sm">
-            {number}
-          </span>
-        </div>
-      </div>
+      {
+        annotation.accounts && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full">
+          <Avatar className="w-6 h-6">
+            <AvatarImage src={annotation.accounts?.settings?.picture_url ?? ''} />
+            <AvatarFallback>
+              {annotation.accounts?.name?.charAt(0).toUpperCase() ?? 'U'}
+            </AvatarFallback>
+          </Avatar>
+            </div>
+          </div>
+        )
+      }
     </div>
   );
 };
@@ -45,7 +51,7 @@ export const AnnotationMarker: React.FC<AnnotationMarkerProps> = ({
 interface AnnotationChatProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (content: string) => void;
+  onSubmit: (content: string, is_first_message: boolean) => Promise<void>;
   messages: Array<{
     id: string;
     content: string;
@@ -53,7 +59,8 @@ interface AnnotationChatProps {
     created_at: string;
   }>;
   isLoading?: boolean;
-  annotationName: string;
+  annotation: any;
+  isInitialMessageOpen: boolean;
 }
 
 export const AnnotationChat: React.FC<AnnotationChatProps> = ({
@@ -62,15 +69,20 @@ export const AnnotationChat: React.FC<AnnotationChatProps> = ({
   onSubmit,
   messages,
   isLoading = false,
-  annotationName,
+  annotation,
+  isInitialMessageOpen,
 }) => {
   const [newMessage, setNewMessage] = React.useState('');
   const { t } = useTranslation('orders');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim()) {
-      onSubmit(newMessage);
+      if(messages.length === 0 && annotation.message_content === 'Annotation') {
+        await onSubmit(newMessage, true);
+      } else {
+        await onSubmit(newMessage, false);
+      }
       setNewMessage('');
     }
   };
@@ -82,43 +94,69 @@ export const AnnotationChat: React.FC<AnnotationChatProps> = ({
       <div className="bg-white rounded-lg shadow-lg sm:max-w-[425px] w-[425px]">
         <div className="flex justify-between items-center p-4">
           <h3 className="font-semibold text-lg">
-            {annotationName}
+            {t('annotations.chat.title')}
           </h3>
           <XIcon className="w-4 h-4 cursor-pointer" onClick={onClose}/>
         </div>
-        <div className="flex flex-col gap-4 h-[400px] overflow-y-auto p-4 relative">
+        <div className="flex flex-col gap-4 h-[300px] overflow-y-auto p-4 relative">
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-white/80">
               <Spinner className="w-6 h-6" />
             </div>
           ) : (
-            messages.map((message) => (
-              <div key={message.id} className="flex flex-col items-start gap-3.5 self-stretch bg-gray-50 p-4">
-                <div className="flex items-start justify-between w-full">
-                  <div className="w-10 h-10 rounded-full overflow-hidden">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={message.accounts?.user_settings?.picture_url} />
-                      <AvatarFallback>
-                        {message.accounts?.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+            <>
+              {annotation.message_content !== 'Annotation' && !isInitialMessageOpen && (
+                <div className="flex flex-col items-start gap-3.5 self-stretch bg-gray-50 p-4">
+                  <div className="flex items-start justify-between w-full">
+                    <div className="w-10 h-10 rounded-full overflow-hidden">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={annotation.accounts?.settings?.picture_url ?? ''} />
+                        <AvatarFallback>
+                          {annotation.accounts?.name?.charAt(0).toUpperCase() ?? 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <p className="overflow-hidden text-gray-900 truncate font-inter text-base font-bold leading-6">
+                      {annotation.accounts?.name}
+                    </p>
+                    <p className="text-gray-600 font-inter text-xs font-normal leading-5 w-[25%] text-end">
+                      {new Date(annotation.created_at).toLocaleDateString('es-ES', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </p>
                   </div>
-                  <p className="overflow-hidden text-gray-900 truncate font-inter text-base font-bold leading-6">{message.accounts.name}</p>
-                  <p className="text-gray-600 font-inter text-xs font-normal leading-5">
-                    {new Date(message.created_at).toLocaleDateString('es-ES', {
-                      weekday: 'long',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true
-                    }).replace(/^./, str => str.toUpperCase())}
+                  <p className="px-4 text-gray-900 font-inter text-sm font-normal">
+                    {annotation.message_content}
                   </p>
                 </div>
-                <p className="px-4 text-gray-900 font-inter text-sm font-normal">{message.content}</p>
-              </div>
-            ))
+              )}
+              {messages.map((message) => (
+                <div key={message.id} className="flex flex-col items-start gap-3.5 self-stretch bg-gray-50 p-4">
+                  <div className="flex items-start justify-between w-full">
+                    <div className="w-10 h-10 rounded-full overflow-hidden">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={message.accounts?.user_settings?.picture_url} />
+                        <AvatarFallback>
+                          {message.accounts?.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <p className="overflow-hidden text-gray-900 truncate font-inter text-base font-bold leading-6">{message.accounts.name}</p>
+                    <p className="text-gray-600 font-inter text-xs font-normal leading-5 w-[25%] text-end">
+                      {new Date(message.created_at).toLocaleDateString('es-ES', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <p className="px-4 text-gray-900 font-inter text-sm font-normal">{message.content}</p>
+                </div>
+              ))}
+            </>
           )}
         </div>
-        <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t">
+        <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t mt-auto">
           <Input
             type="text"
             value={newMessage}

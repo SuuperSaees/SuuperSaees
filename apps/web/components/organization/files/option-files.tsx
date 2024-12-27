@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Download, Plus } from 'lucide-react';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import {
   createFile,
   createUploadBucketURL,
@@ -31,20 +32,24 @@ import {
 } from '@kit/ui/dropdown-menu';
 
 import { generateUUID } from '~/utils/generate-uuid';
-import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 export function OptionFiles({
   clientOrganizationId,
   currentPath,
+  queryKey,
 }: {
   clientOrganizationId: string;
   currentPath: Array<{ title: string; uuid?: string }>;
+  queryKey: string[];
 }) {
   const { t } = useTranslation('organizations');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
-  const showDropdown = !(currentPath.length > 0 && (!currentPath[0]?.uuid || currentPath[0]?.uuid === ''));
+  const showDropdown = !(
+    currentPath.length > 0 &&
+    (!currentPath[0]?.uuid || currentPath[0]?.uuid === '')
+  );
 
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -63,9 +68,8 @@ export function OptionFiles({
 
     onSuccess: async () => {
       toast.success(t('folders.new.success', { folderName }));
-
       await queryClient.invalidateQueries({
-        queryKey: ['folders', clientOrganizationId],
+        queryKey: queryKey,
       });
     },
     onError: () => {
@@ -89,7 +93,6 @@ export function OptionFiles({
 
     onSuccess: async () => {
       const lastFolder = currentPath[currentPath.length - 1];
-
       toast.success(
         t('folders.new.successSubfolder', {
           folderName,
@@ -97,27 +100,8 @@ export function OptionFiles({
         }),
       );
 
-      // Override relevant queries based on the current folder type
-      if (currentPath.length === 0) {
-        // If we are at the root level
-        await queryClient.invalidateQueries({
-          queryKey: ['folders', clientOrganizationId],
-        });
-      } else if (currentPath[0]?.title === 'Orders') {
-        // If we are in an Orders folder
-        await queryClient.invalidateQueries({
-          queryKey: ['foldersByFolder', clientOrganizationId],
-        });
-      } else {
-        // If we are in a subfolder
-        await queryClient.invalidateQueries({
-          queryKey: ['subFolders', lastFolder?.uuid],
-        });
-      }
-
-      // Also invalidate the query for files in the current folder
       await queryClient.invalidateQueries({
-        queryKey: ['files', lastFolder?.uuid ?? clientOrganizationId],
+        queryKey: queryKey,
       });
     },
 
@@ -139,10 +123,9 @@ export function OptionFiles({
 
     onSuccess: async () => {
       toast.success(t('files.new.uploadSuccess'));
-      const lastFolder = currentPath[currentPath.length - 1];
 
       await queryClient.invalidateQueries({
-        queryKey: ['files', lastFolder?.uuid ?? clientOrganizationId],
+        queryKey: queryKey,
       });
     },
 
@@ -310,12 +293,14 @@ export function OptionFiles({
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={triggerFileInput}
-                >
-                  {t('files.new.file')}
-                </DropdownMenuItem>
+                {currentPath.length > 0 && (
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={triggerFileInput}
+                  >
+                    {t('files.new.file')}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() => setDialogOpen(true)}

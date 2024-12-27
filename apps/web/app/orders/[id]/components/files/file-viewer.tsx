@@ -17,6 +17,7 @@ interface FileViewerProps {
   isCreatingAnnotation: boolean;
   selectedFile: any;
   currentPage: number;
+  totalPages: number;
   setTotalPages: (total: number) => void;
   isLoadingAnnotations: boolean;
   annotations: any[];
@@ -26,9 +27,14 @@ interface FileViewerProps {
   setSelectedAnnotation: (annotation: any) => void;
   handleAnnotationClick: (annotation: any) => void;
   handleChatClose: () => void;
-  handleMessageSubmit: (message: string) => void;
+  handleMessageSubmit: (message: string, is_first_message: boolean) => Promise<void>;
   isLoadingMessages: boolean;
   messages: any[];
+  handleWheel: (e: React.WheelEvent<HTMLDivElement>) => void;
+  isSpacePressed: boolean; 
+  isInitialMessageOpen: boolean;
+  setIsInitialMessageOpen: (isInitialMessageOpen: boolean) => void;
+  className?: string;
 }
 
 const FileViewer = ({ 
@@ -42,9 +48,9 @@ const FileViewer = ({
   zoomLevel, 
   position, 
   isDragging, 
-  isCreatingAnnotation, 
   selectedFile,
   currentPage,
+  totalPages,
   setTotalPages,
   isLoadingAnnotations,
   annotations,
@@ -56,42 +62,37 @@ const FileViewer = ({
   handleChatClose,
   handleMessageSubmit,
   isLoadingMessages,
-  messages
+  messages,
+  handleWheel,
+  isSpacePressed,
+  isInitialMessageOpen,
+  setIsInitialMessageOpen,
+  className
 }: FileViewerProps) => {
   return (
-    <div className={`w-full ${currentFileType.startsWith('image/') ? 'h-full' : 'h-[60vh]'}`}>
+    <div className={`w-full ${className}`}>
     <div
       ref={containerRef}
       className="w-full h-full"
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onMouseMove={handleMouseMove}
+      onWheel={handleWheel}
     >
-      <div className="w-full h-full bg-gray-100 p-4 overflow-hidden">
+      <div className="w-full h-full bg-gray-100 p-4 overflow-hidden items-center justify-center flex">
         <div
           ref={imageRef}
-          onClick={handleImageClick}
-          onMouseDown={currentFileType.startsWith('image/') ? handleMouseDown : undefined}
-          onDragStart={(e) => e.preventDefault()}
+          onClick={!isSpacePressed ? handleImageClick : undefined}
+          onMouseDown={handleMouseDown}
           style={{
-            transform: currentFileType.startsWith('image/') 
-              ? `scale(${zoomLevel}) translate(${position.x / zoomLevel}px, ${position.y / zoomLevel}px)`
-              : 'none',
+            transform: `scale(${zoomLevel}) translate(${position.x / zoomLevel}px, ${position.y / zoomLevel}px)`,
             transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-            cursor: isCreatingAnnotation 
-              ? 'crosshair'
-              : currentFileType.startsWith('image/') 
-                ? isDragging 
-                  ? 'grabbing' 
-                  : 'grab'
-                : 'default',
+            cursor: isSpacePressed 
+              ? (isDragging ? 'grabbing' : 'grab') 
+              : (currentFileType.startsWith('video/') || isChatOpen 
+                  ? 'default' 
+                  : 'crosshair'),
             userSelect: 'none',
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative'
           }}
         >
           {selectedFile && (
@@ -100,7 +101,7 @@ const FileViewer = ({
                 src={selectedFile.url}
                 fileName={selectedFile.name}
                 fileType={selectedFile.type}
-                className="max-w-full max-h-full"
+                className={`${currentFileType.startsWith('application/pdf') && totalPages > 2 ? 'h-[60vh]' : 'h-[70vh]'}`}
                 isDialog={true}
                 actualPage={currentPage}
                 onLoadPDF={(total) => setTotalPages(total)}
@@ -112,36 +113,76 @@ const FileViewer = ({
                 </div>
               ) : (
                 <>
-                  {annotations.map((annotation) => (
-                    <Popover key={annotation.id} open={selectedAnnotation?.id === annotation.id && isChatOpen} onOpenChange={(open) => {
-                        setIsChatOpen(open);
-                        if (!open) setSelectedAnnotation(null);
-                      }}>
-                      <PopoverTrigger asChild>
-                        <button 
-                          className="bg-transparent border-none p-0 cursor-pointer"
-                          onClick={() => handleAnnotationClick(annotation)}
+                  {annotations
+                    .filter(annotation => 
+                      currentFileType.startsWith('application/pdf') 
+                        ? annotation.page_number === currentPage 
+                        : true
+                    )
+                    .map((annotation) => (
+                      <div 
+                        key={annotation.id}
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute"
+                        style={{ 
+                          left: `${annotation.position_x}%`, 
+                          top: `${annotation.position_y}%` 
+                        }}
+                      >
+                        <Popover 
+                          open={selectedAnnotation?.id === annotation.id && isChatOpen}
+                          onOpenChange={(open) => {
+                            if (open) {
+                              setSelectedAnnotation(annotation);
+                            }
+                            setIsChatOpen(open);
+                            if (!open) {
+                              setSelectedAnnotation(null);
+                              setIsInitialMessageOpen(false);
+                            }
+                          }}
                         >
-                          <AnnotationMarker
-                            x={annotation.position_x}
-                            y={annotation.position_y}
-                            number={annotation.number}
-                            isActive={selectedAnnotation?.id === annotation.id}
-                          />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80">
-                        <AnnotationChat
-                          isOpen={isChatOpen}
-                          onClose={handleChatClose}
-                          onSubmit={handleMessageSubmit}
-                          messages={messages}
-                          isLoading={isLoadingMessages}
-                          annotationName={selectedAnnotation?.message_content ?? ''}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  ))}
+                          <PopoverTrigger asChild>
+                            <button 
+                              className="bg-transparent border-none p-0 cursor-pointer"
+                              onClick={() => {
+                                handleAnnotationClick(annotation);
+                                setIsChatOpen(!isChatOpen);
+                              }}
+                            >
+                              {
+                                selectedFile.id === annotation.file_id && annotation.status === 'active' ? (
+                                  <AnnotationMarker
+                                    x={0}
+                                    y={0}
+                                    number={annotation.number}
+                                    isActive={selectedAnnotation?.id === annotation.id}
+                                    annotation={annotation}
+                                  />
+                                ) : null
+                              }
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent 
+                            className="w-80" 
+                            sideOffset={5}
+                            side="right"
+                            align="start"
+                            isDraggable={true}
+                          >
+                            <AnnotationChat
+                              isOpen={isChatOpen}
+                              onClose={handleChatClose}
+                              onSubmit={handleMessageSubmit}
+                              messages={messages}
+                              isLoading={isLoadingMessages}
+                              annotation={annotation}
+                              isInitialMessageOpen={isInitialMessageOpen}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    ))}
                 </>
               )}
             </>
