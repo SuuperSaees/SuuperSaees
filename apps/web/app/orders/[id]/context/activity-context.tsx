@@ -30,7 +30,6 @@ import {
   TableName,
   UserExtended,
 } from './activity.types';
-import { Brief } from '~/lib/brief.types';
 
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -43,7 +42,6 @@ export const ActivityProvider = ({
   reviews: serverReviews,
   files: serverFiles,
   order: serverOrder,
-  briefResponses: serverBriefResponses,
   userRole,
 }: {
   children: ReactNode;
@@ -53,7 +51,6 @@ export const ActivityProvider = ({
   files: DataResult.File[];
   order: DataResult.Order;
   userRole: string;
-  briefResponses: Brief.Relationships.FormFieldResponse.Response[];
 }) => {
   const { t } = useTranslation('orders');
   const [order, setOrder] = useState<DataResult.Order>(serverOrder);
@@ -420,7 +417,6 @@ export const ActivityProvider = ({
         files: files.filter((svFile) => !svFile.message_id),
         allFiles: files,
         order,
-        briefResponses: serverBriefResponses,
         userRole,
         addMessage: async ({
           message,

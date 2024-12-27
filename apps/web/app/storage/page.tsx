@@ -4,7 +4,6 @@ import {
   getUserRole,
 } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import {
-  getAgencyForClient,
   getOrganization,
 } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 
@@ -33,11 +32,6 @@ async function StoragePage() {
     ...organization,
     owner: organizationOwner ?? null, // Add owner explicitly
   };
-  const agency = await getAgencyForClient(newOrganization.id ?? '').catch((err) => {
-    console.error(`Error getting agency for client: ${err}`)
-    return null
-  });
-
 
   return (
     <div className="space-y-10 p-8">
@@ -48,7 +42,7 @@ async function StoragePage() {
         owner={newOrganization.owner}
         currentUserRole={userRole}
       />
-      <FilesView clientOrganizationId={newOrganization.id ?? ''} agencyId={agency?.id ?? ''}/>
+      <FilesView clientOrganizationId={newOrganization.id ?? ''} />
     </div>
   );
 }

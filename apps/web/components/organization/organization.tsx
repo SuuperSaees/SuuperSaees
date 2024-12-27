@@ -12,7 +12,6 @@ interface OrganizationSectionProps {
   };
   clientOrganizationId: string;
   currentUserRole: string;
-  agencyId: string;
 }
 function OrganizationSection({
   name,
@@ -20,7 +19,6 @@ function OrganizationSection({
   owner,
   clientOrganizationId,
   currentUserRole,
-  agencyId,
 }: OrganizationSectionProps) {
   return (
     <div className="flex h-full flex-col gap-8 p-8">
@@ -28,7 +26,6 @@ function OrganizationSection({
       <SectionView
         clientOrganizationId={clientOrganizationId}
         currentUserRole={currentUserRole}
-        agencyId={agencyId}
       />
     </div>
   );
