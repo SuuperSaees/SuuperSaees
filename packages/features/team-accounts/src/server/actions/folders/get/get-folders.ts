@@ -1,26 +1,67 @@
 'use server';
 
-import { SupabaseClient } from '@supabase/supabase-js';
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { getUserRoleById } from '../../members/get/get-member-account';
 
-interface FolderData {
-  id: string;
-  name: string;
-  parent_folder_id?: string | null;
-}
+export async function getAllFolders(clientOrganizationId: string) {
+  const client = getSupabaseServerComponentClient();
 
-interface FolderResponse {
-  uuid: string;
-  title: string;
-}
+  // Fetch the current user data
+  const { data: userData, error: userError } = await client.auth.getUser();
 
-// Base folder query builder
-const createFolderQuery = (client: SupabaseClient) => {
-  return client.from('folders');
-};
+  if (userError) throw userError;
+
+  const userRole = await getUserRoleById(userData.user.id);
+
+  if (
+    userRole === 'agency_owner' ||
+    userRole === 'agency_member' ||
+    userRole === 'agency_project_manager'
+  ) {
+    // Fecth the agencies of the user
+    const { data: agencies, error: agenciesError } = await client
+      .from('accounts')
+      .select('id')
+      .eq('primary_owner_user_id', userData.user.id)
+      .eq('is_personal_account', false);
+
+    if (agenciesError) throw agenciesError;
+
+    // Fetch the folders without order
+    const { data: foldersWithoutOrder, error: foldersWithoutOrderError } =
+      await client
+        .from('folders')
+        .select('name, id')
+        .eq('client_organization_id', clientOrganizationId)
+        .eq('agency_id', agencies?.[0]?.id ?? '')
+        .eq('is_subfolder', false);
+    if (foldersWithoutOrderError) throw foldersWithoutOrderError;
+
+    const folders = foldersWithoutOrder.map((folder) => ({
+      title: folder.name,
+      uuid: folder.id,
+    }));
+
+    return folders;
+  }
+
+  // Fetch the folders without order
+  const { data: foldersWithoutOrder, error: foldersWithoutOrderError } =
+    await client
+      .from('folders')
+      .select('name, id')
+      .eq('client_organization_id', clientOrganizationId)
+      .eq('is_subfolder', false);
+  if (foldersWithoutOrderError) throw foldersWithoutOrderError;
+
+  const folders = foldersWithoutOrder.map((folder) => ({
+    title: folder.name,
+    uuid: folder.id,
+  }));
+
+  return folders;
+}
 
 export async function getOrdersFolders(clientOrganizationId: string) {
   const client = getSupabaseServerComponentClient();
@@ -68,6 +109,20 @@ export async function getOrdersFolders(clientOrganizationId: string) {
   return folders;
 }
 
+export async function getFoldersByFolder(folderUuid: string) {
+  const client = getSupabaseServerComponentClient();
+
+  // Fetch the folders within the selected folder
+  const { data: folders, error: foldersError } = await client
+    .from('folders')
+    .select('name, id')
+    .eq('parent_folder_id', folderUuid);
+
+  if (foldersError) throw foldersError;
+
+  return folders;
+}
+
 export async function CheckIfItIsAnOrderFolder(folderUuid: string) {
   const client = getSupabaseServerComponentClient();
 
@@ -84,54 +139,4 @@ export async function CheckIfItIsAnOrderFolder(folderUuid: string) {
   if (folderUuid === '') return true;
 
   return false;
-}
-
-export async function getMainFolders(
-  client: SupabaseClient,
-  clientOrganizationId: string,
-): Promise<FolderResponse[]> {
-  const { data: folders, error } = await createFolderQuery(client)
-    .select('id, name, parent_folder_id')
-    .is('parent_folder_id', null)
-    .eq('client_organization_id', clientOrganizationId);
-
-  if (error) {
-    console.error('Error getting main folders:', error);
-    return [];
-  }
-
-  return (
-    (folders as FolderData[])?.map((folder) => ({
-      uuid: folder.id,
-      title: folder.name,
-    })) ?? []
-  );
-}
-
-export async function getFolderContents(
-  client: SupabaseClient,
-  folderId: string,
-): Promise<FolderResponse[]> {
-  const { data, error } = await createFolderQuery(client)
-    .select(
-      `
-      id,
-      name,
-      folders(id, name)
-    `,
-    )
-    .eq('id', folderId)
-    .single();
-
-  if (error) {
-    console.error('Error getting folder contents:', error);
-    return [];
-  }
-
-  return Array.isArray(data?.folders)
-    ? (data.folders as FolderData[]).map((folder) => ({
-        uuid: folder.id,
-        title: folder.name,
-      }))
-    : [];
 }

@@ -22,14 +22,12 @@ interface FolderItemProps {
   };
   onClick: () => void;
   isOrderFolder?: boolean;
-  queryKey: string[];
 }
 
 const FolderItem: React.FC<FolderItemProps> = ({
   folder,
   onClick,
   isOrderFolder,
-  queryKey,
 }) => {
   const { t } = useTranslation('organizations');
 
@@ -43,9 +41,16 @@ const FolderItem: React.FC<FolderItemProps> = ({
       // const lastFolder = currentPath[currentPath.length - 1];
 
       await queryClient.invalidateQueries({
-        queryKey: queryKey,
+        queryKey: ['folders'],
       });
 
+      await queryClient.invalidateQueries({
+        queryKey: ['foldersByFolder'],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['subFolders'],
+      });
     },
 
     onError: () => {

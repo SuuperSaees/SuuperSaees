@@ -2,7 +2,7 @@ import {
   getUserById,
   getUserRole,
 } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
-import { getAgencyForClient, getOrganization } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { getOrganization } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 import OrganizationSection from '~/components/organization/organization';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
@@ -32,11 +32,6 @@ async function OrganizationsPage() {
     owner: organizationOwner ?? null, // Add owner explicitly
   };
 
-  const agency = await getAgencyForClient(newOrganization.id ?? '').catch((err) => {
-    console.error(`Error getting agency for client: ${err}`)
-    return null
-  });
-
   return (
     <OrganizationSection
       name={newOrganization.name}
@@ -44,7 +39,6 @@ async function OrganizationsPage() {
       owner={newOrganization.owner}
       clientOrganizationId={newOrganization.id ?? ''}
       currentUserRole={userRole}
-      agencyId={agency?.id ?? ''}
     />
   );
 }
