@@ -143,6 +143,9 @@ export const FileDialogView: React.FC<FileProps> = ({
   const { user } = useUserWorkspace();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isInitialMessageOpen, setIsInitialMessageOpen] = useState(false);
+  const filesContainerRef = useRef<HTMLDivElement>(null);
+  const [isDialogMounted, setIsDialogMounted] = useState(false);
 
   const {
     zoomLevel,
@@ -170,7 +173,7 @@ export const FileDialogView: React.FC<FileProps> = ({
     setSelectedAnnotation,
     deleteAnnotation,
     updateAnnotation
-  } = useAnnotations(selectedFile?.id ?? '', isDialogOpen);
+  } = useAnnotations({ fileId: selectedFile?.id ?? '', fileName: selectedFile?.name ?? '', isDialogOpen, isInitialMessageOpen });
   
   useEffect(() => {
     if (files?.length) {
@@ -190,24 +193,75 @@ export const FileDialogView: React.FC<FileProps> = ({
     }
   }, [isCreatingAnnotation, isLoadingAnnotations, setIsCreatingAnnotation]);
 
+  useEffect(() => {
+    if (!isChatOpen) {
+      // Remove all annotations with empty content
+      const updatedAnnotations = annotations.filter(a => a.content !== '');
+      annotations.length = 0;
+      annotations.push(...updatedAnnotations);
+      
+      setSelectedAnnotation(null);
+      setIsInitialMessageOpen(false);
+    }
+  }, [isChatOpen, annotations, setIsInitialMessageOpen, setSelectedAnnotation]);
+
+  useEffect(() => {
+    if (isDialogOpen) {
+      // Set initial file when dialog opens
+      const currentFile = files?.find(f => f.name === fileName);
+      setSelectedFile(currentFile ?? null);
+      setCurrentFileType(currentFile?.type ?? fileType);
+      
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        setIsDialogMounted(true);
+      }, 100);
+
+      return () => clearTimeout(timer);
+    } else {
+      setIsDialogMounted(false);
+    }
+  }, [isDialogOpen, files, fileName, fileType]);
+
+  useEffect(() => {
+    if (selectedFile && filesContainerRef.current && isDialogMounted) {
+      const container = filesContainerRef.current;
+      const selectedElement = container.querySelector(`[data-file-name="${selectedFile.name}"]`);
+      
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    }
+  }, [selectedFile, isDialogMounted]);
+
   const handleImageClick = async (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isCreatingAnnotation || !imageRef.current || !user || isSpacePressed || currentFileType.startsWith('application/pdf')) return;
+    if (!isCreatingAnnotation || !imageRef.current || !user || isSpacePressed || !currentFileType.startsWith('image/') || isChatOpen) return;
 
     const rect = imageRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
     try {
-      const annotation = await createAnnotation({
-        file_id: selectedFile.id,
+      const annotation = {
+        id: crypto.randomUUID(),
+        file_id: selectedFile?.id ?? '',
         position_x: x,
         position_y: y,
-        content: 'Annotation',
+        content: '',
         user_id: user.id,
-        page_number: currentFileType.startsWith('application/pdf') ? currentPage : 1
-      });
+        page_number: currentFileType.startsWith('application/pdf') ? currentPage : 1,
+        status: 'active' as 'active' | 'completed' | 'draft',
+        number: annotations.length + 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
 
-      setSelectedAnnotation(annotation.data);
+      setIsInitialMessageOpen(true);
+      setSelectedAnnotation(annotation);
+      annotations.push(annotation);
       setIsChatOpen(true);
     } catch (error) {
       console.error('Error creating annotation:', error);
@@ -215,10 +269,20 @@ export const FileDialogView: React.FC<FileProps> = ({
     }
   };
 
-  const handleSendMessage = async (content: string, is_first_message: boolean) => {
+  const handleSendMessage = async (content: string) => {
     if (!selectedAnnotation || !user) return;
-    if (is_first_message) {
-      await updateAnnotation({ annotationId: selectedAnnotation.id, status: 'active', first_message: content, message_id: selectedAnnotation.message_id });
+    if (isInitialMessageOpen) {
+      const annotation = await createAnnotation({
+        file_id: selectedFile?.id,
+        position_x: selectedAnnotation.position_x,
+        position_y: selectedAnnotation.position_y,
+        content: content,
+        user_id: user.id,
+        page_number: currentFileType.startsWith('application/pdf') ? currentPage : 1
+      });
+      setIsChatOpen(false);
+      setSelectedAnnotation(annotation);
+      setIsInitialMessageOpen(false);
     } else {
       await addMessage({ parent_id: selectedAnnotation.message_id, content, user_id: user.id });
     }
@@ -244,6 +308,17 @@ export const FileDialogView: React.FC<FileProps> = ({
     await updateAnnotation({ annotationId, status });
   };
 
+  const handleChatClick = (fileId: string) => {
+    const fileToShow = files?.find(f => f.id === fileId);
+    if (fileToShow) {
+      setSelectedFile(fileToShow);
+      setCurrentFileType(fileToShow.type);
+      setValue("1x");
+      resetZoom();
+      setCurrentPage(1);
+    }
+  };
+
   const renderAnnotationsList = (filteredAnnotations: any[]) => {
     if (filteredAnnotations.length === 0) {
       return (
@@ -262,7 +337,12 @@ export const FileDialogView: React.FC<FileProps> = ({
       <div key={annotation.id} className="">
         {activeTab === 'active' ? (
           <>
-            <ActiveChats chat={annotation} onUpdate={handleUpdateAnnotation} onDelete={handleDeleteAnnotation}/>
+            <ActiveChats 
+              chat={annotation} 
+              onUpdate={handleUpdateAnnotation} 
+              onDelete={handleDeleteAnnotation}
+              onChatClick={handleChatClick}
+            />
             {currentFileType.startsWith('application/pdf') && annotation.page_number && (
               <span className="text-xs text-gray-500">
                 {t('annotations.page')} {annotation.page_number}
@@ -271,7 +351,11 @@ export const FileDialogView: React.FC<FileProps> = ({
           </>
         ) : (
           <>
-            <ResolvedChat chat={annotation} onDelete={handleDeleteAnnotation}/>
+            <ResolvedChat 
+              chat={annotation} 
+              onDelete={handleDeleteAnnotation}
+              onChatClick={handleChatClick}
+            />
             {currentFileType.startsWith('application/pdf') && annotation.page_number && (
               <span className="text-xs text-gray-500">
                 {t('annotations.page')} {annotation.page_number}
@@ -337,16 +421,19 @@ export const FileDialogView: React.FC<FileProps> = ({
         </div>
         <Separator />
         <div className="flex flex-1 min-h-0 overflow-hidden">
-          <div className="w-52 overflow-y-auto flex flex-col gap-4 items-center">
+          <div 
+            ref={filesContainerRef} 
+            className="w-52 overflow-y-auto flex flex-col gap-4 items-center"
+          >
             {files?.map((file, index) => (
               <div 
+                data-file-name={file.name}
                 className='flex flex-col cursor-pointer hover:opacity-80' 
                 key={index}
                 onClick={() => {
                   setSelectedFile(file);
                   setCurrentFileType(file.type);
                   setValue("1x");
-                  // resetZoomAndPosition();
                   resetZoom();
                   setCurrentPage(1);
                 }}
@@ -379,7 +466,6 @@ export const FileDialogView: React.FC<FileProps> = ({
               zoomLevel={zoomLevel}
               position={position}
               isDragging={isDragging}
-              isCreatingAnnotation={true}
               selectedFile={selectedFile}
               currentPage={currentPage}
               setTotalPages={setTotalPages}
@@ -395,6 +481,8 @@ export const FileDialogView: React.FC<FileProps> = ({
               isLoadingMessages={isLoadingMessages}
               messages={messages}
               isSpacePressed={isSpacePressed}
+              isInitialMessageOpen={isInitialMessageOpen}
+              setIsInitialMessageOpen={setIsInitialMessageOpen}
             />
             <div className='flex items-center justify-center w-full h-10 my-auto'>
               {currentFileType.startsWith('application/pdf') ? (

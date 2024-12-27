@@ -7,10 +7,10 @@ interface ActiveChatsProps {
   chat: any;
   onUpdate: (annotationId: string, status: 'completed' | 'draft' | 'active') => void;
   onDelete: (annotationId: string) => void;
+  onChatClick: (fileId: string) => void;
 }
 
-
-const ActiveChats = ({ chat, onUpdate, onDelete }: ActiveChatsProps) => {
+const ActiveChats = ({ chat, onUpdate, onDelete, onChatClick }: ActiveChatsProps) => {
   const [isHovering, setIsHovering] = useState(false);
 
   const renderMessage = (message: string) => {
@@ -22,7 +22,12 @@ const ActiveChats = ({ chat, onUpdate, onDelete }: ActiveChatsProps) => {
 
   return (
     <>
-      <div className="flex flex-col items-start gap-3.5 hover:bg-gray-50 px-[16px] py-[12px]" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+      <div 
+        className="flex flex-col items-start gap-3.5 hover:bg-gray-50 px-[16px] py-[12px] cursor-pointer" 
+        onMouseEnter={() => setIsHovering(true)} 
+        onMouseLeave={() => setIsHovering(false)}
+        onClick={() => onChatClick(chat.file_id)}
+      >
         <div className="flex items-center w-full justify-between">
           <div className="flex items-center w-[75%]">
             <div className="mr-[12px]">

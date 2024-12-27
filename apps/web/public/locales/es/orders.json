@@ -190,6 +190,10 @@
     "add": "Añadir anotación",
     "addSuccess": "Anotación añadida con éxito",
     "addError": "Error al añadir anotación"
+  },
+  "files": {
+    "noPreview": "No hay vista previa disponible",
+    "download": "Por favor, descarga el archivo para verlo"
   }
 }
 
