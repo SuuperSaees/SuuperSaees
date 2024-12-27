@@ -372,7 +372,6 @@ export const FileDialogView: React.FC<FileProps> = ({
             <ResolvedChat 
               chat={annotation} 
               onDelete={handleDeleteAnnotation}
-              onChatClick={handleChatClick}
             />
             {currentFileType.startsWith('application/pdf') && annotation.page_number && (
               <span className="text-xs text-gray-500">

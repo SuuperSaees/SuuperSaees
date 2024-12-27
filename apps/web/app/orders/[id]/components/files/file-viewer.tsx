@@ -147,7 +147,7 @@ const FileViewer = ({
                               }}
                             >
                               {
-                                selectedFile.id === annotation.file_id ? (
+                                selectedFile.id === annotation.file_id && annotation.status === 'active' ? (
                                   <AnnotationMarker
                                     x={0}
                                     y={0}
