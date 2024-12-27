@@ -1,4 +1,5 @@
 import { Activity as ServerActivity } from '~/lib/activity.types';
+import { Brief } from '~/lib/brief.types';
 import { Database, Tables } from '~/lib/database.types';
 import { File as ServerFile } from '~/lib/file.types';
 import { Message as ServerMessage } from '~/lib/message.types';
@@ -135,6 +136,7 @@ export interface ActivityContextType {
   files: DataResult.File[];
   allFiles: DataResult.File[];
   order: DataResult.Order;
+  briefResponses: Brief.Relationships.FormFieldResponse.Response[];
   userRole: string;
   addMessage: ({
     message,

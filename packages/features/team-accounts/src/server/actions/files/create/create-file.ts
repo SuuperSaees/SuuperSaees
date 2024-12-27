@@ -59,13 +59,16 @@ export const createFile = async (
         }));
 
         // Insert the files in folder_files table
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { data: folderFilesData, error: folderFilesError } = await client
-          .from('folder_files')
-          .insert(folderFilesToInsert)
-          .select();
 
-        if (folderFilesError) throw folderFilesError;
+        const canInsertFolderFiles = folderFilesToInsert.some(folderFile => folderFile.folder_id !== undefined && folderFile.folder_id !== null);
+        if(canInsertFolderFiles) {
+          const {  error: folderFilesError } = await client
+            .from('folder_files')
+            .insert(folderFilesToInsert)
+            .select();
+  
+          if (folderFilesError) throw folderFilesError;
+        }
 
         return fileData;
       }
@@ -90,13 +93,16 @@ export const createFile = async (
       }));
 
       // Insert the files in folder_files table
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { data: folderFilesData, error: folderFilesError } = await client
-        .from('folder_files')
-        .insert(folderFilesToInsert)
-        .select();
+      const canInsertFolderFiles = folderFilesToInsert.some(folderFile => folderFile?.folder_id !== undefined && folderFile?.folder_id !== null);
+      if(canInsertFolderFiles) {
 
-      if (folderFilesError) throw folderFilesError;
+        const { error: folderFilesError } = await client
+          .from('folder_files')
+          .insert(folderFilesToInsert)
+          .select();
+  
+        if (folderFilesError) throw folderFilesError;
+      }
 
       return fileData;
     }

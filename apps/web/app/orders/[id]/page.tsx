@@ -65,6 +65,7 @@ async function OrderDetailsPage({
         activities={order?.activities ?? []}
         reviews={order?.reviews ?? []}
         order={order}
+        briefResponses={order?.brief_responses ?? []}
         userRole={role ?? ''}
       >
         
