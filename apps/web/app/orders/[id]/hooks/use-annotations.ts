@@ -55,6 +55,7 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
       const allAnnotations = data.data.other_files.filter((annotation: Annotation) => annotation.deleted_on === null);
       return [...currentAnnotations, ...allAnnotations] ?? [];
     },
+    enabled: isDialogOpen,
   });
 
 
@@ -100,7 +101,7 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
       return response.json();
     },
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
       const actualName = workspace?.name;
 
       const message = `has added a new annotation`;
