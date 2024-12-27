@@ -5,8 +5,23 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@kit/supabase/database';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
+import {
+  CustomError,
+  CustomResponse,
+  ErrorPluginOperations,
+} from '../../../../shared/src/response';
+import { HttpStatus } from '../../../../shared/src/response/http-status';
 import { PluginInsert } from '../../types';
 import { updatePlugin } from '../services/plugin-services';
+
+/**
+ * @name updatePluginAction
+ * @description Server Action to handle updates to an existing plugin.
+ * Utilizes Supabase for database interactions and manages responses using CustomResponse and CustomError.
+ * @param {string} id - The ID of the plugin to update.
+ * @param {Partial<PluginInsert>} updates - The fields to update in the plugin.
+ * @returns {Promise<Object>} A standardized response indicating success or failure.
+ */
 
 export const updatePluginAction = async (
   id: string,
@@ -16,15 +31,24 @@ export const updatePluginAction = async (
     const client =
       getSupabaseServerActionClient() as unknown as SupabaseClient<Database>;
 
-    const result = await updatePlugin(client, id, updates);
+    const updatedPlugin = await updatePlugin(client, id, updates);
 
-    if (result.success === false) {
-      return { success: false, message: result.message, error: result.error };
-    }
-
-    return { success: true, data: result.data };
+    return CustomResponse.success(updatedPlugin, 'pluginUpdated').toJSON();
   } catch (error) {
     console.error('Error updating plugin:', error);
-    return { success: false, message: 'Failed to update plugin', error };
+
+    if (error instanceof CustomError) {
+      return CustomResponse.error(error).toJSON();
+    }
+
+    return CustomResponse.error(
+      new CustomError(
+        HttpStatus.Error.InternalServerError,
+        'An unexpected error occurred while updating the plugin',
+        ErrorPluginOperations.FAILED_TO_UPDATE_PLUGIN,
+        undefined,
+        { error },
+      ),
+    ).toJSON();
   }
 };
