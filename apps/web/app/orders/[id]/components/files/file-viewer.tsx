@@ -89,7 +89,7 @@ const FileViewer = ({
             transition: isDragging ? 'none' : 'transform 0.2s ease-out',
             cursor: isSpacePressed 
               ? (isDragging ? 'grabbing' : 'grab') 
-              : (!currentFileType.startsWith('image/') || isChatOpen 
+              : (currentFileType.startsWith('video/') || isChatOpen 
                   ? 'default' 
                   : 'crosshair'),
             userSelect: 'none',

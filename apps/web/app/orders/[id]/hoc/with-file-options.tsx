@@ -254,7 +254,7 @@ export const FileDialogView: React.FC<FileProps> = ({
   }, [selectedFile, isDialogMounted]);
 
   const handleImageClick = async (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isCreatingAnnotation || !imageRef.current || !user || isSpacePressed || !currentFileType.startsWith('image/') || isChatOpen) return;
+    if (!isCreatingAnnotation || !imageRef.current || !user || isSpacePressed || currentFileType.startsWith('video/') || isChatOpen) return;
 
     const rect = imageRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -268,7 +268,7 @@ export const FileDialogView: React.FC<FileProps> = ({
         position_y: y,
         content: '',
         user_id: user.id,
-        page_number: currentFileType.startsWith('application/pdf') ? currentPage : 1,
+        page_number: currentFileType.startsWith('application/pdf') ? currentPage : 0,
         status: 'active' as 'active' | 'completed' | 'draft',
         number: annotations.length + 1,
         created_at: new Date().toISOString(),
@@ -294,7 +294,7 @@ export const FileDialogView: React.FC<FileProps> = ({
         position_y: selectedAnnotation.position_y,
         content: content,
         user_id: user.id,
-        page_number: currentFileType.startsWith('application/pdf') ? currentPage : 1
+        page_number: currentFileType.startsWith('application/pdf') ? currentPage : 0
       });
       setIsChatOpen(false);
       setSelectedAnnotation(annotation);
@@ -360,24 +360,16 @@ export const FileDialogView: React.FC<FileProps> = ({
               onUpdate={handleUpdateAnnotation} 
               onDelete={handleDeleteAnnotation}
               onChatClick={handleChatClick}
+              t={t}
             />
-            {currentFileType.startsWith('application/pdf') && annotation.page_number && (
-              <span className="text-xs text-gray-500">
-                {t('annotations.page')} {annotation.page_number}
-              </span>
-            )}
           </>
         ) : (
           <>
             <ResolvedChat 
               chat={annotation} 
               onDelete={handleDeleteAnnotation}
+              t={t}
             />
-            {currentFileType.startsWith('application/pdf') && annotation.page_number && (
-              <span className="text-xs text-gray-500">
-                {t('annotations.page')} {annotation.page_number}
-              </span>
-            )}
           </>
         )}
       </div>
@@ -470,7 +462,7 @@ export const FileDialogView: React.FC<FileProps> = ({
             ))}
           </div>
 
-          <div className={`flex flex-col justify-between items-center ${currentFileType.startsWith('image/') ? 'w-[70%] pl-4' : 'w-[90%] px-4 pb-4'}`}>
+          <div className={`flex flex-col justify-between items-center ${currentFileType.startsWith('image/') || currentFileType.startsWith('application/pdf') ? 'w-[70%] pl-4' : 'w-[90%] px-4 '}`}>
             <FileViewer
               currentFileType={currentFileType}
               containerRef={containerRef}
@@ -504,7 +496,7 @@ export const FileDialogView: React.FC<FileProps> = ({
               className={currentFileType.startsWith('application/pdf') && totalPages > 2 ? '' : 'h-[78vh]'}
             />
             {currentFileType.startsWith('application/pdf') && totalPages > 2 ? (
-                <div>
+                <div className='flex justify-center items-center pb-4'>
                   <FilePagination
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -517,7 +509,7 @@ export const FileDialogView: React.FC<FileProps> = ({
           </div>
 
           {
-            currentFileType.startsWith('image/') ?  (
+            !currentFileType.startsWith('video/') ?  (
               <div className="w-80 flex flex-col">
                 <div className="flex border-b h-10">
                   <button

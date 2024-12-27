@@ -43,7 +43,7 @@ export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) =
   }, []);
   const handleWheel = (e: WheelEvent) => {
     const isScrollableElement = (e.target as HTMLElement)?.closest('.overflow-y-auto, .overflow-auto');
-    if (isScrollableElement ?? currentFileType.startsWith('application/pdf')) return;
+    if (isScrollableElement ?? currentFileType.startsWith('video/')) return;
 
     e.preventDefault();
     const delta = -e.deltaY;
