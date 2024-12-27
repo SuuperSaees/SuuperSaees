@@ -36,9 +36,11 @@ import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/butto
 export function OptionFiles({
   clientOrganizationId,
   currentPath,
+  queryKey,
 }: {
   clientOrganizationId: string;
   currentPath: Array<{ title: string; uuid?: string }>;
+  queryKey: string[];
 }) {
   const { t } = useTranslation('organizations');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -63,9 +65,8 @@ export function OptionFiles({
 
     onSuccess: async () => {
       toast.success(t('folders.new.success', { folderName }));
-
       await queryClient.invalidateQueries({
-        queryKey: ['folders', clientOrganizationId],
+        queryKey: queryKey,
       });
     },
     onError: () => {
@@ -89,7 +90,6 @@ export function OptionFiles({
 
     onSuccess: async () => {
       const lastFolder = currentPath[currentPath.length - 1];
-
       toast.success(
         t('folders.new.successSubfolder', {
           folderName,
@@ -97,28 +97,10 @@ export function OptionFiles({
         }),
       );
 
-      // Override relevant queries based on the current folder type
-      if (currentPath.length === 0) {
-        // If we are at the root level
         await queryClient.invalidateQueries({
-          queryKey: ['folders', clientOrganizationId],
+          queryKey: queryKey,
         });
-      } else if (currentPath[0]?.title === 'Orders') {
-        // If we are in an Orders folder
-        await queryClient.invalidateQueries({
-          queryKey: ['foldersByFolder', clientOrganizationId],
-        });
-      } else {
-        // If we are in a subfolder
-        await queryClient.invalidateQueries({
-          queryKey: ['subFolders', lastFolder?.uuid],
-        });
-      }
-
-      // Also invalidate the query for files in the current folder
-      await queryClient.invalidateQueries({
-        queryKey: ['files', lastFolder?.uuid ?? clientOrganizationId],
-      });
+    
     },
 
     onError: () => {
@@ -139,10 +121,9 @@ export function OptionFiles({
 
     onSuccess: async () => {
       toast.success(t('files.new.uploadSuccess'));
-      const lastFolder = currentPath[currentPath.length - 1];
 
       await queryClient.invalidateQueries({
-        queryKey: ['files', lastFolder?.uuid ?? clientOrganizationId],
+        queryKey: queryKey,
       });
     },
 

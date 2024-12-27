@@ -17,6 +17,7 @@ import { HttpStatus } from '../../../../../../../shared/src/response/http-status
 import {
   fetchBriefs,
   fetchBriefsResponsesforOrders,
+  fetchFormfieldsWithResponses,
 } from '../../briefs/get/get-brief';
 import {
   fetchCurrentUser,
@@ -26,7 +27,7 @@ import {
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { getOrdersReviewsForUser, getOrdersReviewsById } from '../../review/get/get-review';
 
-export const getOrderById = async (orderId: Order.Type['id']) => {
+export const  getOrderById = async (orderId: Order.Type['id']) => {
   try {
     const client = getSupabaseServerComponentClient();
     const { error: userError } = await client.auth.getUser();
@@ -67,6 +68,9 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
 
     if (clientOrganizationError) throw clientOrganizationError.message;
 
+    // append brief responses to the order
+    const briefResponses = await fetchFormfieldsWithResponses(orderData.uuid);
+
     const proccesedData = {
       ...orderData,
       messages: orderData.messages.map((message) => {
@@ -76,6 +80,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
         };
       }),
       client_organization: clientOrganizationData,
+      brief_responses: briefResponses,
     };
 
     return proccesedData as Order.Relational;
