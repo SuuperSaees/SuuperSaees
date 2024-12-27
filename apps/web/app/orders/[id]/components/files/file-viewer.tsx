@@ -17,6 +17,7 @@ interface FileViewerProps {
   isCreatingAnnotation: boolean;
   selectedFile: any;
   currentPage: number;
+  totalPages: number;
   setTotalPages: (total: number) => void;
   isLoadingAnnotations: boolean;
   annotations: any[];
@@ -33,6 +34,7 @@ interface FileViewerProps {
   isSpacePressed: boolean; 
   isInitialMessageOpen: boolean;
   setIsInitialMessageOpen: (isInitialMessageOpen: boolean) => void;
+  className?: string;
 }
 
 const FileViewer = ({ 
@@ -48,6 +50,7 @@ const FileViewer = ({
   isDragging, 
   selectedFile,
   currentPage,
+  totalPages,
   setTotalPages,
   isLoadingAnnotations,
   annotations,
@@ -63,10 +66,11 @@ const FileViewer = ({
   handleWheel,
   isSpacePressed,
   isInitialMessageOpen,
-  setIsInitialMessageOpen
+  setIsInitialMessageOpen,
+  className
 }: FileViewerProps) => {
   return (
-    <div className={`w-full ${currentFileType.startsWith('image/') ? 'h-full' : 'h-[60vh]'}`}>
+    <div className={`w-full ${className}`}>
     <div
       ref={containerRef}
       className="w-full h-full"
@@ -75,7 +79,7 @@ const FileViewer = ({
       onMouseMove={handleMouseMove}
       onWheel={handleWheel}
     >
-      <div className="w-full h-full bg-gray-100 p-4 overflow-hidden">
+      <div className="w-full h-full bg-gray-100 p-4 overflow-hidden items-center justify-center flex">
         <div
           ref={imageRef}
           onClick={!isSpacePressed ? handleImageClick : undefined}
@@ -97,7 +101,7 @@ const FileViewer = ({
                 src={selectedFile.url}
                 fileName={selectedFile.name}
                 fileType={selectedFile.type}
-                className="max-w-full max-h-full"
+                className={`${currentFileType.startsWith('application/pdf') && totalPages > 2 ? 'h-[60vh]' : 'h-[70vh]'}`}
                 isDialog={true}
                 actualPage={currentPage}
                 onLoadPDF={(total) => setTotalPages(total)}

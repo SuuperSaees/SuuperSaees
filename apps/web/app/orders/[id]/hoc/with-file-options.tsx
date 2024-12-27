@@ -470,7 +470,7 @@ export const FileDialogView: React.FC<FileProps> = ({
             ))}
           </div>
 
-          <div className={`flex flex-col gap-4 items-center ${currentFileType.startsWith('image/') ? 'w-[70%] pl-4' : 'w-[90%] px-4 h-full justify-between'}`}>
+          <div className={`flex flex-col justify-between items-center ${currentFileType.startsWith('image/') ? 'w-[70%] pl-4' : 'w-[90%] px-4 pb-4'}`}>
             <FileViewer
               currentFileType={currentFileType}
               containerRef={containerRef}
@@ -485,6 +485,7 @@ export const FileDialogView: React.FC<FileProps> = ({
               isDragging={isDragging}
               selectedFile={selectedFile}
               currentPage={currentPage}
+              totalPages={totalPages}
               setTotalPages={setTotalPages}
               isLoadingAnnotations={isLoadingAnnotations}
               annotations={annotations}
@@ -500,9 +501,9 @@ export const FileDialogView: React.FC<FileProps> = ({
               isSpacePressed={isSpacePressed}
               isInitialMessageOpen={isInitialMessageOpen}
               setIsInitialMessageOpen={setIsInitialMessageOpen}
+              className={currentFileType.startsWith('application/pdf') && totalPages > 2 ? '' : 'h-[78vh]'}
             />
-            <div className='flex items-center justify-center w-full h-10 my-auto'>
-              {currentFileType.startsWith('application/pdf') ? (
+            {currentFileType.startsWith('application/pdf') && totalPages > 2 ? (
                 <div>
                   <FilePagination
                     currentPage={currentPage}
@@ -511,9 +512,8 @@ export const FileDialogView: React.FC<FileProps> = ({
                   />
                 </div>
               ) : (
-                <div></div>
+                <></>
               )}
-            </div>
           </div>
 
           {

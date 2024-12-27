@@ -116,7 +116,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             <video 
               src={src}
               controls
-              className="w-full h-[60vh]"
+              className="w-full h-[70vh]"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
