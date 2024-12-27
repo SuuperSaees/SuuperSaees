@@ -7,7 +7,7 @@ import { Trash } from 'lucide-react';
 import {
   createUploadBucketURL,
 } from 'node_modules/@kit/team-accounts/src/server/actions/files/create/create-file';
-import { createFilesAction } from '~/server/actions/files/files';
+import { createFile } from '~/server/actions/files/files.action';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -53,7 +53,6 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string>(defaultValue ?? '');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const filesAction = createFilesAction("");
 
   async function uploadImageToBucket(file: File) {
     if (!file) return;
@@ -85,7 +84,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
 
       const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/create_brief/${newFilepath}`;
 
-      const fileData = await filesAction.createFile({
+      const fileData = await createFile({
         files: [
           {
             name: sanitizedFileName,

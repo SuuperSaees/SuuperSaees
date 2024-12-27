@@ -31,7 +31,7 @@ import {
 
 import { generateUUID } from '~/utils/generate-uuid';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import { createFilesAction } from '~/server/actions/files/files';
+import { createFile } from '~/server/actions/files/files.action';
 
 export function OptionFiles({
   clientOrganizationId,
@@ -45,7 +45,6 @@ export function OptionFiles({
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
   const showDropdown = !(currentPath.length > 0 && (!currentPath[0]?.uuid || currentPath[0]?.uuid === ''));
-  const filesAction = createFilesAction("");
 
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -136,7 +135,7 @@ export function OptionFiles({
       files: Array<{ name: string; size: number; type: string; url: string }>;
       clientOrganizationId: string;
       currentPath: Array<{ title: string; uuid?: string }>;
-    }) => filesAction.createFile({
+    }) => createFile({
       files,
       client_organization_id: clientOrganizationId,
       currentPath

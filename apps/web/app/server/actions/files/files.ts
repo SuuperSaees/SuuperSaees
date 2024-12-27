@@ -1,17 +1,15 @@
-'use server';
-
 import { BaseAction } from '../base-action';
 import { IFilesAction, ICreateFile } from './files.interface';
 import { FilesController } from './controller/files.controller';
 
-class FilesAction extends BaseAction implements IFilesAction {
+export class FilesAction extends BaseAction implements IFilesAction {
     private controller: FilesController;
     constructor(baseUrl: string) {
         super(baseUrl);
         this.controller = new FilesController(this.baseUrl, this.client, this.adminClient);
     }
-    createFile(createFileProps: ICreateFile) {
-        return this.controller.createFile(createFileProps);
+    async createFile(createFileProps: ICreateFile) {
+        return await this.controller.createFile(createFileProps);
     }
 
     createUploadBucketURL(file: File): Promise<string> {

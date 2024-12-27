@@ -6,11 +6,11 @@ import { FoldersRepository } from "~/server/actions/folders/repositories/folders
 
 export class FilesService implements IFilesService {
     constructor(
-        private readonly repository: FilesRepository,
+        private readonly filesRepository: FilesRepository,
         private readonly organizationsRepository?: OrganizationsRepository,
         private readonly foldersRepository?: FoldersRepository
     ) {
-        this.repository = repository;
+        this.filesRepository = filesRepository;
         this.organizationsRepository = organizationsRepository;
         this.foldersRepository = foldersRepository;
     }
@@ -21,13 +21,13 @@ export class FilesService implements IFilesService {
                 ...file,
                 user_id: userId,
             }));
-            return this.repository.createFiles(filesToInsert);
+            return this.filesRepository.createFiles(filesToInsert);
         };
 
         if (createFileProps.client_organization_id === undefined) {
             return await createBaseFiles();
         }
-        const agency = await this.organizationsRepository?.getAgencyForClient(createFileProps.client_organization_id);
+        const agency = await this.organizationsRepository?.getAgencyForClient(createFileProps.client_organization_id, true);
         if (!agency) throw new Error('Agency not found');
         if (createFileProps.currentPath && createFileProps.currentPath.length > 0) {
             const folderUuid = createFileProps.currentPath[createFileProps.currentPath.length - 1]?.uuid ?? '';

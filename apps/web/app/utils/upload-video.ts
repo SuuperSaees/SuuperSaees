@@ -1,6 +1,6 @@
 import { createUploadBucketURL } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { generateUUID } from '~/utils/generate-uuid';
-import { createFilesAction } from '~/server/actions/files/files';
+import { createFile } from '~/server/actions/files/files.action';
 
 
 export const uploadFileToBucket = async (
@@ -11,7 +11,6 @@ export const uploadFileToBucket = async (
   const uuid = generateUUID();
   const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const filePath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
-  const filesAction = createFilesAction("");
   
   const urlData = await createUploadBucketURL(bucketName, filePath);
 
@@ -33,7 +32,7 @@ export const uploadFileToBucket = async (
 
   const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
 
-  const fileData = await filesAction.createFile({
+  const fileData = await createFile({
     files: [
       {
         name: sanitizedFileName,

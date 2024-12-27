@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { deleteOrderBriefFile } from '../delete/delete-file';
 import { createUploadBucketURL } from '../create/create-file';
-import { createFilesAction } from '../../../../../../../../apps/web/app/server/actions/files/files';
+import { createFile } from '../../../../../../../../apps/web/app/server/actions/files/files.action';
 
 interface FileInfo {
   file: File;
@@ -15,7 +15,6 @@ interface FileInfo {
 export function useFileUpload(bucketName: string, uuid: string, onFileIdsChange: (fileIds: string[], fileUrls?: string[]) => void, removeResults: boolean) {
   const { t } = useTranslation();
   const [files, setFiles] = useState<Record<string, FileInfo>>({});
-  const filesAction = createFilesAction("");
   const generateFileId = () => Date.now() + Math.random().toString(36).substr(2, 9);
 
   const sanitizeFileName = (fileName: string) => {
@@ -99,7 +98,7 @@ export function useFileUpload(bucketName: string, uuid: string, onFileIdsChange:
         url: fileUrl,
       };
 
-      const createdFiles = await filesAction.createFile({
+      const createdFiles = await createFile({
         files: [newFileData]
       });
       setFiles((prevFiles) => {

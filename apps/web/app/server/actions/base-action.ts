@@ -1,3 +1,4 @@
+
 import { Database } from '~/lib/database.types';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
@@ -19,9 +20,6 @@ export abstract class BaseAction implements IBaseAction {
      protected constructor(baseUrl?: string) {
       this.baseUrl = baseUrl ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
       
-      if (!this.baseUrl) {
-        throw new Error('baseUrl is required but was not provided');
-      }
        // Safe initialization of Supabase clients
       try {
         this.client = getSupabaseServerComponentClient();

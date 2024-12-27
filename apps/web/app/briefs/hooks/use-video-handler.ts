@@ -2,7 +2,7 @@ import { useState, useRef, ChangeEvent, DragEvent, useCallback } from 'react';
 import { toast } from 'sonner';
 import { generateUUID } from '~/utils/generate-uuid';
 import { createUploadBucketURL } from '~/team-accounts/src/server/actions/files/create/create-file';
-import { createFilesAction } from '~/server/actions/files/files';
+import { createFile } from '~/server/actions/files/files.action';
 import { extractYouTubeId } from '~/utils/upload-video';
 import { UseFormReturn } from 'react-hook-form';
 import { widgetEditSchema } from '../schemas/widget-edit-schema';
@@ -23,7 +23,6 @@ export function useVideoHandler(t: TranslationFunction, form: UseFormReturn<z.in
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isVideoValid, setIsVideoValid] = useState<boolean>(false);
   const [isYouTubeVideo, setIsYouTubeVideo] = useState<boolean>(false);
-  const filesAction = createFilesAction("");
 
   const checkVideoValidity = useCallback(async (url: string) => {
     const youtubeId = extractYouTubeId(url);
@@ -81,7 +80,7 @@ export function useVideoHandler(t: TranslationFunction, form: UseFormReturn<z.in
       if (!uploadResponse.ok) throw new Error(t('video.uploadError'));
 
       const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/create_brief/${filePath}`;
-      const fileData = await filesAction.createFile({
+      const fileData = await createFile({
         files: [{ name: sanitizedFileName, size: file.size, type: file.type, url: fileUrl }]
       });
       const finalUrl = fileData?.[0]?.url ?? fileUrl;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createUploadBucketURL } from '../create/create-file';
 import { useTranslation } from 'react-i18next';
 import { deleteFile } from '../delete/delete-file';
-import { createFilesAction } from '../../../../../../../../apps/web/app/server/actions/files/files';
+import { createFile } from '../../../../../../../../apps/web/app/server/actions/files/files.action';
 
 interface FileWithServerId {
   file: File;
@@ -29,7 +29,6 @@ export const useFileUpload = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileUrls, setFileUrls] = useState<File[]>([]);
   const [globalFileList, setGlobalFileList] = useState<FileWithServerId[]>([]);
-  const filesAction = createFilesAction("");
 
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -124,7 +123,7 @@ export const useFileUpload = ({
         url: fileUrl,
       };
 
-      const createdFiles = await filesAction.createFile({
+      const createdFiles = await createFile({
         files: [newFileData]
       });
       

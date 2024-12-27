@@ -11,7 +11,7 @@ export class OrganizationsRepository {
         this.adminClient = adminClient;
     }
 
-   async getAgencyForClient(clientOrganizationId: string): Promise<{
+   async getAgencyForClient(clientOrganizationId: string, getForceClient = false): Promise<{
     id: string,
     name: string,
     email: string | null,
@@ -24,6 +24,18 @@ export class OrganizationsRepository {
     .eq('organization_client_id', clientOrganizationId)
     .single();
 
+    if(clientError?.code === 'PGRST116' && getForceClient) {
+        const { data: agencyData, error: agencyError } = await this.client
+        .from('accounts')
+        .select('id, name, email, picture_url')
+        .eq('id', clientOrganizationId)
+        .eq('is_personal_account', false)
+        .single();
+
+        if(agencyError) throw agencyError;
+
+        return agencyData;
+    }
 
     if (clientError ?? !clientData) {
     console.error('Error fetching agency:', clientError);

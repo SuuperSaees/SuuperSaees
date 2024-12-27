@@ -42,7 +42,7 @@ import { generateUUID } from '~/utils/generate-uuid';
 
 import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
-import { createFilesAction } from '~/server/actions/files/files';
+import { createFile } from '~/server/actions/files/files.action';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -171,7 +171,6 @@ const RichTextEditorV2 = ({
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
-  const filesAction = createFilesAction("");
   const uploadImage = async (file: File) => {
     if (!file) return;
 
@@ -200,7 +199,7 @@ const RichTextEditorV2 = ({
 
     const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/orders/${newFilepath}`;
 
-    const fileData = await filesAction.createFile({
+    const fileData = await createFile({
       files: [
         {
           name: sanitizedFileName,
