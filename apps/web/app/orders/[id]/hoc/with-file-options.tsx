@@ -324,14 +324,18 @@ export const FileDialogView: React.FC<FileProps> = ({
     await updateAnnotation({ annotationId, status });
   };
 
-  const handleChatClick = (fileId: string) => {
+  const handleChatClick = (fileId: string, pageNumber?: number) => {
     const fileToShow = files?.find(f => f.id === fileId);
     if (fileToShow) {
       setSelectedFile(fileToShow);
       setCurrentFileType(fileToShow.type);
       setValue("1x");
       resetZoom();
-      setCurrentPage(1);
+      if (pageNumber && fileToShow.type.startsWith('application/pdf')) {
+        setCurrentPage(pageNumber);
+      } else {
+        setCurrentPage(1);
+      }
     }
   };
 
@@ -434,7 +438,11 @@ export const FileDialogView: React.FC<FileProps> = ({
             ref={filesContainerRef} 
             className="w-52 overflow-y-auto flex flex-col gap-4 items-center"
           >
-            {files?.map((file, index) => (
+            {files
+              ?.filter((file, index, self) => 
+                index === self.findIndex((f) => f.id === file.id)
+              )
+              .map((file, index) => (
               <div 
                 data-file-name={file.name}
                 className='flex flex-col cursor-pointer hover:opacity-80' 
@@ -493,7 +501,6 @@ export const FileDialogView: React.FC<FileProps> = ({
               isSpacePressed={isSpacePressed}
               isInitialMessageOpen={isInitialMessageOpen}
               setIsInitialMessageOpen={setIsInitialMessageOpen}
-              className={currentFileType.startsWith('application/pdf') && totalPages > 2 ? '' : 'h-[78vh]'}
             />
             {currentFileType.startsWith('application/pdf') && totalPages > 2 ? (
                 <div className='flex justify-center items-center pb-4'>

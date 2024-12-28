@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { getFileTypeIcon } from '../../components/files/file-types';
 import { FileIcon } from 'lucide-react';
@@ -141,13 +141,12 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       );
     }
 
-    if (fileType.startsWith('application/pdf')) {
+    if (fileType.startsWith('application/pdf')) {              
       return (
         <div className={`w-full h-[60vh] ${className}`}>
           {isDialog ? (
-            <div className="w-full h-full flex items-center justify-center">
-              {getFileTypeIcon(fileName)}                      
-            </div>
+            <>
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               {getFileTypeIcon(fileName)}
