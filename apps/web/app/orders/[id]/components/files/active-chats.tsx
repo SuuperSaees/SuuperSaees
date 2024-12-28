@@ -7,7 +7,7 @@ interface ActiveChatsProps {
   chat: any;
   onUpdate: (annotationId: string, status: 'completed' | 'draft' | 'active') => void;
   onDelete: (annotationId: string) => void;
-  onChatClick: (fileId: string) => void;
+  onChatClick: (fileId: string, pageNumber: number) => void;
   t: any;
 }
 
@@ -27,7 +27,7 @@ const ActiveChats = ({ chat, onUpdate, onDelete, onChatClick, t}: ActiveChatsPro
         className="flex flex-col items-start gap-3.5 hover:bg-gray-50 px-[16px] py-[12px] cursor-pointer" 
         onMouseEnter={() => setIsHovering(true)} 
         onMouseLeave={() => setIsHovering(false)}
-        onClick={() => onChatClick(chat.file_id)}
+        onClick={() => onChatClick(chat.file_id, chat.page_number)}
       >
         <div className="flex items-center w-full justify-between">
           <div className="flex items-center w-[75%]">
