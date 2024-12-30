@@ -101,7 +101,7 @@ const FileViewer = ({
                 src={selectedFile.url}
                 fileName={selectedFile.name}
                 fileType={selectedFile.type}
-                className={`${currentFileType.startsWith('application/pdf') && totalPages > 2 ? 'h-[60vh]' : 'h-[70vh]'}`}
+                className={`${currentFileType.startsWith('application/pdf') && totalPages > 2 ? 'h-[65vh]' : 'h-[70vh]'}`}
                 isDialog={true}
                 actualPage={currentPage}
                 onLoadPDF={(total) => setTotalPages(total)}
