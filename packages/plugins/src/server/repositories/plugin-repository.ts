@@ -24,14 +24,16 @@ export class PluginRepository {
   async create(plugin: PluginInsert): Promise<Plugin> {
     const { data, error } = await this.client
       .from(this.tableName)
-      .insert(plugin)
+      .upsert(plugin as Required<PluginInsert>, {
+        onConflict: 'provider,account_id',
+      })
       .select()
       .single();
-
+  
     if (error) {
       throw new Error(`Error creating plugin: ${error.message}`);
     }
-
+  
     return data as Plugin;
   }
 
