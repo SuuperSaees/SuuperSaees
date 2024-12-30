@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { getFileTypeIcon } from '../../components/files/file-types';
 import { FileIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Spinner } from '@kit/ui/spinner';
 
 interface FilePreviewProps {
   src: string;
@@ -98,7 +99,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
         <img
           src={fileType.startsWith('application/pdf') ? pageImage! : src}
           alt={alt}
-          className={`w-full h-[60vh] object-contain ${className}`}
+          className={`w-full h-[calc(100vh-100px)] object-contain ${className}`}
         />
       ) : (
         <>
@@ -145,8 +146,9 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       return (
         <div className={`w-full h-[60vh] ${className}`}>
           {isDialog ? (
-            <>
-            </>
+            <div className="w-full h-full flex items-center justify-center">
+              <Spinner className="w-6 h-6" />
+            </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               {getFileTypeIcon(fileName)}
