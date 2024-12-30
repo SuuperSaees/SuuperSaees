@@ -13,7 +13,7 @@ export const generateUUID = (): string => {
  * Zod schema to validate PluginInsert objects.
  */
 export const PluginInsertSchema = z.object({
-  provider_id: z.string().uuid(),
+  provider_id: z.string().uuid().optional(),
   status: z.enum(['installed', 'uninstalled', 'failed', 'in progress']),
   type: z.enum(['integration', 'tool', 'internal', 'external']),
   provider: z.string().min(1),
