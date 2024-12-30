@@ -1,6 +1,6 @@
 import React, { useState, useRef, ComponentType, useEffect } from 'react';
-import { Check, Copy, Download, Eye, MoreVertical, MessageCircle, ArrowDownToLine } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@kit/ui/dialog';
+import { Check, Copy, Download, Eye, MoreVertical, MessageCircle, ArrowDownToLine, X } from 'lucide-react';
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@kit/ui/dialog';
 import { Separator } from '@kit/ui/separator';
 import Tooltip from '~/components/ui/tooltip';
 import { FilePreview } from '../components/files/file-preview';
@@ -324,14 +324,18 @@ export const FileDialogView: React.FC<FileProps> = ({
     await updateAnnotation({ annotationId, status });
   };
 
-  const handleChatClick = (fileId: string) => {
+  const handleChatClick = (fileId: string, pageNumber?: number) => {
     const fileToShow = files?.find(f => f.id === fileId);
     if (fileToShow) {
       setSelectedFile(fileToShow);
       setCurrentFileType(fileToShow.type);
       setValue("1x");
       resetZoom();
-      setCurrentPage(1);
+      if (pageNumber && fileToShow.type.startsWith('application/pdf')) {
+        setCurrentPage(pageNumber);
+      } else {
+        setCurrentPage(1);
+      }
     }
   };
 
@@ -379,7 +383,7 @@ export const FileDialogView: React.FC<FileProps> = ({
   const renderAnnotationsContent = () => {
     if (isLoadingAnnotations) {
       return (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center h-full w-full">
           <Spinner className="w-6 h-6" />
         </div>
       );
@@ -399,7 +403,7 @@ export const FileDialogView: React.FC<FileProps> = ({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       {triggerComponent}
-      <DialogContent className="p-0 h-[90vh] w-[90vw] max-w-[90vw] flex flex-col">
+      <DialogContent className="p-0 h-[90vh] w-[90vw] max-w-[90vw] flex flex-col gap-0" showCloseIcon={false}>
         <div className="p-4">
           <DialogHeader>
             <div className="flex justify-between">
@@ -407,34 +411,45 @@ export const FileDialogView: React.FC<FileProps> = ({
               <div className="flex">
                 <HoverCard>
                   <HoverCardTrigger asChild>
-                    <QuestionMarkCircledIcon className="w-4 h-4 text-gray-600 mr-4" />
+                    <QuestionMarkCircledIcon className="w-6 h-6 text-[#A4A7AE] mr-[34px]" />
                   </HoverCardTrigger>
                   <HoverCardContent className="w-80">
-                  <div>
-                    <p className="font-bold">{t('annotations.help.title')}</p>
-                    <ul className="list-disc pl-4 text-sm text-gray-700">
-                      <li>
-                        <strong>{t('annotations.help.move')}</strong> {t('annotations.help.spacebar')}
-                      </li>
-                      <li>
-                        <strong>{t('annotations.help.zoom')}</strong> {t('annotations.help.mouseWheel')}
-                      </li>
-                    </ul>
-                  </div>
+                    <div>
+                      <p className="font-bold">{t('annotations.help.title')}</p>
+                      <ul className="list-disc pl-4 text-sm text-gray-700">
+                        <li>
+                          <strong>{t('annotations.help.move')}</strong> {t('annotations.help.spacebar')}
+                        </li>
+                        <li>
+                          <strong>{t('annotations.help.zoom')}</strong> {t('annotations.help.mouseWheel')}
+                        </li>
+                      </ul>
+                    </div>
                   </HoverCardContent>
                 </HoverCard>
-                <ArrowDownToLine className="w-4 h-4 cursor-pointer text-gray-600 mr-8" onClick={() => handleFileDownload(selectedFile?.url, selectedFile?.name)} />
+                <ArrowDownToLine 
+                  className="w-6 h-6 cursor-pointer text-[#A4A7AE] mr-[34px]" 
+                  onClick={() => handleFileDownload(selectedFile?.url, selectedFile?.name)} 
+                />
+                <DialogClose className="rounded-sm opacity-70 hover:opacity-100 focus:outline-none">
+                  <X className="h-6 w-6 text-[#A4A7AE]" />
+                  <span className="sr-only">Close</span>
+                </DialogClose>
               </div>
             </div>
           </DialogHeader>
         </div>
         <Separator />
-        <div className="flex flex-1 min-h-0 overflow-hidden">
+        <div className="flex flex-1 min-h-0">
           <div 
             ref={filesContainerRef} 
-            className="w-52 overflow-y-auto flex flex-col gap-4 items-center"
+            className="w-52 overflow-y-auto flex flex-col gap-4 items-center py-4 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
           >
-            {files?.map((file, index) => (
+            {files
+              ?.filter((file, index, self) => 
+                index === self.findIndex((f) => f.id === file.id)
+              )
+              .map((file, index) => (
               <div 
                 data-file-name={file.name}
                 className='flex flex-col cursor-pointer hover:opacity-80' 
@@ -461,86 +476,80 @@ export const FileDialogView: React.FC<FileProps> = ({
               </div>
             ))}
           </div>
-
-          <div className={`flex flex-col justify-between items-center ${currentFileType.startsWith('image/') || currentFileType.startsWith('application/pdf') ? 'w-[70%] pl-4' : 'w-[90%] px-4 '}`}>
-            <FileViewer
-              currentFileType={currentFileType}
-              containerRef={containerRef}
-              handleMouseUp={handleMouseUp}
-              handleMouseMove={handleMouseMove}
-              handleWheel={handleWheel}
-              imageRef={imageRef}
-              handleImageClick={handleImageClick}
-              handleMouseDown={handleMouseDown}
-              zoomLevel={zoomLevel}
-              position={position}
-              isDragging={isDragging}
-              selectedFile={selectedFile}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              setTotalPages={setTotalPages}
-              isLoadingAnnotations={isLoadingAnnotations}
-              annotations={annotations}
-              selectedAnnotation={selectedAnnotation}
-              isChatOpen={isChatOpen}
-              setIsChatOpen={setIsChatOpen}
-              setSelectedAnnotation={setSelectedAnnotation}
-              handleAnnotationClick={handleAnnotationClick}
-              handleChatClose={handleChatClose}
-              handleMessageSubmit={handleSendMessage}
-              isLoadingMessages={isLoadingMessages}
-              messages={messages}
-              isSpacePressed={isSpacePressed}
-              isInitialMessageOpen={isInitialMessageOpen}
-              setIsInitialMessageOpen={setIsInitialMessageOpen}
-              className={currentFileType.startsWith('application/pdf') && totalPages > 2 ? '' : 'h-[78vh]'}
-            />
-            {currentFileType.startsWith('application/pdf') && totalPages > 2 ? (
-                <div className='flex justify-center items-center pb-4'>
-                  <FilePagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                  />
-                </div>
-              ) : (
-                <></>
-              )}
+          <div className={`flex flex-col items-stretch ${currentFileType.startsWith('image/') || currentFileType.startsWith('application/pdf') ? 'w-[70%]' : 'w-[90%] px-4'}`}>
+            <div className="flex-1 overflow-hidden">
+              <FileViewer
+                currentFileType={currentFileType}
+                containerRef={containerRef}
+                handleMouseUp={handleMouseUp}
+                handleMouseMove={handleMouseMove}
+                handleWheel={handleWheel}
+                imageRef={imageRef}
+                handleImageClick={handleImageClick}
+                handleMouseDown={handleMouseDown}
+                zoomLevel={zoomLevel}
+                position={position}
+                isDragging={isDragging}
+                selectedFile={selectedFile}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                setTotalPages={setTotalPages}
+                isLoadingAnnotations={isLoadingAnnotations}
+                annotations={annotations}
+                selectedAnnotation={selectedAnnotation}
+                isChatOpen={isChatOpen}
+                setIsChatOpen={setIsChatOpen}
+                setSelectedAnnotation={setSelectedAnnotation}
+                handleAnnotationClick={handleAnnotationClick}
+                handleChatClose={handleChatClose}
+                handleMessageSubmit={handleSendMessage}
+                isLoadingMessages={isLoadingMessages}
+                messages={messages}
+                isSpacePressed={isSpacePressed}
+                isInitialMessageOpen={isInitialMessageOpen}
+                setIsInitialMessageOpen={setIsInitialMessageOpen}
+              />
+            </div>
+            {currentFileType.startsWith('application/pdf') && totalPages > 1 && (
+              <div className='flex justify-center items-center py-4 shrink-0'>
+                <FilePagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
 
-          {
-            !currentFileType.startsWith('video/') ?  (
-              <div className="w-80 flex flex-col">
-                <div className="flex border-b h-10">
-                  <button
-                    className={`flex-1 py-2 text-sm font-medium ${
-                      activeTab === 'active' 
-                        ? 'border-b-2 border-brand text-brand' 
-                        : 'text-gray-500'
-                    }`}
-                    onClick={() => setActiveTab('active')}
-                  >
-                    {t('annotations.chat.active')} ({annotations.filter((a) => a.status === 'active').length})
-                  </button>
-                  <button
-                    className={`flex-1 py-2 text-sm font-medium ${
-                      activeTab === 'resolved' 
-                        ? 'border-b-2 border-brand text-brand' 
-                        : 'text-gray-500'
-                    }`}
-                    onClick={() => setActiveTab('resolved')}
-                  >
-                    {t('annotations.chat.resolved')} ({annotations.filter((a) => a.status === 'completed').length})
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto w-80">
-                  {renderAnnotationsContent()}
-                </div>
+          {!currentFileType.startsWith('video/') && (
+            <div className="w-80 flex flex-col min-h-0">
+              <div className="flex border-b h-10 shrink-0">
+                <button
+                  className={`flex-1 py-2 text-sm font-medium ${
+                    activeTab === 'active' 
+                      ? 'border-b-2 border-brand text-brand' 
+                      : 'text-gray-500'
+                  }`}
+                  onClick={() => setActiveTab('active')}
+                >
+                  {t('annotations.chat.active')} ({annotations.filter((a) => a.status === 'active').length})
+                </button>
+                <button
+                  className={`flex-1 py-2 text-sm font-medium ${
+                    activeTab === 'resolved' 
+                      ? 'border-b-2 border-brand text-brand' 
+                      : 'text-gray-500'
+                  }`}
+                  onClick={() => setActiveTab('resolved')}
+                >
+                  {t('annotations.chat.resolved')} ({annotations.filter((a) => a.status === 'completed').length})
+                </button>
               </div>
-            ):(
-              <div></div>
-            )
-          }
+              <div className=" overflow-y-auto flex flex-col  [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
+                {renderAnnotationsContent()}
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

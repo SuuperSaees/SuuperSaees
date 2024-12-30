@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@kit/ui/button';
 import { useTranslation } from 'react-i18next';
 import { Spinner } from '@kit/ui/spinner';
@@ -13,6 +13,7 @@ interface AnnotationMarkerProps {
   number: number;
   onClick?: () => void;
   isActive?: boolean;
+  annotation: any;
 }
 
 export const AnnotationMarker: React.FC<AnnotationMarkerProps> = ({
@@ -23,23 +24,31 @@ export const AnnotationMarker: React.FC<AnnotationMarkerProps> = ({
   isActive = false,
   annotation,
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div
-      className={`transform -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110 ${
+      className={`transform -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110 hover:outline-none ${
         isActive ? 'z-50' : 'z-40'
       }`}
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        cursor: isHovered ? 'pointer' : 'default',
+      }}
     >
       <MarkerIcon />
       {
         annotation.accounts && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full">
-          <Avatar className="w-6 h-6">
-            <AvatarImage src={annotation.accounts?.settings?.picture_url ?? ''} />
-            <AvatarFallback>
-              {annotation.accounts?.name?.charAt(0).toUpperCase() ?? 'U'}
-            </AvatarFallback>
-          </Avatar>
+              <Avatar className="w-6 h-6">
+                <AvatarImage src={annotation.accounts?.settings?.picture_url ?? ''} />
+                <AvatarFallback>
+                  {annotation.accounts?.name?.charAt(0).toUpperCase() ?? 'U'}
+                </AvatarFallback>
+              </Avatar>
             </div>
           </div>
         )
