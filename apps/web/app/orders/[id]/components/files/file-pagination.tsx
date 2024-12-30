@@ -24,7 +24,7 @@ export const FilePagination: React.FC<FilePaginationProps> = ({
 }) => {
   if (totalPages <= 1) return null;
   return (
-    <div className={cn("flex items-center justify-center w-full h-10 my-auto", className)}>
+    <div className={cn("flex items-center justify-center h-10 my-auto", className)}>
       <Pagination>
         <PaginationContent>
           <PaginationPrevious 
