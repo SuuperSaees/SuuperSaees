@@ -26,7 +26,7 @@ interface Message {
   parent_id?: string;
 }
 
-export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
+export const useAnnotations = (fileId: string, isDialogOpen: boolean, otherFileIds?: string[]) => {
   const { t } = useTranslation('orders');
   const supabase = useSupabase();
   const queryClient = useQueryClient();
@@ -36,12 +36,13 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean) => {
   const { data: annotations = [], isLoading: isLoadingAnnotations } = useQuery({
     queryKey: ['annotations', fileId],
     queryFn: async () => {
-      const response = await fetch(`/api/v1/annotations?file_id=${fileId}`);
+      const response = await fetch(`/api/v1/annotations?file_id=${fileId}&other_file_ids=${otherFileIds?.join(',')}`);
       const data = await response.json();
-      const annotations = data.data.current_file.filter((annotation: Annotation) => annotation.deleted_on === null);
-      return annotations ?? [];
+      const currentAnnotations = data.data.current_file.filter((annotation: Annotation) => annotation.deleted_on === null);
+      const allAnnotations = data.data.other_files.filter((annotation: Annotation) => annotation.deleted_on === null);
+      return [...currentAnnotations, ...allAnnotations] ?? [];
     },
-    enabled: isDialogOpen && Boolean(fileId),
+    enabled: isDialogOpen,
   });
 
 
