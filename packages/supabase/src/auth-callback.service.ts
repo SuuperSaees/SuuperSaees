@@ -116,9 +116,32 @@ class AuthCallbackService {
         });
 
         if (response.ok) {
+          const orderId = Number(callbackNextPath?.split('/')[2]);
           const { access_token, refresh_token } = response.success?.data?.session;
           await this.client.auth.setSession({ access_token, refresh_token });
+          // verify if the order is public
+          const { data, error } = await this.client.from('orders_v2')
+          .select('visibility')
+          .eq('id', orderId)
+          .single();
+
+          if (error) {
+            console.error('Error verifying order', error);
+            throw new Error('Error verifying order');
+          }
+
+          if (data?.visibility === 'public') {
+            const { error } = await this.client.from('order_followers')
+            .insert({
+              order_id: orderId,
+              client_member_id: response.success?.data?.user_client_id,
+            });
+          if (error) {
+            console.error('Error adding follower to order', error);
+            throw new Error('Error adding follower to order');
+          }
           return url;
+        }
         }
       }
     }

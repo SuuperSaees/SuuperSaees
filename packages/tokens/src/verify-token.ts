@@ -34,7 +34,6 @@ export async function verifyToken(
       };
     }
 
-    console.log('data', data);
     accessToken = data.access_token;
     // Split the token into its parts
     const [base64Header, base64Payload, signature] =
