@@ -232,29 +232,28 @@ const AsideOrderInformation = ({
           <h3 className="pb-4 font-bold">
             <Trans i18nKey="details.createdBy" />
           </h3>
-          <div className="flex gap-3">
-            <AvatarDisplayer
-              displayName={
-                order.client?.settings?.name ?? order.client?.name
-              }
-              pictureUrl={
-                order.client?.settings?.picture_url ?? order.client?.picture_url
-              }
-            />
-            <div className="flex flex-col">
-              <Link 
-                href={`/clients/organizations/${order.client_organization_id}`}
-                className="text-sm font-medium text-gray-600 hover:text-blue-600"
-              >
-                {order.client?.settings?.name ?? order.client?.name ?? ''}
-              </Link>
-              <span className="text-sm text-gray-600">
-                {order.client_organization?.name
-                  ? order.client_organization?.name
-                  : ''}
-              </span>
+          <Link href={`/clients/organizations/${order.client_organization_id}`}>
+            <div className="flex gap-3">
+              <AvatarDisplayer
+                displayName={
+                  order.client?.settings?.name ?? order.client?.name
+                }
+                pictureUrl={
+                  order.client?.settings?.picture_url ?? order.client?.picture_url
+                }
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-600 ">
+                  {order.client?.settings?.name ?? order.client?.name ?? ''}
+                </span>
+                <span className="text-sm text-gray-600">
+                  {order.client_organization?.name
+                    ? order.client_organization?.name
+                    : ''}
+                </span>
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         <h3 className="font-medium">{t('details.summary')}</h3>
