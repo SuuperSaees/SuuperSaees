@@ -123,3 +123,13 @@ export enum ErrorAnnotationOperations {
   FAILED_TO_LIST_MESSAGES = 'failedToListMessages',
   FAILED_TO_ADD_MESSAGE = 'failedToAddMessage',
 }
+
+export enum ErrorPluginOperations {
+  PLUGIN_NOT_FOUND = 'pluginNotFound',
+  PLUGIN_ALREADY_EXISTS = 'pluginAlreadyExists',
+  FAILED_TO_CREATE_PLUGIN = 'failedToCreatePlugin',
+  FAILED_TO_UPDATE_PLUGIN = 'failedToUpdatePlugin',
+  FAILED_TO_DELETE_PLUGIN = 'failedToDeletePlugin',
+  PLUGIN_DELETED = 'pluginDeleted',
+  PLUGIN_UPDATED = 'pluginUpdated',
+}

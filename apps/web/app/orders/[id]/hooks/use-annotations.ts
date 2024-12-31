@@ -3,6 +3,10 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { Activity } from '~/lib/activity.types';
+import { addActivityAction } from '~/team-accounts/src/server/actions/activity/create/create-activity';
+import { useActivityContext } from '../context/activity-context';
 
 interface Annotation {
   id: string;
@@ -26,9 +30,19 @@ interface Message {
   parent_id?: string;
 }
 
-export const useAnnotations = (fileId: string, isDialogOpen: boolean, otherFileIds?: string[]) => {
+interface useAnnotationsProps {
+  fileId: string;
+  fileName: string;
+  isDialogOpen: boolean;
+  isInitialMessageOpen?: boolean;
+  otherFileIds?: string[];
+}
+
+export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessageOpen=false, otherFileIds }: useAnnotationsProps) => {
   const { t } = useTranslation('orders');
   const supabase = useSupabase();
+  const { user, workspace } = useUserWorkspace();
+  const { order } = useActivityContext();
   const queryClient = useQueryClient();
   const [isCreatingAnnotation, setIsCreatingAnnotation] = useState(true);
   const [selectedAnnotation, setSelectedAnnotation] = useState<Annotation | null>(null);
@@ -53,7 +67,7 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean, otherFileI
       const data = await response.json();
       return data.data.children ?? [];
     },
-    enabled: isDialogOpen && Boolean(selectedAnnotation?.id),
+    enabled: isDialogOpen && Boolean(selectedAnnotation?.id) && !isInitialMessageOpen,
   });
 
   // Replace createAnnotation with mutation
@@ -87,8 +101,22 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean, otherFileI
       });
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
+      const actualName = workspace?.name;
+
+      const message = `has added a new annotation`;
+      const activity = {
+        actor: actualName,
+        action: Activity.Enums.ActionType.CREATE,
+        type: Activity.Enums.ActivityType.ANNOTATION,
+        message,
+        value: [fileName, fileId],
+        preposition: 'in_file',
+        order_id: Number(order.id),
+        user_id: user?.id,
+      };
+      await addActivityAction(activity);
       toast.success(t('annotations.addSuccess'));
     },
     onError: () => {
@@ -129,7 +157,7 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean, otherFileI
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
     },
   });
 
@@ -158,7 +186,7 @@ export const useAnnotations = (fileId: string, isDialogOpen: boolean, otherFileI
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', selectedAnnotation?.id] });
-      queryClient.invalidateQueries({ queryKey: ['annotations', fileId] });
+      queryClient.invalidateQueries({ queryKey: ['annotations'] });
     },
     onError: () => {
       console.error('Error updating annotation');

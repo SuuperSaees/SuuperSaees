@@ -13,6 +13,9 @@ import { convertToTitleCase } from '../utils/format-agency-names';
 import { formatDisplayDate } from '@kit/shared/utils';
 import { ActivityType, DataResult } from '../context/activity.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
+import FileWithOptions from '../hoc/with-file-options';
+import { useActivityContext } from '../context/activity-context';
+
 const translateActivity = (
   activity: DataResult.Activity,
   t: TFunction<'logs', undefined>,
@@ -191,29 +194,70 @@ export const DefaultAction = ({
 }: ActivityActionProps) => {
   const { i18n } = useTranslation();
   const language = i18n.language;
+
+  let isFileValue = false;
+
+  let parsedValue = activity.value;
+
+  if (typeof activity.value === 'string' && activity.value.includes('[')) {
+    try {
+      parsedValue = JSON.parse(activity.value); 
+      isFileValue = Array.isArray(parsedValue) && parsedValue.length === 2; 
+    } catch (e) {
+      console.error("Error al parsear activity.value", e);
+      isFileValue = false; 
+    }
+  } else if (Array.isArray(activity.value) && activity.value.length === 2) {
+    isFileValue = true; 
+  }
+
+  const [fileName, fileId] = isFileValue ? parsedValue : [];
+
+  const { allFiles } = useActivityContext();
+
+  const file = allFiles?.find((file) => file.id === fileId);
+
   return (
     <div className="flex h-fit w-full justify-between gap-4">
       <div className="flex gap-4">
         <AvatarDisplayer
-          displayName={formattedActivity.user.settings?.picture_url ?? formattedActivity.user.picture_url ? null : formattedActivity.user?.settings?.name ?? formattedActivity.user.name}
-          pictureUrl={formattedActivity.user.settings?.picture_url ?? formattedActivity.user.picture_url}
+          displayName={
+            formattedActivity.user.settings?.picture_url ?? formattedActivity.user.picture_url
+              ? null
+              : formattedActivity.user?.settings?.name ?? formattedActivity.user.name
+          }
+          pictureUrl={
+            formattedActivity.user.settings?.picture_url ?? formattedActivity.user.picture_url
+          }
         />
-        <span className="flex flex-wrap gap-1">
+        <span className="flex flex-wrap items-center gap-1">
           <span>{formattedActivity.actor}</span>
           <span>{formattedActivity.message}</span>
           <span>{formatTarget(formattedActivity.type)}</span>
           <span>{formattedActivity.preposition}</span>
-          <span>
-            {activity.type === 'due_date'
-              ? formatDisplayDate(parseISO(formattedActivity.value ?? ''), language)
-              : formattedActivity.value}
-          </span>
+          {isFileValue ? (
+            <span className="flex items-center">
+              <FileWithOptions
+                src={file?.url ?? ''}
+                fileName={fileName ?? ''}
+                fileType={file?.type ?? ''}
+                isDialog={false}
+                noPreview={true}
+                files={allFiles}
+              />
+            </span>
+          ) : (
+            <span>
+              {activity.type === 'due_date'
+                ? formatDisplayDate(parseISO(formattedActivity.value ?? ''), language)
+                : formattedActivity.value}
+            </span>
+          )}
         </span>
       </div>
-      <small className="">
-        {format(new Date(activity.created_at), 'MMM dd, p')}
-      </small>
+      <small>{format(new Date(activity.created_at), 'MMM dd, p')}</small>
     </div>
   );
 };
+
 export default ActivityAction;
