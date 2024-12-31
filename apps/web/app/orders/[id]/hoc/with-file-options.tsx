@@ -21,6 +21,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from 'node_modules/@kit/ui/src/shadcn/hover-card';
+import { File } from '~/lib/file.types';
 
 interface FileProps {
   src: string;
@@ -32,7 +33,7 @@ interface FileProps {
   actualPage?: number;
   onLoadPDF?: (total: number) => void;
   zoomLevel?: number;
-  files?: File[];
+  files?: File.Type[];
   triggerComponent?: React.ReactNode;
 }
 
@@ -131,7 +132,7 @@ export const FileDialogView: React.FC<FileProps> = ({
   fileType,
   files,
 }) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File.Type | null>(null);
   const [currentFileType, setCurrentFileType] = useState(fileType);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
@@ -143,7 +144,6 @@ export const FileDialogView: React.FC<FileProps> = ({
   const { user } = useUserWorkspace();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-
   const {
     zoomLevel,
     isDragging,
@@ -156,7 +156,7 @@ export const FileDialogView: React.FC<FileProps> = ({
     resetZoom,
   } = useFileHandlers(1, currentFileType);
 
-
+  const otherFileIds = files?.filter((file) => file.id !== selectedFile?.id).map((file) => file.id);
   const { 
     annotations, 
     isLoadingAnnotations,
@@ -170,7 +170,7 @@ export const FileDialogView: React.FC<FileProps> = ({
     setSelectedAnnotation,
     deleteAnnotation,
     updateAnnotation
-  } = useAnnotations(selectedFile?.id ?? '', isDialogOpen);
+  } = useAnnotations(selectedFile?.id ?? '', isDialogOpen, otherFileIds);
   
   useEffect(() => {
     if (files?.length) {
@@ -199,7 +199,7 @@ export const FileDialogView: React.FC<FileProps> = ({
 
     try {
       const annotation = await createAnnotation({
-        file_id: selectedFile.id,
+        file_id: selectedFile?.id ?? '',
         position_x: x,
         position_y: y,
         content: 'Annotation',

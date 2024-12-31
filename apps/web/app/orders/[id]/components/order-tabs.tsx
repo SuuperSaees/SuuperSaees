@@ -129,6 +129,8 @@ export const OrderTabs = ({
             agencyName={agencyName}
             agencyStatuses={agencyStatuses}
             activeTab={activeTab}
+            agencyId={orderAgencyId}
+            clientOrganizationId={organizationId?.account_id ?? ''}
           />
         )}
       </TabsContent>

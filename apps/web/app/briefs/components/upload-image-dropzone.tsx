@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { CloudUpload } from 'lucide-react';
 import { Trash } from 'lucide-react';
 import {
-  createFile,
+  createFiles,
   createUploadBucketURL,
 } from 'node_modules/@kit/team-accounts/src/server/actions/files/create/create-file';
 import { UseFormReturn } from 'react-hook-form';
@@ -19,6 +19,7 @@ import { Spinner } from '@kit/ui/spinner';
 import { generateUUID } from '~/utils/generate-uuid';
 
 import { BriefCreationForm } from './brief-creation-form';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 export interface UploadImageDropzoneProps {
   index: number | undefined;
@@ -53,7 +54,7 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string>(defaultValue ?? '');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const {workspace: userWorkspace} = useUserWorkspace();
   async function uploadImageToBucket(file: File) {
     if (!file) return;
 
@@ -84,12 +85,13 @@ const UploadImage: React.FC<UploadImageDropzoneProps> = ({
 
       const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/create_brief/${newFilepath}`;
 
-      const fileData = await createFile([
+      const fileData = await createFiles([
         {
           name: sanitizedFileName,
           size: file.size,
           type: file.type,
           url: fileUrl,
+          user_id: userWorkspace.id ?? '',
         },
       ]);
 

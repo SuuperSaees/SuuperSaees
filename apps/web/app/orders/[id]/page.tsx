@@ -14,6 +14,7 @@ import { Order } from '~/lib/order.types';
 import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+import { getFolderFiles } from '~/team-accounts/src/server/actions/files/get/get-files';
 // import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 export const generateMetadata = async () => {
@@ -51,6 +52,11 @@ async function OrderDetailsPage({
     { title: ordersTitle },
     { title: order?.title ?? '', uuid: order?.uuid ?? '' },
   ];
+
+  const orderFiles = await getFolderFiles(order?.uuid ?? '').catch((err) => {
+    console.error(`Error getting order files: ${err}`);
+    return [];
+    });
   // const role = await getUserRole().catch((err) => {
   //   console.error(`Error client, getting user role: ${err}`)
   //   return ''
@@ -61,7 +67,7 @@ async function OrderDetailsPage({
   return (
       <ActivityProvider
         messages={order?.messages ?? []}
-        files={order?.files ?? []}
+        files={orderFiles ?? []}
         activities={order?.activities ?? []}
         reviews={order?.reviews ?? []}
         order={order}

@@ -6,8 +6,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Download, Plus } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import {
-  createFile,
   createUploadBucketURL,
+  insertFilesInFolder,
 } from 'node_modules/@kit/team-accounts/src/server/actions/files/create/create-file';
 import { downloadFiles } from 'node_modules/@kit/team-accounts/src/server/actions/files/download/download-files';
 import { createFolder } from 'node_modules/@kit/team-accounts/src/server/actions/folders/create/create-folder';
@@ -35,10 +35,14 @@ import { generateUUID } from '~/utils/generate-uuid';
 
 export function OptionFiles({
   clientOrganizationId,
+  agencyId,
+  userId,
   currentPath,
   queryKey,
 }: {
   clientOrganizationId: string;
+  agencyId: string;
+  userId: string;
   currentPath: Array<{ title: string; uuid?: string }>;
   queryKey: string[];
 }) {
@@ -116,10 +120,13 @@ export function OptionFiles({
       clientOrganizationId,
       currentPath,
     }: {
-      files: Array<{ name: string; size: number; type: string; url: string }>;
+      files: Array<{ name: string; size: number; type: string; url: string, user_id: string }>;
       clientOrganizationId: string;
       currentPath: Array<{ title: string; uuid?: string }>;
-    }) => createFile(files, clientOrganizationId, currentPath),
+    }) => {
+      const lastFolderPathId = currentPath[currentPath.length - 1]?.uuid ?? '';
+      return insertFilesInFolder(lastFolderPathId, files, clientOrganizationId, agencyId)
+    },
 
     onSuccess: async () => {
       toast.success(t('files.new.uploadSuccess'));
@@ -172,6 +179,7 @@ export function OptionFiles({
             size: selectedFile.size,
             type: selectedFile.type,
             url: fileUrl,
+            user_id: userId,
           },
         ],
         clientOrganizationId,

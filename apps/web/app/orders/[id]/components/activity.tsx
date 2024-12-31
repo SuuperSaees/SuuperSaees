@@ -9,34 +9,15 @@ import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
 import { Separator } from '@kit/ui/separator';
 import { getUrlFile } from '~/team-accounts/src/server/actions/files/get/get-files';
-import { insertOrderFiles } from '~/team-accounts/src/server/actions/files/create/create-file';
+// import { insertOrderFiles } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 
-const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: string, agencyStatuses: AgencyStatus.Type[], activeTab: string }) => {
+const ActivityPage = ({ agencyName, agencyStatuses, activeTab, agencyId, clientOrganizationId }: { agencyName: string, agencyStatuses: AgencyStatus.Type[], activeTab: string, agencyId: string, clientOrganizationId: string }) => {
   const { order } = useActivityContext();
   const [showFileUploader, setShowFileUploader] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-
-  const handleFileIdsChange = async (fileIds: string[]) => {
-    const orderFilesToInsert = fileIds.map((fileId) => {
-      return {
-        order_id: order.uuid,
-        file_id: fileId,
-      };
-    });
-
-    for (const orderFile of orderFilesToInsert) {
-      try {
-        const orderFileInserted = await insertOrderFiles(orderFile.order_id, orderFile.file_id);
-        if (orderFileInserted?.error) {
-          console.error('Error inserting order FILE:', orderFileInserted.error);
-        }
-
-
-      } catch (error) {
-        console.error('Unexpected error inserting order FILE:', error);
-      }
-    }
+  const handleFileIdsChange =  (fileIds: string[]) => {
+    return {fileIds};
   };
 
   const { addMessage, userRole, userWorkspace } = useActivityContext();
@@ -136,9 +117,12 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: s
           uploadFileIsExternal
           toggleExternalUpload={() => setShowFileUploader(!showFileUploader)}
           userRole={userRole}
-          handleFileIdsChange={handleFileIdsChange}
           isDragging={isDragging}
           setIsDragging={setIsDragging}
+          agencyId={agencyId}
+          clientOrganizationId={clientOrganizationId}
+          folderId={order.uuid}
+          handleFileIdsChange={handleFileIdsChange}
         />
       </div>
   </div>

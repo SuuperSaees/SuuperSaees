@@ -145,6 +145,9 @@ interface RichTextEditorProps {
   handleFileIdsChange?: (fileIds: string[]) => void;
   isDragging?: boolean;
   setIsDragging?: (value: boolean) => void;
+  agencyId?: string;
+  clientOrganizationId?: string;
+  folderId?: string;
   [key: string]: unknown;
 }
 const IMAGE_URL_REGEX = /(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))/gi;
@@ -169,6 +172,9 @@ const RichTextEditor = ({
   className,
   isDragging,
   setIsDragging,
+  agencyId,
+  clientOrganizationId,
+  folderId,
   ...rest
   // useInForm = false,
 }: RichTextEditorProps) => {
@@ -322,15 +328,15 @@ const RichTextEditor = ({
       onBlur?.();
     },
   });
-  const sendContent = useCallback(() => {
+  const sendContent = useCallback((isFile = false) => {
     void (async () => {
       setIsSending(true);
       setIsLoading(true);
       const currentContent = editor ? editor.getHTML() : '';
-
       try {
         cleanupImages();
-        if (currentContent.trim() !== '<p></p>' || fileIdsList.length > 0) {
+        if (isFile || currentContent.trim() !== '<p></p>') {
+
           await onComplete?.(currentContent, fileIdsList);
           
           insertedImages.current = new Set<string>();
@@ -493,6 +499,9 @@ const RichTextEditor = ({
             onFileUploadStatusUpdate={updateFileUploadStatus}
             thereAreFilesUploaded={setThereAreFilesUploaded}
             disabled={isLoading}
+            agencyId={agencyId ?? ''}
+            clientOrganizationId={clientOrganizationId ?? ''}
+            folderId={folderId ?? ''}
           />
           <div className='flex justify-between'>
             {showToolbar && (
@@ -510,7 +519,7 @@ const RichTextEditor = ({
             {!hideSubmitButton && (
               <ThemedButton
                 className="mt-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))] bg-[#155EEF] p-[var(--spacing-lg,12px)] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
-                onClick={sendContent}
+                onClick={()=>sendContent(thereAreFilesUploaded)}
                 disabled={
                   isLoading ||
                   (!areAllFilesUploaded() && thereAreFilesUploaded) ||

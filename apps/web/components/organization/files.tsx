@@ -10,6 +10,7 @@ import { OptionFiles } from './files/option-files';
 import RadioOptions from './files/radio-options';
 import { SkeletonCardFile } from './skeleton-card-file';
 import EmptyState from '../ui/empty-state';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface FileSectionProps {
   clientOrganizationId: string;
@@ -21,6 +22,7 @@ interface FileSectionProps {
 }
 
 export default function FileSection({ clientOrganizationId, agencyId, setCurrentPath, currentPath }: FileSectionProps) {
+  const { workspace: userWorkspace } = useUserWorkspace();
   const { t } = useTranslation('organizations')
   const {
     selectedOption,
@@ -155,7 +157,7 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
         />
         {selectedOption === 'all' && (
           <div className="flex-shrink-0">
-            <OptionFiles clientOrganizationId={clientOrganizationId} currentPath={path} queryKey={queryKey}/>
+            <OptionFiles clientOrganizationId={clientOrganizationId} currentPath={path} queryKey={queryKey} userId={userWorkspace.id ?? ''} agencyId={agencyId}/>
           </div>
         )}
       </div>
