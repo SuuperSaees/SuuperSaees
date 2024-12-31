@@ -33,6 +33,7 @@ import { PriorityCombobox } from './priority-combobox';
 import { getClientMembersForOrganization } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getFormattedDateRange } from '../utils/get-formatted-dates';
 import { User } from '@supabase/supabase-js';
+import Link from 'next/link';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -241,12 +242,12 @@ const AsideOrderInformation = ({
               }
             />
             <div className="flex flex-col">
-              <span 
-                className="text-sm font-medium text-gray-600 cursor-pointer hover:text-blue-600"
-                onClick={() => router.push(`/clients/organizations/${order.client_organization_id}`)}
+              <Link 
+                href={`/clients/organizations/${order.client_organization_id}`}
+                className="text-sm font-medium text-gray-600 hover:text-blue-600"
               >
                 {order.client?.settings?.name ?? order.client?.name ?? ''}
-              </span>
+              </Link>
               <span className="text-sm text-gray-600">
                 {order.client_organization?.name
                   ? order.client_organization?.name
