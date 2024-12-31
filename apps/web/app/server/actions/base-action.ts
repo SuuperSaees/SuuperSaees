@@ -1,4 +1,3 @@
-
 import { Database } from '~/lib/database.types';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
@@ -28,6 +27,7 @@ export abstract class BaseAction implements IBaseAction {
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Failed to initialize Supabase clients: ${errorMessage}`);
         throw new Error(`Failed to initialize Supabase clients: ${errorMessage}`);
       }
     }

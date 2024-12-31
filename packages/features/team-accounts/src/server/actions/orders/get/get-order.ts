@@ -169,7 +169,7 @@ export async function getOrderAgencyMembers(
     return agencyMembersData;
   } catch (error) {
     console.error('Error fetching order agency members:', error);
-    throw error;
+    // throw error;
   }
 }
 
@@ -405,9 +405,11 @@ export async function getAgencyClients(
   }
 }
 
-export async function getPropietaryOrganizationIdOfOrder(orderId: string) {
+export async function getPropietaryOrganizationIdOfOrder(orderId: string, adminActived= false) {
   try {
-    const client = getSupabaseServerComponentClient();
+    const client = getSupabaseServerComponentClient({
+      admin: adminActived
+    });
 
     const { data: clientOrganizationData, error: clientOrganizationDataError } =
       await client

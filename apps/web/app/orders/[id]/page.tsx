@@ -26,9 +26,14 @@ export const generateMetadata = async () => {
 
 async function OrderDetailsPage({
   params: { id },
+  searchParams: { public_token_id },
 }: {
   params: { id: string };
+  searchParams: { public_token_id: string };
 }) {
+  if (public_token_id) {
+    console.log('tokenData', public_token_id);
+  }
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
   ) as Order.Relational;

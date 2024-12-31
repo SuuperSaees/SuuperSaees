@@ -6,11 +6,12 @@ import { type EmailOtpType, SupabaseClient } from '@supabase/supabase-js';
 
 
 
-import { TokenRecoveryType } from '../../tokens/src/domain/token-type';
+import { TokenRecoveryType, DefaultToken } from '../../tokens/src/domain/token-type';
 import { verifyToken } from '../../tokens/src/verify-token';
 // import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
-
+import { createClient } from '../../features/team-accounts/src/server/actions/clients/create/create-clients';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * @name createAuthCallbackService
@@ -47,6 +48,7 @@ class AuthCallbackService {
     const searchParams = url.searchParams;
     const token_hash_session = searchParams.get('token_hash_session');
     const tokenHashRecovery = searchParams.get('token_hash_recovery');
+    const publicTokenId = searchParams.get('public_token_id');
     const callbackNextPath = searchParams.get('next');
     const host = request.headers.get('host');
 
@@ -83,10 +85,42 @@ class AuthCallbackService {
     searchParams.delete('type');
     searchParams.delete('next');
     searchParams.delete('callback');
+    searchParams.delete('public_token_id');
 
     // if we have a next path, we redirect to that path
     if (nextPath) {
       url.pathname = nextPath;
+    }
+
+    if (publicTokenId) {
+      // token can be expired. Because it's a public token, we don't need to verify the expiration date
+      const { payload } = await verifyToken(
+        '',
+        publicTokenId,
+      ) as { isValidToken: boolean; payload?: DefaultToken };
+
+      if (payload) {
+        url.pathname = callbackNextPath ?? url.pathname;
+        // here we need to set the session with the user data
+        const newUuid = uuidv4();
+        const response = await createClient({
+          agencyId: payload.agency_id ?? '',
+          adminActivated: true,
+          client: {
+            email: `guest+${newUuid}@suuper.co`,
+            name: 'guest ' + newUuid,
+            slug: `guest ${newUuid}'s organization`,
+          },
+          role: 'client_owner',
+          sendEmail: false,
+        });
+
+        if (response.ok) {
+          const { access_token, refresh_token } = response.success?.data?.session;
+          await this.client.auth.setSession({ access_token, refresh_token });
+          return url;
+        }
+      }
     }
 
     if (tokenHashRecovery && type) {

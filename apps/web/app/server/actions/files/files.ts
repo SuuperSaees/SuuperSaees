@@ -1,6 +1,6 @@
 import { BaseAction } from '../base-action';
 import { IFilesAction, ICreateFile } from './files.interface';
-import { FilesController } from './controller/files.controller';
+import { FilesController } from './controllers/files.controller';
 
 export class FilesAction extends BaseAction implements IFilesAction {
     private controller: FilesController;

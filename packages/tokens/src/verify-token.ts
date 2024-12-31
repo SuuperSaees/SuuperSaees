@@ -4,7 +4,7 @@ import { createHmac } from 'crypto';
 
 import { Tokens } from '../../../apps/web/lib/tokens.types';
 import { getSupabaseServerComponentClient } from '../../../packages/supabase/src/clients/server-component.client';
-import { PayToken, TokenRecoveryType } from './domain/token-type';
+import { PayToken, TokenRecoveryType, DefaultToken } from './domain/token-type';
 
 const { sha256 } = Tokens.EXTRA_TOKENS_KEYS;
 
@@ -13,7 +13,7 @@ export async function verifyToken(
   idTokenProvider?: string,
 ): Promise<{
   isValidToken: boolean;
-  payload?: PayToken | TokenRecoveryType;
+  payload?: PayToken | TokenRecoveryType | DefaultToken;
 }> {
   const client = getSupabaseServerComponentClient({
     admin: true,
@@ -34,6 +34,7 @@ export async function verifyToken(
       };
     }
 
+    console.log('data', data);
     accessToken = data.access_token;
     // Split the token into its parts
     const [base64Header, base64Payload, signature] =
@@ -66,6 +67,7 @@ export async function verifyToken(
       console.error('Token has expired');
       return {
         isValidToken: false,
+        payload,
       };
     }
 
