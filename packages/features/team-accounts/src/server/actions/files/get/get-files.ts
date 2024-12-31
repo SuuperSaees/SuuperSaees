@@ -102,7 +102,6 @@ async function getAllFolderContents(
   clientOrganizationId: string,
   agencyId: string,
 ): Promise<FileSystemResponse> {
-  console.log('getAllFolderContents', folderId, type);
   if (type === 'mainfolder') {
     // This group all files where the user_id of the file belongs the client_organization_id or agency_id
     const clientAndAgencyMembers = await fetchUsersAccounts(client, [
@@ -223,6 +222,25 @@ export async function getFoldersAndFiles(
     }
   } catch (error) {
     console.error('Error getting folders and files:', error);
+    throw error;
+  }
+}
+
+export async function getFolderFiles (folderId: string) {
+  try {
+    const client = getSupabaseServerComponentClient();
+
+    // Fetch the file details
+    const {data: files , error: fileDataError} = await client
+    .from('files')
+    .select('id, url, name, type, size, created_at, folder_files!inner(folder_id), user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))')
+    .eq('folder_files.folder_id', folderId)
+
+    if (fileDataError) throw new Error(`Error getting folder files: ${fileDataError.message}`);
+
+    return files ?? [];
+  } catch (error) {
+    console.error('Error getting folder files:', error);
     throw error;
   }
 }

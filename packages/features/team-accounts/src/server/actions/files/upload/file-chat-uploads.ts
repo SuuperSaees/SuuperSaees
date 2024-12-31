@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { createFile, createUploadBucketURL } from '../create/create-file';
+import {  createUploadBucketURL, insertFilesInFolder } from '../create/create-file';
 import { useTranslation } from 'react-i18next';
 import { deleteFile } from '../delete/delete-file';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface FileWithServerId {
   file: File;
@@ -16,19 +17,25 @@ interface UseFileUploadProps {
   onFileIdsChange?: (fileIds: string[]) => void;
   onFileUploadStatusUpdate?: (file: File, status: 'uploading' | 'completed' | 'error', serverId?: string) => void;
   thereAreFilesUploaded?: (value: boolean) => void;
+  agencyId: string;
+  clientOrganizationId: string;
+  folderId: string;
 }
 
 export const useFileUpload = ({
   onFileSelect,
   onFileIdsChange,
   onFileUploadStatusUpdate,
-  thereAreFilesUploaded
+  thereAreFilesUploaded,
+  agencyId,
+  clientOrganizationId,
+  folderId,
 }: UseFileUploadProps) => {
   const { t } = useTranslation();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileUrls, setFileUrls] = useState<File[]>([]);
   const [globalFileList, setGlobalFileList] = useState<FileWithServerId[]>([]);
-
+  const {workspace: userWorkspace} = useUserWorkspace();
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
   };
@@ -120,11 +127,12 @@ export const useFileUpload = ({
         size: file.size,
         type: file.type,
         url: fileUrl,
+        user_id: userWorkspace.id ?? '',
       };
 
-      const createdFiles = await createFile([newFileData]);
-      
+      const createdFiles = await insertFilesInFolder(folderId, [newFileData], clientOrganizationId, agencyId);
       if (onFileSelect) {
+
         const allServerIds = createdFiles.map((file) => file.id);
         onFileSelect(allServerIds);
         if (onFileIdsChange) {

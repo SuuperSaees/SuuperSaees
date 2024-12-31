@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { deleteOrderBriefFile } from '../delete/delete-file';
-import { createFile, createUploadBucketURL } from '../create/create-file';
+import { createFiles, createUploadBucketURL } from '../create/create-file';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface FileInfo {
   file: File;
@@ -14,6 +15,7 @@ interface FileInfo {
 export function useFileUpload(bucketName: string, uuid: string, onFileIdsChange: (fileIds: string[], fileUrls?: string[]) => void, removeResults: boolean) {
   const { t } = useTranslation();
   const [files, setFiles] = useState<Record<string, FileInfo>>({});
+  const {workspace: userWorkspace} = useUserWorkspace();
 
   const generateFileId = () => Date.now() + Math.random().toString(36).substr(2, 9);
 
@@ -96,9 +98,10 @@ export function useFileUpload(bucketName: string, uuid: string, onFileIdsChange:
         size: file.size,
         type: file.type,
         url: fileUrl,
+        user_id: userWorkspace.id ?? '',
       };
 
-      const createdFiles = await createFile([newFileData]);
+      const createdFiles = await createFiles([newFileData]);
       setFiles((prevFiles) => {
         const updatedFiles = {
           ...prevFiles,

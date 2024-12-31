@@ -7,4 +7,12 @@ export namespace File {
   };
   export type Insert = Database['public']['Tables']['files']['Insert'];
   export type Update = Database['public']['Tables']['files']['Update'];
+
+  export namespace Relationships {
+    export namespace FolderFiles {
+      export type Insert = Database['public']['Tables']['folder_files']['Insert'];
+      export type Update = Database['public']['Tables']['folder_files']['Update'];
+      export type Type = Database['public']['Tables']['folder_files']['Row'];
+    }
+  }
 }
