@@ -14,7 +14,7 @@ export interface Plugin {
 }
 
 export interface PluginInsert {
-  provider_id: string;
+  provider_id?: string;
   status: 'installed' | 'uninstalled' | 'failed' | 'in progress';
   type: 'integration' | 'tool' | 'internal' | 'external';
   provider: string;

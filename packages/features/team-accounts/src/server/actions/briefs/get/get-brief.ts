@@ -171,6 +171,7 @@ export const fetchClientBriefs = async (
     form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
     services!inner( id, name )`,
   )
+  .is('deleted_on', null)
   .in('id', briefIds)
 
   if (serviceIds && serviceIds.length > 0) {
@@ -205,13 +206,14 @@ export const fetchBriefs = async (
     }
 
     // Filter by brief IDs
-    query = query.in('id', briefIds);
+    query = query.in('id', briefIds)
+    .is('deleted_on', null);
 
     const { data: briefsData, error: briefsError } = await query;
     if (briefsError) {
       throw new Error(`Error fetching the briefs: ${briefsError.message}`);
     }
-
+    
     return briefsData as Brief.Response[]; // Ensure the return type aligns with expected output
   } catch (error) {
     console.error(error);
@@ -233,6 +235,7 @@ export const fetchBriefsByOrgOwnerId = async (
         form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))
         ${configurations.includes?.includes('services') ? ',services ( id,name )' : ''}`,
       )
+      .is('deleted_on', null)
       .eq('propietary_organization_id', ownerId);
 
     if (briefsError)
