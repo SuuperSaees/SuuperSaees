@@ -241,7 +241,10 @@ const AsideOrderInformation = ({
               }
             />
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-600">
+              <span 
+                className="text-sm font-medium text-gray-600 cursor-pointer hover:text-blue-600"
+                onClick={() => router.push(`/clients/organizations/${order.client_organization_id}`)}
+              >
                 {order.client?.settings?.name ?? order.client?.name ?? ''}
               </span>
               <span className="text-sm text-gray-600">
