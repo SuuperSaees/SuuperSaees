@@ -33,7 +33,6 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
     loading,
     handleFolderClick,
     handlePathClick,
-    currentFolderType,
     queryKey,
   } = useFileManagement(clientOrganizationId, agencyId, setCurrentPath, currentPath)
 
@@ -79,47 +78,6 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
   );
 
   const renderContent = () => {
-    // Root level - show orders folder and main folders/files
-    if (path.length === 0 && selectedOption === 'all') {
-      return (
-        <div className="mt-4 flex flex-wrap gap-8">
-          <FolderItem
-            folder={{ title: t('organizations:files.orders'), id: '' }}
-            onClick={() => handleFolderClick('', t('organizations:files.orders'), true)}
-            isOrderFolder
-            queryKey={queryKey}
-          />
-          {currentFolders.map((folder) => (
-            <FolderItem
-              key={folder.uuid}
-              folder={{ title: folder.title ?? '', id: folder.uuid }}
-              onClick={() => handleFolderClick(folder.uuid, folder.title ?? '')}
-              queryKey={queryKey}
-            />
-          ))}
-          {currentFiles.map((file) => (
-            <FileItem key={file.id} file={file} currentPath={path} />
-          ))}
-        </div>
-      )
-    }
-
-    // Orders folder - show project folders
-    if (currentFolderType === 'orders' && currentFolders.length > 0) {
-      return (
-        <div className="mt-4 flex flex-wrap gap-8">
-          {currentFolders.map((folder) => (
-            <FolderItem
-              key={folder.uuid}
-              folder={{ title: folder.title ?? '', id: folder.uuid }}
-              onClick={() => handleFolderClick(folder.uuid, folder.title ?? '', true)}
-              isOrderFolder
-              queryKey={queryKey}
-            />
-          ))}
-        </div>
-      )
-    }
 
     // Subfolder or empty folder
     const hasContent = currentFolders.length > 0 || currentFiles.length > 0

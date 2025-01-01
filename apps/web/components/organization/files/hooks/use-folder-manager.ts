@@ -43,7 +43,6 @@ export function useFileManagement(
   );
   const [showFolders, setShowFolders] = useState(false);
   const [showSubFolders, setShowSubFolders] = useState(false);
-
   // Determine initial folder type based on path
   const lastPath = path[path.length - 1];
   const initialFolderType = !lastPath
@@ -99,6 +98,7 @@ export function useFileManagement(
 
   const folders = data?.folders ?? [];
   const files = data?.files ?? [];
+  const parentFolderId = data?.parent_folder_id ?? '';
 
   // Handler functions
 
@@ -131,6 +131,7 @@ export function useFileManagement(
   };
 
   const handlePathClick = async (index: number) => {
+
     if (index === -1) {
       setPath([]);
       setCurrentPath?.([]);
@@ -141,7 +142,17 @@ export function useFileManagement(
       return;
     }
 
-    const newPath = path.slice(0, index + 1);
+    const path1 = path.slice(0, index + 1);
+    const projectPath = path1.find((item) => item.title == 'Projects');
+    const newProjectPath = projectPath
+      ? { ...projectPath, uuid: parentFolderId }
+      : { title: 'Projects' };
+    const path2 = [
+      ...path1.filter((item) => item.title != 'Projects'),
+      newProjectPath,
+    ];
+    const newPath =
+      path1.length === 1 && path1?.[0]?.title === 'Projects' ? path2 : path1;
     setPath(newPath);
     setCurrentPath?.(newPath);
 

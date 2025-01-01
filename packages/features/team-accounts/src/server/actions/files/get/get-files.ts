@@ -6,9 +6,7 @@ import { PostgrestError } from '@supabase/supabase-js';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import {
-  getFolderContents,
-  getMainFolders,
-  getOrdersFolders,
+  getFoldersByIds,
 } from '../../folders/get/get-folders';
 import { fetchUsersAccounts } from '../../members/get/get-member-account';
 
@@ -24,11 +22,13 @@ interface FileData {
 interface FolderData {
   uuid: string;
   title: string;
+  parent_folder_id?: string;
 }
 
 interface FileSystemResponse {
   folders: FolderData[];
   files: FileData[];
+  parent_folder_id?: string;
 }
 
 type FolderTarget = 'project' | 'client' | 'team' | 'all' | null;
@@ -72,28 +72,6 @@ export async function getFiles(
   }
 }
 
-// Specialized queries based on folder type
-async function getProjectFolderContents(
-  client: SupabaseClient,
-  folderId: string,
-  type: FolderType,
-): Promise<FileSystemResponse> {
-  if (type === 'mainfolder') {
-    const folders = await getOrdersFolders(folderId);
-    return { folders, files: [] };
-  }
-
-  const { data: files, error } = await client
-    .from('files')
-    .select('url, id, name, type, size, order_files!inner(order_id)')
-    .in('order_files.order_id', [folderId]);
-
-  if (error) {
-    return handleError(error, 'Error getting project files');
-  }
-
-  return { folders: [], files: files || [] };
-}
 
 async function getAllFolderContents(
   client: SupabaseClient,
@@ -122,27 +100,27 @@ async function getAllFolderContents(
         .in('user_id', clientAndAgencyMembersIds)
         .eq('order_files.orders.client_organization_id', clientOrganizationId)
         .eq('order_files.orders.agency_id', agencyId),
-      getMainFolders(client, folderId),
+      getFoldersByIds([], 'subfolder', { clientOrganizationId, agencyId }),
     ]);
-
+  
     return {
       folders,
       files: filesResult.data ?? [],
     };
   }
 
-  const folders = await getFolderContents(client, folderId);
+  const folders = await getFoldersByIds([folderId]);
   const { data: folderData, error } = await client
     .from('folders')
-    .select('files(id, url, name, type, size)')
+    .select('files(id, url, name, type, size), parent_folder_id')
     .eq('id', folderId)
     .single();
 
   if (error) {
     return handleError(error, 'Error getting folder contents');
   }
-
   return {
+    parent_folder_id: folderData?.parent_folder_id ?? '',
     folders,
     files: folderData?.files ?? [],
   };
@@ -199,8 +177,6 @@ export async function getFoldersAndFiles(
 
     // Use a switch statement for better organization of different cases
     switch (target) {
-      case 'project':
-        return await getProjectFolderContents(client, folderId, type);
 
       case 'all':
         return await getAllFolderContents(

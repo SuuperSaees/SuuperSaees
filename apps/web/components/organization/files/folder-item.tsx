@@ -69,7 +69,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
           className="w-[184.317px] cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-[15.661px] font-semibold text-gray-900"
           onClick={onClick}
         >
-          {folder.title}
+          {folder.title === 'Projects' ? t('orders:title') : folder.title}
         </div>
         {!isOrderFolder && (
           <DropdownMenu>

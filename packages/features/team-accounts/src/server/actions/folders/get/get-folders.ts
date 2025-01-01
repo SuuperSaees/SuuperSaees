@@ -1,71 +1,12 @@
 'use server';
 
-import { SupabaseClient } from '@supabase/supabase-js';
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-import { getUserRoleById } from '../../members/get/get-member-account';
 
 interface FolderData {
   id: string;
   name: string;
   parent_folder_id?: string | null;
-}
-
-interface FolderResponse {
-  uuid: string;
-  title: string;
-}
-
-// Base folder query builder
-const createFolderQuery = (client: SupabaseClient) => {
-  return client.from('folders');
-};
-
-export async function getOrdersFolders(clientOrganizationId: string) {
-  const client = getSupabaseServerComponentClient();
-
-  // Fetch the current user data
-  const { data: userData, error: userError } = await client.auth.getUser();
-  if (userError) throw userError;
-
-  const userRole = await getUserRoleById(userData.user.id);
-
-  if (
-    userRole === 'agency_owner' ||
-    userRole === 'agency_member' ||
-    userRole === 'agency_project_manager'
-  ) {
-    // Fecth the agencies of the user
-    const { data: agencies, error: agenciesError } = await client
-      .from('accounts')
-      .select('id')
-      .eq('primary_owner_user_id', userData.user.id)
-      .eq('is_personal_account', false);
-
-    if (agenciesError) throw agenciesError;
-
-    // Fetch the orders to create the folders
-    const { data: folders, error: foldersError } = await client
-      .from('orders_v2')
-      .select('title, uuid')
-      .eq('agency_id', agencies?.[0]?.id ?? '')
-      .eq('client_organization_id', clientOrganizationId);
-
-    if (foldersError) throw foldersError;
-
-    return folders;
-  }
-
-  // Fetch the orders to create the folders
-  const { data: folders, error: foldersError } = await client
-    .from('orders_v2')
-    .select('title, uuid')
-    .eq('client_organization_id', clientOrganizationId);
-
-  if (foldersError) throw foldersError;
-
-  return folders;
+  folders?: FolderData[];
 }
 
 export async function CheckIfItIsAnOrderFolder(folderUuid: string) {
@@ -86,52 +27,95 @@ export async function CheckIfItIsAnOrderFolder(folderUuid: string) {
   return false;
 }
 
-export async function getMainFolders(
-  client: SupabaseClient,
-  clientOrganizationId: string,
-): Promise<FolderResponse[]> {
-  const { data: folders, error } = await createFolderQuery(client)
-    .select('id, name, parent_folder_id')
-    .is('parent_folder_id', null)
-    .eq('client_organization_id', clientOrganizationId);
+/**
+ * Fetch folders based on folder IDs, root configuration, and type.
+ * Handles both root and subfolder scenarios.
+ * @param {string[]} folderIds - The IDs of the folders.
+ * @param {'root' | 'subfolder'} type - The type of the folder, either 'root' or 'subfolder'.
+ * @param {{clientOrganizationId?: string, agencyId?: string}} [root] - Optional root folder configuration.
+ * @returns {Promise<FolderResponse[]>} - A promise resolving to a list of folder responses.
+ */
 
-  if (error) {
-    console.error('Error getting main folders:', error);
-    return [];
+export async function getFoldersByIds(
+  folderIds: string[],
+  type: 'root' | 'subfolder' = 'subfolder',
+  root?: { clientOrganizationId?: string; agencyId?: string },
+): Promise<{ uuid: string; title: string }[]> {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const baseQuery =
+      type === 'root'
+        ? client.from('folders').select('id, name, parent_folder_id')
+        : client.from('folders').select('id, name, parent_folder_id, folders(id, name, parent_folder_id)');
+
+    let query = baseQuery;
+
+    if (root) {
+      // Fetch root folders
+      query = query.is('parent_folder_id', null);
+
+      if (root.clientOrganizationId && !root.agencyId) {
+        query = query.eq('client_organization_id', root.clientOrganizationId);
+      } else if (root.agencyId && !root.clientOrganizationId) {
+        query = query.eq('agency_id', root.agencyId);
+      } else if (root.agencyId && root.clientOrganizationId) {
+        query = query
+          .eq('agency_id', root.agencyId)
+          .eq('client_organization_id', root.clientOrganizationId);
+      } else {
+        return [];
+      }
+    } else if (folderIds.length > 0) {
+      // Fetch subfolders with nested folders
+      query = query.in('id', folderIds);
+    } else {
+      return [];
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching folders:', error.message);
+      return [];
+    }
+
+    if (!data) {
+      return [];
+    }
+
+    if (type === 'subfolder') {
+      const folders = transformFolderResult(data as FolderData[], type);
+      return folders;
+    }
+
+    const folders = transformFolderResult(data as FolderData[], type);
+    return folders;
+  } catch (error) {
+    console.error('Error in getFoldersByIds:', error);
+    throw error;
+  }
+}
+
+const transformFolderResult = (
+  folders: FolderData[],
+  type: 'root' | 'subfolder',
+) => {
+  if (type === 'root') {
+    return folders.map((folder) => ({
+      uuid: folder.id ?? '',
+      title: folder.name ?? '',
+      parent_folder_id: folder.parent_folder_id ?? '',
+    }));
   }
 
-  return (
-    (folders as FolderData[])?.map((folder) => ({
-      uuid: folder.id,
-      title: folder.name,
-    })) ?? []
+  const foldersWithSubfolders = folders.flatMap(
+    (folder) =>
+      folder.folders?.map((subfolder) => ({
+        uuid: subfolder.id,
+        title: subfolder.name ?? '',
+        parent_folder_id: folder.id,
+      })) ?? [],
   );
-}
 
-export async function getFolderContents(
-  client: SupabaseClient,
-  folderId: string,
-): Promise<FolderResponse[]> {
-  const { data, error } = await createFolderQuery(client)
-    .select(
-      `
-      id,
-      name,
-      folders(id, name)
-    `,
-    )
-    .eq('id', folderId)
-    .single();
-
-  if (error) {
-    console.error('Error getting folder contents:', error);
-    return [];
-  }
-
-  return Array.isArray(data?.folders)
-    ? (data.folders as FolderData[]).map((folder) => ({
-        uuid: folder.id,
-        title: folder.name,
-      }))
-    : [];
-}
+  return foldersWithSubfolders;
+};

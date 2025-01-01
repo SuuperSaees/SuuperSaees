@@ -46,10 +46,10 @@ async function OrderDetailsPage({
     console.error(`Error client, getting domain by user id: ${err}`)
     return { organization: null }
   });
-  const i18n = await createI18nServerInstance();
-  const ordersTitle = i18n.t('orders:title');
+  // const i18n = await createI18nServerInstance();
+  // const ordersTitle = i18n.t('orders:title');
   const currentPath = [
-    { title: ordersTitle },
+    { title: 'Projects' },
     { title: order?.title ?? '', uuid: order?.uuid ?? '' },
   ];
 
