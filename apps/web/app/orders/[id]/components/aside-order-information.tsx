@@ -258,7 +258,7 @@ const AsideOrderInformation = ({
         {canAddAssignes ? (
           <>
           <div>
-            <div className="flex items-center justify-between py-1">
+            <div className="flex items-center justify-between py-1.5">
               <span className="flex text-sm font-medium items-center">
                 <CalendarIcon className="mr-2 h-4 w-4" />{' '}
                 {t('details.deadline')}{' '}
@@ -268,7 +268,7 @@ const AsideOrderInformation = ({
                 defaultDate={order.due_date}
               />
             </div>
-            <div className="flex items-center justify-between py-1">
+            <div className="flex items-center justify-between py-1.5">
               <div className="flex text-sm font-medium items-center">
                 <Loader className="mr-2 h-4 w-4" />
                 {t('details.status')}
@@ -280,7 +280,7 @@ const AsideOrderInformation = ({
                 mode="order"
               />
             </div>
-            <div className="flex items-center justify-between py-1">
+            <div className="flex items-center justify-between py-1.5">
               <div className="flex text-sm font-medium items-center">
                 <FlagIcon className="mr-2 h-4 w-4" />
                 {t('details.priority')}
@@ -288,19 +288,21 @@ const AsideOrderInformation = ({
               <PriorityCombobox order={order} mode={'order'} />
             </div>
             </div>
-            <span className="text-sm font-medium ">{t('details.assignedTo')}</span>
+            <div>
             <ActivityAssignations
               searchUserOptions={searchUserOptions}
               assignedTo={order.assigned_to}
               updateFunction={changeAgencyMembersAssigned.mutate}
               canAddAssignes={canAddAssignes}
             />
-          <span className="text-sm font-medium ">{t('details.followedBy')}</span>
+            </div>
+            <div>
             <ActivityFollowers
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
             />
+            </div>
           </>
         ) : (
           <div className="flex flex-col gap-2">

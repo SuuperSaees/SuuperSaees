@@ -509,7 +509,7 @@ const RichTextEditor = ({
             )}
             {!hideSubmitButton && (
               <ThemedButton
-                className="mt-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2]"
+                className="mt-4 flex h-9 w-9 items-center justify-center shadow-none rounded-[var(--radius-md,8px)] border-2]"
                 onClick={sendContent}
                 disabled={
                   isLoading ||
