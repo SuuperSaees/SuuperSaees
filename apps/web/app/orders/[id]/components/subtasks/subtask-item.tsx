@@ -2,7 +2,7 @@ import { useState } from 'react';
 import React from 'react';
 
 import { UseMutationResult, useQueryClient } from '@tanstack/react-query';
-import { CalendarIcon, FlagIcon, Loader, TrashIcon, X } from 'lucide-react';
+import { CalendarIcon, FlagIcon, Loader, PanelLeftOpen, TrashIcon, X } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 import { DateRange } from '@kit/ui/calendar';
@@ -159,7 +159,7 @@ const SubtaskItem = ({
             onKeyDown={(e) =>
               handleKeyDown(e, subtask.id, subtask, newSubtaskName)
             }
-            className="w-full rounded-md border-none bg-transparent font-semibold text-gray-900 focus:outline-none"
+            className="w-full rounded-md border-none bg-transparent text-sm font-semibold text-gray-900 focus:outline-none"
             autoFocus
             disabled={!isEditable}
           />
@@ -170,7 +170,7 @@ const SubtaskItem = ({
         </div>
       ) : (
         <p
-          className={`mr-4 max-w-[calc(100%-40px)] overflow-hidden truncate font-semibold text-gray-900 ${
+          className={`mr-4 max-w-[calc(100%-40px)] overflow-hidden truncate text-sm font-medium text-gray-900 ${
             isEditable ? 'cursor-pointer' : 'cursor-default'
           }`}
           onClick={isEditable ? onEdit : undefined}
@@ -183,9 +183,9 @@ const SubtaskItem = ({
         <Sheet>
           <SheetTrigger asChild>
             {isHovered && (
-              <Button className="mr-4 bg-gray-200 text-gray-500 hover:bg-slate-200">
-                {t('tasks.openSubtask')}
-              </Button>
+            <Button variant="outline" className="p-1 text-xs bg-transparent hover:bg-white">
+            <PanelLeftOpen className='p-1' /> {t('tasks.openSubtask')}
+            </Button>
             )}
           </SheetTrigger>
           <SheetContent className="max-w-[300px] sm:max-w-[700px]">
@@ -203,12 +203,12 @@ const SubtaskItem = ({
                       onKeyDown={(e) =>
                         handleKeyDown(e, subtask.id, subtask, newSubtaskName)
                       }
-                      className="w-full rounded-md border-none bg-transparent text-xl font-semibold text-gray-900 focus:outline-none"
+                      className="w-full rounded-md border-none bg-transparent text-sm font-semibold text-gray-900 focus:outline-none"
                     />
                   ) : (
                     <div className="mr-2 flex w-full items-center justify-between">
                       <p
-                        className="flex-grow text-xl font-semibold text-gray-900"
+                        className="flex-grow text-sm font-semibold text-gray-900"
                         onClick={isEditable ? onEdit : undefined}
                       >
                         {subtask.name}
@@ -363,7 +363,7 @@ const SubtaskItem = ({
           />
         ) : (
           <p 
-            className='whitespace-nowrap select-none px-3 text-gray-900 font-medium text-sm'
+            className='whitespace-nowrap select-none  text-gray-900 font-medium text-sm'
           >
             {getFormattedDateRange(subtask.start_date && subtask.end_date
               ? {
@@ -373,7 +373,7 @@ const SubtaskItem = ({
               : undefined, language, true) || t('empty_date_range',{ns: 'orders'})}
           </p>
         )}
-        <div className="flex items-center">
+        <div className="flex gap-2 min-w-[40px]">
           {
             enabledUserRole.has(userRole)  && (
               <TimeTracker

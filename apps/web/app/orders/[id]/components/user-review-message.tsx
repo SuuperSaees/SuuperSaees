@@ -16,7 +16,7 @@ const UserReviewMessage = ({ review }: UserReviewMessageProps) => {
       </div>
       <div className="flex flex-col w-full">
         <div className="flex justify-between gap-4">
-          <p className="font-semibold text-gray-600">{`Left a ${review?.rating} star review:`}</p>
+          <p className="font-semibold text-gray-600 text-sm">{`Left a ${review?.rating} star review:`}</p>
           <small className="">
             {format(new Date(review?.created_at), 'MMM dd, p')}
           </small>
@@ -28,8 +28,8 @@ const UserReviewMessage = ({ review }: UserReviewMessageProps) => {
         text={review?.user?.settings?.name ?? review?.user.name ? review?.user?.settings?.name ?? review?.user.name : undefined}
       />
           <div className="flex flex-col gap-1">
-            <span className="font-semibold">{review?.user?.settings?.name ?? review?.user?.name}</span>
-            <p>{review?.content}</p>
+            <span className="font-semibold text-sm">{review?.user?.settings?.name ?? review?.user?.name}</span>
+            <p className='text-sm'>{review?.content}</p>
             <div className="flex gap-1">
               {Array.from({ length: review?.rating ?? 0 }, (_, i) => (
                 <StarFilledIcon

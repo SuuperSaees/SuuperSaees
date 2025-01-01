@@ -255,13 +255,11 @@ const AsideOrderInformation = ({
             </div>
           </Link>
         </div>
-
-        <h3 className="font-medium">{t('details.summary')}</h3>
-
         {canAddAssignes ? (
           <>
-            <div className="flex items-center justify-between">
-              <span className="flex text-sm font-semibold">
+          <div>
+            <div className="flex items-center justify-between py-1">
+              <span className="flex text-sm font-medium items-center">
                 <CalendarIcon className="mr-2 h-4 w-4" />{' '}
                 {t('details.deadline')}{' '}
               </span>
@@ -270,10 +268,10 @@ const AsideOrderInformation = ({
                 defaultDate={order.due_date}
               />
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-[0.20rem] font-semibold">
+            <div className="flex items-center justify-between py-1">
+              <div className="flex text-sm font-medium items-center">
                 <Loader className="mr-2 h-4 w-4" />
-                <p>{t('details.status')}</p>
+                {t('details.status')}
               </div>
 
               <StatusCombobox
@@ -282,20 +280,22 @@ const AsideOrderInformation = ({
                 mode="order"
               />
             </div>
-            <div className="flex justify-between">
-              <div className="flex items-center text-sm">
+            <div className="flex items-center justify-between py-1">
+              <div className="flex text-sm font-medium items-center">
                 <FlagIcon className="mr-2 h-4 w-4" />
-                <span className="font-semibold">{t('details.priority')}</span>
+                {t('details.priority')}
               </div>
               <PriorityCombobox order={order} mode={'order'} />
             </div>
+            </div>
+            <span className="text-sm font-medium ">{t('details.assignedTo')}</span>
             <ActivityAssignations
               searchUserOptions={searchUserOptions}
               assignedTo={order.assigned_to}
               updateFunction={changeAgencyMembersAssigned.mutate}
               canAddAssignes={canAddAssignes}
             />
-
+          <span className="text-sm font-medium ">{t('details.followedBy')}</span>
             <ActivityFollowers
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
@@ -345,13 +345,22 @@ const AsideOrderInformation = ({
                 blocked={true} 
               />
             </div>
-
-            <ActivityAssignations
+            <span className="text-sm font-medium ">Summary</span>
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex">
+              
+              </div>
+              <ActivityAssignations
               searchUserOptions={searchUserOptions}
               assignedTo={order.assigned_to}
               updateFunction={changeAgencyMembersAssigned.mutate}
               canAddAssignes={canAddAssignes}
             />
+            </div>
+            <div>
+           
+            </div>
+            
 
             <ActivityFollowers
               searchUserOptions={searchUserOptionsFollowers}

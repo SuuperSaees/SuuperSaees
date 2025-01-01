@@ -39,13 +39,13 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
     <div className={`flex flex-col gap-2 w-full p-0 max-w-full min-w-0`}>
       <div className="flex justify-between w-full">
       <div className="flex gap-2">
-      <span className="font-semibold">{message.user?.settings?.name ?? message.user.name}</span> 
+      <span className="font-semibold text-sm">{message.user?.settings?.name ?? message.user.name}</span> 
       {
         message?.pending &&
       <ClockIcon className="h-3 w-3 text-muted-foreground self-center" />
       }
       { ["agency_owner", "agency_member", "agency_project_manager"].includes(userRole) && message.visibility === "internal_agency" &&
-        <span className="text-gray-400 flex items-center gap-1">
+        <span className="text-gray-400 text-sm flex items-center gap-1">
           {' '} <KeyIcon className="w-4 h-4" /> {t('internalMessage')}
         </span>
         }
@@ -57,7 +57,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg rounded-ss-none w-full bg-slate-0 overflow-hidden leading-relaxed">
-        <div className={` break-words rounded-r-md rounded-b-md whitespace-normal ${message.visibility === "internal_agency" ? "bg-yellow-50 rounded-lg" : "bg-transparent"}`} dangerouslySetInnerHTML={{ __html: content }} />
+        <div className={`text-sm break-words rounded-r-md rounded-b-md whitespace-normal ${message.visibility === "internal_agency" ? "p-3 rounded bg-yellow-50 rounded-lg" : "bg-transparent"}`} dangerouslySetInnerHTML={{ __html: content }} />
         {message.files && message.files.length > 0 && (
           <div className="pl-4 flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
             {message.files.map((file) => (
