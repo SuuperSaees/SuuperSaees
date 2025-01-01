@@ -69,8 +69,7 @@ const ActivityFollowers = ({
   };
   
   return (
-    <div className="flex flex-col gap-2 mt-[22.5px]">
-      <span className="font-medium">{t('details.followedBy')}</span>
+    <div className="flex flex-col gap-2">
       <div className="no-scrollbar flex max-h-[300px] flex-wrap items-center justify-start gap-2 overflow-y-auto">
         {avatarsWithStatus.map((avatar, index) => {
           return (
@@ -86,8 +85,7 @@ const ActivityFollowers = ({
             />
           );
         })}
-      </div>
-        {canAddFollowers && (
+         {canAddFollowers && (
       <CheckboxCombobox
         options={searchUserOptions ?? []}
         onSubmit={handleFormSubmit}
@@ -96,6 +94,8 @@ const ActivityFollowers = ({
         customItem={CustomUserItem}
       />
       )}
+      </div>
+       
     </div>
   );
 };

@@ -53,7 +53,7 @@ const UserFirstMessage = ({ interaction }) => {
     <div className={`flex flex-col gap-2 w-full p-0 max-w-full min-w-0`}>
     <div className="flex justify-between w-full">
       <div className="flex gap-2">
-        <span className="font-semibold">{interaction?.userSettings.name} {t("createdNewProject")}</span>
+        <span className="font-semibold text-sm">{interaction?.userSettings.name} {t("createdNewProject")}</span>
       </div>
       <small className="">{`${date}`}</small>
     </div>
@@ -63,7 +63,7 @@ const UserFirstMessage = ({ interaction }) => {
         field.response && (
           <div key={field.id} className="flex w-full flex-col gap-2.5 rounded-lg">
             {field.response !== "" && (
-              <span className="text-gray-900 text-4 font-semibold">
+              <span className="text-gray-900 text-sm text-4 font-semibold">
                 {field.field?.label}
               </span>
             )}
@@ -83,7 +83,7 @@ const UserFirstMessage = ({ interaction }) => {
             ) : (
               field.response !== "" && (
                 <span
-                  className="text-gray-900 text-4 font-normal"
+                  className="text-gray-900 text-4 text-sm font-normal"
                   dangerouslySetInnerHTML={{
                     __html: formatResponse(field),
                   }}

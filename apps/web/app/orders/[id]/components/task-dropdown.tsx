@@ -166,7 +166,7 @@ function TaskDropdown({
               onMouseLeave={() => setHoveredTaskId(null)}
             >
               <p
-                className="flex-grow font-semibold text-gray-900"
+                className="flex-grow font-medium text-sm text-gray-900"
                 onClick={() => isEditable ? handleStartEditing(task.id, task.name ?? '') : undefined}
               >
                 {task.name}
