@@ -2,7 +2,7 @@ import { useState } from 'react';
 import React from 'react';
 
 import { UseMutationResult, useQueryClient } from '@tanstack/react-query';
-import { CalendarIcon, FlagIcon, Loader, PanelLeftOpen, TrashIcon, X } from 'lucide-react';
+import { CalendarIcon, FlagIcon, Loader, PanelLeftOpen, PanelRightOpen, TrashIcon, X } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 import { DateRange } from '@kit/ui/calendar';
@@ -159,7 +159,7 @@ const SubtaskItem = ({
             onKeyDown={(e) =>
               handleKeyDown(e, subtask.id, subtask, newSubtaskName)
             }
-            className="w-full rounded-md border-none bg-transparent text-sm font-semibold text-gray-900 focus:outline-none"
+            className="w-full rounded-md border-none bg-transparent text-sm font-medium text-gray-900 focus:outline-none"
             autoFocus
             disabled={!isEditable}
           />
@@ -184,7 +184,7 @@ const SubtaskItem = ({
           <SheetTrigger asChild>
             {isHovered && (
             <Button variant="outline" className="p-1 text-xs bg-transparent hover:bg-white">
-            <PanelLeftOpen className='p-1' /> {t('tasks.openSubtask')}
+            <PanelRightOpen className='p-1' /> {t('tasks.openSubtask')}
             </Button>
             )}
           </SheetTrigger>
@@ -203,12 +203,12 @@ const SubtaskItem = ({
                       onKeyDown={(e) =>
                         handleKeyDown(e, subtask.id, subtask, newSubtaskName)
                       }
-                      className="w-full rounded-md border-none bg-transparent text-sm font-semibold text-gray-900 focus:outline-none"
+                      className="w-full rounded-md border-none bg-transparent text-sm font-medium text-gray-900 focus:outline-none"
                     />
                   ) : (
                     <div className="mr-2 flex w-full items-center justify-between">
                       <p
-                        className="flex-grow text-sm font-semibold text-gray-900"
+                        className="flex-grow text-sm font-medium text-gray-900"
                         onClick={isEditable ? onEdit : undefined}
                       >
                         {subtask.name}
@@ -244,7 +244,7 @@ const SubtaskItem = ({
               <TabsContent value="details" className="mt-4">
                 <div className="grid gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="flex text-sm font-semibold">
+                    <span className="flex text-sm font-medium">
                       <CalendarIcon className="mr-2 h-4 w-4" /> {t('details.deadline')}
                     </span>
                     {isEditable ? (
@@ -276,7 +276,7 @@ const SubtaskItem = ({
                     )}
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="flex text-sm font-semibold">
+                    <span className="flex text-sm font-medium">
                       <Loader className="mr-2 h-4 w-4" />
                       <p>{t('details.status')}</p>
                     </span>
@@ -288,7 +288,7 @@ const SubtaskItem = ({
                     />
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="flex gap-[0.20rem] text-sm font-semibold">
+                    <span className="flex gap-[0.20rem] text-sm font-medium">
                       <FlagIcon className="mr-2 h-4 w-4" />
                       <p>{t('details.priority')}</p>
                     </span>
