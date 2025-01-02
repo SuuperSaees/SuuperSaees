@@ -99,6 +99,11 @@ class AuthCallbackService {
       if (session?.session) {
         // redirect to the next path
         url.href = callbackNextPath?.split('?')[0] ?? url.href;
+        const { domain } = await getDomainByUserId(session.session.user.id, true);
+        if (domain) {
+          url.href = `${domain}${url.pathname}`
+          console.log('url', url, domain)
+        }
         return url;
       }
 
@@ -136,7 +141,7 @@ class AuthCallbackService {
             });
           const { domain } = await getDomainByUserId(response.success?.data?.user_client_id ?? '', true);
           if (domain) {
-            url.href = callbackNextPath?.split('?')[0] ?? url.href;
+            url.href = `${domain}${url.pathname}`
             console.log('url', url, domain)
           }
           if (error) {
