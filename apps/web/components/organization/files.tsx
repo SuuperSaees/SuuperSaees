@@ -7,7 +7,7 @@ import FileItem from './files/file-item';
 import FolderItem from './files/folder-item';
 import { useFileManagement } from './files/hooks/use-folder-manager';
 import { OptionFiles } from './files/option-files';
-import RadioOptions from './files/radio-options';
+// import RadioOptions from './files/radio-options';
 import { SkeletonCardFile } from './skeleton-card-file';
 import EmptyState from '../ui/empty-state';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
@@ -26,7 +26,7 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
   const { t } = useTranslation('organizations')
   const {
     selectedOption,
-    setSelectedOption,
+    // setSelectedOption,
     currentFolders,
     currentFiles,
     path,
@@ -36,11 +36,11 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
     queryKey,
   } = useFileManagement(clientOrganizationId, agencyId, setCurrentPath, currentPath)
 
-  const options = [
-    { value: 'all', label: t('organizations:files.all') },
-    { value: 'team_uploaded', label: t('organizations:files.team_uploaded') },
-    { value: 'client_uploaded', label: t('organizations:files.client_uploaded') },
-  ]
+  // const options = [
+  //   { value: 'all', label: t('organizations:files.all') },
+  //   { value: 'team_uploaded', label: t('organizations:files.team_uploaded') },
+  //   { value: 'client_uploaded', label: t('organizations:files.client_uploaded') },
+  // ]
 
   if (loading) {
     return (
@@ -108,19 +108,20 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
   return (
     <div>
       <div className="flex flex-wrap justify-between">
-        <RadioOptions
+      {path.length > 0 && selectedOption === 'all' && renderBreadcrumbs()}
+        {/* <RadioOptions
           options={options}
           selectedOption={selectedOption}
           onChange={(e) => setSelectedOption(e.target.value)}
-        />
+        /> */}
         {selectedOption === 'all' && (
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 ml-auto">
             <OptionFiles clientOrganizationId={clientOrganizationId} currentPath={path} queryKey={queryKey} userId={userWorkspace.id ?? ''} agencyId={agencyId}/>
           </div>
         )}
       </div>
 
-      {path.length > 0 && selectedOption === 'all' && renderBreadcrumbs()}
+
       {renderContent()}
     </div>
   )

@@ -5,9 +5,7 @@ import { PostgrestError } from '@supabase/supabase-js';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import {
-  getFoldersByIds,
-} from '../../folders/get/get-folders';
+import { getFoldersByIds } from '../../folders/get/get-folders';
 import { fetchUsersAccounts } from '../../members/get/get-member-account';
 
 // Types
@@ -72,8 +70,7 @@ export async function getFiles(
   }
 }
 
-
-async function getAllFolderContents(
+export async function getAllFolderContents(
   client: SupabaseClient,
   folderId: string,
   type: FolderType,
@@ -102,7 +99,7 @@ async function getAllFolderContents(
         .eq('order_files.orders.agency_id', agencyId),
       getFoldersByIds([], 'subfolder', { clientOrganizationId, agencyId }),
     ]);
-  
+
     return {
       folders,
       files: filesResult.data ?? [],
@@ -126,25 +123,29 @@ async function getAllFolderContents(
   };
 }
 
-async function getMemberFolderContents(
+export async function getMemberFolderContents(
   client: SupabaseClient,
   clientOrganizationId: string,
   agencyId: string,
   type: 'client' | 'agency',
 ): Promise<FileSystemResponse> {
-  const members = await fetchUsersAccounts(client, [type === 'client' ? clientOrganizationId : agencyId]);
+  const members = await fetchUsersAccounts(client, [
+    type === 'client' ? clientOrganizationId : agencyId,
+  ]);
   const memberIds = members.map((member) => member.id);
 
   // Get all files where a client member of the organization or agency has uploaded a file (order_files)
   const { data: files, error: filesError } = await client
-  .from('files')
-  .select(`
+    .from('files')
+    .select(
+      `
     url, id, name, type, size, 
     order_files!inner(orders:orders_v2!inner(client_organization_id, agency_id))
-  `)
-  .in('user_id', memberIds)
-  .eq('order_files.orders.client_organization_id', clientOrganizationId)
-  .eq('order_files.orders.agency_id', agencyId);
+  `,
+    )
+    .in('user_id', memberIds)
+    .eq('order_files.orders.client_organization_id', clientOrganizationId)
+    .eq('order_files.orders.agency_id', agencyId);
 
   if (filesError) {
     throw filesError;
@@ -161,6 +162,32 @@ async function getMemberFolderContents(
  * @param { 'subfolder' | 'mainfolder' } [type] - The type of the folder.
  * @returns {Promise<Array<{url: string, id: string, name: string, type: string}>>}
  */
+// Function to transform file data
+const transformFiles = (files: FileData[]) => {
+  return files.map((file) => ({
+    id: file.id,
+    url: file.url,
+    name: file.name,
+    type: file.type,
+    size: file.size,
+  }));
+};
+
+// Function to transform folder data
+const transformFolders = (
+  folders: {
+    id: string;
+    name: string;
+    parent_folder_id?: string | null;
+  }[],
+) => {
+  return folders.map((folder) => ({
+    uuid: folder.id ?? '',
+    title: folder.name ?? '',
+    parent_folder_id: folder.parent_folder_id ?? '',
+  }));
+};
+
 export async function getFoldersAndFiles(
   folderId: string,
   clientOrganizationId: string,
@@ -175,44 +202,74 @@ export async function getFoldersAndFiles(
   try {
     const client = getSupabaseServerComponentClient();
 
-    // Use a switch statement for better organization of different cases
-    switch (target) {
+    if (type === 'mainfolder') {
+      // Fetch both folders and files in a single query
+      const { data, error } = await client
+        .from('folders')
+        .select(
+          `files(id, url, name, type, size), folders(id, name, parent_folder_id)`,
+        )
+        .eq('client_organization_id', clientOrganizationId)
+        .eq('agency_id', agencyId)
+        .is('parent_folder_id', null)
+        .single();
 
-      case 'all':
-        return await getAllFolderContents(
-          client,
-          folderId,
-          type,
-          clientOrganizationId,
-          agencyId,
-        );
+      if (error) {
+        console.error('Error getting main folder contents:', error);
+        throw error;
+      }
 
-      case 'client':
-        return await getMemberFolderContents(client, clientOrganizationId, agencyId, 'client');
+      const files = transformFiles(data.files ?? []);
 
-      case 'team':
-        return await getMemberFolderContents(client, clientOrganizationId, agencyId, 'agency');
-
-      default:
-        return { folders: [], files: [] };
+      const folders = transformFolders(data?.folders ?? []);
+      return {
+        folders,
+        files,
+      };
     }
+
+    // For 'subfolder' or any other type
+    const { data, error } = await client
+      .from('folders')
+      .select(
+        'files(id, url, name, type, size), parent_folder_id, folders(id, name, parent_folder_id)',
+      )
+      .eq('id', folderId)
+      .single();
+
+    if (error) {
+      console.error('Error getting folder contents:', error);
+      throw error;
+    }
+
+    const files = transformFiles(data?.files ?? []);
+    const folders = transformFolders(data?.folders ?? []);
+
+    return {
+      parent_folder_id: data?.parent_folder_id ?? '',
+      folders,
+      files,
+    };
   } catch (error) {
     console.error('Error getting folders and files:', error);
     throw error;
   }
 }
 
-export async function getFolderFiles (folderId: string) {
+export async function getFolderFiles(folderId: string) {
   try {
     const client = getSupabaseServerComponentClient();
 
     // Fetch the file details
-    const {data: files , error: fileDataError} = await client
-    .from('files')
-    .select('id, url, name, type, size, created_at, folder_files!inner(folder_id), user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))')
-    .eq('folder_files.folder_id', folderId)
+    const { data: files, error: fileDataError } = await client
+      .from('files')
+      .select(
+        'id, url, name, type, size, created_at, folder_files!inner(folder_id), user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))',
+      )
+      .eq('folder_files.folder_id', folderId);
 
-    if (fileDataError) throw new Error(`Error getting folder files: ${fileDataError.message}`);
+    if (fileDataError)
+      throw new Error(`Error getting folder files: ${fileDataError.message}`);
 
     return files ?? [];
   } catch (error) {
