@@ -229,5 +229,6 @@
   "loomAppIdDescription": "Introduce el ID de la aplicación de Loom para habilitar la integración de Loom. Copia el subdominio de tu organización en tu aplicación de desarrolladores de Loom",
   "clipboardCopied": "Contenido copiado al portapapeles",
   "clipboardError": "Error al copiar al portapapeles",
-  "connect": "Conectar"
+  "connect": "Conectar",
+  "guest": "Invitado"
 }

@@ -1,6 +1,6 @@
 'use client';
 
-// import { useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -33,6 +33,11 @@ import { PriorityCombobox } from './priority-combobox';
 import { getClientMembersForOrganization } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getFormattedDateRange } from '../utils/get-formatted-dates';
 import { User } from '@supabase/supabase-js';
+import { Share2 } from 'lucide-react';
+import { Copy } from 'lucide-react';
+import { generateTokenId, createToken } from '~/server/actions/tokens/tokens.action';
+import { copyToClipboard } from '~/utils/clipboard';
+import Link from 'next/link';
 
 interface AsideOrderInformationProps {
   order: Order.Relational;
@@ -52,43 +57,44 @@ const AsideOrderInformation = ({
   const language = i18n.language;
   const router = useRouter();
   const { userRole, order } = useActivityContext();
-  // const changeStatus = useMutation({
-  //   mutationFn: async (status: Order.Type['status']) => {
-  //     setSelectedStatus(status);
-  //     await updateOrder(order.id, { status });
-  //     return router.push(`/orders/${order.id}`);
-  //   },
-  //   onSuccess: () => {
-  //     toast.success('Success', {
-  //       description: t('success.orders.orderStatusUpdated'),
-  //     });
-  //   },
-  //   onError: () => {
-  //     setSelectedStatus(order.status);
-  //     toast.error('Error', {
-  //       description: t('error.orders.failedToUpdateOrderStatus'),
-  //     });
-  //   },
-  // });
-
-  // const changePriority = useMutation({
-  //   mutationFn: async (priority: Order.Type['priority']) => {
-  //     setSelectedPriority(priority);
-  //     await updateOrder(order.id, { priority });
-  //     return router.push(`/orders/${order.id}`);
-  //   },
-  //   onSuccess: () => {
-  //     toast.success('Success', {
-  //       description: t('success.orders.orderPriorityUpdated'),
-  //     });
-  //   },
-  //   onError: () => {
-  //     setSelectedPriority(order.priority);
-  //     toast.error('Error', {
-  //       description: t('error.orders.failedToUpdateOrderPriority'),
-  //     });
-  //   },
-  // });
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [urlToShare, setUrlToShare] = useState('');
+  const generateUrlToShare = useMutation({
+    mutationFn: async (id: string): Promise<string> => {
+      try {
+      // Generate token ID and create share URL immediately
+      const tokenId = await generateTokenId({id});
+      const baseUrl = window.location.origin;
+      const shareUrl = `${baseUrl}/orders/${order.id}?public_token_id=${tokenId}`;
+      setUrlToShare(shareUrl);
+      
+      Promise.all([
+        createToken({
+          id: order.uuid,
+          account_id: order.agency_id,
+          agency_id: order.agency_id,
+          data: {
+            order_id: order.id,
+          },
+        }, tokenId),
+        updateOrder(order.id, { visibility: 'public' })
+      ]).catch(error => {
+        console.error('Background operations error:', error);
+      });
+  
+      return shareUrl;
+      } catch (error) {
+        console.error('Error generating share URL:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      setIsShareOpen(true);
+    },
+    onError: () => {
+      toast.error('Error generating share URL');
+    }
+  });
 
   const changeDate = useMutation({
     mutationFn: async (due_date: Order.Type['due_date']) => {
@@ -162,42 +168,6 @@ const AsideOrderInformation = ({
       userRole === 'agency_project_manager',
   });
 
-  // const { data: orderAgencyClientsFollowers } = useQuery({
-  //   queryKey: ['order-agency-clients-followers', order.id],
-  //   queryFn: () => getAgencyClients(order.agency_id, order.id),
-  //   retry: 5,
-  // });
-
-  // const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
-  // const priorities = ['low', 'medium', 'high'];
-
-  // const statusOptions = statuses.map((status) => {
-  //   const camelCaseStatus = status.replace(/_./g, (match) =>
-  //     match.charAt(1).toUpperCase(),
-  //   );
-  //   return {
-  //     value: status,
-  //     label: t(`details.statuses.${camelCaseStatus}`)
-  //       .replace(/_/g, ' ')
-  //       .replace(/^\w/, (c) => c.toUpperCase()),
-  //   };
-  // });
-
-  // const getStatusClassName = (status: string) =>
-  //   statusColors[
-  //     status as 'pending' | 'in_progress' | 'completed' | 'in_review'
-  //   ] ?? '';
-
-  // const priorityOptions = priorities.map((priority) => ({
-  //   value: priority,
-  //   label: t(`details.priorities.${priority}`)
-  //     .replace(/_/g, ' ')
-  //     .replace(/^\w/, (c) => c.toUpperCase()),
-  // }));
-
-  // const getPriorityClassName = (priority: string) =>
-  //   priorityColors[priority as 'low' | 'medium' | 'high'] ?? '';
-
   const searchUserOptions =
     orderAgencyMembers?.map((user) => ({
       picture_url: user?.user_settings?.picture_url ?? user.picture_url ?? '',
@@ -206,10 +176,11 @@ const AsideOrderInformation = ({
     })) ?? [];
 
   const searchUserOptionsFollowers =
-    orderAgencyClientsFollowers?.map((user) => ({
+    orderAgencyClientsFollowers?.filter((currentUser) => currentUser.role !== 'client_guest').map((user) => ({
       picture_url: user?.settings?.picture_url?? user?.picture_url ?? '',
       value: user.id,
       label: user?.settings?.name ?? user.name ?? '',
+      role: user.role,
     })) ?? [];
 
   const userRoles = new Set([
@@ -218,8 +189,14 @@ const AsideOrderInformation = ({
     'agency_project_manager',
   ]);
 
+  const userRolesFollowers = new Set([
+    'client_owner',
+    'client_member',
+  ]);
+
 
   const canAddAssignes = userRoles.has(userRole);
+  const canAddFollowers = userRolesFollowers.has(userRole);
 
   return (
     <AgencyStatusesProvider initialStatuses={agencyStatuses}>
@@ -228,9 +205,36 @@ const AsideOrderInformation = ({
         {...rest}
       >
         <div className="border-b border-gray-200 pb-7">
+          <div className="flex items-center justify-between">
           <h3 className="pb-4 font-bold">
             <Trans i18nKey="details.createdBy" />
           </h3>
+          <button className="pr-2" onClick={() => {
+            generateUrlToShare.mutate(order.uuid);
+            setIsShareOpen(true);
+          }}>
+            <Share2 className="w-4 h-4" />
+          </button>
+          </div>
+          
+          {
+            isShareOpen && (
+              <div className="flex bg-slate-50 p-2 border border-slate-200 rounded-md gap-3 h-30 items-center justify-around w-72 absolute top-20 right-2 z-50">
+                <p>{urlToShare}</p>
+                <button onClick={async () => {
+                  const copied = await copyToClipboard(urlToShare);
+                  if (copied) {
+                    toast.success(t('success.copyToClipboard'));
+                  } else {
+                    toast.error(t('error.copyToClipboard'));
+                  }
+                }}>
+                  <Copy className="w-4 h-4" />
+                </button>
+              </div>
+            )
+          }
+          <Link href={`/clients/organizations/${order.client_organization_id}`}>
           <div className="flex gap-3">
             <AvatarDisplayer
               displayName={
@@ -251,14 +255,13 @@ const AsideOrderInformation = ({
               </span>
             </div>
           </div>
+          </Link>
         </div>
-
-        <h3 className="font-medium">{t('details.summary')}</h3>
-
         {canAddAssignes ? (
           <>
-            <div className="flex items-center justify-between">
-              <span className="flex text-sm font-semibold">
+          <div>
+            <div className="flex items-center justify-between py-1.5">
+              <span className="flex text-sm font-medium items-center">
                 <CalendarIcon className="mr-2 h-4 w-4" />{' '}
                 {t('details.deadline')}{' '}
               </span>
@@ -267,10 +270,10 @@ const AsideOrderInformation = ({
                 defaultDate={order.due_date}
               />
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-[0.20rem] font-semibold">
+            <div className="flex items-center justify-between py-1.5">
+              <div className="flex text-sm font-medium items-center">
                 <Loader className="mr-2 h-4 w-4" />
-                <p>{t('details.status')}</p>
+                {t('details.status')}
               </div>
 
               <StatusCombobox
@@ -279,25 +282,30 @@ const AsideOrderInformation = ({
                 mode="order"
               />
             </div>
-            <div className="flex justify-between">
-              <div className="flex items-center text-sm">
+            <div className="flex items-center justify-between py-1.5">
+              <div className="flex text-sm font-medium items-center">
                 <FlagIcon className="mr-2 h-4 w-4" />
-                <span className="font-semibold">{t('details.priority')}</span>
+                {t('details.priority')}
               </div>
               <PriorityCombobox order={order} mode={'order'} />
             </div>
+            </div>
+            <div>
             <ActivityAssignations
               searchUserOptions={searchUserOptions}
               assignedTo={order.assigned_to}
               updateFunction={changeAgencyMembersAssigned.mutate}
               canAddAssignes={canAddAssignes}
             />
-
+            </div>
+            <div>
             <ActivityFollowers
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
+              canAddFollowers={canAddFollowers}
             />
+            </div>
           </>
         ) : (
           <div className="flex flex-col gap-2">
@@ -342,19 +350,24 @@ const AsideOrderInformation = ({
                 blocked={true} 
               />
             </div>
-
-            <ActivityAssignations
+            <div className="mb-4 flex items-center">
+              <ActivityAssignations
               searchUserOptions={searchUserOptions}
               assignedTo={order.assigned_to}
               updateFunction={changeAgencyMembersAssigned.mutate}
               canAddAssignes={canAddAssignes}
             />
-
+            </div>
+  
+           
+            <div className='mb-4 flex items-center'>
             <ActivityFollowers
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
+              canAddFollowers={canAddFollowers}
             />
+            </div>
           </div>
         )}
 

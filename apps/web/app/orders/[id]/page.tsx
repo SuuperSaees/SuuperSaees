@@ -15,6 +15,7 @@ import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/g
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { getFolderFiles } from '~/team-accounts/src/server/actions/files/get/get-files';
+import { redirect } from 'next/navigation';
 // import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 export const generateMetadata = async () => {
@@ -27,9 +28,14 @@ export const generateMetadata = async () => {
 
 async function OrderDetailsPage({
   params: { id },
+  searchParams: { public_token_id },
 }: {
   params: { id: string };
+  searchParams: { public_token_id: string };
 }) {
+  if (public_token_id) {
+    console.log('tokenData', public_token_id);
+  }
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
   ) as Order.Relational;
@@ -63,6 +69,10 @@ async function OrderDetailsPage({
   // });
   
   const role = workspace?.role
+
+  if(role === 'client_guest' && order?.visibility !== 'public'){
+    return redirect('/orders');
+  }
 
   return (
       <ActivityProvider

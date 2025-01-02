@@ -1684,6 +1684,7 @@ export type Database = {
           title: string
           updated_at: string | null
           uuid: string
+          visibility: Database["public"]["Enums"]["visibility"]
         }
         Insert: {
           agency_id: string
@@ -1703,6 +1704,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           uuid: string
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Update: {
           agency_id?: string
@@ -1722,6 +1724,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           uuid?: string
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Relationships: [
           {
@@ -2946,6 +2949,7 @@ export type Database = {
           title: string
           updated_at: string | null
           uuid: string
+          visibility: Database["public"]["Enums"]["visibility"]
         }
       }
       create_team_account: {

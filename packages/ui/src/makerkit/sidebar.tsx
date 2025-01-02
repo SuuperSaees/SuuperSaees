@@ -61,7 +61,7 @@ export function SidebarContent({
   className?: string;
 }>) {
   return (
-    <div className={cn('flex w-full flex-col space-y-1.5 px-4', className)}>
+    <div className={cn('flex w-full flex-col space-y-1 px-4', className)}>
       {children}
     </div>
   );
@@ -121,7 +121,7 @@ export function SidebarGroup({
     <div className={'flex flex-col space-y-1 py-1'}>
       <Wrapper />
       <If condition={collapsible ? !isGroupCollapsed : true}>
-        <div id={id} className={'px-6.5 flex flex-col space-y-1.5'}>
+        <div id={id} className={'px-6.5 flex flex-col space-y-1'}>
           {children}
         </div>
       </If>

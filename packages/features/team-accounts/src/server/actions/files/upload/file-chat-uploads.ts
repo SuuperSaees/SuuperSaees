@@ -159,7 +159,7 @@ export const useFileUpload = ({
     } catch (error) {
       onFileUploadStatusUpdate?.(file, 'error');
       setFileUrls((prevFiles) => prevFiles.map((prevFile) =>
-        prevFile === file ? { ...prevFile, error: t('orders:uploadURLError', { error: error.message }) } : prevFile
+        prevFile === file ? { ...prevFile, error: t('orders:uploadURLError', { error: (error as Error).message }) } : prevFile
       ));
     }
   };

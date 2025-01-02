@@ -191,6 +191,7 @@
     "addSuccess": "Anotación añadida con éxito",
     "addError": "Error al añadir anotación"
   },
+  "guest": "Invitado",
   "files": {
     "noPreview": "No hay vista previa disponible",
     "download": "Por favor, descarga el archivo para verlo"

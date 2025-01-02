@@ -88,3 +88,8 @@ export const clientAccountNavigationConfig = NavigationConfigSchema.parse({
   routes,
   style: process.env.NEXT_PUBLIC_USER_NAVIGATION_STYLE,
 });
+
+export const clientAccountGuestNavigationConfig = NavigationConfigSchema.parse({
+  routes: [],
+  style: process.env.NEXT_PUBLIC_USER_NAVIGATION_STYLE,
+});

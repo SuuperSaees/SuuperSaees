@@ -16,7 +16,7 @@ import {
 } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { SendHorizontalIcon, Upload } from 'lucide-react';
+import { SendHorizontal, Upload } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 import { Spinner } from '@kit/ui/spinner';
@@ -532,7 +532,7 @@ const RichTextEditor = ({
                 {isSending ? (
                   <Spinner className="h-5 w-5" />
                 ) : (
-                  <SendHorizontalIcon className="h-[20px] w-[20px] flex-shrink-0 -rotate-45" />
+                  <SendHorizontal className="h-[20px] w-[20px] flex-shrink-0" />
                 )}
               </ThemedButton>
             )}
