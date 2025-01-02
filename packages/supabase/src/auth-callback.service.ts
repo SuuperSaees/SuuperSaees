@@ -97,7 +97,7 @@ class AuthCallbackService {
       const { data: session } = await this.client.auth.getSession();
       if (session?.session) {
         // redirect to the next path
-        url.href = callbackNextPath ?? url.href;
+        url.href = callbackNextPath?.split('?')[0] ?? url.href;
         return url;
       }
 
@@ -109,7 +109,7 @@ class AuthCallbackService {
 
       if (payload) {
         
-        url.href = callbackNextPath ?? url.href;
+        url.href = callbackNextPath?.split('?')[0] ?? url.href;
         // here we need to set the session with the user data
         const newUuid = uuidv4();
         const response = await createClient({
@@ -125,7 +125,7 @@ class AuthCallbackService {
         });
 
         if (response.ok) {
-          const orderId = Number(callbackNextPath?.split('/')[2]);
+          const orderId = Number(callbackNextPath?.split('/')[4]?.split('?')[0]);
           const { access_token, refresh_token } = response.success?.data?.session;
           await this.client.auth.setSession({ access_token, refresh_token });
             const { error } = await this.client.from('order_followers')
