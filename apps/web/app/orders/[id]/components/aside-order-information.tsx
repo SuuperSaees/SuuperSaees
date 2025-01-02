@@ -350,11 +350,7 @@ const AsideOrderInformation = ({
                 blocked={true} 
               />
             </div>
-            <span className="text-sm font-medium ">Summary</span>
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex">
-              
-              </div>
+            <div className="mb-4 flex items-center">
               <ActivityAssignations
               searchUserOptions={searchUserOptions}
               assignedTo={order.assigned_to}
@@ -362,17 +358,16 @@ const AsideOrderInformation = ({
               canAddAssignes={canAddAssignes}
             />
             </div>
-            <div>
+  
            
-            </div>
-            
-
+            <div className='mb-4 flex items-center'>
             <ActivityFollowers
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
               canAddFollowers={canAddFollowers}
             />
+            </div>
           </div>
         )}
 
