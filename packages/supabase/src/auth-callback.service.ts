@@ -97,7 +97,7 @@ class AuthCallbackService {
       const { data: session } = await this.client.auth.getSession();
       if (session?.session) {
         // redirect to the next path
-        url.pathname = callbackNextPath ?? url.pathname;
+        url.href = callbackNextPath ?? url.href;
         return url;
       }
 
@@ -109,7 +109,7 @@ class AuthCallbackService {
 
       if (payload) {
         
-        url.pathname = callbackNextPath ?? url.pathname;
+        url.href = callbackNextPath ?? url.href;
         // here we need to set the session with the user data
         const newUuid = uuidv4();
         const response = await createClient({
