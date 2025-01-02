@@ -6,8 +6,10 @@ import FileSection from '~/components/organization/files';
 
 function FilesView({
   clientOrganizationId,
+  agencyId
 }: {
   clientOrganizationId: string;
+  agencyId: string;
 }) {
   const [currentPath, setCurrentPath] = useState<{ title: string; uuid?: string }[]>([]);
 
@@ -22,6 +24,7 @@ function FilesView({
       <FileSection
         key={'files'}
         clientOrganizationId={clientOrganizationId}
+        agencyId={agencyId}
         setCurrentPath={setCurrentPath}
       />
     </>

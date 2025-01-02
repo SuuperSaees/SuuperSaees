@@ -32,6 +32,7 @@ export namespace Order {
     statusData?: AgencyStatus.Type | null;
   };
   export type Relational = Order.Relationships.All & {
+    brief_responses: Brief.Relationships.FormFieldResponse.Response[]
     messages: (Message.Type & { user: User.Response; files: File.Type[] })[];
     files: (File.Type & { user: User.Response })[];
     tasks: Task.Type[];

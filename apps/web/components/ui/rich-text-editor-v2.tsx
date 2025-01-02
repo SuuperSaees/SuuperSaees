@@ -27,6 +27,7 @@ import {
   List,
   ListOrdered,
   Quote,
+  SendHorizontal,
   SendHorizontalIcon,
   Strikethrough,
 } from 'lucide-react';
@@ -430,7 +431,7 @@ const RichTextEditorV2 = ({
             className="absolute bottom-2 right-2 h-fit w-fit rounded-xl p-2 shadow-sm"
             onClick={sendContent}
           >
-            <SendHorizontalIcon className="h-5 w-5 -rotate-45 text-white" />
+            <SendHorizontal className="h-5 w-5  text-white" />
           </ThemedButton>
         )}
       </div>

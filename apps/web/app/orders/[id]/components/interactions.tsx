@@ -2,79 +2,80 @@ import { useEffect, useMemo, useRef } from 'react';
 
 import { format } from 'date-fns';
 
-import {
-  Activity,
-  Review,
-  useActivityContext,
-} from '../context/activity-context';
-import { Message } from '~/lib/message.types';
+import { useActivityContext } from '../context/activity-context';
 import ActivityAction from './activity-actions';
 import UserMessage from './user-message';
 import UserReviewMessage from './user-review-message';
-import { fetchFormfieldsWithResponses } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
-import { useQuery } from '@tanstack/react-query';
 import UserFirstMessage from './user-first-message';
 import { Check } from 'lucide-react';
+
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 
-const Interactions = ({ agencyStatuses }: { agencyStatuses: AgencyStatus.Type[] }) => {
-  const { messages, files, activities, reviews, userRole, order } = useActivityContext();
+import { DataSource } from '../context/activity.types';
 
-  const briefsWithResponsesQuery = useQuery({
-    queryKey: ['briefsWithResponses', order.brief_ids],
-    queryFn: async () => await fetchFormfieldsWithResponses(order.uuid),
-  });
+const Interactions = ({
+  agencyStatuses,
+}: {
+  agencyStatuses: AgencyStatus.Type[];
+}) => {
+  const {
+    messages,
+    files,
+    activities,
+    reviews,
+    userRole,
+    order,
+    briefResponses,
+  } = useActivityContext();
 
-  const notValidFormTypes = new Set([
-    'h1', 'h2', 'h3', 'h4', 'rich-text', 'image', 'video'
-  ]);
+  const notValidFormTypes = useMemo(
+    () => new Set(['h1', 'h2', 'h3', 'h4', 'rich-text', 'image', 'video']),
+    [],
+  );
 
   const filteredFiles = useMemo(() => {
-    if (briefsWithResponsesQuery.isLoading || !briefsWithResponsesQuery.data) {
-      return []; 
+    if (!briefResponses) {
+      return [];
     }
-  
-    const fileFields = briefsWithResponsesQuery.data.filter(
+
+    const fileFields = briefResponses.filter(
       (formField) =>
-        formField.field?.type === "file" && formField.response?.trim()
+        formField.field?.type === 'file' && formField.response?.trim(),
     );
-  
+
     const fileUrlsFromForm = fileFields
-      .flatMap((formField) => formField.response.split(","))
+      .flatMap((formField) => formField.response.split(','))
       .map((url) => url.trim());
-  
+
     return files.filter((file) => !fileUrlsFromForm.includes(file.url));
-  }, [briefsWithResponsesQuery, files]);
-  
+  }, [briefResponses, files]);
 
   const interactionsContainerRef = useRef<HTMLDivElement>(null);
 
   // Combine all items into a single array with filtering based on user role
 
   const briefFieldsInteraction = useMemo(() => {
-    if (!briefsWithResponsesQuery.data) return null;
-  
-    const briefFields = briefsWithResponsesQuery.data
+    if (!briefResponses) return null;
+
+    const briefFields = briefResponses
       .filter((a) => a?.field?.position !== undefined)
       .sort((a, b) => (a.field?.position ?? 0) - (b.field?.position ?? 0))
       .filter(
-        (formField) =>
-          !notValidFormTypes.has(formField.field?.type ?? '')
+        (formField) => !notValidFormTypes.has(formField.field?.type ?? ''),
       );
-  
+
     const combinedBriefs = {
       class: 'brief-field',
       created_at: order.created_at || new Date().toISOString(),
-      userSettings: briefsWithResponsesQuery.data[0]?.userSettings || {}, 
-      fields: briefFields, 
+      userSettings: briefResponses[0]?.userSettings || {},
+      fields: briefFields,
     };
-  
+
     return { briefs: [combinedBriefs] };
-  }, [briefsWithResponsesQuery.data, order]);
-  
+  }, [briefResponses, order, notValidFormTypes]);
 
   const combinedInteractions = [
-    ...briefFieldsInteraction?.briefs ?? [],
+    ...(briefFieldsInteraction?.briefs ?? []),
     ...messages
       .filter((message) =>
         !['agency_owner', 'agency_member', 'agency_project_manager'].includes(
@@ -84,7 +85,7 @@ const Interactions = ({ agencyStatuses }: { agencyStatuses: AgencyStatus.Type[] 
           : true,
       )
       .map((message) => ({ ...message, class: 'message' })),
-      ...filteredFiles.map((file) => ({ ...file, class: "file" })),
+    ...filteredFiles.map((file) => ({ ...file, class: 'file' })),
     ...activities.map((activity) => ({ ...activity, class: 'activity' })),
     ...reviews.map((review) => ({ ...review, class: 'review' })),
   ];
@@ -120,7 +121,7 @@ const Interactions = ({ agencyStatuses }: { agencyStatuses: AgencyStatus.Type[] 
 
   return (
     <div
-      className="no-scrollbar max-h-[calc(100vh-358px)] ml-2 mr-10 flex h-full w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto pr-[2rem] px-8"
+      className="no-scrollbar ml-2 mr-10 flex h-full max-h-[calc(100vh-358px)] w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto px-8 pr-[2rem]"
       ref={interactionsContainerRef}
     >
       {Object.entries(groupedInteractions).map(([date, interactions]) => (
@@ -133,28 +134,30 @@ const Interactions = ({ agencyStatuses }: { agencyStatuses: AgencyStatus.Type[] 
           {interactions.map((interaction) => {
             return interaction.class === 'brief-field' ? (
               <div className="flex w-full">
-                <div className="flex items-center justify-center w-7 h-7 rounded-full bg-green-200 p-1 mr-2">
+                <div className="mr-2 flex h-7 w-7 items-center justify-center rounded-full bg-green-200 p-1">
                   <Check className="text-green-700" />
                 </div>
-                <UserFirstMessage interaction={interaction} key={interaction.id} />
+                <UserFirstMessage
+                  interaction={interaction}
+                  key={interaction.id}
+                />
               </div>
             ) : interaction.class === 'message' ? (
               <div className="flex w-full" key={interaction.id}>
-                <UserMessage message={interaction as Message.Type} />
+                <UserMessage message={interaction as DataSource.Message} />
               </div>
             ) : interaction.class === 'activity' ? (
               <ActivityAction
-                activity={interaction as Activity}
+                activity={interaction as DataSource.Activity}
                 key={interaction.id}
                 agencyStatuses={agencyStatuses}
               />
             ) : interaction.class === 'review' ? (
               <UserReviewMessage
-                review={interaction as Review}
+                review={interaction as DataSource.Review}
                 key={interaction.id}
               />
-            ) 
-            : null;
+            ) : null;
           })}
         </div>
       ))}

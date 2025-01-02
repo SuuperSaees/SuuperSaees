@@ -191,6 +191,10 @@
     "addSuccess": "Annotation added successfully",
     "addError": "Error adding annotation"
   },
-  "guest": "Guest"
+  "guest": "Guest",
+  "files": {
+    "noPreview": "No preview available",
+    "download": "Please download the file to view it"
+  }
 }
 

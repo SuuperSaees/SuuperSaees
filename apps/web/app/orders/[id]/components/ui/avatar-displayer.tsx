@@ -29,7 +29,7 @@ const AvatarDisplayer = ({
   ...rest
 }: AvatarDisplayerProps) => {
   return (
-    <div className={`relative flex ${!isTask ? "h-fit w-fit": ""} items-center ${isAssignedOrFollower && !isTask ? "bg-slate-50 px-4 rounded-full" : ""} ${className}`} {...rest}>
+    <div className={`relative flex ${!isTask ? "h-fit w-fit": ""} items-center ${isAssignedOrFollower && !isTask ? "bg-slate-50 pl-2 pr-4 rounded-full" : ""} ${className}`} {...rest}>
       {/* <ProfileAvatar
         displayName={!displayName ? null : displayName}
         pictureUrl={pictureUrl}
