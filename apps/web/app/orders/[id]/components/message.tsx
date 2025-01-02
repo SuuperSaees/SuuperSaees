@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Message } from '../context/activity-context';
+import { Message } from '~/lib/message.types';
 import { useActivityContext } from '../context/activity-context';
 import { ClockIcon, KeyIcon, Trash2, X } from 'lucide-react';
 import UserFile from './user-file';
@@ -18,7 +18,7 @@ import { Button } from '@kit/ui/button';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface ChatMessageProps {
-  message: Message;
+  message: Message.Type;
   isHovered: boolean;
 }
 
@@ -35,11 +35,16 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
     await deleteMessage(message.id);
     setIsOpen(false);
   }
+
+  const isClientGuest = message?.user?.name?.toLowerCase().includes('guest') &&
+  message?.user?.email?.toLowerCase().includes('guest') &&
+  message?.user?.email?.toLowerCase().includes('@suuper.co');
+
   return (
     <div className={`flex flex-col gap-2 w-full p-0 max-w-full min-w-0`}>
       <div className="flex justify-between w-full">
       <div className="flex gap-2">
-      <span className="font-semibold">{message.user?.settings?.name ?? message.user.name}</span> 
+      <span className="font-semibold">{isClientGuest ? t('guest') : message.user?.settings?.name ?? message?.user?.name}</span> 
       {
         message?.pending &&
       <ClockIcon className="h-3 w-3 text-muted-foreground self-center" />

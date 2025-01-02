@@ -190,6 +190,7 @@
     "add": "Add annotation",
     "addSuccess": "Annotation added successfully",
     "addError": "Error adding annotation"
-  }
+  },
+  "guest": "Guest"
 }
 

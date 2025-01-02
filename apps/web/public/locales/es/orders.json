@@ -190,6 +190,7 @@
     "add": "Añadir anotación",
     "addSuccess": "Anotación añadida con éxito",
     "addError": "Error al añadir anotación"
-  }
+  },
+  "guest": "Invitado"
 }
 

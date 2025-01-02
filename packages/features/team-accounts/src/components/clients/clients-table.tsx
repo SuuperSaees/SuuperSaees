@@ -104,6 +104,10 @@ type ClientsTableProps = {
 // accountIds, accountNames
 export function ClientsTable({ clients, view }: ClientsTableProps) {
   const { t } = useTranslation();
+  clients = clients.filter((client) => {
+    const isClientGuest = client.primaryOwner?.name.toLowerCase().includes('guest') && client.primaryOwner?.email?.toLowerCase().includes('guest') && client.primaryOwner?.email?.toLowerCase().includes('@suuper.co')
+    return !isClientGuest
+  });
   const [activeButton, setActiveButton] = useState<'clients' | 'organizations'>(
     'clients',
   );

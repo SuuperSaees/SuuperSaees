@@ -93,6 +93,14 @@ class AuthCallbackService {
     }
 
     if (publicTokenId) {
+      // get session from supabase
+      const { data: session } = await this.client.auth.getSession();
+      if (session?.session) {
+        // redirect to the next path
+        url.pathname = callbackNextPath ?? url.pathname;
+        return url;
+      }
+
       // token can be expired. Because it's a public token, we don't need to verify the expiration date
       const { payload } = await verifyToken(
         '',
@@ -100,6 +108,7 @@ class AuthCallbackService {
       ) as { isValidToken: boolean; payload?: DefaultToken };
 
       if (payload) {
+        
         url.pathname = callbackNextPath ?? url.pathname;
         // here we need to set the session with the user data
         const newUuid = uuidv4();
@@ -111,7 +120,7 @@ class AuthCallbackService {
             name: 'guest ' + newUuid,
             slug: `guest ${newUuid}'s organization`,
           },
-          role: 'client_owner',
+          role: 'client_guest',
           sendEmail: false,
         });
 
@@ -119,18 +128,6 @@ class AuthCallbackService {
           const orderId = Number(callbackNextPath?.split('/')[2]);
           const { access_token, refresh_token } = response.success?.data?.session;
           await this.client.auth.setSession({ access_token, refresh_token });
-          // verify if the order is public
-          const { data, error } = await this.client.from('orders_v2')
-          .select('visibility')
-          .eq('id', orderId)
-          .single();
-
-          if (error) {
-            console.error('Error verifying order', error);
-            throw new Error('Error verifying order');
-          }
-
-          if (data?.visibility === 'public') {
             const { error } = await this.client.from('order_followers')
             .insert({
               order_id: orderId,
@@ -141,7 +138,6 @@ class AuthCallbackService {
             throw new Error('Error adding follower to order');
           }
           return url;
-        }
         }
       }
     }

@@ -334,7 +334,7 @@ function getPatterns() {
 
         const origin = req.nextUrl.origin;
         const next = req.nextUrl.pathname;
-
+       
         const isOrdersPath = req.nextUrl.pathname.includes('orders') && req.nextUrl.searchParams.has('public_token_id');
 
         // Check if this is an invitation URL
@@ -352,22 +352,30 @@ function getPatterns() {
           const confirmPath = `/auth/confirm?next=${originalPath}&public_token_id=${publicTokenId}`;
           return NextResponse.redirect(new URL(confirmPath, origin).href);
         }
-
+        
         if (isInvitationUrl || isCheckoutUrl) {
           return;
         }
-
+        
         // If user is not logged in, redirect to sign in page.
         if (!user) {
           const signIn = pathsConfig.auth.signIn;
           const redirectPath = `${signIn}?next=${next}`;
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
-
-        const supabase = createMiddlewareClient(req, res);
-
+        
         // Obtain the user role
         const userRole = await getUserRoleById(user.id);
+        if (userRole === 'client_guest') {
+          const allowedPaths = ['/orders', '/auth'];
+          const currentPath = req.nextUrl.pathname;
+          if (!currentPath.startsWith('/orders') && 
+              !allowedPaths.some(path => currentPath.startsWith(path))) {
+            return NextResponse.redirect(new URL(pathsConfig.app.orders, origin).href);
+          }
+        }
+        const supabase = createMiddlewareClient(req, res);
+
         if (userRole === 'agency_owner') {
           const hasPhoneNumber = await checkPhoneNumber(supabase, user.id);
           if (!hasPhoneNumber && !req.nextUrl.pathname.includes('auth/onboarding')) {

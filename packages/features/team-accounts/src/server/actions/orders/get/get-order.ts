@@ -47,6 +47,44 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       .eq('id', orderId)
       .single();
 
+      if (orderData?.followers?.length) {
+        const adminClient = getSupabaseServerComponentClient({
+          admin: true
+        });
+        const followerIds = orderData.followers
+          .map(f => f.client_follower?.id)
+
+        const { data: rolesData } = await adminClient
+          .from('accounts_memberships')
+          .select('user_id, account_role')
+          .in('user_id', followerIds);
+
+        orderData.followers = orderData.followers
+          .map(follower => {
+            if (!follower.client_follower) return null;
+            
+            const userRole = rolesData?.find(r => 
+              r.user_id === follower.client_follower?.id
+            )?.account_role;
+
+            if (userRole === 'client_guest') return null;
+            
+            return {
+              ...follower,
+              client_follower: {
+                id: follower.client_follower?.id,
+                name: follower.client_follower?.name,
+                email: follower.client_follower?.email,
+                picture_url: follower.client_follower?.picture_url,
+                settings: follower.client_follower?.settings,
+                role: userRole
+              }
+            };
+          })
+          .filter(Boolean); // Elimina los null del array final
+      }
+
+
     const userHasReadMessagePermission = await hasPermissionToReadOrderDetails(
       orderId,
       orderData?.agency_id ?? '',
@@ -187,7 +225,7 @@ export const getOrders = async (
 
     // Step 1: Get and define the user's role
     const role = await getUserRole();
-    const clientRoles = new Set(['client_owner', 'client_member']);
+    const clientRoles = new Set(['client_owner', 'client_member', 'client_guest']);
     const agencyRoles = new Set([
       'agency_owner',
       'agency_project_manager',
@@ -226,6 +264,10 @@ export const getOrders = async (
       const ordersIdsClientBelongsTo = ordersAssignedToClient.map(
         (order) => order.order_id,
       );
+      if(role === 'client_guest'){
+        query = query.eq('visibility', 'public');
+      }
+      
       query = query.in('id', ordersIdsClientBelongsTo);
     } else if (isAgencyMember) {
       const ordersAssignedToAgencyMember =

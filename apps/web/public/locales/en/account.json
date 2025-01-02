@@ -229,5 +229,6 @@
   "loomAppIdDescription": "Enter your Loom App ID to enable Loom integration. Copy your organization subdomain in your developer Loom app",
   "clipboardCopied": "Content copied to clipboard",
   "clipboardError": "Error copying content to clipboard",
-  "connect": "Connect"
+  "connect": "Connect",
+  "guest": "Guest"
 }

@@ -4,10 +4,10 @@ import { format } from 'date-fns';
 
 import {
   Activity,
-  Message,
   Review,
   useActivityContext,
 } from '../context/activity-context';
+import { Message } from '~/lib/message.types';
 import ActivityAction from './activity-actions';
 import UserMessage from './user-message';
 import UserReviewMessage from './user-review-message';
@@ -140,7 +140,7 @@ const Interactions = ({ agencyStatuses }: { agencyStatuses: AgencyStatus.Type[] 
               </div>
             ) : interaction.class === 'message' ? (
               <div className="flex w-full" key={interaction.id}>
-                <UserMessage message={interaction as Message} />
+                <UserMessage message={interaction as Message.Type} />
               </div>
             ) : interaction.class === 'activity' ? (
               <ActivityAction

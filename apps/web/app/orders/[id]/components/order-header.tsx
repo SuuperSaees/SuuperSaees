@@ -53,7 +53,11 @@ export const OrderHeader = ({ order, agencyStatuses, user }: { order: Order.Rela
         {(userRole === 'client_owner' || userRole === 'client_member') && (
           <ReviewDialog orderId={order.id} statusId={completedStatusId} className="w-fit" />
         )}
-        <DeleteOrderDropdown orderId={order?.id} />
+        {
+          userRole !== 'client_guest' && (
+            <DeleteOrderDropdown orderId={order?.id} />
+          )
+        }
       </div>
       <div className="flex items-center">
         <h3 className="relative mb-2 text-[0.9em] text-lg font-normal text-gray-600">

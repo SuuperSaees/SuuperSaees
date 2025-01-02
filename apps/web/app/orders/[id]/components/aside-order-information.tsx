@@ -175,10 +175,11 @@ const AsideOrderInformation = ({
     })) ?? [];
 
   const searchUserOptionsFollowers =
-    orderAgencyClientsFollowers?.map((user) => ({
+    orderAgencyClientsFollowers?.filter((currentUser) => currentUser.role !== 'client_guest').map((user) => ({
       picture_url: user?.settings?.picture_url?? user?.picture_url ?? '',
       value: user.id,
       label: user?.settings?.name ?? user.name ?? '',
+      role: user.role,
     })) ?? [];
 
   const userRoles = new Set([
@@ -187,8 +188,14 @@ const AsideOrderInformation = ({
     'agency_project_manager',
   ]);
 
+  const userRolesFollowers = new Set([
+    'client_owner',
+    'client_member',
+  ]);
+
 
   const canAddAssignes = userRoles.has(userRole);
+  const canAddFollowers = userRolesFollowers.has(userRole);
 
   return (
     <AgencyStatusesProvider initialStatuses={agencyStatuses}>
@@ -292,6 +299,7 @@ const AsideOrderInformation = ({
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
+              canAddFollowers={canAddFollowers}
             />
           </>
         ) : (
@@ -349,6 +357,7 @@ const AsideOrderInformation = ({
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
+              canAddFollowers={canAddFollowers}
             />
           </div>
         )}
