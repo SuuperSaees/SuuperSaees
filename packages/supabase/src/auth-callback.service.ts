@@ -10,6 +10,7 @@ import { TokenRecoveryType, DefaultToken } from '../../tokens/src/domain/token-t
 import { verifyToken } from '../../tokens/src/verify-token';
 // import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
+import { getDomainByUserId } from '../../multitenancy/utils/get/get-domain';
 import { createClient } from '../../features/team-accounts/src/server/actions/clients/create/create-clients';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -133,6 +134,11 @@ class AuthCallbackService {
               order_id: orderId,
               client_member_id: response.success?.data?.user_client_id,
             });
+          const { domain } = await getDomainByUserId(response.success?.data?.user_client_id ?? '', true);
+          if (domain) {
+            url.href = callbackNextPath?.split('?')[0] ?? url.href;
+            console.log('url', url, domain)
+          }
           if (error) {
             console.error('Error adding follower to order', error);
             throw new Error('Error adding follower to order');
