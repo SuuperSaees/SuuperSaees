@@ -19,7 +19,7 @@ export function TermsAndConditionsFormField(
               <label className={'flex items-center space-x-2 py-2'}>
                 <Checkbox required name={field.name} className='border-2'/>
 
-                <div className={'text-sm not-italic font-normal leading-[18.72px] tracking-[-0.18px];'}>
+                <div className={'text-black text-sm not-italic font-normal leading-[18.72px] tracking-[-0.18px];'}>
                   <Trans
                     i18nKey={'auth:acceptTermsAndConditions'}
                     components={{
