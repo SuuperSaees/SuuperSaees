@@ -349,6 +349,7 @@ function getPatterns() {
         if (isOrdersPath) {
           const publicTokenId = req.nextUrl.searchParams.get('public_token_id');
           const originalPath = req.nextUrl.href;
+          console.log('originalPath', originalPath, req.nextUrl.origin);
           const confirmPath = `/auth/confirm?next=${originalPath}&public_token_id=${publicTokenId}`;
           return NextResponse.redirect(new URL(confirmPath, origin).href);
         }
@@ -356,13 +357,13 @@ function getPatterns() {
         if (isInvitationUrl || isCheckoutUrl) {
           return;
         }
-        
         // If user is not logged in, redirect to sign in page.
         if (!user) {
           const signIn = pathsConfig.auth.signIn;
           const redirectPath = `${signIn}?next=${next}`;
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
+        
         
         // Obtain the user role
         const userRole = await getUserRoleById(user.id);
