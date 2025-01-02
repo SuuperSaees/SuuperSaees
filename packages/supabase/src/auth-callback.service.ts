@@ -137,6 +137,7 @@ class AuthCallbackService {
             console.error('Error adding follower to order', error);
             throw new Error('Error adding follower to order');
           }
+          console.log('url', url)
           return url;
         }
       }
