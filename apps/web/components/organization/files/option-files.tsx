@@ -6,7 +6,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Download, Plus } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import {
-  createFile,
   createUploadBucketURL,
 } from 'node_modules/@kit/team-accounts/src/server/actions/files/create/create-file';
 import { downloadFiles } from 'node_modules/@kit/team-accounts/src/server/actions/files/download/download-files';
@@ -32,6 +31,7 @@ import {
 } from '@kit/ui/dropdown-menu';
 
 import { generateUUID } from '~/utils/generate-uuid';
+import { createFile } from '~/server/actions/files/files.action';
 
 export function OptionFiles({
   clientOrganizationId,
@@ -119,7 +119,11 @@ export function OptionFiles({
       files: Array<{ name: string; size: number; type: string; url: string }>;
       clientOrganizationId: string;
       currentPath: Array<{ title: string; uuid?: string }>;
-    }) => createFile(files, clientOrganizationId, currentPath),
+    }) => createFile({
+      files,
+      client_organization_id: clientOrganizationId,
+      currentPath
+    }),
 
     onSuccess: async () => {
       toast.success(t('files.new.uploadSuccess'));

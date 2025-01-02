@@ -1,6 +1,7 @@
 {
   "error": {
     "default": "Something went wrong while processing your request. Please try again.",
+    "copyToClipboard": "Failed to copy link to clipboard.",
     "clients": {
       "userAlreadyExists": "A member with that email already exists.",
       "failedToCreateUser": "Couldn't create the client's user. Please try again.",
@@ -51,7 +52,8 @@
       "failedToUpdateOrderStatus": "Couldn't update the order status. Please try again later.",
       "failedToUpdateOrderPriority": "Couldn't update the order priority. Please try again later.",
       "failedToUpdateOrderName": "Couldn't update the order name. Please try again later.",
-      "failedToDeleteOrder": "Couldn't delete the order. Please try again later."
+      "failedToDeleteOrder": "Couldn't delete the order. Please try again later.",
+      "failedToUpdateOrderVisibility": "Couldn't update the order visibility. Please try again later."
     },
     "reviews": {
       "reviewNotFound": "Review not found.",
@@ -65,6 +67,7 @@
   },
   "success": {
     "default": "Operation completed successfully.",
+    "copyToClipboard": "Link copied to clipboard.",
     "clients": {
       "clientCreated": "Client created successfully.",
       "memberAdded": "Member added successfully.",
@@ -101,7 +104,8 @@
       "orderAssigneesUpdated": "Order assignees updated successfully.",
       "orderFollowersUpdated": "Order followers updated successfully.",
       "orderNameUpdated": "Order name updated successfully.",
-      "orderDeleted": "Order deleted successfully."
+      "orderDeleted": "Order deleted successfully.",
+      "orderVisibilityUpdated": "Order visibility updated successfully."
     },
     "reviews": {
       "reviewCreated": "Review added successfully."

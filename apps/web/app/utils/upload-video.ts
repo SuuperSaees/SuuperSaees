@@ -1,5 +1,6 @@
-import { createFile, createUploadBucketURL } from '~/team-accounts/src/server/actions/files/create/create-file';
+import { createUploadBucketURL } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { generateUUID } from '~/utils/generate-uuid';
+import { createFile } from '~/server/actions/files/files.action';
 
 
 export const uploadFileToBucket = async (
@@ -31,14 +32,16 @@ export const uploadFileToBucket = async (
 
   const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
 
-  const fileData = await createFile([
-    {
-      name: sanitizedFileName,
-      size: file.size,
-      type: file.type,
-      url: fileUrl,
-    },
-  ]);
+  const fileData = await createFile({
+    files: [
+      {
+        name: sanitizedFileName,
+        size: file.size,
+        type: file.type,
+        url: fileUrl,
+      }
+    ]
+  });
 
   if (!fileData) {
     throw new Error(t('video.databaseEntryError'));

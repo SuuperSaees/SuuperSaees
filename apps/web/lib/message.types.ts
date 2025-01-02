@@ -4,7 +4,7 @@ import { User } from './user.types';
 
 export namespace Message {
   export type Type = Database['public']['Tables']['messages']['Row'] & {
-    user?: User.Type;
+    user?: User.Response;
     files?: File.Type[];
   };
   export type Insert = Database['public']['Tables']['messages']['Insert'];
