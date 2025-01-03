@@ -195,6 +195,9 @@
   "files": {
     "noPreview": "No hay vista previa disponible",
     "download": "Por favor, descarga el archivo para verlo"
-  }
+  },
+  "shareProject": "Compartir proyecto",
+  "shareProjectDescription": "Al compartir este proyecto públicamente, cualquier persona con el enlace podrá acceder a toda la información de este proyecto, incluyendo la interacción a través del chat y la visualización de archivos, detalles y tareas.",
+  "link": "Enlace"
 }
 

@@ -33,12 +33,10 @@ import { PriorityCombobox } from './priority-combobox';
 import { getClientMembersForOrganization } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getFormattedDateRange } from '../utils/get-formatted-dates';
 import { User } from '@supabase/supabase-js';
-import { Share2 } from 'lucide-react';
-import { Copy } from 'lucide-react';
 import { generateTokenId, createToken } from '~/server/actions/tokens/tokens.action';
-import { copyToClipboard } from '~/utils/clipboard';
 import Link from 'next/link';
-
+import DeleteOrderDropdown from './delete-order-dropdown';
+import { Switch } from '@kit/ui/switch';
 interface AsideOrderInformationProps {
   order: Order.Relational;
   className?: string;
@@ -52,48 +50,36 @@ const AsideOrderInformation = ({
   ...rest
 }: AsideOrderInformationProps) => {
   const { t, i18n } = useTranslation(['orders', 'responses']);
-  // const [selectedStatus, setSelectedStatus] = useState(order.status);
-  // const [selectedPriority, setSelectedPriority] = useState(order.priority);
   const language = i18n.language;
   const router = useRouter();
   const { userRole, order } = useActivityContext();
-  const [isShareOpen, setIsShareOpen] = useState(false);
-  const [urlToShare, setUrlToShare] = useState('');
-  const generateUrlToShare = useMutation({
-    mutationFn: async (id: string): Promise<string> => {
-      try {
-      // Generate token ID and create share URL immediately
-      const tokenId = await generateTokenId({id});
-      const baseUrl = window.location.origin;
-      const shareUrl = `${baseUrl}/orders/${order.id}?public_token_id=${tokenId}`;
-      setUrlToShare(shareUrl);
-      
-      Promise.all([
-        createToken({
+  const [isPublic, setIsPublic] = useState(order.visibility === 'public');
+
+  const changeVisibility = useMutation({
+    mutationFn: async (visibility: Order.Type['visibility']) => {
+      setIsPublic(visibility === 'public');
+      await updateOrder(order.id, { visibility });
+      order.visibility = visibility;
+    },
+    onSuccess: async () => {
+      toast.success('Success', {
+        description: t('success.orders.orderVisibilityUpdated')
+      })
+      const tokenId = await generateTokenId({id: order.uuid});
+        await createToken({
           id: order.uuid,
           account_id: order.agency_id,
           agency_id: order.agency_id,
           data: {
-            order_id: order.id,
-          },
-        }, tokenId),
-        updateOrder(order.id, { visibility: 'public' })
-      ]).catch(error => {
-        console.error('Background operations error:', error);
-      });
-  
-      return shareUrl;
-      } catch (error) {
-        console.error('Error generating share URL:', error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      setIsShareOpen(true);
+          order_id: order.id,
+        }
+        }, tokenId) 
     },
     onError: () => {
-      toast.error('Error generating share URL');
-    }
+      toast.error('Error', {
+        description: t('error.orders.failedToUpdateOrderVisibility'),
+      });
+    },
   });
 
   const changeDate = useMutation({
@@ -209,31 +195,22 @@ const AsideOrderInformation = ({
           <h3 className="pb-4 font-bold">
             <Trans i18nKey="details.createdBy" />
           </h3>
-          <button className="pr-2" onClick={() => {
-            generateUrlToShare.mutate(order.uuid);
-            setIsShareOpen(true);
-          }}>
-            <Share2 className="w-4 h-4" />
-          </button>
-          </div>
-          
+
           {
-            isShareOpen && (
-              <div className="flex bg-slate-50 p-2 border border-slate-200 rounded-md gap-3 h-30 items-center justify-around w-72 absolute top-20 right-2 z-50">
-                <p>{urlToShare}</p>
-                <button onClick={async () => {
-                  const copied = await copyToClipboard(urlToShare);
-                  if (copied) {
-                    toast.success(t('success.copyToClipboard'));
-                  } else {
-                    toast.error(t('error.copyToClipboard'));
-                  }
-                }}>
-                  <Copy className="w-4 h-4" />
-                </button>
+            userRole !== 'client_guest' && (
+              <div className='flex items-center gap-2'>
+                <button className="pr-2" onClick={() => {
+                changeVisibility.mutate(order.visibility === 'public' ? 'private' : 'public');
+              }}>
+                <Switch checked={isPublic} />
+              </button>
+
+                <DeleteOrderDropdown orderId={order?.id} orderUuid={order?.uuid} agencyId={order?.agency_id} />
               </div>
             )
           }
+          </div>
+          
           <Link href={`/clients/organizations/${order.client_organization_id}`}>
           <div className="flex gap-3">
             <AvatarDisplayer
