@@ -195,6 +195,9 @@
   "files": {
     "noPreview": "No preview available",
     "download": "Please download the file to view it"
-  }
+  },
+  "shareProject": "Share project",
+  "shareProjectDescription": "When you publish a project publicly, anyone with the link can access all the information of this project, including interaction through the chat and viewing files, details, and tasks.",
+  "link": "Link"
 }
 
