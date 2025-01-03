@@ -53,7 +53,6 @@ function DeleteOrderDropdown({orderId, orderUuid, agencyId}: {orderId: number, o
     }
   }
   async function handleGenerateTokenId() {
-    if (tokenId) return;
     const generatedTokenId = await generateTokenId({id: orderUuid ?? ''}); 
     setTokenId(generatedTokenId ?? "");
     await createToken({
