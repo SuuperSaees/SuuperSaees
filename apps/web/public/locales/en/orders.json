@@ -62,6 +62,7 @@
     "createdAt": "Created",
     "assignedTo": "Assigned to",
     "followedBy": "Followed by",
+    "tags": "Tags",
     "status": "Status",
     "priority": "Priority",
     "dueDate": "Due date",

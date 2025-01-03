@@ -37,6 +37,7 @@ import { generateTokenId, createToken } from '~/server/actions/tokens/tokens.act
 import Link from 'next/link';
 import DeleteOrderDropdown from './delete-order-dropdown';
 import { Switch } from '@kit/ui/switch';
+// import ActivityTags from './activity-tags';
 interface AsideOrderInformationProps {
   order: Order.Relational;
   className?: string;
@@ -287,6 +288,14 @@ const AsideOrderInformation = ({
               canAddFollowers={canAddFollowers}
             />
             </div>
+            {/* <div>
+            <ActivityTags
+              tags={[]}
+              updateFunction={changeAgencyMembersAssigned.mutate}
+              searchTagOptions={[]}
+              canAddTags={canAddAssignes}
+            />
+            </div> */}
           </>
         ) : (
           <div className="flex flex-col gap-2">

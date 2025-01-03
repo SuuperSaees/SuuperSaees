@@ -62,6 +62,7 @@
     "createdAt": "Creado",
     "assignedTo": "Asignado a",
     "followedBy": "Seguido por",
+    "tags": "Etiquetas",
     "status": "Estado",
     "priority": "Prioridad",
     "dueDate": "Fecha de vencimiento",
