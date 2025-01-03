@@ -48,6 +48,7 @@ export class TokensService implements ITokensService {
 
     async generateTokenId({id}: TokenIdPayload) {
         // If id is not empty, search in the database if the id is already in use
+        console.log('id', id);
         if (id) {
             const token = await this.tokensRepository
             .getTokenById(id);
