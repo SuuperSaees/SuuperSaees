@@ -199,11 +199,15 @@ const AsideOrderInformation = ({
           {
             userRole !== 'client_guest' && (
               <div className='flex items-center gap-2'>
-                <button className="pr-2" onClick={() => {
-                changeVisibility.mutate(order.visibility === 'public' ? 'private' : 'public');
-              }}>
-                <Switch checked={isPublic} />
-              </button>
+                {
+                  canAddAssignes && (
+                    <button className="pr-2" onClick={() => {
+                      changeVisibility.mutate(order.visibility === 'public' ? 'private' : 'public');
+                    }}>
+                      <Switch checked={isPublic} />
+                    </button>
+                  )
+                }
 
                 <DeleteOrderDropdown orderId={order?.id} orderUuid={order?.uuid} agencyId={order?.agency_id} />
               </div>

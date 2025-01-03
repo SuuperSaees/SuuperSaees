@@ -93,7 +93,7 @@ function DeleteOrderDropdown({orderId, orderUuid, agencyId}: {orderId: number, o
           >
             <div className="flex items-center gap-2 text-gray-800">
               <ExternalLink className="h-4 w-4" />
-              <p>{t('share')}</p>
+              <p>{t('publishProject')}</p>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem
