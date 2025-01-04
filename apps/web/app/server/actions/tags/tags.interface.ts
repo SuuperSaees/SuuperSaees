@@ -8,12 +8,12 @@ export interface ITagsAction {
     /*
     * Create
     */
-    create: (payload: Tags.Insert) => Promise<void>;
+    create: (payload: Tags.Insert) => Promise<Tags.Type>;
 
     /*
     * Update
     */
-    update: (payload: Tags.Update) => Promise<void>;
+    update: (payload: Tags.Update) => Promise<Tags.Type>;
 
     /*
     * Delete

@@ -11,11 +11,11 @@ class TagsAction extends BaseAction implements ITagsAction {
         this.controller = new TagsController(this.baseUrl, this.client, this.adminClient);
     }
 
-    async create(payload: Tags.Insert): Promise<void> {
+    async create(payload: Tags.Insert): Promise<Tags.Type> {
         return await this.controller.create(payload);
     }
 
-    async update(payload: Tags.Update): Promise<void> {
+    async update(payload: Tags.Update): Promise<Tags.Type> {
         return await this.controller.update(payload);
     }
 

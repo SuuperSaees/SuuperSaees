@@ -7,11 +7,11 @@ export class TagsService implements ITagsService {
         this.tagsRepository = tagsRepository;
     }
 
-    async create(payload: Tags.Insert): Promise<void> {
+    async create(payload: Tags.Insert): Promise<Tags.Type> {
         return await this.tagsRepository.create(payload);
     }
 
-    async update(payload: Tags.Update): Promise<void> {
+    async update(payload: Tags.Update): Promise<Tags.Type> {
         return await this.tagsRepository.update(payload);
     }
 

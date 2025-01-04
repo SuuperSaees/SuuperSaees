@@ -14,33 +14,58 @@ export class TagsController {
         this.adminClient = adminClient;
     }
 
-    async create(payload: Tags.Insert): Promise<void> {
-        const tagsRepository = new TagsRepository(this.client, this.adminClient);
-        const tagsService = new TagsService(tagsRepository);
-        return await tagsService.create(payload);
+    async create(payload: Tags.Insert): Promise<Tags.Type> {
+        try {
+            const tagsRepository = new TagsRepository(this.client, this.adminClient);
+            const tagsService = new TagsService(tagsRepository);
+            return await tagsService.create(payload);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
-    async update(payload: Tags.Update): Promise<void> {
-        const tagsRepository = new TagsRepository(this.client, this.adminClient);
-        const tagsService = new TagsService(tagsRepository);
-        return await tagsService.update(payload);
+    async update(payload: Tags.Update): Promise<Tags.Type> {
+        try {
+            const tagsRepository = new TagsRepository(this.client, this.adminClient);
+            const tagsService = new TagsService(tagsRepository);
+            return await tagsService.update(payload);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
     async delete(id: string): Promise<void> {
-        const tagsRepository = new TagsRepository(this.client, this.adminClient);
-        const tagsService = new TagsService(tagsRepository);
-        return await tagsService.delete(id);
+        try {
+            const tagsRepository = new TagsRepository(this.client, this.adminClient);
+            const tagsService = new TagsService(tagsRepository);
+            return await tagsService.delete(id);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
     async get(id: string): Promise<Tags.Type> {
-        const tagsRepository = new TagsRepository(this.client, this.adminClient);
-        const tagsService = new TagsService(tagsRepository);
-        return await tagsService.get(id);
+        try {
+            const tagsRepository = new TagsRepository(this.client, this.adminClient);
+            const tagsService = new TagsService(tagsRepository);
+            return await tagsService.get(id);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
     async list(organizationId: string): Promise<Tags.Type[]> {
-        const tagsRepository = new TagsRepository(this.client, this.adminClient);
-        const tagsService = new TagsService(tagsRepository);
-        return await tagsService.list(organizationId);
+        try {
+            const tagsRepository = new TagsRepository(this.client, this.adminClient);
+            const tagsService = new TagsService(tagsRepository);
+            return await tagsService.list(organizationId);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 }

@@ -10,18 +10,37 @@ export class TagsRepository {
         this.adminClient = adminClient;
     }
 
-    async create(payload: Tags.Insert): Promise<void> {
-        const { data: tagData, error: tagError } = await this.client.from('tags').insert(payload);
+    async create(payload: Tags.Insert): Promise<Tags.Type> {
+        const { data: tagData, error: tagError } = await this.client
+        .from('tags')
+        .insert(payload)
+        .select()
+        .single();
+
         if (tagError) throw tagError;
+
+        return tagData;
     }
 
-    async update(payload: Tags.Update): Promise<void> {
-        const { data: tagData, error: tagError } = await this.client.from('tags').update(payload).eq('id', payload.id);
+    async update(payload: Tags.Update): Promise<Tags.Type> {
+        const { data: tagData, error: tagError } = await this.client
+        .from('tags')
+        .update(payload)
+        .eq('id', payload.id ?? '')
+        .select()
+        .single();
+
         if (tagError) throw tagError;
+
+        return tagData;
     }
 
     async delete(id: string): Promise<void> {
-        const { error: tagError } = await this.client.from('tags').delete().eq('id', id);
+        const { error: tagError } = await this.client
+        .from('tags')
+        .delete()
+        .eq('id', id);
+
         if (tagError) throw tagError;
     }
 
@@ -32,8 +51,13 @@ export class TagsRepository {
     }
 
     async list(organizationId: string): Promise<Tags.Type[]> {
-        const { data: tagData, error: tagError } = await this.client.from('tags').select('*').eq('organization_id', organizationId);
+        const { data: tagData, error: tagError } = await this.client
+        .from('tags')
+        .select('*')
+        .eq('organization_id', organizationId);
+
         if (tagError) throw tagError;
+
         return tagData;
     }
 }

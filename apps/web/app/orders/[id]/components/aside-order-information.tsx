@@ -41,6 +41,7 @@ import Tooltip from '~/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@kit/ui/dialog';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { copyToClipboard } from '~/utils/clipboard';
+import ActivityTags from './activity-tags';
 interface AsideOrderInformationProps {
   order: Order.Relational;
   className?: string;
@@ -324,14 +325,14 @@ const AsideOrderInformation = ({
               canAddFollowers={canAddFollowers}
             />
             </div>
-            {/* <div>
+            <div>
             <ActivityTags
               tags={[]}
               updateFunction={changeAgencyMembersAssigned.mutate}
               searchTagOptions={[]}
               canAddTags={canAddAssignes}
             />
-            </div> */}
+            </div> 
           </>
         ) : (
           <div className="flex flex-col gap-2">
