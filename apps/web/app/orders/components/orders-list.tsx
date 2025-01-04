@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
@@ -21,6 +21,8 @@ import { Order } from '~/lib/order.types';
 
 import Table from '../../components/table/table';
 import { useUserOrderActions } from '../hooks/user-order-actions';
+import { useSignOut } from '@kit/supabase/hooks/use-sign-out';
+import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
 
 type OrdersTableProps = {
   orders: Order.Response[];
@@ -40,6 +42,16 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
   const hasPermission = () => {
     return agencyRoles.has(role);
   };
+
+  const signOut = useSignOut();
+  const handleSignOut = async () => {
+    const impersonatingTokenId = localStorage.getItem("impersonatingTokenId");
+    if (impersonatingTokenId){
+      localStorage.removeItem('impersonatingTokenId');
+      await deleteToken(impersonatingTokenId);
+    }
+    await signOut.mutateAsync()
+  }
 
   const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
 
@@ -90,6 +102,12 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
     'agency_project_manager',
     'agency_member',
   ]);
+
+  useEffect(() => {
+   if(role === 'client_guest' && orders.length === 0){
+    void handleSignOut();
+   }
+  }, []);
   return (
     <main>
       <Tabs
