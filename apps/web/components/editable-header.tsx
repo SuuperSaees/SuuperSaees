@@ -92,15 +92,15 @@ const EditableHeader = ({
         </div>
       ) : (
         <div className='w-full relative justify-between flex'>
-          <div className='flex gap-2'>
 
           <span className="max-w-[100%] overflow-hidden whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900 w-full">
             {name.slice(0, 70).trim()}
             {name.length > 70 && '...'}
+          </span>
             {canEdit && (
             <Button
               variant="ghost"
-              className="m-0 h-10 px-1 text-slate-500 "
+              className="m-0 h-10 px-1 text-slate-500"
               onClick={() => {
                 setIsEditing(true);
                 updateInputWidth();
@@ -109,8 +109,6 @@ const EditableHeader = ({
               <PenLine className="h-[20px] w-[20px]" />
             </Button>
           )}
-          </span>
-          </div>
           <TimerContainer />
        
         </div>

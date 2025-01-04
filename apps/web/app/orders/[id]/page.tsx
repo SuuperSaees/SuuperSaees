@@ -1,4 +1,3 @@
-// import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getPropietaryOrganizationIdOfOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 
 
@@ -15,7 +14,6 @@ import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/g
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { redirect } from 'next/navigation';
-// import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -27,14 +25,9 @@ export const generateMetadata = async () => {
 
 async function OrderDetailsPage({
   params: { id },
-  searchParams: { public_token_id },
 }: {
   params: { id: string };
-  searchParams: { public_token_id: string };
 }) {
-  if (public_token_id) {
-    console.log('tokenData', public_token_id);
-  }
   const order = await getOrderById(Number(id)).catch((err) =>
     console.error(err),
   ) as Order.Relational;
@@ -57,6 +50,7 @@ async function OrderDetailsPage({
     { title: ordersTitle },
     { title: order?.title ?? '', uuid: order?.uuid ?? '' },
   ];
+
   // const role = await getUserRole().catch((err) => {
   //   console.error(`Error client, getting user role: ${err}`)
   //   return ''
