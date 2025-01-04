@@ -66,6 +66,7 @@
     "priority": "Prioridad",
     "dueDate": "Fecha de vencimiento",
     "deadline": "Fecha límite",
+    "visibility": "Activa o desactiva para hacer este proyecto público o privado",
     "statuses": {
       "pending": "Esperando respuesta",
       "inProgress": "En Progreso",
@@ -197,7 +198,7 @@
     "download": "Por favor, descarga el archivo para verlo"
   },
   "shareProject": "Compartir proyecto",
-  "publishProject": "Publicar proyecto",
+  "publishProject": "Copiar enlace",
   "shareProjectDescription": "Al compartir este proyecto públicamente, cualquier persona con el enlace podrá acceder a toda la información de este proyecto, incluyendo la interacción a través del chat y la visualización de archivos, detalles y tareas.",
   "link": "Enlace"
 }

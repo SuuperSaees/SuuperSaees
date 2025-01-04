@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { CalendarIcon, FlagIcon, Loader } from 'lucide-react';
+import { CalendarIcon, FlagIcon, Loader, Check, Copy } from 'lucide-react';
 import {
   getOrderAgencyMembers,
 } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
@@ -37,6 +37,10 @@ import { generateTokenId, createToken } from '~/server/actions/tokens/tokens.act
 import Link from 'next/link';
 import DeleteOrderDropdown from './delete-order-dropdown';
 import { Switch } from '@kit/ui/switch';
+import Tooltip from '~/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@kit/ui/dialog';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { copyToClipboard } from '~/utils/clipboard';
 interface AsideOrderInformationProps {
   order: Order.Relational;
   className?: string;
@@ -55,23 +59,54 @@ const AsideOrderInformation = ({
   const { userRole, order } = useActivityContext();
   const [isPublic, setIsPublic] = useState(order.visibility === 'public');
 
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [tokenId, setTokenId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const baseUrl = window.location.origin;
+
+  const handleGenerateTokenId = async () => {
+    const tokenId = await generateTokenId({id: order.uuid});
+    setTokenId(tokenId ?? "");
+    await createToken({
+      id: order.uuid,
+      account_id: order.agency_id,
+      agency_id: order.agency_id,
+      data: {
+      order_id: order.id,
+    }
+    }, tokenId) 
+  }
+
+  useEffect(() => {
+    if(order.visibility === 'public'){
+      void handleGenerateTokenId();
+    }
+  }, []);
+
+  const handleCopy = async () => {
+    await copyToClipboard(`${baseUrl}/orders/${order.id}?public_token_id=${tokenId}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const changeVisibility = useMutation({
     mutationFn: async (visibility: Order.Type['visibility']) => {
       setIsPublic(visibility === 'public');
+      if (visibility === 'public') {
+        setShowShareDialog(true);
+      }
       await updateOrder(order.id, { visibility });
       order.visibility = visibility;
     },
     onSuccess: async () => {
-      toast.success('Success', {
-        description: t('success.orders.orderVisibilityUpdated')
-      })
       const tokenId = await generateTokenId({id: order.uuid});
-        await createToken({
-          id: order.uuid,
-          account_id: order.agency_id,
-          agency_id: order.agency_id,
-          data: {
-          order_id: order.id,
+      setTokenId(tokenId ?? "");
+      await createToken({
+        id: order.uuid,
+        account_id: order.agency_id,
+        agency_id: order.agency_id,
+        data: {
+        order_id: order.id,
         }
         }, tokenId) 
     },
@@ -198,18 +233,20 @@ const AsideOrderInformation = ({
 
           {
             userRole !== 'client_guest' && (
-              <div className='flex items-center gap-2'>
+              <div className='flex items-center'>
                 {
                   canAddAssignes && (
-                    <button className="pr-2" onClick={() => {
-                      changeVisibility.mutate(order.visibility === 'public' ? 'private' : 'public');
+                    <Tooltip content={t('details.visibility')}>
+                    <button onClick={() => {
+                      changeVisibility.mutate(isPublic ? 'private' : 'public');
                     }}>
                       <Switch checked={isPublic} />
                     </button>
+                    </Tooltip>
                   )
                 }
 
-                <DeleteOrderDropdown orderId={order?.id} orderUuid={order?.uuid} agencyId={order?.agency_id} />
+                <DeleteOrderDropdown orderId={order?.id} orderUuid={order?.uuid} agencyId={order?.agency_id} isPublic={isPublic} tokenId={tokenId}/>
               </div>
             )
           }
@@ -351,7 +388,39 @@ const AsideOrderInformation = ({
             </div>
           </div>
         )}
-
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('shareProject')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-gray-600">
+              🔒 {t('shareProjectDescription')}
+            </p>
+            <div>
+            <p>{t('link')}</p>
+            <div className="flex items-center gap-2">
+              
+              <input
+                type="text"
+                readOnly
+                disabled={!tokenId}
+                value={`${baseUrl}/orders/${order.id}?public_token_id=${tokenId}`}
+                className="flex-1 rounded-md border px-3 py-2 text-sm"
+              />
+              <ThemedButton 
+                variant="default" 
+                onClick={handleCopy}
+                className="flex items-center gap-2"
+                disabled={!tokenId}
+              >
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </ThemedButton>
+            </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
     </AgencyStatusesProvider>
   );
