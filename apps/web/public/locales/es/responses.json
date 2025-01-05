@@ -52,7 +52,8 @@
       "failedToUpdateOrderPriority": "No se pudo actualizar la prioridad de la orden. Inténtalo nuevamente.",
       "failedToUpdateOrderName": "No se pudo actualizar el nombre de la orden. Inténtalo más tarde.",
       "failedToDeleteOrder": "No se pudo eliminar la orden. Inténtalo nuevamente.",
-      "failedToUpdateOrderVisibility": "No se pudo actualizar la visibilidad de la orden. Inténtalo nuevamente."
+      "failedToUpdateOrderVisibility": "No se pudo actualizar la visibilidad de la orden. Inténtalo nuevamente.",
+      "failedToUpdateOrderTags": "No se pudo actualizar las etiquetas de la orden. Inténtalo nuevamente."
     },
     "reviews": {
       "reviewNotFound": "La reseña no se encontró.",
@@ -103,7 +104,8 @@
       "orderFollowersUpdated": "Los seguidores de la orden se actualizaron correctamente.",
       "orderNameUpdated": "El nombre de la orden se actualizó con éxito.",
       "orderDeleted": "El pedido se eliminó correctamente.",
-      "orderVisibilityUpdated": "La visibilidad de la orden se actualizó correctamente."
+      "orderVisibilityUpdated": "La visibilidad de la orden se actualizó correctamente.",
+      "orderTagsUpdated": "Las etiquetas de la orden se actualizaron correctamente."
     },
     "reviews": {
       "reviewCreated": "La reseña se añadió correctamente."
