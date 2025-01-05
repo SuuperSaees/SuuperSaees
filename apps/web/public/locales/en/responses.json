@@ -53,7 +53,8 @@
       "failedToUpdateOrderPriority": "Couldn't update the order priority. Please try again later.",
       "failedToUpdateOrderName": "Couldn't update the order name. Please try again later.",
       "failedToDeleteOrder": "Couldn't delete the order. Please try again later.",
-      "failedToUpdateOrderVisibility": "Couldn't update the order visibility. Please try again later."
+      "failedToUpdateOrderVisibility": "Couldn't update the order visibility. Please try again later.",
+      "failedToUpdateOrderTags": "Couldn't update the order tags. Please try again later."
     },
     "reviews": {
       "reviewNotFound": "Review not found.",
@@ -105,7 +106,8 @@
       "orderFollowersUpdated": "Order followers updated successfully.",
       "orderNameUpdated": "Order name updated successfully.",
       "orderDeleted": "Order deleted successfully.",
-      "orderVisibilityUpdated": "Order visibility updated successfully."
+      "orderVisibilityUpdated": "Order visibility updated successfully.",
+      "orderTagsUpdated": "Order tags updated successfully."
     },
     "reviews": {
       "reviewCreated": "Review added successfully."

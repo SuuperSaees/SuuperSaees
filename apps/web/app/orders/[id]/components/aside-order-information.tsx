@@ -41,16 +41,23 @@ import Tooltip from '~/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@kit/ui/dialog';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { copyToClipboard } from '~/utils/clipboard';
+import ActivityTags from './activity-tags';
+import { Tags } from '~/lib/tags.types';
+import { updateOrderTags } from '~/server/actions/orders/orders.action';
 interface AsideOrderInformationProps {
   order: Order.Relational;
   className?: string;
+  orderAgencyTags: Tags.Type[];
   [key: string]: unknown;
   agencyStatuses: AgencyStatus.Type[];
+  agencyTags: Tags.Type[];
 }
 const AsideOrderInformation = ({
   // order,
   className,
   agencyStatuses,
+  orderAgencyTags,
+  agencyTags,
   ...rest
 }: AsideOrderInformationProps) => {
   const { t, i18n } = useTranslation(['orders', 'responses']);
@@ -169,6 +176,22 @@ const AsideOrderInformation = ({
     },
   });
 
+  const changeOrderTags = useMutation({
+    mutationFn: (tagIds: string[]) => {
+      return updateOrderTags(order.id, tagIds);
+    },
+    onSuccess: () => {
+      toast.success('Success', {
+        description: t('success.orders.orderTagsUpdated'),
+      });
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: t('error.orders.failedToUpdateOrderTags'),
+      });
+    },
+  });
+
   const { data: orderAgencyMembers } = useQuery({
     queryKey: ['order-agency-members', order.id],
     queryFn: () => getOrderAgencyMembers(order.agency_id, order.id),
@@ -188,6 +211,7 @@ const AsideOrderInformation = ({
       userRole === 'agency_member' ||
       userRole === 'agency_project_manager',
   });
+
 
   const searchUserOptions =
     orderAgencyMembers?.map((user) => ({
@@ -220,7 +244,7 @@ const AsideOrderInformation = ({
   const canAddFollowers = userRolesFollowers.has(userRole);
 
   return (
-    <AgencyStatusesProvider initialStatuses={agencyStatuses}>
+    <AgencyStatusesProvider initialStatuses={agencyStatuses} initialTags={orderAgencyTags}>
       <div
         className={`no-scrollbar relative flex h-full min-h-full w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 overflow-y-auto border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 pt-4 text-gray-700 ${className}`}
         {...rest}
@@ -246,7 +270,7 @@ const AsideOrderInformation = ({
                   )
                 }
 
-                <DeleteOrderDropdown orderId={order?.id} orderUuid={order?.uuid} agencyId={order?.agency_id} isPublic={isPublic} tokenId={tokenId}/>
+                <DeleteOrderDropdown orderId={order?.id} isPublic={isPublic} tokenId={tokenId ?? undefined}/>
               </div>
             )
           }
@@ -324,6 +348,15 @@ const AsideOrderInformation = ({
               canAddFollowers={canAddFollowers}
             />
             </div>
+            <div>
+            <ActivityTags
+              organizationId={order.agency_id}
+              updateFunction={changeOrderTags.mutate}
+              searchTagOptions={agencyTags}
+              canAddTags={canAddAssignes}
+              orderId={order.id}
+            />
+            </div> 
           </>
         ) : (
           <div className="flex flex-col gap-2">

@@ -1600,6 +1600,39 @@ export type Database = {
           },
         ]
       }
+      order_tags: {
+        Row: {
+          created_at: string
+          order_id: number | null
+          tag_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          order_id?: number | null
+          tag_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          order_id?: number | null
+          tag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_tags_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           account_id: string
@@ -2627,6 +2660,58 @@ export type Database = {
             columns: ["state_id"]
             isOneToOne: false
             referencedRelation: "agency_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
         ]

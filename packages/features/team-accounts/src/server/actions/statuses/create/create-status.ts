@@ -3,12 +3,10 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { AgencyStatus } from '../../../../../../../../apps/web/lib/agency-statuses.types';
-import { AgencyStatus } from '../../../../../../../../apps/web/lib/agency-statuses.types';
 
 export const createNewStatus = async (status: AgencyStatus.Insert) => {
   try {
     const client = getSupabaseServerComponentClient();
-    console.log(status);
 
     const { data: existingPositions, error: positionsError } = await client
       .from('agency_statuses')
