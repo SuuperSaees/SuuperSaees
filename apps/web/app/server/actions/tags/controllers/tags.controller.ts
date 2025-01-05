@@ -3,6 +3,7 @@ import { TagsRepository } from '../repositories/tags.repository';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { TagsService } from '../services/tags.service';
+import { OrderTagsRepository } from '../../order-tags/repositories/order-tags.repository';
 export class TagsController {
     private baseUrl: string
     private client: SupabaseClient<Database>
@@ -14,11 +15,12 @@ export class TagsController {
         this.adminClient = adminClient;
     }
 
-    async create(payload: Tags.Insert): Promise<Tags.Type> {
+    async create(payload: Tags.Insert, orderId?: number): Promise<Tags.Type> {
         try {
             const tagsRepository = new TagsRepository(this.client, this.adminClient);
-            const tagsService = new TagsService(tagsRepository);
-            return await tagsService.create(payload);
+            const orderTagsRepository = new OrderTagsRepository(this.client, this.adminClient);
+            const tagsService = new TagsService(tagsRepository, orderTagsRepository);
+            return await tagsService.create(payload, orderId);
         } catch (error) {
             console.log(error);
             throw error;
@@ -39,7 +41,8 @@ export class TagsController {
     async delete(id: string): Promise<void> {
         try {
             const tagsRepository = new TagsRepository(this.client, this.adminClient);
-            const tagsService = new TagsService(tagsRepository);
+            const orderTagsRepository = new OrderTagsRepository(this.client, this.adminClient);
+            const tagsService = new TagsService(tagsRepository, orderTagsRepository);
             return await tagsService.delete(id);
         } catch (error) {
             console.log(error);
@@ -47,22 +50,23 @@ export class TagsController {
         }
     }
 
-    async get(id: string): Promise<Tags.Type> {
+    async get(ids: string[]): Promise<Tags.Type[]> {
         try {
             const tagsRepository = new TagsRepository(this.client, this.adminClient);
             const tagsService = new TagsService(tagsRepository);
-            return await tagsService.get(id);
+            return await tagsService.get(ids);
         } catch (error) {
             console.log(error);
             throw error;
         }
     }
 
-    async list(organizationId: string): Promise<Tags.Type[]> {
+    async list(organizationId: string, orderId?: number): Promise<Tags.Type[]> {
         try {
             const tagsRepository = new TagsRepository(this.client, this.adminClient);
-            const tagsService = new TagsService(tagsRepository);
-            return await tagsService.list(organizationId);
+            const orderTagsRepository = new OrderTagsRepository(this.client, this.adminClient);
+            const tagsService = new TagsService(tagsRepository, orderTagsRepository);
+            return await tagsService.list(organizationId, orderId);
         } catch (error) {
             console.log(error);
             throw error;

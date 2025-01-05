@@ -8,7 +8,7 @@ export interface ITagsAction {
     /*
     * Create
     */
-    create: (payload: Tags.Insert) => Promise<Tags.Type>;
+    create: (payload: Tags.Insert, orderId?: number) => Promise<Tags.Type>;
 
     /*
     * Update
@@ -23,10 +23,10 @@ export interface ITagsAction {
     /*
     * Get
     */
-    get: (id: string) => Promise<Tags.Type>;
+    get: (ids: string[]) => Promise<Tags.Type[]>;
 
     /*
     * List
     */
-    list: (organizationId: string) => Promise<Tags.Type[]>;
+    list: (organizationId: string, orderId?: number) => Promise<Tags.Type[]>;
 }

@@ -11,8 +11,8 @@ class TagsAction extends BaseAction implements ITagsAction {
         this.controller = new TagsController(this.baseUrl, this.client, this.adminClient);
     }
 
-    async create(payload: Tags.Insert): Promise<Tags.Type> {
-        return await this.controller.create(payload);
+    async create(payload: Tags.Insert, orderId?: number): Promise<Tags.Type> {
+        return await this.controller.create(payload, orderId);
     }
 
     async update(payload: Tags.Update): Promise<Tags.Type> {
@@ -23,12 +23,12 @@ class TagsAction extends BaseAction implements ITagsAction {
         return await this.controller.delete(id);
     }
 
-    async get(id: string): Promise<Tags.Type> {
-        return await this.controller.get(id);
+    async get(ids: string[]): Promise<Tags.Type[]> {
+        return await this.controller.get(ids);
     }
 
-    async list(organizationId: string): Promise<Tags.Type[]> {
-        return await this.controller.list(organizationId);
+    async list(organizationId: string, orderId?: number): Promise<Tags.Type[]> {
+        return await this.controller.list(organizationId, orderId);
     }
 }
 
