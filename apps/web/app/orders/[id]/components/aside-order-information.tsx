@@ -181,12 +181,12 @@ const AsideOrderInformation = ({
       return updateOrderTags(order.id, tagIds);
     },
     onSuccess: () => {
-      toast.success('Success', {
+      toast.success(t('success.toastSuccess'), {
         description: t('success.orders.orderTagsUpdated'),
       });
     },
     onError: () => {
-      toast.error('Error', {
+      toast.error(t('error.toastError'), {
         description: t('error.orders.failedToUpdateOrderTags'),
       });
     },
@@ -351,10 +351,10 @@ const AsideOrderInformation = ({
             <div>
             <ActivityTags
               organizationId={order.agency_id}
+              orderId={order.id}
               updateFunction={changeOrderTags.mutate}
               searchTagOptions={agencyTags}
               canAddTags={canAddAssignes}
-              orderId={order.id}
             />
             </div> 
           </>
