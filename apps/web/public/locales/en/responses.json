@@ -1,5 +1,6 @@
 {
   "error": {
+    "toastError": "Error",
     "default": "Something went wrong while processing your request. Please try again.",
     "copyToClipboard": "Failed to copy link to clipboard.",
     "clients": {
@@ -54,7 +55,10 @@
       "failedToUpdateOrderName": "Couldn't update the order name. Please try again later.",
       "failedToDeleteOrder": "Couldn't delete the order. Please try again later.",
       "failedToUpdateOrderVisibility": "Couldn't update the order visibility. Please try again later.",
-      "failedToUpdateOrderTags": "Couldn't update the order tags. Please try again later."
+      "failedToUpdateOrderTags": "Couldn't update the order tags. Please try again later.",
+      "failedToCreateOrderTag": "Couldn't create the order tag. Please try again later.",
+      "failedToUpdateOrderTag": "Couldn't update the order tag. Please try again later.",
+      "failedToDeleteOrderTag": "Couldn't delete the order tag. Please try again later."
     },
     "reviews": {
       "reviewNotFound": "Review not found.",
@@ -67,6 +71,7 @@
     }
   },
   "success": {
+    "toastSuccess": "Success",
     "default": "Operation completed successfully.",
     "copyToClipboard": "Link copied to clipboard.",
     "clients": {
@@ -107,7 +112,10 @@
       "orderNameUpdated": "Order name updated successfully.",
       "orderDeleted": "Order deleted successfully.",
       "orderVisibilityUpdated": "Order visibility updated successfully.",
-      "orderTagsUpdated": "Order tags updated successfully."
+      "orderTagsUpdated": "Order tags updated successfully.",
+      "orderTagCreated": "Order tag created successfully.",
+      "orderTagUpdated": "Order tag updated successfully.",
+      "orderTagDeleted": "Order tag deleted successfully."
     },
     "reviews": {
       "reviewCreated": "Review added successfully."

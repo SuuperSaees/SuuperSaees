@@ -1,5 +1,6 @@
 {
   "error": {
+    "toastError": "Error",
     "default": "Ocurrió un error inesperado al procesar tu solicitud. Inténtalo de nuevo más tarde.",
     "clients": {
       "userAlreadyExists": "Ya hay un miembro con ese correo electrónico. Usa un correo diferente.",
@@ -53,7 +54,10 @@
       "failedToUpdateOrderName": "No se pudo actualizar el nombre de la orden. Inténtalo más tarde.",
       "failedToDeleteOrder": "No se pudo eliminar la orden. Inténtalo nuevamente.",
       "failedToUpdateOrderVisibility": "No se pudo actualizar la visibilidad de la orden. Inténtalo nuevamente.",
-      "failedToUpdateOrderTags": "No se pudo actualizar las etiquetas de la orden. Inténtalo nuevamente."
+      "failedToUpdateOrderTags": "No se pudo actualizar las etiquetas de la orden. Inténtalo nuevamente.",
+      "failedToCreateOrderTag": "No se pudo crear la etiqueta de la orden. Inténtalo nuevamente.",
+      "failedToUpdateOrderTag": "No se pudo actualizar la etiqueta de la orden. Inténtalo nuevamente.",
+      "failedToDeleteOrderTag": "No se pudo eliminar la etiqueta de la orden. Inténtalo nuevamente."
     },
     "reviews": {
       "reviewNotFound": "La reseña no se encontró.",
@@ -66,6 +70,7 @@
     }
   },
   "success": {
+    "toastSuccess": "Éxito",
     "default": "Operación completada exitosamente.",
     "clients": {
       "clientCreated": "El cliente fue creado con éxito.",
@@ -105,7 +110,10 @@
       "orderNameUpdated": "El nombre de la orden se actualizó con éxito.",
       "orderDeleted": "El pedido se eliminó correctamente.",
       "orderVisibilityUpdated": "La visibilidad de la orden se actualizó correctamente.",
-      "orderTagsUpdated": "Las etiquetas de la orden se actualizaron correctamente."
+      "orderTagsUpdated": "Las etiquetas de la orden se actualizaron correctamente.",
+      "orderTagCreated": "La etiqueta de la orden se creó correctamente.",
+      "orderTagUpdated": "La etiqueta de la orden se actualizó correctamente.",
+      "orderTagDeleted": "La etiqueta de la orden se eliminó correctamente."
     },
     "reviews": {
       "reviewCreated": "La reseña se añadió correctamente."

@@ -45,7 +45,7 @@ interface ActivityTagsProps {
     searchTagOptions: Tags.Type[];
     canAddTags: boolean;
 }
-const ActivityTags = ({organizationId, updateFunction, searchTagOptions, canAddTags}: ActivityTagsProps) => {
+const ActivityTags = ({organizationId, orderId, updateFunction, searchTagOptions, canAddTags}: ActivityTagsProps) => {
     const { t } = useTranslation(['orders', 'responses']);
     const [customTag, setCustomTag] = useState('');
     const [searchTagOptionsFiltered, setSearchTagOptionsFiltered] = useState(searchTagOptions);
@@ -59,17 +59,20 @@ const ActivityTags = ({organizationId, updateFunction, searchTagOptions, canAddT
     const router = useRouter();
     const createTagMutation = useMutation({
         mutationFn: async ({ payload, orderIdForMutation }: { payload: Tags.Insert, orderIdForMutation: number | undefined }) => {
-            return createTag(payload, orderIdForMutation);
-        },
-        onSuccess: (newTag: Tags.Type) => {
+            const newTag = await createTag(payload, orderIdForMutation);
+            setSearchTagOptionsFiltered(prev => [...prev, newTag]);
             setSelectedTags(prev => [...prev, newTag]);
-            toast.success('Success', {
-                description: 'New tag created successfully!',
+            return newTag;
+        },
+        onSuccess: () => {
+            // setSelectedTags(prev => [...prev, newTag]);
+            toast.success(t('success.toastSuccess'), {
+                description: t('success.orders.orderTagCreated'),
             });
             router.refresh();
         },
         onError: () => {
-            toast.error('Error', { description: 'Failed to create new tag.' });
+            toast.error(t('error.toastError'), { description: t('error.orders.failedToCreateOrderTag') });
         },
     });
 
@@ -85,12 +88,14 @@ const ActivityTags = ({organizationId, updateFunction, searchTagOptions, canAddT
         //       tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag
         //     );
         //   });
-          toast.success('Tag updated successfully');
+          toast.success(t('success.toastSuccess'), {
+            description: t('success.orders.orderTagUpdated'),
+          });
           setEditingTag(null);
           router.refresh();
         },
         onError: () => {
-          toast.error('Failed to update tag');
+          toast.error(t('error.toastError'), { description: t('error.orders.failedToUpdateOrderTag') });
         },
       });
 
@@ -101,13 +106,13 @@ const ActivityTags = ({organizationId, updateFunction, searchTagOptions, canAddT
             return await deleteTag(tagId);
         },
         onSuccess: () => {
-            toast.success('Success', {
-                description: 'Tag deleted successfully!',
+            toast.success(t('success.toastSuccess'), {
+                description: t('success.orders.orderTagDeleted'),
             });
             router.refresh();
         },
         onError: () => {
-            toast.error('Error', { description: 'Failed to delete tag.' });
+            toast.error(t('error.toastError'), { description: t('error.orders.failedToDeleteOrderTag') });
         },
 
     });
@@ -120,7 +125,7 @@ const ActivityTags = ({organizationId, updateFunction, searchTagOptions, canAddT
                 color: defaultTagColor,
                 organization_id: organizationId,
             },
-            orderIdForMutation: undefined
+            orderIdForMutation: orderId
         });
         setCustomTag('');
     };
