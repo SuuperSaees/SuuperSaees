@@ -1,42 +1,11 @@
 'use client';
 
-import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-// import { CustomItemProps, Option } from '~/components/ui/checkbox-combobox';
-import {
-    Command,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-  } from '@kit/ui/command';
-import { useMutation } from '@tanstack/react-query';
-import { createTag, deleteTag, updateTag } from '~/server/actions/tags/tags.action';
+import { useTranslation } from 'react-i18next';
 import { Tags } from '~/lib/tags.types';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { Button } from '@kit/ui/button';
-import { convertToTitleCase, convertToSnakeCase } from '../utils/format-agency-names';
-import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
-import { Plus, Trash2, Pencil } from 'lucide-react';
-import { Input } from '@kit/ui/input';
+import { TagList } from './tags/tag-list';
+import { useTagMutations } from '../hooks/tags/use-tags-mutations';
 import { useAgencyStatuses } from '~/orders/components/context/agency-statuses-context';
-import { useRef } from 'react';
-// import { useQueryClient } from '@tanstack/react-query';
-
-// const CustomTagItem: React.FC<
-//   CustomItemProps<
-//     Option & {
-//       picture_url?: string;
-//     }
-//   >
-// > = ({ option }) => (
-//   <div className="flex items-center space-x-2">
-//     <span className="text-sm">{option.label}</span>
-//   </div>
-// );
-
-const defaultTagColor = '#8fd6fc'
 
 interface ActivityTagsProps {
     organizationId: string;
@@ -45,243 +14,52 @@ interface ActivityTagsProps {
     searchTagOptions: Tags.Type[];
     canAddTags: boolean;
 }
-const ActivityTags = ({organizationId, orderId, updateFunction, searchTagOptions, canAddTags}: ActivityTagsProps) => {
-    const { t } = useTranslation(['orders', 'responses']);
-    const [customTag, setCustomTag] = useState('');
-    const [searchTagOptionsFiltered, setSearchTagOptionsFiltered] = useState(searchTagOptions);
+
+const ActivityTags = ({
+    organizationId,
+    orderId,
+    updateFunction,
+    searchTagOptions,
+    canAddTags
+}: ActivityTagsProps) => {
+    const { t } = useTranslation(['orders']);
     const { tags } = useAgencyStatuses();
     const [selectedTags, setSelectedTags] = useState<Tags.Type[]>(tags);
-    const [open, setOpen] = useState(false);
-    const [editingTag, setEditingTag] = useState<Tags.Type | null>(null);
+    const [searchTagOptionsFiltered, setSearchTagOptionsFiltered] = useState(searchTagOptions);
 
-    const colorInputRef = useRef<HTMLInputElement>(null);
-    // const queryClient = useQueryClient();
-    const router = useRouter();
-    const createTagMutation = useMutation({
-        mutationFn: async ({ payload, orderIdForMutation }: { payload: Tags.Insert, orderIdForMutation: number | undefined }) => {
-            const newTag = await createTag(payload, orderIdForMutation);
-            setSearchTagOptionsFiltered(prev => [...prev, newTag]);
-            setSelectedTags(prev => [...prev, newTag]);
-            return newTag;
-        },
-        onSuccess: () => {
-            // setSelectedTags(prev => [...prev, newTag]);
-            toast.success(t('success.toastSuccess'), {
-                description: t('success.orders.orderTagCreated'),
-            });
-            router.refresh();
-        },
-        onError: () => {
-            toast.error(t('error.toastError'), { description: t('error.orders.failedToCreateOrderTag') });
-        },
+    const mutations = useTagMutations({
+        organizationId,
+        orderId,
+        setSelectedTags,
+        setSearchTagOptionsFiltered
     });
-
-    const updateTagMutation = useMutation({
-        mutationFn: async (updatedTag: { id: string; name: string; color: string }) => {
-            setSelectedTags(prev => prev.map(tag => tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag));
-            setSearchTagOptionsFiltered(prev => prev.map(tag => tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag));
-            return await updateTag({ id: updatedTag.id, name: updatedTag.name, color: updatedTag.color })
-        },
-        onSuccess: () => {
-        //   queryClient.setQueryData(['tags'], (oldTags: Tag.Type[]) => {
-        //     return oldTags.map(tag => 
-        //       tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag
-        //     );
-        //   });
-          toast.success(t('success.toastSuccess'), {
-            description: t('success.orders.orderTagUpdated'),
-          });
-          setEditingTag(null);
-          router.refresh();
-        },
-        onError: () => {
-          toast.error(t('error.toastError'), { description: t('error.orders.failedToUpdateOrderTag') });
-        },
-      });
-
-    const deleteTagMutation = useMutation({
-        mutationFn: async (tagId: string) => {
-            setSearchTagOptionsFiltered(prev => prev.filter(tag => tag.id !== tagId));
-            setSelectedTags(prev => prev.filter(tag => tag.id !== tagId));
-            return await deleteTag(tagId);
-        },
-        onSuccess: () => {
-            toast.success(t('success.toastSuccess'), {
-                description: t('success.orders.orderTagDeleted'),
-            });
-            router.refresh();
-        },
-        onError: () => {
-            toast.error(t('error.toastError'), { description: t('error.orders.failedToDeleteOrderTag') });
-        },
-
-    });
-
-    const handleCreateTag = () => {
-        setOpen(false);
-        createTagMutation.mutate({
-            payload: {
-                name: convertToSnakeCase(customTag),
-                color: defaultTagColor,
-                organization_id: organizationId,
-            },
-            orderIdForMutation: orderId
-        });
-        setCustomTag('');
-    };
 
     const handleSelectTag = (tag: Tags.Type) => {
         const isSelected = selectedTags.some(t => t.id === tag.id);
-        let newTags;
-        
-        if (isSelected) {
-            newTags = selectedTags.filter(t => t.id !== tag.id);
-        } else {
-            newTags = [...selectedTags, tag];
-        }
+        const newTags = isSelected 
+            ? selectedTags.filter(t => t.id !== tag.id)
+            : [...selectedTags, tag];
         
         setSelectedTags(newTags);
         updateFunction(newTags.map(t => t.id));
     };
 
-    const handleDeleteTag = (tagId: string) => {
-        deleteTagMutation.mutate(tagId);
-    };
-
     return (
         <div className="flex flex-col gap-1">
             <span className="text-sm font-medium py-1.5">{t('details.tags')}</span>
-            <div className="flex flex-wrap gap-2">
-                {selectedTags.map((tag) => (
-                    <div
-                        key={tag.id}
-                        style={{ backgroundColor: tag.color ?? defaultTagColor }}
-                        className="rounded-full px-2 py-1 text-sm font-medium"
-                    >
-                        {convertToTitleCase(tag.name)}
-                    </div>
-                ))}
-                
-                {canAddTags && (
-                    <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="border-none bg-transparent hover:bg-slate-100 rounded-full"
-                            >
-                                <Plus className="h-4 w-4" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
-                            <Command>
-                                <CommandInput
-                                    value={customTag}
-                                    onValueChange={setCustomTag}
-                                />
-                                <CommandList>
-                                    <CommandGroup>
-                                        {customTag && (
-                                            <CommandItem
-                                                value={customTag}
-                                                onSelect={() => {
-                                                    handleCreateTag();
-                                                }}
-                                            >
-                                                Create <span className="ml-4 font-bold px-2 rounded-md" style={{backgroundColor: defaultTagColor}}>{customTag}</span>
-                                            </CommandItem>
-                                        )}
-                                        {searchTagOptionsFiltered.map((tag) => (
-                                            <CommandItem
-                                                key={tag.id}
-                                                value={tag.name}
-                                                onSelect={() => handleSelectTag(tag)}
-                                            >
-                                                {editingTag?.id === tag.id ? (
-                                                    <div className="flex items-center gap-2 w-full" onClick={(e) => e.stopPropagation()}>
-                                                        <Input
-                                                            value={editingTag.name}
-                                                            onChange={(e) => setEditingTag({ 
-                                                                ...editingTag, 
-                                                                name: e.target.value 
-                                                            })}
-                                                            className="h-8 w-32"
-                                                        />
-                                                        <div
-                                                            className="h-8 w-8 cursor-pointer rounded-full border-2 border-white shadow-md"
-                                                            style={{ backgroundColor: editingTag.color ?? defaultTagColor }}
-                                                            onClick={() => colorInputRef.current?.click()}
-                                                        />
-                                                        <input
-                                                            ref={colorInputRef}
-                                                            type="color"
-                                                            value={editingTag.color ?? defaultTagColor}
-                                                            onChange={(e) => setEditingTag({ 
-                                                                ...editingTag, 
-                                                                color: e.target.value ?? defaultTagColor
-                                                            })}
-                                                            className="sr-only h-8 w-8"
-                                                        />
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() => updateTagMutation.mutate(editingTag)}
-                                                        >
-                                                            {t('save')}
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={() => setEditingTag(null)}
-                                                        >
-                                                            {t('cancel')}
-                                                        </Button>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <div
-                                                            className="mr-2 h-3 w-3 rounded-full"
-                                                            style={{ backgroundColor: tag.color ?? defaultTagColor }}
-                                                        />
-                                                        {convertToTitleCase(tag.name)}
-                                                        <div className="ml-auto flex gap-2">
-                                                            <Button 
-                                                                variant="ghost" 
-                                                                size="icon" 
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setEditingTag(tag);
-                                                                }}
-                                                            >
-                                                                <Pencil className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button 
-                                                                variant="ghost" 
-                                                                size="icon" 
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleDeleteTag(tag.id);
-                                                                }}
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
-                                                        {selectedTags.some(t => t.id === tag.id) && (
-                                                            <span className="ml-2">✓</span>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </CommandItem>
-                                        ))}
-                                    </CommandGroup>
-                                </CommandList>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
-                )}
-            </div>
+            <TagList 
+                selectedTags={selectedTags}
+                searchTagOptions={searchTagOptionsFiltered}
+                onTagSelect={handleSelectTag}
+                onTagUpdate={mutations.updateTag}
+                onTagDelete={mutations.deleteTag}
+                onTagCreate={mutations.createTag}
+                canAddTags={canAddTags}
+                isLoading={mutations.isLoading}
+                organizationId={organizationId}
+            />
         </div>
     );
-
 };
 
 export default ActivityTags;
