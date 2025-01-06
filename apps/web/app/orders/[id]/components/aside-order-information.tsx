@@ -1,10 +1,10 @@
 'use client';
 
-// import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { CalendarIcon, FlagIcon, Loader } from 'lucide-react';
+import { CalendarIcon, FlagIcon, Loader, Check, Copy } from 'lucide-react';
 import {
   getOrderAgencyMembers,
 } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
@@ -33,63 +33,96 @@ import { PriorityCombobox } from './priority-combobox';
 import { getClientMembersForOrganization } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getFormattedDateRange } from '../utils/get-formatted-dates';
 import { User } from '@supabase/supabase-js';
+import { generateTokenId, createToken } from '~/server/actions/tokens/tokens.action';
 import Link from 'next/link';
-
+import DeleteOrderDropdown from './delete-order-dropdown';
+import { Switch } from '@kit/ui/switch';
+import Tooltip from '~/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@kit/ui/dialog';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { copyToClipboard } from '~/utils/clipboard';
+import ActivityTags from './activity-tags';
+import { Tags } from '~/lib/tags.types';
+import { updateOrderTags } from '~/server/actions/orders/orders.action';
 interface AsideOrderInformationProps {
   order: Order.Relational;
   className?: string;
+  orderAgencyTags: Tags.Type[];
   [key: string]: unknown;
   agencyStatuses: AgencyStatus.Type[];
+  agencyTags: Tags.Type[];
 }
 const AsideOrderInformation = ({
   // order,
   className,
   agencyStatuses,
+  orderAgencyTags,
+  agencyTags,
   ...rest
 }: AsideOrderInformationProps) => {
   const { t, i18n } = useTranslation(['orders', 'responses']);
-  // const [selectedStatus, setSelectedStatus] = useState(order.status);
-  // const [selectedPriority, setSelectedPriority] = useState(order.priority);
   const language = i18n.language;
   const router = useRouter();
   const { userRole, order } = useActivityContext();
-  // const changeStatus = useMutation({
-  //   mutationFn: async (status: Order.Type['status']) => {
-  //     setSelectedStatus(status);
-  //     await updateOrder(order.id, { status });
-  //     return router.push(`/orders/${order.id}`);
-  //   },
-  //   onSuccess: () => {
-  //     toast.success('Success', {
-  //       description: t('success.orders.orderStatusUpdated'),
-  //     });
-  //   },
-  //   onError: () => {
-  //     setSelectedStatus(order.status);
-  //     toast.error('Error', {
-  //       description: t('error.orders.failedToUpdateOrderStatus'),
-  //     });
-  //   },
-  // });
+  const [isPublic, setIsPublic] = useState(order.visibility === 'public');
 
-  // const changePriority = useMutation({
-  //   mutationFn: async (priority: Order.Type['priority']) => {
-  //     setSelectedPriority(priority);
-  //     await updateOrder(order.id, { priority });
-  //     return router.push(`/orders/${order.id}`);
-  //   },
-  //   onSuccess: () => {
-  //     toast.success('Success', {
-  //       description: t('success.orders.orderPriorityUpdated'),
-  //     });
-  //   },
-  //   onError: () => {
-  //     setSelectedPriority(order.priority);
-  //     toast.error('Error', {
-  //       description: t('error.orders.failedToUpdateOrderPriority'),
-  //     });
-  //   },
-  // });
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [tokenId, setTokenId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const baseUrl = window.location.origin;
+
+  const handleGenerateTokenId = async () => {
+    const tokenId = await generateTokenId({id: order.uuid});
+    setTokenId(tokenId ?? "");
+    await createToken({
+      id: order.uuid,
+      account_id: order.agency_id,
+      agency_id: order.agency_id,
+      data: {
+      order_id: order.id,
+    }
+    }, tokenId) 
+  }
+
+  useEffect(() => {
+    if(order.visibility === 'public'){
+      void handleGenerateTokenId();
+    }
+  }, []);
+
+  const handleCopy = async () => {
+    await copyToClipboard(`${baseUrl}/orders/${order.id}?public_token_id=${tokenId}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const changeVisibility = useMutation({
+    mutationFn: async (visibility: Order.Type['visibility']) => {
+      setIsPublic(visibility === 'public');
+      if (visibility === 'public') {
+        setShowShareDialog(true);
+      }
+      await updateOrder(order.id, { visibility });
+      order.visibility = visibility;
+    },
+    onSuccess: async () => {
+      const tokenId = await generateTokenId({id: order.uuid});
+      setTokenId(tokenId ?? "");
+      await createToken({
+        id: order.uuid,
+        account_id: order.agency_id,
+        agency_id: order.agency_id,
+        data: {
+        order_id: order.id,
+        }
+        }, tokenId) 
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: t('error.orders.failedToUpdateOrderVisibility'),
+      });
+    },
+  });
 
   const changeDate = useMutation({
     mutationFn: async (due_date: Order.Type['due_date']) => {
@@ -143,6 +176,22 @@ const AsideOrderInformation = ({
     },
   });
 
+  const changeOrderTags = useMutation({
+    mutationFn: (tagIds: string[]) => {
+      return updateOrderTags(order.id, tagIds);
+    },
+    onSuccess: () => {
+      toast.success(t('success.toastSuccess'), {
+        description: t('success.orders.orderTagsUpdated'),
+      });
+    },
+    onError: () => {
+      toast.error(t('error.toastError'), {
+        description: t('error.orders.failedToUpdateOrderTags'),
+      });
+    },
+  });
+
   const { data: orderAgencyMembers } = useQuery({
     queryKey: ['order-agency-members', order.id],
     queryFn: () => getOrderAgencyMembers(order.agency_id, order.id),
@@ -163,41 +212,6 @@ const AsideOrderInformation = ({
       userRole === 'agency_project_manager',
   });
 
-  // const { data: orderAgencyClientsFollowers } = useQuery({
-  //   queryKey: ['order-agency-clients-followers', order.id],
-  //   queryFn: () => getAgencyClients(order.agency_id, order.id),
-  //   retry: 5,
-  // });
-
-  // const statuses = ['pending', 'in_progress', 'completed', 'in_review'];
-  // const priorities = ['low', 'medium', 'high'];
-
-  // const statusOptions = statuses.map((status) => {
-  //   const camelCaseStatus = status.replace(/_./g, (match) =>
-  //     match.charAt(1).toUpperCase(),
-  //   );
-  //   return {
-  //     value: status,
-  //     label: t(`details.statuses.${camelCaseStatus}`)
-  //       .replace(/_/g, ' ')
-  //       .replace(/^\w/, (c) => c.toUpperCase()),
-  //   };
-  // });
-
-  // const getStatusClassName = (status: string) =>
-  //   statusColors[
-  //     status as 'pending' | 'in_progress' | 'completed' | 'in_review'
-  //   ] ?? '';
-
-  // const priorityOptions = priorities.map((priority) => ({
-  //   value: priority,
-  //   label: t(`details.priorities.${priority}`)
-  //     .replace(/_/g, ' ')
-  //     .replace(/^\w/, (c) => c.toUpperCase()),
-  // }));
-
-  // const getPriorityClassName = (priority: string) =>
-  //   priorityColors[priority as 'low' | 'medium' | 'high'] ?? '';
 
   const searchUserOptions =
     orderAgencyMembers?.map((user) => ({
@@ -207,10 +221,11 @@ const AsideOrderInformation = ({
     })) ?? [];
 
   const searchUserOptionsFollowers =
-    orderAgencyClientsFollowers?.map((user) => ({
+    orderAgencyClientsFollowers?.filter((currentUser) => currentUser.role !== 'client_guest').map((user) => ({
       picture_url: user?.settings?.picture_url?? user?.picture_url ?? '',
       value: user.id,
       label: user?.settings?.name ?? user.name ?? '',
+      role: user.role,
     })) ?? [];
 
   const userRoles = new Set([
@@ -219,40 +234,69 @@ const AsideOrderInformation = ({
     'agency_project_manager',
   ]);
 
+  const userRolesFollowers = new Set([
+    'client_owner',
+    'client_member',
+  ]);
+
 
   const canAddAssignes = userRoles.has(userRole);
+  const canAddFollowers = userRolesFollowers.has(userRole);
 
   return (
-    <AgencyStatusesProvider initialStatuses={agencyStatuses}>
+    <AgencyStatusesProvider initialStatuses={agencyStatuses} initialTags={orderAgencyTags}>
       <div
         className={`no-scrollbar relative flex h-full min-h-full w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 overflow-y-auto border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 pt-4 text-gray-700 ${className}`}
         {...rest}
       >
         <div className="border-b border-gray-200 pb-7">
+          <div className="flex items-center justify-between">
           <h3 className="pb-4 font-bold">
             <Trans i18nKey="details.createdBy" />
           </h3>
-          <Link href={`/clients/organizations/${order.client_organization_id}`}>
-            <div className="flex gap-3">
-              <AvatarDisplayer
-                displayName={
-                  order.client?.settings?.name ?? order.client?.name
+
+          {
+            userRole !== 'client_guest' && (
+              <div className='flex items-center'>
+                {
+                  canAddAssignes && (
+                    <Tooltip content={t('details.visibility')}>
+                    <button onClick={() => {
+                      changeVisibility.mutate(isPublic ? 'private' : 'public');
+                    }}>
+                      <Switch checked={isPublic} />
+                    </button>
+                    </Tooltip>
+                  )
                 }
-                pictureUrl={
-                  order.client?.settings?.picture_url ?? order.client?.picture_url
-                }
-              />
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-600 ">
-                  {order.client?.settings?.name ?? order.client?.name ?? ''}
-                </span>
-                <span className="text-sm text-gray-600">
-                  {order.client_organization?.name
-                    ? order.client_organization?.name
-                    : ''}
-                </span>
+
+                <DeleteOrderDropdown orderId={order?.id} isPublic={isPublic} tokenId={tokenId ?? undefined}/>
               </div>
+            )
+          }
+          </div>
+          
+          <Link href={`/clients/organizations/${order.client_organization_id}`}>
+          <div className="flex gap-3">
+            <AvatarDisplayer
+              displayName={
+                order.client?.settings?.name ?? order.client?.name
+              }
+              pictureUrl={
+                order.client?.settings?.picture_url ?? order.client?.picture_url
+              }
+            />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-600">
+                {order.client?.settings?.name ?? order.client?.name ?? ''}
+              </span>
+              <span className="text-sm text-gray-600">
+                {order.client_organization?.name
+                  ? order.client_organization?.name
+                  : ''}
+              </span>
             </div>
+          </div>
           </Link>
         </div>
         {canAddAssignes ? (
@@ -301,8 +345,18 @@ const AsideOrderInformation = ({
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
+              canAddFollowers={canAddFollowers}
             />
             </div>
+            <div>
+            <ActivityTags
+              organizationId={order.agency_id}
+              orderId={order.id}
+              updateFunction={changeOrderTags.mutate}
+              searchTagOptions={agencyTags}
+              canAddTags={canAddAssignes}
+            />
+            </div> 
           </>
         ) : (
           <div className="flex flex-col gap-2">
@@ -362,11 +416,44 @@ const AsideOrderInformation = ({
               searchUserOptions={searchUserOptionsFollowers}
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
+              canAddFollowers={canAddFollowers}
             />
             </div>
           </div>
         )}
-
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('shareProject')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-gray-600">
+              🔒 {t('shareProjectDescription')}
+            </p>
+            <div>
+            <p>{t('link')}</p>
+            <div className="flex items-center gap-2">
+              
+              <input
+                type="text"
+                readOnly
+                disabled={!tokenId}
+                value={`${baseUrl}/orders/${order.id}?public_token_id=${tokenId}`}
+                className="flex-1 rounded-md border px-3 py-2 text-sm"
+              />
+              <ThemedButton 
+                variant="default" 
+                onClick={handleCopy}
+                className="flex items-center gap-2"
+                disabled={!tokenId}
+              >
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </ThemedButton>
+            </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
     </AgencyStatusesProvider>
   );

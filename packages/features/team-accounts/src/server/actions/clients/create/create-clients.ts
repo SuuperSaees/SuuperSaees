@@ -58,6 +58,7 @@ type CreateClient = {
   role: string;
   agencyId?: string;
   adminActivated?: boolean;
+  sendEmail?: boolean;
 };
 
 const createClientUserAccount = async (
@@ -65,6 +66,7 @@ const createClientUserAccount = async (
   organizationName: Account.Type['name'],
   adminActivated = false,
   agencyId?: string,
+  sendEmail = true,
 ) => {
   try {
     const client = getSupabaseServerComponentClient({
@@ -112,7 +114,7 @@ const createClientUserAccount = async (
     } else {
       const organizationSettings =
         await getOrganizationSettingsByOrganizationId(
-          organizationId,
+          organizationId ?? '',
           adminActivated,
           [logo_url, theme_color],
         );
@@ -199,6 +201,7 @@ const createClientUserAccount = async (
       throw new Error('Error occurred while saving the token');
     }
     // Step 5: Send the email with the magic link
+    if (sendEmail) {
     await sendClientConfirmEmail(
       baseUrl,
       clientEmail,
@@ -208,8 +211,19 @@ const createClientUserAccount = async (
       sessionId,
       callbackUrl,
       organizationName,
-      organizationId,
-    );
+      organizationId ?? '',
+      );
+    } else {
+      return {
+        ...clientOrganizationUser,
+        session: {
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          expires_at: expiresAt,
+          provider: providerToken,
+        }
+      };
+    }
     // Step 6: Return the client organization user
     return clientOrganizationUser;
   } catch (error) {
@@ -350,6 +364,7 @@ export const createClient = async (clientData: CreateClient) => {
       organization.name,
       clientData.adminActivated,
       clientData.agencyId,
+      clientData.sendEmail,
     );
 
     const userId = clientOrganizationUser.user?.id;
@@ -408,7 +423,14 @@ export const createClient = async (clientData: CreateClient) => {
       clientData.adminActivated,
     );
 
-    return CustomResponse.success(client, 'clientCreated').toJSON();
+    if (clientData.sendEmail) {
+      return CustomResponse.success(client, 'clientCreated').toJSON();
+    } else {
+      return CustomResponse.success({
+        ...client,
+        session: clientOrganizationUser.session,
+      }, 'clientCreated').toJSON();
+    }
   } catch (error) {
     console.error('Error creating the client:', error);
     return CustomResponse.error(error).toJSON();

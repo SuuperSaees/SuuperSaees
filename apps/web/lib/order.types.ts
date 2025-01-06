@@ -43,7 +43,9 @@ export namespace Order {
       agency_member: User.Response;
     }[];
     followers: {
-      client_follower: User.Response;
+      client_follower: User.Response & {
+        role: string;
+      };
     }[];
     client_organization: {
       name: string;

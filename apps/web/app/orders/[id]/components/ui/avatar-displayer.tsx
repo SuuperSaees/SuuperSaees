@@ -1,6 +1,7 @@
 'use client';
 
 import { Avatar, AvatarImage, AvatarFallback } from '@kit/ui/avatar';
+import { User } from 'lucide-react';
 
 interface AvatarDisplayerProps {
   isTask?: boolean;
@@ -11,6 +12,7 @@ interface AvatarDisplayerProps {
   // status?: 'online' | 'offline'; this is not used anywhere for now
   className?: string;
   organizationName?: string;
+  isClientGuest?: boolean;
   [key: string]: unknown;
   fallbackInitials?: string;
 }
@@ -23,6 +25,7 @@ const AvatarDisplayer = ({
   nickname,
   // status, this is not used anywhere for now
   className,
+  isClientGuest,
   ...rest
 }: AvatarDisplayerProps) => {
   return (
@@ -38,7 +41,13 @@ const AvatarDisplayer = ({
         {...rest}
       /> */}
       <Avatar className={`${isAssignedOrFollower ? "scale-75" : ""} `}>
-        <AvatarImage src={pictureUrl ?? ''} />
+        {
+          isClientGuest ? (
+            <User />
+          ) : (
+            <AvatarImage src={pictureUrl ?? ''} />
+          )
+        }
         {/* <AvatarFallback>{displayName}</AvatarFallback> */}
         {displayName && (
           <AvatarFallback>

@@ -37,13 +37,13 @@ import { Switch } from '@kit/ui/switch';
 import { Trans } from '@kit/ui/trans';
 
 import {
-  createFile,
   createUploadBucketURL,
 } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { generateUUID } from '~/utils/generate-uuid';
 
 import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
+import { createFile } from '~/server/actions/files/files.action';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -172,7 +172,6 @@ const RichTextEditorV2 = ({
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
-
   const uploadImage = async (file: File) => {
     if (!file) return;
 
@@ -201,14 +200,16 @@ const RichTextEditorV2 = ({
 
     const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/orders/${newFilepath}`;
 
-    const fileData = await createFile([
-      {
-        name: sanitizedFileName,
-        size: file.size,
-        type: file.type,
-        url: fileUrl,
-      },
-    ]);
+    const fileData = await createFile({
+      files: [
+        {
+          name: sanitizedFileName,
+          size: file.size,
+          type: file.type,
+          url: fileUrl,
+        },
+      ]
+    });
 
     if (!fileData) {
       throw new Error('Error creating file');

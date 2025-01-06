@@ -30,7 +30,7 @@ export const briefsColumns = (
       header: t('briefs:name'),
       cell: ({ row }) => (
         <Link href={`/briefs/${row.original.id}`} className="flex w-full gap-2">
-          <span className=" capitalize line-clamp-3 font-semibold">
+          <span className="line-clamp-3 font-semibold">
             {row.getValue('name')}
           </span>
         </Link>
@@ -39,7 +39,10 @@ export const briefsColumns = (
     {
       accessorKey: 'services',
       header: t('briefs:services'),
-      cell: ({ row }) => <BriefServices services={row.original.services} />,
+      cell: ({ row }) => {
+        const services = row.original.services;
+        return <BriefServices services={services} />;
+      },
     },
     {
       accessorKey: 'created_at',
@@ -73,32 +76,58 @@ const BriefServices = ({
   services,
 }: {
   services: Brief.Relationships.Services.Response['services'];
+  
 }) => {
-  const tagColors = ['blue', 'violet', 'fuchsia', 'cyan', 'teal'].map(
-    (color) => ({
-      bgColor: `bg-${color}-100`,
-      textColor: `text-${color}-800`,
-      borderColor: `border-${color}-300`,
-    }),
-  );
+  console.log(services)
+  const tagColors = [
+    {
+      bgColor: 'bg-blue-100',
+      textColor: 'text-blue-800',
+      borderColor: 'border-blue-300',
+    },
+    {
+      bgColor: 'bg-violet-100',
+      textColor: 'text-violet-800',
+      borderColor: 'border-violet-300',
+    },
+    {
+      bgColor: 'bg-fuchsia-100',
+      textColor: 'text-fuchsia-800',
+      borderColor: 'border-fuchsia-300',
+    },
+    {
+      bgColor: 'bg-cyan-100',
+      textColor: 'text-cyan-800',
+      borderColor: 'border-cyan-300',
+    },
+    {
+      bgColor: 'bg-teal-100',
+      textColor: 'text-teal-800',
+      borderColor: 'border-teal-300',
+    },
+  ];
 
   const maxTags = 4;
 
+  if (!Array.isArray(services) || services.length === 0) {
+    return <span className="text-gray-500">-</span>;
+  }
+
   return (
     <div className="flex flex-wrap gap-2">
-      {services?.slice(0, maxTags).map((service, index) => {
+      {services.slice(0, maxTags).map((service, index) => {
         const tagColor = tagColors[index % tagColors.length];
 
         return (
           <div
             key={service.id}
-            className={`truncate rounded-full border px-2 py-1 text-sm font-semibold ${tagColor?.bgColor} ${tagColor?.textColor} ${tagColor?.borderColor}`}
+            className={`truncate rounded-full border px-2 py-1 text-sm font-semibold ${tagColor.bgColor} ${tagColor.textColor} ${tagColor.borderColor}`}
           >
             {service.name}
           </div>
         );
       })}
-      {services?.length > maxTags && (
+      {services.length > maxTags && (
         <div className="flex items-center rounded-full border border-neutral-200 bg-gray-100 px-2 py-1 text-sm font-medium text-gray-500">
           +{services.length - maxTags}
         </div>

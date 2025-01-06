@@ -26,7 +26,7 @@ export async function getDomainByUserId(
       'agency_owner',
       'agency_project_manager',
     ]);
-    const availableRolesClient = new Set(['client_owner', 'client_member']);
+    const availableRolesClient = new Set(['client_owner', 'client_member', 'client_guest']);
     let organizationId: string | null = null;
     let ownerEmail: null | string = null;
     let organization: null | Pick<
