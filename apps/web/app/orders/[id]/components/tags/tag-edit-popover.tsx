@@ -20,7 +20,8 @@ export const TagEditPopover = ({ tag, onUpdate, onDelete }: TagEditPopoverProps)
     const [editingTag, setEditingTag] = useState<Tags.Type | null>(null);
     const colorInputRef = useRef<HTMLInputElement>(null);
 
-    const handleSave = () => {
+    const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
         if (editingTag) {
             onUpdate({
                 id: editingTag.id,
@@ -32,7 +33,8 @@ export const TagEditPopover = ({ tag, onUpdate, onDelete }: TagEditPopoverProps)
         }
     };
 
-    const handleDelete = () => {
+    const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
         onDelete(tag.id);
         setOpen(false);
     };
@@ -47,19 +49,22 @@ export const TagEditPopover = ({ tag, onUpdate, onDelete }: TagEditPopoverProps)
                 <Trash2 className="h-4 w-4 mr-2" />
             </Button>
             <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
                     <Pencil className="h-4 w-4" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80">
+            <PopoverContent className="w-80" onClick={(e) => e.stopPropagation()}>
                 <div className="grid gap-4">
                     <div className="flex items-center gap-2">
                         <Input
                             value={editingTag?.name ?? tag.name}
-                            onChange={(e) => setEditingTag({ 
-                                ...tag, 
-                                name: e.target.value 
-                            })}
+                            onChange={(e) => {
+                                e.stopPropagation();
+                                setEditingTag({ 
+                                    ...tag, 
+                                    name: e.target.value 
+                                })
+                            }}
                             className="h-8"
                         />
                         <div
@@ -71,10 +76,13 @@ export const TagEditPopover = ({ tag, onUpdate, onDelete }: TagEditPopoverProps)
                             ref={colorInputRef}
                             type="color"
                             value={editingTag?.color ?? tag.color ?? defaultTagColor}
-                            onChange={(e) => setEditingTag({ 
-                                ...tag, 
-                                color: e.target.value 
-                            })}
+                            onChange={(e) => {
+                                e.stopPropagation();
+                                setEditingTag({ 
+                                    ...tag, 
+                                    color: e.target.value 
+                                })
+                            }}
                             className="sr-only"
                         />
                     </div>
@@ -84,7 +92,10 @@ export const TagEditPopover = ({ tag, onUpdate, onDelete }: TagEditPopoverProps)
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setOpen(false)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpen(false);
+                                }}
                             >
                                 {t('cancel')}
                             </Button>

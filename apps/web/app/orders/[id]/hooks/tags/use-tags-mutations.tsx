@@ -13,7 +13,6 @@ interface UseTagMutationsProps {
 }
 
 export const useTagMutations = ({
-    organizationId,
     orderId,
     setSelectedTags,
     setSearchTagOptionsFiltered

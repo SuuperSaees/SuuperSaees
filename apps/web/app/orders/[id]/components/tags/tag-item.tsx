@@ -1,6 +1,6 @@
 import { convertToTitleCase } from '../../utils/format-agency-names';
 import { Tags } from '~/lib/tags.types';
-// import { TagEditPopover } from './tag-edit-popover';
+import { darkenColor } from '~/utils/generate-colors';
 
 const defaultTagColor = '#8fd6fc';
 
@@ -10,20 +10,18 @@ interface TagItemProps {
     onDelete: (tagId: string) => void;
 }
 
-export const TagItem = ({ tag, onUpdate, onDelete }: TagItemProps) => {
+export const TagItem = ({ tag }: TagItemProps) => {
     return (
         <div className="flex items-center gap-1">
             <div
-                style={{ backgroundColor: tag.color ?? defaultTagColor }}
+                style={{ 
+                    backgroundColor: tag.color ?? defaultTagColor,
+                    color: darkenColor(tag.color ?? defaultTagColor, 0.55)
+                }}
                 className="rounded-full px-2 py-1 text-sm font-medium"
             >
                 {convertToTitleCase(tag.name)}
             </div>
-            {/* <TagEditPopover
-                tag={tag}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
-            /> */}
         </div>
     );
 };
