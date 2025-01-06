@@ -29,10 +29,10 @@ export const servicesColumns = (
       header: t('services:name'),
       cell: ({ row }) => (
         <Link
-          href={`/services/${row.original.id}`}
+          href={`/services/update?id=${row.original.id}`}
           className="flex w-full gap-2 font-semibold"
         >
-          <div className="capitalize">{row.getValue('name')}</div>
+          <div className="">{row.getValue('name')}</div>
         </Link>
       ),
     },
