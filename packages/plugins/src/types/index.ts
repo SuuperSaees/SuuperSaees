@@ -11,6 +11,16 @@ export interface Plugin {
   metadata?: Json;
 }
 
+export interface PluginInsert {
+  name: string;
+  description?: string;
+  type: 'integration' | 'tool' | 'internal' | 'external';
+  metadata?: Json;
+  created_at?: string;
+  updated_at?: string;
+  deleted_on?: string | null;
+}
+
 export interface AccountPlugin {
   id: string;
   plugin_id: string;
