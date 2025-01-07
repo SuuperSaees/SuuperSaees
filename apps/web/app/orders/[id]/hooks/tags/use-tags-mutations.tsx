@@ -51,9 +51,9 @@ export const useTagMutations = ({
             return await updateTag(updatedTag);
         },
         onSuccess: () => {
-            toast.success(t('success.toastSuccess'), {
-                description: t('success.orders.orderTagUpdated'),
-            });
+            // toast.success(t('success.toastSuccess'), {
+            //     description: t('success.orders.orderTagUpdated'),
+            // });
             router.refresh();
         },
         onError: () => {
