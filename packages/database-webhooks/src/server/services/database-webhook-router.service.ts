@@ -82,11 +82,12 @@ class DatabaseWebhookRouterService {
     if (body.type === 'UPDATE' && body.record) {
       const service = createBillingWebhooksService(this.adminClient, baseUrl);
       logger.info(body, 'Handling services webhook');
-      return service.handleServiceUpdatedWebhook(body.record);
+      return service.handleServiceUpdatedWebhook(body.record, body.old_record ?? undefined);
     }
 
     if (body.type === 'DELETE' && body.old_record) {
       logger.info(body, 'This logic should be implemented');
+      return;
     }
   }
 
