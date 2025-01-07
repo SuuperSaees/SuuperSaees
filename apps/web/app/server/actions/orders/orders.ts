@@ -13,6 +13,10 @@ export class OrdersAction extends BaseAction implements IOrdersAction {
     async getPublicOrderById(orderId: number) {
         return await this.controller.getPublicOrderById(orderId);
     }
+
+    async updateOrderTags(orderId: number, tagIds: string[]) {
+        return await this.controller.updateOrderTags(orderId, tagIds);
+    }
 }
 
 export function createOrdersAction(baseUrl: string) {

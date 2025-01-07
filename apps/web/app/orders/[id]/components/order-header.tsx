@@ -7,7 +7,7 @@ import { Order } from '~/lib/order.types';
 import { updateOrder, logOrderActivities } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import EditableHeader from '../../../../components/editable-header';
 import { useActivityContext } from '../context/activity-context';
-import DeleteOrderDropdown from './delete-order-dropdown';
+// import DeleteOrderDropdown from './delete-order-dropdown';
 import { ReviewDialog } from './review-dialog';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import type { User } from '@supabase/supabase-js';
@@ -87,11 +87,11 @@ export const OrderHeader = ({
         {(userRole === 'client_owner' || userRole === 'client_member') && (
           <ReviewDialog orderId={order.id} statusId={completedStatusId} className="w-fit" />
         )}
-        {
+        {/* {
           userRole !== 'client_guest' && (
             <DeleteOrderDropdown orderId={order?.id} />
           )
-        }
+        } */}
       </div>
       <div className="flex items-center">
         <h3 className="relative mb-2 text-sm text-lg font-normal text-gray-600">

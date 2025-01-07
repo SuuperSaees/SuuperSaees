@@ -71,13 +71,17 @@ export async function HomeSidebar(props: { workspace: UserWorkspace }) {
       </SidebarContent>
 
       <div className={'absolute bottom-4 left-0 w-full'}>
-        <SidebarContent>
-          <ProfileAccountDropdownContainer
-            collapsed={false}
-            user={user}
-            account={workspace}
-          />
-        </SidebarContent>
+        {
+          userRole !== 'client_guest' && (
+            <SidebarContent>
+            <ProfileAccountDropdownContainer
+              collapsed={false}
+              user={user}
+              account={workspace}
+            />
+          </SidebarContent>
+          )
+        }
       </div>
     </ThemedSidebar>
   );

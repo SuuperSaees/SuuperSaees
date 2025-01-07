@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { CalendarIcon, FlagIcon, Loader } from 'lucide-react';
+import { CalendarIcon, FlagIcon, Loader, Check, Copy } from 'lucide-react';
 import {
   getOrderAgencyMembers,
 } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
@@ -33,67 +33,95 @@ import { PriorityCombobox } from './priority-combobox';
 import { getClientMembersForOrganization } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getFormattedDateRange } from '../utils/get-formatted-dates';
 import { User } from '@supabase/supabase-js';
-import { Share2 } from 'lucide-react';
-import { Copy } from 'lucide-react';
 import { generateTokenId, createToken } from '~/server/actions/tokens/tokens.action';
-import { copyToClipboard } from '~/utils/clipboard';
 import Link from 'next/link';
-
+import DeleteOrderDropdown from './delete-order-dropdown';
+import { Switch } from '@kit/ui/switch';
+import Tooltip from '~/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@kit/ui/dialog';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { copyToClipboard } from '~/utils/clipboard';
+import ActivityTags from './activity-tags';
+import { Tags } from '~/lib/tags.types';
+import { updateOrderTags } from '~/server/actions/orders/orders.action';
 interface AsideOrderInformationProps {
   order: Order.Relational;
   className?: string;
+  orderAgencyTags: Tags.Type[];
   [key: string]: unknown;
   agencyStatuses: AgencyStatus.Type[];
+  agencyTags: Tags.Type[];
 }
 const AsideOrderInformation = ({
   // order,
   className,
   agencyStatuses,
+  orderAgencyTags,
+  agencyTags,
   ...rest
 }: AsideOrderInformationProps) => {
   const { t, i18n } = useTranslation(['orders', 'responses']);
-  // const [selectedStatus, setSelectedStatus] = useState(order.status);
-  // const [selectedPriority, setSelectedPriority] = useState(order.priority);
   const language = i18n.language;
   const router = useRouter();
   const { userRole, order } = useActivityContext();
-  const [isShareOpen, setIsShareOpen] = useState(false);
-  const [urlToShare, setUrlToShare] = useState('');
-  const generateUrlToShare = useMutation({
-    mutationFn: async (id: string): Promise<string> => {
-      try {
-      // Generate token ID and create share URL immediately
-      const tokenId = await generateTokenId({id});
-      const baseUrl = window.location.origin;
-      const shareUrl = `${baseUrl}/orders/${order.id}?public_token_id=${tokenId}`;
-      setUrlToShare(shareUrl);
-      
-      Promise.all([
-        createToken({
-          id: order.uuid,
-          account_id: order.agency_id,
-          agency_id: order.agency_id,
-          data: {
-            order_id: order.id,
-          },
-        }, tokenId),
-        updateOrder(order.id, { visibility: 'public' })
-      ]).catch(error => {
-        console.error('Background operations error:', error);
-      });
-  
-      return shareUrl;
-      } catch (error) {
-        console.error('Error generating share URL:', error);
-        throw error;
+  const [isPublic, setIsPublic] = useState(order.visibility === 'public');
+
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [tokenId, setTokenId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const baseUrl = window.location.origin;
+
+  const handleGenerateTokenId = async () => {
+    const tokenId = await generateTokenId({id: order.uuid});
+    setTokenId(tokenId ?? "");
+    await createToken({
+      id: order.uuid,
+      account_id: order.agency_id,
+      agency_id: order.agency_id,
+      data: {
+      order_id: order.id,
+    }
+    }, tokenId) 
+  }
+
+  useEffect(() => {
+    if(order.visibility === 'public'){
+      void handleGenerateTokenId();
+    }
+  }, []);
+
+  const handleCopy = async () => {
+    await copyToClipboard(`${baseUrl}/orders/${order.id}?public_token_id=${tokenId}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const changeVisibility = useMutation({
+    mutationFn: async (visibility: Order.Type['visibility']) => {
+      setIsPublic(visibility === 'public');
+      if (visibility === 'public') {
+        setShowShareDialog(true);
       }
+      await updateOrder(order.id, { visibility });
+      order.visibility = visibility;
     },
-    onSuccess: () => {
-      setIsShareOpen(true);
+    onSuccess: async () => {
+      const tokenId = await generateTokenId({id: order.uuid});
+      setTokenId(tokenId ?? "");
+      await createToken({
+        id: order.uuid,
+        account_id: order.agency_id,
+        agency_id: order.agency_id,
+        data: {
+        order_id: order.id,
+        }
+        }, tokenId) 
     },
     onError: () => {
-      toast.error('Error generating share URL');
-    }
+      toast.error('Error', {
+        description: t('error.orders.failedToUpdateOrderVisibility'),
+      });
+    },
   });
 
   const changeDate = useMutation({
@@ -148,6 +176,22 @@ const AsideOrderInformation = ({
     },
   });
 
+  const changeOrderTags = useMutation({
+    mutationFn: (tagIds: string[]) => {
+      return updateOrderTags(order.id, tagIds);
+    },
+    onSuccess: () => {
+      toast.success(t('success.toastSuccess'), {
+        description: t('success.orders.orderTagsUpdated'),
+      });
+    },
+    onError: () => {
+      toast.error(t('error.toastError'), {
+        description: t('error.orders.failedToUpdateOrderTags'),
+      });
+    },
+  });
+
   const { data: orderAgencyMembers } = useQuery({
     queryKey: ['order-agency-members', order.id],
     queryFn: () => getOrderAgencyMembers(order.agency_id, order.id),
@@ -167,6 +211,7 @@ const AsideOrderInformation = ({
       userRole === 'agency_member' ||
       userRole === 'agency_project_manager',
   });
+
 
   const searchUserOptions =
     orderAgencyMembers?.map((user) => ({
@@ -199,7 +244,7 @@ const AsideOrderInformation = ({
   const canAddFollowers = userRolesFollowers.has(userRole);
 
   return (
-    <AgencyStatusesProvider initialStatuses={agencyStatuses}>
+    <AgencyStatusesProvider initialStatuses={agencyStatuses} initialTags={orderAgencyTags}>
       <div
         className={`no-scrollbar relative flex h-full min-h-full w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 overflow-y-auto border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 pt-4 text-gray-700 ${className}`}
         {...rest}
@@ -209,31 +254,28 @@ const AsideOrderInformation = ({
           <h3 className="pb-4 font-bold">
             <Trans i18nKey="details.createdBy" />
           </h3>
-          <button className="pr-2" onClick={() => {
-            generateUrlToShare.mutate(order.uuid);
-            setIsShareOpen(true);
-          }}>
-            <Share2 className="w-4 h-4" />
-          </button>
-          </div>
-          
+
           {
-            isShareOpen && (
-              <div className="flex bg-slate-50 p-2 border border-slate-200 rounded-md gap-3 h-30 items-center justify-around w-72 absolute top-20 right-2 z-50">
-                <p>{urlToShare}</p>
-                <button onClick={async () => {
-                  const copied = await copyToClipboard(urlToShare);
-                  if (copied) {
-                    toast.success(t('success.copyToClipboard'));
-                  } else {
-                    toast.error(t('error.copyToClipboard'));
-                  }
-                }}>
-                  <Copy className="w-4 h-4" />
-                </button>
+            userRole !== 'client_guest' && (
+              <div className='flex items-center'>
+                {
+                  canAddAssignes && (
+                    <Tooltip content={t('details.visibility')}>
+                    <button onClick={() => {
+                      changeVisibility.mutate(isPublic ? 'private' : 'public');
+                    }}>
+                      <Switch checked={isPublic} />
+                    </button>
+                    </Tooltip>
+                  )
+                }
+
+                <DeleteOrderDropdown orderId={order?.id} isPublic={isPublic} tokenId={tokenId ?? undefined}/>
               </div>
             )
           }
+          </div>
+          
           <Link href={`/clients/organizations/${order.client_organization_id}`}>
           <div className="flex gap-3">
             <AvatarDisplayer
@@ -306,6 +348,15 @@ const AsideOrderInformation = ({
               canAddFollowers={canAddFollowers}
             />
             </div>
+            <div>
+            <ActivityTags
+              organizationId={order.agency_id}
+              orderId={order.id}
+              updateFunction={changeOrderTags.mutate}
+              searchTagOptions={agencyTags}
+              canAddTags={canAddAssignes}
+            />
+            </div> 
           </>
         ) : (
           <div className="flex flex-col gap-2">
@@ -370,7 +421,39 @@ const AsideOrderInformation = ({
             </div>
           </div>
         )}
-
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('shareProject')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-gray-600">
+              🔒 {t('shareProjectDescription')}
+            </p>
+            <div>
+            <p>{t('link')}</p>
+            <div className="flex items-center gap-2">
+              
+              <input
+                type="text"
+                readOnly
+                disabled={!tokenId}
+                value={`${baseUrl}/orders/${order.id}?public_token_id=${tokenId}`}
+                className="flex-1 rounded-md border px-3 py-2 text-sm"
+              />
+              <ThemedButton 
+                variant="default" 
+                onClick={handleCopy}
+                className="flex items-center gap-2"
+                disabled={!tokenId}
+              >
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </ThemedButton>
+            </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
     </AgencyStatusesProvider>
   );

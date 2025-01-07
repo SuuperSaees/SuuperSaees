@@ -68,7 +68,6 @@ export default function CheckboxCombobox<
   onChange, 
 }: ComboboxProps<TSchema>) {
   const [searchTerm, setSearchTerm] = useState('');
-
   const form = useForm<z.infer<TSchema>>({
     defaultValues,
     resolver: zodResolver(schema),

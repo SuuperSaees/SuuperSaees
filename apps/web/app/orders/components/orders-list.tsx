@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
@@ -21,6 +21,8 @@ import { Order } from '~/lib/order.types';
 
 import Table from '../../components/table/table';
 import { useUserOrderActions } from '../hooks/user-order-actions';
+import { useSignOut } from '@kit/supabase/hooks/use-sign-out';
+import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
 
 type OrdersTableProps = {
   orders: Order.Response[];
@@ -34,12 +36,23 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
   const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
     'open',
   );
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const { workspace } = useUserWorkspace();
   const role = workspace?.role ?? '';
   // hasPermission based on role
   const hasPermission = () => {
     return agencyRoles.has(role);
   };
+
+  const signOut = useSignOut();
+  const handleSignOut = async () => {
+    const impersonatingTokenId = localStorage.getItem("impersonatingTokenId");
+    if (impersonatingTokenId){
+      localStorage.removeItem('impersonatingTokenId');
+      await deleteToken(impersonatingTokenId);
+    }
+    await signOut.mutateAsync()
+  }
 
   const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
 
@@ -58,12 +71,20 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
 
   const filteredOrders = useMemo(() => {
     const currentTab = tabsConfig.find((tab) => tab.key === activeTab);
-    return orders.filter(
-      (order) =>
+    return orders.filter((order) => {
+      const matchesSearchAndTab = 
         order.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        currentTab?.filter(order),
-    );
-  }, [orders, activeTab, searchTerm]);
+        currentTab?.filter(order);
+  
+      const selectedTagIds = activeFilters?.tags ?? '';
+      const matchesTags = !selectedTagIds || 
+        order.tags?.some(tagObj => 
+          tagObj.tag?.id === selectedTagIds
+        );
+  
+      return matchesSearchAndTab && matchesTags;
+    });
+  }, [orders, activeTab, searchTerm, activeFilters]);
 
   const renderEmptyState = () => (
     <EmptyState
@@ -90,6 +111,12 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
     'agency_project_manager',
     'agency_member',
   ]);
+
+  useEffect(() => {
+   if(role === 'client_guest' && orders.length === 0){
+    void handleSignOut();
+   }
+  }, []);
   return (
     <main>
       <Tabs
@@ -109,7 +136,7 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
                 controllers={controller}
                 emptyStateComponent={renderEmptyState()}
                 presetFilters={{
-                  filterableColumns: ['status', 'priority'],
+                  filterableColumns: ['status', 'priority', 'tags'],
                 }}
                 controllerBarComponents={{
                   search: (

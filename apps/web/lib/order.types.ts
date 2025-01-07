@@ -9,6 +9,7 @@ import { Review } from './review.types';
 import { Task } from './tasks.types';
 import { UserSettings } from './user-settings.types';
 import { User } from './user.types';
+import { Tags } from './tags.types';
 
 type UserResponse = Pick<
   User.Type,
@@ -19,6 +20,7 @@ export namespace Order {
   export type Type = Database['public']['Tables']['orders_v2']['Row'];
 
   export type Response = Order.Type & {
+    tags: {tag:  Tags.Type}[] | null;
     customer: UserResponse[];
     assigned_to: {
       agency_member: UserResponse | null;

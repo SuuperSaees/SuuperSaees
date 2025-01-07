@@ -356,13 +356,13 @@ function getPatterns() {
         if (isInvitationUrl || isCheckoutUrl) {
           return;
         }
-        
         // If user is not logged in, redirect to sign in page.
         if (!user) {
           const signIn = pathsConfig.auth.signIn;
           const redirectPath = `${signIn}?next=${next}`;
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
+        
         
         // Obtain the user role
         const userRole = await getUserRoleById(user.id);
