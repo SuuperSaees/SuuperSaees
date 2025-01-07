@@ -34,6 +34,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_plugins: {
+        Row: {
+          account_id: string
+          created_at: string | null
+          credentials: Json | null
+          deleted_on: string | null
+          id: string
+          plugin_id: string
+          provider_id: string
+          status: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string | null
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          plugin_id: string
+          provider_id: string
+          status?: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string | null
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          plugin_id?: string
+          provider_id?: string
+          status?: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_plugins_plugin_id_fkey"
+            columns: ["plugin_id"]
+            isOneToOne: false
+            referencedRelation: "plugins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounts: {
         Row: {
           created_at: string | null
@@ -1600,6 +1644,39 @@ export type Database = {
           },
         ]
       }
+      order_tags: {
+        Row: {
+          created_at: string
+          order_id: number | null
+          tag_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          order_id?: number | null
+          tag_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          order_id?: number | null
+          tag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_tags_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           account_id: string
@@ -1684,6 +1761,7 @@ export type Database = {
           title: string
           updated_at: string | null
           uuid: string
+          visibility: Database["public"]["Enums"]["visibility"]
         }
         Insert: {
           agency_id: string
@@ -1703,6 +1781,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           uuid: string
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Update: {
           agency_id?: string
@@ -1722,6 +1801,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           uuid?: string
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Relationships: [
           {
@@ -1891,64 +1971,39 @@ export type Database = {
       }
       plugins: {
         Row: {
-          account_id: string
           created_at: string
-          credentials: Json
           deleted_on: string | null
+          description: string | null
+          icon_url: string | null
           id: string
-          provider: string
-          provider_id: string
-          status: Database["public"]["Enums"]["plugin_status"]
+          metadata: Json | null
+          name: string
           type: Database["public"]["Enums"]["plugin_type"]
           updated_at: string
         }
         Insert: {
-          account_id: string
           created_at?: string
-          credentials: Json
           deleted_on?: string | null
+          description?: string | null
+          icon_url?: string | null
           id?: string
-          provider: string
-          provider_id: string
-          status?: Database["public"]["Enums"]["plugin_status"]
+          metadata?: Json | null
+          name: string
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
         Update: {
-          account_id?: string
           created_at?: string
-          credentials?: Json
           deleted_on?: string | null
+          description?: string | null
+          icon_url?: string | null
           id?: string
-          provider?: string
-          provider_id?: string
-          status?: Database["public"]["Enums"]["plugin_status"]
+          metadata?: Json | null
+          name?: string
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       reactions: {
         Row: {
@@ -2628,6 +2683,58 @@ export type Database = {
           },
         ]
       }
+      tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           completed: boolean | null
@@ -2946,6 +3053,7 @@ export type Database = {
           title: string
           updated_at: string | null
           uuid: string
+          visibility: Database["public"]["Enums"]["visibility"]
         }
       }
       create_team_account: {

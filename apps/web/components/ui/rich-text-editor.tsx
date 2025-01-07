@@ -16,7 +16,7 @@ import {
 } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { SendHorizontalIcon, Upload } from 'lucide-react';
+import { SendHorizontal, Upload } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 import { Spinner } from '@kit/ui/spinner';
@@ -509,7 +509,7 @@ const RichTextEditor = ({
             )}
             {!hideSubmitButton && (
               <ThemedButton
-                className="mt-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] border-2 border-[var(--Gradient-skeuemorphic-gradient-border,rgba(255,255,255,0.12))] bg-[#155EEF] p-[var(--spacing-lg,12px)] shadow-[0px_0px_0px_1px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner-border,rgba(10,13,18,0.18))_inset,0px_-2px_0px_0px_var(--Colors-Effects-Shadows-shadow-skeumorphic-inner,rgba(10,13,18,0.05))_inset,0px_1px_2px_0px_var(--Colors-Effects-Shadows-shadow-xs,rgba(10,13,18,0.05))]"
+                className="mt-4 flex h-9 w-9 items-center justify-center shadow-none rounded-[var(--radius-md,8px)] border-2]"
                 onClick={sendContent}
                 disabled={
                   isLoading ||
@@ -523,7 +523,7 @@ const RichTextEditor = ({
                 {isSending ? (
                   <Spinner className="h-5 w-5" />
                 ) : (
-                  <SendHorizontalIcon className="h-[20px] w-[20px] flex-shrink-0 -rotate-45" />
+                  <SendHorizontal className="h-[20px] w-[20px] flex-shrink-0" />
                 )}
               </ThemedButton>
             )}

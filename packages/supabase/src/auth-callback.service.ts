@@ -1,16 +1,13 @@
 import 'server-only';
 
-
-
 import { type EmailOtpType, SupabaseClient } from '@supabase/supabase-js';
 
-
-
-import { TokenRecoveryType } from '../../tokens/src/domain/token-type';
+import { TokenRecoveryType, DefaultToken } from '../../tokens/src/domain/token-type';
 import { verifyToken } from '../../tokens/src/verify-token';
 // import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
-
+import { getDomainByUserId } from '../../multitenancy/utils/get/get-domain';
+import { createClient } from '../../features/team-accounts/src/server/actions/clients/create/create-clients';
 
 /**
  * @name createAuthCallbackService
@@ -47,6 +44,7 @@ class AuthCallbackService {
     const searchParams = url.searchParams;
     const token_hash_session = searchParams.get('token_hash_session');
     const tokenHashRecovery = searchParams.get('token_hash_recovery');
+    const publicTokenId = searchParams.get('public_token_id');
     const callbackNextPath = searchParams.get('next');
     const host = request.headers.get('host');
 
@@ -83,10 +81,82 @@ class AuthCallbackService {
     searchParams.delete('type');
     searchParams.delete('next');
     searchParams.delete('callback');
+    searchParams.delete('public_token_id');
 
     // if we have a next path, we redirect to that path
     if (nextPath) {
       url.pathname = nextPath;
+    }
+
+    if (publicTokenId) {
+      // get session from supabase
+      const { data: session } = await this.client.auth.getSession();
+      if (session?.session) {
+        // redirect to the next path
+        url.href = callbackNextPath?.split('?')[0] ?? url.href;
+        const { domain } = await getDomainByUserId(session.session.user.id, true);
+        if (domain) {
+          url.href = `${domain}${url.pathname}`
+        }
+        return url;
+      }
+
+      // token can be expired. Because it's a public token, we don't need to verify the expiration date
+      const { payload } = await verifyToken(
+        '',
+        publicTokenId,
+      ) as { isValidToken: boolean; payload?: DefaultToken };
+
+      if (payload) {
+        const adminClient = getSupabaseServerComponentClient({
+          admin: true,
+        });
+        const { data, error } = await adminClient
+        .from('accounts')
+        .select('count')
+        .like('email', 'guest%@suuper.co')
+        .single();
+
+      if (error) {
+        console.error('Error getting guest count', error);
+        throw new Error('Error getting guest count');
+      }
+        url.href = callbackNextPath?.split('?')[0] ?? url.href;
+
+        const count = (data?.count ?? 0) + 1;
+        // here we need to set the session with the user data
+        const response = await createClient({
+          agencyId: payload.agency_id ?? '',
+          adminActivated: true,
+          client: {
+            email: `guest+${count}@suuper.co`,
+            name: 'guest ' + count,
+            slug: `guest ${count}'s organization`,
+          },
+          role: 'client_guest',
+          sendEmail: false,
+        });
+
+        if (response.ok) {
+          const orderId = Number(callbackNextPath?.split('/')[4]?.split('?')[0]);
+          const { access_token, refresh_token } = response.success?.data?.session;
+          await this.client.auth.setSession({ access_token, refresh_token });
+            const { error } = await this.client.from('order_followers')
+            .insert({
+              order_id: orderId,
+              client_member_id: response.success?.data?.user_client_id,
+            });
+          const { domain } = await getDomainByUserId(response.success?.data?.user_client_id ?? '', true);
+          if (domain) {
+            url.href = `${domain}${url.pathname}`
+          }
+          if (error) {
+            console.error('Error adding follower to order', error);
+            throw new Error('Error adding follower to order');
+          }
+          return url;
+        }
+      }
     }
 
     if (tokenHashRecovery && type) {

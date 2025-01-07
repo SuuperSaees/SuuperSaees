@@ -1,4 +1,3 @@
-// import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { getPropietaryOrganizationIdOfOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 
 
@@ -14,7 +13,8 @@ import { Order } from '~/lib/order.types';
 import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
-// import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { redirect } from 'next/navigation';
+import { getTags } from '~/server/actions/tags/tags.action';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -36,6 +36,16 @@ async function OrderDetailsPage({
   const agencyStatuses = await getAgencyStatuses(order?.agency_id).catch((err) =>
     console.error(err),
   ) 
+
+  const orderAgencyTags = await getTags(order?.agency_id, order?.id).catch((err) =>
+    console.error(err),
+  )
+
+  const agencyTags = await getTags(order?.agency_id).catch((err) =>
+    console.error(err),
+  )
+
+  // console.log(agencyTags);
   const organizationId = await getPropietaryOrganizationIdOfOrder(id).catch((err) => {
     console.error(`Error getting propietary organization id of order: ${err}`)
     return { organization: '' }
@@ -51,12 +61,17 @@ async function OrderDetailsPage({
     { title: ordersTitle },
     { title: order?.title ?? '', uuid: order?.uuid ?? '' },
   ];
+
   // const role = await getUserRole().catch((err) => {
   //   console.error(`Error client, getting user role: ${err}`)
   //   return ''
   // });
   
   const role = workspace?.role
+
+  if(role === 'client_guest' && order?.visibility !== 'public'){
+    return redirect('/orders');
+  }
 
   return (
       <ActivityProvider
@@ -89,7 +104,7 @@ async function OrderDetailsPage({
             agencyName={agency?.name ?? ''}
           />
         </div>
-        <AsideOrderInformation className="hidden lg:flex " agencyStatuses={agencyStatuses ?? []}/>
+        <AsideOrderInformation className="hidden lg:flex " agencyStatuses={agencyStatuses ?? []} orderAgencyTags={ orderAgencyTags ?? []} agencyTags={ agencyTags ?? []}/>
     
       </div>
     </div>

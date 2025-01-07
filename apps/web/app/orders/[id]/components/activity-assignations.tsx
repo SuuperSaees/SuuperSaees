@@ -12,6 +12,8 @@ import { Order } from '~/lib/order.types';
 
 
 import AvatarDisplayer from './ui/avatar-displayer';
+// import { CalendarIcon } from 'lucide-react';
+// import { DatePicker } from '~/components/date-seletc';
 
 
 const CustomUserItem: React.FC<
@@ -69,9 +71,10 @@ const ActivityAssignations = ({
   };
   
   return (
-    <div className="flex flex-col gap-2  mt-[22.5px]">
-      <span className="font-medium">{t('details.assignedTo')}</span>
+    <div className="flex flex-col gap-1">
+      <span className="text-sm font-medium py-1.5">{t('details.assignedTo')}</span>
       <div className="no-scrollbar flex max-h-[300px] flex-wrap items-center justify-start gap-2 overflow-y-auto">
+        
         {avatarsWithStatus.map((avatar, index) => {
           return (
             <AvatarDisplayer

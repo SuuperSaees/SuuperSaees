@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useRef } from 'react';
 
 import { format } from 'date-fns';
+
+import { useActivityContext } from '../context/activity-context';
+import ActivityAction from './activity-actions';
+import UserMessage from './user-message';
+import UserReviewMessage from './user-review-message';
+import UserFirstMessage from './user-first-message';
 import { Check } from 'lucide-react';
 
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 
-import { useActivityContext } from '../context/activity-context';
 import { DataSource } from '../context/activity.types';
-import ActivityAction from './activity-actions';
-import UserFirstMessage from './user-first-message';
-import UserMessage from './user-message';
-import UserReviewMessage from './user-review-message';
 
 const Interactions = ({
   agencyStatuses,

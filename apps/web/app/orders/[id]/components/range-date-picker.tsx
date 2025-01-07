@@ -1,8 +1,7 @@
 import { 
-	Popover,
-	PopoverContent,
+  Popover,
+  PopoverContent,
   PopoverTrigger,
- 
 } from '@kit/ui/popover';
 
 import { Calendar } from '@kit/ui/calendar';
@@ -10,9 +9,8 @@ import { cn } from '@kit/ui/utils';
 import { DateRange } from '@kit/ui/calendar';
 import { useTranslation } from 'react-i18next';
 import { Subtask } from '~/lib/tasks.types';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { getFormattedDateRange } from '../utils/get-formatted-dates';
-
 
 interface DatePickerWithRangeProps {
   initialPeriod: DateRange | undefined;
@@ -20,12 +18,11 @@ interface DatePickerWithRangeProps {
     subtaskId: string,
     subtask: Subtask.Type,
     newPeriod: DateRange | undefined
-  ) => void
+  ) => void;
   subtaskId: string;  
   subtask: Subtask.Type;
   shortFormat?: boolean;
 }
-
 
 export function DatePickerWithRange({
   initialPeriod,
@@ -33,34 +30,48 @@ export function DatePickerWithRange({
   subtaskId,
   subtask,
   className,
-  shortFormat = false
+  shortFormat = false,
 }: DatePickerWithRangeProps & React.HTMLAttributes<HTMLDivElement>) {
-
-  const { t, i18n } = useTranslation(['tasks','orders']);
+  const { t, i18n } = useTranslation(['tasks', 'orders']);
   const language = i18n.language;
-  const [selectedPeriod, setSelectedPeriod] = useState<DateRange | undefined>(initialPeriod)
+  const [selectedPeriod, setSelectedPeriod] = useState<DateRange | undefined>(initialPeriod);
   const [open, setOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
 
-  const formattedDateRange = getFormattedDateRange(selectedPeriod, language, shortFormat) 
-    || t('select_date_range',{ns: 'orders'});
-  
+  const formattedDateRange = 
+    getFormattedDateRange(selectedPeriod, language, shortFormat) || 
+    t('select_date_range', { ns: 'orders' });
 
   const handleDateSelect = (newPeriod: DateRange | undefined) => {
-    setSelectedPeriod(newPeriod)
-    handlePeriod(subtaskId, subtask, newPeriod)
-  }
-  
+    setSelectedPeriod(newPeriod);
+    handlePeriod(subtaskId, subtask, newPeriod);
+  };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+      setOpen(false);
+    }
+  };
+
+  const togglePopover = () => {
+    if (!open) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    setOpen(!open);
+  };
+
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div
+      className={cn("grid gap-2 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg", className)}
+      ref={popoverRef}
+    >
       <Popover open={open}>
-        <PopoverTrigger asChild onClick={() => {setOpen(!open)}}>
-          
-          <p 
-            className='whitespace-nowrap cursor-pointer select-none px-3 text-gray-900 font-medium text-sm'
-          >
+        <PopoverTrigger asChild onClick={togglePopover}>
+          <p className="whitespace-nowrap cursor-pointer select-none px-3 text-gray-900 font-medium text-sm">
             {formattedDateRange}
           </p>
-          
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
@@ -74,5 +85,5 @@ export function DatePickerWithRange({
         </PopoverContent>
       </Popover>
     </div>
-  )
+  );
 }

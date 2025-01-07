@@ -132,4 +132,5 @@ export enum ErrorPluginOperations {
   FAILED_TO_DELETE_PLUGIN = 'failedToDeletePlugin',
   PLUGIN_DELETED = 'pluginDeleted',
   PLUGIN_UPDATED = 'pluginUpdated',
+  FAILED_TO_FETCH_PLUGIN = 'failedToFetchPlugin',
 }
