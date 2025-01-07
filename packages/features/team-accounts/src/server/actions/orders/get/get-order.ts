@@ -250,7 +250,8 @@ export const getOrders = async (
       .select(
         `*, client_organization:accounts!client_organization_id(id, name),
         customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
-        assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+        assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
+        tags:order_tags(tag:tags(*))
         `,
         { count: 'exact' },
       )

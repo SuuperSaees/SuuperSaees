@@ -36,6 +36,7 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
   const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
     'open',
   );
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const { workspace } = useUserWorkspace();
   const role = workspace?.role ?? '';
   // hasPermission based on role
@@ -70,12 +71,20 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
 
   const filteredOrders = useMemo(() => {
     const currentTab = tabsConfig.find((tab) => tab.key === activeTab);
-    return orders.filter(
-      (order) =>
+    return orders.filter((order) => {
+      const matchesSearchAndTab = 
         order.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        currentTab?.filter(order),
-    );
-  }, [orders, activeTab, searchTerm]);
+        currentTab?.filter(order);
+  
+      const selectedTagIds = activeFilters?.tags ?? '';
+      const matchesTags = !selectedTagIds || 
+        order.tags?.some(tagObj => 
+          tagObj.tag?.id === selectedTagIds
+        );
+  
+      return matchesSearchAndTab && matchesTags;
+    });
+  }, [orders, activeTab, searchTerm, activeFilters]);
 
   const renderEmptyState = () => (
     <EmptyState
@@ -127,7 +136,7 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
                 controllers={controller}
                 emptyStateComponent={renderEmptyState()}
                 presetFilters={{
-                  filterableColumns: ['status', 'priority'],
+                  filterableColumns: ['status', 'priority', 'tags'],
                 }}
                 controllerBarComponents={{
                   search: (

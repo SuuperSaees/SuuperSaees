@@ -8,6 +8,7 @@ import { ListFilter, Search } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
+import { convertToTitleCase } from '~/orders/[id]/utils/format-agency-names';
 
 import { Button } from '@kit/ui/button';
 import { DataTable } from '@kit/ui/data-table';
@@ -126,8 +127,14 @@ export default function Table<T>({
 
       // Check if the object matches all active filters
       const matchesFilters = Object.entries(activeFilters).every(
-        ([key, value]) =>
-          String(obj[key as keyof T] ?? '').includes(String(value)),
+        ([key, value]) => {
+          if (key === 'tags') {
+            return obj.tags?.some(tagObj => 
+              String(tagObj.tag?.name ?? '').includes(String(value))
+            );
+          }
+          return String(obj[key as keyof T] ?? '').includes(String(value));
+        }
       );
 
       return displayValue.includes(searchString) && matchesFilters;
@@ -253,9 +260,9 @@ export function ControllerBar<T>({
 interface PresetFiltersProps<T> {
   columns: ColumnDef<T>[];
   data: T[];
-  filterableColumns: (keyof T)[];
-  onFilter: (columnKey: keyof T, value: string) => void;
-  activeFilters: Record<keyof T, string>;
+  filterableColumns: (keyof T | 'tags')[];
+  onFilter: (columnKey: keyof T | 'tags', value: string) => void;
+  activeFilters: Record<string, string>;
   className?: string;
 }
 
@@ -271,25 +278,47 @@ const PresetFilters = <T,>({
 
   // Helper function to check if a value is primitive
   const isPrimitive = (val: unknown) => val !== Object(val);
-  const dataByColumn = columns.reduce(
-    (acc, column) => {
-      if (filterableColumns.includes(column.accessorKey)) {
-        acc[column.accessorKey] = Array.from(
+
+
+  const dataByColumn = filterableColumns.reduce(
+    (acc, fieldKey) => {
+      if (fieldKey === 'tags') {
+        const allTags = data.reduce((tags: any[], item: any) => {
+          if (item.tags && Array.isArray(item.tags)) {
+            tags.push(...item.tags);
+          }
+          return tags;
+        }, []);
+
+        acc[fieldKey] = allTags
+          .filter((tag: any) => tag.tag?.id && tag.tag?.name)
+          .reduce((unique: any[], current: any) => {
+            const exists = unique.some((item) => item.id === current.tag.id);
+            if (!exists) {
+              unique.push({
+                id: current.tag.id,
+                name: current.tag.name
+              });
+            }
+            return unique;
+          }, []);
+      } else {
+        acc[fieldKey] = Array.from(
           new Set(
             data
-              .map((item) => item[column.accessorKey])
-              .filter(
-                (value) =>
-                  isPrimitive(value) && value !== null && value !== undefined,
-              ), // Ensure value is primitive
-          ),
+              .map((item) => item[fieldKey as keyof T])
+              .filter((value) => 
+                value !== null && 
+                value !== undefined &&
+                (isPrimitive(value) || typeof value === 'object')
+              )
+          )
         );
       }
       return acc;
     },
-    {} as Record<keyof T, string[]>,
+    {} as Record<keyof T, any[]>
   );
-
   // Function to reset all filters
   const resetFilters = () => {
     filterableColumns.forEach((columnKey) => onFilter(columnKey, ''));
@@ -341,6 +370,23 @@ const PresetFilters = <T,>({
               />
             </div>
           ))}
+        {/* Add a new column for tags */}
+        {
+          filterableColumns.includes('tags') && (
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-gray-600">Tags</span>
+              <Combobox 
+                options={dataByColumn['tags']?.map((item: { id: string, name: string }) => ({
+                  value: item.id,
+                  label: convertToTitleCase(item.name),
+                  actionFn: () => onFilter('tags', item.name),
+                }))} 
+                className="w-full text-sm"
+                defaultValue={activeFilters.tags} 
+              />
+            </div>
+          )
+        }
       </PopoverContent>
     </Popover>
   );
