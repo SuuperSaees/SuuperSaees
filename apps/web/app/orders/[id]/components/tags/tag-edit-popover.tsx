@@ -5,6 +5,8 @@ import { Input } from '@kit/ui/input';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Tags } from '~/lib/tags.types';
 import { useTranslation } from 'react-i18next';
+import { convertToSnakeCase, convertToTitleCase } from '../../utils/format-agency-names';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 const defaultTagColor = '#8fd6fc';
 
@@ -41,37 +43,42 @@ export const TagEditPopover = ({ tag, onUpdate, onDelete }: TagEditPopoverProps)
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-gray-500" onClick={(e) => e.stopPropagation()}>
+                    <Pencil className="h-5 w-5 mr-2" />
+                </Button>
+            </PopoverTrigger>
             <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleDelete}
+                className="hover:bg-transparent hover:text-gray-500 p-0"
             >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-5 w-5" />
             </Button>
-            <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                    <Pencil className="h-4 w-4" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80" onClick={(e) => e.stopPropagation()}>
+            <PopoverContent className="w-80" 
+                side="bottom"
+                align="start"
+                sideOffset={20}
+                onClick={(e) => e.stopPropagation()}>
                 <div className="grid gap-4">
                     <div className="flex items-center gap-2">
                         <Input
-                            value={editingTag?.name ?? tag.name}
+                            value={convertToTitleCase(editingTag?.name ?? tag.name)}
                             onChange={(e) => {
                                 e.stopPropagation();
                                 setEditingTag({ 
                                     ...tag, 
-                                    name: e.target.value 
+                                    name: convertToSnakeCase(e.target.value)
                                 })
                             }}
-                            className="h-8"
+                            className="h-8 w-[80%]"
                         />
                         <div
-                            className="h-8 w-8 cursor-pointer rounded-full border-2 border-white shadow-md"
+                              className="w-10 h-10 cursor-pointer rounded-full border-4 border-white shadow-lg transition-transform hover:scale-110"
                             style={{ backgroundColor: editingTag?.color ?? tag.color ?? defaultTagColor }}
                             onClick={() => colorInputRef.current?.click()}
-                        />
+                        ></div>
                         <input
                             ref={colorInputRef}
                             type="color"
@@ -84,11 +91,11 @@ export const TagEditPopover = ({ tag, onUpdate, onDelete }: TagEditPopoverProps)
                                 })
                             }}
                             className="sr-only"
+                            aria-label="Choose color"
                         />
                     </div>
-                    <div className="flex justify-between">
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 justify-between w-full">
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -99,14 +106,13 @@ export const TagEditPopover = ({ tag, onUpdate, onDelete }: TagEditPopoverProps)
                             >
                                 {t('cancel')}
                             </Button>
-                            <Button
+                            <ThemedButton
                                 size="sm"
                                 onClick={handleSave}
                             >
                                 {t('save')}
-                            </Button>
+                            </ThemedButton>
                         </div>
-                    </div>
                 </div>
             </PopoverContent>
         </Popover>

@@ -8,6 +8,7 @@ import { Command, CommandInput, CommandList, CommandGroup, CommandItem } from '@
 import { convertToSnakeCase, convertToTitleCase } from '../../utils/format-agency-names';
 import { TagEditPopover } from './tag-edit-popover';
 import { darkenColor } from '~/utils/generate-colors';
+import { Checkbox } from '@kit/ui/checkbox';
 
 const defaultTagColor = '#8fd6fc';
 
@@ -105,21 +106,25 @@ export const TagList = ({
                                         key={tag.id}
                                         value={tag.id}
                                         onSelect={() => onTagSelect(tag)}
+                                        className="group"
                                     >
                                         <div className="flex items-center justify-between w-full">
-                                        <span className={`w-4 ${selectedTags.some(t => t.id === tag.id) ? 'opacity-100' : 'opacity-0'}`}>
-                                                ✓
-                                            </span>
-                                            <div 
-                                                className="flex items-center p-2 rounded-md" 
-                                                style={{ 
-                                                    backgroundColor: tag.color ?? defaultTagColor,
-                                                    color: darkenColor(tag.color ?? defaultTagColor, 0.55)
-                                                }}
-                                            >
-                                                {convertToTitleCase(tag.name)}
-                                            </div>
                                             <div className="flex items-center gap-2">
+                                                <Checkbox
+                                                    checked={selectedTags.some(t => t.id === tag.id)}
+                                                    className="pointer-events-none"
+                                                />
+                                                <div 
+                                                    className="flex items-center p-2 rounded-full" 
+                                                    style={{ 
+                                                        backgroundColor: tag.color ?? defaultTagColor,
+                                                        color: darkenColor(tag.color ?? defaultTagColor, 0.55)
+                                                    }}
+                                                >
+                                                    {convertToTitleCase(tag.name)}
+                                                </div>
+                                            </div>
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity  text-gray-500">
                                                 <TagEditPopover
                                                     tag={tag}
                                                     onUpdate={onTagUpdate}
