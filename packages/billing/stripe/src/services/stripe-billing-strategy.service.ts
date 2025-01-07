@@ -495,6 +495,7 @@ export class StripeBillingStrategyService
     billingAccount: BillingAccountType,
     baseUrl: string,
     serviceProviderId?: string,
+    priceChanged?: boolean,
   ): Promise<ServiceOperationResult> {
     // get price
     const logger = await getLogger();
@@ -539,30 +540,31 @@ export class StripeBillingStrategyService
         }
     
         // create price
-        const unitAmount = (service.price ?? 0) * 100;
-    
-        const stripePriceResponse = await fetch(
-          // Important: This endpoint is not used anymore.
-          `${baseUrl}/api/stripe/create-service-price`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              accountId: billingAccount.provider_id,
-              productId: getPriceData?.price?.product,
-              unitAmount,
-              serviceId: service.id,
-              currency: service.currency,
-              isRecurring: service.recurring_subscription,
-              interval: service.recurrence,
-              type: 'update',
-            }),
-          },
-        );
-    
-        if (!stripePriceResponse.ok) {
-          logger.error(ctx, `Stripe error creating price`);
-          return { success: false };
+        if (priceChanged) {
+          const unitAmount = (service.price ?? 0) * 100;
+          
+          const stripePriceResponse = await fetch(
+            `${baseUrl}/api/stripe/create-service-price`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                accountId: billingAccount.provider_id,
+                productId: getPriceData?.price?.product,
+                unitAmount,
+                serviceId: service.id,
+                currency: service.currency,
+                isRecurring: service.recurring_subscription,
+                interval: service.recurrence,
+                type: 'update',
+              }),
+            },
+          );
+  
+          if (!stripePriceResponse.ok) {
+            logger.error(ctx, `Stripe error creating price`);
+            return { success: false };
+          }
         }
     
         return { success: true };
