@@ -9,29 +9,30 @@ import {
   CustomError,
   CustomResponse,
   ErrorPluginOperations,
-} from '../../../../shared/src/response';
-import { HttpStatus } from '../../../../shared/src/response/http-status';
-import { PluginInsert } from '../../types';
-import { createPlugin } from '../services/plugin-services';
+} from '../../../../../shared/src/response';
+import { HttpStatus } from '../../../../../shared/src/response/http-status';
+import { deleteAccountPlugin } from '../../services/account-plugin-service';
 
 /**
- * @name createPluginAction
- * @description Server Action to handle the creation of a plugin.
+ * @name deleteAccountPluginAction
+ * @description Server Action to handle the deletion of an account_plugin.
  * Utilizes Supabase for database interactions and manages responses using CustomResponse and CustomError.
- * @param {PluginInsert} pluginData - The data for the plugin to be created.
+ * @param {string} id - The ID of the account_plugin to be deleted.
  * @returns {Promise<Object>} A standardized response indicating success or failure.
  */
-
-export const createPluginAction = async (pluginData: PluginInsert) => {
+export const deleteAccountPluginAction = async (id: string) => {
   try {
     const client =
       getSupabaseServerActionClient() as unknown as SupabaseClient<Database>;
 
-    const newPlugin = await createPlugin(client, pluginData);
+    await deleteAccountPlugin(client, id);
 
-    return CustomResponse.success(newPlugin, 'pluginCreated').toJSON();
+    return CustomResponse.success(
+      null,
+      ErrorPluginOperations.PLUGIN_DELETED,
+    ).toJSON();
   } catch (error) {
-    console.error('Error creating plugin:', error);
+    console.error('Error deleting account plugin:', error);
 
     if (error instanceof CustomError) {
       return CustomResponse.error(error).toJSON();
@@ -40,8 +41,8 @@ export const createPluginAction = async (pluginData: PluginInsert) => {
     return CustomResponse.error(
       new CustomError(
         HttpStatus.Error.InternalServerError,
-        'An unexpected error occurred while creating the plugin',
-        ErrorPluginOperations.FAILED_TO_CREATE_PLUGIN,
+        'An unexpected error occurred while deleting the account plugin',
+        ErrorPluginOperations.FAILED_TO_DELETE_PLUGIN,
         undefined,
         { error },
       ),
