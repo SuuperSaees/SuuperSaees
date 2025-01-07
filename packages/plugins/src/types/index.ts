@@ -9,6 +9,7 @@ export interface Plugin {
   updated_at: string;
   deleted_on?: string | null;
   metadata?: Json;
+  icon_url?: string | null; 
 }
 
 export interface PluginInsert {
@@ -19,6 +20,7 @@ export interface PluginInsert {
   created_at?: string;
   updated_at?: string;
   deleted_on?: string | null;
+  icon_url?: string | null; 
 }
 
 export interface AccountPlugin {

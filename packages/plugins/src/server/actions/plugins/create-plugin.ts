@@ -19,14 +19,18 @@ import { createPlugin } from '../../services/plugin-services';
  * @description Server Action to handle the creation of a plugin.
  * Utilizes Supabase for database interactions and manages responses using CustomResponse and CustomError.
  * @param {PluginInsert} pluginData - The data for the plugin to be created.
+ * @param {File | null} image - The optional image file to upload as the plugin's icon.
  * @returns {Promise<Object>} A standardized response indicating success or failure.
  */
-export const createPluginAction = async (pluginData: PluginInsert) => {
+export const createPluginAction = async (
+  pluginData: PluginInsert,
+  image: File | null,
+) => {
   try {
     const client =
       getSupabaseServerActionClient() as unknown as SupabaseClient<Database>;
 
-    const newPlugin = await createPlugin(client, pluginData);
+    const newPlugin = await createPlugin(client, pluginData, image);
 
     return CustomResponse.success(newPlugin, 'pluginCreated').toJSON();
   } catch (error) {

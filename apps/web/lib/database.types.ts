@@ -1974,6 +1974,7 @@ export type Database = {
           created_at: string
           deleted_on: string | null
           description: string | null
+          icon_url: string | null
           id: string
           metadata: Json | null
           name: string
@@ -1984,6 +1985,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           description?: string | null
+          icon_url?: string | null
           id?: string
           metadata?: Json | null
           name: string
@@ -1994,6 +1996,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           description?: string | null
+          icon_url?: string | null
           id?: string
           metadata?: Json | null
           name?: string
