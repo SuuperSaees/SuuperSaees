@@ -124,7 +124,7 @@ export const TagList = ({
                                                     {convertToTitleCase(tag.name)}
                                                 </div>
                                             </div>
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity  text-gray-500">
                                                 <TagEditPopover
                                                     tag={tag}
                                                     onUpdate={onTagUpdate}

@@ -43,19 +43,19 @@ export const TagEditPopover = ({ tag, onUpdate, onDelete }: TagEditPopoverProps)
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-gray-500" onClick={(e) => e.stopPropagation()}>
+                    <Pencil className="h-5 w-5 mr-2" />
+                </Button>
+            </PopoverTrigger>
             <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleDelete}
-                className="hover:bg-transparent"
+                className="hover:bg-transparent hover:text-gray-500 p-0"
             >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-5 w-5" />
             </Button>
-            <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent" onClick={(e) => e.stopPropagation()}>
-                    <Pencil className="h-4 w-4" />
-                </Button>
-            </PopoverTrigger>
             <PopoverContent className="w-80" 
                 side="bottom"
                 align="start"
