@@ -5,11 +5,10 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 
 import { useViewContext } from '../contexts/view-context';
-import { CalendarViewItem, KanbanViewItem } from '../types';
 
 // Dynamically import the views => this allows us to lazy load the components
-const KanbanView = dynamic(() => import('./kanban-view'));
-const CalendarView = dynamic(() => import('./calendar-view'));
+const KanbanView = dynamic(() => import('./kanban/kanban-view'));
+const CalendarView = dynamic(() => import('./calendar/calendar-view'));
 
 // interface ViewRendererProps<T extends ViewType> {
 //   type: T; // The type can be 'kanban' or 'calendar'
@@ -22,23 +21,12 @@ const CalendarView = dynamic(() => import('./calendar-view'));
 // }
 
 const ViewRenderer = () => {
-  const { data, viewType, configuration, columns } = useViewContext();
+  const { viewType } = useViewContext();
   switch (viewType) {
     case 'kanban':
-      return (
-        <KanbanView
-          data={data as KanbanViewItem[]}
-          configuration={configuration}
-          columns={columns ?? []}
-        />
-      );
+      return <KanbanView />;
     case 'calendar':
-      return (
-        <CalendarView
-          data={data as CalendarViewItem[]}
-          configuration={configuration}
-        />
-      );
+      return <CalendarView />;
     default:
       return null;
   }
