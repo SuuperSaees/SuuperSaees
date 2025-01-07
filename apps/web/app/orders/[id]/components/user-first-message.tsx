@@ -2,10 +2,12 @@ import { Brief } from '~/lib/brief.types';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import UserFile from './user-file';
+import { useActivityContext } from '../context/activity-context';
 
 
 const UserFirstMessage = ({ interaction }) => {
   const { t } = useTranslation('orders');
+  const { allFiles } = useActivityContext();
   const convertLinks = (text: string) => {
     const urlRegex =
       /\b(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*))/gi;
@@ -76,7 +78,7 @@ const UserFirstMessage = ({ interaction }) => {
                       url: fileUrl,
                       name: getFileName(fileUrl),
                       type: getExtension(fileUrl),
-                    }} />
+                    }} files={allFiles} />
                   ))}
                 </div>
               )
