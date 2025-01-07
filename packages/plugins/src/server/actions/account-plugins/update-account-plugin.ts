@@ -1,5 +1,7 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
@@ -31,6 +33,7 @@ export const updateAccountPluginAction = async (
       getSupabaseServerActionClient() as unknown as SupabaseClient<Database>;
 
     const updatedAccountPlugin = await updateAccountPlugin(client, id, updates);
+    revalidatePath('/apps');
 
     return CustomResponse.success(
       updatedAccountPlugin,

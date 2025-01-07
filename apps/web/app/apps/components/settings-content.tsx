@@ -1,16 +1,24 @@
 'use client';
 
-import { useSearchParams } from "next/navigation";
-import SettingsHeaderCard from "./settings-header-card";
-import { useTranslation } from "react-i18next";
-import LoomContent from "./loom-content";
-import TreliContent from "./treli-content";
-import StripeContent from "./stripe-content";
-import { Separator } from "@kit/ui/separator";
+import { useSearchParams } from 'next/navigation';
 
-function SettingsContent() {
-  const provider = useSearchParams().get('provider');
+import { useTranslation } from 'react-i18next';
+
+import { Separator } from '@kit/ui/separator';
+
+import LoomContent from './loom-content';
+import SettingsHeaderCard from './settings-header-card';
+import StripeContent from './stripe-content';
+import TreliContent from './treli-content';
+
+function SettingsContent({ userId }: { userId: string }) {
+  const searchParams = useSearchParams();
+  const name = searchParams.get('provider') ?? '';
+  const pluginId = searchParams.get('pluginId') ?? '';
+  const icon_url = searchParams.get('iconUrl') ?? ''; 
+
   const { t } = useTranslation('plugins');
+  const normalizedProvider = name.toLowerCase();
 
   const components = {
     treli: TreliContent,
@@ -18,17 +26,30 @@ function SettingsContent() {
     stripe: StripeContent,
   };
 
-  const PluginComponent = components[provider as keyof typeof components];
+  const PluginComponent =
+    components[normalizedProvider as keyof typeof components];
+
+  if (!PluginComponent) {
+    return (
+      <div>
+        <p className="text-gray-500">{t('pluginNotFound')}</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <SettingsHeaderCard provider={provider ?? ''} />
+      <SettingsHeaderCard name={name} pluginId={pluginId} icon_url={icon_url} />
       <div>
-        <p className="text-lg font-semibold">{t(`${provider}SettingsTitle`)}</p>
-        <p className="text-sm text-gray-500">{t(`${provider}SettingsDescription`)}</p>
+        <p className="text-lg font-semibold">
+          {t(`${normalizedProvider}SettingsTitle`)}
+        </p>
+        <p className="text-sm text-gray-500">
+          {t(`${normalizedProvider}SettingsDescription`)}
+        </p>
       </div>
       <Separator className="my-4" />
-      <PluginComponent />
+      <PluginComponent pluginId={pluginId} userId={userId} />
     </div>
   );
 }

@@ -1,27 +1,79 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
+import { Ellipsis, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { Card } from '@kit/ui/card';
-import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
-import { Ellipsis, Trash2 } from 'lucide-react';
-  
-function SettingsHeaderCard({ provider }: { provider: string }) {
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@kit/ui/dropdown-menu';
+
+import { updateAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
+
+interface SettingsHeaderCardProps {
+  name: string;
+  pluginId: string;
+  icon_url?: string | null;
+}
+
+function SettingsHeaderCard({
+  name,
+  pluginId,
+  icon_url,
+}: SettingsHeaderCardProps) {
   const { t } = useTranslation('plugins');
+  const router = useRouter();
+
+  console.log(icon_url);
+
+  const handleUninstall = async () => {
+    if (!pluginId) {
+      toast.error('Error', {
+        description: 'Plugin ID is missing',
+      });
+      return;
+    }
+
+    try {
+      await updateAccountPluginAction(pluginId, { status: 'uninstalled' });
+      toast.success(t('uninstallSuccess'), {
+        description: 'Plugin uninstalled successfully',
+      });
+
+      router.replace('/apps');
+    } catch (error) {
+      console.error('Error uninstalling plugin:', error);
+      toast.error(t('uninstallError'), {
+        description: 'Error uninstalling plugin',
+      });
+    }
+  };
+
   return (
-    <Card className="flex items-center justify-between px-3 py-5 my-6 bg-transparent">
+    <Card className="my-6 flex items-center justify-between bg-transparent px-3 py-5">
       <div className="flex items-center gap-2">
-        <img src={`/images/plugins/${provider}.png`} alt={provider} className="h-10 w-10" />
-        <h1>{t(`${provider}Title`)}</h1>
+        <img
+          src={icon_url ?? `/images/plugins/default.png`}
+          alt={name}
+          className="h-10 w-10"
+          onError={(e) => (e.currentTarget.src = '/images/plugins/default.png')} 
+        />
+        <h1 className="text-lg font-bold">{t(`${name}`)}</h1>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Ellipsis className="w-5 h-5" />
+          <Ellipsis className="h-5 w-5" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleUninstall}>
             <div className="flex items-center gap-2">
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="h-4 w-4" />
               {t('uninstall')}
             </div>
           </DropdownMenuItem>

@@ -2,7 +2,6 @@ import { PageBody } from "@kit/ui/page";
 import { createI18nServerInstance } from "~/lib/i18n/i18n.server";
 import ButtonsHeader from "../components/buttons-header";
 import SettingsContent from "../components/settings-content";
-import { loadUserWorkspace } from "~/home/(user)/_lib/server/load-user-workspace";
 import { fetchCurrentUserAccount } from "~/team-accounts/src/server/actions/members/get/get-member-account";
 import { getSupabaseServerComponentClient } from "@kit/supabase/server-component-client";
 
@@ -16,12 +15,12 @@ export const generateMetadata = async () => {
 async function PluginSettingsPage() {
   const client = getSupabaseServerComponentClient()
   const user = await fetchCurrentUserAccount(client)
-  const workspace = await loadUserWorkspace()
+
   return (
     <PageBody>
       <div className="p-[35px]">
         <ButtonsHeader />
-        <SettingsContent />
+        <SettingsContent userId = {user.id} />
       </div>
     </PageBody>
   );

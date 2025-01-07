@@ -17,7 +17,7 @@ export class AccountPluginRepository {
   /**
    * @name create
    * @description Inserts a new account_plugin into the 'account_plugins' table.
-   * Ensures no duplicates based on provider_id and account_id.
+   * Ensures no duplicates based on plugin_id and account_id.
    * @param {AccountPluginInsert} accountPlugin - The account plugin data to be inserted.
    * @returns {Promise<AccountPlugin>} The inserted account plugin data.
    * @throws {Error} If the insert operation fails.
@@ -25,9 +25,15 @@ export class AccountPluginRepository {
   async create(accountPlugin: AccountPluginInsert): Promise<AccountPlugin> {
     const { data, error } = await this.client
       .from(this.tableName)
-      .upsert(accountPlugin as Required<AccountPluginInsert>, {
-        onConflict: 'provider_id,account_id',
-      })
+      .upsert(
+        {
+          ...accountPlugin,
+          deleted_on: null, 
+        } as Required<AccountPluginInsert>,
+        {
+          onConflict: 'plugin_id,account_id',
+        },
+      )
       .select(
         `
         id,

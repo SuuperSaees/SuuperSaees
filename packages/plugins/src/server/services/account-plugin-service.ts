@@ -2,10 +2,16 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
 
+import {
+  CredentialsCrypto,
+  EncryptedCredentials,
+} from '../../../../../apps/web/app/utils/credentials-crypto';
 import { AccountPlugin, AccountPluginInsert } from '../../types';
 import { AccountPluginRepository } from '../repositories/account-plugin-repository';
 import { validatePluginInsert } from '../utils/validations';
 import { generateUUID } from '../utils/validations';
+
+const SECRET_KEY = Buffer.from(process.env.CREDENTIALS_SECRET_KEY ?? '', 'hex');
 
 /**
  * @name createAccountPlugin
@@ -29,13 +35,32 @@ export const createAccountPlugin = async (
       data.provider_id = generateUUID();
     }
 
+    if (
+      data.credentials &&
+      typeof data.credentials === 'object' &&
+      !Array.isArray(data.credentials) &&
+      Object.keys(data.credentials).length > 0
+    ) {
+      const crypto = new CredentialsCrypto(SECRET_KEY);
+      const encryptedCredentials: EncryptedCredentials = crypto.encrypt(
+        data.credentials,
+      );
+
+      data.credentials = JSON.stringify(encryptedCredentials);
+    } else if (data.credentials && typeof data.credentials === 'object') {
+      data.credentials = null;
+    } else if (data.credentials) {
+      throw new Error(
+        'Invalid credentials format. Expected a non-empty object.',
+      );
+    }
+
     return await accountPluginRepository.create(data);
   } catch (error) {
     console.error('Error creating account plugin:', error);
     throw new Error('Failed to create account plugin');
   }
 };
-
 /**
  * @name getAccountPluginById
  * @description Service to fetch an account_plugin by its unique ID.
@@ -111,6 +136,17 @@ export const updateAccountPlugin = async (
 ): Promise<AccountPlugin> => {
   try {
     const accountPluginRepository = new AccountPluginRepository(client);
+
+
+    if (
+      updates.credentials &&
+      typeof updates.credentials === 'object' &&
+      !Array.isArray(updates.credentials) &&
+      Object.keys(updates.credentials).length > 0
+    ) {
+      const crypto = new CredentialsCrypto(SECRET_KEY);
+      updates.credentials = JSON.stringify(crypto.encrypt(updates.credentials));
+    }
 
     return await accountPluginRepository.update(id, updates);
   } catch (error) {

@@ -9,7 +9,7 @@ export interface Plugin {
   updated_at: string;
   deleted_on?: string | null;
   metadata?: Json;
-  icon_url?: string | null; 
+  icon_url?: string | null;
 }
 
 export interface PluginInsert {
@@ -20,14 +20,14 @@ export interface PluginInsert {
   created_at?: string;
   updated_at?: string;
   deleted_on?: string | null;
-  icon_url?: string | null; 
+  icon_url?: string | null;
 }
 
 export interface AccountPlugin {
   id: string;
   plugin_id: string;
   account_id: string;
-  provider_id: string;
+  provider_id?: string; 
   status: 'installed' | 'uninstalled' | 'failed' | 'in progress';
   credentials?: Json;
   created_at: string;
@@ -38,7 +38,7 @@ export interface AccountPlugin {
 export interface AccountPluginInsert {
   plugin_id: string;
   account_id: string;
-  provider_id: string;
+  provider_id?: string; 
   status: 'installed' | 'uninstalled' | 'failed' | 'in progress';
   credentials?: Json;
   deleted_on?: string | null;
