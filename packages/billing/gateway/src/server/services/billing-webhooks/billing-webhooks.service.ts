@@ -122,6 +122,7 @@ class BillingWebhooksService {
 
     // stop bucle if oldService is not provided
     if (!oldService?.price_id && service.price_id) return true;
+    const priceChanged = oldService?.price_id !== service.price_id;
 
     // verify if account has treli enabled
 
@@ -149,6 +150,7 @@ class BillingWebhooksService {
         service,
         account,
         billingServicesData?.provider_id,
+        priceChanged,
       );
     });
     if (promises.length > 0) {

@@ -90,6 +90,7 @@ export abstract class BillingStrategyProviderService {
     billingAccount: BillingAccountType,
     baseUrl: string,
     serviceProviderId?: string,
+    priceChanged?: boolean,
   ): Promise<{
     success: boolean;
   }>;

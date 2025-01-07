@@ -628,6 +628,7 @@ export class TreliBillingStrategyService
     billingAccount: BillingAccountType,
     baseUrl: string,
     serviceProviderId?: string,
+    priceChanged?: boolean,
   ) {
     const logger = await getLogger();
 
@@ -636,6 +637,7 @@ export class TreliBillingStrategyService
       serviceId: service.id,
       billingAccountId: billingAccount.id,
       baseUrl,
+      priceChanged,
     };
     const retryOperation = new RetryOperationService<ServiceOperationResult>(
       async () => {
