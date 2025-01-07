@@ -1,3 +1,5 @@
+'use client';
+
 import { KanbanViewItem, KanbanViewProps } from '../types';
 
 const KanbanView = <T extends KanbanViewItem>({

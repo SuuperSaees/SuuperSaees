@@ -13,7 +13,7 @@ import Avatar from './avatar';
 
 export type AvatarType = {
   name: string;
-  email: string;
+  email?: string;
   picture_url?: string | null;
 };
 
@@ -48,7 +48,7 @@ export default function MultiAvatarDisplayer({
           username={avatar?.name}
           key={index + avatar?.name}
           alt={avatar?.name}
-          className={`h-8 w-8 border-2 border-white ${avatarClassName}`}
+          className={` border-2 border-white ${avatarClassName}`}
           style={{
             marginLeft: index === 0 ? 0 : `${-overlap}px`,
             zIndex: maxAvatars + index,
@@ -67,7 +67,7 @@ export default function MultiAvatarDisplayer({
       ) : (
         avatars.length > maxAvatars && (
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 font-bold text-sm text-gray-600"
+            className={`flex items-center justify-center rounded-full border-2 border-white bg-gray-200 font-bold text-sm text-gray-600  ${avatarClassName?.includes('w-') ? avatarClassName : 'w-8 h-8'}`}
             style={{
               marginLeft: `${overlap / 2}px`,
               zIndex: 1,

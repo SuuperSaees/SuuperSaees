@@ -1,3 +1,4 @@
+'use client';
 import React, { ReactNode, createContext, useContext, useState } from 'react';
 
 import { ViewConfiguration, ViewItem, ViewType } from '../types';
@@ -6,7 +7,8 @@ import { ViewConfiguration, ViewItem, ViewType } from '../types';
 interface ViewContextProps<T extends ViewItem> {
   viewType: ViewType;
   data: T[];
-  configuration: ViewConfiguration<T>;
+  columns?: string[];
+  configuration?: ViewConfiguration<T>;
   setViewType: (viewType: ViewType) => void;
   setData: React.Dispatch<React.SetStateAction<T[]>>;
   setConfiguration: React.Dispatch<React.SetStateAction<ViewConfiguration<T>>>;
@@ -23,27 +25,32 @@ interface ViewProviderProps {
   children: ReactNode;
   initialData: ViewItem[];
   initialViewType: ViewType;
-  initialConfiguration: ViewConfiguration<ViewItem>;
+  initialColumns?: string[];
+  initialConfiguration?: ViewConfiguration<ViewItem>;
 }
 
 export const ViewProvider = ({
   children,
   initialData,
   initialViewType,
+  initialColumns,
   initialConfiguration,
 }: ViewProviderProps) => {
   const [viewType, setViewType] = useState<ViewType>(initialViewType);
   const [data, setData] = useState<ViewItem[]>(initialData);
+  const [columns, setColumns] = useState<string[]>(initialColumns ?? []);
   const [configuration, setConfiguration] =
-    useState<ViewConfiguration<ViewItem>>(initialConfiguration);
+    useState<ViewConfiguration<ViewItem>>(initialConfiguration ?? {});
 
   const value = {
     viewType,
     data,
+    columns,
     configuration,
     setViewType,
     setData,
     setConfiguration,
+    setColumns,
   };
 
   return <ViewContext.Provider value={value}>{children}</ViewContext.Provider>;
