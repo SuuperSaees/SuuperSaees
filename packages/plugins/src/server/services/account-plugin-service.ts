@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-import { Database } from '@kit/supabase/database';
+import { Database, Json } from '@kit/supabase/database';
 
 import {
   CredentialsCrypto,
@@ -61,6 +61,7 @@ export const createAccountPlugin = async (
     throw new Error('Failed to create account plugin');
   }
 };
+
 /**
  * @name getAccountPluginById
  * @description Service to fetch an account_plugin by its unique ID.
@@ -82,6 +83,24 @@ export const getAccountPluginById = async (
 
     if (!accountPlugin) {
       throw new Error('Account plugin not found');
+    }
+
+    if (accountPlugin.credentials) {
+      const crypto = new CredentialsCrypto(SECRET_KEY);
+      try {
+        const decryptedCredentials = crypto.decrypt<Record<string, unknown>>(
+          JSON.parse(
+            accountPlugin.credentials as string,
+          ) as EncryptedCredentials,
+        );
+
+        accountPlugin.credentials = JSON.parse(
+          JSON.stringify(decryptedCredentials),
+        ) as Json;
+      } catch (error) {
+        console.error('Error decrypting credentials:', error);
+        throw new Error('Failed to decrypt account plugin credentials');
+      }
     }
 
     return accountPlugin;

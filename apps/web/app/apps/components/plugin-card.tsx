@@ -87,7 +87,7 @@ export default function PluginCard({
       toast.success(t('updateSuccess'), {
         description: t('pluginUpdatedSuccessfully'),
       });
-      revalidatePage();
+      router.refresh(); 
     },
     onError: (error) => {
       console.error(error);
