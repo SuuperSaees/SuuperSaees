@@ -1,6 +1,6 @@
 import { convertToTitleCase } from '../../utils/format-agency-names';
 import { Tags } from '~/lib/tags.types';
-import { darkenColor } from '~/utils/generate-colors';
+import { getContrastColor } from '~/utils/generate-colors';
 
 const defaultTagColor = '#8fd6fc';
 
@@ -16,7 +16,7 @@ export const TagItem = ({ tag }: TagItemProps) => {
             <div
                 style={{ 
                     backgroundColor: tag.color ?? defaultTagColor,
-                    color: darkenColor(tag.color ?? defaultTagColor, 0.55)
+                    color: getContrastColor(tag.color ?? defaultTagColor)
                 }}
                 className="rounded-full px-2 py-1 text-sm font-medium"
             >
