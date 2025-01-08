@@ -9,7 +9,7 @@ import {
   ViewConfigurations,
   ViewInitialConfigurations,
 } from '../view-config.types';
-import { ViewItem, ViewType } from '../views.types';
+import { UpdateFunction, ViewItem, ViewType } from '../views.types';
 import KanbanProvider from './kanban-context';
 
 // Define the Context types
@@ -39,6 +39,7 @@ interface ViewProviderProps<T extends ViewItem> {
   initialData: T[];
   initialViewType: ViewType;
   initialConfigurations: ViewInitialConfigurations<T>;
+  onUpdateFn?: UpdateFunction<T>;
 }
 
 export const ViewProvider = <T extends ViewItem>({
@@ -46,6 +47,7 @@ export const ViewProvider = <T extends ViewItem>({
   initialData,
   initialViewType,
   initialConfigurations,
+  onUpdateFn
 }: ViewProviderProps<T>) => {
   const newConfigurations = createFullConfiguration<T>(
     initialData,
@@ -85,6 +87,7 @@ export const ViewProvider = <T extends ViewItem>({
         initialConfigurations={
           configurations as unknown as ViewConfigurations<KanbanItem>
         }
+        onUpdateFn={onUpdateFn as unknown as UpdateFunction<KanbanItem>}
       >
         {children}
       </KanbanProvider>

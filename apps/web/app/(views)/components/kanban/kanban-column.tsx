@@ -65,7 +65,7 @@ const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
       <div className="flex flex-col gap-2">
         {column.items.map((item) => (
           <SortableItem
-            key={item.id}
+            key={item.id + column.id}
             id={item.id}
             data={{ type: 'item' }}
           >

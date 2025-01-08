@@ -13,6 +13,7 @@ import { KanbanColumn as KanbanColumnType } from '~/(views)/kanban.types';
 import styles from '../../../../components/ui/styles.module.css';
 import SortableItem from '../../../components/sortable-item';
 import KanbanColumn from './kanban-column';
+import { useKanbanContext } from '~/(views)/contexts/kanban-context';
 
 const KanbanColumns = ({
   columns,
@@ -22,8 +23,9 @@ const KanbanColumns = ({
   setColumns: React.Dispatch<React.SetStateAction<KanbanColumnType[]>>;
 }) => {
   // Helper to update column positions consistently
-  const { handleUpdateColumns } = useKanbanColumns(columns, setColumns);
-
+  const { onUpdateFn } = useKanbanContext();
+  const { handleUpdateColumns } = useKanbanColumns(columns, setColumns, onUpdateFn);
+  
   const {
     sensors,
     handleDragEnd,

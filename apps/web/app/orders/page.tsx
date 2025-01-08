@@ -66,22 +66,6 @@ async function OrdersPage() {
       },
     })) ?? [];
 
-  const initialConfiguarations: ViewInitialConfigurations<OrderResponse> = {
-    kanban: {
-      group: {
-        selected: 'status',
-        values: agencyStatuses?.map((status) => ({
-          id: String(status.id) ?? '',
-          key: status.status_name ?? '',
-          name: formatString(status.status_name ?? '', 'lower'),
-          position: status.position ?? 0,
-          color: status.status_color ?? '',
-          visible: true,
-        })),
-        // updateFn: (value: OrderResponse) => Promise.resolve([value]),
-      },
-    },
-  };
 
   return (
     <>
@@ -92,18 +76,13 @@ async function OrdersPage() {
               title="orders:title"
               rightContent={<TimerContainer />}
             />
-            <ViewProvider
-              initialData={ordersData as unknown as ViewItem[]}
-              initialViewType="kanban"
-              initialConfigurations={initialConfiguarations}
-            >
-              <Board />
+ 
               <OrderList
                 orders={ordersData ?? []}
                 agencyMembers={agencyMembers ?? []}
                 agencyStatuses={agencyStatuses ?? []}
               />
-            </ViewProvider>
+ 
           </div>
         </PageBody>
       </AgencyStatusesProvider>

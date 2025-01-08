@@ -6,10 +6,12 @@ import { ViewConfigurations } from '~/(views)/view-config.types';
 
 import useKanbanColumns from './use-kanban-columns';
 import useKanbanConfigurations from './use-kanban-configurations';
+import { UpdateFunction } from '~/(views)/views.types';
 
 const useKanban = <T extends KanbanItem>(
   data: T[],
   initialConfigurations: ViewConfigurations<T>,
+  onUpdateFn?: UpdateFunction
 ) => {
   // Configurations
   const { configurations, setConfigurations, updateGroupKey } =
@@ -34,11 +36,11 @@ const useKanban = <T extends KanbanItem>(
   }, [groupSelected, data, groupValues]);
 
   const [columns, setColumns] = useState<KanbanColumn[]>(initialColumns ?? []);
-  const { updateColumns } = useKanbanColumns(columns, setColumns);
+  const { updateColumnsByGroup } = useKanbanColumns(columns, setColumns, onUpdateFn);
 
   const updateGroup = (newGroupKey: keyof KanbanItem) => {
     updateGroupKey(newGroupKey);
-    const updatedColumns = updateColumns(data, newGroupKey, [
+    const updatedColumns = updateColumnsByGroup(data, newGroupKey, [
       ...configurations.group.visibility.visible.options,
       ...configurations.group.visibility.hidden.options,
     ]);

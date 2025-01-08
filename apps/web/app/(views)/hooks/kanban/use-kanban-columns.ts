@@ -1,15 +1,21 @@
 import { useCallback } from 'react';
 
-import { KanbanColumn, KanbanItem } from '~/(views)/kanban.types';
+import {
+  KanbanColumn,
+  KanbanItem,
+  KanbanUpdateFunction,
+} from '~/(views)/kanban.types';
 import { createColumnsByGroup } from '~/(views)/utils/kanban/data-transform';
-import { ViewManageableProperty } from '~/(views)/views.types';
+import { UpdateFunction, ViewManageableProperty } from '~/(views)/views.types';
 
 const useKanbanColumns = <T extends KanbanItem>(
   columns: KanbanColumn[],
   setColumns: React.Dispatch<React.SetStateAction<KanbanColumn[]>>,
+  onUpdateFn?: UpdateFunction,
 ) => {
   // column actioners
-  const updateColumns = useCallback(
+
+  const updateColumnsByGroup = useCallback(
     (
       data: T[],
       newGroupKey: keyof T,
@@ -21,28 +27,77 @@ const useKanbanColumns = <T extends KanbanItem>(
   );
 
   // Helper to update column positions consistently
-  function updateColumnPositions(
+  function updateColumns(
     columns: KanbanColumn[],
     isZeroIndexed = true,
+    itemId?: KanbanItem['id'],
   ): KanbanColumn[] {
     return columns.map((column, index) => ({
       ...column,
       position: isZeroIndexed ? index : index + 1,
       count: {
-        total: column.items.length
-      }
+        total: column.items.length,
+      },
+      items: itemId ? updateColumnItems(column, itemId) : column.items,
     }));
   }
 
+  // Helper function to update item position based on the moved item
+  const updateColumnItems = (
+    column: KanbanColumn,
+    updatedItemId: KanbanItem['id'],
+  ) => {
+    const newGroupKey = column.key;
+    const newItemGroupType = column.type;
+
+    // Reposition the item in the new group and update the group type
+    const updatedItems = column.items.map((item, index) => {
+      if (item.id === updatedItemId) {
+        return {
+          ...item,
+          position: index,
+          [newItemGroupType]: newGroupKey,
+        };
+      }
+      return item;
+    });
+    return updatedItems;
+  };
+
   // Function to update columns based on the moved columns
-  const handleUpdateColumns = (columns: KanbanColumn[]) => {
-    const updatedColumns = updateColumnPositions(columns, false);
-    setColumns(updatedColumns);
-    // perform async or any other logic here (e.g., update the database)
+  const handleUpdateColumns: KanbanUpdateFunction = async (
+    { column, columns, item, updatedType },
+    executeMuatation = true,
+  ) => {
+    try {
+      const updatedColumns = updateColumns(columns, false, item?.id);
+      setColumns(updatedColumns);
+      // console.log('column to update', column);
+      // console.log('item to update', item);
+      const newItem = {
+        ...item,
+        [column?.type as string]: column?.key,
+      };
+      const newValueToUpdate =
+        updatedType === 'column' && column && item
+          ? column
+          : updatedType === 'item' && item && column
+            ? newItem
+            : null;
+      onUpdateFn &&
+        executeMuatation &&
+        newValueToUpdate &&
+        (await onUpdateFn<T>(
+          newValueToUpdate as T,
+          column?.type as keyof T,
+        ));
+    } catch (error) {
+      console.error('Error updating columns:', error);
+    }
   };
   return {
+    updateColumnsByGroup,
     updateColumns,
-    updateColumnPositions,
     handleUpdateColumns,
     createColumnsByGroup,
   };
