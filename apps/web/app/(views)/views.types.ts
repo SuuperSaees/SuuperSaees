@@ -55,3 +55,5 @@ export interface ViewProps<T extends ViewItem> {
   configurations?: ViewConfigurations<T>;
   onAction?: (action: string, payload: T) => Promise<void | T>;
 }
+
+export type UpdateFunction = <T>(data: T, property?: keyof T) => Promise<T> ;

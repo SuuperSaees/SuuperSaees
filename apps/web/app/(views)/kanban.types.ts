@@ -15,6 +15,7 @@ export interface KanbanItem extends BaseItem {
 
 // Kanban view column
 export interface KanbanColumn extends ViewColumn {
+  id: string;
   position: number;
   color: string;
   count: {
@@ -30,3 +31,17 @@ export interface KanbanColumn extends ViewColumn {
 export interface KanbanViewProps<T extends KanbanItem> extends ViewProps<T> {
   columns: KanbanColumn[];
 }
+
+export type KanbanUpdateFunction = ({
+  updatedType,
+  column,
+  columns,
+  item,
+  items
+}: {
+  updatedType: 'column' | 'item';
+  column?: KanbanColumn;
+  columns: KanbanColumn[];
+  item?: KanbanItem;
+  items?: KanbanItem[];
+}, executeMuatation?: boolean) => Promise<void>;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -11,19 +11,29 @@ import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/t
 import { useTranslation } from 'react-i18next';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { useSignOut } from '@kit/supabase/hooks/use-sign-out';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
+import Board from '~/(views)/components/board';
+import { ViewProvider } from '~/(views)/contexts/view-context';
+import { ViewInitialConfigurations } from '~/(views)/view-config.types';
+import { UpdateFunction, ViewItem } from '~/(views)/views.types';
 import EmptyState from '~/components/ui/empty-state';
 import { useColumns } from '~/hooks/use-columns';
 import { UserWithSettings } from '~/lib/account.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Order } from '~/lib/order.types';
+import { updateOrder } from '~/team-accounts/src/server/actions/orders/update/update-order';
+import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
+import { formatString } from '~/utils/text-formatter';
 
 import Table from '../../components/table/table';
 import { useUserOrderActions } from '../hooks/user-order-actions';
-import { useSignOut } from '@kit/supabase/hooks/use-sign-out';
-import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
+import { useAgencyStatuses } from './context/agency-statuses-context';
 
+type OrderResponse = Omit<Order.Response, 'id'> & {
+  id: string;
+};
 type OrdersTableProps = {
   orders: Order.Response[];
   agencyMembers: UserWithSettings[];
@@ -36,7 +46,9 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
   const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
     'open',
   );
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>(
+    {},
+  );
   const { workspace } = useUserWorkspace();
   const role = workspace?.role ?? '';
   // hasPermission based on role
@@ -46,13 +58,13 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
 
   const signOut = useSignOut();
   const handleSignOut = async () => {
-    const impersonatingTokenId = localStorage.getItem("impersonatingTokenId");
-    if (impersonatingTokenId){
+    const impersonatingTokenId = localStorage.getItem('impersonatingTokenId');
+    if (impersonatingTokenId) {
       localStorage.removeItem('impersonatingTokenId');
       await deleteToken(impersonatingTokenId);
     }
-    await signOut.mutateAsync()
-  }
+    await signOut.mutateAsync();
+  };
 
   const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
 
@@ -72,16 +84,15 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
   const filteredOrders = useMemo(() => {
     const currentTab = tabsConfig.find((tab) => tab.key === activeTab);
     return orders.filter((order) => {
-      const matchesSearchAndTab = 
+      const matchesSearchAndTab =
         order.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
         currentTab?.filter(order);
-  
+
       const selectedTagIds = activeFilters?.tags ?? '';
-      const matchesTags = !selectedTagIds || 
-        order.tags?.some(tagObj => 
-          tagObj.tag?.id === selectedTagIds
-        );
-  
+      const matchesTags =
+        !selectedTagIds ||
+        order.tags?.some((tagObj) => tagObj.tag?.id === selectedTagIds);
+
       return matchesSearchAndTab && matchesTags;
     });
   }, [orders, activeTab, searchTerm, activeFilters]);
@@ -113,68 +124,104 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
   ]);
 
   useEffect(() => {
-   if(role === 'client_guest' && orders.length === 0){
-    void handleSignOut();
-   }
+    if (role === 'client_guest' && orders.length === 0) {
+      void handleSignOut();
+    }
   }, []);
+
+  const { statuses } = useAgencyStatuses();
+
+  const initialConfiguarations: ViewInitialConfigurations<OrderResponse> = {
+    kanban: {
+      group: {
+        selected: 'status',
+        values: statuses?.map((status) => ({
+          id: String(status.id) ?? '',
+          key: status.status_name ?? '',
+          name: formatString(status.status_name ?? '', 'lower'),
+          position: status.position ?? 0,
+          color: status.status_color ?? '',
+          visible: true,
+        })),
+        // updateFn: (value: OrderResponse) => Promise.resolve([value]),
+      },
+    },
+  };
+  const handleUpdateOrdersData = async (data: Order.Response, property?: string) => {
+    try {
+      // console.log('Updating orders data...', data);
+      const updateValue = property ? { [property]: data[property as keyof Order.Response] } : data;
+      await updateOrder(data.id, updateValue);
+    } catch (error) {
+      console.error('Error updating orders data:', error);
+    }
+  };
   return (
-    <main>
-      <Tabs
-        defaultValue={activeTab}
-        onValueChange={(value: string) =>
-          setActiveTab(value as 'open' | 'completed' | 'all')
-        }
-        className="bg-transparent"
-      > 
-      <div className="mt-4">
-          {tabsConfig.map((tab) => (
-            <TabsContent key={tab.key} value={tab.key}>
-              <Table
-                data={filteredOrders}
-                columns={orderColumns}
-                filterKey={'title'}
-                controllers={controller}
-                emptyStateComponent={renderEmptyState()}
-                presetFilters={{
-                  filterableColumns: ['status', 'priority', 'tags'],
-                }}
-                controllerBarComponents={{
-                  search: (
-                    <SearchComponent
-                      searchTerm={searchTerm}
-                      setSearchTerm={setSearchTerm}
-                      t={t}
-                    />
-                  ),
-                  add: <AddButton t={t} hasOrders={orders.length > 0} />,
-                  other: (
-                    <OtherComponents
-                      activeTab={activeTab}
-                      setActiveTab={setActiveTab}
-                      t={t}
-                    />
-                  ),
-                  config: {
-                    filters: {
-                      position: 3,
-                    },
-                    add: {
-                      position: 4,
-                    },
-                    other: {
-                      position: 1,
-                    },
-                    search: {
-                      position: 2,
-                    },
-                  },
-                }}
-              />
-            </TabsContent>
-          ))}
-        </div>
-      </Tabs>
-    </main>
+    <ViewProvider
+      initialData={orders as unknown as ViewItem[]}
+      initialViewType="kanban"
+      initialConfigurations={initialConfiguarations}
+      onUpdateFn={handleUpdateOrdersData}
+    >
+      <Board />
+    </ViewProvider>
+    // <main>
+    //   <Tabs
+    //     defaultValue={activeTab}
+    //     onValueChange={(value: string) =>
+    //       setActiveTab(value as 'open' | 'completed' | 'all')
+    //     }
+    //     className="bg-transparent"
+    //   >
+    //   <div className="mt-4">
+    //       {tabsConfig.map((tab) => (
+    //         <TabsContent key={tab.key} value={tab.key}>
+    //           <Table
+    //             data={filteredOrders}
+    //             columns={orderColumns}
+    //             filterKey={'title'}
+    //             controllers={controller}
+    //             emptyStateComponent={renderEmptyState()}
+    //             presetFilters={{
+    //               filterableColumns: ['status', 'priority', 'tags'],
+    //             }}
+    //             controllerBarComponents={{
+    //               search: (
+    //                 <SearchComponent
+    //                   searchTerm={searchTerm}
+    //                   setSearchTerm={setSearchTerm}
+    //                   t={t}
+    //                 />
+    //               ),
+    //               add: <AddButton t={t} hasOrders={orders.length > 0} />,
+    //               other: (
+    //                 <OtherComponents
+    //                   activeTab={activeTab}
+    //                   setActiveTab={setActiveTab}
+    //                   t={t}
+    //                 />
+    //               ),
+    //               config: {
+    //                 filters: {
+    //                   position: 3,
+    //                 },
+    //                 add: {
+    //                   position: 4,
+    //                 },
+    //                 other: {
+    //                   position: 1,
+    //                 },
+    //                 search: {
+    //                   position: 2,
+    //                 },
+    //               },
+    //             }}
+    //           />
+    //         </TabsContent>
+    //       ))}
+    //     </div>
+    //   </Tabs>
+    // </main>
   );
 }
 
@@ -230,7 +277,7 @@ const OtherComponents = ({
   t: (key: string) => string;
 }) => {
   return (
-    <TabsList className="gap-2 bg-transparent mr-auto">
+    <TabsList className="mr-auto gap-2 bg-transparent">
       {tabsConfig.map((tab) => (
         <ThemedTabTrigger
           key={tab.key}

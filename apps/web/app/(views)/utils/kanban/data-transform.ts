@@ -220,13 +220,14 @@ const createColumnsByGroup = <T extends KanbanItem>(
 
   // If predefined groups are provided, use them as a base and merge with actual data
   if (predefinedGroups && predefinedGroups.length > 0) {
-    const resultColumns: KanbanColumn[] = predefinedGroups.map((group) => {
+    const resultColumns: KanbanColumn[] = predefinedGroups.map((group, index) => {
       const existingColumn = columns.get(group.key);
       const valueType = existingColumn
         ? detectValueType(existingColumn.value)
         : 'string-default';
 
       return {
+        id: `column-container-${index}`,
         key: group.key,
         name:
           formatString(group.name, 'capitalize') ||
@@ -252,6 +253,7 @@ const createColumnsByGroup = <T extends KanbanItem>(
         const valueType = detectValueType(value);
 
         resultColumns.push({
+          id: `column-container-${index}`,
           key,
           name: formatDisplayName(value, valueType),
           position:
@@ -276,6 +278,7 @@ const createColumnsByGroup = <T extends KanbanItem>(
     const valueType = detectValueType(value);
 
     return {
+      id: `column-container-${index}`,
       key,
       name: formatDisplayName(value, valueType),
       position: index + 1,
