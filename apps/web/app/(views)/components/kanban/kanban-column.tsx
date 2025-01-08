@@ -4,12 +4,13 @@ import { useTranslation } from 'react-i18next';
 
 import { KanbanColumn as KanbanColumnType } from '~/(views)/kanban.types';
 import { parseUser } from '~/(views)/utils/kanban/data-transform';
+import { ViewUser } from '~/(views)/views.types';
 import { darkenColor, hexToRgba } from '~/utils/generate-colors';
 import { formatString } from '~/utils/text-formatter';
 
+import SortableItem from '../../../components/sortable-item';
 import Avatar from '../../../components/ui/avatar';
 import KanbanCard from './kanban-card';
-import { ViewUser } from '~/(views)/views.types';
 
 const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
   const { t } = useTranslation('views');
@@ -22,7 +23,7 @@ const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
   return (
     <div
       key={column.key}
-      className="flex w-full min-w-72 max-w-72 flex-col gap-2 rounded-md p-4"
+      className="flex h-full w-full min-w-72 max-w-72 flex-col gap-2 rounded-md p-4"
       style={{
         backgroundColor: hexToRgba(column.color, 0.2),
       }}
@@ -63,7 +64,13 @@ const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
       </div>
       <div className="flex flex-col gap-2">
         {column.items.map((item) => (
-          <KanbanCard key={item.id} item={item} />
+          <SortableItem
+            key={item.id}
+            id={item.id}
+            data={{ type: 'item' }}
+          >
+            <KanbanCard item={item} />
+          </SortableItem>
         ))}
       </div>
     </div>

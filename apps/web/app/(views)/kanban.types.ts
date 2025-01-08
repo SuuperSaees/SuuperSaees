@@ -15,6 +15,7 @@ export interface KanbanItem extends BaseItem {
 
 // Kanban view column
 export interface KanbanColumn extends ViewColumn {
+  id: string;
   position: number;
   color: string;
   count: {

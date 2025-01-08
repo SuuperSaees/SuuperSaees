@@ -33,8 +33,8 @@ const useKanban = <T extends KanbanItem>(
     return createColumnsByGroup(groupSelected, data, groupValues);
   }, [groupSelected, data, groupValues]);
 
-  const { updateColumns } = useKanbanColumns();
   const [columns, setColumns] = useState<KanbanColumn[]>(initialColumns ?? []);
+  const { updateColumns } = useKanbanColumns(columns, setColumns);
 
   const updateGroup = (newGroupKey: keyof KanbanItem) => {
     updateGroupKey(newGroupKey);
