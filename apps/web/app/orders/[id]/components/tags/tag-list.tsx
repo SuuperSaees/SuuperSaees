@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Command, CommandInput, CommandList, CommandGroup, CommandItem } from '@kit/ui/command';
 import { convertToSnakeCase, convertToTitleCase } from '../../utils/format-agency-names';
 import { TagEditPopover } from './tag-edit-popover';
-import { darkenColor } from '~/utils/generate-colors';
+import { getContrastColor } from '~/utils/generate-colors';
 import { Checkbox } from '@kit/ui/checkbox';
 
 const defaultTagColor = '#8fd6fc';
@@ -94,7 +94,7 @@ export const TagList = ({
                                             className="ml-4 font-bold px-2 rounded-md" 
                                             style={{
                                                 backgroundColor: defaultTagColor,
-                                                color: darkenColor(defaultTagColor, 0.55)
+                                                color: getContrastColor(defaultTagColor)
                                             }}
                                         >
                                             {customTag}
@@ -118,7 +118,7 @@ export const TagList = ({
                                                     className="flex items-center p-2 rounded-full" 
                                                     style={{ 
                                                         backgroundColor: tag.color ?? defaultTagColor,
-                                                        color: darkenColor(tag.color ?? defaultTagColor, 0.55)
+                                                        color: getContrastColor(tag.color ?? defaultTagColor)
                                                     }}
                                                 >
                                                     {convertToTitleCase(tag.name)}
