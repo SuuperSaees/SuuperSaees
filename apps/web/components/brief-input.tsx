@@ -31,9 +31,6 @@ export function InputForm({ question }: InputProps) {
       .min(2, {
         message: `${t('validation.minCharacters')}`,
       })
-      .max(3000, {
-        message: `${t('validation.maxCharacters')}`,
-      }),
   });
 
   const form = useForm<z.infer<typeof FormSchema>>({
