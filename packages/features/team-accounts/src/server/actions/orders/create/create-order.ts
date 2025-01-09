@@ -46,7 +46,7 @@ export const createOrder = async (
     delete orderToInsert.fileIds;
     const processedBriefResponses = briefResponses?.map(response => ({
       ...response,
-      response: textFormat.encode(response.response)
+      response: typeof response.response === 'string' ? textFormat.encode(response.response) : response.response
     }));
 
     // Step 2: Insert order into the database as a transaction procedure
