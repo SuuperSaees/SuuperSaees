@@ -16,6 +16,7 @@ import {
 } from '../../members/get/get-member-account';
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
 import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
+import { textFormat } from '../../../../../../../../apps/web/app/utils/text-format';
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -43,6 +44,10 @@ export const createOrder = async (
       brief_ids: briefIds,
     };
     delete orderToInsert.fileIds;
+    const processedBriefResponses = briefResponses?.map(response => ({
+      ...response,
+      response: textFormat.encode(response.response)
+    }));
 
     // Step 2: Insert order into the database as a transaction procedure
     // The rpc proccess includes: create order, create order files, create order followers and assign agency members
@@ -50,7 +55,7 @@ export const createOrder = async (
       'create_order',
       {
         _order: orderToInsert,
-        _brief_responses: briefResponses ?? [],
+        _brief_responses: processedBriefResponses ?? [],
         _order_followers: orderFollowers ?? [],
         _order_file_ids: order.fileIds ?? [],
       },

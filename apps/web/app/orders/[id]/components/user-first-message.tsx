@@ -3,19 +3,20 @@ import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import UserFile from './user-file';
 import { useActivityContext } from '../context/activity-context';
-
+import { textFormat } from '~/utils/text-format';
 
 const UserFirstMessage = ({ interaction }) => {
   const { t } = useTranslation('orders');
   const { allFiles } = useActivityContext();
   const convertLinks = (text: string) => {
+    const decodedText = textFormat.decode(text);
     const urlRegex =
       /\b(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*))/gi;
-    return text.replace(
-      urlRegex,
-      (url) =>
-        `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">${url}</a>`,
-    );
+      return decodedText.replace(
+        urlRegex,
+        (url) =>
+          `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">${url}</a>`,
+      );
   };
 
   const getFileName = (fileUrl: string) => {
@@ -31,7 +32,7 @@ const UserFirstMessage = ({ interaction }) => {
       return format(new Date(formField.response), "PPPP");
     }
     if (formField.field?.type === "rich-text") {
-      return formField.response;
+      return textUtils.decode(formField.response);
     }
     if (formField.field?.type === "file") {
       return formField.response.split(",").map((url) => url.trim());
@@ -85,7 +86,7 @@ const UserFirstMessage = ({ interaction }) => {
             ) : (
               field.response !== "" && (
                 <span
-                  className="text-gray-900 text-4 text-sm font-normal"
+                  className="text-gray-900 text-4 text-sm font-normal whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{
                     __html: formatResponse(field),
                   }}
