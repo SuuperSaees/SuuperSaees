@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-import { Copy, Eye, EyeOff } from 'lucide-react';
-import { Info } from 'lucide-react';
+import { Copy, Eye, EyeOff, Info } from 'lucide-react';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+
+import { Spinner } from '@kit/ui/spinner';
 
 import Tooltip from '~/components/ui/tooltip';
 
@@ -23,6 +25,8 @@ function TreliContentStatic({ pluginId }: { pluginId: string }) {
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { t } = useTranslation('plugins');
 
   useEffect(() => {
     if (!pluginId) return;
@@ -44,29 +48,29 @@ function TreliContentStatic({ pluginId }: { pluginId: string }) {
           });
         } else {
           throw new Error(
-            response?.error?.message ?? 'Failed to fetch plugin data',
+            response?.error?.message ?? t('errorFetchingTreliCredentials'),
           );
         }
       } catch (error) {
-        console.error('Error fetching Treli credentials:', error);
-        toast.error('Error al cargar las credenciales de Treli.');
+        console.error(t('errorFetchingTreliCredentials'), error);
+        toast.error(t('errorFetchingTreliCredentials'));
       } finally {
         setIsLoading(false);
       }
     };
 
     void fetchPluginData();
-  }, [pluginId]);
+  }, [pluginId, t]);
 
   const handleCopyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('All set!', {
-        description: 'Content copied to clipboard',
+      toast.success(t('successMessage'), {
+        description: t('clipboardCopied'),
       });
     } catch (error) {
-      console.error('Error copying to clipboard:', error);
-      toast.error('Failed to copy content to clipboard.');
+      console.error(t('clipboardCopyError'), error);
+      toast.error(t('clipboardCopyError'));
     }
   };
 
@@ -79,12 +83,12 @@ function TreliContentStatic({ pluginId }: { pluginId: string }) {
       });
 
       setCredentials(updatedCredentials);
-      toast.success('¡Actualización exitosa!', {
-        description: `El campo ${field} se actualizó correctamente.`,
+      toast.success(t('updateSuccess'), {
+        description: t('fieldUpdated', { field }),
       });
     } catch (error) {
-      console.error(`Error updating ${field}:`, error);
-      toast.error('Error al actualizar las credenciales.');
+      console.error(t('updateError', { field }), error);
+      toast.error(t('updateError'));
     }
   };
 
@@ -95,21 +99,19 @@ function TreliContentStatic({ pluginId }: { pluginId: string }) {
   return (
     <div className="space-y-8">
       {isLoading ? (
-        <div className="flex justify-center">
-          <span>Cargando...</span>
-        </div>
+        <Spinner className="h-5" />
       ) : (
         <>
           {/* Usuario Treli */}
           <div className="mb-6 grid grid-cols-3 items-center gap-4">
             <label className="col-span-1 text-sm font-medium text-gray-700">
-              Usuario *
+              {t('treliUser')} *
             </label>
             <div className="relative col-span-2">
               <ThemedInput
                 className="w-full"
                 value={credentials.treli_user}
-                placeholder="Ingresa tu usuario"
+                placeholder={t('treliUserPlaceholder')}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleChange('treli_user', e.target.value)
                 }
@@ -130,14 +132,14 @@ function TreliContentStatic({ pluginId }: { pluginId: string }) {
           {/* Contraseña Treli */}
           <div className="grid grid-cols-3 items-center gap-4">
             <label className="col-span-1 text-sm font-medium text-gray-700">
-              Contraseña *
+              {t('treliPassword')} *
             </label>
             <div className="relative col-span-2">
               <ThemedInput
                 className="w-full"
                 type={showPassword ? 'text' : 'password'}
                 value={credentials.treli_password}
-                placeholder="Ingresa tu contraseña"
+                placeholder={t('treliPasswordPlaceholder')}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleChange('treli_password', e.target.value)
                 }
@@ -162,22 +164,20 @@ function TreliContentStatic({ pluginId }: { pluginId: string }) {
           {/* Webhook Section */}
           <div className="mt-6">
             <h3 className="text-sm font-medium text-gray-800">
-              Conecta el webhook de Treli a Suuper
+              {t('connectTreliWebhook')}
             </h3>
             <p className="mt-1 flex items-center text-sm text-gray-500">
-              Conéctate a múltiples pasarelas de pago en LATAM y vende tus
-              servicios como suscripción.
+              {t('tooltipWebhookDescription')}
               <Tooltip
                 content={
                   <div className="max-w-xs text-xs">
-                    Configura el webhook en Treli para recibir notificaciones de
-                    eventos como la creación de suscripciones. <br />
-                    <span className="font-semibold">Pasos:</span>
+                    {t('tooltipWebhookDescription')} <br />
+                    <span className="font-semibold">{t('tooltipSteps')}</span>
                     <ol className="ml-4 mt-1 list-decimal">
-                      <li>Ir a Configuraciones - API Keys y Webhooks</li>
-                      <li>Ingresar a Webhooks - Agregar Webhook</li>
-                      <li>Completar el formulario (utiliza la url que se genero)</li>
-                      <li>Seleccionar el evento Suscripción creada en eventos a enviar</li>
+                      <li>{t('step1')}</li>
+                      <li>{t('step2')}</li>
+                      <li>{t('step3')}</li>
+                      <li>{t('step4')}</li>
                     </ol>
                   </div>
                 }
@@ -186,7 +186,7 @@ function TreliContentStatic({ pluginId }: { pluginId: string }) {
                 <button
                   type="button"
                   className="ml-2 text-gray-500 hover:text-gray-700"
-                  aria-label="Más información sobre cómo configurar el webhook"
+                  aria-label={t('tooltipMoreInfo')}
                 >
                   <Info className="h-4 w-4" />
                 </button>
@@ -194,12 +194,12 @@ function TreliContentStatic({ pluginId }: { pluginId: string }) {
             </p>
             <div className="mt-4 grid grid-cols-3 items-center gap-4">
               <label className="col-span-1 text-sm font-medium text-gray-700">
-                URL de acceso *
+                {t('webhookUrl')} *
               </label>
               <div className="relative col-span-2">
                 <ThemedInput
                   value={credentials.webhook_url}
-                  placeholder="Ingresa la URL del webhook"
+                  placeholder={t('webhookUrlPlaceholder')}
                   className="w-full"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     handleChange('webhook_url', e.target.value)
