@@ -10,12 +10,13 @@ import { UpdateFunction } from '../views.types';
 export interface KanbanContextProps<T extends KanbanItem> {
   columns: KanbanColumn[];
   configurations: ViewConfigurations<T>;
+  availableProperties: [keyof T];
   setColumns: React.Dispatch<React.SetStateAction<KanbanColumn[]>>;
   setConfigurations: React.Dispatch<
     React.SetStateAction<ViewConfigurations<T>>
   >;
   updateGroup: (groupKey: keyof T) => KanbanColumn[];
-  onUpdateFn?: UpdateFunction<T>;
+  onUpdateFn?: UpdateFunction
 }
 
 // Create a generic context
@@ -28,13 +29,15 @@ interface KanbanProviderProps<T extends KanbanItem> {
   children: React.ReactNode;
   initialData: T[];
   initialConfigurations: ViewConfigurations<T>;
-  onUpdateFn?: UpdateFunction<T>;
+  availableProperties: [keyof T];
+  onUpdateFn?: UpdateFunction
 }
 
 export const KanbanProvider = <T extends KanbanItem>({
   children,
   initialData,
   initialConfigurations,
+  availableProperties = ['status'] as [keyof T],
   onUpdateFn
 }: KanbanProviderProps<T>) => {
   const {
@@ -51,12 +54,13 @@ export const KanbanProvider = <T extends KanbanItem>({
         columns,
         configurations:
           configurations as unknown as ViewConfigurations<KanbanItem>,
+        availableProperties: availableProperties as unknown as [keyof KanbanItem],
         setColumns,
         setConfigurations: setConfigurations as unknown as React.Dispatch<
           React.SetStateAction<ViewConfigurations<KanbanItem>>
         >,
         updateGroup,
-        onUpdateFn: onUpdateFn as unknown as UpdateFunction<KanbanItem>
+        onUpdateFn: onUpdateFn as unknown as UpdateFunction
       }}
     >
       {children}
