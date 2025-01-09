@@ -18,7 +18,7 @@ export const textFormat = {
    * Decodes database-stored newlines back to regular newline characters
    */
   decode: (text: string | null): string => {
-    if (!text) return '';
+    if (!text || typeof text !== 'string') return '';
     return text.replace(/\|\|\|newline\|\|\|/g, '\n');
   }
 };
