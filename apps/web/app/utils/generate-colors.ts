@@ -118,3 +118,17 @@ export const hexToRgb = (hex: string) => {
   
   return `${r}, ${g}, ${b}`;
 };
+
+export const getContrastColor = (color: string) => {
+  const { theme: baseTextColor, luminance } = getColorLuminance(color);
+
+  let contrasColor = baseTextColor === 'dark' ? 'white' : 'black';
+
+  if (luminance < 50) {
+    contrasColor = 'white';
+  } else if (luminance > 200) {
+    contrasColor = 'black';
+  }
+
+  return contrasColor;
+};

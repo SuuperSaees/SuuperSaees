@@ -117,6 +117,11 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
     void handleSignOut();
    }
   }, []);
+
+  const getFilterableColumns = (): (keyof Order.Response)[] => {
+    const baseColumns: (keyof Order.Response)[] = ['status', 'priority'];
+    return hasPermission() ? [...baseColumns, 'tags'] : baseColumns;
+  };
   return (
     <main>
       <Tabs
@@ -136,7 +141,7 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
                 controllers={controller}
                 emptyStateComponent={renderEmptyState()}
                 presetFilters={{
-                  filterableColumns: ['status', 'priority', 'tags'],
+                  filterableColumns: getFilterableColumns(),
                 }}
                 controllerBarComponents={{
                   search: (
