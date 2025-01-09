@@ -19,6 +19,6 @@ export const textFormat = {
    */
   decode: (text: string | null): string => {
     if (!text) return '';
-    return text.replace(new RegExp(NEW_LINE_SEPARATOR, 'g'), '\n');
+    return text.replace(/\|\|\|newline\|\|\|/g, '\n');
   }
 };
