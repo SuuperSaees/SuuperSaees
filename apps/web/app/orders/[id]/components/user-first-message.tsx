@@ -60,43 +60,46 @@ const UserFirstMessage = ({ interaction }) => {
       </div>
       <small className="">{`${date}`}</small>
     </div>
-
+    {interaction?.fields.length > 0 && 
+   (
     <div className="flex w-full p-2.5 flex-col items-start gap-2.5 rounded-tr-lg rounded-br-lg rounded-bl-lg bg-gray-100">
-      {interaction.fields.map((field) => (
-        field.response && (
-          <div key={field.id} className="flex w-full flex-col gap-2.5 rounded-lg">
-            {field.response !== "" && (
-              <span className="text-gray-900 text-sm text-4 font-semibold">
-                {field.field?.label}
-              </span>
-            )}
-            
-            {field.field?.type === "file" ? (
-              field.response !== "" && (
-                <div className="flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
-                  {formatResponse(field).map((fileUrl, index) => (
-                    <UserFile key={index} file={{
-                      url: fileUrl,
-                      name: getFileName(fileUrl),
-                      type: getExtension(fileUrl),
-                    }} files={allFiles} />
-                  ))}
-                </div>
-              )
-            ) : (
-              field.response !== "" && (
-                <span
-                  className="text-gray-900 text-4 text-sm font-normal whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{
-                    __html: formatResponse(field),
-                  }}
-                />
-              )
-            )}
-          </div>
-        )
-      ))}
-    </div>
+    {interaction.fields.map((field) => (
+      field.response && (
+        <div key={field.id} className="flex w-full flex-col gap-2.5 rounded-lg">
+          {field.response !== "" && (
+            <span className="text-gray-900 text-sm text-4 font-semibold">
+              {field.field?.label}
+            </span>
+          )}
+          
+          {field.field?.type === "file" ? (
+            field.response !== "" && (
+              <div className="flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
+                {formatResponse(field).map((fileUrl, index) => (
+                  <UserFile key={index} file={{
+                    url: fileUrl,
+                    name: getFileName(fileUrl),
+                    type: getExtension(fileUrl),
+                  }} files={allFiles} />
+                ))}
+              </div>
+            )
+          ) : (
+            field.response !== "" && (
+              <span
+                className="text-gray-900 text-4 text-sm font-normal whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{
+                  __html: formatResponse(field),
+                }}
+              />
+            )
+          )}
+        </div>
+      )
+    ))}
+  </div>
+   )
+    }
   </div>
   );
 };
