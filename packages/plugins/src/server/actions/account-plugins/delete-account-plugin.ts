@@ -1,7 +1,6 @@
 'use server';
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { revalidatePath } from 'next/cache';
 
 import { Database } from '@kit/supabase/database';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
@@ -27,7 +26,6 @@ export const deleteAccountPluginAction = async (id: string) => {
       getSupabaseServerActionClient() as unknown as SupabaseClient<Database>;
 
     await deleteAccountPlugin(client, id);
-    revalidatePath('/apps');
 
     return CustomResponse.success(
       null,

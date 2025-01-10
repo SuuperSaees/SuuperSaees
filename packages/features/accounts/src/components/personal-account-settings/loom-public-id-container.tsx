@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useMutation } from '@tanstack/react-query';
+import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -8,12 +9,9 @@ import { Spinner } from '@kit/ui/spinner';
 
 import { getAccountPluginByIdAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
 import { updateAccountPluginAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
-import { AccountPluginInsert } from '../../../../../../packages/plugins/src/types';
 import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { ThemedInput } from '../ui/input-themed-with-settings';
 import { CopyDomain } from './copy-domain';
-
-import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'lucide-react';
 
 interface LoomPublicIdContainerProps {
   pluginId: string;
@@ -82,10 +80,11 @@ function LoomPublicIdContainer({
     void fetchDomain();
   }, [userId]);
 
-  const updateOrganizationMutation = useMutation({
+  const updateCredentialsMutation = useMutation({
     mutationFn: async () => {
-      const updates: Partial<AccountPluginInsert> = {
+      const updates = {
         credentials: { loom_app_id: loomAppId },
+        provider: 'loom',
       };
 
       return await updateAccountPluginAction(pluginId, updates);
@@ -96,10 +95,7 @@ function LoomPublicIdContainer({
       });
     },
     onError: (error) => {
-      console.error('Error updating plugin:', error);
-      toast.error(t('updateError'), {
-        description: t('pluginUpdateErrorDescription'),
-      });
+      console.error('Error en cliente:', error);
     },
   });
 
@@ -125,7 +121,7 @@ function LoomPublicIdContainer({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setLoomAppId(e.target.value)
               }
-              onBlur={() => updateOrganizationMutation.mutate()}
+              onBlur={() => updateCredentialsMutation.mutate()}
             />
             <button
               className="absolute inset-y-0 right-3 flex items-center text-gray-500"

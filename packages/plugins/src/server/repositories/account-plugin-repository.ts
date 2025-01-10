@@ -291,6 +291,37 @@ export class AccountPluginRepository {
   }
 
   /**
+   * @name updateStatus
+   * @description Updates the status of an account_plugin in the 'account_plugins' table.
+   * @param {string} id - The unique ID of the account_plugin to update.
+   * @param {"installed" | "uninstalled" | "failed" | "in progress" | null} status - The new status to set for the account_plugin.
+   * @returns {Promise<void>} Resolves when the status is successfully updated.
+   * @throws {Error} If the update operation fails.
+   */
+  async updateStatus(
+    id: string,
+    status: 'installed' | 'uninstalled' | 'failed' | 'in progress' | null,
+  ): Promise<void> {
+    try {
+      const { error } = await this.client
+        .from(this.tableName)
+        .update({ status })
+        .eq('id', id)
+        .is('deleted_on', null);
+
+      if (error) {
+        throw new Error(
+          `[REPOSITORY] Error updating account plugin status: ${error.message}`,
+        );
+      }
+    } catch (error) {
+      throw new Error(
+        `[REPOSITORY] Error in updateStatus method: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  /**
    * @name delete
    * @description Marks an account_plugin as deleted by updating its 'deleted_on' field in the 'account_plugins' table.
    * Performs a soft delete operation.

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 
-import { revalidatePath } from 'next/cache';
 import { useRouter } from 'next/navigation';
 
 import { useMutation } from '@tanstack/react-query';
@@ -17,7 +16,7 @@ import { Switch } from '@kit/ui/switch';
 
 import { createAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/create-account-plugin';
 import { deleteAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/delete-account-plugin';
-import { updateAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
+import { updatePluginStatusAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin-status';
 
 interface AppCardProps {
   pluginId?: string;
@@ -41,10 +40,6 @@ export default function PluginCard({
   const [isInstalled, setIsInstalled] = useState(status === 'installed');
   const { user } = useUserWorkspace();
   const userId = user.id;
-
-  const revalidatePage = () => {
-    revalidatePath('/apps');
-  };
 
   const handleSwitchChange = (checked: boolean) => {
     const newStatus = checked ? 'installed' : 'uninstalled';
@@ -79,15 +74,13 @@ export default function PluginCard({
 
   const updatePluginMutation = useMutation({
     mutationFn: async (newStatus: 'installed' | 'uninstalled') => {
-      await updateAccountPluginAction(pluginId ?? '', {
-        status: newStatus,
-      });
+      await updatePluginStatusAction(pluginId ?? '', newStatus);
     },
     onSuccess: () => {
       toast.success(t('updateSuccess'), {
         description: t('pluginUpdatedSuccessfully'),
       });
-      router.refresh(); 
+      router.refresh();
     },
     onError: (error) => {
       console.error(error);
@@ -99,14 +92,23 @@ export default function PluginCard({
 
   const deletePluginMutation = useMutation({
     mutationFn: async () => {
-      await deleteAccountPluginAction(pluginId ?? '');
+      const response = await deleteAccountPluginAction(pluginId ?? '');
+
+      if (!response || response.error) {
+        throw new Error(
+          response?.error?.message ?? 'Unexpected error occurred',
+        );
+      }
+
+      return response;
     },
     onSuccess: () => {
       toast.success(t('deleteSuccess'), {
         description: t('pluginDeletedSuccessfully'),
       });
       setIsInstalled(false);
-      revalidatePage();
+
+      router.refresh();
     },
     onError: (error) => {
       console.error(error);
@@ -140,7 +142,7 @@ export default function PluginCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
-            <h3 className="font-medium">{t(`${name}`)}</h3>
+            <h3 className="font-medium">{t(`${name}Title`)}</h3>
           </div>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {t('freeInstall')}

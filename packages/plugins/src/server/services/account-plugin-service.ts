@@ -252,6 +252,31 @@ export const updateAccountPlugin = async (
 };
 
 /**
+ * @name updatePluginStatus
+ * @description Service to update the status of an account_plugin in the `account_plugins` table.
+ * @param {SupabaseClient<Database>} client - The Supabase client instance for database interactions.
+ * @param {string} id - The unique ID of the `account_plugin` to update.
+ * @param {"installed" | "uninstalled" | "failed" | "in progress" | null} status - The new status to set for the `account_plugin`.
+ * @returns {Promise<void>} Resolves when the status is successfully updated.
+ * @throws {Error} If the update operation fails.
+ */
+export const updatePluginStatus = async (
+  client: SupabaseClient<Database>,
+  id: string,
+  status: 'installed' | 'uninstalled' | 'failed' | 'in progress' | null,
+): Promise<void> => {
+  try {
+    const accountPluginRepository = new AccountPluginRepository(client);
+
+    await accountPluginRepository.updateStatus(id, status);
+  } catch (error) {
+    throw new Error(
+      `[SERVICE] Failed to update plugin status: ${(error as Error).message}`,
+    );
+  }
+};
+
+/**
  * @name deleteAccountPlugin
  * @description Service to delete an account_plugin by marking it as deleted in the database.
  * Performs a soft delete operation.

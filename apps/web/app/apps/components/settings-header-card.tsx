@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 
-import { updateAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
+import { updatePluginStatusAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin-status';
 
 interface SettingsHeaderCardProps {
   name: string;
@@ -39,7 +39,7 @@ function SettingsHeaderCard({
     }
 
     try {
-      await updateAccountPluginAction(pluginId, { status: 'uninstalled' });
+      await updatePluginStatusAction(pluginId, 'uninstalled');
       toast.success(t('uninstallSuccess'), {
         description: 'Plugin uninstalled successfully',
       });
@@ -62,7 +62,7 @@ function SettingsHeaderCard({
           className="h-10 w-10"
           onError={(e) => (e.currentTarget.src = '/images/plugins/default.png')}
         />
-        <h1 className="text-lg font-bold">{t(`${name}`)}</h1>
+        <h1 className="text-lg font-bold">{t(`${name}Title`)}</h1>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger>
