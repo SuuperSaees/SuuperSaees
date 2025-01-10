@@ -132,7 +132,7 @@ export const fetchFormfieldsWithResponses = async (
     
   } catch (error) {
     console.error('Error obtaining brief fields', error);
-    throw error;
+    // throw error;
   }
 };
 
