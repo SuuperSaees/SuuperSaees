@@ -2,16 +2,17 @@ import React, { useEffect, useState } from 'react';
 
 import { useMutation } from '@tanstack/react-query';
 import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'lucide-react';
+import { CopyDomain } from 'node_modules/@kit/accounts/src/components/personal-account-settings/copy-domain';
+import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Spinner } from '@kit/ui/spinner';
 
-import { getAccountPluginByIdAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
-import { updateAccountPluginAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
-import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
-import { ThemedInput } from '../ui/input-themed-with-settings';
-import { CopyDomain } from './copy-domain';
+import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
+
+import { getAccountPluginByIdAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
+import { updateAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
 
 interface LoomPublicIdContainerProps {
   pluginId: string;
@@ -52,9 +53,6 @@ function LoomPublicIdContainer({
         }
       } catch (error) {
         console.error('Error fetching plugin data:', error);
-        toast.error(t('errorFetchingPlugin'), {
-          description: t('errorFetchingPluginDescription'),
-        });
       } finally {
         setIsLoading(false);
       }
@@ -90,54 +88,67 @@ function LoomPublicIdContainer({
       return await updateAccountPluginAction(pluginId, updates);
     },
     onSuccess: () => {
-      toast.success(t('updateSuccess'), {
+      toast.success(t('successMessage'), {
         description: t('pluginUpdatedSuccessfully'),
       });
     },
     onError: (error) => {
       console.error('Error en cliente:', error);
+      toast.error(t('errorMessage'), {
+        description: t('errorUpdatingPlugin'),
+      });
     },
   });
 
   return (
-    <>
+    <div className="space-y-8">
       {isLoading ? (
         <Spinner className="h-5" />
       ) : (
-        <div className="w-full">
-          <CopyDomain
-            value={domain}
-            className="mb-3"
-            label={t('loomAppIdTitle')}
-          />
-          <div className="relative">
-            <ThemedInput
-              data-test={'account-display-name'}
-              minLength={2}
-              placeholder={t('loomAppIdTitle')}
-              maxLength={100}
-              type={showLoomAppId ? 'text' : 'password'}
-              value={loomAppId}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setLoomAppId(e.target.value)
-              }
-              onBlur={() => updateCredentialsMutation.mutate()}
-            />
-            <button
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-              type="button"
-              onClick={() => setShowLoomAppId(!showLoomAppId)}
-            >
-              {showLoomAppId ? (
-                <EyeOffIcon className="h-5 w-5" />
-              ) : (
-                <EyeIcon className="h-5 w-5" />
-              )}
-            </button>
+        <>
+          <div className="mb-6 grid grid-cols-3 items-center gap-4">
+            <label className="col-span-1 text-sm font-medium text-gray-700">
+              {t('allowedDomains')}
+            </label>
+            <div className="relative col-span-2">
+              <CopyDomain value={domain} className="w-full" label={''} />
+            </div>
           </div>
-        </div>
+
+          <div className="grid grid-cols-3 items-center gap-4">
+            <label className="col-span-1 text-sm font-medium text-gray-700">
+              {t('loomAppId')}
+            </label>
+            <div className="relative col-span-2">
+              <ThemedInput
+                data-test={'account-display-name'}
+                minLength={2}
+                placeholder={t('loomAppIdPlaceholder')}
+                maxLength={100}
+                type={showLoomAppId ? 'text' : 'password'}
+                value={loomAppId}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setLoomAppId(e.target.value)
+                }
+                onBlur={() => updateCredentialsMutation.mutate()}
+                className="w-full"
+              />
+              <button
+                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                type="button"
+                onClick={() => setShowLoomAppId(!showLoomAppId)}
+              >
+                {showLoomAppId ? (
+                  <EyeOffIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </div>
+        </>
       )}
-    </>
+    </div>
   );
 }
 

@@ -42,6 +42,7 @@ export const defaultI18nNamespaces = [
   'stripe',
   'tasks',
   'team',
+  'plugins',
 ];
 
 /**

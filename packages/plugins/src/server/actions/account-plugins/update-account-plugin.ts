@@ -1,5 +1,7 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
@@ -24,21 +26,35 @@ import { updateAccountPlugin } from '../../services/account-plugin-service';
  */
 export const updateAccountPluginAction = async (
   id: string,
-  updates: Partial<AccountPluginInsert>,
+  updates: Partial<AccountPluginInsert> & {
+    provider?: string;
+    account_id?: string;
+  },
 ) => {
   try {
+    if (
+      updates.provider !== 'loom' &&
+      (!updates.provider || !updates.account_id)
+    ) {
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        'Provider and account_id are required for updating billing account',
+        ErrorPluginOperations.FAILED_TO_UPDATE_PLUGIN,
+      );
+    }
+
     const client =
       getSupabaseServerActionClient() as unknown as SupabaseClient<Database>;
 
     const updatedAccountPlugin = await updateAccountPlugin(client, id, updates);
+
+    revalidatePath('/apps');
 
     return CustomResponse.success(
       updatedAccountPlugin,
       'accountPluginUpdated',
     ).toJSON();
   } catch (error) {
-    console.error('Error updating account plugin:', error);
-
     if (error instanceof CustomError) {
       return CustomResponse.error(error).toJSON();
     }
