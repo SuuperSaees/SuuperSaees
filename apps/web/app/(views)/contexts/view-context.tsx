@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, createContext, useContext, useState } from 'react';
+import React, { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
 import useViewConfigurations from '../hooks/view/use-view-configurations';
 import { KanbanItem } from '../kanban.types';
@@ -64,7 +64,7 @@ export const ViewProvider = <T extends ViewItem>({
   );
 
   const [viewType, setViewType] = useState<ViewType>(initialViewType);
-  const [data, setData] = useState<T[]>(initialData);
+  const [data, setData] = useState<T[]>([]);
   const [configurations, setConfigurations] = useState<
     ViewConfigurations<T> | undefined
   >(newConfigurations);
@@ -90,6 +90,10 @@ export const ViewProvider = <T extends ViewItem>({
       React.SetStateAction<ViewConfigurations<ViewItem> | undefined>
     >,
   };
+
+  useEffect(()=> {
+    setData(initialData)
+  }, [initialData])
   return (
     <ViewContext.Provider value={value}>
       <KanbanProvider

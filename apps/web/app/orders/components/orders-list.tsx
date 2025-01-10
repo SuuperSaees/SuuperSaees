@@ -31,18 +31,19 @@ import Table from '../../components/table/table';
 import { useUserOrderActions } from '../hooks/user-order-actions';
 import { useAgencyStatuses } from './context/agency-statuses-context';
 import KanbanCard from './kanban-card';
+import { useOrdersContext } from './context/orders-context';
 
 type OrderResponse = Omit<Order.Response, 'id'> & {
   id: string;
 };
 type OrdersTableProps = {
-  orders: Order.Response[];
   agencyMembers: UserWithSettings[];
   agencyStatuses?: AgencyStatus.Type[];
 };
 
-export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
+export function OrderList({ agencyMembers }: OrdersTableProps) {
   const { t } = useTranslation('orders');
+  const { orders } = useOrdersContext()
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
     'open',

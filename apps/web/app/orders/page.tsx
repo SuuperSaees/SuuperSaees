@@ -13,6 +13,7 @@ import { PageHeader } from '../components/page-header';
 import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
 import { OrderList } from './components/orders-list';
+import { OrdersProvider } from './components/context/orders-context';
 
 type OrderResponse = Omit<Order.Response, 'id'> & {
   id: string;
@@ -64,7 +65,9 @@ async function OrdersPage() {
 
 
   return (
-    <>
+
+    <OrdersProvider initialOrders={ordersData as unknown as Order.Response[]}>
+
       <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []} agencyMembers={agencyMembers ?? []}>
         <PageBody>
           <div className="p-[35px]">
@@ -74,7 +77,6 @@ async function OrdersPage() {
             />
  
               <OrderList
-                orders={ordersData ?? []}
                 agencyMembers={agencyMembers ?? []}
                 agencyStatuses={agencyStatuses ?? []}
               />
@@ -82,7 +84,8 @@ async function OrdersPage() {
           </div>
         </PageBody>
       </AgencyStatusesProvider>
-    </>
+    </OrdersProvider>
+
   );
 }
 
