@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Copy, Eye, EyeOff, Info } from 'lucide-react';
+import { CopyDomain } from 'node_modules/@kit/accounts/src/components/personal-account-settings/copy-domain';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -31,6 +32,10 @@ function TreliContentStatic({
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const webhookUrl =
+    process.env.NODE_ENV === 'production'
+      ? 'app.suuper.co/api/v1/webhook'
+      : 'app.dev.suuper.co/api/v1/webhook';
 
   const { t } = useTranslation('plugins');
 
@@ -59,7 +64,6 @@ function TreliContentStatic({
         }
       } catch (error) {
         console.error(t('errorFetchingTreliCredentials'), error);
-        toast.error(t('errorFetchingTreliCredentials'));
       } finally {
         setIsLoading(false);
       }
@@ -76,7 +80,9 @@ function TreliContentStatic({
       });
     } catch (error) {
       console.error(t('clipboardCopyError'), error);
-      toast.error(t('clipboardCopyError'));
+      toast.error(t('errorMessage'), {
+        description: t('clipboardCopyError'),
+      });
     }
   };
 
@@ -87,16 +93,18 @@ function TreliContentStatic({
       await updateAccountPluginAction(pluginId, {
         credentials: updatedCredentials,
         provider: 'treli',
-        account_id: userId, 
+        account_id: userId,
       });
 
       setCredentials(updatedCredentials);
-      toast.success(t('updateSuccess'), {
-        description: t('fieldUpdated', { field }),
+      toast.success(t('successMessage'), {
+        description: t('fieldUpdated'),
       });
     } catch (error) {
       console.error(t('updateError', { field }), error);
-      toast.error(t('updateError'));
+      toast.error(t('errorMessage'), {
+        description: t('updateError'),
+      });
     }
   };
 
@@ -202,27 +210,10 @@ function TreliContentStatic({
             </p>
             <div className="mt-4 grid grid-cols-3 items-center gap-4">
               <label className="col-span-1 text-sm font-medium text-gray-700">
-                {t('webhookUrl')} *
+                {t('webhookUrl')}
               </label>
               <div className="relative col-span-2">
-                <ThemedInput
-                  value={credentials.webhook_url}
-                  placeholder={t('webhookUrlPlaceholder')}
-                  className="w-full"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleChange('webhook_url', e.target.value)
-                  }
-                  onBlur={() =>
-                    handleUpdate('webhook_url', credentials.webhook_url)
-                  }
-                />
-                <button
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                  type="button"
-                  onClick={() => handleCopyToClipboard(credentials.webhook_url)}
-                >
-                  <Copy className="h-5 w-5" />
-                </button>
+                <CopyDomain value={webhookUrl} className="mt-4" label={''} />
               </div>
             </div>
           </div>

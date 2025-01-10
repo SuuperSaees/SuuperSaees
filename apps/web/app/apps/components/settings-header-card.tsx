@@ -32,23 +32,23 @@ function SettingsHeaderCard({
 
   const handleUninstall = async () => {
     if (!pluginId) {
-      toast.error('Error', {
-        description: 'Plugin ID is missing',
+      toast.error(t('errorMessage'), {
+        description: t('errorDeletingPlugin'),
       });
       return;
     }
 
     try {
       await updatePluginStatusAction(pluginId, 'uninstalled');
-      toast.success(t('uninstallSuccess'), {
-        description: 'Plugin uninstalled successfully',
+      toast.success(t('successMessage'), {
+        description: t('pluginDeletedSuccessfully'),
       });
 
       router.replace('/apps');
     } catch (error) {
       console.error('Error uninstalling plugin:', error);
-      toast.error(t('uninstallError'), {
-        description: 'Error uninstalling plugin',
+      toast.error(t('errorMessage'), {
+        description: t('errorDeletingPlugin'),
       });
     }
   };

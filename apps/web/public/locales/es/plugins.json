@@ -34,9 +34,21 @@
   "errorFetchingTreliCredentials": "Error al cargar las credenciales de Treli.",
   "clipboardCopied": "Contenido copiado al portapapeles.",
   "successMessage": "¡Todo listo!",
-  "updateSuccess": "¡Actualización exitosa!",
+  "errorMessage": "¡Algo salió mal!",
   "fieldUpdated": "El campo {{field}} se actualizó correctamente.",
   "treliUserPlaceholder": "Ingresa tu usuario de Treli",
   "treliPasswordPlaceholder": "Ingresa tu contraseña de Treli",
-  "webhookUrlPlaceholder": "Ingresa la URL del webhook"
+  "webhookUrlPlaceholder": "Ingresa la URL del webhook",
+  "pluginInstalledSuccessfully": "Plugin instalado con éxito.",
+  "errorInstallingPlugin": "Error al instalar el plugin.",
+  "pluginUpdatedSuccessfully": "Plugin actualizado con éxito.",
+  "errorUpdatingPlugin": "Error al actualizar el plugin.",
+  "pluginDeletedSuccessfully": "Plugin eliminado con éxito.",
+  "errorDeletingPlugin": "Error al eliminar el plugin.",
+  "clipboardCopyError": "Error al copiar al portapapeles.",
+  "updateError": "Error al actualizar los datos.",
+  "loomAppId": "ID de Aplicación Loom",
+  "loomAppIdPlaceholder": "Ingresa tu ID de Aplicación Loom",
+  "allowedDomains": "Dominios Permitidos",
+  "webhookUrlLabel": "URL del Webhook"
 }

@@ -57,7 +57,7 @@ export default function PluginCard({
       });
     },
     onSuccess: () => {
-      toast.success(t('installSuccess'), {
+      toast.success(t('successMessage'), {
         description: t('pluginInstalledSuccessfully'),
       });
       setIsInstalled(true);
@@ -66,7 +66,7 @@ export default function PluginCard({
     },
     onError: (error) => {
       console.error(error);
-      toast.error(t('installError'), {
+      toast.error(t('errorMessage'), {
         description: t('errorInstallingPlugin'),
       });
     },
@@ -77,14 +77,14 @@ export default function PluginCard({
       await updatePluginStatusAction(pluginId ?? '', newStatus);
     },
     onSuccess: () => {
-      toast.success(t('updateSuccess'), {
+      toast.success(t('successMessage'), {
         description: t('pluginUpdatedSuccessfully'),
       });
       router.refresh();
     },
     onError: (error) => {
       console.error(error);
-      toast.error(t('updateError'), {
+      toast.error(t('errorMessage'), {
         description: t('errorUpdatingPlugin'),
       });
     },
@@ -103,7 +103,7 @@ export default function PluginCard({
       return response;
     },
     onSuccess: () => {
-      toast.success(t('deleteSuccess'), {
+      toast.success(t('successMessage'), {
         description: t('pluginDeletedSuccessfully'),
       });
       setIsInstalled(false);
@@ -112,7 +112,7 @@ export default function PluginCard({
     },
     onError: (error) => {
       console.error(error);
-      toast.error(t('deleteError'), {
+      toast.error(t('errorMessage'), {
         description: t('errorDeletingPlugin'),
       });
     },
