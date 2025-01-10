@@ -2,6 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 
+import { useKanbanContext } from '~/(views)/contexts/kanban-context';
 import { KanbanColumn as KanbanColumnType } from '~/(views)/kanban.types';
 import { parseUser } from '~/(views)/utils/kanban/data-transform';
 import { ViewUser } from '~/(views)/views.types';
@@ -13,6 +14,9 @@ import Avatar from '../../../components/ui/avatar';
 import KanbanCard from './kanban-card';
 
 const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
+  const { customComponents } = useKanbanContext();
+  const CustomCard = customComponents?.kanban?.Card;
+
   const { t } = useTranslation('views');
 
   const columnName: ViewUser | string =
@@ -69,7 +73,11 @@ const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
             id={item.id}
             data={{ type: 'item' }}
           >
-            <KanbanCard item={item} />
+            {CustomCard ? (
+              <CustomCard item={item} />
+            ) : (
+              <KanbanCard item={item} />
+            )}
           </SortableItem>
         ))}
       </div>

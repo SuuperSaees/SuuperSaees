@@ -14,6 +14,7 @@ export function createFullConfiguration<T extends ViewItem>(
   initialData: T[],
   initialViewType: ViewType,
   initialConfigurations: ViewInitialConfigurations<T>,
+  availableProperties: [keyof T],
 ): ViewConfigurations<T> {
   // Helper function to create visibility configuration
   const createVisibilityConfig = (
@@ -21,6 +22,7 @@ export function createFullConfiguration<T extends ViewItem>(
     title: string,
     action: (value: ViewManageableProperty) => void,
   ): ViewVisiblityConfiguration => {
+
     return {
       title,
       options: items ?? [],
@@ -53,7 +55,9 @@ export function createFullConfiguration<T extends ViewItem>(
   };
 
   // Get all available keys from the data
-  const availableKeys = getAllKeys(initialData);
+  const availableKeys = getAllKeys(initialData).filter((key) =>
+    availableProperties.includes(key),
+  );
 
   // Get the selected group key
   const { group } = initialConfigurations.kanban;
@@ -64,6 +68,7 @@ export function createFullConfiguration<T extends ViewItem>(
 
   // Create the full configuration
   const fullConfiguration: ViewConfigurations<T> = {
+
     viewType: initialViewType,
     group: {
       title: 'Group By',

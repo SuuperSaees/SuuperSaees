@@ -12,9 +12,10 @@ import {
 } from '@kit/ui/select';
 import { Spinner } from '@kit/ui/spinner';
 
-type Option = {
+export type Option = {
   label: string;
   value: string | number;
+  action?: (option: string | number) => void;
 };
 
 interface SelectActionProps {
@@ -26,6 +27,7 @@ interface SelectActionProps {
   customItem?: (option: string) => React.ReactNode; // JSX or string for both selected and dropdown items
   children?: React.ReactNode;
   isLoading?: boolean;
+  showLabel?: boolean;
   [key: string]: unknown;
 }
 
@@ -38,6 +40,7 @@ const SelectAction = ({
   customItem,
   children,
   isLoading,
+  showLabel,
   ...rest
 }: SelectActionProps) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
@@ -54,7 +57,7 @@ const SelectAction = ({
   return (
     <div className="flex flex-col gap-2">
       <span className="font-semibold">
-        {children ? children : groupName ? groupName : 'Select an option'}
+        {children ? children : groupName ? groupName :showLabel ?  'Select an option' : null}
       </span>
       <Select
         value={selectedValue ?? undefined}
@@ -65,12 +68,13 @@ const SelectAction = ({
           if (selectedOption) {
             setSelectedValue(String(selectedOption.value));
             setSelectedLabel(selectedOption.label);
+            selectedOption.action && selectedOption.action(selectedOption.value);
           }
           onSelectHandler && onSelectHandler(value);
         }}
         {...rest}
       >
-        <SelectTrigger className={'w-full border-none bg-black ' + className}>
+        <SelectTrigger className={'w-full border-none ' + className}>
           <SelectValue placeholder={t('common:selectOption')}>
             {/* Use customItem for the selected value if provided, otherwise show the label */}
             {customItem && selectedValue
