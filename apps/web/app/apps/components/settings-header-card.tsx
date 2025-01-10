@@ -30,8 +30,6 @@ function SettingsHeaderCard({
   const { t } = useTranslation('plugins');
   const router = useRouter();
 
-  console.log(icon_url);
-
   const handleUninstall = async () => {
     if (!pluginId) {
       toast.error('Error', {
@@ -62,7 +60,7 @@ function SettingsHeaderCard({
           src={icon_url ?? `/images/plugins/default.png`}
           alt={name}
           className="h-10 w-10"
-          onError={(e) => (e.currentTarget.src = '/images/plugins/default.png')} 
+          onError={(e) => (e.currentTarget.src = '/images/plugins/default.png')}
         />
         <h1 className="text-lg font-bold">{t(`${name}`)}</h1>
       </div>

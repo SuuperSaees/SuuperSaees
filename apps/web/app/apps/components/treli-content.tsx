@@ -12,7 +12,13 @@ import Tooltip from '~/components/ui/tooltip';
 import { getAccountPluginByIdAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
 import { updateAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
 
-function TreliContentStatic({ pluginId }: { pluginId: string }) {
+function TreliContentStatic({
+  pluginId,
+  userId,
+}: {
+  pluginId: string;
+  userId: string;
+}) {
   const [credentials, setCredentials] = useState<{
     treli_user: string;
     treli_password: string;
@@ -80,6 +86,8 @@ function TreliContentStatic({ pluginId }: { pluginId: string }) {
 
       await updateAccountPluginAction(pluginId, {
         credentials: updatedCredentials,
+        provider: 'treli',
+        account_id: userId, 
       });
 
       setCredentials(updatedCredentials);
