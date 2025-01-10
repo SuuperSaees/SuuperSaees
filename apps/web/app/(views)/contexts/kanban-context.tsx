@@ -5,12 +5,13 @@ import { createContext, useContext } from 'react';
 import useKanban from '../hooks/kanban/use-kanban';
 import { KanbanColumn, KanbanItem } from '../kanban.types';
 import { ViewConfigurations } from '../view-config.types';
-import { UpdateFunction } from '../views.types';
+import { UpdateFunction, ViewCustomComponents } from '../views.types';
 
 export interface KanbanContextProps<T extends KanbanItem> {
   columns: KanbanColumn[];
   configurations: ViewConfigurations<T>;
   availableProperties: [keyof T];
+  customComponents?: ViewCustomComponents<T>;
   setColumns: React.Dispatch<React.SetStateAction<KanbanColumn[]>>;
   setConfigurations: React.Dispatch<
     React.SetStateAction<ViewConfigurations<T>>
@@ -30,6 +31,7 @@ interface KanbanProviderProps<T extends KanbanItem> {
   initialData: T[];
   initialConfigurations: ViewConfigurations<T>;
   availableProperties: [keyof T];
+  customComponents?: ViewCustomComponents<T>;
   onUpdateFn?: UpdateFunction
 }
 
@@ -38,6 +40,7 @@ export const KanbanProvider = <T extends KanbanItem>({
   initialData,
   initialConfigurations,
   availableProperties = ['status'] as [keyof T],
+  customComponents,
   onUpdateFn
 }: KanbanProviderProps<T>) => {
   const {
@@ -55,6 +58,7 @@ export const KanbanProvider = <T extends KanbanItem>({
         configurations:
           configurations as unknown as ViewConfigurations<KanbanItem>,
         availableProperties: availableProperties as unknown as [keyof KanbanItem],
+        customComponents: customComponents as unknown as ViewCustomComponents<KanbanItem>,
         setColumns,
         setConfigurations: setConfigurations as unknown as React.Dispatch<
           React.SetStateAction<ViewConfigurations<KanbanItem>>

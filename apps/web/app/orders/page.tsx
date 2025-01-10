@@ -4,15 +4,11 @@ import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/ac
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 
-import { ViewInitialConfigurations, ViewItem } from '~/(views)/types';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { Order } from '~/lib/order.types';
 import { getOrganizationById } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
-import { formatString } from '~/utils/text-formatter';
 
-import Board from '../(views)/components/board';
-import { ViewProvider } from '../(views)/contexts/view-context';
 import { PageHeader } from '../components/page-header';
 import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
@@ -69,7 +65,7 @@ async function OrdersPage() {
 
   return (
     <>
-      <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []}>
+      <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []} agencyMembers={agencyMembers ?? []}>
         <PageBody>
           <div className="p-[35px]">
             <PageHeader

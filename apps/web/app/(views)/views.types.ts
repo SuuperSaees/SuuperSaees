@@ -56,4 +56,14 @@ export interface ViewProps<T extends ViewItem> {
   onAction?: (action: string, payload: T) => Promise<void | T>;
 }
 
+// Custom components for each view
+export interface ViewCustomComponents<T> {
+  kanban?: {
+    Card: React.FC<{ item: T }>; // Card component for the kanban view
+  };
+  calendar?: {
+    Card: React.FC<{ item: T }>; // Card component for the calendar view
+  };
+}
+
 export type UpdateFunction = <T>(data: T, property?: keyof T) => Promise<T> ;

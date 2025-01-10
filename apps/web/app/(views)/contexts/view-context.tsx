@@ -9,7 +9,7 @@ import {
   ViewConfigurations,
   ViewInitialConfigurations,
 } from '../view-config.types';
-import { UpdateFunction, ViewItem, ViewType } from '../views.types';
+import { UpdateFunction, ViewCustomComponents, ViewItem, ViewType } from '../views.types';
 import KanbanProvider from './kanban-context';
 
 // Define the Context types
@@ -18,14 +18,15 @@ export interface ViewContextProps<T extends ViewItem> {
   data: T[];
   configurations: ViewConfigurations<T>;
   availableProperties: [keyof T];
+  manageConfigurations: {
+    updateGroup: (groupKey: keyof T) => void;
+  };
+  customComponents?: ViewCustomComponents<T>; 
   setViewType: (viewType: ViewType) => void;
   setData: React.Dispatch<React.SetStateAction<T[]>>;
   setConfigurations: React.Dispatch<
     React.SetStateAction<ViewConfigurations<T> | undefined>
   >;
-  manageConfigurations: {
-    updateGroup: (groupKey: keyof T) => void;
-  };
   onAction?: (action: string, payload: T) => Promise<void | T>;
 }
 
@@ -41,7 +42,9 @@ interface ViewProviderProps<T extends ViewItem> {
   initialViewType: ViewType;
   initialConfigurations: ViewInitialConfigurations<T>;
   availableProperties: [keyof T];
+  customComponents?: ViewCustomComponents<T>;
   onUpdateFn?: UpdateFunction;
+
 }
 
 export const ViewProvider = <T extends ViewItem>({
@@ -50,6 +53,7 @@ export const ViewProvider = <T extends ViewItem>({
   initialViewType,
   initialConfigurations,
   availableProperties = ['status'] as [keyof T],
+  customComponents,
   onUpdateFn
 }: ViewProviderProps<T>) => {
   const newConfigurations = createFullConfiguration<T>(
@@ -77,6 +81,7 @@ export const ViewProvider = <T extends ViewItem>({
     configurations: configurations as unknown as ViewConfigurations<ViewItem>,
     manageConfigurations,
     availableProperties: availableProperties as unknown as [keyof ViewItem],
+    customComponents: customComponents as unknown as ViewCustomComponents<ViewItem>,
     setViewType,
     setData: setData as unknown as React.Dispatch<
       React.SetStateAction<ViewItem[]>
@@ -94,6 +99,7 @@ export const ViewProvider = <T extends ViewItem>({
         }
         onUpdateFn={onUpdateFn as unknown as UpdateFunction}
         availableProperties={availableProperties as unknown as [keyof KanbanItem]}
+        customComponents={customComponents as unknown as ViewCustomComponents<KanbanItem>}
       >
         {children}
       </KanbanProvider>

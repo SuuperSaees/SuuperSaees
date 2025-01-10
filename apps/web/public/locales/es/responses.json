@@ -57,7 +57,8 @@
       "failedToUpdateOrderTags": "No se pudo actualizar las etiquetas de la orden. Inténtalo nuevamente.",
       "failedToCreateOrderTag": "No se pudo crear la etiqueta de la orden. Inténtalo nuevamente.",
       "failedToUpdateOrderTag": "No se pudo actualizar la etiqueta de la orden. Inténtalo nuevamente.",
-      "failedToDeleteOrderTag": "No se pudo eliminar la etiqueta de la orden. Inténtalo nuevamente."
+      "failedToDeleteOrderTag": "No se pudo eliminar la etiqueta de la orden. Inténtalo nuevamente.",
+      "failedToUpdatedOrder": "No se pudo actualizar la orden. Inténtalo nuevamente."
     },
     "reviews": {
       "reviewNotFound": "La reseña no se encontró.",
@@ -113,7 +114,8 @@
       "orderTagsUpdated": "Las etiquetas de la orden se actualizaron correctamente.",
       "orderTagCreated": "La etiqueta de la orden se creó correctamente.",
       "orderTagUpdated": "La etiqueta de la orden se actualizó correctamente.",
-      "orderTagDeleted": "La etiqueta de la orden se eliminó correctamente."
+      "orderTagDeleted": "La etiqueta de la orden se eliminó correctamente.",
+      "orderUpdated": "La orden se actualizó correctamente."
     },
     "reviews": {
       "reviewCreated": "La reseña se añadió correctamente."

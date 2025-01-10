@@ -30,6 +30,7 @@ import { formatString } from '~/utils/text-formatter';
 import Table from '../../components/table/table';
 import { useUserOrderActions } from '../hooks/user-order-actions';
 import { useAgencyStatuses } from './context/agency-statuses-context';
+import KanbanCard from './kanban-card';
 
 type OrderResponse = Omit<Order.Response, 'id'> & {
   id: string;
@@ -147,21 +148,42 @@ export function OrderList({ orders, agencyMembers }: OrdersTableProps) {
       },
     },
   };
-  const handleUpdateOrdersData = async (data: Order.Response, property?: string) => {
+  const handleUpdateOrdersData = async (
+    data: Order.Response,
+    property?: string,
+  ) => {
     try {
       // console.log('Updating orders data...', data);
-      const updateValue = property ? { [property]: data[property as keyof Order.Response] } : data;
+      const updateValue = property
+        ? { [property]: data[property as keyof Order.Response] }
+        : data;
       await updateOrder(data.id, updateValue);
     } catch (error) {
       console.error('Error updating orders data:', error);
     }
   };
+  console.log('orders', orders);
   return (
     <ViewProvider
       initialData={orders as unknown as ViewItem[]}
       initialViewType="kanban"
       initialConfigurations={initialConfiguarations}
       onUpdateFn={handleUpdateOrdersData}
+      availableProperties={[
+        'status',
+        'brief',
+        'assigned_to',
+        'customer',
+        'priority',
+        'client_organization',
+      ]}
+      customComponents={{
+        kanban: {
+          Card: ({ item }) => (
+            <KanbanCard item={item as unknown as Order.Response} />
+          ),
+        },
+      }}
     >
       <Board />
     </ViewProvider>
