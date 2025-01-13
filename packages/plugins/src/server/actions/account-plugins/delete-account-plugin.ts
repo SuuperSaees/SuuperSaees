@@ -15,17 +15,23 @@ import { deleteAccountPlugin } from '../../services/account-plugin-service';
 
 /**
  * @name deleteAccountPluginAction
- * @description Server Action to handle the deletion of an account_plugin.
+ * @description Server Action to handle the deletion of an account_plugin and its associated billing_account.
  * Utilizes Supabase for database interactions and manages responses using CustomResponse and CustomError.
  * @param {string} id - The ID of the account_plugin to be deleted.
+ * @param {string} accountId - The ID of the account associated with the billing_account.
+ * @param {string} provider - The provider name of the billing_account.
  * @returns {Promise<Object>} A standardized response indicating success or failure.
  */
-export const deleteAccountPluginAction = async (id: string) => {
+export const deleteAccountPluginAction = async (
+  id: string,
+  accountId: string,
+  provider: string,
+) => {
   try {
     const client =
       getSupabaseServerActionClient() as unknown as SupabaseClient<Database>;
 
-    await deleteAccountPlugin(client, id);
+    await deleteAccountPlugin(client, id, accountId, provider);
 
     return CustomResponse.success(
       null,
@@ -41,7 +47,7 @@ export const deleteAccountPluginAction = async (id: string) => {
     return CustomResponse.error(
       new CustomError(
         HttpStatus.Error.InternalServerError,
-        'An unexpected error occurred while deleting the account plugin',
+        'An unexpected error occurred while deleting the account plugin and billing account',
         ErrorPluginOperations.FAILED_TO_DELETE_PLUGIN,
         undefined,
         { error },

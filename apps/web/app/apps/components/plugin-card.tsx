@@ -92,7 +92,11 @@ export default function PluginCard({
 
   const deletePluginMutation = useMutation({
     mutationFn: async () => {
-      const response = await deleteAccountPluginAction(pluginId ?? '');
+      const response = await deleteAccountPluginAction(
+        pluginId ?? '',
+        userId,
+        name.toLowerCase(),
+      );
 
       if (!response || response.error) {
         throw new Error(

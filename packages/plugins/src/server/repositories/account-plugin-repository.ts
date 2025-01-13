@@ -323,21 +323,45 @@ export class AccountPluginRepository {
 
   /**
    * @name delete
-   * @description Marks an account_plugin as deleted by updating its 'deleted_on' field in the 'account_plugins' table.
-   * Performs a soft delete operation.
+   * @description Marks an account_plugin and its corresponding billing_account as deleted by updating their 'deleted_on' fields.
+   * Performs a soft delete operation for both tables.
    * @param {string} id - The unique ID of the account_plugin to delete.
-   * @returns {Promise<void>} Resolves when the account_plugin is successfully marked as deleted.
-   * @throws {Error} If the delete operation fails.
+   * @param {string} accountId - The account ID to identify the billing_account.
+   * @param {string} provider - The provider name to identify the billing_account.
+   * @returns {Promise<void>} Resolves when both records are successfully marked as deleted.
+   * @throws {Error} If any delete operation fails.
    */
-  async delete(id: string): Promise<void> {
-    const { error } = await this.client
-      .from(this.tableName)
-      .update({ deleted_on: new Date().toISOString() })
-      .eq('id', id);
+  async delete(id: string, accountId: string, provider: string): Promise<void> {
+    try {
+      const { error: pluginError } = await this.client
+        .from(this.tableName)
+        .update({ deleted_on: new Date().toISOString() })
+        .eq('id', id)
+        .is('deleted_on', null);
 
-    if (error) {
+      if (pluginError) {
+        throw new Error(
+          `[REPOSITORY] Error deleting account plugin: ${pluginError.message}`,
+        );
+      }
+
+      const { error: billingError } = await this.client
+        .from('billing_accounts')
+        .update({
+          deleted_on: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('account_id', accountId)
+        .eq('provider', provider);
+
+      if (billingError) {
+        throw new Error(
+          `[REPOSITORY] Error deleting billing account: ${billingError.message}`,
+        );
+      }
+    } catch (error) {
       throw new Error(
-        `[REPOSITORY] Error deleting account plugin: ${error.message}`,
+        `[REPOSITORY] Error in delete method: ${(error as Error).message}`,
       );
     }
   }

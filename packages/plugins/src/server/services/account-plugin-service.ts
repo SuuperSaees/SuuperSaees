@@ -278,24 +278,29 @@ export const updatePluginStatus = async (
 
 /**
  * @name deleteAccountPlugin
- * @description Service to delete an account_plugin by marking it as deleted in the database.
- * Performs a soft delete operation.
+ * @description Service to delete an account_plugin and its corresponding billing_account.
+ * Performs a soft delete operation for both tables.
  * @param {SupabaseClient<Database>} client - The Supabase client instance for database interactions.
  * @param {string} id - The unique ID of the account_plugin to delete.
- * @returns {Promise<void>} Resolves when the account_plugin is successfully deleted.
- * @throws {Error} If the delete operation fails.
+ * @param {string} accountId - The ID of the account to identify the billing_account.
+ * @param {string} provider - The provider name to identify the billing_account.
+ * @returns {Promise<void>} Resolves when both records are successfully deleted.
+ * @throws {Error} If any delete operation fails.
  */
 export const deleteAccountPlugin = async (
   client: SupabaseClient<Database>,
   id: string,
+  accountId: string,
+  provider: string,
 ): Promise<void> => {
   try {
+    console.log("[SERVICE] DATA: ", id, accountId, provider);
     const accountPluginRepository = new AccountPluginRepository(client);
 
-    await accountPluginRepository.delete(id);
+    await accountPluginRepository.delete(id, accountId, provider);
   } catch (error) {
     throw new Error(
-      `[SERVICE] Failed to delete account plugin: ${(error as Error).message}`,
+      `[SERVICE] Failed to delete account plugin and billing account: ${(error as Error).message}`,
     );
   }
 };
