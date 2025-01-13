@@ -345,19 +345,21 @@ export class AccountPluginRepository {
         );
       }
 
-      const { error: billingError } = await this.client
-        .from('billing_accounts')
-        .update({
-          deleted_on: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('account_id', accountId)
-        .eq('provider', provider);
+      if (provider !== 'loom') {
+        const { error: billingError } = await this.client
+          .from('billing_accounts')
+          .update({
+            deleted_on: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('account_id', accountId)
+          .eq('provider', provider);
 
-      if (billingError) {
-        throw new Error(
-          `[REPOSITORY] Error deleting billing account: ${billingError.message}`,
-        );
+        if (billingError) {
+          throw new Error(
+            `[REPOSITORY] Error deleting billing account: ${billingError.message}`,
+          );
+        }
       }
     } catch (error) {
       throw new Error(
