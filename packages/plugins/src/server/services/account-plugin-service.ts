@@ -294,7 +294,6 @@ export const deleteAccountPlugin = async (
   provider: string,
 ): Promise<void> => {
   try {
-    console.log("[SERVICE] DATA: ", id, accountId, provider);
     const accountPluginRepository = new AccountPluginRepository(client);
 
     await accountPluginRepository.delete(id, accountId, provider);
