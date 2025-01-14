@@ -33,11 +33,14 @@ class CredentialsEncryptor:
 def main():
     encryption_key = os.getenv('ENCRYPTION_KEY')
     if not encryption_key:
-        raise ValueError("ENCRYPTION_KEY environment variable is required")
+        raise ValueError("ENCRYPTION_KEY environment variable is required")\
 
-    LOOM_PROVIDER_ID = "550e8400-e29b-41d4-a716-446655440000"  
+    # YOUR loom provider id
+
+    LOOM_PROVIDER_ID = uuid.uuid4()  
 
     providers = [
+        # YOUR provider
         {
             'account_id': 'bc5a7eb1-98c9-429d-9b61-eebbca314682',
             'user_id': 'fd052e52-0223-4079-9f3e-a3056c9e8a57',    
@@ -49,6 +52,7 @@ def main():
     sql_content = ''
 
     for provider in providers:
+        # YOUR plugin_id
         plugin_id = 'c9a95821-6d63-4588-98b1-47d4aaaa46be',
         
         credentials = {
