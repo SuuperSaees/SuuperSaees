@@ -46,11 +46,27 @@ export const createAccountPlugin = async (
       !Array.isArray(data.credentials) &&
       Object.keys(data.credentials).length > 0
     ) {
-      const crypto = new CredentialsCrypto(SECRET_KEY);
-      const encryptedCredentials: EncryptedCredentials = crypto.encrypt(
-        data.credentials,
-      );
-      data.credentials = JSON.stringify(encryptedCredentials);
+      const { data: pluginData, error: pluginError } = await client
+        .from('plugins')
+        .select('name')
+        .eq('id', data.plugin_id)
+        .single();
+
+      if (pluginError ?? !pluginData) {
+        throw new Error(
+          `[SERVICE] Failed to retrieve plugin data for provider assignment. Plugin ID: ${data.plugin_id}`,
+        );
+      }
+
+      const provider = pluginData.name.toLowerCase();
+
+      if (provider !== 'stripe') {
+        const crypto = new CredentialsCrypto(SECRET_KEY);
+        const encryptedCredentials: EncryptedCredentials = crypto.encrypt(
+          data.credentials,
+        );
+        data.credentials = JSON.stringify(encryptedCredentials);
+      }
     } else if (data.credentials && typeof data.credentials === 'object') {
       data.credentials = null;
     }
@@ -170,17 +186,6 @@ export const getAccountPluginsByAccount = async (
   }
 };
 
-/**
- * @name updateAccountPlugin
- * @description Service to update the details of an existing `account_plugin`.
- * Separates updates between the `account_plugins` and `billing_accounts` tables.
- * Validates credentials and encrypts sensitive data before saving.
- * @param {SupabaseClient<Database>} client - The Supabase client instance for database interactions.
- * @param {string} id - The unique ID of the `account_plugin` to update.
- * @param {Partial<AccountPluginInsert> & { provider?: string; account_id?: string; }} updates - The fields to update in the `account_plugin`.
- * @returns {Promise<AccountPlugin>} The updated `account_plugin` data.
- * @throws {Error} If any error occurs during the update operation.
- */
 export const updateAccountPlugin = async (
   client: SupabaseClient<Database>,
   id: string,
@@ -219,6 +224,7 @@ export const updateAccountPlugin = async (
     }
 
     if (
+      updates.provider !== 'stripe' &&
       updates.credentials &&
       typeof updates.credentials === 'object' &&
       !Array.isArray(updates.credentials) &&
