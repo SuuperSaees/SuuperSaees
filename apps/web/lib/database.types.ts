@@ -34,6 +34,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_plugins: {
+        Row: {
+          account_id: string
+          created_at: string | null
+          credentials: Json | null
+          deleted_on: string | null
+          id: string
+          plugin_id: string
+          provider_id: string
+          status: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string | null
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          plugin_id: string
+          provider_id: string
+          status?: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string | null
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          plugin_id?: string
+          provider_id?: string
+          status?: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_plugins_plugin_id_fkey"
+            columns: ["plugin_id"]
+            isOneToOne: false
+            referencedRelation: "plugins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounts: {
         Row: {
           created_at: string | null
@@ -1927,64 +1971,39 @@ export type Database = {
       }
       plugins: {
         Row: {
-          account_id: string
           created_at: string
-          credentials: Json
           deleted_on: string | null
+          description: string | null
+          icon_url: string | null
           id: string
-          provider: string
-          provider_id: string
-          status: Database["public"]["Enums"]["plugin_status"]
+          metadata: Json | null
+          name: string
           type: Database["public"]["Enums"]["plugin_type"]
           updated_at: string
         }
         Insert: {
-          account_id: string
           created_at?: string
-          credentials: Json
           deleted_on?: string | null
+          description?: string | null
+          icon_url?: string | null
           id?: string
-          provider: string
-          provider_id: string
-          status?: Database["public"]["Enums"]["plugin_status"]
+          metadata?: Json | null
+          name: string
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
         Update: {
-          account_id?: string
           created_at?: string
-          credentials?: Json
           deleted_on?: string | null
+          description?: string | null
+          icon_url?: string | null
           id?: string
-          provider?: string
-          provider_id?: string
-          status?: Database["public"]["Enums"]["plugin_status"]
+          metadata?: Json | null
+          name?: string
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       reactions: {
         Row: {

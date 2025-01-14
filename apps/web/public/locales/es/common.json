@@ -104,5 +104,6 @@
   "rowsPerPage": "Mostrar",
   "rowNumber": "{{number}} filas",
   "filters": "Filtros",
-  "resetFilters": "Restablecer filtros"
+  "resetFilters": "Restablecer filtros",
+  "pluginsName": "Aplicaciones"
 }

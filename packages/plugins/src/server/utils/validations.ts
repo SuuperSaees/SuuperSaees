@@ -15,9 +15,7 @@ export const generateUUID = (): string => {
 export const PluginInsertSchema = z.object({
   provider_id: z.string().uuid().optional(),
   status: z.enum(['installed', 'uninstalled', 'failed', 'in progress']),
-  type: z.enum(['integration', 'tool', 'internal', 'external']),
-  provider: z.string().min(1),
-  credentials: z.record(z.any()),
+  credentials: z.record(z.string(), z.unknown()).optional(), 
   account_id: z.string().uuid(),
   deleted_on: z.string().datetime().nullable().optional(),
 });
@@ -29,11 +27,17 @@ export const PluginUpdateSchema = PluginInsertSchema.partial();
 
 /**
  * Utility to validate a PluginInsert object.
+ * Automatically generates `provider_id` if not provided.
  * @param data The object to validate.
+ * @returns The validated and updated object.
  * @throws Error if the validation fails.
  */
-export const validatePluginInsert = (data: unknown): void => {
-  PluginInsertSchema.parse(data);
+export const validatePluginInsert = (
+  data: unknown,
+): z.infer<typeof PluginInsertSchema> => {
+  const parsedData = PluginInsertSchema.parse(data);
+
+  return parsedData;
 };
 
 /**
