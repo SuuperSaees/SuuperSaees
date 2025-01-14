@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -41,11 +41,30 @@ export default function PluginCard({
   const { user } = useUserWorkspace();
   const userId = user.id;
 
-  const handleSwitchChange = (checked: boolean) => {
-    const newStatus = checked ? 'installed' : 'uninstalled';
-    updatePluginMutation.mutate(newStatus);
-    setIsInstalled(checked);
-  };
+  useEffect(() => {
+    setIsInstalled(status === 'installed');
+  }, [status]);
+
+  const updatePluginMutation = useMutation({
+    mutationFn: async (newStatus: 'installed' | 'uninstalled') => {
+      await updatePluginStatusAction(pluginId ?? '', newStatus);
+    },
+    onMutate: (newStatus: 'installed' | 'uninstalled') => {
+      setIsInstalled(newStatus === 'installed');
+    },
+    onError: (_error, newStatus) => {
+      setIsInstalled(newStatus === 'installed' ? false : true);
+      toast.error(t('errorMessage'), {
+        description: t('errorUpdatingPlugin'),
+      });
+    },
+    onSuccess: () => {
+      toast.success(t('successMessage'), {
+        description: t('pluginUpdatedSuccessfully'),
+      });
+      router.refresh();
+    },
+  });
 
   const createPluginMutation = useMutation({
     mutationFn: async () => {
@@ -56,37 +75,20 @@ export default function PluginCard({
         credentials: {},
       });
     },
-    onSuccess: () => {
-      toast.success(t('successMessage'), {
-        description: t('pluginInstalledSuccessfully'),
-      });
+    onMutate: () => {
       setIsInstalled(true);
-
-      router.refresh();
     },
-    onError: (error) => {
-      console.error(error);
+    onError: () => {
+      setIsInstalled(false);
       toast.error(t('errorMessage'), {
         description: t('errorInstallingPlugin'),
       });
     },
-  });
-
-  const updatePluginMutation = useMutation({
-    mutationFn: async (newStatus: 'installed' | 'uninstalled') => {
-      await updatePluginStatusAction(pluginId ?? '', newStatus);
-    },
     onSuccess: () => {
       toast.success(t('successMessage'), {
-        description: t('pluginUpdatedSuccessfully'),
+        description: t('pluginInstalledSuccessfully'),
       });
       router.refresh();
-    },
-    onError: (error) => {
-      console.error(error);
-      toast.error(t('errorMessage'), {
-        description: t('errorUpdatingPlugin'),
-      });
     },
   });
 
@@ -106,21 +108,23 @@ export default function PluginCard({
 
       return response;
     },
-    onSuccess: () => {
-      toast.success(t('successMessage'), {
-        description: t('pluginDeletedSuccessfully'),
-      });
-      setIsInstalled(false);
-
-      router.refresh();
-    },
-    onError: (error) => {
-      console.error(error);
+    onError: () => {
       toast.error(t('errorMessage'), {
         description: t('errorDeletingPlugin'),
       });
     },
+    onSuccess: () => {
+      toast.success(t('successMessage'), {
+        description: t('pluginDeletedSuccessfully'),
+      });
+      router.refresh();
+    },
   });
+
+  const handleSwitchChange = (checked: boolean) => {
+    const newStatus = checked ? 'installed' : 'uninstalled';
+    updatePluginMutation.mutate(newStatus);
+  };
 
   const handleDeleteClick = () => {
     if (pluginId) {
