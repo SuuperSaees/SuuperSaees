@@ -91,6 +91,13 @@ const useOrdersFilterConfigs = ({
       filterFn: (order, selectedValues) =>
         selectedValues.some((customerId) => order.customer?.id === customerId),
     },
+    {
+      key: 'search',
+      filterFn: (order, selectedValues) =>
+        selectedValues.some((searchTerm) =>
+          order.title.toLowerCase().includes(searchTerm.toLowerCase()),
+        ),
+    },
   ];
 
   const {
@@ -265,11 +272,21 @@ const useOrdersFilterConfigs = ({
     },
   ];
 
+  const searchConfig = {
+    key: 'search',
+    label: 'search',
+    filter: (searchTerm: string) =>
+      updateFilter('search', 'replace', (order: Order.Response) =>
+        order.title.toLowerCase().includes(searchTerm.toLowerCase()), searchTerm
+      ),
+  };
+
   return {
     filters,
     filtersConfig,
     tabsConfig,
     filteredOrders,
+    searchConfig,
     updateFilter,
     resetFilters,
     getFilterValues,

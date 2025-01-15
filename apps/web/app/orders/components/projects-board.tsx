@@ -54,8 +54,6 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
   const role = workspace.role ?? '';
 
   // State
-  const [searchTerm, setSearchTerm] = useState('');
-
   const { getClientUsers, getClientOrganizations } = useOrdersTransformations();
 
   // Custom hooks
@@ -66,6 +64,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     tabsConfig,
     filtersConfig,
     filters,
+    searchConfig,
   } = useOrdersFilterConfigs({
     orders,
     tags,
@@ -140,7 +139,11 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
             t={t}
             tabsConfig={tabsConfig}
           />
-          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} t={t} />
+          <Search
+            defaultSearch={getFilterValues('search')?.[0] ?? ''}
+            t={t}
+            handleSearch={searchConfig.filter}
+          />
           <Filters
             filters={filtersConfig}
             defaultFilters={filters}
