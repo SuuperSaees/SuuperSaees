@@ -12,8 +12,10 @@ import { getOrganizationById } from '~/team-accounts/src/server/actions/organiza
 import { PageHeader } from '../components/page-header';
 import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
-import { OrderList } from './components/orders-list';
 import { OrdersProvider } from './components/context/orders-context';
+
+import { getTags } from '~/server/actions/tags/tags.action';
+import ProjectsBoard from './components/projects-board';
 
 type OrderResponse = Omit<Order.Response, 'id'> & {
   id: string;
@@ -63,6 +65,7 @@ async function OrdersPage() {
       },
     })) ?? [];
 
+  const tags = await getTags(agencyId ?? '', );
 
   return (
 
@@ -76,10 +79,7 @@ async function OrdersPage() {
               rightContent={<TimerContainer />}
             />
  
-              <OrderList
-                agencyMembers={agencyMembers ?? []}
-                agencyStatuses={agencyStatuses ?? []}
-              />
+              <ProjectsBoard agencyMembers={agencyMembers} tags={tags} />
  
           </div>
         </PageBody>

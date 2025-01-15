@@ -46,7 +46,7 @@ export function useUserOrderActions(
       await queryClient.cancelQueries({ queryKey: ['orders'] });
 
       // Snapshot the previous value
-      const previousOrders = queryClient.getQueryData(['orders']);
+      const previousOrders:Order.Response[] = queryClient.getQueryData(['orders']) ?? [];
       // console.log('previousOrders', previousOrders)
       // Optimistically update to the new value
       // queryClient.setQueryData(['orders'], (old: Order.Response[]) => 
@@ -55,11 +55,11 @@ export function useUserOrderActions(
       //   )
         
       // );
-      console.log('newOrder', newOrder)
-      setOrders && setOrders(old => old.map(order => order.id === newOrder.id ? { ...order, ...newOrder } : order));
+      // console.log('newOrder', newOrder)
+      setOrders && setOrders(old => old.map(order => order.id === newOrder.id ? { ...order, ...newOrder.data } : order));
       
-
-      // Return context with the snapshotted value
+      
+      // Return the snapshot in case of rollback
       return { previousOrders };
     },
     onSuccess: async ({
@@ -67,6 +67,7 @@ export function useUserOrderActions(
     }: {
       updatedOrder: Order.Type | null;
     }) => {
+      setOrders && setOrders(old => old.map(order => order.id === updatedOrder.id ? { ...order, ...updatedOrder } : order));
       toast.success('Success', {
         description: t(
           successTranslateActionName ?? 'success.orders.orderUpdated',
@@ -87,7 +88,10 @@ export function useUserOrderActions(
       //   fields,
       // );
     },
-    onError: () => {
+    onError: (_error, _variables, context) => {
+      // Rollback on error
+      // queryClient.setQueryData(['orders'], previousOrders);
+      setOrders && setOrders && context?.previousOrders && setOrders(context.previousOrders);
       toast.error('Error', {
         description: t(
           errorTranslateActionName ?? 'error.orders.failedToUpdatedOrder',

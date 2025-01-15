@@ -1,0 +1,69 @@
+'use client';
+
+import { Dispatch, SetStateAction, useState } from 'react';
+
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+
+import { Button } from '@kit/ui/button';
+
+import { hexToRgba } from '~/utils/generate-colors';
+
+export type TabConfig = {
+  key: string;
+  label: string;
+  filter: () => void;
+};
+
+interface StatusFiltersProps {
+  activeTab: string;
+  setActiveTab: Dispatch<SetStateAction<string>>
+  t: (key: string) => string;
+  tabsConfig: TabConfig[];
+}
+const StatusFilters = ({
+  activeTab,
+  setActiveTab,
+  t,
+  tabsConfig,
+}: StatusFiltersProps) => {
+  const { theme_color } = useOrganizationSettings();
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Style for the tabs
+  const createStyles = (tab: { key: string; label: string }) => {
+    return theme_color
+      ? {
+          backgroundColor:
+            activeTab === tab.key
+              ? hexToRgba('#667085', 0.1) // Apply 0.1 opacity if active
+              : isHovered
+                ? hexToRgba('#667085', 0.1) // Apply 0.1 opacity on hover
+                : undefined,
+          color: '#667085',
+          borderColor: activeTab === tab.key ? theme_color : undefined,
+        }
+      : undefined;
+  };
+
+  return (
+    <div className="mr-auto gap-2 bg-transparent">
+      {tabsConfig.map((tab) => (
+        <Button
+          onClick={() => {
+            setActiveTab(tab.key)
+            tab.filter()
+          }}
+          className={`font-semibold hover:bg-gray-200/30 hover:text-brand ${tab.key === activeTab ? 'bg-brand-50/60 text-brand-900' : 'bg-transparent text-gray-600'}`}
+          key={tab.key}
+          style={createStyles(tab)}
+          onMouseEnter={() => setIsHovered(true)} // Set hover state
+          onMouseLeave={() => setIsHovered(false)} // Reset hover state
+        >
+          {t(tab.label)}
+        </Button>
+      ))}
+    </div>
+  );
+};
+
+export default StatusFilters;
