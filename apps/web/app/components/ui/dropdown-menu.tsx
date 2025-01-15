@@ -2,7 +2,7 @@
 
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
-import { Check, ChevronDown, type LucideIcon } from 'lucide-react';
+import { Check, ChevronDown, LucideIcon } from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -32,7 +32,7 @@ export interface BaseMenuItem {
 
 export interface ActionMenuItem extends BaseMenuItem {
   type: "item"
-  label: string
+  label: string | JSX.Element
   href?: string
   shortcut?: string
   selected?: boolean
@@ -40,13 +40,14 @@ export interface ActionMenuItem extends BaseMenuItem {
 
 export interface SubmenuItem extends BaseMenuItem {
   type: "submenu"
-  label: string
+  label: string | JSX.Element
   items?: MenuItem[]
   content?: ReactNode
   defaultOpen?: boolean
-  selectedOption?: string // New: Track selected option
-  displaySelection?: boolean // New: Whether to show selection next to label
-  selectionMode?: "single" | "none" // New: Control selection behavior
+  selectedOption?: string
+  displaySelection?: boolean
+  selectionMode?: "single" | "none"
+  triggerBehavior?: 'toggle' | 'close-others'
 }
 
 export interface SeparatorMenuItem extends BaseMenuItem {
@@ -55,7 +56,7 @@ export interface SeparatorMenuItem extends BaseMenuItem {
 
 export interface LabelMenuItem extends BaseMenuItem {
   type: "label"
-  label: string
+  label: string | JSX.Element
 }
 
 export type MenuItem = ActionMenuItem | SubmenuItem | SeparatorMenuItem | LabelMenuItem
@@ -66,23 +67,29 @@ export interface DropdownMenuProps {
   side?: "top" | "right" | "bottom" | "left"
   align?: "start" | "center" | "end"
   className?: string
-  onSelectionChange?: (itemId: string, selectedOption: string) => void // New: Callback for selection changes
+  onSelectionChange?: (itemId: string, selectedOption: string) => void
 }
-
 
 function MenuIcon({ icon: Icon }: { icon: LucideIcon }) {
   return <Icon className="mr-2 h-4 w-4" />
 }
 
-function RenderMenuItem({ item, onSelectionChange }: { 
+function RenderMenuItem({ 
+  item, 
+  onSelectionChange,
+  onToggle,
+  isOpen
+}: { 
   item: MenuItem
   onSelectionChange?: (itemId: string, selectedOption: string) => void 
+  onToggle?: (itemId: string, isOpen: boolean) => void
+  isOpen?: boolean
 }) {
   switch (item.type) {
     case "item":
       return <ActionItem item={item} />
     case "submenu":
-      return <SubmenuItems item={item} onSelectionChange={onSelectionChange} />
+      return <SubmenuItems item={item} onSelectionChange={onSelectionChange} onToggle={onToggle} isOpen={isOpen} />
     case "separator":
       return <DropdownMenuSeparator />
     case "label":
@@ -188,21 +195,36 @@ function CustomCollapsible({
 
 function SubmenuItems({ 
   item,
-  onSelectionChange 
+  onSelectionChange,
+  onToggle,
+  isOpen
 }: { 
   item: SubmenuItem
   onSelectionChange?: (itemId: string, selectedOption: string) => void 
+  onToggle?: (itemId: string, isOpen: boolean) => void
+  isOpen?: boolean
 }) {
-  const [isOpen, setIsOpen] = useState(item.defaultOpen ?? false)
+  const [internalIsOpen, setInternalIsOpen] = useState(item.defaultOpen ?? false)
+  const effectiveIsOpen = isOpen ?? internalIsOpen
 
-  // If we have regular menu items, render them in a submenu
+  const handleToggle = useCallback(() => {
+    const newIsOpen = !effectiveIsOpen
+    if (item.triggerBehavior === 'close-others') {
+      onToggle?.(item.id, newIsOpen)
+    } else {
+      setInternalIsOpen(newIsOpen)
+      onToggle?.(item.id, newIsOpen)
+    }
+    item.onClick?.()
+  }, [effectiveIsOpen, item, onToggle])
+
   if (item.items?.length) {
     return (
       <DropdownMenuSub>
         <DropdownMenuSubTrigger
           disabled={item.disabled}
           className={cn("justify-between", item.className)}
-          onClick={item.onClick}
+          onClick={handleToggle}
         >
           <div className="flex items-center gap-2">
             {item.icon && <MenuIcon icon={item.icon} />}
@@ -222,10 +244,12 @@ function SubmenuItems({
                   key={subItem.id}
                   item={{
                     ...subItem,
-                    selected: subItem.label === item.selectedOption,
+                    selected: typeof subItem.label === 'string' && subItem.label === item.selectedOption,
                     onClick: () => {
                       subItem.onClick?.()
-                      onSelectionChange?.(item.id, subItem.label)
+                      if (typeof subItem.label === 'string') {
+                        onSelectionChange?.(item.id, subItem.label)
+                      }
                     },
                   }}
                 />
@@ -243,16 +267,12 @@ function SubmenuItems({
     )
   }
 
-  // If we only have content, render it in our custom collapsible section
   if (item.content) {
     return (
       <div className="px-1 py-1.5">
         <CustomCollapsible
-          isOpen={isOpen}
-          onToggle={() => {
-            setIsOpen(!isOpen)
-            item.onClick?.()
-          }}
+          isOpen={effectiveIsOpen}
+          onToggle={handleToggle}
           disabled={item.disabled}
           className={item.className}
           content={item.content}
@@ -278,6 +298,11 @@ export function CustomDropdownMenu({
   onSelectionChange,
 }: DropdownMenuProps) {
   const [items, setItems] = useState(initialItems)
+  const [openSubmenuIds, setOpenSubmenuIds] = useState<string[]>(() => 
+    initialItems
+      .filter((item): item is SubmenuItem => item.type === 'submenu' && (item.defaultOpen ?? false))
+      .map(item => item.id)
+  )
 
   const handleSelectionChange = useCallback((itemId: string, selectedOption: string) => {
     setItems((prevItems) =>
@@ -289,6 +314,19 @@ export function CustomDropdownMenu({
     )
     onSelectionChange?.(itemId, selectedOption)
   }, [onSelectionChange])
+
+  const handleSubmenuToggle = useCallback((itemId: string, isOpen: boolean) => {
+    setOpenSubmenuIds(prev => {
+      const item = items.find(i => i.id === itemId) as SubmenuItem | undefined
+      if (item?.triggerBehavior === 'close-others') {
+        return isOpen ? [itemId] : []
+      } else {
+        return isOpen 
+          ? [...prev, itemId]
+          : prev.filter(id => id !== itemId)
+      }
+    })
+  }, [items])
 
   return (
     <DropdownMenu>
@@ -303,9 +341,12 @@ export function CustomDropdownMenu({
             key={item.id} 
             item={item} 
             onSelectionChange={handleSelectionChange}
+            onToggle={handleSubmenuToggle}
+            isOpen={item.type === 'submenu' && openSubmenuIds.includes(item.id)}
           />
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
+

@@ -27,6 +27,7 @@ const useKanbanDragAndDrop = ({
   onUpdateFn,
 }: UseKanbanDragNDropProps) => {
   const [activeId, setActiveId] = useState<string | number | null>(null);
+  const [type, setType] = useState<'column' | 'item' | null>(null);
   const [dragState, setDragState] = useState<{
     item: KanbanItem | null;
     sourceColumn: KanbanColumn | null;
@@ -139,6 +140,8 @@ const useKanbanDragAndDrop = ({
     (event: DragStartEvent) => {
       const { active } = event;
       setActiveId(active.id);
+      setType(active?.data?.current?.type ?? null)
+      // console.log('type', active)
 
       if (!isColumnDrag(active.id)) {
         const sourceColumn = findColumnByItemId(active.id);
@@ -278,8 +281,8 @@ const useKanbanDragAndDrop = ({
         }
       }
 
-      setActiveId(null);
-      setDragState({ item: null, sourceColumn: null, previousColumns: null });
+      // setActiveId(null);
+      // setDragState({ item: null, sourceColumn: null, previousColumns: null });
     },
     [
       columns,
@@ -293,6 +296,7 @@ const useKanbanDragAndDrop = ({
   return {
     sensors,
     activeId,
+    type,
     dragState,
     handleDragStart,
     handleDragOver,

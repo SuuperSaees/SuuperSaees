@@ -15,15 +15,17 @@ const ViewConfigurations = () => {
     manageConfigurations,
   );
   return (
-    <CustomDropdownMenu
-      trigger={
-        <Button variant="outline" size="icon">
-          <Settings className="h-4 w-4" />
-        </Button>
-      }
-      items={menuConfig}
-      className="w-[300px]"
-    />
+    <div className='flex gap-2 justify-end'>
+      <CustomDropdownMenu
+        trigger={
+          <Button variant="outline" size="icon">
+            <Settings className="h-4 w-4" />
+          </Button>
+        }
+        items={menuConfig}
+        className="w-[300px]"
+      />
+    </div>
   );
 };
 

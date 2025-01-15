@@ -6,14 +6,15 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
+import { useKanbanContext } from '~/(views)/contexts/kanban-context';
 import useKanbanColumns from '~/(views)/hooks/kanban/use-kanban-columns';
 import useKanbanDragAndDrop from '~/(views)/hooks/kanban/use-kanban-drag-n-drop';
 import { KanbanColumn as KanbanColumnType } from '~/(views)/kanban.types';
 
 import styles from '../../../../components/ui/styles.module.css';
 import SortableItem from '../../../components/sortable-item';
+// import KanbanCard from './kanban-card';
 import KanbanColumn from './kanban-column';
-import { useKanbanContext } from '~/(views)/contexts/kanban-context';
 
 const KanbanColumns = ({
   columns,
@@ -24,10 +25,17 @@ const KanbanColumns = ({
 }) => {
   // Helper to update column positions consistently
   const { onUpdateFn } = useKanbanContext();
-  const { handleUpdateColumns } = useKanbanColumns(columns, setColumns, onUpdateFn);
-  
+  const { handleUpdateColumns } = useKanbanColumns(
+    columns,
+    setColumns,
+    onUpdateFn,
+  );
+
   const {
     sensors,
+    // activeId,
+    // type,
+    // dragState,
     handleDragEnd,
     handleDragOver,
     handleDragStart,
@@ -36,6 +44,8 @@ const KanbanColumns = ({
     columns,
     onUpdateFn: handleUpdateColumns,
   });
+
+  // const CustomCard = customComponents?.kanban?.Card;
 
   return (
     <DndContext
@@ -69,6 +79,22 @@ const KanbanColumns = ({
               </SortableContext>
             </SortableItem>
           ))}
+          {/* <DragOverlay>
+            {activeId && type === 'column' && (
+              <KanbanColumn
+                column={columns.find((column) => column.id === activeId)}
+              />
+            )}
+            {activeId && type === 'item' && CustomCard ? (
+   
+              <CustomCard
+                item={dragState.item}
+                className='bg-white/70 opacity-50'
+              />
+            ): activeId && type === 'item' ? (
+              <KanbanCard item={dragState.item} />
+            ): null}
+          </DragOverlay> */}
         </SortableContext>
       </div>
     </DndContext>

@@ -5,7 +5,7 @@ import { ViewConfigurations } from './view-config.types';
 // ITEM TYPES
 // Base, shared props for all view items
 export interface BaseItem {
-  id: string;
+  id: string | number;
   title: string;
 }
 
@@ -15,8 +15,13 @@ export interface ViewUser {
   picture_url: string;
 }
 
-export type ViewType = 'kanban' | 'calendar'; // add more view types as needed
+export type ViewType = 'kanban' | 'calendar' | 'table'; // add more view types as needed
 
+export enum ViewTypeEnum {
+  Kanban = 'kanban',
+  Calendar = 'calendar',
+  Table = 'table',
+}
 export type ViewPropertyType =
   | 'text'
   | 'number'
@@ -59,10 +64,10 @@ export interface ViewProps<T extends ViewItem> {
 // Custom components for each view
 export interface ViewCustomComponents<T> {
   kanban?: {
-    Card: React.FC<{ item: T }>; // Card component for the kanban view
+    Card: React.FC<{ item: T, className?: string, [key: string]: unknown }>; // Card component for the kanban view
   };
   calendar?: {
-    Card: React.FC<{ item: T }>; // Card component for the calendar view
+    Card: React.FC<{ item: T, className?: string, [key: string]: unknown }>; // Card component for the calendar view
   };
 }
 

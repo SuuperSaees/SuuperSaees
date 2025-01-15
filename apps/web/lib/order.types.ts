@@ -21,11 +21,11 @@ export namespace Order {
 
   export type Response = Order.Type & {
     tags: {tag:  Tags.Type}[] | null;
-    customer: UserResponse[];
+    customer: User.Response
     assigned_to: {
       agency_member: UserResponse | null;
     }[] | null;
-    client_organization: Pick<Account.Type, 'name' | 'id'>[] | null;
+    client_organization: Account.Response | null;
     followers?: {
       client_follower: User.Response;
     }[] | null;

@@ -248,7 +248,7 @@ export const getOrders = async (
     let query = client
       .from('orders_v2')
       .select(
-        `*, client_organization:accounts!client_organization_id(id, name),
+        `*, client_organization:accounts!client_organization_id(id, name, settings:organization_settings!account_id(key, value)),
         customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
         assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
         tags:order_tags(tag:tags(*))
@@ -325,10 +325,14 @@ export const getOrders = async (
       statusMap.set(status.id, status);
     });
 
-    // Step 6: Assign the status to each order
+    // Step 6: Assign the status to each order and other transformations  
     orders.forEach((order) => {
+      const clientOrganizationPictureURL = order.client_organization?.settings?.find(setting => setting.key === 'logo_url')?.value ?? '';
+      order.client_organization = { id: order.client_organization?.id, name: order.client_organization?.name, picture_url: clientOrganizationPictureURL };
       if (!order.status_id) return;
       order.statusData = statusMap.get(order.status_id) ?? null;
+
+      
     });
 
     // Step 7: Assign optional data

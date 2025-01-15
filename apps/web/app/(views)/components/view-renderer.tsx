@@ -9,7 +9,7 @@ import { useViewContext } from '../contexts/view-context';
 // Dynamically import the views => this allows us to lazy load the components
 const KanbanView = dynamic(() => import('./kanban/kanban-view'));
 const CalendarView = dynamic(() => import('./calendar/calendar-view'));
-
+const TableView = dynamic(() => import('./table/table-view'));
 // interface ViewRendererProps<T extends ViewType> {
 //   type: T; // The type can be 'kanban' or 'calendar'
 //   // Define the props type based on the view type
@@ -27,6 +27,8 @@ const ViewRenderer = () => {
       return <KanbanView />;
     case 'calendar':
       return <CalendarView />;
+    case 'table':
+      return <TableView />;
     default:
       return null;
   }

@@ -1,5 +1,7 @@
 // CONFIG TYPES
+import { ColumnDef } from '@tanstack/react-table';
 import { ViewItem, ViewManageableProperty, ViewType } from './views.types';
+import { ControllersProps } from '../components/table/table';
 
 // Base config type for all views, group and filters
 export type ViewConfiguaration<T extends ViewManageableProperty> = {
@@ -44,6 +46,11 @@ export interface ViewInitialConfigurations<T extends ViewItem> {
       updateFn: (value: T) => Promise<T[]>;
     };
   };
+  table: {
+    columns: ColumnDef<T>[];
+    emptyState: React.ReactNode;
+    controllers?: ControllersProps;
+  }
 }
 
 // Base config type for all views

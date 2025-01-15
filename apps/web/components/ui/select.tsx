@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@kit/ui/select';
 import { Spinner } from '@kit/ui/spinner';
+import { cn } from '@kit/ui/utils';
 
 export type Option = {
   label: string;
@@ -29,6 +30,7 @@ interface SelectActionProps {
   isLoading?: boolean;
   showLabel?: boolean;
   [key: string]: unknown;
+  containerClassname?: string;
 }
 
 const SelectAction = ({
@@ -41,6 +43,7 @@ const SelectAction = ({
   children,
   isLoading,
   showLabel,
+  containerClassname,
   ...rest
 }: SelectActionProps) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
@@ -55,7 +58,7 @@ const SelectAction = ({
   }, [defaultValue, options]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn('flex flex-col gap-2 ', containerClassname)}>
       <span className="font-semibold">
         {children ? children : groupName ? groupName :showLabel ?  'Select an option' : null}
       </span>
@@ -74,7 +77,7 @@ const SelectAction = ({
         }}
         {...rest}
       >
-        <SelectTrigger className={'w-full border-none ' + className}>
+        <SelectTrigger className={'w-full ' + className}>
           <SelectValue placeholder={t('common:selectOption')}>
             {/* Use customItem for the selected value if provided, otherwise show the label */}
             {customItem && selectedValue
