@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -94,6 +95,11 @@ export const KanbanProvider = <T extends KanbanItem>({
     },
     [updateColumnsByGroup, setColumns, data, configurations, updateGroupKey],
   );
+  console.log('data', data.find((item) => item.id === 16)?.status)
+  useEffect(() => {
+    const newColumns = createColumnsByGroup(groupSelected, data, groupValues);
+    setColumns(newColumns);
+  }, [groupSelected, data, groupValues])
 
   return (
     <KanbanContext.Provider

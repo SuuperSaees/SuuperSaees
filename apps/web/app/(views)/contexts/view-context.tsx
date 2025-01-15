@@ -1,6 +1,12 @@
 'use client';
 
-import React, { ReactNode, createContext, useContext, useState } from 'react';
+import React, {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 import useViewConfigurations from '../hooks/view/use-view-configurations';
 import { KanbanItem } from '../kanban.types';
@@ -9,8 +15,15 @@ import {
   ViewConfigurations,
   ViewInitialConfigurations,
 } from '../view-config.types';
-import { UpdateFunction, ViewCustomComponents, ViewItem, ViewType } from '../views.types';
+import {
+  UpdateFunction,
+  ViewCustomComponents,
+  ViewItem,
+  ViewType,
+  ViewTypeEnum,
+} from '../views.types';
 import KanbanProvider from './kanban-context';
+import { TableProvider } from './table-context';
 
 // Define the Context types
 export interface ViewContextProps<T extends ViewItem> {
@@ -21,7 +34,7 @@ export interface ViewContextProps<T extends ViewItem> {
   manageConfigurations: {
     updateGroup: (groupKey: keyof T) => void;
   };
-  customComponents?: ViewCustomComponents<T>; 
+  customComponents?: ViewCustomComponents<T>;
   setViewType: (viewType: ViewType) => void;
   setData: React.Dispatch<React.SetStateAction<T[]>>;
   setConfigurations: React.Dispatch<
@@ -57,7 +70,7 @@ export const ViewProvider = <T extends ViewItem>({
   customComponents,
   onUpdateFn,
   data,
-  setData
+  setData,
 }: ViewProviderProps<T>) => {
   const newConfigurations = createFullConfiguration<T>(
     initialData,
@@ -66,7 +79,7 @@ export const ViewProvider = <T extends ViewItem>({
     availableProperties,
   );
 
-  const [viewType, setViewType] = useState<ViewType>(initialViewType);
+  const [viewType, setViewType] = useState<ViewType>('kanban');
   // const [data, setData] = useState<T[]>(initialData);
   const [configurations, setConfigurations] = useState<
     ViewConfigurations<T> | undefined
@@ -85,7 +98,8 @@ export const ViewProvider = <T extends ViewItem>({
     configurations: configurations as unknown as ViewConfigurations<ViewItem>,
     manageConfigurations,
     availableProperties: availableProperties as unknown as [keyof ViewItem],
-    customComponents: customComponents as unknown as ViewCustomComponents<ViewItem>,
+    customComponents:
+      customComponents as unknown as ViewCustomComponents<ViewItem>,
     setViewType,
     setData: setData as unknown as React.Dispatch<
       React.SetStateAction<ViewItem[]>
@@ -95,24 +109,47 @@ export const ViewProvider = <T extends ViewItem>({
     >,
   };
 
+  // Pending for view change from outside
+  useEffect(() => {
+    setViewType(initialViewType);
+  }, [initialViewType]);
   // useEffect(()=> {
   //   setData(initialData)
   // }, [initialData])
   return (
     <ViewContext.Provider value={value}>
-      <KanbanProvider
-        data={data as unknown as KanbanItem[]}
-        setData={setData as unknown as React.Dispatch<React.SetStateAction<KanbanItem[]>>}
-        initialData={data as unknown as KanbanItem[]}
-        initialConfigurations={
-          configurations as unknown as ViewConfigurations<KanbanItem>
-        }
-        onUpdateFn={onUpdateFn as unknown as UpdateFunction}
-        availableProperties={availableProperties as unknown as [keyof KanbanItem]}
-        customComponents={customComponents as unknown as ViewCustomComponents<KanbanItem>}
-      >
-        {children}
-      </KanbanProvider>
+      {viewType === ViewTypeEnum.Kanban ? (
+        <KanbanProvider
+          data={data as unknown as KanbanItem[]}
+          setData={
+            setData as unknown as React.Dispatch<
+              React.SetStateAction<KanbanItem[]>
+            >
+          }
+          initialData={data as unknown as KanbanItem[]}
+          initialConfigurations={
+            configurations as unknown as ViewConfigurations<KanbanItem>
+          }
+          onUpdateFn={onUpdateFn as unknown as UpdateFunction}
+          availableProperties={
+            availableProperties as unknown as [keyof KanbanItem]
+          }
+          customComponents={
+            customComponents as unknown as ViewCustomComponents<KanbanItem>
+          }
+        >
+          {children}
+        </KanbanProvider>
+      ) : viewType === ViewTypeEnum.Table ? (
+        <TableProvider
+          columns={initialConfigurations.table.columns}
+          data={data}
+          setData={setData}
+          emptyState={initialConfigurations.table.emptyState}
+        >
+          {children}
+        </TableProvider>
+      ) : null}
     </ViewContext.Provider>
   );
 };

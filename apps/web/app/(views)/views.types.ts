@@ -5,7 +5,7 @@ import { ViewConfigurations } from './view-config.types';
 // ITEM TYPES
 // Base, shared props for all view items
 export interface BaseItem {
-  id: string;
+  id: string | number;
   title: string;
 }
 
@@ -15,8 +15,13 @@ export interface ViewUser {
   picture_url: string;
 }
 
-export type ViewType = 'kanban' | 'calendar'; // add more view types as needed
+export type ViewType = 'kanban' | 'calendar' | 'table'; // add more view types as needed
 
+export enum ViewTypeEnum {
+  Kanban = 'kanban',
+  Calendar = 'calendar',
+  Table = 'table',
+}
 export type ViewPropertyType =
   | 'text'
   | 'number'
