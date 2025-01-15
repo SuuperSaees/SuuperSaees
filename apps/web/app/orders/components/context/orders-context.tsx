@@ -13,6 +13,7 @@ import { useRealtime } from '~/hooks/use-realtime';
 import { Order } from '~/lib/order.types';
 
 import { OrdersContextType, OrdersProviderProps } from './orders-context.types';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Create a generic context
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
@@ -24,12 +25,13 @@ export const OrdersProvider = ({
   initialOrders,
 }: OrdersProviderProps) => {
   const [orders, setOrders] = useState<Order.Response[]>(initialOrders ?? []);
-
+  const queryClient = useQueryClient()
+  queryClient.setQueryData(['orders'], initialOrders)
   const value = {
     orders,
     setOrders,
   };
-
+  // console.log('ordersv1', orders)
   // Define the handleSubscriptions function to handle realtime changes and update the state
   const handleSubscriptions = createSubscriptionHandler<Order.Response>({
     onAfterUpdate(payload) {
@@ -44,7 +46,7 @@ export const OrdersProvider = ({
           const newOrders = prevOrders.filter(
             (order) => order.id !== newOrder.id,
           );
-          console.log('newOrders', newOrders);
+          // console.log('newOrders', newOrders);
           return newOrders;
         });
       }

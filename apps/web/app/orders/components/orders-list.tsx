@@ -43,7 +43,7 @@ type OrdersTableProps = {
 
 export function OrderList({ agencyMembers }: OrdersTableProps) {
   const { t } = useTranslation('orders');
-  const { orders } = useOrdersContext()
+  const { orders, setOrders } = useOrdersContext()
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'open' | 'completed' | 'all'>(
     'open',
@@ -149,27 +149,31 @@ export function OrderList({ agencyMembers }: OrdersTableProps) {
       },
     },
   };
+  const { updateOrderMutation } = useUserOrderActions(undefined, undefined, undefined, orders, setOrders);
   const handleUpdateOrdersData = async (
     data: Order.Response,
     property?: string,
   ) => {
     try {
-      // console.log('Updating orders data...', data);
+      console.log('Updating orders data...', data);
       const updateValue = property
-        ? { [property]: data[property as keyof Order.Response] }
+        ? { [property]: data[property as keyof Order.Response], position: data.position }
         : data;
-      await updateOrder(data.id, updateValue);
+      // await updateOrder(data.id, updateValue);
+      await updateOrderMutation.mutateAsync({data: updateValue, id: data.id})
     } catch (error) {
       console.error('Error updating orders data:', error);
     }
   };
-  console.log('orders', orders);
+  // console.log('orders', orders);
   return (
     <ViewProvider
       initialData={orders as unknown as ViewItem[]}
       initialViewType="kanban"
       initialConfigurations={initialConfiguarations}
       onUpdateFn={handleUpdateOrdersData}
+      data={orders as unknown as ViewItem[]}
+      setData={setOrders as unknown as React.Dispatch<React.SetStateAction<ViewItem[]>>}
       availableProperties={[
         'status',
         'brief',

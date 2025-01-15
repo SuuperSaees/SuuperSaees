@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import React, { ReactNode, createContext, useContext, useState } from 'react';
 
 import useViewConfigurations from '../hooks/view/use-view-configurations';
 import { KanbanItem } from '../kanban.types';
@@ -42,9 +42,10 @@ interface ViewProviderProps<T extends ViewItem> {
   initialViewType: ViewType;
   initialConfigurations: ViewInitialConfigurations<T>;
   availableProperties: [keyof T];
+  data: T[];
+  setData: React.Dispatch<React.SetStateAction<T[]>>;
   customComponents?: ViewCustomComponents<T>;
   onUpdateFn?: UpdateFunction;
-
 }
 
 export const ViewProvider = <T extends ViewItem>({
@@ -54,7 +55,9 @@ export const ViewProvider = <T extends ViewItem>({
   initialConfigurations,
   availableProperties = ['status'] as [keyof T],
   customComponents,
-  onUpdateFn
+  onUpdateFn,
+  data,
+  setData
 }: ViewProviderProps<T>) => {
   const newConfigurations = createFullConfiguration<T>(
     initialData,
@@ -64,7 +67,7 @@ export const ViewProvider = <T extends ViewItem>({
   );
 
   const [viewType, setViewType] = useState<ViewType>(initialViewType);
-  const [data, setData] = useState<T[]>([]);
+  // const [data, setData] = useState<T[]>(initialData);
   const [configurations, setConfigurations] = useState<
     ViewConfigurations<T> | undefined
   >(newConfigurations);
@@ -74,6 +77,7 @@ export const ViewProvider = <T extends ViewItem>({
     setConfigurations,
   );
   // const updateConfigurations =
+  // console.log('v2', )
 
   const value: ViewContextProps<ViewItem> = {
     viewType,
@@ -91,12 +95,14 @@ export const ViewProvider = <T extends ViewItem>({
     >,
   };
 
-  useEffect(()=> {
-    setData(initialData)
-  }, [initialData])
+  // useEffect(()=> {
+  //   setData(initialData)
+  // }, [initialData])
   return (
     <ViewContext.Provider value={value}>
       <KanbanProvider
+        data={data as unknown as KanbanItem[]}
+        setData={setData as unknown as React.Dispatch<React.SetStateAction<KanbanItem[]>>}
         initialData={data as unknown as KanbanItem[]}
         initialConfigurations={
           configurations as unknown as ViewConfigurations<KanbanItem>

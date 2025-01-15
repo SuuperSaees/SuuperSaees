@@ -17,9 +17,12 @@ export function useUserOrderActions(
   propertyUpdated?: keyof Order.Update,
   successTranslateActionName?: string,
   errorTranslateActionName?: string,
+  orders?: Order.Response[],
+  setOrders?: React.Dispatch<React.SetStateAction<Order.Response[]>>,
 ) {
   const { t } = useTranslation('orders');
   const queryClient = useQueryClient();
+  // Replace useState with useQuery for better cache management
 
   const { workspace: userWorkspace } = useUserWorkspace();
 
@@ -37,6 +40,28 @@ export function useUserOrderActions(
       const { order: updatedOrder } = await updateOrder(id, data, userId);
       return { updatedOrder };
     },
+    onMutate: async (newOrder) => {
+      // console.log('newOrder', newOrder)
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['orders'] });
+
+      // Snapshot the previous value
+      const previousOrders = queryClient.getQueryData(['orders']);
+      // console.log('previousOrders', previousOrders)
+      // Optimistically update to the new value
+      // queryClient.setQueryData(['orders'], (old: Order.Response[]) => 
+      //   old.map(order => 
+      //     order.id === newOrder.id ? { ...order, ...newOrder } : order
+      //   )
+        
+      // );
+      console.log('newOrder', newOrder)
+      setOrders && setOrders(old => old.map(order => order.id === newOrder.id ? { ...order, ...newOrder } : order));
+      
+
+      // Return context with the snapshotted value
+      return { previousOrders };
+    },
     onSuccess: async ({
       updatedOrder,
     }: {
@@ -53,14 +78,14 @@ export function useUserOrderActions(
 
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
 
-      await logOrderActivities(
-        updatedOrder?.id ?? 0,
-        updatedOrder ?? {},
-        userWorkspace?.id ?? '',
-        userWorkspace?.name ?? '',
-        undefined,
-        fields,
-      );
+      // await logOrderActivities(
+      //   updatedOrder?.id ?? 0,
+      //   updatedOrder ?? {},
+      //   userWorkspace?.id ?? '',
+      //   userWorkspace?.name ?? '',
+      //   undefined,
+      //   fields,
+      // );
     },
     onError: () => {
       toast.error('Error', {

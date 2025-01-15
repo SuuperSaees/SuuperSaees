@@ -59,10 +59,10 @@ export interface ViewProps<T extends ViewItem> {
 // Custom components for each view
 export interface ViewCustomComponents<T> {
   kanban?: {
-    Card: React.FC<{ item: T }>; // Card component for the kanban view
+    Card: React.FC<{ item: T, className?: string, [key: string]: unknown }>; // Card component for the kanban view
   };
   calendar?: {
-    Card: React.FC<{ item: T }>; // Card component for the calendar view
+    Card: React.FC<{ item: T, className?: string, [key: string]: unknown }>; // Card component for the calendar view
   };
 }
 
