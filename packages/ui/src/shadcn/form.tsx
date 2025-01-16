@@ -99,6 +99,57 @@ const FormLabel = React.forwardRef<
 });
 FormLabel.displayName = 'FormLabel';
 
+interface CustomFormLabelProps {
+  label: string;
+  required?: boolean;
+  asteriskColor?: string;
+  textSize?: string;
+  textColor?: string;
+  truncate?: boolean;
+}
+
+export const CustomFormLabel: React.FC<CustomFormLabelProps> = ({
+  label,
+  required = false,
+  asteriskColor = '#E23710',
+  textSize = 'text-[14px]',
+  textColor = 'text-gray-700',
+  truncate = false, 
+  ...props
+}) => {
+  return (
+    <FormLabel
+      {...props}
+      className={`${textSize} ${textColor} flex items-center font-medium leading-[20px]`}
+    >
+      <span
+        className={`${truncate ? 'truncate' : ''}`}
+        style={{
+          display: 'inline-block',
+          maxWidth: truncate ? '100px' : 'auto', 
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+        title={truncate ? label : undefined}
+      >
+        {label}
+      </span>
+      {required && (
+        <span
+          style={{
+            color: asteriskColor,
+            marginLeft: '4px', 
+            flexShrink: 0, 
+          }}
+        >
+          *
+        </span>
+      )}
+    </FormLabel>
+  );
+};
+
 const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot>
