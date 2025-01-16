@@ -110,7 +110,7 @@ export function useStripeActions() {
       }
     const effectiveStripeId = stripeId;
     const effectiveOrgId = organizationId;
-     if (!effectiveStripeId || !effectiveOrgId) {
+     if (!effectiveOrgId) {
       throw new Error('Missing required IDs');
     }
 

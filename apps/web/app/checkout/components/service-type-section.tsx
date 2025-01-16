@@ -1,52 +1,49 @@
 import { useTranslation } from 'react-i18next';
 
-import { ServiceType } from '../types/billing-form-types';
-import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
-
 interface ServiceTypeSectionProps {
-  service: ServiceType;
+  service: {
+    name: string;
+    price: number;
+    currency: string;
+    recurrence?: string;
+    service_image?: string | null;
+  };
+  isDarkBackground: boolean;
 }
 
 export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
   service,
+  isDarkBackground,
 }) => {
   const { t } = useTranslation('services');
-  const { theme_color } = useOrganizationSettings();
+
+  const textColor = isDarkBackground ? 'text-white' : 'text-gray-900';
+  const secondaryTextColor = isDarkBackground
+    ? 'text-gray-300'
+    : 'text-gray-500';
 
   return (
-    <div className="mb-4 mt-7 flex flex-col gap-y-1">
-      <div className="text-gray-900 font-inter text-base font-semibold leading-[2.375]">
-        {t('checkout.typeOfService')}
-      </div>
-      <div 
-        className="flex w-full items-start gap-2 rounded-xl border-2 bg-white p-4 md:w-60"
-        style={{ borderColor: theme_color ?? '#000000' }}
-      >
-        <div 
-          className="mt-1 flex h-4 w-4 items-center justify-center rounded-full border"
-          style={{ 
-            borderColor: theme_color ?? '#000000',
-            backgroundColor: theme_color ?? '#000000'
-          }}
-        >
-          <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium leading-[1.42857] text-gray-700 md:text-base">
-            {
-              service.recurrence ? t(`checkout.${service.recurrence}`) : t('checkout.oneTime')
-            }
-          </span>
-          <span className="text-sm font-normal leading-[1.42857] text-gray-600 md:text-base">
-            ${service.price} {service.currency.toUpperCase()}
-          </span>
-          {service.recurrence && (
-             <span className="text-sm font-normal leading-[1.42857] text-gray-600 md:text-base">
-             {t('checkout.preposition')} {service.recurrence}
-           </span>
-          )}
-         
-        </div>
+    <div className="flex items-start gap-4 rounded-lg p-1">
+      {/* Imagen */}
+      {service.service_image ? (
+        <img
+          src={service.service_image}
+          alt={service.name}
+          className="h-20 w-40 rounded-md object-cover"
+        />
+      ) : (
+        <div className="h-20 w-40 rounded-md bg-gray-200" />
+      )}
+
+      {/* Información del servicio */}
+      <div className="flex flex-col mt-1 justify-between">
+        <span className={`text-base font-medium ${textColor}`}>
+          {service.name}
+        </span>
+        <span className={`text-sm ${secondaryTextColor}`}>{t('1x')}</span>
+        <span className={`text-base font-medium ${textColor}`}>
+          ${service.price.toFixed(2)} {service.currency.toUpperCase()}
+        </span>
       </div>
     </div>
   );
