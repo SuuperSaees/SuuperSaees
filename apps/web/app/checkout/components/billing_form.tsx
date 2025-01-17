@@ -46,9 +46,9 @@ const paymentMethodsIcons = {
         src="images/checkout/mercadopago.png"
         alt="Stripe"
         style={{
-          minWidth: '82px',
-          minHeight: '34.33px',
-          maxHeight: '34.33px',
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
           objectFit: 'contain',
         }}
       />
@@ -65,9 +65,9 @@ const paymentMethodsIcons = {
         src="images/checkout/wompi.png"
         alt="Stripe"
         style={{
-          minWidth: '82px',
-          minHeight: '34.33px',
-          maxHeight: '34.33px',
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
           objectFit: 'contain',
         }}
       />
@@ -79,9 +79,9 @@ const paymentMethodsIcons = {
         src="images/checkout/epayco.png"
         alt="Stripe"
         style={{
-          minWidth: '82px',
-          minHeight: '34.33px',
-          maxHeight: '34.33px',
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
           objectFit: 'contain',
         }}
       />
@@ -93,9 +93,9 @@ const paymentMethodsIcons = {
         src="images/checkout/payu.png"
         alt="Stripe"
         style={{
-          minWidth: '82px',
-          minHeight: '34.33px',
-          maxHeight: '34.33px',
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
           objectFit: 'contain',
         }}
       />
@@ -107,9 +107,9 @@ const paymentMethodsIcons = {
         src="images/checkout/placetopay.png"
         alt="Stripe"
         style={{
-          minWidth: '82px',
-          minHeight: '34.33px',
-          maxHeight: '34.33px',
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
           objectFit: 'contain',
         }}
       />
@@ -121,9 +121,9 @@ const paymentMethodsIcons = {
         src="images/checkout/openpay.png"
         alt="Stripe"
         style={{
-          minWidth: '82px',
-          minHeight: '34.33px',
-          maxHeight: '34.33px',
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
           objectFit: 'contain',
         }}
       />
@@ -145,9 +145,9 @@ const paymentMethodsIcons = {
         src="images/checkout/paymentssway.png"
         alt="Stripe"
         style={{
-          minWidth: '82px',
-          minHeight: '34.33px',
-          maxHeight: '34.33px',
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
           objectFit: 'contain',
         }}
       />
@@ -159,9 +159,9 @@ const paymentMethodsIcons = {
         src="images/checkout/dlocal.png"
         alt="Stripe"
         style={{
-          minWidth: '82px',
-          minHeight: '34.33px',
-          maxHeight: '34.33px',
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
           objectFit: 'contain',
         }}
       />
@@ -188,9 +188,9 @@ const paymentMethodsIcons = {
         src="images/checkout/stripe.png"
         alt="Stripe"
         style={{
-          minWidth: '82px',
-          minHeight: '34.33px',
-          maxHeight: '34.33px',
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
           objectFit: 'contain',
         }}
       />
@@ -429,9 +429,9 @@ const BillingForm: React.FC<{
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
                           style={{
-                            padding: '10.3px 20.6px',
-                            maxHeight: '64.93px',
-                            maxWidth: '123.6',
+                            padding: '10.3px 14.42px',
+                            maxHeight: '45.6px',
+                            maxWidth: '88.84px',
                           }}
                           onClick={() =>
                             setSelectedPaymentMethod(paymentMethod.name)
@@ -549,13 +549,19 @@ const BillingForm: React.FC<{
                               <FormControl>
                                 <div className="relative w-full">
                                   <Input
+                                    type="text"
                                     className="rounded-lg border border-gray-300 px-3.5 py-2.5"
                                     {...field}
                                     placeholder="4242 4242 4242 4242"
                                     onChange={(e) => {
-                                      field.onChange(e);
-                                      handleCardTypeChange(e.target.value);
+                                      const value = e.target.value.replace(
+                                        /\D/g,
+                                        '',
+                                      );
+                                      field.onChange(value);
+                                      handleCardTypeChange(value);
                                     }}
+                                    maxLength={19}
                                   />
                                   <div className="absolute right-2 top-1/2 -translate-y-1/2 transform">
                                     {cardType && (
@@ -591,6 +597,32 @@ const BillingForm: React.FC<{
                                   className="rounded-lg border border-gray-300 px-3.5 py-2.5"
                                   {...field}
                                   placeholder="MM / YY"
+                                  onChange={(e) => {
+                                    const value = e.target.value.replace(
+                                      /\D/g,
+                                      '',
+                                    );
+                                    let formattedValue = value;
+
+                                    if (value.length >= 2) {
+                                      const month = parseInt(
+                                        value.slice(0, 2),
+                                        10,
+                                      );
+                                      if (month < 1 || month > 12) {
+                                        return;
+                                      }
+
+                                      formattedValue = `${value.slice(0, 2)} / `;
+                                    }
+
+                                    if (value.length > 2) {
+                                      formattedValue = `${value.slice(0, 2)} / ${value.slice(2, 4)}`;
+                                    }
+
+                                    field.onChange(formattedValue);
+                                  }}
+                                  maxLength={7}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -616,6 +648,13 @@ const BillingForm: React.FC<{
                                   className="rounded-lg border border-gray-300 px-3.5 py-2.5"
                                   {...field}
                                   placeholder="123"
+                                  onChange={(e) => {
+                                    const value = e.target.value.replace(
+                                      /\D/g,
+                                      '',
+                                    );
+                                    field.onChange(value);
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
