@@ -9,6 +9,8 @@ import { Button } from '@kit/ui/button';
 import { FormField } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
 
+import { DiscountIcon, SecurityIcon } from '~/components/icons/icons';
+
 import { FormData, ServiceType } from '../types/billing-form-types';
 import { ServiceTypeSection } from './service-type-section';
 
@@ -114,11 +116,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
         control={form.control}
         render={({ field }) => (
           <div className="relative flex items-center">
-            <img
-              src="/images/services/cupon.png"
-              alt="Discount Icon"
-              className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform"
-            />
+            <DiscountIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-500" />
             <input
               {...field}
               placeholder={t('checkout.discount_coupon')}
@@ -212,10 +210,8 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
 
       {/* Mensaje de seguridad */}
       <div className="flex items-start gap-3">
-        <img
-          src="/images/services/security-icon.png"
-          alt="Security Icon"
-          className={`h-5 w-5 ${isDarkBackground ? 'invert filter' : ''}`}
+        <SecurityIcon
+          className={`h-5 w-5 ${isDarkBackground ? 'invert filter' : 'text-black'}`}
         />
         <div>
           <div
