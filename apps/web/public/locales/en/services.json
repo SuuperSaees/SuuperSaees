@@ -45,6 +45,8 @@
     "full_name": "Full Name",
     "email": "Email",
     "country": "Country",
+    "address": "Address",
+    "enter_address": "Enter your address",
     "city": "City",
     "state_province": "State/Province/Region",
     "postal_code": "Postal Code",
