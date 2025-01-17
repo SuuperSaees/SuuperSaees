@@ -93,7 +93,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
   return (
     <div className="space-y-4">
       <div
-        className={`font-inter text-xl font-semibold leading-[1.27] ${
+        className={`font-inter font-semibold leading-[1.27] text-[18px] ${
           isDarkBackground ? 'text-white' : 'text-gray-900'
         }`}
       >
