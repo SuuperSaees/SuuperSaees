@@ -1,4 +1,6 @@
-import { useState } from 'react';
+'use client';
+
+import { useEffect, useState } from 'react';
 
 import SelectAction, { Option } from '~/components/ui/select';
 import { getPriorityClassName } from '~/orders/[id]/utils/generate-options-and-classnames';
@@ -50,6 +52,10 @@ export const PrioritySelect = ({
       action: handleUpdatePriority,
     },
   ];
+
+  useEffect(() => {
+    setSelectedPriority(priority);
+  }, [priority]);
   return (
     <SelectAction
       className={
@@ -58,7 +64,7 @@ export const PrioritySelect = ({
         ' ml-auto flex h-fit w-fit items-center gap-0 rounded-full border-none py-0 pr-2 shadow-none outline-none focus:border-none focus:ring-0 [&>*]:ml-0'
       }
       options={options ?? defaultOptions}
-      defaultValue={priority}
+      defaultValue={selectedPriority}
       customItem={(label) => (
         <PriorityChip
           priority={label}

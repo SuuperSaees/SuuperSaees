@@ -55,6 +55,7 @@ const SelectAction = ({
       (option) => option.value === defaultValue,
     );
     setSelectedLabel(defaultOption ? defaultOption.label : null);
+    setSelectedValue(defaultValue);
   }, [defaultValue, options]);
 
   return (
