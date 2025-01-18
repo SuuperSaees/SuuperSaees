@@ -14,7 +14,7 @@ import { Tags } from './tags.types';
 type UserResponse = Pick<
   User.Type,
   'email' | 'id' | 'name' | 'picture_url' > & {
-    settings: Pick<UserSettings.Type, 'name' | 'picture_url'> | null;
+    settings:UserSettings.Type;
   }
 export namespace Order {
   export type Type = Database['public']['Tables']['orders_v2']['Row'];
@@ -88,6 +88,8 @@ export namespace Order {
       activities: Activity.Type[];
     };
   }
+
+  export type Assignee = Database['public']['Tables']['order_assignations']['Row'];
   export namespace Enums {
     export enum Status {
       PENDING = 'pending',

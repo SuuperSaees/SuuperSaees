@@ -6,7 +6,7 @@ import PrioritySelect from '../../components/ui/priority-select';
 import MembersAssignations from '../../components/users/member-assignations';
 import { useUserOrderActions } from '../hooks/user-order-actions';
 import { transformUserData } from '../utils/transform-orders-data';
-import { useAgencyStatuses } from './context/agency-statuses-context';
+import { useOrdersContext } from './context/orders-context';
 
 interface KanbanCardProps {
   item: Order.Response;
@@ -15,7 +15,7 @@ interface KanbanCardProps {
 }
 const KanbanCard = ({ item, className, ...rest }: KanbanCardProps) => {
   // Data
-  const { agencyMembers } = useAgencyStatuses();
+  const { agencyMembers, orders, setOrders } = useOrdersContext();
   const defaultSelectedUsers = transformUserData(item?.assigned_to);
   const users = transformUserData(agencyMembers);
 
@@ -24,6 +24,9 @@ const KanbanCard = ({ item, className, ...rest }: KanbanCardProps) => {
     'priority',
     'success.orders.orderPriorityUpdated',
     'error.orders.failedToUpdateOrderPriority',
+    orders,
+    setOrders,
+    agencyMembers,
   );
 
   // Handlers
@@ -40,7 +43,7 @@ const KanbanCard = ({ item, className, ...rest }: KanbanCardProps) => {
       orderId: item.id,
     });
   };
-
+  // console.log('ITEM', item.id === 17 && item)
   return (
     <div
       className={

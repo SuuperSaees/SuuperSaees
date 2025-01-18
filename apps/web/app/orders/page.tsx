@@ -69,7 +69,7 @@ async function OrdersPage() {
 
   return (
 
-    <OrdersProvider initialOrders={ordersData as unknown as Order.Response[]}>
+    <OrdersProvider initialOrders={ordersData as unknown as Order.Response[]} agencyMembers={agencyMembers ?? []}>
 
       <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []} agencyMembers={agencyMembers ?? []}>
         <PageBody>

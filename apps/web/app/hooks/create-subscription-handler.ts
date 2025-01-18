@@ -6,16 +6,14 @@ import {
   updateArrayData,
 } from '~/utils/data-transform';
 
-// Define the possible subscription events
 type SubscriptionEvent = 'INSERT' | 'UPDATE' | 'DELETE';
-// Generic type for handling different kinds of data responses
 export type DataResponse = Record<string, unknown>;
 
 export function createSubscriptionHandler<T extends DataResponse>(options?: {
   idField?: keyof T;
   onBeforeUpdate?: (
     payload: RealtimePostgresChangesPayload<T>,
-  ) => Promise<void> | void;
+  ) => Promise<void> | void | boolean;
   onAfterUpdate?: (updatedData: T | T[]) => Promise<void> | void;
 }) {
   return async function handleSubscription(
@@ -25,12 +23,16 @@ export function createSubscriptionHandler<T extends DataResponse>(options?: {
   ) {
     const { eventType, new: newData, old: oldData } = payload;
     const idField = options?.idField ?? 'id';
-
+    
     try {
       // Call the before update hook if provided
-      await options?.onBeforeUpdate?.(
+      const beforeUpdateResult = await options?.onBeforeUpdate?.(
         payload as RealtimePostgresChangesPayload<T>,
       );
+      // If onBeforeUpdate returns a value, exit early
+      if (beforeUpdateResult !== undefined) {
+        return;
+      }
 
       // Handle different event types
       switch (eventType as SubscriptionEvent) {
@@ -68,7 +70,6 @@ export function createSubscriptionHandler<T extends DataResponse>(options?: {
               ),
             );
           } else {
-            // For single item data, you might want to handle this differently
             console.warn('Received DELETE event for single-item subscription');
           }
           break;
@@ -79,7 +80,6 @@ export function createSubscriptionHandler<T extends DataResponse>(options?: {
       await options?.onAfterUpdate?.(currentData);
     } catch (error) {
       console.error('Error handling subscription update:', error);
-      // You might want to add error handling logic here
     }
   };
 }
