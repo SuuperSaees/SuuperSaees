@@ -244,7 +244,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
             isDarkBackground ? 'text-white' : 'text-gray-950'
           }`}
         >
-          ${(discountedTotal + 5)?.toFixed(2)}
+          ${(discountedTotal)?.toFixed(2)}
         </div>
       </div>
 
