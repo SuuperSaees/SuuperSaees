@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Minus, Plus } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +44,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
   accountId,
   validSuccess,
   quantity,
+  setQuantity,
   selectedPaymentMethod,
   sidebarBackgroundColor,
   onSubmit,
@@ -87,6 +88,14 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
     }
   };
 
+  const handleIncreaseQuantity = () => {
+    setQuantity((prev) => prev + 1);
+  };
+
+  const handleDecreaseQuantity = () => {
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  };
+
   const discountedTotal =
     (discountAmount
       ? (service.price ?? 0) - discountAmount
@@ -95,7 +104,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
   return (
     <div className="space-y-4">
       <div
-        className={`font-inter font-semibold leading-[1.27] text-[18px] ${
+        className={`font-inter text-[18px] font-semibold leading-[1.27] ${
           isDarkBackground ? 'text-white' : 'text-gray-900'
         }`}
       >
@@ -107,8 +116,61 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
         <ServiceTypeSection
           service={service}
           isDarkBackground={isDarkBackground}
+          quantity={quantity} // Pasamos la cantidad actual
         />
       </div>
+
+      {/* Manejo de cantidades */}
+      {!service.recurrence && (
+        <div className="mb-4 flex items-center justify-between">
+          <div
+            className={`text-sm font-medium leading-5 ${
+              isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+            }`}
+          >
+            {t('checkout.quantity')}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleIncreaseQuantity}
+              className={`flex h-6 w-6 items-center justify-center rounded border ${
+                isDarkBackground ? 'border-gray-500' : 'border-gray-300'
+              }`}
+              style={{ width: '24px', height: '24px' }}
+            >
+              <Plus
+                className={`h-4 w-4 ${
+                  isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              />
+            </button>
+
+            <span
+              className={`px-2 text-sm font-medium ${
+                isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+              }`}
+            >
+              {quantity}
+            </span>
+
+            <button
+              type="button"
+              onClick={handleDecreaseQuantity}
+              className={`flex h-6 w-6 items-center justify-center rounded border ${
+                isDarkBackground ? 'border-gray-500' : 'border-gray-300'
+              }`}
+              style={{ width: '24px', height: '24px' }}
+            >
+              <Minus
+                className={`h-4 w-4 ${
+                  isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Campo de cupón de descuento */}
       <FormField
