@@ -131,7 +131,37 @@ export const UserInfo: React.FC<UserDataFieldsProps> = ({ form }) => {
       </div>
 
       <div className="space-y-6">
-        {fields.slice(0, 3).map((field) =>
+        {fields.slice(0, 1).map((field) =>
+          renderField({
+            name: field.name,
+            label: field.label,
+            placeholder: field.placeholder,
+          }),
+        )}
+      </div>
+
+      <div className="mt-6 space-y-6">
+        {fields.slice(1, 2).map((field) =>
+          renderField({
+            name: field.name,
+            label: field.label,
+            placeholder: field.placeholder,
+          }),
+        )}
+      </div>
+
+      <div className="mt-6 space-y-6">
+        {fields.slice(2, 3).map((field) =>
+          renderField({
+            name: field.name,
+            label: field.label,
+            placeholder: field.placeholder,
+          }),
+        )}
+      </div>
+
+      <div className="mt-6 space-y-6">
+        {fields.slice(3, 4).map((field) =>
           renderField({
             name: field.name,
             label: field.label,
@@ -141,7 +171,7 @@ export const UserInfo: React.FC<UserDataFieldsProps> = ({ form }) => {
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
-        {fields.slice(3).map((field) =>
+        {fields.slice(4).map((field) =>
           renderField({
             name: field.name,
             label: field.label,

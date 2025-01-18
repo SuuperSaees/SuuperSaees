@@ -126,7 +126,6 @@ export const CustomFormLabel: React.FC<CustomFormLabelProps> = ({
         className={`${truncate ? 'truncate' : ''}`}
         style={{
           display: 'inline-block',
-          maxWidth: truncate ? '100px' : 'auto', 
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
