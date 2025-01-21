@@ -1,11 +1,13 @@
+import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import DetailsSide from './components/details';
+import { Service } from '~/lib/services.types';
 import { getOrganizationSettingsByOrganizationId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
-import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+
 import { decodeTokenData } from '../../../../packages/features/team-accounts/src/server/actions/tokens/decode/decode-token';
 import { PayToken } from '../../../../packages/tokens/src/domain/token-type';
-import { Service } from '~/lib/services.types';
+import DetailsSide from './components/details';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -40,7 +42,7 @@ async function ServiceCheckoutPage({
         className="flex min-h-screen w-full flex-grow flex-col items-center"
         style={{ backgroundColor: sidebarBackgroundColor }}
       >
-        <div className="flex w-full max-w-[1200px] flex-col lg:flex-row pb-10">
+        <div className="flex w-full max-w-[1200px] flex-col pb-10 lg:flex-row">
           <DetailsSide
             service={
               tokendecoded?.service as Service.Relationships.Billing.BillingService
