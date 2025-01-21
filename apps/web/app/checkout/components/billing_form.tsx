@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  // CardCvcElement,
+  CardCvcElement,
+  CardExpiryElement, // CardCvcElement,
   // CardExpiryElement,
   CardNumberElement,
   useElements,
@@ -403,7 +404,6 @@ const BillingForm: React.FC<{
         className="absolute left-0 top-0 h-20 w-full"
         style={{ backgroundColor: sidebarBackgroundColor }}
       />
-
       <div className="relative mx-auto flex h-full w-full flex-col items-center justify-center px-2 md:px-4">
         <Form {...form}>
           <form
@@ -448,62 +448,6 @@ const BillingForm: React.FC<{
                       ))}
                     </div>
                   </div>
-                  {/* {selectedPaymentMethod === 'stripe' && (
-                    <>
-                      <div className="mt-6 flex w-full flex-col gap-4 sm:flex-row">
-                        <div className="w-full flex-col gap-1.5">
-                          <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                            {t('checkout.cardNumber')}
-                          </Label>
-                          <CardNumberElement
-                            id="card_number"
-                            className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                          />
-                        </div>
-                        <div className="w-full flex-col gap-1.5">
-                          <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                            {t('checkout.expirationDate')}
-                          </Label>
-                          <CardExpiryElement
-                            id="card_expiry"
-                            className="mt-1.5rounded-lg border border-gray-300 px-3.5 py-2.5"
-                          />
-                        </div>
-                      </div>
-                      <div className="mt-6 flex w-full flex-col gap-4 sm:flex-row">
-                        <div className="w-full flex-col gap-1.5">
-                          <FormField
-                            name="card_name"
-                            control={form.control}
-                            render={({ field }) => (
-                              <FormItem className="w-full">
-                                <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-                                  {t('checkout.cardName')}
-                                </FormLabel>
-                                <FormControl>
-                                  <Input
-                                    className="rounded-lg border border-gray-300 px-3.5 py-2.5"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <div className="w-full flex-col gap-1.5">
-                          <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                            {t('checkout.securityCode')}
-                          </Label>
-                          <CardCvcElement
-                            id="card_cvc"
-                            className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )} */}
-
                   <div className="mt-6 flex w-full flex-col gap-6">
                     {/* Nombre en la tarjeta */}
                     <div className="w-full flex-col gap-1.5">
@@ -535,155 +479,173 @@ const BillingForm: React.FC<{
                     <div className="flex w-full flex-col gap-4 sm:flex-row">
                       {/* Número de tarjeta */}
                       <div className="sm:w- relative w-full flex-col gap-1.5">
-                        <FormField
-                          name="card_number"
-                          control={form.control}
-                          render={({ field }) => (
-                            <FormItem className="w-full">
-                              <CustomFormLabel
-                                label={t('checkout.cardNumber')}
-                                required={true}
-                                textSize="text-[14px]"
-                                textColor="text-[#747476]"
-                              />
-                              <FormControl>
-                                <div className="relative w-full">
+                        {selectedPaymentMethod === 'stripe' ? (
+                          <>
+                            <CustomFormLabel
+                              label={t('checkout.cardNumber')}
+                              required={true}
+                              textSize="text-[14px]"
+                              textColor="text-[#747476]"
+                            />
+                            <CardNumberElement
+                              id="card_number"
+                              className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                              options={{ showIcon: true }}
+                            />
+                          </>
+                        ) : (
+                          <FormField
+                            name="card_number"
+                            control={form.control}
+                            render={({ field }) => (
+                              <FormItem className="w-full">
+                                <CustomFormLabel
+                                  label={t('checkout.cardNumber')}
+                                  required={true}
+                                  textSize="text-[14px]"
+                                  textColor="text-[#747476]"
+                                />
+                                <FormControl>
                                   <Input
                                     type="text"
                                     className="rounded-lg border border-gray-300 px-3.5 py-2.5"
                                     {...field}
                                     placeholder="4242 4242 4242 4242"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                      </div>
+
+                      {/* Fecha de expiración */}
+                      <div className="w-full flex-col gap-1.5 sm:w-1/2">
+                        {selectedPaymentMethod === 'stripe' ? (
+                          <>
+                            <CustomFormLabel
+                              label={t('checkout.expirationDate')}
+                              required={true}
+                              textSize="text-[14px]"
+                              textColor="text-[#747476]"
+                            />
+                            <CardExpiryElement
+                              id="card_expiry"
+                              className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                            />
+                          </>
+                        ) : (
+                          <FormField
+                            name="card_expiration_date"
+                            control={form.control}
+                            render={({ field }) => (
+                              <FormItem className="w-full">
+                                <CustomFormLabel
+                                  label={t('checkout.expirationDate')}
+                                  required={true}
+                                  textSize="text-[14px]"
+                                  textColor="text-[#747476]"
+                                />
+                                <FormControl>
+                                  <Input
+                                    className="rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                    {...field}
+                                    placeholder="MM / YY"
                                     onChange={(e) => {
                                       const value = e.target.value.replace(
                                         /\D/g,
                                         '',
                                       );
-                                      field.onChange(value);
-                                      handleCardTypeChange(value);
-                                    }}
-                                    maxLength={19}
-                                  />
-                                  <div className="absolute right-2 top-1/2 -translate-y-1/2 transform">
-                                    {cardType && (
-                                      <img
-                                        src={`/images/services/${cardType}.png`}
-                                        alt={cardType}
-                                        className="h-6 w-10 object-contain"
-                                      />
-                                    )}
-                                  </div>
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      {/* Fecha de expiración */}
-                      <div className="w-full flex-col gap-1.5 sm:w-1/2">
-                        <FormField
-                          name="card_expiration_date"
-                          control={form.control}
-                          render={({ field }) => (
-                            <FormItem className="w-full">
-                              <CustomFormLabel
-                                label={t('checkout.expirationDate')}
-                                required={true}
-                                textSize="text-[14px]"
-                                textColor="text-[#747476]"
-                              />
-                              <FormControl>
-                                <Input
-                                  className="rounded-lg border border-gray-300 px-3.5 py-2.5"
-                                  {...field}
-                                  placeholder="MM / YY"
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(
-                                      /\D/g,
-                                      '',
-                                    );
-                                    let formattedValue = value;
+                                      let formattedValue = value;
 
-                                    if (value.length >= 2) {
-                                      const month = parseInt(
-                                        value.slice(0, 2),
-                                        10,
-                                      );
-                                      if (month < 1 || month > 12) {
-                                        return;
+                                      if (value.length >= 2) {
+                                        const month = parseInt(
+                                          value.slice(0, 2),
+                                          10,
+                                        );
+                                        if (month < 1 || month > 12) {
+                                          return;
+                                        }
+
+                                        formattedValue = `${value.slice(0, 2)} / `;
                                       }
 
-                                      formattedValue = `${value.slice(0, 2)} / `;
-                                    }
+                                      if (value.length > 2) {
+                                        formattedValue = `${value.slice(0, 2)} / ${value.slice(2, 4)}`;
+                                      }
 
-                                    if (value.length > 2) {
-                                      formattedValue = `${value.slice(0, 2)} / ${value.slice(2, 4)}`;
-                                    }
-
-                                    field.onChange(formattedValue);
-                                  }}
-                                  maxLength={7}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                                      field.onChange(formattedValue);
+                                    }}
+                                    maxLength={7}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
                       </div>
+
                       {/* CVV */}
                       <div className="w-full flex-col gap-1.5 sm:w-1/2">
-                        <FormField
-                          name="card_cvv"
-                          control={form.control}
-                          render={({ field }) => (
-                            <FormItem className="w-full">
-                              <CustomFormLabel
-                                label={t('checkout.securityCode')}
-                                required={true}
-                                textSize="text-[14px]"
-                                textColor="text-[#747476]"
-                              />
-                              <FormControl>
-                                <Input
-                                  className="rounded-lg border border-gray-300 px-3.5 py-2.5"
-                                  {...field}
-                                  placeholder="123"
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(
-                                      /\D/g,
-                                      '',
-                                    );
-                                    field.onChange(value);
-                                  }}
+                        {selectedPaymentMethod === 'stripe' ? (
+                          <>
+                            <CustomFormLabel
+                              label={t('checkout.securityCode')}
+                              required={true}
+                              textSize="text-[14px]"
+                              textColor="text-[#747476]"
+                            />
+                            <CardCvcElement
+                              id="card_cvc"
+                              className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                            />
+                          </>
+                        ) : (
+                          <FormField
+                            name="card_cvv"
+                            control={form.control}
+                            render={({ field }) => (
+                              <FormItem className="w-full">
+                                <CustomFormLabel
+                                  label={t('checkout.securityCode')}
+                                  required={true}
+                                  textSize="text-[14px]"
+                                  textColor="text-[#747476]"
                                 />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                                <FormControl>
+                                  <Input
+                                    className="rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                    {...field}
+                                    placeholder="123"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
                 </>
-                {/* Botón de envío estilizado dentro de la columna izquierda */}
                 <div className="mt-8">
                   <ThemedButton
                     type="submit"
                     disabled={loading}
                     className="w-full transform transition duration-300 ease-in-out hover:scale-105"
+                    onClick={onSubmit}
                   >
                     {t('checkout.subscribe')}
                     {loading && <Spinner className="ml-2 h-4 w-4" />}
                   </ThemedButton>
                 </div>
               </div>
-
-              {/* Columna derecha */}
               <div
                 className="rounded-lg p-6 lg:w-[40%]"
                 style={{ backgroundColor: sidebarBackgroundColor }}
               >
-                {/* Logo alineado */}
                 <div className="mb-8 flex items-start justify-start">
                   <img
                     src={logoUrl}
