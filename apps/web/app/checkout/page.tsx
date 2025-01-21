@@ -23,24 +23,7 @@ async function ServiceCheckoutPage({
 }) {
   const suuperLogo = process.env.NEXT_PUBLIC_SUUPER_LOGO_IMAGE;
 
-  let tokendecoded = await decodeTokenData<PayToken>(tokenId);
-  tokendecoded = {
-    ...tokendecoded,
-    payment_methods: [
-      {
-        id: 'acct_1Pt8YsQLXPK9AJfG',
-        name: 'stripe',
-        icon: 'stripe',
-        description: 'stripe',
-      },
-      {
-        id: 'mercadopago',
-        name: 'mercadopago',
-        icon: 'mercadopago',
-        description: 'mercadopago',
-      },
-    ],
-  };
+  const tokendecoded = await decodeTokenData<PayToken>(tokenId);
 
   const organizationSettings = await getOrganizationSettingsByOrganizationId(
     tokendecoded?.organization_id ?? '',

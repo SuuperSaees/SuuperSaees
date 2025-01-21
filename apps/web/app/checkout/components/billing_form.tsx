@@ -7,8 +7,7 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CardCvcElement,
-  CardExpiryElement, // CardCvcElement,
-  // CardExpiryElement,
+  CardExpiryElement,
   CardNumberElement,
   useElements,
   useStripe,
@@ -29,7 +28,6 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
-// import { Label } from '@kit/ui/label';
 import { Spinner } from '@kit/ui/spinner';
 
 import { StripeIcon } from '~/components/icons/icons';
@@ -336,6 +334,7 @@ const BillingForm: React.FC<{
 
     if (createError) {
       setErrorMessage(createError.message);
+      toast.error(t('checkout.error.paymentFailed'));
       return null;
     }
 
@@ -506,12 +505,32 @@ const BillingForm: React.FC<{
                                   textColor="text-[#747476]"
                                 />
                                 <FormControl>
-                                  <Input
-                                    type="text"
-                                    className="rounded-lg border border-gray-300 px-3.5 py-2.5"
-                                    {...field}
-                                    placeholder="4242 4242 4242 4242"
-                                  />
+                                  <div className="relative w-full">
+                                    <Input
+                                      type="text"
+                                      className="rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                      {...field}
+                                      placeholder="4242 4242 4242 4242"
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(
+                                          /\D/g,
+                                          '',
+                                        );
+                                        field.onChange(value);
+                                        handleCardTypeChange(value);
+                                      }}
+                                      maxLength={19}
+                                    />
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 transform">
+                                      {cardType && (
+                                        <img
+                                          src={`/images/services/${cardType}.png`}
+                                          alt={cardType}
+                                          className="h-6 w-10 object-contain"
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -533,6 +552,7 @@ const BillingForm: React.FC<{
                             <CardExpiryElement
                               id="card_expiry"
                               className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                              options={{ placeholder: 'MM / YY' }}
                             />
                           </>
                         ) : (
@@ -600,6 +620,7 @@ const BillingForm: React.FC<{
                             <CardCvcElement
                               id="card_cvc"
                               className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                              options={{ placeholder: '123' }}
                             />
                           </>
                         ) : (
