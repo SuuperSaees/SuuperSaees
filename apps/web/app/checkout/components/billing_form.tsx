@@ -54,11 +54,11 @@ const paymentMethodsIcons = {
     </div>
   ),
   stripedirect: (
-    <div>
+    <div >
       <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Stripe
-      </span>
       <StripeIcon />
+      </span>
+      
     </div>
   ),
   wompidirect: (
@@ -388,7 +388,7 @@ const BillingForm: React.FC<{
                     {t('checkout.paymentMethod')}
                   </div>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
                       {paymentMethods?.map((paymentMethod) => (
                         <div
                           key={paymentMethod.name}
@@ -619,8 +619,7 @@ const BillingForm: React.FC<{
                     alt="Logo"
                     className="justify-start"
                     style={{
-                      width: '200px',
-                      height: '100px',
+                      width: '160px'
                     }}
                   />
                 </div>
