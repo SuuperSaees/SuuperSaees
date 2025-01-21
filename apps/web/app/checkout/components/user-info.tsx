@@ -39,6 +39,11 @@ export const UserInfo: React.FC<UserDataFieldsProps> = ({ form }) => {
         placeholder: t('checkout.enter_email'),
       },
       {
+        name: 'address',
+        label: t('checkout.address'),
+        placeholder: t('checkout.enter_address'),
+      },
+      {
         name: 'country',
         label: t('checkout.country'),
         placeholder: t('checkout.choose_country'),
@@ -89,11 +94,12 @@ export const UserInfo: React.FC<UserDataFieldsProps> = ({ form }) => {
     const requiredFields = [
       'fullName',
       'email',
+      'address',
       'country',
       'city',
       'state_province_region',
       'postal_code',
-    ]; 
+    ];
     const isRequired = requiredFields.includes(name);
 
     return (
@@ -106,7 +112,7 @@ export const UserInfo: React.FC<UserDataFieldsProps> = ({ form }) => {
             <CustomFormLabel
               label={label}
               required={isRequired}
-              textSize="text-[14px]" 
+              textSize="text-[14px]"
             />
             <FormControl>
               <Input {...field} placeholder={placeholder} />
@@ -125,7 +131,37 @@ export const UserInfo: React.FC<UserDataFieldsProps> = ({ form }) => {
       </div>
 
       <div className="space-y-6">
-        {fields.slice(0, 3).map((field) =>
+        {fields.slice(0, 1).map((field) =>
+          renderField({
+            name: field.name,
+            label: field.label,
+            placeholder: field.placeholder,
+          }),
+        )}
+      </div>
+
+      <div className="mt-6 space-y-6">
+        {fields.slice(1, 2).map((field) =>
+          renderField({
+            name: field.name,
+            label: field.label,
+            placeholder: field.placeholder,
+          }),
+        )}
+      </div>
+
+      <div className="mt-6 space-y-6">
+        {fields.slice(2, 3).map((field) =>
+          renderField({
+            name: field.name,
+            label: field.label,
+            placeholder: field.placeholder,
+          }),
+        )}
+      </div>
+
+      <div className="mt-6 space-y-6">
+        {fields.slice(3, 4).map((field) =>
           renderField({
             name: field.name,
             label: field.label,
@@ -135,7 +171,7 @@ export const UserInfo: React.FC<UserDataFieldsProps> = ({ form }) => {
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
-        {fields.slice(3).map((field) =>
+        {fields.slice(4).map((field) =>
           renderField({
             name: field.name,
             label: field.label,

@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 interface ServiceTypeSectionProps {
   service: {
@@ -9,11 +9,13 @@ interface ServiceTypeSectionProps {
     service_image?: string | null;
   };
   isDarkBackground: boolean;
+  quantity: number; 
 }
 
 export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
   service,
   isDarkBackground,
+  quantity,
 }) => {
   const { t } = useTranslation('services');
 
@@ -35,12 +37,13 @@ export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
         <div className="h-20 w-40 rounded-md bg-gray-200" />
       )}
 
-      {/* Información del servicio */}
       <div className="flex flex-col mt-1 justify-between">
         <span className={`text-base font-medium ${textColor}`}>
           {service.name}
         </span>
-        <span className={`text-sm ${secondaryTextColor}`}>{t('1x')}</span>
+        <span className={`text-sm ${secondaryTextColor}`}>
+          {t(`${quantity} x`)}
+        </span>
         <span className={`text-base font-medium ${textColor}`}>
           ${service.price.toFixed(2)} {service.currency.toUpperCase()}
         </span>
