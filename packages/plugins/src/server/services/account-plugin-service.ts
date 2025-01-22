@@ -13,7 +13,6 @@ import {
 } from '../../types';
 import { AccountPluginRepository } from '../repositories/account-plugin-repository';
 import { validatePluginInsert } from '../utils/validations';
-import { generateUUID } from '../utils/validations';
 
 const SECRET_KEY = Buffer.from(process.env.CREDENTIALS_SECRET_KEY ?? '', 'hex');
 
@@ -35,10 +34,6 @@ export const createAccountPlugin = async (
     const accountPluginRepository = new AccountPluginRepository(client);
 
     validatePluginInsert(data);
-
-    if (!data.provider_id) {
-      data.provider_id = generateUUID();
-    }
 
     if (
       data.credentials &&
@@ -93,7 +88,6 @@ export const createAccountPlugin = async (
     const billingData: BillingAccountInsert = {
       account_id: data.account_id,
       provider,
-      provider_id: data.provider_id,
       credentials: null,
       namespace: 'default-namespace',
       created_at: new Date().toISOString(),

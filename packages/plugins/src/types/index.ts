@@ -38,7 +38,7 @@ export interface AccountPlugin {
 export interface AccountPluginInsert {
   plugin_id: string;
   account_id: string;
-  provider_id?: string;
+  provider_id?: string | null;
   status: 'installed' | 'uninstalled' | 'failed' | 'in progress';
   credentials?: Json;
   deleted_on?: string | null;
@@ -47,7 +47,7 @@ export interface AccountPluginInsert {
 export interface BillingAccountBase {
   account_id: string;
   provider: 'stripe' | 'lemon-squeezy' | 'paddle' | 'treli' | 'suuper';
-  provider_id: string;
+  provider_id?: string | null;
   credentials?: Json;
   namespace?: string;
   deleted_on?: string | null;

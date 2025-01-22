@@ -37,6 +37,7 @@ export class AccountPluginRepository {
         .upsert(
           {
             ...accountPlugin,
+            provider_id: accountPlugin.provider_id ?? null,
             deleted_on: null,
           } as Required<AccountPluginInsert>,
           {
@@ -72,7 +73,8 @@ export class AccountPluginRepository {
           .upsert(
             {
               ...billingAccount,
-            },
+              provider_id: billingAccount.provider_id ?? null,
+            } as unknown as { provider_id: string },
             { onConflict: 'account_id,provider' },
           );
 
@@ -221,17 +223,21 @@ export class AccountPluginRepository {
 
       const { error: billingError } = await this.client
         .from('billing_accounts')
-        .update({
-          credentials: billingUpdates.credentials,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('account_id', billingUpdates.account_id)
-        .eq('provider', billingUpdates.provider as string)
-        .is('deleted_on', null);
+        .upsert(
+          {
+            account_id: billingUpdates.account_id,
+            provider: billingUpdates.provider,
+            credentials: billingUpdates.credentials ?? null,
+            updated_at: billingUpdates.updated_at ?? new Date().toISOString(),
+          },
+          {
+            onConflict: 'account_id,provider',
+          },
+        );
 
       if (billingError) {
         throw new Error(
-          `[REPOSITORY] Error updating billing account: ${billingError.message}`,
+          `[REPOSITORY] Error upserting billing account: ${billingError.message}`,
         );
       }
 
@@ -367,4 +373,5 @@ export class AccountPluginRepository {
       );
     }
   }
+  
 }
