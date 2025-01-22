@@ -162,6 +162,7 @@ class BillingGatewayService {
     service: Service.Type,
     billingAccount: BillingAccounts.Type,
     serviceProviderId?: string,
+    priceChanged?: boolean,
   ) {
     const strategy = await this.getStrategy();
 
@@ -170,6 +171,7 @@ class BillingGatewayService {
       billingAccount,
       this.baseUrl,
       serviceProviderId,
+      priceChanged,
     );
   }
 

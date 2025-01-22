@@ -1,100 +1,140 @@
 import React, { useEffect, useState } from 'react';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Spinner } from '@kit/ui/spinner';
 
-import { getOrganization } from '../../../../team-accounts/src/server/actions/organizations/get/get-organizations';
-import { updateOrganization } from '../../../../team-accounts/src/server/actions/organizations/update/update-organizations';
+import { getAccountPluginByIdAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
+import { updateAccountPluginAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
+import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { ThemedInput } from '../ui/input-themed-with-settings';
 import { CopyDomain } from './copy-domain';
-import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 
 interface LoomPublicIdContainerProps {
-  organizationId: string;
+  pluginId: string;
   userId: string;
 }
 
 function LoomPublicIdContainer({
-  organizationId,
+  pluginId,
   userId,
 }: LoomPublicIdContainerProps) {
   const [loomAppId, setLoomAppId] = useState<string>('');
   const [domain, setDomain] = useState<string>('');
-
-  const {
-    data: getOrganizationData,
-    isLoading: isLoadingOrganization,
-    isPending: isPendingOrganization,
-  } = useQuery({
-    queryKey: ['account-settings', userId],
-    queryFn: async () => await getOrganization(),
-    enabled: !!userId,
-  });
-
-  const {
-    data: getDomainData,
-    isLoading: isLoadingDomain,
-    isPending: isPendingDomain,
-  } = useQuery({
-    queryKey: ['get-subdomain', userId],
-    queryFn: async () => await getDomainByUserId(userId),
-    enabled: !!userId,
-  });
-
-  useEffect(() => {
-    if (getOrganizationData) {
-      setLoomAppId(getOrganizationData?.loom_app_id ?? '');
-    }
-  }, [getOrganizationData]);
-
-  useEffect(() => {
-    if (getDomainData) {
-      setDomain(getDomainData.domain);
-    }
-  }, [getDomainData]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showLoomAppId, setShowLoomAppId] = useState<boolean>(false);
 
   const { t } = useTranslation('account');
 
-  const updateOrganizationMutation = useMutation({
+  useEffect(() => {
+    if (!pluginId) return;
+
+    const fetchPluginData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getAccountPluginByIdAction(pluginId);
+
+        if (response?.success) {
+          const credentials = response.success.data?.credentials as Record<
+            string,
+            unknown
+          >;
+          if (typeof credentials.loom_app_id === 'string') {
+            setLoomAppId(credentials.loom_app_id);
+          }
+        } else {
+          throw new Error(
+            response?.error?.message ?? 'Failed to fetch plugin data',
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching plugin data:', error);
+        toast.error(t('errorFetchingPlugin'), {
+          description: t('errorFetchingPluginDescription'),
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void fetchPluginData();
+  }, [pluginId, t]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchDomain = async () => {
+      try {
+        const domainData = await getDomainByUserId(userId);
+        if (domainData?.domain) {
+          setDomain(domainData.domain);
+        }
+      } catch (error) {
+        console.error('Error fetching domain:', error);
+      }
+    };
+
+    void fetchDomain();
+  }, [userId]);
+
+  const updateCredentialsMutation = useMutation({
     mutationFn: async () => {
-      await updateOrganization(organizationId, {
-        loom_app_id: loomAppId,
-      });
+      const updates = {
+        credentials: { loom_app_id: loomAppId },
+        provider: 'loom',
+      };
+
+      return await updateAccountPluginAction(pluginId, updates);
     },
     onSuccess: () => {
       toast.success(t('updateSuccess'), {
-        description: t('updateSuccessOrganization'),
+        description: t('pluginUpdatedSuccessfully'),
       });
     },
     onError: (error) => {
-      console.error(error);
-      toast.error(t('error'), {
-        description: t('updateErrorOrganization'),
-      });
+      console.error('Error en cliente:', error);
     },
   });
 
   return (
     <>
-      {isLoadingOrganization || isPendingOrganization || isLoadingDomain || isPendingDomain ? (
+      {isLoading ? (
         <Spinner className="h-5" />
       ) : (
-        <div className='w-full'>
-          <CopyDomain value={domain} className='mb-3' label={t('loomAppIdTitle')} />
-          <ThemedInput
-            data-test={'account-display-name'}
-            minLength={2}
-            placeholder={t('loomAppIdTitle')}
-            maxLength={100}
-            value={loomAppId}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setLoomAppId(e.target.value)
-            }
-            onBlur={() => updateOrganizationMutation.mutate()}
+        <div className="w-full">
+          <CopyDomain
+            value={domain}
+            className="mb-3"
+            label={t('loomAppIdTitle')}
           />
+          <div className="relative">
+            <ThemedInput
+              data-test={'account-display-name'}
+              minLength={2}
+              placeholder={t('loomAppIdTitle')}
+              maxLength={100}
+              type={showLoomAppId ? 'text' : 'password'}
+              value={loomAppId}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setLoomAppId(e.target.value)
+              }
+              onBlur={() => updateCredentialsMutation.mutate()}
+            />
+            <button
+              className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+              type="button"
+              onClick={() => setShowLoomAppId(!showLoomAppId)}
+            >
+              {showLoomAppId ? (
+                <EyeOffIcon className="h-5 w-5" />
+              ) : (
+                <EyeIcon className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
       )}
     </>

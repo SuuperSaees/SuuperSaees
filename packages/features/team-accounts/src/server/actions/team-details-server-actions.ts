@@ -5,8 +5,13 @@ import { redirect } from 'next/navigation';
 import { enhanceAction } from '@kit/next/actions';
 import { getLogger } from '@kit/shared/logger';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
-import { BillingAccounts } from '../../../../../../apps/web/lib/billing-accounts.types';
-import { UpdateTeamStripeIdSchema, UpdateTeamNameSchema } from '../../schema/update-team-name.schema';
+
+import { createAccountPluginAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/create-account-plugin';
+import { updateAccountPluginAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
+import {
+  UpdateTeamNameSchema,
+  UpdateTeamStripeIdSchema,
+} from '../../schema/update-team-name.schema';
 
 export const updateTeamAccountName = enhanceAction(
   async (params) => {
@@ -60,66 +65,70 @@ export const updateTeamAccountStripeId = enhanceAction(
   async (params) => {
     const client = getSupabaseServerActionClient();
     const logger = await getLogger();
-    const { stripe_id, id } = params;
-    const { error } = await client
-      .from('accounts')
-      .update({
-        stripe_id
-      })
-      .match({
-        id,
-      })
-      .select('slug')
+    const { stripe_id, id: accountId } = params;
+
+    const { data: pluginData, error: pluginError } = await client
+      .from('plugins')
+      .select('id')
+      .eq('name', 'stripe')
+      .is('deleted_on', null)
       .single();
 
-    if (error) {
-      logger.error({ error }, `Failed to update stripe id`);
-      throw error;
+    if (pluginError) {
+      logger.error(
+        { pluginError },
+        `Failed to fetch plugin_id for stripe in plugins table`,
+      );
+      throw new Error(`Failed to fetch plugin_id for stripe`);
     }
 
-    // select the account by id
-    const { data: billingAccount, error: billingAccountError } = await client
-      .from('billing_accounts')
-      .select('*')
-      .eq('account_id', id )
+    const pluginId = pluginData?.id;
+
+    const { data: existingPlugin, error: existingPluginError } = await client
+      .from('account_plugins')
+      .select('id')
+      .eq('account_id', accountId)
+      .eq('plugin_id', pluginId)
       .single();
 
-    if (billingAccountError && billingAccount) {
-      logger.error({ billingAccountError }, `Failed to update stripe id`);
-      throw billingAccountError;
+    if (existingPluginError) {
+      logger.error(
+        { existingPluginError },
+        `Error fetching account plugin for account_id: ${accountId}`,
+      );
+      throw existingPluginError;
     }
 
-    // update the billing account with the stripe id or create a new one if it doesn't exist
-    if (!billingAccount) {
-      const {error: newBillingAccountError } = await client
-        .from('billing_accounts')
-        .insert({ 
-          account_id: id,
-          provider: BillingAccounts.BillingProviderKeys.STRIPE,
-          provider_id: stripe_id,
-          namespace: 'production',
-          credentials: {
-            stripe_id: stripe_id
-          }
-        })
+    if (!existingPlugin) {
+      await createAccountPluginAction({
+        plugin_id: pluginId,
+        account_id: accountId,
+        credentials: { stripe_id },
+        status: 'installed',
+      });
 
-      if (newBillingAccountError) {
-        logger.error({ newBillingAccountError }, `Failed to create billing account`);
-        throw newBillingAccountError;
-      }
+      logger.info(
+        `Successfully created account plugin for account_id: ${accountId}`,
+      );
     } else {
-      const { error: updatedBillingAccountError } = await client
-        .from('billing_accounts')
-        .update({ provider_id: stripe_id })
-        .eq('account_id', id)
+      const updatedCredentials = { stripe_id };
 
-      if (updatedBillingAccountError) {
-        logger.error({ updatedBillingAccountError }, `Failed to update stripe id`);
-        throw updatedBillingAccountError;
-      }
+      await updateAccountPluginAction(
+        existingPlugin.id,
+        {
+          credentials: updatedCredentials,
+          provider: 'stripe',
+          account_id: accountId,
+        },
+        stripe_id, 
+      );
+
+      logger.info(
+        `Successfully updated account plugin for account_id: ${accountId}`,
+      );
     }
 
-    logger.info(`Account stripe id updated`);
+    logger.info(`Account stripe id updated successfully`);
 
     return { success: true };
   },

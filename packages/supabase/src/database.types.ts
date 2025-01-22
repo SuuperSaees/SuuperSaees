@@ -409,7 +409,7 @@ export type Database = {
           id: string
           namespace: string
           provider: Database["public"]["Enums"]["billing_provider"]
-          provider_id: string
+          provider_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -420,7 +420,7 @@ export type Database = {
           id?: string
           namespace?: string
           provider?: Database["public"]["Enums"]["billing_provider"]
-          provider_id: string
+          provider_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -431,7 +431,7 @@ export type Database = {
           id?: string
           namespace?: string
           provider?: Database["public"]["Enums"]["billing_provider"]
-          provider_id?: string
+          provider_id?: string | null
           updated_at?: string | null
         }
         Relationships: [

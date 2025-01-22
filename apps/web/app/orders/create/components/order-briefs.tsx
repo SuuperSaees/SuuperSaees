@@ -254,6 +254,7 @@ export const OrderBriefs = ({
                                     responseValue as never,
                                   );
                                 }}
+                                style={{whiteSpace: 'pre-wrap'}}
                               >
                                 {field.value}
                               </Textarea>

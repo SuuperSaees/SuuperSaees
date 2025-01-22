@@ -30,8 +30,10 @@ export class FilesController {
 
         const fileService = new FilesService(fileRepository, organizationsRepository, foldersRepository);
         return fileService.createFile(createFileProps, userData.user.id);
-
     } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`Error creating file: ${error.message}`);
+        }
         throw new Error('Error creating file');
     }
     }

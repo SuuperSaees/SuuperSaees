@@ -1,5 +1,7 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
@@ -20,25 +22,44 @@ import { updateAccountPlugin } from '../../services/account-plugin-service';
  * Utilizes Supabase for database interactions and manages responses using CustomResponse and CustomError.
  * @param {string} id - The ID of the account_plugin to update.
  * @param {Partial<AccountPluginInsert>} updates - The fields to update in the account_plugin.
+ * @param {string} [provider_id] - Optional provider_id sent by the client or generated.
  * @returns {Promise<Object>} A standardized response indicating success or failure.
  */
 export const updateAccountPluginAction = async (
   id: string,
-  updates: Partial<AccountPluginInsert>,
+  updates: Partial<AccountPluginInsert> & {
+    provider?: string;
+    account_id?: string;
+  },
+  provider_id?: string,
 ) => {
   try {
+    if (
+      updates.provider !== 'loom' &&
+      (!updates.provider || !updates.account_id)
+    ) {
+      throw new CustomError(
+        HttpStatus.Error.BadRequest,
+        'Provider and account_id are required for updating billing account',
+        ErrorPluginOperations.FAILED_TO_UPDATE_PLUGIN,
+      );
+    }
+
     const client =
       getSupabaseServerActionClient() as unknown as SupabaseClient<Database>;
 
-    const updatedAccountPlugin = await updateAccountPlugin(client, id, updates);
+    const updatedAccountPlugin = await updateAccountPlugin(client, id, {
+      ...updates,
+      provider_id,
+    });
+
+    revalidatePath('/apps');
 
     return CustomResponse.success(
       updatedAccountPlugin,
       'accountPluginUpdated',
     ).toJSON();
   } catch (error) {
-    console.error('Error updating account plugin:', error);
-
     if (error instanceof CustomError) {
       return CustomResponse.error(error).toJSON();
     }

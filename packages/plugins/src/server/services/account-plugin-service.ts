@@ -1,20 +1,30 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-import { Database } from '@kit/supabase/database';
+import { Database, Json } from '@kit/supabase/database';
 
-import { AccountPlugin, AccountPluginInsert } from '../../types';
+import {
+  CredentialsCrypto,
+  EncryptedCredentials,
+} from '../../../../../apps/web/app/utils/credentials-crypto';
+import {
+  AccountPlugin,
+  AccountPluginInsert,
+  BillingAccountInsert,
+} from '../../types';
 import { AccountPluginRepository } from '../repositories/account-plugin-repository';
 import { validatePluginInsert } from '../utils/validations';
-import { generateUUID } from '../utils/validations';
+
+const SECRET_KEY = Buffer.from(process.env.CREDENTIALS_SECRET_KEY ?? '', 'hex');
 
 /**
  * @name createAccountPlugin
- * @description Service to handle the creation of a new account_plugin.
- * Validates the input data and saves the account_plugin in the database.
+ * @description Service to handle the creation of a new `account_plugin`.
+ * Validates the input data and saves the `account_plugin` in the database.
+ * Also ensures a corresponding entry is created in the `billing_accounts` table.
  * @param {SupabaseClient<Database>} client - The Supabase client instance for database interactions.
- * @param {AccountPluginInsert} data - The data required to create an account_plugin.
- * @returns {Promise<AccountPlugin>} The created account_plugin.
- * @throws {Error} If the account_plugin creation fails.
+ * @param {AccountPluginInsert} data - The data required to create an `account_plugin`.
+ * @returns {Promise<AccountPlugin>} The created `account_plugin`.
+ * @throws {Error} If any error occurs during the creation of the `account_plugin`.
  */
 export const createAccountPlugin = async (
   client: SupabaseClient<Database>,
@@ -25,14 +35,70 @@ export const createAccountPlugin = async (
 
     validatePluginInsert(data);
 
-    if (!data.provider_id) {
-      data.provider_id = generateUUID();
+    if (
+      data.credentials &&
+      typeof data.credentials === 'object' &&
+      !Array.isArray(data.credentials) &&
+      Object.keys(data.credentials).length > 0
+    ) {
+      const { data: pluginData, error: pluginError } = await client
+        .from('plugins')
+        .select('name')
+        .eq('id', data.plugin_id)
+        .single();
+
+      if (pluginError ?? !pluginData) {
+        throw new Error(
+          `[SERVICE] Failed to retrieve plugin data for provider assignment. Plugin ID: ${data.plugin_id}`,
+        );
+      }
+
+      const provider = pluginData.name.toLowerCase();
+
+      if (provider !== 'stripe') {
+        const crypto = new CredentialsCrypto(SECRET_KEY);
+        const encryptedCredentials: EncryptedCredentials = crypto.encrypt(
+          data.credentials,
+        );
+        data.credentials = JSON.stringify(encryptedCredentials);
+      }
+    } else if (data.credentials && typeof data.credentials === 'object') {
+      data.credentials = null;
     }
 
-    return await accountPluginRepository.create(data);
+    const { data: pluginData, error: pluginError } = await client
+      .from('plugins')
+      .select('name')
+      .eq('id', data.plugin_id)
+      .single();
+
+    if (pluginError ?? !pluginData) {
+      throw new Error(
+        `[SERVICE] Failed to retrieve plugin data for provider assignment. Plugin ID: ${data.plugin_id}`,
+      );
+    }
+
+    const provider = pluginData.name.toLowerCase() as
+      | 'stripe'
+      | 'treli'
+      | 'paddle'
+      | 'suuper'
+      | 'lemon-squeezy';
+
+    const billingData: BillingAccountInsert = {
+      account_id: data.account_id,
+      provider,
+      credentials: null,
+      namespace: 'default-namespace',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    return await accountPluginRepository.create(data, billingData);
   } catch (error) {
-    console.error('Error creating account plugin:', error);
-    throw new Error('Failed to create account plugin');
+    throw new Error(
+      `[SERVICE] Failed to create account plugin: ${(error as Error).message}`,
+    );
   }
 };
 
@@ -56,13 +122,33 @@ export const getAccountPluginById = async (
       await accountPluginRepository.getById(accountPluginId);
 
     if (!accountPlugin) {
-      throw new Error('Account plugin not found');
+      throw new Error('[SERVICE] Account plugin not found');
+    }
+
+    if (accountPlugin.credentials) {
+      const crypto = new CredentialsCrypto(SECRET_KEY);
+      try {
+        const decryptedCredentials = crypto.decrypt<Record<string, unknown>>(
+          JSON.parse(
+            accountPlugin.credentials as string,
+          ) as EncryptedCredentials,
+        );
+
+        accountPlugin.credentials = JSON.parse(
+          JSON.stringify(decryptedCredentials),
+        ) as Json;
+      } catch (error) {
+        throw new Error(
+          '[SERVICE] Failed to decrypt account plugin credentials',
+        );
+      }
     }
 
     return accountPlugin;
   } catch (error) {
-    console.error('Error fetching account plugin by ID:', error);
-    throw new Error('Failed to get account plugin by ID');
+    throw new Error(
+      `[SERVICE] Failed to get account plugin by ID: ${(error as Error).message}`,
+    );
   }
 };
 
@@ -88,56 +174,143 @@ export const getAccountPluginsByAccount = async (
 
     return await accountPluginRepository.getByAccount(accountId, limit, offset);
   } catch (error) {
-    console.error('Error fetching account plugins for account:', error);
-    throw new Error('Failed to get account plugins for account');
+    throw new Error(
+      `[SERVICE] Failed to get account plugins for account: ${(error as Error).message}`,
+    );
   }
 };
 
 /**
  * @name updateAccountPlugin
- * @description Service to update the details of an existing account_plugin.
- * Applies the specified updates to the account_plugin in the database.
- * @param {SupabaseClient<Database>} client - The Supabase client instance for database interactions.
- * @param {string} id - The unique ID of the account_plugin to update.
- * @param {Partial<AccountPluginInsert>} updates
- * @param {Partial<AccountPluginInsert>} updates - The fields to update in the account_plugin.
- * @returns {Promise<AccountPlugin>} The updated account_plugin data.
- * @throws {Error} If the update operation fails.
+ * @description Updates an account_plugin and its billing_account if applicable, handling encryption, provider_id synchronization, and Loom-specific logic.
+ * @param {SupabaseClient<Database>} client - Supabase client for database interactions.
+ * @param {string} id - The ID of the account_plugin to update.
+ * @param {Partial<AccountPluginInsert> & { provider?: string; account_id?: string; provider_id?: string }} updates - Data to update, including optional provider_id.
+ * @returns {Promise<AccountPlugin>} The updated account_plugin.
+ * @throws {Error} If required fields are missing or the update fails.
  */
+
 export const updateAccountPlugin = async (
   client: SupabaseClient<Database>,
   id: string,
-  updates: Partial<AccountPluginInsert>,
+  updates: Partial<AccountPluginInsert> & {
+    provider?: string;
+    account_id?: string;
+    provider_id?: string;
+  },
 ): Promise<AccountPlugin> => {
   try {
     const accountPluginRepository = new AccountPluginRepository(client);
 
-    return await accountPluginRepository.update(id, updates);
+    if (updates.provider !== 'loom') {
+      if (!updates.account_id || !updates.provider) {
+        throw new Error(
+          '[SERVICE] Account ID and Provider are required for updating billing account.',
+        );
+      }
+    }
+
+    let providerId = updates.provider_id;
+
+    if (!providerId) {
+      const fetchedProviderId = await accountPluginRepository.getProviderId(
+        id,
+        updates.provider,
+        updates.account_id,
+      );
+
+      providerId = fetchedProviderId ?? crypto.randomUUID();
+    }
+
+    if (
+      updates.provider !== 'stripe' &&
+      updates.credentials &&
+      typeof updates.credentials === 'object' &&
+      !Array.isArray(updates.credentials) &&
+      Object.keys(updates.credentials).length > 0
+    ) {
+      const crypto = new CredentialsCrypto(SECRET_KEY);
+      updates.credentials = JSON.stringify(crypto.encrypt(updates.credentials));
+    }
+
+    const accountPluginUpdates: Partial<AccountPluginInsert> = {
+      credentials: updates.credentials,
+      provider_id: providerId,
+    };
+
+    const billingUpdates: Partial<BillingAccountInsert> = {
+      credentials: updates.credentials,
+      updated_at: new Date().toISOString(),
+      provider: updates.provider as BillingAccountInsert['provider'],
+      account_id: updates.account_id,
+      provider_id: providerId,
+    };
+
+    if (updates.provider === 'loom') {
+      return await accountPluginRepository.updateLoom(id, accountPluginUpdates);
+    } else {
+      return await accountPluginRepository.update(
+        id,
+        accountPluginUpdates,
+        billingUpdates,
+      );
+    }
   } catch (error) {
-    console.error('Error updating account plugin:', error);
-    throw new Error('Failed to update account plugin');
+    throw new Error(
+      `[SERVICE] Failed to update account plugin: ${(error as Error).message}`,
+    );
+  }
+};
+
+/**
+ * @name updatePluginStatus
+ * @description Service to update the status of an account_plugin in the `account_plugins` table.
+ * @param {SupabaseClient<Database>} client - The Supabase client instance for database interactions.
+ * @param {string} id - The unique ID of the `account_plugin` to update.
+ * @param {"installed" | "uninstalled" | "failed" | "in progress" | null} status - The new status to set for the `account_plugin`.
+ * @returns {Promise<void>} Resolves when the status is successfully updated.
+ * @throws {Error} If the update operation fails.
+ */
+export const updatePluginStatus = async (
+  client: SupabaseClient<Database>,
+  id: string,
+  status: 'installed' | 'uninstalled' | 'failed' | 'in progress' | null,
+): Promise<void> => {
+  try {
+    const accountPluginRepository = new AccountPluginRepository(client);
+
+    await accountPluginRepository.updateStatus(id, status);
+  } catch (error) {
+    throw new Error(
+      `[SERVICE] Failed to update plugin status: ${(error as Error).message}`,
+    );
   }
 };
 
 /**
  * @name deleteAccountPlugin
- * @description Service to delete an account_plugin by marking it as deleted in the database.
- * Performs a soft delete operation.
+ * @description Service to delete an account_plugin and its corresponding billing_account.
+ * Performs a soft delete operation for both tables.
  * @param {SupabaseClient<Database>} client - The Supabase client instance for database interactions.
  * @param {string} id - The unique ID of the account_plugin to delete.
- * @returns {Promise<void>} Resolves when the account_plugin is successfully deleted.
- * @throws {Error} If the delete operation fails.
+ * @param {string} accountId - The ID of the account to identify the billing_account.
+ * @param {string} provider - The provider name to identify the billing_account.
+ * @returns {Promise<void>} Resolves when both records are successfully deleted.
+ * @throws {Error} If any delete operation fails.
  */
 export const deleteAccountPlugin = async (
   client: SupabaseClient<Database>,
   id: string,
+  accountId: string,
+  provider: string,
 ): Promise<void> => {
   try {
     const accountPluginRepository = new AccountPluginRepository(client);
 
-    await accountPluginRepository.delete(id);
+    await accountPluginRepository.delete(id, accountId, provider);
   } catch (error) {
-    console.error('Error deleting account plugin:', error);
-    throw new Error('Failed to delete account plugin');
+    throw new Error(
+      `[SERVICE] Failed to delete account plugin and billing account: ${(error as Error).message}`,
+    );
   }
 };

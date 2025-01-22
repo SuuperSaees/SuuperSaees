@@ -28,31 +28,31 @@ export const AnnotationMarker: React.FC<AnnotationMarkerProps> = ({
 
   return (
     <div
-      className={`transform -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110 hover:outline-none ${
-        isActive ? 'z-50' : 'z-40'
-      }`}
+      className={`absolute ${isActive ? 'z-50' : 'z-40'}`}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
         cursor: isHovered ? 'pointer' : 'default',
+        transform: `translate(-50%, -50%)`, // Centrado fijo
+        transformOrigin: 'center', // Asegura que la escala se aplique desde el centro
+        scale: isHovered ? '1.1' : '1', // Usamos scale como propiedad separada
+        transition: 'scale 0.2s ease-out',
       }}
     >
       <MarkerIcon />
-      {
-        annotation.accounts && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full">
-              <Avatar className="w-6 h-6">
-                <AvatarImage src={annotation.accounts?.settings?.picture_url ?? ''} />
-                <AvatarFallback>
-                  {annotation.accounts?.name?.charAt(0).toUpperCase() ?? 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </div>
+      {annotation.accounts && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full">
+            <Avatar className="w-6 h-6">
+              <AvatarImage src={annotation.accounts?.settings?.picture_url ?? ''} />
+              <AvatarFallback>
+                {annotation.accounts?.name?.charAt(0).toUpperCase() ?? 'U'}
+              </AvatarFallback>
+            </Avatar>
           </div>
-        )
-      }
+        </div>
+      )}
     </div>
   );
 };
