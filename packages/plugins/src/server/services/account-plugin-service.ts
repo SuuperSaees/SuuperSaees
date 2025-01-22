@@ -13,7 +13,6 @@ import {
 } from '../../types';
 import { AccountPluginRepository } from '../repositories/account-plugin-repository';
 import { validatePluginInsert } from '../utils/validations';
-import { generateUUID } from '../utils/validations';
 
 const SECRET_KEY = Buffer.from(process.env.CREDENTIALS_SECRET_KEY ?? '', 'hex');
 
@@ -35,10 +34,6 @@ export const createAccountPlugin = async (
     const accountPluginRepository = new AccountPluginRepository(client);
 
     validatePluginInsert(data);
-
-    if (!data.provider_id) {
-      data.provider_id = generateUUID();
-    }
 
     if (
       data.credentials &&
@@ -93,7 +88,6 @@ export const createAccountPlugin = async (
     const billingData: BillingAccountInsert = {
       account_id: data.account_id,
       provider,
-      provider_id: data.provider_id,
       credentials: null,
       namespace: 'default-namespace',
       created_at: new Date().toISOString(),
@@ -186,41 +180,46 @@ export const getAccountPluginsByAccount = async (
   }
 };
 
+/**
+ * @name updateAccountPlugin
+ * @description Updates an account_plugin and its billing_account if applicable, handling encryption, provider_id synchronization, and Loom-specific logic.
+ * @param {SupabaseClient<Database>} client - Supabase client for database interactions.
+ * @param {string} id - The ID of the account_plugin to update.
+ * @param {Partial<AccountPluginInsert> & { provider?: string; account_id?: string; provider_id?: string }} updates - Data to update, including optional provider_id.
+ * @returns {Promise<AccountPlugin>} The updated account_plugin.
+ * @throws {Error} If required fields are missing or the update fails.
+ */
+
 export const updateAccountPlugin = async (
   client: SupabaseClient<Database>,
   id: string,
   updates: Partial<AccountPluginInsert> & {
     provider?: string;
     account_id?: string;
+    provider_id?: string;
   },
 ): Promise<AccountPlugin> => {
   try {
     const accountPluginRepository = new AccountPluginRepository(client);
 
-    if (updates.provider === 'loom') {
-      if (
-        updates.credentials &&
-        typeof updates.credentials === 'object' &&
-        !Array.isArray(updates.credentials) &&
-        Object.keys(updates.credentials).length > 0
-      ) {
-        const crypto = new CredentialsCrypto(SECRET_KEY);
-        updates.credentials = JSON.stringify(
-          crypto.encrypt(updates.credentials),
+    if (updates.provider !== 'loom') {
+      if (!updates.account_id || !updates.provider) {
+        throw new Error(
+          '[SERVICE] Account ID and Provider are required for updating billing account.',
         );
       }
-
-      const accountPluginUpdates: Partial<AccountPluginInsert> = {
-        credentials: updates.credentials,
-      };
-
-      return await accountPluginRepository.updateLoom(id, accountPluginUpdates);
     }
 
-    if (!updates.account_id || !updates.provider) {
-      throw new Error(
-        '[SERVICE] Account ID and Provider are required for updating billing account.',
+    let providerId = updates.provider_id;
+
+    if (!providerId) {
+      const fetchedProviderId = await accountPluginRepository.getProviderId(
+        id,
+        updates.provider,
+        updates.account_id,
       );
+
+      providerId = fetchedProviderId ?? crypto.randomUUID();
     }
 
     if (
@@ -236,6 +235,7 @@ export const updateAccountPlugin = async (
 
     const accountPluginUpdates: Partial<AccountPluginInsert> = {
       credentials: updates.credentials,
+      provider_id: providerId,
     };
 
     const billingUpdates: Partial<BillingAccountInsert> = {
@@ -243,13 +243,18 @@ export const updateAccountPlugin = async (
       updated_at: new Date().toISOString(),
       provider: updates.provider as BillingAccountInsert['provider'],
       account_id: updates.account_id,
+      provider_id: providerId,
     };
 
-    return await accountPluginRepository.update(
-      id,
-      accountPluginUpdates,
-      billingUpdates,
-    );
+    if (updates.provider === 'loom') {
+      return await accountPluginRepository.updateLoom(id, accountPluginUpdates);
+    } else {
+      return await accountPluginRepository.update(
+        id,
+        accountPluginUpdates,
+        billingUpdates,
+      );
+    }
   } catch (error) {
     throw new Error(
       `[SERVICE] Failed to update account plugin: ${(error as Error).message}`,

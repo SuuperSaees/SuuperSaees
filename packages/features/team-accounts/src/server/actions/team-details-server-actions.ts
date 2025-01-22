@@ -113,11 +113,15 @@ export const updateTeamAccountStripeId = enhanceAction(
     } else {
       const updatedCredentials = { stripe_id };
 
-      await updateAccountPluginAction(existingPlugin.id, {
-        credentials: updatedCredentials,
-        provider: 'stripe',
-        account_id: accountId,
-      });
+      await updateAccountPluginAction(
+        existingPlugin.id,
+        {
+          credentials: updatedCredentials,
+          provider: 'stripe',
+          account_id: accountId,
+        },
+        stripe_id, 
+      );
 
       logger.info(
         `Successfully updated account plugin for account_id: ${accountId}`,
