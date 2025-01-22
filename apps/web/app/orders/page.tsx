@@ -1,4 +1,3 @@
-import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
@@ -6,13 +5,20 @@ import { PageBody } from '@kit/ui/page';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { getOrganizationById } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+import {  getAgencyForClient, getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 import { PageHeader } from '../components/page-header';
 import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
-import { OrderList } from './components/orders-list';
+import { OrdersProvider } from './components/context/orders-context';
 
+import { getTags } from '~/server/actions/tags/tags.action';
+import ProjectsBoard from './components/projects-board';
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+
+// type OrderResponse = Omit<Order.Response, 'id'> & {
+//   id: string;
+// };
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   return {
@@ -21,55 +27,69 @@ export const generateMetadata = async () => {
 };
 
 async function OrdersPage() {
-  const client = getSupabaseServerComponentClient({ 
+  const client = getSupabaseServerComponentClient({
     admin: false,
   });
-  const ordersData = await getOrders(true).catch((err) => console.error(err));
-  const agencyId = ordersData?.[0]?.agency_id;
+  // const ordersData = ((await getOrders(true).catch((err) => {
+  //   console.error(err);
+  //   return [];
+  // })) ?? []) as OrderResponse[];
+  // const agencyId = ordersData?.[0]?.agency_id;
+  const { workspace: userWorkspace } = await loadUserWorkspace();
+  const userOrganization = await getOrganization()
+  const agencyRoles = ['agency_owner', 'agency_project_manager', 'agency_member']
 
-  const agencyStatuses = await getAgencyStatuses(agencyId ?? '')
-    .catch((err) => console.error(err))
-    .catch(() => []);
+  const agency = agencyRoles.includes(userWorkspace.role ?? '') ? userOrganization : await getAgencyForClient(userOrganization.id ?? '')
+  const agencyId = agency?.id ?? ''
+  const agencyStatuses =
+    (await getAgencyStatuses(agencyId ?? '').catch(() => [])) ?? [];
 
-  const agency = await getOrganizationById(agencyId ?? '').catch((err) => console.error(`Error fetching agency: ${err}`));  
+  // const agency = await getOrganizationById(agencyId ?? '').catch((err) =>
+  //   console.error(`Error fetching agency: ${err}`),
+  // );
 
-  const { data, error: membersError } = await client.rpc('get_account_members', {
-    account_slug: agency?.slug ?? '',
-  })
+  const { data, error: membersError } = await client.rpc(
+    'get_account_members',
+    {
+      account_slug: agency?.slug ?? '',
+    },
+  );
   let agencyMembers = [];
   if (membersError) {
     console.error('Error fetching agency members:', membersError);
     agencyMembers = [];
   }
-  agencyMembers = data?.map((member) => ({
-    ...member,
-    role: member.role.toLowerCase(),
-    user_settings:  {
-      picture_url: member.picture_url,
-      name: member.name,
-    }
-  })) ?? [];
+  agencyMembers =
+    data?.map((member) => ({
+      ...member,
+      role: member.role.toLowerCase(),
+      user_settings: {
+        picture_url: member.picture_url,
+        name: member.name,
+      },
+    })) ?? [];
 
-  
+  const tags = await getTags(agencyId ?? '', );
+
   return (
-    <>
-      <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []}>
+
+    <OrdersProvider agencyMembers={agencyMembers ?? []} agencyId={agencyId ?? ''}>
+
+      <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []} agencyMembers={agencyMembers ?? []}>
         <PageBody>
           <div className="p-[35px]">
             <PageHeader
               title="orders:title"
               rightContent={<TimerContainer />}
             />
-
-            <OrderList
-              orders={ordersData ?? []}
-              agencyMembers={agencyMembers ?? []}
-              agencyStatuses={agencyStatuses ?? []}
-            ></OrderList>
+ 
+              <ProjectsBoard agencyMembers={agencyMembers} tags={tags} />
+ 
           </div>
         </PageBody>
       </AgencyStatusesProvider>
-    </>
+    </OrdersProvider>
+
   );
 }
 

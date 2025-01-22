@@ -34,50 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      account_plugins: {
-        Row: {
-          account_id: string
-          created_at: string | null
-          credentials: Json | null
-          deleted_on: string | null
-          id: string
-          plugin_id: string
-          provider_id: string | null
-          status: Database["public"]["Enums"]["plugin_status"] | null
-          updated_at: string | null
-        }
-        Insert: {
-          account_id: string
-          created_at?: string | null
-          credentials?: Json | null
-          deleted_on?: string | null
-          id?: string
-          plugin_id: string
-          provider_id?: string | null
-          status?: Database["public"]["Enums"]["plugin_status"] | null
-          updated_at?: string | null
-        }
-        Update: {
-          account_id?: string
-          created_at?: string | null
-          credentials?: Json | null
-          deleted_on?: string | null
-          id?: string
-          plugin_id?: string
-          provider_id?: string | null
-          status?: Database["public"]["Enums"]["plugin_status"] | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "account_plugins_plugin_id_fkey"
-            columns: ["plugin_id"]
-            isOneToOne: false
-            referencedRelation: "plugins"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       accounts: {
         Row: {
           created_at: string | null
@@ -1157,24 +1113,24 @@ export type Database = {
           agency_id: string | null
           client_organization_id: string | null
           created_at: string
-          file_id: string | null
-          folder_id: string | null
+          file_id: string
+          folder_id: string
           id: string
         }
         Insert: {
           agency_id?: string | null
           client_organization_id?: string | null
           created_at?: string
-          file_id?: string | null
-          folder_id?: string | null
+          file_id: string
+          folder_id: string
           id?: string
         }
         Update: {
           agency_id?: string | null
           client_organization_id?: string | null
           created_at?: string
-          file_id?: string | null
-          folder_id?: string | null
+          file_id?: string
+          folder_id?: string
           id?: string
         }
         Relationships: [
@@ -1197,7 +1153,7 @@ export type Database = {
       folders: {
         Row: {
           agency_id: string
-          client_organization_id: string
+          client_organization_id: string | null
           created_at: string
           id: string
           is_subfolder: boolean | null
@@ -1206,7 +1162,7 @@ export type Database = {
         }
         Insert: {
           agency_id: string
-          client_organization_id: string
+          client_organization_id?: string | null
           created_at?: string
           id?: string
           is_subfolder?: boolean | null
@@ -1215,7 +1171,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string
-          client_organization_id?: string
+          client_organization_id?: string | null
           created_at?: string
           id?: string
           is_subfolder?: boolean | null
@@ -1753,6 +1709,7 @@ export type Database = {
           description: string
           due_date: string | null
           id: number
+          position: number | null
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: string | null
@@ -1761,7 +1718,6 @@ export type Database = {
           title: string
           updated_at: string | null
           uuid: string
-          visibility: Database["public"]["Enums"]["visibility"]
         }
         Insert: {
           agency_id: string
@@ -1773,6 +1729,7 @@ export type Database = {
           description: string
           due_date?: string | null
           id?: number
+          position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status?: string | null
@@ -1781,7 +1738,6 @@ export type Database = {
           title: string
           updated_at?: string | null
           uuid: string
-          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Update: {
           agency_id?: string
@@ -1793,6 +1749,7 @@ export type Database = {
           description?: string
           due_date?: string | null
           id?: number
+          position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
           status?: string | null
@@ -1801,7 +1758,6 @@ export type Database = {
           title?: string
           updated_at?: string | null
           uuid?: string
-          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Relationships: [
           {
@@ -1971,39 +1927,64 @@ export type Database = {
       }
       plugins: {
         Row: {
+          account_id: string
           created_at: string
+          credentials: Json
           deleted_on: string | null
-          description: string | null
-          icon_url: string | null
           id: string
-          metadata: Json | null
-          name: string
+          provider: string
+          provider_id: string
+          status: Database["public"]["Enums"]["plugin_status"]
           type: Database["public"]["Enums"]["plugin_type"]
           updated_at: string
         }
         Insert: {
+          account_id: string
           created_at?: string
+          credentials: Json
           deleted_on?: string | null
-          description?: string | null
-          icon_url?: string | null
           id?: string
-          metadata?: Json | null
-          name: string
+          provider: string
+          provider_id: string
+          status?: Database["public"]["Enums"]["plugin_status"]
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
         Update: {
+          account_id?: string
           created_at?: string
+          credentials?: Json
           deleted_on?: string | null
-          description?: string | null
-          icon_url?: string | null
           id?: string
-          metadata?: Json | null
-          name?: string
+          provider?: string
+          provider_id?: string
+          status?: Database["public"]["Enums"]["plugin_status"]
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reactions: {
         Row: {
@@ -2939,20 +2920,6 @@ export type Database = {
             referencedRelation: "roles"
             referencedColumns: ["name"]
           },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_accounts: {
@@ -2970,20 +2937,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "roles"
             referencedColumns: ["name"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -3045,6 +2998,7 @@ export type Database = {
           description: string
           due_date: string | null
           id: number
+          position: number | null
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: string | null
@@ -3053,7 +3007,6 @@ export type Database = {
           title: string
           updated_at: string | null
           uuid: string
-          visibility: Database["public"]["Enums"]["visibility"]
         }
       }
       create_team_account: {
@@ -3296,6 +3249,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_order_with_position: {
+        Args: {
+          p_order_id: number
+          p_order_updates: Json
+          p_position_updates: Json[]
+        }
+        Returns: Json
+      }
       upsert_order: {
         Args: {
           target_account_id: string
@@ -3369,6 +3330,7 @@ export type Database = {
         | "title"
         | "assigned_to"
         | "task"
+        | "annotation"
       annotations_status: "active" | "completed" | "draft"
       app_permissions:
         | "roles.manage"

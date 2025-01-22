@@ -1,40 +1,34 @@
+'use client';
+
 import React from 'react';
 
 import dynamic from 'next/dynamic';
 
-import {
-  CalendarViewItem,
-  CalendarViewProps,
-  KanbanViewItem,
-  KanbanViewProps,
-  ViewType,
-} from '../types';
+import { useViewContext } from '../contexts/view-context';
 
 // Dynamically import the views => this allows us to lazy load the components
-const KanbanView = dynamic(() => import('./kanban-view'));
-const CalendarView = dynamic(() => import('./calendar-view'));
+const KanbanView = dynamic(() => import('./kanban/kanban-view'));
+const CalendarView = dynamic(() => import('./calendar/calendar-view'));
+const TableView = dynamic(() => import('./table/table-view'));
+// interface ViewRendererProps<T extends ViewType> {
+//   type: T; // The type can be 'kanban' or 'calendar'
+//   // Define the props type based on the view type
+//   props: T extends 'kanban'
+//     ? KanbanViewProps<KanbanViewItem>
+//     : T extends 'calendar'
+//       ? CalendarViewProps<CalendarViewItem>
+//       : never;
+// }
 
-interface ViewRendererProps<T extends ViewType> {
-  type: T; // The type can be 'kanban' or 'calendar'
-  // Define the props type based on the view type
-  props: T extends 'kanban'
-    ? KanbanViewProps<KanbanViewItem>
-    : T extends 'calendar'
-      ? CalendarViewProps<CalendarViewItem>
-      : never;
-}
-
-const ViewRenderer = <T extends ViewType>({
-  type,
-  props,
-}: ViewRendererProps<T>) => {
-  switch (type) {
+const ViewRenderer = () => {
+  const { viewType } = useViewContext();
+  switch (viewType) {
     case 'kanban':
-      return <KanbanView {...(props as KanbanViewProps<KanbanViewItem>)} />;
+      return <KanbanView />;
     case 'calendar':
-      return (
-        <CalendarView {...(props as CalendarViewProps<CalendarViewItem>)} />
-      );
+      return <CalendarView />;
+    case 'table':
+      return <TableView />;
     default:
       return null;
   }
