@@ -1,4 +1,3 @@
-import { type Dispatch, type SetStateAction } from 'react';
 import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { type Order } from '~/lib/order.types';
 import { OrdersProviderProps } from '~/orders/components/context/orders-context.types';
@@ -15,7 +14,7 @@ import { OrdersProviderProps } from '~/orders/components/context/orders-context.
  */
 export const useOrdersSubscriptionsHandlers = (
   orders: Order.Response[],
-  setOrders: Dispatch<SetStateAction<Order.Response[]>>,
+  setOrders:  (updater: Order.Response[] | ((prev: Order.Response[]) => Order.Response[])) => void,
   agencyMembers: OrdersProviderProps['agencyMembers']
 ) => {
   /**
@@ -49,7 +48,6 @@ export const useOrdersSubscriptionsHandlers = (
     // Handle addition of assignees
     if (eventType === 'INSERT') {
       const currentOrder = orders.find((order) => order.id === newAssignations.order_id);
-      console.log('agencyMembers', agencyMembers);
       if (!currentOrder?.assigned_to) return false;
 
       const newAssignee = agencyMembers.find(

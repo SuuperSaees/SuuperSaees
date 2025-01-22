@@ -1,4 +1,3 @@
-import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
 import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
@@ -6,8 +5,7 @@ import { PageBody } from '@kit/ui/page';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { Order } from '~/lib/order.types';
-import { getOrganizationById } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+import {  getAgencyForClient, getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 import { PageHeader } from '../components/page-header';
 import { TimerContainer } from '../components/timer-container';
@@ -16,10 +14,11 @@ import { OrdersProvider } from './components/context/orders-context';
 
 import { getTags } from '~/server/actions/tags/tags.action';
 import ProjectsBoard from './components/projects-board';
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 
-type OrderResponse = Omit<Order.Response, 'id'> & {
-  id: string;
-};
+// type OrderResponse = Omit<Order.Response, 'id'> & {
+//   id: string;
+// };
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   return {
@@ -31,18 +30,23 @@ async function OrdersPage() {
   const client = getSupabaseServerComponentClient({
     admin: false,
   });
-  const ordersData = ((await getOrders(true).catch((err) => {
-    console.error(err);
-    return [];
-  })) ?? []) as OrderResponse[];
-  const agencyId = ordersData?.[0]?.agency_id;
+  // const ordersData = ((await getOrders(true).catch((err) => {
+  //   console.error(err);
+  //   return [];
+  // })) ?? []) as OrderResponse[];
+  // const agencyId = ordersData?.[0]?.agency_id;
+  const { workspace: userWorkspace } = await loadUserWorkspace();
+  const userOrganization = await getOrganization()
+  const agencyRoles = ['agency_owner', 'agency_project_manager', 'agency_member']
 
+  const agency = agencyRoles.includes(userWorkspace.role ?? '') ? userOrganization : await getAgencyForClient(userOrganization.id ?? '')
+  const agencyId = agency?.id ?? ''
   const agencyStatuses =
     (await getAgencyStatuses(agencyId ?? '').catch(() => [])) ?? [];
 
-  const agency = await getOrganizationById(agencyId ?? '').catch((err) =>
-    console.error(`Error fetching agency: ${err}`),
-  );
+  // const agency = await getOrganizationById(agencyId ?? '').catch((err) =>
+  //   console.error(`Error fetching agency: ${err}`),
+  // );
 
   const { data, error: membersError } = await client.rpc(
     'get_account_members',
@@ -69,7 +73,7 @@ async function OrdersPage() {
 
   return (
 
-    <OrdersProvider initialOrders={ordersData as unknown as Order.Response[]} agencyMembers={agencyMembers ?? []}>
+    <OrdersProvider agencyMembers={agencyMembers ?? []} agencyId={agencyId ?? ''}>
 
       <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []} agencyMembers={agencyMembers ?? []}>
         <PageBody>

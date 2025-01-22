@@ -4,18 +4,19 @@ import {
   type Dispatch,
   type SetStateAction,
   createContext,
+  useCallback,
   useContext,
-  useState,
 } from 'react';
 
 import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
 import { useOrdersSubscriptionsHandlers } from '~/hooks/use-orders-subscriptions-handlers';
 import { useRealtime } from '~/hooks/use-realtime';
 import { type Order } from '~/lib/order.types';
+import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 import {
   type OrdersContextType,
@@ -34,14 +35,41 @@ const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
  */
 export const OrdersProvider = ({
   children,
-  initialOrders = [],
   agencyMembers,
+  agencyId,
 }: OrdersProviderProps) => {
-  const [orders, setOrders] = useState<Order.Response[]>(initialOrders);
+  // const [orders, setOrders] = useState<Order.Response[]>(initialOrders);
   const queryClient = useQueryClient();
+  const ordersQuery = useQuery({
+    queryKey: ['orders'],
+    queryFn: () => getOrders(true),
+  });
+  const orders = ordersQuery.data ?? [];
+
+  const setOrders = useCallback(
+    (
+      updater:
+        | Order.Response[]
+        | ((prev: Order.Response[]) => Order.Response[]),
+    ) => {
+      // Get the current orders from the query cache
+      const currentOrders = queryClient.getQueryData([
+        'orders',
+      ]) as Order.Response[];
+
+      // If updater is a function, call it with current orders
+      // If it's a direct value, use it as is
+      const newOrders =
+        typeof updater === 'function' ? updater(currentOrders) : updater;
+
+      // Update the query cache with new orders
+      queryClient.setQueryData(['orders'], newOrders);
+    },
+    [queryClient],
+  );
 
   // Initialize query cache
-  queryClient.setQueryData(['orders'], initialOrders);
+  // queryClient.setQueryData(['orders'], initialOrders);
 
   const { handleAssigneesChange } = useOrdersSubscriptionsHandlers(
     orders,
@@ -66,6 +94,7 @@ export const OrdersProvider = ({
           prevOrders.filter((order) => order.id !== newOrder.id),
         );
       }
+
     },
   });
 
@@ -95,7 +124,7 @@ export const OrdersProvider = ({
   // Subscribe to realtime updates
   useRealtime(tables, realtimeConfig, handleSubscriptions);
 
-  const contextValue = { orders, setOrders, agencyMembers };
+  const contextValue = { orders, setOrders, agencyMembers, agencyId };
 
   return (
     <OrdersContext.Provider value={contextValue}>

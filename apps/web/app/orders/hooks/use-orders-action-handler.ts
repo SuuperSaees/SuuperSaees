@@ -9,32 +9,35 @@ import { useUserOrderActions } from './user-order-actions';
 interface UseOrdersActionHandlerProps {
   orders: Order.Response[];
   setOrders: Dispatch<SetStateAction<Order.Response[]>>;
+  agencyId?: Order.Type['agency_id'];
 }
 
-const useOrdersActionHandler = ({
-  orders,
-  setOrders,
-}: UseOrdersActionHandlerProps) => {
+const useOrdersActionHandler = ({ agencyId }: UseOrdersActionHandlerProps) => {
   const { updateOrderMutation } = useUserOrderActions(
+    'status',
     undefined,
     undefined,
-    undefined,
-    orders,
-    setOrders,
   );
-  
-  const handleUpdateOrder = async (data: Order.Response, property?: string) => {
+
+  const handleUpdateOrder = async (
+    data: Order.Response,
+    property?: string,
+    targetOrderId?: Order.Type['id'],
+  ) => {
     try {
-      console.log('Updating orders data...', data);
       const updateValue = property
         ? {
             [property as keyof Order.Response]:
               data[property as keyof Order.Response],
-            position: data.position,
           }
         : data;
       // await updateOrder(data.id, updateValue);
-      await updateOrderMutation.mutateAsync({ data: updateValue, id: data.id });
+      await updateOrderMutation.mutateAsync({
+        data: updateValue,
+        id: data.id,
+        agencyId,
+        targetOrderId,
+      });
     } catch (error) {
       console.error('Error updating orders data:', error);
     }

@@ -6,11 +6,12 @@ export interface OrdersContextType {
   orders: Order.Response[];
   setOrders: React.Dispatch<React.SetStateAction<Order.Response[]>>;
   agencyMembers: User.Response[];
+  agencyId: Order.Type['agency_id'];
 }
 
 // Provider
 export interface OrdersProviderProps {
   children: React.ReactNode;
-  initialOrders: Order.Response[];
   agencyMembers: User.Response[];
+  agencyId: Order.Type['agency_id'];
 }

@@ -12,15 +12,12 @@ import { toast } from 'sonner';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 import { Order } from '~/lib/order.types';
-import { User } from '~/lib/user.types';
 
 export function useUserOrderActions(
   propertyUpdated?: keyof Order.Update,
   successTranslateActionName?: string,
   errorTranslateActionName?: string,
-  orders?: Order.Response[],
-  setOrders?: React.Dispatch<React.SetStateAction<Order.Response[]>>,
-  agencyMembers?: User.Response[],
+  // setOrders?: React.Dispatch<React.SetStateAction<Order.Response[]>>,
 ) {
   const { t } = useTranslation('orders');
   const queryClient = useQueryClient();
@@ -34,55 +31,56 @@ export function useUserOrderActions(
       data,
       id,
       userId,
+      agencyId,
+      targetOrderId,
     }: {
       data: Order.Update;
       id: number;
       userId?: string;
+      agencyId?: Order.Type['agency_id'];
+      targetOrderId?: Order.Type['id'];
     }) => {
-      const { order: updatedOrder } = await updateOrder(id, data, userId);
+      const { order: updatedOrder } = await updateOrder(
+        id,
+        data,
+        userId,
+        agencyId,
+        targetOrderId,
+      );
       return { updatedOrder };
     },
-    onMutate: async (newOrder) => {
-      // console.log('newOrder', newOrder)
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['orders'] });
+    // onMutate: async (newOrder) => {
+    //   // console.log('newOrder', newOrder)
+    //   // Cancel any outgoing refetches
+    //   await queryClient.cancelQueries({ queryKey: ['orders'] });
 
-      // Snapshot the previous value
-      const previousOrders: Order.Response[] =
-        queryClient.getQueryData(['orders']) ?? [];
-      // console.log('previousOrders', previousOrders)
-      // Optimistically update to the new value
-      // queryClient.setQueryData(['orders'], (old: Order.Response[]) =>
-      //   old.map(order =>
-      //     order.id === newOrder.id ? { ...order, ...newOrder } : order
-      //   )
+    //   // Snapshot the previous value
+    //   const previousOrders: Order.Response[] =
+    //     queryClient.getQueryData(['orders']) ?? [];
 
-      // );
-      // console.log('newOrder', newOrder)
-      setOrders &&
-        setOrders((old) =>
-          old.map((order) =>
-            order.id === newOrder.id ? { ...order, ...newOrder.data } : order,
-          ),
-        );
+    //   // Optimistically update to the new value
+    //   queryClient.setQueryData(['orders'], previousOrders)
 
-      // Return the snapshot in case of rollback
-      return { previousOrders };
-    },
+    //   // Return the snapshot in case of rollback
+    //   return { previousOrders };
+    // },
     onSuccess: async ({
       updatedOrder,
     }: {
       updatedOrder: Order.Type | null;
     }) => {
       console.log('updatedOrder', updatedOrder);
-      setOrders &&
-        setOrders((old) =>
-          old.map((order) =>
-            order.id === updatedOrder.id
-              ? { ...order, ...updatedOrder }
-              : order,
-          ),
-        );
+
+      updatedOrder
+        ? queryClient.setQueryData(['orders'], (old: Order.Response[]) =>
+            old.map((order) =>
+              order.id === updatedOrder.id
+                ? { ...order, ...updatedOrder }
+                : order,
+            ),
+          )
+        : await queryClient.invalidateQueries({ queryKey: ['orders'] });
+
       toast.success('Success', {
         description: t(
           successTranslateActionName ?? 'success.orders.orderUpdated',
@@ -92,24 +90,24 @@ export function useUserOrderActions(
         ? [propertyUpdated]
         : undefined;
 
-      await queryClient.invalidateQueries({ queryKey: ['orders'] });
-
-      // await logOrderActivities(
-      //   updatedOrder?.id ?? 0,
-      //   updatedOrder ?? {},
-      //   userWorkspace?.id ?? '',
-      //   userWorkspace?.name ?? '',
-      //   undefined,
-      //   fields,
-      // );
+      await logOrderActivities(
+        updatedOrder?.id ?? 0,
+        updatedOrder ?? {},
+        userWorkspace?.id ?? '',
+        userWorkspace?.name ?? '',
+        undefined,
+        fields,
+      );
     },
-    onError: (_error, _variables, context) => {
+    onError: async (_error, _variables) => {
       // Rollback on error
       // queryClient.setQueryData(['orders'], previousOrders);
-      setOrders &&
-        setOrders &&
-        context?.previousOrders &&
-        setOrders(context.previousOrders);
+      // setOrders &&
+      //   setOrders &&
+      //   context?.previousOrders &&
+      //   setOrders(context.previousOrders);
+
+      await queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast.error('Error', {
         description: t(
           errorTranslateActionName ?? 'error.orders.failedToUpdatedOrder',
@@ -131,16 +129,18 @@ export function useUserOrderActions(
       toast.success('Success', {
         description: t('success.orders.orderDateUpdated'),
       });
-      await logOrderActivities(
-        response.order.id,
-        response.order,
-        response.user?.id ?? '',
-        response.user?.user_metadata?.name ??
-          response.user?.user_metadata?.email ??
-          '',
-        undefined,
-        ['due_date'],
-      );
+      const order = response.order as Order.Response;
+      order &&
+        (await logOrderActivities(
+          order.id,
+          order,
+          response.user?.id ?? '',
+          response.user?.user_metadata?.name ??
+            response.user?.user_metadata?.email ??
+            '',
+          undefined,
+          ['due_date'],
+        ));
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: () => {
@@ -165,32 +165,7 @@ export function useUserOrderActions(
       toast.success('Success', {
         description: t('success.orders.orderAssigneesUpdated'),
       });
-      // if (setOrders && orders && agencyMembers) {
-      //   const currentOrder = orders.find(
-      //     (order) => order.id === newAssignees?.[0]?.order_id,
-      //   );
-      //   const currentAssignees = currentOrder?.assigned_to ?? [];
-      //   const newAssigneesIds = newAssignees?.map(
-      //     (assignee) => assignee.agency_member_id,
-      //   );
-      //   const newUsers = agencyMembers
-      //     .map((member) => {
-      //       if (newAssigneesIds.includes(member.id)) {
-      //         return { agency_member: member };
-      //       }
-      //     })
-      //     .filter((nu) => nu !== undefined);
 
-      //   newUsers &&
-      //     setOrders((prevOrders) => {
-      //       const newOrders = prevOrders.map((order) =>
-      //         order.id === currentOrder?.id
-      //           ? { ...order, assigned_to: currentAssignees.concat(newUsers) }
-      //           : order,
-      //       );
-      //       return newOrders;
-      //     });
-      // }
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: () => {

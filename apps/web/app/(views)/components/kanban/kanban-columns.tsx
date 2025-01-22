@@ -1,8 +1,9 @@
+'use client';
 import { DndContext, closestCorners } from '@dnd-kit/core';
 // import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import {
   SortableContext,
-  horizontalListSortingStrategy,
+  // horizontalListSortingStrategy,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
@@ -24,10 +25,11 @@ const KanbanColumns = ({
   setColumns: React.Dispatch<React.SetStateAction<KanbanColumnType[]>>;
 }) => {
   // Helper to update column positions consistently
-  const { onUpdateFn } = useKanbanContext();
+  const { onUpdateFn, setData } = useKanbanContext();
   const { handleUpdateColumns } = useKanbanColumns(
     columns,
     setColumns,
+    setData,
     onUpdateFn,
   );
 
@@ -46,7 +48,6 @@ const KanbanColumns = ({
   });
 
   // const CustomCard = customComponents?.kanban?.Card;
-
   return (
     <DndContext
       sensors={sensors}
@@ -60,10 +61,10 @@ const KanbanColumns = ({
       <div
         className={`flex max-w-full gap-4 overflow-y-auto p-4 ${styles['scrollbar-thin']} max-h-screen min-h-[70vh]`}
       >
-        <SortableContext
+        {/* <SortableContext
           items={columns.map((column) => column.id)}
           strategy={horizontalListSortingStrategy}
-        >
+        > */}
           {columns?.map((column) => (
             <SortableItem
               id={column.id}
@@ -95,7 +96,7 @@ const KanbanColumns = ({
               <KanbanCard item={dragState.item} />
             ): null}
           </DragOverlay> */}
-        </SortableContext>
+        {/* </SortableContext> */}
       </div>
     </DndContext>
   );

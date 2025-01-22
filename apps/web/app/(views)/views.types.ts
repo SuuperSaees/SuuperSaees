@@ -71,4 +71,4 @@ export interface ViewCustomComponents<T> {
   };
 }
 
-export type UpdateFunction = <T>(data: T, property?: keyof T) => Promise<T> ;
+export type UpdateFunction = <T>(data: T, property?: keyof T, targetId?: string | number) => Promise<T> ;

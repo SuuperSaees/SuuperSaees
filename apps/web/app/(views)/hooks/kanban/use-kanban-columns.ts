@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback } from 'react';
 
 import {
@@ -11,10 +13,10 @@ import { UpdateFunction, ViewManageableProperty } from '~/(views)/views.types';
 const useKanbanColumns = <T extends KanbanItem>(
   columns: KanbanColumn[],
   setColumns: React.Dispatch<React.SetStateAction<KanbanColumn[]>>,
+  setData: React.Dispatch<React.SetStateAction<KanbanItem[]>>,
   onUpdateFn?: UpdateFunction,
 ) => {
   // column actioners
-
   const updateColumnsByGroup = useCallback(
     (
       data: T[],
@@ -27,20 +29,23 @@ const useKanbanColumns = <T extends KanbanItem>(
   );
   // Helper function to update item position based on the moved item
   const updateColumnItems = useCallback(
-    (column: KanbanColumn, updatedItemId: KanbanItem['id']) => {
+    (
+      column: KanbanColumn,
+      updatedItemId: KanbanItem['id'],
+      isZeroIndexed = false,
+    ) => {
       const newGroupKey = column.key;
       const newItemGroupType = column.type;
 
       // Reposition the item in the new group and update the group type
       const updatedItems = column.items.map((item, index) => {
-        if (item.id === updatedItemId) {
-          return {
-            ...item,
-            position: index,
-            [newItemGroupType]: newGroupKey,
-          };
-        }
-        return item;
+        return {
+          ...item,
+          position: isZeroIndexed ? index : index + 1,
+          [newItemGroupType]:
+            item.id === updatedItemId ? newGroupKey : item[newItemGroupType],
+          column: newGroupKey,
+        };
       });
       return updatedItems;
     },
@@ -50,7 +55,7 @@ const useKanbanColumns = <T extends KanbanItem>(
   const updateColumns = useCallback(
     (
       columns: KanbanColumn[],
-      isZeroIndexed = true,
+      isZeroIndexed = false,
       itemId?: KanbanItem['id'],
     ): KanbanColumn[] => {
       return columns.map((column, index) => ({
@@ -67,31 +72,49 @@ const useKanbanColumns = <T extends KanbanItem>(
 
   // Function to update columns based on the moved columns
   const handleUpdateColumns: KanbanUpdateFunction = useCallback(
-    async ({ column, columns, item, updatedType }, executeMuatation = true) => {
+    async (
+      { column, columns, item, targetItem, updatedType },
+      executeMuatation = true,
+    ) => {
       try {
         const updatedColumns = updateColumns(columns, false, item?.id);
+        const updatedItems = updatedColumns.reduce(
+          (acc: KanbanItem[], curr) => [...acc, ...curr.items] as KanbanItem[],
+          [],
+        );
         setColumns(updatedColumns);
-        // console.log('column to update', column);
-        // console.log('item to update', item);
-        const newItem = {
-          ...item,
-          [column?.type as string]: column?.key,
-        };
+        executeMuatation && setData(updatedItems);
+
+        // Extract all the items from each column and add to a single array
+        const newColumn = updatedColumns.find((col) => col.id === column?.id);
+        let newItem = newColumn?.items.find((i) => i.id === item?.id);
+
+        newItem = newItem
+          ? {
+              ...newItem,
+              [column?.type as string]: column?.key,
+            }
+          : undefined;
         const newValueToUpdate =
-          updatedType === 'column' && column && item
-            ? column
-            : updatedType === 'item' && item && column
+          updatedType === 'column' && newColumn && newItem
+            ? newColumn
+            : updatedType === 'item' && newItem && newColumn
               ? newItem
               : null;
+
         onUpdateFn &&
           executeMuatation &&
           newValueToUpdate &&
-          (await onUpdateFn<T>(newValueToUpdate as T, column?.type as keyof T));
+          (await onUpdateFn<T>(
+            newValueToUpdate as T,
+            newColumn?.type as keyof T,
+            targetItem?.id,
+          ));
       } catch (error) {
         console.error('Error updating columns:', error);
       }
     },
-    [onUpdateFn, setColumns, updateColumns],
+    [onUpdateFn, setColumns, updateColumns, setData],
   );
   return {
     updateColumnsByGroup,

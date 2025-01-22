@@ -311,7 +311,7 @@ export async function getAgencyForClient(clientOrganizationId: string) {
     // Retriving the corresponding agency => include also the subdomain param on the future
     const { data: agencyData, error: agencyError } = await client
       .from('accounts')
-      .select('id, name, email, picture_url')
+      .select('id, name, email, picture_url, slug')
       .eq('id', clientData?.[0]?.agency_id ?? '')
       .eq('is_personal_account', false)
       .single();

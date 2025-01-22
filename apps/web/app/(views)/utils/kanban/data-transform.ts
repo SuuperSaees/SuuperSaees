@@ -199,7 +199,7 @@ const createColumnsByGroup = <T extends KanbanItem>(
         if (!columns.has(user.id)) {
           columns.set(user.id, {
             value: user,
-            items: [{ ...item, column: user.id }],
+            items: [{ ...item, column: user.id }].sort((a, b) => a.position - b.position),
           });
         } else {
           columns.get(user.id)!.items.push({ ...item, column: user.id });
@@ -210,7 +210,7 @@ const createColumnsByGroup = <T extends KanbanItem>(
       if (!columns.has(key)) {
         columns.set(key, {
           value: groupValue,
-          items: [{ ...item, column: key }],
+          items: [{ ...item, column: key }].sort((a, b) => a.position - b.position),
         });
       } else {
         columns.get(key)!.items.push({ ...item, column: key });
@@ -239,7 +239,7 @@ const createColumnsByGroup = <T extends KanbanItem>(
         },
         is_visible: group.visible,
         value_type: valueType,
-        items: existingColumn?.items ?? [],
+        items: existingColumn?.items.sort((a, b) => a.position - b.position) ?? [],
         type: groupSelected as keyof KanbanItem,
       };
     });
@@ -264,11 +264,10 @@ const createColumnsByGroup = <T extends KanbanItem>(
           },
           is_visible: true,
           value_type: valueType,
-          items,
+          items: items.sort((a, b) => a.position - b.position),
           type: groupSelected as keyof KanbanItem,
         });
       });
-
     // Sort by position
     return resultColumns.sort((a, b) => a.position - b.position);
   }
@@ -276,7 +275,6 @@ const createColumnsByGroup = <T extends KanbanItem>(
   // If no predefined groups, use the original logic
   return Array.from(columns.entries()).map(([key, { value, items }], index) => {
     const valueType = detectValueType(value);
-
     return {
       id: `column-container-${index}`,
       key,
@@ -288,7 +286,7 @@ const createColumnsByGroup = <T extends KanbanItem>(
       },
       is_visible: true,
       value_type: valueType,
-      items,
+      items: items.sort((a, b) => a.position - b.position),
       type: groupSelected as keyof KanbanItem,
     };
   });

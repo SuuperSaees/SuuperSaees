@@ -15,7 +15,7 @@ interface KanbanCardProps {
 }
 const KanbanCard = ({ item, className, ...rest }: KanbanCardProps) => {
   // Data
-  const { agencyMembers, orders, setOrders } = useOrdersContext();
+  const { agencyMembers } = useOrdersContext();
   const defaultSelectedUsers = transformUserData(item?.assigned_to);
   const users = transformUserData(agencyMembers);
 
@@ -24,9 +24,6 @@ const KanbanCard = ({ item, className, ...rest }: KanbanCardProps) => {
     'priority',
     'success.orders.orderPriorityUpdated',
     'error.orders.failedToUpdateOrderPriority',
-    orders,
-    setOrders,
-    agencyMembers,
   );
 
   // Handlers
@@ -43,7 +40,7 @@ const KanbanCard = ({ item, className, ...rest }: KanbanCardProps) => {
       orderId: item.id,
     });
   };
-  // console.log('ITEM', item.id === 17 && item)
+
   return (
     <div
       className={

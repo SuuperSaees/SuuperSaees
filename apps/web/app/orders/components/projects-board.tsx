@@ -47,7 +47,7 @@ const AGENCY_ROLES = new Set([
 
 const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
   // Context and hooks
-  const { orders, setOrders } = useOrdersContext();
+  const { orders, setOrders, agencyId } = useOrdersContext();
   const { statuses } = useAgencyStatuses();
   const { t } = useTranslation('orders');
   const { workspace } = useUserWorkspace();
@@ -88,7 +88,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     agencyMembers,
   });
 
-  const { handleUpdateOrder } = useOrdersActionHandler({ orders, setOrders });
+  const { handleUpdateOrder } = useOrdersActionHandler({ orders, setOrders, agencyId });
 
   // Compute initial active tab
   const statusFilterValues = getFilterValues('status');

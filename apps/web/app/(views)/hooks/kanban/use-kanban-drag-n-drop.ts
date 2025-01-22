@@ -105,6 +105,7 @@ const useKanbanDragAndDrop = ({
       targetColumnId?: string | number,
       itemId?: string | number,
       executeMutation = true,
+      targetItem?: KanbanItem,
     ) => {
       try {
         const { updatedType, column, item } = getAffectedElements(
@@ -120,6 +121,7 @@ const useKanbanDragAndDrop = ({
             columns: newColumns,
             column,
             item,
+            targetItem,
           },
           executeMutation,
         );
@@ -140,8 +142,7 @@ const useKanbanDragAndDrop = ({
     (event: DragStartEvent) => {
       const { active } = event;
       setActiveId(active.id);
-      setType(active?.data?.current?.type ?? null)
-      // console.log('type', active)
+      setType(active?.data?.current?.type ?? null);
 
       if (!isColumnDrag(active.id)) {
         const sourceColumn = findColumnByItemId(active.id);
@@ -193,8 +194,9 @@ const useKanbanDragAndDrop = ({
   const handleDragOver = useCallback(
     async (event: DragOverEvent) => {
       const { active, over } = event;
+
       if (!over || isColumnDrag(active.id)) return;
-      
+
       const sourceColumn = findColumnByItemId(active.id);
       const targetColumn =
         columns.find((col) => col.id === over.id) ??
@@ -209,7 +211,6 @@ const useKanbanDragAndDrop = ({
         active.id,
         over.id as string,
       );
-
       await updateColumns(
         updatedColumns,
         sourceColumn.id,
@@ -272,11 +273,16 @@ const useKanbanDragAndDrop = ({
               : col,
           );
 
+          const targetItem = targetColumn.items.find(
+            (item) => item.id === over.id,
+          );
           await updateColumns(
             updatedColumns,
             sourceColumn.id,
             targetColumn.id,
             active.id,
+            true,
+            targetItem,
           );
         }
       }

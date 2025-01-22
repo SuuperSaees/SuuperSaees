@@ -23,7 +23,7 @@ export function createSubscriptionHandler<T extends DataResponse>(options?: {
   ) {
     const { eventType, new: newData, old: oldData } = payload;
     const idField = options?.idField ?? 'id';
-    
+
     try {
       // Call the before update hook if provided
       const beforeUpdateResult = await options?.onBeforeUpdate?.(
@@ -46,19 +46,24 @@ export function createSubscriptionHandler<T extends DataResponse>(options?: {
         }
 
         case 'UPDATE': {
-          if (isArrayData(currentData)) {
-            const updatedItems = updateArrayData(
-              currentData,
-              newData as Partial<T>,
-              idField,
-              false,
-            );
-            setData(updatedItems);
-          } else {
-            setData((current) =>
-              mergeWithExisting(current as T, newData as Partial<T>),
-            );
-          }
+          setData((currentData) => {
+            if (isArrayData(currentData)) {
+              const updatedItems = updateArrayData(
+                currentData,
+                newData as Partial<T>,
+                idField,
+                false,
+              );
+              return updatedItems;
+            } else {
+              const updatedItem = mergeWithExisting(
+                currentData,
+                newData as Partial<T>,
+              );
+              return updatedItem;
+            }
+          });
+
           break;
         }
 
