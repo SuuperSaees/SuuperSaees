@@ -42,7 +42,7 @@ export type Database = {
           deleted_on: string | null
           id: string
           plugin_id: string
-          provider_id: string
+          provider_id: string | null
           status: Database["public"]["Enums"]["plugin_status"] | null
           updated_at: string | null
         }
@@ -53,7 +53,7 @@ export type Database = {
           deleted_on?: string | null
           id?: string
           plugin_id: string
-          provider_id: string
+          provider_id?: string | null
           status?: Database["public"]["Enums"]["plugin_status"] | null
           updated_at?: string | null
         }
@@ -64,7 +64,7 @@ export type Database = {
           deleted_on?: string | null
           id?: string
           plugin_id?: string
-          provider_id?: string
+          provider_id?: string | null
           status?: Database["public"]["Enums"]["plugin_status"] | null
           updated_at?: string | null
         }
@@ -453,7 +453,7 @@ export type Database = {
           id: string
           namespace: string
           provider: Database["public"]["Enums"]["billing_provider"]
-          provider_id: string
+          provider_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -464,7 +464,7 @@ export type Database = {
           id?: string
           namespace?: string
           provider?: Database["public"]["Enums"]["billing_provider"]
-          provider_id: string
+          provider_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -475,7 +475,7 @@ export type Database = {
           id?: string
           namespace?: string
           provider?: Database["public"]["Enums"]["billing_provider"]
-          provider_id?: string
+          provider_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
