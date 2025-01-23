@@ -11,7 +11,7 @@ import { createSession } from '~/team-accounts/src/server/actions/sessions/creat
 
 
 
-import { Credentials, CredentialsCrypto, EncryptedCredentials } from '../../../../../apps/web/app/utils/credentials-crypto';
+import { TreliCredentials, CredentialsCrypto, EncryptedCredentials } from '../../../../../apps/web/app/utils/credentials-crypto';
 
 
 type ValuesProps = {
@@ -129,11 +129,11 @@ export const handleRecurringPayment = async ({
       return { success: false };
     }
     const credentials =
-      credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+      credentialsCrypto.decrypt<TreliCredentials>(parsedCredentials);
 
     // Create Basic Auth token
     const authToken = Buffer.from(
-      `${credentials.username}:${credentials.password}`,
+      `${credentials.treli_user}:${credentials.treli_password}`,
     ).toString('base64');
 
     const subscriptionPlan = {
@@ -288,11 +288,11 @@ export const handleOneTimePayment = async ({
       return { success: false };
     }
     const credentials =
-      credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+      credentialsCrypto.decrypt<TreliCredentials>(parsedCredentials);
 
     // Create Basic Auth token
     const authToken = Buffer.from(
-      `${credentials.username}:${credentials.password}`,
+      `${credentials.treli_user}:${credentials.treli_password}`,
     ).toString('base64');
 
     const subscriptionPlan = {

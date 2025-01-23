@@ -8,7 +8,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 
-import { Credentials, CredentialsCrypto, EncryptedCredentials } from '../../../../../../../../apps/web/app/utils/credentials-crypto';
+import { CredentialsCrypto, EncryptedCredentials, TreliCredentials } from '../../../../../../../../apps/web/app/utils/credentials-crypto';
 import { BillingAccounts } from '../../../../../../../../apps/web/lib/billing-accounts.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
@@ -212,9 +212,9 @@ export async function getPaymentsMethods(): Promise<{
       );
 
       const credentials =
-        credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+        credentialsCrypto.decrypt<TreliCredentials>(parsedCredentials);
       const authToken = Buffer.from(
-        `${credentials.username}:${credentials.password}`,
+        `${credentials.treli_user}:${credentials.treli_password}`,
       ).toString('base64');
 
       const responsePlans = await fetch(

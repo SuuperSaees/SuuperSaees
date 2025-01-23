@@ -301,7 +301,7 @@ const BillingForm: React.FC<{
     }
   };
 
-  const handleCreateCard = async () => {
+  const handleCreateCard = async (values: z.infer<typeof formSchema>) => {
     if (!stripe || !elements) {
       return;
     }
@@ -339,33 +339,23 @@ const BillingForm: React.FC<{
     }
 
     setErrorMessage('');
-    return paymentMethod;
-  };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setLoading(true);
-    setValidSuccess(false);
-    try {
-      const paymentMethod = (await handleCreateCard()) ?? {
-        id: 'none',
-      };
+    if (!paymentMethod?.id) {
+      throw new Error(t('checkout.error.paymentFailed'));
+    }
 
-      if (!paymentMethod?.id) {
-        throw new Error(t('checkout.error.paymentFailed'));
-      }
-
-      const { success, error, accountAlreadyExists, data } =
-        await handleSubmitPayment({
-          service,
-          values: values,
-          stripeId,
-          organizationId,
-          paymentMethodId: paymentMethod.id,
-          coupon: values.discount_coupon,
-          quantity: quantity,
-          selectedPaymentMethod: selectedPaymentMethod,
-          baseUrl,
-        });
+    const { success, error, accountAlreadyExists, data } =
+      await handleSubmitPayment({
+        service,
+        values,
+        stripeId,
+        organizationId,
+        paymentMethodId: paymentMethod.id,
+        coupon: values.discount_coupon,
+        quantity: quantity,
+        selectedPaymentMethod: selectedPaymentMethod,
+        baseUrl,
+      });
 
       if (!success) {
         if (error === 'User already registered') {
@@ -386,6 +376,17 @@ const BillingForm: React.FC<{
           `${baseUrl}/success?accountAlreadyExists=${accountAlreadyExists}`,
         );
       }
+
+    return paymentMethod;
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true);
+    setValidSuccess(false);
+    try {
+      const paymentMethod = (await handleCreateCard(values)) ?? {
+        id: 'none',
+      };
     } catch (error) {
       setErrorMessage(
         error instanceof Error
