@@ -58,7 +58,8 @@
       "failedToUpdateOrderTags": "Couldn't update the order tags. Please try again later.",
       "failedToCreateOrderTag": "Couldn't create the order tag. Please try again later.",
       "failedToUpdateOrderTag": "Couldn't update the order tag. Please try again later.",
-      "failedToDeleteOrderTag": "Couldn't delete the order tag. Please try again later."
+      "failedToDeleteOrderTag": "Couldn't delete the order tag. Please try again later.",
+      "failedToUpdatedOrder": "Couldn't update the order. Please try again later."
     },
     "reviews": {
       "reviewNotFound": "Review not found.",
@@ -115,7 +116,8 @@
       "orderTagsUpdated": "Order tags updated successfully.",
       "orderTagCreated": "Order tag created successfully.",
       "orderTagUpdated": "Order tag updated successfully.",
-      "orderTagDeleted": "Order tag deleted successfully."
+      "orderTagDeleted": "Order tag deleted successfully.",
+      "orderUpdated": "Order updated successfully."
     },
     "reviews": {
       "reviewCreated": "Review added successfully."

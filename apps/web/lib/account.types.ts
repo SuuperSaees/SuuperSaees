@@ -1,10 +1,17 @@
 import { Database } from './database.types';
+import { UserSettings } from './user-settings.types';
 
 export namespace Account {
   export type Type = Database['public']['Tables']['accounts']['Row'];
   export type Insert = Database['public']['Tables']['accounts']['Insert'];
   export type Update = Database['public']['Tables']['accounts']['Update'];
-
+  export type Response = Pick<
+    Account.Type,
+    'email' | 'id' | 'name' | 'picture_url' | 'organization_id'
+  > & {
+    email?: string;
+    settings: UserSettings.Type;
+  };
   export namespace Relationships {
     export type Membership =
       Database['public']['Tables']['accounts_memberships']['Row'];

@@ -1,15 +1,45 @@
-import React, { ReactNode, createContext, useContext, useState } from 'react';
+'use client';
 
-import { ViewConfiguration, ViewItem, ViewType } from '../types';
+import React, {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+
+import useViewConfigurations from '../hooks/view/use-view-configurations';
+import { KanbanItem } from '../kanban.types';
+import { createFullConfiguration } from '../utils/views/data-transform';
+import {
+  ViewConfigurations,
+  ViewInitialConfigurations,
+} from '../view-config.types';
+import {
+  UpdateFunction,
+  ViewCustomComponents,
+  ViewItem,
+  ViewType,
+  ViewTypeEnum,
+} from '../views.types';
+import KanbanProvider from './kanban-context';
+import { TableProvider } from './table-context';
 
 // Define the Context types
-interface ViewContextProps<T extends ViewItem> {
+export interface ViewContextProps<T extends ViewItem> {
   viewType: ViewType;
   data: T[];
-  configuration: ViewConfiguration<T>;
+  configurations: ViewConfigurations<T>;
+  availableProperties: [keyof T];
+  manageConfigurations: {
+    updateGroup: (groupKey: keyof T) => void;
+  };
+  customComponents?: ViewCustomComponents<T>;
   setViewType: (viewType: ViewType) => void;
   setData: React.Dispatch<React.SetStateAction<T[]>>;
-  setConfiguration: React.Dispatch<React.SetStateAction<ViewConfiguration<T>>>;
+  setConfigurations: React.Dispatch<
+    React.SetStateAction<ViewConfigurations<T> | undefined>
+  >;
   onAction?: (action: string, payload: T) => Promise<void | T>;
 }
 
@@ -19,34 +49,109 @@ const ViewContext = createContext<ViewContextProps<ViewItem> | undefined>(
 );
 
 // Context provider
-interface ViewProviderProps {
+interface ViewProviderProps<T extends ViewItem> {
   children: ReactNode;
-  initialData: ViewItem[];
+  initialData: T[];
   initialViewType: ViewType;
-  initialConfiguration: ViewConfiguration<ViewItem>;
+  initialConfigurations: ViewInitialConfigurations<T>;
+  availableProperties: [keyof T];
+  data: T[];
+  setData: React.Dispatch<React.SetStateAction<T[]>>;
+  customComponents?: ViewCustomComponents<T>;
+  onUpdateFn?: UpdateFunction;
 }
 
-export const ViewProvider = ({
+export const ViewProvider = <T extends ViewItem>({
   children,
   initialData,
   initialViewType,
-  initialConfiguration,
-}: ViewProviderProps) => {
-  const [viewType, setViewType] = useState<ViewType>(initialViewType);
-  const [data, setData] = useState<ViewItem[]>(initialData);
-  const [configuration, setConfiguration] =
-    useState<ViewConfiguration<ViewItem>>(initialConfiguration);
+  initialConfigurations,
+  availableProperties = ['status'] as [keyof T],
+  customComponents,
+  onUpdateFn,
+  data,
+  setData,
+}: ViewProviderProps<T>) => {
+  const newConfigurations = createFullConfiguration<T>(
+    initialData,
+    initialViewType,
+    initialConfigurations,
+    availableProperties,
+  );
 
-  const value = {
+  const [viewType, setViewType] = useState<ViewType>('kanban');
+  // const [data, setData] = useState<T[]>(initialData);
+  const [configurations, setConfigurations] = useState<
+    ViewConfigurations<T> | undefined
+  >(newConfigurations);
+
+  const manageConfigurations = useViewConfigurations(
+    configurations,
+    setConfigurations,
+  );
+  // const updateConfigurations =
+  // console.log('v2', )
+
+  const value: ViewContextProps<ViewItem> = {
     viewType,
     data,
-    configuration,
+    configurations: configurations as unknown as ViewConfigurations<ViewItem>,
+    manageConfigurations,
+    availableProperties: availableProperties as unknown as [keyof ViewItem],
+    customComponents:
+      customComponents as unknown as ViewCustomComponents<ViewItem>,
     setViewType,
-    setData,
-    setConfiguration,
+    setData: setData as unknown as React.Dispatch<
+      React.SetStateAction<ViewItem[]>
+    >,
+    setConfigurations: setConfigurations as unknown as React.Dispatch<
+      React.SetStateAction<ViewConfigurations<ViewItem> | undefined>
+    >,
   };
 
-  return <ViewContext.Provider value={value}>{children}</ViewContext.Provider>;
+  // Pending for view change from outside
+  useEffect(() => {
+    setViewType(initialViewType);
+  }, [initialViewType]);
+  // useEffect(()=> {
+  //   setData(initialData)
+  // }, [initialData])
+  return (
+    <ViewContext.Provider value={value}>
+      {viewType === ViewTypeEnum.Kanban ? (
+        <KanbanProvider
+          data={data as unknown as KanbanItem[]}
+          setData={
+            setData as unknown as React.Dispatch<
+              React.SetStateAction<KanbanItem[]>
+            >
+          }
+          initialData={data as unknown as KanbanItem[]}
+          initialConfigurations={
+            configurations as unknown as ViewConfigurations<KanbanItem>
+          }
+          onUpdateFn={onUpdateFn as unknown as UpdateFunction}
+          availableProperties={
+            availableProperties as unknown as [keyof KanbanItem]
+          }
+          customComponents={
+            customComponents as unknown as ViewCustomComponents<KanbanItem>
+          }
+        >
+          {children}
+        </KanbanProvider>
+      ) : viewType === ViewTypeEnum.Table ? (
+        <TableProvider
+          columns={initialConfigurations.table.columns}
+          data={data}
+          setData={setData}
+          emptyState={initialConfigurations.table.emptyState}
+        >
+          {children}
+        </TableProvider>
+      ) : null}
+    </ViewContext.Provider>
+  );
 };
 
 // Custom hook to use the View Context

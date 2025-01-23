@@ -1,12 +1,8 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-
-
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 import { SupabaseClient } from '@supabase/supabase-js';
-
-
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
@@ -37,21 +33,174 @@ const priorityTranslations = {
   low: 'Baja',
 };
 
+export const updateOrderWithPosition = async (
+  orderId: Order.Type['id'],
+  order: Order.Update,
+  agencyId: Order.Type['agency_id'],
+  targetOrderId?: Order.Type['id'],
+) => {
+  try {
+    const client = getSupabaseServerComponentClient({ admin: true });
+
+    // Fetch the current order
+    const { data: currentOrder, error: currentOrderError } = await client
+      .from('orders_v2')
+      .select('position, status')
+      .eq('id', orderId)
+      .single();
+
+    if (currentOrderError ?? !currentOrder) {
+      throw new Error('Current order not found or could not be fetched');
+    }
+
+    // Determine the target status and fallback to the current order's status
+    const targetStatus = order.status ?? currentOrder.status;
+
+    // Fetch orders affected by this change (source and target statuses)
+    const { data: affectedOrders, error: affectedOrdersError } = await client
+      .from('orders_v2')
+      .select('position, status, id')
+      .in('status', [currentOrder.status, targetStatus])
+      .order('position', { ascending: true, nullsFirst: true }) // Ensures NULLs are handled first
+      .order('created_at', { ascending: false })
+      .eq('agency_id', agencyId);
+
+    const targetOrder = affectedOrders?.find((o) => o.id === targetOrderId);
+    if (
+      (affectedOrdersError ?? !Array.isArray(affectedOrders)) ||
+      !targetOrder
+    ) {
+      throw new Error(
+        'Failed to fetch affected orders or not target order found',
+      );
+    }
+
+    // Logic for recalculating positions
+    const updates: { id: Order.Type['id']; position: number }[] = [];
+
+    const reOrderedSourceGroupWithPositions = affectedOrders.filter(
+      (o) => o.status === currentOrder.status,
+    );
+
+    const reOrderedTargetGroupWithPositions = affectedOrders.filter(
+      (o) => o.status === order.status,
+    );
+
+    // source group/column/property
+    const sourceColumn = currentOrder.status;
+    const targetColumn = order.status;
+
+    const originalOrderPosition = currentOrder.position;
+    const newTargetOrderPosition = targetOrder.position;
+    // The movement is on the same source column
+
+    if (
+      sourceColumn === targetColumn &&
+      originalOrderPosition &&
+      newTargetOrderPosition
+    ) {
+      // The movement is on the same column, so we can just update the positions:
+      // Move one position up or down depending on the direction
+      // If the new position is lower than the current position, update orders starting from the current position to start with one position lower
+
+      if (!newTargetOrderPosition && !originalOrderPosition) {
+        throw new Error('Both new and old positions are null');
+      } else if (newTargetOrderPosition > originalOrderPosition) {
+        const originalColumnOrdersToUpdate =
+          reOrderedSourceGroupWithPositions.slice(
+            originalOrderPosition,
+            newTargetOrderPosition,
+          );
+        originalColumnOrdersToUpdate.forEach((o) => {
+          if (o.position) updates.push({ id: o.id, position: o.position - 1 });
+        });
+      } else if (newTargetOrderPosition < originalOrderPosition) {
+        const originalColumnOrdersToUpdate =
+          reOrderedSourceGroupWithPositions.slice(
+            newTargetOrderPosition - 1,
+            originalOrderPosition - 1,
+          );
+        originalColumnOrdersToUpdate.forEach((o) => {
+          if (o.position) updates.push({ id: o.id, position: o.position + 1 });
+        });
+      }
+    } else if (sourceColumn && targetColumn && sourceColumn !== targetColumn) {
+      // The movement is on different columns, so we need to update the positions of the items in the source column and the target column
+      // Update orders of the target column:
+      // Update the items one position lower starting from the new order position
+      const targetColumnOrdersToUpdate = newTargetOrderPosition
+        ? reOrderedTargetGroupWithPositions.slice(
+            newTargetOrderPosition - 1,
+            reOrderedTargetGroupWithPositions.length + 1,
+          )
+        : reOrderedTargetGroupWithPositions;
+      targetColumnOrdersToUpdate.forEach((o) => {
+        if (o.position) updates.push({ id: o.id, position: o.position + 1 });
+      });
+
+      // Update orders of the source column:
+      // Update the items one position lower starting from last order position of the group/column/property to the original/old order position
+      const sourceColumnOrdersToUpdate = originalOrderPosition
+        ? reOrderedSourceGroupWithPositions.slice(
+            originalOrderPosition,
+            reOrderedSourceGroupWithPositions.length,
+          )
+        : reOrderedSourceGroupWithPositions;
+      sourceColumnOrdersToUpdate.forEach((o) => {
+        if (o.position) updates.push({ id: o.id, position: o.position - 1 });
+      });
+    }
+    const updatedOrder = {
+      ...order,
+      position: newTargetOrderPosition ?? originalOrderPosition,
+      updated_at: new Date().toISOString(),
+    };
+
+    // // Prepare the order update
+
+    // // Perform updates in a single transaction using an RPC
+    const { data, error } = await client.rpc('update_order_with_position', {
+      p_order_id: orderId,
+      p_order_updates: updatedOrder,
+      p_position_updates: updates,
+    });
+
+    if (error) {
+      throw new Error('Failed to execute database updates');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error updating order with position:', error);
+    throw error;
+  }
+};
+
 export const updateOrder = async (
   orderId: Order.Type['id'],
   order: Order.Update,
   userId?: string,
-  // userName?: string,
+  agencyId?: Order.Type['agency_id'],
+  targetOrderId?: Order.Type['id'],
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
-    // Execute all operations in parallel
     const userData = !userId ? await client.auth.getUser() : null;
     userId = userId ?? userData?.data.user?.id ?? '';
-    // userName = userName ?? userData?.data.user?.user_metadata?.name ?? '';
 
-    const [orderUpdate] = await Promise.all([
-      client
+    let updatedOrder;
+
+    // Handle position/status updates
+    if (order.status && targetOrderId) {
+      updatedOrder = await updateOrderWithPosition(
+        orderId,
+        order,
+        agencyId ?? '',
+        targetOrderId,
+      );
+    } else {
+      // Handle regular updates without position changes
+      const { data, error } = await client
         .from('orders_v2')
         .update({
           ...order,
@@ -59,15 +208,14 @@ export const updateOrder = async (
         })
         .eq('id', orderId)
         .select()
-        .single(),
-    ]);
+        .single();
 
-    if (orderUpdate.error) throw orderUpdate.error.message;
-
-    // Start activity logging without waiting
+      if (error) throw error;
+      updatedOrder = data;
+    }
 
     return {
-      order: orderUpdate.data,
+      order: updatedOrder,
       user: userData?.data.user,
     };
   } catch (error) {
@@ -75,6 +223,7 @@ export const updateOrder = async (
     throw error;
   }
 };
+
 export const updateOrderAssigns = async (
   orderId: Order.Type['id'],
   agencyMemberIds: string[],
@@ -125,6 +274,13 @@ export const updateOrderAssigns = async (
     if (upsertError) throw upsertError;
 
     revalidatePath(`/orders/${orderId}`);
+    revalidateTag('orders');
+    const allAssignmentsResult = [...idsToAdd, ...idsToRemove].map((id) => ({
+      order_id: orderId,
+      agency_member_id: id,
+    }));
+
+    return allAssignmentsResult;
   } catch (error) {
     console.error('Error updating order assignments:', error);
     throw new Error('Failed to update order assignments');
