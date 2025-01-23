@@ -88,7 +88,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     agencyMembers,
   });
 
-  const { handleUpdateOrder } = useOrdersActionHandler({ orders, setOrders, agencyId });
+  const { handleUpdateOrder } = useOrdersActionHandler({ orders, setOrders, agencyId, statuses });
 
   // Compute initial active tab
   const statusFilterValues = getFilterValues('status');

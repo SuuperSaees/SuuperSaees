@@ -5,11 +5,14 @@ import { Dispatch, SetStateAction } from 'react';
 import { Order } from '~/lib/order.types';
 
 import { useUserOrderActions } from './user-order-actions';
+import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { ViewManageableProperty } from '~/(views)/views.types';
 
 interface UseOrdersActionHandlerProps {
   orders: Order.Response[];
   setOrders: Dispatch<SetStateAction<Order.Response[]>>;
   agencyId?: Order.Type['agency_id'];
+  statuses: AgencyStatus.Type[];
 }
 
 const useOrdersActionHandler = ({ agencyId }: UseOrdersActionHandlerProps) => {
@@ -23,10 +26,14 @@ const useOrdersActionHandler = ({ agencyId }: UseOrdersActionHandlerProps) => {
     data: Order.Response,
     property?: string,
     targetOrderId?: Order.Type['id'],
+    propertyData?: ViewManageableProperty
   ) => {
     try {
       const updateValue = property
-        ? {
+        ?  property=== 'status' ? {
+          status: data[property as keyof Order.Response],
+          status_id: propertyData?.id,
+        } :{
             [property as keyof Order.Response]:
               data[property as keyof Order.Response],
           }
