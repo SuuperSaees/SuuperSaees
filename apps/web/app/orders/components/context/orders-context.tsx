@@ -45,7 +45,8 @@ export const OrdersProvider = ({
     queryFn: () => getOrders(true),
   });
   const orders = ordersQuery.data ?? [];
-
+  const ordersAreLoading = ordersQuery.isLoading || ordersQuery.isPending;
+  
   const setOrders = useCallback(
     (
       updater:
@@ -124,7 +125,7 @@ export const OrdersProvider = ({
   // Subscribe to realtime updates
   useRealtime(tables, realtimeConfig, handleSubscriptions);
 
-  const contextValue = { orders, setOrders, agencyMembers, agencyId };
+  const contextValue = { orders, ordersAreLoading, agencyMembers, agencyId, setOrders};
 
   return (
     <OrdersContext.Provider value={contextValue}>

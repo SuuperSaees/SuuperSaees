@@ -7,6 +7,7 @@ export interface OrdersContextType {
   setOrders: React.Dispatch<React.SetStateAction<Order.Response[]>>;
   agencyMembers: User.Response[];
   agencyId: Order.Type['agency_id'];
+  ordersAreLoading: boolean;
 }
 
 // Provider
