@@ -62,3 +62,9 @@ export interface Credentials {
   password: string;
   created_at: string;
 }
+
+export interface TreliCredentials {
+  treli_user: string;
+  treli_password: string;
+  webhook_url: string;
+}

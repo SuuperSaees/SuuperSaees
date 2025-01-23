@@ -13,165 +13,186 @@ import {
   useStripe,
 } from '@stripe/react-stripe-js';
 import { DollarSignIcon } from 'lucide-react';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import {
+  CustomFormLabel,
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
-import { Label } from '@kit/ui/label';
-import { Separator } from '@kit/ui/separator';
+import { Spinner } from '@kit/ui/spinner';
 
-import {
-  MercadoPagoIcon,
-  StripeIcon,
-  WompiIcon, // EpaycoIcon,
-  // PayuIcon,
-  // PlaceToPayIcon,
-  // OpenpayIcon,
-  // PayuCoIcon,
-  // PlaceToPayDirectIcon,
-  // PaymentsWayIcon,
-  // DlocalGoIcon,
-  // PalomaIcon,
-  // CoinkIcon,
-  // PayzenIcon,
-} from '~/components/icons/icons';
+import { StripeIcon } from '~/components/icons/icons';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Service } from '~/lib/services.types';
 
 import { handleSubmitPayment } from '../utils/billing-handlers';
-import { ServiceTypeSection } from './service-type-section';
 import { SideInfo } from './side-information';
 import { UserInfo } from './user-info';
 
 const paymentMethodsIcons = {
   mercadopago: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Mercado Pago
-      </span>
-      <MercadoPagoIcon />
+      <img
+        src="images/checkout/mercadopago.png"
+        alt="Stripe"
+        style={{
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
+          objectFit: 'contain',
+        }}
+      />
     </div>
   ),
   stripedirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Stripe
-      </span>
-      <StripeIcon />
+      <StripeIcon className="h-4 w-4" />
     </div>
   ),
   wompidirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Wompi
-      </span>
-      <WompiIcon className="h-28 w-28" />
+      <img
+        src="images/checkout/wompi.png"
+        alt="Stripe"
+        style={{
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
+          objectFit: 'contain',
+        }}
+      />
     </div>
   ),
   epaycodirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Epayco
-      </span>
-      <DollarSignIcon />
+      <img
+        src="images/checkout/epayco.png"
+        alt="Stripe"
+        style={{
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
+          objectFit: 'contain',
+        }}
+      />
     </div>
   ),
   payudirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Payu
-      </span>
-      <DollarSignIcon />
+      <img
+        src="images/checkout/payu.png"
+        alt="Stripe"
+        style={{
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
+          objectFit: 'contain',
+        }}
+      />
     </div>
   ),
   placetopay: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Place to pay
-      </span>
-      <DollarSignIcon />
+      <img
+        src="images/checkout/placetopay.png"
+        alt="Stripe"
+        style={{
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
+          objectFit: 'contain',
+        }}
+      />
     </div>
   ),
   openpaydirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Openpay
-      </span>
-      <DollarSignIcon />
+      <img
+        src="images/checkout/openpay.png"
+        alt="Stripe"
+        style={{
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
+          objectFit: 'contain',
+        }}
+      />
     </div>
   ),
   payucodirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        PayuCo
-      </span>
-      <DollarSignIcon />
+      <DollarSignIcon className="h-4 w-4" />
     </div>
   ),
   placetopaydirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Place to pay
-      </span>
-      <DollarSignIcon />
+      <DollarSignIcon className="h-4 w-4" />
     </div>
   ),
   paymentswaydirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Payments way
-      </span>
-      <DollarSignIcon />
+      <img
+        src="images/checkout/paymentssway.png"
+        alt="Stripe"
+        style={{
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
+          objectFit: 'contain',
+        }}
+      />
     </div>
   ),
   dlocalgodirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        DlocalGo
-      </span>
-      <DollarSignIcon />
+      <img
+        src="images/checkout/dlocal.png"
+        alt="Stripe"
+        style={{
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
+          objectFit: 'contain',
+        }}
+      />
     </div>
   ),
   palommadirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Paloma
-      </span>
-      <DollarSignIcon />
+      <DollarSignIcon className="h-4 w-4" />
     </div>
   ),
   coinkdirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Coink
-      </span>
-      <DollarSignIcon />
+      <DollarSignIcon className="h-4 w-4" />
     </div>
   ),
   payzendirect: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Payzen
-      </span>
-      <DollarSignIcon />
+      <DollarSignIcon className="h-4 w-4" />
     </div>
   ),
   stripe: (
     <div>
-      <span className="text-sm font-medium leading-[20px] text-gray-700">
-        Stripe
-      </span>
-      <StripeIcon />
+      <img
+        src="images/checkout/stripe.png"
+        alt="Stripe"
+        style={{
+          minWidth: '60px',
+          minHeight: '25px',
+          maxHeight: '25px',
+          objectFit: 'contain',
+        }}
+      />
     </div>
   ),
 };
@@ -191,8 +212,6 @@ const BillingForm: React.FC<{
   sidebarBackgroundColor,
   paymentMethods,
 }) => {
-  const paymentMethodsImage = process.env.NEXT_PUBLIC_PAYMENT_METHODS_IMAGE;
-  const poweredByStripeImage = process.env.NEXT_PUBLIC_POWERED_BY_STRIPE_IMAGE;
   const { t } = useTranslation('services');
   const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>(
@@ -206,6 +225,7 @@ const BillingForm: React.FC<{
   const [loading, setLoading] = useState(false);
   const [validSuccess, setValidSuccess] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [cardType, setCardType] = useState<string | null>(null);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
@@ -223,22 +243,22 @@ const BillingForm: React.FC<{
     enterprise_name: z.string(),
     tax_code: z.string(),
     discount_coupon: z.string(),
-    card_name: z
-      .string()
-      .min(0, t('checkout.validation.cardNameRequired'))
-      .optional(),
+    card_name: z.string().min(1, t('checkout.validation.cardNameRequired')),
     card_number: z
       .string()
-      .min(0, t('checkout.validation.cardNumberRequired'))
-      .optional(),
-    card_expiration_date: z
-      .string()
-      .min(0, t('checkout.validation.cardExpirationDateRequired'))
-      .optional(),
+      .regex(/^\d{16}$/, t('checkout.validation.cardNumberRequired')),
+    card_expiration_date: z.preprocess(
+      (val) => (typeof val === 'string' ? val.trim().replace(/\s+/g, '') : val),
+      z
+        .string()
+        .regex(
+          /^(0[1-9]|1[0-2])\/\d{2}$/,
+          t('checkout.validation.cardExpirationDateRequired'),
+        ),
+    ),
     card_cvv: z
       .string()
-      .min(0, t('checkout.validation.cardCvvRequired'))
-      .optional(),
+      .regex(/^\d{3,4}$/, t('checkout.validation.cardCvvRequired')),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -262,70 +282,80 @@ const BillingForm: React.FC<{
     },
   });
 
-  const handleCreateCard = async () => {
+  const handleCardTypeChange = (cardNumber: string) => {
+    const bin = cardNumber.replace(/\D/g, '').substring(0, 6);
+
+    if (bin.startsWith('4')) {
+      setCardType('visa');
+    } else if (
+      /^5[1-5]/.test(bin) ||
+      /^222[1-9]|^22[3-9]\d|^2[3-6]\d{2}|^27[01]\d|^2720/.test(bin)
+    ) {
+      setCardType('mastercard');
+    } else if (/^3[47]/.test(bin)) {
+      setCardType('amex');
+    } else if (bin.startsWith('6')) {
+      setCardType('discover');
+    } else {
+      setCardType(null);
+    }
+  };
+
+  const handleCreateCard = async (values: z.infer<typeof formSchema>) => {
     if (!stripe || !elements) {
       return;
     }
 
-    const cardNumberElement = elements.getElement(CardNumberElement);
-    if (!cardNumberElement && selectedPaymentMethod === 'stripe') {
-      setErrorMessage(t('checkout.error.cardNumberElement'));
+    if (selectedPaymentMethod !== 'stripe') {
       return;
     }
 
-    if (selectedPaymentMethod === 'stripe') {
-      const { error: createError, paymentMethod } =
-        await stripe.createPaymentMethod({
-          type: 'card',
-          card: cardNumberElement,
-          billing_details: {
-            name: form.getValues('card_name'),
-            address: {
-              city: form.getValues('city'),
-              line1: form.getValues('address'),
-              postal_code: form.getValues('postal_code'),
-            },
-            email: form.getValues('email'),
-          },
-        });
+    const cardNumberElement = elements.getElement(CardNumberElement);
 
-      if (createError) {
-        setErrorMessage(createError.message);
-        return;
-      }
-
-      setErrorMessage('');
-
-      return paymentMethod;
+    if (!cardNumberElement) {
+      setErrorMessage('Card number element is not initialized');
+      return null;
     }
 
-    return null;
-  };
+    const { error: createError, paymentMethod } =
+      await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardNumberElement,
+        billing_details: {
+          name: form.getValues('card_name'),
+          address: {
+            city: form.getValues('city'),
+            line1: form.getValues('address'),
+            postal_code: form.getValues('postal_code'),
+          },
+          email: form.getValues('email'),
+        },
+      });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setLoading(true);
-    setValidSuccess(false);
-    try {
-      const paymentMethod = (await handleCreateCard()) ?? {
-        id: 'none',
-      };
+    if (createError) {
+      setErrorMessage(createError.message);
+      toast.error(t('checkout.error.paymentFailed'));
+      return null;
+    }
 
-      if (!paymentMethod?.id) {
-        throw new Error(t('checkout.error.paymentFailed'));
-      }
+    setErrorMessage('');
 
-      const { success, error, accountAlreadyExists, data } =
-        await handleSubmitPayment({
-          service,
-          values: values,
-          stripeId,
-          organizationId,
-          paymentMethodId: paymentMethod.id,
-          coupon: values.discount_coupon,
-          quantity: quantity,
-          selectedPaymentMethod: selectedPaymentMethod,
-          baseUrl,
-        });
+    if (!paymentMethod?.id) {
+      throw new Error(t('checkout.error.paymentFailed'));
+    }
+
+    const { success, error, accountAlreadyExists, data } =
+      await handleSubmitPayment({
+        service,
+        values,
+        stripeId,
+        organizationId,
+        paymentMethodId: paymentMethod.id,
+        coupon: values.discount_coupon,
+        quantity: quantity,
+        selectedPaymentMethod: selectedPaymentMethod,
+        baseUrl,
+      });
 
       if (!success) {
         if (error === 'User already registered') {
@@ -346,6 +376,15 @@ const BillingForm: React.FC<{
           `${baseUrl}/success?accountAlreadyExists=${accountAlreadyExists}`,
         );
       }
+
+    return paymentMethod;
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true);
+    setValidSuccess(false);
+    try {
+      await handleCreateCard(values)
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -358,38 +397,27 @@ const BillingForm: React.FC<{
   }
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative mt-6 h-full w-full">
       <div
         className="absolute left-0 top-0 h-20 w-full"
         style={{ backgroundColor: sidebarBackgroundColor }}
       />
-
       <div className="relative mx-auto flex h-full w-full flex-col items-center justify-center px-2 md:px-4">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="w-full max-w-[1200px] space-y-4"
           >
-            <div className="mb-16 mt-4 flex justify-start lg:justify-start">
-              <img
-                src={logoUrl}
-                alt="Logo"
-                className="relative h-10 w-auto object-contain"
-              />
-            </div>
-            <div className="flex flex-col gap-8 lg:flex-row">
-              <div className="w-full lg:w-[60%]">
-                <div className="font-inter mb-5 text-2xl font-semibold leading-[1.27] text-gray-900">
-                  {t('checkout.billing_details')}
-                </div>
+            <div className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 lg:flex-row">
+              {/* Columna izquierda */}
+              <div className="flex-1 rounded-lg bg-white p-6 shadow-md">
                 <UserInfo form={form} />
-                <ServiceTypeSection service={service} />
                 <>
-                  <div className="font-inter text-base font-semibold leading-[2.375] text-gray-900">
+                  <div className="font-inter mt-5 text-base font-semibold leading-[2.375] text-gray-900">
                     {t('checkout.paymentMethod')}
                   </div>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                       {paymentMethods?.map((paymentMethod) => (
                         <div
                           key={paymentMethod.name}
@@ -398,6 +426,11 @@ const BillingForm: React.FC<{
                               ? 'border-blue-500 bg-blue-50'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
+                          style={{
+                            padding: '10.3px 14.42px',
+                            maxHeight: '45.6px',
+                            maxWidth: '88.84px',
+                          }}
                           onClick={() =>
                             setSelectedPaymentMethod(paymentMethod.name)
                           }
@@ -413,135 +446,197 @@ const BillingForm: React.FC<{
                       ))}
                     </div>
                   </div>
-                  {selectedPaymentMethod === 'stripe' && (
-                    <div className="flex w-full flex-col gap-4 sm:flex-row">
-                      <div className="w-full flex-col gap-1.5">
-                        <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                          {t('checkout.cardNumber')}
-                        </Label>
-                        <CardNumberElement
-                          id="card_number"
-                          className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                        />
-                      </div>
-                      <div className="w-full flex-col gap-1.5">
-                        <Label className="mb-1.5 text-sm font-medium leading-[20px] text-gray-700">
-                          {t('checkout.expirationDate')}
-                        </Label>
-                        <CardExpiryElement
-                          id="card_expiry"
-                          className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                        />
-                      </div>
+                  <div className="mt-6 flex w-full flex-col gap-6">
+                    {/* Nombre en la tarjeta */}
+                    <div className="w-full flex-col gap-1.5">
+                      <FormField
+                        name="card_name"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <CustomFormLabel
+                              label={t('checkout.cardName')}
+                              required={true}
+                              textSize="text-[14px]"
+                              textColor="text-[#747476]"
+                            />
+                            <FormControl>
+                              <Input
+                                className="rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                {...field}
+                                placeholder={t('checkout.cardName')}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-                  )}
-                  {selectedPaymentMethod === 'stripe' && (
-                    <div className="flex w-full flex-col gap-4 sm:flex-row">
-                      <div className="w-full flex-col gap-1.5">
-                        <FormField
-                          name="card_name"
-                          control={form.control}
-                          render={({ field }) => (
-                            <FormItem className="w-full">
-                              <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-                                {t('checkout.cardName')}
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="w-full flex-col gap-1.5">
-                        <Label className="text-sm font-medium leading-[20px] text-gray-700">
-                          {t('checkout.securityCode')}
-                        </Label>
-                        <CardCvcElement
-                          id="card_cvc"
-                          className="mt-1.5 h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                        />
-                      </div>
-                    </div>
-                  )}
 
-                  {selectedPaymentMethod !== 'stripe' &&
-                    selectedPaymentMethod !== 'mercadopago' && (
-                      <div className="flex w-full flex-col gap-4 sm:flex-row">
-                        <div>
+                    {/* Número de tarjeta, Fecha de expiración y CVV */}
+                    <div className="flex w-full flex-col gap-4 sm:flex-row">
+                      {/* Número de tarjeta */}
+                      <div className="sm:w- relative w-full flex-col gap-1.5">
+                        {selectedPaymentMethod === 'stripe' ? (
+                          <>
+                            <CustomFormLabel
+                              label={t('checkout.cardNumber')}
+                              required={true}
+                              textSize="text-[14px]"
+                              textColor="text-[#747476]"
+                            />
+                            <CardNumberElement
+                              id="card_number"
+                              className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                              options={{ showIcon: true }}
+                            />
+                          </>
+                        ) : (
                           <FormField
                             name="card_number"
                             control={form.control}
                             render={({ field }) => (
                               <FormItem className="w-full">
-                                <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-                                  {t('checkout.cardNumber')}
-                                </FormLabel>
+                                <CustomFormLabel
+                                  label={t('checkout.cardNumber')}
+                                  required={true}
+                                  textSize="text-[14px]"
+                                  textColor="text-[#747476]"
+                                />
                                 <FormControl>
-                                  <Input
-                                    className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                                    {...field}
-                                    placeholder="4242 4242 4242 4242"
-                                  />
+                                  <div className="relative w-full">
+                                    <Input
+                                      type="text"
+                                      className="rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                      {...field}
+                                      placeholder="4242 4242 4242 4242"
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(
+                                          /\D/g,
+                                          '',
+                                        );
+                                        field.onChange(value);
+                                        handleCardTypeChange(value);
+                                      }}
+                                      maxLength={19}
+                                    />
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 transform">
+                                      {cardType && (
+                                        <img
+                                          src={`/images/services/${cardType}.png`}
+                                          alt={cardType}
+                                          className="h-6 w-10 object-contain"
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          <FormField
-                            name="card_name"
-                            control={form.control}
-                            render={({ field }) => (
-                              <FormItem className="w-full">
-                                <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-                                  {t('checkout.cardName')}
-                                </FormLabel>
-                                <FormControl>
-                                  <Input
-                                    className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <div>
+                        )}
+                      </div>
+
+                      {/* Fecha de expiración */}
+                      <div className="w-full flex-col gap-1.5 sm:w-1/2">
+                        {selectedPaymentMethod === 'stripe' ? (
+                          <>
+                            <CustomFormLabel
+                              label={t('checkout.expirationDate')}
+                              required={true}
+                              textSize="text-[14px]"
+                              textColor="text-[#747476]"
+                            />
+                            <CardExpiryElement
+                              id="card_expiry"
+                              className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                              options={{ placeholder: 'MM / YY' }}
+                            />
+                          </>
+                        ) : (
                           <FormField
                             name="card_expiration_date"
                             control={form.control}
                             render={({ field }) => (
                               <FormItem className="w-full">
-                                <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-                                  {t('checkout.expirationDate')}
-                                </FormLabel>
+                                <CustomFormLabel
+                                  label={t('checkout.expirationDate')}
+                                  required={true}
+                                  textSize="text-[14px]"
+                                  textColor="text-[#747476]"
+                                />
                                 <FormControl>
                                   <Input
-                                    className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                    className="rounded-lg border border-gray-300 px-3.5 py-2.5"
                                     {...field}
-                                    placeholder="11/28"
+                                    placeholder="MM / YY"
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(
+                                        /\D/g,
+                                        '',
+                                      );
+                                      let formattedValue = value;
+
+                                      if (value.length >= 2) {
+                                        const month = parseInt(
+                                          value.slice(0, 2),
+                                          10,
+                                        );
+                                        if (month < 1 || month > 12) {
+                                          return;
+                                        }
+
+                                        formattedValue = `${value.slice(0, 2)} / `;
+                                      }
+
+                                      if (value.length > 2) {
+                                        formattedValue = `${value.slice(0, 2)} / ${value.slice(2, 4)}`;
+                                      }
+
+                                      field.onChange(formattedValue);
+                                    }}
+                                    maxLength={7}
                                   />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
+                        )}
+                      </div>
+
+                      {/* CVV */}
+                      <div className="w-full flex-col gap-1.5 sm:w-1/2">
+                        {selectedPaymentMethod === 'stripe' ? (
+                          <>
+                            <CustomFormLabel
+                              label={t('checkout.securityCode')}
+                              required={true}
+                              textSize="text-[14px]"
+                              textColor="text-[#747476]"
+                            />
+                            <CardCvcElement
+                              id="card_cvc"
+                              className="mt-1.5 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                              options={{ placeholder: '123' }}
+                            />
+                          </>
+                        ) : (
                           <FormField
                             name="card_cvv"
                             control={form.control}
                             render={({ field }) => (
                               <FormItem className="w-full">
-                                <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-                                  {t('checkout.securityCode')}
-                                </FormLabel>
+                                <CustomFormLabel
+                                  label={t('checkout.securityCode')}
+                                  required={true}
+                                  textSize="text-[14px]"
+                                  textColor="text-[#747476]"
+                                />
                                 <FormControl>
                                   <Input
-                                    className="h-11 rounded-lg border border-gray-300 px-3.5 py-2.5"
+                                    className="rounded-lg border border-gray-300 px-3.5 py-2.5"
                                     {...field}
                                     placeholder="123"
                                   />
@@ -550,12 +645,38 @@ const BillingForm: React.FC<{
                               </FormItem>
                             )}
                           />
-                        </div>
+                        )}
                       </div>
-                    )}
+                    </div>
+                  </div>
                 </>
+                <div className="mt-8">
+                  <ThemedButton
+                    type="submit"
+                    disabled={loading}
+                    className="w-full transform transition duration-300 ease-in-out hover:scale-105"
+                    onClick={onSubmit}
+                  >
+                    {t('checkout.subscribe')}
+                    {loading && <Spinner className="ml-2 h-4 w-4" />}
+                  </ThemedButton>
+                </div>
               </div>
-              <div className="flex w-full flex-col justify-between lg:w-[40%]">
+              <div
+                className="rounded-lg p-6 lg:w-[40%]"
+                style={{ backgroundColor: sidebarBackgroundColor }}
+              >
+                <div className="mb-8 flex items-start justify-start">
+                  <img
+                    src={logoUrl}
+                    alt="Logo"
+                    className="justify-start"
+                    style={{
+                      width: '160px',
+                      height: 'auto',
+                    }}
+                  />
+                </div>
                 <SideInfo
                   form={form}
                   service={service}
@@ -566,29 +687,9 @@ const BillingForm: React.FC<{
                   quantity={quantity}
                   setQuantity={setQuantity}
                   selectedPaymentMethod={selectedPaymentMethod}
+                  onSubmit={onSubmit}
+                  sidebarBackgroundColor={sidebarBackgroundColor}
                 />
-                <div className="mt-6 flex flex-col items-center justify-center lg:mt-0">
-                  <div className="mb-10">
-                    <span className="text-center text-sm font-medium leading-[1.42857] text-gray-700">
-                      {t('checkout.securePayment')}
-                    </span>
-                  </div>
-                  <Separator className="w-full" />
-                  <div className="mt-10">
-                    <img
-                      src={paymentMethodsImage}
-                      alt="Visa"
-                      className="h-7 w-40"
-                    />
-                  </div>
-                  <div>
-                    <img
-                      src={poweredByStripeImage}
-                      alt="Powered By Stripe"
-                      className="h-12 w-40"
-                    />
-                  </div>
-                </div>
               </div>
             </div>
           </form>

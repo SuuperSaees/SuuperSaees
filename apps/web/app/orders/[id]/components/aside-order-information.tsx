@@ -222,7 +222,7 @@ const AsideOrderInformation = ({
 
   const searchUserOptionsFollowers =
     orderAgencyClientsFollowers?.filter((currentUser) => currentUser.role !== 'client_guest').map((user) => ({
-      picture_url: user?.settings?.picture_url?? user?.picture_url ?? '',
+      picture_url: user?.settings?.picture_url ?? user?.picture_url ?? '',
       value: user.id,
       label: user?.settings?.name ?? user.name ?? '',
       role: user.role,
@@ -241,7 +241,8 @@ const AsideOrderInformation = ({
 
 
   const canAddAssignes = userRoles.has(userRole);
-  const canAddFollowers = userRolesFollowers.has(userRole);
+  const canAddFollowers = userRolesFollowers.has(userRole) || userRoles.has(userRole);
+
 
   return (
     <AgencyStatusesProvider initialStatuses={agencyStatuses} initialTags={orderAgencyTags}>
