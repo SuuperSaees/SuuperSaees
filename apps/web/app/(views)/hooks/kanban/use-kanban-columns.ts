@@ -101,6 +101,14 @@ const useKanbanColumns = <T extends KanbanItem>(
             : updatedType === 'item' && newItem && newColumn
               ? newItem
               : null;
+        
+        const propertyData: ViewManageableProperty | undefined = newColumn?.type === 'status' ? {
+          id: newColumn?.id,
+          key: newColumn?.key,
+          name: newColumn?.name,
+          position: newColumn?.position,
+          visible: newColumn?.is_visible,
+        }: undefined;
 
         onUpdateFn &&
           executeMuatation &&
@@ -109,6 +117,7 @@ const useKanbanColumns = <T extends KanbanItem>(
             newValueToUpdate as T,
             newColumn?.type as keyof T,
             targetItem?.id,
+            propertyData
           ));
       } catch (error) {
         console.error('Error updating columns:', error);

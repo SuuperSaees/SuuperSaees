@@ -227,7 +227,7 @@ const createColumnsByGroup = <T extends KanbanItem>(
         : 'string-default';
 
       return {
-        id: `column-container-${index}`,
+        id: group.id ??`column-container-${index}`,
         key: group.key,
         name:
           formatString(group.name, 'capitalize') ||
