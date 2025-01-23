@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 import Board from '~/(views)/components/board';
+import KanbanSkeleton from '~/(views)/components/kanban/kanban-skeleton';
+import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { ViewProvider } from '~/(views)/contexts/view-context';
 import { ViewInitialConfigurations } from '~/(views)/view-config.types';
 import { UpdateFunction, ViewItem, ViewType } from '~/(views)/views.types';
@@ -47,7 +49,7 @@ const AGENCY_ROLES = new Set([
 
 const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
   // Context and hooks
-  const { orders, setOrders, agencyId } = useOrdersContext();
+  const { orders, setOrders, agencyId, ordersAreLoading } = useOrdersContext();
   const { statuses } = useAgencyStatuses();
   const { t } = useTranslation('orders');
   const { workspace } = useUserWorkspace();
@@ -88,7 +90,12 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     agencyMembers,
   });
 
-  const { handleUpdateOrder } = useOrdersActionHandler({ orders, setOrders, agencyId, statuses });
+  const { handleUpdateOrder } = useOrdersActionHandler({
+    orders,
+    setOrders,
+    agencyId,
+    statuses,
+  });
 
   // Compute initial active tab
   const statusFilterValues = getFilterValues('status');
@@ -150,9 +157,20 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
             onReset={resetFilters}
           />
           <ViewSelect options={viewOptions} defaultValue={currentView} />
-          <CreateOrderButton t={t} hasOrders={orders.length > 0} />
+          <CreateOrderButton
+            t={t}
+            hasOrders={orders.length > 0 || ordersAreLoading}
+          />
         </div>
-        <Board />
+        {ordersAreLoading ? (
+          currentView === 'kanban' ? (
+            <KanbanSkeleton columns={5} />
+          ) : (
+            <TableSkeleton columns={9} rows={7} />
+          )
+        ) : (
+          <Board />
+        )}
       </div>
     </ViewProvider>
   );
