@@ -1,5 +1,5 @@
 import { getPropietaryOrganizationIdOfOrder } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
-
+import { Metadata } from 'next';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
@@ -16,13 +16,20 @@ import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace
 import { redirect } from 'next/navigation';
 import { getTags } from '~/server/actions/tags/tags.action';
 
-export const generateMetadata = async () => {
-  const i18n = await createI18nServerInstance();
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const order = await getOrderById(Number(params.id)).catch((err) =>
+    console.error(err),
+  ) as Order.Relational;
+  const agency = order?.agency_id ? await getAgencyStatuses(order.agency_id).catch((err) => null) : null;
+  
+  const title = order 
+    ? `${order.id} - ${order.title}`
+    : 'Order Details';
+  
   return {
-    title: i18n.t('orders:details.title'),
-    // You can add more metadata here if needed
+    title,
   };
-};
+}
 
 async function OrderDetailsPage({
   params: { id },
