@@ -20,7 +20,7 @@ export const SkeletonLineText = ({
 }) => {
   return (
     <div
-      className={`${className} relative isolate min-h-[16px] min-w-[50px] overflow-hidden rounded bg-gray/[.06] before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1s_infinite_ease] before:bg-gradient-to-r before:from-transparent before:via-gray/[.05] before:to-transparent`}
+      className={`${className} ${!className?.includes('w-') ? 'w-[50px]': ''} relative isolate min-h-[16px]  overflow-hidden rounded bg-gray/[.06] before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1s_infinite_ease] before:bg-gradient-to-r before:from-transparent before:via-gray/[.05] before:to-transparent`}
       {...rest}
     ></div>
   );
