@@ -202,7 +202,7 @@ const AsideOrderInformation = ({
       userRole === 'agency_project_manager',
   });
 
-  const { data: orderAgencyClientsFollowers } = useQuery({
+  const { data: orderAgencyClientsFollowers, isLoading: isLoadingFollowers } = useQuery({
     queryKey: ['order-agency-clients-followers', order.id],
     queryFn: () => getClientMembersForOrganization(order.client_organization_id),
     retry: 5,
@@ -347,6 +347,7 @@ const AsideOrderInformation = ({
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
               canAddFollowers={canAddFollowers}
+              isLoading={isLoadingFollowers}
             />
             </div>
             <div>
