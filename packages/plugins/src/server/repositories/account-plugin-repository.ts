@@ -410,13 +410,11 @@ export class AccountPluginRepository {
           `[REPOSITORY] Error fetching provider_id from account_plugins: ${accountError.message}`,
         );
       }
-      console.log('desde busqueda', accountPlugin);
       if (accountPlugin?.provider_id) {
         return accountPlugin.provider_id;
       }
 
       if (provider === 'loom') {
-        console.log('LOOM', account_id);
         return null;
       }
 
