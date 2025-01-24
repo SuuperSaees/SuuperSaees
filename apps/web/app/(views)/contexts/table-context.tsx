@@ -18,7 +18,8 @@ export const TableProvider = <T extends ViewItem>({
   setData,
   columns,
   emptyState,
-  controllers
+  controllers,
+  configs
 }: TableProviderProps<T>) => {
   const value = {
     data,
@@ -28,6 +29,7 @@ export const TableProvider = <T extends ViewItem>({
     setData: setData as unknown as React.Dispatch<
       React.SetStateAction<ViewItem[]>
     >,
+    configs
   };
 
   return (

@@ -45,6 +45,14 @@ interface DataTableProps<TData, TValue> {
   className?: string;
   emptyStateComponent?: React.ReactNode;
   disableInteractions?: boolean;
+  configs?: CustomConfigs;
+}
+
+export interface CustomConfigs {
+  rowsPerPage: {
+    onUpdate: (value: string) => void;
+    value: number;
+  }
 }
 
 export function DataTable<TData, TValue>({
@@ -54,8 +62,10 @@ export function DataTable<TData, TValue>({
   className,
   emptyStateComponent,
   disableInteractions,
+  configs
 }: DataTableProps<TData, TValue>) {
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const [rowsPerPage, setRowsPerPage] = useState(configs?.rowsPerPage.value ?? 10);
 
   const table = useReactTable({
     ...options,
@@ -71,13 +81,14 @@ export function DataTable<TData, TValue>({
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
   const handleRowsPerPageChange = (value: string) => {
+    configs?.rowsPerPage.onUpdate(value);
     const newValue = Number(value);
     if (!isNaN(newValue) && newValue > 0 && newValue <= 100) {
       setRowsPerPage(newValue);
       table.setPageSize(newValue);
     }
   };
-
+  
   return (
 
 
@@ -186,7 +197,7 @@ export function DataTable<TData, TValue>({
                   </PaginationItem>
                 )}
               </div>
-              <SelectRowsPerPage handleRowsPerPageChange={handleRowsPerPageChange} />
+              <SelectRowsPerPage defaultValue={rowsPerPage} handleRowsPerPageChange={handleRowsPerPageChange} />
               {pageIndex < pageCount - 1 && (
                 <PaginationItem>
                   <PaginationNext
@@ -213,17 +224,19 @@ export function DataTable<TData, TValue>({
 
 interface SelectRowsPerPageProps {
   handleRowsPerPageChange: (value: string) => void;
+  defaultValue: number;
 }
 
 export function SelectRowsPerPage({
   handleRowsPerPageChange,
+  defaultValue
 }: SelectRowsPerPageProps) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-gray-600">
         <Trans i18nKey={'common:rowsPerPage'} />
       </span>
-      <Select defaultValue="10" onValueChange={handleRowsPerPageChange}>
+      <Select defaultValue={String(defaultValue)} onValueChange={handleRowsPerPageChange}>
         <SelectTrigger className="w-[100px] rounded-md bg-white font-medium">
           <SelectValue placeholder="Rows" />
         </SelectTrigger>

@@ -2,6 +2,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { ViewItem, ViewManageableProperty, ViewType } from './views.types';
 import { ControllersProps } from '../components/table/table';
+import { CustomConfigs } from '@kit/ui/data-table';
 
 // Base config type for all views, group and filters
 export type ViewConfiguaration<T extends ViewManageableProperty> = {
@@ -50,6 +51,7 @@ export interface ViewInitialConfigurations<T extends ViewItem> {
     columns: ColumnDef<T>[];
     emptyState: React.ReactNode;
     controllers?: ControllersProps;
+    configs?: CustomConfigs;
   }
 }
 
