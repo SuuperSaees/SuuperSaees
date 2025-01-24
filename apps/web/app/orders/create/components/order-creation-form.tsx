@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -83,7 +83,7 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
     },
     mode: 'onChange',
   });
-
+  const queryClient = useQueryClient();
   const orderMutation = useMutation({
     mutationFn: async ({
       values,
@@ -128,7 +128,10 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
         order_followers,
       );
       await handleResponse(res, 'orders', t);
-      if (res.ok) router.push(`/orders/${res?.success?.data?.id}`);
+      if (res.ok) {
+        router.push(`/orders/${res?.success?.data?.id}`);
+        await queryClient.invalidateQueries({ queryKey: ['orders'] });
+      }
     },
     onError: () => {
       console.error('Error creating the order');
