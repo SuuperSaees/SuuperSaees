@@ -66,7 +66,9 @@ export class AccountPluginRepository {
       }
 
       if (
-        billingAccount.provider !== ('loom' as BillingAccountInsert['provider'])
+        billingAccount &&
+        billingAccount.provider !== 'loom' &&
+        billingAccount.provider !== 'treli'
       ) {
         const { error: billingError } = await this.client
           .from('billing_accounts')
@@ -408,13 +410,13 @@ export class AccountPluginRepository {
           `[REPOSITORY] Error fetching provider_id from account_plugins: ${accountError.message}`,
         );
       }
-      console.log("desde busqueda", accountPlugin);
+      console.log('desde busqueda', accountPlugin);
       if (accountPlugin?.provider_id) {
         return accountPlugin.provider_id;
       }
 
       if (provider === 'loom') {
-        console.log("LOOM", account_id);
+        console.log('LOOM', account_id);
         return null;
       }
 
