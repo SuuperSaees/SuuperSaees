@@ -63,7 +63,8 @@ async function fetchClientMembers(
     clientsQuery = client
       .from('clients')
       .select('user_client_id')
-      .or(`agency_id.eq.${currentUserOrganizationId},organization_client_id.eq.${clientOrganizationId}`)
+      .eq('agency_id', currentUserOrganizationId)
+      .eq('organization_client_id', clientOrganizationId)
       .is('deleted_on', null);
   } else if (clientRoles.includes(currentUserRole)) {
     clientsQuery = client
