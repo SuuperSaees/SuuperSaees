@@ -57,14 +57,18 @@ const useOrdersViewConfigs = ({
   // Helper functions
   const hasPermission = () => agencyRoles.has(currentUserRole);
 
-  const createStatusConfig = (status: AgencyStatus.Type) => ({
-    id: String(status.id) ?? '',
-    key: status.status_name ?? '',
-    name: formatString(status.status_name ?? '', 'lower'),
-    position: status.position ?? 0,
-    color: status.status_color ?? '',
-    visible: true,
-  });
+  const createStatusConfig = (status: AgencyStatus.Type) => {
+    if (status.deleted_on === null) {
+      return {
+        id: String(status.id) ?? '',
+        key: status.status_name ?? '',
+        name: formatString(status.status_name ?? '', 'lower'),
+        position: status.position ?? 0,
+        color: status.status_color ?? '',
+        visible: true,
+      }
+    } return
+  }
 
   // Components
   const EmptyStateComponent = () => (
@@ -95,7 +99,7 @@ const useOrdersViewConfigs = ({
       kanban: {
         group: {
           selected: 'status',
-          values: statuses?.map(createStatusConfig),
+          values: statuses?.map(createStatusConfig).filter(val => val !== undefined),
           updateFn: (value: Order.Response) => Promise.resolve([value]),
         },
       },
@@ -107,7 +111,7 @@ const useOrdersViewConfigs = ({
 
   const viewOptions: ViewOption[] = [
     {
-      label: 'Kanban',
+      label: 'Board',
       value: 'kanban',
       action: (view: string | number) => setCurrentView(String(view)),
       icon: Columns3,

@@ -1,5 +1,5 @@
 'use client';
-import { DndContext, closestCorners } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
 // import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import {
   SortableContext,
@@ -16,6 +16,7 @@ import styles from '../../../../components/ui/styles.module.css';
 import SortableItem from '../../../components/sortable-item';
 // import KanbanCard from './kanban-card';
 import KanbanColumn from './kanban-column';
+import KanbanCard from './kanban-card';
 
 const KanbanColumns = ({
   columns,
@@ -25,7 +26,7 @@ const KanbanColumns = ({
   setColumns: React.Dispatch<React.SetStateAction<KanbanColumnType[]>>;
 }) => {
   // Helper to update column positions consistently
-  const { onUpdateFn, setData } = useKanbanContext();
+  const { onUpdateFn, setData, customComponents } = useKanbanContext();
   const { handleUpdateColumns } = useKanbanColumns(
     columns,
     setColumns,
@@ -35,9 +36,9 @@ const KanbanColumns = ({
 
   const {
     sensors,
-    // activeId,
-    // type,
-    // dragState,
+    activeId,
+    type,
+    dragState,
     handleDragEnd,
     handleDragOver,
     handleDragStart,
@@ -46,8 +47,8 @@ const KanbanColumns = ({
     columns,
     onUpdateFn: handleUpdateColumns,
   });
-
-  // const CustomCard = customComponents?.kanban?.Card;
+  
+  const CustomCard = customComponents?.kanban?.Card;
   return (
     <DndContext
       sensors={sensors}
@@ -56,10 +57,10 @@ const KanbanColumns = ({
       onDragOver={handleDragOver}
       onDragStart={handleDragStart}
       onDragCancel={handleDragCancel}
-      // modifiers={[restrictToHorizontalAxis]}
+  
     >
       <div
-        className={`flex max-w-full gap-4 overflow-y-auto p-4 ${styles['scrollbar-thin']} max-h-screen min-h-[70vh]`}
+        className={`flex max-w-full gap-4 py-4 ${styles['scrollbar-thin']} max-h-full min-h-0 h-full`}
       >
         {/* <SortableContext
           items={columns.map((column) => column.id)}
@@ -80,22 +81,23 @@ const KanbanColumns = ({
               </SortableContext>
             </SortableItem>
           ))}
-          {/* <DragOverlay>
-            {activeId && type === 'column' && (
+          <DragOverlay className='opacity-70'>
+            {/* {activeId && type === 'column' && (
               <KanbanColumn
                 column={columns.find((column) => column.id === activeId)}
               />
-            )}
-            {activeId && type === 'item' && CustomCard ? (
+            )} */}
+            {activeId && dragState.item && type === 'item' && CustomCard ? (
    
               <CustomCard
                 item={dragState.item}
-                className='bg-white/70 opacity-50'
+                className='bg-white/70 opacity-70 pointer-events-none'
+                style={{ opacity: 0.7 }}
               />
-            ): activeId && type === 'item' ? (
-              <KanbanCard item={dragState.item} />
+            ): activeId && dragState.item && type === 'item' ? (
+              <KanbanCard item={dragState.item} className='pointer-events-none' style={{ opacity: 0.7 }} />
             ): null}
-          </DragOverlay> */}
+          </DragOverlay>
         {/* </SortableContext> */}
       </div>
     </DndContext>

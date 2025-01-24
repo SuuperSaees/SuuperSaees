@@ -9,11 +9,25 @@ import { getPriorityClassName } from '~/orders/[id]/utils/generate-options-and-c
 
 import MultiAvatarDisplayer from '../../../components/ui/multiavatar-displayer';
 
-const KanbanCard = ({ item }: { item: KanbanItem}) => {
+const KanbanCard = ({
+  item,
+  className,
+  ...rest
+}: {
+  item: KanbanItem;
+  className?: string;
+  [key: string]: unknown;
+}) => {
   const avatars = item?.assignees ?? [];
 
   return (
-    <div className="flex cursor-pointer flex-col gap-2 rounded-md border border-gray-200 bg-white p-4">
+    <div
+      className={
+        'flex cursor-pointer flex-col gap-2 rounded-md border border-gray-200 bg-white p-4 ' +
+        className
+      }
+      {...rest}
+    >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between">
         <small className="max-w-14 truncate text-xs">#{item.id}</small>

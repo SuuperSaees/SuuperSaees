@@ -132,6 +132,7 @@ const useOrdersFilterConfigs = ({
           'status',
           'toggle',
           (order) => order.status === status.status_name,
+          status.status_name ?? '',
         ),
     }));
 
@@ -159,6 +160,7 @@ const useOrdersFilterConfigs = ({
           'priority',
           'toggle',
           (order) => order.priority === priority.name,
+          priority.name ?? '',
         ),
     }));
 

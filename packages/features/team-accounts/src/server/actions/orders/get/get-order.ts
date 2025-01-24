@@ -257,7 +257,7 @@ export const getOrders = async (
       )
       .is('deleted_on', null)
       .order('created_at', { ascending: false })
-      .limit(100);
+   
 
     let orders: Order.Response[] = [];
 
