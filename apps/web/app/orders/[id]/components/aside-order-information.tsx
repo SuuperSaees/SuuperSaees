@@ -198,7 +198,6 @@ const AsideOrderInformation = ({
     retry: 5,
     enabled:
       userRole === 'agency_owner' ||
-      userRole === 'agency_member' ||
       userRole === 'agency_project_manager',
   });
 
@@ -208,8 +207,8 @@ const AsideOrderInformation = ({
     retry: 5,
     enabled:
       userRole === 'agency_owner' ||
-      userRole === 'agency_member' ||
-      userRole === 'agency_project_manager',
+      userRole === 'agency_project_manager' ||
+      userRole === 'client_owner' 
   });
 
 
