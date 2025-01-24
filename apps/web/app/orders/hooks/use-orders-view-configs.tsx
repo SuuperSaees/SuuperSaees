@@ -111,7 +111,7 @@ const useOrdersViewConfigs = ({
 
   const viewOptions: ViewOption[] = [
     {
-      label: 'Kanban',
+      label: 'Board',
       value: 'kanban',
       action: (view: string | number) => setCurrentView(String(view)),
       icon: Columns3,

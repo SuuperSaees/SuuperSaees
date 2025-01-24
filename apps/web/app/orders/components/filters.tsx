@@ -81,8 +81,8 @@ const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
           variant="outline"
           size="icon"
         >
-          <span>{t('common:filters')}</span>
           <ListFilter className="h-4 w-4" />
+          <span>{t('common:filters')}</span>
         </Button>
       }
       items={filtersConfig}

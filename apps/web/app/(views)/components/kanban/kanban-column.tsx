@@ -27,7 +27,7 @@ const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
   return (
     <div
       key={column.key}
-      className="flex h-full w-full min-w-72 max-w-72 flex-col gap-2 rounded-md p-4"
+      className="flex w-full min-w-72 max-w-72 flex-col gap-2 rounded-md p-4 max-h-full min-h-0 overflow-y-auto no-scrollbar"
       style={{
         backgroundColor: hexToRgba(column.color, 0.2),
       }}
@@ -72,6 +72,8 @@ const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
             key={item.id + column.id}
             id={item.id}
             data={{ type: 'item' }}
+            overlayClassName='rounded-md bg-transparent'
+            styleOnDrag={{ opacity: 0 }}
           >
             {CustomCard ? (
               <CustomCard item={item} />
