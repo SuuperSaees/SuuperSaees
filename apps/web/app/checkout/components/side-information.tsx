@@ -6,17 +6,22 @@ import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@kit/ui/form';
-import { Input } from '@kit/ui/input';
+import { FormField } from '@kit/ui/form';
 import { Spinner } from '@kit/ui/spinner';
 
+import { DiscountIcon, SecurityIcon } from '~/components/icons/icons';
+
 import { FormData, ServiceType } from '../types/billing-form-types';
+import { ServiceTypeSection } from './service-type-section';
+
+const isColorDark = (hexColor: string) => {
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+  return brightness < 128;
+};
 
 interface SideDataFieldsProps {
   form: UseFormReturn<FormData>;
@@ -28,23 +33,27 @@ interface SideDataFieldsProps {
   quantity: number;
   setQuantity: React.Dispatch<React.SetStateAction<number>>;
   selectedPaymentMethod: string;
+  onSubmit: () => void;
+  sidebarBackgroundColor: string;
 }
 
 export const SideInfo: React.FC<SideDataFieldsProps> = ({
   form,
   service,
   loading,
-  errorMessage,
   accountId,
   validSuccess,
   quantity,
   setQuantity,
   selectedPaymentMethod,
+  sidebarBackgroundColor,
+  onSubmit,
 }) => {
-  const defaultServiceImage = process.env.NEXT_PUBLIC_SERVICE_DEFAULT_IMAGE;
   const { t } = useTranslation('services');
   const [discountAmount, setDiscountAmount] = useState<number | null>(null);
   const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
+
+  const isDarkBackground = isColorDark(sidebarBackgroundColor);
 
   const handleApplyDiscount = async () => {
     if (selectedPaymentMethod !== 'stripe') return;
@@ -66,7 +75,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
       if (response.ok && data.discountAmount) {
         setDiscountAmount(data.discountAmount);
       } else {
-        setDiscountAmount(null); // No discount if invalid code
+        setDiscountAmount(null);
         form.setError('discount_coupon', {
           message: t('checkout.invalid_coupon'),
         });
@@ -79,117 +88,139 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
     }
   };
 
-  const handleIncrease = () => {
+  const handleIncreaseQuantity = () => {
     setQuantity((prev) => prev + 1);
   };
 
-  const handleDecrease = () => {
+  const handleDecreaseQuantity = () => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
   };
 
   const discountedTotal =
-    (discountAmount ? (service.price ?? 0) - discountAmount : service.price) *
-    quantity;
+    (discountAmount
+      ? (service.price ?? 0) - discountAmount
+      : (service.price ?? 0)) * quantity;
 
   return (
-    <div>
-      <div className="font-inter mb-4 text-2xl font-semibold leading-[1.27] text-gray-900">
+    <div className="space-y-4">
+      <div
+        className={`font-inter text-[18px] font-semibold leading-[1.27] ${
+          isDarkBackground ? 'text-white' : 'text-gray-900'
+        }`}
+      >
         {t('checkout.resume')}
       </div>
-      {service.service_image ? (
-        <img
-          src={service.service_image}
-          alt="Service Image"
-          className="h-[190px] w-[390px] w-full rounded-lg object-cover"
+
+      {/* Componente de servicio */}
+      <div className="space-y-4">
+        <ServiceTypeSection
+          service={service}
+          isDarkBackground={isDarkBackground}
+          quantity={quantity} // Pasamos la cantidad actual
         />
-      ) : (
-        <img
-          src={defaultServiceImage}
-          alt="Service Image"
-          className="h-[190px] w-[390px] w-full rounded-lg object-cover"
-        />
-      )}
-      <div className="my-[18px] flex items-center">
-        <div className="flex flex-1 justify-between">
-          <div className="text-sm font-medium leading-5 text-gray-700">
-            {service.name}
+      </div>
+
+      {/* Manejo de cantidades */}
+      {!service.recurrence && (
+        <div className="mb-4 flex items-center justify-between">
+          <div
+            className={`text-sm font-medium leading-5 ${
+              isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+            }`}
+          >
+            {t('checkout.quantity')}
           </div>
-          <div className="text-sm font-medium leading-5 text-gray-700">
-            ${service.price?.toFixed(2)}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleIncreaseQuantity}
+              className={`flex h-6 w-6 items-center justify-center rounded border ${
+                isDarkBackground ? 'border-gray-500' : 'border-gray-300'
+              }`}
+              style={{ width: '24px', height: '24px' }}
+            >
+              <Plus
+                className={`h-4 w-4 ${
+                  isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              />
+            </button>
+
+            <span
+              className={`px-2 text-sm font-medium ${
+                isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+              }`}
+            >
+              {quantity}
+            </span>
+
+            <button
+              type="button"
+              onClick={handleDecreaseQuantity}
+              className={`flex h-6 w-6 items-center justify-center rounded border ${
+                isDarkBackground ? 'border-gray-500' : 'border-gray-300'
+              }`}
+              style={{ width: '24px', height: '24px' }}
+            >
+              <Minus
+                className={`h-4 w-4 ${
+                  isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              />
+            </button>
           </div>
         </div>
-      </div>
-      {!service.recurring_subscription &&
-        selectedPaymentMethod !== 'stripe' && (
-          <div className="mb-[18px] flex items-center justify-between">
-            <div className="text-sm font-medium leading-5 text-gray-700">
-              {t('checkout.quantity')}
-            </div>
-            <div className="my-2 flex items-center justify-center">
-              <button
-                type="button"
-                onClick={handleDecrease}
-                className="rounded-lg border p-2"
-              >
-                <Minus className="h-2 w-2 text-gray-700" />
-              </button>
-              {/* <span className="mx-2">{quantity}</span> */}
-              <div className="mx-2 flex w-4 items-center justify-center text-sm font-medium leading-5 text-gray-700">
-                {quantity}
-              </div>
-              <button
-                type="button"
-                onClick={handleIncrease}
-                className="rounded-lg border p-2"
-              >
-                <Plus className="h-2 w-2 text-gray-700" />
-              </button>
-            </div>
-          </div>
-        )}
-      {selectedPaymentMethod === 'stripe' && (
-        <FormField
-          name="discount_coupon"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem className="mb-[18px] w-full">
-              <FormLabel className="text-sm font-medium leading-[20px] text-gray-700">
-                {t('checkout.discount_coupon')}
-              </FormLabel>
-              <FormControl>
-                <div className="flex gap-4">
-                  <Input {...field} />
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    className="border border-gray-300"
-                    onClick={handleApplyDiscount}
-                    disabled={isApplyingDiscount}
-                  >
-                    {isApplyingDiscount ? (
-                      <Spinner className="h-4 w-4" />
-                    ) : (
-                      t('checkout.apply')
-                    )}
-                  </Button>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       )}
 
-      <div className="mb-[18px] flex justify-between">
-        <div className="text-sm font-medium leading-5 text-gray-700">
+      {/* Campo de cupón de descuento */}
+      <FormField
+        name="discount_coupon"
+        control={form.control}
+        render={({ field }) => (
+          <div className="relative flex items-center">
+            <DiscountIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-500" />
+            <input
+              {...field}
+              placeholder={t('checkout.discount_coupon')}
+              className="h-12 w-full rounded-lg border border-gray-300 pl-12 pr-24"
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 h-7 -translate-y-1/2 transform bg-transparent px-4 font-medium text-black"
+              onClick={handleApplyDiscount}
+              disabled={isApplyingDiscount}
+            >
+              {isApplyingDiscount ? (
+                <Spinner className="h-4 w-4" />
+              ) : (
+                t('checkout.apply')
+              )}
+            </button>
+          </div>
+        )}
+      />
+
+      {/* Subtotal */}
+      <div className="flex justify-between">
+        <div
+          className={`text-sm font-medium leading-5 ${
+            isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+          }`}
+        >
           {t('checkout.subtotal')}
         </div>
-        <div className="text-sm font-medium leading-5 text-gray-700">
+        <div
+          className={`text-sm font-medium leading-5 ${
+            isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+          }`}
+        >
           ${(service.price! * quantity)?.toFixed(2)}
         </div>
       </div>
+
+      {/* Descuento */}
       {discountAmount !== null && (
-        <div className="mb-[18px] flex justify-between text-green-600">
+        <div className="flex justify-between text-green-600">
           <div className="text-sm font-medium leading-5">
             {t('checkout.discount')}
           </div>
@@ -198,40 +229,68 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
           </div>
         </div>
       )}
-      <div className="mb-[18px] flex justify-between">
-        <div className="text-sm font-medium leading-5 text-gray-700">
+
+      {/* Total */}
+      <div className="flex justify-between">
+        <div
+          className={`text-sm font-bold leading-5 ${
+            isDarkBackground ? 'text-white' : 'text-gray-950'
+          }`}
+        >
           {t('checkout.total')} {`(${service.currency.toUpperCase()})`}
         </div>
-        <div className="text-sm font-medium leading-5 text-gray-700">
-          ${discountedTotal?.toFixed(2)}
+        <div
+          className={`text-sm font-bold leading-5 ${
+            isDarkBackground ? 'text-white' : 'text-gray-950'
+          }`}
+        >
+          ${(discountedTotal)?.toFixed(2)}
         </div>
       </div>
-      <div className="mb-[18px] text-sm font-medium leading-5 text-gray-700">
-        {t('checkout.accept_terms')}
-      </div>
-      {validSuccess ? (
-        <Button
-          type="button"
-          className="w-full transform bg-green-600 text-white transition duration-300 ease-in-out hover:scale-105"
-        >
-          <CheckCircle className="mr-2 h-4 w-4 text-white transition-opacity duration-300" />
-        </Button>
-      ) : (
-        <ThemedButton
-          type="submit"
-          disabled={loading}
-          className="w-full transform transition duration-300 ease-in-out hover:scale-105"
-        >
-          {t('checkout.subscribe')}
-          {loading && <Spinner className="ml-2 h-4 w-4" />}
-        </ThemedButton>
-      )}
+
+      {/* Botón de suscripción */}
       <div>
-        {errorMessage && (
-          <div className="text-sm font-medium leading-5 text-red-500">
-            {errorMessage}
-          </div>
+        {validSuccess ? (
+          <Button
+            type="button"
+            className="w-full transform bg-green-600 text-white transition duration-300 ease-in-out hover:scale-105"
+          >
+            <CheckCircle className="mr-2 h-4 w-4 text-white transition-opacity duration-300" />
+          </Button>
+        ) : (
+          <ThemedButton
+            type="submit"
+            disabled={loading}
+            className="w-full transform transition duration-300 ease-in-out hover:scale-105"
+            onClick={onSubmit}
+          >
+            {t('checkout.subscribe')}
+            {loading && <Spinner className="ml-2 h-4 w-4" />}
+          </ThemedButton>
         )}
+      </div>
+
+      {/* Mensaje de seguridad */}
+      <div className="flex items-start gap-3">
+        <SecurityIcon
+          className={`h-5 w-5 ${isDarkBackground ? 'invert filter' : 'text-black'}`}
+        />
+        <div>
+          <div
+            className={`text-sm font-medium ${
+              isDarkBackground ? 'text-white' : 'text-gray-900'
+            }`}
+          >
+            {t('checkout.secure_checkout')}
+          </div>
+        </div>
+      </div>
+      <div
+        className={`mt-3 items-start text-sm ${
+          isDarkBackground ? 'text-gray-400' : 'text-gray-600'
+        }`}
+      >
+        {t('checkout.secure_description')}
       </div>
     </div>
   );

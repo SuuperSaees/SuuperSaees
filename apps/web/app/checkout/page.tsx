@@ -38,17 +38,22 @@ async function ServiceCheckoutPage({
 
   return (
     <OrganizationSettingsProvider initialSettings={organizationSettings}>
-      <div className="mb-10 flex w-full flex-grow flex-col items-center">
-        <DetailsSide
-          service={
-            tokendecoded?.service as Service.Relationships.Billing.BillingService
-          }
-          stripeId={tokendecoded?.account_id ?? ''}
-          organizationId={tokendecoded?.organization_id ?? ''}
-          logoUrl={logoUrl ?? suuperLogo ?? ''}
-          sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
-          paymentMethods={tokendecoded?.payment_methods ?? []}
-        />
+      <div
+        className="flex min-h-screen w-full flex-grow flex-col items-center"
+        style={{ backgroundColor: sidebarBackgroundColor }}
+      >
+        <div className="flex w-full max-w-[1200px] flex-col pb-10 lg:flex-row">
+          <DetailsSide
+            service={
+              tokendecoded?.service as Service.Relationships.Billing.BillingService
+            }
+            stripeId={tokendecoded?.account_id ?? ''}
+            organizationId={tokendecoded?.organization_id ?? ''}
+            logoUrl={logoUrl ?? suuperLogo ?? ''}
+            sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
+            paymentMethods={tokendecoded?.payment_methods ?? []}
+          />
+        </div>
       </div>
     </OrganizationSettingsProvider>
   );

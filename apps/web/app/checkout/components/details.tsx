@@ -1,14 +1,12 @@
 'use client';
 
 import React from 'react';
-
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
-import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/select-plan/components/convertToSubcurrency';
-
+import { BillingAccounts } from '~/lib/billing-accounts.types';
 import BillingForm from './billing_form';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
@@ -34,12 +32,9 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
   sidebarBackgroundColor,
   paymentMethods,
 }) => {
-  const stripePromise = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? '',
-    {
-      stripeAccount: stripeId,
-    },
-  );
+  const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? '', {
+    stripeAccount: stripeId,
+  });
 
   return (
     <Elements
