@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { convertToTitleCase } from '~/orders/[id]/utils/format-agency-names';
 
 import { Button } from '@kit/ui/button';
-import { DataTable } from '@kit/ui/data-table';
+import { CustomConfigs, DataTable } from '@kit/ui/data-table';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Separator } from '@kit/ui/separator';
 
@@ -86,6 +86,7 @@ interface TableProps<T> {
     filterableColumns: (keyof T)[];
   };
   controllerBarComponents?: ControllerBarComponentsProps;
+  configs?: CustomConfigs
 }
 
 export default function Table<T>({
@@ -99,6 +100,7 @@ export default function Table<T>({
   className,
   presetFilters,
   controllerBarComponents,
+  configs
 }: TableProps<T>) {
   const [search, setSearch] = useState(controllers?.search?.value ?? '');
   const [filteredData, setFilteredData] = useState(data);
@@ -194,6 +196,7 @@ export default function Table<T>({
         className="rounded-xl bg-white"
         emptyStateComponent={emptyStateComponent}
         disableInteractions={disableInteractions}
+        configs={configs}
       />
     </div>
   );

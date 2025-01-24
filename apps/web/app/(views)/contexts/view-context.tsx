@@ -146,6 +146,7 @@ export const ViewProvider = <T extends ViewItem>({
           data={data}
           setData={setData}
           emptyState={initialConfigurations.table.emptyState}
+          configs={initialConfigurations.table.configs}
         >
           {children}
         </TableProvider>

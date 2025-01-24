@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation';
 import { handleResponse } from '~/lib/response/handle-response';
 import { copyToClipboard } from '~/utils/clipboard';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 function DeleteOrderDropdown({orderId, isPublic, tokenId}: {orderId: number, isPublic: boolean, tokenId?: string}) {
   const { t } = useTranslation(['orders', 'responses']);
@@ -35,13 +36,14 @@ function DeleteOrderDropdown({orderId, isPublic, tokenId}: {orderId: number, isP
   const router = useRouter()
 
   const handleCloseDialog = () => setShowDeleteDialog(false);
-
+  const queryClient = useQueryClient();
   async function handleDelete() {
     try {
       const res = await deleteOrderById(orderId);
       await handleResponse(res, 'orders', t);
       handleCloseDialog();
       router.push('/orders');
+      await queryClient.invalidateQueries({ queryKey: ['orders'] });
       router.refresh();
     } catch (error) {
       console.error('Error deleting the order:', error);

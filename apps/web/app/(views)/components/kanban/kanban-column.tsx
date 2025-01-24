@@ -27,7 +27,7 @@ const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
   return (
     <div
       key={column.key}
-      className="flex w-full min-w-72 max-w-72 flex-col gap-2 rounded-md p-4 max-h-full min-h-0 overflow-y-auto no-scrollbar"
+      className="flex w-full min-w-72 max-w-72 flex-col gap-2 rounded-md p-4 max-h-full min-h-0 "
       style={{
         backgroundColor: hexToRgba(column.color, 0.2),
       }}
@@ -66,7 +66,7 @@ const KanbanColumn = ({ column }: { column: KanbanColumnType }) => {
 
         <span className="text-sm font-semibold">{column.count.total}</span>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar max-h-full h-full">
         {column.items.map((item) => (
           <SortableItem
             key={item.id + column.id}
