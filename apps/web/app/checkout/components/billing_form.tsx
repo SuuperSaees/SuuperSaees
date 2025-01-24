@@ -301,7 +301,7 @@ const BillingForm: React.FC<{
     }
   };
 
-  const handleCreateCard = async (values: z.infer<typeof formSchema>) => {
+  const handleCreateCard = async () => {
     if (!stripe || !elements) {
       return;
     }
@@ -347,11 +347,11 @@ const BillingForm: React.FC<{
     const { success, error, accountAlreadyExists, data } =
       await handleSubmitPayment({
         service,
-        values,
+        values: form.getValues(),
         stripeId,
         organizationId,
         paymentMethodId: paymentMethod.id,
-        coupon: values.discount_coupon,
+        coupon: form.getValues('discount_coupon'),
         quantity: quantity,
         selectedPaymentMethod: selectedPaymentMethod,
         baseUrl,
@@ -380,11 +380,11 @@ const BillingForm: React.FC<{
     return paymentMethod;
   };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit() {
     setLoading(true);
     setValidSuccess(false);
     try {
-      await handleCreateCard(values)
+      await handleCreateCard()
     } catch (error) {
       setErrorMessage(
         error instanceof Error
