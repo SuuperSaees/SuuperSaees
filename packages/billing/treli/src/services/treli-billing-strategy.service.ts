@@ -21,7 +21,7 @@ import { getLogger } from '@kit/shared/logger';
 import { RetryOperationService } from '@kit/shared/utils';
 import { Database } from '@kit/supabase/database';
 
-import { CredentialsCrypto } from '../../../../../apps/web/app/utils/credentials-crypto';
+import { CredentialsCrypto, TreliCredentials } from '../../../../../apps/web/app/utils/credentials-crypto';
 
 /**
  * A class representing a mailer using the Suuper HTTP API.
@@ -519,11 +519,11 @@ export class TreliBillingStrategyService
 
         // Decrypt credentials
         const credentials =
-          this.credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+          this.credentialsCrypto.decrypt<TreliCredentials>(parsedCredentials);
 
         // Create Basic Auth token
         const authToken = Buffer.from(
-          `${credentials.username}:${credentials.password}`,
+          `${credentials.treli_user}:${credentials.treli_password}`,
         ).toString('base64');
 
         // Prepare subscription plans
@@ -657,11 +657,11 @@ export class TreliBillingStrategyService
 
         // Decrypt credentials
         const credentials =
-          this.credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+          this.credentialsCrypto.decrypt<TreliCredentials>(parsedCredentials);
 
         // Create Basic Auth token
         const authToken = Buffer.from(
-          `${credentials.username}:${credentials.password}`,
+          `${credentials.treli_user}:${credentials.treli_password}`,
         ).toString('base64');
 
         // list plans

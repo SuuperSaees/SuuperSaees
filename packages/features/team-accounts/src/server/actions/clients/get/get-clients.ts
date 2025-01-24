@@ -53,7 +53,7 @@ async function fetchClientMembers(
   client: SupabaseClient<Database>,
   currentUserOrganizationId: string,
   currentUserRole: string,
-  clientOrganizacionId: string,
+  clientOrganizationId: string,
   agencyRoles: string[],
   clientRoles: string[],
 ) {
@@ -63,8 +63,7 @@ async function fetchClientMembers(
     clientsQuery = client
       .from('clients')
       .select('user_client_id')
-      .eq('agency_id', currentUserOrganizationId)
-      .eq('organization_client_id', clientOrganizacionId)
+      .or(`agency_id.eq.${currentUserOrganizationId},organization_client_id.eq.${clientOrganizationId}`)
       .is('deleted_on', null);
   } else if (clientRoles.includes(currentUserRole)) {
     clientsQuery = client
@@ -76,6 +75,7 @@ async function fetchClientMembers(
     throw new Error('User role is neither agency nor client.');
   }
 
+  
   const { data: clientsData, error: clientsDataError } = await clientsQuery;
   if (clientsDataError) {
     throw new Error(`Error fetching client data: ${clientsDataError.message}`);
@@ -88,6 +88,7 @@ async function fetchClientMembers(
     .select(
       'id, email, picture_url, name, organization_id, primary_owner_user_id, created_at, is_personal_account, settings:user_settings!user_id(name, picture_url)',
     )
+    .eq('is_personal_account', true)
     .in('id', clientsIds);
 
     // Get the roles

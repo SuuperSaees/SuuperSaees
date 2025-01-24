@@ -22,7 +22,7 @@ import { ThemedInput } from "../../ui/input-themed-with-settings";
 import { Spinner } from "@kit/ui/spinner";
 import { toast } from "sonner";
 import { BillingAccounts } from "../../../../../../../apps/web/lib/billing-accounts.types";
-import { CredentialsCrypto, EncryptedCredentials, Credentials } from "../../../../../../../apps/web/app/utils/credentials-crypto";
+import { CredentialsCrypto, EncryptedCredentials, TreliCredentials } from "../../../../../../../apps/web/app/utils/credentials-crypto";
 const formSchema = z.object({
 username: z.string().min(2, {
   message: "Username must be at least 2 characters.",
@@ -86,18 +86,18 @@ useEffect(() => {
           const parsedCredentials: EncryptedCredentials = JSON.parse(
             treliAccount.credentials as string,
           );
-          const decryptedCredentials = credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+          const decryptedCredentials = credentialsCrypto.decrypt<TreliCredentials>(parsedCredentials);
           setExistingAccount({
             id: treliAccount.id,
             provider: treliAccount.provider,
-            username: decryptedCredentials.username,
+            username: decryptedCredentials.treli_user,
             credentials: {
-              username: decryptedCredentials.username,
-              password: decryptedCredentials.password,
+              username: decryptedCredentials.treli_user,
+              password: decryptedCredentials.treli_password,
             },
           });
-          form.setValue('username', decryptedCredentials.username);
-          form.setValue('password', decryptedCredentials.password);
+          form.setValue('username', decryptedCredentials.treli_user);
+          form.setValue('password', decryptedCredentials.treli_password);
         }
       }
     } catch (error) {
