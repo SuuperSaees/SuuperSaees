@@ -22,6 +22,7 @@ import { updateAccountPlugin } from '../../services/account-plugin-service';
  * Utilizes Supabase for database interactions and manages responses using CustomResponse and CustomError.
  * @param {string} id - The ID of the account_plugin to update.
  * @param {Partial<AccountPluginInsert>} updates - The fields to update in the account_plugin.
+ * @param {string} [provider_id] - Optional provider_id sent by the client or generated.
  * @returns {Promise<Object>} A standardized response indicating success or failure.
  */
 export const updateAccountPluginAction = async (
@@ -30,6 +31,7 @@ export const updateAccountPluginAction = async (
     provider?: string;
     account_id?: string;
   },
+  provider_id?: string,
 ) => {
   try {
     if (
@@ -46,7 +48,10 @@ export const updateAccountPluginAction = async (
     const client =
       getSupabaseServerActionClient() as unknown as SupabaseClient<Database>;
 
-    const updatedAccountPlugin = await updateAccountPlugin(client, id, updates);
+    const updatedAccountPlugin = await updateAccountPlugin(client, id, {
+      ...updates,
+      provider_id,
+    });
 
     revalidatePath('/apps');
 

@@ -1,0 +1,43 @@
+{
+  "kanban": {
+    "columns": {
+      "negations": {
+        "noProperty": "Sin {{property}}",
+        "no": "Sin",
+        "assignees": "Asignados",
+        "status": "Estado",
+        "priority": "Prioridad",
+        "assigned_to": "Asignados",
+        "title": "Título",
+        "date": "Fecha"
+      },
+      "color": "Columnas de color"
+    },
+    "group": {
+      "title": "Agrupar",
+      "groupBy": "Agrupar por",
+      "visible": "Grupos visibles",
+      "hidden": "Grupos ocultos"
+    },
+    "properties": {
+      "title": "Propiedades",
+      "visibility": {
+        "visible": "Propiedades visibles",
+        "hidden": "Propiedades ocultas"
+      },
+      "visible": "Visible: {{visibles}}"
+    },
+    "filters": {
+      "title": "Filtros",
+      "none": "Ninguno"
+    },
+    "sort": {
+      "title": "Ordenar",
+      "none": "Sin ordenar"
+    },
+    "common": {
+      "showAll": "Mostrar todo",
+      "hideAll": "Ocultar todo"
+    }
+  }
+}

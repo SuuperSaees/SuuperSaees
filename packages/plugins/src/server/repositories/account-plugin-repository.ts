@@ -37,6 +37,7 @@ export class AccountPluginRepository {
         .upsert(
           {
             ...accountPlugin,
+            provider_id: accountPlugin.provider_id ?? null,
             deleted_on: null,
           } as Required<AccountPluginInsert>,
           {
@@ -72,7 +73,8 @@ export class AccountPluginRepository {
           .upsert(
             {
               ...billingAccount,
-            },
+              provider_id: billingAccount.provider_id ?? null,
+            } as unknown as { provider_id: string },
             { onConflict: 'account_id,provider' },
           );
 
@@ -189,7 +191,10 @@ export class AccountPluginRepository {
     try {
       const { data: pluginData, error: pluginError } = await this.client
         .from(this.tableName)
-        .update(updates)
+        .update({
+          ...updates,
+          provider_id: updates.provider_id ?? undefined,
+        })
         .eq('id', id)
         .is('deleted_on', null)
         .select(
@@ -221,17 +226,22 @@ export class AccountPluginRepository {
 
       const { error: billingError } = await this.client
         .from('billing_accounts')
-        .update({
-          credentials: billingUpdates.credentials,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('account_id', billingUpdates.account_id)
-        .eq('provider', billingUpdates.provider as string)
-        .is('deleted_on', null);
+        .upsert(
+          {
+            account_id: billingUpdates.account_id,
+            provider: billingUpdates.provider,
+            credentials: billingUpdates.credentials ?? null,
+            updated_at: billingUpdates.updated_at ?? new Date().toISOString(),
+            provider_id: billingUpdates.provider_id ?? undefined,
+          },
+          {
+            onConflict: 'account_id,provider',
+          },
+        );
 
       if (billingError) {
         throw new Error(
-          `[REPOSITORY] Error updating billing account: ${billingError.message}`,
+          `[REPOSITORY] Error upserting billing account: ${billingError.message}`,
         );
       }
 
@@ -258,7 +268,10 @@ export class AccountPluginRepository {
     try {
       const { data: pluginData, error: pluginError } = await this.client
         .from(this.tableName)
-        .update(updates)
+        .update({
+          ...updates,
+          provider_id: updates.provider_id ?? undefined,
+        })
         .eq('id', id)
         .is('deleted_on', null)
         .select(
@@ -364,6 +377,75 @@ export class AccountPluginRepository {
     } catch (error) {
       throw new Error(
         `[REPOSITORY] Error in delete method: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * @name getProviderId
+   * @description Busca el provider_id en las tablas account_plugins y billing_accounts según los parámetros dados.
+   * @param {string} id - ID del account_plugin para buscar en la tabla account_plugins.
+   * @param {string} [provider] - Nombre del proveedor para buscar en la tabla billing_accounts.
+   * @param {string} [account_id] - ID de la cuenta para buscar en billing_accounts.
+   * @returns {Promise<string | null>} - El provider_id encontrado o null si no existe.
+   * @throws {Error} - Si ocurre un error durante la búsqueda.
+   */
+  async getProviderId(
+    id: string,
+    provider?: string,
+    account_id?: string,
+  ): Promise<string | null> {
+    try {
+      const { data: accountPlugin, error: accountError } = await this.client
+        .from('account_plugins')
+        .select('provider_id')
+        .eq('id', id)
+        .is('deleted_on', null)
+        .single();
+
+      if (accountError) {
+        throw new Error(
+          `[REPOSITORY] Error fetching provider_id from account_plugins: ${accountError.message}`,
+        );
+      }
+      console.log("desde busqueda", accountPlugin);
+      if (accountPlugin?.provider_id) {
+        return accountPlugin.provider_id;
+      }
+
+      if (provider === 'loom') {
+        console.log("LOOM", account_id);
+        return null;
+      }
+
+      if (!provider || !account_id) {
+        throw new Error(
+          `[REPOSITORY] Missing required parameters: provider or account_id.`,
+        );
+      }
+
+      const { data: billingAccount, error: billingError } = await this.client
+        .from('billing_accounts')
+        .select('provider_id')
+        .eq('account_id', account_id)
+        .eq('provider', provider)
+        .is('deleted_on', null)
+        .single();
+
+      if (billingError) {
+        throw new Error(
+          `[REPOSITORY] Error fetching provider_id from billing_accounts: ${billingError.message}`,
+        );
+      }
+
+      if (billingAccount?.provider_id) {
+        return billingAccount.provider_id;
+      }
+
+      return null;
+    } catch (error) {
+      throw new Error(
+        `[REPOSITORY] Error in getProviderId method: ${(error as Error).message}`,
       );
     }
   }

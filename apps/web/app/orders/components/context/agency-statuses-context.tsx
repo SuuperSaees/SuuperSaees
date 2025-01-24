@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, useMemo, useEffect } 
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 import { Tags } from '~/lib/tags.types';
+import { User } from '~/lib/user.types';
 
 interface AgencyStatusesContextType {
   statuses: AgencyStatus.Type[];
@@ -11,15 +12,17 @@ interface AgencyStatusesContextType {
   updateStatuses: (updatedStatus: AgencyStatus.Type) => void;
   tags: Tags.Type[];
   setTags: (tags: Tags.Type[]) => void;
+  agencyMembers?: User.Response[];
 }
 
 const AgencyStatusesContext = createContext<AgencyStatusesContextType | undefined>(undefined);
 
-export function AgencyStatusesProvider({ children, initialStatuses, initialTags, agencyId }: { 
+export function AgencyStatusesProvider({ children, initialStatuses, initialTags, agencyId, agencyMembers }: { 
     children: React.ReactNode;
     initialStatuses?: AgencyStatus.Type[];
     initialTags?: Tags.Type[];
     agencyId?: string;
+    agencyMembers?: User.Response[];
   }) {
     const [statuses, setStatuses] = useState<AgencyStatus.Type[]>(initialStatuses ?? []);
     const [tags, setTags] = useState<Tags.Type[]>(initialTags ?? []);
@@ -36,11 +39,12 @@ export function AgencyStatusesProvider({ children, initialStatuses, initialTags,
   
     const value = useMemo(() => ({
       statuses,
+      agencyMembers,
+      tags,
+      setTags,
       setStatuses,
       updateStatuses,
-      tags,
-      setTags
-    }), [statuses, updateStatuses, tags, setTags]);
+    }), [statuses, updateStatuses, tags, setTags, agencyMembers]);
     
     const { data: fetchedStatuses } = useQuery({
         queryKey: ['agencyStatuses'],

@@ -384,9 +384,7 @@ const BillingForm: React.FC<{
     setLoading(true);
     setValidSuccess(false);
     try {
-      const paymentMethod = (await handleCreateCard(values)) ?? {
-        id: 'none',
-      };
+      await handleCreateCard(values)
     } catch (error) {
       setErrorMessage(
         error instanceof Error
