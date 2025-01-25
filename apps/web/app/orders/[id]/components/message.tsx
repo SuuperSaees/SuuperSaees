@@ -25,57 +25,71 @@ interface ChatMessageProps {
 const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
   const { userRole, deleteMessage, allFiles } = useActivityContext();
   const { user: currentUser } = useUserWorkspace();
-  const date = format(new Date(message.created_at), 'MMM dd, p');
-  const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation('orders');
-  // Ensure content is a string
+  const [isOpen, setIsOpen] = useState(false);
+
+  const date = format(new Date(message.created_at), 'MMM dd, p');
   const content = message.content ?? '';
+  
+  const isClientGuest = message.user?.name?.toLowerCase().includes('guest') &&
+    message.user?.email?.toLowerCase().includes('guest') &&
+    message.user?.email?.toLowerCase().includes('@suuper.co');
+
+  const displayName = isClientGuest 
+    ? `${t('guest')} ${message.user?.settings?.name?.split(' ')[1] ?? message.user?.name?.split(' ')[1]}`
+    : message.user?.settings?.name ?? message.user?.name;
+
+  const isInternalMessage = ["agency_owner", "agency_member", "agency_project_manager"].includes(userRole) && 
+    message.visibility === "internal_agency";
 
   const handleDeleteMessage = async () => {
     await deleteMessage(message.id);
     setIsOpen(false);
-  }
-
-  const isClientGuest = message?.user?.name?.toLowerCase().includes('guest') &&
-  message?.user?.email?.toLowerCase().includes('guest') &&
-  message?.user?.email?.toLowerCase().includes('@suuper.co');
+  };
 
   return (
-    <div className={`flex flex-col gap-2 w-full p-0 max-w-full min-w-0`}>
+    <div className="flex flex-col gap-2 w-full p-0 max-w-full min-w-0">
       <div className="flex justify-between w-full">
-      <div className="flex gap-2">
-      <span className="font-semibold">{isClientGuest ? `${t('guest')} ${(message.user?.settings?.name ?? message?.user?.name)?.split(' ')[1]}` : message.user?.settings?.name ?? message?.user?.name}</span> 
-      {
-        message?.pending &&
-      <ClockIcon className="h-3 w-3 text-muted-foreground self-center" />
-      }
-      { ["agency_owner", "agency_member", "agency_project_manager"].includes(userRole) && message.visibility === "internal_agency" &&
-        <span className="text-gray-400 text-sm flex items-center gap-1">
-          {' '} <KeyIcon className="w-4 h-4" /> {t('internalMessage')}
-        </span>
-        }
-      </div>
         <div className="flex gap-2">
-          <small className="">{`${date}`}</small>
-          <div className='w-4 h-4'>{isHovered && currentUser?.id === message.user_id && <Trash2 className="w-4 h-4 hover:text-red-500 transition duration-300 cursor-pointer text-gray-600" onClick={() => setIsOpen(true)} />}</div>
+          <span className="font-semibold">{displayName}</span>
+          {message?.pending && (
+            <ClockIcon className="h-3 w-3 text-muted-foreground self-center" />
+          )}
+          {isInternalMessage && (
+            <span className="text-gray-400 text-sm flex items-center gap-1">
+              <KeyIcon className="w-4 h-4" /> {t('internalMessage')}
+            </span>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <small>{date}</small>
+          <div className="w-4 h-4">
+            {isHovered && currentUser?.id === message.user_id && (
+              <Trash2 
+                className="w-4 h-4 hover:text-red-500 transition duration-300 cursor-pointer text-gray-600" 
+                onClick={() => setIsOpen(true)} 
+              />
+            )}
+          </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg rounded-ss-none w-full bg-slate-0 overflow-hidden leading-relaxed">
         <div className={`flex flex-col gap-2 text-sm break-words rounded-lg whitespace-normal ${
-          message.visibility === "internal_agency" ? "p-3 bg-yellow-50" : "bg-transparent"
+          isInternalMessage ? "p-3 bg-yellow-50" : "bg-transparent"
         }`}>
           <div dangerouslySetInnerHTML={{ __html: content }} />
           {message.files && message.files.length > 0 && (
-            <div className="flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
+            <div className="flex max-w-full gap-4 overflow-x-auto scrollbar-custom">
               {message.files.map((file) => (
-                <UserFile key={file.id} file={file} files={allFiles}/>
+                <UserFile key={file.id} file={file} files={allFiles} />
               ))}
             </div>
           )}
         </div>
-        <AlertDialog open={isOpen} onOpenChange={setIsOpen} contentClassName="w-[400px]">
-          <AlertDialogContent>
+
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+          <AlertDialogContent className="w-[400px]">
             <AlertDialogHeader >
               <div className="flex justify-between">
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-error-100">
@@ -96,8 +110,10 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+      </div>
     </div>
   );
 };
 
 export default ChatMessage;
+
