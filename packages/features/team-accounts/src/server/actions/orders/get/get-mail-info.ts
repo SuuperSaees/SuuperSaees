@@ -16,15 +16,25 @@ export async function getEmails(orderId: string) {
 
     if (assignationsError) throw assignationsError;
 
-    const agencyMemberIds = assignationsData.map(assignation => assignation.agency_member_id);
+    const { data: followersData, error: followersError } = await client
+      .from('order_followers')
+      .select('client_member_id')
+      .eq('order_id', orderId);
 
-    if (agencyMemberIds.length === 0) return []; // Si no hay asignaciones, retorna un arreglo vacío
+    if (followersError) throw followersError;
+
+    const agencyMemberIds = assignationsData.map(assignation => assignation.agency_member_id);
+    const clientMemberIds = followersData.map(follower => follower.client_member_id);
+
+    if (agencyMemberIds.length === 0 && clientMemberIds.length === 0) return []; // Si no hay asignaciones, retorna un arreglo vacío
+
+    const memberIds = [...agencyMemberIds, ...clientMemberIds];
 
     // Consulta para obtener los correos electrónicos de los miembros de la agencia
     const { data: emailData, error: emailError } = await client
       .from('accounts')
       .select('email')
-      .in('id', agencyMemberIds);
+      .in('id', memberIds);
 
       if (emailError) throw emailError;
 
