@@ -46,7 +46,7 @@ export async function sendOrderStatusPriorityEmail(
   });
 
   const { fromSenderIdentity, logoUrl, themeColor, buttonTextColor } = await getFormSendIdentity(
-    organizationId,
+    organizationId ?? '',
     t('at'),
   );
 
