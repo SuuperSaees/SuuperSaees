@@ -115,11 +115,11 @@ function ProfileSettings({
     <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 text-sm lg:flex-nowrap'>
       <div className="flex w-full flex-col space-y-6">
         <div className="flex justify-between">
-          <div className="mr-24 flex flex-col whitespace-nowrap text-gray-700">
+          <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
             <p className="font-bold">{t('accountImage')}</p>
             <p>{t('accountImageDescription')}</p>
           </div>
-          <div className="w-full">
+          <div className="w-[100%]">
             <UpdateImage
               bucketStorage={bucketStorage}
               defaultImageURL={

@@ -109,7 +109,7 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
                             </div>
                         
                     </Card>
-                    <Card className="w-[619px] h-[225px] p-[24px] flex flex-col">
+                    <Card className="w-[75%] h-[225px] p-[24px] flex flex-col">
                     
                         <div className="text-gray-900 font-inter text-lg font-semibold leading-7">{t('total.title')}</div>
                         <div className="text-gray-900 font-inter text-5xl font-semibold leading-[60px] tracking-[-0.96px] mb-[24px]">{calculateTotalAmountPaid(upcomingInvoice?.total ?? 0)} US$</div>

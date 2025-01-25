@@ -51,7 +51,7 @@ function SiteSettings({
       {role === 'agency_owner' && (
         <div className="flex w-full flex-col space-y-6">
           <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 <Trans i18nKey={'accounts:brandName'} />
               </p>
@@ -67,39 +67,37 @@ function SiteSettings({
             <LanguageSelector onChange={handleChangeLanguage} />
           </div>
           <Separator />
-          <div className="flex gap-20">
-            <div className="mr-7 flex w-[30%] flex-col whitespace-nowrap text-gray-700">
+          <div className="flex justify-between">
+            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                {' '}
                 <Trans i18nKey={'accounts:brandColor'} />
               </p>
             </div>
-            <div className='flex w-full flex-col gap-2'>
+            <div className="w-[100%]">
               <UpdateAccountColorBrand />
             </div>
           </div>
-          <div className="flex gap-20">
-            <div className="mr-7 flex w-[30%] flex-col whitespace-nowrap text-gray-700">
+          <div className="flex justify-between">
+            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 <Trans i18nKey={'accounts:brandSidebar'} />
               </p>
             </div>
-            <div className='flex w-full flex-col gap-2'>
+            <div className="w-[100%]">
               <UpdateAccountOrganizationSidebar />
             </div>
           </div>
           <Separator />
-          <div className="flex gap-20">
-            <div className="mr-7 flex w-[30%] flex-col whitespace-nowrap text-gray-700">
+          <div className="flex justify-between">
+            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                {' '}
                 <Trans i18nKey={'accounts:brandLogo'} />
               </p>
-              <p className="text-wrap">
+              <p className="text-wrap max-w-[300px]">
                 <Trans i18nKey={'accounts:brandLogoDescription'} />
               </p>
             </div>
-            <div className="flex w-full flex-col gap-2">
+            <div className="w-[100%] flex flex-col gap-2">
               <p className="font-bold text-gray-700">
                 <Trans i18nKey={'accounts:lightVersion'} />
               </p>
@@ -121,9 +119,9 @@ function SiteSettings({
             </div>
           </div>
 
-          <div className="flex gap-20">
-            <div className="mr-7 flex w-[30%] flex-col whitespace-nowrap text-gray-700"></div>
-            <div className="flex w-full flex-col gap-2">
+          <div className="flex justify-between">
+            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700"></div>
+            <div className="w-[100%] flex flex-col gap-2">
               <p className="font-bold text-gray-700">
                 <Trans i18nKey={'accounts:darkVersion'} />
               </p>
@@ -145,16 +143,16 @@ function SiteSettings({
             </div>
           </div>
           <Separator />
-          <div className="flex gap-20">
-            <div className="mr-7 flex w-[30%] flex-col whitespace-nowrap text-gray-700">
+          <div className="flex justify-between">
+            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 <Trans i18nKey={'accounts:brandFavicon'} />
               </p>
-              <p className="text-wrap">
+              <p className="text-wrap max-w-[300px]">
                 <Trans i18nKey={'accounts:brandFaviconDescription'} />
               </p>
             </div>
-            <div className="w-full">
+            <div className="w-[100%] flex flex-col">
               <UpdateImage
                 bucketStorage={{
                   ...bucketStorage,
@@ -178,7 +176,7 @@ function SiteSettings({
                 {' '}
                 <Trans i18nKey={'accounts:loomAppIdTitle'} />
               </p>
-              <p className="text-wrap">
+              <p className="text-wrap max-w-[300px]">
                 {' '}
                 <Trans i18nKey={'accounts:loomAppIdDescription'} />
               </p>
@@ -206,7 +204,7 @@ function SiteSettings({
             </div>
             <UpdateAccountOrganizationSenderEmailAndSenderDomain />
           </div>
-          <Separator />
+          {/* <Separator />
           <div className="flex justify-between">
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
@@ -235,7 +233,7 @@ function SiteSettings({
                 </Link>
               </ThemedButton>
             )}
-          </div>
+          </div> 
           <Separator />
           <div className="flex justify-between items-center">
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
@@ -247,7 +245,7 @@ function SiteSettings({
               </p>
             </div>
             {user && <TreliDialog userId={user?.id} />}
-          </div>
+          </div>*/}
         </div>
       )}
     </div>
@@ -255,3 +253,4 @@ function SiteSettings({
 }
 
 export default SiteSettings;
+
