@@ -62,15 +62,18 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg rounded-ss-none w-full bg-slate-0 overflow-hidden leading-relaxed">
-        <div className={`text-sm break-words rounded-r-md rounded-b-md whitespace-normal ${message.visibility === "internal_agency" ? "p-3 rounded bg-yellow-50 rounded-lg" : "bg-transparent"}`} dangerouslySetInnerHTML={{ __html: content }} />
-        {message.files && message.files.length > 0 && (
-          <div className="pl-4 flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
-            {message.files.map((file) => (
-              <UserFile key={file.id} file={file} files={allFiles}/>
-            ))}
-          </div>
-        )}
-      </div>
+        <div className={`flex flex-col gap-2 text-sm break-words rounded-lg whitespace-normal ${
+          message.visibility === "internal_agency" ? "p-3 bg-yellow-50" : "bg-transparent"
+        }`}>
+          <div dangerouslySetInnerHTML={{ __html: content }} />
+          {message.files && message.files.length > 0 && (
+            <div className="flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
+              {message.files.map((file) => (
+                <UserFile key={file.id} file={file} files={allFiles}/>
+              ))}
+            </div>
+          )}
+        </div>
         <AlertDialog open={isOpen} onOpenChange={setIsOpen} contentClassName="w-[400px]">
           <AlertDialogContent>
             <AlertDialogHeader >
