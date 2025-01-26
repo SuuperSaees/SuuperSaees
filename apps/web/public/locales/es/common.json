@@ -82,7 +82,8 @@
   "clear": "Eliminar",
   "pagination": {
     "next": "Siguiente",
-    "previous": "Anterior"
+    "previous": "Anterior",
+    "search": "Buscar..."
   },
   "timer": {
     "pauseTimer": "Pausar temporizador",

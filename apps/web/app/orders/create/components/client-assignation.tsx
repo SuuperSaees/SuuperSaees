@@ -130,8 +130,8 @@ export default function ClientAssignation() {
   );
 
   return (
-    <div className="flex flex-col gap-4 border-t border-gray-100 py-2">
-      <h3 className="text-xl font-semibold">
+    <div className="flex flex-col border-t border-gray-100 py-2">
+      <h3 className="text-[16px] font-semibold">
         {t('form.completion.client.title')}
       </h3>
       <div>
@@ -154,18 +154,18 @@ export default function ClientAssignation() {
             clientsOrganizationsQuery.isPending
           }
         >
-          <span className="text-sm text-gray-700">
+          <span className="text-sm">
             {t('form.completion.client.label')}
-            <span className="text-[#7F56D9]"> *</span>{' '}
+            <span className="text-red"> *</span>{' '}
             {/* Change text-red-500 to any desired color */}
           </span>
         </SelectAction>
       </div>
       {selectedOrganization && (
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="text-sm font-semibold">
             {t('form.completion.client.members.label')}
-            <span className="text-[#7F56D9]"> *</span>{' '}
+            <span className="text-red"> *</span>{' '}
             {/* Change text-red-500 to any desired color */}
           </span>
 

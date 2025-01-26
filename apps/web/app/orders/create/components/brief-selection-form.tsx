@@ -2,6 +2,7 @@
 
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 
 // import { Button } from '@kit/ui/button';
 import {
@@ -31,6 +32,17 @@ export default function BriefSelectionForm({
   const { form, nextStep, isStepValid } = useMultiStepFormContext();
   const selectedBriefId = form.watch('briefSelection.selectedBriefId');
   const { t } = useTranslation(['orders', 'common']);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filtrar briefs basado en el término de búsqueda (nombre, descripción o servicios)
+  const filteredBriefs = briefs.filter((brief) =>
+    brief.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    brief.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    brief.services?.some((service) => 
+      service.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
   // Function to handle selection toggle
   const handleBriefSelection = (id: string) => {
     form.setValue('briefSelection.selectedBriefId', id);
@@ -38,7 +50,31 @@ export default function BriefSelectionForm({
 
   return (
     <Form {...form}>
-      <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
+      <div className="flex h-full max-h-full  flex-col gap-8">
+        <div className="flex w-full p-2 px-3 items-center gap-2 self-stretch rounded-lg border border-[#E4E7EC] bg-[rgba(255,255,255,0.8)]">
+          <svg
+            className="h-5 w-5 text-gray-400 mr-[8px]"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="text"
+            placeholder={t('pagination.search')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full outline-none focus:outline-none focus:ring-0"
+          />
+        </div>
+        
         <div className="no-scrollbar h-full overflow-y-auto thin-scrollbar">
           <FormField
             control={form.control}
@@ -46,21 +82,18 @@ export default function BriefSelectionForm({
             render={() => (
               <FormItem>
                 <FormControl>
-                  <div className="flex h-full max-h-full w-full flex-wrap gap-8">
-                    {briefs?.map((brief) => (
+                  <div className="flex h-full gap-x-[24px] gap-y-[24px] flex-wrap">
+                    {filteredBriefs?.map((brief) => (
                       <div
                         key={brief.id}
-                        className="relative cursor-pointer"
+                        className=""
                         onClick={() => handleBriefSelection(brief.id)}
                       >
-                        {/* Render icon based on selection */}
-                        {selectedBriefId === brief.id ? (
-                          <CheckboxRoundedFilled className="absolute right-4 top-4 z-10 h-5 w-5" />
-                        ) : (
-                          <CheckboxRounded className="absolute right-4 top-4 z-10 h-5 w-5" />
-                        )}
-
-                        <BriefCard brief={brief} />
+                        <BriefCard 
+                          brief={brief} 
+                          selected={selectedBriefId === brief.id}
+                          SelectIcon={selectedBriefId === brief.id ? CheckboxRoundedFilled : CheckboxRounded}
+                        />
                       </div>
                     ))}
                   </div>
@@ -87,3 +120,4 @@ export default function BriefSelectionForm({
     </Form>
   );
 }
+
