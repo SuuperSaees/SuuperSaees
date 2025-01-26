@@ -28,7 +28,7 @@ async function CreateOrderPage() {
       <div className="mb-[32px] flex w-full items-center justify-between">
         <h2
           className={
-            'font-inter text-[30px] font-semibold leading-8 text-gray-900'
+            'font-inter text-[20px] font-semibold leading-8 text-gray-900'
           }
         >
           <Trans i18nKey={'orders:creation.title'} />

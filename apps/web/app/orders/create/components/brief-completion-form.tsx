@@ -73,7 +73,7 @@ export default function BriefCompletionForm({
     <Form {...form}>
       <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
         <div className="no-scrollbar flex h-full flex-wrap gap-16 overflow-y-auto lg:flex-nowrap">
-          <div className="flex w-full max-w-full shrink-0 flex-col gap-16 lg:max-w-xs">
+          <div className="flex w-full max-w-full shrink-0 flex-col gap-16 lg:max-w-xs justify-between items-start">
             <BriefCard brief={brief} />
             {(userRole === 'agency_owner' ||
               userRole === 'agency_project_manager') && <ClientAssignation />}
@@ -86,7 +86,6 @@ export default function BriefCompletionForm({
                   name="briefCompletion.title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('creation.form.titleLabel')}</FormLabel>
                       <FormControl>
                         <ThemedInput
                           {...field}
@@ -102,9 +101,7 @@ export default function BriefCompletionForm({
                   name="briefCompletion.description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        {t('creation.form.descriptionLabel')}
-                      </FormLabel>
+
                       <FormControl>
                         <ThemedTextarea
                           {...field}

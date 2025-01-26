@@ -85,7 +85,8 @@
   "clear": "Clear",
   "pagination": {
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "search": "Search..."
   },
   "timer": {
     "pauseTimer": "Pause timer",

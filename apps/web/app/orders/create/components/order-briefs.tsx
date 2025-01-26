@@ -144,7 +144,7 @@ export const OrderBriefs = ({
 
         return (
           <div key={brief?.id} className="flex flex-col gap-4">
-            <h3 className="text-lg font-bold">{brief?.name}</h3>
+            
             <div className="flex flex-col gap-8">
               {brief?.form_fields
                 ?.sort(
