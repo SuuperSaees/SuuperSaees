@@ -5,17 +5,16 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+import { useTranslation } from 'react-i18next';
+
 import { getAccountPluginByIdAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
 
-function StripeContent({
-  pluginId,
-}: {
-  pluginId: string;
-  userId: string;
-}) {
+function StripeContent({ pluginId }: { pluginId: string; userId: string }) {
   const router = useRouter();
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const { t } = useTranslation('plugins');
 
   useEffect(() => {
     if (!pluginId) return;
@@ -25,11 +24,9 @@ function StripeContent({
         setIsLoading(true);
 
         const response = await getAccountPluginByIdAction(pluginId);
-        console.log("RESPUESTAAAAA", response);
 
         if (response?.success) {
           const providerId = response.success.data?.provider_id;
-          console.log("RESPONESSSSSSSSS", providerId);
 
           setIsConnected(!!providerId);
         } else {
@@ -67,7 +64,7 @@ function StripeContent({
         className="text-sm font-medium text-blue-600 hover:underline"
         disabled={isLoading}
       >
-        {isLoading ? 'Loading...' : isConnected ? 'Reconnect' : 'Connect'}
+        {isLoading ? t('loading') : isConnected ? t('reconnect') : t('connect')}
       </button>
     </div>
   );
