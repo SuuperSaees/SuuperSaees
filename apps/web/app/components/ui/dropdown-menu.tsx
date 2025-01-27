@@ -328,6 +328,10 @@ export function CustomDropdownMenu({
     })
   }, [items])
 
+  useEffect(() => {
+    setItems(initialItems)
+  }, [initialItems])
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
