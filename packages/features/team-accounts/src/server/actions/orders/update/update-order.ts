@@ -319,7 +319,7 @@ const handleFieldUpdate = async (
 
   for (const email of emailsData) {
     if (email) {
-      sendOrderStatusPriorityEmail(
+      sendOrderStatusPriorityEmail( 
         email,
         `${actualName?.name ?? ''}`,
         `${type}`,

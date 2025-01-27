@@ -41,6 +41,7 @@ interface ActivityAssignationProps {
     label: string;
   }[];
   canAddAssignes: boolean;
+  isLoading?: boolean
 }
 
 const ActivityAssignations = ({
@@ -48,6 +49,7 @@ const ActivityAssignations = ({
   updateFunction,
   searchUserOptions,
   canAddAssignes = false,
+  isLoading = false
 }: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
 
@@ -96,6 +98,7 @@ const ActivityAssignations = ({
             schema={membersAssignedSchema}
             defaultValues={defaultValues}
             customItem={CustomUserItem}
+            isLoading={isLoading}
         />
         )}
       </div>

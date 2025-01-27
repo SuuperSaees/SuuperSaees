@@ -192,24 +192,23 @@ const AsideOrderInformation = ({
     },
   });
 
-  const { data: orderAgencyMembers } = useQuery({
+  const { data: orderAgencyMembers, isLoading: isLoadingAssignees } = useQuery({
     queryKey: ['order-agency-members', order.id],
     queryFn: () => getOrderAgencyMembers(order.agency_id, order.id),
     retry: 5,
     enabled:
       userRole === 'agency_owner' ||
-      userRole === 'agency_member' ||
       userRole === 'agency_project_manager',
   });
 
-  const { data: orderAgencyClientsFollowers } = useQuery({
+  const { data: orderAgencyClientsFollowers, isLoading: isLoadingFollowers } = useQuery({
     queryKey: ['order-agency-clients-followers', order.id],
     queryFn: () => getClientMembersForOrganization(order.client_organization_id),
     retry: 5,
     enabled:
       userRole === 'agency_owner' ||
-      userRole === 'agency_member' ||
-      userRole === 'agency_project_manager',
+      userRole === 'agency_project_manager' ||
+      userRole === 'client_owner' 
   });
 
 
@@ -339,14 +338,20 @@ const AsideOrderInformation = ({
               assignedTo={order.assigned_to}
               updateFunction={changeAgencyMembersAssigned.mutate}
               canAddAssignes={canAddAssignes}
+              isLoading={isLoadingAssignees}
             />
             </div>
             <div>
             <ActivityFollowers
-              searchUserOptions={searchUserOptionsFollowers}
+              searchUserOptions={
+                order.client_organization_id === order.agency_id
+                  ? searchUserOptions
+                  : searchUserOptionsFollowers
+              }
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
               canAddFollowers={canAddFollowers}
+              isLoading={isLoadingFollowers}
             />
             </div>
             <div>
@@ -408,16 +413,22 @@ const AsideOrderInformation = ({
               assignedTo={order.assigned_to}
               updateFunction={changeAgencyMembersAssigned.mutate}
               canAddAssignes={canAddAssignes}
+              isLoading={isLoadingAssignees}
             />
             </div>
   
            
             <div className='mb-4 flex items-center'>
             <ActivityFollowers
-              searchUserOptions={searchUserOptionsFollowers}
+              searchUserOptions={
+                order.client_organization_id === order.agency_id
+                  ? searchUserOptions
+                  : searchUserOptionsFollowers
+              }
               followers={order.followers}
               updateFunction={changeAgencyMembersFollowers.mutate}
               canAddFollowers={canAddFollowers}
+              isLoading={isLoadingFollowers}
             />
             </div>
           </div>

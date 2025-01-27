@@ -11,6 +11,7 @@ import { Separator } from '@kit/ui/separator';
 import { getUrlFile } from '~/team-accounts/src/server/actions/files/get/get-files';
 import { insertOrderFiles } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { getEmails } from '~/team-accounts/src/server/actions/orders/get/get-mail-info';
 
 const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: string, agencyStatuses: AgencyStatus.Type[], activeTab: string }) => {
   const { order } = useActivityContext();
@@ -43,6 +44,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: s
 
   const handleOnCompleteMessageSend = async (messageContent: string, fileIdsList?: string[]) => {
     try {
+      const emailsData = await getEmails(order.id.toString());
       if (fileIdsList && fileIdsList?.length > 0) {
         const idsListFromServer = [];
         for (const fileId of fileIdsList) {
@@ -61,8 +63,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: s
             order.title,
             messageContent,
             userWorkspace.name ?? '',
-            order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
-              [],
+            emailsData,
             agencyName,
             new Date().toLocaleDateString(),
             userWorkspace.id ?? '',
@@ -74,8 +75,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: s
             order.title,
             messageContent,
             userWorkspace.name ?? '',
-            order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
-              [],
+            emailsData,
             agencyName,
             new Date().toLocaleDateString(),
             userWorkspace.id ?? '',
@@ -89,8 +89,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: s
           order.title,
           messageContent,
           userWorkspace.name ?? '',
-          order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
-            [],
+          emailsData,
           agencyName,
           new Date().toLocaleDateString(),
           userWorkspace.id ?? '',

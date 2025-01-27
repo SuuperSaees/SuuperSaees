@@ -408,7 +408,7 @@ const BillingForm: React.FC<{
             onSubmit={form.handleSubmit(onSubmit)}
             className="w-full max-w-[1200px] space-y-4"
           >
-            <div className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 lg:flex-row">
+            <div className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 lg:flex-row" style={{flexFlow: 'wrap-reverse'}}>
               {/* Columna izquierda */}
               <div className="flex-1 rounded-lg bg-white p-6 shadow-md">
                 <UserInfo form={form} />

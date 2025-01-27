@@ -39,6 +39,7 @@ interface ActivityAssignationProps {
     label: string;
   }[];
   canAddFollowers?: boolean;
+  isLoading?: boolean;
 }
 
 const ActivityFollowers = ({
@@ -46,6 +47,7 @@ const ActivityFollowers = ({
   updateFunction,
   searchUserOptions,
   canAddFollowers = true,
+  isLoading = false,
 }: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
 
@@ -93,6 +95,7 @@ const ActivityFollowers = ({
         schema={membersAssignedSchema}
         defaultValues={defaultValues}
         customItem={CustomUserItem}
+        isLoading={isLoading}
       />
       )}
       </div>
