@@ -11,7 +11,7 @@ import KanbanSkeleton from '~/(views)/components/kanban/kanban-skeleton';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { ViewProvider } from '~/(views)/contexts/view-context';
 import { ViewInitialConfigurations } from '~/(views)/view-config.types';
-import { UpdateFunction, ViewItem, ViewType } from '~/(views)/views.types';
+import { UpdateFunction, ViewItem, ViewTypeEnum } from '~/(views)/views.types';
 import { Tags } from '~/lib/tags.types';
 import { User } from '~/lib/user.types';
 
@@ -125,7 +125,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
   return (
     <ViewProvider
       initialData={filteredOrders as ViewItem[]}
-      initialViewType={currentView as ViewType}
+      initialViewType={currentView as ViewTypeEnum}
       initialConfigurations={
         viewInitialConfiguarations as unknown as ViewInitialConfigurations<ViewItem>
       }

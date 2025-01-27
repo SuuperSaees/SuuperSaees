@@ -1,5 +1,6 @@
 {
   "kanban": {
+    "title": "Board",
     "columns": {
       "negations": {
         "noProperty": "No {{property}}",
@@ -39,5 +40,11 @@
       "showAll": "Show all",
       "hideAll": "Hide all"
     }
+  },
+  "calendar": {
+    "title": "Calendar"
+  },
+  "table": {
+    "title": "Table"
   }
 }
