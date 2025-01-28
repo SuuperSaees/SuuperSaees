@@ -120,10 +120,10 @@ const Interactions = ({
   }, []);
 
   return (
-    <div
-      className="no-scrollbar ml-2 mr-10 flex h-full max-h-[calc(100vh-358px)] w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto px-8 pr-[2rem]"
-      ref={interactionsContainerRef}
-    >
+<div
+  className=" flex h-full max-h-[calc(100vh-358px)] w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto px-8 box-border"
+  ref={interactionsContainerRef}
+>
       {Object.entries(groupedInteractions).map(([date, interactions]) => (
         <div key={date} className="flex flex-col gap-8">
           <div className="relative mt-2 flex w-full items-center justify-center rounded-md before:absolute before:left-0 before:top-1/2 before:h-[0.3px] before:w-full before:bg-gray-100">
