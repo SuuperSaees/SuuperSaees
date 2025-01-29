@@ -1,4 +1,4 @@
-import { ChatRoleType } from './middleware/validate_chat_role';
+import { ChatRoleType } from '../middleware/validate_chat_role';
 
 export interface ChatPayload {
   name: string;
@@ -7,6 +7,7 @@ export interface ChatPayload {
   settings?: Record<string, unknown>;
   visibility: boolean;
   image?: string;
+  role?: string[];
 }
 
 export interface ChatResponse {
@@ -153,6 +154,7 @@ export interface ResetMemberSettingsResponse {
 export interface UpdateChatSettingsPayload {
   chat_id: string;
   settings: Record<string, unknown>;
+  role?: string[];
 }
 
 export interface UpdateChatSettingsResponse {
