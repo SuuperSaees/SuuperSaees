@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -122,15 +122,25 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     role,
     hasOrders: orders.length > 0,
   });
+
+  const mutedOrders = useMemo(() => {
+    if (currentView === 'calendar') {
+      return filteredOrders.map((order) => ({
+        ...order,
+        color: statuses.find((status) => status.id === order.status_id)?.status_color,
+      }));
+    }
+    return filteredOrders;
+  }, [filteredOrders, currentView, statuses]);
   return (
     <ViewProvider
-      initialData={filteredOrders as ViewItem[]}
+      initialData={mutedOrders as ViewItem[]}
       initialViewType={currentView as ViewTypeEnum}
       initialConfigurations={
         viewInitialConfiguarations as unknown as ViewInitialConfigurations<ViewItem>
       }
       onUpdateFn={handleUpdateOrder as UpdateFunction}
-      data={filteredOrders as ViewItem[]}
+      data={mutedOrders as ViewItem[]}
       setData={setOrders as Dispatch<SetStateAction<ViewItem[]>>}
       availableProperties={
         viewAvailableProperties as unknown as [keyof ViewItem]

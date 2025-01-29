@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { CalendarItem } from '../calendar.types';
 import useViewConfigurations from '../hooks/view/use-view-configurations';
 import { KanbanItem } from '../kanban.types';
 import { createFullConfiguration } from '../utils/views/data-transform';
@@ -113,7 +114,14 @@ export const ViewProvider = <T extends ViewItem>({
           {children}
         </TableProvider>
       ) : viewType === ViewTypeEnum.Calendar ? (
-        <CalendarProvider data={data} setData={setData}>
+        <CalendarProvider
+          data={data as unknown as CalendarItem[]}
+          setData={
+            setData as unknown as React.Dispatch<
+              React.SetStateAction<CalendarItem[]>
+            >
+          }
+        >
           {children}
         </CalendarProvider>
       ) : null}
