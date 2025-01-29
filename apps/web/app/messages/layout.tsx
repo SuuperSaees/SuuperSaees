@@ -1,4 +1,4 @@
-import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
+import { cookies } from 'next/headers';
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
 import {
@@ -60,7 +60,8 @@ async function MessagesLayout({ children }: React.PropsWithChildren) {
 export default withI18n(MessagesLayout);
 
 function getLayoutStyle() {
-  return (((cookies() as unknown as UnsafeUnwrappedCookies).get('layout-style')?.value as PageLayoutStyle) ?? personalAccountNavigationConfig.style);
+  const cookieValue = (cookies() as { get(name: string): { value: string } | undefined }).get('layout-style')?.value as PageLayoutStyle;
+  return cookieValue ?? personalAccountNavigationConfig.style;
 }
 
 async function loadOrganizationSettings() {
@@ -73,5 +74,6 @@ async function loadOrganizationSettings() {
 }
 
 function getTheme() {
-  return (cookies() as unknown as UnsafeUnwrappedCookies).get('theme')?.value;
+  const cookieValue = (cookies() as { get(name: string): { value: string } | undefined }).get('theme')?.value;
+  return cookieValue ?? 'light';
 }
