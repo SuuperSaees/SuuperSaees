@@ -186,6 +186,9 @@ export async function middleware(request: NextRequest) {
  
         setCachedLanguage(csrfResponse, language);
       }
+    } else {
+      // Clear all localStorage when no session is present
+      csrfResponse.headers.set('Clear-Site-Data', '"storage"');
     }
   } catch (error) {
     console.error('Error setting language in middleware:', error);
