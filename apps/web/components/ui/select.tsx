@@ -82,7 +82,7 @@ const SelectAction = ({
           <SelectValue placeholder={t('common:selectOption')}>
             {/* Use customItem for the selected value if provided, otherwise show the label */}
             {customItem && selectedValue
-              ? customItem(options.find((opt) => opt.value === selectedValue)!.label)
+              ? customItem(options.find((opt) => opt.value === selectedValue)?.label ?? '')
               : selectedLabel ?? t('common:selectOption')}
           </SelectValue>
         </SelectTrigger>
