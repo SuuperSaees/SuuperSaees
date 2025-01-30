@@ -16,6 +16,7 @@ import {
 import { useCalendarCells } from '../hooks/calendar/use-calendar-cells';
 import useCalendarNavigation from '../hooks/calendar/use-calendar-navigation';
 import { dateUtils } from '../utils/calendar/dates';
+import { ViewCustomComponents } from '../views.types';
 
 /**
  * Context for managing calendar state and operations
@@ -38,6 +39,7 @@ const CalendarContext = createContext<
 export const CalendarProvider = <T extends CalendarItem>({
   children,
   data,
+  customComponent,
   setData,
 }: CalendarProviderProps<T>) => {
   // Initialize with current date
@@ -97,6 +99,7 @@ export const CalendarProvider = <T extends CalendarItem>({
     endDate: calendarConfig.endDate,
     referenceDate: calendarConfig.referenceDate,
     ...navigation,
+    customComponent: customComponent as unknown as ViewCustomComponents<CalendarItem>['calendar'],
     isDateToday: dateUtils.isDateToday,
     isDateSameMonth: (date: string) =>
       dateUtils.isDateInMonth(date, calendarConfig.referenceDate),

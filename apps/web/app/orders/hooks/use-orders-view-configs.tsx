@@ -27,6 +27,7 @@ import { formatString } from '~/utils/text-formatter';
 // Custom Components and Actions
 import KanbanCard from '../components/kanban-card';
 import { useUserOrderActions } from './user-order-actions';
+import CalendarCard from '../components/calendar-card';
 
 // Enhanced Types
 export interface ViewOption extends Option {
@@ -244,6 +245,11 @@ const useOrdersViewConfigs = ({
     kanban: {
       Card: ({ item }: { item: ViewItem }) => (
         <KanbanCard item={item as Order.Response} />
+      ),
+    },
+    calendar: {
+      Card: ({ item }: { item: ViewItem }) => (
+        <CalendarCard item={item as Order.Response & { color: string }} />
       ),
     },
   };

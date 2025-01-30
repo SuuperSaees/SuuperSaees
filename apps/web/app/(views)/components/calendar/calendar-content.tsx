@@ -1,13 +1,22 @@
 import { parseISO } from 'date-fns';
 
-import { CalendarCell, CalendarItem } from '~/(views)/calendar.types';
-import { darkenColor, hexToRgba } from '~/utils/generate-colors';
+import { CalendarCell, CalendarItem, CalendarView } from '~/(views)/calendar.types';
+import { ViewCustomComponents } from '~/(views)/views.types';
+
+import CalendarCard from './calendar-card';
 
 interface CalendarContentProps {
   content: CalendarCell<CalendarItem>['content'] | undefined;
   gridClassName: string;
+  currentView: CalendarView;
+  customComponent?: ViewCustomComponents<CalendarItem>['calendar'];
 }
-const CalendarContent = ({ content, gridClassName }: CalendarContentProps) => {
+const CalendarContent = ({
+  content,
+  gridClassName,
+  customComponent: CustomComponent,
+  currentView,
+}: CalendarContentProps) => {
   return (
     <div className={'grid h-full min-h-0 w-full ' + gridClassName}>
       {content?.map((content, index) => (
@@ -27,26 +36,14 @@ const CalendarContent = ({ content, gridClassName }: CalendarContentProps) => {
             {/* "2024-12-29T00:00:00-05:00" */}
             {parseISO(content.date).getDate()}
           </div>
-          <div className="flex flex-col gap-1 overflow-y-auto">
-            {content.items.map((item, index) => (
-              <div
-                key={index}
-                className="flex h-full flex-1 gap-2 rounded-md border px-2 py-1"
-                style={{
-                  backgroundColor:
-                    hexToRgba(item?.color ?? '', 0.2) ?? 'transparent',
-                  borderColor:
-                    hexToRgba(item?.color ?? '', 0.2) ?? 'transparent',
-                }}
-              >
-                <h4
-                  className="text-xs font-medium text-inherit"
-                  style={{ color: darkenColor(item.color ?? '', 0.5) }}
-                >
-                  {item.title}
-                </h4>
-              </div>
-            ))}
+          <div className="flex flex-col gap-1 overflow-y-auto no-scrollbar">
+            {content.items.map((item, index) =>
+              CustomComponent?.Card && currentView === CalendarView.WEEK ? (
+                CustomComponent.Card({ item, index })
+              ) : (
+                <CalendarCard item={item} key={index} />
+              ),
+            )}
           </div>
         </div>
       ))}

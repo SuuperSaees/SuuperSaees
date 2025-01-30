@@ -19,6 +19,7 @@ const CalendarView = () => {
     goToPrevDate,
     goToCurrentDate,
     updateView,
+    customComponent
   } = useCalendarContext(); // replace with useCalendarContext
 
   const { t } = useTranslation('views');
@@ -50,6 +51,8 @@ const CalendarView = () => {
       <CalendarContent
         content={cells?.content}
         gridClassName={gridClassNames[currentView].content}
+        customComponent={customComponent}
+        currentView={currentView}
       />
       {/* Footer */}
       <CalendarFooter

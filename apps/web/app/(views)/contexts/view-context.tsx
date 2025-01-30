@@ -121,6 +121,9 @@ export const ViewProvider = <T extends ViewItem>({
               React.SetStateAction<CalendarItem[]>
             >
           }
+          customComponent={
+            customComponents?.calendar as unknown as ViewCustomComponents<CalendarItem>['calendar']
+          }
         >
           {children}
         </CalendarProvider>

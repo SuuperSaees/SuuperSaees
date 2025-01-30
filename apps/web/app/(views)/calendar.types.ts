@@ -1,4 +1,4 @@
-import { BaseItem, ViewProps } from './views.types';
+import { BaseItem, ViewCustomComponents, ViewProps } from './views.types';
 
 // Strict type (must have props) for calendar view item
 export interface CalendarItem extends BaseItem {
@@ -86,6 +86,7 @@ export interface CalendarContextType<T extends CalendarItem> {
   startDate: string;
   endDate: string;
   referenceDate: string;
+  customComponent?: ViewCustomComponents<T>['calendar'];
   updateView: (view: CalendarView) => void;
   goToNextDate: () => void;
   goToPrevDate: () => void;
@@ -97,5 +98,6 @@ export interface CalendarContextType<T extends CalendarItem> {
 export interface CalendarProviderProps<T extends CalendarItem> {
   children: React.ReactNode;
   data: T[];
+  customComponent?: ViewCustomComponents<T>['calendar'];
   setData: React.Dispatch<React.SetStateAction<T[]>>;
 }
