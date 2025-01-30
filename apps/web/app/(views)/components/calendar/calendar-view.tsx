@@ -5,6 +5,7 @@ import { useCalendarContext } from '~/(views)/contexts/calendar-context';
 import CalendarContent from './calendar-content';
 import CalendarFooter from './calendar-footer';
 import CalendarHeader from './calendar-header';
+import { useTranslation } from 'react-i18next';
 
 const CalendarView = () => {
   const {
@@ -20,6 +21,8 @@ const CalendarView = () => {
     updateView,
   } = useCalendarContext(); // replace with useCalendarContext
 
+  const { t } = useTranslation('views');
+
   const gridClassNames = {
     week: {
       headers: 'grid-cols-7 grid-rows-1',
@@ -32,8 +35,8 @@ const CalendarView = () => {
   };
 
   const viewOptions = [
-    { label: 'Week view', value: 'week' },
-    { label: 'Month view', value: 'month' },
+    { label: t('calendar.view.week'), value: 'week' },
+    { label: t('calendar.view.month'), value: 'month' },
   ];
 
   return (

@@ -1,6 +1,8 @@
 import { format, getWeekOfMonth } from 'date-fns';
+import { es, enUS } from 'date-fns/locale';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from 'node_modules/@kit/ui/src/shadcn/button-shadcn';
+import { useTranslation } from 'react-i18next';
 
 import { CalendarView } from '~/(views)/calendar.types';
 import SelectAction, { Option } from '~/components/ui/select';
@@ -29,12 +31,17 @@ const CalendarFooter = ({
   goToCurrentDate,
   goToNextDate,
 }: CalendarFooterProps) => {
+  const { t, i18n } = useTranslation('views');
+  
+  // Get the appropriate locale based on current language
+  const locale = i18n.language === 'es' ? es : enUS;
+
   return (
     <div className="flex w-full items-center justify-between border-t border-gray-200 p-4">
       <div className="flex gap-2">
         <div className="flex flex-col items-center rounded-md border border-gray-200">
           <span className="bg-gray-100 px-4 py-0.5 text-xs font-medium uppercase text-gray-500">
-            {format(currentDate, 'MMM')}
+            {format(currentDate, 'MMM', { locale })}
           </span>
           <span className="px-4 py-0.5 font-bold text-brand">
             {format(currentDate, 'd')}
@@ -44,18 +51,18 @@ const CalendarFooter = ({
           <div className="items center flex gap-2">
             <span className="font-bold">
               {/* format example: January 2025 */}
-              {format(referenceDate, 'MMMM yyyy')}
+              {format(referenceDate, 'MMMM yyyy', { locale })}
             </span>
             <span className="inline-flex items-center rounded-md border border-gray-200 px-2 text-xs font-medium text-gray-500">
               {/* format example: Week 2 (week of the month) */}
-              Week
+              {t('calendar.date.week')}
               {` ${getWeekOfMonth(startDate)}`}
             </span>
           </div>
           {/* format example: Jan 1, 2025 - Jan 31, 2025 */}
           <span className="text-xs font-medium text-gray-500">
-            {format(startDate, 'MMM d, yyyy')} -{' '}
-            {format(endDate, 'MMM d, yyyy')}
+            {format(startDate, 'MMM d, yyyy', { locale })} -{' '}
+            {format(endDate, 'MMM d, yyyy', { locale })}
           </span>
         </div>
       </div>
@@ -73,7 +80,7 @@ const CalendarFooter = ({
             onClick={goToCurrentDate}
             className="border-none bg-transparent font-medium"
           >
-            Today
+            {t('calendar.date.today')}
           </Button>
           <Button
             variant="outline"

@@ -42,7 +42,38 @@
     }
   },
   "calendar": {
-    "title": "Calendar"
+    "title": "Calendar",
+    "view": {
+      "month": "Month view",
+      "week": "Week view"
+    },
+    "date": {
+      "today": "Today",
+      "week": "Week",
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      }
+    }
   },
   "table": {
     "title": "Table"

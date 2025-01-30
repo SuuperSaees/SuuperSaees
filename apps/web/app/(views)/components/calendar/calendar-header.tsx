@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslation } from 'react-i18next';
 import {
   CalendarCell,
   CalendarItem,
@@ -9,6 +12,7 @@ interface CalendarHeaderProps {
 }
 
 const CalendarHeader = ({ headers, gridClassName }: CalendarHeaderProps) => {
+  const { t } = useTranslation('views');
   return (
     <div className={'grid w-full ' + gridClassName}>
       {headers?.map((header, index) => (
@@ -16,7 +20,7 @@ const CalendarHeader = ({ headers, gridClassName }: CalendarHeaderProps) => {
           key={index}
           className="flex h-fit justify-center border-e border-gray-200 px-4 py-2 last:border-none"
         >
-          <h3 className="text-sm font-medium text-gray-500">{header.title}</h3>
+          <h3 className="text-sm font-medium text-gray-500">{t(`calendar.date.days.${header.title.toLowerCase()}`)}</h3>
         </div>
       ))}
     </div>
