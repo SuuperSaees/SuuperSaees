@@ -8,7 +8,7 @@ import {
   GetMessagesResponse,
   UpdateMessageContentPayload,
   UpdateMessageContentResponse,
-} from '../interfaces/message-interfaces';
+} from '../message.interface';
 import { MessagesRepository } from '../repositories/messages.respositories';
 
 export class MessagesService {

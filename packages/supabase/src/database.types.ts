@@ -3444,7 +3444,7 @@ export type Database = {
         | "treli"
         | "suuper"
       chat_role: "user" | "assistant"
-      chat_role_type: "Project Manager" | "assistant" | "owner" | "guest"
+      chat_role_type: "project_manager" | "assistant" | "owner" | "guest"
       field_types:
         | "date"
         | "multiple_choice"

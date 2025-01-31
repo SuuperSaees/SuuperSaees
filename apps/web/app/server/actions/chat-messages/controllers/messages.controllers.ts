@@ -12,7 +12,7 @@ import {
   GetMessagesResponse,
   UpdateMessageContentPayload,
   UpdateMessageContentResponse,
-} from '../interfaces/message-interfaces';
+} from '../message.interface';
 import { MessagesRepository } from '../repositories/messages.respositories';
 import { MessagesService } from '../services/messages.servies';
 
@@ -32,31 +32,56 @@ export class MessagesController {
   async createMessage(
     payload: ChatMessagePayload,
   ): Promise<ChatMessageResponse> {
-    return await this.messagesService.createMessage(payload);
+    try {
+      return await this.messagesService.createMessage(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   // * GET CONTROLLERS
   async getMessages(chatId: string): Promise<GetMessagesResponse[]> {
-    return await this.messagesService.getMessages(chatId);
+    try {
+      return await this.messagesService.getMessages(chatId);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   // * DELETE CONTROLLERS
   async deleteMessage(
     payload: DeleteMessagePayload,
   ): Promise<DeleteMessageResponse> {
-    return await this.messagesService.deleteMessage(payload);
+    try {
+      return await this.messagesService.deleteMessage(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   async clearChatMessages(
     payload: ClearChatMessagesPayload,
   ): Promise<ClearChatMessagesResponse> {
-    return await this.messagesService.clearChatMessages(payload);
+    try {
+      return await this.messagesService.clearChatMessages(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   // * UPDATE CONTROLLERS
   async updateMessageContent(
     payload: UpdateMessageContentPayload,
   ): Promise<UpdateMessageContentResponse> {
-    return await this.messagesService.updateMessageContent(payload);
+    try {
+      return await this.messagesService.updateMessageContent(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

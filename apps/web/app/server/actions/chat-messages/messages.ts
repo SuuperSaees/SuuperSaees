@@ -10,7 +10,7 @@ import {
   GetMessagesResponse,
   UpdateMessageContentPayload,
   UpdateMessageContentResponse,
-} from './interfaces/message-interfaces';
+} from './message.interface';
 
 export class MessagesAction extends BaseAction {
   private controller: MessagesController;

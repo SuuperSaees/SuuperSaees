@@ -10,7 +10,7 @@ import {
   ResetMemberSettingsPayload,
   UpdateMemberSettingsPayload,
   UpdateMemberVisibilityPayload,
-} from './interfaces/members-interfaces';
+} from './members.interface';
 import { createMembersAction } from './members';
 
 function getMembersAction() {

@@ -1,5 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
+import { Database } from '~/lib/database.types';
+
 import {
   AddMembersPayload,
   AddMembersResponse,
@@ -13,10 +15,9 @@ import {
   UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
-} from '../interfaces/members-interfaces';
+} from '../members.interface';
 import { MembersRepository } from '../repositories/members.repositories';
 import { MembersService } from '../services/members.services';
-import { Database } from '~/lib/database.types';
 
 export class MembersController {
   private membersService: MembersService;
@@ -32,44 +33,79 @@ export class MembersController {
 
   // * CREATE CONTROLLERS
   async addMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
-    return await this.membersService.addMembers(payload);
+    try {
+      return await this.membersService.addMembers(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   // * GET CONTROLLERS
   async getMembers(chatId: string): Promise<GetMembersResponse[]> {
-    return await this.membersService.getMembers(chatId);
+    try {
+      return await this.membersService.getMembers(chatId);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   async getMemberSettings(
     chatId: string,
     userId: string,
   ): Promise<MemberSettingsResponse> {
-    return await this.membersService.getMemberSettings(chatId, userId);
+    try {
+      return await this.membersService.getMemberSettings(chatId, userId);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   // * DELETE CONTROLLERS
   async removeMember(
     payload: RemoveMemberPayload,
   ): Promise<RemoveMemberResponse> {
-    return await this.membersService.removeMember(payload);
+    try {
+      return await this.membersService.removeMember(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   async resetMemberSettings(
     payload: ResetMemberSettingsPayload,
   ): Promise<ResetMemberSettingsResponse> {
-    return await this.membersService.resetMemberSettings(payload);
+    try {
+      return await this.membersService.resetMemberSettings(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   // * UPDATE CONTROLLERS
   async updateMemberSettings(
     payload: UpdateMemberSettingsPayload,
   ): Promise<UpdateMemberSettingsResponse> {
-    return await this.membersService.updateMemberSettings(payload);
+    try {
+      return await this.membersService.updateMemberSettings(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   async updateMemberVisibility(
     payload: UpdateMemberVisibilityPayload,
   ): Promise<UpdateMemberVisibilityResponse> {
-    return await this.membersService.updateMemberVisibility(payload);
+    try {
+      return await this.membersService.updateMemberVisibility(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

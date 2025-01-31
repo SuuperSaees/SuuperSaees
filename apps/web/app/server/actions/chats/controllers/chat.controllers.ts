@@ -12,7 +12,7 @@ import {
   GetChatsResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
-} from '../interfaces/chat-interfaces';
+} from '../chat.interface';
 import { ChatRepository } from '../repositories/chat.repositories';
 import { ChatService } from '../services/chat.services';
 
@@ -37,27 +37,52 @@ export class ChatController {
 
   // * CREATE CONTROLLERS
   async createChat(payload: ChatPayload): Promise<ChatResponse> {
-    return await this.chatService.createChat(payload);
+    try {
+      return await this.chatService.createChat(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   // * GET CONTROLLERS
   async getChats(): Promise<GetChatsResponse[]> {
-    return await this.chatService.getChats();
+    try {
+      return await this.chatService.getChats();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   async getChatById(chatId: string): Promise<GetChatByIdResponse> {
-    return await this.chatService.getChatById(chatId);
+    try {
+      return await this.chatService.getChatById(chatId);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   // * DELETE CONTROLLERS
   async deleteChat(chatId: string): Promise<DeleteChatResponse> {
-    return await this.chatService.deleteChat(chatId);
+    try {
+      return await this.chatService.deleteChat(chatId);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   // * UPDATE CONTROLLERS
   async updateChatSettings(
     payload: UpdateChatSettingsPayload,
   ): Promise<UpdateChatSettingsResponse> {
-    return await this.chatService.updateChatSettings(payload);
+    try {
+      return await this.chatService.updateChatSettings(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

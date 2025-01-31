@@ -8,7 +8,7 @@ import {
   GetChatsResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
-} from '../interfaces/chat-interfaces';
+} from '../chat.interface';
 import { ChatRepository } from '../repositories/chat.repositories';
 
 export class ChatService {
