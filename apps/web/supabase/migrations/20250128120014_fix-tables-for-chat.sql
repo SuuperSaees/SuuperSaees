@@ -1,19 +1,3 @@
-drop policy "delete_chats" on "public"."chats";
-
-drop policy "insert_chats" on "public"."chats";
-
-drop policy "select_chats" on "public"."chats";
-
-drop policy "update_chats" on "public"."chats";
-
-alter table "public"."chats" drop constraint "chats_account_id_fkey";
-
-alter table "public"."chats" drop constraint "chats_reference_id_key";
-
-drop index if exists "public"."chats_reference_id_key";
-
-drop index if exists "public"."ix_chats_account_id";
-
 alter table "public"."chats" drop column "account_id";
 
 alter table "public"."chats" drop column "reference_id";
