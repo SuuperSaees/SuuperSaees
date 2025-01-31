@@ -1,8 +1,9 @@
 import { ElementType, ReactNode } from 'react';
 
 import { Data, useDraggable } from '@dnd-kit/core';
+
 interface DraggableProps {
-  id: string;
+  id: string | number;
   element?: ElementType; // Accepts any valid JSX element or component
   children: ReactNode; // Accepts children to be rendered inside the component
   data?: Data;
@@ -16,7 +17,7 @@ export default function DraggableItem({
   className,
   children,
 }: DraggableProps) {
-  const { attributes, listeners, setNodeRef,  } = useDraggable({
+  const { attributes, listeners, setNodeRef } = useDraggable({
     id,
     data,
   });

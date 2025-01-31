@@ -1,4 +1,4 @@
-import { BaseItem, ViewCustomComponents, ViewProps } from './views.types';
+import { BaseItem, UpdateFunction, ViewCustomComponents, ViewProps } from './views.types';
 
 // Strict type (must have props) for calendar view item
 export interface CalendarItem extends BaseItem {
@@ -22,6 +22,7 @@ export type CalendarCellContent<T extends CalendarItem> = {
 };
 
 export type CalendarCell<T extends CalendarItem> = {
+  date: string;
   headers: CalendarCellHeader[];
   content: CalendarCellContent<T>[];
 };
@@ -80,7 +81,8 @@ export type CalendarViewProps<T extends CalendarItem> = ViewProps<T>;
 export interface CalendarContextType<T extends CalendarItem> {
   data: T[];
   setData: React.Dispatch<React.SetStateAction<T[]>>;
-  cells: CalendarCell<T> | null;
+  cells: CalendarCell<T>['content'];
+  headers: CalendarCell<T>['headers'];
   currentView: CalendarView;
   currentDate: string;
   startDate: string;
@@ -93,6 +95,7 @@ export interface CalendarContextType<T extends CalendarItem> {
   goToCurrentDate: () => void;
   isDateToday: (date: string) => boolean;
   isDateSameMonth: (date: string) => boolean;
+  updateCells: UpdateCalendarFunction;
 }
 
 export interface CalendarProviderProps<T extends CalendarItem> {
@@ -100,4 +103,12 @@ export interface CalendarProviderProps<T extends CalendarItem> {
   data: T[];
   customComponent?: ViewCustomComponents<T>['calendar'];
   setData: React.Dispatch<React.SetStateAction<T[]>>;
+  onUpdateFn: UpdateFunction;
 }
+
+export type UpdateCalendarFunction = <T extends CalendarItem>(
+  updatedItem: T,
+  updatedCellContentItems?: CalendarCellContent<T>,
+  updatedCellsContentItems?: CalendarCellContent<T>[],
+  executeMutation?: boolean,
+) => Promise<void>;

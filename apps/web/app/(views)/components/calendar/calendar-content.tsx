@@ -1,8 +1,14 @@
 import { parseISO } from 'date-fns';
 
-import { CalendarCell, CalendarItem, CalendarView } from '~/(views)/calendar.types';
+import {
+  CalendarCell,
+  CalendarItem,
+  CalendarView,
+} from '~/(views)/calendar.types';
 import { ViewCustomComponents } from '~/(views)/views.types';
 
+import Droppable from '../../../components/droppable-container';
+import SortableItem from '../../../components/sortable-item';
 import CalendarCard from './calendar-card';
 
 interface CalendarContentProps {
@@ -11,6 +17,7 @@ interface CalendarContentProps {
   currentView: CalendarView;
   customComponent?: ViewCustomComponents<CalendarItem>['calendar'];
 }
+
 const CalendarContent = ({
   content,
   gridClassName,
@@ -19,33 +26,56 @@ const CalendarContent = ({
 }: CalendarContentProps) => {
   return (
     <div className={'grid h-full min-h-0 w-full ' + gridClassName}>
-      {content?.map((content, index) => (
-        <div
-          key={index}
-          className={
-            'last:border-r-none flex h-full flex-col gap-2 border-e border-t border-gray-200 px-4 py-2 ' +
-            `${!content.isWithinCurrentMonth ? 'opacity-50' : ''}`
-          }
+      {content?.map((content) => (
+        <Droppable
+          id={content.date}
+          key={'calendar-content-' + content.date}
+          data={{ id: content.date, date: content.date }}
         >
           <div
             className={
-              'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ' +
-              `${content.isToday ? 'bg-brand text-white' : ''}`
+              'last:border-r-none flex h-full flex-col gap-2 border-e border-t border-gray-200 px-4 py-2 ' +
+              `${!content.isWithinCurrentMonth ? 'opacity-50' : ''}`
             }
           >
-            {/* "2024-12-29T00:00:00-05:00" */}
-            {parseISO(content.date).getDate()}
+            <div
+              className={
+                'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ' +
+                `${content.isToday ? 'bg-brand text-white' : ''}`
+              }
+            >
+              {parseISO(content.date).getDate()}
+            </div>
+
+            <div className="no-scrollbar flex flex-col gap-1 overflow-y-auto">
+              {content.items.map((item, index) =>
+                CustomComponent?.Card && currentView === CalendarView.WEEK ? (
+                  <SortableItem
+                    id={item.id}
+                    key={'calendar-item-' + item.id}
+                    data={{ item, date: content.date }}
+                    overlayClassName="rounded-md bg-transparent"
+                    styleOnDrag={{ opacity: 0 }}
+                    className="h-full"
+                  >
+                    {CustomComponent.Card({ item, index })}
+                  </SortableItem>
+                ) : (
+                  <SortableItem
+                    id={item.id}
+                    key={'calendar-item-' + item.id}
+                    data={{ item, date: content.date }}
+                    overlayClassName="rounded-md bg-transparent"
+                    styleOnDrag={{ opacity: 0 }}
+                    className="h-full"
+                  >
+                    <CalendarCard item={item} key={index} />
+                  </SortableItem>
+                ),
+              )}
+            </div>
           </div>
-          <div className="flex flex-col gap-1 overflow-y-auto no-scrollbar">
-            {content.items.map((item, index) =>
-              CustomComponent?.Card && currentView === CalendarView.WEEK ? (
-                CustomComponent.Card({ item, index })
-              ) : (
-                <CalendarCard item={item} key={index} />
-              ),
-            )}
-          </div>
-        </div>
+        </Droppable>
       ))}
     </div>
   );
