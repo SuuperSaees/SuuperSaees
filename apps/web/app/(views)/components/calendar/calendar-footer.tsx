@@ -1,5 +1,5 @@
 import { format, getWeekOfMonth } from 'date-fns';
-import { es, enUS } from 'date-fns/locale';
+import { enUS, es } from 'date-fns/locale';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from 'node_modules/@kit/ui/src/shadcn/button-shadcn';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +32,7 @@ const CalendarFooter = ({
   goToNextDate,
 }: CalendarFooterProps) => {
   const { t, i18n } = useTranslation('views');
-  
+
   // Get the appropriate locale based on current language
   const locale = i18n.language === 'es' ? es : enUS;
 
@@ -49,15 +49,17 @@ const CalendarFooter = ({
         </div>
         <div className="flex flex-col justify-center gap-1">
           <div className="items center flex gap-2">
-            <span className="font-bold">
+            <span className="font-bold capitalize">
               {/* format example: January 2025 */}
               {format(referenceDate, 'MMMM yyyy', { locale })}
             </span>
-            <span className="inline-flex items-center rounded-md border border-gray-200 px-2 text-xs font-medium text-gray-500">
-              {/* format example: Week 2 (week of the month) */}
-              {t('calendar.date.week')}
-              {` ${getWeekOfMonth(startDate)}`}
-            </span>
+            {currentView === CalendarView.WEEK && (
+              <span className="inline-flex items-center rounded-md border border-gray-200 px-2 text-xs font-medium text-gray-500">
+                {/* format example: Week 2 (week of the month) */}
+                {t('calendar.date.week')}
+                {` ${getWeekOfMonth(startDate)}`}
+              </span>
+            )}
           </div>
           {/* format example: Jan 1, 2025 - Jan 31, 2025 */}
           <span className="text-xs font-medium text-gray-500">

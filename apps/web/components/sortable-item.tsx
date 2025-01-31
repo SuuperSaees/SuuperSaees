@@ -1,22 +1,24 @@
+import { Data } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import { useState } from "react";
 
 interface SortableItemProps {
-  id: string;
+  id: string | number;
   children: React.ReactNode;
   className?: string;
+  data?: Data;
 }
 
-export function SortableItem({ id, children, className }: SortableItemProps) {
+export function SortableItem({ id, children, className, data }: SortableItemProps) {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id });
+  } = useSortable({ id, data });
 
   const [isHovered, setIsHovered] = useState(false);
 
