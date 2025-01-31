@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import {
   DragEndEvent,
   DragOverEvent,
   DragStartEvent,
+  DragCancelEvent,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
@@ -23,6 +24,10 @@ import {
 type DragState<T extends CalendarItem> = {
   id: string | number;
   item: T;
+  sourceDate?: string;
+  sourceCell?: CalendarCellContent<CalendarItem>;
+  lastTargetDate?: string;
+  lastTargetCell?: CalendarCellContent<CalendarItem>;
 };
 
 export type UpdateFunction = UpdateCalendarFunction;
@@ -37,6 +42,8 @@ const useCalendarDragAndDrop = <T extends CalendarItem>({
   onUpdateFn,
 }: UseCalendarDragAndDropProps) => {
   const [dragState, setDragState] = useState<DragState<T> | null>(null);
+  const lastDragOverTime = useRef<number>(0);
+  const dragOverThrottleMs = 50; // Minimum time between dragOver updates
   
   // Use rectIntersection for more precise collision detection
   const collisionDetection = rectIntersection;
@@ -62,16 +69,27 @@ const useCalendarDragAndDrop = <T extends CalendarItem>({
 
   const handleDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.item) {
+      const sourceDate = event.active.data.current?.date as string;
+      const sourceCell = cells.find((cell) => cell.date === sourceDate);
+      
       setDragState({
         id: event.active.id,
         item: event.active.data.current?.item,
+        sourceDate,
+        sourceCell: sourceCell as CalendarCellContent<CalendarItem>,
       });
     }
   };
 
-  const handleDragOver = async (event: DragOverEvent) => {
+  const handleDragOver = useCallback(async (event: DragOverEvent) => {
     const { active, over } = event;
     if (!active || !over) return;
+
+    const now = Date.now();
+    if (now - lastDragOverTime.current < dragOverThrottleMs) {
+      return; // Skip update if too soon
+    }
+    lastDragOverTime.current = now;
 
     const sourceItem = active.data.current?.item as T;
     const sourceDate = active.data.current?.date as string;
@@ -103,6 +121,13 @@ const useCalendarDragAndDrop = <T extends CalendarItem>({
       items: [...targetCell.items, updatedItem],
     };
 
+    // Update dragState with the last target information
+    setDragState((prev) => prev ? {
+      ...prev,
+      lastTargetDate: targetDate,
+      lastTargetCell: targetCell,
+    } : null);
+
     // Update cells with the changes
     await onUpdateFn(
       updatedItem,
@@ -110,7 +135,49 @@ const useCalendarDragAndDrop = <T extends CalendarItem>({
       [updatedSourceCell, updatedTargetCell],
       false
     );
-  };
+  }, [cells, onUpdateFn]);
+
+  const handleDragCancel = useCallback((_event: DragCancelEvent) => {
+    if (!dragState?.sourceCell) {
+      setDragState(null);
+      return;
+    }
+
+    // If we have a last target cell, we need to revert both cells
+    if (dragState.lastTargetCell && dragState.lastTargetDate !== dragState.sourceDate) {
+      const updatedSourceCell = {
+        ...dragState.sourceCell,
+        items: [...dragState.sourceCell.items], // Keep original items
+      };
+
+      const updatedTargetCell = {
+        ...dragState.lastTargetCell,
+        items: dragState.lastTargetCell.items.filter(item => item.id !== dragState.item.id), // Remove dragged item
+      };
+
+      void onUpdateFn(
+        dragState.item,
+        updatedSourceCell,
+        [updatedSourceCell, updatedTargetCell],
+        false
+      );
+    } else {
+      // Just restore the source cell if no target cell was involved
+      const updatedSourceCell = {
+        ...dragState.sourceCell,
+        items: [...dragState.sourceCell.items],
+      };
+
+      void onUpdateFn(
+        dragState.item,
+        updatedSourceCell,
+        [updatedSourceCell],
+        false
+      );
+    }
+
+    setDragState(null);
+  }, [dragState, onUpdateFn]);
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -186,6 +253,7 @@ const useCalendarDragAndDrop = <T extends CalendarItem>({
     handleDragEnd,
     handleDragStart,
     handleDragOver,
+    handleDragCancel,
     collisionDetection,
     sensors,
     dragState,

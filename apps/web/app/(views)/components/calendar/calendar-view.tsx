@@ -37,6 +37,7 @@ const CalendarView = () => {
     collisionDetection,
     sensors,
     dragState,
+    handleDragCancel,
   } = useCalendarDragAndDrop({
     cells,
     onUpdateFn: updateCells,
@@ -64,6 +65,7 @@ const CalendarView = () => {
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
+      onDragCancel={handleDragCancel}
       sensors={sensors}
       collisionDetection={collisionDetection}
     >
