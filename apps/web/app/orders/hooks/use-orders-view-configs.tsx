@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 // Lucide Icons
-import { Columns3, LucideIcon, Table } from 'lucide-react';
+import { Calendar, Columns3, LucideIcon, Table } from 'lucide-react';
 // Theming and Internationalization
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +27,7 @@ import { formatString } from '~/utils/text-formatter';
 // Custom Components and Actions
 import KanbanCard from '../components/kanban-card';
 import { useUserOrderActions } from './user-order-actions';
+import CalendarCard from '../components/calendar-card';
 
 // Enhanced Types
 export interface ViewOption extends Option {
@@ -220,17 +221,23 @@ const useOrdersViewConfigs = ({
   // View options for switching between views
   const viewOptions: ViewOption[] = [
     {
-      label: 'Board',
+      label: t('views:kanban.title'),
       value: 'kanban',
       action: updateCurrentView,
       icon: Columns3,
     },
     {
-      label: 'Table',
+      label: t('views:table.title'),
       value: 'table',
       action: updateCurrentView,
       icon: Table,
     },
+    {
+      label: t('views:calendar.title'),
+      value: 'calendar',
+      action: updateCurrentView,
+      icon: Calendar,
+    }
   ];
 
   // Custom components for different views
@@ -238,6 +245,11 @@ const useOrdersViewConfigs = ({
     kanban: {
       Card: ({ item }: { item: ViewItem }) => (
         <KanbanCard item={item as Order.Response} />
+      ),
+    },
+    calendar: {
+      Card: ({ item }: { item: ViewItem }) => (
+        <CalendarCard item={item as Order.Response & { color: string }} />
       ),
     },
   };
