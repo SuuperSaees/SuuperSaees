@@ -2,9 +2,15 @@ import { useCallback } from 'react';
 
 import { addDays, formatISO, parseISO } from 'date-fns';
 
-import { CalendarCell, CalendarItem } from '~/(views)/calendar.types';
+import {
+  CalendarCell,
+  CalendarCellContent,
+  CalendarItem,
+  UpdateCalendarFunction,
+} from '~/(views)/calendar.types';
 import { DATE_FORMATS } from '~/(views)/utils/calendar/constants';
 import { dateUtils } from '~/(views)/utils/calendar/dates';
+import { UpdateFunction } from '~/(views)/views.types';
 
 /**
  * Interface for calendar cell creation parameters
@@ -19,6 +25,10 @@ import { dateUtils } from '~/(views)/utils/calendar/dates';
  */
 export function useCalendarCells<T extends CalendarItem>(
   referenceDate: string,
+  cells: CalendarCell<T>['content'],
+  setCells: React.Dispatch<React.SetStateAction<CalendarCell<T>['content']>>,
+  onUpdateFn: UpdateFunction,
+  setData: React.Dispatch<React.SetStateAction<CalendarItem[]>>,
 ) {
   /**
    * Creates calendar cells with headers and content based on provided data and date range
@@ -94,10 +104,75 @@ export function useCalendarCells<T extends CalendarItem>(
         });
       }
 
-      return { headers, content };
+      return {
+        headers,
+        content,
+        date: formatISO(newStartDate, DATE_FORMATS.ISO_DATE),
+      };
     },
     [referenceDate],
   );
 
-  return { createCells };
+  const updateCells: UpdateCalendarFunction = useCallback(
+    async (
+      updatedItem,
+      updatedCellContentItems,
+      updatedCellsContentItems,
+      executeMutation = true,
+    ) => {
+      const allItems = cells.flatMap((cell) => cell.items);
+      executeMutation && setData(allItems);
+      setCells((prevCells) => {
+        // Handle multiple cells update (drag between different cells)
+        if (updatedCellsContentItems?.length) {
+          return prevCells.map((cell) => {
+            const updatedCell = updatedCellsContentItems.find(
+              (updatedContent) => updatedContent.date === cell.date,
+            );
+            return updatedCell ?? cell;
+          }) as CalendarCellContent<T>[];
+        }
+
+        // Handle single cell update (reordering within same cell)
+        if (updatedCellContentItems) {
+          return prevCells.map((cell) =>
+            cell.date === updatedCellContentItems.date
+              ? {
+                  ...updatedCellContentItems,
+                  items: [...updatedCellContentItems.items].map(
+                    (item) => item as unknown as T,
+                  ),
+                }
+              : cell,
+          );
+        }
+
+        // Handle item update only
+        if (updatedItem?.due_date) {
+          return prevCells.map((cell) => {
+            if (cell.date === updatedItem.due_date) {
+              const typedItem = updatedItem as unknown as T;
+              return {
+                ...cell,
+                items: [...cell.items, typedItem],
+              };
+            }
+            return {
+              ...cell,
+              items: cell.items.filter((item) => item.id !== updatedItem.id),
+            };
+          });
+        }
+
+        return prevCells;
+      });
+
+      if (onUpdateFn && executeMutation) {
+        await onUpdateFn(updatedItem, 'due_date');
+      }
+    },
+    [setCells, onUpdateFn, setData, cells],
+  );
+
+  return { createCells, updateCells };
 }

@@ -124,6 +124,7 @@ export const ViewProvider = <T extends ViewItem>({
           customComponent={
             customComponents?.calendar as unknown as ViewCustomComponents<CalendarItem>['calendar']
           }
+          onUpdateFn={onUpdateFn as unknown as UpdateFunction}
         >
           {children}
         </CalendarProvider>

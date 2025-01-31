@@ -41,6 +41,7 @@ export const CalendarProvider = <T extends CalendarItem>({
   data,
   customComponent,
   setData,
+  onUpdateFn,
 }: CalendarProviderProps<T>) => {
   // Initialize with current date
   const currentDate = dateUtils.getCurrentDate();
@@ -67,9 +68,16 @@ export const CalendarProvider = <T extends CalendarItem>({
     visibleColumnDays: CalendarVisibleColumnDays.MONTH,
   });
 
-  const { createCells } = useCalendarCells<T>(calendarConfig.referenceDate);
+  const [headers, setHeaders] = useState<CalendarCell<T>['headers']>([]);
+  const [cells, setCells] = useState<CalendarCell<T>['content']>([]);
+  const { createCells, updateCells } = useCalendarCells<T>(
+    calendarConfig.referenceDate,
+    cells,
+    setCells,
+    onUpdateFn,
+    setData as unknown as React.Dispatch<React.SetStateAction<CalendarItem[]>>,
+  );
   const navigation = useCalendarNavigation(calendarConfig, setCalendarConfig);
-  const [cells, setCells] = useState<CalendarCell<T> | null>(null);
 
   /**
    * Effect to initialize and update calendar cells when data or configuration changes
@@ -81,7 +89,8 @@ export const CalendarProvider = <T extends CalendarItem>({
       calendarConfig.endDate,
       calendarConfig.visibleColumnDays,
     );
-    setCells(initialCells);
+    setCells(initialCells.content);
+    setHeaders(initialCells.headers);
   }, [data, createCells, calendarConfig]);
 
   /**
@@ -93,16 +102,19 @@ export const CalendarProvider = <T extends CalendarItem>({
       React.SetStateAction<CalendarItem[]>
     >,
     cells,
+    headers,
     currentView: calendarConfig.view,
     currentDate: calendarConfig.currentDate,
     startDate: calendarConfig.startDate,
     endDate: calendarConfig.endDate,
     referenceDate: calendarConfig.referenceDate,
     ...navigation,
-    customComponent: customComponent as unknown as ViewCustomComponents<CalendarItem>['calendar'],
+    customComponent:
+      customComponent as unknown as ViewCustomComponents<CalendarItem>['calendar'],
     isDateToday: dateUtils.isDateToday,
     isDateSameMonth: (date: string) =>
       dateUtils.isDateInMonth(date, calendarConfig.referenceDate),
+    updateCells,
   };
 
   return (

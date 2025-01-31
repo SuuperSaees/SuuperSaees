@@ -1,26 +1,47 @@
 'use client';
 
-import { useCalendarContext } from '~/(views)/contexts/calendar-context';
+import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
+import { useTranslation } from 'react-i18next';
 
+import { CalendarView as CalendarViewType } from '~/(views)/calendar.types';
+import { useCalendarContext } from '~/(views)/contexts/calendar-context';
+import useCalendarDragAndDrop from '~/(views)/hooks/calendar/use-calendar-drag-n-drop';
+
+import CalendarCard from './calendar-card';
 import CalendarContent from './calendar-content';
 import CalendarFooter from './calendar-footer';
 import CalendarHeader from './calendar-header';
-import { useTranslation } from 'react-i18next';
 
 const CalendarView = () => {
   const {
     cells,
+    headers,
     currentView,
     currentDate,
     startDate,
     endDate,
     referenceDate,
+    customComponent,
     goToNextDate,
     goToPrevDate,
     goToCurrentDate,
     updateView,
-    customComponent
+    updateCells,
   } = useCalendarContext(); // replace with useCalendarContext
+
+  const {
+    handleDragEnd,
+    handleDragOver,
+    handleDragStart,
+    collisionDetection,
+    sensors,
+    dragState,
+    handleDragCancel,
+  } = useCalendarDragAndDrop({
+    cells,
+    onUpdateFn: updateCells,
+  });
 
   const { t } = useTranslation('views');
 
@@ -39,35 +60,62 @@ const CalendarView = () => {
     { label: t('calendar.view.week'), value: 'week' },
     { label: t('calendar.view.month'), value: 'month' },
   ];
-
   return (
-    <div className="flex h-full max-h-full min-h-0 w-full flex-col rounded-xl border border-gray-200">
-      {/* Header */}
-      <CalendarHeader
-        headers={cells?.headers}
-        gridClassName={gridClassNames[currentView].headers}
-      />
-      {/* Content */}
-      <CalendarContent
-        content={cells?.content}
-        gridClassName={gridClassNames[currentView].content}
-        customComponent={customComponent}
-        currentView={currentView}
-      />
-      {/* Footer */}
-      <CalendarFooter
-        currentDate={currentDate}
-        referenceDate={referenceDate}
-        startDate={startDate}
-        endDate={endDate}
-        currentView={currentView}
-        viewOptions={viewOptions}
-        updateView={updateView}
-        goToPrevDate={goToPrevDate}
-        goToCurrentDate={goToCurrentDate}
-        goToNextDate={goToNextDate}
-      />
-    </div>
+    <DndContext
+      onDragEnd={handleDragEnd}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragCancel={handleDragCancel}
+      sensors={sensors}
+      collisionDetection={collisionDetection}
+    >
+      {/* Include all items of all cells in the sortable context */}
+      <SortableContext
+        items={cells.flatMap((cell) => cell.items.map((item) => item.id))}
+
+      >
+        <div className="flex h-full max-h-full min-h-0 w-full flex-col rounded-xl border border-gray-200">
+          {/* Header */}
+          <CalendarHeader
+            headers={headers}
+            gridClassName={gridClassNames[currentView].headers}
+          />
+          {/* Content */}
+          <CalendarContent
+            content={cells}
+            gridClassName={gridClassNames[currentView].content}
+            customComponent={customComponent}
+            currentView={currentView}
+          />
+          {/* Footer */}
+          <CalendarFooter
+            currentDate={currentDate}
+            referenceDate={referenceDate}
+            startDate={startDate}
+            endDate={endDate}
+            currentView={currentView}
+            viewOptions={viewOptions}
+            updateView={updateView}
+            goToPrevDate={goToPrevDate}
+            goToCurrentDate={goToCurrentDate}
+            goToNextDate={goToNextDate}
+          />
+        </div>
+
+        <DragOverlay className="pointer-events-none">
+          {dragState?.item &&
+            (customComponent?.Card ? (
+              currentView === CalendarViewType.WEEK ? (
+                customComponent.Card({ item: dragState.item })
+              ) : currentView === CalendarViewType.MONTH ? (
+                <CalendarCard item={dragState.item} />
+              ) : (
+                <CalendarCard item={dragState.item} />
+              )
+            ) : null)}
+        </DragOverlay>
+      </SortableContext>
+    </DndContext>
   );
 };
 
