@@ -221,19 +221,19 @@ const useOrdersViewConfigs = ({
   // View options for switching between views
   const viewOptions: ViewOption[] = [
     {
-      label: t('views:kanban.title'),
+      label: 'Kanban',
       value: 'kanban',
       action: updateCurrentView,
       icon: Columns3,
     },
     {
-      label: t('views:table.title'),
+      label: 'Table',
       value: 'table',
       action: updateCurrentView,
       icon: Table,
     },
     {
-      label: t('views:calendar.title'),
+      label: 'Calendar',
       value: 'calendar',
       action: updateCurrentView,
       icon: Calendar,
