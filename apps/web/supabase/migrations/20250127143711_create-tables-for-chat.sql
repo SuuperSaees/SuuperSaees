@@ -1,4 +1,4 @@
-create type "public"."chat_role_type" as enum ('Project Manager', 'assistant', 'owner', 'guest');
+create type "public"."chat_role_type" as enum ('project_manager', 'assistant', 'owner', 'guest');
 
 create table "public"."chat_members" (
     "id" uuid not null,
