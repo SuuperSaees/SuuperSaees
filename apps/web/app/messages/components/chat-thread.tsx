@@ -1,35 +1,107 @@
 'use client';
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import ChatEmptyState from './chat-empty-state';
+import { getChatById, deleteChat, updateChat } from '~/server/actions/chat/actions/chats/chat.actions';
+import { useChat } from './context/chat-context';
+import EditableHeader from '~/components/editable-header';
+import { EllipsisVertical, Trash2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
+import { Button } from '@kit/ui/button';
+import { toast } from 'sonner';
 
 export default function ChatThread() {
   const [message, setMessage] = useState('');
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { activeChat, activeChatData } = useChat();
 
-  const handleSendMessage = () => {
-    console.log('Sending message:', message);
-    setMessage('');
+  // Efecto para manejar cambios en el chat activo
+  useEffect(() => {
+    if (activeChat) {
+      void queryClient.invalidateQueries({ queryKey: ['chat', activeChat] }  );
+      void queryClient.prefetchQuery({ queryKey: ['chat', activeChat], queryFn: async () => {
+        const response = await getChatById(activeChat);
+        if (!response.success) throw new Error(response.error?.message ?? 'Unknown error');
+        return response.success.data;
+      }});
+    }
+  }, [activeChat, queryClient]);
+
+  // Mutación para eliminar chat
+  const deleteChatMutation = useMutation({
+    mutationFn: async () => await deleteChat(activeChatData?.id.toString() ?? ''),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['chats'] });
+    }
+  });
+
+  // Query para obtener datos del chat
+  const { data: chatData, isLoading } = useQuery({
+    queryKey: ['chat', activeChat],
+    queryFn: async () => {
+      if (!activeChat) return null;
+      const response = await getChatById(activeChat);
+      if (!response.success) throw new Error(response.error?.message ?? 'Unknown error');
+      return response.success.data;
+    },
+    enabled: !!activeChat,
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    refetchOnReconnect: false
+  });
+
+  // Manejadores de eventos
+  const handleDelete = () => {
+    deleteChatMutation.mutate();
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  const handleUpdate = async (value: string) => {
+    try {
+      await updateChat({
+        id: Number(activeChatData?.id),
+        name: value,
+      });
+      void queryClient.invalidateQueries({ queryKey: ['chats'] });
+      toast.success('Success', {
+        description: 'Chat name updated',
+      });
+    } catch (error) {
+      console.error('Error updating chat name:', error);
+      toast.error('Error', {
+        description: 'Error updating chat name',
+      });
     }
   };
+
+  // Renderizado condicional
+  if (!activeChat || !activeChatData) {
+    return <ChatEmptyState />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <span>Loading chat...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b flex items-center justify-between">
+      <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img
-            src="https://via.placeholder.com/40"
-            alt="Chat avatar"
-            className="w-10 h-10 rounded-full object-cover"
+          <EditableHeader
+            initialName={activeChatData.name}
+            id={activeChatData.id.toString()}
+            userRole={'agency_owner'}
+            updateFunction={handleUpdate}
+            rolesThatCanEdit={new Set(['agency_owner'])}
           />
-          <div>
-            <h2 className="font-medium">Diseño de brandbook</h2>
-            <p className="text-sm text-gray-500">3 participants</p>
-          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -39,30 +111,35 @@ export default function ChatThread() {
               <path d="M12 5v14M5 12h14"/>
             </svg>
           </button>
-          <button
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            <Popover open={isPopupOpen} onOpenChange={setIsPopupOpen}>
+              <PopoverTrigger asChild>
+                <button className="p-2 hover:bg-gray-100 rounded-full">
+                  <EllipsisVertical className="w-5 h-5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-0" align="end">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start gap-2" 
+                  onClick={() => {
+                    setIsPopupOpen(false);
+                    handleDelete();
+                  }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Eliminar chat
+                </Button>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
 
       {/* Messages area */}
       <div className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-4">
-          {/* Example messages - replace with actual message components */}
-          <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg p-3 max-w-[70%]">
-              <p>Hola! ¿Cómo va todo?</p>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <div className="bg-blue-600 text-white rounded-lg p-3 max-w-[70%]">
-              <p>¡Todo bien! Trabajando en el diseño</p>
-            </div>
-          </div>
+          {/* Aquí irían los mensajes del chat */}
         </div>
       </div>
 
@@ -82,7 +159,6 @@ export default function ChatThread() {
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
               placeholder="Escribe un mensaje..."
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
             />

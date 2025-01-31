@@ -1,5 +1,6 @@
-import { BaseAction } from '../base-action';
-import { ChatController } from './controllers/chat.controllers';
+import { Chats } from '~/lib/chats.types';
+import { BaseAction } from '../../base-action';
+import { ChatController } from '../controllers/chats/chat.controllers';
 import {
   ChatPayload,
   ChatResponse,
@@ -36,6 +37,10 @@ export class ChatAction extends BaseAction {
 
   async deleteChat(chatId: string): Promise<DeleteChatResponse> {
     return await this.controller.deleteChat(chatId);
+  }
+
+  async updateChat(payload: Chats.Update): Promise<UpdateChatSettingsResponse> {
+    return await this.controller.updateChat(payload);
   }
 
   async updateChatSettings(
