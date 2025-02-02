@@ -1,10 +1,10 @@
 'use server';
 
-import { createChatAction } from './chat';
+import { createChatAction } from './chats';
 import {
   ChatPayload,
   UpdateChatSettingsPayload,
-} from './chat.interface';
+} from './chats.interface';
 import {
   ChatRoleType,
   validateChatRole,

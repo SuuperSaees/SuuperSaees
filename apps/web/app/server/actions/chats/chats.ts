@@ -1,6 +1,6 @@
 import { Chats } from '~/lib/chats.types';
 import { BaseAction } from '../base-action';
-import { ChatController } from './controllers/chat.controllers';
+import { ChatController } from './controllers/chats.controller';
 import {
   ChatPayload,
   ChatResponse,
@@ -8,7 +8,7 @@ import {
   GetChatByIdResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
-} from './chat.interface';
+} from './chats.interface';
 
 export class ChatAction extends BaseAction {
   private controller: ChatController;

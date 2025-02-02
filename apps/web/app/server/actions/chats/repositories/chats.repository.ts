@@ -9,7 +9,7 @@ import {
   GetChatByIdResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
-} from '../chat.interface';
+} from '../chats.interface';
 import { Chats } from '~/lib/chats.types';
 
 export class ChatRepository {

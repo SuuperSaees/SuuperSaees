@@ -4,7 +4,7 @@ import { SquarePen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 // import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createChat } from '~/server/actions/chats/chat.action';
+import { createChat } from '~/server/actions/chats/chats.action';
 import { Button } from '@kit/ui/button';
 import { useChat } from './context/chat-context';
 

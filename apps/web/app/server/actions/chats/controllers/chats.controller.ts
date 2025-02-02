@@ -11,9 +11,9 @@ import {
   GetChatByIdResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
-} from '../chat.interface';
-import { ChatRepository } from '../repositories/chat.repository';
-import { ChatService } from '../services/chat.service';
+} from '../chats.interface';
+import { ChatRepository } from '../repositories/chats.repository';
+import { ChatService } from '../services/chats.service';
 import { Chats } from '~/lib/chats.types';
 
 export class ChatController {

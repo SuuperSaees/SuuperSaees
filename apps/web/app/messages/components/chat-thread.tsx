@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import ChatEmptyState from './chat-empty-state';
-import { getChatById, deleteChat, updateChat } from '~/server/actions/chats/chat.action';
+import { getChatById, deleteChat, updateChat } from '~/server/actions/chats/chats.action';
 import { useChat } from './context/chat-context';
 import EditableHeader from '~/components/editable-header';
 import { EllipsisVertical, Trash2 } from 'lucide-react';

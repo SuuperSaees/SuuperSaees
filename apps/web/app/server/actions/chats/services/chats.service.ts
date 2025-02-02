@@ -7,8 +7,8 @@ import {
   GetChatByIdResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
-} from '../chat.interface';
-import { ChatRepository } from '../repositories/chat.repository';
+} from '../chats.interface';
+import { ChatRepository } from '../repositories/chats.repository';
 import { Chats } from '~/lib/chats.types';
 
 
