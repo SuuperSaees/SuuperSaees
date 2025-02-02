@@ -27,19 +27,26 @@ export class TeamRepository {
       members: [],
     }
 
+    const { data: organizationSettings } = await this.client
+    .from('organization_settings')
+    .select('value')
+    .eq('key', 'logo_url')
+    .eq('account_id', organizationId)
+
     const { data: agencyOrganization, error: agencyOrganizationError } = await this.client
     .from('accounts')
-    .select('id, name, logo_url:organizations_settings(logo_url)')
+    .select('id, name')
     .eq('id', organizationId)
     .single();
-
+    
     if (agencyOrganizationError) throw agencyOrganizationError;
     
     resultMembers.organizations.push({
       id: agencyOrganization.id,
       name: agencyOrganization.name,
-      logo_url: agencyOrganization.logo_url[0] ?? '',
+      logo_url: organizationSettings?.[0]?.value ?? '',
     });
+
 
     if (isAgency) {
       
@@ -51,18 +58,25 @@ export class TeamRepository {
       if (clientOrganizationsError) throw clientOrganizationsError;
 
       const clientOrganizationIds = clientOrganizations.map((client) => client.organization_client_id);
+      
+      const { data: clientOrganizationsSettings} = await this.client
+      .from('organization_settings')
+      .select('value, account_id')
+      .eq('key', 'logo_url')
+      .in('account_id', clientOrganizationIds);
 
       const { data: clientOrganizationsData, error: clientOrganizationsDataError } = await this.client
       .from('accounts')
-      .select('id, name, logo_url:organizations_settings(logo_url)')
+      .select('id, name')
       .in('id', clientOrganizationIds);
+
 
       if (clientOrganizationsDataError) throw clientOrganizationsDataError;
 
       resultMembers.organizations.push(...clientOrganizationsData.map((client) => ({
         id: client.id,
         name: client.name,
-        logo_url: client.logo_url[0] ?? '',
+        logo_url: clientOrganizationsSettings?.find((setting) => setting.account_id === client.id)?.value ?? '',
       })));
 
       const { data: agencyMembersIds, error: agencyMembersIdsError } = await this.client

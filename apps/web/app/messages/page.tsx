@@ -11,8 +11,6 @@ export default async function MessagesPage() {
   const userOrganization = await getOrganizationByUserId(userWorkspace.id ?? '');
   const teams = await getTeams({ organizationId: userOrganization.id ?? '', role: userWorkspace.role ?? '' });
 
-  console.log(teams, "HOLA");
-
   return (
     <ChatProvider>
       <div className="h-full flex border-t">
@@ -23,7 +21,7 @@ export default async function MessagesPage() {
         </div>
         <div className="flex-1 flex flex-col bg-white">
           <Suspense fallback={<div>Loading...</div>}>
-            <ChatThread />
+            <ChatThread teams={teams}/>
           </Suspense>
         </div>
       </div>

@@ -10,13 +10,17 @@ import { EllipsisVertical, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Button } from '@kit/ui/button';
 import { toast } from 'sonner';
+import { Members } from '~/lib/members.types';
+import ChatMembersSelector from './chat-members-selector';
+import { addMembers } from '~/server/actions/chat-members/members.actions';
 
-
-export default function ChatThread() {
+export default function ChatThread({ teams }: { teams: Members.Type }) {
   const [message, setMessage] = useState('');
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const queryClient = useQueryClient();
   const { activeChat, activeChatData } = useChat();
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+
 
   // Efecto para manejar cambios en el chat activo
   useEffect(() => {
@@ -39,7 +43,37 @@ export default function ChatThread() {
     }
   });
 
+  const addMembersMutation = useMutation({
+    mutationFn: async () => await addMembers({
+      chat_id: activeChatData?.id.toString() ?? '',
+      members: selectedMembers.map(member => ({
+        user_id: member,
+        role: 'guest'
+      }))
+    }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['chats'] });
+      toast.success('Success', {
+        description: 'Chat members updated',
+      });
+    },
+    onError: () => {
+      toast.error('Error', {
+        description: 'Error updating chat members',
+      });
+    }
+  });
+
+
+  const handleMembersUpdate = (memberIds: string[]) => {
+    setSelectedMembers(memberIds);
+    addMembersMutation.mutate();
+    // Here you would add your API call to update chat members
+  };
+
+
   // Query para obtener datos del chat
+
   const { data: chatData, isLoading } = useQuery({
     queryKey: ['chat', activeChat],
     queryFn: async () => {
@@ -106,13 +140,11 @@ export default function ChatThread() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <button
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-          </button>
+            <ChatMembersSelector
+            teams={teams}
+            selectedMembers={selectedMembers}
+            onMembersUpdate={handleMembersUpdate}
+          />
           <div className="flex items-center gap-2">
             <Popover open={isPopupOpen} onOpenChange={setIsPopupOpen}>
               <PopoverTrigger asChild>

@@ -18,12 +18,6 @@ function getMembersAction() {
 }
 
 export async function addMembers(payload: AddMembersPayload) {
-  payload.members.forEach((member) => {
-    validateChatRole(['owner', 'project_manager'] as ChatRoleType[], [
-      member.role,
-    ]);
-  });
-
   return await getMembersAction().addMembers(payload);
 }
 
