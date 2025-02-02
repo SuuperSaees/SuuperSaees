@@ -12,7 +12,7 @@ import {
   GetMessagesResponse,
   UpdateMessageContentPayload,
   UpdateMessageContentResponse,
-} from '../interfaces/message-interfaces';
+} from '../message.interface';
 
 export class MessagesRepository {
   private client: SupabaseClient;

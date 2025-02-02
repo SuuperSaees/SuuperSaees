@@ -9,7 +9,7 @@ import {
   GetChatsResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
-} from './interfaces/chat-interfaces';
+} from './chat.interface';
 
 export class ChatAction extends BaseAction {
   private controller: ChatController;

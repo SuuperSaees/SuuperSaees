@@ -1,4 +1,4 @@
-import { ChatRoleType } from '../middleware/validate_chat_role';
+import { ChatRoleType } from './middleware/validate_chat_role';
 
 export interface ChatPayload {
   name: string;

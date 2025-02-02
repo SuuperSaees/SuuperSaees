@@ -9,7 +9,7 @@ import {
   ClearChatMessagesPayload,
   DeleteMessagePayload,
   UpdateMessageContentPayload,
-} from './interfaces/message-interfaces';
+} from './message.interface';
 import { createMessagesAction } from './messages';
 
 function getMessagesAction() {

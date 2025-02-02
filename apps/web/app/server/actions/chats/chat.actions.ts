@@ -4,7 +4,7 @@ import { createChatAction } from './chat';
 import {
   ChatPayload,
   UpdateChatSettingsPayload,
-} from './interfaces/chat-interfaces';
+} from './chat.interface';
 import {
   ChatRoleType,
   validateChatRole,

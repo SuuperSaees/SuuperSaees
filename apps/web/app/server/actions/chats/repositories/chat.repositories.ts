@@ -10,7 +10,7 @@ import {
   GetChatsResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
-} from '../interfaces/chat-interfaces';
+} from '../chat.interface';
 
 export class ChatRepository {
   private client: SupabaseClient;

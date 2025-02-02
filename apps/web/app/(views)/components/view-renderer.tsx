@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { useViewContext } from '../contexts/view-context';
 import KanbanSkeleton from './kanban/kanban-skeleton';
 import TableSkeleton from './table/table-skeleton';
+import { ViewTypeEnum } from '../views.types';
 
 // Dynamically import the views => this allows us to lazy load the components
 const KanbanView = dynamic(() => import('./kanban/kanban-view'), {
@@ -29,11 +30,11 @@ const TableView = dynamic(() => import('./table/table-view'), {
 const ViewRenderer = () => {
   const { viewType } = useViewContext();
   switch (viewType) {
-    case 'kanban':
+    case ViewTypeEnum.Kanban:
       return <KanbanView />;
-    case 'calendar':
+    case ViewTypeEnum.Calendar:
       return <CalendarView />;
-    case 'table':
+    case ViewTypeEnum.Table:
       return <TableView />;
     default:
       return null;

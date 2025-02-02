@@ -9,7 +9,7 @@ import {
   UpdateMemberSettingsPayload,
   UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
-} from '../interfaces/members-interfaces';
+} from '../members.interface';
 
 export class MembersRepository {
   private client: SupabaseClient;

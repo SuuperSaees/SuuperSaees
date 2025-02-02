@@ -11,7 +11,7 @@ import {
   UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
-} from '../interfaces/members-interfaces';
+} from '../members.interface';
 import { MembersRepository } from '../repositories/members.repositories';
 
 export class MembersService {

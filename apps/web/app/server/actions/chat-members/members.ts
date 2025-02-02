@@ -13,7 +13,7 @@ import {
   UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
-} from './interfaces/members-interfaces';
+} from './members.interface';
 
 export class MembersAction extends BaseAction {
   private controller: MembersController;

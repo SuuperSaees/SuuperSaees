@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +11,7 @@ import KanbanSkeleton from '~/(views)/components/kanban/kanban-skeleton';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { ViewProvider } from '~/(views)/contexts/view-context';
 import { ViewInitialConfigurations } from '~/(views)/view-config.types';
-import { UpdateFunction, ViewItem, ViewType } from '~/(views)/views.types';
+import { UpdateFunction, ViewItem, ViewTypeEnum } from '~/(views)/views.types';
 import { Tags } from '~/lib/tags.types';
 import { User } from '~/lib/user.types';
 
@@ -122,15 +122,25 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     role,
     hasOrders: orders.length > 0,
   });
+
+  const mutedOrders = useMemo(() => {
+    if (currentView === 'calendar') {
+      return filteredOrders.map((order) => ({
+        ...order,
+        color: statuses.find((status) => status.id === order.status_id)?.status_color,
+      }));
+    }
+    return filteredOrders;
+  }, [filteredOrders, currentView, statuses]);
   return (
     <ViewProvider
-      initialData={filteredOrders as ViewItem[]}
-      initialViewType={currentView as ViewType}
+      initialData={mutedOrders as ViewItem[]}
+      initialViewType={currentView as ViewTypeEnum}
       initialConfigurations={
         viewInitialConfiguarations as unknown as ViewInitialConfigurations<ViewItem>
       }
       onUpdateFn={handleUpdateOrder as UpdateFunction}
-      data={filteredOrders as ViewItem[]}
+      data={mutedOrders as ViewItem[]}
       setData={setOrders as Dispatch<SetStateAction<ViewItem[]>>}
       availableProperties={
         viewAvailableProperties as unknown as [keyof ViewItem]

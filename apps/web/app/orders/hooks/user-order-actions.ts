@@ -69,7 +69,7 @@ export function useUserOrderActions(
     }: {
       updatedOrder: Order.Type | null;
     }) => {
-      console.log('updatedOrder', updatedOrder);
+      // console.log('updatedOrder', updatedOrder);
 
       updatedOrder
         ? queryClient.setQueryData(['orders'], (old: Order.Response[]) =>
@@ -160,8 +160,8 @@ export function useUserOrderActions(
     }) => {
       return updateOrderAssigns(orderId, agencyMemberIds);
     },
-    onSuccess: async (newAssignees) => {
-      console.log('assignees', newAssignees);
+    onSuccess: async () => {
+      // console.log('assignees', newAssignees);
       toast.success('Success', {
         description: t('success.orders.orderAssigneesUpdated'),
       });
