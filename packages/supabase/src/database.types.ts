@@ -826,47 +826,56 @@ export type Database = {
       }
       chats: {
         Row: {
-          account_id: string
           created_at: string | null
+          deleted_on: string | null
           id: number
           name: string
           reference_id: string
           settings: Json
+          updated_at: string | null
+          user_id: string
+          visibility: boolean
         }
         Insert: {
-          account_id: string
           created_at?: string | null
+          deleted_on?: string | null
           id?: number
           name: string
           reference_id: string
           settings?: Json
+          updated_at?: string | null
+          user_id: string
+          visibility?: boolean
         }
         Update: {
-          account_id?: string
           created_at?: string | null
+          deleted_on?: string | null
           id?: number
           name?: string
           reference_id?: string
           settings?: Json
+          updated_at?: string | null
+          user_id?: string
+          visibility?: boolean
         }
         Relationships: [
           {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
