@@ -9,8 +9,8 @@ import {
   ClearChatMessagesPayload,
   DeleteMessagePayload,
   UpdateMessageContentPayload,
-} from './message.interface';
-import { createMessagesAction } from './messages';
+} from './chat-messages.interface';
+import { createMessagesAction } from './chat-messages';
 
 function getMessagesAction() {
   return createMessagesAction(process.env.NEXT_PUBLIC_SITE_URL as string);

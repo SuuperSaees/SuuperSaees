@@ -1,5 +1,5 @@
 import { BaseAction } from '../base-action';
-import { MessagesController } from './controllers/messages.controllers';
+import { MessagesController } from './controllers/chat-messages.controller';
 import {
   ChatMessagePayload,
   ChatMessageResponse,
@@ -10,7 +10,7 @@ import {
   GetMessagesResponse,
   UpdateMessageContentPayload,
   UpdateMessageContentResponse,
-} from './message.interface';
+} from './chat-messages.interface';
 
 export class MessagesAction extends BaseAction {
   private controller: MessagesController;
