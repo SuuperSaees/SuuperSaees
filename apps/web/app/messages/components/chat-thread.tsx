@@ -12,13 +12,13 @@ import { Button } from '@kit/ui/button';
 import { toast } from 'sonner';
 import { Members } from '~/lib/members.types';
 import ChatMembersSelector from './chat-members-selector';
-import { addMembers } from '~/server/actions/chat-members/members.actions';
+import { addMembers } from '~/server/actions/chat-members/members.action';
 
-export default function ChatThread({ teams }: { teams: Members.Type }) {
+export default function ChatThread({ teams, userId }: { teams: Members.Type, userId: string }) {
   const [message, setMessage] = useState('');
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { activeChat, activeChatData } = useChat();
+  const { activeChat, activeChatData, setActiveChat, setActiveChatData } = useChat();
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
 
@@ -40,8 +40,20 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
     mutationFn: async () => await deleteChat(activeChatData?.id.toString() ?? ''),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['chats'] });
+      toast.success('Success', {
+        description: 'Chat deleted',
+      });
+      setActiveChat(null);
+      setActiveChatData(null);
+    },
+    onError: () => {
+      toast.error('Error', {
+
+        description: 'Error deleting chat',
+      });
     }
   });
+
 
   const addMembersMutation = useMutation({
     mutationFn: async () => await addMembers({
@@ -115,7 +127,7 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
 
   // Renderizado condicional
   if (!activeChat || !activeChatData) {
-    return <ChatEmptyState />;
+    return <ChatEmptyState userId={userId} />;
   }
 
   if (isLoading) {

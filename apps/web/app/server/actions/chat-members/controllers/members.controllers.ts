@@ -16,8 +16,8 @@ import {
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
 } from '../members.interface';
-import { MembersRepository } from '../repositories/members.repositories';
-import { MembersService } from '../services/members.services';
+import { MembersRepository } from '../repositories/members.repository';
+import { MembersService } from '../services/members.service';
 
 export class MembersController {
   private membersService: MembersService;

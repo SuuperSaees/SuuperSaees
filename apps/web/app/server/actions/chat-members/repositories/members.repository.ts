@@ -33,7 +33,7 @@ export class MembersRepository {
       members.map((member) => ({
         chat_id,
         user_id: member.user_id,
-        role: member.role,
+        type: member.role,
       })),
     );
 

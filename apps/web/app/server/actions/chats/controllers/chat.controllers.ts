@@ -2,7 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
 
-import { MembersRepository } from '../../chat-members/repositories/members.repositories';
+import { MembersRepository } from '../../chat-members/repositories/members.repository';
 import { MessagesRepository } from '../../chat-messages/repositories/messages.respositories';
 import {
   ChatPayload,

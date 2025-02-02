@@ -8,7 +8,7 @@ import { createChat } from '~/server/actions/chats/chat.action';
 import { Button } from '@kit/ui/button';
 import { useChat } from './context/chat-context';
 
-export default function ChatSearchHeader() {
+export default function ChatSearchHeader({ userId }: { userId: string }) {
   // const router = useRouter();
   const queryClient = useQueryClient();
   const { t } = useTranslation('chats');
@@ -17,11 +17,12 @@ export default function ChatSearchHeader() {
   const createChatMutation = useMutation({
     mutationFn: () => createChat({
       name: 'New Chat',
-      user_id: 'acf26def-78fd-400f-bccc-c61a86137a1f',
+      user_id: userId,
       members: [],
       visibility: true,
       image: '',
       role: ['owner'],
+
     }),
     onSuccess: (response) => {
       console.log('response', response);

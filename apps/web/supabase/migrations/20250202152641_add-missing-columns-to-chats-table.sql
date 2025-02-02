@@ -12,6 +12,8 @@ alter table "public"."chats" add column "updated_at" timestamp with time zone;
 
 alter table "public"."chats" add column "user_id" uuid not null;
 
+alter table "public"."chats" alter column "reference_id" drop not null;
+
 alter table "public"."chats" add column "visibility" boolean not null default true;
 
 CREATE INDEX ix_chats_account_id ON public.chats USING btree (user_id);

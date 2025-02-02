@@ -16,12 +16,13 @@ export default async function MessagesPage() {
       <div className="h-full flex border-t">
         <div className="w-[380px] border-r flex flex-col bg-white">
           <Suspense fallback={<div>Loading...</div>}>
-            <ChatInbox />
+            <ChatInbox userId={userWorkspace.id ?? ''}/>
           </Suspense>
         </div>
         <div className="flex-1 flex flex-col bg-white">
+
           <Suspense fallback={<div>Loading...</div>}>
-            <ChatThread teams={teams}/>
+            <ChatThread teams={teams} userId={userWorkspace.id ?? ''} />
           </Suspense>
         </div>
       </div>

@@ -12,7 +12,7 @@ import {
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
 } from '../members.interface';
-import { MembersRepository } from '../repositories/members.repositories';
+import { MembersRepository } from '../repositories/members.repository';
 
 export class MembersService {
   constructor(private readonly membersRepository: MembersRepository) {}

@@ -7,19 +7,20 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createChat } from '~/server/actions/chats/chat.action';
 import { useChat } from './context/chat-context';
 
-export default function ChatEmptyState() {
+export default function ChatEmptyState({ userId }: { userId: string }) {
     const { t } = useTranslation('chats');
     const { setActiveChat, setActiveChatData } = useChat();
     const queryClient = useQueryClient();
     const createChatMutation = useMutation({
       mutationFn: () => createChat({
         name: 'New Chat',
-        user_id: 'acf26def-78fd-400f-bccc-c61a86137a1f',
+        user_id: userId,
         members: [],
         visibility: true,
         image: '',
         role: ['owner'],
       }),
+
       onSuccess: (response) => {
         console.log('response', response);
         const newChat = response.success?.data;
