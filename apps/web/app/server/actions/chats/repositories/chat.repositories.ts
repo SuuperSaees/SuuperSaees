@@ -7,10 +7,10 @@ import {
   ChatResponse,
   DeleteChatResponse,
   GetChatByIdResponse,
-  GetChatsResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
 } from '../chat.interface';
+import { Chats } from '~/lib/chats.types';
 
 export class ChatRepository {
   private client: SupabaseClient;
@@ -47,34 +47,21 @@ export class ChatRepository {
   }
 
   // * GET REPOSITORIES
-  async getChats(): Promise<GetChatsResponse[]> {
+  async getChats(): Promise<Chats.Type[]> {
     const client = this.adminClient ?? this.client;
-    const { data, error } = await client.from('chats').select(`
-        id,
-        name,
-        user_id,
-        settings,
-        visibility,
-        image,
-        created_at,
-        chat_members (user_id)
-      `);
+    const { data, error } = await client
+    .from('chats')
+    .select(`*`)
+    .is('deleted_on', null);
+
 
     if (error) {
       throw new Error(`Error fetching chats: ${error.message}`);
     }
 
-    return (data || []).map((chat) => ({
-      id: chat.id,
-      name: chat.name,
-      user_id: chat.user_id,
-      settings: chat.settings,
-      visibility: chat.visibility,
-      image: chat.image,
-      created_at: chat.created_at,
-      members_count: chat.chat_members?.length || 0,
-    })) as GetChatsResponse[];
+    return data as Chats.Type[];
   }
+
 
   async getChatById(chatId: string): Promise<GetChatByIdResponse> {
     const client = this.adminClient ?? this.client;
@@ -158,5 +145,16 @@ export class ChatRepository {
       success: true,
       message: `Chat settings updated successfully for ${payload.chat_id}.`,
     };
+  }
+
+  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
+    const client = this.adminClient ?? this.client;
+    const { data, error } = await client.from('chats').update(payload).eq('id', payload.id).select().single();
+
+    if (error) {
+      throw new Error(`Error updating chat ${payload.id}: ${error.message}`);
+    }
+
+    return data as Chats.Type;
   }
 }

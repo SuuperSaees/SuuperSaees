@@ -16,7 +16,7 @@ export default function ChatItem({ chat, isActive = false, onSelect }: { chat: C
       }`}
     >
       <div className="relative">
-        <MessageCircle className="w-10 h-10 rounded-full object-cover" />
+        <MessageCircle className="w-12 h-12 rounded-full object-cover p-2 pl-4" />
         <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
       </div>
       <div className="flex-1 min-w-0">

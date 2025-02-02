@@ -5,11 +5,11 @@ import {
   ChatResponse,
   DeleteChatResponse,
   GetChatByIdResponse,
-  GetChatsResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
 } from '../chat.interface';
 import { ChatRepository } from '../repositories/chat.repositories';
+import { Chats } from '~/lib/chats.types';
 
 export class ChatService {
   constructor(
@@ -36,7 +36,7 @@ export class ChatService {
   }
 
   // * GET SERVICES
-  async getChats(): Promise<GetChatsResponse[]> {
+  async getChats(): Promise<Chats.Type[]> {
     return await this.chatRepository.getChats();
   }
 
@@ -58,5 +58,9 @@ export class ChatService {
     payload: UpdateChatSettingsPayload,
   ): Promise<UpdateChatSettingsResponse> {
     return await this.chatRepository.updateChatSettings(payload);
+  }
+
+  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
+    return await this.chatRepository.updateChat(payload);
   }
 }

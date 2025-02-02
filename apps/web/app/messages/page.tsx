@@ -2,9 +2,17 @@ import ChatInbox from './components/chat-inbox';
 import ChatThread from './components/chat-thread';
 import { Suspense } from 'react';
 import { ChatProvider } from './components/context/chat-context';
+import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+import { getTeams } from '~/server/actions/team/team.action';
 
+export default async function MessagesPage() {
+  const { workspace: userWorkspace } = await loadUserWorkspace();
+  const userOrganization = await getOrganizationByUserId(userWorkspace.id ?? '');
+  const teams = await getTeams({ organizationId: userOrganization.id ?? '', role: userWorkspace.role ?? '' });
 
-export default function MessagesPage() {
+  console.log(teams, "HOLA");
+
   return (
     <ChatProvider>
       <div className="h-full flex border-t">

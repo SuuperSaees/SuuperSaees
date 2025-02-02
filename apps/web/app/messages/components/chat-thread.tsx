@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import ChatEmptyState from './chat-empty-state';
-import { getChatById, deleteChat, updateChat } from '~/server/actions/chat/actions/chats/chat.actions';
+import { getChatById, deleteChat, updateChat } from '~/server/actions/chats/chat.actions';
 import { useChat } from './context/chat-context';
 import EditableHeader from '~/components/editable-header';
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Button } from '@kit/ui/button';
 import { toast } from 'sonner';
+
 
 export default function ChatThread() {
   const [message, setMessage] = useState('');
@@ -23,8 +24,9 @@ export default function ChatThread() {
       void queryClient.invalidateQueries({ queryKey: ['chat', activeChat] }  );
       void queryClient.prefetchQuery({ queryKey: ['chat', activeChat], queryFn: async () => {
         const response = await getChatById(activeChat);
-        if (!response.success) throw new Error(response.error?.message ?? 'Unknown error');
-        return response.success.data;
+        if (!response) throw new Error('Unknown error');
+        return response;
+
       }});
     }
   }, [activeChat, queryClient]);
@@ -43,8 +45,9 @@ export default function ChatThread() {
     queryFn: async () => {
       if (!activeChat) return null;
       const response = await getChatById(activeChat);
-      if (!response.success) throw new Error(response.error?.message ?? 'Unknown error');
-      return response.success.data;
+      if (!response) throw new Error('Unknown error');
+      return response;
+
     },
     enabled: !!activeChat,
     staleTime: 0,
@@ -53,11 +56,10 @@ export default function ChatThread() {
     refetchOnMount: true,
     refetchOnReconnect: false
   });
-
-  // Manejadores de eventos
   const handleDelete = () => {
     deleteChatMutation.mutate();
   };
+
 
   const handleUpdate = async (value: string) => {
     try {

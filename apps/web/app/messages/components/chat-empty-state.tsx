@@ -4,7 +4,7 @@ import EmptyState from '~/components/ui/empty-state';
 import { useTranslation } from 'react-i18next';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createChat } from '~/server/actions/chat/actions/chats/chat.actions';
+import { createChat } from '~/server/actions/chats/chat.actions';
 import { useChat } from './context/chat-context';
 
 export default function ChatEmptyState() {

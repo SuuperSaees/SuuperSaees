@@ -1,10 +1,10 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Chats } from "~/lib/chats.types";
 import ChatItem from "./chat-item";
-import { getChats } from '~/server/actions/chat/actions/chats/chat.actions';
+import { getChats } from '~/server/actions/chats/chat.actions';
 import { useChat } from './context/chat-context';
+import { Chats } from '~/lib/chats.types';
 
 export default function ChatList() {
   const { activeChat, setActiveChat, setActiveChatData } = useChat();
@@ -13,12 +13,14 @@ export default function ChatList() {
     queryKey: ['chats'],
     queryFn: async () => {
       const response = await getChats();
-      if (!response.success) throw new Error(response.error?.message ?? 'Unknown error');
-      if(!activeChat && response.success.data.length > 0) {
-        setActiveChat(response.success.data[0].id.toString());
-        setActiveChatData(response.success.data[0]);
+
+      if (!response) throw new Error('Unknown error');
+      if(!activeChat && response.length > 0) {
+        setActiveChat(response[0].id.toString());
+        setActiveChatData(response[0]);
       }
-      return response.success.data as unknown as Chats.Type[];
+      return response as unknown as Chats.Type[];
+
     }
   });
 

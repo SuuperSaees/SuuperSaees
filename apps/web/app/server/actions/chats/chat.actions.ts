@@ -9,6 +9,7 @@ import {
   ChatRoleType,
   validateChatRole,
 } from './middleware/validate_chat_role';
+import { Chats } from '~/lib/chats.types';
 
 function getChatAction() {
   return createChatAction(process.env.NEXT_PUBLIC_SITE_URL as string);
@@ -37,3 +38,8 @@ export async function deleteChat(chatId: string) {
 export async function updateChatSettings(payload: UpdateChatSettingsPayload) {
   return await getChatAction().updateChatSettings(payload);
 }
+
+export async function updateChat(payload: Chats.Update) {
+  return await getChatAction().updateChat(payload);
+}
+

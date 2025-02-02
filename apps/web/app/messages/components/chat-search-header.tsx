@@ -4,7 +4,7 @@ import { SquarePen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 // import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createChat } from '~/server/actions/chat/actions/chats/chat.actions';
+import { createChat } from '~/server/actions/chats/chat.actions';
 import { Button } from '@kit/ui/button';
 import { useChat } from './context/chat-context';
 
@@ -25,12 +25,13 @@ export default function ChatSearchHeader() {
     }),
     onSuccess: (response) => {
       console.log('response', response);
-      const newChat = response.success?.data;
+      const newChat = response;
       if (newChat) {
         setActiveChat(newChat.id);
         setActiveChatData(newChat);
       }
       void queryClient.invalidateQueries({ queryKey: ['chats'] });
+
     },
   });
 

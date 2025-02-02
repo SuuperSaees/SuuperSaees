@@ -1,12 +1,11 @@
 import { Chats } from '~/lib/chats.types';
-import { BaseAction } from '../../base-action';
-import { ChatController } from '../controllers/chats/chat.controllers';
+import { BaseAction } from '../base-action';
+import { ChatController } from './controllers/chat.controllers';
 import {
   ChatPayload,
   ChatResponse,
   DeleteChatResponse,
   GetChatByIdResponse,
-  GetChatsResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
 } from './chat.interface';
@@ -27,7 +26,7 @@ export class ChatAction extends BaseAction {
     return await this.controller.createChat(payload);
   }
 
-  async getChats(): Promise<GetChatsResponse[]> {
+  async getChats(): Promise<Chats.Type[]> {
     return await this.controller.getChats();
   }
 
@@ -39,7 +38,7 @@ export class ChatAction extends BaseAction {
     return await this.controller.deleteChat(chatId);
   }
 
-  async updateChat(payload: Chats.Update): Promise<UpdateChatSettingsResponse> {
+  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
     return await this.controller.updateChat(payload);
   }
 

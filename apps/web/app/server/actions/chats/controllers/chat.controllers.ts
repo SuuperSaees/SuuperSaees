@@ -9,12 +9,12 @@ import {
   ChatResponse,
   DeleteChatResponse,
   GetChatByIdResponse,
-  GetChatsResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
 } from '../chat.interface';
 import { ChatRepository } from '../repositories/chat.repositories';
 import { ChatService } from '../services/chat.services';
+import { Chats } from '~/lib/chats.types';
 
 export class ChatController {
   private chatService: ChatService;
@@ -46,7 +46,7 @@ export class ChatController {
   }
 
   // * GET CONTROLLERS
-  async getChats(): Promise<GetChatsResponse[]> {
+  async getChats(): Promise<Chats.Type[]> {
     try {
       return await this.chatService.getChats();
     } catch (error) {
@@ -80,6 +80,15 @@ export class ChatController {
   ): Promise<UpdateChatSettingsResponse> {
     try {
       return await this.chatService.updateChatSettings(payload);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
+    try {
+      return await this.chatService.updateChat(payload);
     } catch (error) {
       console.error(error);
       throw error;
