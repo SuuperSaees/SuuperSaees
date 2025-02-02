@@ -6,6 +6,8 @@ alter table "public"."chats" drop column "account_id";
 
 alter table "public"."chats" add column "deleted_on" timestamp with time zone;
 
+alter table "public"."chats" add column "image" text;
+
 alter table "public"."chats" add column "updated_at" timestamp with time zone;
 
 alter table "public"."chats" add column "user_id" uuid not null;
