@@ -65,6 +65,7 @@ export class ChatRepository {
 
   async getChatById(chatId: string): Promise<GetChatByIdResponse> {
     const client = this.adminClient ?? this.client;
+
     const { data: chat, error } = await client
       .from('chats')
       .select(
@@ -80,11 +81,11 @@ export class ChatRepository {
         deleted_on,
         chat_members (
           user_id,
-          role
+          type
         ),
         chat_messages (
           id,
-          user_id,
+          account_id,
           content,
           role,
           created_at
@@ -98,6 +99,18 @@ export class ChatRepository {
       throw new Error(`Error fetching chat ${chatId}: ${error.message}`);
     }
 
+    const membersIds = chat.chat_members?.map((member) => member.user_id as string);
+
+    const { data: members, error: membersError } = await client
+      .from('user_settings')
+      .select('user_id, name, picture_url, email:accounts(email)')
+      .in('user_id', membersIds);
+
+
+    if (membersError) {
+      throw new Error(`Error fetching members: ${membersError.message}`);
+    }
+
     return {
       id: chat.id,
       name: chat.name,
@@ -108,10 +121,16 @@ export class ChatRepository {
       created_at: chat.created_at,
       updated_at: chat.updated_at,
       deleted_on: chat.deleted_on,
-      members: chat.chat_members || [],
+      members: members?.map((member) => ({
+        id: member.user_id,
+        name: member.name,
+        email: typeof member.email === 'string' ? member.email : member.email?.[0]?.email ?? '',
+        picture_url: member.picture_url,
+      })) || [],
       messages: chat.chat_messages || [],
     } as GetChatByIdResponse;
   }
+
 
   // * DELETE REPOSITORIES
   async deleteChat(chatId: string): Promise<DeleteChatResponse> {

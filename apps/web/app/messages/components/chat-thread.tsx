@@ -83,25 +83,22 @@ export default function ChatThread({ teams, userId }: { teams: Members.Type, use
     // Here you would add your API call to update chat members
   };
 
-
-  // Query para obtener datos del chat
-
   const { data: chatData, isLoading } = useQuery({
     queryKey: ['chat', activeChat],
     queryFn: async () => {
       if (!activeChat) return null;
       const response = await getChatById(activeChat);
       if (!response) throw new Error('Unknown error');
+      setSelectedMembers(response.members?.map((member) => member.id) ?? []);
       return response;
-
     },
     enabled: !!activeChat,
     staleTime: 0,
-    cacheTime: 0,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: false
   });
+
   const handleDelete = () => {
     deleteChatMutation.mutate();
   };
