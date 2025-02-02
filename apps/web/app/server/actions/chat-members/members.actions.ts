@@ -1,15 +1,11 @@
 'use server';
-
-import {
-  ChatRoleType,
-  validateChatRole,
-} from '../chats/middleware/validate_chat_role';
 import {
   AddMembersPayload,
   RemoveMemberPayload,
   ResetMemberSettingsPayload,
   UpdateMemberSettingsPayload,
   UpdateMemberVisibilityPayload,
+
 } from './members.interface';
 import { createMembersAction } from './members';
 

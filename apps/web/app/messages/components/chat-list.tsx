@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import ChatItem from "./chat-item";
-import { getChats } from '~/server/actions/chats/chat.actions';
+import { getChats } from '~/server/actions/chats/chat.action';
 import { useChat } from './context/chat-context';
 import { Chats } from '~/lib/chats.types';
 

@@ -8,8 +8,9 @@ import {
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
 } from '../chat.interface';
-import { ChatRepository } from '../repositories/chat.repositories';
+import { ChatRepository } from '../repositories/chat.repository';
 import { Chats } from '~/lib/chats.types';
+
 
 export class ChatService {
   constructor(

@@ -12,12 +12,13 @@ import {
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
 } from '../chat.interface';
-import { ChatRepository } from '../repositories/chat.repositories';
-import { ChatService } from '../services/chat.services';
+import { ChatRepository } from '../repositories/chat.repository';
+import { ChatService } from '../services/chat.service';
 import { Chats } from '~/lib/chats.types';
 
 export class ChatController {
   private chatService: ChatService;
+
 
   constructor(
     baseUrl: string,
