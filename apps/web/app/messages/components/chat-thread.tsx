@@ -110,7 +110,7 @@ export default function ChatThread({ teams, userId }: { teams: Members.Type, use
   const handleUpdate = async (value: string) => {
     try {
       await updateChat({
-        id: Number(activeChatData?.id),
+        id: activeChatData?.id,
         name: value,
       });
       void queryClient.invalidateQueries({ queryKey: ['chats'] });
