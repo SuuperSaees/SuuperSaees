@@ -12,7 +12,7 @@ import { Button } from '@kit/ui/button';
 import { toast } from 'sonner';
 import { Members } from '~/lib/members.types';
 import ChatMembersSelector from './chat-members-selector';
-import { addMembers } from '~/server/actions/chat-members/members.action';
+import { addMembers } from '~/server/actions/chat-members/chat-members.action';
 
 export default function ChatThread({ teams, userId }: { teams: Members.Type, userId: string }) {
   const [message, setMessage] = useState('');

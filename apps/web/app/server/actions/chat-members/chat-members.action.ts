@@ -6,8 +6,8 @@ import {
   UpdateMemberSettingsPayload,
   UpdateMemberVisibilityPayload,
 
-} from './members.interface';
-import { createMembersAction } from './members';
+} from './chat-members.interface';
+import { createMembersAction } from './chat-members';
 
 function getMembersAction() {
   return createMembersAction(process.env.NEXT_PUBLIC_SITE_URL as string);

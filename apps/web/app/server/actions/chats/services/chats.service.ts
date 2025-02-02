@@ -1,4 +1,4 @@
-import { MembersRepository } from '../../chat-members/repositories/members.repository';
+import { MembersRepository } from '../../chat-members/repositories/chat-members.repository';
 import { MessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
 import {
   ChatPayload,

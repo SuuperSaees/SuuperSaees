@@ -15,9 +15,9 @@ import {
   UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
-} from '../members.interface';
-import { MembersRepository } from '../repositories/members.repository';
-import { MembersService } from '../services/members.service';
+} from '../chat-members.interface';
+import { MembersRepository } from '../repositories/chat-members.repository';
+import { MembersService } from '../services/chat-members.service';
 
 export class MembersController {
   private membersService: MembersService;

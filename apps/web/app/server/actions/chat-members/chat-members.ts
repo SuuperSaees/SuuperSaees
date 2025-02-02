@@ -1,5 +1,5 @@
 import { BaseAction } from '../base-action';
-import { MembersController } from './controllers/members.controllers';
+import { MembersController } from './controllers/chat-members.controller';
 import {
   AddMembersPayload,
   AddMembersResponse,
@@ -13,7 +13,7 @@ import {
   UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
-} from './members.interface';
+} from './chat-members.interface';
 
 export class MembersAction extends BaseAction {
   private controller: MembersController;
