@@ -38,7 +38,7 @@ export const OrdersProvider = ({
   children,
   agencyMembers,
   agencyId,
-  queryKey,
+  queryKey = ['orders'],
   queryFn,
   initialOrders,
 }: OrdersProviderProps) => {
@@ -140,8 +140,10 @@ export const OrdersProvider = ({
     ordersAreLoading,
     agencyMembers,
     agencyId,
+    queryKey,
     setOrders,
   };
+
 
   return (
     <OrdersContext.Provider value={contextValue}>

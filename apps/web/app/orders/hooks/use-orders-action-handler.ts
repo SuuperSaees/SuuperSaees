@@ -13,14 +13,17 @@ interface UseOrdersActionHandlerProps {
   setOrders: Dispatch<SetStateAction<Order.Response[]>>;
   agencyId?: Order.Type['agency_id'];
   statuses: AgencyStatus.Type[];
+  queryKey: string[];
 }
 
-const useOrdersActionHandler = ({ agencyId }: UseOrdersActionHandlerProps) => {
+const useOrdersActionHandler = ({ agencyId, queryKey }: UseOrdersActionHandlerProps) => {
   const { updateOrderMutation } = useUserOrderActions(
     'status',
     undefined,
     undefined,
+    queryKey,
   );
+
 
   const handleUpdateOrder = async (
     data: Order.Response,

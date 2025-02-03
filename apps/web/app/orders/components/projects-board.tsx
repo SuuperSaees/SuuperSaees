@@ -48,9 +48,14 @@ const AGENCY_ROLES = new Set([
   'agency_member',
 ]);
 
-const ProjectsBoard = ({ agencyMembers, tags, className }: ProjectsBoardProps) => {
+const ProjectsBoard = ({
+  agencyMembers,
+  tags,
+  className,
+}: ProjectsBoardProps) => {
   // Context and hooks
-  const { orders, setOrders, agencyId, ordersAreLoading } = useOrdersContext();
+  const { orders, setOrders, agencyId, ordersAreLoading, queryKey } =
+    useOrdersContext();
   const { statuses } = useAgencyStatuses();
   const { t } = useTranslation('orders');
   const { workspace } = useUserWorkspace();
@@ -92,15 +97,16 @@ const ProjectsBoard = ({ agencyMembers, tags, className }: ProjectsBoardProps) =
     agencyMembers,
   });
 
-
   const { handleUpdateOrder } = useOrdersActionHandler({
     orders,
     setOrders,
     agencyId,
     statuses,
+    queryKey,
   });
 
   // Compute initial active tab
+
   const statusFilterValues = getFilterValues('status');
   const getInitialActiveTab = () => {
     if (
@@ -130,7 +136,8 @@ const ProjectsBoard = ({ agencyMembers, tags, className }: ProjectsBoardProps) =
     if (currentView === 'calendar') {
       return filteredOrders.map((order) => ({
         ...order,
-        color: statuses.find((status) => status.id === order.status_id)?.status_color,
+        color: statuses.find((status) => status.id === order.status_id)
+          ?.status_color,
       }));
     }
     return filteredOrders;
@@ -151,7 +158,7 @@ const ProjectsBoard = ({ agencyMembers, tags, className }: ProjectsBoardProps) =
       initialPreferences={preferences}
       customComponents={customComponents}
     >
-      <div className="flex w-full flex-col gap-4 max-h-full min-h-0 h-full">
+      <div className="flex h-full max-h-full min-h-0 w-full flex-col gap-4">
         <div className="flex items-center justify-end gap-4">
           <StatusFilters
             activeTab={activeTab}

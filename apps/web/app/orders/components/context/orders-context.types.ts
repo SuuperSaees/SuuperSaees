@@ -8,7 +8,9 @@ export interface OrdersContextType {
   agencyMembers: User.Response[];
   agencyId: Order.Type['agency_id'];
   ordersAreLoading: boolean;
+  queryKey: string[];
 }
+
 
 // Provider
 export interface OrdersProviderProps {
