@@ -107,7 +107,7 @@ export default function OrdersSection({ organizationId }: OrdersSectionProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-full">
       <div className="flex flex-wrap gap-2.5">
         <CardStats
           title={t('projects.active')}
@@ -153,7 +153,7 @@ export default function OrdersSection({ organizationId }: OrdersSectionProps) {
           initialStatuses={agencyStatuses}
           agencyMembers={transformedAgencyMembers}
         >
-          <ProjectsBoard agencyMembers={transformedAgencyMembers} tags={tags} />
+          <ProjectsBoard agencyMembers={transformedAgencyMembers} tags={tags} className="min-h-[800px]" />
         </AgencyStatusesProvider>
       </OrdersProvider>
     </div>

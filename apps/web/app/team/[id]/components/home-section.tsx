@@ -50,7 +50,7 @@ export default function HomeSection({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-full">
       <div className="flex flex-wrap gap-2.5">
         <CardStats
           title={t('projects.active')}
@@ -92,7 +92,7 @@ export default function HomeSection({
         queryFn={queryFn}
         initialOrders={memberOrders}
       >
-        <ProjectsBoard agencyMembers={agencyMembers} tags={tags} />
+        <ProjectsBoard agencyMembers={agencyMembers} tags={tags} className="min-h-[800px]" />
       </OrdersProvider>
     </div>
   );

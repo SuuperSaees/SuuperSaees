@@ -32,6 +32,7 @@ import ViewSelect from './view-select';
 interface ProjectsBoardProps {
   agencyMembers: User.Response[];
   tags: Tags.Type[];
+  className?: string;
 }
 
 // Constants
@@ -47,7 +48,7 @@ const AGENCY_ROLES = new Set([
   'agency_member',
 ]);
 
-const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
+const ProjectsBoard = ({ agencyMembers, tags, className }: ProjectsBoardProps) => {
   // Context and hooks
   const { orders, setOrders, agencyId, ordersAreLoading } = useOrdersContext();
   const { statuses } = useAgencyStatuses();
@@ -181,7 +182,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
             <TableSkeleton columns={9} rows={7} />
           )
         ) : (
-          <Board />
+          <Board className={className} />
         )}
       </div>
     </ViewProvider>
