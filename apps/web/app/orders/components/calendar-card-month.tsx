@@ -24,12 +24,13 @@ const CalendarCard = ({ item, className, ...rest }: CalendarCardProps) => {
     >
       <Link
         href={`/orders/${item.id}`}
-        className="inline-flex items-center text-xs font-medium text-inherit gap-1"
+        className="inline-flex items-center gap-1 text-xs font-medium text-inherit"
+        style={{ color: darkenColor(item.color ?? '', 0.5) }}
       >
-        <span className="text-xs text-gray-500">#{item.id} {' · '}</span>
-        <h4 style={{ color: darkenColor(item.color ?? '', 0.5) }}>
-          {item.title}
-        </h4>
+        <span className="text-xs">
+          #{item.id} {' · '}
+        </span>
+        <h4>{item.title}</h4>
       </Link>
     </div>
   );
