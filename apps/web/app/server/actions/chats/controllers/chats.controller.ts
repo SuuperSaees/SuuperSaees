@@ -6,7 +6,6 @@ import { MembersRepository } from '../../chat-members/repositories/chat-members.
 import { MessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
 import {
   ChatPayload,
-  ChatResponse,
   DeleteChatResponse,
   GetChatByIdResponse,
   UpdateChatSettingsPayload,
@@ -37,7 +36,7 @@ export class ChatController {
   }
 
   // * CREATE CONTROLLERS
-  async createChat(payload: ChatPayload): Promise<ChatResponse> {
+  async createChat(payload: ChatPayload): Promise<Chats.Type> {
     try {
       return await this.chatService.createChat(payload);
     } catch (error) {

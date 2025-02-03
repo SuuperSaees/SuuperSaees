@@ -3,7 +3,6 @@ import { BaseAction } from '../base-action';
 import { ChatController } from './controllers/chats.controller';
 import {
   ChatPayload,
-  ChatResponse,
   DeleteChatResponse,
   GetChatByIdResponse,
   UpdateChatSettingsPayload,
@@ -22,7 +21,7 @@ export class ChatAction extends BaseAction {
     );
   }
 
-  async createChat(payload: ChatPayload): Promise<ChatResponse> {
+  async createChat(payload: ChatPayload): Promise<Chats.Type> {
     return await this.controller.createChat(payload);
   }
 

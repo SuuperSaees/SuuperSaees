@@ -25,7 +25,6 @@ export default function ChatSearchHeader({ userId }: { userId: string }) {
 
     }),
     onSuccess: (response) => {
-      console.log('response', response);
       const newChat = response;
       if (newChat) {
         setActiveChat(newChat.id);

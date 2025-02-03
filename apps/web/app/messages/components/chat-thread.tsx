@@ -13,6 +13,11 @@ import ChatMembersSelector from './chat-members-selector';
 import RichTextEditor from './rich-text-editor';
 import MessageList from './message-list';
 import { updateChat } from '~/server/actions/chats/chats.action';
+import { useMutation } from '@tanstack/react-query';
+import { deleteChat } from '~/server/actions/chats/chats.action';
+import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { Chats } from '~/lib/chats.types';
 
 export default function ChatThread({ 
   teams, 
@@ -31,9 +36,12 @@ export default function ChatThread({
     addMessage,
     isLoading
   } = useChat();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const handleSendMessage = async (content: string, fileIds?: string[]) => {
     if (!activeChatData) return;
+
     
     try {
       await addMessage({ content, fileIds });
@@ -55,20 +63,50 @@ export default function ChatThread({
       toast.error('Failed to update chat name');
     }
   };
+  const handleDeleteMutation = useMutation({
+    mutationFn: async () => {
+      setActiveChat(null);
+      setActiveChatData(null);
+      
+      await deleteChat(activeChatData?.id.toString() ?? '');
 
-  if (!activeChat || !activeChatData) {
-    return <ChatEmptyState userId={userId} />;
-  }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
+      const chats = await queryClient.fetchQuery<Chats.Type[]>({ 
+        queryKey: ['chats']
 
+      });
+      toast.success('Chat deleted successfully');
+      
+      if (chats && chats.length > 0) {
+        setActiveChat(chats[0]?.id.toString() ?? null);
+        setActiveChatData(chats[0] ?? null);
+        
+      } else {
+        setActiveChat(null);
+        setActiveChatData(null);
+      }
+      router.push('/messages');
+    },
+    onError: () => {
+      toast.error('Failed to delete chat');
+    },
+  });
+
+  
   const handleMembersUpdate = async (members: string[]) => {
     await Promise.resolve();
     console.log('update members', members);
   };
-
-  const handleDelete = async () => {
-    await Promise.resolve();
-    console.log('delete');
+  
+  const handleDelete = () => {
+    handleDeleteMutation.mutate();
   };
+  
+  if (!activeChat || !activeChatData) {
+    return <ChatEmptyState userId={userId} />;
+  }
 
   return (
     <div className="h-full flex flex-col">

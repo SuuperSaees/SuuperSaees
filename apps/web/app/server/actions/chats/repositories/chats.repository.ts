@@ -4,7 +4,6 @@ import { Database } from '~/lib/database.types';
 
 import {
   ChatPayload,
-  ChatResponse,
   DeleteChatResponse,
   GetChatByIdResponse,
   UpdateChatSettingsPayload,
@@ -25,9 +24,10 @@ export class ChatRepository {
   }
 
   // * CREATE REPOSITORIES
-  async createChat(payload: ChatPayload): Promise<ChatResponse> {
+  async createChat(payload: ChatPayload): Promise<Chats.Type> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
+
       .from('chats')
       .insert({
         name: payload.name,
@@ -43,10 +43,11 @@ export class ChatRepository {
       throw new Error(`Error creating chat: ${error.message}`);
     }
 
-    return data as ChatResponse;
+    return data as Chats.Type;
   }
 
   // * GET REPOSITORIES
+
   async getChats(): Promise<Chats.Type[]> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client

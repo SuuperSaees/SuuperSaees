@@ -26,18 +26,18 @@ export default function ChatList() {
         setActiveChatData(response[0]);
         // Initialize messages for first chat
         const initialMessages = response[0].messages || [];
-        setMessages(initialMessages);
+        // setMessages(initialMessages);
       }
       
       return response as Chats.Type[];
     }
   });
 
-  const handleChatSelect = async (chat: Chats.Type) => {
+  const handleChatSelect = (chat: Chats.Type) => {
     setActiveChat(chat.id.toString());
     setActiveChatData(chat);
     // Set messages for selected chat
-    setMessages(chat.messages || []);
+    // setMessages(chat.messages || []);
   };
 
   if (isLoading) {

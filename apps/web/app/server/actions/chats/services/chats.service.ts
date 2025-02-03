@@ -2,7 +2,6 @@ import { MembersRepository } from '../../chat-members/repositories/chat-members.
 import { MessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
 import {
   ChatPayload,
-  ChatResponse,
   DeleteChatResponse,
   GetChatByIdResponse,
   UpdateChatSettingsPayload,
@@ -20,12 +19,13 @@ export class ChatService {
   ) {}
 
   // * CREATE SERVICES
-  async createChat(payload: ChatPayload): Promise<ChatResponse> {
+  async createChat(payload: ChatPayload): Promise<Chats.Type> {
     const chat = await this.chatRepository.createChat(payload);
+
 
     if (payload.members && payload.members.length > 0) {
       await this.membersRepository.addMembers(
-        chat.id,
+        chat.id.toString(),
         payload.members.map((member) => ({
           user_id: member.user_id,
           role: member.role,
