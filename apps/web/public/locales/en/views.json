@@ -1,5 +1,6 @@
 {
   "kanban": {
+    "title": "Board",
     "columns": {
       "negations": {
         "noProperty": "No {{property}}",
@@ -39,5 +40,44 @@
       "showAll": "Show all",
       "hideAll": "Hide all"
     }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "view": {
+      "month": "Month view",
+      "week": "Week view"
+    },
+    "date": {
+      "today": "Today",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "week": "Week",
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      }
+    }
+  },
+  "table": {
+    "title": "Table"
   }
 }

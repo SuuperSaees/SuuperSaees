@@ -60,10 +60,15 @@ const SelectAction = ({
 
   return (
     <div className={cn('flex flex-col gap-2 ', containerClassname)}>
-      <span className="font-semibold">
-        {children ? children : groupName ? groupName :showLabel ?  'Select an option' : null}
-      </span>
+      {
+        (children ?? groupName ?? showLabel) && (
+          <span className="font-semibold">
+            {children ? children : groupName ? groupName :showLabel ?  'Select an option' : null}
+          </span>
+        )
+      }
       <Select
+
         value={selectedValue ?? undefined}
         onValueChange={(value) => {
           const selectedOption = options.find(

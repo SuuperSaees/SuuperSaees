@@ -34,6 +34,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_plugins: {
+        Row: {
+          account_id: string
+          created_at: string | null
+          credentials: Json | null
+          deleted_on: string | null
+          id: string
+          plugin_id: string
+          provider_id: string | null
+          status: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string | null
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          plugin_id: string
+          provider_id?: string | null
+          status?: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string | null
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          plugin_id?: string
+          provider_id?: string | null
+          status?: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_plugins_plugin_id_fkey"
+            columns: ["plugin_id"]
+            isOneToOne: false
+            referencedRelation: "plugins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounts: {
         Row: {
           created_at: string | null
@@ -688,6 +732,42 @@ export type Database = {
           },
         ]
       }
+      chat_members: {
+        Row: {
+          chat_id: string
+          created_at: string
+          deleted_on: string | null
+          id: string
+          settings: Json | null
+          type: Database["public"]["Enums"]["chat_role_type"]
+          updated_at: string
+          user_id: string
+          visibility: boolean
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string
+          deleted_on?: string | null
+          id: string
+          settings?: Json | null
+          type?: Database["public"]["Enums"]["chat_role_type"]
+          updated_at?: string
+          user_id: string
+          visibility?: boolean
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          settings?: Json | null
+          type?: Database["public"]["Enums"]["chat_role_type"]
+          updated_at?: string
+          user_id?: string
+          visibility?: boolean
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           account_id: string
@@ -695,7 +775,7 @@ export type Database = {
           content: string
           created_at: string | null
           id: string
-          role: Database["public"]["Enums"]["chat_role"]
+          role: Database["public"]["Enums"]["chat_role_type"]
         }
         Insert: {
           account_id: string
@@ -703,7 +783,7 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: string
-          role: Database["public"]["Enums"]["chat_role"]
+          role: Database["public"]["Enums"]["chat_role_type"]
         }
         Update: {
           account_id?: string
@@ -711,7 +791,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["chat_role"]
+          role?: Database["public"]["Enums"]["chat_role_type"]
         }
         Relationships: [
           {
@@ -3364,6 +3444,7 @@ export type Database = {
         | "treli"
         | "suuper"
       chat_role: "user" | "assistant"
+      chat_role_type: "project_manager" | "assistant" | "owner" | "guest"
       field_types:
         | "date"
         | "multiple_choice"

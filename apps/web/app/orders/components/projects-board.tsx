@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +11,7 @@ import KanbanSkeleton from '~/(views)/components/kanban/kanban-skeleton';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { ViewProvider } from '~/(views)/contexts/view-context';
 import { ViewInitialConfigurations } from '~/(views)/view-config.types';
-import { UpdateFunction, ViewItem, ViewType } from '~/(views)/views.types';
+import { UpdateFunction, ViewItem, ViewTypeEnum } from '~/(views)/views.types';
 import { Tags } from '~/lib/tags.types';
 import { User } from '~/lib/user.types';
 
@@ -32,6 +32,7 @@ import ViewSelect from './view-select';
 interface ProjectsBoardProps {
   agencyMembers: User.Response[];
   tags: Tags.Type[];
+  className?: string;
 }
 
 // Constants
@@ -47,9 +48,14 @@ const AGENCY_ROLES = new Set([
   'agency_member',
 ]);
 
-const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
+const ProjectsBoard = ({
+  agencyMembers,
+  tags,
+  className,
+}: ProjectsBoardProps) => {
   // Context and hooks
-  const { orders, setOrders, agencyId, ordersAreLoading } = useOrdersContext();
+  const { orders, setOrders, agencyId, ordersAreLoading, queryKey } =
+    useOrdersContext();
   const { statuses } = useAgencyStatuses();
   const { t } = useTranslation('orders');
   const { workspace } = useUserWorkspace();
@@ -83,6 +89,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     viewOptions,
     currentView,
     customComponents,
+    preferences,
   } = useOrdersViewConfigs({
     agencyRoles: AGENCY_ROLES,
     statuses,
@@ -95,9 +102,11 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     setOrders,
     agencyId,
     statuses,
+    queryKey,
   });
 
   // Compute initial active tab
+
   const statusFilterValues = getFilterValues('status');
   const getInitialActiveTab = () => {
     if (
@@ -122,19 +131,31 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     role,
     hasOrders: orders.length > 0,
   });
+
+  const mutedOrders = useMemo(() => {
+    if (currentView === 'calendar') {
+      return filteredOrders.map((order) => ({
+        ...order,
+        color: statuses.find((status) => status.id === order.status_id)
+          ?.status_color,
+      }));
+    }
+    return filteredOrders;
+  }, [filteredOrders, currentView, statuses]);
   return (
     <ViewProvider
-      initialData={filteredOrders as ViewItem[]}
-      initialViewType={currentView as ViewType}
+      initialData={mutedOrders as ViewItem[]}
+      initialViewType={currentView as ViewTypeEnum}
       initialConfigurations={
         viewInitialConfiguarations as unknown as ViewInitialConfigurations<ViewItem>
       }
       onUpdateFn={handleUpdateOrder as UpdateFunction}
-      data={filteredOrders as ViewItem[]}
+      data={mutedOrders as ViewItem[]}
       setData={setOrders as Dispatch<SetStateAction<ViewItem[]>>}
       availableProperties={
         viewAvailableProperties as unknown as [keyof ViewItem]
       }
+      initialPreferences={preferences}
       customComponents={customComponents}
     >
       <div className="flex w-full flex-col gap-4 max-h-full min-h-0 h-full">
@@ -168,7 +189,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
             <TableSkeleton columns={9} rows={7} />
           )
         ) : (
-          <Board />
+          <Board className={className} />
         )}
       </div>
     </ViewProvider>

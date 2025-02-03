@@ -125,7 +125,19 @@ export const getAccountPluginById = async (
       throw new Error('[SERVICE] Account plugin not found');
     }
 
-    if (accountPlugin.credentials) {
+    const pluginData = await client
+      .from('plugins')
+      .select('id, name')
+      .eq('id', accountPlugin.plugin_id)
+      .single();
+
+    if (!pluginData.data) {
+      throw new Error('[SERVICE] Plugin data not found');
+    }
+
+    const pluginName = pluginData.data.name.toLowerCase();
+
+    if (pluginName !== 'stripe' && accountPlugin.credentials) {
       const crypto = new CredentialsCrypto(SECRET_KEY);
       try {
         const decryptedCredentials = crypto.decrypt<Record<string, unknown>>(

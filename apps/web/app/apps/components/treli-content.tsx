@@ -90,11 +90,17 @@ function TreliContentStatic({
     try {
       const updatedCredentials = { ...credentials, [field]: value };
 
-      await updateAccountPluginAction(pluginId, {
-        credentials: updatedCredentials,
-        provider: 'treli',
-        account_id: userId,
-      });
+      const providerId = crypto.randomUUID();
+
+      await updateAccountPluginAction(
+        pluginId,
+        {
+          credentials: updatedCredentials,
+          provider: 'treli',
+          account_id: userId,
+        },
+        providerId,
+      );
 
       setCredentials(updatedCredentials);
       toast.success(t('successMessage'), {
