@@ -1,6 +1,12 @@
+import { ReactNode } from 'react';
+
 import { CalendarItem } from './calendar.types';
 import { KanbanItem } from './kanban.types';
-import { ViewConfigurations } from './view-config.types';
+import {
+  ViewConfigurations,
+  ViewInitialConfigurations,
+  ViewPreferences,
+} from './view-config.types';
 
 // ITEM TYPES
 // Base, shared props for all view items
@@ -64,11 +70,49 @@ export interface ViewProps<T extends ViewItem> {
 // Custom components for each view
 export interface ViewCustomComponents<T> {
   kanban?: {
-    Card: React.FC<{ item: T, className?: string, [key: string]: unknown }>; // Card component for the kanban view
+    Card: React.FC<{ item: T; className?: string; [key: string]: unknown }>; // Card component for the kanban view
   };
   calendar?: {
-    Card: React.FC<{ item: T, className?: string, [key: string]: unknown }>; // Card component for the calendar view
+    Card: React.FC<{ item: T; className?: string; [key: string]: unknown }>; // Card component for the calendar view
+    CardMonth: React.FC<{ item: T; className?: string; [key: string]: unknown }>; // Card component for the calendar view
   };
 }
 
-export type UpdateFunction = <T>(data: T, property?: keyof T, targetId?: string | number, propertyData?: ViewManageableProperty) => Promise<T> ;
+// Define the Context types
+export interface ViewContextProps<T extends ViewItem> {
+  viewType: ViewTypeEnum;
+  data: T[];
+  configurations: ViewConfigurations<T>;
+  availableProperties: [keyof T];
+  manageConfigurations: {
+    updateGroup: (groupKey: keyof T) => void;
+  };
+  customComponents?: ViewCustomComponents<T>;
+  setViewType: (viewType: ViewTypeEnum) => void;
+  setData: React.Dispatch<React.SetStateAction<T[]>>;
+  setConfigurations: React.Dispatch<
+    React.SetStateAction<ViewConfigurations<T> | undefined>
+  >;
+  onAction?: (action: string, payload: T) => Promise<void | T>;
+}
+
+// Context provider
+export interface ViewProviderProps<T extends ViewItem> {
+  children: ReactNode;
+  initialData: T[];
+  initialViewType: ViewTypeEnum;
+  initialConfigurations: ViewInitialConfigurations<T>;
+  availableProperties: [keyof T];
+  data: T[];
+  setData: React.Dispatch<React.SetStateAction<T[]>>;
+  initialPreferences?: ViewPreferences;
+  customComponents?: ViewCustomComponents<T>;
+  onUpdateFn?: UpdateFunction;
+}
+
+export type UpdateFunction = <T>(
+  data: T,
+  property?: keyof T,
+  targetId?: string | number,
+  propertyData?: ViewManageableProperty,
+) => Promise<T>;

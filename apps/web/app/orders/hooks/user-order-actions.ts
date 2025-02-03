@@ -18,6 +18,7 @@ export function useUserOrderActions(
   successTranslateActionName?: string,
   errorTranslateActionName?: string,
   // setOrders?: React.Dispatch<React.SetStateAction<Order.Response[]>>,
+  queryKey = ['orders'],
 ) {
   const { t } = useTranslation('orders');
   const queryClient = useQueryClient();
@@ -69,23 +70,25 @@ export function useUserOrderActions(
     }: {
       updatedOrder: Order.Type | null;
     }) => {
-      console.log('updatedOrder', updatedOrder);
+      // console.log('updatedOrder', updatedOrder);
 
       updatedOrder
-        ? queryClient.setQueryData(['orders'], (old: Order.Response[]) =>
+        ? queryClient.setQueryData(queryKey, (old: Order.Response[]) =>
             old.map((order) =>
               order.id === updatedOrder.id
                 ? { ...order, ...updatedOrder }
                 : order,
             ),
           )
-        : await queryClient.invalidateQueries({ queryKey: ['orders'] });
+        : await queryClient.invalidateQueries({ queryKey: queryKey });
+      await queryClient.invalidateQueries({ queryKey: queryKey });
 
       toast.success('Success', {
         description: t(
           successTranslateActionName ?? 'success.orders.orderUpdated',
         ),
       });
+
       const fields: (keyof Order.Update)[] | undefined = propertyUpdated
         ? [propertyUpdated]
         : undefined;
@@ -107,7 +110,7 @@ export function useUserOrderActions(
       //   context?.previousOrders &&
       //   setOrders(context.previousOrders);
 
-      await queryClient.invalidateQueries({ queryKey: ['orders'] });
+      await queryClient.invalidateQueries({ queryKey: queryKey });
       toast.error('Error', {
         description: t(
           errorTranslateActionName ?? 'error.orders.failedToUpdatedOrder',
@@ -141,7 +144,7 @@ export function useUserOrderActions(
           undefined,
           ['due_date'],
         ));
-      await queryClient.invalidateQueries({ queryKey: ['orders'] });
+      await queryClient.invalidateQueries({ queryKey: queryKey });
     },
     onError: () => {
       toast.error('Error', {
@@ -160,14 +163,15 @@ export function useUserOrderActions(
     }) => {
       return updateOrderAssigns(orderId, agencyMemberIds);
     },
-    onSuccess: async (newAssignees) => {
-      console.log('assignees', newAssignees);
+    onSuccess: async () => {
+      // console.log('assignees', newAssignees);
       toast.success('Success', {
         description: t('success.orders.orderAssigneesUpdated'),
       });
 
-      await queryClient.invalidateQueries({ queryKey: ['orders'] });
+      await queryClient.invalidateQueries({ queryKey: queryKey });
     },
+
     onError: () => {
       toast.error('Error', {
         description: t('error.orders.failedToUpdateOrderAssigneees'),

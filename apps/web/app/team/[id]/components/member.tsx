@@ -114,13 +114,14 @@ export default function Member({
   ]);
 
   return (
-    <AgencyStatusesProvider initialStatuses={agencyStatuses}>
+    <AgencyStatusesProvider initialStatuses={agencyStatuses} agencyMembers={agencyMembers}>
       <Section views={views} state={null}>
         <Section.Header
           id={id}
           currentUserRole={userRole}
           account={account}
           bucketStorage={bucketStorage}
+
           emailLabel="Email"
           controllers={{
             onUpdateAccountImage: updateMemberImage,

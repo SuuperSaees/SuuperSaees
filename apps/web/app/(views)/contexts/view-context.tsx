@@ -1,65 +1,28 @@
 'use client';
 
-import React, {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { CalendarItem } from '../calendar.types';
 import useViewConfigurations from '../hooks/view/use-view-configurations';
 import { KanbanItem } from '../kanban.types';
 import { createFullConfiguration } from '../utils/views/data-transform';
-import {
-  ViewConfigurations,
-  ViewInitialConfigurations,
-} from '../view-config.types';
+import { ViewConfigurations } from '../view-config.types';
 import {
   UpdateFunction,
+  ViewContextProps,
   ViewCustomComponents,
   ViewItem,
-  ViewType,
+  ViewProviderProps,
   ViewTypeEnum,
 } from '../views.types';
+import { CalendarProvider } from './calendar-context';
 import KanbanProvider from './kanban-context';
 import { TableProvider } from './table-context';
-
-// Define the Context types
-export interface ViewContextProps<T extends ViewItem> {
-  viewType: ViewType;
-  data: T[];
-  configurations: ViewConfigurations<T>;
-  availableProperties: [keyof T];
-  manageConfigurations: {
-    updateGroup: (groupKey: keyof T) => void;
-  };
-  customComponents?: ViewCustomComponents<T>;
-  setViewType: (viewType: ViewType) => void;
-  setData: React.Dispatch<React.SetStateAction<T[]>>;
-  setConfigurations: React.Dispatch<
-    React.SetStateAction<ViewConfigurations<T> | undefined>
-  >;
-  onAction?: (action: string, payload: T) => Promise<void | T>;
-}
 
 // Create a generic context
 const ViewContext = createContext<ViewContextProps<ViewItem> | undefined>(
   undefined,
 );
-
-// Context provider
-interface ViewProviderProps<T extends ViewItem> {
-  children: ReactNode;
-  initialData: T[];
-  initialViewType: ViewType;
-  initialConfigurations: ViewInitialConfigurations<T>;
-  availableProperties: [keyof T];
-  data: T[];
-  setData: React.Dispatch<React.SetStateAction<T[]>>;
-  customComponents?: ViewCustomComponents<T>;
-  onUpdateFn?: UpdateFunction;
-}
 
 export const ViewProvider = <T extends ViewItem>({
   children,
@@ -68,6 +31,7 @@ export const ViewProvider = <T extends ViewItem>({
   initialConfigurations,
   availableProperties = ['status'] as [keyof T],
   customComponents,
+  initialPreferences,
   onUpdateFn,
   data,
   setData,
@@ -79,7 +43,7 @@ export const ViewProvider = <T extends ViewItem>({
     availableProperties,
   );
 
-  const [viewType, setViewType] = useState<ViewType>('kanban');
+  const [viewType, setViewType] = useState<ViewTypeEnum>(ViewTypeEnum.Kanban);
   // const [data, setData] = useState<T[]>(initialData);
   const [configurations, setConfigurations] = useState<
     ViewConfigurations<T> | undefined
@@ -150,6 +114,23 @@ export const ViewProvider = <T extends ViewItem>({
         >
           {children}
         </TableProvider>
+      ) : viewType === ViewTypeEnum.Calendar ? (
+        <CalendarProvider
+          data={data as unknown as CalendarItem[]}
+          setData={
+            setData as unknown as React.Dispatch<
+              React.SetStateAction<CalendarItem[]>
+            >
+          }
+          customComponent={
+            customComponents?.calendar as unknown as ViewCustomComponents<CalendarItem>['calendar']
+          }
+          preferences={initialPreferences}
+          onUpdateFn={onUpdateFn as unknown as UpdateFunction}
+        >
+          {children}
+
+        </CalendarProvider>
       ) : null}
     </ViewContext.Provider>
   );

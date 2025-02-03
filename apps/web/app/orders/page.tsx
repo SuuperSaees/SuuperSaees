@@ -3,18 +3,21 @@ import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/ac
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import {  getAgencyForClient, getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { getTags } from '~/server/actions/tags/tags.action';
+import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
+import {
+  getAgencyForClient,
+  getOrganization,
+} from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 import { PageHeader } from '../components/page-header';
 import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
 import { OrdersProvider } from './components/context/orders-context';
-
-import { getTags } from '~/server/actions/tags/tags.action';
 import ProjectsBoard from './components/projects-board';
-import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 
 // type OrderResponse = Omit<Order.Response, 'id'> & {
 //   id: string;
@@ -36,11 +39,17 @@ async function OrdersPage() {
   // })) ?? []) as OrderResponse[];
   // const agencyId = ordersData?.[0]?.agency_id;
   const { workspace: userWorkspace } = await loadUserWorkspace();
-  const userOrganization = await getOrganization()
-  const agencyRoles = ['agency_owner', 'agency_project_manager', 'agency_member']
+  const userOrganization = await getOrganization();
+  const agencyRoles = [
+    'agency_owner',
+    'agency_project_manager',
+    'agency_member',
+  ];
 
-  const agency = agencyRoles.includes(userWorkspace.role ?? '') ? userOrganization : await getAgencyForClient(userOrganization.id ?? '')
-  const agencyId = agency?.id ?? ''
+  const agency = agencyRoles.includes(userWorkspace.role ?? '')
+    ? userOrganization
+    : await getAgencyForClient(userOrganization.id ?? '');
+  const agencyId = agency?.id ?? '';
   const agencyStatuses =
     (await getAgencyStatuses(agencyId ?? '').catch(() => [])) ?? [];
 
@@ -69,27 +78,29 @@ async function OrdersPage() {
       },
     })) ?? [];
 
-  const tags = await getTags(agencyId ?? '', );
+  const tags = await getTags(agencyId ?? '');
 
   return (
-
-    <OrdersProvider agencyMembers={agencyMembers ?? []} agencyId={agencyId ?? ''}>
-
-      <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []} agencyMembers={agencyMembers ?? []}>
-        <PageBody className='h-screen'>
-          <div className="p-[35px] max-h-full min-h-0 h-full flex flex-col flex-1">
+    <OrdersProvider
+      agencyMembers={agencyMembers ?? []}
+      agencyId={agencyId ?? ''}
+    >
+      <AgencyStatusesProvider
+        initialStatuses={agencyStatuses ?? []}
+        agencyMembers={agencyMembers ?? []}
+      >
+        <PageBody className="h-screen">
+          <div className="flex h-full max-h-full min-h-0 flex-1 flex-col p-[35px]">
             <PageHeader
               title="orders:title"
               rightContent={<TimerContainer />}
             />
- 
-              <ProjectsBoard agencyMembers={agencyMembers} tags={tags} />
- 
+
+            <ProjectsBoard agencyMembers={agencyMembers} tags={tags} />
           </div>
         </PageBody>
       </AgencyStatusesProvider>
     </OrdersProvider>
-
   );
 }
 
