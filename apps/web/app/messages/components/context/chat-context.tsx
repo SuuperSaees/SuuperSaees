@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useCallback, ReactNode, useState, useEffect } from 'react';
+import { createContext, useContext, useCallback, ReactNode, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ChatMessages } from '~/lib/chat-messages.types';
@@ -9,7 +9,7 @@ import { ChatMembers } from '~/lib/chat-members.types';
 import { createMessage, deleteMessage } from '~/server/actions/chat-messages/chat-messages.action';
 import { updateFile } from '~/team-accounts/src/server/actions/files/update/update-file';
 import { generateUUID } from '~/utils/generate-uuid';
-import { useChatSubscriptions } from '~/messages/hooks/use-chat-subscription';
+// import { useChatSubscriptions } from '~/messages/hooks/use-chat-subscription';
 import { SubscriptionPayload, TableName } from '~/lib/chats.types';
 import { getUserById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 

@@ -104,7 +104,16 @@ export default function ChatThread({
       toast.error('Failed to delete chat');
     },
   });
+  
 
+  const handleMembersUpdateMutation = useMutation({
+    mutationFn: async (members: string[]) => {
+      await updateChat({
+        id: activeChatData?.id.toString() ?? '',
+        members: members,
+      });
+    },
+  });
   
   const handleMembersUpdate = async (members: string[]) => {
     await Promise.resolve();
@@ -119,18 +128,22 @@ export default function ChatThread({
     return <ChatEmptyState userId={userId} />;
   }
 
+  const activeChatDataName = {...activeChatData}.name;
+  const activeChatDataId = {...activeChatData}.id;
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b">
         <div className="flex items-center gap-3">
           <EditableHeader
-            initialName={activeChatData.name}
-            id={activeChatData.id.toString()}
+            initialName={activeChatDataName}
+            id={activeChatDataId}
             userRole={'owner'}
             updateFunction={handleUpdate}
             rolesThatCanEdit={new Set(['owner'])}
           />
+
         </div>
         <div className="flex items-center gap-2">
           <ChatMembersSelector

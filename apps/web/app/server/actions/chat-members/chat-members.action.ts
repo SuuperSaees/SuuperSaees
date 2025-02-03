@@ -13,8 +13,8 @@ function getMembersAction() {
   return createMembersAction(process.env.NEXT_PUBLIC_SITE_URL as string);
 }
 
-export async function addMembers(payload: AddMembersPayload) {
-  return await getMembersAction().addMembers(payload);
+export async function upsertMembers(payload: AddMembersPayload) {
+  return await getMembersAction().upsertMembers(payload);
 }
 
 export async function getMembers(chatId: string) {

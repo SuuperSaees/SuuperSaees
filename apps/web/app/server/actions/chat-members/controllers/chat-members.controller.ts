@@ -32,10 +32,11 @@ export class MembersController {
   }
 
   // * CREATE CONTROLLERS
-  async addMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
+  async upsertMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
     try {
-      return await this.membersService.addMembers(payload);
+      return await this.membersService.upsertMembers(payload);
     } catch (error) {
+
       console.error(error);
       throw error;
     }

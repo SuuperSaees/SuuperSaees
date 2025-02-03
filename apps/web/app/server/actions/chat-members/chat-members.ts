@@ -27,8 +27,8 @@ export class MembersAction extends BaseAction {
     );
   }
 
-  async addMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
-    return await this.controller.addMembers(payload);
+  async upsertMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
+    return await this.controller.upsertMembers(payload);
   }
 
   async getMembers(chatId: string): Promise<GetMembersResponse[]> {

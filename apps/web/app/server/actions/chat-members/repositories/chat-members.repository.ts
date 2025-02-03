@@ -24,7 +24,7 @@ export class MembersRepository {
   }
 
   // * CREATE REPOSITORIES
-  async addMembers(
+  async upsertMembers(
     chat_id: string,
     members: { user_id: string; role: string }[],
   ): Promise<{ success: boolean; message: string }> {

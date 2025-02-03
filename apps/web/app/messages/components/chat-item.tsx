@@ -8,16 +8,16 @@ export default function ChatItem({ chat, isActive = false }: { chat: Chats.Type;
   const { setActiveChat, setActiveChatData } = useChat();
 
   const router = useRouter();
+
+  const handleChatSelect = () => {  
+    setActiveChat(chat.id.toString());
+    setActiveChatData(chat);
+    router.push(`/messages`);
+  }
+
   return (
     <button
-
-      onClick={() => {
-        setActiveChat(chat.id.toString());
-        setActiveChatData(chat);
-        router.refresh()
-      }}
-
-
+      onClick={handleChatSelect}
       className={`p-4 hover:bg-gray-50 cursor-pointer flex items-center gap-3 ${
         isActive ? 'bg-gray-50' : ''
       }`}

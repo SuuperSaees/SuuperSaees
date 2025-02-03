@@ -10,8 +10,7 @@ export default function ChatList() {
   const { 
     activeChat, 
     setActiveChat, 
-    setActiveChatData,
-    setMessages, // From the combined context
+    setActiveChatData, // From the combined context
   } = useChat();
 
   const { data: chatsData, isLoading, error } = useQuery({

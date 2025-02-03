@@ -18,8 +18,8 @@ export class MembersService {
   constructor(private readonly membersRepository: MembersRepository) {}
 
   // * CREATE SERVICES
-  async addMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
-    return await this.membersRepository.addMembers(
+  async upsertMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
+    return await this.membersRepository.upsertMembers(
       payload.chat_id,
       payload.members,
     );
