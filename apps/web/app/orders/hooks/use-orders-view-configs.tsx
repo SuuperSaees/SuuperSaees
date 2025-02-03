@@ -8,10 +8,14 @@ import Link from 'next/link';
 import { Calendar, Columns3, LucideIcon, Table } from 'lucide-react';
 // Theming and Internationalization
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { useTranslation } from 'react-i18next';
 
 // Internal Type Definitions
-import { ViewInitialConfigurations } from '~/(views)/view-config.types';
+import {
+  ViewInitialConfigurations,
+  ViewPreferences,
+} from '~/(views)/view-config.types';
 import { ViewItem, ViewTypeEnum } from '~/(views)/views.types';
 // UI Components
 import EmptyState from '~/components/ui/empty-state';
@@ -24,10 +28,11 @@ import { Order } from '~/lib/order.types';
 import { User } from '~/lib/user.types';
 import { formatString } from '~/utils/text-formatter';
 
+import CalendarCard from '../components/calendar-card';
+import CalendarCardMonth from '../components/calendar-card-month';
 // Custom Components and Actions
 import KanbanCard from '../components/kanban-card';
 import { useUserOrderActions } from './user-order-actions';
-import CalendarCard from '../components/calendar-card';
 
 // Enhanced Types
 export interface ViewOption extends Option {
@@ -58,7 +63,7 @@ interface OrdersViewConfig extends Record<string, unknown> {
   currentView: string;
   table?: {
     rowsPerPage: number;
-  }
+  };
 }
 
 class LocalStorageManager<T extends Record<string, unknown>> {
@@ -131,6 +136,7 @@ const useOrdersViewConfigs = ({
     return savedConfig?.currentView ?? ViewTypeEnum.Table;
   });
 
+  const { theme_color } = useOrganizationSettings();
   // Destructure and use hooks
   const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
   const { t } = useTranslation('orders');
@@ -206,15 +212,16 @@ const useOrdersViewConfigs = ({
         emptyState: <EmptyStateComponent />,
         configs: {
           rowsPerPage: {
-            onUpdate: (value: string) => ordersConfigStorage.save({
-              currentView: currentView,
-              table: {
-                rowsPerPage: Number(value)
-              }
-            }),
-            value: ordersConfigStorage.get()?.table?.rowsPerPage ?? 10
-          }
-        }
+            onUpdate: (value: string) =>
+              ordersConfigStorage.save({
+                currentView: currentView,
+                table: {
+                  rowsPerPage: Number(value),
+                },
+              }),
+            value: ordersConfigStorage.get()?.table?.rowsPerPage ?? 10,
+          },
+        },
       },
     };
 
@@ -237,7 +244,7 @@ const useOrdersViewConfigs = ({
       value: 'calendar',
       action: updateCurrentView,
       icon: Calendar,
-    }
+    },
   ];
 
   // Custom components for different views
@@ -251,12 +258,21 @@ const useOrdersViewConfigs = ({
       Card: ({ item }: { item: ViewItem }) => (
         <CalendarCard item={item as Order.Response & { color: string }} />
       ),
+      CardMonth: ({ item }: { item: ViewItem }) => (
+        <CalendarCardMonth item={item as Order.Response & { color: string }} />
+      ),
     },
   };
 
+  const preferences: ViewPreferences = {
+    interfaceColors: {
+      primary: theme_color ?? '#1A38D7',
+    },
+  };
   // Return all configurations and state
   return {
     viewOptions,
+    preferences,
     viewInitialConfiguarations,
     viewAvailableProperties: VIEW_AVAILABLE_PROPERTIES,
     currentView,

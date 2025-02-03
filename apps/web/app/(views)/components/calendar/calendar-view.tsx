@@ -23,6 +23,7 @@ const CalendarView = () => {
     endDate,
     referenceDate,
     customComponent,
+    preferences,
     goToNextDate,
     goToPrevDate,
     goToCurrentDate,
@@ -72,7 +73,6 @@ const CalendarView = () => {
       {/* Include all items of all cells in the sortable context */}
       <SortableContext
         items={cells.flatMap((cell) => cell.items.map((item) => item.id))}
-
       >
         <div className="flex h-full max-h-full min-h-0 w-full flex-col rounded-xl border border-gray-200">
           {/* Header */}
@@ -86,6 +86,7 @@ const CalendarView = () => {
             gridClassName={gridClassNames[currentView].content}
             customComponent={customComponent}
             currentView={currentView}
+            preferences={preferences}
           />
           {/* Footer */}
           <CalendarFooter
@@ -99,6 +100,7 @@ const CalendarView = () => {
             goToPrevDate={goToPrevDate}
             goToCurrentDate={goToCurrentDate}
             goToNextDate={goToNextDate}
+            preferences={preferences}
           />
         </div>
 

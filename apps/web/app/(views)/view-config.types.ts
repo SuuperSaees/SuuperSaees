@@ -76,3 +76,11 @@ export interface ViewConfigurations<T extends ViewItem> {
   filters?: ViewFilterConfiguration<T>;
   sort?: ViewSortConfiguration<T>;
 }
+
+
+// Preferences config type for all views
+export interface ViewPreferences {
+  interfaceColors: {
+    primary: string;
+  }
+}

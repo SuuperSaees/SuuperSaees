@@ -49,6 +49,8 @@
     },
     "date": {
       "today": "Today",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
       "week": "Week",
       "months": {
         "january": "January",

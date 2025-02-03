@@ -40,6 +40,7 @@ export const CalendarProvider = <T extends CalendarItem>({
   children,
   data,
   customComponent,
+  preferences,
   setData,
   onUpdateFn,
 }: CalendarProviderProps<T>) => {
@@ -50,14 +51,14 @@ export const CalendarProvider = <T extends CalendarItem>({
    * Calendar configuration state
    */
   const [calendarConfig, setCalendarConfig] = useState<CalendarConfig>({
-    startOfWeek: WeekDaysIndex.SUNDAY,
+    startOfWeek: WeekDaysIndex.MONDAY,
     startDate: dateUtils.getStartDate(
-      WeekDaysIndex.SUNDAY,
+      WeekDaysIndex.MONDAY,
       currentDate,
       CalendarView.MONTH,
     ),
     endDate: dateUtils.getEndDate(
-      WeekDaysIndex.SUNDAY,
+      WeekDaysIndex.MONDAY,
       currentDate,
       CalendarView.MONTH,
     ),
@@ -111,6 +112,7 @@ export const CalendarProvider = <T extends CalendarItem>({
     ...navigation,
     customComponent:
       customComponent as unknown as ViewCustomComponents<CalendarItem>['calendar'],
+    preferences,
     isDateToday: dateUtils.isDateToday,
     isDateSameMonth: (date: string) =>
       dateUtils.isDateInMonth(date, calendarConfig.referenceDate),
