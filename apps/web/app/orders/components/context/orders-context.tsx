@@ -6,6 +6,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
 } from 'react';
 
 import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
@@ -37,16 +38,26 @@ export const OrdersProvider = ({
   children,
   agencyMembers,
   agencyId,
+  queryKey,
+  queryFn,
+  initialOrders,
 }: OrdersProviderProps) => {
   // const [orders, setOrders] = useState<Order.Response[]>(initialOrders);
   const queryClient = useQueryClient();
+
+  const defaultQueryKey = useMemo(() => ['orders'], []);
+  const defaultQueryFn = useCallback(() => getOrders(true), []);
+
   const ordersQuery = useQuery({
-    queryKey: ['orders'],
-    queryFn: () => getOrders(true),
+    queryKey: queryKey ?? defaultQueryKey,
+    queryFn: queryFn ?? defaultQueryFn,
+    initialData: initialOrders,
   });
+
+
   const orders = ordersQuery.data ?? [];
   const ordersAreLoading = ordersQuery.isLoading || ordersQuery.isPending;
-  
+
   const setOrders = useCallback(
     (
       updater:
@@ -54,9 +65,9 @@ export const OrdersProvider = ({
         | ((prev: Order.Response[]) => Order.Response[]),
     ) => {
       // Get the current orders from the query cache
-      const currentOrders = queryClient.getQueryData([
-        'orders',
-      ]) as Order.Response[];
+      const currentOrders = queryClient.getQueryData(
+        queryKey ?? defaultQueryKey,
+      ) as Order.Response[];
 
       // If updater is a function, call it with current orders
       // If it's a direct value, use it as is
@@ -64,9 +75,9 @@ export const OrdersProvider = ({
         typeof updater === 'function' ? updater(currentOrders) : updater;
 
       // Update the query cache with new orders
-      queryClient.setQueryData(['orders'], newOrders);
+      queryClient.setQueryData(queryKey ?? defaultQueryKey, newOrders);
     },
-    [queryClient],
+    [defaultQueryKey, queryClient, queryKey],
   );
 
   // Initialize query cache
@@ -95,7 +106,6 @@ export const OrdersProvider = ({
           prevOrders.filter((order) => order.id !== newOrder.id),
         );
       }
-
     },
   });
 
@@ -125,7 +135,13 @@ export const OrdersProvider = ({
   // Subscribe to realtime updates
   useRealtime(tables, realtimeConfig, handleSubscriptions);
 
-  const contextValue = { orders, ordersAreLoading, agencyMembers, agencyId, setOrders};
+  const contextValue = {
+    orders,
+    ordersAreLoading,
+    agencyMembers,
+    agencyId,
+    setOrders,
+  };
 
   return (
     <OrdersContext.Provider value={contextValue}>
