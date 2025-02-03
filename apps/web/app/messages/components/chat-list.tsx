@@ -22,23 +22,17 @@ export default function ChatList() {
       
       // Set initial active chat if none selected
       if(!activeChat && response.length > 0) {
-        setActiveChat(response[0].id.toString());
-        setActiveChatData(response[0]);
+        setActiveChat(response[0]?.id.toString() ?? '');
+        setActiveChatData(response[0] ?? null);
         // Initialize messages for first chat
-        const initialMessages = response[0].messages || [];
+        const initialMessages = response[0]?.messages || [];
         // setMessages(initialMessages);
       }
+
       
       return response as Chats.Type[];
     }
   });
-
-  const handleChatSelect = (chat: Chats.Type) => {
-    setActiveChat(chat.id.toString());
-    setActiveChatData(chat);
-    // Set messages for selected chat
-    // setMessages(chat.messages || []);
-  };
 
   if (isLoading) {
     return <div className="flex-1 flex items-center justify-center">Loading chats...</div>;
@@ -56,7 +50,6 @@ export default function ChatList() {
             key={chat.id} 
             chat={chat} 
             isActive={activeChat === chat.id.toString()}
-            onSelect={() => handleChatSelect(chat)}
           />
         ))}
       </div>

@@ -50,24 +50,35 @@ export default function ChatThread({
     }
   };
 
-  const handleUpdate = async (value: string) => {
-    if (!activeChatData) return;
-    
-    try {
+  const handleUpdateMutation = useMutation({
+    mutationFn: async (value: string) => {
       await updateChat({
-        id: activeChatData.id,
+        id: activeChatData?.id.toString() ?? '',
         name: value,
       });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
       toast.success('Chat name updated successfully');
-    } catch (error) {
+      router.refresh();
+    },
+    onError: () => {
       toast.error('Failed to update chat name');
-    }
+    },
+  });
+
+  const handleUpdate = async (value: string) => {
+    if (!activeChatData) return;
+    await Promise.resolve();
+    handleUpdateMutation.mutate(value);
   };
+
+
   const handleDeleteMutation = useMutation({
     mutationFn: async () => {
       setActiveChat(null);
       setActiveChatData(null);
-      
+
       await deleteChat(activeChatData?.id.toString() ?? '');
 
     },

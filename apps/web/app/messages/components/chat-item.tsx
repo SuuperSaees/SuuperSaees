@@ -2,15 +2,22 @@
 
 import { Chats } from "~/lib/chats.types";
 import { MessageCircle } from 'lucide-react'
+import { useChat } from "./context/chat-context";
+import { useRouter } from "next/navigation";
+export default function ChatItem({ chat, isActive = false }: { chat: Chats.Type; isActive?: boolean }) {
+  const { setActiveChat, setActiveChatData } = useChat();
 
-export default function ChatItem({ chat, isActive = false, onSelect }: { chat: Chats.Type; isActive?: boolean, onSelect: () => void }) {
-
-
+  const router = useRouter();
   return (
     <button
+
       onClick={() => {
-        onSelect();
+        setActiveChat(chat.id.toString());
+        setActiveChatData(chat);
+        router.refresh()
       }}
+
+
       className={`p-4 hover:bg-gray-50 cursor-pointer flex items-center gap-3 ${
         isActive ? 'bg-gray-50' : ''
       }`}
