@@ -70,7 +70,7 @@ const CalendarCard = ({ item, className, ...rest }: CalendarCardProps) => {
       {/*Main Content */}
       <div className="flex flex-col gap-1">
         <Link
-          className="line-clamp-1 text-xs font-bold font-medium text-black"
+          className="line-clamp-1 text-sm font-bold font-medium text-black"
           href={`/orders/${item.id}`}
           style={{
             color: darkenColor(item?.color ?? '', 0.5) ?? 'inherit',
@@ -78,7 +78,7 @@ const CalendarCard = ({ item, className, ...rest }: CalendarCardProps) => {
         >
           {item.title}
         </Link>
-        <p className="line-clamp-2 text-xs text-xs text-gray-600">
+        <p className="line-clamp-2 text-xs text-gray-600">
           {item.brief?.name}
         </p>
       </div>
@@ -87,7 +87,7 @@ const CalendarCard = ({ item, className, ...rest }: CalendarCardProps) => {
         <MembersAssignations
           users={users}
           defaultSelectedUsers={defaultSelectedUsers}
-          avatarClassName="h-4 w-4 rounded-full text-xs items-center justify-center"
+          avatarClassName="h-6 w-6 rounded-full text-sm items-center justify-center"
           updateOrderUsersFn={handleUpdateAgencyAssignees}
         />
       </div>
