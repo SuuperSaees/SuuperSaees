@@ -44,7 +44,7 @@ const CalendarContent = ({
           >
             <div
               className={
-                'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ' +
+                'flex h-6 w-6 items-center justify-center rounded-full shrink-0 text-xs font-semibold ' +
                 `${content.isToday ? 'bg-brand text-white' : ''}`
               }
               style={

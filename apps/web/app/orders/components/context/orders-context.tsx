@@ -21,6 +21,7 @@ import {
   type OrdersContextType,
   type OrdersProviderProps,
 } from './orders-context.types';
+import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 /**
  * Context for managing orders state and realtime updates
@@ -36,8 +37,8 @@ export const OrdersProvider = ({
   children,
   agencyMembers,
   agencyId,
-  queryKey,
-  queryFn,
+  queryKey = ['orders'],
+  queryFn = () => getOrders(true),
   initialOrders,
 }: OrdersProviderProps) => {
   // const [orders, setOrders] = useState<Order.Response[]>(initialOrders);

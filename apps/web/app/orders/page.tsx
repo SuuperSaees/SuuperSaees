@@ -84,8 +84,6 @@ async function OrdersPage() {
     <OrdersProvider
       agencyMembers={agencyMembers ?? []}
       agencyId={agencyId ?? ''}
-      queryKey={['orders']}
-      queryFn={() => getOrders(true)}
     >
       <AgencyStatusesProvider
         initialStatuses={agencyStatuses ?? []}
