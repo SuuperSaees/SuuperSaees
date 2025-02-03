@@ -74,6 +74,7 @@ export interface ViewCustomComponents<T> {
   };
   calendar?: {
     Card: React.FC<{ item: T; className?: string; [key: string]: unknown }>; // Card component for the calendar view
+    CardMonth: React.FC<{ item: T; className?: string; [key: string]: unknown }>; // Card component for the calendar view
   };
 }
 

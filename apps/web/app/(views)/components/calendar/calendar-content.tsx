@@ -71,6 +71,17 @@ const CalendarContent = ({
                   >
                     {CustomComponent.Card({ item, index })}
                   </SortableItem>
+                ) : currentView === CalendarView.MONTH ? (
+                  <SortableItem
+                    id={item.id}
+                    key={'calendar-item-' + item.id}
+                    data={{ item, date: content.date }}
+                    overlayClassName="rounded-md bg-transparent"
+                    styleOnDrag={{ opacity: 0 }}
+                    className="h-full"
+                  >
+                    {CustomComponent?.CardMonth({ item, index })}
+                  </SortableItem>
                 ) : (
                   <SortableItem
                     id={item.id}
