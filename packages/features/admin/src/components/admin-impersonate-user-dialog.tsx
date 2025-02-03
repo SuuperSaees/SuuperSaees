@@ -84,6 +84,7 @@ export function AdminImpersonateUserDialog(
             className={'flex flex-col space-y-8'}
             onSubmit={form.handleSubmit(
               async (data) => {
+                localStorage.clear();
                 const tokens = await impersonateUserAction(data);
                 setTokens(tokens);
               },

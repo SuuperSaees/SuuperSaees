@@ -116,6 +116,22 @@ class LocalStorageManager<T extends Record<string, unknown>> {
       console.error(`Error clearing ${this.key} from localStorage:`, error);
     }
   }
+
+  // New method to validate and clean invalid views
+  validateAndCleanConfig(validViews: string[]): void {
+    const config = this.get();
+    if (!config) return;
+
+    const currentView = config.currentView;
+    if (typeof currentView === 'string' && !validViews.includes(currentView)) {
+      // If current view is invalid, remove it and set to default table view
+      const newConfig = {
+        ...config,
+        currentView: ViewTypeEnum.Table
+      };
+      this.save(newConfig);
+    }
+  }
 }
 
 // Create a typed localStorage manager for orders view configuration
@@ -130,10 +146,50 @@ const useOrdersViewConfigs = ({
   currentUserRole,
   agencyMembers,
 }: UseOrdersViewConfigsProps) => {
+  // Type-safe update function
+  const updateCurrentView = (view: string | number): void => {
+    const viewString = String(view);
+    setCurrentView(viewString);
+
+    // Save to localStorage with proper typing
+    ordersConfigStorage.save({
+      ...ordersConfigStorage.get(),
+      currentView: viewString,
+    });
+  };
+
+  // Get valid views from viewOptions
+  const viewOptions: ViewOption[] = [
+    {
+      label: 'Board',
+      value: 'kanban',
+      action: updateCurrentView,
+      icon: Columns3,
+    },
+    {
+      label: 'Table',
+      value: 'table',
+      action: updateCurrentView,
+      icon: Table,
+    },
+    {
+      label: 'Calendar',
+      value: 'calendar',
+      action: updateCurrentView,
+      icon: Calendar,
+    },
+  ];
+
+  const validViews = viewOptions.map(option => String(option.value));
+
+  // Validate stored view against valid views before initializing state
+  ordersConfigStorage.validateAndCleanConfig(validViews);
+
   // Type-safe initialization from localStorage
   const [currentView, setCurrentView] = useState<string>(() => {
     const savedConfig = ordersConfigStorage.get();
-    return savedConfig?.currentView ?? ViewTypeEnum.Table;
+    const savedView = savedConfig?.currentView;
+    return validViews.includes(savedView ?? '') ? savedView ?? ViewTypeEnum.Table : ViewTypeEnum.Table;
   });
 
   const { theme_color } = useOrganizationSettings();
@@ -157,18 +213,6 @@ const useOrdersViewConfigs = ({
       };
     }
     return undefined;
-  };
-
-  // Type-safe view update function
-  const updateCurrentView = (view: string | number): void => {
-    const viewString = String(view);
-    setCurrentView(viewString);
-
-    // Save to localStorage with proper typing
-    ordersConfigStorage.save({
-      ...ordersConfigStorage.get(),
-      currentView: viewString,
-    });
   };
 
   // Empty State Component for when no orders exist
@@ -224,28 +268,6 @@ const useOrdersViewConfigs = ({
         },
       },
     };
-
-  // View options for switching between views
-  const viewOptions: ViewOption[] = [
-    {
-      label: 'Kanban',
-      value: 'kanban',
-      action: updateCurrentView,
-      icon: Columns3,
-    },
-    {
-      label: 'Table',
-      value: 'table',
-      action: updateCurrentView,
-      icon: Table,
-    },
-    {
-      label: 'Calendar',
-      value: 'calendar',
-      action: updateCurrentView,
-      icon: Calendar,
-    },
-  ];
 
   // Custom components for different views
   const customComponents = {

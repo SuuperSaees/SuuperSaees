@@ -158,8 +158,8 @@ const ProjectsBoard = ({
       initialPreferences={preferences}
       customComponents={customComponents}
     >
-      <div className="flex h-full max-h-full min-h-0 w-full flex-col gap-4">
-        <div className="flex items-center justify-end gap-4">
+      <div className="flex w-full flex-col gap-4 max-h-full min-h-0 h-full">
+        <div className="flex flex-wrap items-center justify-end gap-4">
           <StatusFilters
             activeTab={activeTab}
             setActiveTab={setActiveTab}
