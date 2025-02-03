@@ -22,7 +22,6 @@ export default function ChatEmptyState({ userId }: { userId: string }) {
       }),
 
       onSuccess: (response) => {
-        console.log('response', response);
         const newChat = response.success?.data;
         if (newChat) {
           setActiveChat(newChat.id);

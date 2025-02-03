@@ -7,36 +7,46 @@ import { useChat } from './context/chat-context';
 import { Chats } from '~/lib/chats.types';
 
 export default function ChatList() {
-  const { activeChat, setActiveChat, setActiveChatData } = useChat();
+  const { 
+    activeChat, 
+    setActiveChat, 
+    setActiveChatData,
+    setMessages, // From the combined context
+  } = useChat();
 
   const { data: chatsData, isLoading, error } = useQuery({
     queryKey: ['chats'],
     queryFn: async () => {
       const response = await getChats();
-
-      if (!response) throw new Error('Unknown error');
+      if (!response) throw new Error('Failed to fetch chats');
+      
+      // Set initial active chat if none selected
       if(!activeChat && response.length > 0) {
         setActiveChat(response[0].id.toString());
         setActiveChatData(response[0]);
+        // Initialize messages for first chat
+        const initialMessages = response[0].messages || [];
+        setMessages(initialMessages);
       }
-      return response as unknown as Chats.Type[];
-
+      
+      return response as Chats.Type[];
     }
   });
 
-  const handleChatSelect = (chat: Chats.Type) => {
+  const handleChatSelect = async (chat: Chats.Type) => {
     setActiveChat(chat.id.toString());
     setActiveChatData(chat);
+    // Set messages for selected chat
+    setMessages(chat.messages || []);
   };
 
   if (isLoading) {
-    return <div className="flex-1 flex items-center justify-center">Cargando chats...</div>;
+    return <div className="flex-1 flex items-center justify-center">Loading chats...</div>;
   }
 
   if (error) {
     return <div className="flex-1 flex items-center justify-center text-red-500">Error: {error.message}</div>;
   }
-
 
   return (
     <div className="flex-1 overflow-y-auto">
