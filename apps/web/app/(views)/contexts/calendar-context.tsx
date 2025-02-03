@@ -50,14 +50,14 @@ export const CalendarProvider = <T extends CalendarItem>({
    * Calendar configuration state
    */
   const [calendarConfig, setCalendarConfig] = useState<CalendarConfig>({
-    startOfWeek: WeekDaysIndex.SUNDAY,
+    startOfWeek: WeekDaysIndex.MONDAY,
     startDate: dateUtils.getStartDate(
-      WeekDaysIndex.SUNDAY,
+      WeekDaysIndex.MONDAY,
       currentDate,
       CalendarView.MONTH,
     ),
     endDate: dateUtils.getEndDate(
-      WeekDaysIndex.SUNDAY,
+      WeekDaysIndex.MONDAY,
       currentDate,
       CalendarView.MONTH,
     ),
