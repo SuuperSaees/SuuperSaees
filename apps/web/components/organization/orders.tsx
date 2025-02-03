@@ -22,8 +22,12 @@ import { SkeletonOrdersSection } from './skeleton-orders-section';
 
 interface OrdersSectionProps {
   organizationId: string;
+  agencyId: string;
 }
-export default function OrdersSection({ organizationId }: OrdersSectionProps) {
+export default function OrdersSection({
+  organizationId,
+  agencyId,
+}: OrdersSectionProps) {
   const client = useSupabase();
   const { t } = useTranslation('statistics');
 
@@ -52,9 +56,7 @@ export default function OrdersSection({ organizationId }: OrdersSectionProps) {
 
   const agencyStatusesQuery = useQuery({
     queryKey: ['statuses'],
-    queryFn: async () =>
-      await getAgencyStatuses(organizationOrders?.[0]?.agency_id ?? ''),
-    enabled: !!organizationOrders?.length,
+    queryFn: async () => await getAgencyStatuses(agencyId),
   });
 
   const agencyStatuses = agencyStatusesQuery?.data ?? [];
@@ -73,8 +75,7 @@ export default function OrdersSection({ organizationId }: OrdersSectionProps) {
   const tagsQuery = useQuery({
     queryKey: ['tags'],
     queryFn: async () =>
-      await getTags(organizationOrders?.[0]?.agency_id ?? ''),
-    enabled: !!organizationOrders?.length,
+      await getTags(agencyId),
   });
 
   const tags = tagsQuery?.data ?? [];
@@ -107,7 +108,7 @@ export default function OrdersSection({ organizationId }: OrdersSectionProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex h-full flex-col gap-4">
       <div className="flex flex-wrap gap-2.5">
         <CardStats
           title={t('projects.active')}
@@ -153,7 +154,11 @@ export default function OrdersSection({ organizationId }: OrdersSectionProps) {
           initialStatuses={agencyStatuses}
           agencyMembers={transformedAgencyMembers}
         >
-          <ProjectsBoard agencyMembers={transformedAgencyMembers} tags={tags} className="min-h-[800px]" />
+          <ProjectsBoard
+            agencyMembers={transformedAgencyMembers}
+            tags={tags}
+            className="min-h-[800px]"
+          />
         </AgencyStatusesProvider>
       </OrdersProvider>
     </div>

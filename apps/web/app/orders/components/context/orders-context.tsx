@@ -6,7 +6,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useMemo,
 } from 'react';
 
 import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
@@ -17,7 +16,6 @@ import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
 import { useOrdersSubscriptionsHandlers } from '~/hooks/use-orders-subscriptions-handlers';
 import { useRealtime } from '~/hooks/use-realtime';
 import { type Order } from '~/lib/order.types';
-import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 import {
   type OrdersContextType,
@@ -38,22 +36,18 @@ export const OrdersProvider = ({
   children,
   agencyMembers,
   agencyId,
-  queryKey = ['orders'],
+  queryKey,
   queryFn,
   initialOrders,
 }: OrdersProviderProps) => {
   // const [orders, setOrders] = useState<Order.Response[]>(initialOrders);
   const queryClient = useQueryClient();
 
-  const defaultQueryKey = useMemo(() => ['orders'], []);
-  const defaultQueryFn = useCallback(() => getOrders(true), []);
-
   const ordersQuery = useQuery({
-    queryKey: queryKey ?? defaultQueryKey,
-    queryFn: queryFn ?? defaultQueryFn,
+    queryKey: queryKey,
+    queryFn: queryFn,
     initialData: initialOrders,
   });
-
 
   const orders = ordersQuery.data ?? [];
   const ordersAreLoading = ordersQuery.isLoading || ordersQuery.isPending;
@@ -66,7 +60,7 @@ export const OrdersProvider = ({
     ) => {
       // Get the current orders from the query cache
       const currentOrders = queryClient.getQueryData(
-        queryKey ?? defaultQueryKey,
+        queryKey,
       ) as Order.Response[];
 
       // If updater is a function, call it with current orders
@@ -75,9 +69,9 @@ export const OrdersProvider = ({
         typeof updater === 'function' ? updater(currentOrders) : updater;
 
       // Update the query cache with new orders
-      queryClient.setQueryData(queryKey ?? defaultQueryKey, newOrders);
+      queryClient.setQueryData(queryKey, newOrders);
     },
-    [defaultQueryKey, queryClient, queryKey],
+    [queryClient, queryKey],
   );
 
   // Initialize query cache
@@ -143,7 +137,6 @@ export const OrdersProvider = ({
     queryKey,
     setOrders,
   };
-
 
   return (
     <OrdersContext.Provider value={contextValue}>
