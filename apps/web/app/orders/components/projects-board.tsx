@@ -83,12 +83,14 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     viewOptions,
     currentView,
     customComponents,
+    preferences,
   } = useOrdersViewConfigs({
     agencyRoles: AGENCY_ROLES,
     statuses,
     currentUserRole: role,
     agencyMembers,
   });
+
 
   const { handleUpdateOrder } = useOrdersActionHandler({
     orders,
@@ -145,6 +147,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
       availableProperties={
         viewAvailableProperties as unknown as [keyof ViewItem]
       }
+      initialPreferences={preferences}
       customComponents={customComponents}
     >
       <div className="flex w-full flex-col gap-4 max-h-full min-h-0 h-full">

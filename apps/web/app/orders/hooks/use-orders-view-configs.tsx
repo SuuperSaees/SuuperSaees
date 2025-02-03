@@ -11,7 +11,7 @@ import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/butto
 import { useTranslation } from 'react-i18next';
 
 // Internal Type Definitions
-import { ViewInitialConfigurations } from '~/(views)/view-config.types';
+import { ViewInitialConfigurations, ViewPreferences } from '~/(views)/view-config.types';
 import { ViewItem, ViewTypeEnum } from '~/(views)/views.types';
 // UI Components
 import EmptyState from '~/components/ui/empty-state';
@@ -28,6 +28,7 @@ import { formatString } from '~/utils/text-formatter';
 import KanbanCard from '../components/kanban-card';
 import { useUserOrderActions } from './user-order-actions';
 import CalendarCard from '../components/calendar-card';
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
 // Enhanced Types
 export interface ViewOption extends Option {
@@ -131,6 +132,7 @@ const useOrdersViewConfigs = ({
     return savedConfig?.currentView ?? ViewTypeEnum.Table;
   });
 
+  const { theme_color } = useOrganizationSettings();
   // Destructure and use hooks
   const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
   const { t } = useTranslation('orders');
@@ -254,9 +256,15 @@ const useOrdersViewConfigs = ({
     },
   };
 
+  const preferences: ViewPreferences = {
+    interfaceColors: {
+      primary: theme_color ?? '#1A38D7',
+    },
+  };
   // Return all configurations and state
   return {
     viewOptions,
+    preferences,
     viewInitialConfiguarations,
     viewAvailableProperties: VIEW_AVAILABLE_PROPERTIES,
     currentView,

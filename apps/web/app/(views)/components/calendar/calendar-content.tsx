@@ -5,6 +5,7 @@ import {
   CalendarItem,
   CalendarView,
 } from '~/(views)/calendar.types';
+import { ViewPreferences } from '~/(views)/view-config.types';
 import { ViewCustomComponents } from '~/(views)/views.types';
 
 import Droppable from '../../../components/droppable-container';
@@ -16,14 +17,17 @@ interface CalendarContentProps {
   gridClassName: string;
   currentView: CalendarView;
   customComponent?: ViewCustomComponents<CalendarItem>['calendar'];
+  preferences?: ViewPreferences;
 }
 
 const CalendarContent = ({
   content,
   gridClassName,
   customComponent: CustomComponent,
+  preferences,
   currentView,
 }: CalendarContentProps) => {
+
   return (
     <div className={'grid h-full min-h-0 w-full ' + gridClassName}>
       {content?.map((content) => (
@@ -42,6 +46,13 @@ const CalendarContent = ({
               className={
                 'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ' +
                 `${content.isToday ? 'bg-brand text-white' : ''}`
+              }
+              style={
+                preferences?.interfaceColors?.primary && content.isToday
+                  ? {
+                      backgroundColor: preferences?.interfaceColors?.primary,
+                    }
+                  : undefined
               }
             >
               {parseISO(content.date).getDate()}

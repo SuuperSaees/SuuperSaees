@@ -40,6 +40,7 @@ export const CalendarProvider = <T extends CalendarItem>({
   children,
   data,
   customComponent,
+  preferences,
   setData,
   onUpdateFn,
 }: CalendarProviderProps<T>) => {
@@ -111,6 +112,7 @@ export const CalendarProvider = <T extends CalendarItem>({
     ...navigation,
     customComponent:
       customComponent as unknown as ViewCustomComponents<CalendarItem>['calendar'],
+    preferences,
     isDateToday: dateUtils.isDateToday,
     isDateSameMonth: (date: string) =>
       dateUtils.isDateInMonth(date, calendarConfig.referenceDate),

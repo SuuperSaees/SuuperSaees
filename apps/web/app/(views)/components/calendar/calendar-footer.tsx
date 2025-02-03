@@ -5,6 +5,7 @@ import { Button } from 'node_modules/@kit/ui/src/shadcn/button-shadcn';
 import { useTranslation } from 'react-i18next';
 
 import { CalendarView } from '~/(views)/calendar.types';
+import { ViewPreferences } from '~/(views)/view-config.types';
 import SelectAction, { Option } from '~/components/ui/select';
 
 interface CalendarFooterProps {
@@ -14,6 +15,7 @@ interface CalendarFooterProps {
   endDate: string;
   currentView: CalendarView;
   viewOptions: Option[];
+  preferences?: ViewPreferences;
   updateView: (view: CalendarView) => void;
   goToPrevDate: () => void;
   goToCurrentDate: () => void;
@@ -31,7 +33,7 @@ const CalendarFooter = ({
   goToPrevDate,
   goToCurrentDate,
   goToNextDate,
-
+  preferences,
 }: CalendarFooterProps) => {
   const { t, i18n } = useTranslation('views');
 
@@ -45,10 +47,17 @@ const CalendarFooter = ({
           <span className="bg-gray-100 px-4 py-0.5 text-xs font-medium uppercase text-gray-500">
             {format(currentDate, 'MMM', { locale })}
           </span>
-          <span className="px-4 py-0.5 font-bold text-brand">
+          <span className="px-4 py-0.5 font-bold text-brand"
+          style={
+            preferences?.interfaceColors?.primary ? {
+              color: preferences?.interfaceColors?.primary,
+            } : undefined
+          }
+          >
             {format(currentDate, 'd')}
           </span>
         </div>
+
         <div className="flex flex-col justify-center gap-1">
           <div className="items center flex gap-2">
             <span className="font-bold capitalize">
