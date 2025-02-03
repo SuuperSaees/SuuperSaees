@@ -18,6 +18,7 @@ interface CalendarFooterProps {
   goToPrevDate: () => void;
   goToCurrentDate: () => void;
   goToNextDate: () => void;
+
 }
 const CalendarFooter = ({
   currentDate,
@@ -30,6 +31,7 @@ const CalendarFooter = ({
   goToPrevDate,
   goToCurrentDate,
   goToNextDate,
+
 }: CalendarFooterProps) => {
   const { t, i18n } = useTranslation('views');
 
@@ -82,7 +84,7 @@ const CalendarFooter = ({
             onClick={goToCurrentDate}
             className="border-none bg-transparent font-medium"
           >
-            {t('calendar.date.today')}
+            {currentView === CalendarView.WEEK ? t('calendar.date.thisWeek') : t('calendar.date.thisMonth')}
           </Button>
           <Button
             variant="outline"
