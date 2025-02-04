@@ -7,6 +7,7 @@ import {
 } from '~/(views)/calendar.types';
 import { ViewPreferences } from '~/(views)/view-config.types';
 import { ViewCustomComponents } from '~/(views)/views.types';
+import { getContrastColor } from '~/utils/generate-colors';
 
 import Droppable from '../../../components/droppable-container';
 import SortableItem from '../../../components/sortable-item';
@@ -27,9 +28,12 @@ const CalendarContent = ({
   preferences,
   currentView,
 }: CalendarContentProps) => {
-
   return (
-    <div className={'grid h-full min-h-0 w-full ' + gridClassName}>
+    <div
+      className={
+        'grid h-full min-h-0 w-full border-s border-gray-200 ' + gridClassName
+      }
+    >
       {content?.map((content) => (
         <Droppable
           id={content.date}
@@ -37,20 +41,24 @@ const CalendarContent = ({
           data={{ id: content.date, date: content.date }}
         >
           <div
-            className={
-              'last:border-r-none flex h-full flex-col gap-2 border-e border-t border-gray-200 px-4 py-2 ' +
-              `${!content.isWithinCurrentMonth ? 'opacity-50' : ''}`
-            }
+            className={[
+              'last:border-r-none flex h-full flex-col gap-2 border-e border-t border-gray-200 px-4 py-2',
+              !content.isWithinCurrentMonth ? 'opacity-50' : '',
+              content.isWeekend ? 'bg-muted' : 'bg-gray-50'
+            ].filter(Boolean).join(' ')}
           >
             <div
               className={
-                'flex h-6 w-6 items-center justify-center rounded-full shrink-0 text-xs font-semibold ' +
+                'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ' +
                 `${content.isToday ? 'bg-brand text-white' : ''}`
               }
               style={
                 preferences?.interfaceColors?.primary && content.isToday
                   ? {
                       backgroundColor: preferences?.interfaceColors?.primary,
+                      color: getContrastColor(
+                        preferences?.interfaceColors?.primary,
+                      ),
                     }
                   : undefined
               }

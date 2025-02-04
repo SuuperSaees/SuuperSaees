@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 // Lucide Icons
-import { Calendar, Columns3, LucideIcon, Table } from 'lucide-react';
+import { Calendar, Columns3, LucideIcon, Table2 } from 'lucide-react';
 // Theming and Internationalization
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
@@ -170,7 +170,7 @@ const useOrdersViewConfigs = ({
       label: 'Table',
       value: 'table',
       action: updateCurrentView,
-      icon: Table,
+      icon: Table2,
     },
     {
       label: 'Calendar',
