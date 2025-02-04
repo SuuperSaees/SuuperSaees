@@ -18,6 +18,9 @@ import { deleteChat } from '~/server/actions/chats/chats.action';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Chats } from '~/lib/chats.types';
+import { upsertMembers } from '~/server/actions/chat-members/chat-members.action';
+import { getChatById } from '~/server/actions/chats/chats.action';
+import { useQuery } from '@tanstack/react-query';
 
 export default function ChatThread({ 
   teams, 
@@ -108,16 +111,31 @@ export default function ChatThread({
 
   const handleMembersUpdateMutation = useMutation({
     mutationFn: async (members: string[]) => {
-      await updateChat({
-        id: activeChatData?.id.toString() ?? '',
-        members: members,
+      await upsertMembers({
+        chat_id: activeChatData?.id.toString() ?? '',
+        members: members.map((member) => ({
+          user_id: member,
+          role: 'guest',
+        })),
       });
+
+
     },
   });
+
+  const { data: chatById } = useQuery({
+    queryKey: ['chatById', activeChatData?.id.toString() ?? ''],
+    queryFn: async () => {
+      const chat = await getChatById(activeChatData?.id.toString() ?? '');
+      return chat;
+    }
+  });
+
+
   
-  const handleMembersUpdate = async (members: string[]) => {
-    await Promise.resolve();
-    console.log('update members', members);
+  const handleMembersUpdate = (members: string[]) => {
+    console.log(members);
+    handleMembersUpdateMutation.mutate(members);
   };
   
   const handleDelete = () => {
@@ -130,6 +148,7 @@ export default function ChatThread({
 
   const activeChatDataName = {...activeChatData}.name;
   const activeChatDataId = {...activeChatData}.id;
+
 
   return (
     <div className="h-full flex flex-col">
@@ -148,7 +167,7 @@ export default function ChatThread({
         <div className="flex items-center gap-2">
           <ChatMembersSelector
             teams={teams}
-            selectedMembers={activeChatData.members?.map(m => m.id) ?? []}
+            selectedMembers={chatById?.members?.map((m: { id: string }) => m.id) ?? []}
             onMembersUpdate={handleMembersUpdate}
           />
           <Popover open={isPopupOpen} onOpenChange={setIsPopupOpen}>

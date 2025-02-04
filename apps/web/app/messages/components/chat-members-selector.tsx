@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-import { Popover } from '@kit/ui/popover';
 import { Members } from '~/lib/members.types';
 import CheckboxCombobox, { CustomItemProps, Option } from '~/components/ui/checkbox-combobox';
 import { z } from 'zod';
@@ -28,6 +26,7 @@ interface ChatMembersSelectorProps {
   teams: Members.Type;
   selectedMembers: string[];
   onMembersUpdate: (memberIds: string[]) => void;
+  isLoading?: boolean;
 }
 
 const membersSchema = z.object({
@@ -37,9 +36,13 @@ const membersSchema = z.object({
 export default function ChatMembersSelector({ 
   teams, 
   selectedMembers, 
-  onMembersUpdate 
+  onMembersUpdate,
+  isLoading = false
 }: ChatMembersSelectorProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  // Crear array de miembros seleccionados con sus detalles
+  const selectedMembersDetails = selectedMembers
+    .map(memberId => teams.members.find(m => m.id === memberId))
+    .filter(member => member !== undefined);
 
   const memberOptions = teams.members.map(member => ({
     value: member.id,
@@ -49,22 +52,38 @@ export default function ChatMembersSelector({
 
   const handleSubmit = (data: z.infer<typeof membersSchema>) => {
     onMembersUpdate(data.members);
-    setIsOpen(false);
   };
 
-  const selectedMembersData = selectedMembers.map(id => 
-    teams.members.find(m => m.id === id)
-  ).filter((member): member is Members.Member => member !== undefined);
+  const defaultValues = {
+    members: selectedMembers
+  };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-          <CheckboxCombobox
-            options={memberOptions}
-            onSubmit={handleSubmit}
-            schema={membersSchema}
-            defaultValues={{ members: selectedMembers }}
-            customItem={CustomUserItem}
-          />
-    </Popover>
+    <div className="flex flex-col gap-1">
+      <div className="no-scrollbar flex max-h-[300px] flex-wrap items-center justify-start gap-2 overflow-y-auto">
+        {/* Mostrar avatares de miembros seleccionados */}
+        {selectedMembersDetails.map((member, index) => (
+          member && (
+            <AvatarDisplayer
+              key={index + member.name}
+              displayName={member.name}
+              pictureUrl={member.picture_url}
+              isAssignedOrFollower={true}
+              className="h-8 w-8 border-2 border-white"
+            />
+          )
+        ))}
+        
+        {/* Checkbox Combobox para seleccionar miembros */}
+        <CheckboxCombobox
+          options={memberOptions}
+          onSubmit={handleSubmit}
+          schema={membersSchema}
+          defaultValues={defaultValues}
+          customItem={CustomUserItem}
+          isLoading={isLoading}
+        />
+      </div>
+    </div>
   );
 }
