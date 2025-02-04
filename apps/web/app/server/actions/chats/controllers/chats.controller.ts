@@ -3,7 +3,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 
 import { MembersRepository } from '../../chat-members/repositories/chat-members.repository';
-import { MessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
+import { ChatMessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
 import {
   ChatPayload,
   DeleteChatResponse,
@@ -26,7 +26,7 @@ export class ChatController {
   ) {
     const chatRepository = new ChatRepository(client, adminClient);
     const membersRepository = new MembersRepository(client, adminClient);
-    const messagesRepository = new MessagesRepository(client, adminClient);
+    const messagesRepository = new ChatMessagesRepository(client, adminClient);
 
     this.chatService = new ChatService(
       chatRepository,

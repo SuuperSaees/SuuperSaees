@@ -12,13 +12,13 @@ import {
   UpdateMessageContentResponse,
 } from '../chat-messages.interface';
 
-export class MessagesRepository {
+export class ChatMessagesRepository {
   private client: SupabaseClient;
   private adminClient?: SupabaseClient;
 
   constructor(
     client: SupabaseClient<Database>,
-    adminClient: SupabaseClient<Database>,
+    adminClient?: SupabaseClient<Database>,
   ) {
     this.client = client;
     this.adminClient = adminClient;
@@ -27,21 +27,25 @@ export class MessagesRepository {
   // * CREATE REPOSITORIES
   async createMessage(
     payload: ChatMessages.Insert,
-  ): Promise<ChatMessages.Type> {
+  ): Promise<ChatMessages.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
 
     const { data, error } = await client
       .from('chat_messages')
       .insert(payload)
-      .select()
+      .select(`
+        *,
+        message:messages(*)
+      `)
       .single();
+
 
 
     if (error) {
       throw new Error(`Error creating message: ${error.message}`);
     }
 
-    return data as ChatMessages.Type;
+    return data as ChatMessages.TypeWithRelations;
   }
 
 
