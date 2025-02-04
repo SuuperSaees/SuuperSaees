@@ -11,28 +11,33 @@ import {
   UpdateMessageContentPayload,
   UpdateMessageContentResponse,
 } from '../chat-messages.interface';
-import { MessagesRepository } from '../repositories/chat-messages.respository';
-import { MessagesService } from '../services/chat-messages.service';
+import { ChatMessagesRepository } from '../repositories/chat-messages.respository';
+import { MessagesRepository } from '../../messages/repositories/messages.repository';
+import { ChatMessagesService } from '../services/chat-messages.service';
 
 export class MessagesController {
-  private messagesService: MessagesService;
+  private baseUrl: string
+  private client: SupabaseClient<Database>
+  private adminClient?: SupabaseClient<Database>
 
-  constructor(
-    baseUrl: string,
-    client: SupabaseClient<Database>,
-    adminClient: SupabaseClient<Database>,
-  ) {
-    const messagesRepository = new MessagesRepository(client, adminClient);
-    this.messagesService = new MessagesService(messagesRepository);
+  constructor(baseUrl: string, client: SupabaseClient<Database>, adminClient?: SupabaseClient<Database>) {
+      this.baseUrl = baseUrl;
+      this.client = client;
+      this.adminClient = adminClient;
   }
+
+
 
   // * CREATE CONTROLLERS
   async createMessage(
-    payload: ChatMessages.Insert,
-  ): Promise<ChatMessages.Type> {
+    payload: ChatMessages.InsertWithRelations,
+  ): Promise<ChatMessages.TypeWithRelations> {
     try {
+      const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
+      const messagesRepository = new MessagesRepository(this.client, this.adminClient);
+      const chatMessageService = new ChatMessagesService(chatMessagesRepository, messagesRepository);
+      return await chatMessageService.createMessage(payload);
 
-      return await this.messagesService.createMessage(payload);
     } catch (error) {
       console.error(error);
       throw error;
@@ -42,7 +47,10 @@ export class MessagesController {
   // * GET CONTROLLERS
   async getMessages(chatId: string): Promise<GetMessagesResponse[]> {
     try {
-      return await this.messagesService.getMessages(chatId);
+      const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
+      const chatMessageService = new ChatMessagesService(chatMessagesRepository);
+      return await chatMessageService.getMessages(chatId);
+
     } catch (error) {
       console.error(error);
       throw error;
@@ -54,7 +62,10 @@ export class MessagesController {
     payload: DeleteMessagePayload,
   ): Promise<DeleteMessageResponse> {
     try {
-      return await this.messagesService.deleteMessage(payload);
+      const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
+      const chatMessageService = new ChatMessagesService(chatMessagesRepository);
+      return await chatMessageService.deleteMessage(payload);
+
     } catch (error) {
       console.error(error);
       throw error;
@@ -65,7 +76,9 @@ export class MessagesController {
     payload: ClearChatMessagesPayload,
   ): Promise<ClearChatMessagesResponse> {
     try {
-      return await this.messagesService.clearChatMessages(payload);
+      const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
+      const chatMessageService = new ChatMessagesService(chatMessagesRepository);
+      return await chatMessageService.clearChatMessages(payload);
     } catch (error) {
       console.error(error);
       throw error;
@@ -77,7 +90,9 @@ export class MessagesController {
     payload: UpdateMessageContentPayload,
   ): Promise<UpdateMessageContentResponse> {
     try {
-      return await this.messagesService.updateMessageContent(payload);
+      const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
+      const chatMessageService = new ChatMessagesService(chatMessagesRepository);
+      return await chatMessageService.updateMessageContent(payload);
     } catch (error) {
       console.error(error);
       throw error;

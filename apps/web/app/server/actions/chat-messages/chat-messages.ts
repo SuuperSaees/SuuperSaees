@@ -24,8 +24,8 @@ export class MessagesAction extends BaseAction {
   }
 
   async createMessage(
-    payload: ChatMessages.Insert,
-  ): Promise<ChatMessages.Type> {
+    payload: ChatMessages.InsertWithRelations,
+  ): Promise<ChatMessages.TypeWithRelations> {
     return await this.controller.createMessage(payload);
   }
 

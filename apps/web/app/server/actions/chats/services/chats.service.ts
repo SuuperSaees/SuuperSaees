@@ -1,5 +1,5 @@
 import { MembersRepository } from '../../chat-members/repositories/chat-members.repository';
-import { MessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
+import { ChatMessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
 import {
   ChatPayload,
   DeleteChatResponse,
@@ -15,7 +15,7 @@ export class ChatService {
   constructor(
     private readonly chatRepository: ChatRepository,
     private readonly membersRepository: MembersRepository,
-    private readonly messagesRepository: MessagesRepository,
+    private readonly messagesRepository: ChatMessagesRepository,
   ) {}
 
   // * CREATE SERVICES

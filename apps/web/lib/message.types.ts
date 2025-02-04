@@ -9,4 +9,5 @@ export namespace Message {
   };
   export type Insert = Database['public']['Tables']['messages']['Insert'];
   export type Update = Database['public']['Tables']['messages']['Update'];
+  export type TypeOnly = Database['public']['Tables']['messages']['Row'];
 }
