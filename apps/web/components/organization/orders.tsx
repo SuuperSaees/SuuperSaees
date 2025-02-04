@@ -108,7 +108,7 @@ export default function OrdersSection({
   }
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    <div className="flex h-full flex-col gap-8">
       <div className="flex flex-wrap gap-2.5">
         <CardStats
           title={t('projects.active')}

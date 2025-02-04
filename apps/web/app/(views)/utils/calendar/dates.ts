@@ -1,4 +1,4 @@
-import { format, isSameMonth } from 'date-fns';
+import { format, isSameMonth, isWeekend } from 'date-fns';
 import { isToday } from 'date-fns';
 import {
   addMonths,
@@ -65,5 +65,7 @@ export const dateUtils = {
     isSameMonth(parseISO(date), parseISO(referenceDate)),
 
   formatDayName: (date: Date): string => format(date, DATE_FORMATS.FULL_DAY),
+
+  isDateWeekend: (date: string): boolean => isWeekend(parseISO(date)),
 
 };
