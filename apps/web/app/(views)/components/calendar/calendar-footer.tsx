@@ -5,7 +5,6 @@ import { Button } from 'node_modules/@kit/ui/src/shadcn/button-shadcn';
 import { useTranslation } from 'react-i18next';
 
 import { CalendarView } from '~/(views)/calendar.types';
-import { ViewPreferences } from '~/(views)/view-config.types';
 import SelectAction, { Option } from '~/components/ui/select';
 
 interface CalendarFooterProps {
@@ -15,12 +14,10 @@ interface CalendarFooterProps {
   endDate: string;
   currentView: CalendarView;
   viewOptions: Option[];
-  preferences?: ViewPreferences;
   updateView: (view: CalendarView) => void;
   goToPrevDate: () => void;
   goToCurrentDate: () => void;
   goToNextDate: () => void;
-
 }
 const CalendarFooter = ({
   currentDate,
@@ -33,7 +30,6 @@ const CalendarFooter = ({
   goToPrevDate,
   goToCurrentDate,
   goToNextDate,
-  preferences,
 }: CalendarFooterProps) => {
   const { t, i18n } = useTranslation('views');
 
@@ -41,19 +37,13 @@ const CalendarFooter = ({
   const locale = i18n.language === 'es' ? es : enUS;
 
   return (
-    <div className="flex w-full items-center justify-between border-t border-gray-200 p-4">
+    <div className="flex w-full items-center justify-between border rounded-b-xl border-gray-200 p-4">
       <div className="flex gap-2">
         <div className="flex flex-col items-center rounded-md border border-gray-200">
           <span className="bg-gray-100 px-4 py-0.5 text-xs font-medium uppercase text-gray-500">
             {format(currentDate, 'MMM', { locale })}
           </span>
-          <span className="px-4 py-0.5 font-bold text-brand"
-          style={
-            preferences?.interfaceColors?.primary ? {
-              color: preferences?.interfaceColors?.primary,
-            } : undefined
-          }
-          >
+          <span className="px-4 py-0.5 font-bold text-black">
             {format(currentDate, 'd')}
           </span>
         </div>
@@ -93,7 +83,7 @@ const CalendarFooter = ({
             onClick={goToCurrentDate}
             className="border-none bg-transparent font-medium"
           >
-            {currentView === CalendarView.WEEK ? t('calendar.date.thisWeek') : t('calendar.date.thisMonth')}
+            {t('calendar.date.today')}
           </Button>
           <Button
             variant="outline"

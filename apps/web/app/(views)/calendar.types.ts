@@ -13,11 +13,13 @@ export type CalendarCellHeader = {
   date: string;
   title: string;
   isToday: boolean;
+  isWeekend: boolean;
   isWithinCurrentMonth: boolean;
 };
 export type CalendarCellContent<T extends CalendarItem> = {
   date: string;
   isToday: boolean;
+  isWeekend: boolean;
   isWithinCurrentMonth: boolean;
   items: T[];
 };
