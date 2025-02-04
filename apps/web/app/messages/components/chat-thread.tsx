@@ -37,7 +37,8 @@ export default function ChatThread({
     setActiveChatData,
     messages,
     addMessage,
-    isLoading
+    isLoading, 
+    setMessages
   } = useChat();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -45,9 +46,8 @@ export default function ChatThread({
   const handleSendMessage = async (content: string, fileIds?: string[]) => {
     if (!activeChatData) return;
 
-    
     try {
-      await addMessage({ content, fileIds });
+      await addMessage({ content, fileIds, userId });
     } catch (error) {
       console.error('Error sending message:', error);
     }
@@ -127,9 +127,11 @@ export default function ChatThread({
     queryKey: ['chatById', activeChatData?.id.toString() ?? ''],
     queryFn: async () => {
       const chat = await getChatById(activeChatData?.id.toString() ?? '');
+      setMessages(chat.messages);
       return chat;
     }
   });
+
 
 
   
@@ -148,7 +150,6 @@ export default function ChatThread({
 
   const activeChatDataName = {...activeChatData}.name;
   const activeChatDataId = {...activeChatData}.id;
-
 
   return (
     <div className="h-full flex flex-col">

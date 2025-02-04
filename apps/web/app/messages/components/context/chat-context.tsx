@@ -12,6 +12,7 @@ import { generateUUID } from '~/utils/generate-uuid';
 // import { useChatSubscriptions } from '~/messages/hooks/use-chat-subscription';
 import { SubscriptionPayload, TableName } from '~/lib/chats.types';
 import { getUserById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import { ChatRoleType } from '~/server/actions/chats/middleware/validate_chat_role';
 
 interface ChatContextType {
   // Active chat management
@@ -22,8 +23,9 @@ interface ChatContextType {
   
   // Messages management
   messages: ChatMessages.Type[];
+  setMessages: (messages: ChatMessages.Type[]) => void;
   members: ChatMembers.Type[];
-  addMessage: (params: { content: string; fileIds?: string[] }) => Promise<void>;
+  addMessage: (params: { content: string; fileIds?: string[]; userId: string }) => Promise<void>;
   deleteMessage: (messageId: string) => Promise<void>;
   isLoading: boolean;
 }
@@ -137,13 +139,14 @@ export function ChatProvider({
 
   // Add message mutation
   const addMessageMutation = useMutation({
-    mutationFn: async ({ content, fileIds }: { content: string; fileIds?: string[] }) => {
+    mutationFn: async ({ content, fileIds, userId }: { content: string; fileIds?: string[]; userId: string }) => {
       if (!activeChatData) throw new Error('No active chat');
       
       const messageData = {
+        account_id: userId,
         content,
         chat_id: activeChatData.id,
-        visibility: 'public',
+        role: 'guest' as ChatRoleType,
       };
 
       const response = await createMessage(messageData);
@@ -164,7 +167,7 @@ export function ChatProvider({
         id: `temp-${tempId}`,
         content,
         chat_id: activeChatData?.id ?? '',
-        user_id: userId,
+        account_id: userId,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         visibility: 'public',
@@ -172,7 +175,7 @@ export function ChatProvider({
         pending: true,
         user: {
           id: userId,
-          name: 'Current User', // You might want to pass user data through props
+          name: 'Jairo David Holgado', // You might want to pass user data through props
           email: '',
         }
       };
@@ -187,9 +190,6 @@ export function ChatProvider({
         );
       }
       toast.error('Failed to send message');
-    },
-    onSuccess: () => {
-      toast.success('Message sent successfully');
     },
     onSettled: () => {
       setIsLoading(false);
@@ -229,13 +229,15 @@ export function ChatProvider({
     setActiveChat,
     activeChatData,
     setActiveChatData,
-    
+    setMessages,
     // Messages management
-    messages: messages.filter(msg => !msg.deleted_at),
+    messages: messages.filter(msg => !('deleted_at' in msg)),
     members,
-    addMessage: async ({ content, fileIds }) => {
-      await addMessageMutation.mutateAsync({ content, fileIds });
+
+    addMessage: async ({ content, fileIds, userId }: { content: string, fileIds: string[], userId: string }) => {
+      await addMessageMutation.mutateAsync({ content, fileIds, userId });
     },
+
     deleteMessage: async (messageId: string) => {
       await deleteMessageMutation.mutateAsync(messageId);
     },

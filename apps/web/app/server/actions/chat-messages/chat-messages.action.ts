@@ -1,11 +1,6 @@
 'use server';
-
+import { ChatMessages } from '~/lib/chat-messages.types';
 import {
-  ChatRoleType,
-  validateChatRole,
-} from '../chats/middleware/validate_chat_role';
-import {
-  ChatMessagePayload,
   ClearChatMessagesPayload,
   DeleteMessagePayload,
   UpdateMessageContentPayload,
@@ -16,10 +11,7 @@ function getMessagesAction() {
   return createMessagesAction(process.env.NEXT_PUBLIC_SITE_URL as string);
 }
 
-export async function createMessage(payload: ChatMessagePayload) {
-  validateChatRole(['owner', 'project_manager'] as ChatRoleType[], [
-    payload.role,
-  ]);
+export async function createMessage(payload: ChatMessages.Insert) {
   return await getMessagesAction().createMessage(payload);
 }
 

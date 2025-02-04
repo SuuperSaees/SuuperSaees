@@ -11,6 +11,7 @@ export default function ChatList() {
     activeChat, 
     setActiveChat, 
     setActiveChatData, // From the combined context
+    setMessages,
   } = useChat();
 
   const { data: chatsData, isLoading, error } = useQuery({
@@ -24,8 +25,7 @@ export default function ChatList() {
         setActiveChat(response[0]?.id.toString() ?? '');
         setActiveChatData(response[0] ?? null);
         // Initialize messages for first chat
-        const initialMessages = response[0]?.messages || [];
-        // setMessages(initialMessages);
+        setMessages([])
       }
 
       

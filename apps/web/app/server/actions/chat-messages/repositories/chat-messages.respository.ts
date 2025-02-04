@@ -1,10 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
-
+import { ChatMessages } from '~/lib/chat-messages.types';
 import {
-  ChatMessagePayload,
-  ChatMessageResponse,
   ClearChatMessagesPayload,
   ClearChatMessagesResponse,
   DeleteMessagePayload,
@@ -28,26 +26,24 @@ export class MessagesRepository {
 
   // * CREATE REPOSITORIES
   async createMessage(
-    payload: ChatMessagePayload,
-  ): Promise<ChatMessageResponse> {
+    payload: ChatMessages.Insert,
+  ): Promise<ChatMessages.Type> {
     const client = this.adminClient ?? this.client;
+
     const { data, error } = await client
       .from('chat_messages')
-      .insert({
-        chat_id: payload.chat_id,
-        user_id: payload.user_id,
-        content: payload.content,
-        role: payload.role,
-      })
+      .insert(payload)
       .select()
       .single();
+
 
     if (error) {
       throw new Error(`Error creating message: ${error.message}`);
     }
 
-    return data as ChatMessageResponse;
+    return data as ChatMessages.Type;
   }
+
 
   // * GET REPOSITORIES
   async getMessages(chatId: string): Promise<GetMessagesResponse[]> {

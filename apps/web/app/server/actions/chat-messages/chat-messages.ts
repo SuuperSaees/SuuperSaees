@@ -1,8 +1,7 @@
 import { BaseAction } from '../base-action';
 import { MessagesController } from './controllers/chat-messages.controller';
+import { ChatMessages } from '~/lib/chat-messages.types';
 import {
-  ChatMessagePayload,
-  ChatMessageResponse,
   ClearChatMessagesPayload,
   ClearChatMessagesResponse,
   DeleteMessagePayload,
@@ -25,10 +24,11 @@ export class MessagesAction extends BaseAction {
   }
 
   async createMessage(
-    payload: ChatMessagePayload,
-  ): Promise<ChatMessageResponse> {
+    payload: ChatMessages.Insert,
+  ): Promise<ChatMessages.Type> {
     return await this.controller.createMessage(payload);
   }
+
 
   async getMessages(chatId: string): Promise<GetMessagesResponse[]> {
     return await this.controller.getMessages(chatId);

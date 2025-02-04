@@ -1,10 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
-
+import { ChatMessages } from '~/lib/chat-messages.types';
 import {
-  ChatMessagePayload,
-  ChatMessageResponse,
   ClearChatMessagesPayload,
   ClearChatMessagesResponse,
   DeleteMessagePayload,
@@ -30,9 +28,10 @@ export class MessagesController {
 
   // * CREATE CONTROLLERS
   async createMessage(
-    payload: ChatMessagePayload,
-  ): Promise<ChatMessageResponse> {
+    payload: ChatMessages.Insert,
+  ): Promise<ChatMessages.Type> {
     try {
+
       return await this.messagesService.createMessage(payload);
     } catch (error) {
       console.error(error);

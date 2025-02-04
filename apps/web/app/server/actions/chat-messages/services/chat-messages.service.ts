@@ -1,6 +1,5 @@
+import { ChatMessages } from '~/lib/chat-messages.types';
 import {
-  ChatMessagePayload,
-  ChatMessageResponse,
   ClearChatMessagesPayload,
   ClearChatMessagesResponse,
   DeleteMessagePayload,
@@ -16,10 +15,12 @@ export class MessagesService {
 
   // * CREATE SERVICES
   async createMessage(
-    payload: ChatMessagePayload,
-  ): Promise<ChatMessageResponse> {
+    payload: ChatMessages.Insert,
+  ): Promise<ChatMessages.Type> {
     return await this.messagesRepository.createMessage(payload);
   }
+
+
 
   // * GET SERVICES
   async getMessages(chatId: string): Promise<GetMessagesResponse[]> {
