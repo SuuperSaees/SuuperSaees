@@ -9,7 +9,7 @@ import {
   UpdateMemberSettingsPayload,
   UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
-} from '../members.interface';
+} from '../chat-members.interface';
 
 export class MembersRepository {
   private client: SupabaseClient;
@@ -24,28 +24,61 @@ export class MembersRepository {
   }
 
   // * CREATE REPOSITORIES
-  async addMembers(
+  async upsertMembers(
     chat_id: string,
     members: { user_id: string; role: string }[],
   ): Promise<{ success: boolean; message: string }> {
     const client = this.adminClient ?? this.client;
-    const { error } = await client.from('chat_members').upsert(
-      members.map((member) => ({
-        chat_id,
-        user_id: member.user_id,
-        role: member.role,
-      })),
-    );
-
-    if (error) {
-      throw new Error(
-        `Error adding members to chat ${chat_id}: ${error.message}`,
-      );
+    
+    const { data: existingMembers, error: fetchError } = await client
+      .from('chat_members')
+      .select('user_id')
+      .eq('chat_id', chat_id);
+  
+    if (fetchError) {
+      throw new Error(`Error fetching existing members: ${fetchError.message}`);
     }
+  
+    const newUserIds = new Set(members.map(m => m.user_id));
+    
+    const usersToDelete = existingMembers
+      ?.filter(m => !newUserIds.has(m.user_id))
+      .map((m: { user_id: string }) => m.user_id) || [];
+
+    if (usersToDelete.length > 0) {
+      const { error: deleteError } = await client
+        .from('chat_members')
+        .delete()
+        .eq('chat_id', chat_id)
+        .in('user_id', usersToDelete);
+
+  
+      if (deleteError) {
+        throw new Error(`Error removing members: ${deleteError.message}`);
+      }
+    }
+
+    const membersToUpsert = members.filter(m => !usersToDelete.includes(m.user_id));
+
+    await Promise.all(membersToUpsert.map(async (member) => {
+      const { error: upsertError } = await client
+        .from('chat_members')
+        .insert({
+          chat_id,
+          user_id: member.user_id,
+          type: member.role,
+        }
+      );
+
+
+      if (upsertError) {
+        throw new Error(`Error updating members: ${upsertError.message}`);
+      }
+    }));
 
     return {
       success: true,
-      message: `Members successfully added to chat ${chat_id}.`,
+      message: `Members successfully synchronized for chat ${chat_id}.`,
     };
   }
 

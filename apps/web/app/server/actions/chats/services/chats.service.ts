@@ -1,15 +1,15 @@
-import { MembersRepository } from '../../chat-members/repositories/members.repositories';
-import { MessagesRepository } from '../../chat-messages/repositories/messages.respositories';
+import { MembersRepository } from '../../chat-members/repositories/chat-members.repository';
+import { MessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
 import {
   ChatPayload,
-  ChatResponse,
   DeleteChatResponse,
   GetChatByIdResponse,
-  GetChatsResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
-} from '../chat.interface';
-import { ChatRepository } from '../repositories/chat.repositories';
+} from '../chats.interface';
+import { ChatRepository } from '../repositories/chats.repository';
+import { Chats } from '~/lib/chats.types';
+
 
 export class ChatService {
   constructor(
@@ -19,12 +19,13 @@ export class ChatService {
   ) {}
 
   // * CREATE SERVICES
-  async createChat(payload: ChatPayload): Promise<ChatResponse> {
+  async createChat(payload: ChatPayload): Promise<Chats.Type> {
     const chat = await this.chatRepository.createChat(payload);
+
 
     if (payload.members && payload.members.length > 0) {
       await this.membersRepository.addMembers(
-        chat.id,
+        chat.id.toString(),
         payload.members.map((member) => ({
           user_id: member.user_id,
           role: member.role,
@@ -36,7 +37,7 @@ export class ChatService {
   }
 
   // * GET SERVICES
-  async getChats(): Promise<GetChatsResponse[]> {
+  async getChats(): Promise<Chats.Type[]> {
     return await this.chatRepository.getChats();
   }
 
@@ -58,5 +59,9 @@ export class ChatService {
     payload: UpdateChatSettingsPayload,
   ): Promise<UpdateChatSettingsResponse> {
     return await this.chatRepository.updateChatSettings(payload);
+  }
+
+  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
+    return await this.chatRepository.updateChat(payload);
   }
 }

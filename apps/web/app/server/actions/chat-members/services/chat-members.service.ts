@@ -11,15 +11,15 @@ import {
   UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
-} from '../members.interface';
-import { MembersRepository } from '../repositories/members.repositories';
+} from '../chat-members.interface';
+import { MembersRepository } from '../repositories/chat-members.repository';
 
 export class MembersService {
   constructor(private readonly membersRepository: MembersRepository) {}
 
   // * CREATE SERVICES
-  async addMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
-    return await this.membersRepository.addMembers(
+  async upsertMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
+    return await this.membersRepository.upsertMembers(
       payload.chat_id,
       payload.members,
     );

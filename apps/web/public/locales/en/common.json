@@ -12,6 +12,7 @@
   "settingsTabLabel": "Settings",
   "profileSettingsTabLabel": "Profile",
   "subscriptionSettingsTabLabel": "Subscription",
+  "messagesName": "Messages",
   "dashboardTabDescription": "An overview of your organization's activity and performance across all your projects.",
   "settingsTabDescription": "Manage your settings and preferences.",
   "emailAddress": "Email",

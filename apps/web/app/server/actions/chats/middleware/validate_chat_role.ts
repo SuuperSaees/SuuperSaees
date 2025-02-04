@@ -12,7 +12,7 @@ export const validateChatRole = (
   if (!roles || !Array.isArray(roles)) {
     throw new CustomError(
       400,
-      'La propiedad "roles" es requerida y debe ser un array.',
+      'The "roles" property is required and must be an array.',
       ErrorChatOperations.FAILED_TO_CREATE_CHAT,
     );
   }
@@ -24,7 +24,7 @@ export const validateChatRole = (
   if (invalidRoles.length > 0) {
     throw new CustomError(
       400,
-      `Roles inválidos: ${invalidRoles.join(', ')}`,
+      `Invalid roles: ${invalidRoles.join(', ')}`,
       ErrorChatOperations.INSUFFICIENT_PERMISSIONS,
     );
   }

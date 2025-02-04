@@ -1,16 +1,14 @@
-alter table "public"."chats" drop column "account_id";
+drop policy if exists "delete_chats"
+on "public"."chats";
 
-alter table "public"."chats" drop column "reference_id";
+drop policy if exists "insert_chats"
+on "public"."chats";
 
-alter table "public"."chats" add column "deleted_on" timestamp with time zone;
+drop policy if exists "select_chats"
+on "public"."chats";
 
-alter table "public"."chats" add column "image" text;
-
-alter table "public"."chats" add column "updated_at" timestamp with time zone default now();
-
-alter table "public"."chats" add column "user_id" uuid not null;
-
-alter table "public"."chats" add column "visibility" boolean default true;
+drop policy if exists "update_chats"
+on "public"."chats";
 
 alter table "public"."chats" disable row level security;
 
@@ -44,5 +42,3 @@ as permissive
 for update
 to public
 using (true);
-
-

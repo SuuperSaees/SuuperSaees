@@ -15,9 +15,9 @@ import {
   UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
-} from '../members.interface';
-import { MembersRepository } from '../repositories/members.repositories';
-import { MembersService } from '../services/members.services';
+} from '../chat-members.interface';
+import { MembersRepository } from '../repositories/chat-members.repository';
+import { MembersService } from '../services/chat-members.service';
 
 export class MembersController {
   private membersService: MembersService;
@@ -32,10 +32,11 @@ export class MembersController {
   }
 
   // * CREATE CONTROLLERS
-  async addMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
+  async upsertMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
     try {
-      return await this.membersService.addMembers(payload);
+      return await this.membersService.upsertMembers(payload);
     } catch (error) {
+
       console.error(error);
       throw error;
     }

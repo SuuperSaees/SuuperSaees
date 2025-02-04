@@ -8,8 +8,8 @@ import {
   GetMessagesResponse,
   UpdateMessageContentPayload,
   UpdateMessageContentResponse,
-} from '../message.interface';
-import { MessagesRepository } from '../repositories/messages.respositories';
+} from '../chat-messages.interface';
+import { MessagesRepository } from '../repositories/chat-messages.respository';
 
 export class MessagesService {
   constructor(private readonly messagesRepository: MessagesRepository) {}

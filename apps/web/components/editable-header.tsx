@@ -19,6 +19,7 @@ interface EditableHeaderProps {
 
 const EditableHeader = ({
   initialName,
+  id,
   userRole,
   updateFunction,
   rolesThatCanEdit,
@@ -27,6 +28,14 @@ const EditableHeader = ({
   const [name, setName] = useState(initialName);
   const inputRef = useRef<HTMLInputElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    setName(initialName);
+  }, [initialName]);
+
+  useEffect(() => {
+    setIsEditing(false);
+  }, [id]);
 
   const handleSave = async () => {
     if (name.trim() === '') {
