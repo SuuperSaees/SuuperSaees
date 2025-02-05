@@ -18,6 +18,7 @@ export const getServicesByOrganizationId = async (): Promise<{
       .select('*, billing_services!left(provider_id, provider).service_id(id)')
       .eq('propietary_organization_id', primary_owner_user_id ?? '')
       .is('deleted_on', null)
+      .order('created_at', { ascending: false })
       .returns<Service.Relationships.Billing.BillingService[]>();
 
     if (error) throw new Error(error.message);
