@@ -32,6 +32,7 @@ import ViewSelect from './view-select';
 interface ProjectsBoardProps {
   agencyMembers: User.Response[];
   tags: Tags.Type[];
+  className?: string;
 }
 
 // Constants
@@ -47,9 +48,14 @@ const AGENCY_ROLES = new Set([
   'agency_member',
 ]);
 
-const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
+const ProjectsBoard = ({
+  agencyMembers,
+  tags,
+  className,
+}: ProjectsBoardProps) => {
   // Context and hooks
-  const { orders, setOrders, agencyId, ordersAreLoading } = useOrdersContext();
+  const { orders, setOrders, agencyId, ordersAreLoading, queryKey } =
+    useOrdersContext();
   const { statuses } = useAgencyStatuses();
   const { t } = useTranslation('orders');
   const { workspace } = useUserWorkspace();
@@ -83,6 +89,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     viewOptions,
     currentView,
     customComponents,
+    preferences,
   } = useOrdersViewConfigs({
     agencyRoles: AGENCY_ROLES,
     statuses,
@@ -95,9 +102,11 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     setOrders,
     agencyId,
     statuses,
+    queryKey,
   });
 
   // Compute initial active tab
+
   const statusFilterValues = getFilterValues('status');
   const getInitialActiveTab = () => {
     if (
@@ -127,7 +136,8 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
     if (currentView === 'calendar') {
       return filteredOrders.map((order) => ({
         ...order,
-        color: statuses.find((status) => status.id === order.status_id)?.status_color,
+        color: statuses.find((status) => status.id === order.status_id)
+          ?.status_color,
       }));
     }
     return filteredOrders;
@@ -145,10 +155,11 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
       availableProperties={
         viewAvailableProperties as unknown as [keyof ViewItem]
       }
+      initialPreferences={preferences}
       customComponents={customComponents}
     >
       <div className="flex w-full flex-col gap-4 max-h-full min-h-0 h-full">
-        <div className="flex items-center justify-end gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-4">
           <StatusFilters
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -178,7 +189,7 @@ const ProjectsBoard = ({ agencyMembers, tags }: ProjectsBoardProps) => {
             <TableSkeleton columns={9} rows={7} />
           )
         ) : (
-          <Board />
+          <Board className={className} />
         )}
       </div>
     </ViewProvider>

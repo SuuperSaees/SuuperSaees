@@ -49,9 +49,12 @@
     },
     "date": {
       "today": "Hoy",
+      "thisWeek": "Esta semana",
+      "thisMonth": "Este mes",
       "week": "Semana",
       "months": {
         "january": "Enero",
+
         "february": "Febrero",
         "march": "Marzo",
         "april": "Abril",

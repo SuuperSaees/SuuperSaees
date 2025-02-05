@@ -75,10 +75,12 @@ export function useCalendarCells<T extends CalendarItem>(
           date: formattedDate,
           title: dateUtils.formatDayName(date),
           isToday: dateUtils.isDateToday(formattedDate),
+          isWeekend: dateUtils.isDateWeekend(formattedDate),
           isWithinCurrentMonth: dateUtils.isDateInMonth(
             formattedDate,
             referenceDate,
           ),
+
         };
       });
 
@@ -97,6 +99,7 @@ export function useCalendarCells<T extends CalendarItem>(
           date: formattedDate,
           items: dateItemsMap.get(formattedDate) ?? [],
           isToday: dateUtils.isDateToday(formattedDate),
+          isWeekend: dateUtils.isDateWeekend(formattedDate),
           isWithinCurrentMonth: dateUtils.isDateInMonth(
             formattedDate,
             referenceDate,

@@ -1,3 +1,4 @@
+import { ViewPreferences } from './view-config.types';
 import { BaseItem, UpdateFunction, ViewCustomComponents, ViewProps } from './views.types';
 
 // Strict type (must have props) for calendar view item
@@ -12,11 +13,13 @@ export type CalendarCellHeader = {
   date: string;
   title: string;
   isToday: boolean;
+  isWeekend: boolean;
   isWithinCurrentMonth: boolean;
 };
 export type CalendarCellContent<T extends CalendarItem> = {
   date: string;
   isToday: boolean;
+  isWeekend: boolean;
   isWithinCurrentMonth: boolean;
   items: T[];
 };
@@ -89,6 +92,7 @@ export interface CalendarContextType<T extends CalendarItem> {
   endDate: string;
   referenceDate: string;
   customComponent?: ViewCustomComponents<T>['calendar'];
+  preferences?: ViewPreferences;
   updateView: (view: CalendarView) => void;
   goToNextDate: () => void;
   goToPrevDate: () => void;
@@ -102,9 +106,12 @@ export interface CalendarProviderProps<T extends CalendarItem> {
   children: React.ReactNode;
   data: T[];
   customComponent?: ViewCustomComponents<T>['calendar'];
+  preferences?: ViewPreferences;
   setData: React.Dispatch<React.SetStateAction<T[]>>;
   onUpdateFn: UpdateFunction;
+
 }
+
 
 export type UpdateCalendarFunction = <T extends CalendarItem>(
   updatedItem: T,

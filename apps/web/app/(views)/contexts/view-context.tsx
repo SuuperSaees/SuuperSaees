@@ -31,6 +31,7 @@ export const ViewProvider = <T extends ViewItem>({
   initialConfigurations,
   availableProperties = ['status'] as [keyof T],
   customComponents,
+  initialPreferences,
   onUpdateFn,
   data,
   setData,
@@ -124,9 +125,11 @@ export const ViewProvider = <T extends ViewItem>({
           customComponent={
             customComponents?.calendar as unknown as ViewCustomComponents<CalendarItem>['calendar']
           }
+          preferences={initialPreferences}
           onUpdateFn={onUpdateFn as unknown as UpdateFunction}
         >
           {children}
+
         </CalendarProvider>
       ) : null}
     </ViewContext.Provider>
