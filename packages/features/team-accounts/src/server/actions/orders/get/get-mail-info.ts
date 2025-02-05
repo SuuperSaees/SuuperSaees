@@ -24,17 +24,45 @@ export async function getEmails(orderId: string) {
     if (followersError) throw followersError;
 
     const agencyMemberIds = assignationsData.map(assignation => assignation.agency_member_id);
+
+    // Query to get the agency id
+    const { data: agencyData, error: agencyError } = await client
+      .from('orders_v2')
+      .select('agency_id')
+      .eq('id', orderId)
+      .single();
+
+    if (agencyError) throw agencyError;
+
+    const agencyId = agencyData.agency_id;
+
+    // Query to get the project manager from accounts memberships
+
+    const { data: projectManagerData, error: projectManagerError } = await client
+      .from('accounts_memberships')
+      .select('user_id')
+      .eq('account_id', agencyId)
+      .eq('account_role', 'agency_project_manager')
+      .single();
+
+    if (projectManagerError) throw projectManagerError;
+
+    const projectManagerId = projectManagerData.user_id;
+    
+    agencyMemberIds.push(projectManagerId);
+
     const clientMemberIds = followersData.map(follower => follower.client_member_id);
 
-    if (agencyMemberIds.length === 0 && clientMemberIds.length === 0) return []; // Si no hay asignaciones, retorna un arreglo vacío
+    if (agencyMemberIds.length === 0 && clientMemberIds.length === 0) return []; // If there are no assignations or followers, return an empty array
 
     const memberIds = [...agencyMemberIds, ...clientMemberIds];
 
-    // Consulta para obtener los correos electrónicos de los miembros de la agencia
+    // Query to get the emails of the agency members
     const { data: emailData, error: emailError } = await client
       .from('accounts')
       .select('email')
       .in('id', memberIds);
+
 
       if (emailError) throw emailError;
 
