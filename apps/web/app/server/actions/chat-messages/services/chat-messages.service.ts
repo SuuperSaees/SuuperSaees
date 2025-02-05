@@ -3,7 +3,6 @@ import { Message } from '~/lib/message.types';
 import {
   ClearChatMessagesPayload,
   ClearChatMessagesResponse,
-  DeleteMessagePayload,
   DeleteMessageResponse,
   GetMessagesResponse,
   UpdateMessageContentPayload,
@@ -49,9 +48,9 @@ export class ChatMessagesService {
 
   // * DELETE SERVICES
   async deleteMessage(
-    payload: DeleteMessagePayload,
+    messageId: string,
   ): Promise<DeleteMessageResponse> {
-    return await this.chatMessagesRepository.deleteMessage(payload);
+    return await this.chatMessagesRepository.deleteMessage(messageId);
   }                                                                                                                                                                
 
   async clearChatMessages(

@@ -35,6 +35,7 @@ interface ChatManagementActionsProps {
   setActiveChat: Dispatch<SetStateAction<string | null>>;
   setActiveChatData: Dispatch<SetStateAction<Chats.Type | null>>;
   user: Pick<User.Response, 'id' | 'name' | 'email' | 'picture_url'>;
+  queryKey?: string[];
 }
 
 /**
@@ -49,9 +50,11 @@ export const useChatManagement = ({
   setActiveChat,
   setActiveChatData,
   user,
+  queryKey = ['chats'],
 }: ChatManagementActionsProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
+
 
   /**
    * Mutation for updating chat name
@@ -147,12 +150,14 @@ export const useChatManagement = ({
    * Sets initial active chat if none is selected
    */
   const chatsQuery = useQuery({
-    queryKey: ['chats'],
+    queryKey: queryKey,
     queryFn: async () => {
       const response = await getChats();
+
       if (!response) throw new Error('Failed to fetch chats');
 
       if (!activeChat && response.length > 0) {
+        console.log('setting active chat', response[0]?.id.toString());
         setActiveChat(response[0]?.id.toString() ?? '');
         setActiveChatData(response[0] ?? null);
         setMessages([]);
@@ -173,8 +178,9 @@ export const useChatManagement = ({
       setMessages(chat?.messages ?? []);
       return chat;
     },
+    refetchOnMount: true,
   });
-
+  console.log('activeChat', activeChat);
   return {
     chatsQuery,
     chatByIdQuery,

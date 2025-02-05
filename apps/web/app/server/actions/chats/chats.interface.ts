@@ -1,3 +1,4 @@
+import { Message } from '~/lib/message.types';
 import { ChatRoleType } from './middleware/validate_chat_role';
 import { Members } from '~/lib/members.types';
 export interface ChatPayload {
@@ -44,13 +45,7 @@ export interface GetChatByIdResponse {
   updated_at?: string;
   deleted_on?: string;
   members?: Members.Member[];
-  messages?: {
-    id: string;
-    account_id: string;
-    content: string;
-    role: ChatRoleType;
-    created_at: string;
-  }[];
+  messages?: Message.Type[];
 }
 
 export interface DeleteChatResponse {

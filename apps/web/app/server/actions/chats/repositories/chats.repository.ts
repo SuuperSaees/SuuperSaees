@@ -84,15 +84,13 @@ export class ChatRepository {
           user_id,
           type
         ),
-        chat_messages (
-          id,
-          account_id,
-          content,
-          role,
-          created_at
+        messages (
+          *,
+          user:accounts(id, name, email, picture_url)
         )
       `,
       )
+
       .eq('id', chatId)
       .single();
 
@@ -128,8 +126,8 @@ export class ChatRepository {
         email: typeof member.email === 'string' ? member.email : member.email?.[0]?.email ?? '',
         picture_url: member.picture_url,
       })) || [],
-      messages: chat.chat_messages || [],
-    } as GetChatByIdResponse;
+      messages: chat.messages || [],
+    } 
   }
 
 
