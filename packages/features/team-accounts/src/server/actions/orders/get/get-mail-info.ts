@@ -23,7 +23,9 @@ export async function getEmails(orderId: string) {
 
     if (followersError) throw followersError;
 
-    const agencyMemberIds = assignationsData.map(assignation => assignation.agency_member_id);
+    const agencyMemberIdsSet = new Set(
+      assignationsData.map(assignation => assignation.agency_member_id)
+    );
 
     // Query to get the agency id
     const { data: agencyData, error: agencyError } = await client
@@ -37,19 +39,20 @@ export async function getEmails(orderId: string) {
     const agencyId = agencyData.agency_id;
 
     // Query to get the project manager from accounts memberships
-
     const { data: projectManagerData, error: projectManagerError } = await client
       .from('accounts_memberships')
       .select('user_id')
       .eq('account_id', agencyId)
       .eq('account_role', 'agency_project_manager')
-      .single();
 
     if (projectManagerError) throw projectManagerError;
 
-    const projectManagerId = projectManagerData.user_id;
+    // Add only unique project manager IDs
+    projectManagerData.forEach(manager => {
+      agencyMemberIdsSet.add(manager.user_id);
+    });
     
-    agencyMemberIds.push(projectManagerId);
+    const agencyMemberIds = Array.from(agencyMemberIdsSet);
 
     const clientMemberIds = followersData.map(follower => follower.client_member_id);
 
