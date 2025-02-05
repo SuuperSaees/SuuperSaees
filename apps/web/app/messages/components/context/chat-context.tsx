@@ -3,7 +3,6 @@
 import { createContext, useContext, useCallback, ReactNode, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ChatMessages } from '~/lib/chat-messages.types';
 import { Chats } from '~/lib/chats.types';
 import { ChatMembers } from '~/lib/chat-members.types';
 import { createMessage, deleteMessage } from '~/server/actions/chat-messages/chat-messages.action';
@@ -12,8 +11,7 @@ import { generateUUID } from '~/utils/generate-uuid';
 // import { useChatSubscriptions } from '~/messages/hooks/use-chat-subscription';
 import { SubscriptionPayload, TableName } from '~/lib/chats.types';
 import { getUserById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
-import { ChatRoleType } from '~/server/actions/chats/middleware/validate_chat_role';
-
+import { ChatMessages } from '~/lib/chat-messages.types';
 interface ChatContextType {
   // Active chat management
   activeChat: string | null;
@@ -142,11 +140,24 @@ export function ChatProvider({
     mutationFn: async ({ content, fileIds, userId }: { content: string; fileIds?: string[]; userId: string }) => {
       if (!activeChatData) throw new Error('No active chat');
       
-      const messageData = {
-        account_id: userId,
-        content,
+      const messageData: ChatMessages.InsertWithRelations = {
         chat_id: activeChatData.id,
-        role: 'guest' as ChatRoleType,
+        message_id: '',
+        messages: [
+          {
+            user_id: userId,
+            content,
+            type: 'chat_message' as const,
+            visibility: 'public' as const,
+            created_at: new Date().toISOString(),
+            deleted_on: null,
+            id: generateUUID(),
+            order_id: null,
+            parent_id: null,
+            temp_id: null,
+            updated_at: new Date().toISOString()
+          }
+        ]
       };
 
       const response = await createMessage(messageData);

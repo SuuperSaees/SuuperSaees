@@ -11,7 +11,7 @@ function getMessagesAction() {
   return createMessagesAction(process.env.NEXT_PUBLIC_SITE_URL as string);
 }
 
-export async function createMessage(payload: ChatMessages.Insert) {
+export async function createMessage(payload: ChatMessages.InsertWithRelations) {
   return await getMessagesAction().createMessage(payload);
 }
 
