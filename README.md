@@ -219,5 +219,5 @@ graph TD
 
 3. **Monitoring**
    - Use Stripe Dashboard for supervision
-   - Implement detailed event logging
+   - Implement detailed event logging.
   
