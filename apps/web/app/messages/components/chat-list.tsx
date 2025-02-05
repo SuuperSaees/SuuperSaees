@@ -1,53 +1,36 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import ChatItem from "./chat-item";
-import { getChats } from '~/server/actions/chats/chats.action';
+import ChatItem from './chat-item';
 import { useChat } from './context/chat-context';
-import { Chats } from '~/lib/chats.types';
 
 export default function ChatList() {
-  const { 
-    activeChat, 
-    setActiveChat, 
-    setActiveChatData, // From the combined context
-    setMessages,
-  } = useChat();
+  const { activeChat, chatsQuery } = useChat();
 
-  const { data: chatsData, isLoading, error } = useQuery({
-    queryKey: ['chats'],
-    queryFn: async () => {
-      const response = await getChats();
-      if (!response) throw new Error('Failed to fetch chats');
-      
-      // Set initial active chat if none selected
-      if(!activeChat && response.length > 0) {
-        setActiveChat(response[0]?.id.toString() ?? '');
-        setActiveChatData(response[0] ?? null);
-        // Initialize messages for first chat
-        setMessages([])
-      }
+  const chatsData = chatsQuery.data;
 
-      
-      return response as Chats.Type[];
-    }
-  });
-
-  if (isLoading) {
-    return <div className="flex-1 flex items-center justify-center">Loading chats...</div>;
+  if (chatsQuery.isLoading) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        Loading chats...
+      </div>
+    );
   }
 
-  if (error) {
-    return <div className="flex-1 flex items-center justify-center text-red-500">Error: {error.message}</div>;
+  if (chatsQuery.error) {
+    return (
+      <div className="flex flex-1 items-center justify-center text-red-500">
+        Error: {chatsQuery.error.message}
+      </div>
+    );
   }
 
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="flex flex-col">
         {chatsData?.map((chat) => (
-          <ChatItem 
-            key={chat.id} 
-            chat={chat} 
+          <ChatItem
+            key={chat.id}
+            chat={chat}
             isActive={activeChat === chat.id.toString()}
           />
         ))}

@@ -4,7 +4,6 @@ import { ChatMessages } from '~/lib/chat-messages.types';
 import {
   ClearChatMessagesPayload,
   ClearChatMessagesResponse,
-  DeleteMessagePayload,
   DeleteMessageResponse,
   GetMessagesResponse,
   UpdateMessageContentPayload,
@@ -35,10 +34,11 @@ export class MessagesAction extends BaseAction {
   }
 
   async deleteMessage(
-    payload: DeleteMessagePayload,
+    messageId: string,
   ): Promise<DeleteMessageResponse> {
-    return await this.controller.deleteMessage(payload);
+    return await this.controller.deleteMessage(messageId);
   }
+
 
   async clearChatMessages(
     payload: ClearChatMessagesPayload,

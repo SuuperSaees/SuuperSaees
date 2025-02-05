@@ -2,7 +2,6 @@
 import { ChatMessages } from '~/lib/chat-messages.types';
 import {
   ClearChatMessagesPayload,
-  DeleteMessagePayload,
   UpdateMessageContentPayload,
 } from './chat-messages.interface';
 import { createMessagesAction } from './chat-messages';
@@ -15,12 +14,13 @@ export async function createMessage(payload: ChatMessages.InsertWithRelations) {
   return await getMessagesAction().createMessage(payload);
 }
 
+
 export async function getMessages(chatId: string) {
   return await getMessagesAction().getMessages(chatId);
 }
 
-export async function deleteMessage(payload: DeleteMessagePayload) {
-  return await getMessagesAction().deleteMessage(payload);
+export async function deleteMessage(messageId: string) {
+  return await getMessagesAction().deleteMessage(messageId);
 }
 
 export async function clearChatMessages(payload: ClearChatMessagesPayload) {

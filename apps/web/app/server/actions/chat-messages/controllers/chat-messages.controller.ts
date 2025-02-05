@@ -5,7 +5,6 @@ import { ChatMessages } from '~/lib/chat-messages.types';
 import {
   ClearChatMessagesPayload,
   ClearChatMessagesResponse,
-  DeleteMessagePayload,
   DeleteMessageResponse,
   GetMessagesResponse,
   UpdateMessageContentPayload,
@@ -59,12 +58,13 @@ export class MessagesController {
 
   // * DELETE CONTROLLERS
   async deleteMessage(
-    payload: DeleteMessagePayload,
+    messageId: string,
   ): Promise<DeleteMessageResponse> {
     try {
+
       const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
       const chatMessageService = new ChatMessagesService(chatMessagesRepository);
-      return await chatMessageService.deleteMessage(payload);
+      return await chatMessageService.deleteMessage(messageId);
 
     } catch (error) {
       console.error(error);
