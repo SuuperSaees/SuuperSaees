@@ -100,9 +100,17 @@ export function ServicesPageClient({
 
   const filteredData = useMemo(() => {
     const items = activeTab === 'briefs' ? briefs : services;
-    return items.filter((item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    return items.filter((item) => {
+      const searchTermLower = searchTerm.toLowerCase();
+      
+      if (item.name?.toLowerCase().includes(searchTermLower)) return true;
+      
+      if (activeTab === 'services') {
+        if ('price' in item && item.price?.toString().includes(searchTermLower)) return true;
+        if ('status' in item && item.status?.toLowerCase().includes(searchTermLower)) return true;
+      }
+      return false;
+    });
   }, [activeTab, briefs, services, searchTerm]);
 
   const handleTabChange = (value: string) => {
