@@ -4,11 +4,11 @@ import ChatItem from './chat-item';
 import { useChat } from './context/chat-context';
 
 export default function ChatList() {
-  const { activeChat, chats } = useChat();
+  const { activeChat, chatsQuery } = useChat();
 
-  const chatsData = chats.data;
-  
-  if (chats.isLoading) {
+  const chatsData = chatsQuery.data;
+
+  if (chatsQuery.isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
         Loading chats...
@@ -16,10 +16,10 @@ export default function ChatList() {
     );
   }
 
-  if (chats.error) {
+  if (chatsQuery.error) {
     return (
       <div className="flex flex-1 items-center justify-center text-red-500">
-        Error: {chats.error.message}
+        Error: {chatsQuery.error.message}
       </div>
     );
   }

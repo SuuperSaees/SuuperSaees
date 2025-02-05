@@ -19,24 +19,35 @@ import RichTextEditor from './rich-text-editor';
 export default function ChatThread({ teams }: { teams: Members.Type }) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const {
+    user,
     activeChat,
     activeChatData,
     messages,
-    isLoading,
-    handleMembersUpdateMutation,
-    handleDeleteMutation,
-    handleUpdate,
-    handleSendMessage,
-    chatById,
+    membersUpdateMutation,
+    deleteChatMutation,
+    updateChatMutation,
+    chatByIdQuery,
+    addMessageMutation,
   } = useChat();
+  const userId = user.id;
+  const chatById = chatByIdQuery.data;
+  const isLoading = chatByIdQuery.isLoading;
 
   const handleMembersUpdate = (members: string[]) => {
     console.log(members);
-    handleMembersUpdateMutation.mutate(members);
+    membersUpdateMutation.mutate(members);
   };
 
   const handleDelete = () => {
-    handleDeleteMutation.mutate();
+    deleteChatMutation.mutate();
+  };
+
+  const handleUpdate = async (name: string) => {
+    await updateChatMutation.mutateAsync(name);
+  };
+
+  const handleSendMessage = async (message: string, fileIds?: string[]) => {
+    await addMessageMutation.mutateAsync({ content: message, userId, fileIds });
   };
 
   if (!activeChat || !activeChatData) {
