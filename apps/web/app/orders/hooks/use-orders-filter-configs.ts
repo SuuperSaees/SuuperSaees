@@ -97,9 +97,37 @@ const useOrdersFilterConfigs = ({
         selectedValues.some((searchTerm) => {
           const searchTermLower = searchTerm.toLowerCase();
           
+          const orderId = order.id?.toString().replace('#', '');
+          if (orderId?.includes(searchTermLower.replace('#', ''))) return true;
+          
           if (order.title.toLowerCase().includes(searchTermLower)) return true;
           if (order.description?.toLowerCase().includes(searchTermLower)) return true;
           if (order.brief?.name?.toLowerCase().includes(searchTermLower)) return true;
+          
+          const getDateFormats = (date: Date) => [
+            date.toLocaleDateString(),
+            date.toLocaleDateString('es-ES'),
+            date.toLocaleString('default', { month: 'short' }),
+            date.toLocaleString('en-US', { month: 'short' }), 
+            date.toLocaleString('default', { month: 'long' }),
+            date.toLocaleString('en-US', { month: 'long' }), 
+            date.getFullYear().toString()
+          ].map(d => d.toLowerCase());
+
+          if (order.created_at) {
+            const date = new Date(order.created_at);
+            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+          }
+          
+          if (order.updated_at) {
+            const date = new Date(order.updated_at);
+            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+          }
+          
+          if (order.due_date) {
+            const date = new Date(order.due_date);
+            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+          }
           
           if (order.client_organization?.name.toLowerCase().includes(searchTermLower)) return true;
           if (order.customer?.name.toLowerCase().includes(searchTermLower)) return true;
@@ -302,9 +330,37 @@ const useOrdersFilterConfigs = ({
         (order: Order.Response) => {
           const searchTermLower = searchTerm.toLowerCase();
           
+          const orderId = order.id?.toString().replace('#', '');
+          if (orderId?.includes(searchTermLower.replace('#', ''))) return true;
+          
           if (order.title.toLowerCase().includes(searchTermLower)) return true;
           if (order.description?.toLowerCase().includes(searchTermLower)) return true;
           if (order.brief?.name?.toLowerCase().includes(searchTermLower)) return true;
+          
+          const getDateFormats = (date: Date) => [
+            date.toLocaleDateString(),
+            date.toLocaleDateString('es-ES'),
+            date.toLocaleString('default', { month: 'short' }),
+            date.toLocaleString('en-US', { month: 'short' }), 
+            date.toLocaleString('default', { month: 'long' }),
+            date.toLocaleString('en-US', { month: 'long' }), 
+            date.getFullYear().toString()
+          ].map(d => d.toLowerCase());
+
+          if (order.created_at) {
+            const date = new Date(order.created_at);
+            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+          }
+          
+          if (order.updated_at) {
+            const date = new Date(order.updated_at);
+            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+          }
+          
+          if (order.due_date) {
+            const date = new Date(order.due_date);
+            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+          }
           
           if (order.client_organization?.name.toLowerCase().includes(searchTermLower)) return true;
           if (order.customer?.name.toLowerCase().includes(searchTermLower)) return true;
