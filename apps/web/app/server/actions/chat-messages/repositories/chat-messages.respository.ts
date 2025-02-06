@@ -2,14 +2,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
 import { ChatMessages } from '~/lib/chat-messages.types';
-import {
-  ClearChatMessagesPayload,
-  ClearChatMessagesResponse,
-  DeleteMessageResponse,
-  GetMessagesResponse,
-  UpdateMessageContentPayload,
-  UpdateMessageContentResponse,
-} from '../chat-messages.interface';
 
 export class ChatMessagesRepository {
   private client: SupabaseClient;
@@ -24,7 +16,7 @@ export class ChatMessagesRepository {
   }
 
   // * CREATE REPOSITORIES
-  async createMessage(
+  async create(
     payload: ChatMessages.Insert,
   ): Promise<ChatMessages.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
@@ -49,7 +41,7 @@ export class ChatMessagesRepository {
 
 
   // * GET REPOSITORIES
-  async getMessages(chatId: string): Promise<GetMessagesResponse[]> {
+  async list(chatId: string): Promise<GetMessagesResponse[]> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
       .from('chat_messages')
@@ -66,16 +58,25 @@ export class ChatMessagesRepository {
   }
 
   // * DELETE REPOSITORIES
-  async deleteMessage(
-    messageId: string,
-  ): Promise<DeleteMessageResponse> {
+  async delete(
+    {
+      chat_id,
+      message_id,
+    }: {
+      chat_id?: string;
+      message_id?: string;
+    }
+  ): Promise<void> {
+
     const client = this.adminClient ?? this.client;
 
 
     const { error } = await client
       .from('messages')
       .delete()
-      .eq('id', messageId);
+      .eq('id', message_id)
+      .eq('chat_id', chat_id);
+
 
 
     if (error) {
@@ -92,30 +93,8 @@ export class ChatMessagesRepository {
 
   }
 
-  async clearChatMessages(
-    payload: ClearChatMessagesPayload,
-  ): Promise<ClearChatMessagesResponse> {
-    const client = this.adminClient ?? this.client;
-    const { chat_id } = payload;
-    const { error } = await client
-      .from('chat_messages')
-      .delete()
-      .eq('chat_id', chat_id);
-
-    if (error) {
-      throw new Error(
-        `Error clearing messages for chat ${chat_id}: ${error.message}`,
-      );
-    }
-
-    return {
-      success: true,
-      message: `All messages from chat ${chat_id} have been successfully cleared.`,
-    };
-  }
-
   // * UPDATE REPOSITORIES
-  async updateMessageContent(
+  async update(
     payload: UpdateMessageContentPayload,
   ): Promise<UpdateMessageContentResponse> {
     const client = this.adminClient ?? this.client;

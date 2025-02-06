@@ -2,17 +2,10 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
 
-import {
-  GetMembersResponse,
-  MemberSettingsResponse,
-  UpdateMemberSettingsPayload,
-  UpdateMemberSettingsResponse,
-  UpdateMemberVisibilityPayload,
-} from '../chat-members.interface';
-
-export class MembersRepository {
+export class ChatMembersRepository {
   private client: SupabaseClient;
   private adminClient?: SupabaseClient;
+
 
   constructor(
     client: SupabaseClient<Database>,
@@ -23,12 +16,13 @@ export class MembersRepository {
   }
 
   // * CREATE REPOSITORIES
-  async upsertMembers(
+  async upsert(
     chat_id: string,
-    members: { user_id: string; role: string }[],
+    members: { user_id: string; type: string }[],
   ): Promise<{ success: boolean; message: string }> {
     const client = this.adminClient ?? this.client;
     
+
     const { data: existingMembers, error: fetchError } = await client
       .from('chat_members')
       .select('user_id')
@@ -65,7 +59,7 @@ export class MembersRepository {
         .insert({
           chat_id,
           user_id: member.user_id,
-          type: member.role,
+          type: member.type,
         }
       );
 
@@ -82,7 +76,7 @@ export class MembersRepository {
   }
 
   // * GET REPOSITORIES
-  async getMembers(chatId: string): Promise<GetMembersResponse[]> {
+  async list(chatId: string): Promise<GetMembersResponse[]> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
       .from('chat_members')
@@ -103,7 +97,7 @@ export class MembersRepository {
     })) as GetMembersResponse[];
   }
 
-  async getMemberSettings(
+  async get(
     chatId: string,
     userId: string,
   ): Promise<MemberSettingsResponse> {
@@ -135,10 +129,13 @@ export class MembersRepository {
   }
 
   // * DELETE REPOSITORIES
-  async removeMember(
-    chat_id: string,
-    user_id: string,
-  ): Promise<{ success: boolean; message: string }> {
+  async delete({
+    chat_id,
+    user_id,
+  }: {
+    chat_id?: string;
+    user_id?: string;
+  }): Promise<void> {
     const client = this.adminClient ?? this.client;
     const { error } = await client
       .from('chat_members')
@@ -151,57 +148,11 @@ export class MembersRepository {
         `Error removing member ${user_id} from chat ${chat_id}: ${error.message}`,
       );
     }
-
-    return {
-      success: true,
-      message: `Member ${user_id} successfully removed from chat ${chat_id}.`,
-    };
   }
-
-  async resetMemberSettings(
-    chat_id: string,
-    user_id: string,
-  ): Promise<{ success: boolean; message: string }> {
-    const client = this.adminClient ?? this.client;
-    const { error } = await client
-      .from('chat_members')
-      .update({ settings: {} })
-      .eq('chat_id', chat_id)
-      .eq('user_id', user_id);
-
-    if (error) {
-      throw new Error(
-        `Error resetting settings for member ${user_id} in chat ${chat_id}: ${error.message}`,
-      );
-    }
-
-    return {
-      success: true,
-      message: `Settings for member ${user_id} in chat ${chat_id} reset successfully.`,
-    };
-  }
-
-  async removeAllMembers(
-    chat_id: string,
-  ): Promise<{ success: boolean; message: string }> {
-    const client = this.adminClient ?? this.client;
-    const { error } = await client
-      .from('chat_members')
-      .delete()
-      .eq('chat_id', chat_id);
-    if (error) {
-      throw new Error(
-        `Error removing all members from chat ${chat_id}: ${error.message}`,
-      );
-    }
-    return {
-      success: true,
-      message: `All members removed from chat ${chat_id}.`,
-    };
   }
 
   // * UPDATE REPOSITORIES
-  async updateMemberSettings(
+  async update(
     payload: UpdateMemberSettingsPayload,
   ): Promise<UpdateMemberSettingsResponse> {
     const client = this.adminClient ?? this.client;
@@ -222,28 +173,6 @@ export class MembersRepository {
     return {
       success: true,
       message: `Settings for member ${user_id} successfully updated in chat ${chat_id}.`,
-    };
-  }
-
-  async updateMemberVisibility(
-    payload: UpdateMemberVisibilityPayload,
-  ): Promise<{ success: boolean; message: string }> {
-    const client = this.adminClient ?? this.client;
-    const { error } = await client
-      .from('chat_members')
-      .update({ visibility: payload.visibility })
-      .eq('chat_id', payload.chat_id)
-      .eq('user_id', payload.user_id);
-
-    if (error) {
-      throw new Error(
-        `Error updating visibility for member ${payload.user_id} in chat ${payload.chat_id}: ${error.message}`,
-      );
-    }
-
-    return {
-      success: true,
-      message: `Visibility for member ${payload.user_id} successfully updated in chat ${payload.chat_id}.`,
     };
   }
 }

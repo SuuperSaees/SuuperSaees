@@ -16,7 +16,7 @@ export class ChatRepository {
   }
 
   // * CREATE REPOSITORIES
-  async create(payload: ChatPayload): Promise<Chats.Type> {
+  async create(payload: Chats.Insert): Promise<Chats.Type> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
 
@@ -25,7 +25,7 @@ export class ChatRepository {
         name: payload.name,
         user_id: payload.user_id,
         settings: payload.settings ?? {},
-        visibility: payload.visibility,
+        visibility: payload.visibility ?? true,
         image: payload.image ?? null,
       })
       .select()
@@ -39,7 +39,6 @@ export class ChatRepository {
   }
 
   // * GET REPOSITORIES
-
   async list(userId: string): Promise<Chats.Type[]> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
@@ -55,7 +54,6 @@ export class ChatRepository {
 
     return data as Chats.Type[];
   }
-
 
   async get(chatId: string): Promise<Chats.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
@@ -147,10 +145,8 @@ export class ChatRepository {
     } 
   }
 
-
-
   // * DELETE REPOSITORIES
-  async delete(chatId: string): Promise<DeleteChatResponse> {
+  async delete(chatId: string): Promise<void> {
     const client = this.adminClient ?? this.client;
     const { error } = await client.from('chats').delete().eq('id', chatId);
 
