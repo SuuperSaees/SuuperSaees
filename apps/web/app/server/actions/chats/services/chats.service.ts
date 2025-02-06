@@ -12,8 +12,8 @@ export class ChatService {
   ) {}
 
   // * CREATE SERVICES
-  async createChat(payload: ChatPayload): Promise<Chats.Type> {
-    const chat = await this.chatRepository.createChat(payload);
+  async create(payload: Chats.InsertWithRelations): Promise<Chats.Type> {
+    const chat = await this.chatRepository.create(payload);
 
 
     if (payload.members && payload.members.length > 0) {
@@ -30,31 +30,29 @@ export class ChatService {
   }
 
   // * GET SERVICES
-  async getChats(): Promise<Chats.Type[]> {
-    return await this.chatRepository.getChats();
+  async list(userId: string): Promise<Chats.Type[]> {
+    return await this.chatRepository.list(userId);
   }
 
-  async getChatById(chatId: string): Promise<Chats.TypeWithRelations> {
-    return await this.chatRepository.getChatById(chatId);
+
+  async get(chatId: string): Promise<Chats.TypeWithRelations> {
+    return await this.chatRepository.get(chatId);
   }
+
 
   // * DELETE SERVICES
-  async deleteChat(chatId: string): Promise<DeleteChatResponse> {
+  async delete(chatId: string): Promise<void> {
     // ❗ Primero eliminamos los miembros y mensajes del chat antes de eliminarlo
     await this.membersRepository.removeAllMembers(chatId);
     await this.messagesRepository.clearChatMessages({ chat_id: chatId });
 
-    return await this.chatRepository.deleteChat(chatId);
+    return await this.chatRepository.delete(chatId);
   }
+
 
   // * UPDATE SERVICES
-  async updateChatSettings(
-    payload: UpdateChatSettingsPayload,
-  ): Promise<UpdateChatSettingsResponse> {
-    return await this.chatRepository.updateChatSettings(payload);
+  async update(payload: Chats.Update): Promise<Chats.Type> {
+    return await this.chatRepository.update(payload);
   }
 
-  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
-    return await this.chatRepository.updateChat(payload);
-  }
 }
