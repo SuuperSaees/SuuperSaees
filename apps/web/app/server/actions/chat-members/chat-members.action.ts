@@ -2,8 +2,6 @@
 import {
   AddMembersPayload,
   RemoveMemberPayload,
-  ResetMemberSettingsPayload,
-  UpdateMemberSettingsPayload,
   UpdateMemberVisibilityPayload,
 
 } from './chat-members.interface';
@@ -14,33 +12,23 @@ function getMembersAction() {
 }
 
 export async function upsertMembers(payload: AddMembersPayload) {
-  return await getMembersAction().upsertMembers(payload);
+  return await getMembersAction().upsert(payload);
 }
 
 export async function getMembers(chatId: string) {
-  return await getMembersAction().getMembers(chatId);
+  return await getMembersAction().list(chatId);
 }
 
 export async function getMemberSettings(chatId: string, userId: string) {
-  return await getMembersAction().getMemberSettings(chatId, userId);
+  return await getMembersAction().get(chatId, userId);
 }
 
 export async function removeMember(payload: RemoveMemberPayload) {
-  return await getMembersAction().removeMember(payload);
+  return await getMembersAction().delete(payload);
 }
 
-export async function resetMemberSettings(payload: ResetMemberSettingsPayload) {
-  return await getMembersAction().resetMemberSettings(payload);
-}
-
-export async function updateMemberVisibility(
+export async function updateMember(
   payload: UpdateMemberVisibilityPayload,
 ) {
-  return await getMembersAction().updateMemberVisibility(payload);
-}
-
-export async function updateMemberSettings(
-  payload: UpdateMemberSettingsPayload,
-) {
-  return await getMembersAction().updateMemberSettings(payload);
+  return await getMembersAction().update(payload);
 }

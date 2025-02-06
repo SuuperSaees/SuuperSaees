@@ -7,7 +7,6 @@ import { ChatMessagesRepository } from '../../chat-messages/repositories/chat-me
 import {
   ChatPayload,
   DeleteChatResponse,
-  GetChatByIdResponse,
   UpdateChatSettingsPayload,
   UpdateChatSettingsResponse,
 } from '../chats.interface';
@@ -55,10 +54,11 @@ export class ChatController {
     }
   }
 
-  async getChatById(chatId: string): Promise<GetChatByIdResponse> {
+  async getChatById(chatId: string): Promise<Chats.TypeWithRelations> {
     try {
       return await this.chatService.getChatById(chatId);
     } catch (error) {
+
       console.error(error);
       throw error;
     }

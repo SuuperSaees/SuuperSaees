@@ -7,10 +7,6 @@ import {
   MemberSettingsResponse,
   RemoveMemberPayload,
   RemoveMemberResponse,
-  ResetMemberSettingsPayload,
-  ResetMemberSettingsResponse,
-  UpdateMemberSettingsPayload,
-  UpdateMemberSettingsResponse,
   UpdateMemberVisibilityPayload,
   UpdateMemberVisibilityResponse,
 } from './chat-members.interface';
@@ -27,46 +23,35 @@ export class MembersAction extends BaseAction {
     );
   }
 
-  async upsertMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
+  async upsert(payload: AddMembersPayload): Promise<AddMembersResponse> {
     return await this.controller.upsertMembers(payload);
   }
 
-  async getMembers(chatId: string): Promise<GetMembersResponse[]> {
+  async list(chatId: string): Promise<GetMembersResponse[]> {
     return await this.controller.getMembers(chatId);
   }
 
-  async getMemberSettings(
+  async get(
     chatId: string,
     userId: string,
   ): Promise<MemberSettingsResponse> {
     return await this.controller.getMemberSettings(chatId, userId);
   }
 
-  async removeMember(
+  async delete(
     payload: RemoveMemberPayload,
   ): Promise<RemoveMemberResponse> {
     return await this.controller.removeMember(payload);
   }
 
-  async resetMemberSettings(
-    payload: ResetMemberSettingsPayload,
-  ): Promise<ResetMemberSettingsResponse> {
-    return await this.controller.resetMemberSettings(payload);
-  }
-
-  async updateMemberVisibility(
+  async update(
     payload: UpdateMemberVisibilityPayload,
   ): Promise<UpdateMemberVisibilityResponse> {
     return await this.controller.updateMemberVisibility(payload);
-  }
-
-  async updateMemberSettings(
-    payload: UpdateMemberSettingsPayload,
-  ): Promise<UpdateMemberSettingsResponse> {
-    return await this.controller.updateMemberSettings(payload);
   }
 }
 
 export function createMembersAction(baseUrl: string) {
   return new MembersAction(baseUrl);
 }
+

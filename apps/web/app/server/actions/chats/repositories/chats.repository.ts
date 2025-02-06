@@ -64,8 +64,31 @@ export class ChatRepository {
   }
 
 
-  async getChatById(chatId: string): Promise<GetChatByIdResponse> {
+  async getChatById(chatId: string): Promise<Chats.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
+
+    // chat_messages (
+    //   id,
+    //   messages (
+    //     id,
+    //     user_id,
+    //     content,
+    //     created_at,
+    //     updated_at,
+    //     deleted_on,
+    //     type,
+    //     visibility,
+    //     temp_id,
+    //     order_id,
+    //     parent_id,
+    //     user:user_settings (
+    //       id,
+    //       name,
+    //       picture_url,
+    //       email:accounts(email)
+    //     )
+    //   )
+
 
     const { data: chat, error } = await client
       .from('chats')
@@ -84,17 +107,30 @@ export class ChatRepository {
           user_id,
           type
         ),
-        chat_messages (
-          id,
-          account_id,
-          content,
-          role,
-          created_at
+        messages (
+            id,
+            user_id,
+            content,
+            created_at,
+            updated_at,
+            deleted_on,
+            type,
+            visibility,
+            temp_id,
+            order_id,
+            parent_id,
+            user:user_settings (
+              id,
+              name,
+              picture_url,
+              email:accounts(email)
+          )
         )
       `,
       )
       .eq('id', chatId)
       .single();
+
 
     if (error) {
       throw new Error(`Error fetching chat ${chatId}: ${error.message}`);
@@ -122,15 +158,22 @@ export class ChatRepository {
       created_at: chat.created_at,
       updated_at: chat.updated_at,
       deleted_on: chat.deleted_on,
-      members: members?.map((member) => ({
+      reference_id: chat.id,
+      chat_members: chat.chat_members?.map((member) => ({
+        chat_id: chatId,
+        created_at: new Date().toISOString(),
+        deleted_on: null,
         id: member.user_id,
-        name: member.name,
-        email: typeof member.email === 'string' ? member.email : member.email?.[0]?.email ?? '',
-        picture_url: member.picture_url,
+        settings: {},
+        type: member.type,
+        updated_at: new Date().toISOString(),
+        user_id: member.user_id,
+        visibility: true
       })) || [],
-      messages: chat.chat_messages || [],
-    } as GetChatByIdResponse;
+      chat_messages: chat.chat_messages || [],
+    } as Chats.TypeWithRelations;
   }
+
 
 
   // * DELETE REPOSITORIES

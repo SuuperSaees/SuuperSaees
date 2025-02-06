@@ -1,4 +1,5 @@
 import { Database } from "./database.types";
+import { Message } from "./message.types";
 
 export namespace ChatMessages {
   export type Type = Database['public']['Tables']['chat_messages']['Row'];
@@ -10,5 +11,7 @@ export namespace ChatMessages {
   export type TypeWithRelations = Database['public']['Tables']['chat_messages']['Row'] & {
     messages: Database['public']['Tables']['messages']['Row'][];
   };
-
+  export type TypeWithRelationsForChat = Database['public']['Tables']['chat_messages']['Row'] & {
+    messages: Message.Type[];
+  };
 }

@@ -41,7 +41,7 @@ export class ChatService {
     return await this.chatRepository.getChats();
   }
 
-  async getChatById(chatId: string): Promise<GetChatByIdResponse> {
+  async getChatById(chatId: string): Promise<Chats.TypeWithRelations> {
     return await this.chatRepository.getChatById(chatId);
   }
 
