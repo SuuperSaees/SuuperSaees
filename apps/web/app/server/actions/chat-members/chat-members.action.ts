@@ -1,30 +1,20 @@
 'use server';
-
-import {
-  ChatRoleType,
-  validateChatRole,
-} from '../chats/middleware/validate_chat_role';
 import {
   AddMembersPayload,
   RemoveMemberPayload,
   ResetMemberSettingsPayload,
   UpdateMemberSettingsPayload,
   UpdateMemberVisibilityPayload,
-} from './members.interface';
-import { createMembersAction } from './members';
+
+} from './chat-members.interface';
+import { createMembersAction } from './chat-members';
 
 function getMembersAction() {
   return createMembersAction(process.env.NEXT_PUBLIC_SITE_URL as string);
 }
 
-export async function addMembers(payload: AddMembersPayload) {
-  payload.members.forEach((member) => {
-    validateChatRole(['owner', 'project_manager'] as ChatRoleType[], [
-      member.role,
-    ]);
-  });
-
-  return await getMembersAction().addMembers(payload);
+export async function upsertMembers(payload: AddMembersPayload) {
+  return await getMembersAction().upsertMembers(payload);
 }
 
 export async function getMembers(chatId: string) {

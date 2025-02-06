@@ -12,9 +12,9 @@ import {
   GetMessagesResponse,
   UpdateMessageContentPayload,
   UpdateMessageContentResponse,
-} from '../message.interface';
-import { MessagesRepository } from '../repositories/messages.respositories';
-import { MessagesService } from '../services/messages.servies';
+} from '../chat-messages.interface';
+import { MessagesRepository } from '../repositories/chat-messages.respository';
+import { MessagesService } from '../services/chat-messages.service';
 
 export class MessagesController {
   private messagesService: MessagesService;

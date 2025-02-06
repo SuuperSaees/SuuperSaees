@@ -1,7 +1,7 @@
 create type "public"."chat_role_type" as enum ('project_manager', 'assistant', 'owner', 'guest');
 
 create table "public"."chat_members" (
-    "id" uuid not null,
+    "id" uuid not null default gen_random_uuid(),
     "user_id" uuid not null,
     "chat_id" uuid not null,
     "deleted_on" timestamp with time zone,
