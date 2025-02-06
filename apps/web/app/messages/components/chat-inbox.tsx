@@ -3,10 +3,10 @@
 import ChatSearchHeader from "./chat-search-header";
 import ChatList from "./chat-list";
 
-export default function ChatInbox({ userId }: { userId: string }) {  
+export default function ChatInbox() {  
   return (
     <div className="h-full flex flex-col">
-      <ChatSearchHeader userId={userId}/>
+      <ChatSearchHeader />
       <ChatList />
     </div>
   );

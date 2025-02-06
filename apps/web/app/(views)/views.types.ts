@@ -5,6 +5,7 @@ import { KanbanItem } from './kanban.types';
 import {
   ViewConfigurations,
   ViewInitialConfigurations,
+  ViewPreferences,
 } from './view-config.types';
 
 // ITEM TYPES
@@ -73,6 +74,7 @@ export interface ViewCustomComponents<T> {
   };
   calendar?: {
     Card: React.FC<{ item: T; className?: string; [key: string]: unknown }>; // Card component for the calendar view
+    CardMonth: React.FC<{ item: T; className?: string; [key: string]: unknown }>; // Card component for the calendar view
   };
 }
 
@@ -103,6 +105,7 @@ export interface ViewProviderProps<T extends ViewItem> {
   availableProperties: [keyof T];
   data: T[];
   setData: React.Dispatch<React.SetStateAction<T[]>>;
+  initialPreferences?: ViewPreferences;
   customComponents?: ViewCustomComponents<T>;
   onUpdateFn?: UpdateFunction;
 }

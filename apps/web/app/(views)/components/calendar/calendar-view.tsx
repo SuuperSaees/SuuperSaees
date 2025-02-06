@@ -23,6 +23,7 @@ const CalendarView = () => {
     endDate,
     referenceDate,
     customComponent,
+    preferences,
     goToNextDate,
     goToPrevDate,
     goToCurrentDate,
@@ -47,11 +48,11 @@ const CalendarView = () => {
 
   const gridClassNames = {
     week: {
-      headers: 'grid-cols-7 grid-rows-1',
+      headers: 'grid-cols-7 grid-flow-row auto-rows-fr',
       content: 'grid-cols-7 grid-flow-row auto-rows-fr',
     },
     month: {
-      headers: 'grid-cols-7 grid-rows-1',
+      headers: 'grid-cols-7 grid-flow-row auto-rows-fr',
       content: 'grid-cols-7 grid-flow-row auto-rows-fr',
     },
   };
@@ -72,9 +73,8 @@ const CalendarView = () => {
       {/* Include all items of all cells in the sortable context */}
       <SortableContext
         items={cells.flatMap((cell) => cell.items.map((item) => item.id))}
-
       >
-        <div className="flex h-full max-h-full min-h-0 w-full flex-col rounded-xl border border-gray-200">
+        <div className="flex h-full max-h-full min-h-0 w-full flex-col py-4 box-border">
           {/* Header */}
           <CalendarHeader
             headers={headers}
@@ -86,6 +86,7 @@ const CalendarView = () => {
             gridClassName={gridClassNames[currentView].content}
             customComponent={customComponent}
             currentView={currentView}
+            preferences={preferences}
           />
           {/* Footer */}
           <CalendarFooter

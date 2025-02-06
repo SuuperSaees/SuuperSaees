@@ -5,7 +5,6 @@ import { ChatMessages } from '~/lib/chat-messages.types';
 import {
   ClearChatMessagesPayload,
   ClearChatMessagesResponse,
-  DeleteMessagePayload,
   DeleteMessageResponse,
   GetMessagesResponse,
   UpdateMessageContentPayload,
@@ -68,26 +67,29 @@ export class ChatMessagesRepository {
 
   // * DELETE REPOSITORIES
   async deleteMessage(
-    payload: DeleteMessagePayload,
+    messageId: string,
   ): Promise<DeleteMessageResponse> {
     const client = this.adminClient ?? this.client;
-    const { chat_id, message_id } = payload;
+
+
     const { error } = await client
-      .from('chat_messages')
+      .from('messages')
       .delete()
-      .eq('chat_id', chat_id)
-      .eq('id', message_id);
+      .eq('id', messageId);
+
 
     if (error) {
       throw new Error(
-        `Error deleting message ${message_id} from chat ${chat_id}: ${error.message}`,
+        `Error deleting message ${messageId}: ${error.message}`,
       );
     }
 
+
     return {
       success: true,
-      message: `Message ${message_id} successfully deleted from chat ${chat_id}.`,
+      message: `Message ${messageId} successfully deleted.`,
     };
+
   }
 
   async clearChatMessages(

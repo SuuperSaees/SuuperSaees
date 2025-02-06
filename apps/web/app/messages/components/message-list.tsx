@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { ChatMessages } from '~/lib/types/chat-messages.types';
 import Message from './message';
+import { Message as MessageType } from '~/lib/message.types';
 
 interface MessageListProps {
-  messages: ChatMessages.Type[];
+  messages: MessageType.Type[];
   isLoading: boolean;
 }
+
 
 export default function MessageList({ messages, isLoading }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);

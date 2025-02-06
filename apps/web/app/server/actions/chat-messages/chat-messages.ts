@@ -35,7 +35,7 @@ export class MessagesAction extends BaseAction {
   async delete(
     payload: DeleteMessagePayload,
   ): Promise<DeleteMessageResponse> {
-    return await this.controller.deleteMessage(payload);
+    return await this.controller.deleteMessage(messageId);
   }
 
   async update(

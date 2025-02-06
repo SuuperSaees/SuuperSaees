@@ -5,13 +5,17 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 // Lucide Icons
-import { Calendar, Columns3, LucideIcon, Table } from 'lucide-react';
+import { Calendar, Columns3, LucideIcon, Table2 } from 'lucide-react';
 // Theming and Internationalization
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { useTranslation } from 'react-i18next';
 
 // Internal Type Definitions
-import { ViewInitialConfigurations } from '~/(views)/view-config.types';
+import {
+  ViewInitialConfigurations,
+  ViewPreferences,
+} from '~/(views)/view-config.types';
 import { ViewItem, ViewTypeEnum } from '~/(views)/views.types';
 // UI Components
 import EmptyState from '~/components/ui/empty-state';
@@ -24,10 +28,11 @@ import { Order } from '~/lib/order.types';
 import { User } from '~/lib/user.types';
 import { formatString } from '~/utils/text-formatter';
 
+import CalendarCard from '../components/calendar-card';
+import CalendarCardMonth from '../components/calendar-card-month';
 // Custom Components and Actions
 import KanbanCard from '../components/kanban-card';
 import { useUserOrderActions } from './user-order-actions';
-import CalendarCard from '../components/calendar-card';
 
 // Enhanced Types
 export interface ViewOption extends Option {
@@ -58,7 +63,7 @@ interface OrdersViewConfig extends Record<string, unknown> {
   currentView: string;
   table?: {
     rowsPerPage: number;
-  }
+  };
 }
 
 class LocalStorageManager<T extends Record<string, unknown>> {
@@ -111,6 +116,22 @@ class LocalStorageManager<T extends Record<string, unknown>> {
       console.error(`Error clearing ${this.key} from localStorage:`, error);
     }
   }
+
+  // New method to validate and clean invalid views
+  validateAndCleanConfig(validViews: string[]): void {
+    const config = this.get();
+    if (!config) return;
+
+    const currentView = config.currentView;
+    if (typeof currentView === 'string' && !validViews.includes(currentView)) {
+      // If current view is invalid, remove it and set to default table view
+      const newConfig = {
+        ...config,
+        currentView: ViewTypeEnum.Table
+      };
+      this.save(newConfig);
+    }
+  }
 }
 
 // Create a typed localStorage manager for orders view configuration
@@ -125,12 +146,53 @@ const useOrdersViewConfigs = ({
   currentUserRole,
   agencyMembers,
 }: UseOrdersViewConfigsProps) => {
+  // Type-safe update function
+  const updateCurrentView = (view: string | number): void => {
+    const viewString = String(view);
+    setCurrentView(viewString);
+
+    // Save to localStorage with proper typing
+    ordersConfigStorage.save({
+      ...ordersConfigStorage.get(),
+      currentView: viewString,
+    });
+  };
+
+  // Get valid views from viewOptions
+  const viewOptions: ViewOption[] = [
+    {
+      label: 'Board',
+      value: 'kanban',
+      action: updateCurrentView,
+      icon: Columns3,
+    },
+    {
+      label: 'Table',
+      value: 'table',
+      action: updateCurrentView,
+      icon: Table2,
+    },
+    {
+      label: 'Calendar',
+      value: 'calendar',
+      action: updateCurrentView,
+      icon: Calendar,
+    },
+  ];
+
+  const validViews = viewOptions.map(option => String(option.value));
+
+  // Validate stored view against valid views before initializing state
+  ordersConfigStorage.validateAndCleanConfig(validViews);
+
   // Type-safe initialization from localStorage
   const [currentView, setCurrentView] = useState<string>(() => {
     const savedConfig = ordersConfigStorage.get();
-    return savedConfig?.currentView ?? ViewTypeEnum.Table;
+    const savedView = savedConfig?.currentView;
+    return validViews.includes(savedView ?? '') ? savedView ?? ViewTypeEnum.Table : ViewTypeEnum.Table;
   });
 
+  const { theme_color } = useOrganizationSettings();
   // Destructure and use hooks
   const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
   const { t } = useTranslation('orders');
@@ -151,18 +213,6 @@ const useOrdersViewConfigs = ({
       };
     }
     return undefined;
-  };
-
-  // Type-safe view update function
-  const updateCurrentView = (view: string | number): void => {
-    const viewString = String(view);
-    setCurrentView(viewString);
-
-    // Save to localStorage with proper typing
-    ordersConfigStorage.save({
-      ...ordersConfigStorage.get(),
-      currentView: viewString,
-    });
   };
 
   // Empty State Component for when no orders exist
@@ -206,39 +256,18 @@ const useOrdersViewConfigs = ({
         emptyState: <EmptyStateComponent />,
         configs: {
           rowsPerPage: {
-            onUpdate: (value: string) => ordersConfigStorage.save({
-              currentView: currentView,
-              table: {
-                rowsPerPage: Number(value)
-              }
-            }),
-            value: ordersConfigStorage.get()?.table?.rowsPerPage ?? 10
-          }
-        }
+            onUpdate: (value: string) =>
+              ordersConfigStorage.save({
+                currentView: currentView,
+                table: {
+                  rowsPerPage: Number(value),
+                },
+              }),
+            value: ordersConfigStorage.get()?.table?.rowsPerPage ?? 10,
+          },
+        },
       },
     };
-
-  // View options for switching between views
-  const viewOptions: ViewOption[] = [
-    {
-      label: 'Kanban',
-      value: 'kanban',
-      action: updateCurrentView,
-      icon: Columns3,
-    },
-    {
-      label: 'Table',
-      value: 'table',
-      action: updateCurrentView,
-      icon: Table,
-    },
-    {
-      label: 'Calendar',
-      value: 'calendar',
-      action: updateCurrentView,
-      icon: Calendar,
-    }
-  ];
 
   // Custom components for different views
   const customComponents = {
@@ -251,12 +280,21 @@ const useOrdersViewConfigs = ({
       Card: ({ item }: { item: ViewItem }) => (
         <CalendarCard item={item as Order.Response & { color: string }} />
       ),
+      CardMonth: ({ item }: { item: ViewItem }) => (
+        <CalendarCardMonth item={item as Order.Response & { color: string }} />
+      ),
     },
   };
 
+  const preferences: ViewPreferences = {
+    interfaceColors: {
+      primary: theme_color ?? '#1A38D7',
+    },
+  };
   // Return all configurations and state
   return {
     viewOptions,
+    preferences,
     viewInitialConfiguarations,
     viewAvailableProperties: VIEW_AVAILABLE_PROPERTIES,
     currentView,

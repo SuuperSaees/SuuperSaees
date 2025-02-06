@@ -125,9 +125,12 @@ export class ChatRepository {
               picture_url,
               email:accounts(email)
           )
+          *,
+          user:accounts(id, name, email, picture_url)
         )
       `,
       )
+
       .eq('id', chatId)
       .single();
 
@@ -170,8 +173,8 @@ export class ChatRepository {
         user_id: member.user_id,
         visibility: true
       })) || [],
-      chat_messages: chat.chat_messages || [],
-    } as Chats.TypeWithRelations;
+      messages: chat.messages || [],
+    } 
   }
 
 

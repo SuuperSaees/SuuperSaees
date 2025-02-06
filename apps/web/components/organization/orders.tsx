@@ -1,49 +1,62 @@
 'use client';
 
+import { useCallback } from 'react';
+
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
-import { useColumns } from '~/hooks/use-columns';
-import { Order } from '~/lib/order.types';
+import { User } from '~/lib/user.types';
 import { AgencyStatusesProvider } from '~/orders/components/context/agency-statuses-context';
-import { useUserOrderActions } from '~/orders/hooks/user-order-actions';
+import { OrdersProvider } from '~/orders/components/context/orders-context';
+import ProjectsBoard from '~/orders/components/projects-board';
+import { useOrderStats } from '~/orders/hooks/use-order-stats';
+import { getTags } from '~/server/actions/tags/tags.action';
 import { getOrdersByOrganizationId } from '~/team-accounts/src/server/actions/orders/get/get-order';
 import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 
-import Table from '../../app/components/table/table';
 import CardStats from '../../app/components/ui/card-stats';
-import EmptyState from '../ui/empty-state';
-import { useOrderStats } from '~/orders/hooks/use-order-stats';
 import { SkeletonOrdersSection } from './skeleton-orders-section';
 
 interface OrdersSectionProps {
   organizationId: string;
+  agencyId: string;
 }
-export default function OrdersSection({ organizationId }: OrdersSectionProps) {
+export default function OrdersSection({
+  organizationId,
+  agencyId,
+}: OrdersSectionProps) {
   const client = useSupabase();
   const { t } = useTranslation('statistics');
 
   const { workspace, organization } = useUserWorkspace();
   const agencySlug = organization?.slug;
 
+  const queryKey = ['orders', organizationId];
+
+  const queryFn = useCallback(async () => {
+    const orders = await getOrdersByOrganizationId(organizationId);
+    return orders.success?.data ?? [];
+  }, [organizationId]);
+
   const organizationOrdersQuery = useQuery({
-    queryKey: ['orders', organizationId],
-    queryFn: async () => await getOrdersByOrganizationId(organizationId),
+    queryKey,
+    queryFn,
   });
 
-  const organizationOrders =
-    (organizationOrdersQuery?.data?.success?.data as Order.Response[]) ?? [];
+  const organizationOrders = organizationOrdersQuery.data ?? [];
 
-  const validAgencyRoles = new Set(['agency_owner', 'agency_project_manager', 'agency_member']);
+  const validAgencyRoles = new Set([
+    'agency_owner',
+    'agency_project_manager',
+    'agency_member',
+  ]);
 
   const agencyStatusesQuery = useQuery({
     queryKey: ['statuses'],
-    queryFn: async () =>
-      await getAgencyStatuses(organizationOrders?.[0]?.agency_id),
-    enabled: !!organizationOrders?.length,
+    queryFn: async () => await getAgencyStatuses(agencyId),
   });
 
   const agencyStatuses = agencyStatusesQuery?.data ?? [];
@@ -57,93 +70,97 @@ export default function OrdersSection({ organizationId }: OrdersSectionProps) {
     enabled: !!agencySlug && validAgencyRoles.has(workspace?.role ?? ''),
   });
 
-  let agencyMembers = agencyMembersQuery?.data?.data ?? [];
+  const agencyMembers = agencyMembersQuery?.data?.data ?? [];
 
-  agencyMembers =
-    agencyMembers?.map((member) => ({
-      ...member,
-      role: member.role.toLowerCase(),
-      user_settings: {
-        picture_url: member.picture_url,
-        name: member.name,
-      },
-    })) ?? [];
-
-  const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
-  const actions = {
-    updateOrderDate: orderDateMutation,
-    updateOrderAssigns: orderAssignsMutation,
-  };
-  const additionalData = {
-    orderAgencyMembers: agencyMembers,
-  };
-  const hasPermission = () => {
-    return validAgencyRoles.has(workspace?.role ?? '');
-  }
-  const columns = useColumns('orders', {
-    data: additionalData,
-    actions: actions,
-    hasPermission,
+  const tagsQuery = useQuery({
+    queryKey: ['tags'],
+    queryFn: async () =>
+      await getTags(agencyId),
   });
- 
+
+  const tags = tagsQuery?.data ?? [];
+
+  // Transform agencyMembers to match the expected User.Response type
+
+  const transformedAgencyMembers = agencyMembers?.map((member) => ({
+    ...member,
+    organization_id: organizationOrders[0]?.agency_id ?? '',
+    picture_url: member.picture_url ?? null,
+    settings: {
+      calendar: null,
+      created_at: member.created_at,
+      name: member.name,
+      phone_number: null,
+      picture_url: member.picture_url ?? null,
+      user_id: member.user_id,
+    },
+  })) as User.Response[];
+
   const { currentStats, previousStats } = useOrderStats(organizationOrders);
 
   if (
-    agencyMembersQuery.isLoading ||
+    organizationOrdersQuery.isLoading ||
     agencyStatusesQuery.isLoading ||
-    organizationOrdersQuery.isLoading
-  )
+    agencyMembersQuery.isLoading ||
+    tagsQuery.isLoading
+  ) {
     return <SkeletonOrdersSection />;
+  }
+
   return (
-    <AgencyStatusesProvider initialStatuses={agencyStatuses}>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap gap-2.5">
-          <CardStats
-            title={t('projects.active')}
-            value={{
-              current: currentStats.active,
-              previous: previousStats.active,
-              unit: 'months',
-            }}
-          />
-          <CardStats
-            title={t('projects.rating.average')}
-            value={{
-              current: currentStats.averageRating,
-              previous: previousStats.averageRating,
-              unit: 'months',
-            }} // Placeholder for rating
-          />
-          <CardStats
-            title={t('projects.month.last')}
-            value={{
-              current: currentStats.total,
-              previous: previousStats.total,
-              unit: 'months',
-            }}
-          />
-          <CardStats
-            title={t('projects.completed')}
-            value={{
-              current: currentStats.completed,
-              previous: previousStats.completed,
-              unit: 'months',
-            }}
-          />
-        </div>
-        <Table
-          data={organizationOrders}
-          columns={columns}
-          filterKey={'title'}
-          emptyStateComponent={
-            <EmptyState
-              title={t('orders:empty.organization.title')}
-              description={t('orders:empty.organization.description')}
-              imageSrc="/images/illustrations/Illustration-box.svg"
-            />
-          }
+    <div className="flex h-full flex-col gap-8">
+      <div className="flex flex-wrap gap-2.5">
+        <CardStats
+          title={t('projects.active')}
+          value={{
+            current: currentStats.active,
+            previous: previousStats.active,
+            unit: 'months',
+          }}
+        />
+        <CardStats
+          title={t('projects.rating.average')}
+          value={{
+            current: currentStats.averageRating,
+            previous: previousStats.averageRating,
+            unit: 'months',
+          }}
+        />
+        <CardStats
+          title={t('projects.month.last')}
+          value={{
+            current: currentStats.total,
+            previous: previousStats.total,
+            unit: 'months',
+          }}
+        />
+        <CardStats
+          title={t('projects.completed')}
+          value={{
+            current: currentStats.completed,
+            previous: previousStats.completed,
+            unit: 'months',
+          }}
         />
       </div>
-    </AgencyStatusesProvider>
+      <OrdersProvider
+        agencyMembers={transformedAgencyMembers}
+        agencyId={organizationOrders[0]?.agency_id ?? ''}
+        queryKey={queryKey}
+        queryFn={queryFn}
+        initialOrders={organizationOrders}
+      >
+        <AgencyStatusesProvider
+          initialStatuses={agencyStatuses}
+          agencyMembers={transformedAgencyMembers}
+        >
+          <ProjectsBoard
+            agencyMembers={transformedAgencyMembers}
+            tags={tags}
+            className="min-h-[800px]"
+          />
+        </AgencyStatusesProvider>
+      </OrdersProvider>
+    </div>
   );
 }

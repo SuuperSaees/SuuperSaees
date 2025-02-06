@@ -8,11 +8,16 @@ export interface OrdersContextType {
   agencyMembers: User.Response[];
   agencyId: Order.Type['agency_id'];
   ordersAreLoading: boolean;
+  queryKey: string[];
 }
+
 
 // Provider
 export interface OrdersProviderProps {
   children: React.ReactNode;
   agencyMembers: User.Response[];
   agencyId: Order.Type['agency_id'];
+  queryKey?: string[];
+  queryFn?: () => Promise<Order.Response[]>;
+  initialOrders?: Order.Response[];
 }

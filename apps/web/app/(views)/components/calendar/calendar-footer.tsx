@@ -37,16 +37,17 @@ const CalendarFooter = ({
   const locale = i18n.language === 'es' ? es : enUS;
 
   return (
-    <div className="flex w-full items-center justify-between border-t border-gray-200 p-4">
+    <div className="flex w-full items-center justify-between border rounded-b-xl border-gray-200 p-4">
       <div className="flex gap-2">
         <div className="flex flex-col items-center rounded-md border border-gray-200">
           <span className="bg-gray-100 px-4 py-0.5 text-xs font-medium uppercase text-gray-500">
             {format(currentDate, 'MMM', { locale })}
           </span>
-          <span className="px-4 py-0.5 font-bold text-brand">
+          <span className="px-4 py-0.5 font-bold text-black">
             {format(currentDate, 'd')}
           </span>
         </div>
+
         <div className="flex flex-col justify-center gap-1">
           <div className="items center flex gap-2">
             <span className="font-bold capitalize">

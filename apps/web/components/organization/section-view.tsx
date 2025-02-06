@@ -87,7 +87,7 @@ function SectionView({
   const navigationOptionsMap = new Map<string, JSX.Element>([
     [
       'orders',
-      <OrdersSection key={'orders'} organizationId={clientOrganizationId} />,
+      <OrdersSection key={'orders'} organizationId={clientOrganizationId} agencyId={agencyId}/>,
     ],
     [
       'members',

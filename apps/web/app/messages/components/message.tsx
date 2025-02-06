@@ -1,28 +1,32 @@
 'use client';
 
 import { useState } from 'react';
-import { ChatMessages } from '~/lib/chat-messages.types';
-import { useChat } from './context/chat-context';
+
 import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react';
+
 import { Button } from '@kit/ui/button';
+
+import { Message as MessageType } from '~/lib/message.types';
 import AvatarDisplayer from '~/orders/[id]/components/ui/avatar-displayer';
 
+import { useChat } from './context/chat-context';
+
 interface MessageProps {
-  message: ChatMessages.Type;
+  message: MessageType.Type;
 }
 
 export default function Message({ message }: MessageProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const { deleteMessage } = useChat();
-  
+  const { deleteMessageMutation } = useChat();
+
   const handleDelete = async () => {
-    await deleteMessage(message.id);
+    await deleteMessageMutation.mutateAsync(message.id);
   };
 
   return (
     <div
-      className="group flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+      className="group flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-gray-50"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -30,8 +34,8 @@ export default function Message({ message }: MessageProps) {
         displayName={message.user?.name}
         pictureUrl={message.user?.picture_url}
       />
-      
-      <div className="flex-1 min-w-0">
+
+      <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between">
           <span className="font-medium">{message.user?.name}</span>
           <div className="flex items-center gap-2">
@@ -43,19 +47,19 @@ export default function Message({ message }: MessageProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleDelete}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                className="opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
           </div>
         </div>
-        
-        <div 
+
+        <div
           className="mt-1 text-gray-700"
-          dangerouslySetInnerHTML={{ __html: message.content }}
+          dangerouslySetInnerHTML={{ __html: message.content ?? '' }}
         />
-        
+
         {message.files && message.files.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {message.files.map((file) => (
@@ -64,7 +68,7 @@ export default function Message({ message }: MessageProps) {
                 href={file.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline text-sm"
+                className="text-sm text-blue-600 hover:underline"
               >
                 {file.name}
               </a>

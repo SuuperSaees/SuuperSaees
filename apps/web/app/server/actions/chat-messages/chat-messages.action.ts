@@ -14,6 +14,7 @@ export async function createMessage(payload: ChatMessages.InsertWithRelations) {
   return await getMessagesAction().create(payload);
 }
 
+
 export async function getMessages(chatId: string) {
   return await getMessagesAction().list(chatId);
 }
