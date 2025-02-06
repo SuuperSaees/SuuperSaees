@@ -227,16 +227,15 @@ export const fetchBriefsByOrgOwnerId = async (
   configurations: Configurations = {},
 ): Promise<Brief.Relationships.Services.Response[]> => {
   try {
-    // *, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message)), services ( name )
     const { data: briefsData, error: briefsError } = await client
       .from('briefs')
       .select(
-        `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
-        form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))
-        ${configurations.includes?.includes('services') ? ',services ( id,name )' : ''}`,
+        'id, created_at, name, propietary_organization_id, description, image_url, deleted_on, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))' +
+        (configurations.includes?.includes('services') ? ', services(id, name)' : ''),
       )
       .is('deleted_on', null)
-      .eq('propietary_organization_id', ownerId);
+      .eq('propietary_organization_id', ownerId)
+      .order('created_at', { ascending: false });
 
     if (briefsError)
       throw new Error(`Error fetching the briefs, ${briefsError.message}`);
