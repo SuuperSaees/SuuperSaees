@@ -4,7 +4,7 @@ import ChatItem from './chat-item';
 import { useChat } from './context/chat-context';
 
 export default function ChatList() {
-  const { activeChat, chatsQuery } = useChat();
+  const { chatId, chatsQuery } = useChat();
 
   const chatsData = chatsQuery.data;
 
@@ -31,7 +31,7 @@ export default function ChatList() {
           <ChatItem
             key={chat.id}
             chat={chat}
-            isActive={activeChat === chat.id.toString()}
+            isActive={chatId === chat.id.toString()}
           />
         ))}
       </div>

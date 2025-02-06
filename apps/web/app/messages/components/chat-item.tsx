@@ -15,13 +15,13 @@ export default function ChatItem({
   chat: Chats.Type;
   isActive?: boolean;
 }) {
-  const { setActiveChat, setActiveChatData } = useChat();
+  const { setChatId, setActiveChat } = useChat();
 
   const router = useRouter();
 
   const handleChatSelect = () => {
-    setActiveChat(chat.id.toString());
-    setActiveChatData(chat);
+    setChatId(chat.id.toString());
+    setActiveChat(chat);
     router.push(`/messages`);
   };
 

@@ -1,10 +1,9 @@
 import { Dispatch } from 'react';
 import { SetStateAction } from 'react';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { Chats } from '~/lib/chats.types';
 import { Message } from '~/lib/message.types';
 import { User } from '~/lib/user.types';
 import {
@@ -12,21 +11,26 @@ import {
   deleteMessage,
 } from '~/server/actions/chat-messages/chat-messages.action';
 import { updateFile } from '~/team-accounts/src/server/actions/files/update/update-file';
-import { generateUUID } from '~/utils/generate-uuid';
 
 /**
  * Props interface for useChatMessageActions hook
  * @interface ChatMessageActionsProps
- * @property {Message.Type[]} messages - Array of chat messages
+ * @property {Message.Type[]} messages - Array of the current chat messages
  * @property {Function} setMessages - Function to update messages state
- * @property {Chats.Type | null} activeChatData - Data of currently active chat
+ * @property {string} chatId - ID of currently active chat
  * @property {Pick<User.Response, 'id' | 'name' | 'email' | 'picture_url'>} user - Current user information
  */
+
 interface ChatMessageActionsProps {
+  chatId: string;
   messages: Message.Type[];
-  setMessages: Dispatch<SetStateAction<Message.Type[]>>;
-  activeChatData: Chats.Type | null;
+  setMessages:
+    | Dispatch<SetStateAction<Message.Type[]>>
+    | ((
+        updater: Message.Type[] | ((prev: Message.Type[]) => Message.Type[]),
+      ) => void);
   user: Pick<User.Response, 'id' | 'name' | 'email' | 'picture_url'>;
+  queryKey: string[];
 }
 
 /**
@@ -35,31 +39,36 @@ interface ChatMessageActionsProps {
  * @returns {Object} Object containing message-related mutations
  */
 export const useChatMessageActions = ({
+  chatId,
   messages,
   setMessages,
-  activeChatData,
   user,
+  queryKey = ['chat-messages', chatId],
 }: ChatMessageActionsProps) => {
+  const queryClient = useQueryClient();
   /**
    * Mutation for adding new messages to the chat
+
    * Handles optimistic updates and file attachments
    */
+
   const addMessageMutation = useMutation({
     mutationFn: async ({
       content,
+
       fileIds,
       userId,
+      temp_id,
     }: {
       content: string;
       fileIds?: string[];
       userId: string;
+      temp_id: string;
     }) => {
-      if (!activeChatData) throw new Error('No active chat');
-
-      const messageData = { user_id: userId, content };
+      const messageData = { user_id: userId, content, temp_id };
       const response = await createMessage({
         message_id: '',
-        chat_id: activeChatData.id,
+        chat_id: chatId,
         messages: [messageData],
       });
 
@@ -71,9 +80,18 @@ export const useChatMessageActions = ({
 
       return response;
     },
-    onMutate: ({ content }) => {
+    onMutate: async ({ content, temp_id }) => {
+      // Cancel any outgoing refetches
+      // (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey });
+
+      // Snapshot the previous messages
+      const previousMessages = messages;
+
+      // Optimistically update to the new value
       // Create optimistic message with temporary ID
-      const tempId = generateUUID();
+      const tempId = temp_id;
+
       const optimisticMessage: Message.Type = {
         content,
         user_id: user.id,
@@ -89,19 +107,21 @@ export const useChatMessageActions = ({
         user,
       };
 
-      setMessages((prev) => [...prev, optimisticMessage]);
-      return { optimisticMessage };
+      setMessages((prev) => {
+        const newMessages = [...prev, optimisticMessage];
+        return newMessages;
+      });
+      return { previousMessages };
     },
+    // If the mutation fails,
+    // use the context returned from onMutate to roll back
     onError: (_, __, context) => {
-      // Remove optimistic message on error
-      if (context?.optimisticMessage) {
-        setMessages((prev) =>
-          prev.filter(
-            (msg) => msg.temp_id !== context.optimisticMessage.temp_id,
-          ),
-        );
-      }
+      queryClient.setQueryData(queryKey, context?.previousMessages);
       toast.error('Failed to send message');
+    },
+    // Always refetch after error or success
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey });
     },
   });
 

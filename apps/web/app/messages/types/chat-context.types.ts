@@ -18,11 +18,12 @@ import { GetChatByIdResponse } from '~/server/actions/chats/chats.interface'
  * @property {Function} setActiveChatData - Function to update the active chat data
  */
 export interface ActiveChatState {
-  activeChat: string | null
-  setActiveChat: Dispatch<SetStateAction<string | null>>
-  activeChatData: Chats.Type | null
-  setActiveChatData: Dispatch<SetStateAction<Chats.Type | null>>
+  chatId: string
+  setChatId: Dispatch<SetStateAction<string>>
+  activeChat: Chats.Type | null
+  setActiveChat: Dispatch<SetStateAction<Chats.Type | null>>
 }
+
 
 /**
  * Interface for managing messages and members state
@@ -52,13 +53,15 @@ export interface ChatMutations {
       content: string
       fileIds?: string[]
       userId: string
+      temp_id: string
     },
     {
-      optimisticMessage: Message.Type
+      previousMessages: Message.Type[]
     }
   >
   /** Mutation for deleting messages */
   deleteMessageMutation: UseMutationResult<
+
     DeleteMessageResponse,
     Error,
     string,
@@ -105,6 +108,8 @@ export interface ChatContextType extends ActiveChatState, MessagesState, ChatMut
  */
 export interface ChatProviderProps {
   children: ReactNode
-  initialMessages?: Message.Type[]
+  // chatId: string
+  initialChat?: GetChatByIdResponse
   initialMembers?: ChatMembers.Type[]
 }
+

@@ -3,32 +3,30 @@
 import { Dispatch } from 'react';
 import { SetStateAction } from 'react';
 
-import { Chats } from '~/lib/chats.types';
 import { Message } from '~/lib/message.types';
 import { User } from '~/lib/user.types';
 
 import { useChatManagement } from './use-chat-management-actions';
 import { useChatMessageActions } from './use-chat-message-actions';
+import { GetChatByIdResponse } from '~/server/actions/chats/chats.interface';
 
 /**
  * Props interface for useChatActions hook
  * @interface UseChatActionsProps
  * @property {Message.Type[]} messages - Array of chat messages
  * @property {Function} setMessages - Function to update messages state
- * @property {string | null} activeChat - ID of currently active chat
- * @property {Chats.Type | null} activeChatData - Data of currently active chat
- * @property {Function} setActiveChatData - Function to update active chat data
+ * @property {string} chatId - ID of currently active chat
  * @property {Pick<User.Response, 'id' | 'name' | 'email' | 'picture_url'>} user - Current user information
- * @property {Function} setActiveChat - Function to update active chat ID
  */
+
 interface UseChatActionsProps {
+  chatId: string;
+  initialChat?: GetChatByIdResponse;
+  messagesQueryKey: string[];
+  chatQueryKey: string[];
   messages: Message.Type[];
-  setMessages: Dispatch<SetStateAction<Message.Type[]>>;
-  activeChat: string | null;
-  activeChatData: Chats.Type | null;
-  setActiveChatData: Dispatch<SetStateAction<Chats.Type | null>>;
   user: Pick<User.Response, 'id' | 'name' | 'email' | 'picture_url'>;
-  setActiveChat: Dispatch<SetStateAction<string | null>>;
+  setMessages: Dispatch<SetStateAction<Message.Type[]>>;
 }
 
 /**
@@ -47,18 +45,21 @@ interface UseChatActionsProps {
 const useChatActions = ({
   messages,
   setMessages,
-  activeChatData,
-  activeChat,
-  setActiveChatData,
+  chatId,
   user,
-  setActiveChat,
+  messagesQueryKey,
+  chatQueryKey,
+  initialChat,
 }: UseChatActionsProps) => {
   const { addMessageMutation, deleteMessageMutation } = useChatMessageActions({
     messages,
     setMessages,
-    activeChatData,
+    chatId,
     user,
+    queryKey: messagesQueryKey,
+
   });
+
   const {
     updateChatMutation,
     deleteChatMutation,
@@ -67,12 +68,12 @@ const useChatActions = ({
     chatsQuery,
     chatByIdQuery,
   } = useChatManagement({
+    chatId,
+    initialChat,
     setMessages,
-    activeChat,
-    activeChatData,
-    setActiveChat,
-    setActiveChatData,
-    user,
+    userId: user.id,
+    queryKey: chatQueryKey,
+
   });
 
   return {

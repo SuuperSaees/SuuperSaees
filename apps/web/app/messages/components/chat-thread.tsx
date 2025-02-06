@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 
 import EditableHeader from '~/components/editable-header';
 import { Members } from '~/lib/members.types';
+import { generateUUID } from '~/utils/generate-uuid';
 
 import ChatEmptyState from './chat-empty-state';
 import ChatMembersSelector from './chat-members-selector';
@@ -21,7 +22,6 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
   const {
     user,
     activeChat,
-    activeChatData,
     messages,
     membersUpdateMutation,
     deleteChatMutation,
@@ -34,7 +34,6 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
   const isLoading = chatByIdQuery.isLoading;
 
   const handleMembersUpdate = (members: string[]) => {
-    console.log(members);
     membersUpdateMutation.mutate(members);
   };
 
@@ -47,20 +46,25 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
   };
 
   const handleSendMessage = async (message: string, fileIds?: string[]) => {
-    await addMessageMutation.mutateAsync({ content: message, userId, fileIds });
+    await addMessageMutation.mutateAsync({
+      content: message,
+      userId,
+      fileIds,
+      temp_id: generateUUID(),
+    });
   };
 
-  if (!activeChat || !activeChatData) {
+  if (!activeChat) {
     return <ChatEmptyState />;
   }
 
-  const activeChatDataName = { ...activeChatData }.name;
-  const activeChatDataId = { ...activeChatData }.id;
+  const activeChatDataName = { ...activeChat }.name;
+  const activeChatDataId = { ...activeChat }.id;
 
-  console.log('messages', messages);
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
+
       <div className="flex items-center justify-between border-b p-4">
         <div className="flex items-center gap-3">
           <EditableHeader

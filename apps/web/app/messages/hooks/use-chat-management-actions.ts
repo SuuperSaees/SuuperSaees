@@ -6,9 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { Chats } from '~/lib/chats.types';
 import { Message } from '~/lib/message.types';
-import { User } from '~/lib/user.types';
 import { upsertMembers } from '~/server/actions/chat-members/chat-members.action';
 import {
   createChat,
@@ -17,25 +15,28 @@ import {
   getChats,
   updateChat,
 } from '~/server/actions/chats/chats.action';
+import { GetChatByIdResponse } from '~/server/actions/chats/chats.interface';
 
 /**
  * Props interface for useChatManagement hook
  * @interface ChatManagementActionsProps
  * @property {Function} setMessages - Function to update messages state
- * @property {string | null} activeChat - ID of currently active chat
- * @property {Chats.Type | null} activeChatData - Data of currently active chat
- * @property {Function} setActiveChat - Function to update active chat ID
- * @property {Function} setActiveChatData - Function to update active chat data
- * @property {Pick<User.Response, 'id' | 'name' | 'email' | 'picture_url'>} user - Current user information
+ * @property {string} userId - Current user ID
+ * @property {string} chatId - ID of currently active chat
+ * @property {string[]} queryKey - Query key for the chats
+ * @property {GetChatByIdResponse} initialChat - Initial chat data
  */
+
 interface ChatManagementActionsProps {
-  setMessages: Dispatch<SetStateAction<Message.Type[]>>;
-  activeChat: string | null;
-  activeChatData: Chats.Type | null;
-  setActiveChat: Dispatch<SetStateAction<string | null>>;
-  setActiveChatData: Dispatch<SetStateAction<Chats.Type | null>>;
-  user: Pick<User.Response, 'id' | 'name' | 'email' | 'picture_url'>;
+  chatId: string;
+  setMessages:
+    | Dispatch<SetStateAction<Message.Type[]>>
+    | ((
+        updater: Message.Type[] | ((prev: Message.Type[]) => Message.Type[]),
+      ) => void);
+  userId: string;
   queryKey?: string[];
+  initialChat?: GetChatByIdResponse;
 }
 
 /**
@@ -44,17 +45,14 @@ interface ChatManagementActionsProps {
  * @returns {Object} Object containing chat management mutations and queries
  */
 export const useChatManagement = ({
-  setMessages,
-  activeChat,
-  activeChatData,
-  setActiveChat,
-  setActiveChatData,
-  user,
+  chatId,
+  userId,
   queryKey = ['chats'],
+  initialChat,
+  setMessages,
 }: ChatManagementActionsProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
-
 
   /**
    * Mutation for updating chat name
@@ -63,11 +61,11 @@ export const useChatManagement = ({
   const updateChatMutation = useMutation({
     mutationFn: (name: string) =>
       updateChat({
-        id: activeChatData?.id.toString() ?? '',
+        id: chatId,
         name,
       }),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['chats'] });
+      await queryClient.invalidateQueries({ queryKey });
       toast.success('Chat name updated successfully');
       router.refresh();
     },
@@ -82,24 +80,14 @@ export const useChatManagement = ({
    */
   const deleteChatMutation = useMutation({
     mutationFn: async () => {
-      setActiveChat(null);
-      setActiveChatData(null);
-      await deleteChat(activeChatData?.id.toString() ?? '');
+      await deleteChat(chatId);
     },
+
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['chats'] });
-      const chats = await queryClient.fetchQuery<Chats.Type[]>({
-        queryKey: ['chats'],
-      });
+      await queryClient.invalidateQueries({ queryKey });
+
       toast.success('Chat deleted successfully');
 
-      if (chats?.length > 0) {
-        setActiveChat(chats[0]?.id.toString() ?? null);
-        setActiveChatData(chats[0] ?? null);
-      } else {
-        setActiveChat(null);
-        setActiveChatData(null);
-      }
       router.push('/messages');
     },
     onError: () => {
@@ -115,18 +103,14 @@ export const useChatManagement = ({
     mutationFn: () =>
       createChat({
         name: 'New Chat',
-        user_id: user.id,
+        user_id: userId,
         members: [],
         visibility: true,
         image: '',
         role: ['owner'],
       }),
-    onSuccess: (newChat) => {
-      if (newChat) {
-        setActiveChat(newChat.id);
-        setActiveChatData(newChat);
-      }
-      void queryClient.invalidateQueries({ queryKey: ['chats'] });
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -137,7 +121,7 @@ export const useChatManagement = ({
   const membersUpdateMutation = useMutation({
     mutationFn: (members: string[]) =>
       upsertMembers({
-        chat_id: activeChatData?.id.toString() ?? '',
+        chat_id: chatId,
         members: members.map((member) => ({
           user_id: member,
           role: 'guest',
@@ -150,18 +134,11 @@ export const useChatManagement = ({
    * Sets initial active chat if none is selected
    */
   const chatsQuery = useQuery({
-    queryKey: queryKey,
+    queryKey: ['chats'],
     queryFn: async () => {
       const response = await getChats();
 
       if (!response) throw new Error('Failed to fetch chats');
-
-      if (!activeChat && response.length > 0) {
-        console.log('setting active chat', response[0]?.id.toString());
-        setActiveChat(response[0]?.id.toString() ?? '');
-        setActiveChatData(response[0] ?? null);
-        setMessages([]);
-      }
 
       return response;
     },
@@ -172,15 +149,16 @@ export const useChatManagement = ({
    * Updates messages state with chat messages
    */
   const chatByIdQuery = useQuery({
-    queryKey: ['chatById', activeChatData?.id.toString() ?? ''],
+    queryKey: queryKey,
     queryFn: async () => {
-      const chat = await getChatById(activeChatData?.id.toString() ?? '');
+      const chat = await getChatById(chatId ?? '');
       setMessages(chat?.messages ?? []);
       return chat;
     },
-    refetchOnMount: true,
+    initialData: initialChat,
+    enabled: !!chatId,
   });
-  console.log('activeChat', activeChat);
+  
   return {
     chatsQuery,
     chatByIdQuery,
