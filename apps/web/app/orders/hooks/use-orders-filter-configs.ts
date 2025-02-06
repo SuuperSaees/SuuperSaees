@@ -94,9 +94,27 @@ const useOrdersFilterConfigs = ({
     {
       key: 'search',
       filterFn: (order, selectedValues) =>
-        selectedValues.some((searchTerm) =>
-          order.title.toLowerCase().includes(searchTerm.toLowerCase()),
-        ),
+        selectedValues.some((searchTerm) => {
+          const searchTermLower = searchTerm.toLowerCase();
+          
+          if (order.title.toLowerCase().includes(searchTermLower)) return true;
+          if (order.description?.toLowerCase().includes(searchTermLower)) return true;
+          if (order.brief?.name?.toLowerCase().includes(searchTermLower)) return true;
+          
+          if (order.client_organization?.name.toLowerCase().includes(searchTermLower)) return true;
+          if (order.customer?.name.toLowerCase().includes(searchTermLower)) return true;
+          if (order.customer?.email?.toLowerCase().includes(searchTermLower)) return true;
+          
+          if (order.assigned_to?.some(assignee => 
+            assignee.agency_member?.name.toLowerCase().includes(searchTermLower) ??
+            assignee.agency_member?.email?.toLowerCase().includes(searchTermLower)
+          )) return true;
+          
+          if (order.status?.toLowerCase().includes(searchTermLower)) return true;
+          if (order.priority?.toLowerCase().includes(searchTermLower)) return true;
+          
+          return false;
+        }),
     },
   ];
 
@@ -278,8 +296,31 @@ const useOrdersFilterConfigs = ({
     key: 'search',
     label: 'search',
     filter: (searchTerm: string) =>
-      updateFilter('search', 'replace', (order: Order.Response) =>
-        order.title.toLowerCase().includes(searchTerm.toLowerCase()), searchTerm
+      updateFilter(
+        'search',
+        'replace',
+        (order: Order.Response) => {
+          const searchTermLower = searchTerm.toLowerCase();
+          
+          if (order.title.toLowerCase().includes(searchTermLower)) return true;
+          if (order.description?.toLowerCase().includes(searchTermLower)) return true;
+          if (order.brief?.name?.toLowerCase().includes(searchTermLower)) return true;
+          
+          if (order.client_organization?.name.toLowerCase().includes(searchTermLower)) return true;
+          if (order.customer?.name.toLowerCase().includes(searchTermLower)) return true;
+          if (order.customer?.email?.toLowerCase().includes(searchTermLower)) return true;
+          
+          if (order.assigned_to?.some(assignee => 
+            assignee.agency_member?.name.toLowerCase().includes(searchTermLower) ??
+            assignee.agency_member?.email?.toLowerCase().includes(searchTermLower)
+          )) return true;
+          
+          if (order.status?.toLowerCase().includes(searchTermLower)) return true;
+          if (order.priority?.toLowerCase().includes(searchTermLower)) return true;
+          
+          return false;
+        },
+        searchTerm
       ),
   };
 

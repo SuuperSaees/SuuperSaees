@@ -140,14 +140,19 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
 
   const filteredClients = uniqueClients.filter((client) => {
     const searchString = search?.toLowerCase();
-    const displayName = client?.name.toLowerCase();
-    return displayName.includes(searchString);
+    return (
+      client?.name?.toLowerCase().includes(searchString) ||
+      (client?.email?.toLowerCase().includes(searchString) ??
+      client?.organization?.name?.toLowerCase().includes(searchString))
+    );
   });
 
-  const filteredOrganizations = uniqueOrganizations.filter((client) => {
+  const filteredOrganizations = uniqueOrganizations.filter((org) => {
     const searchString = search?.toLowerCase();
-    const displayName = client?.name.toLowerCase();
-    return displayName.includes(searchString);
+    return (
+      org?.name?.toLowerCase().includes(searchString) ||
+      org?.primary_owner?.toLowerCase().includes(searchString)
+    );
   });
   const options = {
     data:
