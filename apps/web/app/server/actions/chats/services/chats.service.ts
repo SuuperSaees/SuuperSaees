@@ -1,12 +1,5 @@
 import { MembersRepository } from '../../chat-members/repositories/chat-members.repository';
 import { ChatMessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
-import {
-  ChatPayload,
-  DeleteChatResponse,
-  GetChatByIdResponse,
-  UpdateChatSettingsPayload,
-  UpdateChatSettingsResponse,
-} from '../chats.interface';
 import { ChatRepository } from '../repositories/chats.repository';
 import { Chats } from '~/lib/chats.types';
 
@@ -14,8 +7,8 @@ import { Chats } from '~/lib/chats.types';
 export class ChatService {
   constructor(
     private readonly chatRepository: ChatRepository,
-    private readonly membersRepository: MembersRepository,
-    private readonly messagesRepository: ChatMessagesRepository,
+    private readonly membersRepository?: MembersRepository,
+    private readonly messagesRepository?: ChatMessagesRepository,
   ) {}
 
   // * CREATE SERVICES

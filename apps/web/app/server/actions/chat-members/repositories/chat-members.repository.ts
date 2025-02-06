@@ -2,7 +2,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
 
-import { ChatRoleType } from '../../chats/middleware/validate_chat_role';
 import {
   GetMembersResponse,
   MemberSettingsResponse,
@@ -17,7 +16,7 @@ export class MembersRepository {
 
   constructor(
     client: SupabaseClient<Database>,
-    adminClient: SupabaseClient<Database>,
+    adminClient?: SupabaseClient<Database>,
   ) {
     this.client = client;
     this.adminClient = adminClient;

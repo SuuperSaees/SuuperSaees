@@ -1,14 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
-
-import {
-  ChatPayload,
-  DeleteChatResponse,
-  GetChatByIdResponse,
-  UpdateChatSettingsPayload,
-  UpdateChatSettingsResponse,
-} from '../chats.interface';
 import { Chats } from '~/lib/chats.types';
 
 export class ChatRepository {
@@ -17,14 +9,14 @@ export class ChatRepository {
 
   constructor(
     client: SupabaseClient<Database>,
-    adminClient: SupabaseClient<Database>,
+    adminClient?: SupabaseClient<Database>,
   ) {
     this.client = client;
     this.adminClient = adminClient;
   }
 
   // * CREATE REPOSITORIES
-  async createChat(payload: ChatPayload): Promise<Chats.Type> {
+  async create(payload: ChatPayload): Promise<Chats.Type> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
 
@@ -48,11 +40,12 @@ export class ChatRepository {
 
   // * GET REPOSITORIES
 
-  async getChats(): Promise<Chats.Type[]> {
+  async list(userId: string): Promise<Chats.Type[]> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
     .from('chats')
     .select(`*`)
+    .eq('user_id', userId)
     .is('deleted_on', null);
 
 
@@ -64,31 +57,8 @@ export class ChatRepository {
   }
 
 
-  async getChatById(chatId: string): Promise<Chats.TypeWithRelations> {
+  async get(chatId: string): Promise<Chats.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
-
-    // chat_messages (
-    //   id,
-    //   messages (
-    //     id,
-    //     user_id,
-    //     content,
-    //     created_at,
-    //     updated_at,
-    //     deleted_on,
-    //     type,
-    //     visibility,
-    //     temp_id,
-    //     order_id,
-    //     parent_id,
-    //     user:user_settings (
-    //       id,
-    //       name,
-    //       picture_url,
-    //       email:accounts(email)
-    //     )
-    //   )
-
 
     const { data: chat, error } = await client
       .from('chats')
@@ -180,7 +150,7 @@ export class ChatRepository {
 
 
   // * DELETE REPOSITORIES
-  async deleteChat(chatId: string): Promise<DeleteChatResponse> {
+  async delete(chatId: string): Promise<DeleteChatResponse> {
     const client = this.adminClient ?? this.client;
     const { error } = await client.from('chats').delete().eq('id', chatId);
 
@@ -192,28 +162,7 @@ export class ChatRepository {
   }
 
   // * UPDATE REPOSITORIES
-  async updateChatSettings(
-    payload: UpdateChatSettingsPayload,
-  ): Promise<UpdateChatSettingsResponse> {
-    const client = this.adminClient ?? this.client;
-    const { error } = await client
-      .from('chats')
-      .update({ settings: payload.settings })
-      .eq('id', payload.chat_id);
-
-    if (error) {
-      throw new Error(
-        `Error updating chat settings for ${payload.chat_id}: ${error.message}`,
-      );
-    }
-
-    return {
-      success: true,
-      message: `Chat settings updated successfully for ${payload.chat_id}.`,
-    };
-  }
-
-  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
+  async update(payload: Chats.Update): Promise<Chats.Type> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client.from('chats').update(payload).eq('id', payload.id).select().single();
 

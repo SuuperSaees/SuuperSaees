@@ -1,10 +1,6 @@
 import { Chats } from '~/lib/chats.types';
 import { BaseAction } from '../base-action';
 import { ChatController } from './controllers/chats.controller';
-import {
-  ChatPayload,
-  DeleteChatResponse,
-} from './chats.interface';
 
 export class ChatAction extends BaseAction {
   private controller: ChatController;
@@ -18,19 +14,19 @@ export class ChatAction extends BaseAction {
     );
   }
 
-  async create(payload: ChatPayload): Promise<Chats.Type> {
+  async create(payload: Chats.InsertWithRelations): Promise<Chats.Type> {
     return await this.controller.create(payload);
   }
 
-  async list(): Promise<Chats.Type[]> {
-    return await this.controller.list();
+  async list(userId: string): Promise<Chats.TypeWithRelations[]> {
+    return await this.controller.list(userId);
   }
 
   async get(chatId: string): Promise<Chats.TypeWithRelations> {
     return await this.controller.get(chatId);
   }
 
-  async delete(chatId: string): Promise<DeleteChatResponse> {
+  async delete(chatId: string): Promise<void> {
     return await this.controller.delete(chatId);
   }
 
