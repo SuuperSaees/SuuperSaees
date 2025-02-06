@@ -281,14 +281,16 @@ export async function fetchClientOrganizations(
 }
 
 // Helper function to combine client owner data with organization data
-// Helper function to combine client owner data with organization data
 function combineClientData(
   clientOwners: UserAccount[],
   clientOrganizations: Organization[],
   clientUsers: UserAccount[],
 ) {
-  // Map over each organization to attach its primary owner and associated users
-  return clientOrganizations.map((organization) => {
+  const sortedOrganizations = [...clientOrganizations].sort((a, b) => 
+    new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime()
+  );
+
+  return sortedOrganizations.map((organization) => {
     // Find the primary owner based on `primary_owner_user_id`
     const primaryOwner = clientOwners.find(
       (owner) => owner.id === organization.primary_owner_user_id
