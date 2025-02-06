@@ -42,6 +42,15 @@ const STATUS_FILTERS = {
   COMPLETED: (order: Order.Response) => order.status === 'completed',
 };
 
+const normalizeString = (str: string | undefined | null) => {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '');
+};
+
 const useOrdersFilterConfigs = ({
   orders,
   tags,
@@ -95,14 +104,14 @@ const useOrdersFilterConfigs = ({
       key: 'search',
       filterFn: (order, selectedValues) =>
         selectedValues.some((searchTerm) => {
-          const searchTermLower = searchTerm.toLowerCase();
+          const searchTermNormalized = normalizeString(searchTerm);
           
           const orderId = order.id?.toString().replace('#', '');
-          if (orderId?.includes(searchTermLower.replace('#', ''))) return true;
+          if (normalizeString(orderId)?.includes(searchTermNormalized)) return true;
           
-          if (order.title.toLowerCase().includes(searchTermLower)) return true;
-          if (order.description?.toLowerCase().includes(searchTermLower)) return true;
-          if (order.brief?.name?.toLowerCase().includes(searchTermLower)) return true;
+          if (normalizeString(order.title)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.description)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.brief?.name)?.includes(searchTermNormalized)) return true;
           
           const getDateFormats = (date: Date) => [
             date.toLocaleDateString(),
@@ -112,34 +121,34 @@ const useOrdersFilterConfigs = ({
             date.toLocaleString('default', { month: 'long' }),
             date.toLocaleString('en-US', { month: 'long' }), 
             date.getFullYear().toString()
-          ].map(d => d.toLowerCase());
+          ].map(d => normalizeString(d)?.toLowerCase() ?? '');
 
           if (order.created_at) {
             const date = new Date(order.created_at);
-            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
           }
           
           if (order.updated_at) {
             const date = new Date(order.updated_at);
-            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
           }
           
           if (order.due_date) {
             const date = new Date(order.due_date);
-            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
           }
           
-          if (order.client_organization?.name.toLowerCase().includes(searchTermLower)) return true;
-          if (order.customer?.name.toLowerCase().includes(searchTermLower)) return true;
-          if (order.customer?.email?.toLowerCase().includes(searchTermLower)) return true;
+          if (normalizeString(order.client_organization?.name)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.customer?.name)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.customer?.email)?.includes(searchTermNormalized)) return true;
           
           if (order.assigned_to?.some(assignee => 
-            assignee.agency_member?.name.toLowerCase().includes(searchTermLower) ??
-            assignee.agency_member?.email?.toLowerCase().includes(searchTermLower)
+            normalizeString(assignee.agency_member?.name)?.includes(searchTermNormalized) ??
+            normalizeString(assignee.agency_member?.email)?.includes(searchTermNormalized)
           )) return true;
           
-          if (order.status?.toLowerCase().includes(searchTermLower)) return true;
-          if (order.priority?.toLowerCase().includes(searchTermLower)) return true;
+          if (normalizeString(order.status?.toLowerCase())?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.priority?.toLowerCase())?.includes(searchTermNormalized)) return true;
           
           return false;
         }),
@@ -328,14 +337,14 @@ const useOrdersFilterConfigs = ({
         'search',
         'replace',
         (order: Order.Response) => {
-          const searchTermLower = searchTerm.toLowerCase();
+          const searchTermNormalized = normalizeString(searchTerm);
           
           const orderId = order.id?.toString().replace('#', '');
-          if (orderId?.includes(searchTermLower.replace('#', ''))) return true;
+          if (normalizeString(orderId)?.includes(searchTermNormalized)) return true;
           
-          if (order.title.toLowerCase().includes(searchTermLower)) return true;
-          if (order.description?.toLowerCase().includes(searchTermLower)) return true;
-          if (order.brief?.name?.toLowerCase().includes(searchTermLower)) return true;
+          if (normalizeString(order.title)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.description)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.brief?.name)?.includes(searchTermNormalized)) return true;
           
           const getDateFormats = (date: Date) => [
             date.toLocaleDateString(),
@@ -345,34 +354,34 @@ const useOrdersFilterConfigs = ({
             date.toLocaleString('default', { month: 'long' }),
             date.toLocaleString('en-US', { month: 'long' }), 
             date.getFullYear().toString()
-          ].map(d => d.toLowerCase());
+          ].map(d => normalizeString(d)?.toLowerCase() ?? '');
 
           if (order.created_at) {
             const date = new Date(order.created_at);
-            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
           }
           
           if (order.updated_at) {
             const date = new Date(order.updated_at);
-            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
           }
           
           if (order.due_date) {
             const date = new Date(order.due_date);
-            if (getDateFormats(date).some(d => d.includes(searchTermLower))) return true;
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
           }
           
-          if (order.client_organization?.name.toLowerCase().includes(searchTermLower)) return true;
-          if (order.customer?.name.toLowerCase().includes(searchTermLower)) return true;
-          if (order.customer?.email?.toLowerCase().includes(searchTermLower)) return true;
+          if (normalizeString(order.client_organization?.name)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.customer?.name)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.customer?.email)?.includes(searchTermNormalized)) return true;
           
           if (order.assigned_to?.some(assignee => 
-            assignee.agency_member?.name.toLowerCase().includes(searchTermLower) ??
-            assignee.agency_member?.email?.toLowerCase().includes(searchTermLower)
+            normalizeString(assignee.agency_member?.name)?.includes(searchTermNormalized) ??
+            normalizeString(assignee.agency_member?.email)?.includes(searchTermNormalized)
           )) return true;
           
-          if (order.status?.toLowerCase().includes(searchTermLower)) return true;
-          if (order.priority?.toLowerCase().includes(searchTermLower)) return true;
+          if (normalizeString(order.status?.toLowerCase())?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.priority?.toLowerCase())?.includes(searchTermNormalized)) return true;
           
           return false;
         },
