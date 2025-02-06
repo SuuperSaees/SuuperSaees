@@ -140,19 +140,14 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
 
   const filteredClients = uniqueClients.filter((client) => {
     const searchString = search?.toLowerCase();
-    return (
-      client?.name?.toLowerCase().includes(searchString) ||
-      (client?.email?.toLowerCase().includes(searchString) ??
-      client?.organization?.name?.toLowerCase().includes(searchString))
-    );
+    const displayName = client?.name.toLowerCase();
+    return displayName.includes(searchString);
   });
 
-  const filteredOrganizations = uniqueOrganizations.filter((org) => {
+  const filteredOrganizations = uniqueOrganizations.filter((client) => {
     const searchString = search?.toLowerCase();
-    return (
-      org?.name?.toLowerCase().includes(searchString) ||
-      org?.primary_owner?.toLowerCase().includes(searchString)
-    );
+    const displayName = client?.name.toLowerCase();
+    return displayName.includes(searchString);
   });
   const options = {
     data:
@@ -374,12 +369,7 @@ const useClientColumns = (
       {
         accessorKey: 'created_at_column',
         header: () => {
-          return (
-     
-                  <span >{t('createdAt')}</span>
-        
-       
-          );
+          return <span>{t('createdAt')}</span>;
         },
         cell: ({ row }) => {
           const date = new Date(row.original.created_at ?? '');
@@ -387,7 +377,7 @@ const useClientColumns = (
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
           const year = date.getFullYear();
 
-          const formattedDate = `${day}-${month}-${year}`;
+          const formattedDate = `${day}/${month}/${year}`;
 
           return (
             <span className="text-sm text-gray-600">
@@ -463,21 +453,19 @@ const useOrganizationColumns = (
       },
       {
         accessorKey: 'created_at_organization',
-        header: () => (
-
-                <span>{t('createdAt')}</span>
-      
-        ),
+        header: () => {
+          return <span>{t('createdAt')}</span>;
+        },
         cell: ({ row }) => {
           const date = new Date(row.original.created_at ?? '');
           const day = date.getDate().toString().padStart(2, '0');
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
           const year = date.getFullYear();
 
-          const formattedDate = `${day}-${month}-${year}`;
+          const formattedDate = `${day}/${month}/${year}`;
 
           return (
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm text-gray-600">
               {formattedDate}
             </span>
           );
