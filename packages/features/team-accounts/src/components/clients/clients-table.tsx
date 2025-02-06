@@ -379,12 +379,7 @@ const useClientColumns = (
       {
         accessorKey: 'created_at_column',
         header: () => {
-          return (
-     
-                  <span >{t('createdAt')}</span>
-        
-       
-          );
+          return <span>{t('createdAt')}</span>;
         },
         cell: ({ row }) => {
           const date = new Date(row.original.created_at ?? '');
@@ -392,7 +387,7 @@ const useClientColumns = (
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
           const year = date.getFullYear();
 
-          const formattedDate = `${day}-${month}-${year}`;
+          const formattedDate = `${day}/${month}/${year}`;
 
           return (
             <span className="text-sm text-gray-600">
@@ -468,21 +463,19 @@ const useOrganizationColumns = (
       },
       {
         accessorKey: 'created_at_organization',
-        header: () => (
-
-                <span>{t('createdAt')}</span>
-      
-        ),
+        header: () => {
+          return <span>{t('createdAt')}</span>;
+        },
         cell: ({ row }) => {
           const date = new Date(row.original.created_at ?? '');
           const day = date.getDate().toString().padStart(2, '0');
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
           const year = date.getFullYear();
 
-          const formattedDate = `${day}-${month}-${year}`;
+          const formattedDate = `${day}/${month}/${year}`;
 
           return (
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm text-gray-600">
               {formattedDate}
             </span>
           );

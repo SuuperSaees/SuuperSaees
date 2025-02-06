@@ -1,7 +1,5 @@
 import 'server-only';
 
-
-
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { hasPermissionToAddTeamMembers } from 'node_modules/@kit/team-accounts/src/server/actions/permissions/permissions';
@@ -58,7 +56,17 @@ async function loadAccountMembers(
     throw error;
   }
 
-  return data ?? [];
+  const owners = (data ?? []).filter(
+    (member) => member.role === 'agency_owner',
+  );
+  const nonOwners = (data ?? [])
+    .filter((member) => member.role !== 'agency_owner')
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+
+  return [...owners, ...nonOwners];
 }
 
 /**

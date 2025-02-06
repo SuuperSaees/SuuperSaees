@@ -98,16 +98,27 @@ export function ServicesPageClient({
     },
   });
 
+  // Helper function para normalizar strings
+  const normalizeString = (str: string | undefined | null) => {
+    if (!str) return '';
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, '');
+  };
+
   const filteredData = useMemo(() => {
     const items = activeTab === 'briefs' ? briefs : services;
+    const searchTermNormalized = normalizeString(searchTerm);
+
     return items.filter((item) => {
-      const searchTermLower = searchTerm.toLowerCase();
-      
-      if (item.name?.toLowerCase().includes(searchTermLower)) return true;
+      if (normalizeString(item.name)?.includes(searchTermNormalized)) return true;
       
       if (activeTab === 'services') {
-        if ('price' in item && item.price?.toString().includes(searchTermLower)) return true;
-        if ('status' in item && item.status?.toLowerCase().includes(searchTermLower)) return true;
+        if ('price' in item && item.price?.toString().includes(searchTermNormalized)) return true;
+        if ('status' in item && normalizeString(item.status)?.includes(searchTermNormalized)) return true;
+
       }
       return false;
     });
