@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 
 import { MessageCircle } from 'lucide-react';
 
+import Avatar from '../../components/ui/avatar'
+
 import { Chats } from '~/lib/chats.types';
 
 import { useChat } from './context/chat-context';
@@ -33,7 +35,15 @@ export default function ChatItem({
       }`}
     >
       <div className="relative">
-        <MessageCircle className="h-12 w-12 rounded-full object-cover p-2 pl-4" />
+        {
+          chat.image ? (
+            <Avatar src={chat.image} alt={chat.name} />
+          ) : (
+            <MessageCircle className="h-12 w-12 rounded-full object-cover p-2 pl-4" />
+          )
+        }
+        {/* <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}
+
         {/* <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}
       </div>
       <div className="min-w-0 flex-1">
