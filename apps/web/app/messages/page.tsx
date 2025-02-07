@@ -1,26 +1,36 @@
-import ChatInbox from './components/chat-inbox';
-import ChatThread from './components/chat-thread';
 import { Suspense } from 'react';
-import { ChatProvider } from './components/context/chat-context';
-import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { getTeams } from '~/server/actions/team/team.action';
 
+import ChatInbox from './components/chat-inbox';
+import ChatThread from './components/chat-thread';
+import { ChatProvider } from './components/context/chat-context';
+
 export default async function MessagesPage() {
-  const { workspace: userWorkspace } = await loadUserWorkspace();
-  const userOrganization = await getOrganizationByUserId(userWorkspace.id ?? '');
-  const teams = await getTeams({ organizationIds: [userOrganization.id ?? ''], includeMembers: true });
+  const {
+    organization,
+    workspace: userWorkspace,
+    agency,
+  } = await loadUserWorkspace();
+  // Always bring the agency members and the organization data
+  // This because this data is always needed for the messages page and not changes frequently
+  const isAgency = typeof agency === 'object';
+  const agencyId = isAgency && agency ? agency.id : organization?.id;
+  const teams = await getTeams({
+    organizationIds: [agencyId ?? ''],
+    includeMembers: true,
+  });
 
   return (
-    <ChatProvider userId={userWorkspace.id ?? ''}> 
-      <div className="h-full flex border-t">
-        <div className="w-[380px] border-r flex flex-col bg-white">
+    <ChatProvider >
+      <div className="flex h-full border-t">
+        <div className="flex w-[380px] flex-col border-r bg-white">
           <Suspense fallback={<div>Loading...</div>}>
-            <ChatInbox userId={userWorkspace.id ?? ''} teams={teams}/>
+            <ChatInbox teams={teams} />
           </Suspense>
         </div>
-        <div className="flex-1 flex flex-col bg-white">
-
+        <div className="flex flex-1 flex-col bg-white">
           <Suspense fallback={<div>Loading...</div>}>
             <ChatThread teams={teams} userId={userWorkspace.id ?? ''} />
           </Suspense>

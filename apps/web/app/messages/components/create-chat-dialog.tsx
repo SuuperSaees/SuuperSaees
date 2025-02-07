@@ -28,15 +28,13 @@ import { Separator } from '@kit/ui/separator';
 
 import { Account } from '~/lib/account.types';
 import { Chats } from '~/lib/chats.types';
-import { User } from '~/lib/user.types';
 import {
   getClientMembersForOrganization,
   getClientsOrganizations,
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
 import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
-
-// Dialog to create a new chat
+import { Members } from '~/lib/members.types';
 
 // Dialog to create a new chat
 
@@ -50,7 +48,6 @@ const formSchema = z.object({
   }),
 });
 
-
 type FormValues = z.infer<typeof formSchema>;
 
 interface CreateChatDialogProps {
@@ -60,9 +57,11 @@ interface CreateChatDialogProps {
     { name: string; memberIds: string[] },
     unknown
   >;
-  agencyMembers: User.Response[];
-  agencyOrganization: Account.Type;
+  agencyMembers: Members.Member[];
+  agencyOrganization: Members.TeamResponse;
   clientOrganization?: Account.Type;
+
+
 }
 
 export default function CreateOrganizationsChatDialog({
@@ -87,6 +86,7 @@ export default function CreateOrganizationsChatDialog({
       memberIds: allMembers,
     });
   };
+  
 
   return (
     <Dialog>

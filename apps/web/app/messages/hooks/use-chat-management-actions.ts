@@ -112,7 +112,7 @@ export const useChatManagement = ({
         image: '',
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey });
+      void queryClient.invalidateQueries({ queryKey: ['chats'] });
     },
   });
 
