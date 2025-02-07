@@ -9,7 +9,7 @@ import { getTeams } from '~/server/actions/team/team.action';
 export default async function MessagesPage() {
   const { workspace: userWorkspace } = await loadUserWorkspace();
   const userOrganization = await getOrganizationByUserId(userWorkspace.id ?? '');
-  const teams = await getTeams({ organizationId: userOrganization.id ?? '', role: userWorkspace.role ?? '' });
+  const teams = await getTeams({ organizationIds: [userOrganization.id ?? ''], includeMembers: true });
 
   return (
     <ChatProvider userId={userWorkspace.id ?? ''}> 
