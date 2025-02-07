@@ -1,9 +1,9 @@
 import { BaseAction } from '../base-action';
 import { ChatMessagesController } from './controllers/chat-messages.controller';
 import { ChatMessages } from '~/lib/chat-messages.types';
-import { IChatMessageActions } from './chat-messages.interface';
+import { IChatMessagesActions } from './chat-messages.interface';
 
-export class ChatMessagesAction extends BaseAction implements IChatMessageActions {
+export class ChatMessagesAction extends BaseAction implements IChatMessagesActions {
   private controller: ChatMessagesController;
 
   constructor(baseUrl: string) {

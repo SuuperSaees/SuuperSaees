@@ -1,57 +1,55 @@
 import { BaseAction } from '../base-action';
-import { MembersController } from './controllers/chat-members.controller';
+import { ChatMembersController } from './controllers/chat-members.controller';
 import {
   AddMembersPayload,
-  AddMembersResponse,
-  GetMembersResponse,
-  MemberSettingsResponse,
-  RemoveMemberPayload,
-  RemoveMemberResponse,
-  UpdateMemberVisibilityPayload,
-  UpdateMemberVisibilityResponse,
+  IChatMembersActions
 } from './chat-members.interface';
 
-export class MembersAction extends BaseAction {
-  private controller: MembersController;
+import { ChatMembers } from '~/lib/chat-members.types';
+export class ChatMembersAction extends BaseAction implements IChatMembersActions {
+  private controller: ChatMembersController;
 
   constructor(baseUrl: string) {
     super(baseUrl);
-    this.controller = new MembersController(
+    this.controller = new ChatMembersController(
       this.baseUrl,
       this.client,
       this.adminClient,
     );
   }
 
-  async upsert(payload: AddMembersPayload): Promise<AddMembersResponse> {
-    return await this.controller.upsertMembers(payload);
+  async upsert(payload: AddMembersPayload): Promise<ChatMembers.TypeWithRelations[]> {
+    return await this.controller.upsert(payload);
   }
 
-  async list(chatId: string): Promise<GetMembersResponse[]> {
-    return await this.controller.getMembers(chatId);
+  async list(chatId: string): Promise<ChatMembers.TypeWithRelations[]> {
+    return await this.controller.list(chatId);
   }
 
   async get(
     chatId: string,
     userId: string,
-  ): Promise<MemberSettingsResponse> {
-    return await this.controller.getMemberSettings(chatId, userId);
+  ): Promise<ChatMembers.TypeWithRelations> {
+    return await this.controller.get(chatId, userId);
   }
 
   async delete(
-    payload: RemoveMemberPayload,
-  ): Promise<RemoveMemberResponse> {
-    return await this.controller.removeMember(payload);
+    chatId?: string,
+    userId?: string,
+  ): Promise<void> {
+    return await this.controller.delete(chatId, userId);
   }
+
 
   async update(
-    payload: UpdateMemberVisibilityPayload,
-  ): Promise<UpdateMemberVisibilityResponse> {
-    return await this.controller.updateMemberVisibility(payload);
+    payload: ChatMembers.Update,
+  ): Promise<ChatMembers.TypeWithRelations> {
+    return await this.controller.update(payload);
   }
+
 }
 
-export function createMembersAction(baseUrl: string) {
-  return new MembersAction(baseUrl);
+export function createChatMembersAction(baseUrl: string) {
+  return new ChatMembersAction(baseUrl);
 }
 

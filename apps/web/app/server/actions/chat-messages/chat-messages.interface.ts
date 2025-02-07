@@ -1,6 +1,6 @@
 import { ChatMessages } from '~/lib/chat-messages.types';
 
-export interface IChatMessageActions {
+export interface IChatMessagesActions {
   /**
    * Creates a new message in the chat
    * @param {ChatMessages.InsertWithRelations} payload - Data of the message to be sent

@@ -20,9 +20,9 @@ export class ChatMembersRepository {
   async upsert(
     chat_id: string,
     members: { user_id: string; type: string }[],
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<ChatMembers.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
-    
+
 
     const { data: existingMembers, error: fetchError } = await client
       .from('chat_members')
@@ -54,26 +54,38 @@ export class ChatMembersRepository {
 
     const membersToUpsert = members.filter(m => !usersToDelete.includes(m.user_id));
 
+    const upsertedMembers: ChatMembers.TypeWithRelations[] = [];
+
     await Promise.all(membersToUpsert.map(async (member) => {
-      const { error: upsertError } = await client
+      const { data: upsertedMember, error: upsertError} = await client
         .from('chat_members')
+
         .insert({
           chat_id,
           user_id: member.user_id,
           type: member.type,
         }
-      );
+      )
+      .select('*, user:accounts(email, settings:user_settings(name, picture_url))')
+      .single();
 
-
+      if (upsertedMembers.length > 0) {
+        upsertedMembers.push({
+          ...upsertedMember,
+          user: {
+            id: upsertedMember.user.id,
+            email: upsertedMember.user.email,
+            name: upsertedMember.user.settings?.name,
+            picture_url: upsertedMember.user.settings?.picture_url,
+          },
+        });
+      }
       if (upsertError) {
         throw new Error(`Error updating members: ${upsertError.message}`);
       }
     }));
 
-    return {
-      success: true,
-      message: `Members successfully synchronized for chat ${chat_id}.`,
-    };
+    return upsertedMembers;
   }
 
   // * GET REPOSITORIES

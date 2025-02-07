@@ -1,14 +1,12 @@
 'use server';
 import {
   AddMembersPayload,
-  RemoveMemberPayload,
-  UpdateMemberVisibilityPayload,
-
 } from './chat-members.interface';
-import { createMembersAction } from './chat-members';
+import { createChatMembersAction } from './chat-members';
+import { ChatMembers } from '~/lib/chat-members.types';
 
 function getMembersAction() {
-  return createMembersAction(process.env.NEXT_PUBLIC_SITE_URL as string);
+  return createChatMembersAction(process.env.NEXT_PUBLIC_SITE_URL as string);
 }
 
 export async function upsertMembers(payload: AddMembersPayload) {
@@ -23,12 +21,12 @@ export async function getMember(chatId: string, userId: string) {
   return await getMembersAction().get(chatId, userId);
 }
 
-export async function deleteMember(payload: RemoveMemberPayload) {
-  return await getMembersAction().delete(payload);
+export async function deleteMember(chatId?: string, userId?: string) {
+  return await getMembersAction().delete(chatId, userId);
 }
 
 export async function updateMember(
-  payload: UpdateMemberVisibilityPayload,
+  payload: ChatMembers.Update,
 ) {
   return await getMembersAction().update(payload);
 }

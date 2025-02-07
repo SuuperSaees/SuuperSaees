@@ -8,4 +8,5 @@ export namespace ChatMembers {
   export type TypeWithRelations = Database['public']['Tables']['chat_members']['Row'] & {
     user: User.Response;
   };
+  export type ChatRoleType = Database['public']['Enums']['chat_role_type'];
 }
