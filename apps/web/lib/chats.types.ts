@@ -9,6 +9,7 @@ export namespace Chats {
   export type Update = Database['public']['Tables']['chats']['Update'];
   export type TypeWithRelations = Type & {
     chat_members?: ChatMembers.Type[];
+    members?: ChatMembers.Type[];
     messages?: Message.Type[] | null;
     chat_messages?: ChatMessages.TypeWithRelations[];
 

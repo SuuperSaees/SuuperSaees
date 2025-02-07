@@ -142,7 +142,7 @@ export class ChatRepository {
       updated_at: chat.updated_at,
       deleted_on: chat.deleted_on,
       reference_id: chat.id,
-      chat_members: chat.chat_members?.map((member) => ({
+      members: chat.chat_members?.map((member) => ({
         chat_id: chatId,
         created_at: new Date().toISOString(),
         deleted_on: null,
@@ -202,10 +202,9 @@ export class ChatRepository {
     const { data, error } = await client
     .from('chats')
     .update(payload)
-    .eq('id', payload.id)
+    .eq('id', payload.id ?? '')
     .select()
     .single();
-
     if (error) {
       throw new Error(`Error updating chat ${payload.id}: ${error.message}`);
     }
