@@ -42,7 +42,7 @@ export class ChatRepository {
   // * GET REPOSITORIES
   async list(userId: string, chatIds?: string[]): Promise<Chats.Type[]> {
     const client = this.adminClient ?? this.client;
-    const chatList: Chats.Type[] = [];
+    let chatList: Chats.Type[] = [];
     const { data, error } = await client
     .from('chats')
     .select(`*`)
@@ -53,7 +53,8 @@ export class ChatRepository {
       throw new Error(`Error fetching chats: ${error.message}`);
     }
 
-    chatList.push(data as unknown as Chats.Type);  
+    chatList = chatList.concat(data as unknown as Chats.Type[]);  
+
 
     if (chatIds) {
       const { data: chatMembers, error: membersError } = await client
@@ -66,9 +67,8 @@ export class ChatRepository {
         throw new Error(`Error fetching chats as members: ${membersError.message}`);
       }
 
-      chatList.push(chatMembers as unknown as Chats.Type);
+      chatList = chatList.concat(chatMembers as unknown as Chats.Type[]);
     }
-
     return chatList;
 
   }
@@ -114,21 +114,21 @@ export class ChatRepository {
             temp_id,
             order_id,
             parent_id,
-            user:user_settings (
-              id,
-              name,
-              picture_url,
-              email:accounts(email)
-          )
+            user:accounts(email, user_settings(name, picture_url))
         )
       `,
       )
       .eq('id', chatId)
+      // is deleted_on null but for messages
+      .is('messages.deleted_on', null)
       .single();
 
 
     if (error) {
       throw new Error(`Error fetching chat ${chatId}: ${error.message}`);
+    }
+    if (!chat) {
+      throw new Error(`Chat ${chatId} not found`);
     }
 
     return {
@@ -153,23 +153,27 @@ export class ChatRepository {
         user_id: member.user_id,
         visibility: true
       })) || [],
-      messages: chat.messages.map((message) => ({
+      messages: chat?.messages?.map((message) => ({
         id: message.id,
         user_id: message.user_id,
         content: message.content,
         created_at: message.created_at,
         updated_at: message.updated_at,
         deleted_on: message.deleted_on,
+
         type: message.type,
         visibility: message.visibility,
         temp_id: message.temp_id,
         order_id: message.order_id,
         parent_id: message.parent_id,
         user: {
-          id: message.user?.[0]?.id,
-          name: message.user?.[0]?.name,
-          email: message.user?.[0]?.email?.[0]?.email,
-          picture_url: message.user?.[0]?.picture_url,
+          id: message.user_id,
+          name: message.user?.user_settings?.name ?? '',
+          email: message.user?.email ?? '',
+          picture_url: message.user?.user_settings?.picture_url ?? '',
+
+
+
         },
       })),
     } 

@@ -70,7 +70,7 @@ export class ChatMessagesRepository {
   }): Promise<void> {
     const client = this.adminClient ?? this.client;
     const baseQuery = client
-      .from('chat_messages')
+      .from('messages')
       .update({ deleted_on: new Date().toISOString() });
 
     try {

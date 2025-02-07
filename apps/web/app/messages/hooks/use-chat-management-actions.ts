@@ -6,16 +6,16 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import { Chats } from '~/lib/chats.types';
 import { Message } from '~/lib/message.types';
 import { upsertMembers } from '~/server/actions/chat-members/chat-members.action';
 import {
   createChat,
   deleteChat,
-  getChatById,
+  getChat,
   getChats,
   updateChat,
 } from '~/server/actions/chats/chats.action';
-import { GetChatByIdResponse } from '~/server/actions/chats/chats.interface';
 
 /**
  * Props interface for useChatManagement hook
@@ -36,7 +36,7 @@ interface ChatManagementActionsProps {
       ) => void);
   userId: string;
   queryKey?: string[];
-  initialChat?: GetChatByIdResponse;
+  initialChat?: Chats.TypeWithRelations;
 }
 
 /**
@@ -104,14 +104,13 @@ export const useChatManagement = ({
       createChat({
         name,
         user_id: userId,
-        members: memberIds.map((memberId) => ({
+        chat_members: memberIds.map((memberId) => ({
+          chat_id: '',
           user_id: memberId,
-
-          role: 'guest',
+          type: 'guest',
         })),
         visibility: true,
         image: '',
-        role: ['owner'],
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
@@ -128,7 +127,7 @@ export const useChatManagement = ({
         chat_id: chatId,
         members: members.map((member) => ({
           user_id: member,
-          role: 'guest',
+          type: 'guest',
         })),
       }),
   });
@@ -140,7 +139,7 @@ export const useChatManagement = ({
   const chatsQuery = useQuery({
     queryKey: ['chats'],
     queryFn: async () => {
-      const response = await getChats();
+      const response = await getChats(userId);
 
       if (!response) throw new Error('Failed to fetch chats');
 
@@ -155,7 +154,7 @@ export const useChatManagement = ({
   const chatByIdQuery = useQuery({
     queryKey: queryKey,
     queryFn: async () => {
-      const chat = await getChatById(chatId ?? '');
+      const chat = await getChat(chatId ?? '');
       setMessages(chat?.messages ?? []);
       return chat;
     },
