@@ -15,7 +15,7 @@ export interface IChatAction {
    * Retrieves all chats accessible to the user
    * @returns {Promise<GetChatsResponse[]>} - List of chats the user can access
    */
-  list(): Promise<Chats.Type[]>;
+  list(userId: string): Promise<Chats.TypeWithRelations[]>;
 
 
   /**

@@ -47,14 +47,13 @@ export class ChatRepository {
     .eq('user_id', userId)
     .is('deleted_on', null);
 
-
     if (error) {
       throw new Error(`Error fetching chats: ${error.message}`);
     }
 
     return data as Chats.Type[];
   }
-
+ 
   async get(chatId: string): Promise<Chats.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
 
@@ -73,7 +72,15 @@ export class ChatRepository {
         deleted_on,
         chat_members (
           user_id,
-          type
+          type,
+          account:accounts!inner (
+            email,
+            user_settings (
+              name,
+              picture_url
+            )
+          )
+
         ),
         messages (
             id,
@@ -93,30 +100,15 @@ export class ChatRepository {
               picture_url,
               email:accounts(email)
           )
-          *,
-          user:accounts(id, name, email, picture_url)
         )
       `,
       )
-
       .eq('id', chatId)
       .single();
 
 
     if (error) {
       throw new Error(`Error fetching chat ${chatId}: ${error.message}`);
-    }
-
-    const membersIds = chat.chat_members?.map((member) => member.user_id as string);
-
-    const { data: members, error: membersError } = await client
-      .from('user_settings')
-      .select('user_id, name, picture_url, email:accounts(email)')
-      .in('user_id', membersIds);
-
-
-    if (membersError) {
-      throw new Error(`Error fetching members: ${membersError.message}`);
     }
 
     return {
@@ -141,26 +133,55 @@ export class ChatRepository {
         user_id: member.user_id,
         visibility: true
       })) || [],
-      messages: chat.messages || [],
+      messages: chat.messages.map((message) => ({
+        id: message.id,
+        user_id: message.user_id,
+        content: message.content,
+        created_at: message.created_at,
+        updated_at: message.updated_at,
+        deleted_on: message.deleted_on,
+        type: message.type,
+        visibility: message.visibility,
+        temp_id: message.temp_id,
+        order_id: message.order_id,
+        parent_id: message.parent_id,
+        user: {
+          id: message.user?.[0]?.id,
+          name: message.user?.[0]?.name,
+          email: message.user?.[0]?.email?.[0]?.email,
+          picture_url: message.user?.[0]?.picture_url,
+        },
+      })),
     } 
+
   }
+
+
 
   // * DELETE REPOSITORIES
   async delete(chatId: string): Promise<void> {
     const client = this.adminClient ?? this.client;
-    const { error } = await client.from('chats').delete().eq('id', chatId);
+    const { error } = await client
+    .from('chats')
+    .update({ deleted_on: new Date().toISOString() })
+    .eq('id', chatId);
 
     if (error) {
       throw new Error(`Error deleting chat ${chatId}: ${error.message}`);
     }
 
-    return { success: true, message: `Chat ${chatId} successfully deleted.` };
+    return;
   }
 
   // * UPDATE REPOSITORIES
   async update(payload: Chats.Update): Promise<Chats.Type> {
     const client = this.adminClient ?? this.client;
-    const { data, error } = await client.from('chats').update(payload).eq('id', payload.id).select().single();
+    const { data, error } = await client
+    .from('chats')
+    .update(payload)
+    .eq('id', payload.id)
+    .select()
+    .single();
 
     if (error) {
       throw new Error(`Error updating chat ${payload.id}: ${error.message}`);

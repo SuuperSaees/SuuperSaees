@@ -1,8 +1,9 @@
 import { Chats } from '~/lib/chats.types';
 import { BaseAction } from '../base-action';
 import { ChatController } from './controllers/chats.controller';
+import { IChatAction } from './chats.interface';
 
-export class ChatAction extends BaseAction {
+export class ChatAction extends BaseAction implements IChatAction {
   private controller: ChatController;
 
   constructor(baseUrl: string) {
