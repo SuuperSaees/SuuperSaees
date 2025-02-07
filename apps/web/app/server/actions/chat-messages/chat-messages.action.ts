@@ -15,9 +15,10 @@ export async function getMessages(chatId: string) {
   return await getMessagesAction().list(chatId);
 }
 
-export async function deleteMessage(chatId?: string, messageId?: string) {
+export async function deleteMessage({chatId, messageId}: {chatId?: string, messageId?: string}) {
   return await getMessagesAction().delete(chatId, messageId);
 }
+
 
 export async function updateMessage(
   payload: ChatMessages.Update,
