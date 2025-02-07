@@ -2,7 +2,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { Members } from '~/lib/members.types';
 import { GetTeamsOptions } from '../team.interface';
-
 export class TeamRepository {
   constructor(
     private readonly client: SupabaseClient<Database>,
@@ -10,13 +9,68 @@ export class TeamRepository {
 
   ) {}
 
-  async getTeams({ organizationIds, includeMembers }: GetTeamsOptions): Promise<Members.TeamResponse> {
-    // YOUR TABLE HERE
+  async getTeams({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
     const client = this.adminClient ?? this.client;
-    const agencyRoles = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
-    // const clientRoles = new Set(['client_admin', 'client_member', 'client_guest']);
+
+    if (!organizationIds.length && !includeAgency) {
+      throw new Error('No organization ids or agency requested');
+    }
+
     const resultMembers: Members.TeamResponse = {}
 
+    // get the agency if organizationIds is empty and includeAgency is true
+    if (includeAgency && !organizationIds.length) {
+      // If the user is not logged in, return an empty object
+      const user = (await this.client.auth.getUser()).data;
+
+      if (!user) {
+        return resultMembers;
+      }
+
+      const { data: getAccountInfo, error: getAccountInfoError } = await this.client
+      .from('accounts_memberships')
+      .select('account_id, account_role')
+      .eq('user_id', user?.user?.id ?? '')
+
+      .or('account_role.eq.client_owner,account_role.eq.client_member,account_role.eq.client_guest')
+      .single();
+
+      if (getAccountInfoError) {
+        return resultMembers;
+      }
+
+      const { data: getClientInfo, error: getClientInfoError } = await this.client
+      .from('clients')
+      .select('agency_id')
+      .eq('organization_client_id', getAccountInfo.account_id)
+      .single();
+
+      if (getClientInfoError) {
+        return resultMembers;
+      }
+
+      const { data: getAgencyInfo, error: getAgencyInfoError } = await this.client
+      .from('accounts')
+      .select('id, name, organization_settings(value)')
+      .eq('id', getClientInfo.agency_id)
+      .eq('is_personal_account', false)
+      .eq('organization_settings.key', 'logo_url')
+      .single();
+
+      if (getAgencyInfoError) {
+        return resultMembers;
+      }
+
+      resultMembers[getClientInfo.agency_id]  = {
+        id: getAgencyInfo.id,
+        name: getAgencyInfo.name,
+        picture_url: getAgencyInfo.organization_settings?.[0]?.value ?? '',
+        is_agency: true,
+      }
+    }
+
+    // get the organizations if organizationIds is not empty and includeAgency is false
+    const agencyRoles = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
 
     for (const organizationId of organizationIds) {
       const { data: organizationSettings } = await client
@@ -72,10 +126,6 @@ export class TeamRepository {
       }
       
     }
-
     return resultMembers;
-
   }
-
-
 }

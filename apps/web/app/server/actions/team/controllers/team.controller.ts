@@ -17,12 +17,14 @@ export class TeamController
         this.adminClient = adminClient;
     }
 
-  async getTeams({ organizationIds, includeMembers }: GetTeamsOptions): Promise<Members.TeamResponse> {
+  async getTeams({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
     try {
         const teamRepository = new TeamRepository(this.client, this.adminClient);
+
         const teamService = new TeamService(teamRepository);
 
-      return await teamService.getTeams({ organizationIds, includeMembers });
+      return await teamService.getTeams({ organizationIds, includeMembers, includeAgency });
+
     } catch (error) {
       console.error(error);
       throw error;
