@@ -1,16 +1,17 @@
 'use client';
 
-import { useEditor, EditorContent, Editor } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Send, Upload, Paperclip } from 'lucide-react';
+import { Send } from 'lucide-react';
+// import { Upload, Paperclip } from 'lucide-react';
 import { Button } from '@kit/ui/button';
 import { toast } from 'sonner';
-import FileUploader from './file-uploader';
+// import FileUploader from './file-uploader';
 import { Spinner } from '@kit/ui/spinner';
 
 interface RichTextEditorProps {
-  onComplete: (content: string, fileIds?: string[]) => Promise<void>;
+  onComplete: (content: string) => Promise<void>; // , fileIds?: string[]
   showToolbar?: boolean;
   isEditable?: boolean;
   placeholder?: string;
@@ -25,10 +26,10 @@ const RichTextEditor = ({
   className = '',
 }: RichTextEditorProps) => {
   const [isSending, setIsSending] = useState(false);
-  const [fileIdsList, setFileIdsList] = useState<string[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [fileUploadStatus, setFileUploadStatus] = useState<Record<string, { status: 'uploading' | 'completed' | 'error', id?: string }>>({});
-  const [thereAreFilesUploaded, setThereAreFilesUploaded] = useState(false);
+  // const [fileIdsList, setFileIdsList] = useState<string[]>([]);
+  // const [isDragging, setIsDragging] = useState(false);
+  // const [fileUploadStatus, setFileUploadStatus] = useState<Record<string, { status: 'uploading' | 'completed' | 'error', id?: string }>>({});
+  // const [thereAreFilesUploaded, setThereAreFilesUploaded] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -50,21 +51,23 @@ const RichTextEditor = ({
     if (!editor) return;
 
     const content = editor.getHTML();
-    if (content === '<p></p>' && fileIdsList.length === 0) return;
+    if (content === '<p></p>') return;
+    // if (content === '<p></p>' && fileIdsList.length === 0) return;
 
     try {
       setIsSending(true);
-      await onComplete(content, fileIdsList.length > 0 ? fileIdsList : undefined);
+      await onComplete(content);
+      // await onComplete(content, fileIdsList.length > 0 ? fileIdsList : undefined);
       editor.commands.setContent('');
-      setFileIdsList([]);
-      setFileUploadStatus({});
-      setThereAreFilesUploaded(false);
+      // setFileIdsList([]);
+      // setFileUploadStatus({});
+      // setThereAreFilesUploaded(false);
     } catch (error) {
       toast.error('Failed to send message');
     } finally {
       setIsSending(false);
     }
-  }, [editor, fileIdsList, onComplete]);
+  }, [editor, onComplete]); // [editor, fileIdsList, onComplete]
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -79,80 +82,82 @@ const RichTextEditor = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [sendContent]);
 
-  const fileUploaderRef = useRef<HTMLInputElement>(null);
+  // File upload related code
+  // const fileUploaderRef = useRef<HTMLInputElement>(null);
 
-  const handleUploadClick = () => {
-    fileUploaderRef.current?.click();
-  };
+  // const handleUploadClick = () => {
+  //   fileUploaderRef.current?.click();
+  // };
 
-  const handleFileIdsChange = (fileIds: string[]) => {
-    setFileIdsList((prevFileIds) => [...prevFileIds, ...fileIds]);
-  };
+  // const handleFileIdsChange = (fileIds: string[]) => {
+  //   setFileIdsList((prevFileIds) => [...prevFileIds, ...fileIds]);
+  // };
 
   // File upload status tracking
-  const updateFileUploadStatus = (
-    file: File,
-    status: 'uploading' | 'completed' | 'error',
-    serverId?: string,
-  ) => {
-    setFileUploadStatus((prev) => ({
-      ...prev,
-      [file.name]: {
-        status,
-        id: serverId,
-      },
-    }));
-  };
+  // const updateFileUploadStatus = (
+  //   file: File,
+  //   status: 'uploading' | 'completed' | 'error',
+  //   serverId?: string,
+  // ) => {
+  //   setFileUploadStatus((prev) => ({
+  //     ...prev,
+  //     [file.name]: {
+  //       status,
+  //       id: serverId,
+  //     },
+  //   }));
+  // };
 
-  const areAllFilesUploaded = () => {
-    return Object.values(fileUploadStatus).every(
-      (file) => file.status === 'completed',
-    );
-  };
+  // const areAllFilesUploaded = () => {
+  //   return Object.values(fileUploadStatus).every(
+  //     (file) => file.status === 'completed',
+  //   );
+  // };
 
   // Drag and drop handlers
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
+  // const handleDragOver = (e: React.DragEvent) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   setIsDragging(true);
+  // };
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
+  // const handleDragLeave = (e: React.DragEvent) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   setIsDragging(false);
+  // };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
+  // const handleDrop = (e: React.DragEvent) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   setIsDragging(false);
 
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0 && fileUploaderRef.current) {
-      const dataTransfer = new DataTransfer();
-      files.forEach(file => dataTransfer.items.add(file));
-      fileUploaderRef.current.files = dataTransfer.files;
-      const event = new Event('change', { bubbles: true });
-      fileUploaderRef.current.dispatchEvent(event);
-    }
-  };
+  //   const files = Array.from(e.dataTransfer.files);
+  //   if (files.length > 0 && fileUploaderRef.current) {
+  //     const dataTransfer = new DataTransfer();
+  //     files.forEach(file => dataTransfer.items.add(file));
+  //     fileUploaderRef.current.files = dataTransfer.files;
+  //     const event = new Event('change', { bubbles: true });
+  //     fileUploaderRef.current.dispatchEvent(event);
+  //   }
+  // };
 
   return (
     <div
       className={`relative grid w-full gap-1 rounded-lg border bg-white p-4 ${className}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      // onDragOver={handleDragOver}
+      // onDragLeave={handleDragLeave}
+      // onDrop={handleDrop}
     >
-      {isDragging && (
+      {/* Drag and drop overlay */}
+      {/* {isDragging && (
         <div className="absolute inset-0 z-50 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50">
           <div className="text-center">
             <Paperclip className="mx-auto h-12 w-12 text-gray-400" />
             <p className="mt-2 text-sm text-gray-600">Drop files to attach</p>
           </div>
         </div>
-      )}
+      )} */}
 
       <div className="min-h-[100px] max-h-[200px] overflow-y-auto">
         {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused && (
@@ -165,7 +170,8 @@ const RichTextEditor = ({
 
       <div className="flex items-center justify-between pt-2 border-t">
         <div className="flex items-center gap-2">
-          {showToolbar && (
+          {/* File upload button */}
+          {/* {showToolbar && (
             <>
               <Button
                 variant="ghost"
@@ -183,16 +189,17 @@ const RichTextEditor = ({
                 className="hidden"
               />
             </>
-          )}
+          )} */}
         </div>
 
         <Button
           onClick={sendContent}
-          disabled={
-            isSending ||
-            (!areAllFilesUploaded() && thereAreFilesUploaded) ||
-            (editor?.getHTML().trim() === '<p></p>' && fileIdsList.length === 0)
-          }
+          disabled={isSending || editor?.getHTML().trim() === '<p></p>'}
+          // disabled={
+          //   isSending ||
+          //   (!areAllFilesUploaded() && thereAreFilesUploaded) ||
+          //   (editor?.getHTML().trim() === '<p></p>' && fileIdsList.length === 0)
+          // }
         >
           {isSending ? (
             <Spinner className="h-4 w-4" />
@@ -203,7 +210,7 @@ const RichTextEditor = ({
       </div>
 
       {/* File preview area */}
-      {fileIdsList.length > 0 && (
+      {/* {fileIdsList.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
           {Object.entries(fileUploadStatus).map(([fileName, status]) => (
             <div
@@ -217,7 +224,7 @@ const RichTextEditor = ({
             </div>
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 };
