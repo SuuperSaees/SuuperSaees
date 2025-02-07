@@ -4,9 +4,8 @@ import { Database } from '~/lib/database.types';
 import { ChatMembers } from '~/lib/chat-members.types';
 
 export class ChatMembersRepository {
-  private client: SupabaseClient;
-  private adminClient?: SupabaseClient;
-
+  private client: SupabaseClient<Database>;
+  private adminClient?: SupabaseClient<Database>;
 
   constructor(
     client: SupabaseClient<Database>,

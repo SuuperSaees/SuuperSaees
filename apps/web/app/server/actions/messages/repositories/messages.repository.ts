@@ -4,8 +4,8 @@ import { Database } from '~/lib/database.types';
 import { Message } from '~/lib/message.types';
 
 export class MessagesRepository {
-  private client: SupabaseClient;
-  private adminClient?: SupabaseClient;
+  private client: SupabaseClient<Database>;
+  private adminClient?: SupabaseClient<Database>;
 
   constructor(
     client: SupabaseClient<Database>,

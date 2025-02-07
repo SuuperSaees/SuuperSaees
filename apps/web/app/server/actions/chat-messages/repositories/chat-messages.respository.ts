@@ -4,8 +4,8 @@ import { Database } from '~/lib/database.types';
 import { ChatMessages } from '~/lib/chat-messages.types';
 
 export class ChatMessagesRepository {
-  private client: SupabaseClient;
-  private adminClient?: SupabaseClient;
+  private client: SupabaseClient<Database>;
+  private adminClient?: SupabaseClient<Database>;
 
   constructor(
     client: SupabaseClient<Database>,
