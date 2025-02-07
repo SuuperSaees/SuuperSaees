@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
+import { ChatMembers } from '~/lib/chat-members.types';
 
 export class ChatMembersRepository {
   private client: SupabaseClient;
@@ -76,11 +77,11 @@ export class ChatMembersRepository {
   }
 
   // * GET REPOSITORIES
-  async list(chatId: string): Promise<GetMembersResponse[]> {
+  async list(chatId: string): Promise<ChatMembers.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
       .from('chat_members')
-      .select('user_id, role, settings, created_at')
+      .select(`*, user:accounts(email, settings:user_settings(name, picture_url))`)
       .eq('chat_id', chatId);
 
     if (error) {
@@ -89,22 +90,28 @@ export class ChatMembersRepository {
       );
     }
 
-    return (data || []).map((member) => ({
-      user_id: member.user_id,
-      role: member.role as ChatRoleType,
-      settings: member.settings || {},
-      joined_at: member.created_at,
-    })) as GetMembersResponse[];
+    const members = data.map((member: ChatMembers.TypeWithRelations) => ({
+      ...member,
+      user: {
+        id: member.user.id,
+        email: member.user.email,
+        name: member.user.settings?.name,
+        picture_url: member.user.settings?.picture_url,
+      },
+    })) as ChatMembers.TypeWithRelations[];
+
+
+    return members;
   }
 
   async get(
     chatId: string,
     userId: string,
-  ): Promise<MemberSettingsResponse> {
+  ): Promise<ChatMembers.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
       .from('chat_members')
-      .select('user_id, chat_id, settings')
+      .select(`*, user:accounts(email, settings:user_settings(name, picture_url))`)
       .eq('chat_id', chatId)
       .eq('user_id', userId)
       .single();
@@ -121,11 +128,16 @@ export class ChatMembersRepository {
       );
     }
 
-    return {
-      user_id: data.user_id,
-      chat_id: data.chat_id,
-      settings: data.settings,
-    };
+    const member = {
+      ...data,
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.settings?.name,
+        picture_url: data.user.settings?.picture_url,
+      },
+    }
+    return member as ChatMembers.TypeWithRelations;
   }
 
   // * DELETE REPOSITORIES
@@ -137,32 +149,59 @@ export class ChatMembersRepository {
     user_id?: string;
   }): Promise<void> {
     const client = this.adminClient ?? this.client;
-    const { error } = await client
+    const baseQuery = client
       .from('chat_members')
-      .delete()
-      .eq('chat_id', chat_id)
-      .eq('user_id', user_id);
+      .update({ deleted_on: new Date().toISOString() });
 
-    if (error) {
-      throw new Error(
-        `Error removing member ${user_id} from chat ${chat_id}: ${error.message}`,
-      );
+    try {
+      if (chat_id && user_id) {
+        const { error } = await baseQuery
+          .eq('chat_id', chat_id)
+          .eq('user_id', user_id);
+          
+        if (error) throw error;
+        return;
+      }
+
+      if (chat_id) {
+        const { error } = await baseQuery.eq('chat_id', chat_id);
+        if (error) throw error;
+        return;
+      }
+
+      if (user_id) {
+        const { error } = await baseQuery.eq('user_id', user_id);
+        if (error) throw error;
+        return;
+      }
+    } catch (error: unknown) {
+      const context = chat_id && user_id
+        ? `member ${user_id} from chat ${chat_id}`
+        : chat_id
+
+          ? `members from chat ${chat_id}`
+          : `member ${user_id}`;
+
+      throw new Error(`Error removing ${context}: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }
   }
 
   // * UPDATE REPOSITORIES
   async update(
-    payload: UpdateMemberSettingsPayload,
-  ): Promise<UpdateMemberSettingsResponse> {
+    payload: ChatMembers.Update,
+  ): Promise<ChatMembers.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
-    const { chat_id, user_id, settings } = payload;
+    const { chat_id, user_id } = payload;
 
-    const { error } = await client
+
+    const { data, error } = await client
       .from('chat_members')
-      .update({ settings })
+      .update(payload)
       .eq('chat_id', chat_id)
-      .eq('user_id', user_id);
+      .eq('user_id', user_id)
+      .select('*, user:accounts(email, settings:user_settings(name, picture_url))')
+      .single();
+
 
     if (error) {
       throw new Error(
@@ -170,9 +209,16 @@ export class ChatMembersRepository {
       );
     }
 
-    return {
-      success: true,
-      message: `Settings for member ${user_id} successfully updated in chat ${chat_id}.`,
-    };
+    const member = {
+      ...data,
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.settings?.name,
+        picture_url: data.user.settings?.picture_url,
+      },
+    }
+
+    return member as ChatMembers.TypeWithRelations;
   }
 }

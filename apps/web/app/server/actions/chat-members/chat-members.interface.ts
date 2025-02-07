@@ -1,5 +1,3 @@
-import { ChatRoleType } from '../chats/middleware/validate_chat_role';
-
 export interface AddMembersPayload {
   chat_id: string;
   members: {
