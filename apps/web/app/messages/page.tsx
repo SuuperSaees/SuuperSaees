@@ -10,10 +10,10 @@ import { ChatProvider } from './components/context/chat-context';
 export default async function MessagesPage() {
   const {
     organization,
-    workspace: userWorkspace,
     agency,
   } = await loadUserWorkspace();
   // Always bring the agency members and the organization data
+
   // This because this data is always needed for the messages page and not changes frequently
   const isAgency = typeof agency === 'object';
   const agencyId = isAgency && agency ? agency.id : organization?.id;
@@ -32,10 +32,11 @@ export default async function MessagesPage() {
         </div>
         <div className="flex flex-1 flex-col bg-white">
           <Suspense fallback={<div>Loading...</div>}>
-            <ChatThread teams={teams} userId={userWorkspace.id ?? ''} />
+            <ChatThread teams={teams} />
           </Suspense>
         </div>
       </div>
     </ChatProvider>
+
   );
 }
