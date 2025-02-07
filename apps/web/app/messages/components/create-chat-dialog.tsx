@@ -28,13 +28,15 @@ import { Separator } from '@kit/ui/separator';
 
 import { Account } from '~/lib/account.types';
 import { Chats } from '~/lib/chats.types';
+import { Members } from '~/lib/members.types';
 import {
   getClientMembersForOrganization,
   getClientsOrganizations,
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
 import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
-import { Members } from '~/lib/members.types';
+
+// Dialog to create a new chat
 
 // Dialog to create a new chat
 
@@ -58,10 +60,8 @@ interface CreateChatDialogProps {
     unknown
   >;
   agencyMembers: Members.Member[];
-  agencyOrganization: Members.TeamResponse;
+  agencyOrganization: Members.Organization;
   clientOrganization?: Account.Type;
-
-
 }
 
 export default function CreateOrganizationsChatDialog({
@@ -86,7 +86,6 @@ export default function CreateOrganizationsChatDialog({
       memberIds: allMembers,
     });
   };
-  
 
   return (
     <Dialog>
@@ -95,11 +94,10 @@ export default function CreateOrganizationsChatDialog({
           <SquarePen className="cursor-pointer text-gray-600" />
         </Button>
       </DialogTrigger>
-      <DialogContent className=" max-w-lg">
+      <DialogContent className="max-w-lg">
         <DialogTitle className="text-xl font-bold">
           Create a new chat
         </DialogTitle>
-
 
         <Separator />
         <Form {...form}>
@@ -110,7 +108,6 @@ export default function CreateOrganizationsChatDialog({
             <FormField
               control={form.control}
               name="name"
-
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-semibold text-gray-600">
@@ -161,7 +158,6 @@ export default function CreateOrganizationsChatDialog({
                       schema={z.object({ members: z.array(z.string()) })}
                       defaultOrganization={agencyOrganization}
                       defaultMembers={agencyMembers}
-
                     />
                   </FormControl>
                   <FormMessage />
@@ -182,7 +178,6 @@ export default function CreateOrganizationsChatDialog({
                       schema={z.object({ members: z.array(z.string()) })}
                       fetchOrganizations={getClientsOrganizations}
                       fetchMembers={getClientMembersForOrganization}
-
                     />
                   </FormControl>
                   <FormMessage />

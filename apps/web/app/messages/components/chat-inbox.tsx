@@ -1,14 +1,18 @@
 'use client';
 
-import ChatSearchHeader from "./chat-search-header";
-import ChatList from "./chat-list";
-import { Members } from "~/lib/members.types";
+import { Members } from '~/lib/members.types';
 
-export default function ChatInbox({ teams }: { teams: Members.TeamResponse }) {  
+import ChatList from './chat-list';
+import ChatSearchHeader from './chat-search-header';
+
+export default function ChatInbox({
+  agencyTeam,
+}: {
+  agencyTeam: Members.Organization;
+}) {
   return (
-    <div className="h-full flex flex-col">
-      <ChatSearchHeader teams={teams} />
-
+    <div className="flex h-full flex-col">
+      <ChatSearchHeader agencyTeam={agencyTeam} />
       <ChatList />
     </div>
   );

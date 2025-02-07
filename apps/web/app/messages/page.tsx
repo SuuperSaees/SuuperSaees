@@ -6,6 +6,7 @@ import { getTeams } from '~/server/actions/team/team.action';
 import ChatInbox from './components/chat-inbox';
 import ChatThread from './components/chat-thread';
 import { ChatProvider } from './components/context/chat-context';
+import { Members } from '~/lib/members.types';
 
 export default async function MessagesPage() {
   const {
@@ -22,20 +23,28 @@ export default async function MessagesPage() {
     includeMembers: true,
   });
 
+  const agencyTeam: Members.Organization | undefined = teams[agencyId ?? ''];
+
+  if (!agencyTeam) {
+    console.error('No agency team found');
+    return null
+  }
   return (
     <ChatProvider >
       <div className="flex h-full border-t">
+
         <div className="flex w-[380px] flex-col border-r bg-white">
           <Suspense fallback={<div>Loading...</div>}>
-            <ChatInbox teams={teams} />
+            <ChatInbox agencyTeam={agencyTeam} />
           </Suspense>
         </div>
         <div className="flex flex-1 flex-col bg-white">
           <Suspense fallback={<div>Loading...</div>}>
-            <ChatThread teams={teams} />
+            <ChatThread agencyTeam={agencyTeam} />
           </Suspense>
         </div>
       </div>
+
     </ChatProvider>
 
   );

@@ -17,7 +17,7 @@ import { useChat } from './context/chat-context';
 import MessageList from './message-list';
 import RichTextEditor from './rich-text-editor';
 
-export default function ChatThread({ teams }: { teams: Members.TeamResponse }) {
+export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organization }) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const {
     user,
@@ -60,6 +60,7 @@ export default function ChatThread({ teams }: { teams: Members.TeamResponse }) {
 
   const activeChatDataName = { ...activeChat }.name;
   const activeChatDataId = { ...activeChat }.id;
+  
 
   return (
     <div className="flex h-full flex-col">
@@ -77,10 +78,11 @@ export default function ChatThread({ teams }: { teams: Members.TeamResponse }) {
         </div>
         <div className="flex items-center gap-2">
           <ChatMembersSelector
-            teams={[]}
+            agencyTeam={agencyTeam}
             selectedMembers={
               chatById?.members?.map((m: { id: string }) => m.id) ?? []
             }
+
             onMembersUpdate={handleMembersUpdate}
             isLoading={isLoading}
           />

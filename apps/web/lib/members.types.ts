@@ -8,7 +8,10 @@ export namespace Members {
   export type Organization = {
     id: string;
     name: string;
-    logo_url: string;
+    logo_url?: string;
+    picture_url?: string;
+    members?: Member[];
+    is_agency?: boolean;
   }
 
   export type Member = {

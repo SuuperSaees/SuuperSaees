@@ -2,8 +2,6 @@
 
 import { useTranslation } from 'react-i18next';
 
-import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
-
 import { Members } from '~/lib/members.types';
 
 // import { useRouter } from 'next/navigation';
@@ -11,21 +9,19 @@ import { useChat } from './context/chat-context';
 import CreateOrganizationsChatDialog from './create-chat-dialog';
 
 export default function ChatSearchHeader({
-  teams,
+  agencyTeam,
 }: {
-  teams: Members.TeamResponse;
+  agencyTeam: Members.Organization;
 }) {
   // const router = useRouter();
   const { t } = useTranslation('chats');
   const { createChatMutation } = useChat();
-  const { organization } = useUserWorkspace(); // replace with agency
-  
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('Searching:', e.target.value);
   };
-  const agencyOrganization = organization.id in teams ? teams[organization.id] : null;
-  const agencyMembers = agencyOrganization?.members ?? [];
-
+  const agencyOrganization = agencyTeam;
+  const agencyMembers = agencyTeam.members ?? [];
 
   return (
     <div className="border-b p-4">
