@@ -93,8 +93,10 @@ export class ChatRepository {
         chat_members (
           user_id,
           type,
-          account:accounts!inner (
+          account:accounts(
             email,
+            name,
+            picture_url,
             user_settings (
               name,
               picture_url
@@ -147,11 +149,16 @@ export class ChatRepository {
         created_at: new Date().toISOString(),
         deleted_on: null,
         id: member.user_id,
+        name: member.account?.user_settings?.name ?? member.account?.name ?? '',
+        picture_url: member.account?.user_settings?.picture_url ?? member.account?.picture_url ?? '',
+        email: member.account?.email ?? '',
         settings: {},
         type: member.type,
         updated_at: new Date().toISOString(),
+
         user_id: member.user_id,
         visibility: true
+
       })) || [],
       messages: chat?.messages?.map((message) => ({
         id: message.id,
@@ -171,9 +178,6 @@ export class ChatRepository {
           name: message.user?.user_settings?.name ?? '',
           email: message.user?.email ?? '',
           picture_url: message.user?.user_settings?.picture_url ?? '',
-
-
-
         },
       })),
     } 
