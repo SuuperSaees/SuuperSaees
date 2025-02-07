@@ -12,11 +12,11 @@ export default async function MessagesPage() {
   const teams = await getTeams({ organizationId: userOrganization.id ?? '', role: userWorkspace.role ?? '' });
 
   return (
-    <ChatProvider userId={userWorkspace.id ?? ''}>
+    <ChatProvider userId={userWorkspace.id ?? ''}> 
       <div className="h-full flex border-t">
         <div className="w-[380px] border-r flex flex-col bg-white">
           <Suspense fallback={<div>Loading...</div>}>
-            <ChatInbox userId={userWorkspace.id ?? ''}/>
+            <ChatInbox userId={userWorkspace.id ?? ''} teams={teams}/>
           </Suspense>
         </div>
         <div className="flex-1 flex flex-col bg-white">

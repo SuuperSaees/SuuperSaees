@@ -118,7 +118,7 @@ export default function CheckboxCombobox<
                       </button>
                     )}
                   </PopoverTrigger>
-                  <PopoverContent className="flex w-[300px] flex-col p-2">
+                  <PopoverContent className="flex w-[300px] flex-col p-4">
                     <Input
                       placeholder="Search..."
                       value={searchTerm}

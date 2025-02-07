@@ -1,89 +1,85 @@
 'use client';
 
 import { Members } from '~/lib/members.types';
-import CheckboxCombobox, { CustomItemProps, Option } from '~/components/ui/checkbox-combobox';
-import { z } from 'zod';
-import AvatarDisplayer from '~/orders/[id]/components/ui/avatar-displayer';
 
-const CustomUserItem: React.FC<
-  CustomItemProps<
-    Option & {
-      picture_url?: string | null;
-    }
-  >
-> = ({ option }) => (
-  <div className="flex items-center space-x-2">
-    <AvatarDisplayer
-      className="font-normal"
-      pictureUrl={option?.picture_url ?? null}
-      displayName={option.label}
-    />
-    <span>{option.label}</span>
-  </div>
-);
+import OrganizationsMembersDropdownMenu from './organizations-members-dropdown-menu';
+// import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface ChatMembersSelectorProps {
   teams: Members.Type;
   selectedMembers: string[];
-  onMembersUpdate: (memberIds: string[]) => void;
+  onMembersUpdate: (userIds: string[]) => Promise<void>;
   isLoading?: boolean;
 }
 
-const membersSchema = z.object({
-  members: z.array(z.string()),
-});
-
-export default function ChatMembersSelector({ 
-  teams, 
-  selectedMembers, 
+export default function ChatMembersSelector({
+  teams,
+  selectedMembers,
   onMembersUpdate,
-  isLoading = false
+  isLoading = false,
 }: ChatMembersSelectorProps) {
-  // Crear array de miembros seleccionados con sus detalles
-  const selectedMembersDetails = selectedMembers
-    .map(memberId => teams.members.find(m => m.id === memberId))
-    .filter(member => member !== undefined);
+  // const { workspace: userWorkspace } = useUserWorkspace();
+  // const agencyRoles = ['agency_owner', 'agency_project_manager', 'agency_member'];
+  // // const clientRoles = ['client_owner', 'client_member'];
+  // const role = userWorkspace.role ?? '';
 
-  const memberOptions = teams.members.map(member => ({
-    value: member.id,
-    label: member.name,
-    picture_url: member.picture_url
-  }));
 
-  const handleSubmit = (data: z.infer<typeof membersSchema>) => {
-    onMembersUpdate(data.members);
-  };
 
-  const defaultValues = {
-    members: selectedMembers
-  };
+  //   const isAgencyRole = agencyRoles.includes(role);
+    // const isClientRole = clientRoles.includes(role);
+
+    // // Get the current organization based on role
+    // const currentOrganization = isAgencyRole 
+    //   ? teams.organizations[0] // Agency org is first for agency roles
+    //   : teams.organizations[1]; // Client org is second for client roles
+
+    // Split members into agency and client based on their organization_id
+    const agencyMembers = teams.members.filter(member => 
+      member.organization_id === teams.organizations[0]?.id
+    );
+
+    const clientOrganizationMembers = teams.members.filter(member =>
+      member.organization_id === teams.organizations[1]?.id  
+    );
+
+    // Get selected members details
+    const selectedMembersDetails = teams.members.filter(member => 
+      selectedMembers.includes(member.id)
+    );
+
+    const selectedAgencyMembers = selectedMembersDetails.filter(member =>
+      member.organization_id === teams.organizations[0]?.id
+    );
+
+    const selectedClientOrganizationMembers = selectedMembersDetails.filter(member =>
+      member.organization_id === teams.organizations[1]?.id
+    );
+    console.log('selectedAgencyMembers', selectedAgencyMembers, 'selectedClientOrganizationMembers', selectedClientOrganizationMembers);
+
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="no-scrollbar flex max-h-[300px] flex-wrap items-center justify-start gap-2 overflow-y-auto">
-        {/* Mostrar avatares de miembros seleccionados */}
-        {selectedMembersDetails.map((member, index) => (
-          member && (
-            <AvatarDisplayer
-              key={index + member.name}
-              displayName={member.name}
-              pictureUrl={member.picture_url}
-              isAssignedOrFollower={true}
-              className="h-8 w-8 border-2 border-white"
-            />
-          )
-        ))}
-        
-        {/* Checkbox Combobox para seleccionar miembros */}
-        <CheckboxCombobox
-          options={memberOptions}
-          onSubmit={handleSubmit}
-          schema={membersSchema}
-          defaultValues={defaultValues}
-          customItem={CustomUserItem}
+    <div className="flex items-center gap-1 rounded-full border border-gray-200 px-1">
+      {/* Mostrar avatares de miembros seleccionados */}
+
+      {/* Checkbox Combobox para seleccionar miembros */}
+      <OrganizationsMembersDropdownMenu
+        agencyMembers={agencyMembers}
+        clientOrganizationMembers={clientOrganizationMembers}
+        selectedAgencyMembers={selectedAgencyMembers}
+        selectedClientOrganizationMembers={selectedClientOrganizationMembers}
+        onMembersUpdate={onMembersUpdate}
+        isLoading={isLoading}
+
+
+      />
+      {/* {!isLoading && (
+        <MembersAssignations
+          users={teams.members}
+          defaultSelectedUsers={selectedMembersDetails}
+          updateOrderUsersFn={onMembersUpdate}
           isLoading={isLoading}
         />
-      </div>
+      )} */}
     </div>
   );
 }

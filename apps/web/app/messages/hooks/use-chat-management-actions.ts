@@ -100,11 +100,15 @@ export const useChatManagement = ({
    * Sets the new chat as active on success
    */
   const createChatMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: ({ name, memberIds }: { name: string; memberIds: string[] }) =>
       createChat({
-        name: 'New Chat',
+        name,
         user_id: userId,
-        members: [],
+        members: memberIds.map((memberId) => ({
+          user_id: memberId,
+
+          role: 'guest',
+        })),
         visibility: true,
         image: '',
         role: ['owner'],
@@ -158,7 +162,7 @@ export const useChatManagement = ({
     initialData: initialChat,
     enabled: !!chatId,
   });
-  
+
   return {
     chatsQuery,
     chatByIdQuery,

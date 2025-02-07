@@ -33,8 +33,8 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
   const chatById = chatByIdQuery.data;
   const isLoading = chatByIdQuery.isLoading;
 
-  const handleMembersUpdate = (members: string[]) => {
-    membersUpdateMutation.mutate(members);
+  const handleMembersUpdate = async (members: string[]) => {
+    await membersUpdateMutation.mutateAsync(members);
   };
 
   const handleDelete = () => {
@@ -82,6 +82,7 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
               chatById?.members?.map((m: { id: string }) => m.id) ?? []
             }
             onMembersUpdate={handleMembersUpdate}
+            isLoading={isLoading}
           />
           <Popover open={isPopupOpen} onOpenChange={setIsPopupOpen}>
             <PopoverTrigger asChild>
