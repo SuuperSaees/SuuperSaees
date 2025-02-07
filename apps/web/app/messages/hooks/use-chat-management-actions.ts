@@ -84,11 +84,10 @@ export const useChatManagement = ({
     },
 
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey });
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
 
       toast.success('Chat deleted successfully');
 
-      router.push('/messages');
     },
     onError: () => {
       toast.error('Failed to delete chat');

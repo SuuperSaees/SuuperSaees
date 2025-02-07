@@ -5,9 +5,7 @@ import { ChatMessages } from '~/lib/chat-messages.types'
 import { Chats } from '~/lib/chats.types'
 import { Message } from '~/lib/message.types'
 import { User } from '~/lib/user.types'
-import { AddMembersResponse } from '~/server/actions/chat-members/chat-members.interface'
-import { DeleteMessageResponse } from '~/server/actions/chat-messages/chat-messages.interface'
-import { GetChatByIdResponse } from '~/server/actions/chats/chats.interface'
+
 
 /**
  * Interface for managing the active chat state
@@ -60,15 +58,12 @@ export interface ChatMutations {
     }
   >
   /** Mutation for deleting messages */
-  deleteMessageMutation: UseMutationResult<
-
-    DeleteMessageResponse,
-    Error,
-    string,
-    {
-      previousMessages: Message.Type[]
-    }
-  >
+  deleteMessageMutation: UseMutationResult<void, Error, {
+    chatId?: string;
+    messageId?: string;
+}, {
+    previousMessages: Message.Type[];
+}>
   /** Mutation for updating chat details */
   updateChatMutation: UseMutationResult<Chats.Update, Error, string>
   /** Mutation for deleting entire chat */
@@ -76,7 +71,7 @@ export interface ChatMutations {
   /** Mutation for creating new chat */
   createChatMutation: UseMutationResult<Chats.Insert, Error, {name: string, memberIds: string[]}>
   /** Mutation for updating chat members */
-  membersUpdateMutation: UseMutationResult<AddMembersResponse, Error, string[]>
+  membersUpdateMutation: UseMutationResult<ChatMembers.TypeWithRelations[], Error, string[], unknown>
 
 }
 
@@ -88,7 +83,7 @@ export interface ChatQueries {
   /** Query for fetching all chats */
   chatsQuery: UseQueryResult<Chats.Type[], Error>
   /** Query for fetching specific chat by ID */
-  chatByIdQuery: UseQueryResult<GetChatByIdResponse, Error>
+  chatByIdQuery: UseQueryResult<Chats.TypeWithRelations, Error>
 }
 
 /**
@@ -110,7 +105,7 @@ export interface ChatContextType extends ActiveChatState, MessagesState, ChatMut
 export interface ChatProviderProps {
   children: ReactNode
   // chatId: string
-  initialChat?: GetChatByIdResponse
+  initialChat?: Chats.TypeWithRelations
   initialMembers?: ChatMembers.Type[]
 }
 
