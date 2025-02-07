@@ -1,13 +1,9 @@
 'use server';
 import { ChatMessages } from '~/lib/chat-messages.types';
-import {
-  DeleteMessagePayload,
-  UpdateMessageContentPayload,
-} from './chat-messages.interface';
-import { createMessagesAction } from './chat-messages';
+import { createChatMessagesAction } from './chat-messages';
 
 function getMessagesAction() {
-  return createMessagesAction(process.env.NEXT_PUBLIC_SITE_URL as string);
+  return createChatMessagesAction(process.env.NEXT_PUBLIC_SITE_URL as string);
 }
 
 export async function createMessage(payload: ChatMessages.InsertWithRelations) {
@@ -19,12 +15,12 @@ export async function getMessages(chatId: string) {
   return await getMessagesAction().list(chatId);
 }
 
-export async function deleteMessage(payload: DeleteMessagePayload) {
-  return await getMessagesAction().delete(payload);
+export async function deleteMessage(chatId?: string, messageId?: string) {
+  return await getMessagesAction().delete(chatId, messageId);
 }
 
-export async function updateMessageContent(
-  payload: UpdateMessageContentPayload,
+export async function updateMessage(
+  payload: ChatMessages.Update,
 ) {
   return await getMessagesAction().update(payload);
 }

@@ -19,11 +19,11 @@ export async function getMembers(chatId: string) {
   return await getMembersAction().list(chatId);
 }
 
-export async function getMemberSettings(chatId: string, userId: string) {
+export async function getMember(chatId: string, userId: string) {
   return await getMembersAction().get(chatId, userId);
 }
 
-export async function removeMember(payload: RemoveMemberPayload) {
+export async function deleteMember(payload: RemoveMemberPayload) {
   return await getMembersAction().delete(payload);
 }
 

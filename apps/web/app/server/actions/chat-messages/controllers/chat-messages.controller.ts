@@ -2,19 +2,11 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
 import { ChatMessages } from '~/lib/chat-messages.types';
-import {
-  ClearChatMessagesPayload,
-  ClearChatMessagesResponse,
-  DeleteMessageResponse,
-  GetMessagesResponse,
-  UpdateMessageContentPayload,
-  UpdateMessageContentResponse,
-} from '../chat-messages.interface';
 import { ChatMessagesRepository } from '../repositories/chat-messages.respository';
 import { MessagesRepository } from '../../messages/repositories/messages.repository';
 import { ChatMessagesService } from '../services/chat-messages.service';
 
-export class MessagesController {
+export class ChatMessagesController {
   private baseUrl: string
   private client: SupabaseClient<Database>
   private adminClient?: SupabaseClient<Database>
@@ -25,17 +17,15 @@ export class MessagesController {
       this.adminClient = adminClient;
   }
 
-
-
   // * CREATE CONTROLLERS
-  async createMessage(
+  async create(
     payload: ChatMessages.InsertWithRelations,
   ): Promise<ChatMessages.TypeWithRelations> {
     try {
       const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
       const messagesRepository = new MessagesRepository(this.client, this.adminClient);
       const chatMessageService = new ChatMessagesService(chatMessagesRepository, messagesRepository);
-      return await chatMessageService.createMessage(payload);
+      return await chatMessageService.create(payload);
 
     } catch (error) {
       console.error(error);
@@ -44,12 +34,11 @@ export class MessagesController {
   }
 
   // * GET CONTROLLERS
-  async getMessages(chatId: string): Promise<GetMessagesResponse[]> {
+  async list(chatId: string): Promise<ChatMessages.TypeWithRelations[]> {
     try {
       const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
       const chatMessageService = new ChatMessagesService(chatMessagesRepository);
-      return await chatMessageService.getMessages(chatId);
-
+      return await chatMessageService.list(chatId);
     } catch (error) {
       console.error(error);
       throw error;
@@ -57,28 +46,15 @@ export class MessagesController {
   }
 
   // * DELETE CONTROLLERS
-  async deleteMessage(
-    messageId: string,
-  ): Promise<DeleteMessageResponse> {
-    try {
-
-      const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
-      const chatMessageService = new ChatMessagesService(chatMessagesRepository);
-      return await chatMessageService.deleteMessage(messageId);
-
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  async clearChatMessages(
-    payload: ClearChatMessagesPayload,
-  ): Promise<ClearChatMessagesResponse> {
+  async delete(
+    chatId?: string,
+    messageId?: string,
+  ): Promise<void> {
     try {
       const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
       const chatMessageService = new ChatMessagesService(chatMessagesRepository);
-      return await chatMessageService.clearChatMessages(payload);
+      return await chatMessageService.delete(chatId, messageId);
+
     } catch (error) {
       console.error(error);
       throw error;
@@ -86,13 +62,14 @@ export class MessagesController {
   }
 
   // * UPDATE CONTROLLERS
-  async updateMessageContent(
-    payload: UpdateMessageContentPayload,
-  ): Promise<UpdateMessageContentResponse> {
+  async update(
+    payload: ChatMessages.Update,
+  ): Promise<ChatMessages.Type> {
     try {
       const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
+
       const chatMessageService = new ChatMessagesService(chatMessagesRepository);
-      return await chatMessageService.updateMessageContent(payload);
+      return await chatMessageService.update(payload);
     } catch (error) {
       console.error(error);
       throw error;

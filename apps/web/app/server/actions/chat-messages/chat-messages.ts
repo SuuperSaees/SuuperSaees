@@ -1,20 +1,14 @@
 import { BaseAction } from '../base-action';
-import { MessagesController } from './controllers/chat-messages.controller';
+import { ChatMessagesController } from './controllers/chat-messages.controller';
 import { ChatMessages } from '~/lib/chat-messages.types';
-import {
-  DeleteMessagePayload,
-  DeleteMessageResponse,
-  GetMessagesResponse,
-  UpdateMessageContentPayload,
-  UpdateMessageContentResponse,
-} from './chat-messages.interface';
+import { IChatMessageActions } from './chat-messages.interface';
 
-export class MessagesAction extends BaseAction {
-  private controller: MessagesController;
+export class ChatMessagesAction extends BaseAction implements IChatMessageActions {
+  private controller: ChatMessagesController;
 
   constructor(baseUrl: string) {
     super(baseUrl);
-    this.controller = new MessagesController(
+    this.controller = new ChatMessagesController(
       this.baseUrl,
       this.client,
       this.adminClient,
@@ -24,27 +18,27 @@ export class MessagesAction extends BaseAction {
   async create(
     payload: ChatMessages.InsertWithRelations,
   ): Promise<ChatMessages.TypeWithRelations> {
-    return await this.controller.createMessage(payload);
+    return await this.controller.create(payload);
   }
 
-
-  async list(chatId: string): Promise<GetMessagesResponse[]> {
-    return await this.controller.getMessages(chatId);
+  async list(chatId: string): Promise<ChatMessages.TypeWithRelations[]> {
+    return await this.controller.list(chatId);
   }
 
   async delete(
-    payload: DeleteMessagePayload,
-  ): Promise<DeleteMessageResponse> {
-    return await this.controller.deleteMessage(messageId);
+    chatId?: string,
+    messageId?: string,
+  ): Promise<void> {
+    return await this.controller.delete(chatId, messageId);
   }
 
   async update(
-    payload: UpdateMessageContentPayload,
-  ): Promise<UpdateMessageContentResponse> {
-    return await this.controller.updateMessageContent(payload);
+    payload: ChatMessages.Update,
+  ): Promise<ChatMessages.Type> {
+    return await this.controller.update(payload);
   }
 }
 
-export function createMessagesAction(baseUrl: string) {
-  return new MessagesAction(baseUrl);
+export function createChatMessagesAction(baseUrl: string) {
+  return new ChatMessagesAction(baseUrl);
 }
