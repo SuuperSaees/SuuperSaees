@@ -4,8 +4,9 @@ import { Database } from '~/lib/database.types';
 import { Chats } from '~/lib/chats.types';
 
 export class ChatRepository {
-  private client: SupabaseClient;
-  private adminClient?: SupabaseClient;
+  private client: SupabaseClient<Database>;
+  private adminClient?: SupabaseClient<Database>;
+
 
   constructor(
     client: SupabaseClient<Database>,
@@ -39,8 +40,9 @@ export class ChatRepository {
   }
 
   // * GET REPOSITORIES
-  async list(userId: string): Promise<Chats.Type[]> {
+  async list(userId: string, chatIds?: string[]): Promise<Chats.Type[]> {
     const client = this.adminClient ?? this.client;
+    const chatList: Chats.Type[] = [];
     const { data, error } = await client
     .from('chats')
     .select(`*`)
@@ -51,9 +53,27 @@ export class ChatRepository {
       throw new Error(`Error fetching chats: ${error.message}`);
     }
 
-    return data as Chats.Type[];
+    chatList.push(data as unknown as Chats.Type);  
+
+    if (chatIds) {
+      const { data: chatMembers, error: membersError } = await client
+      .from('chats')
+      .select(`*`)
+      .in('id', chatIds)
+      .is('deleted_on', null);
+
+      if (membersError) {
+        throw new Error(`Error fetching chats as members: ${membersError.message}`);
+      }
+
+      chatList.push(chatMembers as unknown as Chats.Type);
+    }
+
+    return chatList;
+
   }
  
+
   async get(chatId: string): Promise<Chats.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
 
@@ -155,7 +175,6 @@ export class ChatRepository {
     } 
 
   }
-
 
 
   // * DELETE REPOSITORIES

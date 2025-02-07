@@ -36,8 +36,13 @@ export class ChatService {
 
   // * GET SERVICES
   async list(userId: string): Promise<Chats.Type[]> {
-    return await this.chatRepository.list(userId);
+    const chatsResult = await this.chatMembersRepository?.list(userId);
+
+    const chatIds = chatsResult?.map((chat) => chat.chat_id);
+
+    return await this.chatRepository.list(userId, chatIds);
   }
+
 
 
   async get(chatId: string): Promise<Chats.TypeWithRelations> {

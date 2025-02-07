@@ -89,8 +89,24 @@ export class ChatMembersRepository {
   }
 
   // * GET REPOSITORIES
-  async list(chatId: string): Promise<ChatMembers.TypeWithRelations[]> {
+  async list(chatId: string, userId?: string): Promise<ChatMembers.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
+
+    if(userId) {
+      const { data, error } = await client
+        .from('chat_members')
+        .select(`*, user:accounts(email, settings:user_settings(name, picture_url))`)
+        .eq('user_id', userId);
+
+      if (error) {
+        throw new Error(
+          `Error fetching members for chat ${chatId} and user ${userId}: ${error.message}`,
+        );
+      }
+
+      return data as ChatMembers.TypeWithRelations[];
+    }
+
     const { data, error } = await client
       .from('chat_members')
       .select(`*, user:accounts(email, settings:user_settings(name, picture_url))`)
