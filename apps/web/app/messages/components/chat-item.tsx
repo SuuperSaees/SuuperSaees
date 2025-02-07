@@ -39,11 +39,11 @@ export default function ChatItem({
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between">
           <h3 className="truncate font-medium">{chat.name}</h3>
-          <span className="flex-shrink-0 text-sm text-gray-500">4:00pm</span>
+          {/* <span className="flex-shrink-0 text-sm text-gray-500">4:00pm</span> */}
         </div>
-        <p className="truncate text-sm text-gray-500">
+        {/* <p className="truncate text-sm text-gray-500">
           {chat.name || 'No messages yet'}
-        </p>
+        </p> */}
       </div>
     </button>
   );
