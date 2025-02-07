@@ -33,10 +33,10 @@ end if;
 
 end; $$ language plpgsql;
 
-create
-or replace trigger prevent_chats_update before
-update on public.chats for each row
-execute function kit.prevent_chats_update ();
+-- create
+-- or replace trigger prevent_chats_update before
+-- update on public.chats for each row
+-- execute function kit.prevent_chats_update ();
 
 -- SELECT(public.chats)
 create policy select_chats on public.chats
