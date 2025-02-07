@@ -1,58 +1,44 @@
 import { BaseAction } from '../base-action';
-import { MessagesController } from './controllers/chat-messages.controller';
+import { ChatMessagesController } from './controllers/chat-messages.controller';
 import { ChatMessages } from '~/lib/chat-messages.types';
-import {
-  ClearChatMessagesPayload,
-  ClearChatMessagesResponse,
-  DeleteMessageResponse,
-  GetMessagesResponse,
-  UpdateMessageContentPayload,
-  UpdateMessageContentResponse,
-} from './chat-messages.interface';
+import { IChatMessagesActions } from './chat-messages.interface';
 
-export class MessagesAction extends BaseAction {
-  private controller: MessagesController;
+export class ChatMessagesAction extends BaseAction implements IChatMessagesActions {
+  private controller: ChatMessagesController;
 
   constructor(baseUrl: string) {
     super(baseUrl);
-    this.controller = new MessagesController(
+    this.controller = new ChatMessagesController(
       this.baseUrl,
       this.client,
       this.adminClient,
     );
   }
 
-  async createMessage(
+  async create(
     payload: ChatMessages.InsertWithRelations,
   ): Promise<ChatMessages.TypeWithRelations> {
-    return await this.controller.createMessage(payload);
+    return await this.controller.create(payload);
   }
 
-
-  async getMessages(chatId: string): Promise<GetMessagesResponse[]> {
-    return await this.controller.getMessages(chatId);
+  async list(chatId: string): Promise<ChatMessages.TypeWithRelations[]> {
+    return await this.controller.list(chatId);
   }
 
-  async deleteMessage(
-    messageId: string,
-  ): Promise<DeleteMessageResponse> {
-    return await this.controller.deleteMessage(messageId);
+  async delete(
+    chatId?: string,
+    messageId?: string,
+  ): Promise<void> {
+    return await this.controller.delete(chatId, messageId);
   }
 
-
-  async clearChatMessages(
-    payload: ClearChatMessagesPayload,
-  ): Promise<ClearChatMessagesResponse> {
-    return await this.controller.clearChatMessages(payload);
-  }
-
-  async updateMessageContent(
-    payload: UpdateMessageContentPayload,
-  ): Promise<UpdateMessageContentResponse> {
-    return await this.controller.updateMessageContent(payload);
+  async update(
+    payload: ChatMessages.Update,
+  ): Promise<ChatMessages.Type> {
+    return await this.controller.update(payload);
   }
 }
 
-export function createMessagesAction(baseUrl: string) {
-  return new MessagesAction(baseUrl);
+export function createChatMessagesAction(baseUrl: string) {
+  return new ChatMessagesAction(baseUrl);
 }

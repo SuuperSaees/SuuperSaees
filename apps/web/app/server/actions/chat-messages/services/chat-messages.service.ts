@@ -1,13 +1,5 @@
 import { ChatMessages } from '~/lib/chat-messages.types';
 import { Message } from '~/lib/message.types';
-import {
-  ClearChatMessagesPayload,
-  ClearChatMessagesResponse,
-  DeleteMessageResponse,
-  GetMessagesResponse,
-  UpdateMessageContentPayload,
-  UpdateMessageContentResponse,
-} from '../chat-messages.interface';
 import { ChatMessagesRepository } from '../repositories/chat-messages.respository';
 import { MessagesRepository } from '../../messages/repositories/messages.repository';
 
@@ -16,7 +8,7 @@ export class ChatMessagesService {
 
 
   // * CREATE SERVICES
-  async createMessage(
+  async create(
     payload: ChatMessages.InsertWithRelations,
   ): Promise<ChatMessages.TypeWithRelations> {
     let chatMessage: ChatMessages.TypeWithRelations;
@@ -31,10 +23,10 @@ export class ChatMessagesService {
         message_id: createdMessages[createdMessages.length - 1]?.id ?? '',
       };
       
-      chatMessage = await this.chatMessagesRepository.createMessage(chatMessagePayload);
+      chatMessage = await this.chatMessagesRepository.create(chatMessagePayload);
       chatMessage.messages = createdMessages.map(message => message as Message.TypeOnly);
     } else {
-      chatMessage = await this.chatMessagesRepository.createMessage(payload);
+      chatMessage = await this.chatMessagesRepository.create(payload);
     }
   
     return chatMessage;
@@ -42,27 +34,25 @@ export class ChatMessagesService {
 
 
   // * GET SERVICES
-  async getMessages(chatId: string): Promise<GetMessagesResponse[]> {
-    return await this.chatMessagesRepository.getMessages(chatId);
+  async list(chatId: string): Promise<ChatMessages.TypeWithRelations[]> {
+    return await this.chatMessagesRepository.list(chatId);
   }
+
 
   // * DELETE SERVICES
-  async deleteMessage(
-    messageId: string,
-  ): Promise<DeleteMessageResponse> {
-    return await this.chatMessagesRepository.deleteMessage(messageId);
-  }                                                                                                                                                                
-
-  async clearChatMessages(
-    payload: ClearChatMessagesPayload,
-  ): Promise<ClearChatMessagesResponse> {
-    return await this.chatMessagesRepository.clearChatMessages(payload);
+  async delete(
+    chatId?: string,
+    messageId?: string,
+  ): Promise<void> {
+    return await this.chatMessagesRepository.delete({chat_id: chatId, message_id: messageId});
   }
 
+
+
   // * UPDATE SERVICES
-  async updateMessageContent(
-    payload: UpdateMessageContentPayload,
-  ): Promise<UpdateMessageContentResponse> {
-    return await this.chatMessagesRepository.updateMessageContent(payload);
+  async update(
+    payload: ChatMessages.Update,
+  ): Promise<ChatMessages.Type> {
+    return await this.chatMessagesRepository.update(payload);
   }
 }

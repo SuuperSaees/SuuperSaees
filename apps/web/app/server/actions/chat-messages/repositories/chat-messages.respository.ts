@@ -2,14 +2,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
 import { ChatMessages } from '~/lib/chat-messages.types';
-import {
-  ClearChatMessagesPayload,
-  ClearChatMessagesResponse,
-  DeleteMessageResponse,
-  GetMessagesResponse,
-  UpdateMessageContentPayload,
-  UpdateMessageContentResponse,
-} from '../chat-messages.interface';
 
 export class ChatMessagesRepository {
   private client: SupabaseClient;
@@ -24,7 +16,7 @@ export class ChatMessagesRepository {
   }
 
   // * CREATE REPOSITORIES
-  async createMessage(
+  async create(
     payload: ChatMessages.Insert,
   ): Promise<ChatMessages.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
@@ -34,7 +26,7 @@ export class ChatMessagesRepository {
       .insert(payload)
       .select(`
         *,
-        message:messages(*)
+        messages:messages(*)
       `)
       .single();
 
@@ -49,11 +41,14 @@ export class ChatMessagesRepository {
 
 
   // * GET REPOSITORIES
-  async getMessages(chatId: string): Promise<GetMessagesResponse[]> {
+  async list(chatId: string): Promise<ChatMessages.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
       .from('chat_messages')
-      .select('id, chat_id, user_id, content, role, created_at')
+      .select(`
+        *,
+        messages:messages(*)
+      `)
       .eq('chat_id', chatId);
 
     if (error) {
@@ -62,80 +57,80 @@ export class ChatMessagesRepository {
       );
     }
 
-    return data as GetMessagesResponse[];
+    return data as ChatMessages.TypeWithRelations[];
   }
 
   // * DELETE REPOSITORIES
-  async deleteMessage(
-    messageId: string,
-  ): Promise<DeleteMessageResponse> {
+  async delete({
+    chat_id,
+    message_id,
+  }: {
+    chat_id?: string;
+    message_id?: string;
+  }): Promise<void> {
     const client = this.adminClient ?? this.client;
-
-
-    const { error } = await client
-      .from('messages')
-      .delete()
-      .eq('id', messageId);
-
-
-    if (error) {
-      throw new Error(
-        `Error deleting message ${messageId}: ${error.message}`,
-      );
-    }
-
-
-    return {
-      success: true,
-      message: `Message ${messageId} successfully deleted.`,
-    };
-
-  }
-
-  async clearChatMessages(
-    payload: ClearChatMessagesPayload,
-  ): Promise<ClearChatMessagesResponse> {
-    const client = this.adminClient ?? this.client;
-    const { chat_id } = payload;
-    const { error } = await client
+    const baseQuery = client
       .from('chat_messages')
-      .delete()
-      .eq('chat_id', chat_id);
+      .update({ deleted_on: new Date().toISOString() });
 
-    if (error) {
-      throw new Error(
-        `Error clearing messages for chat ${chat_id}: ${error.message}`,
-      );
+    try {
+      if (chat_id && message_id) {
+        const { error } = await baseQuery
+          .eq('chat_id', chat_id)
+          .eq('message_id', message_id);
+          
+        if (error) throw error;
+        return;
+      }
+
+      if (chat_id) {
+        const { error } = await baseQuery.eq('chat_id', chat_id);
+        if (error) throw error;
+        return;
+      }
+
+      if (message_id) {
+        const { error } = await baseQuery.eq('message_id', message_id);
+        if (error) throw error;
+        return;
+      }
+    } catch (error: unknown) {
+      const context = chat_id && message_id
+        ? `message ${message_id} from chat ${chat_id}`
+        : chat_id
+
+          ? `messages from chat ${chat_id}`
+          : `message ${message_id}`;
+
+      throw new Error(`Error deleting ${context}: ${error instanceof Error ? error.message : String(error)}`);
+
     }
-
-    return {
-      success: true,
-      message: `All messages from chat ${chat_id} have been successfully cleared.`,
-    };
   }
 
   // * UPDATE REPOSITORIES
-  async updateMessageContent(
-    payload: UpdateMessageContentPayload,
-  ): Promise<UpdateMessageContentResponse> {
+  async update(
+    payload: ChatMessages.Update,
+  ): Promise<ChatMessages.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
-    const { chat_id, message_id, new_content } = payload;
 
-    const { error } = await client
+    const { data, error } = await client
       .from('chat_messages')
-      .update({ content: new_content })
-      .eq('chat_id', chat_id)
-      .eq('id', message_id);
+      .update(payload)
+      .eq('chat_id', payload.chat_id)
+      .eq('message_id', payload.message_id)
+      .select(`
+        *,
+        messages:messages(*)
+      `)
+      .single();
 
     if (error) {
       throw new Error(
-        `Error updating content of message ${message_id} in chat ${chat_id}: ${error.message}`,
+        `Error updating chat message: ${error.message}`,
       );
     }
 
-    return {
-      success: true,
-      message: `Content of message ${message_id} successfully updated in chat ${chat_id}.`,
-    };
+    return data as ChatMessages.TypeWithRelations;
+
   }
 }

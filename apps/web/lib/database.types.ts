@@ -838,8 +838,9 @@ export type Database = {
           created_at: string | null
           deleted_on: string | null
           id: string
+          image: string | null
           name: string
-          reference_id: string
+          reference_id: string | null
           settings: Json
           updated_at: string | null
           user_id: string
@@ -848,9 +849,10 @@ export type Database = {
         Insert: {
           created_at?: string | null
           deleted_on?: string | null
-          id: string
+          id?: string
+          image?: string | null
           name: string
-          reference_id: string
+          reference_id?: string | null
           settings?: Json
           updated_at?: string | null
           user_id: string
@@ -859,9 +861,10 @@ export type Database = {
         Update: {
           created_at?: string | null
           deleted_on?: string | null
-          id: string
+          id?: string
+          image?: string | null
           name?: string
-          reference_id?: string
+          reference_id?: string | null
           settings?: Json
           updated_at?: string | null
           user_id?: string

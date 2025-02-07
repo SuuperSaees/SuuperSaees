@@ -4,94 +4,88 @@ import { Database } from '~/lib/database.types';
 
 import { MembersRepository } from '../../chat-members/repositories/chat-members.repository';
 import { ChatMessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
-import {
-  ChatPayload,
-  DeleteChatResponse,
-  GetChatByIdResponse,
-  UpdateChatSettingsPayload,
-  UpdateChatSettingsResponse,
-} from '../chats.interface';
 import { ChatRepository } from '../repositories/chats.repository';
 import { ChatService } from '../services/chats.service';
 import { Chats } from '~/lib/chats.types';
 
 export class ChatController {
-  private chatService: ChatService;
+  private baseUrl: string
+  private client: SupabaseClient<Database>
+  private adminClient?: SupabaseClient<Database>
 
-
-  constructor(
-    baseUrl: string,
-    client: SupabaseClient<Database>,
-    adminClient: SupabaseClient<Database>,
-  ) {
-    const chatRepository = new ChatRepository(client, adminClient);
-    const membersRepository = new MembersRepository(client, adminClient);
-    const messagesRepository = new ChatMessagesRepository(client, adminClient);
-
-    this.chatService = new ChatService(
-      chatRepository,
-      membersRepository,
-      messagesRepository,
-    );
+  constructor(baseUrl: string, client: SupabaseClient<Database>, adminClient?: SupabaseClient<Database>) {
+      this.baseUrl = baseUrl;
+      this.client = client;
+      this.adminClient = adminClient;
   }
 
   // * CREATE CONTROLLERS
-  async createChat(payload: ChatPayload): Promise<Chats.Type> {
+  async create(payload: Chats.InsertWithRelations): Promise<Chats.Type> {
     try {
-      return await this.chatService.createChat(payload);
+      const chatRepository = new ChatRepository(this.client, this.adminClient);
+      const membersRepository = new MembersRepository(this.client, this.adminClient);
+      const chatService = new ChatService(chatRepository, membersRepository);
+      return await chatService.create(payload);
+
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
+
 
   // * GET CONTROLLERS
-  async getChats(): Promise<Chats.Type[]> {
+  async list(userId: string): Promise<Chats.TypeWithRelations[]> {
     try {
-      return await this.chatService.getChats();
+      const chatRepository = new ChatRepository(this.client, this.adminClient);
+      const membersRepository = new MembersRepository(this.client, this.adminClient);
+      const chatService = new ChatService(chatRepository, membersRepository);
+      return await chatService.list(userId);
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
 
-  async getChatById(chatId: string): Promise<GetChatByIdResponse> {
+  async get(chatId: string): Promise<Chats.TypeWithRelations> {
     try {
-      return await this.chatService.getChatById(chatId);
+      const chatRepository = new ChatRepository(this.client, this.adminClient);
+      const membersRepository = new MembersRepository(this.client, this.adminClient);
+      const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
+      const chatService = new ChatService(chatRepository, membersRepository, chatMessagesRepository);
+      return await chatService.get(chatId);
+
     } catch (error) {
+
+
       console.error(error);
       throw error;
     }
   }
 
   // * DELETE CONTROLLERS
-  async deleteChat(chatId: string): Promise<DeleteChatResponse> {
+  async delete(chatId: string): Promise<void> {
     try {
-      return await this.chatService.deleteChat(chatId);
+      const chatRepository = new ChatRepository(this.client, this.adminClient);
+      const chatService = new ChatService(chatRepository);
+      return await chatService.delete(chatId);
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
+
 
   // * UPDATE CONTROLLERS
-  async updateChatSettings(
-    payload: UpdateChatSettingsPayload,
-  ): Promise<UpdateChatSettingsResponse> {
+  async update(payload: Chats.Update): Promise<Chats.Type> {
     try {
-      return await this.chatService.updateChatSettings(payload);
+      const chatRepository = new ChatRepository(this.client, this.adminClient);
+      const chatService = new ChatService(chatRepository);
+      return await chatService.update(payload);
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
 
-  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
-    try {
-      return await this.chatService.updateChat(payload);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
 }

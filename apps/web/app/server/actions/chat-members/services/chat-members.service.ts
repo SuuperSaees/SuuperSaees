@@ -1,71 +1,54 @@
 import {
   AddMembersPayload,
-  AddMembersResponse,
-  GetMembersResponse,
-  MemberSettingsResponse,
-  RemoveMemberPayload,
-  RemoveMemberResponse,
-  ResetMemberSettingsPayload,
-  ResetMemberSettingsResponse,
-  UpdateMemberSettingsPayload,
-  UpdateMemberSettingsResponse,
-  UpdateMemberVisibilityPayload,
-  UpdateMemberVisibilityResponse,
 } from '../chat-members.interface';
-import { MembersRepository } from '../repositories/chat-members.repository';
+import { ChatMembersRepository } from '../repositories/chat-members.repository';
+import { ChatMembers } from '~/lib/chat-members.types';
 
-export class MembersService {
-  constructor(private readonly membersRepository: MembersRepository) {}
+export class ChatMembersService {
+  constructor(private readonly membersRepository: ChatMembersRepository) {}
+
 
   // * CREATE SERVICES
-  async upsertMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
-    return await this.membersRepository.upsertMembers(
+  async upsert(payload: AddMembersPayload): Promise<ChatMembers.TypeWithRelations[]> {
+    return await this.membersRepository.upsert(
       payload.chat_id,
       payload.members,
     );
   }
 
   // * GET SERVICES
-  async getMembers(chatId: string): Promise<GetMembersResponse[]> {
-    return await this.membersRepository.getMembers(chatId);
+  async list(chatId: string): Promise<ChatMembers.TypeWithRelations[]> {
+    return await this.membersRepository.list(chatId);
   }
 
-  async getMemberSettings(
+
+  async get(
     chatId: string,
     userId: string,
-  ): Promise<MemberSettingsResponse> {
-    return await this.membersRepository.getMemberSettings(chatId, userId);
+  ): Promise<ChatMembers.TypeWithRelations> {
+    return await this.membersRepository.get(chatId, userId);
   }
+
 
   // * DELETE SERVICES
-  async removeMember(
-    payload: RemoveMemberPayload,
-  ): Promise<RemoveMemberResponse> {
-    return await this.membersRepository.removeMember(
-      payload.chat_id,
-      payload.user_id,
-    );
+  async delete(
+    chatId?: string,
+    userId?: string,
+  ): Promise<void> {
+    return await this.membersRepository.delete({
+      chat_id: chatId,
+      user_id: userId,
+    });
   }
 
-  async resetMemberSettings(
-    payload: ResetMemberSettingsPayload,
-  ): Promise<ResetMemberSettingsResponse> {
-    return await this.membersRepository.resetMemberSettings(
-      payload.chat_id,
-      payload.user_id,
-    );
-  }
+
 
   // * UPDATE SERVICES
-  async updateMemberSettings(
-    payload: UpdateMemberSettingsPayload,
-  ): Promise<UpdateMemberSettingsResponse> {
-    return await this.membersRepository.updateMemberSettings(payload);
-  }
+  async update(
+    payload: ChatMembers.Update,
 
-  async updateMemberVisibility(
-    payload: UpdateMemberVisibilityPayload,
-  ): Promise<UpdateMemberVisibilityResponse> {
-    return await this.membersRepository.updateMemberVisibility(payload);
+  ): Promise<ChatMembers.TypeWithRelations> {
+    return await this.membersRepository.update(payload);
   }
 }
+
