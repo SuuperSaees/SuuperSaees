@@ -7,7 +7,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ChatMembers } from '~/lib/chat-members.types';
 import { Chats } from '~/lib/chats.types';
 import { Message } from '~/lib/message.types';
-import { GetChatByIdResponse } from '~/server/actions/chats/chats.interface';
 
 /**
  * Props interface for useChatState hook
@@ -32,15 +31,31 @@ interface UseChatStateProps {
  * @property {Function} setMembers - Function to update members list
  * @property {Function} setMessages - Optimized function to update messages using QueryClient
  * @property {string[]} messagesQueryKey - Query key for messages cache
+ * @property {Function} setChats - Optimized function to update chats using QueryClient
+ * @property {string} searchQuery - Current search query
+ * @property {Function} setSearchQuery - Function to update search query
+ * @property {Chats.TypeWithRelations[]} filteredChats - Filtered chats based on search query
+ * @property {Function} setFilteredChats - Function to update filtered chats
+ * @property {boolean} isChatCreationDialogOpen - Whether the chat creation dialog is open
+ * @property {Function} setIsChatCreationDialogOpen - Function to update chat creation dialog open state
  */
+
+
 const useChatState = ({ initialMembers }: UseChatStateProps) => {
   // State for tracking current chat ID and active chat
   const [chatId, setChatId] = useState<string>('');
   const [activeChat, setActiveChat] = useState<Chats.Type | null>(null);
-
+  const [isChatCreationDialogOpen, setIsChatCreationDialogOpen] =
+    useState(false);
   // State for chat members with initial values
   const [members, setMembers] = useState<ChatMembers.Type[]>(
     initialMembers ?? [],
+  );
+
+  // State for search query
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredChats, setFilteredChats] = useState<Chats.TypeWithRelations[]>(
+    [],
   );
 
   // Query key for messages cache
@@ -60,7 +75,7 @@ const useChatState = ({ initialMembers }: UseChatStateProps) => {
       // TODO: Refactor to use messages data directly from query
       const currentChat = queryClient.getQueryData(
         messagesQueryKey,
-      ) as GetChatByIdResponse;
+      ) as Chats.TypeWithRelations;
       const currentMessages = currentChat?.messages ?? [];
 
       const newMessages =
@@ -73,6 +88,29 @@ const useChatState = ({ initialMembers }: UseChatStateProps) => {
     [queryClient, messagesQueryKey],
   );
 
+  /**
+   * Optimized chat setter that works with React Query cache
+   * Updates chats while preserving other chat data
+   *
+   * @param {Chats.Type} data - New chat data
+   */
+  const setChats = useCallback(
+    (
+      updater:
+        | Chats.Type
+        | ((prev: Chats.TypeWithRelations[]) => Chats.TypeWithRelations[]),
+    ) => {
+      const currentChats =
+        queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']) ??
+        ([] as Chats.TypeWithRelations[]);
+      const newChats =
+        typeof updater === 'function' ? updater(currentChats ?? []) : updater;
+
+      queryClient.setQueryData(['chats'], newChats);
+    },
+    [queryClient],
+  );
+
   return {
     chatId,
     setChatId,
@@ -82,7 +120,15 @@ const useChatState = ({ initialMembers }: UseChatStateProps) => {
     setMembers,
     setMessages,
     messagesQueryKey,
+    searchQuery,
+    setSearchQuery,
+    filteredChats,
+    setFilteredChats,
+    isChatCreationDialogOpen,
+    setIsChatCreationDialogOpen,
+    setChats,
   };
 };
+
 
 export default useChatState;

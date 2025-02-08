@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DefaultValues, Path, SubmitHandler, useForm } from 'react-hook-form';
@@ -118,7 +118,7 @@ export default function CheckboxCombobox<
                       </button>
                     )}
                   </PopoverTrigger>
-                  <PopoverContent className="flex w-[300px] flex-col p-2">
+                  <PopoverContent className="flex w-[300px] flex-col p-4">
                     <Input
                       placeholder="Search..."
                       value={searchTerm}
@@ -147,6 +147,7 @@ export default function CheckboxCombobox<
                                       );
                                   if (onChange) {
                                     onChange(newValue);
+                                    field.onChange(newValue);
                                   } else {
                                     field.onChange(newValue);
                                   }

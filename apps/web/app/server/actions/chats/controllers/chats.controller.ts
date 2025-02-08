@@ -2,7 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
 
-import { MembersRepository } from '../../chat-members/repositories/chat-members.repository';
+import { ChatMembersRepository } from '../../chat-members/repositories/chat-members.repository';
 import { ChatMessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
 import { ChatRepository } from '../repositories/chats.repository';
 import { ChatService } from '../services/chats.service';
@@ -23,7 +23,7 @@ export class ChatController {
   async create(payload: Chats.InsertWithRelations): Promise<Chats.Type> {
     try {
       const chatRepository = new ChatRepository(this.client, this.adminClient);
-      const membersRepository = new MembersRepository(this.client, this.adminClient);
+      const membersRepository = new ChatMembersRepository(this.client, this.adminClient);
       const chatService = new ChatService(chatRepository, membersRepository);
       return await chatService.create(payload);
 
@@ -38,7 +38,7 @@ export class ChatController {
   async list(userId: string): Promise<Chats.TypeWithRelations[]> {
     try {
       const chatRepository = new ChatRepository(this.client, this.adminClient);
-      const membersRepository = new MembersRepository(this.client, this.adminClient);
+      const membersRepository = new ChatMembersRepository(this.client, this.adminClient);
       const chatService = new ChatService(chatRepository, membersRepository);
       return await chatService.list(userId);
     } catch (error) {
@@ -50,7 +50,7 @@ export class ChatController {
   async get(chatId: string): Promise<Chats.TypeWithRelations> {
     try {
       const chatRepository = new ChatRepository(this.client, this.adminClient);
-      const membersRepository = new MembersRepository(this.client, this.adminClient);
+      const membersRepository = new ChatMembersRepository(this.client, this.adminClient);
       const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
       const chatService = new ChatService(chatRepository, membersRepository, chatMessagesRepository);
       return await chatService.get(chatId);

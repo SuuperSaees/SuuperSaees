@@ -9,7 +9,8 @@ import { useChat } from './context/chat-context';
 
 export default function ChatEmptyState() {
   const { t } = useTranslation('chats');
-  const { createChatMutation } = useChat();
+  const { setIsChatCreationDialogOpen } = useChat();
+
 
   return (
     <EmptyState
@@ -17,11 +18,13 @@ export default function ChatEmptyState() {
       description={t('empty.description')}
       imageSrc="/images/illustrations/Illustration-box.svg"
       button={
-        <ThemedButton onClick={() => createChatMutation.mutate()}>
+        <ThemedButton onClick={() => setIsChatCreationDialogOpen(true)}>
           {t('newChat')}
         </ThemedButton>
       }
+
       className="h-full"
     />
   );
 }
+

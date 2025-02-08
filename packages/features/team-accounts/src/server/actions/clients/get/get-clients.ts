@@ -267,7 +267,7 @@ export async function fetchClientOrganizations(
     await client
       .from('accounts')
       .select(
-        'id, name, slug, picture_url, primary_owner_user_id, created_at, is_personal_account',
+        'id, name, slug, picture_url, primary_owner_user_id, created_at, is_personal_account, settings:organization_settings(key, value)',
       )
       .in('id', clientOrganizationIds)
       .eq('is_personal_account', false);
@@ -425,11 +425,20 @@ export async function getClientsOrganizations() {
       client,
       clientOrganizationIds,
     );
-    return clientOrganizations;
+
+    // Return only the logo_url
+    const clientOrganizationsWithLogoUrl = clientOrganizations.map((organization) => ({
+      ...organization,
+      logo_url: organization.settings?.find((setting) => setting.key === 'logo_url')?.value ?? '',
+    }));
+
+
+    return clientOrganizationsWithLogoUrl;
   } catch (error) {
     console.error('Error fetching client organizations:', error);
     throw error;
   }
+
 }
 
 export async function fetchDeletedClients(client: SupabaseClient<Database>, agencyId: Client.Type['agency_id'], userId?: Client.Type['user_client_id']) {

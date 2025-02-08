@@ -17,7 +17,7 @@ import { useChat } from './context/chat-context';
 import MessageList from './message-list';
 import RichTextEditor from './rich-text-editor';
 
-export default function ChatThread({ teams }: { teams: Members.Type }) {
+export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organization }) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const {
     user,
@@ -33,8 +33,8 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
   const chatById = chatByIdQuery.data;
   const isLoading = chatByIdQuery.isLoading;
 
-  const handleMembersUpdate = (members: string[]) => {
-    membersUpdateMutation.mutate(members);
+  const handleMembersUpdate = async (members: string[]) => {
+    await membersUpdateMutation.mutateAsync(members);
   };
 
   const handleDelete = () => {
@@ -60,6 +60,7 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
 
   const activeChatDataName = { ...activeChat }.name;
   const activeChatDataId = { ...activeChat }.id;
+  
 
   return (
     <div className="flex h-full flex-col">
@@ -77,11 +78,12 @@ export default function ChatThread({ teams }: { teams: Members.Type }) {
         </div>
         <div className="flex items-center gap-2">
           <ChatMembersSelector
-            teams={teams}
-            selectedMembers={
-              chatById?.members?.map((m: { id: string }) => m.id) ?? []
-            }
+            agencyTeam={agencyTeam}
+            selectedMembers={chatById?.members ?? []}
+
+
             onMembersUpdate={handleMembersUpdate}
+            isLoading={isLoading}
           />
           <Popover open={isPopupOpen} onOpenChange={setIsPopupOpen}>
             <PopoverTrigger asChild>

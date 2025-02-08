@@ -5,15 +5,17 @@ import { Dispatch, SetStateAction, createContext, useContext } from 'react';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
-import { useRealtime } from '~/hooks/use-realtime';
+import { TableConfig, useRealtime } from '~/hooks/use-realtime';
 import { Message } from '~/lib/message.types';
 import { useChatManagement } from '~/messages/hooks/use-chat-management-actions';
 import { useChatMessageActions } from '~/messages/hooks/use-chat-message-actions';
 import useChatState from '~/messages/hooks/use-chat-state';
 import {
+  ActiveChatState,
   ChatContextType,
   ChatProviderProps,
 } from '~/messages/types/chat-context.types';
+
 
 /**
  * Context for managing chat state and operations.
@@ -72,6 +74,14 @@ export function ChatProvider({
     setMembers,
     setMessages,
     messagesQueryKey,
+    isChatCreationDialogOpen,
+    setIsChatCreationDialogOpen,
+    searchQuery,
+    setSearchQuery,
+    filteredChats,
+    setFilteredChats,
+    setChats,
+
   } = useChatState({ initialMembers });
 
   // Query for chat by id
@@ -90,7 +100,7 @@ export function ChatProvider({
 
   const messageActions = useChatMessageActions({
     messages,
-    setMessages: setMessages,
+    setMessages,
     chatId,
     queryKey: messagesQueryKey,
     user: currentUserInfo,
@@ -117,10 +127,15 @@ export function ChatProvider({
         SetStateAction<Message.Type[] | Message.Type>
       >,
     },
+    // {
+    //   tableName: 'chats',
+    //   currentData: activeChat,
+    //   setData: setChats,
+    // },
   ];
 
   // Initialize real-time subscriptions
-  useRealtime(tables, realtimeConfig, handleSubscriptions);
+  useRealtime(tables as TableConfig<Message.Type>[], realtimeConfig, handleSubscriptions);
 
   const value: ChatContextType = {
     messages: messages.filter((msg) => !('deleted_at' in msg)),
@@ -129,15 +144,24 @@ export function ChatProvider({
     setMembers,
     activeChat,
     setActiveChat,
+
     chatId,
     setChatId,
+    isChatCreationDialogOpen,
+    setIsChatCreationDialogOpen,
+    searchQuery,
+    setSearchQuery,
 
+    filteredChats,
+    setFilteredChats,
+    setChats: setChats as ActiveChatState['setChats'],
     user: {
       id: currentUser?.id ?? '',
       name: currentUser?.name ?? '',
       email: user?.email ?? '',
       picture_url: currentUser?.picture_url ?? '',
     },
+
     chatByIdQuery,
     ...chatActions,
     ...messageActions,

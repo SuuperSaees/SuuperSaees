@@ -4,8 +4,8 @@ import { Database } from '~/lib/database.types';
 import { ChatMessages } from '~/lib/chat-messages.types';
 
 export class ChatMessagesRepository {
-  private client: SupabaseClient;
-  private adminClient?: SupabaseClient;
+  private client: SupabaseClient<Database>;
+  private adminClient?: SupabaseClient<Database>;
 
   constructor(
     client: SupabaseClient<Database>,
@@ -70,7 +70,7 @@ export class ChatMessagesRepository {
   }): Promise<void> {
     const client = this.adminClient ?? this.client;
     const baseQuery = client
-      .from('chat_messages')
+      .from('messages')
       .update({ deleted_on: new Date().toISOString() });
 
     try {

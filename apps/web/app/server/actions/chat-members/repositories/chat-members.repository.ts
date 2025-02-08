@@ -4,9 +4,8 @@ import { Database } from '~/lib/database.types';
 import { ChatMembers } from '~/lib/chat-members.types';
 
 export class ChatMembersRepository {
-  private client: SupabaseClient;
-  private adminClient?: SupabaseClient;
-
+  private client: SupabaseClient<Database>;
+  private adminClient?: SupabaseClient<Database>;
 
   constructor(
     client: SupabaseClient<Database>,
@@ -59,29 +58,28 @@ export class ChatMembersRepository {
     await Promise.all(membersToUpsert.map(async (member) => {
       const { data: upsertedMember, error: upsertError} = await client
         .from('chat_members')
-
         .insert({
           chat_id,
           user_id: member.user_id,
-          type: member.type,
+          type: member.type as "project_manager" | "assistant" | "owner" | "guest",
         }
       )
       .select('*, user:accounts(email, settings:user_settings(name, picture_url))')
       .single();
+      if (upsertError) {
+        throw new Error(`Error updating members: ${upsertError.message}`);
+      }
 
-      if (upsertedMembers.length > 0) {
+      if (upsertedMember) {
         upsertedMembers.push({
           ...upsertedMember,
           user: {
-            id: upsertedMember.user.id,
-            email: upsertedMember.user.email,
-            name: upsertedMember.user.settings?.name,
-            picture_url: upsertedMember.user.settings?.picture_url,
+            id: upsertedMember.user_id ?? '',
+            email: upsertedMember.user?.email ?? '',
+            name: upsertedMember.user?.settings?.name ?? '',
+            picture_url: upsertedMember.user?.settings?.picture_url ?? '',
           },
         });
-      }
-      if (upsertError) {
-        throw new Error(`Error updating members: ${upsertError.message}`);
       }
     }));
 
@@ -89,10 +87,10 @@ export class ChatMembersRepository {
   }
 
   // * GET REPOSITORIES
-  async list(chatId: string, userId?: string): Promise<ChatMembers.TypeWithRelations[]> {
+  async list(chatId?: string, userId?: string): Promise<ChatMembers.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
 
-    if(userId) {
+    if(userId && !chatId	) {
       const { data, error } = await client
         .from('chat_members')
         .select(`*, user:accounts(email, settings:user_settings(name, picture_url))`)
@@ -110,7 +108,8 @@ export class ChatMembersRepository {
     const { data, error } = await client
       .from('chat_members')
       .select(`*, user:accounts(email, settings:user_settings(name, picture_url))`)
-      .eq('chat_id', chatId);
+      .eq('chat_id', chatId ?? '');
+
 
     if (error) {
       throw new Error(
@@ -118,16 +117,15 @@ export class ChatMembersRepository {
       );
     }
 
-    const members = data.map((member: ChatMembers.TypeWithRelations) => ({
+    const members = data.map((member) => ({
       ...member,
       user: {
-        id: member.user.id,
-        email: member.user.email,
-        name: member.user.settings?.name,
-        picture_url: member.user.settings?.picture_url,
+        id: member.user_id ?? '',
+        email: member.user?.email ?? '',
+        name: member.user?.settings?.name ?? '',
+        picture_url: member.user?.settings?.picture_url ?? '',
       },
-    })) as ChatMembers.TypeWithRelations[];
-
+    }));
 
     return members;
   }
@@ -159,11 +157,12 @@ export class ChatMembersRepository {
     const member = {
       ...data,
       user: {
-        id: data.user.id,
-        email: data.user.email,
-        name: data.user.settings?.name,
-        picture_url: data.user.settings?.picture_url,
+        id: data.user_id ?? '',
+        email: data.user?.email ?? '',
+        name: data.user?.settings?.name ?? '',
+        picture_url: data.user?.settings?.picture_url ?? '',
       },
+
     }
     return member as ChatMembers.TypeWithRelations;
   }
@@ -225,10 +224,11 @@ export class ChatMembersRepository {
     const { data, error } = await client
       .from('chat_members')
       .update(payload)
-      .eq('chat_id', chat_id)
-      .eq('user_id', user_id)
+      .eq('chat_id', chat_id ?? '')
+      .eq('user_id', user_id ?? '')
       .select('*, user:accounts(email, settings:user_settings(name, picture_url))')
       .single();
+
 
 
     if (error) {
@@ -240,11 +240,12 @@ export class ChatMembersRepository {
     const member = {
       ...data,
       user: {
-        id: data.user.id,
-        email: data.user.email,
-        name: data.user.settings?.name,
-        picture_url: data.user.settings?.picture_url,
+        id: data?.user_id ?? '',
+        email: data?.user?.email ?? '',
+        name: data?.user?.settings?.name ?? '',
+        picture_url: data?.user?.settings?.picture_url ?? '',
       },
+
     }
 
     return member as ChatMembers.TypeWithRelations;

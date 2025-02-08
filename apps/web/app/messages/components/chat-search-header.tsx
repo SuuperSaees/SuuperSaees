@@ -1,22 +1,28 @@
 'use client';
 
-import { SquarePen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { Members } from '~/lib/members.types';
+
 // import { useRouter } from 'next/navigation';
-import { Button } from '@kit/ui/button';
-
 import { useChat } from './context/chat-context';
+import CreateOrganizationsChatDialog from './create-chat-dialog';
 
-export default function ChatSearchHeader() {
+export default function ChatSearchHeader({
+  agencyTeam,
+}: {
+  agencyTeam: Members.Organization;
+}) {
   // const router = useRouter();
-
   const { t } = useTranslation('chats');
-  const { createChatMutation } = useChat();
+  const { createChatMutation, isChatCreationDialogOpen, setIsChatCreationDialogOpen, setSearchQuery  } = useChat();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Searching:', e.target.value);
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
   };
+  const agencyOrganization = agencyTeam;
+  const agencyMembers = agencyTeam.members ?? [];
 
   return (
     <div className="border-b p-4">
@@ -24,10 +30,19 @@ export default function ChatSearchHeader() {
         <div className="mb-4 flex items-center justify-between gap-2">
           <h2 className="text-2xl font-semibold">{t('chats')}</h2>
           {/*  Drop down menu */}
-          <Button onClick={() => createChatMutation.mutate()} variant="ghost">
-            <SquarePen className="cursor-pointer text-gray-500" />
-          </Button>
+          {agencyOrganization && (
+            <CreateOrganizationsChatDialog
+              createChatMutation={createChatMutation}
+              agencyMembers={agencyMembers}
+              agencyOrganization={agencyOrganization}
+              isChatCreationDialogOpen={isChatCreationDialogOpen}
+              setIsChatCreationDialogOpen={setIsChatCreationDialogOpen}
+            />
+          )}
         </div>
+
+
+
         <div className="relative">
           <input
             type="text"
