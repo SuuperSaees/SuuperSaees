@@ -36,6 +36,7 @@ export default function ChatMembersSelector({
         includeMembers: true,
       }),
     enabled: !!clientOrganizationIds,
+    retry: 4
   });
 
   const clientOrganizationMembers = clientMembersQuery.data ?? {};

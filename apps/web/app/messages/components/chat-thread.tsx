@@ -61,7 +61,6 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
   const activeChatDataName = { ...activeChat }.name;
   const activeChatDataId = { ...activeChat }.id;
   
-  console.log('chatById', chatById);
 
   return (
     <div className="flex h-full flex-col">

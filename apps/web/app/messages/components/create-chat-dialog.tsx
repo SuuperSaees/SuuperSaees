@@ -36,12 +36,14 @@ import {
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
 import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
+import { Dispatch, SetStateAction } from 'react';
 
 // Dialog to create a new chat
 
 // Dialog to create a new chat
 
 // Dialog to create a new chat
+
 
 // Dialog to create a new chat
 
@@ -68,16 +70,23 @@ interface CreateChatDialogProps {
   agencyMembers: Members.Member[];
   agencyOrganization: Members.Organization;
   clientOrganization?: Account.Type;
+  isChatCreationDialogOpen: boolean;
+  setIsChatCreationDialogOpen: Dispatch<SetStateAction<boolean>>;
 }
+
 
 export default function CreateOrganizationsChatDialog({
   createChatMutation,
   agencyMembers,
   clientOrganization,
   agencyOrganization,
+  isChatCreationDialogOpen,
+  setIsChatCreationDialogOpen,
 }: CreateChatDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+
+
 
     defaultValues: {
       name: '',
@@ -97,13 +106,14 @@ export default function CreateOrganizationsChatDialog({
   };
 
   return (
-    <Dialog>
+    <Dialog open={isChatCreationDialogOpen} onOpenChange={() => setIsChatCreationDialogOpen(!isChatCreationDialogOpen)}>
       <DialogTrigger asChild>
         <Button variant="ghost">
           <SquarePen className="cursor-pointer text-gray-600" />
+
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg" >
         <DialogTitle className="text-xl font-bold">
           Create a new chat
         </DialogTitle>

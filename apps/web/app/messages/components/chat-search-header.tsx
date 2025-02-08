@@ -15,7 +15,7 @@ export default function ChatSearchHeader({
 }) {
   // const router = useRouter();
   const { t } = useTranslation('chats');
-  const { createChatMutation, setSearchQuery } = useChat();
+  const { createChatMutation, isChatCreationDialogOpen, setIsChatCreationDialogOpen, setSearchQuery  } = useChat();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -35,9 +35,13 @@ export default function ChatSearchHeader({
               createChatMutation={createChatMutation}
               agencyMembers={agencyMembers}
               agencyOrganization={agencyOrganization}
+              isChatCreationDialogOpen={isChatCreationDialogOpen}
+              setIsChatCreationDialogOpen={setIsChatCreationDialogOpen}
             />
           )}
         </div>
+
+
 
         <div className="relative">
           <input

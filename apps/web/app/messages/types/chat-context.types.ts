@@ -1,11 +1,12 @@
-import { Dispatch, SetStateAction, ReactNode } from 'react'
-import { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
-import { ChatMembers } from '~/lib/chat-members.types'
-import { ChatMessages } from '~/lib/chat-messages.types'
-import { Chats } from '~/lib/chats.types'
-import { Message } from '~/lib/message.types'
-import { User } from '~/lib/user.types'
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 
+import { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+
+import { ChatMembers } from '~/lib/chat-members.types';
+import { ChatMessages } from '~/lib/chat-messages.types';
+import { Chats } from '~/lib/chats.types';
+import { Message } from '~/lib/message.types';
+import { User } from '~/lib/user.types';
 
 /**
  * Interface for managing the active chat state
@@ -16,16 +17,24 @@ import { User } from '~/lib/user.types'
  * @property {Function} setActiveChatData - Function to update the active chat data
  */
 export interface ActiveChatState {
-  chatId: string
-  setChatId: Dispatch<SetStateAction<string>>
-  activeChat: Chats.Type | null
-  setActiveChat: Dispatch<SetStateAction<Chats.Type | null>>
+  chatId: string;
+  setChatId: Dispatch<SetStateAction<string>>;
+  activeChat: Chats.Type | null;
+  setActiveChat: Dispatch<SetStateAction<Chats.Type | null>>;
   searchQuery: string;
   setSearchQuery: Dispatch<SetStateAction<string>>;
   filteredChats: Chats.TypeWithRelations[];
   setFilteredChats: Dispatch<SetStateAction<Chats.TypeWithRelations[]>>;
+  isChatCreationDialogOpen: boolean;
+  setIsChatCreationDialogOpen: Dispatch<SetStateAction<boolean>>;
+  setChats:
+    | Dispatch<SetStateAction<Chats.TypeWithRelations[]>>
+    | ((
+        updater:
+          | Chats.TypeWithRelations[]
+          | ((prev: Chats.TypeWithRelations[]) => Chats.TypeWithRelations[]),
+      ) => void);
 }
-
 
 /**
  * Interface for managing messages and members state
@@ -36,10 +45,10 @@ export interface ActiveChatState {
  * @property {Function} setMembers - Function to update members
  */
 export interface MessagesState {
-  messages: Message.Type[]
-  setMessages: Dispatch<SetStateAction<Message.Type[]>>
-  members: ChatMembers.Type[]
-  setMembers: Dispatch<SetStateAction<ChatMembers.Type[]>>
+  messages: Message.Type[];
+  setMessages: Dispatch<SetStateAction<Message.Type[]>>;
+  members: ChatMembers.Type[];
+  setMembers: Dispatch<SetStateAction<ChatMembers.Type[]>>;
 }
 
 /**
@@ -52,31 +61,44 @@ export interface ChatMutations {
     ChatMessages.TypeWithRelations,
     Error,
     {
-      content: string
-      fileIds?: string[]
-      userId: string
-      temp_id: string
+      content: string;
+      fileIds?: string[];
+      userId: string;
+      temp_id: string;
     },
     {
-      previousMessages: Message.Type[]
+      previousMessages: Message.Type[];
     }
-  >
+  >;
   /** Mutation for deleting messages */
-  deleteMessageMutation: UseMutationResult<void, Error, {
-    chatId?: string;
-    messageId?: string;
-}, {
-    previousMessages: Message.Type[];
-}>
+  deleteMessageMutation: UseMutationResult<
+    void,
+    Error,
+    {
+      chatId?: string;
+      messageId?: string;
+    },
+    {
+      previousMessages: Message.Type[];
+    }
+  >;
   /** Mutation for updating chat details */
-  updateChatMutation: UseMutationResult<Chats.Update, Error, string>
+  updateChatMutation: UseMutationResult<Chats.Update, Error, string>;
   /** Mutation for deleting entire chat */
-  deleteChatMutation: UseMutationResult<void, Error, void>
+  deleteChatMutation: UseMutationResult<void, Error, void>;
   /** Mutation for creating new chat */
-  createChatMutation: UseMutationResult<Chats.Insert, Error, {name: string, memberIds: string[]}>
+  createChatMutation: UseMutationResult<
+    Chats.Insert,
+    Error,
+    { name: string; memberIds: string[] }
+  >;
   /** Mutation for updating chat members */
-  membersUpdateMutation: UseMutationResult<ChatMembers.TypeWithRelations[], Error, string[], unknown>
-
+  membersUpdateMutation: UseMutationResult<
+    ChatMembers.TypeWithRelations[],
+    Error,
+    string[],
+    unknown
+  >;
 }
 
 /**
@@ -85,9 +107,9 @@ export interface ChatMutations {
  */
 export interface ChatQueries {
   /** Query for fetching all chats */
-  chatsQuery: UseQueryResult<Chats.Type[], Error>
+  chatsQuery: UseQueryResult<Chats.Type[], Error>;
   /** Query for fetching specific chat by ID */
-  chatByIdQuery: UseQueryResult<Chats.TypeWithRelations, Error>
+  chatByIdQuery: UseQueryResult<Chats.TypeWithRelations, Error>;
 }
 
 /**
@@ -98,8 +120,12 @@ export interface ChatQueries {
  * @extends {ChatMutations}
  * @extends {ChatQueries}
  */
-export interface ChatContextType extends ActiveChatState, MessagesState, ChatMutations, ChatQueries {
-  user: User.Response
+export interface ChatContextType
+  extends ActiveChatState,
+    MessagesState,
+    ChatMutations,
+    ChatQueries {
+  user: User.Response;
 }
 
 /**
@@ -107,9 +133,8 @@ export interface ChatContextType extends ActiveChatState, MessagesState, ChatMut
  * @interface ChatProviderProps
  */
 export interface ChatProviderProps {
-  children: ReactNode
+  children: ReactNode;
   // chatId: string
-  initialChat?: Chats.TypeWithRelations
-  initialMembers?: ChatMembers.Type[]
+  initialChat?: Chats.TypeWithRelations;
+  initialMembers?: ChatMembers.Type[];
 }
-

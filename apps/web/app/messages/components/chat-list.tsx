@@ -7,30 +7,31 @@ import { useChat } from './context/chat-context';
 
 export default function ChatList() {
   const { chatId, chatsQuery, searchQuery } = useChat();
-  const chats = chatsQuery.data ?? [];
 
   const filteredChats = useMemo(() => {
+    const chats = chatsQuery.data ?? [];
     if (!searchQuery) return chats;
+    if (!Array.isArray(chats) || !chats.length) return [];
     
     return chats.filter((chat) => {
       // Verificar nombre del chat de forma segura
-      if (chat.name?.toLowerCase().includes(searchQuery.toLowerCase())) {
+      if (chat?.name?.toLowerCase().includes(searchQuery.toLowerCase())) {
         return true;
       }
       
       // Verificar mensajes de forma segura
-      const hasMatchingMessage = chat.messages?.some((message) =>
+      const hasMatchingMessage = Array.isArray(chat?.messages) && chat.messages.some((message) =>
         message?.content?.toLowerCase().includes(searchQuery.toLowerCase())
       );
       
       // Verificar miembros de forma segura
-      const hasMatchingMember = chat.chat_members?.some((member) =>
+      const hasMatchingMember = Array.isArray(chat?.chat_members) && chat.chat_members.some((member) =>
         member?.name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
       return hasMatchingMessage || hasMatchingMember;
     });
-  }, [chats, searchQuery]);
+  }, [chatsQuery.data, searchQuery]);
 
   // Estado de carga
   if (chatsQuery.isLoading) {
@@ -53,7 +54,7 @@ export default function ChatList() {
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="flex flex-col">
-        {filteredChats.length === 0 ? (
+        {!Array.isArray(filteredChats) || filteredChats.length === 0 ? (
           <div className="p-4 text-center text-gray-500">
             {searchQuery ? 'No chats found' : 'No chats yet'}
           </div>
