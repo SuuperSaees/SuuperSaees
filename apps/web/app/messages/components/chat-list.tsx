@@ -8,12 +8,10 @@ import { Chats } from '~/lib/chats.types';
 
 export default function ChatList() {
   const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat, setChatId } = useChat();
-
   const filteredChats = useMemo(() => {
     const chats = chatsQuery.data ?? [];
     if (!searchQuery) return chats;
     if (!Array.isArray(chats) || !chats.length) return [];
-    
     return chats.filter((chat) => {
       // Verificar nombre del chat de forma segura
       if (chat?.name?.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -57,6 +55,7 @@ export default function ChatList() {
       </div>
     );
   }
+
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="flex flex-col">

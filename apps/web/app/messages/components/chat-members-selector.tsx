@@ -34,8 +34,10 @@ export default function ChatMembersSelector({
 
   const clientOrganizationIds = selectedMembers
     .map((member) => member.organization_id)
+
     .filter((id) => id !== agencyTeam.id) // don't include undefined
     .filter(Boolean);
+
 
   const clientMembersQuery = useQuery({
     queryKey: ['clientMembers', clientOrganizationIds],

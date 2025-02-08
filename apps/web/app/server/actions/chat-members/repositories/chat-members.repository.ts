@@ -18,7 +18,7 @@ export class ChatMembersRepository {
   // * CREATE REPOSITORIES
   async upsert(
     chat_id: string,
-    members: { user_id: string; type: string }[],
+    members: { user_id: string; type: string, visibility: boolean }[],
   ): Promise<ChatMembers.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
 
@@ -62,6 +62,7 @@ export class ChatMembersRepository {
           chat_id,
           user_id: member.user_id,
           type: member.type as "project_manager" | "assistant" | "owner" | "guest",
+          visibility: member.visibility,
         }
       )
       .select('*, user:accounts(email, settings:user_settings(name, picture_url))')

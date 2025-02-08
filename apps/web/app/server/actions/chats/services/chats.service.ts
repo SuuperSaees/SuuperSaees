@@ -28,6 +28,7 @@ export class ChatService {
         payload.chat_members.map((member) => ({
           user_id: member.user_id,
           type: member.type ?? 'guest',
+          visibility: member.visibility ?? true,
         })),
       );
     }
