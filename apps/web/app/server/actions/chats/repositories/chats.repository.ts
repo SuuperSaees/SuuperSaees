@@ -103,6 +103,7 @@ export class ChatRepository {
           account:accounts(
             email,
             name,
+            organization_id,
             picture_url,
             user_settings (
               name,
@@ -155,6 +156,7 @@ export class ChatRepository {
         chat_id: chatId,
         created_at: new Date().toISOString(),
         deleted_on: null,
+        organization_id: member.account?.organization_id ?? '',
         id: member.user_id,
         name: member.account?.user_settings?.name ?? member.account?.name ?? '',
         picture_url: member.account?.user_settings?.picture_url ?? member.account?.picture_url ?? '',
