@@ -1,46 +1,32 @@
 'use server';
 import {
   AddMembersPayload,
-  RemoveMemberPayload,
-  ResetMemberSettingsPayload,
-  UpdateMemberSettingsPayload,
-  UpdateMemberVisibilityPayload,
-
 } from './chat-members.interface';
-import { createMembersAction } from './chat-members';
+import { createChatMembersAction } from './chat-members';
+import { ChatMembers } from '~/lib/chat-members.types';
 
 function getMembersAction() {
-  return createMembersAction(process.env.NEXT_PUBLIC_SITE_URL as string);
+  return createChatMembersAction(process.env.NEXT_PUBLIC_SITE_URL as string);
 }
 
 export async function upsertMembers(payload: AddMembersPayload) {
-  return await getMembersAction().upsertMembers(payload);
+  return await getMembersAction().upsert(payload);
 }
 
 export async function getMembers(chatId: string) {
-  return await getMembersAction().getMembers(chatId);
+  return await getMembersAction().list(chatId);
 }
 
-export async function getMemberSettings(chatId: string, userId: string) {
-  return await getMembersAction().getMemberSettings(chatId, userId);
+export async function getMember(chatId: string, userId: string) {
+  return await getMembersAction().get(chatId, userId);
 }
 
-export async function removeMember(payload: RemoveMemberPayload) {
-  return await getMembersAction().removeMember(payload);
+export async function deleteMember(chatId?: string, userId?: string) {
+  return await getMembersAction().delete(chatId, userId);
 }
 
-export async function resetMemberSettings(payload: ResetMemberSettingsPayload) {
-  return await getMembersAction().resetMemberSettings(payload);
-}
-
-export async function updateMemberVisibility(
-  payload: UpdateMemberVisibilityPayload,
+export async function updateMember(
+  payload: ChatMembers.Update,
 ) {
-  return await getMembersAction().updateMemberVisibility(payload);
-}
-
-export async function updateMemberSettings(
-  payload: UpdateMemberSettingsPayload,
-) {
-  return await getMembersAction().updateMemberSettings(payload);
+  return await getMembersAction().update(payload);
 }

@@ -1,42 +1,27 @@
 'use server';
-
-import {
-  ChatRoleType,
-  validateChatRole,
-} from '../chats/middleware/validate_chat_role';
-import {
-  ChatMessagePayload,
-  ClearChatMessagesPayload,
-  DeleteMessagePayload,
-  UpdateMessageContentPayload,
-} from './chat-messages.interface';
-import { createMessagesAction } from './chat-messages';
+import { ChatMessages } from '~/lib/chat-messages.types';
+import { createChatMessagesAction } from './chat-messages';
 
 function getMessagesAction() {
-  return createMessagesAction(process.env.NEXT_PUBLIC_SITE_URL as string);
+  return createChatMessagesAction(process.env.NEXT_PUBLIC_SITE_URL as string);
 }
 
-export async function createMessage(payload: ChatMessagePayload) {
-  validateChatRole(['owner', 'project_manager'] as ChatRoleType[], [
-    payload.role,
-  ]);
-  return await getMessagesAction().createMessage(payload);
+export async function createMessage(payload: ChatMessages.InsertWithRelations) {
+  return await getMessagesAction().create(payload);
 }
+
 
 export async function getMessages(chatId: string) {
-  return await getMessagesAction().getMessages(chatId);
+  return await getMessagesAction().list(chatId);
 }
 
-export async function deleteMessage(payload: DeleteMessagePayload) {
-  return await getMessagesAction().deleteMessage(payload);
+export async function deleteMessage({chatId, messageId}: {chatId?: string, messageId?: string}) {
+  return await getMessagesAction().delete(chatId, messageId);
 }
 
-export async function clearChatMessages(payload: ClearChatMessagesPayload) {
-  return await getMessagesAction().clearChatMessages(payload);
-}
 
-export async function updateMessageContent(
-  payload: UpdateMessageContentPayload,
+export async function updateMessage(
+  payload: ChatMessages.Update,
 ) {
-  return await getMessagesAction().updateMessageContent(payload);
+  return await getMessagesAction().update(payload);
 }

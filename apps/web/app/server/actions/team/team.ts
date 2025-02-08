@@ -15,9 +15,10 @@ export class TeamAction extends BaseAction {
     );
   }
 
-  async getTeams({ organizationId, role }: GetTeamsOptions): Promise<Members.Type> {
-    return await this.controller.getTeams({ organizationId, role });
+  async getTeams({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
+    return await this.controller.getTeams({ organizationIds, includeMembers, includeAgency });
   }
+
 
 }
 

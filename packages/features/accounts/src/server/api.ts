@@ -56,7 +56,7 @@ class AccountsApi {
   async loadUserAccounts() {
     const { data: accounts, error } = await this.client
       .from('user_accounts')
-      .select(`name, slug, picture_url`);
+      .select(`id, name, slug, picture_url`)
 
 
     if (error) {
@@ -64,6 +64,7 @@ class AccountsApi {
     }
 
     return {
+      id: accounts[0]?.id,
       name: accounts[0]?.name,
       slug: accounts[0]?.slug,
       picture_url: accounts[0]?.picture_url,

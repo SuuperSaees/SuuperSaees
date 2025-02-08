@@ -4,37 +4,29 @@ import { Database } from '~/lib/database.types';
 
 import {
   AddMembersPayload,
-  AddMembersResponse,
-  GetMembersResponse,
-  MemberSettingsResponse,
-  RemoveMemberPayload,
-  RemoveMemberResponse,
-  ResetMemberSettingsPayload,
-  ResetMemberSettingsResponse,
-  UpdateMemberSettingsPayload,
-  UpdateMemberSettingsResponse,
-  UpdateMemberVisibilityPayload,
-  UpdateMemberVisibilityResponse,
 } from '../chat-members.interface';
-import { MembersRepository } from '../repositories/chat-members.repository';
-import { MembersService } from '../services/chat-members.service';
+import { ChatMembers } from '~/lib/chat-members.types';
 
-export class MembersController {
-  private membersService: MembersService;
+import { ChatMembersRepository } from '../repositories/chat-members.repository';
+import { ChatMembersService } from '../services/chat-members.service';
+
+export class ChatMembersController {
+  private membersService: ChatMembersService;
 
   constructor(
     baseUrl: string,
     client: SupabaseClient<Database>,
     adminClient: SupabaseClient<Database>,
   ) {
-    const membersRepository = new MembersRepository(client, adminClient);
-    this.membersService = new MembersService(membersRepository);
+    const membersRepository = new ChatMembersRepository(client, adminClient);
+    this.membersService = new ChatMembersService(membersRepository);
   }
 
+
   // * CREATE CONTROLLERS
-  async upsertMembers(payload: AddMembersPayload): Promise<AddMembersResponse> {
+  async upsert(payload: AddMembersPayload): Promise<ChatMembers.TypeWithRelations[]> {
     try {
-      return await this.membersService.upsertMembers(payload);
+      return await this.membersService.upsert(payload);
     } catch (error) {
 
       console.error(error);
@@ -43,21 +35,21 @@ export class MembersController {
   }
 
   // * GET CONTROLLERS
-  async getMembers(chatId: string): Promise<GetMembersResponse[]> {
+  async list(chatId: string): Promise<ChatMembers.TypeWithRelations[]> {
     try {
-      return await this.membersService.getMembers(chatId);
+      return await this.membersService.list(chatId);
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
 
-  async getMemberSettings(
+  async get(
     chatId: string,
     userId: string,
-  ): Promise<MemberSettingsResponse> {
+  ): Promise<ChatMembers.TypeWithRelations> {
     try {
-      return await this.membersService.getMemberSettings(chatId, userId);
+      return await this.membersService.get(chatId, userId);
     } catch (error) {
       console.error(error);
       throw error;
@@ -65,22 +57,13 @@ export class MembersController {
   }
 
   // * DELETE CONTROLLERS
-  async removeMember(
-    payload: RemoveMemberPayload,
-  ): Promise<RemoveMemberResponse> {
+  async delete(
+    chatId?: string,
+    userId?: string,
+  ): Promise<void> {
     try {
-      return await this.membersService.removeMember(payload);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
+      return await this.membersService.delete(chatId, userId);
 
-  async resetMemberSettings(
-    payload: ResetMemberSettingsPayload,
-  ): Promise<ResetMemberSettingsResponse> {
-    try {
-      return await this.membersService.resetMemberSettings(payload);
     } catch (error) {
       console.error(error);
       throw error;
@@ -88,22 +71,11 @@ export class MembersController {
   }
 
   // * UPDATE CONTROLLERS
-  async updateMemberSettings(
-    payload: UpdateMemberSettingsPayload,
-  ): Promise<UpdateMemberSettingsResponse> {
+  async update(
+    payload: ChatMembers.Update,
+  ): Promise<ChatMembers.TypeWithRelations> {
     try {
-      return await this.membersService.updateMemberSettings(payload);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  async updateMemberVisibility(
-    payload: UpdateMemberVisibilityPayload,
-  ): Promise<UpdateMemberVisibilityResponse> {
-    try {
-      return await this.membersService.updateMemberVisibility(payload);
+      return await this.membersService.update(payload);
     } catch (error) {
       console.error(error);
       throw error;

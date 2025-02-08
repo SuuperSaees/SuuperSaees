@@ -1,12 +1,5 @@
-import { MembersRepository } from '../../chat-members/repositories/chat-members.repository';
-import { MessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
-import {
-  ChatPayload,
-  DeleteChatResponse,
-  GetChatByIdResponse,
-  UpdateChatSettingsPayload,
-  UpdateChatSettingsResponse,
-} from '../chats.interface';
+import { ChatMembersRepository } from '../../chat-members/repositories/chat-members.repository';
+import { ChatMessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
 import { ChatRepository } from '../repositories/chats.repository';
 import { Chats } from '~/lib/chats.types';
 
@@ -14,54 +7,65 @@ import { Chats } from '~/lib/chats.types';
 export class ChatService {
   constructor(
     private readonly chatRepository: ChatRepository,
-    private readonly membersRepository: MembersRepository,
-    private readonly messagesRepository: MessagesRepository,
+    private readonly chatMembersRepository?: ChatMembersRepository,
+    private readonly chatMessagesRepository?: ChatMessagesRepository,
   ) {}
 
+
   // * CREATE SERVICES
-  async createChat(payload: ChatPayload): Promise<Chats.Type> {
-    const chat = await this.chatRepository.createChat(payload);
+  async create(payload: Chats.InsertWithRelations): Promise<Chats.Type> {
+    const createdChat = await this.chatRepository.create({
+      name: payload.name,
+      user_id: payload.user_id,
+      visibility: payload.visibility,
+      image: payload.image,
+      settings: payload.settings,
+    });
 
-
-    if (payload.members && payload.members.length > 0) {
-      await this.membersRepository.addMembers(
-        chat.id.toString(),
-        payload.members.map((member) => ({
+    if (payload.chat_members && payload.chat_members.length > 0) {
+      await this.chatMembersRepository?.upsert(
+        createdChat.id.toString(),
+        payload.chat_members.map((member) => ({
           user_id: member.user_id,
-          role: member.role,
+          type: member.type ?? 'guest',
         })),
       );
     }
-
-    return chat;
+    return createdChat;
   }
 
   // * GET SERVICES
-  async getChats(): Promise<Chats.Type[]> {
-    return await this.chatRepository.getChats();
+  async list(userId: string): Promise<Chats.Type[]> {
+    const chatsResult = await this.chatMembersRepository?.list(undefined, userId);
+
+    const chatIds = chatsResult?.map((chat) => chat.chat_id);
+
+    return await this.chatRepository.list(userId, chatIds);
   }
 
-  async getChatById(chatId: string): Promise<GetChatByIdResponse> {
-    return await this.chatRepository.getChatById(chatId);
+
+
+  async get(chatId: string): Promise<Chats.TypeWithRelations> {
+    return await this.chatRepository.get(chatId);
   }
+
 
   // * DELETE SERVICES
-  async deleteChat(chatId: string): Promise<DeleteChatResponse> {
-    // ❗ Primero eliminamos los miembros y mensajes del chat antes de eliminarlo
-    await this.membersRepository.removeAllMembers(chatId);
-    await this.messagesRepository.clearChatMessages({ chat_id: chatId });
+  async delete(chatId: string): Promise<void> {
+    // ❗ First we delete the members and messages of the chat before deleting it
+    await Promise.all([
+      this.chatMembersRepository?.delete({
+        chat_id: chatId,
+      }),
+      this.chatMessagesRepository?.delete({ chat_id: chatId })
+    ]);
 
-    return await this.chatRepository.deleteChat(chatId);
+    return await this.chatRepository.delete(chatId);
   }
 
   // * UPDATE SERVICES
-  async updateChatSettings(
-    payload: UpdateChatSettingsPayload,
-  ): Promise<UpdateChatSettingsResponse> {
-    return await this.chatRepository.updateChatSettings(payload);
+  async update(payload: Chats.Update): Promise<Chats.Type> {
+    return await this.chatRepository.update(payload);
   }
 
-  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
-    return await this.chatRepository.updateChat(payload);
-  }
 }

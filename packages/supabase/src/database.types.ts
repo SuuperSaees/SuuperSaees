@@ -799,56 +799,36 @@ export type Database = {
       }
       chat_messages: {
         Row: {
-          account_id: string
           chat_id: string
-          content: string
           created_at: string | null
           id: string
-          role: Database["public"]["Enums"]["chat_role_type"]
+          message_id: string
         }
         Insert: {
-          account_id: string
           chat_id: string
-          content: string
           created_at?: string | null
           id?: string
-          role: Database["public"]["Enums"]["chat_role_type"]
+          message_id: string
         }
         Update: {
-          account_id?: string
           chat_id?: string
-          content?: string
           created_at?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["chat_role_type"]
+          message_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "chat_messages_chat_id_fkey"
             columns: ["chat_id"]
             isOneToOne: false
             referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]

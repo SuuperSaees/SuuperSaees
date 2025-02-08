@@ -7,8 +7,8 @@ export class TeamService {
     private readonly teamRepository: TeamRepository,
   ) {}
 
-  async getTeams({ organizationId, role }: GetTeamsOptions): Promise<Members.Type> {
-    return await this.teamRepository.getTeams({ organizationId, role });
+  async getTeams({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
+    return await this.teamRepository.getTeams({ organizationIds, includeMembers, includeAgency });
   }
 
 }

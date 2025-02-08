@@ -1,30 +1,23 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
-
-import {
-  ChatPayload,
-  DeleteChatResponse,
-  GetChatByIdResponse,
-  UpdateChatSettingsPayload,
-  UpdateChatSettingsResponse,
-} from '../chats.interface';
 import { Chats } from '~/lib/chats.types';
 
 export class ChatRepository {
-  private client: SupabaseClient;
-  private adminClient?: SupabaseClient;
+  private client: SupabaseClient<Database>;
+  private adminClient?: SupabaseClient<Database>;
+
 
   constructor(
     client: SupabaseClient<Database>,
-    adminClient: SupabaseClient<Database>,
+    adminClient?: SupabaseClient<Database>,
   ) {
     this.client = client;
     this.adminClient = adminClient;
   }
 
   // * CREATE REPOSITORIES
-  async createChat(payload: ChatPayload): Promise<Chats.Type> {
+  async create(payload: Chats.Insert): Promise<Chats.Type> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
 
@@ -33,7 +26,7 @@ export class ChatRepository {
         name: payload.name,
         user_id: payload.user_id,
         settings: payload.settings ?? {},
-        visibility: payload.visibility,
+        visibility: payload.visibility ?? true,
         image: payload.image ?? null,
       })
       .select()
@@ -47,24 +40,48 @@ export class ChatRepository {
   }
 
   // * GET REPOSITORIES
-
-  async getChats(): Promise<Chats.Type[]> {
+  async list(userId: string, chatIds?: string[]): Promise<Chats.Type[]> {
     const client = this.adminClient ?? this.client;
+
+    let chatList: Chats.Type[] = [];
+
+    if (chatIds) {
+      const { data: chatMembers, error: membersError } = await client
+      .from('chats')
+      .select(`*`)
+      .in('id', chatIds)
+      .is('deleted_on', null);
+
+      if (membersError) {
+        throw new Error(`Error fetching chats as members: ${membersError.message}`);
+      }
+
+      chatList = chatList.concat(chatMembers as unknown as Chats.Type[]);
+      
+    return chatList;
+
+    }
+    
     const { data, error } = await client
     .from('chats')
     .select(`*`)
+    .eq('user_id', userId)
     .is('deleted_on', null);
-
 
     if (error) {
       throw new Error(`Error fetching chats: ${error.message}`);
     }
 
-    return data as Chats.Type[];
+    chatList = chatList.concat(data as unknown as Chats.Type[]);  
+
+
+    
+    return chatList;
+
   }
+ 
 
-
-  async getChatById(chatId: string): Promise<GetChatByIdResponse> {
+  async get(chatId: string): Promise<Chats.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
 
     const { data: chat, error } = await client
@@ -82,34 +99,45 @@ export class ChatRepository {
         deleted_on,
         chat_members (
           user_id,
-          type
+          type,
+          account:accounts(
+            email,
+            name,
+            picture_url,
+            user_settings (
+              name,
+              picture_url
+            )
+          )
+
         ),
-        chat_messages (
-          id,
-          account_id,
-          content,
-          role,
-          created_at
+        messages (
+            id,
+            user_id,
+            content,
+            created_at,
+            updated_at,
+            deleted_on,
+            type,
+            visibility,
+            temp_id,
+            order_id,
+            parent_id,
+            user:accounts(email, user_settings(name, picture_url))
         )
       `,
       )
       .eq('id', chatId)
+      // is deleted_on null but for messages
+      .is('messages.deleted_on', null)
       .single();
+
 
     if (error) {
       throw new Error(`Error fetching chat ${chatId}: ${error.message}`);
     }
-
-    const membersIds = chat.chat_members?.map((member) => member.user_id as string);
-
-    const { data: members, error: membersError } = await client
-      .from('user_settings')
-      .select('user_id, name, picture_url, email:accounts(email)')
-      .in('user_id', membersIds);
-
-
-    if (membersError) {
-      throw new Error(`Error fetching members: ${membersError.message}`);
+    if (!chat) {
+      throw new Error(`Chat ${chatId} not found`);
     }
 
     return {
@@ -122,55 +150,72 @@ export class ChatRepository {
       created_at: chat.created_at,
       updated_at: chat.updated_at,
       deleted_on: chat.deleted_on,
-      members: members?.map((member) => ({
+      reference_id: chat.id,
+      members: chat.chat_members?.map((member) => ({
+        chat_id: chatId,
+        created_at: new Date().toISOString(),
+        deleted_on: null,
         id: member.user_id,
-        name: member.name,
-        email: typeof member.email === 'string' ? member.email : member.email?.[0]?.email ?? '',
-        picture_url: member.picture_url,
+        name: member.account?.user_settings?.name ?? member.account?.name ?? '',
+        picture_url: member.account?.user_settings?.picture_url ?? member.account?.picture_url ?? '',
+        email: member.account?.email ?? '',
+        settings: {},
+        type: member.type,
+        updated_at: new Date().toISOString(),
+
+        user_id: member.user_id,
+        visibility: true
+
       })) || [],
-      messages: chat.chat_messages || [],
-    } as GetChatByIdResponse;
+      messages: chat?.messages?.map((message) => ({
+        id: message.id,
+        user_id: message.user_id,
+        content: message.content,
+        created_at: message.created_at,
+        updated_at: message.updated_at,
+        deleted_on: message.deleted_on,
+
+        type: message.type,
+        visibility: message.visibility,
+        temp_id: message.temp_id,
+        order_id: message.order_id,
+        parent_id: message.parent_id,
+        user: {
+          id: message.user_id,
+          name: message.user?.user_settings?.name ?? '',
+          email: message.user?.email ?? '',
+          picture_url: message.user?.user_settings?.picture_url ?? '',
+        },
+      })),
+    } 
+
   }
 
 
   // * DELETE REPOSITORIES
-  async deleteChat(chatId: string): Promise<DeleteChatResponse> {
+  async delete(chatId: string): Promise<void> {
     const client = this.adminClient ?? this.client;
-    const { error } = await client.from('chats').delete().eq('id', chatId);
+    const { error } = await client
+    .from('chats')
+    .update({ deleted_on: new Date().toISOString() })
+    .eq('id', chatId);
 
     if (error) {
       throw new Error(`Error deleting chat ${chatId}: ${error.message}`);
     }
 
-    return { success: true, message: `Chat ${chatId} successfully deleted.` };
+    return;
   }
 
   // * UPDATE REPOSITORIES
-  async updateChatSettings(
-    payload: UpdateChatSettingsPayload,
-  ): Promise<UpdateChatSettingsResponse> {
+  async update(payload: Chats.Update): Promise<Chats.Type> {
     const client = this.adminClient ?? this.client;
-    const { error } = await client
-      .from('chats')
-      .update({ settings: payload.settings })
-      .eq('id', payload.chat_id);
-
-    if (error) {
-      throw new Error(
-        `Error updating chat settings for ${payload.chat_id}: ${error.message}`,
-      );
-    }
-
-    return {
-      success: true,
-      message: `Chat settings updated successfully for ${payload.chat_id}.`,
-    };
-  }
-
-  async updateChat(payload: Chats.Update): Promise<Chats.Type> {
-    const client = this.adminClient ?? this.client;
-    const { data, error } = await client.from('chats').update(payload).eq('id', payload.id).select().single();
-
+    const { data, error } = await client
+    .from('chats')
+    .update(payload)
+    .eq('id', payload.id ?? '')
+    .select()
+    .single();
     if (error) {
       throw new Error(`Error updating chat ${payload.id}: ${error.message}`);
     }

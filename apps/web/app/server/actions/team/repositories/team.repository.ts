@@ -2,7 +2,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { Members } from '~/lib/members.types';
 import { GetTeamsOptions } from '../team.interface';
-
 export class TeamRepository {
   constructor(
     private readonly client: SupabaseClient<Database>,
@@ -10,190 +9,123 @@ export class TeamRepository {
 
   ) {}
 
-  async getTeams({ organizationId, role }: GetTeamsOptions): Promise<Members.Type> {
-    // YOUR TABLE HERE
-    const agencyRoles = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
-    const clientRoles = new Set(['client_admin', 'client_member', 'client_guest']);
+  async getTeams({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
+    const client = this.adminClient ?? this.client;
 
-    const isAgency = agencyRoles.has(role ?? '');
-    const isClient = clientRoles.has(role ?? '');
-
-    if (!isAgency && !isClient) {
-      throw new Error('Invalid role');
+    if (!organizationIds.length && !includeAgency) {
+      throw new Error('No organization ids or agency requested');
     }
 
-    const resultMembers: Members.Type = {
-      organizations: [],
-      members: [],
-    }
+    const resultMembers: Members.TeamResponse = {}
 
-    const { data: organizationSettings } = await this.client
-    .from('organization_settings')
-    .select('value')
-    .eq('key', 'logo_url')
-    .eq('account_id', organizationId)
+    // get the agency if organizationIds is empty and includeAgency is true
+    if (includeAgency && !organizationIds.length) {
+      // If the user is not logged in, return an empty object
+      const user = (await this.client.auth.getUser()).data;
 
-    const { data: agencyOrganization, error: agencyOrganizationError } = await this.client
-    .from('accounts')
-    .select('id, name')
-    .eq('id', organizationId)
-    .single();
-    
-    if (agencyOrganizationError) throw agencyOrganizationError;
-    
-    resultMembers.organizations.push({
-      id: agencyOrganization.id,
-      name: agencyOrganization.name,
-      logo_url: organizationSettings?.[0]?.value ?? '',
-    });
+      if (!user) {
+        return resultMembers;
+      }
 
-
-    if (isAgency) {
-      
-      const { data: clientOrganizations, error: clientOrganizationsError } = await this.client
-      .from('clients')
-      .select('organization_client_id')
-      .eq('organization_client_id', organizationId);
-
-      if (clientOrganizationsError) throw clientOrganizationsError;
-
-      const clientOrganizationIds = clientOrganizations.map((client) => client.organization_client_id);
-      
-      const { data: clientOrganizationsSettings} = await this.client
-      .from('organization_settings')
-      .select('value, account_id')
-      .eq('key', 'logo_url')
-      .in('account_id', clientOrganizationIds);
-
-      const { data: clientOrganizationsData, error: clientOrganizationsDataError } = await this.client
-      .from('accounts')
-      .select('id, name')
-      .in('id', clientOrganizationIds);
-
-
-      if (clientOrganizationsDataError) throw clientOrganizationsDataError;
-
-      resultMembers.organizations.push(...clientOrganizationsData.map((client) => ({
-        id: client.id,
-        name: client.name,
-        logo_url: clientOrganizationsSettings?.find((setting) => setting.account_id === client.id)?.value ?? '',
-      })));
-
-      const { data: agencyMembersIds, error: agencyMembersIdsError } = await this.client
+      const { data: getAccountInfo, error: getAccountInfoError } = await this.client
       .from('accounts_memberships')
-      .select('user_id')
-      .eq('account_id', organizationId);
+      .select('account_id, account_role')
+      .eq('user_id', user?.user?.id ?? '')
 
-
-      if (agencyMembersIdsError) throw agencyMembersIdsError;
-
-
-      const { data: agencyMembers, error: agencyMembersError } = await this.client
-      .from('user_settings')
-      .select('user_id, name, picture_url, email:accounts(email)')
-      .in('user_id', agencyMembersIds.map((member) => member.user_id));
-
-
-      if (agencyMembersError) throw agencyMembersError;
-
-
-      resultMembers.members.push(...agencyMembers.map((member) => ({
-        id: member.user_id ?? '',
-        name: member.name ?? '',
-        email: typeof member.email === 'string' ? member.email : member.email?.email ?? '',
-        picture_url: member.picture_url ?? '',
-      })));
-
-
-      for (const clientOrganizationId of clientOrganizationIds) {
-        const { data: clientOrganizationIds, error: clientOrganizationIdsError } = await this.client
-        .from('accounts_memberships')
-        .select('user_id')
-        .eq('account_id', clientOrganizationId);
-
-        if (clientOrganizationIdsError) throw clientOrganizationIdsError;
-
-        const clientMemberIds = clientOrganizationIds.map((member) => member.user_id);
-
-
-        const { data: clientMembers, error: clientMembersError } = await this.client
-        .from('user_settings')
-        .select('user_id, name, picture_url, email:accounts(email)')
-        .in('user_id', clientMemberIds);
-      if (clientMembersError) throw clientMembersError;
-
-      resultMembers.members.push(...clientMembers.map((member) => ({
-        id: member.user_id ?? '',
-        name: member.name ?? '',
-        email: typeof member.email === 'string' ? member.email : member.email?.email ?? '',
-        picture_url: member.picture_url ?? '',
-      })));
-    }
-  }
-
-
-    if (isClient) {
-      const { data: clientMembersIds, error: clientMembersIdsError } = await this.client
-      .from('accounts_memberships')
-      .select('user_id')
-      .eq('account_id', organizationId);
-
-      if (clientMembersIdsError) throw clientMembersIdsError;
-
-      const clientMemberIds = clientMembersIds.map((member) => member.user_id);
-
-      const { data: clientMembers, error: clientMembersError } = await this.client
-      .from('user_settings')
-      .select('user_id, name, picture_url, email:accounts(email)')
-      .in('user_id', clientMemberIds);
-
-      if (clientMembersError) throw clientMembersError;
-      
-
-      resultMembers.members.push(...clientMembers.map((member) => ({
-        id: member.user_id ?? '',
-        name: member.name ?? '',
-        email: typeof member.email === 'string' ? member.email : member.email?.email ?? '',
-        picture_url: member.picture_url ?? '',
-      })));
-
-      const { data: agencyOrganization, error: agencyOrganizationError } = await this.client
-      .from('clients')
-      .select('agency_id')
-      .eq('organization_client_id', organizationId)
+      .or('account_role.eq.client_owner,account_role.eq.client_member,account_role.eq.client_guest')
       .single();
 
+      if (getAccountInfoError) {
+        return resultMembers;
+      }
 
-      if (agencyOrganizationError) throw agencyOrganizationError;
+      const { data: getClientInfo, error: getClientInfoError } = await this.client
+      .from('clients')
+      .select('agency_id')
+      .eq('organization_client_id', getAccountInfo.account_id)
+      .single();
 
-      const agencyOrganizationId = agencyOrganization.agency_id;
+      if (getClientInfoError) {
+        return resultMembers;
+      }
 
-      const { data: agencyMembersIds, error: agencyMembersIdsError } = await this.client
-      .from('accounts_memberships')
-      .select('user_id')
-      .eq('account_id', agencyOrganizationId);
+      const { data: getAgencyInfo, error: getAgencyInfoError } = await this.client
+      .from('accounts')
+      .select('id, name, organization_settings(value)')
+      .eq('id', getClientInfo.agency_id)
+      .eq('is_personal_account', false)
+      .eq('organization_settings.key', 'logo_url')
+      .single();
 
-      if (agencyMembersIdsError) throw agencyMembersIdsError;
+      if (getAgencyInfoError) {
+        return resultMembers;
+      }
 
-      const agencyMemberIds = agencyMembersIds.map((member) => member.user_id);
-
-      const { data: agencyMembers, error: agencyMembersError } = await this.client
-      .from('user_settings')
-      .select('user_id, name, picture_url, email:accounts(email)')
-      .in('user_id', agencyMemberIds);
-
-      if (agencyMembersError) throw agencyMembersError;
-
-      resultMembers.members.push(...agencyMembers.map((member) => ({
-        id: member.user_id ?? '',
-        name: member.name ?? '',
-        email: typeof member.email === 'string' ? member.email : member.email?.email ?? '',
-        picture_url: member.picture_url ?? '',
-      })));
-      
+      resultMembers[getClientInfo.agency_id]  = {
+        id: getAgencyInfo.id,
+        name: getAgencyInfo.name,
+        picture_url: getAgencyInfo.organization_settings?.[0]?.value ?? '',
+        is_agency: true,
+      }
     }
 
+    // get the organizations if organizationIds is not empty and includeAgency is false
+    const agencyRoles = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
+
+    for (const organizationId of organizationIds) {
+      const { data: organizationSettings } = await client
+      .from('organization_settings')
+      .select('value')
+      .eq('key', 'logo_url')
+      .eq('account_id', organizationId)
+      .single();
+
+      const { data: organization, error: organizationError } = await client
+      .from('accounts')
+      .select('id, name, accounts_memberships(account_role)')
+      .eq('id', organizationId)
+      .eq('is_personal_account', false)
+      .single();
+
+      if (organizationError) throw organizationError;
+
+      resultMembers[organizationId] = {
+        id: organization.id,
+        name: organization.name,
+        picture_url: organizationSettings?.value ?? '',
+        is_agency: agencyRoles.has(organization.accounts_memberships[0]?.account_role ?? ''),
+      }
+
+      if (includeMembers) {
+        const { data: members, error: membersError } = await client
+        .from('accounts_memberships')
+        .select('user_id, account_role')
+        .eq('account_id', organizationId);
+
+        if (membersError) throw membersError;
+
+        const membersIds = members.map((member) => member.user_id);
+
+        const { data: membersData, error: membersDataError } = await client
+        .from('accounts')
+        .select('id, email, user_settings(name, picture_url)')
+        .in('id', membersIds);
+
+        if (membersDataError) throw membersDataError;
+
+        const membersDataMap = new Map(membersData.map((member) => [member.id, member]));
+        
+        resultMembers[organizationId].members = members.map((member) => ({
+          id: member.user_id,
+          name: membersDataMap.get(member.user_id)?.user_settings?.name ?? '',
+          email: membersDataMap.get(member.user_id)?.email ?? '',
+          organization_id: organizationId,
+          picture_url: membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? '',
+        }
+      ));
+      }
+      
+    }
     return resultMembers;
   }
-
 }
