@@ -29,10 +29,12 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
     chatByIdQuery,
     addMessageMutation,
     setActiveChat,
+    setChatId,
   } = useChat();
   const userId = user.id;
   const chatById = chatByIdQuery.data;
   const isLoading = chatByIdQuery.isLoading;
+
 
 
   const handleMembersUpdate = async (members: string[]) => {
@@ -43,6 +45,7 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
     await deleteChatMutation.mutateAsync();
     // Clear the conversation
     setActiveChat(null);
+    setChatId('');
   };
 
 
