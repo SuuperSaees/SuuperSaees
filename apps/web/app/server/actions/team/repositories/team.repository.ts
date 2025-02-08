@@ -9,7 +9,7 @@ export class TeamRepository {
 
   ) {}
 
-  async getTeams({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
+  async list({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
     const client = this.adminClient ?? this.client;
 
     if (!organizationIds.length && !includeAgency) {
@@ -108,8 +108,9 @@ export class TeamRepository {
 
         const { data: membersData, error: membersDataError } = await client
         .from('accounts')
-        .select('id, email, user_settings(name, picture_url)')
+        .select('id, email, name, picture_url, user_settings(name, picture_url)')
         .in('id', membersIds);
+
 
         if (membersDataError) throw membersDataError;
 
@@ -117,14 +118,15 @@ export class TeamRepository {
         
         resultMembers[organizationId].members = members.map((member) => ({
           id: member.user_id,
-          name: membersDataMap.get(member.user_id)?.user_settings?.name ?? '',
+          name: membersDataMap.get(member.user_id)?.name ?? membersDataMap.get(member.user_id)?.user_settings?.name ?? '',
           email: membersDataMap.get(member.user_id)?.email ?? '',
           organization_id: organizationId,
-          picture_url: membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? '',
+          picture_url: membersDataMap.get(member.user_id)?.picture_url ?? membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? '',
         }
       ));
       }
       
+
     }
     return resultMembers;
   }
