@@ -136,7 +136,7 @@ export class ChatRepository {
             temp_id,
             order_id,
             parent_id,
-            user:accounts(email, user_settings(name, picture_url))
+            user:accounts(email, name, picture_url, user_settings(name, picture_url))
         )
       `,
       )
@@ -196,9 +196,9 @@ export class ChatRepository {
         parent_id: message.parent_id,
         user: {
           id: message.user_id,
-          name: message.user?.user_settings?.name ?? '',
+          name: message.user?.name ?? message.user?.user_settings?.name ?? '',
           email: message.user?.email ?? '',
-          picture_url: message.user?.user_settings?.picture_url ?? '',
+          picture_url: message.user?.picture_url ?? message.user?.user_settings?.picture_url ?? '',
         },
       })),
     } 
