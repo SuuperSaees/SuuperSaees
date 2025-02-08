@@ -7,7 +7,7 @@ import { useChat } from './context/chat-context';
 import { Chats } from '~/lib/chats.types';
 
 export default function ChatList() {
-  const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat } = useChat();
+  const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat, setChatId } = useChat();
 
   const filteredChats = useMemo(() => {
     const chats = chatsQuery.data ?? [];
@@ -37,6 +37,7 @@ export default function ChatList() {
   useEffect(() => {
     if (filteredChats?.length && !activeChat) {
       setActiveChat(filteredChats[0] as Chats.Type);
+      setChatId(filteredChats[0].id.toString());
     }
   }, [filteredChats, activeChat, setActiveChat]);
   // Estado de carga
