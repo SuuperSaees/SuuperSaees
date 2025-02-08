@@ -15,10 +15,11 @@ export default function ChatSearchHeader({
 }) {
   // const router = useRouter();
   const { t } = useTranslation('chats');
-  const { createChatMutation } = useChat();
+  const { createChatMutation, setSearchQuery } = useChat();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Searching:', e.target.value);
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
   };
   const agencyOrganization = agencyTeam;
   const agencyMembers = agencyTeam.members ?? [];

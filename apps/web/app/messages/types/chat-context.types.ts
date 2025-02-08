@@ -20,6 +20,10 @@ export interface ActiveChatState {
   setChatId: Dispatch<SetStateAction<string>>
   activeChat: Chats.Type | null
   setActiveChat: Dispatch<SetStateAction<Chats.Type | null>>
+  searchQuery: string;
+  setSearchQuery: Dispatch<SetStateAction<string>>;
+  filteredChats: Chats.TypeWithRelations[];
+  setFilteredChats: Dispatch<SetStateAction<Chats.TypeWithRelations[]>>;
 }
 
 

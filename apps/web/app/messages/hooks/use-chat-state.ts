@@ -7,8 +7,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ChatMembers } from '~/lib/chat-members.types';
 import { Chats } from '~/lib/chats.types';
 import { Message } from '~/lib/message.types';
-import { GetChatByIdResponse } from '~/server/actions/chats/chats.interface';
-
 /**
  * Props interface for useChatState hook
  * @interface UseChatStateProps
@@ -43,6 +41,11 @@ const useChatState = ({ initialMembers }: UseChatStateProps) => {
     initialMembers ?? [],
   );
 
+  // State for search query
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredChats, setFilteredChats] = useState<Chats.TypeWithRelations[]>([]);
+
+
   // Query key for messages cache
   // TODO: Update to use 'chat-messages' prefix in future
   const messagesQueryKey = useMemo(() => ['chat', chatId], [chatId]);
@@ -60,7 +63,7 @@ const useChatState = ({ initialMembers }: UseChatStateProps) => {
       // TODO: Refactor to use messages data directly from query
       const currentChat = queryClient.getQueryData(
         messagesQueryKey,
-      ) as GetChatByIdResponse;
+      ) as Chats.TypeWithRelations;
       const currentMessages = currentChat?.messages ?? [];
 
       const newMessages =
@@ -82,7 +85,12 @@ const useChatState = ({ initialMembers }: UseChatStateProps) => {
     setMembers,
     setMessages,
     messagesQueryKey,
+    searchQuery,
+    setSearchQuery,
+    filteredChats,
+    setFilteredChats,
   };
 };
+
 
 export default useChatState;

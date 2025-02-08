@@ -72,7 +72,12 @@ export function ChatProvider({
     setMembers,
     setMessages,
     messagesQueryKey,
+    searchQuery,
+    setSearchQuery,
+    filteredChats,
+    setFilteredChats,
   } = useChatState({ initialMembers });
+
 
   // Query for chat by id
   // Uses cached messages
@@ -131,13 +136,17 @@ export function ChatProvider({
     setActiveChat,
     chatId,
     setChatId,
-
+    searchQuery,
+    setSearchQuery,
+    filteredChats,
+    setFilteredChats,
     user: {
       id: currentUser?.id ?? '',
       name: currentUser?.name ?? '',
       email: user?.email ?? '',
       picture_url: currentUser?.picture_url ?? '',
     },
+
     chatByIdQuery,
     ...chatActions,
     ...messageActions,
