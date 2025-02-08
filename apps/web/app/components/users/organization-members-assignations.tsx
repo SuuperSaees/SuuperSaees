@@ -29,6 +29,7 @@ interface OrganizationMemberAssignationProps<T extends z.ZodSchema<unknown>> {
   fetchMembers?: (organizationId: string) => Promise<Account.Type[]>;
   onOrganizationChange?: (organizationId: string) => void;
   onMembersChange?: (memberIds: string[]) => void;
+  setImage?: boolean
 }
 
 export default function OrganizationMemberAssignation<
@@ -44,6 +45,8 @@ export default function OrganizationMemberAssignation<
   fetchMembers,
   onOrganizationChange,
   onMembersChange,
+  setImage,
+
 }: OrganizationMemberAssignationProps<T>) {
   const [selectedOrganization, setSelectedOrganization] =
     useState<Partial<Account.Type> | null>(defaultOrganization ?? null);
@@ -158,8 +161,13 @@ export default function OrganizationMemberAssignation<
         groupName={t('dialogs.add.select.label')}
         defaultValue={defaultOrganization?.id}
         onSelectHandler={(value: string) => {
+          const selectedOrganization = organizationsQuery?.data?.find((cOrg) => cOrg.id === value);
+          console.log('selectedOrganization', selectedOrganization);
+          setImage && form.setValue('image', selectedOrganization?.logo_url ?? '');
           setSelectedOrganization(
-            organizationsQuery?.data?.find((cOrg) => cOrg.id === value),
+            selectedOrganization,
+
+
           );
           form.setValue(
             valueKey,

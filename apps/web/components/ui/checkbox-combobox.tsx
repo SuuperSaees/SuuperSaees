@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DefaultValues, Path, SubmitHandler, useForm } from 'react-hook-form';
@@ -147,6 +147,7 @@ export default function CheckboxCombobox<
                                       );
                                   if (onChange) {
                                     onChange(newValue);
+                                    field.onChange(newValue);
                                   } else {
                                     field.onChange(newValue);
                                   }

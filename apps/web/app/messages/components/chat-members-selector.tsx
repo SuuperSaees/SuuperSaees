@@ -11,7 +11,7 @@ import OrganizationsMembersDropdownMenu from './organizations-members-dropdown-m
 
 interface ChatMembersSelectorProps {
   agencyTeam: Members.Organization;
-  selectedMembers: string[];
+  selectedMembers: Members.Member[];
   onMembersUpdate: (userIds: string[]) => Promise<void>;
   isLoading?: boolean;
 }
@@ -24,8 +24,8 @@ export default function ChatMembersSelector({
 }: ChatMembersSelectorProps) {
   const agencyMembers = agencyTeam.members ?? [];
 
-  const clientOrganizationIds = agencyTeam.members
-    ?.map((member) => member.organization_id)
+  const clientOrganizationIds = selectedMembers
+    .map((member) => member.organization_id)
     .filter((id) => id !== agencyTeam.id);
 
   const clientMembersQuery = useQuery({
@@ -45,16 +45,16 @@ export default function ChatMembersSelector({
     ) ?? [];
 
   const selectedAgencyMembers =
-    agencyMembers.filter((member) => selectedMembers.includes(member.id)) ?? [];
+    agencyMembers.filter((member) =>
+      selectedMembers.map((m) => m.id).includes(member.id),
+    ) ?? [];
   const selectedClientOrganizationMembers =
-    clientMembers.filter((member) => selectedMembers.includes(member.id)) ?? [];
+    clientMembers.filter((member) =>
+      selectedMembers.map((m) => m.id).includes(member.id),
+    ) ?? [];
 
-  console.log('selected members', selectedMembers);
   return (
-    <div className="flex items-center gap-1 rounded-full border border-gray-200 px-1">
-      {/* Mostrar avatares de miembros seleccionados */}
-
-      {/* Checkbox Combobox para seleccionar miembros */}
+    <>
       {!clientMembersQuery.isLoading && (
         <OrganizationsMembersDropdownMenu
           agencyMembers={agencyMembers}
@@ -63,17 +63,9 @@ export default function ChatMembersSelector({
           selectedClientOrganizationMembers={selectedClientOrganizationMembers}
           onMembersUpdate={onMembersUpdate}
           isLoading={isLoading}
+          className="flex items-center gap-1 rounded-full border border-gray-200 px-2 py-1"
         />
       )}
-
-      {/* {!isLoading && (
-        <MembersAssignations
-          users={teams.members}
-          defaultSelectedUsers={selectedMembersDetails}
-          updateOrderUsersFn={onMembersUpdate}
-          isLoading={isLoading}
-        />
-      )} */}
-    </div>
+    </>
   );
 }

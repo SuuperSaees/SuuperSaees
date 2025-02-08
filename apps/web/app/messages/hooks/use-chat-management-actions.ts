@@ -99,7 +99,7 @@ export const useChatManagement = ({
    * Sets the new chat as active on success
    */
   const createChatMutation = useMutation({
-    mutationFn: ({ name, memberIds }: { name: string; memberIds: string[] }) =>
+    mutationFn: ({ name, memberIds, image }: { name: string; memberIds: string[]; image?: string }) =>
       createChat({
         name,
         user_id: userId,
@@ -109,7 +109,7 @@ export const useChatManagement = ({
           type: 'guest',
         })),
         visibility: true,
-        image: '',
+        image: image ?? '',
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['chats'] });
@@ -129,6 +129,9 @@ export const useChatManagement = ({
           type: 'guest',
         })),
       }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey });
+    },
   });
 
   /**

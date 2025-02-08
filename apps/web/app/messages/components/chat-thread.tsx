@@ -61,6 +61,7 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
   const activeChatDataName = { ...activeChat }.name;
   const activeChatDataId = { ...activeChat }.id;
   
+  console.log('chatById', chatById);
 
   return (
     <div className="flex h-full flex-col">
@@ -79,9 +80,8 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
         <div className="flex items-center gap-2">
           <ChatMembersSelector
             agencyTeam={agencyTeam}
-            selectedMembers={
-              chatById?.members?.map((m: { id: string }) => m.id) ?? []
-            }
+            selectedMembers={chatById?.members ?? []}
+
 
             onMembersUpdate={handleMembersUpdate}
             isLoading={isLoading}

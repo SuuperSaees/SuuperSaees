@@ -1,7 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 import { MessageCircle } from 'lucide-react';
 
 import { Chats } from '~/lib/chats.types';
@@ -17,12 +15,9 @@ export default function ChatItem({
 }) {
   const { setChatId, setActiveChat } = useChat();
 
-  const router = useRouter();
-
   const handleChatSelect = () => {
     setChatId(chat.id.toString());
     setActiveChat(chat);
-    router.push(`/messages`);
   };
 
   return (

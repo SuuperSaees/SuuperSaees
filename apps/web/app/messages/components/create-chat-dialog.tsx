@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { Button } from '@kit/ui/button';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,
@@ -40,6 +41,10 @@ import OrganizationMemberAssignation from '../../components/users/organization-m
 
 // Dialog to create a new chat
 
+// Dialog to create a new chat
+
+// Dialog to create a new chat
+
 const formSchema = z.object({
   name: z.string().min(1),
   agencyMembers: z.array(z.string()).refine((data) => data.length > 0, {
@@ -48,6 +53,7 @@ const formSchema = z.object({
   clientMembers: z.array(z.string()).refine((data) => data.length > 0, {
     message: 'At least one client member is required',
   }),
+  image: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -56,7 +62,7 @@ interface CreateChatDialogProps {
   createChatMutation: UseMutationResult<
     Chats.Insert,
     Error,
-    { name: string; memberIds: string[] },
+    { name: string; memberIds: string[]; image?: string },
     unknown
   >;
   agencyMembers: Members.Member[];
@@ -67,6 +73,7 @@ interface CreateChatDialogProps {
 export default function CreateOrganizationsChatDialog({
   createChatMutation,
   agencyMembers,
+  clientOrganization,
   agencyOrganization,
 }: CreateChatDialogProps) {
   const form = useForm<FormValues>({
@@ -76,6 +83,7 @@ export default function CreateOrganizationsChatDialog({
       name: '',
       agencyMembers: [],
       clientMembers: [],
+      image: clientOrganization?.picture_url ?? '',
     },
   });
 
@@ -84,6 +92,7 @@ export default function CreateOrganizationsChatDialog({
     await createChatMutation.mutateAsync({
       name: data.name,
       memberIds: allMembers,
+      image: form.getValues('image'),
     });
   };
 
@@ -178,20 +187,24 @@ export default function CreateOrganizationsChatDialog({
                       schema={z.object({ members: z.array(z.string()) })}
                       fetchOrganizations={getClientsOrganizations}
                       fetchMembers={getClientMembersForOrganization}
+                      setImage={true}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <DialogClose asChild disabled={createChatMutation.isPending}>
 
-            <ThemedButton
-              type="submit"
-              className="w-full"
-              disabled={createChatMutation.isPending}
-            >
-              Create Chat
-            </ThemedButton>
+              <ThemedButton
+                type="submit"
+                className="w-full"
+                disabled={createChatMutation.isPending}
+
+              >
+                Create Chat
+              </ThemedButton>
+          </DialogClose>
           </form>
         </Form>
       </DialogContent>
