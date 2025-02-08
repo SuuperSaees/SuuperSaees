@@ -20,7 +20,11 @@ export namespace Members {
     email: string;
     organization_id: string;
     picture_url: string;
+    role: string;
+    visibility: boolean;
   }
+
+
 
   export type TeamResponse = Record<string, {
     id: string;

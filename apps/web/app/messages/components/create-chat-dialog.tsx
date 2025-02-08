@@ -40,21 +40,21 @@ import { Dispatch, SetStateAction } from 'react';
 
 // Dialog to create a new chat
 
-// Dialog to create a new chat
-
-// Dialog to create a new chat
-
-
-// Dialog to create a new chat
+// const formSchema = z.object({
+//   name: z.string().min(1),
+//   agencyMembers: z.array(z.string()).refine((data) => data.length > 0, {
+//     message: 'At least one agency member is required',
+//   }),
+//   clientMembers: z.array(z.string()).refine((data) => data.length > 0, {
+//     message: 'At least one client member is required',
+//   }),
+//   image: z.string().optional(),
+// });
 
 const formSchema = z.object({
   name: z.string().min(1),
-  agencyMembers: z.array(z.string()).refine((data) => data.length > 0, {
-    message: 'At least one agency member is required',
-  }),
-  clientMembers: z.array(z.string()).refine((data) => data.length > 0, {
-    message: 'At least one client member is required',
-  }),
+  agencyMembers: z.array(z.string()),
+  clientMembers: z.array(z.string()),
   image: z.string().optional(),
 });
 
@@ -64,10 +64,11 @@ interface CreateChatDialogProps {
   createChatMutation: UseMutationResult<
     Chats.Insert,
     Error,
-    { name: string; memberIds: string[]; image?: string },
+    { name: string; members: {id: string, role: string, visibility: boolean}[]; image?: string },
     unknown
   >;
   agencyMembers: Members.Member[];
+
   agencyOrganization: Members.Organization;
   clientOrganization?: Account.Type;
   isChatCreationDialogOpen: boolean;
@@ -83,8 +84,10 @@ export default function CreateOrganizationsChatDialog({
   isChatCreationDialogOpen,
   setIsChatCreationDialogOpen,
 }: CreateChatDialogProps) {
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+
 
 
 
@@ -96,14 +99,37 @@ export default function CreateOrganizationsChatDialog({
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
-    const allMembers = [...data.agencyMembers, ...data.clientMembers];
-    await createChatMutation.mutateAsync({
-      name: data.name,
-      memberIds: allMembers,
-      image: form.getValues('image'),
-    });
-  };
+const onSubmit = async (data: FormValues) => {
+  // Create a map of agency members for faster lookups
+  const agencyMembersMap = new Map(
+    agencyMembers.map(member => [member.id, member.role])
+  );
+
+  // Define management roles that should have visibility false
+  const managementRoles = new Set(['agency_owner', 'agency_project_manager']);
+  
+  // Get default members (owners and PMs)
+  const defaultMembers = agencyMembers
+    .filter((member) => managementRoles.has(member.role))
+    .map((member) => member.id);
+
+
+  // Combine all members and remove duplicates
+  const uniqueMembers = [...new Set([...defaultMembers, ...data.agencyMembers, ...data.clientMembers])];
+
+  await createChatMutation.mutateAsync({
+    name: data.name,
+    members: uniqueMembers.map(memberId => {
+      const role = agencyMembersMap.get(memberId) ?? '';
+      return {
+        id: memberId,
+        role,
+        visibility: !managementRoles.has(role)
+      };
+    }),
+    image: form.getValues('image'),
+  });
+};
 
   return (
     <Dialog open={isChatCreationDialogOpen} onOpenChange={() => setIsChatCreationDialogOpen(!isChatCreationDialogOpen)}>

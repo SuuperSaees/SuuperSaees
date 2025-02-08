@@ -57,22 +57,19 @@ export class ChatRepository {
       }
 
       chatList = chatList.concat(chatMembers as unknown as Chats.Type[]);
-      
-    return chatList;
-
     }
     
     const { data, error } = await client
     .from('chats')
     .select(`*`)
     .eq('user_id', userId)
-    .is('deleted_on', null);
+    .is('deleted_on', null)
 
     if (error) {
       throw new Error(`Error fetching chats: ${error.message}`);
     }
 
-    chatList = chatList.concat(data as unknown as Chats.Type[]);  
+    chatList = chatList.concat(data.filter((chat) => !chatIds?.includes(chat.id)) as unknown as Chats.Type[]);  
 
     return chatList;
   }
@@ -112,6 +109,7 @@ export class ChatRepository {
         chat_members (
           user_id,
           type,
+          visibility,
           account:accounts(
             email,
             name,
@@ -178,7 +176,7 @@ export class ChatRepository {
         updated_at: new Date().toISOString(),
 
         user_id: member.user_id,
-        visibility: true
+        visibility: member.visibility
 
       })) || [],
       messages: chat?.messages?.map((message) => ({

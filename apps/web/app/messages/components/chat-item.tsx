@@ -1,8 +1,6 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
-
-import Avatar from '../../components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 
 import { Chats } from '~/lib/chats.types';
 
@@ -21,7 +19,6 @@ export default function ChatItem({
     setChatId(chat.id.toString());
     setActiveChat(chat);
   };
-
   return (
     <button
       onClick={handleChatSelect}
@@ -30,13 +27,10 @@ export default function ChatItem({
       }`}
     >
       <div className="relative">
-        {
-          chat.image ? (
-            <Avatar src={chat.image} alt={chat.name} />
-          ) : (
-            <MessageCircle className="h-12 w-12 rounded-full object-cover p-2 pl-4" />
-          )
-        }
+            <Avatar className="h-6 w-6">
+            <AvatarImage src={chat.image ?? ''} />
+            <AvatarFallback>{chat.name.charAt(0).toUpperCase()}</AvatarFallback>
+          </Avatar>
         {/* <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}
 
         {/* <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}

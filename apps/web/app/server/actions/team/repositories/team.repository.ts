@@ -121,6 +121,7 @@ export class TeamRepository {
           name: membersDataMap.get(member.user_id)?.name ?? membersDataMap.get(member.user_id)?.user_settings?.name ?? '',
           email: membersDataMap.get(member.user_id)?.email ?? '',
           organization_id: organizationId,
+          role: member.account_role,
           picture_url: membersDataMap.get(member.user_id)?.picture_url ?? membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? '',
         }
       ));
