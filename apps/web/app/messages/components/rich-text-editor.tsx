@@ -1,14 +1,17 @@
 'use client';
 
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useCallback, useEffect } from 'react';
+
+import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { Send } from 'lucide-react';
+import { toast } from 'sonner';
+
 // import { Upload, Paperclip } from 'lucide-react';
 import { Button } from '@kit/ui/button';
-import { toast } from 'sonner';
+
 // import FileUploader from './file-uploader';
-import { Spinner } from '@kit/ui/spinner';
+// import { Spinner } from '@kit/ui/spinner';
 
 interface RichTextEditorProps {
   onComplete: (content: string) => Promise<void>; // , fileIds?: string[]
@@ -25,16 +28,14 @@ const RichTextEditor = ({
   placeholder = 'Type a message...',
   className = '',
 }: RichTextEditorProps) => {
-  const [isSending, setIsSending] = useState(false);
+  // const [isSending, setIsSending] = useState(false);
   // const [fileIdsList, setFileIdsList] = useState<string[]>([]);
   // const [isDragging, setIsDragging] = useState(false);
   // const [fileUploadStatus, setFileUploadStatus] = useState<Record<string, { status: 'uploading' | 'completed' | 'error', id?: string }>>({});
   // const [thereAreFilesUploaded, setThereAreFilesUploaded] = useState(false);
 
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-    ],
+    extensions: [StarterKit],
     editable: isEditable,
     content: '',
     editorProps: {
@@ -55,17 +56,17 @@ const RichTextEditor = ({
     // if (content === '<p></p>' && fileIdsList.length === 0) return;
 
     try {
-      setIsSending(true);
+      // setIsSending(true);
+      editor.commands.setContent('');
       await onComplete(content);
       // await onComplete(content, fileIdsList.length > 0 ? fileIdsList : undefined);
-      editor.commands.setContent('');
       // setFileIdsList([]);
       // setFileUploadStatus({});
       // setThereAreFilesUploaded(false);
     } catch (error) {
       toast.error('Failed to send message');
     } finally {
-      setIsSending(false);
+      // setIsSending(false);
     }
   }, [editor, onComplete]); // [editor, fileIdsList, onComplete]
 
@@ -159,16 +160,16 @@ const RichTextEditor = ({
         </div>
       )} */}
 
-      <div className="min-h-[100px] max-h-[200px] overflow-y-auto">
+      <div className="max-h-[200px] min-h-[100px] overflow-y-auto">
         {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused && (
-          <div className="absolute pointer-events-none text-gray-400">
+          <div className="pointer-events-none absolute text-gray-400">
             {placeholder}
           </div>
         )}
         <EditorContent editor={editor} />
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t">
+      <div className="flex items-center justify-between border-t pt-2">
         <div className="flex items-center gap-2">
           {/* File upload button */}
           {/* {showToolbar && (
@@ -194,18 +195,20 @@ const RichTextEditor = ({
 
         <Button
           onClick={sendContent}
-          disabled={isSending || editor?.getHTML().trim() === '<p></p>'}
+          // disabled={isSending || editor?.getHTML().trim() === '<p></p>'
+          disabled={editor?.getHTML().trim() === '<p></p>'}
           // disabled={
           //   isSending ||
           //   (!areAllFilesUploaded() && thereAreFilesUploaded) ||
           //   (editor?.getHTML().trim() === '<p></p>' && fileIdsList.length === 0)
           // }
         >
-          {isSending ? (
+          {/* {isSending ? (
             <Spinner className="h-4 w-4" />
           ) : (
             <Send className="h-4 w-4" />
-          )}
+          )} */}
+          <Send className="h-4 w-4" />
         </Button>
       </div>
 

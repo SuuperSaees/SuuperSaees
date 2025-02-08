@@ -28,18 +28,24 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
     updateChatMutation,
     chatByIdQuery,
     addMessageMutation,
+    setActiveChat,
   } = useChat();
   const userId = user.id;
   const chatById = chatByIdQuery.data;
   const isLoading = chatByIdQuery.isLoading;
 
+
   const handleMembersUpdate = async (members: string[]) => {
     await membersUpdateMutation.mutateAsync(members);
   };
 
-  const handleDelete = () => {
-    deleteChatMutation.mutate();
+  const handleDelete = async () => {
+    await deleteChatMutation.mutateAsync();
+    // Clear the conversation
+    setActiveChat(null);
   };
+
+
 
   const handleUpdate = async (name: string) => {
     await updateChatMutation.mutateAsync(name);
@@ -95,12 +101,13 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
               <Button
                 variant="ghost"
                 className="w-full justify-start gap-2 text-red-600"
-                onClick={() => {
+                onClick={async () => {
                   setIsPopupOpen(false);
-                  handleDelete();
+                  await handleDelete();
                 }}
               >
                 <Trash2 className="h-4 w-4" />
+
                 Delete chat
               </Button>
             </PopoverContent>
