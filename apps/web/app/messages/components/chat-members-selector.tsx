@@ -58,10 +58,10 @@ export default function ChatMembersSelector({
     agencyMembers.filter((member) =>
       selectedMembers.map((m) => m.id).includes(member.id),
     ) ?? [];
-  const selectedClientOrganizationMembers =
-    clientMembers.filter((member) =>
-      selectedMembers.map((m) => m.id).includes(member.id),
-    ) ?? [];
+    
+  const selectedClientOrganizationMembers = selectedMembers.filter(
+    (member) => member.organization_id && member.organization_id !== agencyTeam.id
+  ) ?? [];
 
   const agencyMembersAvatars = selectedAgencyMembers.map((user) => ({
     id: user.id,
