@@ -74,17 +74,29 @@ export class ChatRepository {
 
     chatList = chatList.concat(data as unknown as Chats.Type[]);  
 
-
-    
     return chatList;
-
   }
  
 
-  async get(chatId: string): Promise<Chats.TypeWithRelations> {
+  async get(chatId: string, fields?: string[]): Promise<Chats.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
+    
+    if (fields){
+      const { data: chat, error } = await client
+      .from('chats')
+      .select(fields.join(','))
+      .eq('id', chatId)
+      .single();
+      
+      if (error) {
+        throw new Error(`Error fetching chat ${chatId}: ${error.message}`);
+      }
+
+      return chat as unknown as Chats.TypeWithRelations;
+    }
 
     const { data: chat, error } = await client
+
       .from('chats')
       .select(
         `

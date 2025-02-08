@@ -2,9 +2,17 @@ import { ChatMessages } from '~/lib/chat-messages.types';
 import { Message } from '~/lib/message.types';
 import { ChatMessagesRepository } from '../repositories/chat-messages.respository';
 import { MessagesRepository } from '../../messages/repositories/messages.repository';
-
+import { ChatMembersRepository } from '../../chat-members/repositories/chat-members.repository';
+import { sendChatMessageEmail } from './send-email.service';
+import { ChatRepository } from '../../chats/repositories/chats.repository';
 export class ChatMessagesService {
-  constructor(private readonly chatMessagesRepository: ChatMessagesRepository, private readonly messagesRepository?: MessagesRepository) {}
+  constructor(
+    private readonly chatMessagesRepository: ChatMessagesRepository,
+    private readonly messagesRepository?: MessagesRepository,
+    private readonly chatMembersRepository?: ChatMembersRepository,
+    private readonly chatRepository?: ChatRepository
+  ) {}
+
 
 
   // * CREATE SERVICES
@@ -17,17 +25,19 @@ export class ChatMessagesService {
       const createdMessages = await Promise.all(
         payload.messages.map(message => this.messagesRepository?.createMessage(message))
       );
-  
+      
       const chatMessagePayload = {
         chat_id: payload.chat_id,
         message_id: createdMessages[createdMessages.length - 1]?.id ?? '',
       };
-      
+
       chatMessage = await this.chatMessagesRepository.create(chatMessagePayload);
       chatMessage.messages = createdMessages.map(message => message as Message.TypeOnly);
     } else {
       chatMessage = await this.chatMessagesRepository.create(payload);
     }
+
+
   
     return chatMessage;
   }
@@ -54,5 +64,34 @@ export class ChatMessagesService {
     payload: ChatMessages.Update,
   ): Promise<ChatMessages.Type> {
     return await this.chatMessagesRepository.update(payload);
+  }
+
+  // * SEND EMAIL SERVICES
+  async sendEmail(
+    payload: ChatMessages.TypeWithRelations,
+  ): Promise<void> {
+    const userId = payload.messages?.[0]?.user_id;
+
+    const chatMembers = await this.chatMembersRepository?.list(payload.chat_id);
+
+    const chatMembersEmails = chatMembers?.filter(member => member.user_id !== userId).map(member => member.user.email);
+
+
+    const senderName = chatMembers?.find(member => member.user_id === userId)?.user.name;
+
+
+    const chatInfo = await this.chatRepository?.get(payload.chat_id, ['name']);
+
+    if (chatMembersEmails?.length) {
+      await Promise.all(
+        chatMembersEmails.map(async (email) => {
+          await sendChatMessageEmail(email ?? '', senderName ?? '', payload.messages?.[0]?.content ?? '', chatInfo?.name ?? '', userId ?? '');
+        })
+
+      );
+    }
+
+    return;
+
   }
 }
