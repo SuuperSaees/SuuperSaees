@@ -118,6 +118,7 @@ export function ServicesPageClient({
       if (activeTab === 'services') {
         if ('price' in item && item.price?.toString().includes(searchTermNormalized)) return true;
         if ('status' in item && normalizeString(item.status)?.includes(searchTermNormalized)) return true;
+
       }
       return false;
     });

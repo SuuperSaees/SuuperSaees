@@ -748,7 +748,7 @@ export type Database = {
           chat_id: string
           created_at?: string
           deleted_on?: string | null
-          id: string
+          id?: string
           settings?: Json | null
           type?: Database["public"]["Enums"]["chat_role_type"]
           updated_at?: string
@@ -766,55 +766,57 @@ export type Database = {
           user_id?: string
           visibility?: boolean
         }
-        Relationships: []
-      }
-      chat_messages: {
-        Row: {
-          account_id: string
-          chat_id: number
-          content: string
-          created_at: string | null
-          id: string
-          role: Database["public"]["Enums"]["chat_role_type"]
-        }
-        Insert: {
-          account_id: string
-          chat_id?: number
-          content: string
-          created_at?: string | null
-          id?: string
-          role: Database["public"]["Enums"]["chat_role_type"]
-        }
-        Update: {
-          account_id?: string
-          chat_id?: number
-          content?: string
-          created_at?: string | null
-          id?: string
-          role?: Database["public"]["Enums"]["chat_role_type"]
-        }
         Relationships: [
           {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chat_members_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_members_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chat_members_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chat_members_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      chat_messages: {
+        Row: {
+          chat_id: string
+          created_at: string | null
+          id: string
+          message_id: string
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string | null
+          id?: string
+          message_id: string
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string | null
+          id?: string
+          message_id?: string
+        }
+        Relationships: [
           {
             foreignKeyName: "chat_messages_chat_id_fkey"
             columns: ["chat_id"]
@@ -822,51 +824,70 @@ export type Database = {
             referencedRelation: "chats"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chats: {
         Row: {
-          account_id: string
           created_at: string | null
-          id: number
+          deleted_on: string | null
+          id: string
+          image: string | null
           name: string
-          reference_id: string
+          reference_id: string | null
           settings: Json
+          updated_at: string | null
+          user_id: string
+          visibility: boolean
         }
         Insert: {
-          account_id: string
           created_at?: string | null
-          id?: number
+          deleted_on?: string | null
+          id?: string
+          image?: string | null
           name: string
-          reference_id: string
+          reference_id?: string | null
           settings?: Json
+          updated_at?: string | null
+          user_id: string
+          visibility?: boolean
         }
         Update: {
-          account_id?: string
           created_at?: string | null
-          id?: number
+          deleted_on?: string | null
+          id?: string
+          image?: string | null
           name?: string
-          reference_id?: string
+          reference_id?: string | null
           settings?: Json
+          updated_at?: string | null
+          user_id?: string
+          visibility?: boolean
         }
         Relationships: [
           {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]

@@ -36,6 +36,7 @@ export function withDropdown<
               customItem={customItem}
               customItemTrigger={customItemTrigger}
               isLoading={isLoading}
+              {...wrappedProps}
             />
           }
         />

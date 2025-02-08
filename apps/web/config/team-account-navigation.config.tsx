@@ -1,7 +1,7 @@
 import {
   CreditCard,
   LayoutDashboard,
-  MessageSquare,
+  MessagesSquare,
   Settings,
   Users,
 } from 'lucide-react';
@@ -23,7 +23,7 @@ const getRoutes = (account: string) => [
   {
     label: 'chats:chatTabLabel',
     path: pathsConfig.app.accountHome.replace('[account]', account) + '/chat',
-    Icon: <MessageSquare className={iconClasses} />,
+    Icon: <MessagesSquare className={iconClasses} />,
     end: false,
   },
   {

@@ -38,7 +38,13 @@ export function createSubscriptionHandler<T extends DataResponse>(options?: {
       switch (eventType as SubscriptionEvent) {
         case 'INSERT': {
           if (isArrayData(currentData)) {
-            setData([...currentData, newData as T]);
+            const updatedItems = updateArrayData(
+              currentData,
+              newData as Partial<T>,
+              idField,
+              true,
+            );
+            setData(updatedItems);
           } else {
             setData(newData as T);
           }
