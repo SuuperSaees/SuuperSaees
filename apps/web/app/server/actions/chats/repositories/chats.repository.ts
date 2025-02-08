@@ -42,19 +42,8 @@ export class ChatRepository {
   // * GET REPOSITORIES
   async list(userId: string, chatIds?: string[]): Promise<Chats.Type[]> {
     const client = this.adminClient ?? this.client;
+
     let chatList: Chats.Type[] = [];
-    const { data, error } = await client
-    .from('chats')
-    .select(`*`)
-    .eq('user_id', userId)
-    .is('deleted_on', null);
-
-    if (error) {
-      throw new Error(`Error fetching chats: ${error.message}`);
-    }
-
-    chatList = chatList.concat(data as unknown as Chats.Type[]);  
-
 
     if (chatIds) {
       const { data: chatMembers, error: membersError } = await client
@@ -68,7 +57,25 @@ export class ChatRepository {
       }
 
       chatList = chatList.concat(chatMembers as unknown as Chats.Type[]);
+      
+    return chatList;
+
     }
+    
+    const { data, error } = await client
+    .from('chats')
+    .select(`*`)
+    .eq('user_id', userId)
+    .is('deleted_on', null);
+
+    if (error) {
+      throw new Error(`Error fetching chats: ${error.message}`);
+    }
+
+    chatList = chatList.concat(data as unknown as Chats.Type[]);  
+
+
+    
     return chatList;
 
   }
