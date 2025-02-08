@@ -35,8 +35,8 @@ export class ChatMessagesRepository {
     if (error) {
       throw new Error(`Error creating message: ${error.message}`);
     }
-
-    return data as ChatMessages.TypeWithRelations;
+    
+    return data as unknown as ChatMessages.TypeWithRelations;
   }
 
 
@@ -57,7 +57,7 @@ export class ChatMessagesRepository {
       );
     }
 
-    return data as ChatMessages.TypeWithRelations[];
+    return data as unknown as ChatMessages.TypeWithRelations[];
   }
 
   // * DELETE REPOSITORIES
@@ -116,12 +116,13 @@ export class ChatMessagesRepository {
     const { data, error } = await client
       .from('chat_messages')
       .update(payload)
-      .eq('chat_id', payload.chat_id)
-      .eq('message_id', payload.message_id)
+      .eq('chat_id', payload.chat_id ?? '')
+      .eq('message_id', payload.message_id ?? '')
       .select(`
         *,
         messages:messages(*)
       `)
+
       .single();
 
     if (error) {
@@ -130,7 +131,7 @@ export class ChatMessagesRepository {
       );
     }
 
-    return data as ChatMessages.TypeWithRelations;
+    return data as unknown as ChatMessages.TypeWithRelations;
 
   }
 }
