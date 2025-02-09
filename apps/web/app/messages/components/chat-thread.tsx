@@ -17,6 +17,7 @@ import { useChat } from './context/chat-context';
 import MessageList from './message-list';
 import RichTextEditor from './rich-text-editor';
 
+
 export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organization }) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const {
@@ -83,6 +84,9 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
             userRole={'owner'}
             updateFunction={handleUpdate}
             rolesThatCanEdit={new Set(['owner'])}
+            variant="chat"
+            maxWidth={600}
+            maxWindowWidthRatio={0.5}
           />
         </div>
         <div className="flex items-center gap-2">
