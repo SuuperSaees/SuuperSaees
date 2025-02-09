@@ -40,7 +40,7 @@ export class ChatRepository {
   }
 
   // * GET REPOSITORIES
-  async list(userId: string, chatIds?: string[]): Promise<Chats.Type[]> {
+  async list(userId: string, chatIds?: string[]): Promise<Chats.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
 
     let chatList: Chats.Type[] = [];
@@ -48,7 +48,7 @@ export class ChatRepository {
     if (chatIds) {
       const { data: chatMembers, error: membersError } = await client
       .from('chats')
-      .select(`*`)
+      .select(`*, members:chat_members (user:accounts(organization_id))`)
       .in('id', chatIds)
       .is('deleted_on', null);
 

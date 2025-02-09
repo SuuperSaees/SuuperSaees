@@ -2,13 +2,16 @@ import { ChatMembersRepository } from '../../chat-members/repositories/chat-memb
 import { ChatMessagesRepository } from '../../chat-messages/repositories/chat-messages.respository';
 import { ChatRepository } from '../repositories/chats.repository';
 import { Chats } from '~/lib/chats.types';
-
+import { TeamRepository } from '../../team/repositories/team.repository';
+import { Members } from '~/lib/members.types';
 
 export class ChatService {
   constructor(
     private readonly chatRepository: ChatRepository,
     private readonly chatMembersRepository?: ChatMembersRepository,
     private readonly chatMessagesRepository?: ChatMessagesRepository,
+    private readonly teamRepository?: TeamRepository,
+
   ) {}
 
 
@@ -36,12 +39,33 @@ export class ChatService {
   }
 
   // * GET SERVICES
-  async list(userId: string): Promise<Chats.Type[]> {
-    const chatsResult = await this.chatMembersRepository?.list(undefined, userId);
+  async list(userId: string): Promise<Chats.TypeWithRelations[]> {
+    const chatsResult = await this.chatMembersRepository?.list(undefined, userId, true);
 
     const chatIds = chatsResult?.map((chat) => chat.chat_id);
 
-    return await this.chatRepository.list(userId, chatIds);
+    const chats = await this.chatRepository.list(userId, chatIds);
+
+    const organizationsIds = [...new Set(chatsResult?.map((chat) => chat.user?.organization_id ?? ''))];
+    
+    const teamResult = await this.teamRepository?.list({ organizationIds: organizationsIds ?? [], includeMembers: false, includeAgency: false });
+
+    const newChats = chats.map((chat) => {
+      const uniqueOrgIds = [...new Set(
+        chat.members?.map((member) => member.user?.organization_id).filter(Boolean) ?? []
+      )];
+
+      const organizations = uniqueOrgIds
+        .map((orgId: string | null) => teamResult?.[orgId ?? ''])
+        .filter(Boolean) as Members.Organization[];
+
+      return {
+        ...chat,
+        organizations 
+      };
+    });
+  
+    return newChats;
   }
 
 

@@ -10,7 +10,7 @@ export default function ChatItem({
   chat,
   isActive = false,
 }: {
-  chat: Chats.Type;
+  chat: Chats.TypeWithRelations;
   isActive?: boolean;
 }) {
   const { setChatId, setActiveChat } = useChat();
@@ -27,9 +27,9 @@ export default function ChatItem({
       }`}
     >
       <div className="relative">
-            <Avatar className="h-6 w-6">
+          <Avatar className="h-6 w-6">
             <AvatarImage src={chat.image ?? ''} />
-            <AvatarFallback>{chat.name.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{chat.organizations?.filter((org) => !org.is_agency)[0]?.name.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         {/* <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}
 

@@ -7,6 +7,7 @@ import { ChatMessagesRepository } from '../../chat-messages/repositories/chat-me
 import { ChatRepository } from '../repositories/chats.repository';
 import { ChatService } from '../services/chats.service';
 import { Chats } from '~/lib/chats.types';
+import { TeamRepository } from '../../team/repositories/team.repository';
 
 export class ChatController {
   private baseUrl: string
@@ -39,8 +40,10 @@ export class ChatController {
     try {
       const chatRepository = new ChatRepository(this.client, this.adminClient);
       const membersRepository = new ChatMembersRepository(this.client, this.adminClient);
-      const chatService = new ChatService(chatRepository, membersRepository);
+      const teamRepository = new TeamRepository(this.client, this.adminClient);
+      const chatService = new ChatService(chatRepository, membersRepository, undefined, teamRepository);
       return await chatService.list(userId);
+
     } catch (error) {
       console.error(error);
       throw error;

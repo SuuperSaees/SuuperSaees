@@ -88,13 +88,13 @@ export class ChatMembersRepository {
   }
 
   // * GET REPOSITORIES
-  async list(chatId?: string, userId?: string): Promise<ChatMembers.TypeWithRelations[]> {
+  async list(chatId?: string, userId?: string, getAllMembers= false): Promise<ChatMembers.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
 
     if(userId && !chatId	) {
       const { data, error } = await client
         .from('chat_members')
-        .select(`*, user:accounts(email, settings:user_settings(name, picture_url))`)
+        .select(`*, user:accounts(email, organization_id, settings:user_settings(name, picture_url))`)
         .eq('user_id', userId);
 
       if (error) {
@@ -103,7 +103,23 @@ export class ChatMembersRepository {
         );
       }
 
+      if(getAllMembers) {
+        const { data: allMembers, error: allMembersError } = await client
+          .from('chat_members')
+          .select(`*, user:accounts(email, organization_id, settings:user_settings(name, picture_url))`)
+          .eq('chat_id', data[0]?.chat_id ?? '');
+
+        if (allMembersError) {
+          throw new Error(
+            `Error fetching all members for chat ${chatId}: ${allMembersError.message}`,
+          );
+        }
+
+        return data.concat(allMembers) as ChatMembers.TypeWithRelations[];
+      }
+
       return data as ChatMembers.TypeWithRelations[];
+
     }
 
     const { data, error } = await client
