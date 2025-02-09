@@ -162,7 +162,6 @@ export default function OrganizationMemberAssignation<
         defaultValue={defaultOrganization?.id}
         onSelectHandler={(value: string) => {
           const selectedOrganization = organizationsQuery?.data?.find((cOrg) => cOrg.id === value);
-          console.log('selectedOrganization', selectedOrganization);
           setImage && form.setValue('image', selectedOrganization?.logo_url ?? '');
           setSelectedOrganization(
             selectedOrganization,

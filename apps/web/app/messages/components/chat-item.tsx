@@ -19,6 +19,7 @@ export default function ChatItem({
     setChatId(chat.id.toString());
     setActiveChat(chat);
   };
+
   return (
     <button
       onClick={handleChatSelect}
@@ -29,7 +30,7 @@ export default function ChatItem({
       <div className="relative">
           <Avatar className="h-6 w-6">
             <AvatarImage src={chat.image ?? ''} />
-            <AvatarFallback>{chat.organizations?.filter((org) => !org.is_agency)[0]?.name.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{chat.organizations?.find((org) => !org.is_agency)?.name.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         {/* <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}
 

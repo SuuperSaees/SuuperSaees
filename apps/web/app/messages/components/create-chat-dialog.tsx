@@ -57,9 +57,12 @@ import OrganizationMemberAssignation from '../../components/users/organization-m
 const formSchema = z.object({
   name: z.string().min(1),
   agencyMembers: z.array(z.string()),
-  clientMembers: z.array(z.string()),
+  clientMembers: z.array(z.string()).refine((data) => data.length > 0, {
+     message: 'At least one client member is required',
+    }),
   image: z.string().optional(),
 });
+
 
 type FormValues = z.infer<typeof formSchema>;
 
