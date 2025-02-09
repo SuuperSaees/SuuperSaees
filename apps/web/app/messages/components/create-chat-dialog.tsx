@@ -1,6 +1,8 @@
 // Dialog to create a new chat
 'use client';
 
+import { Dispatch, SetStateAction } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UseMutationResult } from '@tanstack/react-query';
 import { SquarePen } from 'lucide-react';
@@ -36,7 +38,8 @@ import {
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
 import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
-import { Dispatch, SetStateAction } from 'react';
+
+// Dialog to create a new chat
 
 // Dialog to create a new chat
 
@@ -64,7 +67,11 @@ interface CreateChatDialogProps {
   createChatMutation: UseMutationResult<
     Chats.Insert,
     Error,
-    { name: string; members: {id: string, role: string, visibility: boolean}[]; image?: string },
+    {
+      name: string;
+      members: { id: string; role: string; visibility: boolean }[];
+      image?: string;
+    },
     unknown
   >;
   agencyMembers: Members.Member[];
@@ -75,7 +82,6 @@ interface CreateChatDialogProps {
   setIsChatCreationDialogOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-
 export default function CreateOrganizationsChatDialog({
   createChatMutation,
   agencyMembers,
@@ -84,12 +90,9 @@ export default function CreateOrganizationsChatDialog({
   isChatCreationDialogOpen,
   setIsChatCreationDialogOpen,
 }: CreateChatDialogProps) {
-
+  // console.log('agencyMembers', agencyMembers);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-
-
-
 
     defaultValues: {
       name: '',
@@ -99,47 +102,56 @@ export default function CreateOrganizationsChatDialog({
     },
   });
 
-const onSubmit = async (data: FormValues) => {
-  // Create a map of agency members for faster lookups
-  const agencyMembersMap = new Map(
-    agencyMembers.map(member => [member.id, member.role])
-  );
+  const onSubmit = async (data: FormValues) => {
+    // Create a map of agency members for faster lookups
+    const agencyMembersMap = new Map(
+      agencyMembers.map((member) => [member.id, member.role]),
+    );
 
-  // Define management roles that should have visibility false
-  const managementRoles = new Set(['agency_owner', 'agency_project_manager']);
-  
-  // Get default members (owners and PMs)
-  const defaultMembers = agencyMembers
-    .filter((member) => managementRoles.has(member.role))
-    .map((member) => member.id);
+    // Define management roles that should have visibility false
+    const managementRoles = new Set(['agency_owner', 'agency_project_manager']);
 
+    // Get default members (owners and PMs)
+    const defaultMembers = agencyMembers
+      .filter((member) => managementRoles.has(member.role))
+      .map((member) => member.id);
 
-  // Combine all members and remove duplicates
-  const uniqueMembers = [...new Set([...defaultMembers, ...data.agencyMembers, ...data.clientMembers])];
+    // Combine all members and remove duplicates
+    const uniqueMembers = [
+      ...new Set([
+        ...defaultMembers,
+        ...data.agencyMembers,
+        ...data.clientMembers,
+      ]),
+    ];
 
-  await createChatMutation.mutateAsync({
-    name: data.name,
-    members: uniqueMembers.map(memberId => {
-      const role = agencyMembersMap.get(memberId) ?? '';
-      return {
-        id: memberId,
-        role,
-        visibility: !managementRoles.has(role)
-      };
-    }),
-    image: form.getValues('image'),
-  });
-};
+    await createChatMutation.mutateAsync({
+      name: data.name,
+      members: uniqueMembers.map((memberId) => {
+        const role = agencyMembersMap.get(memberId) ?? '';
+        return {
+          id: memberId,
+          role,
+          visibility: !managementRoles.has(role),
+        };
+      }),
+      image: form.getValues('image'),
+    });
+  };
 
   return (
-    <Dialog open={isChatCreationDialogOpen} onOpenChange={() => setIsChatCreationDialogOpen(!isChatCreationDialogOpen)}>
+    <Dialog
+      open={isChatCreationDialogOpen}
+      onOpenChange={() =>
+        setIsChatCreationDialogOpen(!isChatCreationDialogOpen)
+      }
+    >
       <DialogTrigger asChild>
         <Button variant="ghost">
           <SquarePen className="cursor-pointer text-gray-600" />
-
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg" >
+      <DialogContent className="max-w-lg">
         <DialogTitle className="text-xl font-bold">
           Create a new chat
         </DialogTitle>
@@ -231,16 +243,14 @@ const onSubmit = async (data: FormValues) => {
               )}
             />
             <DialogClose asChild disabled={createChatMutation.isPending}>
-
               <ThemedButton
                 type="submit"
                 className="w-full"
                 disabled={createChatMutation.isPending}
-
               >
                 Create Chat
               </ThemedButton>
-          </DialogClose>
+            </DialogClose>
           </form>
         </Form>
       </DialogContent>

@@ -25,6 +25,7 @@ export default async function MessagesPage() {
 
   const agencyTeam: Members.Organization | undefined = teams[agencyId ?? ''];
 
+  console.log( 'agency', agency);
   if (!agencyTeam) {
     console.error('No agency team found');
     return null
@@ -32,6 +33,7 @@ export default async function MessagesPage() {
   return (
     <ChatProvider >
       <div className="flex h-full border-t">
+
 
         <div className="flex w-[380px] flex-col border-r bg-white">
           <Suspense fallback={<div>Loading...</div>}>

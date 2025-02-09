@@ -14,6 +14,7 @@ import { getTeams } from '~/server/actions/team/team.action';
 import { AvatarType } from '../../components/ui/multiavatar-displayer';
 import MultiAvatarDisplayer from '../../components/ui/multiavatar-displayer';
 import MembersAssignations from '../../components/users/member-assignations';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 // import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
@@ -24,13 +25,29 @@ interface ChatMembersSelectorProps {
   isLoading?: boolean;
 }
 
+
 export default function ChatMembersSelector({
   agencyTeam,
   selectedMembers, // This include both members selected from the agency and the client organizations
   onMembersUpdate,
   isLoading = false,
+
 }: ChatMembersSelectorProps) {
   const agencyMembers = agencyTeam.members ?? [];
+  const { workspace: userWorkspace } = useUserWorkspace();
+  const currentRole = userWorkspace?.role;
+
+
+  const validAgencyRoles = ['agency_owner', 'agency_project_manager'];
+  const isValidAgencyRole = validAgencyRoles.includes(currentRole ?? '');
+
+
+  const validClientRoles = ['client_owner'];
+  const isValidClientRole = validClientRoles.includes(currentRole ?? '');
+
+
+  const canAddMembers = isValidAgencyRole || isValidClientRole;
+
 
   const clientOrganizationIds = selectedMembers
     .map((member) => member.organization_id)
@@ -113,7 +130,9 @@ export default function ChatMembersSelector({
                 selectedUsers={selectedClientOrganizationMembers}
                 onMembersUpdate={onMembersUpdate}
                 isLoading={clientMembersQuery.isLoading}
+                canAddMembers={canAddMembers}
               />
+
 
               <OrganizationMembersSelector
                 title="Agency members"
@@ -121,9 +140,11 @@ export default function ChatMembersSelector({
                 selectedUsers={selectedAgencyMembers}
                 onMembersUpdate={onMembersUpdate}
                 isLoading={isLoading}
+                canAddMembers={isValidAgencyRole}
               />
             </div>
           </div>
+
         </PopoverContent>
       </Popover>
     </div>
@@ -147,7 +168,9 @@ interface OrganizationMembersSelectorProps {
   selectedUsers: User.Response[];
   onMembersUpdate: (userIds: string[]) => Promise<void>;
   isLoading?: boolean;
+  canAddMembers?: boolean;
 }
+
 
 const OrganizationMembersSelector = ({
   title,
@@ -155,9 +178,11 @@ const OrganizationMembersSelector = ({
   selectedUsers,
   onMembersUpdate,
   isLoading,
+  canAddMembers = true,
 }: OrganizationMembersSelectorProps) => {
   return (
     <div className="flex flex-col gap-2">
+
       <span className="text-sm font-medium text-gray-500">{title}</span>
       {isLoading ? (
         <Spinner className="h-4 w-4" />
@@ -167,8 +192,10 @@ const OrganizationMembersSelector = ({
           defaultSelectedUsers={selectedUsers}
           updateOrderUsersFn={onMembersUpdate}
           isLoading={isLoading}
+          canAddMembers={canAddMembers}
         />
       )}
     </div>
   );
+
 };
