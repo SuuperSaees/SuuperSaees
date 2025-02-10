@@ -4,9 +4,10 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 
-import { ChatMembers } from '~/lib/chat-members.types';
 import { Chats } from '~/lib/chats.types';
 import { Message } from '~/lib/message.types';
+import { User } from '~/lib/user.types';
+
 
 /**
  * Props interface for useChatState hook
@@ -14,8 +15,9 @@ import { Message } from '~/lib/message.types';
  * @property {ChatMembers.Type[]} initialMembers - Initial list of chat members
  */
 interface UseChatStateProps {
-  initialMembers: ChatMembers.Type[];
+  initialMembers: User.Response[];
 }
+
 
 /**
  * Custom hook for managing chat state
@@ -48,9 +50,10 @@ const useChatState = ({ initialMembers }: UseChatStateProps) => {
   const [isChatCreationDialogOpen, setIsChatCreationDialogOpen] =
     useState(false);
   // State for chat members with initial values
-  const [members, setMembers] = useState<ChatMembers.Type[]>(
+  const [members, setMembers] = useState<User.Response[]>(
     initialMembers ?? [],
   );
+
 
   // State for search query
   const [searchQuery, setSearchQuery] = useState('');

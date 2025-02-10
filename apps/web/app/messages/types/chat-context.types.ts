@@ -47,9 +47,10 @@ export interface ActiveChatState {
 export interface MessagesState {
   messages: Message.Type[];
   setMessages: Dispatch<SetStateAction<Message.Type[]>>;
-  members: ChatMembers.Type[];
-  setMembers: Dispatch<SetStateAction<ChatMembers.Type[]>>;
+  members: User.Response[];
+  setMembers: Dispatch<SetStateAction<User.Response[]>>;
 }
+
 
 /**
  * Interface containing all chat-related mutations
@@ -136,5 +137,6 @@ export interface ChatProviderProps {
   children: ReactNode;
   // chatId: string
   initialChat?: Chats.TypeWithRelations;
-  initialMembers?: ChatMembers.Type[];
+  initialMembers?: User.Response[];
 }
+

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 
@@ -31,10 +31,12 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
     addMessageMutation,
     setActiveChat,
     setChatId,
+    setMembers,
   } = useChat();
   const userId = user.id;
   const chatById = chatByIdQuery.data;
   const isLoading = chatByIdQuery.isLoading;
+
 
 
 
@@ -63,7 +65,15 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
       temp_id: generateUUID(),
     });
   };
-
+  // Set 
+  // members 
+  useEffect(() => {
+    if(chatByIdQuery.data && chatByIdQuery.data.members) {
+      setMembers(chatByIdQuery.data.members);
+    }
+  }, [chatByIdQuery.data, setMembers
+    
+  ])
   if (!activeChat) {
     return <ChatEmptyState />;
   }
@@ -71,6 +81,9 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
   const activeChatDataName = { ...activeChat }.name;
   const activeChatDataId = { ...activeChat }.id;
   
+
+
+
 
   return (
     <div className="flex h-full flex-col">
