@@ -38,6 +38,15 @@ import {
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
 import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+
+// Dialog to create a new chat
+
+// Dialog to create a new chat
+
+// Dialog to create a new chat
+
+// Dialog to create a new chat
 
 // Dialog to create a new chat
 
@@ -58,11 +67,10 @@ const formSchema = z.object({
   name: z.string().min(1),
   agencyMembers: z.array(z.string()),
   clientMembers: z.array(z.string()).refine((data) => data.length > 0, {
-     message: 'At least one client member is required',
-    }),
+    message: 'At least one client member is required',
+  }),
   image: z.string().optional(),
 });
-
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -93,7 +101,6 @@ export default function CreateOrganizationsChatDialog({
   isChatCreationDialogOpen,
   setIsChatCreationDialogOpen,
 }: CreateChatDialogProps) {
-  // console.log('agencyMembers', agencyMembers);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
 
@@ -105,24 +112,29 @@ export default function CreateOrganizationsChatDialog({
     },
   });
 
+  const { workspace: userWorkspace } = useUserWorkspace()
+  const currentUserRole = userWorkspace?.role
+  // Define management roles that should have visibility false
+  const managementRoles = new Set(['agency_owner', 'agency_project_manager']);
+  const isValidAgencyManager = managementRoles.has(currentUserRole)
+
+
+  // Get default members (owners and PMs)
+  const defaultMembers = agencyMembers.filter((member) =>
+    managementRoles.has(member.role),
+  );
+
   const onSubmit = async (data: FormValues) => {
     // Create a map of agency members for faster lookups
     const agencyMembersMap = new Map(
       agencyMembers.map((member) => [member.id, member.role]),
     );
 
-    // Define management roles that should have visibility false
-    const managementRoles = new Set(['agency_owner', 'agency_project_manager']);
-
-    // Get default members (owners and PMs)
-    const defaultMembers = agencyMembers
-      .filter((member) => managementRoles.has(member.role))
-      .map((member) => member.id);
-
+    const defaultMembersIds = defaultMembers.map((member) => member.id);
     // Combine all members and remove duplicates
     const uniqueMembers = [
       ...new Set([
-        ...defaultMembers,
+        ...defaultMembersIds,
         ...data.agencyMembers,
         ...data.clientMembers,
       ]),
@@ -216,10 +228,14 @@ export default function CreateOrganizationsChatDialog({
                       form={form}
                       valueKey="agencyMembers"
                       schema={z.object({ members: z.array(z.string()) })}
-                      defaultOrganization={agencyOrganization}
-                      defaultMembers={agencyMembers}
+                      organization={agencyOrganization}
+                      members={agencyMembers}
+                      defaultMembers={defaultMembers}
+                      disabledOrganizationSelector={true}
+                      disabledMembersSelector={!isValidAgencyManager}
                     />
                   </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -236,8 +252,11 @@ export default function CreateOrganizationsChatDialog({
                       form={form}
                       valueKey="clientMembers"
                       schema={z.object({ members: z.array(z.string()) })}
-                      fetchOrganizations={getClientsOrganizations}
+                      fetchOrganizations={
+                        clientOrganization ? undefined : getClientsOrganizations
+                      }
                       fetchMembers={getClientMembersForOrganization}
+                      organization={clientOrganization}
                       setImage={true}
                     />
                   </FormControl>

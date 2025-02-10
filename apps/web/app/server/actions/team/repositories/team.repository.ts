@@ -34,7 +34,7 @@ export class TeamRepository {
 
       .or('account_role.eq.client_owner,account_role.eq.client_member,account_role.eq.client_guest')
       .single();
-
+      
       if (getAccountInfoError) {
         return resultMembers;
       }
@@ -43,8 +43,9 @@ export class TeamRepository {
       .from('clients')
       .select('agency_id')
       .eq('organization_client_id', getAccountInfo.account_id)
+      .eq('user_client_id', user?.user?.id ?? '')
       .single();
-
+      
       if (getClientInfoError) {
         return resultMembers;
       }
