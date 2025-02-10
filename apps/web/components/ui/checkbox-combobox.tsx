@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type JSX } from 'react';
+import {  useState, type JSX } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DefaultValues, Path, SubmitHandler, useForm } from 'react-hook-form';
@@ -49,7 +49,10 @@ export interface ComboboxProps<
   isLoading?: boolean;
   onSelect?: (value: string) => void; // New prop for selection handler
   onChange?: (values: string[]) => void; // New prop for change handler
+  disabled?: boolean;
 }
+
+
 
 export default function CheckboxCombobox<
   TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, unknown>,
@@ -66,9 +69,13 @@ export default function CheckboxCombobox<
   isLoading, 
   onSelect, 
   onChange, 
+  disabled,
+
 }: ComboboxProps<TSchema>) {
   const [searchTerm, setSearchTerm] = useState('');
   const form = useForm<z.infer<TSchema>>({
+
+
     defaultValues,
     resolver: zodResolver(schema),
   });
@@ -103,12 +110,14 @@ export default function CheckboxCombobox<
             key={name}
             control={form.control}
             name={name as Path<z.infer<TSchema>>}
+            disabled
             render={({ field }) => (
               <FormItem>
                 <Popover onOpenChange={handlePopoverClose}>
                   <PopoverTrigger
                     asChild={customItemTrigger ? false : true}
                     className={classNameTrigger}
+                    disabled={disabled}
                   >
                     {customItemTrigger ? (
                       customItemTrigger

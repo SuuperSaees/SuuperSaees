@@ -1,6 +1,8 @@
 // Dialog to create a new chat
 'use client';
 
+import { Dispatch, SetStateAction } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UseMutationResult } from '@tanstack/react-query';
 import { SquarePen } from 'lucide-react';
@@ -36,7 +38,17 @@ import {
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
 import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
-import { Dispatch, SetStateAction } from 'react';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+
+// Dialog to create a new chat
+
+// Dialog to create a new chat
+
+// Dialog to create a new chat
+
+// Dialog to create a new chat
+
+// Dialog to create a new chat
 
 // Dialog to create a new chat
 
@@ -55,11 +67,10 @@ const formSchema = z.object({
   name: z.string().min(1),
   agencyMembers: z.array(z.string()),
   clientMembers: z.array(z.string()).refine((data) => data.length > 0, {
-     message: 'At least one client member is required',
-    }),
+    message: 'At least one client member is required',
+  }),
   image: z.string().optional(),
 });
-
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -67,7 +78,11 @@ interface CreateChatDialogProps {
   createChatMutation: UseMutationResult<
     Chats.Insert,
     Error,
-    { name: string; members: {id: string, role: string, visibility: boolean}[]; image?: string },
+    {
+      name: string;
+      members: { id: string; role: string; visibility: boolean }[];
+      image?: string;
+    },
     unknown
   >;
   agencyMembers: Members.Member[];
@@ -78,7 +93,6 @@ interface CreateChatDialogProps {
   setIsChatCreationDialogOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-
 export default function CreateOrganizationsChatDialog({
   createChatMutation,
   agencyMembers,
@@ -87,7 +101,6 @@ export default function CreateOrganizationsChatDialog({
   isChatCreationDialogOpen,
   setIsChatCreationDialogOpen,
 }: CreateChatDialogProps) {
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
 
@@ -99,47 +112,61 @@ export default function CreateOrganizationsChatDialog({
     },
   });
 
-const onSubmit = async (data: FormValues) => {
-  // Create a map of agency members for faster lookups
-  const agencyMembersMap = new Map(
-    agencyMembers.map(member => [member.id, member.role])
-  );
-
+  const { workspace: userWorkspace } = useUserWorkspace()
+  const currentUserRole = userWorkspace?.role
   // Define management roles that should have visibility false
   const managementRoles = new Set(['agency_owner', 'agency_project_manager']);
-  
+  const isValidAgencyManager = managementRoles.has(currentUserRole)
+
+
   // Get default members (owners and PMs)
-  const defaultMembers = agencyMembers
-    .filter((member) => managementRoles.has(member.role))
-    .map((member) => member.id);
+  const defaultMembers = agencyMembers.filter((member) =>
+    managementRoles.has(member.role),
+  );
 
+  const onSubmit = async (data: FormValues) => {
+    // Create a map of agency members for faster lookups
+    const agencyMembersMap = new Map(
+      agencyMembers.map((member) => [member.id, member.role]),
+    );
 
-  // Combine all members and remove duplicates
-  const uniqueMembers = [...new Set([...defaultMembers, ...data.agencyMembers, ...data.clientMembers])];
+    const defaultMembersIds = defaultMembers.map((member) => member.id);
+    // Combine all members and remove duplicates
+    const uniqueMembers = [
+      ...new Set([
+        ...defaultMembersIds,
+        ...data.agencyMembers,
+        ...data.clientMembers,
+      ]),
+    ];
 
-  await createChatMutation.mutateAsync({
-    name: data.name,
-    members: uniqueMembers.map(memberId => {
-      const role = agencyMembersMap.get(memberId) ?? '';
-      return {
-        id: memberId,
-        role,
-        visibility: !managementRoles.has(role)
-      };
-    }),
-    image: form.getValues('image'),
-  });
-};
+    await createChatMutation.mutateAsync({
+      name: data.name,
+      members: uniqueMembers.map((memberId) => {
+        const role = agencyMembersMap.get(memberId) ?? '';
+        return {
+          id: memberId,
+          role,
+          visibility: !managementRoles.has(role),
+        };
+      }),
+      image: form.getValues('image'),
+    });
+  };
 
   return (
-    <Dialog open={isChatCreationDialogOpen} onOpenChange={() => setIsChatCreationDialogOpen(!isChatCreationDialogOpen)}>
+    <Dialog
+      open={isChatCreationDialogOpen}
+      onOpenChange={() =>
+        setIsChatCreationDialogOpen(!isChatCreationDialogOpen)
+      }
+    >
       <DialogTrigger asChild>
         <Button variant="ghost">
           <SquarePen className="cursor-pointer text-gray-600" />
-
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg" >
+      <DialogContent className="max-w-lg">
         <DialogTitle className="text-xl font-bold">
           Create a new chat
         </DialogTitle>
@@ -201,10 +228,14 @@ const onSubmit = async (data: FormValues) => {
                       form={form}
                       valueKey="agencyMembers"
                       schema={z.object({ members: z.array(z.string()) })}
-                      defaultOrganization={agencyOrganization}
-                      defaultMembers={agencyMembers}
+                      organization={agencyOrganization}
+                      members={agencyMembers}
+                      defaultMembers={defaultMembers}
+                      disabledOrganizationSelector={true}
+                      disabledMembersSelector={!isValidAgencyManager}
                     />
                   </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -221,8 +252,11 @@ const onSubmit = async (data: FormValues) => {
                       form={form}
                       valueKey="clientMembers"
                       schema={z.object({ members: z.array(z.string()) })}
-                      fetchOrganizations={getClientsOrganizations}
+                      fetchOrganizations={
+                        clientOrganization ? undefined : getClientsOrganizations
+                      }
                       fetchMembers={getClientMembersForOrganization}
+                      organization={clientOrganization}
                       setImage={true}
                     />
                   </FormControl>
@@ -231,16 +265,14 @@ const onSubmit = async (data: FormValues) => {
               )}
             />
             <DialogClose asChild disabled={createChatMutation.isPending}>
-
               <ThemedButton
                 type="submit"
                 className="w-full"
                 disabled={createChatMutation.isPending}
-
               >
                 Create Chat
               </ThemedButton>
-          </DialogClose>
+            </DialogClose>
           </form>
         </Form>
       </DialogContent>

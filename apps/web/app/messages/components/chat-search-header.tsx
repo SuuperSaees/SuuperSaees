@@ -7,14 +7,21 @@ import { Members } from '~/lib/members.types';
 // import { useRouter } from 'next/navigation';
 import { useChat } from './context/chat-context';
 import CreateOrganizationsChatDialog from './create-chat-dialog';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { Account } from '~/lib/account.types';
 
 export default function ChatSearchHeader({
   agencyTeam,
+  clientOrganization,
 }: {
   agencyTeam: Members.Organization;
+  clientOrganization?: Account.Type;
 }) {
+
+
   // const router = useRouter();
   const { t } = useTranslation('chats');
+
   const { createChatMutation, isChatCreationDialogOpen, setIsChatCreationDialogOpen, setSearchQuery  } = useChat();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,19 +31,30 @@ export default function ChatSearchHeader({
   const agencyOrganization = agencyTeam;
   const agencyMembers = agencyTeam.members ?? [];
 
+  // Permissions to create a chat
+  const { workspace: userWorkspace } = useUserWorkspace();
+  const role = userWorkspace?.role;
+  const validAgencyRoles = ['agency_owner', 'agency_project_manager'];
+  const validClientRoles = ['client_owner']; 
+  const isValidClientRole = validClientRoles.includes(role ?? '');
+  const canCreateChat = validAgencyRoles.includes(role ?? '') || validClientRoles.includes(role ?? '');
+
+  
   return (
     <div className="border-b p-4">
       <div className="relative mt-4">
         <div className="mb-4 flex items-center justify-between gap-2">
           <h2 className="text-2xl font-semibold">{t('chats')}</h2>
           {/*  Drop down menu */}
-          {agencyOrganization && (
+          {agencyOrganization && canCreateChat && (
             <CreateOrganizationsChatDialog
               createChatMutation={createChatMutation}
               agencyMembers={agencyMembers}
               agencyOrganization={agencyOrganization}
               isChatCreationDialogOpen={isChatCreationDialogOpen}
               setIsChatCreationDialogOpen={setIsChatCreationDialogOpen}
+              clientOrganization={isValidClientRole ? clientOrganization : undefined}
+
             />
           )}
         </div>

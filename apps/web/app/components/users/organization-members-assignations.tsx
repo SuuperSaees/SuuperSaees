@@ -23,14 +23,18 @@ interface OrganizationMemberAssignationProps<T extends z.ZodSchema<unknown>> {
   valueKey: Path<z.infer<T> & FieldValues>;
   schema: T;
   title?: string;
-  defaultOrganization?: Partial<Account.Type>;
+  organization?: Partial<Account.Type>;
+  members?: Account.Type[];
   defaultMembers?: Account.Type[];
+  setImage?: boolean
+  disabledOrganizationSelector?: boolean
+  disabledMembersSelector?: boolean
   fetchOrganizations?: () => Promise<Account.Type[]>;
   fetchMembers?: (organizationId: string) => Promise<Account.Type[]>;
   onOrganizationChange?: (organizationId: string) => void;
   onMembersChange?: (memberIds: string[]) => void;
-  setImage?: boolean
 }
+
 
 export default function OrganizationMemberAssignation<
   T extends z.ZodSchema<unknown>,
@@ -38,19 +42,24 @@ export default function OrganizationMemberAssignation<
   form,
   valueKey,
   schema,
-  defaultOrganization,
-  defaultMembers,
+  organization,
+  members,
   title,
+  defaultMembers,
   fetchOrganizations,
   fetchMembers,
   onOrganizationChange,
   onMembersChange,
   setImage,
+  disabledOrganizationSelector,
+  disabledMembersSelector,
+
+
 
 }: OrganizationMemberAssignationProps<T>) {
   const [selectedOrganization, setSelectedOrganization] =
-    useState<Partial<Account.Type> | null>(defaultOrganization ?? null);
-  const [selectedMembers, setSelectedMembers] = useState<Account.Type[]>([]);
+    useState<Partial<Account.Type> | null>(organization ?? null);
+  const [selectedMembers, setSelectedMembers] = useState<Account.Type[]>(defaultMembers ?? []);
 
   const { t } = useTranslation('orders');
 
@@ -67,8 +76,8 @@ export default function OrganizationMemberAssignation<
   });
 
   const onSelectHandler = (value: string) => {
-    const newMember = defaultMembers
-      ? defaultMembers.find((member) => member.id === value)
+    const newMember = members
+      ? members.find((member) => member.id === value)
       : membersQuery.data?.find((member) => member.id === value);
     if (!newMember) return;
 
@@ -109,26 +118,26 @@ export default function OrganizationMemberAssignation<
 
   const organizationOptions = useMemo(
     () =>
-      (defaultOrganization
-        ? [defaultOrganization]
+      (organization
+        ? [organization]
         : organizationsQuery?.data
       )?.map((org) => ({
         value: org.id,
         label: org.name,
       })) ?? [],
-    [organizationsQuery.data, defaultOrganization],
+    [organizationsQuery.data, organization],
   );
 
   const memberOptions = useMemo(
     () =>
-      (defaultMembers ? [...defaultMembers] : membersQuery.data)?.map(
+      (members ? [...members] : membersQuery.data)?.map(
         (member) => ({
           value: member.id,
           label: member.name,
           picture_url: member.picture_url,
         }),
       ) ?? [],
-    [membersQuery.data, defaultMembers],
+    [membersQuery.data, members],
   );
 
   const selectedMemberIds = selectedMembers.map((member) => member.id) ?? [];
@@ -159,7 +168,7 @@ export default function OrganizationMemberAssignation<
         options={organizationOptions}
         className="w-full bg-transparent"
         groupName={t('dialogs.add.select.label')}
-        defaultValue={defaultOrganization?.id}
+        defaultValue={organization?.id}
         onSelectHandler={(value: string) => {
           const selectedOrganization = organizationsQuery?.data?.find((cOrg) => cOrg.id === value);
           setImage && form.setValue('image', selectedOrganization?.logo_url ?? '');
@@ -180,9 +189,11 @@ export default function OrganizationMemberAssignation<
         }}
         customItem={(option: string) => customItem(option)}
         isLoading={organizationsQuery.isLoading || organizationsQuery.isPending}
+        disabled={disabledOrganizationSelector}
       >
         <span className="text-sm text-gray-600">
           {title ?? t('form.completion.client.label')}
+
           <span className="text-red"> *</span>{' '}
           {/* Change text-red-500 to any desired color */}
         </span>
@@ -209,8 +220,10 @@ export default function OrganizationMemberAssignation<
               <CustomTrigger
                 members={selectedMembers}
                 onRemoveHandler={onRemoveHandler}
+                disabled={disabledMembersSelector}
               />
             }
+            disabled={disabledMembersSelector}
             classNameTrigger="w-full h-fit"
             isLoading={
               fetchMembers &&
@@ -227,7 +240,9 @@ export default function OrganizationMemberAssignation<
 const CustomTrigger = ({
   members,
   onRemoveHandler,
+  disabled,
 }: {
+
   members: Account.Type[];
   onRemoveHandler: (value: string) => void;
 }) => {
@@ -242,10 +257,11 @@ const CustomTrigger = ({
   };
 
   return (
-    <div className="flex h-fit w-full max-w-full items-center justify-between gap-2 rounded-md border border-gray-300 px-4 py-2">
+    <div className={`flex h-fit w-full max-w-full items-center justify-between gap-2 rounded-md border border-gray-300 px-4 py-2 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
       <Search className="h-4 w-4 text-gray-600" />
       <div
         ref={scrollContainerRef}
+
         className="no-scrollbar flex w-full max-w-full gap-2 overflow-x-auto whitespace-nowrap"
         onWheel={handleWheel} // Add the wheel event listener
       >

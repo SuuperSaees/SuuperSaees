@@ -11,7 +11,7 @@ export class TeamRepository {
 
   async list({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
     const client = this.adminClient ?? this.client;
-
+    console.log('includeAgency', includeAgency);
     if (!organizationIds.length && !includeAgency) {
       throw new Error('No organization ids or agency requested');
     }
@@ -34,7 +34,7 @@ export class TeamRepository {
 
       .or('account_role.eq.client_owner,account_role.eq.client_member,account_role.eq.client_guest')
       .single();
-
+      
       if (getAccountInfoError) {
         return resultMembers;
       }
@@ -43,12 +43,13 @@ export class TeamRepository {
       .from('clients')
       .select('agency_id')
       .eq('organization_client_id', getAccountInfo.account_id)
+      .eq('user_client_id', user?.user?.id ?? '')
       .single();
-
+      
       if (getClientInfoError) {
         return resultMembers;
       }
-
+      console.log('getClientInfo', getClientInfo);
       const { data: getAgencyInfo, error: getAgencyInfoError } = await this.client
       .from('accounts')
       .select('id, name, organization_settings(value)')

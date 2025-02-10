@@ -25,7 +25,7 @@ const MembersAssignations = ({
   avatarClassName,
   updateOrderUsersFn,
   isLoading,
-
+  canAddMembers = true,
 }: MembersProps) => {
   const membersAssignedSchema = z.object({
     members: z.array(z.string()),
@@ -64,12 +64,18 @@ const MembersAssignations = ({
 
   const maxAvatars = 3;
   const CustomItemTrigger = (
+    canAddMembers ? (
     <div
       className={`flex items-center justify-center rounded-full border-2 border-white bg-gray-200 text-sm font-bold text-gray-600 ${avatarClassName} ${!avatarClassName?.includes('h-') && 'h-8 w-8'}`}
     >
       +{maxAvatars >= avatars.length ? '' : avatars.length - maxAvatars}
     </div>
-  );
+  ) : (
+    <div />
+  ))
+
+
+
 
   return (
     <div className="flex items-center gap-2">
