@@ -48,26 +48,42 @@ export class ChatService {
 
     const organizationsIds = [...new Set(chatsResult?.map((chat) => chat.user?.organization_id ?? ''))];
     
-    const teamResult = await this.teamRepository?.list({ organizationIds: organizationsIds ?? [], includeMembers: false, includeAgency: false });
-
-    const newChats = chats.map((chat) => {
-      const uniqueOrgIds = [...new Set(
-        chat.members?.map((member) => member.user?.organization_id).filter(Boolean) ?? []
-      )];
-
-      const organizations = uniqueOrgIds
-        .map((orgId: string | null) => teamResult?.[orgId ?? ''])
-        .filter(Boolean) as Members.Organization[];
-
-      return {
-        ...chat,
-        organizations 
-      };
-    });
+    const [teamResult, lastMessages] = await Promise.all([
+      this.teamRepository?.list({ 
+        organizationIds: organizationsIds, 
+        includeMembers: false, 
+        includeAgency: false 
+      }),
+      this.chatMessagesRepository?.listLastMessages(chatIds)
+    ]);
   
-    return newChats;
+    const chatsSorted = chats
+      .map(chat => {
+        const uniqueOrgIds = [...new Set(
+          chat.members?.map(member => member.user?.organization_id).filter(Boolean)
+        )];
+  
+        const organizations = uniqueOrgIds
+          .map(orgId => teamResult?.[orgId ?? ''])
+          .filter(Boolean) as Members.Organization[];
+  
+        const lastMessage = lastMessages?.find(msg => msg.chat_id === chat.id)?.messages ?? [];
+        const messages = Array.isArray(lastMessage) ? lastMessage : [lastMessage];
+  
+        return {
+          ...chat,
+          organizations,
+          messages
+        };
+      })
+      .sort((a, b) => {
+        const bDate = b.messages?.[0]?.created_at;
+        const aDate = a.messages?.[0]?.created_at;
+        return (!bDate || !aDate) ? 0 : new Date(bDate).getTime() - new Date(aDate).getTime();
+      });
+  
+    return chatsSorted;
   }
-
 
 
   async get(chatId: string): Promise<Chats.TypeWithRelations> {
