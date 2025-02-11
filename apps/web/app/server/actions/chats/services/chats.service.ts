@@ -56,8 +56,6 @@ export class ChatService {
       }),
       this.chatMessagesRepository?.listLastMessages(chatIds)
     ]);
-
-    console.log('lastMessages', lastMessages);
   
     const chatsSorted = chats
       .map(chat => {
