@@ -126,6 +126,9 @@ export function ChatProvider({
       setData: setMessages as Dispatch<
         SetStateAction<Message.Type[] | Message.Type>
       >,
+      filter: {
+        order_id: 'null'
+      },
     },
     // {
     //   tableName: 'chats',
