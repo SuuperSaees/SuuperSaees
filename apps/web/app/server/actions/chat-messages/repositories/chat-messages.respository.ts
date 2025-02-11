@@ -41,27 +41,8 @@ export class ChatMessagesRepository {
 
 
   // * GET REPOSITORIES
-  async list(chatId?: string, chatIds?: string[]): Promise<ChatMessages.TypeWithRelations[]> {
+  async list(chatId?: string): Promise<ChatMessages.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
-
-    if (!chatId && chatIds) {
-      const { data, error } = await client
-        .from('chat_messages')
-        .select(`
-          *,
-          messages!inner(*)
-        `)
-        .in('chat_id', chatIds ?? [])
-        .is('messages.deleted_on', null)
-        .order('created_at', { ascending: false })
-        
-
-      if (error) {
-        throw new Error(`Error fetching messages: ${error.message}`);
-      }
-
-      return data as unknown as ChatMessages.TypeWithRelations[];
-    }
 
     const { data, error } = await client
       .from('chat_messages')
@@ -77,6 +58,26 @@ export class ChatMessagesRepository {
       );
     }
 
+    return data as unknown as ChatMessages.TypeWithRelations[];
+  }
+
+  async listLastMessages(chatIds?: string[]): Promise<ChatMessages.TypeWithRelations[]> {
+    const client = this.adminClient ?? this.client;
+  
+    const { data, error } = await client
+      .from('chat_messages')
+      .select(`
+        *,
+        messages!inner(*)
+      `)
+      .in('chat_id', chatIds ?? [])
+      .is('messages.deleted_on', null)
+      .order('created_at', { ascending: false })
+  
+    if (error) {
+      throw new Error(`Error fetching last messages: ${error.message}`);
+    }
+  
     return data as unknown as ChatMessages.TypeWithRelations[];
   }
 
