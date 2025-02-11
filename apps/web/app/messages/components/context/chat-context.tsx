@@ -15,7 +15,7 @@ import {
   ChatContextType,
   ChatProviderProps,
 } from '~/messages/types/chat-context.types';
-
+import { updateArrayData } from '~/utils/data-transform';
 
 /**
  * Context for managing chat state and operations.
@@ -81,7 +81,6 @@ export function ChatProvider({
     filteredChats,
     setFilteredChats,
     setChats,
-
   } = useChatState({ initialMembers });
 
   // Query for chat by id
@@ -110,6 +109,37 @@ export function ChatProvider({
   // TODO: Implement user addition based on members for new messages
   const handleSubscriptions = createSubscriptionHandler<Message.Type>({
     idField: 'temp_id',
+    onBeforeUpdate: (payload) => {
+      // add user join based on members and the user_id that comes in the payload
+      const message = payload.new as Message.Type;
+      const userId = message.user_id;
+      const user = members.find((member) => member.id === userId);
+      if (
+        user &&
+        payload.eventType === 'INSERT' &&
+        payload.table === 'messages'
+      ) {
+        const newMessage = {
+          ...message,
+          user: {
+            id: user.id,
+            name: user.name ?? '',
+            email: user.email ?? '',
+            picture_url: user.picture_url ?? '',
+          },
+        };
+
+        const updatedItems = updateArrayData(
+          messages,
+          newMessage,
+          'temp_id',
+          true,
+        );
+        setMessages(updatedItems);
+      }
+
+      return true;
+    },
   });
 
   // Configure real-time subscriptions
@@ -135,7 +165,11 @@ export function ChatProvider({
   ];
 
   // Initialize real-time subscriptions
-  useRealtime(tables as TableConfig<Message.Type>[], realtimeConfig, handleSubscriptions);
+  useRealtime(
+    tables as TableConfig<Message.Type>[],
+    realtimeConfig,
+    handleSubscriptions,
+  );
 
   const value: ChatContextType = {
     messages: messages.filter((msg) => !('deleted_at' in msg)),

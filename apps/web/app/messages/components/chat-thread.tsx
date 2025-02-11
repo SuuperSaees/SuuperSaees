@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 
@@ -17,8 +17,11 @@ import { useChat } from './context/chat-context';
 import MessageList from './message-list';
 import RichTextEditor from './rich-text-editor';
 
-
-export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organization }) {
+export default function ChatThread({
+  agencyTeam,
+}: {
+  agencyTeam: Members.Organization;
+}) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const {
     user,
@@ -31,12 +34,11 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
     addMessageMutation,
     setActiveChat,
     setChatId,
+    setMembers,
   } = useChat();
   const userId = user.id;
   const chatById = chatByIdQuery.data;
   const isLoading = chatByIdQuery.isLoading;
-
-
 
   const handleMembersUpdate = async (members: string[]) => {
     await membersUpdateMutation.mutateAsync(members);
@@ -48,8 +50,6 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
     setActiveChat(null);
     setChatId('');
   };
-
-
 
   const handleUpdate = async (name: string) => {
     await updateChatMutation.mutateAsync(name);
@@ -63,14 +63,22 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
       temp_id: generateUUID(),
     });
   };
-
+  // Set
+  // members
+  useEffect(() => {
+    if (chatByIdQuery.data && chatByIdQuery.data.members) {
+      setMembers(chatByIdQuery.data.members);
+    }
+  }, [chatByIdQuery.data, setMembers]);
+  if (!activeChat) {
+    return <ChatEmptyState />;
+  }
   if (!activeChat) {
     return <ChatEmptyState />;
   }
 
   const activeChatDataName = { ...activeChat }.name;
   const activeChatDataId = { ...activeChat }.id;
-  
 
   return (
     <div className="flex h-full flex-col">
@@ -93,17 +101,19 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
           <ChatMembersSelector
             agencyTeam={{
               ...agencyTeam,
-              members: agencyTeam.members?.filter(member => {
-                const selectedMember = chatById?.members?.find(m => m.id === member.id);
-                
+              members: agencyTeam.members?.filter((member) => {
+                const selectedMember = chatById?.members?.find(
+                  (m) => m.id === member.id,
+                );
+
                 if (!selectedMember) return true;
-                
+
                 return selectedMember.visibility;
-              })
+              }),
             }}
-            selectedMembers={chatById?.members?.filter((member) => member.visibility) ?? []}
-
-
+            selectedMembers={
+              chatById?.members?.filter((member) => member.visibility) ?? []
+            }
             onMembersUpdate={handleMembersUpdate}
             isLoading={isLoading}
           />
@@ -123,7 +133,6 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
                 }}
               >
                 <Trash2 className="h-4 w-4" />
-
                 Delete chat
               </Button>
             </PopoverContent>
