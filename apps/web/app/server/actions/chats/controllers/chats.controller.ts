@@ -41,7 +41,8 @@ export class ChatController {
       const chatRepository = new ChatRepository(this.client, this.adminClient);
       const membersRepository = new ChatMembersRepository(this.client, this.adminClient);
       const teamRepository = new TeamRepository(this.client, this.adminClient);
-      const chatService = new ChatService(chatRepository, membersRepository, undefined, teamRepository);
+      const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
+      const chatService = new ChatService(chatRepository, membersRepository, chatMessagesRepository, teamRepository);
       return await chatService.list(userId);
 
     } catch (error) {

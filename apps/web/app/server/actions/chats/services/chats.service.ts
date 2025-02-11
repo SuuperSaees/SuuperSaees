@@ -50,7 +50,7 @@ export class ChatService {
     
     const teamResult = await this.teamRepository?.list({ organizationIds: organizationsIds ?? [], includeMembers: false, includeAgency: false });
 
-    const newChats = chats.map((chat) => {
+    let newChats = chats.map((chat) => {
       const uniqueOrgIds = [...new Set(
         chat.members?.map((member) => member.user?.organization_id).filter(Boolean) ?? []
       )];
@@ -64,10 +64,31 @@ export class ChatService {
         organizations 
       };
     });
-  
-    return newChats;
-  }
 
+    const chatResponseIds = newChats.map((chat) => chat.id);
+
+    const chatsWithLastMessage = await this.chatMessagesRepository?.list(undefined, chatResponseIds);
+
+    newChats = newChats.map((chat) => {
+      const rawMessages = chatsWithLastMessage?.find((message) => message.chat_id === chat.id)?.messages ?? [];
+      const messages = Array.isArray(rawMessages) ? rawMessages : [rawMessages];
+      return { ...chat, messages };
+    });
+
+    const chatsSorted = newChats.sort((a, b) => {
+      const bDate = b.messages?.[0]?.created_at;
+      const aDate = a.messages?.[0]?.created_at;
+      
+      if (!bDate || !aDate) return 0;
+      
+      const bTime = new Date(bDate).getTime();
+      const aTime = new Date(aDate).getTime();
+      
+      return bTime - aTime;
+    });
+
+    return chatsSorted;
+  }
 
 
   async get(chatId: string): Promise<Chats.TypeWithRelations> {
