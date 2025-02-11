@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 
@@ -15,8 +15,10 @@ import ChatEmptyState from './chat-empty-state';
 import ChatMembersSelector from './chat-members-selector';
 import { useChat } from './context/chat-context';
 import MessageList from './message-list';
-import RichTextEditor from './rich-text-editor';
-
+import RichTextEditor from '../../components/messages/rich-text-editor';
+import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+import * as tus from 'tus-js-client';
+import { FileUpload } from '../../components/messages/types';
 
 export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organization }) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -74,6 +76,97 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
   }, [chatByIdQuery.data, setMembers
     
   ])
+
+  const [uploads, setUploads] = useState<Record<string, { progress: number; status: string; url: string | null }>>({});
+  const supabase = useSupabase();
+
+  const handleFileUpload = async (file: File, setUploadsFunction: Dispatch<SetStateAction<FileUpload[]>>, fileId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    // const fileId = crypto.randomUUID();
+    setUploads((prev) => ({
+      ...prev,
+      [fileId]: {
+        progress: 0,
+        status: 'uploading',
+        url: null
+      }
+    }));
+
+    const bucketName = 'chats';
+    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const uuid = crypto.randomUUID();
+    const filePath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
+    console.log('file', file)
+    return new Promise((resolve, reject) => {
+      const upload = new tus.Upload(file, {
+        endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
+        retryDelays: [0, 3000, 5000, 10000, 20000],
+        headers: {
+          authorization: `Bearer ${session?.access_token}`,
+          'x-upsert': 'true',
+        },
+        uploadDataDuringCreation: true,
+        removeFingerprintOnSuccess: true,
+        metadata: {
+          bucketName,
+          objectName: fileId,
+          contentType: file.type,
+          cacheControl: '3600',
+        },
+        chunkSize: 6 * 1024 * 1024, // 6MB,
+        onError: (error) => {
+          console.error('Error uploading file:', error);
+          reject(error);
+        },
+        onProgress: (bytesUploaded, bytesTotal) => {
+          const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
+          console.log(`Uploading: ${percentage}% done`)
+          setUploadsFunction((prev) => {
+ 
+            console.log('prev', prev)
+            const newUpload = prev.find((upload) => upload.id === fileId) ?? {
+              id: fileId,
+              file: file,
+              progress: 0,
+              status: 'uploading',
+              previewUrl: null
+            }
+            if (newUpload) {
+              newUpload.progress = parseFloat(percentage)
+              newUpload.status = percentage === '100.00' ? 'success' : 'uploading'
+              
+            }
+            const newUploads = [...prev.filter((upload) => upload.id !== fileId), newUpload]
+            return newUploads
+          });
+          setUploads((prev) => {
+            const newUploads = { ...prev };
+            if (fileId && newUploads[fileId]) {
+              newUploads[fileId].progress = parseFloat(percentage);
+            }
+            return newUploads;
+          });
+        },
+        onSuccess: (data) => {
+          console.log('Upload successful:', data);
+          resolve(data);
+        },
+      })
+      
+      // Check if there are any previous uploads to continue.
+      void upload.findPreviousUploads().then(function (previousUploads) {
+        // Found previous uploads so we select the first one.
+        if (previousUploads.length && previousUploads[0]) {
+          upload.resumeFromPreviousUpload(previousUploads[0])
+        }
+
+        // Start the upload
+        upload.start()
+      })
+    })
+  };
+
+
   if (!activeChat) {
     return <ChatEmptyState />;
   }
@@ -81,8 +174,6 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
   const activeChatDataName = { ...activeChat }.name;
   const activeChatDataId = { ...activeChat }.id;
   
-
-
 
 
   return (
@@ -155,6 +246,7 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
           onComplete={handleSendMessage}
           showToolbar={true}
           isEditable={true}
+          onFileUpload={handleFileUpload}
         />
       </div>
     </div>
