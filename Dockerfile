@@ -9,7 +9,7 @@ RUN rm -rf node_modules
 RUN pnpm add -w -D @sentry/utils
 RUN pnpm i
 
-RUN dotenv -- pnpm run build
+RUN NODE_OPTIONS="--max-old-space-size=4096" dotenv -- pnpm run build
 
 FROM node:20-alpine
 
