@@ -1,7 +1,7 @@
 import {
   Layers,
   CreditCard,
-  // MessagesSquare,
+  MessagesSquare,
   Settings,
   SquareCheck,
   Users,
@@ -23,14 +23,14 @@ const routes = [
   //   Icon: <Home className={iconClasses} />,
   //   end: true,
   // },
-  // {
-  //   label: 'common:messagesName',
-  //   path: pathsConfig.app.messages,
-  //   Icon: <MessagesSquare className={iconClasses} />,
-  //   end: true,
-  //   children: [],
-  //   divider: true,
-  // },
+  {
+    label: 'common:messagesName',
+    path: pathsConfig.app.messages,
+    Icon: <MessagesSquare className={iconClasses} />,
+    end: true,
+    children: [],
+    divider: true,
+  },
   {
     label: 'common:ordersName',
     path: pathsConfig.app.orders,
