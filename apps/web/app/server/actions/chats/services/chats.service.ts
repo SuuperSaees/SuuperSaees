@@ -79,8 +79,8 @@ export class ChatService {
         };
       })
       .sort((a, b) => {
-        const bDate = b.messages?.[0]?.created_at;
-        const aDate = a.messages?.[0]?.created_at;
+        const bDate = b.messages?.[0]?.created_at ?? b.created_at;
+        const aDate = a.messages?.[0]?.created_at ?? a.created_at;
         return (!bDate || !aDate) ? 0 : new Date(bDate).getTime() - new Date(aDate).getTime();
       });
   
