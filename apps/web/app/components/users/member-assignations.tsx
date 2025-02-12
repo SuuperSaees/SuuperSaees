@@ -14,37 +14,39 @@ interface MembersProps {
   updateOrderUsersFn: (userIds: string[]) => Promise<void>;
   avatarClassName?: string;
   className?: string;
+  isLoading?: boolean;
   [key: string]: unknown;
 }
 
 const MembersAssignations = ({
-  users,
-  defaultSelectedUsers,
+  users = [],
+  defaultSelectedUsers = [],
   className,
   avatarClassName,
   updateOrderUsersFn,
+  isLoading,
+  canAddMembers = true,
 }: MembersProps) => {
   const membersAssignedSchema = z.object({
     members: z.array(z.string()),
   });
 
-  const [selectedUsers, setSelectedUsers] = useState<Omit<User.Response, 'organization_id' | 'settings'>[]>(defaultSelectedUsers);
+  const [selectedUsers, setSelectedUsers] =
+    useState<Omit<User.Response, 'organization_id' | 'settings'>[]>(
+      defaultSelectedUsers,
+    );
   const onSelectedUsersChange = (ids: string[]) => {
-    console.log('ids', ids);
-    setSelectedUsers(users.filter((user) => ids.includes(user.id)));
-  }
+    setSelectedUsers(users?.filter((user) => ids.includes(user.id)));
+  };
   const avatars =
-
     selectedUsers?.map((user) => ({
       name: user.name,
       picture_url: user.picture_url,
     })) ?? [];
 
-
   const defaultValues = {
     members: selectedUsers?.map((user) => user.id),
   };
-
 
   async function handleFormSubmit(data: z.infer<typeof membersAssignedSchema>) {
     return await updateOrderUsersFn(data.members);
@@ -61,15 +63,19 @@ const MembersAssignations = ({
   );
 
   const maxAvatars = 3;
-  console.log('selectedUsers', selectedUsers);
   const CustomItemTrigger = (
-
+    canAddMembers ? (
     <div
       className={`flex items-center justify-center rounded-full border-2 border-white bg-gray-200 text-sm font-bold text-gray-600 ${avatarClassName} ${!avatarClassName?.includes('h-') && 'h-8 w-8'}`}
     >
       +{maxAvatars >= avatars.length ? '' : avatars.length - maxAvatars}
     </div>
-  );
+  ) : (
+    <div />
+  ))
+
+
+
 
   return (
     <div className="flex items-center gap-2">
@@ -86,9 +92,9 @@ const MembersAssignations = ({
         customItem={CustomUserItem}
         customItemTrigger={CustomItemTrigger}
         onChange={onSelectedUsersChange}
+        isLoading={isLoading}
       />
     </div>
-
   );
 };
 

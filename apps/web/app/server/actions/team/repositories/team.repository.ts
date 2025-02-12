@@ -9,9 +9,9 @@ export class TeamRepository {
 
   ) {}
 
-  async getTeams({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
+  async list({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
     const client = this.adminClient ?? this.client;
-
+    console.log('includeAgency', includeAgency);
     if (!organizationIds.length && !includeAgency) {
       throw new Error('No organization ids or agency requested');
     }
@@ -34,7 +34,7 @@ export class TeamRepository {
 
       .or('account_role.eq.client_owner,account_role.eq.client_member,account_role.eq.client_guest')
       .single();
-
+      
       if (getAccountInfoError) {
         return resultMembers;
       }
@@ -43,12 +43,13 @@ export class TeamRepository {
       .from('clients')
       .select('agency_id')
       .eq('organization_client_id', getAccountInfo.account_id)
+      .eq('user_client_id', user?.user?.id ?? '')
       .single();
-
+      
       if (getClientInfoError) {
         return resultMembers;
       }
-
+      console.log('getClientInfo', getClientInfo);
       const { data: getAgencyInfo, error: getAgencyInfoError } = await this.client
       .from('accounts')
       .select('id, name, organization_settings(value)')
@@ -108,8 +109,9 @@ export class TeamRepository {
 
         const { data: membersData, error: membersDataError } = await client
         .from('accounts')
-        .select('id, email, user_settings(name, picture_url)')
+        .select('id, email, name, picture_url, user_settings(name, picture_url)')
         .in('id', membersIds);
+
 
         if (membersDataError) throw membersDataError;
 
@@ -117,14 +119,16 @@ export class TeamRepository {
         
         resultMembers[organizationId].members = members.map((member) => ({
           id: member.user_id,
-          name: membersDataMap.get(member.user_id)?.user_settings?.name ?? '',
+          name: membersDataMap.get(member.user_id)?.name ?? membersDataMap.get(member.user_id)?.user_settings?.name ?? '',
           email: membersDataMap.get(member.user_id)?.email ?? '',
           organization_id: organizationId,
-          picture_url: membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? '',
+          role: member.account_role,
+          picture_url: membersDataMap.get(member.user_id)?.picture_url ?? membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? '',
         }
       ));
       }
       
+
     }
     return resultMembers;
   }

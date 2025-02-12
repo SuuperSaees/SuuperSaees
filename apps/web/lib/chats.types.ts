@@ -2,6 +2,8 @@ import { Database } from './database.types';
 import { ChatMembers } from './chat-members.types';
 import { ChatMessages } from './chat-messages.types';
 import { Message } from './message.types';
+import { Members } from './members.types';
+import { Account } from './account.types';
 
 export namespace Chats {
   export type Type = Database['public']['Tables']['chats']['Row']
@@ -9,10 +11,10 @@ export namespace Chats {
   export type Update = Database['public']['Tables']['chats']['Update'];
   export type TypeWithRelations = Type & {
     chat_members?: ChatMembers.Type[];
-    members?: ChatMembers.Type[];
+    members?: (ChatMembers.Type & { user: { organization_id: Account.Type['organization_id'] } })[];
     messages?: Message.Type[] | null;
     chat_messages?: ChatMessages.TypeWithRelations[];
-
+    organizations?: Members.Organization[];
   };
   export type InsertWithRelations = Insert & {
     chat_members: ChatMembers.Insert[];

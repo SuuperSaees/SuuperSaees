@@ -1,8 +1,6 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
-
-import Avatar from '../../components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 
 import { Chats } from '~/lib/chats.types';
 
@@ -12,7 +10,7 @@ export default function ChatItem({
   chat,
   isActive = false,
 }: {
-  chat: Chats.Type;
+  chat: Chats.TypeWithRelations;
   isActive?: boolean;
 }) {
   const { setChatId, setActiveChat } = useChat();
@@ -30,13 +28,10 @@ export default function ChatItem({
       }`}
     >
       <div className="relative">
-        {
-          chat.image ? (
-            <Avatar src={chat.image} alt={chat.name} />
-          ) : (
-            <MessageCircle className="h-12 w-12 rounded-full object-cover p-2 pl-4" />
-          )
-        }
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={chat.image ?? ''} />
+            <AvatarFallback>{chat.organizations?.find((org) => !org.is_agency)?.name.charAt(0).toUpperCase()}</AvatarFallback>
+          </Avatar>
         {/* <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}
 
         {/* <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}

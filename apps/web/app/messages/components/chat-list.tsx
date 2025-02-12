@@ -1,18 +1,17 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import ChatItem from './chat-item';
 import { useChat } from './context/chat-context';
+import { Chats } from '~/lib/chats.types';
 
 export default function ChatList() {
-  const { chatId, chatsQuery, searchQuery } = useChat();
-
+  const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat, setChatId } = useChat();
   const filteredChats = useMemo(() => {
     const chats = chatsQuery.data ?? [];
     if (!searchQuery) return chats;
     if (!Array.isArray(chats) || !chats.length) return [];
-    
     return chats.filter((chat) => {
       // Verificar nombre del chat de forma segura
       if (chat?.name?.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -33,6 +32,12 @@ export default function ChatList() {
     });
   }, [chatsQuery.data, searchQuery]);
 
+  useEffect(() => {
+    if (filteredChats?.length && !activeChat) {
+      setActiveChat(filteredChats[0] as Chats.Type);
+      setChatId(filteredChats[0].id.toString());
+    }
+  }, [filteredChats, activeChat, setActiveChat]);
   // Estado de carga
   if (chatsQuery.isLoading) {
     return (

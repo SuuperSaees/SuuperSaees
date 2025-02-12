@@ -23,49 +23,18 @@ export async function getEmails(orderId: string) {
 
     if (followersError) throw followersError;
 
-    const agencyMemberIdsSet = new Set(
-      assignationsData.map(assignation => assignation.agency_member_id)
-    );
-
-    // Query to get the agency id
-    const { data: agencyData, error: agencyError } = await client
-      .from('orders_v2')
-      .select('agency_id')
-      .eq('id', orderId)
-      .single();
-
-    if (agencyError) throw agencyError;
-
-    const agencyId = agencyData.agency_id;
-
-    // Query to get the project manager from accounts memberships
-    const { data: projectManagerData, error: projectManagerError } = await client
-      .from('accounts_memberships')
-      .select('user_id')
-      .eq('account_id', agencyId)
-      .eq('account_role', 'agency_project_manager')
-
-    if (projectManagerError) throw projectManagerError;
-
-    // Add only unique project manager IDs
-    projectManagerData.forEach(manager => {
-      agencyMemberIdsSet.add(manager.user_id);
-    });
-    
-    const agencyMemberIds = Array.from(agencyMemberIdsSet);
-
+    const agencyMemberIds = assignationsData.map(assignation => assignation.agency_member_id);
     const clientMemberIds = followersData.map(follower => follower.client_member_id);
 
-    if (agencyMemberIds.length === 0 && clientMemberIds.length === 0) return []; // If there are no assignations or followers, return an empty array
+    if (agencyMemberIds.length === 0 && clientMemberIds.length === 0) return []; // Si no hay asignaciones, retorna un arreglo vacío
 
     const memberIds = [...agencyMemberIds, ...clientMemberIds];
 
-    // Query to get the emails of the agency members
+    // Consulta para obtener los correos electrónicos de los miembros de la agencia
     const { data: emailData, error: emailError } = await client
       .from('accounts')
       .select('email')
       .in('id', memberIds);
-
 
       if (emailError) throw emailError;
 

@@ -40,7 +40,7 @@ export class ChatRepository {
   }
 
   // * GET REPOSITORIES
-  async list(userId: string, chatIds?: string[]): Promise<Chats.Type[]> {
+  async list(userId: string, chatIds?: string[]): Promise<Chats.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
 
     let chatList: Chats.Type[] = [];
@@ -48,7 +48,7 @@ export class ChatRepository {
     if (chatIds) {
       const { data: chatMembers, error: membersError } = await client
       .from('chats')
-      .select(`*`)
+      .select(`*, members:chat_members (user:accounts(organization_id))`)
       .in('id', chatIds)
       .is('deleted_on', null);
 
@@ -57,34 +57,43 @@ export class ChatRepository {
       }
 
       chatList = chatList.concat(chatMembers as unknown as Chats.Type[]);
-      
-    return chatList;
-
     }
     
     const { data, error } = await client
     .from('chats')
     .select(`*`)
     .eq('user_id', userId)
-    .is('deleted_on', null);
+    .is('deleted_on', null)
 
     if (error) {
       throw new Error(`Error fetching chats: ${error.message}`);
     }
 
-    chatList = chatList.concat(data as unknown as Chats.Type[]);  
+    chatList = chatList.concat(data.filter((chat) => !chatIds?.includes(chat.id)) as unknown as Chats.Type[]);  
 
-
-    
     return chatList;
-
   }
  
 
-  async get(chatId: string): Promise<Chats.TypeWithRelations> {
+  async get(chatId: string, fields?: string[]): Promise<Chats.TypeWithRelations> {
     const client = this.adminClient ?? this.client;
+    
+    if (fields){
+      const { data: chat, error } = await client
+      .from('chats')
+      .select(fields.join(','))
+      .eq('id', chatId)
+      .single();
+      
+      if (error) {
+        throw new Error(`Error fetching chat ${chatId}: ${error.message}`);
+      }
+
+      return chat as unknown as Chats.TypeWithRelations;
+    }
 
     const { data: chat, error } = await client
+
       .from('chats')
       .select(
         `
@@ -100,9 +109,11 @@ export class ChatRepository {
         chat_members (
           user_id,
           type,
+          visibility,
           account:accounts(
             email,
             name,
+            organization_id,
             picture_url,
             user_settings (
               name,
@@ -123,7 +134,7 @@ export class ChatRepository {
             temp_id,
             order_id,
             parent_id,
-            user:accounts(email, user_settings(name, picture_url))
+            user:accounts(email, name, picture_url, user_settings(name, picture_url))
         )
       `,
       )
@@ -155,6 +166,7 @@ export class ChatRepository {
         chat_id: chatId,
         created_at: new Date().toISOString(),
         deleted_on: null,
+        organization_id: member.account?.organization_id ?? '',
         id: member.user_id,
         name: member.account?.user_settings?.name ?? member.account?.name ?? '',
         picture_url: member.account?.user_settings?.picture_url ?? member.account?.picture_url ?? '',
@@ -164,7 +176,7 @@ export class ChatRepository {
         updated_at: new Date().toISOString(),
 
         user_id: member.user_id,
-        visibility: true
+        visibility: member.visibility
 
       })) || [],
       messages: chat?.messages?.map((message) => ({
@@ -182,9 +194,9 @@ export class ChatRepository {
         parent_id: message.parent_id,
         user: {
           id: message.user_id,
-          name: message.user?.user_settings?.name ?? '',
+          name: message.user?.name ?? message.user?.user_settings?.name ?? '',
           email: message.user?.email ?? '',
-          picture_url: message.user?.user_settings?.picture_url ?? '',
+          picture_url: message.user?.picture_url ?? message.user?.user_settings?.picture_url ?? '',
         },
       })),
     } 
