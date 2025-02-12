@@ -1,16 +1,16 @@
 'use client';
 
-// import { Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import type React from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import CheckboxCombobox, {
-  CustomItemProps,
-  Option,
+  type CustomItemProps,
+  type Option,
 } from '~/components/ui/checkbox-combobox';
-import { Order } from '~/lib/order.types';
+import type { Order } from '~/lib/order.types';
 
 import AvatarDisplayer from './ui/avatar-displayer';
 
@@ -31,7 +31,7 @@ const CustomUserItem: React.FC<
   </div>
 );
 
-interface ActivityFollowersProps {
+interface ActivityAssignationProps {
   followers: Order.Type['followers'];
   updateFunction: (data: string[]) => void;
   searchUserOptions: {
@@ -49,62 +49,54 @@ const ActivityFollowers = ({
   searchUserOptions,
   canAddFollowers = true,
   isLoading = false,
-}: ActivityFollowersProps) => {
+}: ActivityAssignationProps) => {
   const { t } = useTranslation('orders');
+  const [selectedFollowers, setSelectedFollowers] = useState(
+    followers?.map((follower) => follower.client_follower.id) ?? [],
+  );
 
-  // Add state to track current selections
-  const [currentFollowers, setCurrentFollowers] = useState(followers || []);
-
-  // Update local state when prop changes
-  useEffect(() => {
-    setCurrentFollowers(followers || []);
-  }, [followers]);
-
-  const avatarsWithStatus = currentFollowers.map((account) => ({
-    ...account.client_follower,
-    status: undefined,
-  }));
-
-  const membersAssignedSchema = z.object({
-    order_followers: z.array(z.string()),
+  // Update avatarsWithStatus based on selected followers
+  const avatarsWithStatus = selectedFollowers.map((followerId) => {
+    // First try to find in followers
+    const follower = followers?.find(
+      (f) => f.client_follower.id === followerId,
+    )?.client_follower;
+    // If not found, search in searchUserOptions
+    if (!follower) {
+      const searchOption = searchUserOptions.find((option) => option.value === followerId);
+      if (searchOption) {
+        return {
+          id: searchOption.value,
+          name: searchOption.label,
+          picture_url: searchOption.picture_url,
+          settings: {
+            name: searchOption.label,
+            picture_url: searchOption.picture_url,
+          },
+          status: undefined,
+        };
+      }
+    }
+    return {
+      ...follower,
+      status: undefined,
+    };
   });
 
-  const defaultValues = {
-    order_followers: currentFollowers.map((option) => option.client_follower.id),
-  };
+  const membersAssignedSchema = z.object({
+    agency_members: z.array(z.string()),
+  });
 
   function handleFormSubmit(data: z.infer<typeof membersAssignedSchema>) {
-    updateFunction(data.order_followers);
+    updateFunction(data.agency_members);
   }
 
-  // Add onChange handler for immediate UI updates
-  const handleSelectionChange = (selectedIds: string[]) => {
-    // Create new followers array based on selected IDs
-    const newFollowers = selectedIds
-      .map((id) => {
-        // Find the original follower entry or create a new one from searchUserOptions
-        const existing = followers?.find((f) => f.client_follower.id === id);
-        if (existing) return existing;
+  const defaultValues = {
+    agency_members: selectedFollowers,
+  };
 
-        const userOption = searchUserOptions.find((o) => o.value === id);
-        if (!userOption) return null;
-
-        return {
-          client_follower: {
-            id: userOption.value,
-            name: userOption.label,
-            settings: {
-              name: userOption.label,
-              picture_url: userOption.picture_url,
-            },
-            picture_url: userOption.picture_url,
-          },
-        };
-      })
-      .filter((x): x is NonNullable<typeof x> => x !== null);
-
-    setCurrentFollowers(newFollowers);
-    updateFunction(selectedIds);
+  const handleChange = (newValues: string[]) => {
+    setSelectedFollowers(newValues);
   };
 
   return (
@@ -113,9 +105,9 @@ const ActivityFollowers = ({
         {t('details.followedBy')}
       </span>
       <div className="no-scrollbar flex max-h-[300px] flex-wrap items-center justify-start gap-2 overflow-y-auto">
-        {avatarsWithStatus.map((avatar) => (
+        {avatarsWithStatus.map((avatar, index) => (
           <AvatarDisplayer
-            key={avatar.id}
+            key={avatar?.id ?? index}
             displayName={avatar?.settings?.name ?? avatar?.name ?? ''}
             isAssignedOrFollower={true}
             pictureUrl={avatar?.settings?.picture_url ?? avatar?.picture_url}
@@ -131,8 +123,8 @@ const ActivityFollowers = ({
             defaultValues={defaultValues}
             customItem={CustomUserItem}
             isLoading={isLoading}
-            onChange={handleSelectionChange}
-            values={currentFollowers.map((f) => f.client_follower.id)}
+            values={selectedFollowers}
+            onChange={handleChange}
           />
         )}
       </div>
