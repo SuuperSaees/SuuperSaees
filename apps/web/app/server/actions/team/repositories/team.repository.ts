@@ -11,6 +11,7 @@ export class TeamRepository {
 
   async list({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
     const client = this.adminClient ?? this.client;
+    console.log('includeAgency', includeAgency);
     if (!organizationIds.length && !includeAgency) {
       throw new Error('No organization ids or agency requested');
     }
