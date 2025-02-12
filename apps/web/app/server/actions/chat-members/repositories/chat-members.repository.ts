@@ -103,11 +103,12 @@ export class ChatMembersRepository {
         );
       }
 
-      if(getAllMembers && data[0]?.chat_id) {
+      if(getAllMembers && data.length) {
+        const chatIds = data.map((chat) => chat.chat_id);
         const { data: allMembers, error: allMembersError } = await client
           .from('chat_members')
           .select(`*, user:accounts(email, organization_id, settings:user_settings(name, picture_url))`)
-          .eq('chat_id', data[0]?.chat_id ?? '');
+          .in('chat_id', chatIds);
 
         if (allMembersError) {
           throw new Error(
