@@ -1,6 +1,6 @@
 'use client';
 
-import {  useEffect, useState, type JSX } from 'react';
+import { useState, type JSX } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DefaultValues, Path, SubmitHandler, useForm } from 'react-hook-form';
@@ -21,34 +21,39 @@ import { Spinner } from '@kit/ui/spinner';
 import { Plus } from 'lucide-react';
 
 export type Option = {
-  value: string
-  label: string
-  actionFn?: (value: string) => void
-}
+  value: string;
+  label: string;
+  actionFn?: (value: string) => void;
+};
 
 export interface CustomItemProps<T extends Option> {
-  option: T
+  option: T;
 }
 
-export type CustomItemComponent<T extends Option> = React.ComponentType<CustomItemProps<T>>
+export type CustomItemComponent<T extends Option> = React.ComponentType<
+  CustomItemProps<T>
+>;
 
-export interface ComboboxProps<TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, unknown>> {
-  options: Option[]
-  defaultValues: DefaultValues<z.infer<TSchema>>
-  schema: TSchema
-  onSubmit: SubmitHandler<z.infer<TSchema>>
-  className?: string
-  customItem?: CustomItemComponent<Option>
-  customItemTrigger?: JSX.Element
-  classNameTrigger?: string
-  values?: string[]
-  isLoading?: boolean
-  onSelect?: (value: string) => void
-  onChange?: (values: string[]) => void
-  disabled?: boolean
+export interface ComboboxProps<
+  TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, unknown>,
+> {
+  options: Option[];
+  defaultValues: DefaultValues<z.infer<TSchema>>;
+  schema: TSchema;
+  onSubmit: SubmitHandler<z.infer<TSchema>>;
+  className?: string;
+  customItem?: CustomItemComponent<Option>;
+  customItemTrigger?: JSX.Element;
+  classNameTrigger?: string;
+  values?: string[]; // New prop for controlled values
+  isLoading?: boolean;
+  onSelect?: (value: string) => void; // New prop for selection handler
+  onChange?: (values: string[]) => void; // New prop for change handler
 }
 
-export default function CheckboxCombobox<TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, unknown>>({
+export default function CheckboxCombobox<
+  TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, unknown>,
+>({
   options,
   defaultValues,
   schema,
@@ -57,61 +62,44 @@ export default function CheckboxCombobox<TSchema extends ZodType<Record<string, 
   customItem: CustomItemComponent,
   customItemTrigger,
   classNameTrigger,
-  values,
-  isLoading,
-  onSelect,
-  onChange,
-  disabled,
+  values, 
+  isLoading, 
+  onSelect, 
+  onChange, 
 }: ComboboxProps<TSchema>) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [formKey, setFormKey] = useState(0) // Add key for form reset
-
+  const [searchTerm, setSearchTerm] = useState('');
   const form = useForm<z.infer<TSchema>>({
     defaultValues,
     resolver: zodResolver(schema),
-  })
+  });
 
-  // Reset form when defaultValues change
-  useEffect(() => {
-    form.reset(defaultValues)
-  }, [defaultValues, form])
-
-  const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredOptions = options.filter((option) =>
+    option.label?.toLowerCase().includes(searchTerm?.toLowerCase() ?? ''),
+  );
 
   const handlePopoverClose = async (open: boolean) => {
     if (!open) {
-      const currentValues = form.getValues()
+      const currentValues = form.getValues();
+      const formDefaultValues = form.formState.defaultValues;
       const hasChanges = Object.keys(currentValues).some(
         (key) =>
-          JSON.stringify(currentValues[key]) !== JSON.stringify(defaultValues[key as keyof typeof defaultValues]),
-      )
+          JSON.stringify(currentValues[key]) !==
+          JSON.stringify(formDefaultValues?.[key]),
+      );
 
       if (hasChanges) {
-        await form.handleSubmit(onSubmit)()
+        await form.handleSubmit(onSubmit)();
       }
     }
-  }
-
-  // Force form reset if values prop changes
-  useEffect(() => {
-    if (values !== undefined) {
-      const formValues = Object.keys(defaultValues).reduce(
-        (acc, key) => {
-          acc[key as keyof typeof defaultValues] = values
-          return acc
-        },
-        {} as typeof defaultValues,
-      )
-
-      form.reset(formValues)
-      setFormKey((prev) => prev + 1) // Force re-render
-    }
-  }, [values, defaultValues, form])
+  };
 
   return (
     <Form {...form}>
-      <form key={formKey} onSubmit={form.handleSubmit(onSubmit)} className={`space-y-8 ${className}`}>
-        {Object.keys(defaultValues).map((name) => (
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={`space-y-8 ${className}`}
+      >
+        {Object.keys(form.getValues()).map((name) => (
           <FormField
             key={name}
             control={form.control}
@@ -119,19 +107,19 @@ export default function CheckboxCombobox<TSchema extends ZodType<Record<string, 
             render={({ field }) => (
               <FormItem>
                 <Popover onOpenChange={handlePopoverClose}>
-                  <PopoverTrigger asChild={!customItemTrigger} className={classNameTrigger} disabled={disabled}>
+                  <PopoverTrigger
+                    asChild={customItemTrigger ? false : true}
+                    className={classNameTrigger}
+                  >
                     {customItemTrigger ? (
                       customItemTrigger
                     ) : (
-                      <button
-                        type="button"
-                        className="mr-auto flex h-7 w-7 items-center justify-center rounded-full border-none bg-slate-50 text-2xl font-semibold text-slate-500 transition-transform duration-100 hover:shadow-sm"
-                      >
-                        <Plus className="h-4 w-4" />
+                      <button className="mr-auto flex h-7 w-7 items-center justify-center rounded-full border-none bg-slate-50 text-2xl font-semibold text-slate-500 transition-transform duration-100 hover:shadow-sm">
+                        <Plus className="w-4 h-4" />
                       </button>
                     )}
                   </PopoverTrigger>
-                  <PopoverContent className="flex w-[300px] flex-col p-4">
+                  <PopoverContent className="flex w-[300px] flex-col p-2">
                     <Input
                       placeholder="Search..."
                       value={searchTerm}
@@ -139,9 +127,7 @@ export default function CheckboxCombobox<TSchema extends ZodType<Record<string, 
                       className="mb-2"
                     />
                     <div className="no-scrollbar max-h-[250px] overflow-y-auto">
-                      {isLoading ? (
-                        <Spinner className="mx-auto h-5 w-5" />
-                      ) : filteredOptions.length ? (
+                      { isLoading ? <Spinner className='w-5 h-5 mx-auto' /> :filteredOptions.length ? (
                         filteredOptions.map((option) => (
                           <FormItem
                             key={option.value}
@@ -149,36 +135,44 @@ export default function CheckboxCombobox<TSchema extends ZodType<Record<string, 
                           >
                             <FormControl>
                               <Checkbox
-                                checked={values ? values.includes(option.value) : field.value?.includes(option.value)}
+                                checked={
+                                  values
+                                    ? values.includes(option.value)
+                                    : field.value.includes(option.value)
+                                }
                                 onCheckedChange={(checked) => {
-                                  const currentValues = values ?? field.value ?? []
                                   const newValue = checked
-                                    ? [...currentValues, option.value]
-                                    : currentValues.filter((value) => value !== option.value)
-
+                                    ? [...(values ?? field.value), option.value]
+                                    : (values ?? field.value).filter(
+                                        (value) => value !== option.value,
+                                      );
                                   if (onChange) {
-                                    onChange(newValue)
+                                    field.onChange(newValue);
+                                    onChange(newValue);
+                                  } else {
+                                    field.onChange(newValue);
                                   }
-                                  field.onChange(newValue)
-
                                   if (onSelect) {
-                                    onSelect(option.value)
+                                    onSelect(option.value);
                                   }
-                                  option.actionFn?.(option.value)
+                                  option.actionFn &&
+                                    option.actionFn(option.value);
                                 }}
                               />
                             </FormControl>
                             {CustomItemComponent ? (
-                              <FormLabel className="h-full w-full font-normal">
+                              <FormLabel className="h-full w-full font-normal text-gray">
                                 <CustomItemComponent option={option} />
                               </FormLabel>
                             ) : (
-                              <FormLabel className="cursor-pointer">{option.label}</FormLabel>
+                              <FormLabel>{option.label}</FormLabel>
                             )}
                           </FormItem>
                         ))
                       ) : (
-                        <p className="p-2 text-sm text-gray-500">No results found.</p>
+                        <p className="p-2 text-sm text-gray-500">
+                          No results found.
+                        </p>
                       )}
                     </div>
                   </PopoverContent>
@@ -190,6 +184,5 @@ export default function CheckboxCombobox<TSchema extends ZodType<Record<string, 
         ))}
       </form>
     </Form>
-  )
+  );
 }
-
