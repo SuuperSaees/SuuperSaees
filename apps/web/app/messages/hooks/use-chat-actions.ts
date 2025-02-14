@@ -8,7 +8,7 @@ import { User } from '~/lib/user.types';
 
 import { useChatManagement } from './use-chat-management-actions';
 import { useChatMessageActions } from './use-chat-message-actions';
-import { GetChatByIdResponse } from '~/server/actions/chats/chats.interface';
+import { Chats } from '~/lib/chats.types';
 
 /**
  * Props interface for useChatActions hook
@@ -21,7 +21,7 @@ import { GetChatByIdResponse } from '~/server/actions/chats/chats.interface';
 
 interface UseChatActionsProps {
   chatId: string;
-  initialChat?: GetChatByIdResponse;
+  initialChat?: Chats.TypeWithRelations;
   messagesQueryKey: string[];
   chatQueryKey: string[];
   messages: Message.Type[];

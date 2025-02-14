@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import {  Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 
@@ -8,19 +8,21 @@ import { Button } from '@kit/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 
 import EditableHeader from '~/components/editable-header';
+import { File } from '~/lib/file.types';
 import { Members } from '~/lib/members.types';
-import { generateUUID } from '~/utils/generate-uuid';
 
+import RichTextEditor from '../../components/messages/rich-text-editor';
+import { FileUpload } from '../../components/messages/types';
 import ChatEmptyState from './chat-empty-state';
 import ChatMembersSelector from './chat-members-selector';
 import { useChat } from './context/chat-context';
 import MessageList from './message-list';
-import RichTextEditor from '../../components/messages/rich-text-editor';
-import { useSupabase } from '@kit/supabase/hooks/use-supabase';
-import * as tus from 'tus-js-client';
-import { FileUpload } from '../../components/messages/types';
 
-export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organization }) {
+export default function ChatThread({
+  agencyTeam,
+}: {
+  agencyTeam: Members.Organization;
+}) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const {
     user,
@@ -34,13 +36,11 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
     setActiveChat,
     setChatId,
     setMembers,
+    handleFileUpload,
   } = useChat();
   const userId = user.id;
   const chatById = chatByIdQuery.data;
   const isLoading = chatByIdQuery.isLoading;
-
-
-
 
   const handleMembersUpdate = async (members: string[]) => {
     await membersUpdateMutation.mutateAsync(members);
@@ -53,119 +53,60 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
     setChatId('');
   };
 
-
-
   const handleUpdate = async (name: string) => {
     await updateChatMutation.mutateAsync(name);
   };
 
-  const handleSendMessage = async (message: string, fileIds?: string[]) => {
-    await addMessageMutation.mutateAsync({
-      content: message,
-      userId,
-      fileIds,
-      temp_id: generateUUID(),
-    });
+  const handleSendMessage = async (
+    message: string,
+    fileUploads?: FileUpload[],
+    setUploads?: Dispatch<SetStateAction<FileUpload[]>>,
+  ) => {
+    const messageId = crypto.randomUUID();
+    let filesToAdd: File.Insert[] | undefined = undefined;
+    // add the files to the bd
+    if (fileUploads) {
+      filesToAdd = [...fileUploads].map((upload) => {
+        const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chats/${chatByIdQuery.data?.id}/uploads/${upload.id}`;
+        return {
+          name: upload.file.name,
+          size: upload.file.size,
+          type: upload.file.type,
+          url: fileUrl,
+          message_id: messageId,
+          user_id: userId,
+        };
+      });
+
+      const newMessage = {
+        id: messageId,
+        content: message,
+        user_id: userId,
+        temp_id: messageId,
+      };
+      if (setUploads) {
+        // Since we're going to add the files to the bd, we need to update the current upload to be pending
+        setUploads((prev) => prev.map((upload) => ({ ...upload, status: 'uploading' })));
+      }
+      await addMessageMutation.mutateAsync({
+        message: newMessage,
+        files: filesToAdd,
+      });
+      if (setUploads) {
+        // Since we're going to add the files to the bd, we need to update the current upload to be pending
+        setUploads((prev) => prev.map((upload) => ({ ...upload, status: 'success' })));
+      }
+    }
   };
-  // Set 
-  // members 
+  // Set
+  // members
   useEffect(() => {
-    if(chatByIdQuery.data && chatByIdQuery.data.members) {
+    if (chatByIdQuery.data && chatByIdQuery.data.members) {
       setMembers(chatByIdQuery.data.members);
     }
-  }, [chatByIdQuery.data, setMembers
-    
-  ])
+  }, [chatByIdQuery.data, setMembers]);
 
-  const [uploads, setUploads] = useState<Record<string, { progress: number; status: string; url: string | null }>>({});
-  const supabase = useSupabase();
-
-  const handleFileUpload = async (file: File, setUploadsFunction: Dispatch<SetStateAction<FileUpload[]>>, fileId: string) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    // const fileId = crypto.randomUUID();
-    setUploads((prev) => ({
-      ...prev,
-      [fileId]: {
-        progress: 0,
-        status: 'uploading',
-        url: null
-      }
-    }));
-
-    const bucketName = 'chats';
-    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const uuid = crypto.randomUUID();
-    const filePath = `uploads/${uuid}/${Date.now()}_${sanitizedFileName}`;
-    console.log('file', file)
-    return new Promise((resolve, reject) => {
-      const upload = new tus.Upload(file, {
-        endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
-        retryDelays: [0, 3000, 5000, 10000, 20000],
-        headers: {
-          authorization: `Bearer ${session?.access_token}`,
-          'x-upsert': 'true',
-        },
-        uploadDataDuringCreation: true,
-        removeFingerprintOnSuccess: true,
-        metadata: {
-          bucketName,
-          objectName: fileId,
-          contentType: file.type,
-          cacheControl: '3600',
-        },
-        chunkSize: 6 * 1024 * 1024, // 6MB,
-        onError: (error) => {
-          console.error('Error uploading file:', error);
-          reject(error);
-        },
-        onProgress: (bytesUploaded, bytesTotal) => {
-          const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
-          console.log(`Uploading: ${percentage}% done`)
-          setUploadsFunction((prev) => {
- 
-            console.log('prev', prev)
-            const newUpload = prev.find((upload) => upload.id === fileId) ?? {
-              id: fileId,
-              file: file,
-              progress: 0,
-              status: 'uploading',
-              previewUrl: null
-            }
-            if (newUpload) {
-              newUpload.progress = parseFloat(percentage)
-              newUpload.status = percentage === '100.00' ? 'success' : 'uploading'
-              
-            }
-            const newUploads = [...prev.filter((upload) => upload.id !== fileId), newUpload]
-            return newUploads
-          });
-          setUploads((prev) => {
-            const newUploads = { ...prev };
-            if (fileId && newUploads[fileId]) {
-              newUploads[fileId].progress = parseFloat(percentage);
-            }
-            return newUploads;
-          });
-        },
-        onSuccess: (data) => {
-          console.log('Upload successful:', data);
-          resolve(data);
-        },
-      })
-      
-      // Check if there are any previous uploads to continue.
-      void upload.findPreviousUploads().then(function (previousUploads) {
-        // Found previous uploads so we select the first one.
-        if (previousUploads.length && previousUploads[0]) {
-          upload.resumeFromPreviousUpload(previousUploads[0])
-        }
-
-        // Start the upload
-        upload.start()
-      })
-    })
-  };
-
+  // console.log('IS CREATING MESSAGE', addMessageMutation.isPending );
 
   if (!activeChat) {
     return <ChatEmptyState />;
@@ -173,8 +114,6 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
 
   const activeChatDataName = { ...activeChat }.name;
   const activeChatDataId = { ...activeChat }.id;
-  
-
 
   return (
     <div className="flex h-full flex-col">
@@ -197,17 +136,19 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
           <ChatMembersSelector
             agencyTeam={{
               ...agencyTeam,
-              members: agencyTeam.members?.filter(member => {
-                const selectedMember = chatById?.members?.find(m => m.id === member.id);
-                
+              members: agencyTeam.members?.filter((member) => {
+                const selectedMember = chatById?.members?.find(
+                  (m) => m.id === member.id,
+                );
+
                 if (!selectedMember) return true;
-                
+
                 return selectedMember.visibility;
-              })
+              }),
             }}
-            selectedMembers={chatById?.members?.filter((member) => member.visibility) ?? []}
-
-
+            selectedMembers={
+              chatById?.members?.filter((member) => member.visibility) ?? []
+            }
             onMembersUpdate={handleMembersUpdate}
             isLoading={isLoading}
           />
@@ -227,7 +168,6 @@ export default function ChatThread({ agencyTeam }: { agencyTeam: Members.Organiz
                 }}
               >
                 <Trash2 className="h-4 w-4" />
-
                 Delete chat
               </Button>
             </PopoverContent>

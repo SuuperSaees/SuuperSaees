@@ -22,7 +22,7 @@ const RichTextEditor = ({
   onChange,
   onBlur,
   onFileUpload,
-  showSubmitButton = false,
+  showSubmitButton = true,
   showToolbar = true,
   isEditable = true,
   className = '',
@@ -52,14 +52,14 @@ const RichTextEditor = ({
         cleanupImages();
         editor?.commands.clearContent();
         if (currentContent.trim() !== '<p></p>') {
-          await onComplete?.(currentContent);
+          await onComplete?.(currentContent, uploads, setUploads);
           insertedImages.current = new Set<string>();
         }
       } catch (error) {
         console.error('Error sending content:', error);
       }
     })();
-  }, [editor, onComplete, cleanupImages, insertedImages]);
+  }, [editor, onComplete, cleanupImages, insertedImages, uploads]);
 
   const handleFileSelect = async (files: FileList) => {
     const newUploads: FileUpload[] = Array.from(files).map((file) => ({
@@ -67,9 +67,7 @@ const RichTextEditor = ({
       file,
       progress: 0,
       status: 'uploading',
-      previewUrl: file.type.startsWith('image/')
-        ? URL.createObjectURL(file)
-        : undefined,
+      url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
     }));
 
     setUploads((prev) => [...prev, ...newUploads]);
@@ -78,19 +76,19 @@ const RichTextEditor = ({
       try {
         if (!onFileUpload) continue;
 
-        const fileUrl = await onFileUpload(upload.file, setUploads, upload.id);
-
-        if (upload.file.type.startsWith('image/')) {
-          // editor?.chain().focus().setImage({ src: fileUrl }).run();
-        } else {
-          // Insert file link
-          editor
-            ?.chain()
-            .focus()
-            .setLink({ href: fileUrl, target: '_blank' })
-            .insertContent(upload.file.name)
-            .run();
-        }
+        await onFileUpload(upload.file, upload.id, setUploads);
+        // add the files to the bd
+        // if (upload.file.type.startsWith('image/')) {
+        //   // editor?.chain().focus().setImage({ src: fileUrl }).run();
+        // } else {
+        //   // Insert file link
+        //   editor
+        //     ?.chain()
+        //     .focus()
+        //     .setLink({ href: fileUrl, target: '_blank' })
+        //     .insertContent(upload.file.name)
+        //     .run();
+        // }
       } catch (error) {
         console.error('Error uploading file:', error);
         setUploads((prev) =>
@@ -103,14 +101,14 @@ const RichTextEditor = ({
   const removeUpload = (id: string) => {
     setUploads((prev) => {
       const upload = prev.find((u) => u.id === id);
-      if (upload?.previewUrl) {
-        URL.revokeObjectURL(upload.previewUrl);
+      if (upload?.url) {
+        URL.revokeObjectURL(upload.url);
       }
       return prev.filter((u) => u.id !== id);
     });
   };
 
-  console.log('uploads', uploads);
+  // console.log('UPLOADS', uploads);
   return (
     <div
       className={`relative grid h-fit w-full grid-rows-[auto_1fr_auto] gap-1 rounded-2xl border border-gray-200 bg-gray-50 p-4 ${className}`}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { Activity } from '~/lib/activity.types';
 import { Message as MessageType } from '~/lib/message.types';
@@ -27,13 +27,12 @@ export default function MessageList({
 }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const combinedInteractions = combineChatInteractions(messages, activities);
-
-  // Sort combined interactions by date/time (oldest first)
-  const sortedInteractions = sortChatInteractions(combinedInteractions);
-
-  // Group interactions by day
-  const groupedInteractions = groupChatInteractionsByDay(sortedInteractions);
+  // Memoize the transformation operations to prevent unnecessary recalculations
+  const groupedInteractions = useMemo(() => {
+    const combinedInteractions = combineChatInteractions(messages, activities);
+    const sortedInteractions = sortChatInteractions(combinedInteractions);
+    return groupChatInteractionsByDay(sortedInteractions);
+  }, [messages, activities]); //
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

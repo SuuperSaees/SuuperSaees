@@ -40,7 +40,7 @@ export default function Message({ message }: MessageProps) {
   const displayName = message.user?.name;
 
   const handleDeleteMessage = async () => {
-    await deleteMessageMutation.mutateAsync(message.id);
+    await deleteMessageMutation.mutateAsync({ messageId: message.id, chatId: '' });
   };
 
   return (
@@ -72,7 +72,7 @@ export default function Message({ message }: MessageProps) {
           {message.files && message.files.length > 0 && (
             <div className="scrollbar-custom flex max-w-full gap-4 overflow-x-auto">
               {message.files.map((file) => (
-                <UserFile key={file.id} file={file} files={message?.files} />
+                <UserFile key={file.id} file={file}  />
               ))}
             </div>
           )}

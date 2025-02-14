@@ -6,10 +6,11 @@ import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
 import { TableConfig, useRealtime } from '~/hooks/use-realtime';
+import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
 import { useChatManagement } from '~/messages/hooks/use-chat-management-actions';
 import { useChatMessageActions } from '~/messages/hooks/use-chat-message-actions';
-import useChatState from '~/messages/hooks/use-chat-state';
+import { useChatState } from '~/messages/hooks/use-chat-state';
 import {
   ActiveChatState,
   ChatContextType,
@@ -81,6 +82,8 @@ export function ChatProvider({
     filteredChats,
     setFilteredChats,
     setChats,
+    handleFileUpload,
+    uploads,
   } = useChatState({ initialMembers });
 
   // Query for chat by id
@@ -107,14 +110,20 @@ export function ChatProvider({
 
   // Real-time subscription handler
   // TODO: Implement user addition based on members for new messages
-  const handleSubscriptions = createSubscriptionHandler<Message.Type>({
+  const handleSubscriptions = createSubscriptionHandler<
+    Message.Type | File.Type
+  >({
     idField: 'temp_id',
     onBeforeUpdate: (payload) => {
       // add user join based on members and the user_id that comes in the payload
       const message = payload.new as Message.Type;
       const userId = message.user_id;
       const user = members.find((member) => member.id === userId);
-      if (user && payload.eventType === 'INSERT' && payload.table === 'messages') {
+      if (
+        user &&
+        payload.eventType === 'INSERT' &&
+        payload.table === 'messages'
+      ) {
         const newMessage = {
           ...message,
           user: {
@@ -132,6 +141,21 @@ export function ChatProvider({
           true,
         );
         setMessages(updatedItems);
+      }
+      if (payload.eventType === 'INSERT' && payload.table === 'files') {
+        // insert the file in files messages
+        const file = payload.new as File.Type;
+
+        // Use the message_id to insert the file in the files messages table
+        const message = messages.find(
+          (message) => message.id === file.message_id,
+        );
+        if (message) {
+          message.files = [...(message.files ?? []), file];
+          const updatedItems = updateArrayData(messages, message, 'id', false);
+          console.log('UPDATED MESSAGES');
+          setMessages(updatedItems);
+        }
       }
 
       return true;
@@ -153,6 +177,13 @@ export function ChatProvider({
         SetStateAction<Message.Type[] | Message.Type>
       >,
     },
+    {
+      tableName: 'files',
+      currentData: [],
+      setData: ((data) => data) as Dispatch<
+        SetStateAction<File.Type[] | File.Type>
+      >,
+    },
     // {
     //   tableName: 'chats',
     //   currentData: activeChat,
@@ -162,11 +193,13 @@ export function ChatProvider({
 
   // Initialize real-time subscriptions
   useRealtime(
-    tables as TableConfig<Message.Type>[],
+    tables as TableConfig<Message.Type | File.Type>[],
     realtimeConfig,
     handleSubscriptions,
   );
 
+  // console.log('UPLOADS', uploads);
+  // console.log('MESSAGES', messages);
   const value: ChatContextType = {
     messages: messages.filter((msg) => !('deleted_at' in msg)),
     setMessages: setMessages,
@@ -191,7 +224,8 @@ export function ChatProvider({
       email: user?.email ?? '',
       picture_url: currentUser?.picture_url ?? '',
     },
-
+    handleFileUpload,
+    uploads,
     chatByIdQuery,
     ...chatActions,
     ...messageActions,
