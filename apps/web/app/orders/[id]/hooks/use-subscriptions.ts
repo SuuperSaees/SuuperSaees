@@ -76,7 +76,6 @@ export const useOrderSubscriptions = (
           event: '*',
           schema: 'public',
           table: 'files',
-          filter: `id=in.(select file_id from order_files where order_id=eq.${orderId})`,
         },
         (payload) => {
           if (payload.table === 'files') {
