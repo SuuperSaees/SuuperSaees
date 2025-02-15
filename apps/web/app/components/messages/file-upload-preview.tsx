@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 import { Spinner } from '@kit/ui/spinner';
 
 import { FileUpload } from './types';
+import FileUploadCard from '../file-preview/file-upload-card';
+import { getFileExtension } from '../shared/file-icons';
 
 interface FileUploadPreviewProps {
   upload: FileUpload;
@@ -16,6 +18,7 @@ export const FileUploadPreview = ({
   loadingMethod = 'loading',
 }: FileUploadPreviewProps) => {
   const isImage = upload.file.type.startsWith('image/');
+  const extension = getFileExtension(upload.file.name);
 
   return (
     <div className="group relative rounded-lg">
@@ -36,31 +39,30 @@ export const FileUploadPreview = ({
             <img
               src={upload.url}
               alt={upload.file.name}
-              className={`h-20 w-20 rounded object-cover ${upload.status === 'uploading' && loadingMethod === 'loading' ? 'blur-[1px]' : ''}`}
+              className={`h-16 w-16 rounded object-cover ${upload.status === 'uploading' && loadingMethod === 'loading' ? 'blur-[1px]' : ''}`}
             />
           </div>
         ) : (
-          <div className="flex h-20 w-20 items-center justify-center rounded bg-gray-100">
-            <span className="text-sm text-gray-500">
-              {upload.file.name.split('.').pop()}
-            </span>
-          </div>
+          <FileUploadCard
+            fileName={upload.file.name}
+            fileType={upload.file.type}
+            extension={extension}
+            className="w-36 h-16"
+            size="sm"
+          />
         )}
 
-        <div className="flex flex-col gap-1">
-          {/* <span className="text-sm font-medium">{upload.file.name}</span> */}
-          {upload.status === 'uploading' && loadingMethod === 'progress' && (
-            <div className="h-1.5 w-32 overflow-hidden rounded-full bg-gray-200">
-              <div
-                className="h-full bg-blue-500 transition-all duration-300"
-                style={{ width: `${upload.progress}%` }}
-              />
-            </div>
-          )}
-          {upload.status === 'error' && (
-            <span className="text-xs text-red-500">Upload failed</span>
-          )}
-        </div>
+        {upload.status === 'uploading' && loadingMethod === 'progress' && (
+          <div className="h-1.5 w-32 overflow-hidden rounded-full bg-gray-200">
+            <div
+              className="h-full bg-blue-500 transition-all duration-300"
+              style={{ width: `${upload.progress}%` }}
+            />
+          </div>
+        )}
+        {upload.status === 'error' && (
+          <span className="text-xs text-red-500">Upload failed</span>
+        )}
       </div>
     </div>
   );

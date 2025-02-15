@@ -116,7 +116,7 @@ export default function ChatThread({
   const activeChatDataId = { ...activeChat }.id;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col min-w-0">
       {/* Header */}
 
       <div className="flex items-center justify-between border-b p-4">

@@ -37,9 +37,7 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
   json: '#444CE7',
   xml: '#444CE7',
   
-  // Media
-  mp3: '#155EEF',
-  wav: '#155EEF',
+  // Media - Video
   mp4: '#155EEF',
   mov: '#155EEF',
   avi: '#155EEF',
@@ -56,6 +54,17 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
   hevc: '#039855',
   hev: '#039855',
 
+  // Audio
+  mp3: '#53B1FD',
+  wav: '#53B1FD',
+  m4a: '#53B1FD',
+  m4b: '#53B1FD',
+  m4p: '#53B1FD',
+  m4v: '#53B1FD',
+  ogg: '#53B1FD',
+  wma: '#53B1FD',
+
+  
 };
 
 interface FileIconProps {
