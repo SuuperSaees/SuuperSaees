@@ -1,6 +1,13 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { ComponentType, useEffect, useRef, useState, type JSX } from 'react';
+import React, {
+  ComponentType,
+  type JSX,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { Check, Copy, Download, Eye, MoreVertical } from 'lucide-react';
 
@@ -12,11 +19,12 @@ import {
   DialogFooter,
   DialogTrigger,
 } from '@kit/ui/dialog';
+import { Spinner } from '@kit/ui/spinner';
+import { cn } from '@kit/ui/utils';
 
 import Tooltip from '~/components/ui/tooltip';
 
 import { useImageActions } from '../hooks/use-image-actions';
-import Image from 'next/image';
 
 interface ImageProps {
   src: string;
@@ -25,6 +33,7 @@ interface ImageProps {
   dialogClassName?: string; // New prop for dialog-specific class
   bucketName?: string;
   isDialog?: boolean;
+  isLoading?: boolean;
 }
 
 export const withImageOptions = <P extends ImageProps>(
@@ -43,7 +52,7 @@ export const withImageOptions = <P extends ImageProps>(
     });
 
     return (
-      <div className="group relative inline-block h-full max-h-[2000px] w-[150px] min-w-[150px] overflow-hidden justify-center items-center flex">
+      <div className="group relative inline-block flex h-full max-h-[2000px] w-[150px] min-w-[150px] items-center justify-center overflow-hidden">
         <ImageDialogView
           triggerComponent={
             <>
@@ -102,10 +111,7 @@ export const withImageOptions = <P extends ImageProps>(
             </>
           }
           imageContentComponent={
-            <WrappedComponent
-              {...props}
-              className={props.dialogClassName}
-            />
+            <WrappedComponent {...props} className={props.dialogClassName} />
           }
           handleCopyLink={handleCopyLink}
           handleDownload={handleDownload}
@@ -118,7 +124,13 @@ export const withImageOptions = <P extends ImageProps>(
   return WithImageOptions;
 };
 
-const ImageComponent: React.FC<ImageProps> = ({ src, alt, className, isDialog }) => {
+const ImageComponent: React.FC<ImageProps> = ({
+  src,
+  alt,
+  className,
+  isDialog,
+  isLoading,
+}) => {
   if (isDialog) {
     return (
       <img
@@ -126,19 +138,24 @@ const ImageComponent: React.FC<ImageProps> = ({ src, alt, className, isDialog })
         alt={alt}
         className={`aspect-square object-contain ${className}`}
       />
-    )
+    );
   }
   return (
-    <Image 
-      src={src}
-      alt={alt ?? 'image'}
-      className={`aspect-square object-contain ${className}`}
-      width={150}
-      height={150}
-      quality={100}
-      priority
-    />
-  )
+    <div className="relative">
+      <img
+        src={src}
+        alt={alt ?? 'image'}
+        className={cn('aspect-square object-contain', className)}
+        width={150}
+        height={150}
+      />
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Spinner className="h-8 w-8 text-gray-400" />
+        </div>
+      )}
+    </div>
+  );
 };
 
 const ImageWithOptions = withImageOptions(ImageComponent);
@@ -206,7 +223,7 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
       }}
     >
       <DialogTrigger>{triggerComponent}</DialogTrigger>
-      <DialogContent className="p-8 h-[90vh] w-[90vw]">
+      <DialogContent className="h-[90vh] w-[90vw] p-8">
         <div
           className="relative flex aspect-auto max-h-[calc(90vh-10rem)] w-full items-center justify-center overflow-hidden"
           ref={containerRef}
@@ -217,15 +234,15 @@ export const ImageDialogView: React.FC<ImageDialogViewProps> = ({
             onClick={handleImageClick}
             ref={imageRef}
             style={{
-              transform: isZoomedIn
-                ? `scale(2)`
-                : 'scale(1)',
-              transformOrigin: isZoomedIn ? `${mousePosition.x}% ${mousePosition.y}%` : 'center',
+              transform: isZoomedIn ? `scale(2)` : 'scale(1)',
+              transformOrigin: isZoomedIn
+                ? `${mousePosition.x}% ${mousePosition.y}%`
+                : 'center',
               cursor: isZoomedIn ? 'zoom-out' : 'zoom-in',
             }}
           >
             {React.cloneElement(imageContentComponent, {
-              className: "max-h-[calc(90vh-12rem)] w-auto object-contain",
+              className: 'max-h-[calc(90vh-12rem)] w-auto object-contain',
               isDialog: true,
             })}
           </div>

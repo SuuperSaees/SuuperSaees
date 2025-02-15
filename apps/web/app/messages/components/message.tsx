@@ -42,7 +42,6 @@ export default function Message({ message }: MessageProps) {
   const handleDeleteMessage = async () => {
     await deleteMessageMutation.mutateAsync({ messageId: message.id, chatId: '' });
   };
-
   return (
     <div className="flex w-full min-w-0 max-w-full flex-col gap-2 p-0 group">
       <div className="flex w-full justify-between">
@@ -70,7 +69,7 @@ export default function Message({ message }: MessageProps) {
         >
           <div dangerouslySetInnerHTML={{ __html: content }} />
           {message.files && message.files.length > 0 && (
-            <div className="scrollbar-custom flex max-w-full gap-4 overflow-x-auto">
+            <div className="scrollbar-custom flex max-w-full gap-4 overflow-x-auto items-end">
               {message.files.map((file) => (
                 <UserFile key={file.id} file={file}  />
               ))}

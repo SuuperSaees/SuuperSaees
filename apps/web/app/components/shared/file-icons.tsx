@@ -1,0 +1,140 @@
+import React from 'react';
+import { StickyNote } from 'lucide-react';
+import { FileType } from '../../lib/file-types';
+
+// Define the supported file extensions and their corresponding colors
+export const FILE_EXTENSION_COLORS: Record<string, string> = {
+  // Documents
+  pdf: '#D92D20',
+  doc: '#155EEF',
+  docx: '#155EEF',
+  txt: '#535862',
+  rtf: '#535862',
+  
+  // Spreadsheets
+  csv: '#079455',
+  xls: '#079455',
+  xlsx: '#079455',
+  
+  // Presentations
+  ppt: '#E62E05',
+  pptx: '#E62E05',
+  
+  // Design
+  fig: '#7F56D9',
+  ai: '#E04F16',
+  psd: '#155EEF',
+  indd: '#BA24D5',
+  aep: '#6938EF',
+  
+  // Development
+  html: '#444CE7',
+  css: '#444CE7',
+  js: '#444CE7',
+  jsx: '#444CE7',
+  ts: '#444CE7',
+  tsx: '#444CE7',
+  json: '#444CE7',
+  xml: '#444CE7',
+  
+  // Media
+  mp3: '#155EEF',
+  wav: '#155EEF',
+  mp4: '#155EEF',
+  mov: '#155EEF',
+  avi: '#155EEF',
+  mkv: '#155EEF',
+  
+  // Archives
+  zip: '#535862',
+  rar: '#535862',
+  '7z': '#535862',
+
+  // Images
+  heic: '#039855',
+  heif: '#039855',
+  hevc: '#039855',
+  hev: '#039855',
+
+};
+
+interface FileIconProps {
+  extension: string;
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+}
+
+export const FileIcon: React.FC<FileIconProps> = ({ 
+  extension, 
+  size = 'md',
+  className = ''
+}) => {
+  const ext = extension.toLowerCase();
+  const color = FILE_EXTENSION_COLORS[ext] ?? '#535862';
+  
+  const sizeClasses = {
+    sm: 'w-8 h-8',
+    md: 'w-10 h-10',
+    lg: 'w-12 h-12'
+  };
+
+  if (!ext) {
+    return <StickyNote className={`text-gray-500 ${sizeClasses[size]} ${className}`} />;
+  }
+
+  return (
+    <div className={`relative ${sizeClasses[size]} ${className}`}>
+      <svg width="100%" height="100%" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path 
+          d="M7.75 4C7.75 2.20508 9.20508 0.75 11 0.75H27C27.1212 0.75 27.2375 0.798159 27.3232 0.883885L38.1161 11.6768C38.2018 11.7625 38.25 11.8788 38.25 12V36C38.25 37.7949 36.7949 39.25 35 39.25H11C9.20507 39.25 7.75 37.7949 7.75 36V4Z" 
+          stroke="#D5D7DA" 
+          strokeWidth="1.5"
+        />
+        <path 
+          d="M27 0.5V8C27 10.2091 28.7909 12 31 12H38.5" 
+          stroke="#D5D7DA" 
+          strokeWidth="1.5"
+        />
+        <rect x="1" y="18" width="27" height="16" rx="2" fill={color} />
+        <text
+          x="50%"
+          y="29"
+          textAnchor="middle"
+          fill="white"
+          fontSize="8"
+          fontFamily="system-ui"
+          fontWeight="500"
+        >
+          {ext.toUpperCase()}
+        </text>
+      </svg>
+    </div>
+  );
+};
+
+// Helper function to get file extension from filename
+export const getFileExtension = (filename: string): string => {
+  return filename.split('.').pop()?.toLowerCase() ?? '';
+};
+
+// Helper function to get icon color based on file type and extension
+export const getFileIconColor = (fileType: FileType, extension: string): string => {
+  // First try to get color by extension
+  if (extension && FILE_EXTENSION_COLORS[extension]) {
+    return FILE_EXTENSION_COLORS[extension];
+  }
+
+  // Fallback colors based on file type
+  const typeColors: Record<FileType, string> = {
+    image: '#039855',
+    video: '#155EEF',
+    audio: '#155EEF',
+    pdf: '#D92D20',
+    document: '#155EEF',
+    spreadsheet: '#079455',
+    presentation: '#E62E05',
+    other: '#535862'
+  };
+
+  return typeColors[fileType];
+}; 
