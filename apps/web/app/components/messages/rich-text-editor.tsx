@@ -51,6 +51,7 @@ const RichTextEditor = ({
       try {
         cleanupImages();
         editor?.commands.clearContent();
+        setUploads([]);
         if (currentContent.trim() !== '<p></p>') {
           await onComplete?.(currentContent, uploads, setUploads);
           insertedImages.current = new Set<string>();
@@ -77,18 +78,6 @@ const RichTextEditor = ({
         if (!onFileUpload) continue;
 
         await onFileUpload(upload.file, upload.id, setUploads);
-        // add the files to the bd
-        // if (upload.file.type.startsWith('image/')) {
-        //   // editor?.chain().focus().setImage({ src: fileUrl }).run();
-        // } else {
-        //   // Insert file link
-        //   editor
-        //     ?.chain()
-        //     .focus()
-        //     .setLink({ href: fileUrl, target: '_blank' })
-        //     .insertContent(upload.file.name)
-        //     .run();
-        // }
       } catch (error) {
         console.error('Error uploading file:', error);
         setUploads((prev) =>
@@ -111,57 +100,56 @@ const RichTextEditor = ({
   // console.log('UPLOADS', uploads);
   return (
     <div
-      className={`relative grid h-fit w-full grid-rows-[auto_1fr_auto] gap-1 rounded-2xl border border-gray-200 bg-gray-50 p-4 ${className}`}
+      className={`relative flex h-fit w-full flex-col gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 ${className}`}
       {...rest}
     >
-      <div className="relative">
-        <div
-          onClick={() => editor?.commands.focus()}
-          className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
-        >
-          {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused && (
-            <span className="absolute h-[40px] min-h-[40px] transform text-gray-400">
-              <Trans i18nKey="placeholder" />
-            </span>
-          )}
-          <EditorContent
-            editor={editor}
-            className={`${styles['scrollbar-thin']} flex h-full max-h-60 w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
-          />
-        </div>
+      <div
+        onClick={() => editor?.commands.focus()}
+        className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
+      >
+        {editor?.getHTML().trim() === '<p></p>' && !editor?.isFocused && (
+          <span className="absolute h-[40px] min-h-[40px] transform text-gray-400">
+            <Trans i18nKey="placeholder" />
+          </span>
+        )}
+        <EditorContent
+          editor={editor}
+          className={`${styles['scrollbar-thin']} flex h-full max-h-60 w-full flex-col-reverse overflow-y-auto whitespace-normal placeholder:text-gray-400`}
+        />
+      </div>
 
-        <div className="flex flex-col">
-          <div className="flex justify-between">
-            {showToolbar && (
-              <Toolbar
-                editor={editor}
-                disabled={editor?.getHTML().trim() === '<p></p>'}
-                onFileSelect={handleFileSelect}
+      <div className="flex flex-col">
+        {uploads.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {uploads.map((upload) => (
+              <FileUploadPreview
+                key={upload.id}
+                upload={upload}
+                onRemove={removeUpload}
               />
-            )}
-            {showSubmitButton && (
-              <ThemedButton
-                className="mt-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] shadow-none"
-                onClick={sendContent}
-                disabled={editor?.getHTML().trim() === '<p></p>'}
-              >
-                <SendHorizontal className="h-[20px] w-[20px] flex-shrink-0" />
-              </ThemedButton>
-            )}
+            ))}
           </div>
+        )}
+        <div className="flex justify-between">
+          {showToolbar && (
+            <Toolbar
+              editor={editor}
+              disabled={editor?.getHTML().trim() === '<p></p>'}
+              onFileSelect={handleFileSelect}
+            />
+          )}
+
+          {showSubmitButton && (
+            <ThemedButton
+              className="mt-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] shadow-none"
+              onClick={sendContent}
+              disabled={editor?.getHTML().trim() === '<p></p>'}
+            >
+              <SendHorizontal className="h-[20px] w-[20px] flex-shrink-0" />
+            </ThemedButton>
+          )}
         </div>
       </div>
-      {uploads.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-2">
-          {uploads.map((upload) => (
-            <FileUploadPreview
-              key={upload.id}
-              upload={upload}
-              onRemove={removeUpload}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

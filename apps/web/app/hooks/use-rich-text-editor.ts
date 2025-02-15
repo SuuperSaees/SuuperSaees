@@ -143,7 +143,7 @@ export const useRichTextEditor = ({
     editorProps: {
       attributes: {
         class:
-          'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none',
+          'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none text-sm',
       },
     },
     onUpdate({ editor }) {

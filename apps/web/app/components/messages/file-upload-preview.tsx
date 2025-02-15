@@ -35,7 +35,7 @@ export const FileUploadPreview = ({
 
       <div className="flex flex-col items-center gap-2">
         {isImage && upload.url ? (
-          <div className="relative">
+          <div className="relative rounded-lg overflow-hidden">
             <img
               src={upload.url}
               alt={upload.file.name}
