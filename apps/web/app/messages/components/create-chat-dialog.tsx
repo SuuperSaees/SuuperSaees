@@ -116,7 +116,7 @@ export default function CreateOrganizationsChatDialog({
   const currentUserRole = userWorkspace?.role
   // Define management roles that should have visibility false
   const managementRoles = new Set(['agency_owner', 'agency_project_manager']);
-  const isValidAgencyManager = managementRoles.has(currentUserRole)
+  const isValidAgencyManager = currentUserRole ? managementRoles.has(currentUserRole) : false;
 
 
   // Get default members (owners and PMs)
@@ -233,6 +233,7 @@ export default function CreateOrganizationsChatDialog({
                       defaultMembers={defaultMembers}
                       disabledOrganizationSelector={true}
                       disabledMembersSelector={!isValidAgencyManager}
+                      hideOrganizationSelector
                     />
                   </FormControl>
 
@@ -258,6 +259,7 @@ export default function CreateOrganizationsChatDialog({
                       fetchMembers={getClientMembersForOrganization}
                       organization={clientOrganization}
                       setImage={true}
+                      hideOrganizationSelector={!isValidAgencyManager}
                     />
                   </FormControl>
                   <FormMessage />

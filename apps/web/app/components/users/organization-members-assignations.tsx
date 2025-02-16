@@ -33,6 +33,7 @@ interface OrganizationMemberAssignationProps<T extends z.ZodSchema<unknown>> {
   fetchMembers?: (organizationId: string) => Promise<Account.Type[]>;
   onOrganizationChange?: (organizationId: string) => void;
   onMembersChange?: (memberIds: string[]) => void;
+  hideOrganizationSelector?: boolean;
 }
 
 
@@ -53,7 +54,7 @@ export default function OrganizationMemberAssignation<
   setImage,
   disabledOrganizationSelector,
   disabledMembersSelector,
-
+  hideOrganizationSelector = false,
 
 
 }: OrganizationMemberAssignationProps<T>) {
@@ -162,14 +163,16 @@ export default function OrganizationMemberAssignation<
     </div>
   );
 
+  if (hideOrganizationSelector && disabledMembersSelector) return null;
   return (
     <div className="flex flex-col gap-4 border-t border-gray-100 py-2">
-      <SelectAction
-        options={organizationOptions}
-        className="w-full bg-transparent"
-        groupName={t('dialogs.add.select.label')}
-        defaultValue={organization?.id}
-        onSelectHandler={(value: string) => {
+      {!hideOrganizationSelector && (
+        <SelectAction
+          options={organizationOptions}
+          className="w-full bg-transparent"
+          groupName={t('dialogs.add.select.label')}
+          defaultValue={organization?.id}
+          onSelectHandler={(value: string) => {
           const selectedOrganization = organizationsQuery?.data?.find((cOrg) => cOrg.id === value);
           setImage && form.setValue('image', selectedOrganization?.logo_url ?? '');
           setSelectedOrganization(
@@ -195,11 +198,12 @@ export default function OrganizationMemberAssignation<
           {title ?? t('form.completion.client.label')}
 
           <span className="text-red"> *</span>{' '}
-          {/* Change text-red-500 to any desired color */}
-        </span>
-      </SelectAction>
+            {/* Change text-red-500 to any desired color */}
+          </span>
+        </SelectAction>
+      )}
 
-      {selectedOrganization && (
+      {selectedOrganization && !disabledMembersSelector && (
         <div className="flex flex-col gap-2">
           <span className="text-sm font-semibold text-gray-600">
             {t('form.completion.client.members.label')}
