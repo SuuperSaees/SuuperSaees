@@ -134,7 +134,14 @@ export class ChatRepository {
             temp_id,
             order_id,
             parent_id,
-            user:accounts(email, name, picture_url, user_settings(name, picture_url))
+            user:accounts(email, name, picture_url, user_settings(name, picture_url)),
+            files (
+              id,
+              name,
+              size,
+              type,
+              url
+            )
         )
       `,
       )
@@ -142,7 +149,7 @@ export class ChatRepository {
       // is deleted_on null but for messages
       .is('messages.deleted_on', null)
       .single();
-
+      console.log('chat', chat?.messages.filter((message) => message.files.length > 0))
 
     if (error) {
       throw new Error(`Error fetching chat ${chatId}: ${error.message}`);
@@ -198,6 +205,7 @@ export class ChatRepository {
           email: message.user?.email ?? '',
           picture_url: message.user?.picture_url ?? message.user?.user_settings?.picture_url ?? '',
         },
+        files: message.files
       })),
     } 
 

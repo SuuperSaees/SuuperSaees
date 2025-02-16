@@ -49,13 +49,11 @@ export class ChatService {
     const organizationsIds = [...new Set(chatsResult?.map((chat) => chat.user?.organization_id ?? ''))];
     
     const [teamResult, lastMessages] = await Promise.all([
-      organizationsIds.length > 0 
-        ? this.teamRepository?.list({ 
-            organizationIds: organizationsIds, 
-            includeMembers: false, 
-            includeAgency: false 
-          })
-        : Promise.resolve({} as Members.TeamResponse),
+      this.teamRepository?.list({ 
+        organizationIds: organizationsIds, 
+        includeMembers: false, 
+        includeAgency: false 
+      }),
       this.chatMessagesRepository?.listLastMessages(chatIds)
     ]);
   

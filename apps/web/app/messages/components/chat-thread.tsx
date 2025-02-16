@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import {  Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 
@@ -8,14 +8,15 @@ import { Button } from '@kit/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 
 import EditableHeader from '~/components/editable-header';
+import { File } from '~/lib/file.types';
 import { Members } from '~/lib/members.types';
-import { generateUUID } from '~/utils/generate-uuid';
 
+import RichTextEditor from '../../components/messages/rich-text-editor';
+import { FileUpload } from '../../components/messages/types';
 import ChatEmptyState from './chat-empty-state';
 import ChatMembersSelector from './chat-members-selector';
 import { useChat } from './context/chat-context';
 import MessageList from './message-list';
-import RichTextEditor from './rich-text-editor';
 
 export default function ChatThread({
   agencyTeam,
@@ -35,6 +36,7 @@ export default function ChatThread({
     setActiveChat,
     setChatId,
     setMembers,
+    handleFileUpload,
   } = useChat();
   const userId = user.id;
   const chatById = chatByIdQuery.data;
@@ -55,13 +57,46 @@ export default function ChatThread({
     await updateChatMutation.mutateAsync(name);
   };
 
-  const handleSendMessage = async (message: string, fileIds?: string[]) => {
-    await addMessageMutation.mutateAsync({
-      content: message,
-      userId,
-      fileIds,
-      temp_id: generateUUID(),
-    });
+  const handleSendMessage = async (
+    message: string,
+    fileUploads?: FileUpload[],
+    setUploads?: Dispatch<SetStateAction<FileUpload[]>>,
+  ) => {
+    const messageId = crypto.randomUUID();
+    let filesToAdd: File.Insert[] | undefined = undefined;
+    // add the files to the bd
+    if (fileUploads) {
+      filesToAdd = [...fileUploads].map((upload) => {
+        const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chats/${chatByIdQuery.data?.id}/uploads/${upload.id}`;
+        return {
+          name: upload.file.name,
+          size: upload.file.size,
+          type: upload.file.type,
+          url: fileUrl,
+          message_id: messageId,
+          user_id: userId,
+        };
+      });
+
+      const newMessage = {
+        id: messageId,
+        content: message,
+        user_id: userId,
+        temp_id: messageId,
+      };
+      if (setUploads) {
+        // Since we're going to add the files to the bd, we need to update the current upload to be pending
+        setUploads((prev) => prev.map((upload) => ({ ...upload, status: 'uploading' })));
+      }
+      await addMessageMutation.mutateAsync({
+        message: newMessage,
+        files: filesToAdd,
+      });
+      if (setUploads) {
+        // Since we're going to add the files to the bd, we need to update the current upload to be pending
+        setUploads((prev) => prev.map((upload) => ({ ...upload, status: 'success' })));
+      }
+    }
   };
   // Set
   // members
@@ -70,9 +105,9 @@ export default function ChatThread({
       setMembers(chatByIdQuery.data.members);
     }
   }, [chatByIdQuery.data, setMembers]);
-  if (!activeChat) {
-    return <ChatEmptyState />;
-  }
+
+  // console.log('IS CREATING MESSAGE', addMessageMutation.isPending );
+
   if (!activeChat) {
     return <ChatEmptyState />;
   }
@@ -81,7 +116,7 @@ export default function ChatThread({
   const activeChatDataId = { ...activeChat }.id;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col min-w-0">
       {/* Header */}
 
       <div className="flex items-center justify-between border-b p-4">
@@ -151,6 +186,7 @@ export default function ChatThread({
           onComplete={handleSendMessage}
           showToolbar={true}
           isEditable={true}
+          onFileUpload={handleFileUpload}
         />
       </div>
     </div>

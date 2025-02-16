@@ -105,6 +105,7 @@ export class ChatMembersRepository {
 
       if(getAllMembers && data.length) {
         const chatIds = data.map((chat) => chat.chat_id);
+
         const { data: allMembers, error: allMembersError } = await client
           .from('chat_members')
           .select(`*, user:accounts(email, organization_id, settings:user_settings(name, picture_url))`)

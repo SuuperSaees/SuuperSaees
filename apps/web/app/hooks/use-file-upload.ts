@@ -1,0 +1,175 @@
+'use client';
+
+import { useState } from 'react';
+
+import * as tus from 'tus-js-client';
+
+import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+
+/**
+ * Represents the state of a file upload
+ * @interface FileUploadState
+ */
+export interface FileUploadState {
+  /** Upload progress percentage (0-100) */
+  progress: number;
+  /** Current status of the upload */
+  status: 'idle' | 'uploading' | 'success' | 'error';
+  /** The final URL of the uploaded file (null while uploading) */
+  url: string | null;
+  /** The file that is being uploaded */
+  file: File;
+  /** The id of the upload */
+  id: string;
+
+}
+
+/**
+ * Configuration options for file upload
+ * @interface FileUploadOptions
+ */
+export interface FileUploadOptions {
+  /** The Supabase storage bucket name */
+  bucketName: string;
+  /** The path within the bucket where the file will be stored */
+  path: string;
+  /** Optional chunk size for resumable uploads (in bytes) */
+  chunkSize?: number;
+  /** Optional cache control header value */
+  cacheControl?: string;
+  /** Optional callback for upload progress updates */
+  onProgress?: (progress: number) => void;
+}
+
+/**
+ * Custom hook for handling resumable file uploads to Supabase storage
+ *
+ * @returns {Object} Upload state and control functions
+ * @property {Record<string, FileUploadState>} uploads - Current state of all uploads
+ * @property {Function} upload - Function to start a new file upload
+ *
+ * @example
+ * ```tsx
+ * const { upload, uploads } = useFileUpload();
+ *
+ * // Start an upload
+ * const handleUpload = async (file: File) => {
+ *   const fileId = crypto.randomUUID();
+ *   await upload(file, fileId, {
+ *     bucketName: 'my-bucket',
+ *     path: 'uploads',
+ *     onProgress: (progress) => console.log(`Upload progress: ${progress}%`)
+ *   });
+ * };
+ * ```
+ */
+export function useFileUpload() {
+  const [uploads, setUploads] = useState<Record<string, FileUploadState>>({});
+  const supabase = useSupabase();
+
+  /**
+   * Uploads a file using TUS protocol for resumable uploads
+   *
+   * @param {File} file - The file to upload
+   * @param {string} fileId - Unique identifier for the upload
+   * @param {FileUploadOptions} options - Upload configuration options
+   * @returns {Promise<string>} The final path of the uploaded file
+   * @throws {Error} If no authentication session is found or upload fails
+   */
+  const upload = async (
+    file: File,
+    fileId: string,
+    options: FileUploadOptions,
+  ): Promise<string> => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error('No authentication session found');
+    }
+
+    // Initialize upload state
+    setUploads((prev) => ({
+      ...prev,
+      [fileId]: {
+        progress: 0,
+        status: 'uploading',
+        url: null,
+        file,
+        id: fileId,
+      },
+    }));
+
+    const filePath = `${options.path}/${fileId}`;
+    const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${options.bucketName}/${filePath}`;
+    return new Promise((resolve, reject) => {
+      // Configure TUS upload
+      const upload = new tus.Upload(file, {
+        endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
+        retryDelays: [0, 3000, 5000, 10000, 20000],
+        headers: {
+          authorization: `Bearer ${session.access_token}`,
+          'x-upsert': 'true',
+        },
+        uploadDataDuringCreation: true,
+        removeFingerprintOnSuccess: true,
+        metadata: {
+          bucketName: options.bucketName,
+          objectName: filePath,
+          contentType: file.type,
+          cacheControl: options.cacheControl ?? '3600',
+        },
+        chunkSize: options.chunkSize ?? 6 * 1024 * 1024, // 6MB default
+        onError: (error) => {
+          setUploads((prev) => ({
+            ...prev,
+            [fileId]: {
+              progress: prev[fileId]?.progress ?? 0,
+              status: 'error',
+              url: prev[fileId]?.url ?? null,
+              file: prev[fileId]?.file ?? file,
+              id: prev[fileId]?.id ?? fileId,
+            },
+          }));
+          reject(error);
+        },
+        onProgress: (bytesUploaded, bytesTotal) => {
+          const progress = Number(
+            ((bytesUploaded / bytesTotal) * 100).toFixed(2),
+          );
+
+          setUploads((prev) => ({
+            ...prev,
+            [fileId]: {
+              ...prev[fileId],
+              progress,
+              status: progress === 100 ? 'success' : 'uploading',
+              url: progress === 100 ? fileUrl : null,
+              file: prev[fileId]?.file ?? file,
+              id: prev[fileId]?.id ?? fileId,
+            },
+          }));
+
+          options.onProgress?.(progress);
+        },
+        onSuccess: () => {
+          resolve(filePath);
+        },
+      });
+
+      // Check for previous uploads to resume
+      void upload.findPreviousUploads().then((previousUploads) => {
+        if (previousUploads.length && previousUploads[0]) {
+          upload.resumeFromPreviousUpload(previousUploads[0]);
+        }
+        upload.start();
+      });
+    });
+  };
+
+  return {
+    uploads,
+    upload,
+  };
+}

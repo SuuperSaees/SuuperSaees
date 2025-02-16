@@ -2,9 +2,11 @@ import { Dispatch, ReactNode, SetStateAction } from 'react';
 
 import { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
+import { FileUploadState } from '~/hooks/use-file-upload';
 import { ChatMembers } from '~/lib/chat-members.types';
 import { ChatMessages } from '~/lib/chat-messages.types';
 import { Chats } from '~/lib/chats.types';
+import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
 import { User } from '~/lib/user.types';
 
@@ -34,6 +36,12 @@ export interface ActiveChatState {
           | Chats.TypeWithRelations[]
           | ((prev: Chats.TypeWithRelations[]) => Chats.TypeWithRelations[]),
       ) => void);
+  handleFileUpload: (
+    file: File,
+    fileId: string,
+    setUploads?: React.Dispatch<React.SetStateAction<FileUploadState[]>>,
+  ) => Promise<string>;
+  uploads: Record<string, FileUploadState>;
 }
 
 /**
@@ -61,10 +69,8 @@ export interface ChatMutations {
     ChatMessages.TypeWithRelations,
     Error,
     {
-      content: string;
-      fileIds?: string[];
-      userId: string;
-      temp_id: string;
+      message: Message.Insert;
+      files?: File.Insert[];
     },
     {
       previousMessages: Message.Type[];
@@ -136,5 +142,5 @@ export interface ChatProviderProps {
   children: ReactNode;
   // chatId: string
   initialChat?: Chats.TypeWithRelations;
-  initialMembers?:  User.Response[];
+  initialMembers?: User.Response[];
 }
