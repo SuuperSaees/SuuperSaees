@@ -4,13 +4,14 @@ import { SetStateAction } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
 import { User } from '~/lib/user.types';
 import {
   createMessage,
   deleteMessage,
 } from '~/server/actions/chat-messages/chat-messages.action';
-import { updateFile } from '~/team-accounts/src/server/actions/files/update/update-file';
+import { createFile } from '~/server/actions/files/files.action';
 
 /**
  * Props interface for useChatMessageActions hook
@@ -54,33 +55,28 @@ export const useChatMessageActions = ({
 
   const addMessageMutation = useMutation({
     mutationFn: async ({
-      content,
-
-      fileIds,
-      userId,
-      temp_id,
+      message,
+      files,
     }: {
-      content: string;
-      fileIds?: string[];
-      userId: string;
-      temp_id: string;
+      message: Message.Insert;
+      files?: File.Insert[];
     }) => {
-      const messageData = { user_id: userId, content, temp_id };
+      const messageData = {
+        user_id: user.id,
+        content: message.content,
+        temp_id: message.temp_id,
+        id: message.id,
+      };
       const response = await createMessage({
+        id: message.id,
         message_id: '',
         chat_id: chatId,
         messages: [messageData],
       });
 
-      if (fileIds?.length) {
-        await Promise.all(
-          fileIds.map((fileId) => updateFile(fileId, response.id)),
-        );
-      }
-
-      return response;
+      return { message: response, files: files };
     },
-    onMutate: async ({ content, temp_id }) => {
+    onMutate: async ({ message, files }) => {
       // Cancel any outgoing refetches
       // (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey });
@@ -90,10 +86,10 @@ export const useChatMessageActions = ({
 
       // Optimistically update to the new value
       // Create optimistic message with temporary ID
-      const tempId = temp_id;
+      const tempId = message.temp_id;
 
       const optimisticMessage: Message.Type = {
-        content,
+        content: message.content ?? '',
         user_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -103,8 +99,9 @@ export const useChatMessageActions = ({
         order_id: null,
         parent_id: null,
         type: Message.Category.CHAT_MESSAGE,
-        temp_id: tempId,
-        user,
+        temp_id: tempId ?? '',
+        user: user,
+        files: files?.map((file) => ({ ...file, isLoading: true })) ?? [],
       };
 
       setMessages((prev) => {
@@ -121,6 +118,24 @@ export const useChatMessageActions = ({
     },
     // Always refetch after error or success
     onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey });
+    },
+    onSuccess: async (data) => {
+      if (data.files) {
+        await createFile({ files: data.files });
+        // Set isLoading to false for the previous message
+        setMessages((prev) => {
+          const newMessage = prev.find(
+            (msg) => msg.id === data.message.message_id,
+          );
+          if (!newMessage) return prev;
+          newMessage.files = data.files as File.Response[];
+          return [
+            ...prev.filter((msg) => msg.id !== newMessage?.id),
+            newMessage,
+          ];
+        });
+      }
       void queryClient.invalidateQueries({ queryKey });
     },
   });

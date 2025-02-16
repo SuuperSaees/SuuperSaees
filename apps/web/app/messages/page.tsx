@@ -43,7 +43,7 @@ export default async function MessagesPage() {
             />
           </Suspense>
         </div>
-        <div className="flex flex-1 flex-col bg-white">
+        <div className="flex flex-1 flex-col bg-white min-w-0">
           <Suspense fallback={<div>Loading...</div>}>
             <ChatThread agencyTeam={agencyTeam} />
           </Suspense>

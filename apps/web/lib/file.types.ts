@@ -7,4 +7,7 @@ export namespace File {
   };
   export type Insert = Database['public']['Tables']['files']['Insert'];
   export type Update = Database['public']['Tables']['files']['Update'];
+  export type Response = Pick<Type, 'id' | 'name' | 'type' | 'size' | 'url'> & {
+    created_at?: string;
+  }
 }

@@ -4,111 +4,163 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 
-import { Chats } from '~/lib/chats.types';
-import { Message } from '~/lib/message.types';
-import { User } from '~/lib/user.types';
+import { FileUploadState, useFileUpload } from '~/hooks/use-file-upload';
+import type { Chats } from '~/lib/chats.types';
+import type { Message } from '~/lib/message.types';
+import type { User } from '~/lib/user.types';
 
 /**
- * Props interface for useChatState hook
- * @interface UseChatStateProps
- * @property {ChatMembers.Type[]} initialMembers - Initial list of chat members
+ * Props for the useChatState hook
  */
 interface UseChatStateProps {
+  /** Initial list of chat members */
   initialMembers: User.Response[];
 }
 
 /**
- * Custom hook for managing chat state
- * Handles chat ID, active chat, members, and messages state management
+ * Custom hook for managing chat state and operations
  *
- * @param {UseChatStateProps} props - Hook properties
- * @returns {Object} Object containing chat state and setters
- * @property {string} chatId - Current chat ID
- * @property {Function} setChatId - Function to update chat ID
- * @property {Chats.Type | null} activeChat - Currently active chat
- * @property {Function} setActiveChat - Function to update active chat
- * @property {ChatMembers.Type[]} members - List of chat members
- * @property {Function} setMembers - Function to update members list
- * @property {Function} setMessages - Optimized function to update messages using QueryClient
- * @property {string[]} messagesQueryKey - Query key for messages cache
- * @property {Function} setChats - Optimized function to update chats using QueryClient
- * @property {string} searchQuery - Current search query
- * @property {Function} setSearchQuery - Function to update search query
- * @property {Chats.TypeWithRelations[]} filteredChats - Filtered chats based on search query
- * @property {Function} setFilteredChats - Function to update filtered chats
- * @property {boolean} isChatCreationDialogOpen - Whether the chat creation dialog is open
- * @property {Function} setIsChatCreationDialogOpen - Function to update chat creation dialog open state
+ * This hook centralizes chat-related state management including:
+ * - Chat selection and active chat state
+ * - Member management
+ * - Message operations with React Query cache
+ * - File uploads for chat attachments
+ * - Search and filtering functionality
+ *
+ * @param {UseChatStateProps} props - Hook configuration
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   chatId,
+ *   setMessages,
+ *   handleFileUpload,
+ *   // ... other values
+ * } = useChatState({ initialMembers: [] });
+ * ```
  */
-
-
-const useChatState = ({ initialMembers }: UseChatStateProps) => {
-  // State for tracking current chat ID and active chat
+export function useChatState({ initialMembers }: UseChatStateProps) {
+  // Basic chat state
   const [chatId, setChatId] = useState<string>('');
   const [activeChat, setActiveChat] = useState<Chats.Type | null>(null);
   const [isChatCreationDialogOpen, setIsChatCreationDialogOpen] =
     useState(false);
-  // State for chat members with initial values
-  const [members, setMembers] = useState<User.Response[]>(
-    initialMembers ?? [],
-  );
+  const [members, setMembers] = useState<User.Response[]>(initialMembers ?? []);
 
-  // State for search query
+  // Search and filtering state
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredChats, setFilteredChats] = useState<Chats.TypeWithRelations[]>(
     [],
   );
 
-  // Query key for messages cache
-  // TODO: Update to use 'chat-messages' prefix in future
-  const messagesQueryKey = useMemo(() => ['chat', chatId], [chatId]);
-
+  // Hooks initialization
   const queryClient = useQueryClient();
+  const { upload, uploads } = useFileUpload();
 
   /**
-   * Optimized message setter that works with React Query cache
-   * Updates messages while preserving other chat data
+   * Memoized query key for chat messages
+   * Used for React Query cache management
+   */
+  const messagesQueryKey = useMemo(() => ['chat', chatId], [chatId]);
+
+  /**
+   * Updates messages in the React Query cache while preserving other chat data
    *
-   * @param {Message.Type[] | ((prev: Message.Type[]) => Message.Type[])} updater - New messages or update function
+   * @param updater - New messages array or update function
    */
   const setMessages = useCallback(
     (updater: Message.Type[] | ((prev: Message.Type[]) => Message.Type[])) => {
-      // TODO: Refactor to use messages data directly from query
-      const currentChat = queryClient.getQueryData(
+      queryClient.setQueryData<Chats.TypeWithRelations>(
         messagesQueryKey,
-      ) as Chats.TypeWithRelations;
-      const currentMessages = currentChat?.messages ?? [];
-
-      const newMessages =
-        typeof updater === 'function' ? updater(currentMessages) : updater;
-      queryClient.setQueryData(messagesQueryKey, {
-        ...currentChat,
-        messages: newMessages,
-      });
+        (oldData) => {
+          if (!oldData) return oldData;
+          const currentMessages = oldData.messages ?? [];
+          const newMessages =
+            typeof updater === 'function' ? updater(currentMessages) : updater;
+          return {
+            ...oldData,
+            messages: newMessages,
+          };
+        },
+      );
     },
     [queryClient, messagesQueryKey],
   );
 
   /**
-   * Optimized chat setter that works with React Query cache
-   * Updates chats while preserving other chat data
+   * Updates chats in the React Query cache
    *
-   * @param {Chats.Type} data - New chat data
+   * @param updater - New chats data or update function
    */
   const setChats = useCallback(
     (
       updater:
-        | Chats.Type
+        | Chats.TypeWithRelations[]
         | ((prev: Chats.TypeWithRelations[]) => Chats.TypeWithRelations[]),
     ) => {
-      const currentChats =
-        queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']) ??
-        ([] as Chats.TypeWithRelations[]);
-      const newChats =
-        typeof updater === 'function' ? updater(currentChats ?? []) : updater;
-
-      queryClient.setQueryData(['chats'], newChats);
+      queryClient.setQueryData<Chats.TypeWithRelations[]>(
+        ['chats'],
+        (oldData) => {
+          const currentChats = oldData ?? [];
+          return typeof updater === 'function'
+            ? updater(currentChats)
+            : updater;
+        },
+      );
     },
     [queryClient],
+  );
+
+  /**
+   * Handles file uploads for the current chat
+   *
+   * @param file - The file to upload
+   * @param setUploadsFunction - Function to update upload state in the UI
+   * @param fileId - Unique identifier for the upload
+   * @returns Promise resolving to the uploaded file path
+   * @throws Error if no active chat or upload fails
+   */
+  const handleFileUpload = useCallback(
+    async (
+      file: File,
+      fileId: string,
+      setUploads?: React.Dispatch<React.SetStateAction<FileUploadState[]>>,
+      config?: {
+        bucketName: string;
+        path: string;
+      },
+    ) => {
+      if (!chatId) throw new Error('No active chat');
+
+      try {
+        const filePath = await upload(file, fileId, {
+          bucketName: config?.bucketName ?? 'chats',
+          path: config?.path ?? `${chatId}/uploads`,
+          onProgress: (progress) => {
+            setUploads?.((prev) => {
+              const existingUpload = prev.find((u) => u.id === fileId);
+              if (!existingUpload) return prev;
+
+              return prev.map((u) =>
+                u.id === fileId
+                  ? {
+                      ...u,
+                      progress,
+                      status: progress === 100 ? 'success' : 'uploading',
+                    }
+                  : u,
+              );
+            });
+          },
+        });
+
+        return filePath;
+      } catch (error) {
+        console.error('File upload failed:', error);
+        throw error;
+      }
+    },
+    [chatId, upload],
   );
 
   return {
@@ -127,8 +179,7 @@ const useChatState = ({ initialMembers }: UseChatStateProps) => {
     isChatCreationDialogOpen,
     setIsChatCreationDialogOpen,
     setChats,
+    handleFileUpload,
+    uploads,
   };
-};
-
-
-export default useChatState;
+}
