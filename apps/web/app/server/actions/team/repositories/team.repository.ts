@@ -83,7 +83,7 @@ export class TeamRepository {
 
       const { data: organization, error: organizationError } = await client
       .from('accounts')
-      .select('id, name, accounts_memberships(account_role)')
+      .select('id, name, picture_url, accounts_memberships(account_role)')
       .eq('id', organizationId)
       .eq('is_personal_account', false)
       .single();
@@ -93,7 +93,7 @@ export class TeamRepository {
       resultMembers[organizationId] = {
         id: organization.id,
         name: organization.name,
-        picture_url: organizationSettings?.value ?? '',
+        picture_url: organizationSettings?.value ?? organization.picture_url ?? '',
         is_agency: agencyRoles.has(organization.accounts_memberships[0]?.account_role ?? ''),
       }
 
