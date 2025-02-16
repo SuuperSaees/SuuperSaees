@@ -1,6 +1,6 @@
 'use client';
 
-import {  useState, type JSX } from 'react';
+import { useState, type JSX } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DefaultValues, Path, SubmitHandler, useForm } from 'react-hook-form';
@@ -49,10 +49,7 @@ export interface ComboboxProps<
   isLoading?: boolean;
   onSelect?: (value: string) => void; // New prop for selection handler
   onChange?: (values: string[]) => void; // New prop for change handler
-  disabled?: boolean;
 }
-
-
 
 export default function CheckboxCombobox<
   TSchema extends ZodType<Record<string, string[]>, ZodTypeDef, unknown>,
@@ -69,28 +66,25 @@ export default function CheckboxCombobox<
   isLoading, 
   onSelect, 
   onChange, 
-  disabled,
-
 }: ComboboxProps<TSchema>) {
   const [searchTerm, setSearchTerm] = useState('');
   const form = useForm<z.infer<TSchema>>({
-
-
     defaultValues,
     resolver: zodResolver(schema),
   });
 
   const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase()),
+    option.label?.toLowerCase().includes(searchTerm?.toLowerCase() ?? ''),
   );
 
   const handlePopoverClose = async (open: boolean) => {
     if (!open) {
       const currentValues = form.getValues();
+      const formDefaultValues = form.formState.defaultValues;
       const hasChanges = Object.keys(currentValues).some(
         (key) =>
           JSON.stringify(currentValues[key]) !==
-          JSON.stringify(defaultValues[key]),
+          JSON.stringify(formDefaultValues?.[key]),
       );
 
       if (hasChanges) {
@@ -110,14 +104,12 @@ export default function CheckboxCombobox<
             key={name}
             control={form.control}
             name={name as Path<z.infer<TSchema>>}
-            disabled
             render={({ field }) => (
               <FormItem>
                 <Popover onOpenChange={handlePopoverClose}>
                   <PopoverTrigger
                     asChild={customItemTrigger ? false : true}
                     className={classNameTrigger}
-                    disabled={disabled}
                   >
                     {customItemTrigger ? (
                       customItemTrigger
@@ -127,7 +119,7 @@ export default function CheckboxCombobox<
                       </button>
                     )}
                   </PopoverTrigger>
-                  <PopoverContent className="flex w-[300px] flex-col p-4">
+                  <PopoverContent className="flex w-[300px] flex-col p-2">
                     <Input
                       placeholder="Search..."
                       value={searchTerm}
@@ -155,8 +147,8 @@ export default function CheckboxCombobox<
                                         (value) => value !== option.value,
                                       );
                                   if (onChange) {
-                                    onChange(newValue);
                                     field.onChange(newValue);
+                                    onChange(newValue);
                                   } else {
                                     field.onChange(newValue);
                                   }
