@@ -7,13 +7,11 @@ import { getTeams } from '~/server/actions/team/team.action';
 import ChatInbox from './components/chat-inbox';
 import ChatThread from './components/chat-thread';
 import { ChatProvider } from './components/context/chat-context';
-import { redirect } from 'next/navigation';
-import pathsConfig from '~/config/paths.config';
+
 
 export default async function MessagesPage() {
   const { organization, agency, workspace } = await loadUserWorkspace();
   // Always bring the agency members and the organization data
-  return redirect(pathsConfig.app.orders);
   // This because this data is always needed for the messages page and not changes frequently
   const isAgency = typeof agency === 'object';
   const agencyId = isAgency && agency ? agency.id : organization?.id;
