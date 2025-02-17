@@ -62,6 +62,7 @@ export function ChatProvider({
     name: currentUser?.name ?? '',
     email: user?.email ?? '',
     picture_url: currentUser?.picture_url ?? '',
+    role: user?.role ?? '',
   };
 
   // Chat state
@@ -219,6 +220,7 @@ export function ChatProvider({
     setFilteredChats,
     setChats: setChats as ActiveChatState['setChats'],
     user: {
+      role: currentUser?.role ?? '',
       id: currentUser?.id ?? '',
       name: currentUser?.name ?? '',
       email: user?.email ?? '',

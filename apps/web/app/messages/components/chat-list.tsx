@@ -5,6 +5,7 @@ import { useEffect, useMemo } from 'react';
 import ChatItem from './chat-item';
 import { useChat } from './context/chat-context';
 import { Chats } from '~/lib/chats.types';
+import { Spinner } from '@kit/ui/spinner';
 
 export default function ChatList() {
   const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat, setChatId } = useChat();
@@ -39,13 +40,7 @@ export default function ChatList() {
     }
   }, [filteredChats, activeChat, setActiveChat, setChatId]);
   // Estado de carga
-  if (chatsQuery.isLoading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        Loading chats...
-      </div>
-    );
-  }
+  if (chatsQuery.isLoading) return <Spinner className="w-5 h-5 mx-auto mt-6 text-gray-500" />
 
   // Estado de error
   if (chatsQuery.error) {
