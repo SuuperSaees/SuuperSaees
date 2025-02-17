@@ -6,7 +6,7 @@ import { ICreateFile } from '../files.interface';
 import { OrganizationsRepository } from '~/server/actions/organizations/repositories/organizations.repository';
 import { FoldersRepository } from '~/server/actions/folders/repositories/folders.repository';
 import { File } from '~/lib/file.types';
-
+import { OrdersRepository } from '~/server/actions/orders/repositories/orders.repository';
 export class FilesController {
 
    private baseUrl: string
@@ -38,17 +38,26 @@ export class FilesController {
     }
     }
 
+    async getFile(fileId?: string, orderId?: string): Promise<File.Type> {
+        try {
+            const fileRepository = new FilesRepository(this.client, this.adminClient);
+            const orderRepository = new OrdersRepository(this.client, this.adminClient);
+            const fileService = new FilesService(fileRepository, undefined, undefined, orderRepository);
+            return fileService.getFile(fileId, orderId);
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(`Error getting file: ${error.message}`);
+            }
+            throw new Error('Error getting file');
+        }
+    }
+
     createUploadBucketURL(file: File): Promise<string> {
         const fileRepository = new FilesRepository(this.client, this.adminClient);
         const fileService = new FilesService(fileRepository);
         return fileService.createUploadBucketURL(file);
     }
 
-    getFile(fileId: string): Promise<File> {
-        const fileRepository = new FilesRepository(this.client, this.adminClient);
-        const fileService = new FilesService(fileRepository);
-        return fileService.getFile(fileId);
-    }
 
     updateFile(fileId: string, file: File): Promise<File> {
         const fileRepository = new FilesRepository(this.client, this.adminClient);

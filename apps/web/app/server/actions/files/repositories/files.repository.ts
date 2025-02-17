@@ -21,15 +21,23 @@ export class FilesRepository {
         return fileData;
     }
 
+    async getFile(fileId?: string): Promise<File.Type> {
+        const res = await this.client
+        .from('files')
+        .select('*')
+        .eq('id', fileId ?? '')
+        .single();
+
+        if (res.error) throw res.error;
+
+        return res.data as File.Type;
+    }
+    
     async createUploadBucketURL(file: File): Promise<string> {
         const res = await this.client.storage.from('files').createSignedUrl(file.name, 60);
         return res.signedUrl;
     }
     
-    async getFile(fileId: string): Promise<File> {
-        const res = await this.client.from('files').select('*').eq('id', fileId).single();
-        return res.data;
-    }
 
     async updateFile(fileId: string, file: File): Promise<File> {
         const res = await this.client.from('files').update({
