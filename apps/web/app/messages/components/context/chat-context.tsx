@@ -177,6 +177,9 @@ export function ChatProvider({
       setData: setMessages as Dispatch<
         SetStateAction<Message.Type[] | Message.Type>
       >,
+      filter: {
+        chat_id: `eq.${chatId}`,
+      }
     },
     {
       tableName: 'files',

@@ -66,6 +66,7 @@ export const useChatMessageActions = ({
         content: message.content,
         temp_id: message.temp_id,
         id: message.id,
+        chat_id: chatId,
       };
       const response = await createMessage({
         id: message.id,
