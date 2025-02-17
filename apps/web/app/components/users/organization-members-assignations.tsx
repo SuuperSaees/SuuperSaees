@@ -156,7 +156,7 @@ export default function OrganizationMemberAssignation<
   const customItem = (option: string) => (
     <div className="flex items-center gap-2">
       <Avatar className="h-6 w-6">
-        <AvatarImage src={selectedOrganization?.picture_url ?? ''} />
+        <AvatarImage src={organizationOptions.find((org) => org.label === option)?.picture_url ?? ''} />
         <AvatarFallback>{option.charAt(0).toUpperCase()}</AvatarFallback>
       </Avatar>
       <span className="text-sm font-semibold">{option}</span>
