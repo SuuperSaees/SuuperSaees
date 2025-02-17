@@ -112,8 +112,8 @@ export const useChatManagement = ({
         visibility: true,
         image: image ?? '',
       }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['chats'] });
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
     },
   });
 
@@ -143,9 +143,6 @@ export const useChatManagement = ({
     queryKey: ['chats'],
     queryFn: async () => {
       const response = await getChats(userId);
-
-      if (!response) throw new Error('Failed to fetch chats');
-
       return response;
     },
   });

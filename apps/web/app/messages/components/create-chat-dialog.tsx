@@ -39,6 +39,7 @@ import {
 
 import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { useChat } from './context/chat-context';
 
 // Dialog to create a new chat
 
@@ -111,7 +112,7 @@ export default function CreateOrganizationsChatDialog({
       image: clientOrganization?.picture_url ?? '',
     },
   });
-
+  const { setActiveChat, setChatId } = useChat();
   const { workspace: userWorkspace } = useUserWorkspace()
   const currentUserRole = userWorkspace?.role
   // Define management roles that should have visibility false
@@ -140,7 +141,7 @@ export default function CreateOrganizationsChatDialog({
       ]),
     ];
 
-    await createChatMutation.mutateAsync({
+    const newChat = await createChatMutation.mutateAsync({
       name: data.name,
       members: uniqueMembers.map((memberId) => {
         const role = agencyMembersMap.get(memberId) ?? '';
@@ -152,6 +153,11 @@ export default function CreateOrganizationsChatDialog({
       }),
       image: form.getValues('image'),
     });
+    
+    if (newChat?.id) {
+      setActiveChat(newChat as Chats.TypeWithRelations);
+      setChatId(newChat.id.toString());
+    }
   };
 
   return (

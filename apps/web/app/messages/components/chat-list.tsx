@@ -8,8 +8,8 @@ import { Chats } from '~/lib/chats.types';
 
 export default function ChatList() {
   const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat, setChatId } = useChat();
+  const chats = useMemo(() => chatsQuery.data ?? [], [chatsQuery.data]);
   const filteredChats = useMemo(() => {
-    const chats = chatsQuery.data ?? [];
     if (!searchQuery) return chats;
     if (!Array.isArray(chats) || !chats.length) return [];
     return chats.filter((chat) => {
@@ -30,14 +30,14 @@ export default function ChatList() {
 
       return hasMatchingMessage || hasMatchingMember;
     });
-  }, [chatsQuery.data, searchQuery]);
+  }, [searchQuery, chats]);
 
   useEffect(() => {
     if (filteredChats?.length && !activeChat) {
       setActiveChat(filteredChats[0] as Chats.Type);
       setChatId(filteredChats[0].id.toString());
     }
-  }, [filteredChats, activeChat, setActiveChat]);
+  }, [filteredChats, activeChat, setActiveChat, setChatId]);
   // Estado de carga
   if (chatsQuery.isLoading) {
     return (
