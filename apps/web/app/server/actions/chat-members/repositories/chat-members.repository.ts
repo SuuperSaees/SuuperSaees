@@ -22,21 +22,35 @@ export class ChatMembersRepository {
   ): Promise<ChatMembers.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
 
+    // Remove any duplicate user_ids, keeping the last occurrence
+    const uniqueMembers = [...new Map(members.map(m => [m.user_id, m])).values()];
 
     const { data: existingMembers, error: fetchError } = await client
       .from('chat_members')
-      .select('user_id')
+      .select('user_id, type, visibility')
       .eq('chat_id', chat_id);
   
     if (fetchError) {
       throw new Error(`Error fetching existing members: ${fetchError.message}`);
     }
-  
-    const newUserIds = new Set(members.map(m => m.user_id));
-    
-    const usersToDelete = existingMembers
-      ?.filter(m => !newUserIds.has(m.user_id))
-      .map((m: { user_id: string }) => m.user_id) || [];
+
+    // Extract existing IDs and create a map for easy lookup
+    const existingIds = existingMembers?.map(m => m.user_id) || [];
+    const existingMembersMap = new Map(
+      existingMembers?.map(m => [m.user_id, m]) || []
+    );
+
+    // Determine which members to add and which to update
+    const idsToAdd = uniqueMembers.filter(m => !existingIds.includes(m.user_id));
+    const idsToUpdate = uniqueMembers.filter(m => {
+      const existing = existingMembersMap.get(m.user_id);
+      return existing && (existing.type !== m.type || existing.visibility !== m.visibility);
+    });
+
+    // Delete members that are not in the new list
+    const usersToDelete = existingIds.filter(
+      id => !uniqueMembers.some(m => m.user_id === id)
+    );
 
     if (usersToDelete.length > 0) {
       const { error: deleteError } = await client
@@ -44,45 +58,43 @@ export class ChatMembersRepository {
         .delete()
         .eq('chat_id', chat_id)
         .in('user_id', usersToDelete);
-
   
       if (deleteError) {
         throw new Error(`Error removing members: ${deleteError.message}`);
       }
     }
 
-    const membersToUpsert = members.filter(m => !usersToDelete.includes(m.user_id));
-
-    const upsertedMembers: ChatMembers.TypeWithRelations[] = [];
-
-    await Promise.all(membersToUpsert.map(async (member) => {
-      const { data: upsertedMember, error: upsertError} = await client
-        .from('chat_members')
-        .insert({
-          chat_id,
-          user_id: member.user_id,
-          type: member.type as "project_manager" | "assistant" | "owner" | "guest",
-          visibility: member.visibility,
-        }
-      )
-      .select('*, user:accounts(email, settings:user_settings(name, picture_url))')
-      .single();
-      if (upsertError) {
-        throw new Error(`Error updating members: ${upsertError.message}`);
-      }
-
-      if (upsertedMember) {
-        upsertedMembers.push({
-          ...upsertedMember,
-          user: {
-            id: upsertedMember.user_id ?? '',
-            email: upsertedMember.user?.email ?? '',
-            name: upsertedMember.user?.settings?.name ?? '',
-            picture_url: upsertedMember.user?.settings?.picture_url ?? '',
-          },
-        });
-      }
+    // Prepare data for members that need to be added or updated
+    const upsertData = [...idsToAdd, ...idsToUpdate].map(member => ({
+      chat_id,
+      user_id: member.user_id,
+      type: member.type as "project_manager" | "assistant" | "owner" | "guest",
+      visibility: member.visibility,
     }));
+
+    let upsertedMembers: ChatMembers.TypeWithRelations[] = [];
+
+    if (upsertData.length > 0) {
+      const { data: upsertedData, error: upsertError } = await client
+        .from('chat_members')
+        .upsert(upsertData)
+        .select('*, user:accounts(email, settings:user_settings(name, picture_url))');
+
+      if (upsertError) {
+        throw new Error(`Error upserting members: ${upsertError.message}`);
+      }
+
+      // Transform the upserted data
+      upsertedMembers = (upsertedData || []).map(member => ({
+        ...member,
+        user: {
+          id: member.user_id ?? '',
+          email: member.user?.email ?? '',
+          name: member.user?.settings?.name ?? '',
+          picture_url: member.user?.settings?.picture_url ?? '',
+        },
+      }));
+    }
 
     return upsertedMembers;
   }

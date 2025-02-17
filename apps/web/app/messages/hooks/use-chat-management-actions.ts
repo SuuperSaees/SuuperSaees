@@ -128,6 +128,7 @@ export const useChatManagement = ({
         members: members.map((member) => ({
           user_id: member,
           type: 'guest',
+          visibility: true,
         })),
       }),
     onSuccess: () => {
