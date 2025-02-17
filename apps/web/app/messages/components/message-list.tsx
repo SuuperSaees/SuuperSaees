@@ -13,6 +13,7 @@ import {
 } from '../utils/messages/transform';
 import ActivityAction from './activity-action';
 import UserMessage from './user-message';
+import { Spinner } from '@kit/ui/spinner';
 
 interface MessageListProps {
   messages: MessageType.Type[];
@@ -42,13 +43,7 @@ export default function MessageList({
     scrollToBottom();
   }, [messages]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        Loading messages...
-      </div>
-    );
-  }
+  if (isLoading) return <Spinner className="w-5 h-5 mx-auto text-gray-500" />
 
   return (
     <div className="space-y-4">

@@ -15,7 +15,7 @@ import { AvatarType } from '../../components/ui/multiavatar-displayer';
 import MultiAvatarDisplayer from '../../components/ui/multiavatar-displayer';
 import MembersAssignations from '../../components/users/member-assignations';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
-
+import { useMemo } from 'react';  
 // import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface ChatMembersSelectorProps {
@@ -49,11 +49,11 @@ export default function ChatMembersSelector({
   const canAddMembers = isValidAgencyRole || isValidClientRole;
 
 
-  const clientOrganizationIds = selectedMembers
+  const clientOrganizationIds = useMemo(() => selectedMembers
     .map((member) => member.organization_id)
 
     .filter((id) => id !== agencyTeam.id) // don't include undefined
-    .filter(Boolean);
+    .filter(Boolean), [selectedMembers, agencyTeam.id]);
 
 
   const clientMembersQuery = useQuery({
@@ -64,7 +64,7 @@ export default function ChatMembersSelector({
         includeMembers: true,
       }),
     enabled: !!clientOrganizationIds,
-    retry: 4,
+    retry: 2,
   });
 
   const clientOrganizationMembers = clientMembersQuery.data;
@@ -128,7 +128,9 @@ export default function ChatMembersSelector({
                 title="Organization members"
                 users={clientMembers ?? []}
                 selectedUsers={selectedClientOrganizationMembers}
-                onMembersUpdate={onMembersUpdate}
+                onMembersUpdate={async (userIds: string[]) => {
+                  await onMembersUpdate([...userIds, ...selectedAgencyMembers.map((member) => member.id)]);
+                }}
                 isLoading={clientMembersQuery.isLoading}
                 canAddMembers={canAddMembers}
               />
@@ -138,7 +140,9 @@ export default function ChatMembersSelector({
                 title="Agency members"
                 users={agencyMembers}
                 selectedUsers={selectedAgencyMembers}
-                onMembersUpdate={onMembersUpdate}
+                onMembersUpdate={async (userIds: string[]) => {
+                  await onMembersUpdate([...userIds, ...selectedClientOrganizationMembers.map((member) => member.id)]);
+                }}
                 isLoading={isLoading}
                 canAddMembers={isValidAgencyRole}
               />

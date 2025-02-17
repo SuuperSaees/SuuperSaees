@@ -112,8 +112,8 @@ export const useChatManagement = ({
         visibility: true,
         image: image ?? '',
       }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['chats'] });
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
     },
   });
 
@@ -128,6 +128,7 @@ export const useChatManagement = ({
         members: members.map((member) => ({
           user_id: member,
           type: 'guest',
+          visibility: true,
         })),
       }),
     onSuccess: () => {
@@ -143,9 +144,6 @@ export const useChatManagement = ({
     queryKey: ['chats'],
     queryFn: async () => {
       const response = await getChats(userId);
-
-      if (!response) throw new Error('Failed to fetch chats');
-
       return response;
     },
   });

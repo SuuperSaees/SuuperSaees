@@ -131,7 +131,7 @@ export interface ChatContextType
     MessagesState,
     ChatMutations,
     ChatQueries {
-  user: User.Response;
+  user: User.Response & { role: string };
 }
 
 /**

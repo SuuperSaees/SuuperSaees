@@ -7,7 +7,6 @@ import { EllipsisVertical, Trash2 } from 'lucide-react';
 import { Button } from '@kit/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 
-import EditableHeader from '~/components/editable-header';
 import { File } from '~/lib/file.types';
 import { Members } from '~/lib/members.types';
 
@@ -113,24 +112,33 @@ export default function ChatThread({
   }
 
   const activeChatDataName = { ...activeChat }.name;
-  const activeChatDataId = { ...activeChat }.id;
-
+  const isOwner = chatById?.user_id === user.id;
   return (
     <div className="flex h-full flex-col min-w-0">
       {/* Header */}
 
-      <div className="flex items-center justify-between border-b p-4">
-        <div className="flex items-center gap-3">
-          <EditableHeader
-            initialName={activeChatDataName}
-            id={activeChatDataId}
-            userRole={'owner'}
-            updateFunction={handleUpdate}
-            rolesThatCanEdit={new Set(['owner'])}
-            variant="chat"
-            maxWidth={600}
-            maxWindowWidthRatio={0.5}
-          />
+      <div className="flex items-center justify-between border-b p-4 min-h-20">
+        <div className="flex-1 min-w-0 ">
+          {isOwner ? (
+            <input
+              type="text"
+              value={activeChatDataName}
+            onChange={(e) => {
+              const newChat = { ...activeChat, name: e.target.value };
+              setActiveChat(newChat);
+            }}
+            onBlur={async (e) => {
+              if (e.target.value !== chatById?.name) {
+                await handleUpdate(e.target.value);
+              }
+            }}
+              className="w-full text-xl font-semibold bg-transparent border-none outline-none focus:ring-0 text-primary-900 overflow-hidden text-ellipsis"
+            />
+          ) : (
+            <span className="block w-full text-xl font-semibold text-primary-900 overflow-hidden text-ellipsis">
+              {activeChatDataName}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <ChatMembersSelector
