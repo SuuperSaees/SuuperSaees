@@ -163,8 +163,6 @@ export default function OrganizationMemberAssignation<
     </div>
   );
 
-  console.log('selectedOrganization', organizationOptions);
-
   return (
     <div className="flex flex-col gap-4 border-t border-gray-100 py-2">
       <SelectAction
