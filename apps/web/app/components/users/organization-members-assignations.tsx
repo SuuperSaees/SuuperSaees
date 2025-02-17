@@ -124,6 +124,7 @@ export default function OrganizationMemberAssignation<
       )?.map((org) => ({
         value: org.id,
         label: org.name,
+        picture_url: org.picture_url,
       })) ?? [],
     [organizationsQuery.data, organization],
   );
@@ -161,6 +162,8 @@ export default function OrganizationMemberAssignation<
       <span className="text-sm font-semibold">{option}</span>
     </div>
   );
+
+  console.log('selectedOrganization', organizationOptions);
 
   return (
     <div className="flex flex-col gap-4 border-t border-gray-100 py-2">

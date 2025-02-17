@@ -49,7 +49,7 @@ export class TeamRepository {
       if (getClientInfoError) {
         return resultMembers;
       }
-      console.log('getClientInfo', getClientInfo);
+      
       const { data: getAgencyInfo, error: getAgencyInfoError } = await this.client
       .from('accounts')
       .select('id, name, organization_settings(value)')

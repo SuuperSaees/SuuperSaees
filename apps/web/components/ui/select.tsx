@@ -12,10 +12,12 @@ import {
 } from '@kit/ui/select';
 import { Spinner } from '@kit/ui/spinner';
 import { cn } from '@kit/ui/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 
 export type Option = {
   label: string;
   value: string | number;
+  picture_url?: string;
   action?: (option: string | number) => void;
 };
 
@@ -102,7 +104,13 @@ const SelectAction = ({
                 className="pointer-events-auto cursor-pointer"
               >
                 {/* Use customItem for dropdown items if provided, otherwise show the label */}
-                {customItem ? customItem(option.label) : option.label}
+                <div className='flex items-center gap-2'>
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={option.picture_url} />
+                  <AvatarFallback>{option.label.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                {option.label}
+                </div>
               </SelectItem>
             ))}
           </SelectGroup>
