@@ -69,7 +69,6 @@ export function ChatProvider({
 
   const {
     chatId,
-    setChatId,
     activeChat,
     setActiveChat,
     members,
@@ -94,7 +93,9 @@ export function ChatProvider({
     chatId,
     setMessages: setMessages,
     userId: user.id,
-    initialChat: initialChat,
+    initialChat,
+    activeChat: activeChat ?? undefined,
+    setActiveChat: setActiveChat ?? undefined,
   });
 
   // Initialize chat actions with optimized message setter
@@ -211,9 +212,7 @@ export function ChatProvider({
     setMembers,
     activeChat,
     setActiveChat,
-
     chatId,
-    setChatId,
     isChatCreationDialogOpen,
     setIsChatCreationDialogOpen,
     searchQuery,
