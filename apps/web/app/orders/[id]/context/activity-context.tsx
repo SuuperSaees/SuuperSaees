@@ -31,7 +31,6 @@ import {
   UserExtended,
 } from './activity.types';
 import { Brief } from '~/lib/brief.types';
-import { getFile } from '~/server/actions/files/files.action';
 
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -382,13 +381,6 @@ export const ActivityProvider = ({
             return prevState;
           });
         } else {
-          const file = await getFile(newData.id.toString(), order.id.toString());
-
-          if(!file) {
-            console.log('file not found', newData.id, order.id)
-            return;
-          };
-
             stateSetter((prevState) => {
             if (Array.isArray(prevState)) {
               return [...prevState, newData] as T[];

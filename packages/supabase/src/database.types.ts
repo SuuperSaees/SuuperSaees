@@ -1150,6 +1150,7 @@ export type Database = {
           id: string
           message_id: string | null
           name: string
+          reference_id: string | null
           size: number
           temp_id: string | null
           type: string
@@ -1161,6 +1162,7 @@ export type Database = {
           id?: string
           message_id?: string | null
           name: string
+          reference_id?: string | null
           size: number
           temp_id?: string | null
           type: string
@@ -1172,6 +1174,7 @@ export type Database = {
           id?: string
           message_id?: string | null
           name?: string
+          reference_id?: string | null
           size?: number
           temp_id?: string | null
           type?: string

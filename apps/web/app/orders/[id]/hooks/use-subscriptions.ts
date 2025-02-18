@@ -76,6 +76,7 @@ export const useOrderSubscriptions = (
           event: '*',
           schema: 'public',
           table: 'files',
+          filter: `reference_id=eq.${orderId.toString()}`,
         },
         (payload) => {
           if (payload.table === 'files') {

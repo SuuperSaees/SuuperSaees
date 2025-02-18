@@ -28,7 +28,6 @@ import {
   ListOrdered,
   Quote,
   SendHorizontal,
-  SendHorizontalIcon,
   Strikethrough,
 } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
@@ -157,6 +156,7 @@ interface RichTextEditorProps {
   useInForm?: boolean;
   showToolbar?: boolean;
   isEditable?: boolean;
+  referenceId?: string;
 }
 
 // TODO: remove not related logic for this presentation component !IMPORTANT- TECHDEBT
@@ -169,6 +169,7 @@ const RichTextEditorV2 = ({
   hideSubmitButton = false,
   showToolbar = true,
   isEditable = true,
+  referenceId,
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
@@ -207,6 +208,7 @@ const RichTextEditorV2 = ({
           size: file.size,
           type: file.type,
           url: fileUrl,
+          reference_id: referenceId,
         },
       ]
     });

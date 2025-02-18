@@ -1146,37 +1146,40 @@ export type Database = {
       };
       files: {
         Row: {
-          created_at: string;
-          id: string;
-          message_id: string | null;
-          name: string;
-          size: number;
-          temp_id: string | null;
-          type: string;
-          url: string;
-          user_id: string;
-        };
+          created_at: string
+          id: string
+          message_id: string | null
+          name: string
+          reference_id: string | null
+          size: number
+          temp_id: string | null
+          type: string
+          url: string
+          user_id: string
+        }
         Insert: {
-          created_at?: string;
-          id?: string;
-          message_id?: string | null;
-          name: string;
-          size: number;
-          temp_id?: string | null;
-          type: string;
-          url: string;
-          user_id: string;
-        };
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          name: string
+          reference_id?: string | null
+          size: number
+          temp_id?: string | null
+          type: string
+          url: string
+          user_id: string
+        }
         Update: {
-          created_at?: string;
-          id?: string;
-          message_id?: string | null;
-          name?: string;
-          size?: number;
-          temp_id?: string | null;
-          type?: string;
-          url?: string;
-          user_id?: string;
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          name?: string
+          reference_id?: string | null
+          size?: number
+          temp_id?: string | null
+          type?: string
+          url?: string
+          user_id?: string
         };
         Relationships: [
           {
