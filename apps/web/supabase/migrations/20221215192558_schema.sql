@@ -2974,3 +2974,44 @@ USING (
   auth.uid() IS NOT NULL
   AND bucket_id = 'plugins'
 );
+
+-- CHATS
+insert into storage.buckets
+(id, name, public)
+values
+('chats', 'chats', true);
+
+CREATE POLICY "authenticated user select access chats"
+ON storage.objects
+FOR SELECT
+TO authenticated
+USING (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'chats'
+);
+CREATE POLICY "authenticated user update access chats"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'chats'
+);
+
+CREATE POLICY "authenticated user insert access chats"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'chats'
+);
+
+CREATE POLICY "authenticated user delete access chats"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'chats'
+);
