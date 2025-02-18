@@ -91,7 +91,7 @@ export interface ChatMutations {
   /** Mutation for updating chat details */
   updateChatMutation: UseMutationResult<Chats.Update, Error, string>;
   /** Mutation for deleting entire chat */
-  deleteChatMutation: UseMutationResult<void, Error, void>;
+  deleteChatMutation: UseMutationResult<void, Error, string>;
   /** Mutation for creating new chat */
   createChatMutation: UseMutationResult<
     Chats.Insert,

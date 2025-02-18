@@ -37,6 +37,8 @@ interface ChatManagementActionsProps {
   userId: string;
   queryKey?: string[];
   initialChat?: Chats.TypeWithRelations;
+  activeChat?: Chats.Type;
+  setActiveChat?: (chat: Chats.Type | null) => void;
 }
 
 /**
@@ -50,10 +52,12 @@ export const useChatManagement = ({
   queryKey = ['chats'],
   initialChat,
   setMessages,
+  activeChat,
+  setActiveChat,
 }: ChatManagementActionsProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
-
+  
   /**
    * Mutation for updating chat name
    * Handles success/error notifications and cache invalidation
@@ -79,18 +83,38 @@ export const useChatManagement = ({
    * Handles state updates, notifications and redirects
    */
   const deleteChatMutation = useMutation({
-    mutationFn: async () => {
-      await deleteChat(chatId);
+    mutationFn: deleteChat,
+    onMutate: async () => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['chats'] });
+      await queryClient.cancelQueries({ queryKey });
+
+      // Snapshot the previous values
+      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']);
+      const previousChat = activeChat ?? queryClient.getQueryData(queryKey);
+
+      // Optimistically update both caches
+      queryClient.setQueryData(['chats'], (old: Chats.TypeWithRelations[]) => {
+        return old.filter((chat) => chat.id !== chatId);
+      });
+      
+      !setActiveChat ? queryClient.setQueryData(queryKey, null) : setActiveChat(null);
+
+      return { previousChats, previousChat };
     },
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['chats'] });
-
+      await queryClient.invalidateQueries({ queryKey });
       toast.success('Chat deleted successfully');
-
     },
-    onError: () => {
+
+    onError: (_error, _variables, context) => {
       toast.error('Failed to delete chat');
+      if (context) {
+        queryClient.setQueryData(['chats'], context.previousChats);
+        queryClient.setQueryData(queryKey, context.previousChat);
+      }
     },
   });
 

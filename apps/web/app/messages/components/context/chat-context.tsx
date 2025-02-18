@@ -94,7 +94,9 @@ export function ChatProvider({
     chatId,
     setMessages: setMessages,
     userId: user.id,
-    initialChat: initialChat,
+    initialChat,
+    activeChat: activeChat ?? undefined,
+    setActiveChat: setActiveChat ?? undefined,
   });
 
   // Initialize chat actions with optimized message setter

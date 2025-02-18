@@ -33,7 +33,6 @@ export default function ChatThread({
     chatByIdQuery,
     addMessageMutation,
     setActiveChat,
-    setChatId,
     setMembers,
     handleFileUpload,
   } = useChat();
@@ -45,11 +44,8 @@ export default function ChatThread({
     await membersUpdateMutation.mutateAsync(members);
   };
 
-  const handleDelete = async () => {
-    await deleteChatMutation.mutateAsync();
-    // Clear the conversation
-    setActiveChat(null);
-    setChatId('');
+  const handleDelete =  () => {
+    deleteChatMutation.mutate(activeChat?.id ?? '');
   };
 
   const handleUpdate = async (name: string) => {
@@ -170,9 +166,9 @@ export default function ChatThread({
               <Button
                 variant="ghost"
                 className="w-full justify-start gap-2 text-red-600"
-                onClick={async () => {
+                onClick={ () => {
                   setIsPopupOpen(false);
-                  await handleDelete();
+                  handleDelete();
                 }}
               >
                 <Trash2 className="h-4 w-4" />
