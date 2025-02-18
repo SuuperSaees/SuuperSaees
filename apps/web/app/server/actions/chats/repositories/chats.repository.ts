@@ -122,7 +122,7 @@ export class ChatRepository {
           )
 
         ),
-        messages (
+        messages!chat_id (
             id,
             user_id,
             content,
