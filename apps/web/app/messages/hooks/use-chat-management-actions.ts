@@ -68,13 +68,49 @@ export const useChatManagement = ({
         id: chatId,
         name,
       }),
+    onMutate: async (newName: string) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['chats'] });
+      await queryClient.cancelQueries({ queryKey });
+
+      // Snapshot the previous values
+      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']);
+      const previousChat = activeChat ?? queryClient.getQueryData(queryKey);
+
+      // Optimistically update both caches
+      queryClient.setQueryData(['chats'], (old: Chats.TypeWithRelations[]) => {
+        return old.map((chat) =>
+          chat.id === chatId ? { ...chat, name: newName } : chat
+        );
+      });
+
+      if (setActiveChat && activeChat) {
+        setActiveChat({ ...activeChat, name: newName });
+      } else {
+        queryClient.setQueryData(queryKey, (old: Chats.TypeWithRelations) =>
+          old ? { ...old, name: newName } : old
+        );
+      }
+
+      return { previousChats, previousChat };
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey });
       toast.success('Chat name updated successfully');
       router.refresh();
     },
-    onError: () => {
+    onError: (_error, _variables, context) => {
       toast.error('Failed to update chat name');
+      if (context) {
+        queryClient.setQueryData(['chats'], context.previousChats);
+        !setActiveChat 
+          ? queryClient.setQueryData(queryKey, context.previousChat)
+          : setActiveChat(context.previousChat as Chats.Type);
+      }
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
+      await queryClient.invalidateQueries({ queryKey });
     },
   });
 
