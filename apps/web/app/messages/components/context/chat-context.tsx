@@ -69,7 +69,6 @@ export function ChatProvider({
 
   const {
     chatId,
-    setChatId,
     activeChat,
     setActiveChat,
     members,
@@ -213,9 +212,7 @@ export function ChatProvider({
     setMembers,
     activeChat,
     setActiveChat,
-
     chatId,
-    setChatId,
     isChatCreationDialogOpen,
     setIsChatCreationDialogOpen,
     searchQuery,

@@ -136,6 +136,58 @@ export const useChatManagement = ({
         visibility: true,
         image: image ?? '',
       }),
+    onMutate: async ({ name, members, image }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['chats'] });
+
+      // Snapshot the previous value
+      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']) ?? [];
+
+      // Temporary chat id
+      const tempChatId = `temp-${crypto.randomUUID()}`;
+      // Create an optimistic chat
+      const optimisticChat: Chats.TypeWithRelations = {
+        id: tempChatId,
+        name,
+        user_id: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        visibility: true,
+        image: image ?? '',
+        messages: [],
+        deleted_on: null,
+        reference_id: null,
+        settings: {},
+        chat_members: members.map((member) => ({
+          chat_id: tempChatId,
+          user_id: member.id,
+          type: 'guest' as const,
+          visibility: member.visibility,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          id: member.id,
+          deleted_on: null,
+          settings: {}
+        }))
+      };
+
+      // Optimistically update the cache
+      queryClient.setQueryData(['chats'], [...previousChats, optimisticChat]);
+      !setActiveChat ? queryClient.setQueryData(queryKey, optimisticChat) : setActiveChat(optimisticChat);
+
+      return { previousChats };
+    },
+    onError: (_error, _variables, context) => {
+      // Rollback on error
+      if (context) {
+        queryClient.setQueryData(['chats'], context.previousChats);
+      }
+      toast.error('Failed to create chat');
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
+      toast.success('Chat created successfully');
+    },
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: ['chats'] });
     },

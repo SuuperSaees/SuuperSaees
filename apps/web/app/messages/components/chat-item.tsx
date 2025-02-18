@@ -13,10 +13,9 @@ export default function ChatItem({
   chat: Chats.TypeWithRelations;
   isActive?: boolean;
 }) {
-  const { setChatId, setActiveChat } = useChat();
+  const { setActiveChat } = useChat();
 
   const handleChatSelect = () => {
-    setChatId(chat.id.toString());
     setActiveChat(chat);
   };
 

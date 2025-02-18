@@ -8,7 +8,7 @@ import { Chats } from '~/lib/chats.types';
 import { Spinner } from '@kit/ui/spinner';
 
 export default function ChatList() {
-  const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat, setChatId } = useChat();
+  const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat } = useChat();
   const chats = useMemo(() => chatsQuery.data ?? [], [chatsQuery.data]);
   const filteredChats = useMemo(() => {
     if (!searchQuery) return chats;
@@ -36,9 +36,9 @@ export default function ChatList() {
   useEffect(() => {
     if (filteredChats?.length && !activeChat) {
       setActiveChat(filteredChats[0] as Chats.Type);
-      setChatId(filteredChats[0].id.toString());
     }
-  }, [filteredChats, activeChat, setActiveChat, setChatId]);
+  }, [filteredChats, activeChat, setActiveChat]);
+
   // Estado de carga
   if (chatsQuery.isLoading) return <Spinner className="w-5 h-5 mx-auto mt-6 text-gray-500" />
 

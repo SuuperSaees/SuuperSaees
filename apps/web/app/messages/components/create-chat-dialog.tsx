@@ -10,10 +10,10 @@ import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/butto
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Button } from '@kit/ui/button';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,
@@ -28,6 +28,7 @@ import {
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
 import { Separator } from '@kit/ui/separator';
+import { Spinner } from '@kit/ui/spinner';
 
 import { Account } from '~/lib/account.types';
 import { Chats } from '~/lib/chats.types';
@@ -38,8 +39,9 @@ import {
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
 import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
-import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { useChat } from './context/chat-context';
+
+// Dialog to create a new chat
 
 // Dialog to create a new chat
 
@@ -112,13 +114,14 @@ export default function CreateOrganizationsChatDialog({
       image: clientOrganization?.picture_url ?? '',
     },
   });
-  const { setActiveChat, setChatId } = useChat();
-  const { workspace: userWorkspace } = useUserWorkspace()
-  const currentUserRole = userWorkspace?.role
+  const { setActiveChat } = useChat();
+  const { workspace: userWorkspace } = useUserWorkspace();
+  const currentUserRole = userWorkspace?.role;
   // Define management roles that should have visibility false
   const managementRoles = new Set(['agency_owner', 'agency_project_manager']);
-  const isValidAgencyManager = currentUserRole ? managementRoles.has(currentUserRole) : false;
-
+  const isValidAgencyManager = currentUserRole
+    ? managementRoles.has(currentUserRole)
+    : false;
 
   // Get default members (owners and PMs)
   const defaultMembers = agencyMembers.filter((member) =>
@@ -153,11 +156,13 @@ export default function CreateOrganizationsChatDialog({
       }),
       image: form.getValues('image'),
     });
-    
+
     if (newChat?.id) {
       setActiveChat(newChat as Chats.TypeWithRelations);
-      setChatId(newChat.id.toString());
+      setIsChatCreationDialogOpen(false);
     }
+    // clear form
+    form.reset();
   };
 
   return (
@@ -272,15 +277,16 @@ export default function CreateOrganizationsChatDialog({
                 </FormItem>
               )}
             />
-            <DialogClose asChild disabled={createChatMutation.isPending}>
-              <ThemedButton
-                type="submit"
-                className="w-full"
-                disabled={createChatMutation.isPending}
-              >
-                Create Chat
-              </ThemedButton>
-            </DialogClose>
+            <ThemedButton
+              type="submit"
+              className="w-full"
+              disabled={createChatMutation.isPending}
+            >
+              Create Chat
+              {createChatMutation.isPending && (
+                <Spinner className="ml-2 h-4 w-4" />
+              )}
+            </ThemedButton>
           </form>
         </Form>
       </DialogContent>
