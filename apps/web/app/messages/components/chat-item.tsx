@@ -29,7 +29,7 @@ export default function ChatItem({
       }`}
     >
       <div className="relative">
-          <Avatar className="h-6 w-6">
+          <Avatar className="h-8 w-8">
             <AvatarImage src={image} />
             <AvatarFallback>{chat.organizations?.find((org) => !org.is_agency)?.name.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
