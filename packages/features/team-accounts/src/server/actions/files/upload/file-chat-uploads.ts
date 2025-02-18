@@ -17,13 +17,15 @@ interface UseFileUploadProps {
   onFileIdsChange?: (fileIds: string[]) => void;
   onFileUploadStatusUpdate?: (file: File, status: 'uploading' | 'completed' | 'error', serverId?: string) => void;
   thereAreFilesUploaded?: (value: boolean) => void;
+  referenceId?: string;
 }
 
 export const useFileUpload = ({
   onFileSelect,
   onFileIdsChange,
   onFileUploadStatusUpdate,
-  thereAreFilesUploaded
+  thereAreFilesUploaded,
+  referenceId
 }: UseFileUploadProps) => {
   const { t } = useTranslation();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -121,6 +123,7 @@ export const useFileUpload = ({
         size: file.size,
         type: file.type,
         url: fileUrl,
+        reference_id: referenceId,
       };
 
       const createdFiles = await createFile({

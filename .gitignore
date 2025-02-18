@@ -49,3 +49,6 @@ yarn-error.log*
 
 # scripts
 scripts/subscriptions.sql
+
+# set-credentials.ps1
+set-credentials.ps1
