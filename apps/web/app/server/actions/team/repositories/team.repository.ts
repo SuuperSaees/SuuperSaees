@@ -119,11 +119,11 @@ export class TeamRepository {
         
         resultMembers[organizationId].members = members.map((member) => ({
           id: member.user_id,
-          name: membersDataMap.get(member.user_id)?.name ?? membersDataMap.get(member.user_id)?.user_settings?.name ?? '',
+          name: membersDataMap.get(member.user_id)?.user_settings?.name ?? membersDataMap.get(member.user_id)?.name ??  '',
           email: membersDataMap.get(member.user_id)?.email ?? '',
           organization_id: organizationId,
           role: member.account_role,
-          picture_url: membersDataMap.get(member.user_id)?.picture_url ?? membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? '',
+          picture_url: membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? membersDataMap.get(member.user_id)?.picture_url ??  '',
         }
       ));
       }

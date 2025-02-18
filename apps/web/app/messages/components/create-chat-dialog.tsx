@@ -41,30 +41,7 @@ import {
 import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
 import { useChat } from './context/chat-context';
 
-// Dialog to create a new chat
 
-// Dialog to create a new chat
-
-// Dialog to create a new chat
-
-// Dialog to create a new chat
-
-// Dialog to create a new chat
-
-// Dialog to create a new chat
-
-// Dialog to create a new chat
-
-// const formSchema = z.object({
-//   name: z.string().min(1),
-//   agencyMembers: z.array(z.string()).refine((data) => data.length > 0, {
-//     message: 'At least one agency member is required',
-//   }),
-//   clientMembers: z.array(z.string()).refine((data) => data.length > 0, {
-//     message: 'At least one client member is required',
-//   }),
-//   image: z.string().optional(),
-// });
 
 const formSchema = z.object({
   name: z.string().min(1),
@@ -104,20 +81,16 @@ export default function CreateOrganizationsChatDialog({
   isChatCreationDialogOpen,
   setIsChatCreationDialogOpen,
 }: CreateChatDialogProps) {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-
-    defaultValues: {
-      name: '',
-      agencyMembers: [],
-      clientMembers: [],
-      image: clientOrganization?.picture_url ?? '',
-    },
-  });
   const { setActiveChat } = useChat();
   const { workspace: userWorkspace } = useUserWorkspace();
   const currentUserRole = userWorkspace?.role;
   // Define management roles that should have visibility false
+  const agencyRoles = [
+    'agency_owner',
+    'agency_project_manager',
+    'agency_member',
+  ];
+  const clientRoles = ['client_owner', 'client_member'];
   const managementRoles = new Set(['agency_owner', 'agency_project_manager']);
   const isValidAgencyManager = currentUserRole
     ? managementRoles.has(currentUserRole)
@@ -128,6 +101,28 @@ export default function CreateOrganizationsChatDialog({
     managementRoles.has(member.role),
   );
 
+  //Default only the self user and if belongs to agency or client based on the user role
+  const defaultAgencyMembers = agencyRoles.includes(currentUserRole ?? '')
+    ? [userWorkspace]
+    : [];
+  const defaultClientMembers = clientRoles.includes(currentUserRole ?? '')
+    ? [userWorkspace]
+    : [];
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+
+    defaultValues: {
+      name: '',
+      agencyMembers: defaultAgencyMembers
+        .map((member) => member?.id ?? '')
+        .filter((id) => id !== ''),
+      clientMembers: defaultClientMembers
+        .map((member) => member?.id ?? '')
+        .filter((id) => id !== ''),
+      image: clientOrganization?.picture_url ?? '',
+    },
+  });
   const onSubmit = async (data: FormValues) => {
     // Create a map of agency members for faster lookups
     const agencyMembersMap = new Map(
@@ -144,19 +139,33 @@ export default function CreateOrganizationsChatDialog({
       ]),
     ];
 
-    const newChat = await createChatMutation.mutateAsync({
-      name: data.name,
-      members: uniqueMembers.map((memberId) => {
-        const role = agencyMembersMap.get(memberId) ?? '';
-        return {
-          id: memberId,
-          role,
-          visibility: !managementRoles.has(role),
-        };
-      }),
-      image: form.getValues('image'),
+    const isClientCreating = clientRoles.includes(currentUserRole ?? '');
+
+    const members = uniqueMembers.map((memberId) => {
+      const role = agencyMembersMap.get(memberId) ?? '';
+      const isManagementRole = managementRoles.has(role);
+      const isClientMember = data.clientMembers.includes(memberId);
+      // If client is creating, management roles should be visible
+      // If agency is creating, explicitly selected members should be visible
+      const shouldBeVisible = isClientCreating
+        ? true
+        : isClientMember
+          ? true
+          : isManagementRole;
+
+      return {
+        id: memberId,
+        role,
+        visibility: shouldBeVisible,
+      };
     });
 
+    const image = form.getValues('image');
+    const newChat = await createChatMutation.mutateAsync({
+      name: data.name,
+      members: members,
+      image: image,
+    });
     if (newChat?.id) {
       setActiveChat(newChat as Chats.TypeWithRelations);
       setIsChatCreationDialogOpen(false);
@@ -164,7 +173,6 @@ export default function CreateOrganizationsChatDialog({
     // clear form
     form.reset();
   };
-
   return (
     <Dialog
       open={isChatCreationDialogOpen}
@@ -204,29 +212,6 @@ export default function CreateOrganizationsChatDialog({
               )}
             />
 
-            {/*         
-              <FormField
-                control={form.control}
-                name="agencyMembers"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-semibold text-gray-500">
-                      Agency Members
-                    </FormLabel>
-                    <FormControl>
-                      <CheckboxCombobox
-                        options={agencyMemberOptions}
-                        defaultValues={{ members: field.value }}
-                        schema={z.object({ members: z.array(z.string()) })}
-                        onSubmit={(data) => field.onChange(data.members)}
-                        values={field.value}
-                        onChange={(values) => field.onChange(values)}
-                        customItemTrigger={<span>+</span>}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              /> */}
 
             <FormField
               control={form.control}
@@ -241,7 +226,9 @@ export default function CreateOrganizationsChatDialog({
                       schema={z.object({ members: z.array(z.string()) })}
                       organization={agencyOrganization}
                       members={agencyMembers}
-                      defaultMembers={defaultMembers}
+                      // in default only the self user and if belongs to agency or client
+                      defaultMembers={defaultAgencyMembers}
+                      // defaultMembers={defaultMembers}
                       disabledOrganizationSelector={true}
                       disabledMembersSelector={!isValidAgencyManager}
                       hideOrganizationSelector
@@ -267,6 +254,7 @@ export default function CreateOrganizationsChatDialog({
                       fetchOrganizations={
                         clientOrganization ? undefined : getClientsOrganizations
                       }
+                      defaultMembers={defaultClientMembers}
                       fetchMembers={getClientMembersForOrganization}
                       organization={clientOrganization}
                       setImage={true}

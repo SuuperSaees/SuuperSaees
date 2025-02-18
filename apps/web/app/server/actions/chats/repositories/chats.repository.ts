@@ -201,9 +201,9 @@ export class ChatRepository {
         parent_id: message.parent_id,
         user: {
           id: message.user_id,
-          name: message.user?.name ?? message.user?.user_settings?.name ?? '',
+          name: message.user?.user_settings?.name ?? message.user?.name ?? '',
           email: message.user?.email ?? '',
-          picture_url: message.user?.picture_url ?? message.user?.user_settings?.picture_url ?? '',
+          picture_url: message.user?.user_settings?.picture_url ?? message.user?.picture_url ?? '',
         },
         files: message.files
       })),
