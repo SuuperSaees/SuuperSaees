@@ -2976,6 +2976,11 @@ USING (
 );
 
 -- CHATS
+insert into storage.buckets
+(id, name, public)
+values
+('chats', 'chats', true);
+
 CREATE POLICY "authenticated user select access chats"
 ON storage.objects
 FOR SELECT
