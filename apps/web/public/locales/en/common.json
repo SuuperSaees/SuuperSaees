@@ -59,6 +59,7 @@
   "settingsName": "Settings",
   "usersName": "Users",
   "ordersName": "Projects",
+  "dashboardName": "Dashboard",
   "clientsName": "Clients",
   "teamName": "Team",
   "orders": "Projects",

@@ -21,6 +21,7 @@ import { SidebarContext } from './context/sidebar.context';
 import { If } from './if';
 import { NavigationConfigSchema } from './navigation-config.schema';
 import { Trans } from './trans';
+import pathsConfig from '../../../../apps/web/config/paths.config';
 
 export type SidebarConfig = z.infer<typeof NavigationConfigSchema>;
 export function Sidebar(props: {
@@ -196,9 +197,12 @@ function getClassNameBuilder(className: string) {
 }
 export function SidebarNavigation({
   config,
+  showDashboardUrl,
 }: React.PropsWithChildren<{
   config: SidebarConfig;
+  showDashboardUrl?: boolean;
 }>) {
+  console.log('showDashboardUrl', showDashboardUrl);
   return (
     <>
       {config.routes.map((item, index) => {
@@ -214,19 +218,19 @@ export function SidebarNavigation({
                   i18nKey={item.label}
                   defaults={item.label}
                   key={item.label + index}
-                />
-              }
-              collapsible={item.collapsible}
-              collapsed={item.collapsed}
-              Icon={item.Icon}
-            >
+                  />
+                }
+                collapsible={item.collapsible}
+                collapsed={item.collapsed}
+                Icon={item.Icon}
+                >
               {item.children.map((child) => {
                 return (
                   <SidebarItem
-                    key={child.path}
-                    end={child.end}
-                    path={child.path}
-                    Icon={child.Icon}
+                  key={child.path}
+                  end={child.end}
+                  path={child.path}
+                  Icon={child.Icon}
                   >
                     <Trans i18nKey={child.label} defaults={child.label} />
                   </SidebarItem>
@@ -234,6 +238,10 @@ export function SidebarNavigation({
               })}
             </SidebarGroup>
           );
+        }
+        if (!showDashboardUrl && item.path === pathsConfig.app.dashboard) {
+          console.log('item', item);
+          return null
         }
         return (
           <SidebarItem
