@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 import RichTextEditor from '~/components/ui/rich-text-editor';
 import { sendEmailsOfOrderMessages } from '~/team-accounts/src/server/actions/orders/update/update-order';
-
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
 import { Separator } from '@kit/ui/separator';
@@ -12,6 +11,7 @@ import { getUrlFile } from '~/team-accounts/src/server/actions/files/get/get-fil
 import { insertOrderFiles } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { getEmails } from '~/team-accounts/src/server/actions/orders/get/get-mail-info';
+import useInternalMessaging from '../hooks/use-messages';
 
 const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: string, agencyStatuses: AgencyStatus.Type[], activeTab: string }) => {
   const { order } = useActivityContext();
@@ -42,9 +42,15 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: s
 
   const { addMessage, userRole, userWorkspace } = useActivityContext();
 
+  const { getInternalMessagingEnabled } = useInternalMessaging()
+
   const handleOnCompleteMessageSend = async (messageContent: string, fileIdsList?: string[]) => {
     try {
-      const emailsData = await getEmails(order.id.toString());
+
+      const currentInternalMessagingState = getInternalMessagingEnabled();
+
+      const rolesAvailable = currentInternalMessagingState ? ['agency_member', 'agency_owner', 'agency_project_manager'] : ['agency_member', 'agency_owner', 'agency_project_manager', 'client_member', 'client_owner'];
+      const emailsData = await getEmails(order.id.toString(), rolesAvailable);
       if (fileIdsList && fileIdsList?.length > 0) {
         const idsListFromServer = [];
         for (const fileId of fileIdsList) {
