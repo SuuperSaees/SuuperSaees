@@ -105,6 +105,7 @@ export const getOrganizationSettingsByOrganizationId = async (
     'sender_email',
     'auth_card_background_color',
     'auth_section_background_color',
+    'dashboard_url',
   ],
   client?: SupabaseClient<Database>,
 ): Promise<{ key: string; value: string }[]> => {

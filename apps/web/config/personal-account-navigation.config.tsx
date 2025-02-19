@@ -5,7 +5,8 @@ import {
   Settings,
   SquareCheck,
   Users,
-  Sparkles
+  Sparkles,
+  Home,
   // Wallet,
 } from 'lucide-react';
 
@@ -17,12 +18,12 @@ import pathsConfig from '~/config/paths.config';
 const iconClasses = 'w-4';
 
 const routes = [
-  // {
-  //   label: 'Inicio',
-  //   path: pathsConfig.app.home,
-  //   Icon: <Home className={iconClasses} />,
-  //   end: true,
-  // },
+  {
+    label: 'common:dashboardName',
+    path: pathsConfig.app.dashboard,
+    Icon: <Home className={iconClasses} />,
+    end: true,
+  },
   // {
   //   label: 'common:messagesName',
   //   path: pathsConfig.app.messages,

@@ -3512,7 +3512,8 @@ export type Database = {
         | 'sender_domain'
         | 'logo_dark_url'
         | 'auth_card_background_color'
-        | 'auth_section_background_color';
+        | 'auth_section_background_color'
+        | "dashboard_url"
       payment_status: 'pending' | 'succeeded' | 'failed';
       plugin_status: 'installed' | 'uninstalled' | 'failed' | 'in progress';
       plugin_type: 'tool' | 'internal' | 'external' | 'integration';

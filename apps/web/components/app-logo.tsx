@@ -57,7 +57,7 @@ export function AppLogo({
 }) {
   const { logo_url, logo_dark_url, sidebar_background_color } = useOrganizationSettings();
   const {theme} = getColorLuminance(sidebar_background_color ?? '#f2f2f2');
-  const themedLogoUrl = theme === 'dark' ? (logo_dark_url || logo_url): logo_url  
+  const themedLogoUrl = theme === 'dark' ? (logo_dark_url ?? logo_url): logo_url  
   logoUrl = logoUrl ?? themedLogoUrl;
   return (
     <Link

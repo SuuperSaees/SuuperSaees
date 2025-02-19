@@ -10,18 +10,29 @@ import pathsConfig from '~/config/paths.config';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
 import { teamMemberAccountNavigationConfig } from '../../../../config/member-team-account-navigation.config';
 import { GuestContent } from './guest-content';
+import { getOrganizationSettingsByOrganizationId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 // home imports
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
 import './styles/home-sidebar.css';
+import { OrganizationSettings } from '~/lib/organization-settings.types';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 export async function HomeSidebar(props: { workspace: UserWorkspace }) {
-  const { workspace, user } = props.workspace;
+  const { workspace, user, organization, agency } = props.workspace;
   const userRole = await getUserRole().catch((err) => {
     console.error(`Error client, getting user role: ${err}`)
     return ''
   });
   // const { t } = useTranslation('auth');
+
+  const organizationSettings = await getOrganizationSettingsByOrganizationId(agency ? agency.id : organization?.id ?? '', true, ['dashboard_url']).catch((err) => {
+    console.error(`Error client, getting organization settings: ${err}`)
+    return []
+  });
+
+  const showDashboardUrl = !!organizationSettings?.find(
+    setting => setting.key === OrganizationSettings.KEYS.dashboard_url
+  )?.value;
 
   // Filter the navigation config to remove the /clients path if userRole is 'agency_owner' or 'client_owner'
   const filterNavigationConfig = (config: NavigationConfig) => {
@@ -62,7 +73,7 @@ export async function HomeSidebar(props: { workspace: UserWorkspace }) {
       </div>
 
       <SidebarContent className={`mt-5 h-[calc(100%-160px)] b-["#f2f2f2"] overflow-y-auto`}>
-        <SidebarNavigation config={selectedNavigationConfig} />
+        <SidebarNavigation config={selectedNavigationConfig} showDashboardUrl={showDashboardUrl} />
         {userRole === 'client_guest' && (
           <SidebarContent>
             <GuestContent />
