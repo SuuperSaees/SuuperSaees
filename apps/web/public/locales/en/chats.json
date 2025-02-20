@@ -32,5 +32,10 @@
   "continue": "Continue",
   "errorCreatingChat": "Error creating chat",
   "newChat": "Create new chat",
-  "search": "Search chats..."
+  "search": "Search chats...",
+  "dateFormat": {
+    "today": "h:mm a",
+    "thisWeek": "EEEE",
+    "older": "MM/dd/yyyy"
+  }
 }

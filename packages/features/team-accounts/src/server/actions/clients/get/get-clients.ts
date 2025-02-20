@@ -110,6 +110,7 @@ async function fetchClientMembers(
     const transformedClientAccounts = clientAccounts?.map((client) => ({
       ...client,
       role: clientUsersRoles?.find((role) => role.user_id === client.id)?.account_role ?? null,
+      picture_url: client.settings?.picture_url ?? client.picture_url,
     }));
 
   if (clientAccountsError) {
@@ -431,7 +432,7 @@ export async function getClientsOrganizations() {
     // Return only the logo_url
     const clientOrganizationsWithLogoUrl = clientOrganizations.map((organization) => ({
       ...organization,
-      logo_url: organization.settings?.find((setting) => setting.key === 'logo_url')?.value ?? '',
+      picture_url: organization.settings?.find((setting) => setting.key === 'logo_url')?.value ?? organization.picture_url ?? '',
     }));
 
 

@@ -63,6 +63,7 @@ export default function ChatThread({
     if (fileUploads) {
       filesToAdd = [...fileUploads].map((upload) => {
         const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chats/${chatByIdQuery.data?.id}/uploads/${upload.id}`;
+        const tempId = crypto.randomUUID();
         return {
           name: upload.file.name,
           size: upload.file.size,
@@ -70,6 +71,7 @@ export default function ChatThread({
           url: fileUrl,
           message_id: messageId,
           user_id: userId,
+          temp_id: tempId,
         };
       });
 
@@ -109,13 +111,14 @@ export default function ChatThread({
 
   const activeChatDataName = { ...activeChat }.name;
   const isOwner = chatById?.user_id === user.id;
+  const canEditName = isOwner || chatById?.members?.some((member) => member.id === user.id);
   return (
     <div className="flex h-full flex-col min-w-0">
       {/* Header */}
 
       <div className="flex items-center justify-between border-b p-4 min-h-20">
         <div className="flex-1 min-w-0 ">
-          {isOwner ? (
+          {canEditName ? (
             <input
               type="text"
               value={activeChatDataName}

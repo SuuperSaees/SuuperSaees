@@ -12,6 +12,7 @@ import {
   deleteMessage,
 } from '~/server/actions/chat-messages/chat-messages.action';
 import { createFile } from '~/server/actions/files/files.action';
+import { Chats } from '~/lib/chats.types';
 
 /**
  * Props interface for useChatMessageActions hook
@@ -34,6 +35,16 @@ interface ChatMessageActionsProps {
   queryKey: string[];
 }
 
+interface MutationContext {
+  previousMessages: Message.Type[];
+  previousChats: Chats.TypeWithRelations[] | undefined;
+}
+
+interface DeleteMessageVariables {
+  chatId: string;
+  messageId: string;
+}
+
 /**
  * Custom hook for managing chat message actions like adding and deleting messages
  * @param {ChatMessageActionsProps} props - Hook properties
@@ -49,7 +60,6 @@ export const useChatMessageActions = ({
   const queryClient = useQueryClient();
   /**
    * Mutation for adding new messages to the chat
-
    * Handles optimistic updates and file attachments
    */
 
@@ -79,16 +89,15 @@ export const useChatMessageActions = ({
     },
     onMutate: async ({ message, files }) => {
       // Cancel any outgoing refetches
-      // (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey });
+      await queryClient.cancelQueries({ queryKey: ['chats'] });
 
-      // Snapshot the previous messages
+      // Snapshot the previous messages and chats
       const previousMessages = messages;
+      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']);
 
-      // Optimistically update to the new value
       // Create optimistic message with temporary ID
       const tempId = message.temp_id;
-
       const optimisticMessage: Message.Type = {
         content: message.content ?? '',
         user_id: user.id,
@@ -102,42 +111,52 @@ export const useChatMessageActions = ({
         type: Message.Category.CHAT_MESSAGE,
         temp_id: tempId ?? '',
         user: user,
-        files: files?.map((file) => ({ ...file, isLoading: true })) ?? [],
+        files: files?.map((file) => ({ ...file, isLoading: true, temp_id: file.temp_id })) ?? [],
+        chat_id: chatId,
       };
 
+      // Update messages in the current chat
       setMessages((prev) => {
         const newMessages = [...prev, optimisticMessage];
         return newMessages;
       });
-      return { previousMessages };
+
+      // Update the last message in the chats list
+      if (previousChats) {
+        queryClient.setQueryData<Chats.TypeWithRelations[]>(['chats'], 
+          previousChats.map((chat) => {
+            if (chat.id === chatId) {
+              return {
+                ...chat,
+                messages: [optimisticMessage],
+                chat_messages: chat.chat_messages?.map(cm => ({
+                  ...cm,
+                  messages: [optimisticMessage]
+                }))
+              };
+            }
+            return chat;
+          })
+        );
+      }
+
+      return { previousMessages, previousChats };
     },
-    // If the mutation fails,
-    // use the context returned from onMutate to roll back
     onError: (_, __, context) => {
-      queryClient.setQueryData(queryKey, context?.previousMessages);
+      // Restore both messages and chats on error
+      if (context) {
+        queryClient.setQueryData(queryKey, context.previousMessages);
+        queryClient.setQueryData(['chats'], context.previousChats);
+      }
       toast.error('Failed to send message');
     },
-    // Always refetch after error or success
-    onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey });
-    },
+
     onSuccess: async (data) => {
       if (data.files) {
         await createFile({ files: data.files });
-        // Set isLoading to false for the previous message
-        setMessages((prev) => {
-          const newMessage = prev.find(
-            (msg) => msg.id === data.message.message_id,
-          );
-          if (!newMessage) return prev;
-          newMessage.files = data.files as File.Response[];
-          return [
-            ...prev.filter((msg) => msg.id !== newMessage?.id),
-            newMessage,
-          ];
-        });
       }
       void queryClient.invalidateQueries({ queryKey });
+      void queryClient.invalidateQueries({ queryKey: ['chats'] });
     },
   });
 
@@ -145,11 +164,19 @@ export const useChatMessageActions = ({
    * Mutation for deleting messages from the chat
    * Handles optimistic updates and error recovery
    */
-  const deleteMessageMutation = useMutation({
-    mutationFn: deleteMessage,
-    onMutate: (messageId) => {
+  const deleteMessageMutation = useMutation<
+    void,
+    Error,
+    DeleteMessageVariables,
+    MutationContext
+  >({
+    mutationFn: ({ chatId, messageId }) => deleteMessage({ chatId, messageId }),
+    onMutate: ({ messageId }) => {
       // Store current messages for recovery
       const previousMessages = messages;
+      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']);
+
+      // Update message in current chat
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === messageId
@@ -157,17 +184,43 @@ export const useChatMessageActions = ({
             : msg,
         ),
       );
-      return { previousMessages };
+
+      // Update message in chats list if it was the last message
+      if (previousChats) {
+        queryClient.setQueryData<Chats.TypeWithRelations[]>(['chats'], 
+          previousChats.map((chat) => {
+            if (chat.id === chatId && chat.messages?.[0]?.id === messageId) {
+              const newLastMessage = messages.filter(m => m.id !== messageId).pop();
+              return {
+                ...chat,
+                messages: newLastMessage ? [newLastMessage] : [],
+                chat_messages: chat.chat_messages?.map(cm => ({
+                  ...cm,
+                  messages: newLastMessage ? [newLastMessage] : []
+                }))
+              };
+            }
+            return chat;
+          })
+        );
+      }
+
+      return { previousMessages, previousChats };
     },
     onError: (_, __, context) => {
-      // Restore previous messages on error
-      if (context?.previousMessages) {
+      // Restore both messages and chats on error
+      if (context) {
         setMessages(context.previousMessages);
+        queryClient.setQueryData(['chats'], context.previousChats);
       }
       toast.error('Failed to delete message');
     },
     onSuccess: () => {
       toast.success('Message deleted successfully');
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey });
+      void queryClient.invalidateQueries({ queryKey: ['chats'] });
     },
   });
 
