@@ -17,6 +17,7 @@ import {
   ChatProviderProps,
 } from '~/messages/types/chat-context.types';
 import { updateArrayData } from '~/utils/data-transform';
+import { Chats } from '~/lib/chats.types';
 
 /**
  * Context for managing chat state and operations.
@@ -88,7 +89,7 @@ export function ChatProvider({
 
   // Query for chat by id
   // Uses cached messages
-  const { chatByIdQuery, ...chatActions } = useChatManagement({
+  const { chatByIdQuery, chatsQuery,...chatActions } = useChatManagement({
     queryKey: ['chat', chatId ?? ''],
     chatId,
     setMessages: setMessages,
@@ -101,7 +102,7 @@ export function ChatProvider({
   // Initialize chat actions with optimized message setter
   // TODO: Replace with queryMessages instead of using chatByIdQuery.data?.messages
   const messages = chatByIdQuery.data?.messages ?? [];
-
+  const chats = chatsQuery.data ?? [];
   const messageActions = useChatMessageActions({
     messages,
     setMessages,
@@ -109,11 +110,10 @@ export function ChatProvider({
     queryKey: messagesQueryKey,
     user: currentUserInfo,
   });
-
   // Real-time subscription handler
   // TODO: Implement user addition based on members for new messages
   const handleSubscriptions = createSubscriptionHandler<
-    Message.Type | File.Type
+    Message.Type | File.Type | Chats.Type
   >({
     idField: 'temp_id',
     onBeforeUpdate: (payload) => {
@@ -143,24 +143,57 @@ export function ChatProvider({
           true,
         );
         setMessages(updatedItems);
+
+        // Add last message to the chats
+        const chat = chats.find((chat) => chat.id === message.chat_id);
+        if (chat) {
+          chat.messages = [newMessage];
+          const updatedChats = updateArrayData(chats, chat, 'id', false);
+          // put chat in order of last message, so the message withe the most recent created_at makes the chat the first one
+          const sortedChats = updatedChats.sort((a, b) => {
+            const aTime = a.messages?.[0]?.created_at ?? '';
+            const bTime = b.messages?.[0]?.created_at ?? '';
+            return new Date(bTime).getTime() - new Date(aTime).getTime();
+          });
+          setChats(sortedChats);
+        }
+        return true;
       }
       if (payload.eventType === 'INSERT' && payload.table === 'files') {
         // insert the file in files messages
         const file = payload.new as File.Type;
-
         // Use the message_id to insert the file in the files messages table
-        const message = messages.find(
-          (message) => message.id === file.message_id,
-        );
+        setMessages(prev => {
+          const message = prev.find(
+            (message) => message.id === file.message_id,
+          );
         if (message) {
-          message.files = [...(message.files ?? []), file];
-          const updatedItems = updateArrayData(messages, message, 'id', false);
-          console.log('UPDATED MESSAGES');
-          setMessages(updatedItems);
+          const files = updateArrayData(message.files ?? [], file, 'temp_id', true);
+          const newMessage = {...message, files: files};
+          const updatedItems = updateArrayData(messages, newMessage, 'id', false);
+          return updatedItems;
         }
-      }
-
+        return prev
+        
+      })
       return true;
+
+      } 
+
+      // Handles soft delete of chats
+      if (payload.eventType === 'UPDATE' && payload.table === 'chats') {
+        const chat = payload.new as Chats.Type;
+        // put the user in the chat
+
+        if (chat.deleted_on) {
+          const updatedChats = updateArrayData(chats, chat, 'id', false);
+          setChats(updatedChats);
+          setActiveChat(null);
+        }
+        
+      }
+ 
+      
     },
   });
 
@@ -189,22 +222,21 @@ export function ChatProvider({
         SetStateAction<File.Type[] | File.Type>
       >,
     },
-    // {
-    //   tableName: 'chats',
-    //   currentData: activeChat,
-    //   setData: setChats,
-    // },
+    {
+      tableName: 'chats',
+      currentData: chats,
+      setData: setChats,
+    },
   ];
 
   // Initialize real-time subscriptions
   useRealtime(
-    tables as TableConfig<Message.Type | File.Type>[],
+    tables as TableConfig<Message.Type | File.Type | Chats.Type>[],
     realtimeConfig,
     handleSubscriptions,
   );
 
-  // console.log('UPLOADS', uploads);
-  // console.log('MESSAGES', messages);
+
   const value: ChatContextType = {
     messages: messages.filter((msg) => !('deleted_at' in msg)),
     setMessages: setMessages,
@@ -212,11 +244,12 @@ export function ChatProvider({
     setMembers,
     activeChat,
     setActiveChat,
-    chatId,
+    chatId: chatId ?? '',
     isChatCreationDialogOpen,
     setIsChatCreationDialogOpen,
     searchQuery,
     setSearchQuery,
+    chatsQuery,
 
     filteredChats,
     setFilteredChats,

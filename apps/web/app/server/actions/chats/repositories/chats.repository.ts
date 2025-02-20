@@ -140,7 +140,8 @@ export class ChatRepository {
               name,
               size,
               type,
-              url
+              url,
+              temp_id
             )
         )
       `,

@@ -22,7 +22,7 @@ export function createSubscriptionHandler<T extends DataResponse>(options?: {
     setData: React.Dispatch<React.SetStateAction<T | T[]>>,
   ) {
     const { eventType, new: newData, old: oldData } = payload;
-    const idField = options?.idField ?? 'id';
+    const idField = options?.idField && options.idField in newData ? options.idField : 'id';
 
     try {
       // Call the before update hook if provided
@@ -38,13 +38,16 @@ export function createSubscriptionHandler<T extends DataResponse>(options?: {
       switch (eventType as SubscriptionEvent) {
         case 'INSERT': {
           if (isArrayData(currentData)) {
-            const updatedItems = updateArrayData(
-              currentData,
-              newData as Partial<T>,
-              idField,
-              true,
-            );
-            setData(updatedItems);
+            
+            setData((currentData) => {
+              const updatedItems = updateArrayData(
+                currentData as T[],
+                newData as Partial<T>,
+                idField,
+                true,
+              );
+              return updatedItems;
+            });
           } else {
             setData(newData as T);
           }

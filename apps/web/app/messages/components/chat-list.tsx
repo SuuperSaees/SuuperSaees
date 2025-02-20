@@ -9,7 +9,7 @@ import { Spinner } from '@kit/ui/spinner';
 
 export default function ChatList() {
   const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat } = useChat();
-  const chats = useMemo(() => chatsQuery.data ?? [], [chatsQuery.data]);
+  const chats = useMemo(() => chatsQuery.data?.filter((chat) => !chat.deleted_on) ?? [], [chatsQuery.data]);
   const filteredChats = useMemo(() => {
     if (!searchQuery) return chats;
     if (!Array.isArray(chats) || !chats.length) return [];
