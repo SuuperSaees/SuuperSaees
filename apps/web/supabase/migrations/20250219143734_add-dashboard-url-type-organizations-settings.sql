@@ -4,4 +4,4 @@ create type "public"."organization_setting_key" as enum ('theme_color', 'backgro
 
 alter table "public"."organization_settings" alter column key type "public"."organization_setting_key" using key::text::"public"."organization_setting_key";
 
-drop type "public"."organization_setting_key__old_version_to_be_dropped";
+drop type "public"."organization_setting_key__old_version_to_be_dropped" cascade;
