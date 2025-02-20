@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
@@ -37,7 +37,7 @@ export default function ChatItem({
         const isToday = date.toDateString() === now.toDateString();
         const isThisWeek = date > new Date(now.setDate(now.getDate() - 7));
 
-        const locale = i18n.language === 'es' ? es : undefined;
+        const locale = i18n.language === 'es' ? es : enUS;
 
         if (isToday) {
           return format(date, t('dateFormat.today'), { locale });
