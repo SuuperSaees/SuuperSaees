@@ -5,7 +5,8 @@ import {
   Settings,
   SquareCheck,
   Users,
-  Sparkles
+  Sparkles,
+  Home,
   // Wallet,
 } from 'lucide-react';
 
@@ -31,6 +32,13 @@ const routes = [
     children: [],
     divider: true,
   },
+  {
+    label: 'common:dashboardName',
+    path: pathsConfig.app.dashboard,
+    Icon: <Home className={iconClasses} />,
+    end: true,
+  },
+
   {
     label: 'common:ordersName',
     path: pathsConfig.app.orders,

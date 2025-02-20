@@ -1,6 +1,7 @@
 import { BaseAction } from '../base-action';
 import { IFilesAction, ICreateFile } from './files.interface';
 import { FilesController } from './controllers/files.controller';
+import { File } from '~/lib/file.types';
 
 export class FilesAction extends BaseAction implements IFilesAction {
     private controller: FilesController;
@@ -20,8 +21,8 @@ export class FilesAction extends BaseAction implements IFilesAction {
         return this.controller.deleteFile(fileId);
     }
 
-    getFile(fileId: string): Promise<File> {
-        return this.controller.getFile(fileId);
+    getFile(fileId?: string, orderId?: string): Promise<File.Type> {
+        return this.controller.getFile(fileId, orderId);
     }
 
     getFiles(): Promise<File[]> {

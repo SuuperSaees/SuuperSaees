@@ -12,3 +12,9 @@ export async function createFile(props: ICreateFile){
     const filesAction = getFilesAction();
     return await filesAction.createFile(props);
 }
+
+export async function getFile(fileId?: string, orderId?: string){
+    const filesAction = getFilesAction();
+    return await filesAction.getFile(fileId, orderId);
+}
+

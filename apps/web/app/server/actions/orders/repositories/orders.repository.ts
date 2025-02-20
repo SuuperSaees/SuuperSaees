@@ -93,4 +93,22 @@ export class OrdersRepository {
             client_organization: clientOrganizationData,
         } as Order.Type;
     }
+
+    async getOrder(orderId: string): Promise<Order.Type> {
+        const client = this.adminClient ?? this.client;
+
+        if (!client) throw new Error('Client not found');
+
+        const { data: orderData, error: orderError } = await client
+            .from('orders_v2')
+            .select('uuid, id')
+            .eq('id', orderId)
+            .single();
+
+        if (orderError) throw orderError;
+        
+        if (!orderData) throw new Error('Order not found');
+
+        return orderData as Order.Type;
+    }
 }

@@ -2,12 +2,11 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-export async function getEmails(orderId: string) {
+export async function getEmails(orderId: string, rolesAvailable?: string[]) {
   try {
-    const client = getSupabaseServerComponentClient();
-    const { error: userAuthenticatedError } = await client.auth.getUser();
-
-    if (userAuthenticatedError) throw userAuthenticatedError;
+    const client = getSupabaseServerComponentClient({
+      admin: true,
+    });
 
     const { data: assignationsData, error: assignationsError } = await client
       .from('order_assignations')
@@ -28,7 +27,19 @@ export async function getEmails(orderId: string) {
 
     if (agencyMemberIds.length === 0 && clientMemberIds.length === 0) return []; // Si no hay asignaciones, retorna un arreglo vacío
 
-    const memberIds = [...agencyMemberIds, ...clientMemberIds];
+    let memberIds = [...agencyMemberIds, ...clientMemberIds];
+    // Filter by rolesAvailable
+    if (rolesAvailable && rolesAvailable.length > 0) {
+      const { data: accountsByRolesData, error: accountsByRolesError } = await client
+        .from('accounts_memberships')
+        .select('user_id')
+        .in('user_id', memberIds)
+        .in('account_role', rolesAvailable);
+
+      if (accountsByRolesError) throw accountsByRolesError;
+
+      memberIds = accountsByRolesData.map(account => account.user_id);
+    }
 
     // Consulta para obtener los correos electrónicos de los miembros de la agencia
     const { data: emailData, error: emailError } = await client

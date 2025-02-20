@@ -21,7 +21,7 @@ export interface IFilesAction {
     * @param fileId The ID of the file to retrieve
     * @returns Promise with the file data
     */
-   getFile(fileId: string): Promise<File>;
+   getFile(fileId: string): Promise<File.Type>;
     /**
     * Updates an existing file
     * @param fileId The ID of the file to update

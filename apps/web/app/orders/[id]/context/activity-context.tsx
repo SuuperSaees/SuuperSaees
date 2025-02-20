@@ -381,7 +381,7 @@ export const ActivityProvider = ({
             return prevState;
           });
         } else {
-          stateSetter((prevState) => {
+            stateSetter((prevState) => {
             if (Array.isArray(prevState)) {
               return [...prevState, newData] as T[];
             } else {

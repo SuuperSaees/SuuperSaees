@@ -144,6 +144,7 @@ interface RichTextEditorProps {
   className?: string;
   handleFileIdsChange?: (fileIds: string[]) => void;
   isDragging?: boolean;
+  referenceId?: string;
   setIsDragging?: (value: boolean) => void;
   [key: string]: unknown;
 }
@@ -168,6 +169,7 @@ const RichTextEditor = ({
   handleFileIdsChange,
   className,
   isDragging,
+  referenceId,
   setIsDragging,
   ...rest
   // useInForm = false,
@@ -493,6 +495,7 @@ const RichTextEditor = ({
             onFileUploadStatusUpdate={updateFileUploadStatus}
             thereAreFilesUploaded={setThereAreFilesUploaded}
             disabled={isLoading}
+            referenceId={referenceId}
           />
           <div className='flex justify-between'>
             {showToolbar && (

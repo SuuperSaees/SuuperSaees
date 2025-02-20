@@ -1198,6 +1198,7 @@ export type Database = {
           id: string
           message_id: string | null
           name: string
+          reference_id: string | null
           size: number
           temp_id: string | null
           type: string
@@ -1209,6 +1210,7 @@ export type Database = {
           id?: string
           message_id?: string | null
           name: string
+          reference_id?: string | null
           size: number
           temp_id?: string | null
           type: string
@@ -1220,12 +1222,13 @@ export type Database = {
           id?: string
           message_id?: string | null
           name?: string
+          reference_id?: string | null
           size?: number
           temp_id?: string | null
           type?: string
           url?: string
           user_id?: string
-        }
+        };
         Relationships: [
           {
             foreignKeyName: "files_message_id_fkey"
@@ -3552,26 +3555,27 @@ export type Database = {
         | "completed"
         | "annulled"
       organization_setting_key:
-        | "theme_color"
-        | "background_color"
-        | "logo_url"
-        | "timezone"
-        | "language"
-        | "date_format"
-        | "sidebar_background_color"
-        | "portal_name"
-        | "favicon_url"
-        | "sender_name"
-        | "sender_email"
-        | "sender_domain"
-        | "logo_dark_url"
-        | "auth_card_background_color"
-        | "auth_section_background_color"
-      payment_status: "pending" | "succeeded" | "failed"
-      plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
-      plugin_type: "tool" | "internal" | "external" | "integration"
-      priority_types: "high" | "medium" | "low"
-      reaction_types: "like" | "favorite"
+        | 'theme_color'
+        | 'background_color'
+        | 'logo_url'
+        | 'timezone'
+        | 'language'
+        | 'date_format'
+        | 'sidebar_background_color'
+        | 'portal_name'
+        | 'favicon_url'
+        | 'sender_name'
+        | 'sender_email'
+        | 'sender_domain'
+        | 'logo_dark_url'
+        | 'auth_card_background_color'
+        | 'auth_section_background_color'
+        | "dashboard_url"
+      payment_status: 'pending' | 'succeeded' | 'failed';
+      plugin_status: 'installed' | 'uninstalled' | 'failed' | 'in progress';
+      plugin_type: 'tool' | 'internal' | 'external' | 'integration';
+      priority_types: 'high' | 'medium' | 'low';
+      reaction_types: 'like' | 'favorite';
       service_status:
         | "active"
         | "inactive"

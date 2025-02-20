@@ -12,6 +12,7 @@ const PathsSchema = z.object({
   }),
   app: z.object({
     home: z.string().min(1),
+    dashboard: z.string().min(1),
     messages: z.string().min(1),
     orders: z.string().min(1),
     users: z.string().min(1),
@@ -47,6 +48,7 @@ const pathsConfig = PathsSchema.parse({
   },
   app: {
     home: '/home',
+    dashboard: '/dashboard',
     team: '/team',
     clients: '/clients',
     orders: '/orders',

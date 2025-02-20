@@ -46,10 +46,11 @@ interface FileUploaderProps {
   onMessageSend?: boolean;
   onFileUploadStatusUpdate?: (file: File, status: 'uploading' | 'completed' | 'error', serverId?: string) => void;
   thereAreFilesUploaded?: (value: boolean) => void;
+  referenceId?: string;
 }
 
 const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
-  ({ onFileSelect, onFileIdsChange, onMessageSend = false, onFileUploadStatusUpdate, thereAreFilesUploaded }, ref) => {
+  ({ onFileSelect, onFileIdsChange, onMessageSend = false, onFileUploadStatusUpdate, thereAreFilesUploaded, referenceId }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [hoveredFileId, setHoveredFileId] = useState<number | null>(null);
     const videoRefs = useRef<{ [key: number]: HTMLVideoElement }>({});
@@ -64,7 +65,8 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
       onFileSelect,
       onFileIdsChange,
       onFileUploadStatusUpdate,
-      thereAreFilesUploaded
+      thereAreFilesUploaded,
+      referenceId
     });
 
     useImperativeHandle(ref, () => inputRef.current!);

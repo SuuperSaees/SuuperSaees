@@ -1,5 +1,5 @@
 import { // Briefcase,
-CreditCard, Layers, Settings, Users, MessagesSquare, // Wallet,
+CreditCard, Layers, Settings, Users, Home, MessagesSquare // Wallet,
 } from 'lucide-react';
 
 
@@ -28,6 +28,12 @@ const routes = [
     end: true,
     children: [],
     divider: true,
+  },
+  {
+    label: 'common:dashboardName',
+    path: pathsConfig.app.dashboard,
+    Icon: <Home className={iconClasses} />,
+    end: true,
   },
   {
     label: 'common:ordersName',

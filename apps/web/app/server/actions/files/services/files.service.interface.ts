@@ -7,7 +7,7 @@ export interface IFilesService {
     */
     createFile(createFileProps: ICreateFile, userId: string): Promise<File.Type[]>;
     createUploadBucketURL(file: File): Promise<string>;
-    getFile(fileId: string): Promise<File>;
+    getFile(fileId: string): Promise<File.Type>;
     updateFile(fileId: string, file: File): Promise<File>;
     deleteFile(fileId: string): Promise<void>;
     getFiles(): Promise<File[]>;
