@@ -89,7 +89,7 @@ export class ChatMessagesRepository {
     chat_id?: string;
     message_id?: string;
   }): Promise<void> {
-    const client = this.adminClient ?? this.client;
+    const client = this.client;
     const baseQuery = client
       .from('messages')
       .update({ deleted_on: new Date().toISOString() });
@@ -111,7 +111,7 @@ export class ChatMessagesRepository {
       }
 
       if (message_id) {
-        const { error } = await baseQuery.eq('message_id', message_id);
+        const { error } = await baseQuery.eq('id', message_id);
         if (error) throw error;
         return;
       }

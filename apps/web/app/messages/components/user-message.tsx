@@ -5,9 +5,10 @@ import Message from './message';
 
 interface UserMessageProps {
   message: MessageType.Type;
+  canDelete?: boolean;
 }
 
-const UserMessage = ({ message }: UserMessageProps) => {
+const UserMessage = ({ message, canDelete = false }: UserMessageProps) => {
   return (
     <div className="flex w-full items-start gap-4 rounded-lg p-2 transition duration-300 hover:bg-grayTrue-100">
       <Avatar
@@ -17,7 +18,7 @@ const UserMessage = ({ message }: UserMessageProps) => {
         text={message?.user?.name}
       />
 
-      <Message key={message?.id} message={message} />
+      <Message key={message?.id} message={message} canDelete={canDelete} />
     </div>
   );
 };
