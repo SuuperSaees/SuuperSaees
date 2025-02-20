@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { Spinner } from '@kit/ui/spinner';
+
 import { Activity } from '~/lib/activity.types';
 import { Message as MessageType } from '~/lib/message.types';
 
@@ -13,7 +16,6 @@ import {
 } from '../utils/messages/transform';
 import ActivityAction from './activity-action';
 import UserMessage from './user-message';
-import { Spinner } from '@kit/ui/spinner';
 
 interface MessageListProps {
   messages: MessageType.Type[];
@@ -27,7 +29,7 @@ export default function MessageList({
   activities = [],
 }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  const { workspace: userWorkspace } = useUserWorkspace();
   // Memoize the transformation operations to prevent unnecessary recalculations
   const groupedInteractions = useMemo(() => {
     const combinedInteractions = combineChatInteractions(messages, activities);
@@ -43,7 +45,7 @@ export default function MessageList({
     scrollToBottom();
   }, [messages]);
 
-  if (isLoading) return <Spinner className="w-5 h-5 mx-auto text-gray-500" />
+  if (isLoading) return <Spinner className="mx-auto h-5 w-5 text-gray-500" />;
 
   return (
     <div className="space-y-4">
@@ -57,7 +59,10 @@ export default function MessageList({
           {interactions.map((interaction) => {
             return interaction.class === ChatInteractionType.MESSAGE ? (
               <div className="flex w-full" key={interaction.id}>
-                <UserMessage message={interaction as MessageType.Type} />
+                <UserMessage
+                  message={interaction as MessageType.Type}
+                  canDelete={userWorkspace?.id === interaction.user_id}
+                />
               </div>
             ) : interaction.class === ChatInteractionType.ACTIVITY ? (
               <ActivityAction
