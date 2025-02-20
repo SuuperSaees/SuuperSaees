@@ -34,12 +34,6 @@ const routes = [
     children: [],
     divider: true,
   },
-  {
-    label: 'common:dashboardName',
-    path: pathsConfig.app.dashboard,
-    Icon: <Home className={iconClasses} />,
-    end: true,
-  },
   // {
   //   label: 'common:messagesName',
   //   path: pathsConfig.app.messages,

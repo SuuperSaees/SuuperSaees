@@ -30,12 +30,6 @@ const routes = [
     divider: true,
   },
   {
-    label: 'common:dashboardName',
-    path: pathsConfig.app.dashboard,
-    Icon: <Home className={iconClasses} />,
-    end: true,
-  },
-  {
     label: 'common:ordersName',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
