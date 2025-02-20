@@ -57,7 +57,7 @@ export const useChatManagement = ({
 }: ChatManagementActionsProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
-  
+
   /**
    * Mutation for updating chat name
    * Handles success/error notifications and cache invalidation
@@ -74,13 +74,15 @@ export const useChatManagement = ({
       await queryClient.cancelQueries({ queryKey });
 
       // Snapshot the previous values
-      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']);
+      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(
+        ['chats'],
+      );
       const previousChat = activeChat ?? queryClient.getQueryData(queryKey);
 
       // Optimistically update both caches
       queryClient.setQueryData(['chats'], (old: Chats.TypeWithRelations[]) => {
         return old.map((chat) =>
-          chat.id === chatId ? { ...chat, name: newName } : chat
+          chat.id === chatId ? { ...chat, name: newName } : chat,
         );
       });
 
@@ -88,7 +90,7 @@ export const useChatManagement = ({
         setActiveChat({ ...activeChat, name: newName });
       } else {
         queryClient.setQueryData(queryKey, (old: Chats.TypeWithRelations) =>
-          old ? { ...old, name: newName } : old
+          old ? { ...old, name: newName } : old,
         );
       }
 
@@ -103,7 +105,7 @@ export const useChatManagement = ({
       toast.error('Failed to update chat name');
       if (context) {
         queryClient.setQueryData(['chats'], context.previousChats);
-        !setActiveChat 
+        !setActiveChat
           ? queryClient.setQueryData(queryKey, context.previousChat)
           : setActiveChat(context.previousChat as Chats.Type);
       }
@@ -126,15 +128,19 @@ export const useChatManagement = ({
       await queryClient.cancelQueries({ queryKey });
 
       // Snapshot the previous values
-      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']);
+      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(
+        ['chats'],
+      );
       const previousChat = activeChat ?? queryClient.getQueryData(queryKey);
 
       // Optimistically update both caches
       queryClient.setQueryData(['chats'], (old: Chats.TypeWithRelations[]) => {
         return old.filter((chat) => chat.id !== chatId);
       });
-      
-      !setActiveChat ? queryClient.setQueryData(queryKey, null) : setActiveChat(null);
+
+      !setActiveChat
+        ? queryClient.setQueryData(queryKey, null)
+        : setActiveChat(null);
 
       return { previousChats, previousChat };
     },
@@ -159,7 +165,19 @@ export const useChatManagement = ({
    * Sets the new chat as active on success
    */
   const createChatMutation = useMutation({
-    mutationFn: ({ name, members, image }: { name: string; members: {id: string, role: string, visibility: boolean}[]; image?: string }) =>
+    mutationFn: ({
+      name,
+      members,
+      image,
+      clientOrganizationId,
+      agencyId,
+    }: {
+      name: string;
+      members: { id: string; role: string; visibility: boolean }[];
+      image?: string;
+      clientOrganizationId: string;
+      agencyId: string;
+    }) =>
       createChat({
         name,
         user_id: userId,
@@ -171,13 +189,16 @@ export const useChatManagement = ({
         })),
         visibility: true,
         image: image ?? '',
+        client_organization_id: clientOrganizationId,
+        agency_id: agencyId,
       }),
     onMutate: async ({ name, members, image }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['chats'] });
 
       // Snapshot the previous value
-      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']) ?? [];
+      const previousChats =
+        queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']) ?? [];
 
       // Temporary chat id
       const tempChatId = `temp-${crypto.randomUUID()}`;
@@ -203,13 +224,15 @@ export const useChatManagement = ({
           updated_at: new Date().toISOString(),
           id: member.id,
           deleted_on: null,
-          settings: {}
-        }))
+          settings: {},
+        })),
       };
 
       // Optimistically update the cache
       queryClient.setQueryData(['chats'], [...previousChats, optimisticChat]);
-      !setActiveChat ? queryClient.setQueryData(queryKey, optimisticChat) : setActiveChat(optimisticChat);
+      !setActiveChat
+        ? queryClient.setQueryData(queryKey, optimisticChat)
+        : setActiveChat(optimisticChat);
 
       return { previousChats };
     },

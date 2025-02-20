@@ -13,7 +13,7 @@ export class TeamRepository {
     const client = this.adminClient ?? this.client;
     console.log('includeAgency', includeAgency);
     if (!organizationIds.length && !includeAgency) {
-      throw new Error('No organization ids or agency requested');
+      return {}
     }
 
     const resultMembers: Members.TeamResponse = {}

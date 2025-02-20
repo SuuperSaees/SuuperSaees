@@ -50,6 +50,8 @@ const formSchema = z.object({
     message: 'At least one client member is required',
   }),
   image: z.string().optional(),
+  clientOrganizationId: z.string().optional(),
+  agencyId: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -62,6 +64,8 @@ interface CreateChatDialogProps {
       name: string;
       members: { id: string; role: string; visibility: boolean }[];
       image?: string;
+      clientOrganizationId?: string;
+      agencyId?: string ;
     },
     unknown
   >;
@@ -121,6 +125,8 @@ export default function CreateOrganizationsChatDialog({
         .map((member) => member?.id ?? '')
         .filter((id) => id !== ''),
       image: clientOrganization?.picture_url ?? '',
+      clientOrganizationId: clientOrganization?.id ?? undefined,
+      agencyId: agencyOrganization?.id ?? undefined,
     },
   });
   const onSubmit = async (data: FormValues) => {
@@ -147,11 +153,7 @@ export default function CreateOrganizationsChatDialog({
       const isClientMember = data.clientMembers.includes(memberId);
       // If client is creating, management roles should be visible
       // If agency is creating, explicitly selected members should be visible
-      const shouldBeVisible = isClientCreating
-        ? true
-        : isClientMember
-          ? true
-          : isManagementRole;
+      const shouldBeVisible = !isManagementRole;
 
       return {
         id: memberId,
@@ -165,6 +167,8 @@ export default function CreateOrganizationsChatDialog({
       name: data.name,
       members: members,
       image: image,
+      clientOrganizationId: data.clientOrganizationId,
+      agencyId: data.agencyId,
     });
     if (newChat?.id) {
       setActiveChat(newChat as Chats.TypeWithRelations);
@@ -259,6 +263,7 @@ export default function CreateOrganizationsChatDialog({
                       organization={clientOrganization}
                       setImage={true}
                       hideOrganizationSelector={!isValidAgencyManager}
+                      organizationIdKey="clientOrganizationId"
                     />
                   </FormControl>
                   <FormMessage />
