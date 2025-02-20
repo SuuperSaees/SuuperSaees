@@ -23,6 +23,8 @@ export class ChatService {
       visibility: payload.visibility,
       image: payload.image,
       settings: payload.settings,
+      client_organization_id: payload.client_organization_id,
+      agency_id: payload.agency_id,
     });
 
     if (payload.chat_members && payload.chat_members.length > 0) {
@@ -77,8 +79,8 @@ export class ChatService {
         };
       })
       .sort((a, b) => {
-        const bDate = b.messages?.[0]?.created_at;
-        const aDate = a.messages?.[0]?.created_at;
+        const bDate = b.messages?.[0]?.created_at ?? b.created_at;
+        const aDate = a.messages?.[0]?.created_at ?? a.created_at;
         return (!bDate || !aDate) ? 0 : new Date(bDate).getTime() - new Date(aDate).getTime();
       });
   

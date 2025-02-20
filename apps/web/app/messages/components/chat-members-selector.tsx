@@ -1,9 +1,12 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import { useQuery } from '@tanstack/react-query';
 import { PlusIcon } from 'lucide-react';
 import { cn } from 'node_modules/@kit/ui/src/utils/cn';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Spinner } from '@kit/ui/spinner';
 
@@ -14,7 +17,6 @@ import { getTeams } from '~/server/actions/team/team.action';
 import { AvatarType } from '../../components/ui/multiavatar-displayer';
 import MultiAvatarDisplayer from '../../components/ui/multiavatar-displayer';
 import MembersAssignations from '../../components/users/member-assignations';
-import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 // import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
@@ -25,36 +27,33 @@ interface ChatMembersSelectorProps {
   isLoading?: boolean;
 }
 
-
 export default function ChatMembersSelector({
   agencyTeam,
   selectedMembers, // This include both members selected from the agency and the client organizations
   onMembersUpdate,
   isLoading = false,
-
 }: ChatMembersSelectorProps) {
   const agencyMembers = agencyTeam.members ?? [];
   const { workspace: userWorkspace } = useUserWorkspace();
   const currentRole = userWorkspace?.role;
 
-
   const validAgencyRoles = ['agency_owner', 'agency_project_manager'];
   const isValidAgencyRole = validAgencyRoles.includes(currentRole ?? '');
-
 
   const validClientRoles = ['client_owner'];
   const isValidClientRole = validClientRoles.includes(currentRole ?? '');
 
-
   const canAddMembers = isValidAgencyRole || isValidClientRole;
 
+  const clientOrganizationIds = useMemo(
+    () =>
+      selectedMembers
+        .map((member) => member.organization_id)
 
-  const clientOrganizationIds = selectedMembers
-    .map((member) => member.organization_id)
-
-    .filter((id) => id !== agencyTeam.id) // don't include undefined
-    .filter(Boolean);
-
+        .filter((id) => id !== agencyTeam.id) // don't include undefined
+        .filter(Boolean),
+    [selectedMembers, agencyTeam.id],
+  );
 
   const clientMembersQuery = useQuery({
     queryKey: ['clientMembers', clientOrganizationIds],
@@ -64,7 +63,7 @@ export default function ChatMembersSelector({
         includeMembers: true,
       }),
     enabled: !!clientOrganizationIds,
-    retry: 4,
+    retry: 2,
   });
 
   const clientOrganizationMembers = clientMembersQuery.data;
@@ -77,10 +76,12 @@ export default function ChatMembersSelector({
     agencyMembers.filter((member) =>
       selectedMembers.map((m) => m.id).includes(member.id),
     ) ?? [];
-    
-  const selectedClientOrganizationMembers = selectedMembers.filter(
-    (member) => member.organization_id && member.organization_id !== agencyTeam.id
-  ) ?? [];
+
+  const selectedClientOrganizationMembers =
+    selectedMembers.filter(
+      (member) =>
+        member.organization_id && member.organization_id !== agencyTeam.id,
+    ) ?? [];
 
   const agencyMembersAvatars = selectedAgencyMembers.map((user) => ({
     id: user.id,
@@ -128,23 +129,36 @@ export default function ChatMembersSelector({
                 title="Organization members"
                 users={clientMembers ?? []}
                 selectedUsers={selectedClientOrganizationMembers}
-                onMembersUpdate={onMembersUpdate}
+                onMembersUpdate={async (userIds: string[]) => {
+                  await onMembersUpdate([
+                    ...userIds,
+                    ...selectedAgencyMembers.map((member) => member.id),
+                  ]);
+                }}
                 isLoading={clientMembersQuery.isLoading}
                 canAddMembers={canAddMembers}
               />
 
-
-              <OrganizationMembersSelector
-                title="Agency members"
-                users={agencyMembers}
-                selectedUsers={selectedAgencyMembers}
-                onMembersUpdate={onMembersUpdate}
-                isLoading={isLoading}
-                canAddMembers={isValidAgencyRole}
-              />
+              {(isValidAgencyRole ||
+                (!isValidAgencyRole && selectedAgencyMembers.length > 0)) && (
+                <OrganizationMembersSelector
+                  title="Agency members"
+                  users={agencyMembers}
+                  selectedUsers={selectedAgencyMembers}
+                  onMembersUpdate={async (userIds: string[]) => {
+                    await onMembersUpdate([
+                      ...userIds,
+                      ...selectedClientOrganizationMembers.map(
+                        (member) => member.id,
+                      ),
+                    ]);
+                  }}
+                  isLoading={isLoading}
+                  canAddMembers={isValidAgencyRole}
+                />
+              )}
             </div>
           </div>
-
         </PopoverContent>
       </Popover>
     </div>
@@ -171,7 +185,6 @@ interface OrganizationMembersSelectorProps {
   canAddMembers?: boolean;
 }
 
-
 const OrganizationMembersSelector = ({
   title,
   users,
@@ -182,7 +195,6 @@ const OrganizationMembersSelector = ({
 }: OrganizationMembersSelectorProps) => {
   return (
     <div className="flex flex-col gap-2">
-
       <span className="text-sm font-medium text-gray-500">{title}</span>
       {isLoading ? (
         <Spinner className="h-4 w-4" />
@@ -197,5 +209,4 @@ const OrganizationMembersSelector = ({
       )}
     </div>
   );
-
 };

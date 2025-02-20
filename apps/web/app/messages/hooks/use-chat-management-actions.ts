@@ -37,6 +37,8 @@ interface ChatManagementActionsProps {
   userId: string;
   queryKey?: string[];
   initialChat?: Chats.TypeWithRelations;
+  activeChat?: Chats.Type;
+  setActiveChat?: (chat: Chats.Type | null) => void;
 }
 
 /**
@@ -50,6 +52,8 @@ export const useChatManagement = ({
   queryKey = ['chats'],
   initialChat,
   setMessages,
+  activeChat,
+  setActiveChat,
 }: ChatManagementActionsProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -64,13 +68,51 @@ export const useChatManagement = ({
         id: chatId,
         name,
       }),
+    onMutate: async (newName: string) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['chats'] });
+      await queryClient.cancelQueries({ queryKey });
+
+      // Snapshot the previous values
+      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(
+        ['chats'],
+      );
+      const previousChat = activeChat ?? queryClient.getQueryData(queryKey);
+
+      // Optimistically update both caches
+      queryClient.setQueryData(['chats'], (old: Chats.TypeWithRelations[]) => {
+        return old.map((chat) =>
+          chat.id === chatId ? { ...chat, name: newName } : chat,
+        );
+      });
+
+      if (setActiveChat && activeChat) {
+        setActiveChat({ ...activeChat, name: newName });
+      } else {
+        queryClient.setQueryData(queryKey, (old: Chats.TypeWithRelations) =>
+          old ? { ...old, name: newName } : old,
+        );
+      }
+
+      return { previousChats, previousChat };
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey });
       toast.success('Chat name updated successfully');
       router.refresh();
     },
-    onError: () => {
+    onError: (_error, _variables, context) => {
       toast.error('Failed to update chat name');
+      if (context) {
+        queryClient.setQueryData(['chats'], context.previousChats);
+        !setActiveChat
+          ? queryClient.setQueryData(queryKey, context.previousChat)
+          : setActiveChat(context.previousChat as Chats.Type);
+      }
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
+      await queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -79,18 +121,42 @@ export const useChatManagement = ({
    * Handles state updates, notifications and redirects
    */
   const deleteChatMutation = useMutation({
-    mutationFn: async () => {
-      await deleteChat(chatId);
+    mutationFn: deleteChat,
+    onMutate: async () => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['chats'] });
+      await queryClient.cancelQueries({ queryKey });
+
+      // Snapshot the previous values
+      const previousChats = queryClient.getQueryData<Chats.TypeWithRelations[]>(
+        ['chats'],
+      );
+      const previousChat = activeChat ?? queryClient.getQueryData(queryKey);
+
+      // Optimistically update both caches
+      queryClient.setQueryData(['chats'], (old: Chats.TypeWithRelations[]) => {
+        return old.filter((chat) => chat.id !== chatId);
+      });
+
+      !setActiveChat
+        ? queryClient.setQueryData(queryKey, null)
+        : setActiveChat(null);
+
+      return { previousChats, previousChat };
     },
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['chats'] });
-
+      await queryClient.invalidateQueries({ queryKey });
       toast.success('Chat deleted successfully');
-
     },
-    onError: () => {
+
+    onError: (_error, _variables, context) => {
       toast.error('Failed to delete chat');
+      if (context) {
+        queryClient.setQueryData(['chats'], context.previousChats);
+        queryClient.setQueryData(queryKey, context.previousChat);
+      }
     },
   });
 
@@ -99,7 +165,19 @@ export const useChatManagement = ({
    * Sets the new chat as active on success
    */
   const createChatMutation = useMutation({
-    mutationFn: ({ name, members, image }: { name: string; members: {id: string, role: string, visibility: boolean}[]; image?: string }) =>
+    mutationFn: ({
+      name,
+      members,
+      image,
+      clientOrganizationId,
+      agencyId,
+    }: {
+      name: string;
+      members: { id: string; role: string; visibility: boolean }[];
+      image?: string;
+      clientOrganizationId: string;
+      agencyId: string;
+    }) =>
       createChat({
         name,
         user_id: userId,
@@ -111,9 +189,66 @@ export const useChatManagement = ({
         })),
         visibility: true,
         image: image ?? '',
+        client_organization_id: clientOrganizationId,
+        agency_id: agencyId,
       }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['chats'] });
+    onMutate: async ({ name, members, image }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['chats'] });
+
+      // Snapshot the previous value
+      const previousChats =
+        queryClient.getQueryData<Chats.TypeWithRelations[]>(['chats']) ?? [];
+
+      // Temporary chat id
+      const tempChatId = `temp-${crypto.randomUUID()}`;
+      // Create an optimistic chat
+      const optimisticChat: Chats.TypeWithRelations = {
+        id: tempChatId,
+        name,
+        user_id: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        visibility: true,
+        image: image ?? '',
+        messages: [],
+        deleted_on: null,
+        reference_id: null,
+        settings: {},
+        chat_members: members.map((member) => ({
+          chat_id: tempChatId,
+          user_id: member.id,
+          type: 'guest' as const,
+          visibility: member.visibility,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          id: member.id,
+          deleted_on: null,
+          settings: {},
+        })),
+      };
+
+      // Optimistically update the cache
+      queryClient.setQueryData(['chats'], [...previousChats, optimisticChat]);
+      !setActiveChat
+        ? queryClient.setQueryData(queryKey, optimisticChat)
+        : setActiveChat(optimisticChat);
+
+      return { previousChats };
+    },
+    onError: (_error, _variables, context) => {
+      // Rollback on error
+      if (context) {
+        queryClient.setQueryData(['chats'], context.previousChats);
+      }
+      toast.error('Failed to create chat');
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
+      toast.success('Chat created successfully');
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chats'] });
     },
   });
 
@@ -128,6 +263,7 @@ export const useChatManagement = ({
         members: members.map((member) => ({
           user_id: member,
           type: 'guest',
+          visibility: true,
         })),
       }),
     onSuccess: () => {
@@ -143,9 +279,6 @@ export const useChatManagement = ({
     queryKey: ['chats'],
     queryFn: async () => {
       const response = await getChats(userId);
-
-      if (!response) throw new Error('Failed to fetch chats');
-
       return response;
     },
   });

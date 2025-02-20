@@ -13,7 +13,7 @@ export class TeamRepository {
     const client = this.adminClient ?? this.client;
     console.log('includeAgency', includeAgency);
     if (!organizationIds.length && !includeAgency) {
-      throw new Error('No organization ids or agency requested');
+      return {}
     }
 
     const resultMembers: Members.TeamResponse = {}
@@ -49,7 +49,7 @@ export class TeamRepository {
       if (getClientInfoError) {
         return resultMembers;
       }
-      console.log('getClientInfo', getClientInfo);
+      
       const { data: getAgencyInfo, error: getAgencyInfoError } = await this.client
       .from('accounts')
       .select('id, name, organization_settings(value)')
@@ -83,7 +83,7 @@ export class TeamRepository {
 
       const { data: organization, error: organizationError } = await client
       .from('accounts')
-      .select('id, name, accounts_memberships(account_role)')
+      .select('id, name, picture_url, accounts_memberships(account_role)')
       .eq('id', organizationId)
       .eq('is_personal_account', false)
       .single();
@@ -93,7 +93,7 @@ export class TeamRepository {
       resultMembers[organizationId] = {
         id: organization.id,
         name: organization.name,
-        picture_url: organizationSettings?.value ?? '',
+        picture_url: organizationSettings?.value ?? organization.picture_url ?? '',
         is_agency: agencyRoles.has(organization.accounts_memberships[0]?.account_role ?? ''),
       }
 
@@ -119,11 +119,11 @@ export class TeamRepository {
         
         resultMembers[organizationId].members = members.map((member) => ({
           id: member.user_id,
-          name: membersDataMap.get(member.user_id)?.name ?? membersDataMap.get(member.user_id)?.user_settings?.name ?? '',
+          name: membersDataMap.get(member.user_id)?.user_settings?.name ?? membersDataMap.get(member.user_id)?.name ??  '',
           email: membersDataMap.get(member.user_id)?.email ?? '',
           organization_id: organizationId,
           role: member.account_role,
-          picture_url: membersDataMap.get(member.user_id)?.picture_url ?? membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? '',
+          picture_url: membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? membersDataMap.get(member.user_id)?.picture_url ??  '',
         }
       ));
       }

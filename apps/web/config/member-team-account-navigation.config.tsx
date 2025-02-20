@@ -1,5 +1,5 @@
 import { // Briefcase,
-CreditCard, Layers, Settings, Users, Home // MessagesSquare // Wallet,
+CreditCard, Layers, Settings, Users, Home, MessagesSquare // Wallet,
 } from 'lucide-react';
 
 
@@ -15,20 +15,26 @@ import pathsConfig from './paths.config';
 const iconClasses = 'w-4';
 
 const routes = [
+  // {
+  //   label: 'Inicio',
+  //   path: pathsConfig.app.home,
+  //   Icon: <Home className={iconClasses} />,
+  //   end: true,
+  // },
+  {
+    label: 'common:messagesName',
+    path: pathsConfig.app.messages,
+    Icon: <MessagesSquare className={iconClasses} />,
+    end: true,
+    children: [],
+    divider: true,
+  },
   {
     label: 'common:dashboardName',
     path: pathsConfig.app.dashboard,
     Icon: <Home className={iconClasses} />,
     end: true,
   },
-  // {
-  //   label: 'common:messagesName',
-  //   path: pathsConfig.app.messages,
-  //   Icon: <MessagesSquare className={iconClasses} />,
-  //   end: true,
-  //   children: [],
-  //   divider: true,
-  // },
   {
     label: 'common:ordersName',
     path: pathsConfig.app.orders,

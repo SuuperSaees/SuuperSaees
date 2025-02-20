@@ -68,7 +68,7 @@ export class ChatMessagesRepository {
       .from('chat_messages')
       .select(`
         *,
-        messages!inner(*)
+        messages!inner(*, user:accounts(id, name, email, picture_url, organization_id))
       `)
       .in('chat_id', chatIds ?? [])
       .is('messages.deleted_on', null)

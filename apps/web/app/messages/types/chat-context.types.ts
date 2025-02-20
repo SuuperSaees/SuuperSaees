@@ -91,12 +91,12 @@ export interface ChatMutations {
   /** Mutation for updating chat details */
   updateChatMutation: UseMutationResult<Chats.Update, Error, string>;
   /** Mutation for deleting entire chat */
-  deleteChatMutation: UseMutationResult<void, Error, void>;
+  deleteChatMutation: UseMutationResult<void, Error, string>;
   /** Mutation for creating new chat */
   createChatMutation: UseMutationResult<
     Chats.Insert,
     Error,
-    { name: string; memberIds: string[] }
+    { name: string; memberIds: string[]; clientOrganizationId: string; agencyId: string }
   >;
   /** Mutation for updating chat members */
   membersUpdateMutation: UseMutationResult<
@@ -131,7 +131,7 @@ export interface ChatContextType
     MessagesState,
     ChatMutations,
     ChatQueries {
-  user: User.Response;
+  user: User.Response & { role: string };
 }
 
 /**

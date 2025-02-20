@@ -3,8 +3,8 @@ import { // Briefcase,
   Layers, Settings, // SquareCheck,
   Users, // Wallet,
   FolderClosed,
+  MessagesSquare,
   Home
-  // MessagesSquare
 } from 'lucide-react';
 
 
@@ -20,6 +20,20 @@ import pathsConfig from '~/config/paths.config';
 const iconClasses = 'w-4';
 
 const routes = [
+  // {
+  //   label: 'Inicio',
+  //   path: pathsConfig.app.home,
+  //   Icon: <Home className={iconClasses} />,
+  //   end: true,
+  // },
+  {
+    label: 'common:messagesName',
+    path: pathsConfig.app.messages,
+    Icon: <MessagesSquare className={iconClasses} />,
+    end: true,
+    children: [],
+    divider: true,
+  },
   {
     label: 'common:dashboardName',
     path: pathsConfig.app.dashboard,

@@ -7,7 +7,6 @@ import { EllipsisVertical, Trash2 } from 'lucide-react';
 import { Button } from '@kit/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 
-import EditableHeader from '~/components/editable-header';
 import { File } from '~/lib/file.types';
 import { Members } from '~/lib/members.types';
 
@@ -34,7 +33,6 @@ export default function ChatThread({
     chatByIdQuery,
     addMessageMutation,
     setActiveChat,
-    setChatId,
     setMembers,
     handleFileUpload,
   } = useChat();
@@ -46,11 +44,8 @@ export default function ChatThread({
     await membersUpdateMutation.mutateAsync(members);
   };
 
-  const handleDelete = async () => {
-    await deleteChatMutation.mutateAsync();
-    // Clear the conversation
-    setActiveChat(null);
-    setChatId('');
+  const handleDelete =  () => {
+    deleteChatMutation.mutate(activeChat?.id ?? '');
   };
 
   const handleUpdate = async (name: string) => {
@@ -68,6 +63,7 @@ export default function ChatThread({
     if (fileUploads) {
       filesToAdd = [...fileUploads].map((upload) => {
         const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chats/${chatByIdQuery.data?.id}/uploads/${upload.id}`;
+        const tempId = crypto.randomUUID();
         return {
           name: upload.file.name,
           size: upload.file.size,
@@ -75,6 +71,7 @@ export default function ChatThread({
           url: fileUrl,
           message_id: messageId,
           user_id: userId,
+          temp_id: tempId,
         };
       });
 
@@ -113,24 +110,34 @@ export default function ChatThread({
   }
 
   const activeChatDataName = { ...activeChat }.name;
-  const activeChatDataId = { ...activeChat }.id;
-
+  const isOwner = chatById?.user_id === user.id;
+  const canEditName = isOwner || chatById?.members?.some((member) => member.id === user.id);
   return (
     <div className="flex h-full flex-col min-w-0">
       {/* Header */}
 
-      <div className="flex items-center justify-between border-b p-4">
-        <div className="flex items-center gap-3">
-          <EditableHeader
-            initialName={activeChatDataName}
-            id={activeChatDataId}
-            userRole={'owner'}
-            updateFunction={handleUpdate}
-            rolesThatCanEdit={new Set(['owner'])}
-            variant="chat"
-            maxWidth={600}
-            maxWindowWidthRatio={0.5}
-          />
+      <div className="flex items-center justify-between border-b p-4 min-h-20">
+        <div className="flex-1 min-w-0 ">
+          {canEditName ? (
+            <input
+              type="text"
+              value={activeChatDataName}
+            onChange={(e) => {
+              const newChat = { ...activeChat, name: e.target.value };
+              setActiveChat(newChat);
+            }}
+            onBlur={async (e) => {
+              if (e.target.value !== chatById?.name) {
+                await handleUpdate(e.target.value);
+              }
+            }}
+              className="w-full text-xl font-semibold bg-transparent border-none outline-none focus:ring-0 text-primary-900 overflow-hidden text-ellipsis"
+            />
+          ) : (
+            <span className="block w-full text-xl font-semibold text-primary-900 overflow-hidden text-ellipsis">
+              {activeChatDataName}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <ChatMembersSelector
@@ -162,9 +169,9 @@ export default function ChatThread({
               <Button
                 variant="ghost"
                 className="w-full justify-start gap-2 text-red-600"
-                onClick={async () => {
+                onClick={ () => {
                   setIsPopupOpen(false);
-                  await handleDelete();
+                  handleDelete();
                 }}
               >
                 <Trash2 className="h-4 w-4" />

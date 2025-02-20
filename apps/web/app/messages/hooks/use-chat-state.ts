@@ -41,8 +41,8 @@ interface UseChatStateProps {
  */
 export function useChatState({ initialMembers }: UseChatStateProps) {
   // Basic chat state
-  const [chatId, setChatId] = useState<string>('');
   const [activeChat, setActiveChat] = useState<Chats.Type | null>(null);
+  const chatId = activeChat?.id ?? '';
   const [isChatCreationDialogOpen, setIsChatCreationDialogOpen] =
     useState(false);
   const [members, setMembers] = useState<User.Response[]>(initialMembers ?? []);
@@ -163,9 +163,11 @@ export function useChatState({ initialMembers }: UseChatStateProps) {
     [chatId, upload],
   );
 
+  // Update chatId when activeChat changes
+
+
   return {
     chatId,
-    setChatId,
     activeChat,
     setActiveChat,
     members,

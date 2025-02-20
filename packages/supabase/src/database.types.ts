@@ -835,6 +835,8 @@ export type Database = {
       }
       chats: {
         Row: {
+          agency_id: string | null
+          client_organization_id: string | null
           created_at: string | null
           deleted_on: string | null
           id: string
@@ -847,6 +849,8 @@ export type Database = {
           visibility: boolean
         }
         Insert: {
+          agency_id?: string | null
+          client_organization_id?: string | null
           created_at?: string | null
           deleted_on?: string | null
           id?: string
@@ -859,6 +863,8 @@ export type Database = {
           visibility?: boolean
         }
         Update: {
+          agency_id?: string | null
+          client_organization_id?: string | null
           created_at?: string | null
           deleted_on?: string | null
           id?: string
@@ -871,6 +877,48 @@ export type Database = {
           visibility?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "chats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chats_user_id_fkey"
             columns: ["user_id"]
@@ -1257,7 +1305,7 @@ export type Database = {
       folders: {
         Row: {
           agency_id: string
-          client_organization_id: string | null
+          client_organization_id: string
           created_at: string
           id: string
           is_subfolder: boolean | null
@@ -1266,7 +1314,7 @@ export type Database = {
         }
         Insert: {
           agency_id: string
-          client_organization_id?: string | null
+          client_organization_id: string
           created_at?: string
           id?: string
           is_subfolder?: boolean | null
@@ -1275,7 +1323,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string
-          client_organization_id?: string | null
+          client_organization_id?: string
           created_at?: string
           id?: string
           is_subfolder?: boolean | null
@@ -1405,6 +1453,7 @@ export type Database = {
       }
       messages: {
         Row: {
+          chat_id: string | null
           content: string | null
           created_at: string
           deleted_on: string | null
@@ -1418,6 +1467,7 @@ export type Database = {
           visibility: Database["public"]["Enums"]["messages_types"] | null
         }
         Insert: {
+          chat_id?: string | null
           content?: string | null
           created_at?: string
           deleted_on?: string | null
@@ -1431,6 +1481,7 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Update: {
+          chat_id?: string | null
           content?: string | null
           created_at?: string
           deleted_on?: string | null
@@ -1444,6 +1495,13 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_order_id_fkey"
             columns: ["order_id"]
@@ -1822,6 +1880,7 @@ export type Database = {
           title: string
           updated_at: string | null
           uuid: string
+          visibility: Database["public"]["Enums"]["visibility"]
         }
         Insert: {
           agency_id: string
@@ -1842,6 +1901,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           uuid: string
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Update: {
           agency_id?: string
@@ -1862,6 +1922,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           uuid?: string
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Relationships: [
           {
@@ -2031,64 +2092,39 @@ export type Database = {
       }
       plugins: {
         Row: {
-          account_id: string
           created_at: string
-          credentials: Json
           deleted_on: string | null
+          description: string | null
+          icon_url: string | null
           id: string
-          provider: string
-          provider_id: string
-          status: Database["public"]["Enums"]["plugin_status"]
+          metadata: Json | null
+          name: string
           type: Database["public"]["Enums"]["plugin_type"]
           updated_at: string
         }
         Insert: {
-          account_id: string
           created_at?: string
-          credentials: Json
           deleted_on?: string | null
+          description?: string | null
+          icon_url?: string | null
           id?: string
-          provider: string
-          provider_id: string
-          status?: Database["public"]["Enums"]["plugin_status"]
+          metadata?: Json | null
+          name: string
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
         Update: {
-          account_id?: string
           created_at?: string
-          credentials?: Json
           deleted_on?: string | null
+          description?: string | null
+          icon_url?: string | null
           id?: string
-          provider?: string
-          provider_id?: string
-          status?: Database["public"]["Enums"]["plugin_status"]
+          metadata?: Json | null
+          name?: string
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       reactions: {
         Row: {
@@ -3111,6 +3147,7 @@ export type Database = {
           title: string
           updated_at: string | null
           uuid: string
+          visibility: Database["public"]["Enums"]["visibility"]
         }
       }
       create_team_account: {
@@ -3359,7 +3396,27 @@ export type Database = {
           p_order_updates: Json
           p_position_updates: Json[]
         }
-        Returns: Json
+        Returns: {
+          agency_id: string
+          brief_ids: string[] | null
+          client_organization_id: string
+          created_at: string
+          customer_id: string
+          deleted_on: string | null
+          description: string
+          due_date: string | null
+          id: number
+          position: number | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status: string | null
+          status_id: number | null
+          stripe_account_id: string | null
+          title: string
+          updated_at: string | null
+          uuid: string
+          visibility: Database["public"]["Enums"]["visibility"]
+        }
       }
       upsert_order: {
         Args: {

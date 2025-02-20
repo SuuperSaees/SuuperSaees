@@ -52,7 +52,7 @@ const RichTextEditor = ({
         cleanupImages();
         editor?.commands.clearContent();
         setUploads([]);
-        if (currentContent.trim() !== '<p></p>') {
+        if (currentContent.replace(/<p>\s*<\/p>/, '').trim() !== '' || uploads.length > 0) {
           await onComplete?.(currentContent, uploads, setUploads);
           insertedImages.current = new Set<string>();
         }
@@ -134,7 +134,7 @@ const RichTextEditor = ({
           {showToolbar && (
             <Toolbar
               editor={editor}
-              disabled={editor?.getHTML().trim() === '<p></p>'}
+     
               onFileSelect={handleFileSelect}
             />
           )}
@@ -143,7 +143,7 @@ const RichTextEditor = ({
             <ThemedButton
               className="mt-4 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md,8px)] shadow-none"
               onClick={sendContent}
-              disabled={editor?.getHTML().trim() === '<p></p>'}
+              disabled={editor?.getHTML().replace(/<[^>]*>/g, '').trim() === '' && uploads.length === 0}
             >
               <SendHorizontal className="h-[20px] w-[20px] flex-shrink-0" />
             </ThemedButton>

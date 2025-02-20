@@ -5,11 +5,12 @@ import { useEffect, useMemo } from 'react';
 import ChatItem from './chat-item';
 import { useChat } from './context/chat-context';
 import { Chats } from '~/lib/chats.types';
+import { Spinner } from '@kit/ui/spinner';
 
 export default function ChatList() {
-  const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat, setChatId } = useChat();
+  const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat } = useChat();
+  const chats = useMemo(() => chatsQuery.data?.filter((chat) => !chat.deleted_on) ?? [], [chatsQuery.data]);
   const filteredChats = useMemo(() => {
-    const chats = chatsQuery.data ?? [];
     if (!searchQuery) return chats;
     if (!Array.isArray(chats) || !chats.length) return [];
     return chats.filter((chat) => {
@@ -30,22 +31,16 @@ export default function ChatList() {
 
       return hasMatchingMessage || hasMatchingMember;
     });
-  }, [chatsQuery.data, searchQuery]);
+  }, [searchQuery, chats]);
 
   useEffect(() => {
     if (filteredChats?.length && !activeChat) {
       setActiveChat(filteredChats[0] as Chats.Type);
-      setChatId(filteredChats[0].id.toString());
     }
   }, [filteredChats, activeChat, setActiveChat]);
+
   // Estado de carga
-  if (chatsQuery.isLoading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        Loading chats...
-      </div>
-    );
-  }
+  if (chatsQuery.isLoading) return <Spinner className="w-5 h-5 mx-auto mt-6 text-gray-500" />
 
   // Estado de error
   if (chatsQuery.error) {
