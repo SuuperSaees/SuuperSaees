@@ -26,11 +26,12 @@ interface MessageProps {
   message: MessageType.Type & {
     pending?: boolean;
   };
+  canDelete?: boolean;
 }
 
-export default function Message({ message }: MessageProps) {
+export default function Message({ message, canDelete = false }: MessageProps) {
   const { deleteMessageMutation } = useChat();
-
+  
   const { t } = useTranslation('orders');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -53,12 +54,14 @@ export default function Message({ message }: MessageProps) {
         </div>
         <div className="flex gap-2 items-center">
           <small>{date}</small>
-          <button className="h-4 w-4 group-hover:visible invisible">
-            <Trash2
-              className="h-4 w-4 cursor-pointer text-gray-600 transition duration-300 hover:text-red-500 "
-              onClick={() => setIsOpen(true)}
-            />
-          </button>
+          {canDelete && (
+            <button className="h-4 w-4 group-hover:visible invisible">
+              <Trash2
+                className="h-4 w-4 cursor-pointer text-gray-600 transition duration-300 hover:text-red-500 "
+                onClick={() => setIsOpen(true)}
+              />
+            </button>
+          )}
 
         </div>
       </div>
@@ -77,9 +80,10 @@ export default function Message({ message }: MessageProps) {
           )}
         </div>
 
-        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-          <AlertDialogContent className="w-[400px]">
-            <AlertDialogHeader>
+        {canDelete && (
+          <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+            <AlertDialogContent className="w-[400px]">
+              <AlertDialogHeader>
               <div className="flex justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-error-100">
                   <Trash2 className="h-6 w-6 text-error-600" />
@@ -108,8 +112,9 @@ export default function Message({ message }: MessageProps) {
                 </Button>
               </div>
             </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </div>
   );
