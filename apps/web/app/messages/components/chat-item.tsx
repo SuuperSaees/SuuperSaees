@@ -1,6 +1,8 @@
 'use client';
 
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 
@@ -16,6 +18,7 @@ export default function ChatItem({
   isActive?: boolean;
 }) {
   const { setActiveChat } = useChat();
+  const { t, i18n } = useTranslation('chats');
 
   const handleChatSelect = () => {
     setActiveChat(chat);
@@ -34,13 +37,15 @@ export default function ChatItem({
         const isToday = date.toDateString() === now.toDateString();
         const isThisWeek = date > new Date(now.setDate(now.getDate() - 7));
 
+        const locale = i18n.language === 'es' ? es : undefined;
+
         if (isToday) {
-          return format(date, 'h:mm a');
+          return format(date, t('dateFormat.today'), { locale });
         }
         if (isThisWeek) {
-          return format(date, 'EEEE');
+          return format(date, t('dateFormat.thisWeek'), { locale });
         }
-        return format(date, 'MMM d, yyyy');
+        return format(date, t('dateFormat.older'), { locale });
       })()
     : '';
 
