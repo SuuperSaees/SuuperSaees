@@ -6,6 +6,7 @@ import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
 import { TableConfig, useRealtime } from '~/hooks/use-realtime';
+import { Chats } from '~/lib/chats.types';
 import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
 import { useChatManagement } from '~/messages/hooks/use-chat-management-actions';
@@ -17,7 +18,6 @@ import {
   ChatProviderProps,
 } from '~/messages/types/chat-context.types';
 import { updateArrayData } from '~/utils/data-transform';
-import { Chats } from '~/lib/chats.types';
 
 /**
  * Context for managing chat state and operations.
@@ -89,7 +89,7 @@ export function ChatProvider({
 
   // Query for chat by id
   // Uses cached messages
-  const { chatByIdQuery, chatsQuery,...chatActions } = useChatManagement({
+  const { chatByIdQuery, chatsQuery, ...chatActions } = useChatManagement({
     queryKey: ['chat', chatId ?? ''],
     chatId,
     setMessages: setMessages,
@@ -159,26 +159,62 @@ export function ChatProvider({
         }
         return true;
       }
+      // Soft delete (update "deleted_on" ) of messages
+      if (payload.eventType === 'UPDATE' && payload.table === 'messages') {
+        const message = payload.new as Message.Type;
+
+        setMessages((currentMessages) => {
+          let updatedMessages = updateArrayData(
+            currentMessages,
+            message,
+            'temp_id',
+            false,
+          );
+          updatedMessages = updatedMessages.filter(
+            (msg) => !msg.deleted_on, // Only filter out deleted messages
+          );
+          return updatedMessages;
+        });
+        // ALso, delete the message from the chats if is the last message
+        const chat = chats.find((chat) => chat.id === message.chat_id);
+        if (chat && message.deleted_on) {
+          const newMessages = messages.filter((msg) => msg.id !== message.id);
+          const lastMessage = newMessages[newMessages.length - 1];
+          chat.messages = lastMessage ? [lastMessage] : [];
+
+          setChats(updateArrayData(chats, chat, 'id', false));
+        }
+        return true;
+      }
+
       if (payload.eventType === 'INSERT' && payload.table === 'files') {
         // insert the file in files messages
         const file = payload.new as File.Type;
         // Use the message_id to insert the file in the files messages table
-        setMessages(prev => {
+        setMessages((prev) => {
           const message = prev.find(
             (message) => message.id === file.message_id,
           );
-        if (message) {
-          const files = updateArrayData(message.files ?? [], file, 'temp_id', true);
-          const newMessage = {...message, files: files};
-          const updatedItems = updateArrayData(messages, newMessage, 'id', false);
-          return updatedItems;
-        }
-        return prev
-        
-      })
-      return true;
-
-      } 
+          if (message) {
+            const files = updateArrayData(
+              message.files ?? [],
+              file,
+              'temp_id',
+              true,
+            );
+            const newMessage = { ...message, files: files };
+            const updatedItems = updateArrayData(
+              messages,
+              newMessage,
+              'id',
+              false,
+            );
+            return updatedItems;
+          }
+          return prev;
+        });
+        return true;
+      }
 
       // Handles soft delete of chats
       if (payload.eventType === 'UPDATE' && payload.table === 'chats') {
@@ -190,10 +226,7 @@ export function ChatProvider({
           setChats(updatedChats);
           setActiveChat(null);
         }
-        
       }
- 
-      
     },
   });
 
@@ -213,7 +246,7 @@ export function ChatProvider({
       >,
       filter: {
         chat_id: `eq.${chatId}`,
-      }
+      },
     },
     {
       tableName: 'files',
@@ -235,7 +268,6 @@ export function ChatProvider({
     realtimeConfig,
     handleSubscriptions,
   );
-
 
   const value: ChatContextType = {
     messages: messages.filter((msg) => !('deleted_at' in msg)),
