@@ -23,6 +23,8 @@ export class ChatService {
       visibility: payload.visibility,
       image: payload.image,
       settings: payload.settings,
+      client_organization_id: payload.client_organization_id,
+      agency_id: payload.agency_id,
     });
 
     if (payload.chat_members && payload.chat_members.length > 0) {

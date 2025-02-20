@@ -28,6 +28,8 @@ export class ChatRepository {
         settings: payload.settings ?? {},
         visibility: payload.visibility ?? true,
         image: payload.image ?? null,
+        client_organization_id: payload.client_organization_id ?? null,
+        agency_id: payload.agency_id ?? null,
       })
       .select()
       .single();

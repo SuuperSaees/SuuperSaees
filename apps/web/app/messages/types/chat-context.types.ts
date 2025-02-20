@@ -96,7 +96,7 @@ export interface ChatMutations {
   createChatMutation: UseMutationResult<
     Chats.Insert,
     Error,
-    { name: string; memberIds: string[] }
+    { name: string; memberIds: string[]; clientOrganizationId: string; agencyId: string }
   >;
   /** Mutation for updating chat members */
   membersUpdateMutation: UseMutationResult<

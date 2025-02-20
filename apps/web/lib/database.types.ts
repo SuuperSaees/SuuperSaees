@@ -835,6 +835,8 @@ export type Database = {
       }
       chats: {
         Row: {
+          agency_id: string | null
+          client_organization_id: string | null
           created_at: string | null
           deleted_on: string | null
           id: string
@@ -847,6 +849,8 @@ export type Database = {
           visibility: boolean
         }
         Insert: {
+          agency_id?: string | null
+          client_organization_id?: string | null
           created_at?: string | null
           deleted_on?: string | null
           id?: string
@@ -859,6 +863,8 @@ export type Database = {
           visibility?: boolean
         }
         Update: {
+          agency_id?: string | null
+          client_organization_id?: string | null
           created_at?: string | null
           deleted_on?: string | null
           id?: string
@@ -871,6 +877,48 @@ export type Database = {
           visibility?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "chats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chats_user_id_fkey"
             columns: ["user_id"]

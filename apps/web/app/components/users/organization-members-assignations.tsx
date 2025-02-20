@@ -34,6 +34,7 @@ interface OrganizationMemberAssignationProps<T extends z.ZodSchema<unknown>> {
   onOrganizationChange?: (organizationId: string) => void;
   onMembersChange?: (memberIds: string[]) => void;
   hideOrganizationSelector?: boolean;
+  organizationIdKey?: string;
 }
 
 
@@ -55,7 +56,7 @@ export default function OrganizationMemberAssignation<
   disabledOrganizationSelector,
   disabledMembersSelector,
   hideOrganizationSelector = false,
-
+  organizationIdKey,
 
 }: OrganizationMemberAssignationProps<T>) {
   const [selectedOrganization, setSelectedOrganization] =
@@ -175,7 +176,8 @@ export default function OrganizationMemberAssignation<
           defaultValue={organization?.id}
           onSelectHandler={(value: string) => {
           const selectedOrganization = organizationsQuery?.data?.find((cOrg) => cOrg.id === value);
-          setImage && form.setValue('image', selectedOrganization?.logo_url ?? '');
+          setImage && form.setValue('image', selectedOrganization?.picture_url ?? '');
+          organizationIdKey && form.setValue(organizationIdKey, selectedOrganization?.id ?? undefined);
           setSelectedOrganization(
             selectedOrganization,
 
