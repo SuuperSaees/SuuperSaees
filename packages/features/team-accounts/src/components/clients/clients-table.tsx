@@ -16,7 +16,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
@@ -134,7 +134,16 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
     [clients],
   );
   const organizationColumns = useOrganizationColumns(t);
-  const clientColumns = useClientColumns(t, userRole, uniqueOrganizations);
+  const filteredOrganizations = uniqueOrganizations.filter((org) => {
+    const searchString = search?.toLowerCase();
+    
+    if (org.name?.toLowerCase().includes(searchString)) return true;
+    
+    if (org.primary_owner?.toLowerCase().includes(searchString)) return true;
+    
+    return false;
+  });
+  const clientColumns = useClientColumns(t, userRole, filteredOrganizations);
   const columns =
     activeButton === 'clients' ? clientColumns : organizationColumns;
 
@@ -150,15 +159,6 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
     return false;
   });
 
-  const filteredOrganizations = uniqueOrganizations.filter((org) => {
-    const searchString = search?.toLowerCase();
-    
-    if (org.name?.toLowerCase().includes(searchString)) return true;
-    
-    if (org.primary_owner?.toLowerCase().includes(searchString)) return true;
-    
-    return false;
-  });
   const options = {
     data:
       activeButton === 'organizations'
@@ -294,7 +294,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
 const useClientColumns = (
   t: TFunction<'clients', undefined>,
   userRole: string,
-  uniqueOrganizations: Organization[],
+  filteredOrganizations: Organization[],
 ): ColumnDef<Client>[] => {
   return useMemo(
     () => [
@@ -323,19 +323,6 @@ const useClientColumns = (
           </Link>
         ),
       },
-      // {
-      //   accessorKey: "role",
-      //   header: t("role"),
-      //   cell: ({ row }) => {
-      //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      //     const role = row.getValue("role") as string;
-      //     return (
-      //       <div className="capitalize">
-      //         {role === 'leader' ? t('leader') : role === 'member' ? t('member') : role}
-      //       </div>
-      //     );
-      //   },
-      // },
       {
         accessorKey: 'client_organization',
         header: t('organization'),
@@ -348,34 +335,6 @@ const useClientColumns = (
           </Link>
         ),
       },
-      // {
-      //   accessorKey: 'last_login',
-      //   header: () => {
-      //     return (
-       
-            
-           
-      //             <span className='text-gray-600'>{t('lastLogin')}</span>
-             
-         
-  
-      //     );
-      //   },
-      //   cell: ({ row }) => {
-      //     const date = new Date(row.original.created_at ?? '');
-      //     const day = date.getDate().toString().padStart(2, '0');
-      //     const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      //     const year = date.getFullYear();
-
-      //     const formattedDate = `${day}-${month}-${year}`;
-
-      //     return (
-      //       <span className="text-sm font-medium text-gray-900">
-      //         {formattedDate}
-      //       </span>
-      //     );
-      //   },
-      // },
       {
         accessorKey: 'created_at_column',
         header: () => {
@@ -402,7 +361,7 @@ const useClientColumns = (
         enableHiding: false,
         cell: ({ row }) => {
           const client = row.original;
-          const organizationOptions = uniqueOrganizations.map((org) => ({ id: org.id, name: org.name, slug: org.slug ?? '' }));
+          const organizationOptions = filteredOrganizations.map((org: Organization) => ({ id: org.id, name: org.name, slug: org.slug ?? '' }));
           return (userRole === 'agency_owner' || userRole === 'agency_project_manager') &&(
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               {/* <UpdateClientDialog {...client} /> */}
@@ -413,7 +372,7 @@ const useClientColumns = (
         },
       },
     ],
-    [t],
+    [t, userRole, filteredOrganizations],
   );
 };
 
