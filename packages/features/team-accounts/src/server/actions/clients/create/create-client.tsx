@@ -51,10 +51,13 @@ const CreateClientDialog = () => {
     },
   });
 
+  let host = 'localhost:3000';
+  host = typeof window !== 'undefined' ? window.location.host : 'localhost:3000';
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const newClient = { ...values };
     // delete newClient?.role;
-    const res = await createClient({ client: newClient, role: values.role });
+    const res = await createClient({ client: newClient, role: values.role, adminActivated: true, baseUrl: `${host === 'localhost:3000' ? 'http://' : 'https://'}${host}` });
     await handleResponse(res, 'clients', t).catch(() => null);
     window.location.reload();
   }
