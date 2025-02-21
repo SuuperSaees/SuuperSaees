@@ -24,7 +24,6 @@ export default function Member({
   id,
   userRole,
   user,
-  orders,
   agencyStatuses,
   agencyMembers,
 }: {
@@ -93,7 +92,6 @@ export default function Member({
       t('team:member.tabs.home'),
       <HomeSection
         key={t('team:member.tabs.home')}
-        memberOrders={orders}
         agencyMembers={agencyMembers}
       />,
     ],
