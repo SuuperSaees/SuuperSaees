@@ -80,8 +80,9 @@ export const useRichTextEditor = ({
   const CustomShortcuts = Extension.create({
     addKeyboardShortcuts() {
       return {
+        // Insert line break on Ctrl + Enter or Cmd + Enter
         'Mod-Enter': () => {
-          this.editor.commands.splitBlock();
+          this.editor.commands.setHardBreak();
           return true;
         },
       };
@@ -101,6 +102,11 @@ export const useRichTextEditor = ({
           HTMLAttributes: {
             class:
               'relative border-l-2 pl-4 italic mx-4 my-2 before:content-["\\""] before:text-2xl before:font-bold before:absolute before:left-0 before:transform before:-translate-x-0 inline-block',
+          },
+        },
+        hardBreak: {
+          HTMLAttributes: {
+            class: 'inline-block',
           },
         },
       }),
@@ -143,7 +149,14 @@ export const useRichTextEditor = ({
     editorProps: {
       attributes: {
         class:
-          'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none text-sm',
+          'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none text-sm [&>p]:mb-4 last:[&>p]:mb-0 [&>p]:leading-relaxed',
+      },
+      handleKeyDown: (_, event) => {
+        if (event.key === 'Enter' && event.ctrlKey) {
+          editor?.commands.setHardBreak();
+          return true;
+        }
+        return false;
       },
     },
     onUpdate({ editor }) {
