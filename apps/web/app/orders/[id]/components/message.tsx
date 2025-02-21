@@ -78,7 +78,10 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
         <div className={`flex flex-col gap-2 text-sm break-words rounded-lg whitespace-normal ${
           isInternalMessage ? "p-3 bg-yellow-50" : "bg-transparent"
         }`}>
-          <div dangerouslySetInnerHTML={{ __html: content }} />
+          <div 
+            dangerouslySetInnerHTML={{ __html: content }} 
+            className="prose prose-sm max-w-none [&>p]:mb-4 last:[&>p]:mb-0 [&>p]:leading-relaxed"
+          />
           {message.files && message.files.length > 0 && (
             <div className="flex max-w-full gap-4 overflow-x-auto scrollbar-custom">
               {message.files.map((file) => (

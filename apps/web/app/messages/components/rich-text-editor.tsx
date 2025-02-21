@@ -35,12 +35,27 @@ const RichTextEditor = ({
   // const [thereAreFilesUploaded, setThereAreFilesUploaded] = useState(false);
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit.configure({
+        hardBreak: {
+          HTMLAttributes: {
+            class: 'inline-block',
+          },
+        },
+      }),
+    ],
     editable: isEditable,
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[40px]',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[40px] [&>p]:mb-4 last:[&>p]:mb-0 [&>p]:leading-relaxed',
+      },
+      handleKeyDown: (_, event) => {
+        if (event.key === 'Enter' && event.ctrlKey) {
+          editor?.commands.setHardBreak();
+          return true;
+        }
+        return false;
       },
     },
     onUpdate: ({ editor }) => {
