@@ -111,5 +111,9 @@
   "rowNumber": "{{number}} rows",
   "filters": "Filters",
   "resetFilters": "Reset filters",
-  "pluginsName": "Apps"
+  "pluginsName": "Apps",
+  "goToPage": "Go to page",
+  "of": "of",
+  "showing": "Showing",
+  "go": "Go"
 }
