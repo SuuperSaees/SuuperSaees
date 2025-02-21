@@ -57,7 +57,7 @@ const CreateClientDialog = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const newClient = { ...values };
     // delete newClient?.role;
-    const res = await createClient({ client: newClient, role: values.role, adminActivated: true, baseUrl: `${host === 'localhost:3000' ? 'http://' : 'https://'}${host}` });
+    const res = await createClient({ client: newClient, role: values.role, adminActivated: false, baseUrl: `${host === 'localhost:3000' ? 'http://' : 'https://'}${host}` });
     await handleResponse(res, 'clients', t).catch(() => null);
     window.location.reload();
   }

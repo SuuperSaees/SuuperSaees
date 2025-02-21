@@ -68,8 +68,8 @@ export const createClient = async (clientData: CreateClient) => {
             name: clientData.client.name,
             slug: clientData.client.slug,
             baseUrl: clientData.baseUrl,
-            supabase,
-            adminActivated: clientData.adminActivated,
+            supabase: undefined,
+            adminActivated: true,
           });
           
           return CustomResponse.success(existingClient, 'clientCreated').toJSON();
@@ -118,7 +118,7 @@ export const createClient = async (clientData: CreateClient) => {
     const clientOrganizationUser = await createClientUserAccount(
       clientData.client.email,
       organization.name,
-      false,
+      clientData.adminActivated,
       clientData.agencyId,
       clientData.sendEmail,
     );
