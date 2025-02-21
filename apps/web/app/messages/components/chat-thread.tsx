@@ -141,18 +141,7 @@ export default function ChatThread({
         </div>
         <div className="flex items-center gap-2">
           <ChatMembersSelector
-            agencyTeam={{
-              ...agencyTeam,
-              members: agencyTeam.members?.filter((member) => {
-                const selectedMember = chatById?.members?.find(
-                  (m) => m.id === member.id,
-                );
-
-                if (!selectedMember) return true;
-
-                return selectedMember.visibility;
-              }),
-            }}
+            agencyTeam={agencyTeam}
             selectedMembers={
               chatById?.members?.filter((member) => member.visibility) ?? []
             }
