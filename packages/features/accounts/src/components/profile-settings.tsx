@@ -125,7 +125,7 @@ function ProfileSettings({
               defaultImageURL={
                 userSettings?.picture_url ?? user?.picture_url ?? ''
               }
-              className="aspect-square h-20 w-20"
+              className="aspect-square h-20 w-20 [&>img]:object-cover"
               onUpdate={updateProfileImage}
             />
           </div>
