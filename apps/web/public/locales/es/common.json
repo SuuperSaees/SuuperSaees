@@ -108,5 +108,9 @@
   "rowNumber": "{{number}} filas",
   "filters": "Filtros",
   "resetFilters": "Restablecer filtros",
-  "pluginsName": "Aplicaciones"
+  "pluginsName": "Aplicaciones",
+  "goToPage": "Ir a la página",
+  "of": "de",
+  "showing": "Mostrando",
+  "go": "Ir"
 }
