@@ -33,7 +33,7 @@ export function useSignInWithEmailPassword() {
       .from('clients')
       .select('user_client_id')
       .eq('user_client_id', userId)
-      .eq('agency_id', organizationId)
+      .eq('agency_id', organizationId ?? '')
       .not('deleted_on', 'is', null)
       .maybeSingle();
 

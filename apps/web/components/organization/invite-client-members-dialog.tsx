@@ -60,6 +60,9 @@ export function InviteClientMembersDialogContainer({
   const { t } = useTranslation('responses');
   const queryClient = useQueryClient();
 
+  let host = 'localhost:3000';
+  host = typeof window !== 'undefined' ? window.location.host : 'localhost:3000';
+
   const inviteClientMembers = useMutation({
     mutationFn: async ({
       email,
@@ -67,7 +70,7 @@ export function InviteClientMembersDialogContainer({
     }: {
       email: string;
       clientOrganizationId: string;
-    }) => await addClientMember({ email, clientOrganizationId }),
+    }) => await addClientMember({ email, clientOrganizationId, baseUrl: `${host === 'localhost:3000' ? 'http://' : 'https://'}${host}` }),
   });
 
   const onSubmit = ({ invitations }: { invitations: InviteModel[] }) => {
