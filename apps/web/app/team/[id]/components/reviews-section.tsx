@@ -49,9 +49,10 @@ export default function ReviewsSection({
   const paginatedReviews = reviews?.slice(startIndex, endIndex) ?? [];
 
   const reviewWithRating = reviews?.filter((rev) => rev.rating !== null);
-  const rating =
-    reviewWithRating?.reduce((acc, review) => acc + (review?.rating ?? 0), 0) /
-    reviewWithRating?.length;
+  const rating = Number(
+    (reviewWithRating?.reduce((acc, review) => acc + (review?.rating ?? 0), 0) /
+    reviewWithRating?.length).toFixed(2)
+  );
 
   if (reviewsQuery.isLoading || reviewsQuery.isPending) {
     return <SkeletonReviewsSection />;
