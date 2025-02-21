@@ -65,7 +65,6 @@ export function DataTable<TData, TValue>({
   const [rowsPerPage, setRowsPerPage] = useState(
     configs?.rowsPerPage.value ?? 10,
   );
-  const [customPageNumber, setCustomPageNumber] = useState('');
 
   const table = useReactTable({
     ...options,
@@ -88,34 +87,32 @@ export function DataTable<TData, TValue>({
     }
   };
 
-  const handleCustomPageSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const pageNum = parseInt(customPageNumber);
-    if (pageNum && pageNum > 0 && pageNum <= pageCount) {
-      table.setPageIndex(pageNum - 1);
-    }
-    setCustomPageNumber('');
-  };
-
   const renderPageNumbers = () => {
     const pages = [];
-    const showPages = 3;
+    const showPages = 4;
+    const currentPage = pageIndex + 1;
 
     pages.push(1);
 
-    if (pageIndex > showPages) {
+    if (currentPage > showPages) {
       pages.push('ellipsis');
     }
 
-    for (
-      let i = Math.max(2, pageIndex);
-      i <= Math.min(pageIndex + 2, pageCount - 1);
-      i++
-    ) {
+    let rangeStart = Math.max(2, currentPage - 2);
+    let rangeEnd = Math.min(pageCount - 1, currentPage + 2);
+
+    if (currentPage <= showPages) {
+      rangeEnd = Math.min(pageCount - 1, showPages + 2);
+    }
+    if (currentPage > pageCount - showPages) {
+      rangeStart = Math.max(2, pageCount - showPages - 1);
+    }
+
+    for (let i = rangeStart; i <= rangeEnd; i++) {
       pages.push(i);
     }
 
-    if (pageIndex < pageCount - showPages) {
+    if (currentPage < pageCount - showPages) {
       pages.push('ellipsis');
     }
 
@@ -183,130 +180,92 @@ export function DataTable<TData, TValue>({
 
       {table.getRowModel().rows?.length > 0 && (
         <Pagination className="border-t p-4">
-          <PaginationContent className="flex w-full flex-wrap items-center justify-between gap-8">
-            {/* Left side: Pagination controls */}
-            <div className="flex flex-wrap items-center gap-8 sm:flex-1">
-              <div className="mx-auto flex items-center gap-8 2xl:mx-0 2xl:ml-auto">
-                <PaginationItem
-                  className={`${pageIndex > 0 ? 'visible' : 'invisible'} transition-all duration-200`}
+          <PaginationContent className="flex w-full items-center flex-wrap">
+            <div className="flex-none">
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 transition-colors duration-200 ${
+                    pageIndex === 0
+                      ? 'pointer-events-none opacity-50'
+                      : 'hover:bg-gray-100'
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (table.getCanPreviousPage()) {
+                      table.previousPage();
+                    }
+                  }}
                 >
-                  <PaginationPrevious
-                    href="#"
-                    className="flex items-center gap-2 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-gray-100"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (table.getCanPreviousPage()) {
-                        table.previousPage();
-                      }
-                    }}
-                  >
-                    <span className="hidden sm:inline">
-                      <Trans i18nKey={'common:pagination.previous'} />
-                    </span>
-                  </PaginationPrevious>
-                </PaginationItem>
-                <div className="flex gap-1">
-                  {renderPageNumbers().map((page, index) =>
-                    page === 'ellipsis' ? (
-                      <PaginationItem key={`ellipsis-${index}`}>
-                        <PaginationEllipsis className="text-gray-400" />
-                      </PaginationItem>
-                    ) : (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          className={`h-9 min-w-[2.25rem] rounded-md text-sm font-medium ${
-                            typeof page === 'number' && pageIndex === page - 1
-                              ? 'bg-gray-900 text-white hover:bg-gray-800 hover:text-white'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          } transition-all duration-200`}
-                          href="#"
-                          isActive={
-                            typeof page === 'number' && pageIndex === page - 1
-                          }
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (typeof page === 'number') {
-                              table.setPageIndex(page - 1);
-                            }
-                          }}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ),
-                  )}
-                </div>
-                <PaginationItem
-                  className={`${pageIndex < pageCount - 1 ? 'visible' : 'invisible'} transition-all duration-200`}
-                >
-                  <PaginationNext
-                    href="#"
-                    className="flex items-center gap-2 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-gray-100"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (table.getCanNextPage()) {
-                        table.nextPage();
-                      }
-                    }}
-                  >
-                    <span className="hidden sm:inline">
-                      <Trans i18nKey={'common:pagination.next'} />
-                    </span>
-                  </PaginationNext>
-                </PaginationItem>
-              </div>
+                  <span className="hidden sm:inline">
+                    <Trans i18nKey={'common:pagination.previous'} />
+                  </span>
+                </PaginationPrevious>
+              </PaginationItem>
             </div>
 
-            {/* Right side: Results info and controls */}
-            <div className="mx-auto flex flex-wrap items-center gap-4 sm:justify-end">
-              {/* Results count */}
-              <div className="text-sm text-gray-500">
-                <span className="hidden sm:inline">
-                  <Trans i18nKey="common:showing" />{' '}
+            <div className="flex flex-1 justify-center gap-2">
+              {renderPageNumbers().map((page, index) =>
+                page === 'ellipsis' ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis className="text-gray-400" />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      className={`h-9 min-w-[2.25rem] rounded-md text-sm font-medium ${
+                        typeof page === 'number' && pageIndex === page - 1
+                          ? 'bg-gray-100 text-gray-900 border-none'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      } transition-all duration-200`}
+                      href="#"
+                      isActive={typeof page === 'number' && pageIndex === page - 1}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (typeof page === 'number') {
+                          table.setPageIndex(page - 1);
+                        }
+                      }}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ),
+              )}
+            </div>
+
+            <div className="flex flex-none items-center gap-4 mx-auto">
+              <div className="flex items-center gap-2">
+                <SelectRowsPerPage
+                  defaultValue={rowsPerPage}
+                  handleRowsPerPageChange={handleRowsPerPageChange}
+                />
+                <span className="text-sm text-gray-500">
+                  <Trans i18nKey={'common:of'} />{' '}
+                  {table.getFilteredRowModel().rows.length}
                 </span>
-                {table.getState().pagination.pageIndex *
-                  table.getState().pagination.pageSize +
-                  1}
-                -
-                {Math.min(
-                  (table.getState().pagination.pageIndex + 1) *
-                    table.getState().pagination.pageSize,
-                  table.getFilteredRowModel().rows.length,
-                )}{' '}
-                <Trans i18nKey="common:of" />{' '}
-                {table.getFilteredRowModel().rows.length}
               </div>
 
-              {/* Go to page form */}
-              <form
-                onSubmit={handleCustomPageSubmit}
-                className="flex items-center gap-2"
-              >
-                <span className="hidden text-sm text-gray-500 sm:inline">
-                  <Trans i18nKey="common:goToPage" />:
-                </span>
-                <input
-                  type="number"
-                  min={1}
-                  max={pageCount}
-                  value={customPageNumber}
-                  onChange={(e) => setCustomPageNumber(e.target.value)}
-                  className="w-16 rounded-md border border-gray-200 px-2 py-1 text-sm focus:border-gray-300 focus:outline-none"
-                  placeholder={`1-${pageCount}`}
-                />
-                <button
-                  type="submit"
-                  className="rounded-md bg-gray-50 px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 focus:outline-none"
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 transition-colors duration-200 ${
+                    pageIndex >= pageCount - 1
+                      ? 'pointer-events-none opacity-50'
+                      : 'hover:bg-gray-100'
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (table.getCanNextPage()) {
+                      table.nextPage();
+                    }
+                  }}
                 >
-                  <Trans i18nKey="common:go" />
-                </button>
-              </form>
-
-              {/* Rows per page selector */}
-              <SelectRowsPerPage
-                defaultValue={rowsPerPage}
-                handleRowsPerPageChange={handleRowsPerPageChange}
-              />
+                  <span className="hidden sm:inline">
+                    <Trans i18nKey={'common:pagination.next'} />
+                  </span>
+                </PaginationNext>
+              </PaginationItem>
             </div>
           </PaginationContent>
         </Pagination>
@@ -326,17 +285,17 @@ export function SelectRowsPerPage({
 }: SelectRowsPerPageProps) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-gray-600">
+      <span className="text-sm text-gray-500">
         <Trans i18nKey={'common:rowsPerPage'} />
       </span>
       <Select
         defaultValue={String(defaultValue)}
         onValueChange={handleRowsPerPageChange}
       >
-        <SelectTrigger className="w-[100px] rounded-md bg-white font-medium">
+        <SelectTrigger className="w-[100px] rounded-md bg-white font-medium text-gray-500">
           <SelectValue placeholder="Rows" />
         </SelectTrigger>
-        <SelectContent className="rounded-md text-gray-600">
+        <SelectContent className="rounded-md text-gray-500">
           <SelectItem value="5">
             <Trans i18nKey={'common:rowNumber'} values={{ number: 5 }} />
           </SelectItem>
