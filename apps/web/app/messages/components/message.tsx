@@ -70,7 +70,10 @@ export default function Message({ message, canDelete = false }: MessageProps) {
         <div
           className={`flex flex-col gap-2 whitespace-normal break-words rounded-lg text-sm`}
         >
-          <div dangerouslySetInnerHTML={{ __html: content }} />
+          <div 
+            dangerouslySetInnerHTML={{ __html: content }} 
+            className="prose prose-sm max-w-none [&>p]:mb-4 last:[&>p]:mb-0 [&>p]:leading-relaxed"
+          />
           {message.files && message.files.length > 0 && (
             <div className="scrollbar-custom flex max-w-full gap-4 overflow-x-auto items-end">
               {message.files.map((file) => (

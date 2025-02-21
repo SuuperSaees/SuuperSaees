@@ -202,7 +202,6 @@ export function SidebarNavigation({
   config: SidebarConfig;
   showDashboardUrl?: boolean;
 }>) {
-  console.log('showDashboardUrl', showDashboardUrl);
   return (
     <>
       {config.routes.map((item, index) => {
@@ -240,7 +239,6 @@ export function SidebarNavigation({
           );
         }
         if (!showDashboardUrl && item.path === pathsConfig.app.dashboard) {
-          console.log('item', item);
           return null
         }
         return (
