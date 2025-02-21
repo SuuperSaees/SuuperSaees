@@ -1,5 +1,4 @@
 import { ThemedSidebar } from 'node_modules/@kit/accounts/src/components/ui/sidebar-themed-with-settings';
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
 import { z } from 'zod';
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 import { SidebarContent, SidebarNavigation } from '@kit/ui/sidebar';
@@ -11,7 +10,6 @@ import { personalAccountNavigationConfig } from '~/config/personal-account-navig
 import { teamMemberAccountNavigationConfig } from '../../../../config/member-team-account-navigation.config';
 import { GuestContent } from './guest-content';
 import { getOrganizationSettingsByOrganizationId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
-// home imports
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
 import './styles/home-sidebar.css';
 import { OrganizationSettings } from '~/lib/organization-settings.types';
@@ -19,20 +17,29 @@ import { OrganizationSettings } from '~/lib/organization-settings.types';
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 export async function HomeSidebar(props: { workspace: UserWorkspace }) {
   const { workspace, user, organization, agency } = props.workspace;
-  const userRole = await getUserRole().catch((err) => {
-    console.error(`Error client, getting user role: ${err}`)
-    return ''
-  });
-  // const { t } = useTranslation('auth');
+  const userRole = workspace.role;
 
   const organizationSettings = await getOrganizationSettingsByOrganizationId(agency ? agency.id : organization?.id ?? '', true, ['dashboard_url']).catch((err) => {
     console.error(`Error client, getting organization settings: ${err}`)
     return []
   });
 
-  const showDashboardUrl = !!organizationSettings?.find(
+  const dashboardUrl = organizationSettings?.find(
     setting => setting.key === OrganizationSettings.KEYS.dashboard_url
   )?.value;
+
+  let showDashboardUrl = !!dashboardUrl;
+
+  // Verificar permisos adicionales para roles de cliente
+  if (showDashboardUrl) {
+    const clientRoles = new Set(['client_owner', 'client_member']);
+    const urlHasUserIds = dashboardUrl?.includes('userIds=');
+    
+    if (urlHasUserIds && clientRoles.has(userRole ?? '')) {
+      const userIds = new URL(dashboardUrl ?? '').searchParams.get('userIds')?.split(',') ?? [];
+      showDashboardUrl = userIds.includes(workspace.id ?? '');
+    }
+  }
 
   // Filter the navigation config to remove the /clients path if userRole is 'agency_owner' or 'client_owner'
   const filterNavigationConfig = (config: NavigationConfig) => {
