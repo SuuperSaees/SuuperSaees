@@ -118,7 +118,7 @@ export const createClient = async (clientData: CreateClient) => {
     const clientOrganizationUser = await createClientUserAccount(
       clientData.client.email,
       organization.name,
-      clientData.adminActivated,
+      false,
       clientData.agencyId,
       clientData.sendEmail,
     );
