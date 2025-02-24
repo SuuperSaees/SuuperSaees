@@ -9,28 +9,41 @@ import { useTranslation } from 'react-i18next';
 
 import { SkeletonOrdersSection } from '~/components/organization/skeleton-orders-section';
 import { UserWithSettings } from '~/lib/account.types';
-import { Order } from '~/lib/order.types';
 import { OrdersProvider } from '~/orders/components/context/orders-context';
 import ProjectsBoard from '~/orders/components/projects-board';
 import { useOrderStats } from '~/orders/hooks/use-order-stats';
 import { getTags } from '~/server/actions/tags/tags.action';
-import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
+import { getOrdersByUserId } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 import CardStats from '../../../components/ui/card-stats';
 
 interface HomeSectionProps {
-  memberOrders: Order.Response[];
   agencyMembers: UserWithSettings[];
 }
 
-export default function HomeSection({
-  memberOrders,
-  agencyMembers,
-}: HomeSectionProps) {
+export default function HomeSection({ agencyMembers }: HomeSectionProps) {
   const { t } = useTranslation('statistics');
-  const { currentStats, previousStats } = useOrderStats(memberOrders);
+
   const { id } = useParams();
   // Transform agencyMembers to match the expected User.Response type
+
+  const queryKey = ['orders', id as string];
+  const queryFn = useCallback(async () => {
+    const orders = await getOrdersByUserId(
+      (id as string) ?? '',
+      true,
+      60,
+      true,
+    );
+    return orders.success?.data ?? [];
+  }, [id]);
+
+  const memberOrdersQuery = useQuery({
+    queryKey,
+    queryFn,
+  });
+
+  const memberOrders = memberOrdersQuery?.data ?? [];
 
   const tagsQuery = useQuery({
     queryKey: ['tags'],
@@ -40,12 +53,8 @@ export default function HomeSection({
 
   const tags = tagsQuery?.data ?? [];
 
-  const queryKey = ['orders', id as string];
-  const queryFn = useCallback(async () => {
-    return await getOrders(true);
-  }, []);
-
-  if (tagsQuery.isLoading) {
+  const { currentStats, previousStats } = useOrderStats(memberOrders);
+  if (tagsQuery.isLoading || memberOrdersQuery.isLoading) {
     return <SkeletonOrdersSection />;
   }
 
