@@ -19,17 +19,17 @@ export const createFolder = async (folderName: string, client_organization_id: s
     let agencyId = null;
 
     // Fetch the agencies of the user if is agency_owner
-    if (userRoleData === 'agency_owner' || userRoleData === 'agency_member' || userRoleData?.account_role === 'agency_project_manager') {
+    if (userRoleData === 'agency_owner' || userRoleData === 'agency_member' || userRoleData === 'agency_project_manager') {
       const { data: agencies, error: agenciesError } = await client
         .from('accounts')
-        .select('id')
-        .eq('primary_owner_user_id', userData.user.id)
-        .eq('is_personal_account', false)
+        .select('organization_id')
+        .eq('id', userData.user.id)
+        .eq('is_personal_account', true)
         .single();
       
       if (agenciesError) throw agenciesError.message;
 
-      agencyId = agencies?.id;
+      agencyId = agencies?.organization_id;
 
     } else {
       // Fetch the client_organization_id of the user
