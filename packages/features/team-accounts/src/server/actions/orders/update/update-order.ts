@@ -310,7 +310,7 @@ const handleFieldUpdate = async (
     translatedValue = new Date(value).toLocaleDateString();
   }
 
-  const emailsData = await getEmails(orderId.toString());
+  const emailsData = await getEmails(orderId.toString(), [], userData.user.id);
   const actualName = await getUserById(userData.user.id);
   const organization = await getOrganization();
   const organizationName = organization?.name;
