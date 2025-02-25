@@ -1,10 +1,9 @@
-import { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
 import {
   CheckSquare,
   ListFilter,
   LucideIcon,
-  RefreshCcw,
   SquareIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +11,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
 
-import Tooltip from '~/components/ui/tooltip';
 import { darkenColor, hexToRgba } from '~/utils/generate-colors';
 
 import Avatar from '../../components/ui/avatar';
@@ -42,93 +40,47 @@ interface FiltersProps {
   onReset: () => void;
 }
 
-const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
+const FilterLabel = ({
+  filterGroup,
+  appliedFilters,
+}: {
+  filterGroup?: FilterGroup;
+  appliedFilters: number;
+}) => {
   const { t } = useTranslation();
-  const [filterKeyOpen, setFilterKeyOpen] = useState(filters[0]?.key);
-
-  const filtersConfig: MenuItem[] = useMemo(() => {
-    const submenus: MenuItem[] = filters.map((filterGroup) => ({
-      id: filterGroup.title,
-      type: 'submenu',
-      label: filterGroup.title,
-      defaultOpen: filterGroup.title === filterKeyOpen,
-      icon: filterGroup.icon,
-      triggerBehavior: 'close-others',
-      content: (
-        <FiltersMenuContent
-          type={filterGroup.type}
-          filterGroup={filterGroup}
-          defaultFilters={defaultFilters}
-          setFilterKeyOpen={setFilterKeyOpen}
-        />
-      ),
-    }));
-    const headers: MenuItem[] = [
-      {
-        id: 'header',
-        type: 'label',
-        label: <FiltersHeaderMenu t={t} onReset={onReset} />,
-      },
-    ];
-    return [...headers, ...submenus];
-  }, [defaultFilters, filters, filterKeyOpen, t, onReset]);
-
   return (
-    <CustomDropdownMenu
-      trigger={
-        <Button
-          className="flex w-fit items-center gap-2 px-4 py-1 text-sm font-semibold text-gray-600"
-          variant="outline"
-          size="icon"
-        >
-          <ListFilter className="h-4 w-4" />
-          <span>{t('common:filters')}</span>
-        </Button>
-      }
-      items={filtersConfig}
-      className="w-[300px]"
-    />
-  );
-};
-
-const FiltersHeaderMenu = ({ t, onReset }: { t:(key:string)=>string, onReset:()=>void }) => {
-  return (
-    <div className="flex w-full justify-between px-2">
-      {/* Reset button */}
-      <Tooltip content={t('common:resetFilters')}>
-        <Button
-          variant={'ghost'}
-          className="h-5 w-5 rounded-full p-0 px-0 py-0"
-          onClick={onReset}
-        >
-          <RefreshCcw className="h-4 w-4" />
-        </Button>
-      </Tooltip>
+    <div className="flex items-center gap-2">
+      {filterGroup?.title
+        ? t(`common:filters.groups.${filterGroup?.key}.title`)
+        : filterGroup?.title ?? ''}
+      {/* Applied filters */}
+      {appliedFilters > 0 && (
+        <span className="text-xs font-normal text-gray-400">
+          {t(
+            appliedFilters === 1
+              ? 'common:filters.appliedFilters.singular'
+              : 'common:filters.appliedFilters.plural',
+            { number: appliedFilters },
+          )}
+        </span>
+      )}
     </div>
   );
 };
 
-const FiltersMenuContent = ({
-  type,
-  filterGroup,
-  defaultFilters,
-  setFilterKeyOpen,
-}: {
-  type: 'multiple-choice' | 'users';
-  filterGroup: FilterGroup;
-  defaultFilters?: Record<string, string[]>;
-  setFilterKeyOpen: Dispatch<SetStateAction<string | undefined>>;
-}) => {
-  const [selectedFilters, setSelectedFilters] = useState<
-    Record<string, string[]>
-  >(defaultFilters ?? {});
-  const [searchTerm, setSearchTerm] = useState('');
+const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
+  const { t } = useTranslation();
+  const [filterKeyOpen, setFilterKeyOpen] = useState(filters[0]?.key);
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>(defaultFilters ?? {});
 
-  const groupKey = filterGroup.key;
+  const handleReset = useCallback(() => {
+    setSelectedFilters({});
+    onReset();
+  }, [onReset]);
 
-  const handleToggleFilter = (option: FilterOption) => {
+  const handleFilterChange = (groupKey: string, option: FilterOption) => {
     const value = option.value;
-
+    
     setSelectedFilters((prev) => {
       const currentValues = prev[groupKey] ?? [];
       const hasValue = currentValues.includes(value);
@@ -148,6 +100,106 @@ const FiltersMenuContent = ({
     });
 
     option.onFilter(value);
+  };
+
+  const filtersConfig: MenuItem[] = useMemo(() => {
+    const submenus: MenuItem[] = filters.map((filterGroup) => ({
+      id: filterGroup.title,
+      type: 'submenu',
+      label: (
+        <FilterLabel
+          filterGroup={filterGroup}
+          appliedFilters={
+            filterGroup.options.filter((option) =>
+              selectedFilters?.[filterGroup.key]?.includes(option.value),
+            ).length
+          }
+        />
+      ),
+      defaultOpen: filterGroup.title === filterKeyOpen,
+      icon: filterGroup.icon,
+      triggerBehavior: 'close-others',
+      content: (
+        <FiltersMenuContent
+          type={filterGroup.type}
+          filterGroup={filterGroup}
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          setFilterKeyOpen={setFilterKeyOpen}
+        />
+      ),
+    }));
+    const headers: MenuItem[] = [
+      {
+        id: 'header',
+        type: 'label',
+        label: <FiltersHeaderMenu t={t} onReset={handleReset} />,
+      },
+    ];
+    return [...headers, ...submenus];
+  }, [selectedFilters, filters, filterKeyOpen, t, handleReset]);
+
+  return (
+    <CustomDropdownMenu
+      trigger={
+        <Button
+          className="flex w-fit items-center gap-2 px-4 py-1 text-sm font-semibold text-gray-600"
+          variant="outline"
+          size="icon"
+        >
+          <ListFilter className="h-4 w-4" />
+          <span>{t('common:filters.title')}</span>
+          <FilterLabel
+            appliedFilters={Object.values(selectedFilters ?? {}).reduce((sum, values) => sum + values.length, 0)}
+          />
+        </Button>
+      }
+      items={filtersConfig}
+      className="w-[300px]"
+    />
+  );
+};
+
+const FiltersHeaderMenu = ({
+  t,
+  onReset,
+}: {
+  t: (key: string) => string;
+  onReset: () => void;
+}) => {
+  return (
+    <div className="flex w-full justify-between px-2">
+      {/* Reset button */}
+
+      <Button
+        variant={'ghost'}
+        className="ml-auto h-fit w-fit rounded-lg bg-gray-100 px-2 py-1 text-gray-600"
+        onClick={onReset}
+      >
+        <span>{t('common:filters.resetFilters')}</span>
+      </Button>
+    </div>
+  );
+};
+
+const FiltersMenuContent = ({
+  type,
+  filterGroup,
+  selectedFilters,
+  onFilterChange,
+  setFilterKeyOpen,
+}: {
+  type: 'multiple-choice' | 'users';
+  filterGroup: FilterGroup;
+  selectedFilters: Record<string, string[]>;
+  onFilterChange: (groupKey: string, option: FilterOption) => void;
+  setFilterKeyOpen: Dispatch<SetStateAction<string | undefined>>;
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const groupKey = filterGroup.key;
+
+  const handleToggleFilter = (option: FilterOption) => {
+    onFilterChange(groupKey, option);
     setFilterKeyOpen(filterGroup.key);
   };
 
@@ -162,7 +214,6 @@ const FiltersMenuContent = ({
 
   return (
     <div className="flex max-h-96 flex-col gap-2 overflow-y-auto">
-      {/* Search */}
       <Input
         type="search"
         placeholder="Search"
@@ -175,12 +226,12 @@ const FiltersMenuContent = ({
         return (
           <Button
             key={option.value}
-            className="border-1 flex w-full justify-start gap-2 border border-transparent bg-transparent hover:bg-gray-100 px-4 py-1 text-sm font-semibold text-gray-600 hover:border-gray-300"
+            className="border-1 flex w-full justify-start gap-2 border border-transparent bg-transparent px-4 py-1 text-sm font-semibold text-gray-600 hover:border-gray-300 hover:bg-gray-100"
             size="icon"
             onClick={() => handleToggleFilter(option)}
             style={{
               backgroundColor: hexToRgba(option.color ?? '', 1),
-              color: darkenColor(option.color ?? '', 0.8), // replace with getContrastColor
+              color: darkenColor(option.color ?? '', 0.8),
             }}
           >
             {type === 'users' ? (

@@ -109,8 +109,34 @@
   "stopImpersonatingDescription": "You will go back to your session shortly",
   "rowsPerPage": "Show",
   "rowNumber": "{{number}} rows",
-  "filters": "Filters",
-  "resetFilters": "Reset filters",
+  "filters": {
+    "title": "Filters",
+    "appliedFilters": {
+      "singular": "({{number}})",
+      "plural": "({{number}})"
+    },
+    "resetFilters": "Clear filters",
+    "groups": {
+      "status": {
+        "title": "Status"
+      },
+      "client_organization": {
+        "title": "Client Organization"
+      },
+      "assigned_to": {
+        "title": "Assigned to"
+      },
+      "tags": {
+        "title": "Tags"
+      },
+      "customer": {
+        "title": "Customer"
+      },
+      "priority": {
+        "title": "Priority"
+      }
+    }
+  },
   "pluginsName": "Apps",
   "goToPage": "Go to page",
   "of": "of",

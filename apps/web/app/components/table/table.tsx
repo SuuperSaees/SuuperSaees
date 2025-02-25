@@ -335,7 +335,7 @@ const PresetFilters = <T,>({
           className="flex w-fit items-center gap-2 text-sm font-semibold text-gray-600"
         >
           <ListFilter className="h-4 w-4" />
-          <span>{t('common:filters')}</span>
+          <span>{t('common:filters.title')}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="relative flex flex-col gap-4 py-6">
@@ -344,7 +344,7 @@ const PresetFilters = <T,>({
           className="absolute right-4 top-2 h-6 w-6 rounded-full p-0"
           onClick={resetFilters}
         >
-          <Tooltip content={t('common:resetFilters')}>
+          <Tooltip content={t('common:filters.resetFilters')}>
             <ResetIcon className="h-4 w-4" />
           </Tooltip>
         </Button>
