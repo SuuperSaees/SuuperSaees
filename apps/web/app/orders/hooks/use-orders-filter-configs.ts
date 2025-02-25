@@ -320,7 +320,13 @@ const useOrdersFilterConfigs = ({
     {
       key: 'completed',
       label: 'completedOrders',
-      filter: () => updateFilter('status', 'replace', STATUS_FILTERS.COMPLETED),
+      filter: ()  =>
+        updateFilter(
+          'status',
+          'replace',
+          STATUS_FILTERS.COMPLETED,
+          'completed',
+        ),
     },
     {
       key: 'all',
