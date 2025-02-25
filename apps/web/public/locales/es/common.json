@@ -106,8 +106,34 @@
   "stopImpersonatingDescription": "Regresarás a tu sesión en unos segundos",
   "rowsPerPage": "Mostrar",
   "rowNumber": "{{number}} filas",
-  "filters": "Filtros",
-  "resetFilters": "Restablecer filtros",
+  "filters": {
+    "title": "Filtros",
+    "appliedFilters": {
+      "singular": "({{number}})",
+      "plural": "({{number}})"
+    },
+    "resetFilters": "Limpiar filtros",
+    "groups": {
+      "status": {
+        "title": "Estado"
+      },
+      "client_organization": {
+        "title": "Organización del cliente"
+      },
+      "assigned_to": {
+        "title": "Asignado a"
+      },
+      "tags": {
+        "title": "Etiquetas"
+      },
+      "customer": {
+        "title": "Cliente"
+      },
+      "priority": {
+        "title": "Prioridad"
+      }
+    }
+  },
   "pluginsName": "Aplicaciones",
   "goToPage": "Ir a la página",
   "of": "de",
