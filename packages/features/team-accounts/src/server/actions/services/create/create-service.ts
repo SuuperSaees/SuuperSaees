@@ -17,6 +17,11 @@ import { HttpStatus } from '../../../../../../../shared/src/response/http-status
 import { fetchClientByOrgId } from '../../clients/get/get-clients';
 import { fetchCurrentUser, getPrimaryOwnerId } from '../../members/get/get-member-account';
 import { hasPermissionToAddClientServices } from '../../permissions/services';
+import { createUrlForCheckout } from './create-token-for-checkout';
+import { getStripeAccountID } from '../../members/get/get-member-account';
+import { getOrganization } from '../../organizations/get/get-organizations';
+import { RetryOperationService } from '@kit/shared/utils';
+import { getDomainByOrganizationId } from '../../../../../../../multitenancy/utils/get/get-domain';
 
 
 // import { updateTeamAccountStripeId } from '../../team-details-server-actions';
@@ -57,6 +62,7 @@ export const createService = async (clientData: ServiceData) => {
   try {
     const primary_owner_user_id = await getPrimaryOwnerId();
     if (!primary_owner_user_id) throw new Error('No primary owner found');
+
     // const { userId, stripeId: stripeAccountId } = await getStripeAccountID();
     // let stripeId = stripeAccountId;
     const newService = {
@@ -104,6 +110,46 @@ export const createService = async (clientData: ServiceData) => {
         error.message,
         ErrorServiceOperations.FAILED_TO_CREATE_SERVICE,
       );
+
+    // Iniciamos la generación del checkout URL en segundo plano
+    const generateCheckoutUrlPromise = new RetryOperationService(
+      async () => {
+        const { stripeId } = await getStripeAccountID(primary_owner_user_id)
+        const organization = await getOrganization(primary_owner_user_id)
+        const baseUrl = await getDomainByOrganizationId(organization.id, true, true);
+
+        const checkoutUrl = await createUrlForCheckout({
+          stripeId: stripeId,
+          priceId: '',
+          service: dataResponseCreateService,
+          organizationId: organization.id,
+          baseUrl: baseUrl,
+          primaryOwnerId: primary_owner_user_id,
+        });
+
+        // Actualizar el servicio con la URL generada
+        const { error: errorUpdateService } = await client
+          .from('services')
+          .update({ checkout_url: checkoutUrl })
+          .eq('id', dataResponseCreateService.id);
+
+        if (errorUpdateService) {
+          throw new Error(`Failed to update service with checkout URL: ${errorUpdateService.message}`);
+        }
+
+        return checkoutUrl;
+      },
+      {
+        maxAttempts: 3,
+        delayMs: 1000,
+        backoffFactor: 2,
+      }
+    );
+
+    // Ejecutar en segundo plano
+    generateCheckoutUrlPromise.execute().catch((error) => {
+      console.error('Failed to generate checkout URL:', error);
+    });
 
     // if (!stripeId) {
     //   const user = await fetchUserAccount(client);

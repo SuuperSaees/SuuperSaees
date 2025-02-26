@@ -127,6 +127,7 @@ export function useStripeActions() {
       organizationId: effectiveOrgId,
       paymentMethods,
       baseUrl: window.location.origin,
+      primaryOwnerId: ''
     });
   } catch (error) {
     console.error('Checkout error:', error);

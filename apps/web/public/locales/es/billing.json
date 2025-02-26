@@ -21,6 +21,9 @@
   "manageTeamPlan": "Administra tu Plan de Equipo",
   "manageTeamPlanDescription": "Elige un plan que se ajuste a las necesidades de tu equipo. Puedes mejorar o degradar tu plan en cualquier momento.",
   "basePlan": "Plan Base",
+  "noPaymentMethodsTitle": "No hay métodos de pago disponibles",
+  "noPaymentMethodsDescription": "Por favor, contacta al propietario de tu organización para agregar un método de pago.",
+  "contactSupport": "Contactar Soporte",
   "billingInterval": {
     "label": "Elige tu intervalo de facturación",
     "month": "Facturado mensualmente",

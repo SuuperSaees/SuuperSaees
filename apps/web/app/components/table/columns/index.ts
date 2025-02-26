@@ -30,10 +30,7 @@ export const columnFactory = <K extends keyof EntityData>(
     case 'services':
       return servicesColumns(
         t,
-        servicesConfig.paymentsMethods,
         servicesConfig.hasPermission,
-        servicesConfig.stripeId,
-        servicesConfig.organizationId,
       ) as ColumnDef<EntityData[K][number]>[];
     default:
       return [];

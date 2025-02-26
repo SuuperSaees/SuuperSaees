@@ -8,6 +8,9 @@ import { getOrganizationSettingsByOrganizationId } from '~/team-accounts/src/ser
 import { decodeTokenData } from '../../../../packages/features/team-accounts/src/server/actions/tokens/decode/decode-token';
 import { PayToken } from '../../../../packages/tokens/src/domain/token-type';
 import DetailsSide from './components/details';
+import { getPaymentsMethods, getServiceById } from '~/team-accounts/src/server/actions/services/get/get-services';
+import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import EmptyPaymentMethods from './components/empty-payment-methods';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -36,6 +39,30 @@ async function ServiceCheckoutPage({
     (setting) => setting.key === 'sidebar_background_color',
   )?.value;
 
+  const paymentMethods = await getPaymentsMethods(tokendecoded?.primary_owner_id ?? '', undefined, true).catch((error) => {
+    console.error('Error fetching payment methods:', error);
+    return {
+      paymentMethods: [],
+      primaryOwnerId: tokendecoded?.primary_owner_id ?? '',
+    };
+  });
+
+  const service = await getServiceById(tokendecoded?.service.id ?? 0, false).catch((error) => {
+    console.error('Error fetching service:', error);
+    return null;
+  });
+
+  let accountId = tokendecoded?.account_id ?? '';
+
+  if(!accountId) {
+    const { stripeId } = await getStripeAccountID(tokendecoded?.primary_owner_id ?? '', true).catch((err) => {
+      console.error(`Error client, getting stripe account id: ${err}`)
+      return { stripeId: '' }
+    });
+
+    accountId = stripeId;
+  }
+
   return (
     <OrganizationSettingsProvider initialSettings={organizationSettings}>
       <div
@@ -43,16 +70,22 @@ async function ServiceCheckoutPage({
         style={{ backgroundColor: sidebarBackgroundColor }}
       >
         <div className="flex w-full max-w-[1200px] flex-col pb-10 lg:flex-row">
-          <DetailsSide
-            service={
-              tokendecoded?.service as Service.Relationships.Billing.BillingService
-            }
-            stripeId={tokendecoded?.account_id ?? ''}
-            organizationId={tokendecoded?.organization_id ?? ''}
-            logoUrl={logoUrl ?? suuperLogo ?? ''}
-            sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
-            paymentMethods={tokendecoded?.payment_methods ?? []}
+          {
+            !paymentMethods.paymentMethods.length ? (
+              <EmptyPaymentMethods logoUrl={logoUrl ?? suuperLogo ?? ''} />
+            ) : (
+              <DetailsSide
+                service={
+                  service as Service.Relationships.Billing.BillingService
+                }
+                stripeId={accountId}
+                organizationId={tokendecoded?.organization_id ?? ''}
+                logoUrl={logoUrl ?? suuperLogo ?? ''}
+                sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
+                paymentMethods={paymentMethods.paymentMethods ?? []}
           />
+            )
+          }
         </div>
       </div>
     </OrganizationSettingsProvider>

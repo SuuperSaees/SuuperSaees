@@ -235,29 +235,35 @@ export async function getUserRoleById(userId: string, adminActivated = false, cl
   }
 }
 
-export async function getStripeAccountID(primaryOwnerId?: string): Promise<{
+export async function getStripeAccountID(primaryOwnerId?: string, adminActivated = false): Promise<{
   userId: string;
   stripeId: string;
 }> {
   try {
-    const client = getSupabaseServerComponentClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
+    const client = getSupabaseServerComponentClient({
+      admin: adminActivated,
+    });
+    let userId = '';
+
+    if(!adminActivated) {
+      const { data: userData, error: userError } = await client.auth.getUser();
+      if (userError) throw userError;
+      userId = userData.user.id;
+    }
 
     const { data: userAccountData, error: accountsError } = await client
       .from('billing_accounts')
       .select('provider_id')
-      .eq('account_id', primaryOwnerId ?? userData.user.id)
+      .eq('account_id', primaryOwnerId ?? userId)
       .eq('provider', 'stripe')
       .single();
 
     if (accountsError) throw accountsError;
 
     const stripeId = userAccountData?.provider_id;
-
     return {
       stripeId: stripeId ?? '',
-      userId: userData.user.id,
+      userId: userId,
     };
   } catch (error) {
     console.error('Error fetching primary owner:', error);

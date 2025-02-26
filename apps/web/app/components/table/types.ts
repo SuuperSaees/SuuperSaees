@@ -1,5 +1,4 @@
 import { UseMutationResult } from '@tanstack/react-query';
-import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Brief } from '~/lib/brief.types';
 import { Order } from '~/lib/order.types';
 import { Service } from '~/lib/services.types';
@@ -34,11 +33,8 @@ export type ColumnConfigs = {
     hasPermission?: (row?: string) => boolean;
   };
   services: {
-    paymentsMethods: BillingAccounts.PaymentMethod[];
     hasPermission: (
       row?: keyof (EntityData['services'][0] & ServicePermissions),
     ) => boolean;
-    stripeId?: string;
-    organizationId?: string;
   };
 };
