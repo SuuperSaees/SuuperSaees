@@ -2,7 +2,7 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-export async function getEmails(orderId: string, rolesAvailable?: string[]) {
+export async function getEmails(orderId: string, rolesAvailable?: string[], userId?: string) {
   try {
     const client = getSupabaseServerComponentClient({
       admin: true,
@@ -41,11 +41,18 @@ export async function getEmails(orderId: string, rolesAvailable?: string[]) {
       memberIds = accountsByRolesData.map(account => account.user_id);
     }
 
-    // Consulta para obtener los correos electrónicos de los miembros de la agencia
-    const { data: emailData, error: emailError } = await client
-      .from('accounts')
-      .select('email')
-      .in('id', memberIds);
+    // Query to get the emails of the agency members
+    let query = client
+    .from('accounts')
+    .select('email')
+    .in('id', memberIds);
+  
+    // Only apply the userId filter if it exists
+    if (userId) {
+      query = query.not('id', 'eq', userId);
+    }
+
+  const { data: emailData, error: emailError } = await query;
 
       if (emailError) throw emailError;
 

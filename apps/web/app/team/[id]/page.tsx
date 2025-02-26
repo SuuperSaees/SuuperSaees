@@ -5,7 +5,6 @@ import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace
 import {
   getUserById, // getUserRole,
 } from '~/team-accounts/src/server/actions/members/get/get-member-account';
-import { getOrdersByUserId } from '~/team-accounts/src/server/actions/orders/get/get-order';
 import { getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getAgencyForClient } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
@@ -29,13 +28,6 @@ export default async function MemberPage(props: {
   });
 
   if (!user) return null;
-
-  const memberOrders = await getOrdersByUserId(id, true, 60, true)
-    .catch((error) => {
-      console.error('Error fetching orders in team member page:', error);
-      return [];
-    })
-    .then((res) => res?.success?.data);
 
   const userOrganization = await getOrganization();
   const agencyRoles = [
@@ -78,7 +70,6 @@ export default async function MemberPage(props: {
         id={id}
         userRole={userRole ?? ''}
         user={user}
-        orders={memberOrders}
         agencyStatuses={agencyStatuses}
         agencyMembers={agencyMembers}
       />

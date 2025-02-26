@@ -88,7 +88,7 @@ export const createReview = async (review: CreateReviewProps) => {
     const orderInfo = await getOrderInfo(review.order_id.toString());
     const agency = await getOrganization();
     const agencyName = agency?.name;
-    const emailsData = await getEmails(review.order_id.toString());
+    const emailsData = await getEmails(review.order_id.toString(), [], userData.user.id);
 
     // Send order completion notifications
     for (const email of emailsData) {

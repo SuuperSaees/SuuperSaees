@@ -50,7 +50,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: s
       const currentInternalMessagingState = getInternalMessagingEnabled();
 
       const rolesAvailable = currentInternalMessagingState ? ['agency_member', 'agency_owner', 'agency_project_manager'] : ['agency_member', 'agency_owner', 'agency_project_manager', 'client_member', 'client_owner'];
-      const emailsData = await getEmails(order.id.toString(), rolesAvailable);
+      const emailsData = await getEmails(order.id.toString(), rolesAvailable, userWorkspace.id ?? '');
       if (fileIdsList && fileIdsList?.length > 0) {
         const idsListFromServer = [];
         for (const fileId of fileIdsList) {
