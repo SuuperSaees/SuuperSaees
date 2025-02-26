@@ -202,6 +202,21 @@
   "shareProject": "Share project",
   "publishProject": "Copy project link",
   "shareProjectDescription": "When you publish a project publicly, anyone with the link can access all the information of this project, including interaction through the chat and viewing files, details, and tasks.",
-  "link": "Link"
+  "link": "Link",
+  "columns": {
+    "id": "ID",
+    "title": "Title",
+    "description": "Description",
+    "status": "Status",
+    "statusId": "Status ID",
+    "dueDate": "Due Date",
+    "priority": "Priority",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "clientOrganization": "Client Organization",
+    "agency": "Agency",
+    "assignedTo": "Assigned To",
+    "customer": "Customer"
+  }
 }
 

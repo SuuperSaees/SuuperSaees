@@ -1,6 +1,7 @@
 import React from 'react';
 import { StickyNote } from 'lucide-react';
 import { FileType } from '../../lib/file-types';
+import { cn } from 'node_modules/@kit/ui/src/utils/cn';
 
 // Define the supported file extensions and their corresponding colors
 export const FILE_EXTENSION_COLORS: Record<string, string> = {
@@ -69,7 +70,7 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
 
 interface FileIconProps {
   extension: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xs';
   className?: string;
 }
 
@@ -84,11 +85,12 @@ export const FileIcon: React.FC<FileIconProps> = ({
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
-    lg: 'w-12 h-12'
+    lg: 'w-12 h-12',
+    xs: 'w-5 h-5'
   };
 
   if (!ext) {
-    return <StickyNote className={`text-gray-500 ${sizeClasses[size]} ${className}`} />;
+    return <StickyNote className={cn(`text-gray-500 ${sizeClasses[size]} ${className}`)} />;
   }
 
   return (
