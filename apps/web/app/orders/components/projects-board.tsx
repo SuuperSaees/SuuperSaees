@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState, useCallback } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -146,6 +146,15 @@ const ProjectsBoard = ({
     return filteredOrders;
   }, [filteredOrders, currentView, statuses]);
   
+  // Handle search with a stable reference to prevent re-renders
+  const handleSearch = useCallback((searchTerm: string) => {
+    // Only update if the search term has actually changed
+    const currentSearchValue = getFilterValues('search')?.[0] ?? '';
+    if (searchTerm !== currentSearchValue) {
+      searchConfig.filter(searchTerm);
+    }
+  }, [searchConfig, getFilterValues]);
+  
   return (
     <ViewProvider
       initialData={mutedOrders as ViewItem[]}
@@ -173,7 +182,7 @@ const ProjectsBoard = ({
           <Search
             defaultSearch={getFilterValues('search')?.[0] ?? ''}
             t={t}
-            handleSearch={searchConfig.filter}
+            handleSearch={handleSearch}
           />
           <Filters
             filters={filtersConfig}

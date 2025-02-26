@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useCallback } from 'react';
 import { Flag, SquareKanban, Tag, Users2 } from 'lucide-react';
 
 import useFilters from '~/hooks/use-filters';
@@ -106,6 +107,29 @@ const useOrdersFilterConfigs = ({
   clientOrganizations,
   storageKey = 'orders-filters',
 }: UseOrdersFilterConfigsProps) => {
+  // Create a more efficient search index using a Map for faster lookups
+  const ordersSearchIndex = useMemo(() => {
+    // Skip rebuilding the index if orders haven't changed
+    if (orders.length === 0) {
+      return new Map<string, string[]>();
+    }
+    
+    console.time('Building search index');
+    const searchIndex = new Map<string, string[]>();
+    
+    orders.forEach(order => {
+      // Only compute searchable fields if not already in the index or if order has changed
+      const orderId = order.id?.toString() ?? '';
+      if (!searchIndex.has(orderId)) {
+        const searchableFields = getSearchableFields(order);
+        searchIndex.set(orderId, searchableFields);
+      }
+    });
+    
+    console.timeEnd('Building search index');
+    return searchIndex;
+  }, [orders]);
+
   const initialFiltersHandlers: FilterHandler[] = [
     {
       key: 'status',
@@ -150,9 +174,11 @@ const useOrdersFilterConfigs = ({
       key: 'search',
       filterFn: (order, selectedValues) =>
         selectedValues.some((searchTerm) => {
+          if (!searchTerm) return true;
           const searchTermNormalized = normalizeString(searchTerm);
-          const searchableFields = getSearchableFields(order);
-          return searchableFields.some(field => field.includes(searchTermNormalized));
+          // Use the search index for faster lookups
+          const orderFields = ordersSearchIndex.get(order.id?.toString() ?? '') ?? [];
+          return orderFields.some(field => field.includes(searchTermNormalized));
         }),
       persistent: false,
     },
@@ -341,18 +367,39 @@ const useOrdersFilterConfigs = ({
   const searchConfig = {
     key: 'search',
     label: 'search',
-    filter: (searchTerm: string) =>
+    filter: useCallback((searchTerm: string) => {
+      // Normalize the search term once outside the filter function
+      const normalizedSearchTerm = normalizeString(searchTerm.trim());
+      
+      // Get current search filter value
+      const currentSearchValue = getFilterValues('search')?.[0] ?? '';
+      
+      // Only update if the search term has actually changed
+      if (normalizedSearchTerm === normalizeString(currentSearchValue.trim())) {
+        return; // Skip update if the normalized search terms are the same
+      }
+      
+      if (!normalizedSearchTerm) {
+        // If search is empty, remove the filter entirely
+        removeFilter('search');
+        return;
+      }
+      
+      // Create a stable filter function that doesn't recreate on each render
+      const searchFilterFn = (order: Order.Response) => {
+        // Use the search index for faster lookups
+        const orderFields = ordersSearchIndex.get(order.id?.toString() ?? '') ?? [];
+        return orderFields.some(field => field.includes(normalizedSearchTerm));
+      };
+      
       updateFilter(
         'search',
         'replace',
-        (order: Order.Response) => {
-          const searchTermNormalized = normalizeString(searchTerm);
-          const searchableFields = getSearchableFields(order);
-          return searchableFields.some(field => field.includes(searchTermNormalized));
-        },
+        searchFilterFn,
         searchTerm,
         false
-      ),
+      );
+    }, [ordersSearchIndex, getFilterValues, removeFilter, updateFilter]),
   };
 
   return {
