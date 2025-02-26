@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Link from 'next/link';
 
@@ -22,6 +22,7 @@ import EmptyState from '~/components/ui/empty-state';
 import { Option } from '~/components/ui/select';
 // Hooks and Utilities
 import { useColumns } from '~/hooks/use-columns';
+import useStorageConfigs from '~/hooks/use-storage-configs';
 // Type Definitions
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Order } from '~/lib/order.types';
@@ -66,79 +67,6 @@ interface OrdersViewConfig extends Record<string, unknown> {
   };
 }
 
-class LocalStorageManager<T extends Record<string, unknown>> {
-  private readonly key: string;
-
-  constructor(key: string) {
-    this.key = key;
-  }
-
-  save(config: T): void {
-    try {
-      localStorage.setItem(this.key, JSON.stringify(config));
-    } catch (error) {
-      console.error(`Error saving ${this.key} to localStorage:`, error);
-    }
-  }
-
-  get(): T | null {
-    try {
-      const config = localStorage.getItem(this.key);
-
-      // Type guard to ensure the parsed value matches the expected type
-      if (config) {
-        const parsed = JSON.parse(config);
-        return this.isValidConfig(parsed) ? parsed : null;
-      }
-
-      return null;
-    } catch (error) {
-      console.error(`Error reading ${this.key} from localStorage:`, error);
-      return null;
-    }
-  }
-
-  // Type guard method to validate the configuration
-  private isValidConfig(config: unknown): config is T {
-    // Validate the configuration
-    return (
-      typeof config === 'object' &&
-      config !== null &&
-      'currentView' in config &&
-      typeof (config as T).currentView === 'string'
-    );
-  }
-
-  clear(): void {
-    try {
-      localStorage.removeItem(this.key);
-    } catch (error) {
-      console.error(`Error clearing ${this.key} from localStorage:`, error);
-    }
-  }
-
-  // New method to validate and clean invalid views
-  validateAndCleanConfig(validViews: string[]): void {
-    const config = this.get();
-    if (!config) return;
-
-    const currentView = config.currentView;
-    if (typeof currentView === 'string' && !validViews.includes(currentView)) {
-      // If current view is invalid, remove it and set to default table view
-      const newConfig = {
-        ...config,
-        currentView: ViewTypeEnum.Table
-      };
-      this.save(newConfig);
-    }
-  }
-}
-
-// Create a typed localStorage manager for orders view configuration
-const ordersConfigStorage = new LocalStorageManager<OrdersViewConfig>(
-  'orders-config',
-);
-
 // Main Hook Implementation
 const useOrdersViewConfigs = ({
   statuses,
@@ -146,56 +74,81 @@ const useOrdersViewConfigs = ({
   currentUserRole,
   agencyMembers,
 }: UseOrdersViewConfigsProps) => {
-  // Type-safe update function
-  const updateCurrentView = (view: string | number): void => {
-    const viewString = String(view);
-    setCurrentView(viewString);
-
-    // Save to localStorage with proper typing
-    ordersConfigStorage.save({
-      ...ordersConfigStorage.get(),
-      currentView: viewString,
-    });
-  };
-
-  // Get valid views from viewOptions
-  const viewOptions: ViewOption[] = [
-    {
-      label: 'Board',
-      value: 'kanban',
-      action: updateCurrentView,
-      icon: Columns3,
-    },
-    {
-      label: 'Table',
-      value: 'table',
-      action: updateCurrentView,
-      icon: Table2,
-    },
-    {
-      label: 'Calendar',
-      value: 'calendar',
-      action: updateCurrentView,
-      icon: Calendar,
-    },
-  ];
-
-  const validViews = viewOptions.map(option => String(option.value));
-
-  // Validate stored view against valid views before initializing state
-  ordersConfigStorage.validateAndCleanConfig(validViews);
-
-  // Type-safe initialization from localStorage
-  const [currentView, setCurrentView] = useState<string>(() => {
-    const savedConfig = ordersConfigStorage.get();
-    const savedView = savedConfig?.currentView;
-    return validViews.includes(savedView ?? '') ? savedView ?? ViewTypeEnum.Table : ViewTypeEnum.Table;
-  });
-
   const { theme_color } = useOrganizationSettings();
   // Destructure and use hooks
   const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
   const { t } = useTranslation('orders');
+
+  // Define view options
+  const viewOptions = useMemo(() => [
+    {
+      label: 'Board',
+      value: 'kanban',
+      icon: Columns3,
+      action: (_: string) => null, // Will be replaced by useStorageConfigs
+    },
+    {
+      label: 'Table',
+      value: 'table',
+      icon: Table2,
+      action: (_: string) => null, // Will be replaced by useStorageConfigs
+    },
+    {
+      label: 'Calendar',
+      value: 'calendar',
+      icon: Calendar,
+      action: (_: string) => null, // Will be replaced by useStorageConfigs
+    },
+  ], []);
+
+  // Custom validator for view configurations
+  const validator = (config: unknown): boolean => {
+    if (typeof config !== 'object' || config === null) return false;
+    
+    // Check if currentView is valid
+    const viewConfig = config as Partial<OrdersViewConfig>;
+    if (typeof viewConfig.currentView !== 'string') return false;
+    
+    // Validate that the view is one of the available options
+    const validViews = viewOptions.map(option => String(option.value));
+    return validViews.includes(viewConfig.currentView);
+  };
+
+  // Default configuration
+  const defaultConfig: OrdersViewConfig = {
+    currentView: ViewTypeEnum.Table,
+    table: {
+      rowsPerPage: 10,
+    },
+  };
+
+  // Use our generic storage hook
+  const { configs, updateConfig } = useStorageConfigs<OrdersViewConfig>(
+    'orders-config',
+    defaultConfig,
+    validator
+  );
+
+  // Use the currentView directly from configs
+  // This ensures we're always using the value from localStorage
+  const [currentView, setCurrentView] = useState(configs.currentView);
+  
+  // Keep currentView in sync with configs
+  useEffect(() => {
+    setCurrentView(configs.currentView);
+  }, [configs.currentView]);
+
+  // Update current view in state and storage
+  const updateCurrentView = useCallback((view: string | number) => {
+    const viewString = String(view);
+    updateConfig('currentView', viewString);
+  }, [updateConfig]);
+
+  // Configure view options with the update function
+  const configuredViewOptions = useMemo(() => viewOptions.map(option => ({
+    ...option,
+    action: updateCurrentView,
+  })), [viewOptions, updateCurrentView]);
 
   // Permission check helper
   const hasPermission = () => agencyRoles.has(currentUserRole);
@@ -256,14 +209,11 @@ const useOrdersViewConfigs = ({
         emptyState: <EmptyStateComponent />,
         configs: {
           rowsPerPage: {
-            onUpdate: (value: string) =>
-              ordersConfigStorage.save({
-                currentView: currentView,
-                table: {
-                  rowsPerPage: Number(value),
-                },
-              }),
-            value: ordersConfigStorage.get()?.table?.rowsPerPage ?? 10,
+            onUpdate: (value: string) => updateConfig('table', {
+              ...configs.table,
+              rowsPerPage: Number(value),
+            }),
+            value: configs.table?.rowsPerPage ?? 10,
           },
         },
       },
@@ -291,15 +241,18 @@ const useOrdersViewConfigs = ({
       primary: theme_color ?? '#1A38D7',
     },
   };
+  
   // Return all configurations and state
   return {
-    viewOptions,
+    viewOptions: configuredViewOptions,
     preferences,
     viewInitialConfiguarations,
     viewAvailableProperties: VIEW_AVAILABLE_PROPERTIES,
     currentView,
     customComponents,
     setCurrentView: updateCurrentView,
+    configs,
+    updateConfig,
   };
 };
 

@@ -28,6 +28,7 @@ import { PageHeader } from '../../components/page-header';
 import Table from '../../components/table/table';
 import { TimerContainer } from '../../components/timer-container';
 import { useStripeActions } from '../hooks/use-stripe-actions';
+import { useTableConfigs } from '~/(views)/hooks/use-table-configs';
 
 interface ServicesPageClientProps {
   accountRole: string;
@@ -163,6 +164,7 @@ export function ServicesPageClient({
       }
     />
   );
+  const {config} = useTableConfigs('table-config');
 
   return (
     <Tabs defaultValue={activeTab} onValueChange={handleTabChange}>
@@ -227,6 +229,7 @@ export function ServicesPageClient({
                   search: { value: searchTerm, setValue: setSearchTerm },
                 }}
                 emptyStateComponent={renderEmptyState(accountRole)}
+                configs={config}
               />
             )}
           </TabsContent>
@@ -244,6 +247,7 @@ export function ServicesPageClient({
                   search: { value: searchTerm, setValue: setSearchTerm },
                 }}
                 emptyStateComponent={renderEmptyState(accountRole)}
+                configs={config}
               />
             )}
           </TabsContent>
