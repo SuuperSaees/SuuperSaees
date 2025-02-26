@@ -6,21 +6,18 @@ export type FilterFunction<T> = (item: T, selectedValues: string[]) => boolean;
 export interface FilterConfig<T> {
   key: string;
   filterFn: FilterFunction<T>;
-  persistent?: boolean;
 }
 
 const createFilterRegistry = <T>(initialFilters?: FilterConfig<T>[]) => {
-  const filters = new Map<string, { filterFn: FilterFunction<T>, persistent: boolean }>();
+  const filters = new Map<string, FilterFunction<T>>();
   
-  initialFilters?.forEach(({ key, filterFn, persistent = true }) => {
-    filters.set(key, { filterFn, persistent });
+  initialFilters?.forEach(({ key, filterFn }) => {
+    filters.set(key, filterFn);
   });
 
   return {
-    register: (key: string, filterFn: FilterFunction<T>, persistent = true) => 
-      filters.set(key, { filterFn, persistent }),
-    get: (key: string) => filters.get(key)?.filterFn,
-    isPersistent: (key: string) => filters.get(key)?.persistent ?? true,
+    register: (key: string, filterFn: FilterFunction<T>) => filters.set(key, filterFn),
+    get: (key: string) => filters.get(key),
     remove: (key: string) => filters.delete(key),
   };
 };
@@ -41,22 +38,14 @@ export default function useFilters<T>(
   });
 
   useEffect(() => {
-    initialFilters?.forEach(({ key, filterFn, persistent = true }) => {
-      filterRegistry.register(key, filterFn, persistent);
+    initialFilters?.forEach(({ key, filterFn }) => {
+      filterRegistry.register(key, filterFn);
     });
   }, [initialFilters, filterRegistry]);
 
   useEffect(() => {
-    // Only persist filters that are marked as persistent
-    const persistentFilters = Object.entries(activeFilters).reduce((acc, [key, value]) => {
-      if (filterRegistry.isPersistent(key)) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {} as Record<string, string[]>);
-
-    localStorage.setItem(storageKey, JSON.stringify(persistentFilters));
-  }, [activeFilters, storageKey, filterRegistry]);
+    localStorage.setItem(storageKey, JSON.stringify(activeFilters));
+  }, [activeFilters, storageKey]);
 
   const filteredData = useMemo(() => {
     return data.filter((item) =>
@@ -115,7 +104,6 @@ export default function useFilters<T>(
     action: 'add' | 'replace' | 'remove' | 'toggle',
     filterFn?: FilterFunction<T>,
     value?: string,
-    persistent = true
   ) => {
     if (action === 'remove') {
       removeFilter(key);
@@ -126,7 +114,7 @@ export default function useFilters<T>(
 
     const selectedValues = deriveSelectedValues(key, filterFn, value);
 
-    filterRegistry.register(key, filterFn, persistent);
+    filterRegistry.register(key, filterFn);
 
     setActiveFilters((prev) => {
       const currentValues = prev[key] ?? [];

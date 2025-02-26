@@ -23,7 +23,6 @@ interface Priority {
 interface FilterHandler {
   key: string;
   filterFn: (order: Order.Response, selectedValues: string[]) => boolean;
-  persistent?: boolean;
 }
 
 interface UseOrdersFilterConfigsProps {
@@ -34,7 +33,6 @@ interface UseOrdersFilterConfigsProps {
   clientMembers: User.Response[];
   clientOrganizations: Account.Response[];
   priorities: Priority[];
-  storageKey: string;
 }
 
 // Constants
@@ -53,49 +51,6 @@ const normalizeString = (str: string | undefined | null) => {
     .replace(/[^a-z0-9\s]/g, '');
 };
 
-const getDateFormats = (date: Date) => [
-  date.toLocaleDateString(),
-  date.toLocaleDateString('es-ES'),
-  date.toLocaleString('default', { month: 'short' }),
-  date.toLocaleString('en-US', { month: 'short' }), 
-  date.toLocaleString('default', { month: 'long' }),
-  date.toLocaleString('en-US', { month: 'long' }), 
-  date.getFullYear().toString()
-].map(d => normalizeString(d));
-
-const getSearchableFields = (order: Order.Response) => {
-  const fields = [
-    order.id?.toString().replace('#', ''),
-    order.title,
-    order.description,
-    order.brief?.name,
-    order.client_organization?.name,
-    order.customer?.name,
-    order.customer?.email,
-    order.status?.toLowerCase(),
-    order.priority?.toLowerCase(),
-    ...order.assigned_to?.flatMap(assignee => [
-      assignee.agency_member?.name,
-      assignee.agency_member?.email
-    ]) ?? []
-  ];
-
-  // Add date formats
-  const dates = [
-    order.created_at,
-    order.updated_at,
-    order.due_date
-  ].filter(Boolean);
-
-  const dateFormats = dates.flatMap(date => 
-    date ? getDateFormats(new Date(date)) : []
-  );
-
-  return [...fields, ...dateFormats]
-    .filter(Boolean)
-    .map(normalizeString);
-};
-
 const useOrdersFilterConfigs = ({
   orders,
   tags,
@@ -104,7 +59,6 @@ const useOrdersFilterConfigs = ({
   priorities,
   clientMembers,
   clientOrganizations,
-  storageKey = 'orders-filters',
 }: UseOrdersFilterConfigsProps) => {
   const initialFiltersHandlers: FilterHandler[] = [
     {
@@ -151,10 +105,53 @@ const useOrdersFilterConfigs = ({
       filterFn: (order, selectedValues) =>
         selectedValues.some((searchTerm) => {
           const searchTermNormalized = normalizeString(searchTerm);
-          const searchableFields = getSearchableFields(order);
-          return searchableFields.some(field => field.includes(searchTermNormalized));
+          
+          const orderId = order.id?.toString().replace('#', '');
+          if (normalizeString(orderId)?.includes(searchTermNormalized)) return true;
+          
+          if (normalizeString(order.title)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.description)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.brief?.name)?.includes(searchTermNormalized)) return true;
+          
+          const getDateFormats = (date: Date) => [
+            date.toLocaleDateString(),
+            date.toLocaleDateString('es-ES'),
+            date.toLocaleString('default', { month: 'short' }),
+            date.toLocaleString('en-US', { month: 'short' }), 
+            date.toLocaleString('default', { month: 'long' }),
+            date.toLocaleString('en-US', { month: 'long' }), 
+            date.getFullYear().toString()
+          ].map(d => normalizeString(d)?.toLowerCase() ?? '');
+
+          if (order.created_at) {
+            const date = new Date(order.created_at);
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
+          }
+          
+          if (order.updated_at) {
+            const date = new Date(order.updated_at);
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
+          }
+          
+          if (order.due_date) {
+            const date = new Date(order.due_date);
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
+          }
+          
+          if (normalizeString(order.client_organization?.name)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.customer?.name)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.customer?.email)?.includes(searchTermNormalized)) return true;
+          
+          if (order.assigned_to?.some(assignee => 
+            normalizeString(assignee.agency_member?.name)?.includes(searchTermNormalized) ??
+            normalizeString(assignee.agency_member?.email)?.includes(searchTermNormalized)
+          )) return true;
+          
+          if (normalizeString(order.status?.toLowerCase())?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.priority?.toLowerCase())?.includes(searchTermNormalized)) return true;
+          
+          return false;
         }),
-      persistent: false,
     },
   ];
 
@@ -165,7 +162,7 @@ const useOrdersFilterConfigs = ({
     removeFilter,
     resetFilters,
     getFilterValues,
-  } = useFilters(orders, initialFiltersHandlers, storageKey);
+  } = useFilters(orders, initialFiltersHandlers, 'orders-filters');
 
   // Utility functions
 
@@ -347,11 +344,54 @@ const useOrdersFilterConfigs = ({
         'replace',
         (order: Order.Response) => {
           const searchTermNormalized = normalizeString(searchTerm);
-          const searchableFields = getSearchableFields(order);
-          return searchableFields.some(field => field.includes(searchTermNormalized));
+          
+          const orderId = order.id?.toString().replace('#', '');
+          if (normalizeString(orderId)?.includes(searchTermNormalized)) return true;
+          
+          if (normalizeString(order.title)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.description)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.brief?.name)?.includes(searchTermNormalized)) return true;
+          
+          const getDateFormats = (date: Date) => [
+            date.toLocaleDateString(),
+            date.toLocaleDateString('es-ES'),
+            date.toLocaleString('default', { month: 'short' }),
+            date.toLocaleString('en-US', { month: 'short' }), 
+            date.toLocaleString('default', { month: 'long' }),
+            date.toLocaleString('en-US', { month: 'long' }), 
+            date.getFullYear().toString()
+          ].map(d => normalizeString(d)?.toLowerCase() ?? '');
+
+          if (order.created_at) {
+            const date = new Date(order.created_at);
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
+          }
+          
+          if (order.updated_at) {
+            const date = new Date(order.updated_at);
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
+          }
+          
+          if (order.due_date) {
+            const date = new Date(order.due_date);
+            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
+          }
+          
+          if (normalizeString(order.client_organization?.name)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.customer?.name)?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.customer?.email)?.includes(searchTermNormalized)) return true;
+          
+          if (order.assigned_to?.some(assignee => 
+            normalizeString(assignee.agency_member?.name)?.includes(searchTermNormalized) ??
+            normalizeString(assignee.agency_member?.email)?.includes(searchTermNormalized)
+          )) return true;
+          
+          if (normalizeString(order.status?.toLowerCase())?.includes(searchTermNormalized)) return true;
+          if (normalizeString(order.priority?.toLowerCase())?.includes(searchTermNormalized)) return true;
+          
+          return false;
         },
-        searchTerm,
-        false
+        searchTerm
       ),
   };
 
