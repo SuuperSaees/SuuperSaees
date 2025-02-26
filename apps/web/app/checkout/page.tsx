@@ -47,7 +47,7 @@ async function ServiceCheckoutPage({
     };
   });
 
-  const service = await getServiceById(tokendecoded?.service.id ?? 0, false).catch((error) => {
+  const service = await getServiceById(tokendecoded?.service.id ?? 0, false, true, true).catch((error) => {
     console.error('Error fetching service:', error);
     return null;
   });

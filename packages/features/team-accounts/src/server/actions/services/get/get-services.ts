@@ -27,8 +27,11 @@ export const getServiceById = async (
     const client = getSupabaseServerComponentClient({
       admin: adminActived,
     });
-    const { error: userError } = await client.auth.getUser();
-    if (userError) throw userError.message;
+
+    if(!adminActived) {
+      const { error: userError } = await client.auth.getUser();
+      if (userError) throw userError.message;
+    }
 
     if (briefsNeeded) {
       const { data: serviceData, error: serviceError } = await client
