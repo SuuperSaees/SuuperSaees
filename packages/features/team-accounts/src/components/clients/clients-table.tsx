@@ -33,7 +33,7 @@ import { ClientsWithOrganization } from '../../server/actions/clients/get/get-cl
 import { Account } from '../../../../../../apps/web/lib/account.types';
 import AgencyClientCrudMenu from './agency-client-crud-menu';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
-
+import { useTableConfigs } from '../../../../../../apps/web/app/(views)/hooks/use-table-configs';  
 // import UpdateClientDialog from '../../server/actions/clients/update/update-client';
 
 const getUniqueOrganizations = (clients: ClientsWithOrganization[]): Organization[] => {
@@ -188,6 +188,8 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
     setActiveButton(button);
   };
 
+  const {config} = useTableConfigs('table-config');
+
   React.useEffect(() => {
     if (view) {
       setActiveButton(view);
@@ -284,6 +286,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
           }
           columns={columns as ColumnDef<Client>[]}
           options={options as TableOptions<Client>}
+          configs={config}
         />
       )}
       </div>
