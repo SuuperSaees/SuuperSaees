@@ -111,7 +111,6 @@ export const createService = async (clientData: ServiceData) => {
         ErrorServiceOperations.FAILED_TO_CREATE_SERVICE,
       );
 
-    // Iniciamos la generación del checkout URL en segundo plano
     const generateCheckoutUrlPromise = new RetryOperationService(
       async () => {
         const { stripeId } = await getStripeAccountID(primary_owner_user_id)
@@ -146,37 +145,9 @@ export const createService = async (clientData: ServiceData) => {
       }
     );
 
-    // Ejecutar en segundo plano
     generateCheckoutUrlPromise.execute().catch((error) => {
       console.error('Failed to generate checkout URL:', error);
     });
-
-    // if (!stripeId) {
-    //   const user = await fetchUserAccount(client);
-    //   const stripeAccount = await createStripeAccount('', user?.id ?? '');
-    //   await updateTeamAccountStripeId({
-    //     stripe_id: stripeAccount.accountId,
-    //     id: user?.id as string,
-    //   });
-    //   stripeId = stripeAccount.accountId;
-    // }
-    // const stripeProduct = await createStripeProduct(
-    //   stripeId,
-    //   clientData,
-    //   userId,
-    // );
-    // const stripePrice = await createStripePrice(
-    //   stripeId,
-    //   stripeProduct.productId,
-    //   clientData,
-    //   userId,
-    // );
-
-    // await updateServiceWithPriceId(
-    //   client,
-    //   dataResponseCreateService.id,
-    //   stripePrice.priceId,
-    // );
 
     return CustomResponse.success(
       {
