@@ -33,7 +33,6 @@ interface ProjectsBoardProps {
   agencyMembers: User.Response[];
   tags: Tags.Type[];
   className?: string;
-  storageKey?: string;
 }
 
 // Constants
@@ -53,7 +52,6 @@ const ProjectsBoard = ({
   agencyMembers,
   tags,
   className,
-  storageKey = 'orders-filters',
 }: ProjectsBoardProps) => {
   // Context and hooks
   const { orders, setOrders, agencyId, ordersAreLoading, queryKey } =
@@ -83,17 +81,15 @@ const ProjectsBoard = ({
     priorities: PRIORITIES,
     clientMembers: getClientUsers(orders),
     clientOrganizations: getClientOrganizations(orders),
-    storageKey,
   });
 
-  // Get the view configurations from our enhanced hook
   const {
     viewInitialConfiguarations,
     viewAvailableProperties,
+    viewOptions,
+    currentView,
     customComponents,
     preferences,
-    currentView,
-    viewOptions,
   } = useOrdersViewConfigs({
     agencyRoles: AGENCY_ROLES,
     statuses,
@@ -110,6 +106,7 @@ const ProjectsBoard = ({
   });
 
   // Compute initial active tab
+
   const statusFilterValues = getFilterValues('status');
   const getInitialActiveTab = () => {
     if (
@@ -145,7 +142,6 @@ const ProjectsBoard = ({
     }
     return filteredOrders;
   }, [filteredOrders, currentView, statuses]);
-  
   return (
     <ViewProvider
       initialData={mutedOrders as ViewItem[]}
