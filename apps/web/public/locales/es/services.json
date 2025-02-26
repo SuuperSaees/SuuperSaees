@@ -23,6 +23,7 @@
   "draft": "En borrador",
   "title": "Servicios",
   "checkoutURL": "Checkout URL",
+  "checkoutURLCopied": "Checkout URL copiado al portapapeles",
   "edit": "Editar servicio",
   "eliminate": "Eliminar servicio",
   "step_type_of_service": "Tipo de servicio",

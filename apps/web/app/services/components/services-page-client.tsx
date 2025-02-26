@@ -19,7 +19,6 @@ import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 import EmptyState from '~/components/ui/empty-state';
 import { SkeletonTable } from '~/components/ui/skeleton';
 import { useColumns } from '~/hooks/use-columns';
-import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Brief } from '~/lib/brief.types';
 import { handleResponse } from '~/lib/response/handle-response';
 import { createBrief } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
@@ -32,9 +31,6 @@ import { useTableConfigs } from '~/(views)/hooks/use-table-configs';
 
 interface ServicesPageClientProps {
   accountRole: string;
-  paymentsMethods: BillingAccounts.PaymentMethod[];
-  stripeId: string;
-  organizationId: string;
 }
 
 const TABS = [
@@ -46,9 +42,6 @@ type TabType = (typeof TABS)[number]['key'];
 
 export function ServicesPageClient({
   accountRole,
-  paymentsMethods,
-  stripeId,
-  organizationId,
 }: ServicesPageClientProps) {
   const router = useRouter();
   const { t } = useTranslation(['briefs', 'services']);
@@ -70,7 +63,7 @@ export function ServicesPageClient({
       case 'delete':
         return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'checkout':
-        return ['agency_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       default:
         return false;
     }
@@ -84,9 +77,6 @@ export function ServicesPageClient({
   });
   const servicesColumns = useColumns('services', {
     hasPermission: hasPermissionToActionServices,
-    paymentsMethods,
-    stripeId,
-    organizationId,
   });
 
   const briefMutation = useMutation({

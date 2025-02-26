@@ -21,6 +21,9 @@
   "manageTeamPlan": "Manage Your Team Plan",
   "manageTeamPlanDescription": "Choose a plan that fits your team's needs. You can upgrade or downgrade your plan at any time.",
   "basePlan": "Base Plan",
+  "noPaymentMethodsTitle": "No payment methods available",
+  "noPaymentMethodsDescription": "Please contact your organization's owner to add a payment method.",
+  "contactSupport": "Contact Support",
   "billingInterval": {
     "label": "Choose your billing interval",
     "month": "Billed monthly",

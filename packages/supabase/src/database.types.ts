@@ -2311,6 +2311,7 @@ export type Database = {
       services: {
         Row: {
           allowed_orders: number | null
+          checkout_url: string | null
           created_at: string
           credit_based: boolean | null
           credits: number | null
@@ -2342,6 +2343,7 @@ export type Database = {
         }
         Insert: {
           allowed_orders?: number | null
+          checkout_url?: string | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
@@ -2373,6 +2375,7 @@ export type Database = {
         }
         Update: {
           allowed_orders?: number | null
+          checkout_url?: string | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
