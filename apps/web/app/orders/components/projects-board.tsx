@@ -15,7 +15,6 @@ import { UpdateFunction, ViewItem, ViewTypeEnum } from '~/(views)/views.types';
 import { Tags } from '~/lib/tags.types';
 import { User } from '~/lib/user.types';
 
-import ExportCSVButton from '../../components/shared/export-csv-button/index';
 import useCSVExportFormatters from '../hooks/use-csv-export-formatters';
 import useOrdersActionHandler from '../hooks/use-orders-action-handler';
 import useOrdersAuthManagement from '../hooks/use-orders-auth-management';
@@ -25,10 +24,12 @@ import useOrdersViewConfigs from '../hooks/use-orders-view-configs';
 import { useAgencyStatuses } from './context/agency-statuses-context';
 import { useOrdersContext } from './context/orders-context';
 import CreateOrderButton from './create-order-button';
+
 import Filters from './filters';
 import Search from './search';
 import StatusFilters from './status-filters';
 import ViewSelect from './view-select';
+import SettingsDropdown from './settings-dropdown';
 
 // Types
 interface ProjectsBoardProps {
@@ -194,7 +195,8 @@ const ProjectsBoard = ({
             onReset={resetFilters}
           />
           <ViewSelect options={viewOptions} defaultValue={currentView} />
-          <ExportCSVButton
+          
+          <SettingsDropdown
             disabled={ordersAreLoading}
             data={orders}
             t={t}
@@ -238,6 +240,7 @@ const ProjectsBoard = ({
             }}
             valueFormatters={getValueFormatters()}
           />
+          
           <CreateOrderButton
             t={t}
             hasOrders={orders.length > 0 || ordersAreLoading}
