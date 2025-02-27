@@ -230,5 +230,6 @@
   "clipboardCopied": "Contenido copiado al portapapeles",
   "clipboardError": "Error al copiar al portapapeles",
   "connect": "Conectar",
-  "guest": "Invitado"
+  "guest": "Invitado",
+  "invalidLoomAppIdFormat": "Formato de ID de aplicación de Loom inválido"
 }
