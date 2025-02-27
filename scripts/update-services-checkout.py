@@ -15,9 +15,9 @@ RED = "\033[91m"
 RESET = "\033[0m"
 
 # Configuración de Supabase
-SUPABASE_URL = ""
-SUPABASE_SERVICE_ROLE_KEY = ""
-IS_PROD = os.getenv("NEXT_PUBLIC_IS_PROD", "false").lower() == "true"
+SUPABASE_URL = "your_supabase_url"
+SUPABASE_SERVICE_ROLE_KEY = "your_supabase_service_role_key"
+IS_PROD = False
 
 # Inicializar cliente de Supabase
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
@@ -52,10 +52,10 @@ async def get_domain_by_organization_id(organization_id: str) -> str:
     try:
         response = supabase.table('organization_subdomains').select(
             'subdomains(domain)'
-        ).eq('organization_id', organization_id).single().execute()
+        ).eq('organization_id', organization_id).limit(1).execute()
 
-        if response.data:
-            subdomains = response.data.get('subdomains')
+        if response.data and len(response.data) > 0:
+            subdomains = response.data[0].get('subdomains')
             if isinstance(subdomains, list):
                 domain = subdomains[0].get('domain')
             else:
@@ -110,7 +110,7 @@ async def generate_checkout_url(service: Dict[str, Any]) -> str:
         base64_payload = base64.b64encode(json.dumps(token_payload).encode()).decode()
         
         # Generar firma
-        jwt_secret = ''
+        jwt_secret = 'your_jwt_secret'
             
         signature = base64.b64encode(
             hmac.new(
@@ -143,6 +143,18 @@ async def generate_checkout_url(service: Dict[str, Any]) -> str:
         print(f"{RED}Error generating checkout URL for service {service.get('id')}: {str(e)}{RESET}")
         return ""
 
+async def process_service(service: Dict[str, Any], sql_file: str):
+    try:
+        checkout_url = await generate_checkout_url(service)
+        if checkout_url:
+            sql_update = f"UPDATE services SET checkout_url = '{checkout_url}' WHERE id = '{service['id']}';\n"
+            # Escribir la actualización SQL en tiempo real
+            with open(sql_file, "a") as f:
+                f.write(sql_update)
+            print(f"{GREEN}Generated checkout URL for service {service['id']}{RESET}")
+    except Exception as e:
+        print(f"{RED}Error processing service {service['id']}: {str(e)}{RESET}")
+
 async def main():
     try:
         # Obtener todos los servicios sin checkout_url
@@ -155,21 +167,16 @@ async def main():
 
         print(f"Found {len(services)} services without checkout_url")
 
-        # Generar SQL updates
-        sql_updates = []
+        # Crear o limpiar el archivo SQL
+        sql_file = "update_checkout_urls.sql"
+        with open(sql_file, "w") as f:
+            f.write("-- Generated SQL updates for checkout URLs\n")
 
-        for service in services:
-            checkout_url = await generate_checkout_url(service)
-            if checkout_url:
-                sql_updates.append(
-                    f"UPDATE services SET checkout_url = '{checkout_url}' WHERE id = '{service['id']}';"
-                )
+        # Procesar servicios concurrentemente
+        tasks = [process_service(service, sql_file) for service in services]
+        await asyncio.gather(*tasks)
 
-        # Guardar SQL en archivo
-        with open("update_checkout_urls.sql", "w") as f:
-            f.write("\n".join(sql_updates))
-
-        print(f"{GREEN}Generated SQL file with {len(sql_updates)} updates{RESET}")
+        print(f"{GREEN}Completed processing all services{RESET}")
 
     except Exception as e:
         print(f"{RED}Error: {str(e)}{RESET}")
