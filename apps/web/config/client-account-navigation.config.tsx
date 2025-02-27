@@ -86,6 +86,7 @@ const routes = [
   {
     label: 'common:catalogName',
     Icon: <Package className={iconClasses} />,
+    collapsed: true,
     children: [
       {
         label: 'common:catalogProviderName',
@@ -100,6 +101,7 @@ const routes = [
   {
     label: 'common:aiToolsName',
     Icon: <Bot className={iconClasses} />,
+    collapsed: true,
     children: [
       {
         label: 'common:toolCopyListName',
