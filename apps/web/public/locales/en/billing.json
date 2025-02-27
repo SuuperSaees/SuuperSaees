@@ -23,6 +23,8 @@
   "basePlan": "Base Plan",
   "noPaymentMethodsTitle": "No payment methods available",
   "noPaymentMethodsDescription": "Please contact your organization's owner to add a payment method.",
+  "invalidCheckoutUrl": "Invalid Checkout URL",
+  "invalidCheckoutUrlDescription": "There was an error processing your checkout URL. Please try again or contact support if the problem persists.",
   "contactSupport": "Contact Support",
   "billingInterval": {
     "label": "Choose your billing interval",
