@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
       serviceId,
       sessionId,
       quantity,
+      trialPeriodDays,
     } = await request.clone().json();
 
     const supabase = getSupabaseServerComponentClient(
@@ -122,6 +123,7 @@ export async function POST(request: NextRequest) {
           allow_redirects: 'never',
         },
         metadata: { sessionId: sessionId },
+        ...(trialPeriodDays ? { trial_period_days: trialPeriodDays } : {}),
       },
       { stripeAccount: accountId },
     );
