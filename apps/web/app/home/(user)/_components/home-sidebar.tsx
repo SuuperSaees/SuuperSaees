@@ -1,3 +1,5 @@
+'use client';
+
 import { ThemedSidebar } from 'node_modules/@kit/accounts/src/components/ui/sidebar-themed-with-settings';
 import { z } from 'zod';
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
@@ -9,28 +11,20 @@ import pathsConfig from '~/config/paths.config';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
 import { teamMemberAccountNavigationConfig } from '../../../../config/member-team-account-navigation.config';
 import { GuestContent } from './guest-content';
-import { getOrganizationSettingsByOrganizationId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
 import './styles/home-sidebar.css';
-import { OrganizationSettings } from '~/lib/organization-settings.types';
+import { useOrganizationSettings } from '../../../../../../packages/features/accounts/src/context/organization-settings-context';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
-export async function HomeSidebar(props: { workspace: UserWorkspace }) {
-  const { workspace, user, organization, agency } = props.workspace;
+export function HomeSidebar(props: { workspace: UserWorkspace }) {
+  const { workspace, user } = props.workspace;
   const userRole = workspace.role;
 
-  const organizationSettings = await getOrganizationSettingsByOrganizationId(agency ? agency.id : organization?.id ?? '', true, ['dashboard_url']).catch((err) => {
-    console.error(`Error client, getting organization settings: ${err}`)
-    return []
-  });
-
-  const dashboardUrl = organizationSettings?.find(
-    setting => setting.key === OrganizationSettings.KEYS.dashboard_url
-  )?.value;
+  const {dashboard_url: dashboardUrl, catalog_provider_url: catalogProviderUrl, catalog_product_url: catalogProductUrl, tool_copy_list_url: toolCopyListUrl} = useOrganizationSettings();
 
   let showDashboardUrl = !!dashboardUrl;
 
-  // Verificar permisos adicionales para roles de cliente
+  // Verify if the dashboard url has userIds
   if (showDashboardUrl) {
     const clientRoles = new Set(['client_owner', 'client_member']);
     const urlHasUserIds = dashboardUrl?.includes('userIds=');
@@ -80,7 +74,7 @@ export async function HomeSidebar(props: { workspace: UserWorkspace }) {
       </div>
 
       <SidebarContent className={`mt-5 h-[calc(100%-160px)] b-["#f2f2f2"] overflow-y-auto`}>
-        <SidebarNavigation config={selectedNavigationConfig} showDashboardUrl={showDashboardUrl} />
+        <SidebarNavigation config={selectedNavigationConfig} showDashboardUrl={showDashboardUrl} catalogProviderUrl={!!catalogProviderUrl} catalogProductUrl={!!catalogProductUrl} toolCopyListUrl={!!toolCopyListUrl} />
         {userRole === 'client_guest' && (
           <SidebarContent>
             <GuestContent />

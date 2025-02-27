@@ -198,9 +198,15 @@ function getClassNameBuilder(className: string) {
 export function SidebarNavigation({
   config,
   showDashboardUrl,
+  catalogProviderUrl,
+  catalogProductUrl,
+  toolCopyListUrl,
 }: React.PropsWithChildren<{
   config: SidebarConfig;
   showDashboardUrl?: boolean;
+  catalogProviderUrl?: boolean;
+  catalogProductUrl?: boolean;
+  toolCopyListUrl?: boolean;
 }>) {
   return (
     <>
@@ -208,7 +214,12 @@ export function SidebarNavigation({
         if ('divider' in item) {
           return <SidebarDivider key={index} />;
         }
-        if ('children' in item) {
+
+        if (item.label === 'common:catalogName' && !catalogProviderUrl && !catalogProductUrl) {
+          return null;
+        } else if (item.label === 'common:aiToolsName' && !toolCopyListUrl) {
+          return null;
+        } else if ('children' in item) {
           return (
             <SidebarGroup
               key={item.label}
@@ -217,19 +228,26 @@ export function SidebarNavigation({
                   i18nKey={item.label}
                   defaults={item.label}
                   key={item.label + index}
-                  />
-                }
-                collapsible={item.collapsible}
-                collapsed={item.collapsed}
-                Icon={item.Icon}
-                >
+                />
+              }
+              collapsible={item.collapsible}
+              collapsed={item.collapsed}
+              Icon={item.Icon}
+            >
               {item.children.map((child) => {
+                if (
+                  (child.label === 'common:catalogProviderName' && !catalogProviderUrl) ||
+                  (child.label === 'common:catalogProductName' && !catalogProductUrl) ||
+                  (child.label === 'common:toolCopyListName' && !toolCopyListUrl)
+                ) {
+                  return null;
+                }
                 return (
                   <SidebarItem
-                  key={child.path}
-                  end={child.end}
-                  path={child.path}
-                  Icon={child.Icon}
+                    key={child.path}
+                    end={child.end}
+                    path={child.path}
+                    Icon={child.Icon}
                   >
                     <Trans i18nKey={child.label} defaults={child.label} />
                   </SidebarItem>
@@ -238,6 +256,7 @@ export function SidebarNavigation({
             </SidebarGroup>
           );
         }
+
         if (!showDashboardUrl && item.path === pathsConfig.app.dashboard) {
           return null
         }
