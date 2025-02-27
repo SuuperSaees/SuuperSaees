@@ -30,6 +30,9 @@ export namespace OrganizationSettings {
     auth_card_background_color: 'auth_card_background_color',
     auth_section_background_color: 'auth_section_background_color',
     dashboard_url: 'dashboard_url',
+    catalog_provider_url: 'catalog_provider_url',
+    catalog_product_url: 'catalog_product_url',
+    tool_copy_list_url: 'tool_copy_list_url',
     // If you want to add more keys, make sure they are defined in the 'organization_setting_key' enum in 'database.types.ts'
   };
 

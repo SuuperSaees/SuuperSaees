@@ -7,6 +7,8 @@ import {
   Users,
   Sparkles,
   Home,
+  Bot,
+  Package,
   // Wallet,
 } from 'lucide-react';
 
@@ -49,6 +51,31 @@ const routes = [
         label: 'common:teamName',
         path: pathsConfig.app.team,
       },
+    ],
+  },
+  {
+    label: 'common:catalogName',
+    Icon: <Package className={iconClasses} />,
+    children: [
+      {
+        label: 'common:catalogProviderName',
+        path: pathsConfig.app.catalogProvider,
+      },
+      {
+        label: 'common:catalogProductName',
+        path: pathsConfig.app.catalogProduct,
+      }
+    ],
+  },
+  {
+    label: 'common:aiToolsName',
+    Icon: <Bot className={iconClasses} />,
+    children: [
+      {
+        label: 'common:toolCopyListName',
+        path: pathsConfig.app.toolCopyList,
+      },
+      
     ],
   },
 
