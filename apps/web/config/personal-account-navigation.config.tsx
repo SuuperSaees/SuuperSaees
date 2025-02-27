@@ -55,6 +55,18 @@ const routes = [
     ],
   },
   {
+    label: 'common:aiToolsName',
+    Icon: <Bot className={iconClasses} />,
+    collapsed: true,
+    children: [
+      {
+        label: 'common:toolCopyListName',
+        path: pathsConfig.app.toolCopyList,
+      },
+      
+    ],
+  },
+  {
     label: 'common:catalogName',
     Icon: <Package className={iconClasses} />,
     collapsed: true,
@@ -67,18 +79,6 @@ const routes = [
         label: 'common:catalogProductName',
         path: pathsConfig.app.catalogProduct,
       }
-    ],
-  },
-  {
-    label: 'common:aiToolsName',
-    Icon: <Bot className={iconClasses} />,
-    collapsed: true,
-    children: [
-      {
-        label: 'common:toolCopyListName',
-        path: pathsConfig.app.toolCopyList,
-      },
-      
     ],
   },
 
