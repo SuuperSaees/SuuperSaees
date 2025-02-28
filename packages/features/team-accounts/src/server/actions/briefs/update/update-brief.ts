@@ -12,6 +12,7 @@ import {
 } from '../../../../../../../shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import {  createFormFields } from '../create/create-briefs';
+import { revalidatePath } from 'next/cache';
 
 export const updateBriefById = async (briefData: Brief.Request.Update) => {
   try {
@@ -32,6 +33,7 @@ export const updateBriefById = async (briefData: Brief.Request.Update) => {
         ErrorBriefOperations.FAILED_TO_UPDATE_BRIEF,
       );
     }
+    revalidatePath(`/briefs/${briefData.id}`);
     return CustomResponse.success(briefData, 'briefUpdated').toJSON();
   } catch (error) {
     console.error('Error al crear el brief:', error);
