@@ -527,7 +527,8 @@ export async function getOrdersByUserId(
       .select(
         `*, client_organization:accounts!client_organization_id(id, name),
       customer:accounts!customer_id(id, name),
-      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
+      reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
       `,
       )
       .order('created_at', { ascending: false })
@@ -673,7 +674,8 @@ export async function getOrdersByOrganizationId(
       .select(
         `*, client_organization:accounts!client_organization_id(id, name),
       customer:accounts!customer_id(id, name),
-      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))), 
+      reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
       `,
       )
       .order('created_at', { ascending: false })

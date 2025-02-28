@@ -23,8 +23,9 @@ export function useOrderStats(orders: Order.Response[]) {
   );
 
   // Calculate Stats
-  const calculateStats = (orders: Order.Response[]) => {
+  const calculateStats = (orders: Order.Response[], filteredOrders: Order.Response[]) => {
     const ordersExists = orders && orders.length > 0;
+    const filteredOrdersExists = filteredOrders && filteredOrders.length > 0;
 
     return {
       active: ordersExists
@@ -36,17 +37,22 @@ export function useOrderStats(orders: Order.Response[]) {
       completed: ordersExists
         ? orders?.filter((order) => order.status === 'completed').length
         : null,
-      total: ordersExists ? orders?.length : null,
-      // Calculate the average rating of the reviews
+      total: filteredOrdersExists ? filteredOrders?.length : null,
+      // Calculate the average rating of the reviews using filtered orders
       averageRating: ordersExists
-        ? orders?.reduce((acc, order) => acc + (order.review?.rating ?? 0), 0) /
-            orders?.filter((order) => order.review?.rating).length || 0
+        ? orders?.reduce((acc, order) => {
+            const orderRatings = order.reviews?.reduce((reviewAcc, review) => 
+              reviewAcc + (review.rating ?? 0), 0) ?? 0;
+            return acc + orderRatings;
+          }, 0) / orders?.filter(order => 
+            order.reviews?.some(review => review.rating != null)
+          ).length || null
         : null,
     };
   };
 
-  const currentStats = calculateStats(ordersCurrentPeriod);
-  const previousStats = calculateStats(ordersPreviousPeriod);
+  const currentStats = calculateStats(orders, ordersCurrentPeriod);
+  const previousStats = calculateStats(orders, ordersPreviousPeriod);
 
   return {
     currentStats,
