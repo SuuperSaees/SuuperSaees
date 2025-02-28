@@ -117,6 +117,7 @@ export default function OrdersSection({
             previous: previousStats.active,
             unit: 'months',
           }}
+          type="active"
         />
         <CardStats
           title={t('projects.rating.average')}
@@ -125,6 +126,7 @@ export default function OrdersSection({
             previous: previousStats.averageRating,
             unit: 'months',
           }}
+          type="rating"
         />
         <CardStats
           title={t('projects.month.last')}
@@ -133,6 +135,7 @@ export default function OrdersSection({
             previous: previousStats.total,
             unit: 'months',
           }}
+          type="totalInTheLastMonth"
         />
         <CardStats
           title={t('projects.completed')}
@@ -141,6 +144,7 @@ export default function OrdersSection({
             previous: previousStats.completed,
             unit: 'months',
           }}
+          type="completed"
         />
       </div>
       <OrdersProvider

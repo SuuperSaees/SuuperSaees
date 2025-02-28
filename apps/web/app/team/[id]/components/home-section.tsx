@@ -68,6 +68,7 @@ export default function HomeSection({ agencyMembers }: HomeSectionProps) {
             previous: previousStats.active,
             unit: 'months',
           }}
+          type="active"
         />
         <CardStats
           title={t('projects.rating.average')}
@@ -76,6 +77,7 @@ export default function HomeSection({ agencyMembers }: HomeSectionProps) {
             previous: previousStats.averageRating,
             unit: 'months',
           }}
+          type="rating"
         />
         <CardStats
           title={t('projects.month.last')}
@@ -84,6 +86,7 @@ export default function HomeSection({ agencyMembers }: HomeSectionProps) {
             previous: previousStats.total,
             unit: 'months',
           }}
+          type="totalInTheLastMonth"
         />
         <CardStats
           title={t('projects.completed')}
@@ -92,6 +95,7 @@ export default function HomeSection({ agencyMembers }: HomeSectionProps) {
             previous: previousStats.completed,
             unit: 'months',
           }}
+          type="completed"
         />
       </div>
       <OrdersProvider
