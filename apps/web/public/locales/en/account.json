@@ -231,6 +231,6 @@
   "clipboardError": "Error copying content to clipboard",
   "connect": "Connect",
   "guest": "Guest",
-  "updateLanguageSuccess": "Language updated successfully"
+  "updateLanguageSuccess": "Language updated successfully",
   "invalidLoomAppIdFormat": "Invalid Loom App ID format"
 }
