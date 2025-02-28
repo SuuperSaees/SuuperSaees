@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState, useCallback } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -36,6 +36,7 @@ interface ProjectsBoardProps {
   agencyMembers: User.Response[];
   tags: Tags.Type[];
   className?: string;
+  storageKey?: string;
 }
 
 // Constants
@@ -55,6 +56,7 @@ const ProjectsBoard = ({
   agencyMembers,
   tags,
   className,
+  storageKey = 'orders-filters',
 }: ProjectsBoardProps) => {
   // Context and hooks
   const { orders, setOrders, agencyId, ordersAreLoading, queryKey } =
@@ -84,15 +86,17 @@ const ProjectsBoard = ({
     priorities: PRIORITIES,
     clientMembers: getClientUsers(orders),
     clientOrganizations: getClientOrganizations(orders),
+    storageKey,
   });
 
+  // Get the view configurations from our enhanced hook
   const {
     viewInitialConfiguarations,
     viewAvailableProperties,
-    viewOptions,
-    currentView,
     customComponents,
     preferences,
+    currentView,
+    viewOptions,
   } = useOrdersViewConfigs({
     agencyRoles: AGENCY_ROLES,
     statuses,
@@ -122,7 +126,6 @@ const ProjectsBoard = ({
   // );
 
   // Compute initial active tab
-
   const statusFilterValues = getFilterValues('status');
   const getInitialActiveTab = () => {
     if (
@@ -159,7 +162,15 @@ const ProjectsBoard = ({
     return filteredOrders;
   }, [filteredOrders, currentView, statuses]);
 
-  console.log('orders', orders);
+  // Handle search with a stable reference to prevent re-renders
+  const handleSearch = useCallback((searchTerm: string) => {
+    // Only update if the search term has actually changed
+    const currentSearchValue = getFilterValues('search')?.[0] ?? '';
+    if (searchTerm !== currentSearchValue) {
+      searchConfig.filter(searchTerm);
+    }
+  }, [searchConfig, getFilterValues]);
+  
   return (
     <ViewProvider
       initialData={mutedOrders as ViewItem[]}
@@ -187,7 +198,7 @@ const ProjectsBoard = ({
           <Search
             defaultSearch={getFilterValues('search')?.[0] ?? ''}
             t={t}
-            handleSearch={searchConfig.filter}
+            handleSearch={handleSearch}
           />
           <Filters
             filters={filtersConfig}

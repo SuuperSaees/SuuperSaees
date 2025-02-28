@@ -20,11 +20,18 @@ import { hasPermissionToReadClientServices } from '../../permissions/services';
 export const getServiceById = async (
   serviceId: Service.Type['id'],
   briefsNeeded?: boolean,
+  billingServiceNeeded?: boolean,
+  adminActived = false,
 ) => {
   try {
-    const client = getSupabaseServerComponentClient();
-    const { error: userError } = await client.auth.getUser();
-    if (userError) throw userError.message;
+    const client = getSupabaseServerComponentClient({
+      admin: adminActived,
+    });
+
+    if(!adminActived) {
+      const { error: userError } = await client.auth.getUser();
+      if (userError) throw userError.message;
+    }
 
     if (briefsNeeded) {
       const { data: serviceData, error: serviceError } = await client
@@ -46,6 +53,20 @@ export const getServiceById = async (
       };
 
       return proccesedData;
+    }
+
+    if (billingServiceNeeded) {
+      const { data: serviceData, error: serviceError } = await client
+        .from('services')
+        .select('*, billing_services!left(provider_id, provider).service_id(id)')
+        .eq('id', serviceId)
+        .is('deleted_on', null)
+        .single();
+
+      if (serviceError) throw serviceError.message;
+      const processedData = serviceData;
+
+      return processedData;
     }
 
     const { data: serviceData, error: orderError } = await client
@@ -174,12 +195,14 @@ export async function getClientServices(
   }
 }
 
-export async function getPaymentsMethods(): Promise<{
+export async function getPaymentsMethods(primaryOwnerId?: string, client?: SupabaseClient<Database>, adminActived = false): Promise<{
   paymentMethods: BillingAccounts.PaymentMethod[],
   primaryOwnerId: string,
 }> {
-  const client = getSupabaseServerComponentClient();
-  const primaryOwnerId = (await getPrimaryOwnerId(client)) ?? '';
+  client = client ?? getSupabaseServerComponentClient({
+    admin: adminActived,
+  });
+  primaryOwnerId = primaryOwnerId ?? (await getPrimaryOwnerId(client)) ?? '';
   const paymentMethods: BillingAccounts.PaymentMethod[] = [];
   const { data: billingAccountsData, error: billingAccountsError } =
     await client

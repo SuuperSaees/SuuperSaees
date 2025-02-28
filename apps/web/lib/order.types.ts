@@ -30,8 +30,8 @@ export namespace Order {
       client_follower: User.Response;
     }[] | null;
     brief?: Partial<Pick<Brief.Response, 'name'>>;
-    review?: Review.Response;
     statusData?: AgencyStatus.Type | null;
+    reviews?: Review.Response[];
   };
   export type Relational = Order.Relationships.All & {
     brief_responses: Brief.Relationships.FormFieldResponse.Response[]

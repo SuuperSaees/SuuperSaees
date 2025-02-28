@@ -218,6 +218,6 @@ graph TD
    - Implement bidirectional synchronization
 
 3. **Monitoring**
-   - Use Stripe Dashboard for supervision
-   - Implement detailed event logging
+   - Use Stripe Dashboard for supervision.
+   - Implement detailed event logging.
   

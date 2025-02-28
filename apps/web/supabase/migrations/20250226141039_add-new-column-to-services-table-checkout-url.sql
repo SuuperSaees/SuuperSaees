@@ -1,0 +1,1 @@
+alter table "public"."services" add column "checkout_url" text;

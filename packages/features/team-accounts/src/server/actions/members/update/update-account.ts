@@ -13,7 +13,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
-import { Database } from '../../../../../../../../apps/web/lib/database.types';
+import { Database, Json } from '../../../../../../../../apps/web/lib/database.types';
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
 import { updateClient } from '../../clients/update/update-client';
 import { formatToTimestamptz } from '../../../../../../../../apps/web/app/utils/format-to-timestamptz';
@@ -284,6 +284,35 @@ export const updateUserSettings = async (
 ) => {
   const client = getSupabaseServerComponentClient();
   try {
+    // If updating preferences, we need to merge with existing preferences
+    if (userSettings.preferences) {
+      // First, get the current user settings to properly merge preferences
+      const { data: currentUserSettings, error: fetchError } = await client
+        .from('user_settings')
+        .select('preferences')
+        .eq('user_id', userId)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+        console.error('Error fetching current user settings:', fetchError);
+        throw new Error(fetchError.message);
+      }
+
+      // Handle preferences update
+      if (currentUserSettings?.preferences) {
+        // Get current preferences
+        const currentPreferences = currentUserSettings.preferences;
+        
+        // Deep merge the current preferences with the new ones
+        if (typeof currentPreferences === 'object' && !Array.isArray(currentPreferences) && currentPreferences !== null) {
+          userSettings.preferences = deepMerge(
+            currentPreferences as Record<string, unknown>, 
+            userSettings.preferences as Record<string, unknown>
+          ) as Json;
+        }
+      }
+    }
+
     const { data: userSettingsData, error: errorUpdateUserSettings } =
       await client
         .from('user_settings')
@@ -301,6 +330,42 @@ export const updateUserSettings = async (
     throw error;
   }
 };
+
+/**
+ * Deep merge utility function to merge nested objects
+ * @param target The target object to merge into
+ * @param source The source object to merge from
+ * @returns The merged object
+ */
+function deepMerge<T extends Record<string, unknown>>(target: T, source: Record<string, unknown>): T {
+  const output = { ...target };
+
+  for (const key in source) {
+    if (source[key] === null || source[key] === undefined) {
+      continue; // Skip null or undefined values
+    }
+
+    if (
+      typeof source[key] === 'object' && 
+      !Array.isArray(source[key]) && 
+      source[key] !== null &&
+      key in target && 
+      typeof target[key as keyof T] === 'object' && 
+      !Array.isArray(target[key as keyof T])
+    ) {
+      // If both values are objects, recursively merge them
+      output[key as keyof T] = deepMerge(
+        target[key as keyof T] as Record<string, unknown>, 
+        source[key] as Record<string, unknown>
+      ) as T[keyof T];
+    } else {
+      // Otherwise, just assign the source value
+      output[key as keyof T] = source[key] as T[keyof T];
+    }
+  }
+
+  return output;
+}
 
 export const generateMagicLinkRecoveryPassword = async (
   email: Account.Type['email'],

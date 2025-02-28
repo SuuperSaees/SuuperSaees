@@ -44,7 +44,7 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
     if (typeof window !== 'undefined') {
       const cookieLang = document.cookie
         .split('; ')
-        .find(row => row.startsWith('i18next='))
+        .find(row => row.startsWith('lang='))
         ?.split('=')[1];
 
       if (cookieLang && i18nInstance.language !== cookieLang) {
