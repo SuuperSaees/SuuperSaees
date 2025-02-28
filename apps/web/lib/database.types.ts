@@ -3001,6 +3001,7 @@ export type Database = {
           name: string | null
           phone_number: string | null
           picture_url: string | null
+          preferences: Json | null
           user_id: string
         }
         Insert: {
@@ -3009,6 +3010,7 @@ export type Database = {
           name?: string | null
           phone_number?: string | null
           picture_url?: string | null
+          preferences?: Json | null
           user_id: string
         }
         Update: {
@@ -3017,6 +3019,7 @@ export type Database = {
           name?: string | null
           phone_number?: string | null
           picture_url?: string | null
+          preferences?: Json | null
           user_id?: string
         }
         Relationships: [

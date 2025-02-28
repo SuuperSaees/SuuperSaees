@@ -16,13 +16,14 @@ import {
 
 export function LanguageSelector({
   onChange,
+  defaultLanguage,
 }: {
   onChange?: (locale: string) => unknown;
+  defaultLanguage?: string;
 }) {
   const { i18n } = useTranslation();
   const router = useRouter();
   const { language: currentLanguage, options } = i18n;
-
   const locales = (options.supportedLngs as string[]).filter(
     (locale) => locale.toLowerCase() !== 'cimode',
   );
@@ -33,14 +34,14 @@ export function LanguageSelector({
     });
   }, [currentLanguage]);
 
-  const [value, setValue] = useState(i18n.language);
+  const [value, setValue] = useState(defaultLanguage ?? i18n.language);
 
   const languageChanged = useCallback(
     async (locale: string) => {
       setValue(locale);
 
       if (onChange) {
-        onChange(locale);
+        await onChange(locale);
       }
 
       await i18n.changeLanguage(locale);
